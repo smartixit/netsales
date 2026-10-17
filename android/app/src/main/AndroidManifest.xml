@@ -1,8 +1,45 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"/>
+    <!-- إشعارات Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- خدمات وتنزيلات الخلفية في Android 14+ -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <!-- إعادة جدولة المهام الدورية بعد إقلاع الجهاز -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- كاميرا ماسح رمز QR -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- اختيار أرقام الهواتف من جهات الاتصال -->
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <!-- إذن تنفيذ مهام التنزيل بطلب المستخدم UIDT لـ Android 14+ -->
+    <uses-permission android:name="android.permission.RUN_USER_INITIATED_JOBS" />
     <application
-        android:label="netsales"
+        android:label="NetSales"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- الأيقونة الافتراضية للإشعارات لحمايتها من الحذف بواسطة R8 في وضع Release -->
+        <meta-data
+            android:name="flutter_local_notifications.default_icon"
+            android:resource="@drawable/ic_notification" />
+        <!-- خدمة التحميل بالخلفية لـ Android WorkManager لمنع إيقاف التنزيل عند إغلاق التطبيق -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false" />
+
+        <!-- خدمة UIDT لنظام Android 14+ لضمان استمرار التنزيل عند مسح التطبيق من قائمة المهام -->
+        <service
+            android:name="com.bbflight.background_downloader.UIDTJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"
+            android:foregroundServiceType="dataSync" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -37,6 +74,22 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="tel"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="sms"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="mailto"/>
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

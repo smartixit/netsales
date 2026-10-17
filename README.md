@@ -1,4 +1,4 @@
-# netsales
+# NetSales
 
 A new Flutter project.
 

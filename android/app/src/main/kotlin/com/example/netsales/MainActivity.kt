@@ -1,4 +1,4 @@
-package com.example.netsales
+package com.smartix.netsales
 
 import io.flutter.embedding.android.FlutterActivity
 
