@@ -13,6 +13,9 @@ abstract final class StorageKeys {
   /// معرف المستخدم المسجل
   static const String userId = 'user_id';
 
+  /// مفتاح تخزين الصلاحيات محلياً
+  static const String permissionsStorage = 'user_permissions';
+
   /// بيانات المستخدم المخزنة كـ JSON
   static const String userData = 'user_data';
 
