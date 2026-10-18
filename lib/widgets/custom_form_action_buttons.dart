@@ -1,13 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/widgets/buttons/custom_app_button.dart';
-import 'package:netsales/widgets/buttons/custom_app_primary_button.dart';
-import 'package:netsales/widgets/buttons/custom_app_secondary_button.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 
-/// صفّ أزرار الحفظ الثلاثة في شاشات النماذج:
+/// طقم أزرار الحفظ الثلاثية في شاشات النماذج:
 /// «حفظ وإضافة» و«حفظ وطباعة» و«حفظ وإغلاق».
-class FormActionButtons extends StatelessWidget {
-  const FormActionButtons({
+class CustomFormActionButtons extends StatelessWidget {
+  const CustomFormActionButtons({
     super.key,
     required this.onSaveAndAdd,
     required this.onSaveAndPrint,
@@ -24,15 +22,13 @@ class FormActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final colors = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           children: [
             Expanded(
-              child: CustomAppSecondaryButton(
+              child: CustomButton.secondary(
                 size: AppButtonSize.medium,
                 text: 'حفظ وإضافة',
                 icon: Icons.playlist_add_rounded,
@@ -42,7 +38,7 @@ class FormActionButtons extends StatelessWidget {
             ),
             AppSpacing.hSm,
             Expanded(
-              child: CustomAppSecondaryButton(
+              child: CustomButton.secondary(
                 size: AppButtonSize.medium,
                 text: 'حفظ وإغلاق',
                 icon: Icons.save_rounded,
@@ -53,7 +49,7 @@ class FormActionButtons extends StatelessWidget {
           ],
         ),
         AppSpacing.vMd,
-        CustomAppPrimaryButton(
+        CustomButton.primary(
           text: 'حفظ وطباعة',
           icon: Icons.print_rounded,
           loading: loading,
