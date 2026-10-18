@@ -1,8 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// ============================================================================
 /// وسائط حماية المسارات (Route Guards Middlewares)
@@ -15,12 +17,19 @@ class AuthGuard extends GetMiddleware {
 
   @override
   RouteSettings? redirect(String? route) {
-    if (!Get.isRegistered<SessionService>()) {
-      return const RouteSettings(name: AppRoutes.login);
-    }
-
-    final isAuthenticated = SessionService.to.isAuthenticated;
-    if (!isAuthenticated) {
+    if (!Get.isRegistered<SessionService>() ||
+        !SessionService.to.isAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        CustomSnackbar.show(
+          title: 'تسجيل الدخول مطلوب',
+          message: AppException.sanitizeMessage(
+            const UnauthenticatedException(
+              'يرجى تسجيل الدخول للوصول إلى هذه الصفحة',
+            ),
+          ),
+          type: SnackType.warning,
+        );
+      });
       return const RouteSettings(name: AppRoutes.login);
     }
 
@@ -64,7 +73,19 @@ class PermissionGuardMiddleware extends GetMiddleware {
 
   @override
   RouteSettings? redirect(String? route) {
-    if (!Get.isRegistered<SessionService>() || !SessionService.to.isAuthenticated) {
+    if (!Get.isRegistered<SessionService>() ||
+        !SessionService.to.isAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        CustomSnackbar.show(
+          title: 'تسجيل الدخول مطلوب',
+          message: AppException.sanitizeMessage(
+            const UnauthenticatedException(
+              'يرجى تسجيل الدخول للمتابعة',
+            ),
+          ),
+          type: SnackType.warning,
+        );
+      });
       return const RouteSettings(name: AppRoutes.login);
     }
 
@@ -81,20 +102,38 @@ class PermissionGuardMiddleware extends GetMiddleware {
 
     // التحقق من الدور
     if (requiredRole != null && !perm.hasRole(requiredRole!)) {
+      _notifyDenied('يتطلب هذا المسار دور: $requiredRole');
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
     if (anyRoles != null && !perm.hasAnyRole(anyRoles!)) {
+      _notifyDenied('لا تملك أحد الأدوار المطلوبة للوصول لهذا المسار');
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
     // التحقق من الصلاحيات الدقيقة
     if (requiredPermission != null && !perm.can(requiredPermission!)) {
+      _notifyDenied('يتطلب هذا المسار صلاحية: $requiredPermission');
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
     if (anyPermissions != null && !perm.canAny(anyPermissions!)) {
+      _notifyDenied('لا تملك أي من الصلاحيات المطلوبة للوصول لهذا المسار');
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
     return null;
+  }
+
+  void _notifyDenied([String? reason]) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      CustomSnackbar.show(
+        title: 'صلاحية غير متوفرة',
+        message: AppException.sanitizeMessage(
+          PermissionDeniedException(
+            reason ?? 'ليس لديك الصلاحية الكافية للوصول إلى هذا المسار',
+          ),
+        ),
+        type: SnackType.warning,
+      );
+    });
   }
 }

@@ -5,6 +5,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/custom_not_found.dart';
+import 'package:netsales/widgets/custom_unauthorized.dart';
 // import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 
 /// ============================================================================
@@ -23,6 +24,12 @@ abstract final class AppPages {
 
     // Not Found
     GetPage(name: AppRoutes.notFound, page: () => const CustomNotFound()),
+
+    // Unauthorized Access Rejection (Deep Link Defense)
+    GetPage(
+      name: AppRoutes.unauthorized,
+      page: () => const CustomUnauthorized(),
+    ),
 
     // ========================================================================
     // 1. مسار البداية والفحص الأولي (Splash)
