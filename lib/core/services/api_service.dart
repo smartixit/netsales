@@ -565,9 +565,9 @@ class _SessionAuthInterceptor extends Interceptor {
     }
 
     // تجاوز التشفير أثناء بيئة التطوير والاختبار
-    if (!AppEnvironment.isProd) {
-      options.headers['X-Bypass-Encryption'] = 'true';
-    }
+    // if (!AppEnvironment.isProd) {
+    //   options.headers['X-Bypass-Encryption'] = 'true';
+    // }
 
     if (AppEnvironment.enableLogging) {
       log('🌐 [HTTP Request] ${options.method} ${options.uri}');
