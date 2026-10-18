@@ -20,7 +20,6 @@ abstract final class ApiConstants {
   // 1. البيانات المرجعية وصحة النظام والملفات (Reference, Health & Public Files)
   // ==========================================================================
   static const String healthCheck = '/auth/health-check';
-  static const String publicKeys = '/security/public-keys';
   static String file(String path) => '/files/$path';
   static String signedFile(String path) => '/files/signed/$path';
 
@@ -65,14 +64,18 @@ abstract final class ApiConstants {
   static const String usersBatchForceDelete = '/users/batch-force-delete';
 
   // ==========================================================================
-  // 5. الأمان والجلسات والحظر (Security, Sessions & Bans)
+  // 5. الأمان والمفاتيح الرقمية السيادية (Security & Sovereign Public Keys)
   // ==========================================================================
-  static String userSessions(int id) => '/security/users/$id/sessions';
-  static String userDevices(int id) => '/security/users/$id/devices';
-  static const String banUser = '/security/ban-user';
-  static const String banDevice = '/security/ban-device';
-  static String unban(int id) => '/security/bans/$id';
-  static String terminateSession(int id) => '/security/sessions/$id/terminate';
+  static const String securityPublicKeys = '/security/public-keys';
+  static String securityUserSessions(int userId) =>
+      '/security/users/$userId/sessions';
+  static String securityUserDevices(int userId) =>
+      '/security/users/$userId/devices';
+  static const String securityBanUser = '/security/bans/users';
+  static const String securityBanDevice = '/security/bans/devices';
+  static String securityUnban(int banId) => '/security/bans/$banId/unban';
+  static String securityTerminateSession(int sessionId) =>
+      '/security/sessions/$sessionId/terminate';
 
   // ==========================================================================
   // 6. إدارة مزودي الشبكات (Networks Management)
@@ -85,7 +88,8 @@ abstract final class ApiConstants {
   static String networkRestore(int id) => '/networks/$id/restore';
   static String networkForceDelete(int id) => '/networks/$id/force';
   static String networkPosList(int id) => '/networks/$id/pos';
-  static String networkVoucherPackages(int id) => '/networks/$id/voucher-packages';
+  static String networkVoucherPackages(int id) =>
+      '/networks/$id/voucher-packages';
   static const String networksBatchDelete = '/networks/batch-delete';
   static const String networksBatchRestore = '/networks/batch-restore';
   static const String networksBatchForceDelete = '/networks/batch-force-delete';
@@ -110,7 +114,8 @@ abstract final class ApiConstants {
   // ==========================================================================
   static const String networkPos = '/network-pos';
   static String networkPosItem(int id) => '/network-pos/$id';
-  static String networkPosToggleStatus(int id) => '/network-pos/$id/toggle-status';
+  static String networkPosToggleStatus(int id) =>
+      '/network-pos/$id/toggle-status';
   static const String networkPosBatchDelete = '/network-pos/batch-delete';
   static const String networkPosBatchStatus = '/network-pos/batch-status';
 
@@ -120,26 +125,41 @@ abstract final class ApiConstants {
   static const String voucherPackages = '/voucher-packages';
   static const String voucherPackagesTrashed = '/voucher-packages/trashed';
   static String voucherPackage(int id) => '/voucher-packages/$id';
-  static String voucherPackageToggleStatus(int id) => '/voucher-packages/$id/toggle-status';
-  static String voucherPackageRestore(int id) => '/voucher-packages/$id/restore';
-  static String voucherPackageForceDelete(int id) => '/voucher-packages/$id/force';
-  static const String voucherPackagesBatchDelete = '/voucher-packages/batch-delete';
-  static const String voucherPackagesBatchRestore = '/voucher-packages/batch-restore';
-  static const String voucherPackagesBatchForceDelete = '/voucher-packages/batch-force-delete';
+  static String voucherPackageToggleStatus(int id) =>
+      '/voucher-packages/$id/toggle-status';
+  static String voucherPackageRestore(int id) =>
+      '/voucher-packages/$id/restore';
+  static String voucherPackageForceDelete(int id) =>
+      '/voucher-packages/$id/force';
+  static const String voucherPackagesBatchDelete =
+      '/voucher-packages/batch-delete';
+  static const String voucherPackagesBatchRestore =
+      '/voucher-packages/batch-restore';
+  static const String voucherPackagesBatchForceDelete =
+      '/voucher-packages/batch-force-delete';
 
   // ==========================================================================
   // 10. خصومات الباقات لنقاط البيع (Voucher Package Discounts)
   // ==========================================================================
   static const String voucherPackageDiscounts = '/voucher-package-discounts';
-  static const String voucherPackageDiscountsTrashed = '/voucher-package-discounts/trashed';
-  static const String voucherPackageDiscountsEffective = '/voucher-package-discounts/effective';
-  static String voucherPackageDiscount(int id) => '/voucher-package-discounts/$id';
-  static String voucherPackageDiscountToggleStatus(int id) => '/voucher-package-discounts/$id/toggle-status';
-  static String voucherPackageDiscountRestore(int id) => '/voucher-package-discounts/$id/restore';
-  static String voucherPackageDiscountForceDelete(int id) => '/voucher-package-discounts/$id/force';
-  static const String voucherPackageDiscountsBatchDelete = '/voucher-package-discounts/batch-delete';
-  static const String voucherPackageDiscountsBatchRestore = '/voucher-package-discounts/batch-restore';
-  static const String voucherPackageDiscountsBatchForceDelete = '/voucher-package-discounts/batch-force-delete';
+  static const String voucherPackageDiscountsTrashed =
+      '/voucher-package-discounts/trashed';
+  static const String voucherPackageDiscountsEffective =
+      '/voucher-package-discounts/effective';
+  static String voucherPackageDiscount(int id) =>
+      '/voucher-package-discounts/$id';
+  static String voucherPackageDiscountToggleStatus(int id) =>
+      '/voucher-package-discounts/$id/toggle-status';
+  static String voucherPackageDiscountRestore(int id) =>
+      '/voucher-package-discounts/$id/restore';
+  static String voucherPackageDiscountForceDelete(int id) =>
+      '/voucher-package-discounts/$id/force';
+  static const String voucherPackageDiscountsBatchDelete =
+      '/voucher-package-discounts/batch-delete';
+  static const String voucherPackageDiscountsBatchRestore =
+      '/voucher-package-discounts/batch-restore';
+  static const String voucherPackageDiscountsBatchForceDelete =
+      '/voucher-package-discounts/batch-force-delete';
 
   // ==========================================================================
   // 11. محافظ مزودي الشبكات ودفتر الأستاذ (Network Wallets & Ledger)
@@ -148,14 +168,20 @@ abstract final class ApiConstants {
   static const String networkWalletsTrashed = '/network-wallets/trashed';
   static String networkWallet(int id) => '/network-wallets/$id';
   static String networkWalletLogs(int id) => '/network-wallets/$id/logs';
-  static String networkWalletByNetwork(int networkId) => '/network-wallets/network/$networkId';
+  static String networkWalletByNetwork(int networkId) =>
+      '/network-wallets/network/$networkId';
   static String networkWalletDeposit(int id) => '/network-wallets/$id/deposit';
-  static String networkWalletWithdraw(int id) => '/network-wallets/$id/withdraw';
+  static String networkWalletWithdraw(int id) =>
+      '/network-wallets/$id/withdraw';
   static String networkWalletRestore(int id) => '/network-wallets/$id/restore';
-  static String networkWalletForceDelete(int id) => '/network-wallets/$id/force';
-  static const String networkWalletsBatchDelete = '/network-wallets/batch-delete';
-  static const String networkWalletsBatchRestore = '/network-wallets/batch-restore';
-  static const String networkWalletsBatchForceDelete = '/network-wallets/batch-force-delete';
+  static String networkWalletForceDelete(int id) =>
+      '/network-wallets/$id/force';
+  static const String networkWalletsBatchDelete =
+      '/network-wallets/batch-delete';
+  static const String networkWalletsBatchRestore =
+      '/network-wallets/batch-restore';
+  static const String networkWalletsBatchForceDelete =
+      '/network-wallets/batch-force-delete';
 
   // ==========================================================================
   // 12. محافظ نقاط البيع والتحويلات المالية (POS Wallets & Transfers)
@@ -168,13 +194,16 @@ abstract final class ApiConstants {
       '/pos-wallets/network/$networkId/pos/$posId';
   static String posWalletDeposit(int id) => '/pos-wallets/$id/deposit';
   static String posWalletWithdraw(int id) => '/pos-wallets/$id/withdraw';
-  static const String posWalletTransferFromNetwork = '/pos-wallets/transfer-from-network';
-  static const String posWalletTransferToNetwork = '/pos-wallets/transfer-to-network';
+  static const String posWalletTransferFromNetwork =
+      '/pos-wallets/transfer-from-network';
+  static const String posWalletTransferToNetwork =
+      '/pos-wallets/transfer-to-network';
   static String posWalletRestore(int id) => '/pos-wallets/$id/restore';
   static String posWalletForceDelete(int id) => '/pos-wallets/$id/force';
   static const String posWalletsBatchDelete = '/pos-wallets/batch-delete';
   static const String posWalletsBatchRestore = '/pos-wallets/batch-restore';
-  static const String posWalletsBatchForceDelete = '/pos-wallets/batch-force-delete';
+  static const String posWalletsBatchForceDelete =
+      '/pos-wallets/batch-force-delete';
 
   // ==========================================================================
   // 13. طلبات شراء كروت الإنترنت (Voucher Requests)
@@ -189,7 +218,8 @@ abstract final class ApiConstants {
   static String voucherRequestForceDelete(int id) => '/requests/$id/force';
   static const String voucherRequestsBatchDelete = '/requests/batch-delete';
   static const String voucherRequestsBatchRestore = '/requests/batch-restore';
-  static const String voucherRequestsBatchForceDelete = '/requests/batch-force-delete';
+  static const String voucherRequestsBatchForceDelete =
+      '/requests/batch-force-delete';
 
   // ==========================================================================
   // 14. فواتير مبيعات الكروت (Sale Invoices)
@@ -201,7 +231,8 @@ abstract final class ApiConstants {
   static String saleInvoiceForceDelete(int id) => '/sale-invoices/$id/force';
   static const String saleInvoicesBatchDelete = '/sale-invoices/batch-delete';
   static const String saleInvoicesBatchRestore = '/sale-invoices/batch-restore';
-  static const String saleInvoicesBatchForceDelete = '/sale-invoices/batch-force-delete';
+  static const String saleInvoicesBatchForceDelete =
+      '/sale-invoices/batch-force-delete';
 
   // ==========================================================================
   // 15. المصروفات التشغيلية والبنود والمرفقات (Expenses & Operational Disbursals)
@@ -212,7 +243,8 @@ abstract final class ApiConstants {
   static String expenseRestore(int id) => '/expenses/$id/restore';
   static String expenseForceDelete(int id) => '/expenses/$id/force';
   static String expenseAddItem(int id) => '/expenses/$id/items';
-  static String expenseDeleteItem(int id, int itemId) => '/expenses/$id/items/$itemId';
+  static String expenseDeleteItem(int id, int itemId) =>
+      '/expenses/$id/items/$itemId';
   static String expenseDeleteAttachment(int id, int attachmentId) =>
       '/expenses/$id/attachments/$attachmentId';
   static const String expensesBatchDelete = '/expenses/batch-delete';
@@ -225,15 +257,22 @@ abstract final class ApiConstants {
   static const String subscriptionPlans = '/subscription-plans';
   static const String subscriptionPlansTrashed = '/subscription-plans/trashed';
   static String subscriptionPlan(int id) => '/subscription-plans/$id';
-  static String subscriptionPlanToggleStatus(int id) => '/subscription-plans/$id/toggle-status';
-  static String subscriptionPlanAttachFeature(int id) => '/subscription-plans/$id/features';
+  static String subscriptionPlanToggleStatus(int id) =>
+      '/subscription-plans/$id/toggle-status';
+  static String subscriptionPlanAttachFeature(int id) =>
+      '/subscription-plans/$id/features';
   static String subscriptionPlanDetachFeature(int id, int featureId) =>
       '/subscription-plans/$id/features/$featureId';
-  static String subscriptionPlanRestore(int id) => '/subscription-plans/$id/restore';
-  static String subscriptionPlanForceDelete(int id) => '/subscription-plans/$id/force';
-  static const String subscriptionPlansBatchDelete = '/subscription-plans/batch-delete';
-  static const String subscriptionPlansBatchRestore = '/subscription-plans/batch-restore';
-  static const String subscriptionPlansBatchForceDelete = '/subscription-plans/batch-force-delete';
+  static String subscriptionPlanRestore(int id) =>
+      '/subscription-plans/$id/restore';
+  static String subscriptionPlanForceDelete(int id) =>
+      '/subscription-plans/$id/force';
+  static const String subscriptionPlansBatchDelete =
+      '/subscription-plans/batch-delete';
+  static const String subscriptionPlansBatchRestore =
+      '/subscription-plans/batch-restore';
+  static const String subscriptionPlansBatchForceDelete =
+      '/subscription-plans/batch-force-delete';
 
   // ==========================================================================
   // 17. كتالوج ميزات النظام (System Features)
@@ -255,19 +294,23 @@ abstract final class ApiConstants {
   static const String bankAccountsActive = '/bank-accounts/active';
   static const String bankAccountsTrashed = '/bank-accounts/trashed';
   static String bankAccount(int id) => '/bank-accounts/$id';
-  static String bankAccountToggleStatus(int id) => '/bank-accounts/$id/toggle-status';
+  static String bankAccountToggleStatus(int id) =>
+      '/bank-accounts/$id/toggle-status';
   static String bankAccountRestore(int id) => '/bank-accounts/$id/restore';
   static String bankAccountForceDelete(int id) => '/bank-accounts/$id/force';
   static const String bankAccountsBatchDelete = '/bank-accounts/batch-delete';
   static const String bankAccountsBatchRestore = '/bank-accounts/batch-restore';
-  static const String bankAccountsBatchForceDelete = '/bank-accounts/batch-force-delete';
+  static const String bankAccountsBatchForceDelete =
+      '/bank-accounts/batch-force-delete';
 
   // ==========================================================================
   // 19. طلبات الاشتراك والترقية (Subscription Plan Requests)
   // ==========================================================================
   static const String subscriptionPlanRequests = '/subscription-plan-requests';
-  static const String subscriptionPlanRequestsTrashed = '/subscription-plan-requests/trashed';
-  static String subscriptionPlanRequest(int id) => '/subscription-plan-requests/$id';
+  static const String subscriptionPlanRequestsTrashed =
+      '/subscription-plan-requests/trashed';
+  static String subscriptionPlanRequest(int id) =>
+      '/subscription-plan-requests/$id';
   static String subscriptionPlanRequestApprove(int id) =>
       '/subscription-plan-requests/$id/approve';
   static String subscriptionPlanRequestReject(int id) =>
@@ -307,13 +350,18 @@ abstract final class ApiConstants {
   static const String supportTickets = '/support-tickets';
   static const String supportTicketsTrashed = '/support-tickets/trashed';
   static String supportTicket(int id) => '/support-tickets/$id';
-  static String supportTicketMessages(int id) => '/support-tickets/$id/messages';
+  static String supportTicketMessages(int id) =>
+      '/support-tickets/$id/messages';
   static String supportTicketMarkAsRead(int id) => '/support-tickets/$id/read';
   static String supportTicketRestore(int id) => '/support-tickets/$id/restore';
-  static String supportTicketForceDelete(int id) => '/support-tickets/$id/force';
-  static const String supportTicketsBatchDelete = '/support-tickets/batch-delete';
-  static const String supportTicketsBatchRestore = '/support-tickets/batch-restore';
-  static const String supportTicketsBatchForceDelete = '/support-tickets/batch-force-delete';
+  static String supportTicketForceDelete(int id) =>
+      '/support-tickets/$id/force';
+  static const String supportTicketsBatchDelete =
+      '/support-tickets/batch-delete';
+  static const String supportTicketsBatchRestore =
+      '/support-tickets/batch-restore';
+  static const String supportTicketsBatchForceDelete =
+      '/support-tickets/batch-force-delete';
 
   // ==========================================================================
   // 22. الإشعارات والتنبيهات الموجهة (Notifications Engine)
@@ -329,8 +377,10 @@ abstract final class ApiConstants {
   static String notificationRestore(int id) => '/notifications/$id/restore';
   static String notificationForceDelete(int id) => '/notifications/$id/force';
   static const String notificationsBatchDelete = '/notifications/batch-delete';
-  static const String notificationsBatchRestore = '/notifications/batch-restore';
-  static const String notificationsBatchForceDelete = '/notifications/batch-force-delete';
+  static const String notificationsBatchRestore =
+      '/notifications/batch-restore';
+  static const String notificationsBatchForceDelete =
+      '/notifications/batch-force-delete';
 
   // ==========================================================================
   // 23. إعدادات النظام وتهيئة البيئة (System Settings & Engine Configuration)
@@ -341,13 +391,18 @@ abstract final class ApiConstants {
       '/system-settings/category/$category';
   static String systemSettingsByKey(String key) => '/system-settings/key/$key';
   static String systemSetting(int id) => '/system-settings/$id';
-  static const String systemSettingsBatchUpdate = '/system-settings/batch-update';
+  static const String systemSettingsBatchUpdate =
+      '/system-settings/batch-update';
   static const String systemSettingsClearCache = '/system-settings/clear-cache';
   static String systemSettingRestore(int id) => '/system-settings/$id/restore';
-  static String systemSettingForceDelete(int id) => '/system-settings/$id/force';
-  static const String systemSettingsBatchDelete = '/system-settings/batch-delete';
-  static const String systemSettingsBatchRestore = '/system-settings/batch-restore';
-  static const String systemSettingsBatchForceDelete = '/system-settings/batch-force-delete';
+  static String systemSettingForceDelete(int id) =>
+      '/system-settings/$id/force';
+  static const String systemSettingsBatchDelete =
+      '/system-settings/batch-delete';
+  static const String systemSettingsBatchRestore =
+      '/system-settings/batch-restore';
+  static const String systemSettingsBatchForceDelete =
+      '/system-settings/batch-force-delete';
 
   // ==========================================================================
   // 24. سجلات تدقيق النظام والتتبع الأمني (System Audit Logs & Activity Trails)
@@ -372,7 +427,8 @@ abstract final class ApiConstants {
   static String governorateForceDelete(int id) => '/governorates/$id/force';
   static const String governoratesBatchDelete = '/governorates/batch-delete';
   static const String governoratesBatchRestore = '/governorates/batch-restore';
-  static const String governoratesBatchForceDelete = '/governorates/batch-force-delete';
+  static const String governoratesBatchForceDelete =
+      '/governorates/batch-force-delete';
 
   static const String directorates = '/directorates';
   static const String directoratesTrashed = '/directorates/trashed';
@@ -383,7 +439,8 @@ abstract final class ApiConstants {
   static String directorateForceDelete(int id) => '/directorates/$id/force';
   static const String directoratesBatchDelete = '/directorates/batch-delete';
   static const String directoratesBatchRestore = '/directorates/batch-restore';
-  static const String directoratesBatchForceDelete = '/directorates/batch-force-delete';
+  static const String directoratesBatchForceDelete =
+      '/directorates/batch-force-delete';
 
   // ==========================================================================
   // 26. إعدادات وبوابات الرسائل النصية للشبكات (Network SMS Settings)

@@ -79,6 +79,7 @@ dependencies:
   flutter_native_contact_picker: ^0.0.11
   flutter_launcher_icons: ^0.14.4
   shimmer: ^3.0.0
+  sodium: 3.4.6
 
 dependency_overrides:
   archive: ^4.5.2
@@ -126,13 +127,13 @@ flutter:
   fonts:
     - family: IBM
       fonts:
-        - asset: fonts/IBM-Regular.ttf
+        - asset: assets/fonts/IBM-Regular.ttf
           weight: 400
-        - asset: fonts/IBM-Medium.ttf
+        - asset: assets/fonts/IBM-Medium.ttf
           weight: 500
-        - asset: fonts/IBM-SemiBold.ttf
+        - asset: assets/fonts/IBM-SemiBold.ttf
           weight: 600
-        - asset: fonts/IBM-Bold.ttf
+        - asset: assets/fonts/IBM-Bold.ttf
           weight: 700
 
   # For details regarding fonts from package dependencies,

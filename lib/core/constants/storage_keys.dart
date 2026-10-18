@@ -30,4 +30,10 @@ abstract final class StorageKeys {
 
   /// لغة التطبيق: ar | en
   static const String locale = 'locale';
+
+  /// المفتاح العام السيادي للتشفير (X25519 Box Public Key)
+  static const String serverBoxPublicKey = 'server_box_public_key';
+
+  /// المفتاح العام السيادي للتحقق من التوقيع الرقمي (Ed25519 Sign Public Key)
+  static const String serverSignPublicKey = 'server_sign_public_key';
 }

@@ -13,6 +13,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_pages.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
@@ -112,7 +113,11 @@ void main() async {
   await StorageService.instance.init();
   Get.put<StorageService>(StorageService.instance, permanent: true);
 
-  // 2. تهيئة خدمات المظهر والهوية والصلاحيات الدائمة
+  // 2. تهيئة خدمة التشفير اللامتناظر ومزامنة المفاتيح العامة السيادية
+  await AppCryptoService.instance.init();
+  Get.put<AppCryptoService>(AppCryptoService.instance, permanent: true);
+
+  // 3. تهيئة خدمات المظهر والهوية والصلاحيات الدائمة
   final themeService = Get.put<ThemeService>(ThemeService(), permanent: true);
   await themeService.init();
 

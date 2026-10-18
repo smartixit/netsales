@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
@@ -10,6 +11,7 @@ import 'package:netsales/core/services/theme_service.dart';
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
+    Get.put<AppCryptoService>(AppCryptoService.instance, permanent: true);
     Get.put<ThemeService>(ThemeService(), permanent: true);
     Get.put<PermissionService>(PermissionService(), permanent: true);
     Get.put<SessionService>(SessionService(), permanent: true);

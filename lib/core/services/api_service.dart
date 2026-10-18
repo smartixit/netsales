@@ -9,9 +9,11 @@ import 'package:netsales/core/config/app_environment.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
+import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/utils/connection_failure.dart';
+import 'package:sodium/sodium.dart' show KeyPair;
 
 /// ============================================================================
 /// عميل الشبكة الموحد لنظام NetSales (Core HTTP Network Client)
@@ -77,6 +79,7 @@ class ApiService {
       _RetryInterceptor(_dio),
       _InfinityFreeChallengeInterceptor(_dio),
       _SessionAuthInterceptor(),
+      _CryptoInterceptor(),
     ]);
   }
 
@@ -565,9 +568,9 @@ class _SessionAuthInterceptor extends Interceptor {
     }
 
     // تجاوز التشفير أثناء بيئة التطوير والاختبار
-    // if (!AppEnvironment.isProd) {
-    //   options.headers['X-Bypass-Encryption'] = 'true';
-    // }
+    if (!AppEnvironment.isProd) {
+      options.headers['X-Bypass-Encryption'] = 'true';
+    }
 
     if (AppEnvironment.enableLogging) {
       log('🌐 [HTTP Request] ${options.method} ${options.uri}');
@@ -725,5 +728,109 @@ class _RetryInterceptor extends Interceptor {
     }
 
     return handler.next(err);
+  }
+}
+
+/// ============================================================================
+/// معترض التشفير اللامتناظر وحماية البيانات (Asymmetric Crypto Interceptor)
+/// ============================================================================
+/// يتولى وفق أعلى المعايير السيبرانية:
+/// 1. تشفير حمولة الطلبات (POST, PUT, PATCH) بمفتاح الخادم العام عبر `crypto_box_seal`.
+/// 2. توليد زوج مفاتيح مؤقت لكل طلب في الـ RAM وحقن المفتاح العام في [X-Client-Public-Key].
+/// 3. فك تشفير استجابات الخادم الآمنة (NTS_ENC_...) بالمفتاح المؤقت للطلب.
+/// 4. مسح وتحرير المفتاح المؤقت من الذاكرة فور انتهاء دورة الطلب في finally.
+class _CryptoInterceptor extends Interceptor {
+  @override
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    final crypto = AppCryptoService.instance;
+
+    // استثناء المسارات العامة أو الطلبات المستثناة صراحة
+    final isBypassed = options.headers['X-Bypass-Encryption'] == 'true' ||
+        options.extra['bypass_encryption'] == true ||
+        _isBypassEndpoint(options.path);
+
+    if (isBypassed || !crypto.isEncryptionActive) {
+      return handler.next(options);
+    }
+
+    try {
+      final method = options.method.toUpperCase();
+
+      // 1. طلبات التعديل والإرسال التي تحتوي حمولة (POST, PUT, PATCH) وليست FormData
+      if (['POST', 'PUT', 'PATCH'].contains(method) &&
+          options.data != null &&
+          options.data is! FormData) {
+        final sealed = crypto.sealRequestPayload(options.data);
+        options.data = sealed.body;
+        options.headers['X-Client-Public-Key'] = sealed.clientPublicKeyHex;
+        options.extra['_crypto_keypair'] = sealed.ephemeralKeyPair;
+      } else {
+        // 2. طلبات القراءة أو الحذف التي تتطلب استجابة مشفرة من الخادم
+        final ephemeral = crypto.generateEphemeralKeyPair();
+        final clientPublicKeyHex =
+            AppCryptoService.bytesToHex(ephemeral.publicKey);
+        options.headers['X-Client-Public-Key'] = clientPublicKeyHex;
+        options.extra['_crypto_keypair'] = ephemeral;
+      }
+    } catch (e, stack) {
+      log('⚠️ [CryptoInterceptor] Encryption failed for ${options.uri}: $e\n$stack');
+    }
+
+    return handler.next(options);
+  }
+
+  @override
+  void onResponse(
+    Response<dynamic> response,
+    ResponseInterceptorHandler handler,
+  ) {
+    final keyPair =
+        response.requestOptions.extra['_crypto_keypair'] as KeyPair?;
+
+    if (keyPair != null) {
+      try {
+        final body = response.data;
+        if (body is Map) {
+          final rawData = body['data'];
+          if (rawData is String &&
+              rawData.startsWith(AppCryptoService.encResponsePrefix)) {
+            final unsealed = AppCryptoService.instance.unsealResponseData(
+              rawResponseData: rawData,
+              ephemeralKeyPair: keyPair,
+            );
+            body['data'] = unsealed;
+          }
+        }
+      } catch (e, stack) {
+        log('❌ [CryptoInterceptor] Decryption failed for ${response.requestOptions.uri}: $e\n$stack');
+      } finally {
+        // تحرير الذاكرة الآمنة ومسح المفتاح المؤقت للطلب فوراً
+        keyPair.dispose();
+      }
+    }
+
+    return handler.next(response);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    final keyPair =
+        err.requestOptions.extra['_crypto_keypair'] as KeyPair?;
+    try {
+      keyPair?.dispose();
+    } catch (_) {}
+
+    return handler.next(err);
+  }
+
+  /// فحص مسارات النظام العامة المستثناة من التشفير
+  bool _isBypassEndpoint(String path) {
+    return path.contains(ApiConstants.securityPublicKeys) ||
+        path.contains('/auth/health-check') ||
+        path.contains('/up') ||
+        path.contains('/files/');
   }
 }
