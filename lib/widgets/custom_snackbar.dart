@@ -40,14 +40,14 @@ class CustomSnackbar {
       SnackType.info => Icons.info,
     };
 
-    final iconColor = Colors.white;
-
     final titleColor = switch (type) {
       SnackType.warning => themeColors.onWarning,
       SnackType.success => themeColors.onSuccess,
       SnackType.info => themeColors.onInfo,
       SnackType.error => themeColors.onError,
     };
+
+    final iconColor = titleColor;
 
     final subtitleColor = switch (type) {
       SnackType.warning => themeColors.onWarningVariant,

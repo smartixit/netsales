@@ -1,3 +1,4 @@
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -93,7 +94,7 @@ class _CustomTextFieldState extends State<CustomTextField>
 
     _shakeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: AppMotion.slow,
     );
     _shakeAnimation = _shakeController.drive(
       TweenSequence<Offset>([

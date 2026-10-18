@@ -1,3 +1,4 @@
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:flutter/material.dart';
 
 class CustomInteractiveBounce extends StatefulWidget {
@@ -24,12 +25,12 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 90),
+      duration: AppMotion.fast,
     );
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.93,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    ).animate(CurvedAnimation(parent: _controller, curve: AppMotion.emphasized));
   }
 
   @override

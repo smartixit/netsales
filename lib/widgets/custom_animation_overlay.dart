@@ -1,3 +1,8 @@
+import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
+import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
@@ -498,15 +503,15 @@ class CustomAnimationOverlay {
       barrierDismissible: false,
       maintainState: true,
 
-      transitionDuration: const Duration(milliseconds: 450),
+      transitionDuration: AppMotion.page,
 
-      reverseTransitionDuration: const Duration(milliseconds: 350),
+      reverseTransitionDuration: AppMotion.slow,
 
       transitionsBuilder: (_, animation, __, child) {
         final curve = CurvedAnimation(
           parent: animation,
-          curve: Curves.easeOutBack,
-          reverseCurve: Curves.easeInOutCubic,
+          curve: AppMotion.springy,
+          reverseCurve: AppMotion.standard,
         );
 
         return FadeTransition(
@@ -518,8 +523,7 @@ class CustomAnimationOverlay {
         );
       },
 
-      pageBuilder: (_, __, ___) {
-        final theme = Get.theme;
+      pageBuilder: (context, _, __) {
 
         final isAction = actionLabel != null && onAction != null;
 
@@ -549,7 +553,7 @@ class CustomAnimationOverlay {
                       }
                     },
                     child: Container(
-                      color: Colors.black.withValues(alpha: 0.45),
+                      color: context.colors.scrim.withValues(alpha: 0.45),
                     ),
                   ),
                 ),
@@ -563,17 +567,9 @@ class CustomAnimationOverlay {
                         vertical: AppSpacing.xxl,
                       ),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
+                        color: context.colors.surface,
                         borderRadius: BorderRadius.circular(AppRadius.dialog),
-                        boxShadow: [
-                          BoxShadow(
-                            blurRadius: 30,
-                            offset: const Offset(0, 12),
-                            color: theme.colorScheme.shadow.withValues(
-                              alpha: .15,
-                            ),
-                          ),
-                        ],
+                        boxShadow: AppElevation.level5(context),
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -595,15 +591,16 @@ class CustomAnimationOverlay {
                             Text(
                               cleanMessage ?? defaultMessage,
                               textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyMedium?.copyWith(
+                              style: AppTypography.titleSmall.copyWith(
                                 fontWeight: FontWeight.w600,
+                                color: context.colors.onSurface,
                               ),
                             ),
 
                           if (isAction) ...[
                             AppSpacing.vLg,
 
-                            CustomPrimaryButton(
+                            CustomButton.primary(
                               text: actionLabel,
                               onPressed: () async {
                                 await hide();
