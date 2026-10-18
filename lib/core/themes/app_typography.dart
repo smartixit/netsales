@@ -1,255 +1,315 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+/// ============================================================================
+/// نظام التيبوغرافي المركزي الموحد (Enterprise Design System Typography)
+/// ============================================================================
+/// مصمم وفق أعلى معايير أنظمة التصميم العالمية (Material 3, Apple HIG, Stripe).
+/// يمثل المصدر المركزي الوحيد والنهائي لكافة نصوص التطبيق بدون أي أرقام عشوائية.
 class AppTypography {
   AppTypography._();
 
-  /// Base font family
+  /// اسم الخط الأساسي الموحد للنظام
   static const String fontFamily = 'ibm';
 
-  /// Font weights
-  static const FontWeight w400 = FontWeight.w400; // Regular
-  static const FontWeight w500 = FontWeight.w500; // Medium
-  static const FontWeight w600 = FontWeight.w600; // SemiBold
-  static const FontWeight w700 = FontWeight.w700; // Bold
+  // ---------------------------------------------------------------------------
+  // أوزان الخطوط القياسية (Font Weights)
+  // ---------------------------------------------------------------------------
+  static const FontWeight regular = FontWeight.w400;
+  static const FontWeight medium = FontWeight.w500;
+  static const FontWeight semiBold = FontWeight.w600;
+  static const FontWeight bold = FontWeight.w700;
+  static const FontWeight extraBold = FontWeight.w800;
 
-  /// ── Display (Hero titles, large branding) ──
-  /// displayLarge: 57sp, w400
+  // ===========================================================================
+  // 1. شاشات العرض الكبرى (Display - Hero & Big Stats)
+  // ===========================================================================
+
+  /// displayLarge (57sp, Bold)
   static TextStyle get displayLarge => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 57.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    // height: 1.12.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 57.sp,
+        fontWeight: bold,
+        letterSpacing: -0.25.sp,
+        height: 1.15.h,
+      );
 
-  /// displayMedium: 45sp, w400
+  /// displayMedium (45sp, Bold)
   static TextStyle get displayMedium => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 45.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    // height: 1.16.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 45.sp,
+        fontWeight: bold,
+        letterSpacing: 0.sp,
+        height: 1.18.h,
+      );
 
-  /// displaySmall: 36sp, w400
+  /// displaySmall (36sp, Bold)
   static TextStyle get displaySmall => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 36.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    // height: 1.22.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 36.sp,
+        fontWeight: bold,
+        letterSpacing: 0.sp,
+        height: 1.22.h,
+      );
 
-  /// ── Headline (Page titles, section headers) ──
-  /// headlineLarge: 32sp, w400
+  // ===========================================================================
+  // 2. عناوين الشاشات والأقسام (Headline - Screen & Section Titles)
+  // ===========================================================================
+
+  /// headlineLarge (32sp, Bold)
   static TextStyle get headlineLarge => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 32.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    height: 1.25.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 32.sp,
+        fontWeight: bold,
+        letterSpacing: 0.sp,
+        height: 1.25.h,
+      );
 
-  /// headlineMedium: 28sp, w400
+  /// headlineMedium (28sp, SemiBold)
   static TextStyle get headlineMedium => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 28.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    // height: 1.29.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 28.sp,
+        fontWeight: semiBold,
+        letterSpacing: 0.sp,
+        height: 1.28.h,
+      );
 
-  /// headlineSmall: 24sp, w400
+  /// headlineSmall (24sp, SemiBold)
   static TextStyle get headlineSmall => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 24.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    // height: 1.33.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 24.sp,
+        fontWeight: semiBold,
+        letterSpacing: 0.sp,
+        height: 1.32.h,
+      );
 
-  /// ── Title (Card titles, list items, app bar) ──
-  /// titleLarge: 22sp, w500
+  // ===========================================================================
+  // 3. عناوين البطاقات والقوائم (Title - Cards, Lists, AppBar)
+  // ===========================================================================
+
+  /// titleLarge (20sp, Bold)
   static TextStyle get titleLarge => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 22.sp,
-    fontWeight: w500,
-    letterSpacing: 0.sp,
-    // height: 1.27.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 20.sp,
+        fontWeight: bold,
+        letterSpacing: 0.sp,
+        height: 1.3.h,
+      );
 
-  /// titleMedium: 16sp, w500
+  /// titleMedium (16sp, SemiBold)
   static TextStyle get titleMedium => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 16.sp,
-    fontWeight: w500,
-    letterSpacing: 0.sp,
-    // height: 1.5.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 16.sp,
+        fontWeight: semiBold,
+        letterSpacing: 0.15.sp,
+        height: 1.35.h,
+      );
 
-  /// titleSmall: 14sp, w500
+  /// titleSmall (14sp, SemiBold)
   static TextStyle get titleSmall => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 14.sp,
-    fontWeight: w500,
-    letterSpacing: 0.sp,
-    // height: 1.43.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 14.sp,
+        fontWeight: semiBold,
+        letterSpacing: 0.1.sp,
+        height: 1.4.h,
+      );
 
-  /// ── Body (Main content text) ──
-  /// bodyLarge: 16sp, w400
+  // ===========================================================================
+  // 4. نصوص المحتوى والفقرات (Body - Paragraphs & Content)
+  // ===========================================================================
+
+  /// bodyLarge (16sp, Regular)
   static TextStyle get bodyLarge => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 16.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    // height: 1.5.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 16.sp,
+        fontWeight: regular,
+        letterSpacing: 0.15.sp,
+        height: 1.5.h,
+      );
 
-  /// bodyMedium: 14sp, w400
+  /// bodyMedium (14sp, Regular)
   static TextStyle get bodyMedium => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 14.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    // height: 1.43.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 14.sp,
+        fontWeight: regular,
+        letterSpacing: 0.25.sp,
+        height: 1.45.h,
+      );
 
-  /// bodySmall: 12sp, w400
+  /// bodySmall (12sp, Regular)
   static TextStyle get bodySmall => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 12.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    // height: 1.33.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 12.sp,
+        fontWeight: regular,
+        letterSpacing: 0.3.sp,
+        height: 1.4.h,
+      );
 
-  /// ── Label (Buttons, chips, captions, overlines) ──
-  /// labelLarge: 14sp, w500
-  static TextStyle get labelLarge => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 14.sp,
-    fontWeight: w500,
-    letterSpacing: 0.sp,
-    // height: 1.43.h,
-  );
+  // ===========================================================================
+  // 5. خطوط الأزرار المركزية (Button Tokens - Enterprise Hierarchy)
+  // ===========================================================================
 
-  /// labelMedium: 12sp, w500
-  static TextStyle get labelMedium => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 12.sp,
-    fontWeight: w500,
-    letterSpacing: 0.sp,
-    // height: 1.33.h,
-  );
+  /// زر بحجم كبير (Large Button - Hero / CTAs / Auth)
+  static TextStyle get buttonLarge => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 16.sp,
+        fontWeight: bold,
+        letterSpacing: 0.2.sp,
+        height: 1.15.h,
+      );
 
-  /// labelSmall: 11sp, w500
-  static TextStyle get labelSmall => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 11.sp,
-    fontWeight: w500,
-    letterSpacing: 0.sp,
-    // height: 1.45.h,
-  );
+  /// زر بحجم قياسي (Medium Button - Standard / Dialogs / Forms)
+  static TextStyle get buttonMedium => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 14.sp,
+        fontWeight: semiBold,
+        letterSpacing: 0.1.sp,
+        height: 1.15.h,
+      );
 
-  /// ── Custom Styles (Project-specific) ──
+  /// زر بحجم صغير (Small Button - Compact / Tables / Inline)
+  static TextStyle get buttonSmall => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 12.sp,
+        fontWeight: semiBold,
+        letterSpacing: 0.sp,
+        height: 1.15.h,
+      );
 
-  /// Brand name - Large display with tight tracking
-  static TextStyle get brandName => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 36.sp,
-    fontWeight: w700,
-    letterSpacing: 0.sp,
-    // height: 1.1.h,
-  );
+  /// خط الزر التقليدي (للتوافقية العكسية)
+  static TextStyle get buttonText => buttonLarge;
 
-  /// Hero title - Bold display
-  static TextStyle get heroTitle => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 32.sp,
-    fontWeight: w700,
-    letterSpacing: 0.sp,
-    // height: 1.2.h,
-  );
+  /// Material 3 Label Aliases
+  static TextStyle get labelLarge => buttonLarge;
+  static TextStyle get labelMedium => buttonMedium;
+  static TextStyle get labelSmall => buttonSmall;
 
-  /// Section title - SemiBold
-  static TextStyle get sectionTitle => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 20.sp,
-    fontWeight: w700,
-    letterSpacing: 0.sp,
-    // height: 1.3.h,
-  );
+  /// Input Helper & Error Aliases
+  static TextStyle get errorText => inputError;
+  static TextStyle get helperText => caption;
 
-  /// Card title - Medium weight
-  static TextStyle get cardTitle => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 16.sp,
-    fontWeight: w600,
-    letterSpacing: 0.sp,
-    // height: 1.4.h,
-  );
+  // ===========================================================================
+  // 6. حقول الإدخال والنماذج (Input & Form Tokens)
+  // ===========================================================================
 
-  /// Button text - Bold with tracking
-  static TextStyle get buttonText => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 16.sp,
-    fontWeight: w700,
-    letterSpacing: 0.sp,
-    // height: 1.0.h,
-  );
+  /// النص المدخل داخل الحقل
+  static TextStyle get inputText => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 15.sp,
+        fontWeight: medium,
+        letterSpacing: 0.sp,
+        height: 1.3.h,
+      );
 
-  /// Caption - Small muted text
+  /// نص التلميح داخل الحقل (Hint / Placeholder)
+  static TextStyle get inputHint => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 14.sp,
+        fontWeight: regular,
+        letterSpacing: 0.sp,
+        height: 1.3.h,
+      );
+
+  /// عنوان الحقل العلوي (Label)
+  static TextStyle get inputLabel => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 13.sp,
+        fontWeight: semiBold,
+        letterSpacing: 0.1.sp,
+        height: 1.3.h,
+      );
+
+  /// رسالة خطأ التحقق (Validation Error)
+  static TextStyle get inputError => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 12.sp,
+        fontWeight: medium,
+        letterSpacing: 0.sp,
+        height: 1.25.h,
+      );
+
+  // ===========================================================================
+  // 7. المعاملات المالية والمبالغ (Financial & Currency Tokens)
+  // ===========================================================================
+
+  /// رصيد المحفظة الرئيسي الكبير
+  static TextStyle get currencyHero => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 32.sp,
+        fontWeight: extraBold,
+        letterSpacing: -0.5.sp,
+        height: 1.1.h,
+      );
+
+  /// أسعار الكروت وبنود الفواتير
+  static TextStyle get currencyMedium => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 18.sp,
+        fontWeight: bold,
+        letterSpacing: 0.sp,
+        height: 1.2.h,
+      );
+
+  /// رمز العملة المصغر بجانب الرقم
+  static TextStyle get currencySymbol => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 12.sp,
+        fontWeight: semiBold,
+        letterSpacing: 0.sp,
+        height: 1.2.h,
+      );
+
+  // ===========================================================================
+  // 8. الوسوم والبادجات والملاحظات (Chips, Badges, & Metadata)
+  // ===========================================================================
+
+  /// نصوص الشرائح والفلترة (Filter Chips)
+  static TextStyle get chipText => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 13.sp,
+        fontWeight: medium,
+        letterSpacing: 0.sp,
+        height: 1.2.h,
+      );
+
+  /// شارات الحالة (Badges)
+  static TextStyle get badgeText => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 11.sp,
+        fontWeight: bold,
+        letterSpacing: 0.2.sp,
+        height: 1.15.h,
+      );
+
+  /// نصوص التواريخ والتوقيتات التوضيحية (Captions)
   static TextStyle get caption => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 12.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    // height: 1.4.h,
-  );
+        fontFamily: fontFamily,
+        fontSize: 12.sp,
+        fontWeight: regular,
+        letterSpacing: 0.2.sp,
+        height: 1.35.h,
+      );
 
-  /// Overline - Uppercase small text
-  static TextStyle get overline => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 11.sp,
-    fontWeight: w600,
-    // letterSpacing: 2.sp,
-    // height: 1.0.h,
-  );
+  // ===========================================================================
+  // 9. مولّد ثيم فلاتر الرسمي (Material 3 TextTheme Generator)
+  // ===========================================================================
 
-  /// Error text
-  static TextStyle get errorText => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 12.sp,
-    fontWeight: w500,
-    // letterSpacing: 0.sp,
-    // height: 1.33.h,
-  );
-
-  /// Helper text - Small secondary
-  static TextStyle get helperText => TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 11.sp,
-    fontWeight: w400,
-    letterSpacing: 0.sp,
-    // height: 1.4.h,
-  );
-
-  /// ── Responsive Helpers ──
-
-  /// Scale font size based on screen width
-  static double responsiveFont(double baseSize) {
-    return baseSize.sp;
-  }
-
-  /// Get appropriate headline size for screen
-  static TextStyle get responsiveHeadline {
-    return headlineLarge;
-  }
-
-  /// Get appropriate body size for screen
-  static TextStyle get responsiveBody {
-    return bodyLarge;
-  }
+  /// يُحقن مباشرة داخل `ThemeData(textTheme: AppTypography.textTheme)`
+  static TextTheme get textTheme => TextTheme(
+        displayLarge: displayLarge,
+        displayMedium: displayMedium,
+        displaySmall: displaySmall,
+        headlineLarge: headlineLarge,
+        headlineMedium: headlineMedium,
+        headlineSmall: headlineSmall,
+        titleLarge: titleLarge,
+        titleMedium: titleMedium,
+        titleSmall: titleSmall,
+        bodyLarge: bodyLarge,
+        bodyMedium: bodyMedium,
+        bodySmall: bodySmall,
+        labelLarge: buttonLarge,
+        labelMedium: buttonMedium,
+        labelSmall: buttonSmall,
+      );
 }

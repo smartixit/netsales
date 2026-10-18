@@ -1,31 +1,27 @@
-
 import 'package:netsales/core/config/app_environment.dart';
 
+/// ============================================================================
+/// ثوابت مسارات واجهة برمجة التطبيقات (NetSales API V1 Endpoints)
+/// ============================================================================
+/// موثقة ومطابقة 100% لمسارات الباك إند المعتمدة في netsales_api (routes/api.php).
 class ApiConstants {
   ApiConstants._();
 
-  /// عنوان الـ API — يُشتق من البيئة الحالية (`AppEnvironment`).
-  /// ممنوع كتابة عناوين صريحة هنا؛ استخدم `--dart-define=API_BASE_URL=...`.
+  /// عنوان الـ API الأساسي — يُشتق ديناميكياً من بيئة التشغيل الحالية
   static String get baseUrl => AppEnvironment.apiBaseUrl;
 
-  /// جذر الملفات والصور المرفوعة.
-
-  // Connection timeout in milliseconds
+  // ── مهلات الاتصال (Timeouts in milliseconds) ──
   static const int connectTimeout = 15000;
-
-  // Receive timeout in milliseconds
   static const int receiveTimeout = 30000;
-
-  // Send timeout in milliseconds
   static const int sendTimeout = 30000;
 
   // ──────────────────────────────────────────────
-  // Health Check
+  // 1. فحص الحالة والجاهزية (Health Check)
   // ──────────────────────────────────────────────
   static const String healthCheck = '/auth/health-check';
 
   // ──────────────────────────────────────────────
-  // Auth
+  // 2. المصادقة والحساب الشخصي (Authentication & Profile)
   // ──────────────────────────────────────────────
   static const String authRegister = '/auth/register';
   static const String authLogin = '/auth/login';
@@ -43,85 +39,144 @@ class ApiConstants {
   static const String authUploadProfilePicture = '/auth/upload-profile-picture';
   static const String authDeleteProfilePicture = '/auth/profile-picture';
 
-  // ──────────────────────────────────────────────
-  // Users
-  // ──────────────────────────────────────────────
-  static const String users = '/users';
+  // التحقق بخطوتين والـ OTP
+  static const String otpSend = '/auth/otp/send';
+  static const String otpVerify = '/auth/otp/verify';
 
   // ──────────────────────────────────────────────
-  // Roles
+  // 3. شبكات بيع الكروت (Networks)
   // ──────────────────────────────────────────────
-  static const String roles = '/roles';
+  static const String networks = '/networks';
+  static const String networksCounts = '/networks/counts';
+  static const String networksTrashed = '/networks/trashed';
+  static const String networksBatchDelete = '/networks/batch-delete';
+  static const String networksBatchRestore = '/networks/batch-restore';
+  static const String networksBatchForceDelete = '/networks/batch-force-delete';
+  static String networkDetails(int id) => '$networks/$id';
+  static String networkStatus(int id) => '$networks/$id/status';
+  static String networkLogo(int id) => '$networks/$id/logo';
 
   // ──────────────────────────────────────────────
-  // Permissions
+  // 4. نقاط البيع (POS - Points of Sale)
   // ──────────────────────────────────────────────
-  static const String permissions = '/permissions';
-  static const String permissionModules = '/permission-modules';
+  static const String pos = '/pos';
+  static const String posCounts = '/pos/counts';
+  static const String posTrashed = '/pos/trashed';
+  static const String posBatchDelete = '/pos/batch-delete';
+  static const String posBatchRestore = '/pos/batch-restore';
+  static const String posBatchForceDelete = '/pos/batch-force-delete';
+  static String posDetails(int id) => '$pos/$id';
+  static String posStatus(int id) => '$pos/$id/status';
+  static String posByNetwork(int networkId) => '$pos/network/$networkId';
 
   // ──────────────────────────────────────────────
-  // Notifications
+  // 5. ربط نقاط البيع بالشبكات (Network POS)
   // ──────────────────────────────────────────────
-  static const String getAllNotifications = '/notifications';
-  static const String getAllNotificationsUnread = '/notifications/unread';
-  static const String markNotificationAsRead = '/notifications/mark-as-read';
-  static const String markAllNotificationsAsRead = '/notifications/read-all';
-  static const String adminNotifications = '/admin/notifications';
+  static const String networkPos = '/network-pos';
+  static const String networkPosCounts = '/network-pos/counts';
+  static String networkPosStatus(int id) => '$networkPos/$id/status';
+  static String networkPosByNetwork(int networkId) => '$networkPos/network/$networkId';
+  static String networkPosByPos(int posId) => '$networkPos/pos/$posId';
 
   // ──────────────────────────────────────────────
-  // Stores
+  // 6. باقات الكروت (Voucher Packages)
   // ──────────────────────────────────────────────
-  static const String stores = '/stores';
-  static String storeUploadLogo(int storeId) => '$stores/$storeId/logo';
+  static const String voucherPackages = '/voucher-packages';
+  static const String voucherPackagesTrashed = '/voucher-packages/trashed';
+  static const String voucherPackagesBatchDelete = '/voucher-packages/batch-delete';
+  static const String voucherPackagesBatchRestore = '/voucher-packages/batch-restore';
+  static const String voucherPackagesBatchForceDelete = '/voucher-packages/batch-force-delete';
+  static String voucherPackageDetails(int id) => '$voucherPackages/$id';
+  static String voucherPackageStatus(int id) => '$voucherPackages/$id/status';
+  static String voucherPackagesByNetwork(int networkId) => '$voucherPackages/network/$networkId';
 
   // ──────────────────────────────────────────────
-  // Payment Types
+  // 7. خصومات باقات الكروت لنقاط البيع (Voucher Package Discounts)
   // ──────────────────────────────────────────────
-  static const String paymentTypes = '/payment-types';
+  static const String voucherPackageDiscounts = '/voucher-package-discounts';
+  static String voucherPackageDiscountsByNetworkPos(int networkPosId) =>
+      '$voucherPackageDiscounts/network-pos/$networkPosId';
 
   // ──────────────────────────────────────────────
-  // Currencies
+  // 8. فواتير ومبيعات الكروت (Sale Invoices)
   // ──────────────────────────────────────────────
-  static const String currencies = '/currencies';
+  static const String saleInvoices = '/sale-invoices';
+  static const String saleInvoicesStats = '/sale-invoices/stats';
+  static String saleInvoiceDetails(int id) => '$saleInvoices/$id';
+  static String saleInvoiceCancel(int id) => '$saleInvoices/$id/cancel';
+  static String saleInvoicesByNetwork(int networkId) => '$saleInvoices/network/$networkId';
+  static String saleInvoicesByPos(int posId) => '$saleInvoices/pos/$posId';
 
   // ──────────────────────────────────────────────
-  // Exchange Rates
+  // 9. محافظ الشبكات وسجلاتها (Network Wallets & Logs)
   // ──────────────────────────────────────────────
-  static const String exchangeRates = '/exchange-rates';
+  static const String networkWallets = '/network-wallets';
+  static const String networkWalletLogs = '/network-wallets/logs';
+  static String networkWalletByNetwork(int networkId) => '$networkWallets/network/$networkId';
 
   // ──────────────────────────────────────────────
-  // Security Bans
+  // 10. محافظ نقاط البيع وسجلاتها (POS Wallets & Logs)
   // ──────────────────────────────────────────────
-  static const String securityBans = '/security-bans';
+  static const String posWallets = '/pos-wallets';
+  static const String posWalletLogs = '/pos-wallets/logs';
+  static String posWalletByPos(int posId) => '$posWallets/pos/$posId';
 
   // ──────────────────────────────────────────────
-  // Role Permissions
+  // 11. باقات واشتراكات مزودي الشبكات (Provider Subscriptions & Plans)
   // ──────────────────────────────────────────────
-  static const String rolePermissions = '/role-permissions';
+  static const String providerSubscriptions = '/provider-subscriptions';
+  static String providerSubscriptionByNetwork(int networkId) =>
+      '$providerSubscriptions/network/$networkId';
+
+  static const String subscriptionPlans = '/subscription-plans';
+  static const String subscriptionPlanRequests = '/subscription-plan-requests';
 
   // ──────────────────────────────────────────────
-  // Operation Types
+  // 12. تذاكر ورسائل الدعم الفني (Support Tickets)
   // ──────────────────────────────────────────────
-  static const String operationTypes = '/operation-types';
+  static const String supportTickets = '/support-tickets';
+  static const String supportTicketMessages = '/support-tickets/messages';
+  static String supportTicketDetails(int id) => '$supportTickets/$id';
+  static String supportTicketClose(int id) => '$supportTickets/$id/close';
 
   // ──────────────────────────────────────────────
-  // System Settings
+  // 13. المصروفات وبنودها (Expenses)
   // ──────────────────────────────────────────────
-  static const String systemSettings = '/system-settings';
+  static const String expenses = '/expenses';
+  static String expenseDetails(int id) => '$expenses/$id';
 
-  // ــ إعدادات الرسائل النصية (مدير التطبيق) ــ
+  // ──────────────────────────────────────────────
+  // 14. الحسابات البنكية (Bank Accounts)
+  // ──────────────────────────────────────────────
+  static const String bankAccounts = '/bank-accounts';
+  static String bankAccountDetails(int id) => '$bankAccounts/$id';
+
+  // ──────────────────────────────────────────────
+  // 15. المحافظات والمديريات (Governorates & Directorates)
+  // ──────────────────────────────────────────────
+  static const String governorates = '/governorates';
+  static const String governoratesCounts = '/governorates/counts';
+  static String governorateDetails(int id) => '$governorates/$id';
+
+  static const String directorates = '/directorates';
+  static String directoratesByGovernorate(int governorateId) =>
+      '$directorates/governorate/$governorateId';
+  static String directorateDetails(int id) => '$directorates/$id';
+
+  // ──────────────────────────────────────────────
+  // 16. إعدادات الرسائل النصية للشبكات (Network SMS Settings)
+  // ──────────────────────────────────────────────
   static const String smsSettings = '/sms-settings';
-  static String smsSettingsStore(int storeId) => '$smsSettings/stores/$storeId';
-  static String smsSettingsStoreTest(int storeId) =>
-      '$smsSettings/stores/$storeId/test';
+  static const String smsSettingsGlobal = '/sms-settings/global';
+  static String smsSettingsNetwork(int networkId) => '$smsSettings/networks/$networkId';
+  static String smsSettingsNetworkTest(int networkId) => '$smsSettings/networks/$networkId/test';
 
   // ──────────────────────────────────────────────
-  // النسخ الاحتياطي إلى جوجل درايف (مدير التطبيق)
+  // 17. النسخ الاحتياطي السحابي (Backups & Google Drive)
   // ──────────────────────────────────────────────
   static const String backups = '/backups';
   static const String backupsSettings = '/backups/settings';
   static const String backupsHealth = '/backups/health';
-  static const String backupsHistory = '/backups/history';
   static const String backupsRun = '/backups/run';
   static const String backupsConfig = '/backups/config';
   static const String backupsDriveAuth = '/backups/drive/auth';
@@ -129,127 +184,27 @@ class ApiConstants {
   static const String backupsDriveDisconnect = '/backups/drive/disconnect';
 
   // ──────────────────────────────────────────────
-  // Dashboard
+  // 18. المستخدمون والأدوار والصلاحيات (Users & Access Control)
   // ──────────────────────────────────────────────
-  static const String dashboard = '/dashboard/summary';
-
-  // ──────────────────────────────────────────────
-  // Customers
-  // ──────────────────────────────────────────────
-  static const String customers = '/customers';
-
-  // ──────────────────────────────────────────────
-  // Suppliers
-  // ──────────────────────────────────────────────
-  static const String suppliers = '/suppliers';
-  static String supplierStatement(int supplierId) =>
-      '$suppliers/$supplierId/statement';
-
-  // ──────────────────────────────────────────────
-  // Expenses
-  // ──────────────────────────────────────────────
-  static const String expenses = '/expenses';
-
-  // ──────────────────────────────────────────────
-  // Sales
-  // ──────────────────────────────────────────────
-  static const String sales = '/sales';
-
-  // ──────────────────────────────────────────────
-  // Purchases
-  // ──────────────────────────────────────────────
-  static const String purchases = '/purchases';
-  static String purchaseStatus(int invoiceId) => '$purchases/$invoiceId/status';
-  static String purchaseAttachment(int attachmentId) =>
-      '$purchases/attachments/$attachmentId';
-
-  // ──────────────────────────────────────────────
-  // Bank Accounts
-  // ──────────────────────────────────────────────
-  static const String bankAccounts = '/bank-accounts';
-  static String bankAccountUploadLogo(int bankAccountId) =>
-      '$bankAccounts/$bankAccountId/logo';
-
-  // ──────────────────────────────────────────────
-  // Payments
-  // ──────────────────────────────────────────────
-  static const String payments = '/payments';
-
-  // ──────────────────────────────────────────────
-  // Returns
-  // ──────────────────────────────────────────────
-  static const String returns = '/returns';
-
-  // ──────────────────────────────────────────────
-  // Purchase Returns
-  // ──────────────────────────────────────────────
-  static const String purchaseReturns = '/purchase-returns';
-
-  // ──────────────────────────────────────────────
-  // Reports
-  // ──────────────────────────────────────────────
-  static const String reportsSales = '/reports/sales';
-  static const String reportsPurchases = '/reports/purchases';
-  static const String reportsSuppliers = '/reports/suppliers';
-  static const String reportsCustomers = '/reports/customers';
-  static const String reportsExpenses = '/reports/expenses';
-  static const String reportsPayments = '/reports/payments';
-  static const String reportsReturns = '/reports/returns';
-  static const String reportsPurchaseReturns = '/reports/purchase-returns';
-  static const String reportsFinancial = '/reports/financial';
-  static const String reportsBankTransactions = '/reports/bank-transactions';
-  static const String reportsBankAccounts = '/reports/bank-accounts';
-  static const String reportsCustomerStatement = '/reports/customer-statement';
-  static const String reportsSupplierStatement = '/reports/supplier-statement';
-  static const String reportsStorePerformance = '/reports/store-performance';
-
-  // ──────────────────────────────────────────────
-  // User Sessions
-  // ──────────────────────────────────────────────
+  static const String users = '/users';
+  static const String roles = '/roles';
+  static const String permissions = '/permissions';
   static const String userSessions = '/user-sessions';
-
-  // ──────────────────────────────────────────────
-  // User Devices
-  // ──────────────────────────────────────────────
   static const String userDevices = '/user-devices';
 
   // ──────────────────────────────────────────────
-  // Two Factor Auth
+  // 19. الإشعارات وسجلات النظام (Notifications & System Logs)
   // ──────────────────────────────────────────────
-  static const String twoFactorAuths = '/two-factor-auths';
+  static const String notifications = '/notifications';
+  static const String notificationsUnread = '/notifications/unread';
+  static const String markNotificationAsRead = '/notifications/mark-as-read';
+  static const String markAllNotificationsAsRead = '/notifications/read-all';
+  static const String adminNotificationsSend = '/admin/notifications/send';
+  static const String adminNotificationsUser = '/admin/notifications/user';
 
-  // ──────────────────────────────────────────────
-  // Wallets
-  // ──────────────────────────────────────────────
-  static const String wallets = '/wallets';
-  static const String walletLogs = '/wallet-logs';
-
-  // ──────────────────────────────────────────────
-  // System Logs & Scheduled Tasks
-  // ──────────────────────────────────────────────
   static const String systemLogs = '/system-logs';
+  static const String systemLogsStats = '/system-logs/stats';
   static const String scheduledTasks = '/scheduled-tasks';
-
-  // ──────────────────────────────────────────────
-  // User Permissions
-  // ──────────────────────────────────────────────
-  static const String userPermissions = '/user-permissions';
-
-  // ──────────────────────────────────────────────
-  // Bank Transactions
-  // ──────────────────────────────────────────────
-  static const String bankTransactions = '/bank-transactions';
-
-  // ──────────────────────────────────────────────
-  // QR Code (توليد موقّع للفواتير والسندات + تحقق)
-  // ──────────────────────────────────────────────
-  static const String qrKey = '/qr/key';
-  static const String qrVerify = '/qr/verify';
-
-  // ──────────────────────────────────────────────
-  // Background Tasks / Cron & Queue Runner
-  // ──────────────────────────────────────────────
-  static const String cronRun = '/cron/run';
-  static const String cronScheduler = '/cron/scheduler';
-  static const String cronQueue = '/cron/queue';
+  static const String securityBans = '/security-bans';
+  static const String systemSettings = '/system-settings';
 }

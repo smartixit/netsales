@@ -3,6 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
+import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/custom_interactive_bounce.dart';
 
 /// أنماط الأزرار المتاحة في النظام
 enum AppButtonVariant {
@@ -16,7 +21,7 @@ enum AppButtonVariant {
   custom,
 }
 
-/// أحجام الأزرار القياسية
+/// أحجام الأزرار القياسية المتوافقة مع ScreenUtil
 enum AppButtonSize {
   small,
   medium,
@@ -32,7 +37,7 @@ enum AppButtonShape {
   square,
 }
 
-/// موضع الأيقونة بالنسبة للنص (للتوافقية العكسية مع معامل icon)
+/// موضع الأيقونة بالنسبة للنص
 enum AppButtonIconPosition {
   start,
   end,
@@ -41,9 +46,12 @@ enum AppButtonIconPosition {
 /// ============================================================================
 /// كلاس الزر الموحد فائق المرونة والمخصص للإنتاج (Enterprise Unified Button)
 /// ============================================================================
-/// يجمع كافة أنواع الأزرار (أساسي، ثانوي، تحذيري، مفرغ، نصي، أيقونة، عائم)
-/// يدعم prefix و suffix معاً (أيقونات أو Widgets)، والـ Scale Animation ومؤشر التحميل.
-class CustomButton extends StatefulWidget {
+/// مدمج كلياً مع:
+/// - AppRadius & AppSpacing (core/constants)
+/// - AppElevation, AppMotion & AppTypography (core/themes)
+/// - CustomInteractiveBounce (micro-interaction scale)
+/// - ScreenUtil (.h, .w, .sp, .r) لكافة الأبعاد
+class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
     this.text,
@@ -61,7 +69,6 @@ class CustomButton extends StatefulWidget {
     this.enabled = true,
     this.enableFeedback = true,
     this.enableScaleAnimation = true,
-    this.scaleFactor = 0.95,
     this.width,
     this.height,
     this.padding,
@@ -90,7 +97,7 @@ class CustomButton extends StatefulWidget {
   /// عنصر أو أيقونة في نهاية الزر (IconData أو Widget مثل سهم أو شارة)
   final dynamic suffix;
 
-  /// أيقونة افتراضية (للتوافقية العكسية - يوضع في البداية أو النهاية وفقاً لـ iconPosition)
+  /// أيقونة افتراضية (للتوافقية العكسية - توضع في البداية أو النهاية وفقاً لـ iconPosition)
   final dynamic icon;
   final AppButtonIconPosition iconPosition;
   final double? iconSize;
@@ -99,7 +106,6 @@ class CustomButton extends StatefulWidget {
   final bool enabled;
   final bool enableFeedback;
   final bool enableScaleAnimation;
-  final double scaleFactor;
   final double? width;
   final double? height;
   final EdgeInsetsGeometry? padding;
@@ -118,7 +124,7 @@ class CustomButton extends StatefulWidget {
   // Factory Constructors للوصول السريع والبديهي لكافة الأنماط
   // ---------------------------------------------------------------------------
 
-  /// 1. زر أساسي (Primary) - بلون الهوية المتدرج أو المصمت
+  /// 1. زر أساسي (Primary)
   factory CustomButton.primary({
     Key? key,
     String? text,
@@ -145,38 +151,36 @@ class CustomButton extends StatefulWidget {
     Gradient? gradient,
     List<BoxShadow>? shadow,
     TextStyle? textStyle,
-  }) {
-    return CustomButton(
-      key: key,
-      text: text,
-      onPressed: onPressed,
-      variant: AppButtonVariant.primary,
-      size: size,
-      shape: shape,
-      prefix: prefix,
-      suffix: suffix,
-      icon: icon,
-      iconPosition: iconPosition,
-      iconSize: iconSize,
-      loading: loading,
-      enabled: enabled,
-      enableFeedback: enableFeedback,
-      enableScaleAnimation: enableScaleAnimation,
-      width: width,
-      height: height,
-      padding: padding,
-      margin: margin,
-      borderRadius: borderRadius,
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
-      gradient: gradient,
-      shadow: shadow,
-      textStyle: textStyle,
-      child: child,
-    );
-  }
+  }) => _create(
+        key: key,
+        text: text,
+        onPressed: onPressed,
+        variant: AppButtonVariant.primary,
+        size: size,
+        shape: shape,
+        prefix: prefix,
+        suffix: suffix,
+        icon: icon,
+        iconPosition: iconPosition,
+        iconSize: iconSize,
+        loading: loading,
+        enabled: enabled,
+        enableFeedback: enableFeedback,
+        enableScaleAnimation: enableScaleAnimation,
+        width: width,
+        height: height,
+        padding: padding,
+        margin: margin,
+        borderRadius: borderRadius,
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        gradient: gradient,
+        shadow: shadow,
+        textStyle: textStyle,
+        child: child,
+      );
 
-  /// 2. زر ثانوي (Secondary) - خلفية هادئة متباينة
+  /// 2. زر ثانوي (Secondary)
   factory CustomButton.secondary({
     Key? key,
     String? text,
@@ -202,37 +206,35 @@ class CustomButton extends StatefulWidget {
     Color? foregroundColor,
     List<BoxShadow>? shadow,
     TextStyle? textStyle,
-  }) {
-    return CustomButton(
-      key: key,
-      text: text,
-      onPressed: onPressed,
-      variant: AppButtonVariant.secondary,
-      size: size,
-      shape: shape,
-      prefix: prefix,
-      suffix: suffix,
-      icon: icon,
-      iconPosition: iconPosition,
-      iconSize: iconSize,
-      loading: loading,
-      enabled: enabled,
-      enableFeedback: enableFeedback,
-      enableScaleAnimation: enableScaleAnimation,
-      width: width,
-      height: height,
-      padding: padding,
-      margin: margin,
-      borderRadius: borderRadius,
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
-      shadow: shadow,
-      textStyle: textStyle,
-      child: child,
-    );
-  }
+  }) => _create(
+        key: key,
+        text: text,
+        onPressed: onPressed,
+        variant: AppButtonVariant.secondary,
+        size: size,
+        shape: shape,
+        prefix: prefix,
+        suffix: suffix,
+        icon: icon,
+        iconPosition: iconPosition,
+        iconSize: iconSize,
+        loading: loading,
+        enabled: enabled,
+        enableFeedback: enableFeedback,
+        enableScaleAnimation: enableScaleAnimation,
+        width: width,
+        height: height,
+        padding: padding,
+        margin: margin,
+        borderRadius: borderRadius,
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        shadow: shadow,
+        textStyle: textStyle,
+        child: child,
+      );
 
-  /// 3. زر تفريغ خارجي (Outline) - شفاف مع حدود ملونة
+  /// 3. زر مفرغ بحدود خارجية (Outline)
   factory CustomButton.outline({
     Key? key,
     String? text,
@@ -256,39 +258,37 @@ class CustomButton extends StatefulWidget {
     double? borderRadius,
     Color? foregroundColor,
     Color? borderColor,
-    double borderWidth = 1.5,
+    double? borderWidth,
     TextStyle? textStyle,
-  }) {
-    return CustomButton(
-      key: key,
-      text: text,
-      onPressed: onPressed,
-      variant: AppButtonVariant.outline,
-      size: size,
-      shape: shape,
-      prefix: prefix,
-      suffix: suffix,
-      icon: icon,
-      iconPosition: iconPosition,
-      iconSize: iconSize,
-      loading: loading,
-      enabled: enabled,
-      enableFeedback: enableFeedback,
-      enableScaleAnimation: enableScaleAnimation,
-      width: width,
-      height: height,
-      padding: padding,
-      margin: margin,
-      borderRadius: borderRadius,
-      foregroundColor: foregroundColor,
-      borderColor: borderColor,
-      borderWidth: borderWidth,
-      textStyle: textStyle,
-      child: child,
-    );
-  }
+  }) => _create(
+        key: key,
+        text: text,
+        onPressed: onPressed,
+        variant: AppButtonVariant.outline,
+        size: size,
+        shape: shape,
+        prefix: prefix,
+        suffix: suffix,
+        icon: icon,
+        iconPosition: iconPosition,
+        iconSize: iconSize,
+        loading: loading,
+        enabled: enabled,
+        enableFeedback: enableFeedback,
+        enableScaleAnimation: enableScaleAnimation,
+        width: width,
+        height: height,
+        padding: padding,
+        margin: margin,
+        borderRadius: borderRadius,
+        foregroundColor: foregroundColor,
+        borderColor: borderColor,
+        borderWidth: borderWidth ?? 1.5.w,
+        textStyle: textStyle,
+        child: child,
+      );
 
-  /// 4. زر نصي (Text / Ghost) - بدون خلفية أو حدود
+  /// 4. زر نصي (Text / Ghost)
   factory CustomButton.text({
     Key? key,
     String? text,
@@ -311,34 +311,32 @@ class CustomButton extends StatefulWidget {
     EdgeInsetsGeometry? margin,
     Color? foregroundColor,
     TextStyle? textStyle,
-  }) {
-    return CustomButton(
-      key: key,
-      text: text,
-      onPressed: onPressed,
-      variant: AppButtonVariant.text,
-      size: size,
-      shape: shape,
-      prefix: prefix,
-      suffix: suffix,
-      icon: icon,
-      iconPosition: iconPosition,
-      iconSize: iconSize,
-      loading: loading,
-      enabled: enabled,
-      enableFeedback: enableFeedback,
-      enableScaleAnimation: enableScaleAnimation,
-      width: width,
-      height: height,
-      padding: padding,
-      margin: margin,
-      foregroundColor: foregroundColor,
-      textStyle: textStyle,
-      child: child,
-    );
-  }
+  }) => _create(
+        key: key,
+        text: text,
+        onPressed: onPressed,
+        variant: AppButtonVariant.text,
+        size: size,
+        shape: shape,
+        prefix: prefix,
+        suffix: suffix,
+        icon: icon,
+        iconPosition: iconPosition,
+        iconSize: iconSize,
+        loading: loading,
+        enabled: enabled,
+        enableFeedback: enableFeedback,
+        enableScaleAnimation: enableScaleAnimation,
+        width: width,
+        height: height,
+        padding: padding,
+        margin: margin,
+        foregroundColor: foregroundColor,
+        textStyle: textStyle,
+        child: child,
+      );
 
-  /// 5. زر تحذيري / خطر (Danger) - أحمر لعمليات الحذف والرفض
+  /// 5. زر خطر / تحذيري (Danger)
   factory CustomButton.danger({
     Key? key,
     String? text,
@@ -364,37 +362,35 @@ class CustomButton extends StatefulWidget {
     Color? foregroundColor,
     List<BoxShadow>? shadow,
     TextStyle? textStyle,
-  }) {
-    return CustomButton(
-      key: key,
-      text: text,
-      onPressed: onPressed,
-      variant: AppButtonVariant.danger,
-      size: size,
-      shape: shape,
-      prefix: prefix,
-      suffix: suffix,
-      icon: icon,
-      iconPosition: iconPosition,
-      iconSize: iconSize,
-      loading: loading,
-      enabled: enabled,
-      enableFeedback: enableFeedback,
-      enableScaleAnimation: enableScaleAnimation,
-      width: width,
-      height: height,
-      padding: padding,
-      margin: margin,
-      borderRadius: borderRadius,
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
-      shadow: shadow,
-      textStyle: textStyle,
-      child: child,
-    );
-  }
+  }) => _create(
+        key: key,
+        text: text,
+        onPressed: onPressed,
+        variant: AppButtonVariant.danger,
+        size: size,
+        shape: shape,
+        prefix: prefix,
+        suffix: suffix,
+        icon: icon,
+        iconPosition: iconPosition,
+        iconSize: iconSize,
+        loading: loading,
+        enabled: enabled,
+        enableFeedback: enableFeedback,
+        enableScaleAnimation: enableScaleAnimation,
+        width: width,
+        height: height,
+        padding: padding,
+        margin: margin,
+        borderRadius: borderRadius,
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        shadow: shadow,
+        textStyle: textStyle,
+        child: child,
+      );
 
-  /// 6. زر أيقونة مخصص (Icon) - مربع أو دائري
+  /// 6. زر أيقونة مخصص (Icon)
   factory CustomButton.icon({
     Key? key,
     required dynamic icon,
@@ -413,37 +409,35 @@ class CustomButton extends StatefulWidget {
     bool enableFeedback = true,
     bool enableScaleAnimation = true,
     List<BoxShadow>? shadow,
-  }) {
-    return CustomButton(
-      key: key,
-      onPressed: onPressed,
-      variant: AppButtonVariant.icon,
-      size: size,
-      shape: shape,
-      icon: icon,
-      iconSize: iconSize,
-      tooltip: tooltip,
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
-      borderColor: borderColor,
-      borderWidth: borderWidth,
-      width: dimension,
-      height: dimension,
-      loading: loading,
-      enabled: enabled,
-      enableFeedback: enableFeedback,
-      enableScaleAnimation: enableScaleAnimation,
-      shadow: shadow,
-    );
-  }
+  }) => _create(
+        key: key,
+        onPressed: onPressed,
+        variant: AppButtonVariant.icon,
+        size: size,
+        shape: shape,
+        icon: icon,
+        iconSize: iconSize,
+        tooltip: tooltip,
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        width: dimension,
+        height: dimension,
+        loading: loading,
+        enabled: enabled,
+        enableFeedback: enableFeedback,
+        enableScaleAnimation: enableScaleAnimation,
+        shadow: shadow,
+      );
 
-  /// 7. زر عائم (Floating Action Button) - دائري مع ظل بارز وتدرج
+  /// 7. زر عائم دائري (Floating Action Button)
   factory CustomButton.floating({
     Key? key,
     required dynamic icon,
     required VoidCallback? onPressed,
     String? tooltip,
-    double size = 56.0,
+    double? size,
     Gradient? gradient,
     Color? backgroundColor,
     Color? foregroundColor,
@@ -453,66 +447,107 @@ class CustomButton extends StatefulWidget {
     bool enableFeedback = true,
     bool enableScaleAnimation = true,
     List<BoxShadow>? shadow,
+  }) => _create(
+        key: key,
+        onPressed: onPressed,
+        variant: AppButtonVariant.floating,
+        shape: AppButtonShape.circle,
+        icon: icon,
+        iconSize: iconSize,
+        tooltip: tooltip,
+        width: size ?? 56.r,
+        height: size ?? 56.r,
+        gradient: gradient,
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        loading: loading,
+        enabled: enabled,
+        enableFeedback: enableFeedback,
+        enableScaleAnimation: enableScaleAnimation,
+        shadow: shadow,
+      );
+
+  /// مساعد داخلي لمنع تكرار كود إنشاء الكائن عبر الـ Factory Constructors
+  static CustomButton _create({
+    Key? key,
+    String? text,
+    Widget? child,
+    required VoidCallback? onPressed,
+    required AppButtonVariant variant,
+    AppButtonSize size = AppButtonSize.medium,
+    AppButtonShape shape = AppButtonShape.rounded,
+    dynamic prefix,
+    dynamic suffix,
+    dynamic icon,
+    AppButtonIconPosition iconPosition = AppButtonIconPosition.start,
+    double? iconSize,
+    bool loading = false,
+    bool enabled = true,
+    bool enableFeedback = true,
+    bool enableScaleAnimation = true,
+    double? width,
+    double? height,
+    EdgeInsetsGeometry? padding,
+    EdgeInsetsGeometry? margin,
+    double? borderRadius,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    Color? borderColor,
+    double? borderWidth,
+    Gradient? gradient,
+    List<BoxShadow>? shadow,
+    TextStyle? textStyle,
+    String? tooltip,
   }) {
     return CustomButton(
       key: key,
+      text: text,
       onPressed: onPressed,
-      variant: AppButtonVariant.floating,
-      shape: AppButtonShape.circle,
+      variant: variant,
+      size: size,
+      shape: shape,
+      prefix: prefix,
+      suffix: suffix,
       icon: icon,
+      iconPosition: iconPosition,
       iconSize: iconSize,
-      tooltip: tooltip,
-      width: size,
-      height: size,
-      gradient: gradient,
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
       loading: loading,
       enabled: enabled,
       enableFeedback: enableFeedback,
       enableScaleAnimation: enableScaleAnimation,
+      width: width,
+      height: height,
+      padding: padding,
+      margin: margin,
+      borderRadius: borderRadius,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      borderColor: borderColor,
+      borderWidth: borderWidth,
+      gradient: gradient,
       shadow: shadow,
+      textStyle: textStyle,
+      tooltip: tooltip,
+      child: child,
     );
   }
 
-  @override
-  State<CustomButton> createState() => _CustomButtonState();
-}
-
-class _CustomButtonState extends State<CustomButton> {
-  double _scale = 1.0;
-
-  void _animate(bool pressed) {
-    if (!widget.enableScaleAnimation || !mounted) return;
-    setState(() {
-      _scale = pressed ? widget.scaleFactor : 1.0;
-    });
-  }
-
-  void _handleTap() {
-    if (!widget.enabled || widget.loading || widget.onPressed == null) return;
-    if (widget.enableFeedback) {
-      HapticFeedback.lightImpact();
-    }
-    widget.onPressed?.call();
-  }
-
   // ---------------------------------------------------------------------------
-  // حساب الأبعاد ودرجات التدوير ديناميكياً
+  // حساب الأبعاد ودرجات التدوير ديناميكياً مع ScreenUtil & AppRadius
   // ---------------------------------------------------------------------------
 
   double get _effectiveHeight {
-    if (widget.height != null) return widget.height!;
-    if (widget.variant == AppButtonVariant.floating) return 56.r;
-    if (widget.variant == AppButtonVariant.icon) {
-      return switch (widget.size) {
+    if (height != null) return height!;
+    if (variant == AppButtonVariant.floating) return 56.r;
+    if (variant == AppButtonVariant.icon) {
+      return switch (size) {
         AppButtonSize.small => 40.h,
         AppButtonSize.medium => 52.h,
         AppButtonSize.large => 64.h,
         AppButtonSize.custom => 52.h,
       };
     }
-    return switch (widget.size) {
+    return switch (size) {
       AppButtonSize.small => 40.h,
       AppButtonSize.medium => 56.h,
       AppButtonSize.large => 68.h,
@@ -521,169 +556,167 @@ class _CustomButtonState extends State<CustomButton> {
   }
 
   BorderRadius get _effectiveBorderRadius {
-    if (widget.shape == AppButtonShape.circle) {
-      return BorderRadius.circular(999.r);
+    if (shape == AppButtonShape.circle || shape == AppButtonShape.pill) {
+      return AppRadius.fullRadius;
     }
-    if (widget.shape == AppButtonShape.pill) {
-      return BorderRadius.circular(999.r);
+    if (shape == AppButtonShape.square) {
+      return AppRadius.noneRadius;
     }
-    if (widget.shape == AppButtonShape.square) {
-      return BorderRadius.zero;
+    if (borderRadius != null) {
+      return BorderRadius.circular(borderRadius!.r);
     }
-    if (widget.borderRadius != null) {
-      return BorderRadius.circular(widget.borderRadius!.r);
-    }
-    return switch (widget.size) {
-      AppButtonSize.small => BorderRadius.circular(AppRadius.sm),
-      AppButtonSize.medium => BorderRadius.circular(AppRadius.md),
-      AppButtonSize.large => BorderRadius.circular(AppRadius.lg),
+    return switch (size) {
+      AppButtonSize.small => AppRadius.smRadius,
+      AppButtonSize.medium => AppRadius.mdRadius,
+      AppButtonSize.large => AppRadius.lgRadius,
       AppButtonSize.custom => BorderRadius.circular(AppRadius.button),
     };
   }
 
+  void _handleTap() {
+    if (!enabled || loading || onPressed == null) return;
+    if (enableFeedback) {
+      HapticFeedback.lightImpact();
+    }
+    onPressed?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final isDisabled = !widget.enabled || widget.loading;
+    final colors = context.colors;
+    final isDisabled = !enabled || loading;
 
-    // 1. حساب الألوان التلقائية وفقاً للنمط
+    // 1. حساب الألوان والظلال عبر AppElevation ونظام الثيمات
     Color? resolvedBgColor;
     Color resolvedFgColor;
     Gradient? resolvedGradient;
     Border? resolvedBorder;
-    List<BoxShadow>? resolvedShadow = widget.shadow;
+    List<BoxShadow>? resolvedShadow = shadow;
 
-    switch (widget.variant) {
+    switch (variant) {
       case AppButtonVariant.primary:
-        resolvedGradient = widget.gradient ??
+        resolvedGradient = gradient ??
             LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
               colors: [colors.primary, colors.secondary],
             );
-        resolvedBgColor = widget.backgroundColor ?? colors.primary;
-        resolvedFgColor = widget.foregroundColor ?? colors.onPrimary;
-        resolvedShadow ??= [
-          BoxShadow(
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-            color: colors.primary.withValues(alpha: 0.22),
-          ),
-        ];
+        resolvedBgColor = backgroundColor ?? colors.primary;
+        resolvedFgColor = foregroundColor ?? colors.onPrimary;
+        resolvedShadow ??= AppElevation.tinted(
+          context,
+          colors.primary,
+          alpha: 0.22,
+          blur: 16.r,
+          dy: 6.h,
+        );
         break;
 
       case AppButtonVariant.secondary:
-        resolvedBgColor = widget.backgroundColor ?? colors.secondaryContainer;
-        resolvedFgColor = widget.foregroundColor ?? colors.onSecondaryContainer;
+        resolvedBgColor = backgroundColor ?? colors.secondaryContainer;
+        resolvedFgColor = foregroundColor ?? colors.onSecondaryContainer;
         break;
 
       case AppButtonVariant.danger:
-        resolvedBgColor = widget.backgroundColor ?? colors.error;
-        resolvedFgColor = widget.foregroundColor ?? colors.onError;
-        resolvedShadow ??= [
-          BoxShadow(
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-            color: colors.error.withValues(alpha: 0.22),
-          ),
-        ];
+        resolvedBgColor = backgroundColor ?? colors.error;
+        resolvedFgColor = foregroundColor ?? colors.onError;
+        resolvedShadow ??= AppElevation.tinted(
+          context,
+          colors.error,
+          alpha: 0.22,
+          blur: 16.r,
+          dy: 6.h,
+        );
         break;
 
       case AppButtonVariant.outline:
-        resolvedBgColor = widget.backgroundColor ?? Colors.transparent;
-        resolvedFgColor = widget.foregroundColor ?? colors.primary;
+        resolvedBgColor = backgroundColor ?? Colors.transparent;
+        resolvedFgColor = foregroundColor ?? colors.primary;
         resolvedBorder = Border.all(
-          color: widget.borderColor ?? colors.primary,
-          width: widget.borderWidth ?? 1.5,
+          color: borderColor ?? colors.primary,
+          width: borderWidth ?? 1.5.w,
         );
         break;
 
       case AppButtonVariant.text:
         resolvedBgColor = Colors.transparent;
-        resolvedFgColor = widget.foregroundColor ?? colors.primary;
+        resolvedFgColor = foregroundColor ?? colors.primary;
         break;
 
       case AppButtonVariant.icon:
-        resolvedBgColor = widget.backgroundColor ?? colors.surfaceContainerHighest;
-        resolvedFgColor = widget.foregroundColor ?? colors.primary;
-        if (widget.borderColor != null) {
+        resolvedBgColor = backgroundColor ?? colors.surfaceContainerHighest;
+        resolvedFgColor = foregroundColor ?? colors.primary;
+        if (borderColor != null) {
           resolvedBorder = Border.all(
-            color: widget.borderColor!,
-            width: widget.borderWidth ?? 1.0,
+            color: borderColor!,
+            width: borderWidth ?? 1.0.w,
           );
         }
         break;
 
       case AppButtonVariant.floating:
-        resolvedGradient = widget.gradient ??
+        resolvedGradient = gradient ??
             LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
               colors: [colors.primary, colors.secondary],
             );
-        resolvedBgColor = widget.backgroundColor ?? colors.primary;
-        resolvedFgColor = widget.foregroundColor ?? colors.onPrimary;
-        resolvedShadow ??= [
-          BoxShadow(
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-            color: colors.shadow.withValues(alpha: 0.20),
-          ),
-        ];
+        resolvedBgColor = backgroundColor ?? colors.primary;
+        resolvedFgColor = foregroundColor ?? colors.onPrimary;
+        resolvedShadow ??= AppElevation.level4(context);
         break;
 
       case AppButtonVariant.custom:
-        resolvedBgColor = widget.backgroundColor ?? colors.primary;
-        resolvedFgColor = widget.foregroundColor ?? colors.onPrimary;
-        resolvedGradient = widget.gradient;
-        if (widget.borderColor != null) {
+        resolvedBgColor = backgroundColor ?? colors.primary;
+        resolvedFgColor = foregroundColor ?? colors.onPrimary;
+        resolvedGradient = gradient;
+        if (borderColor != null) {
           resolvedBorder = Border.all(
-            color: widget.borderColor!,
-            width: widget.borderWidth ?? 1.0,
+            color: borderColor!,
+            width: borderWidth ?? 1.0.w,
           );
         }
         break;
     }
 
-    // 2. بناء المحتوى الداخلي للزر (نص، prefix, suffix، مؤشر تحميل)
+    // 2. بناء المحتوى مع AppTypography و ScreenUtil
     Widget content;
-    if (widget.loading) {
-      final spinnerSize = (widget.size == AppButtonSize.small ? 18.0 : 22.0).r;
+    if (loading) {
+      final spinnerSize = (size == AppButtonSize.small ? 18.0 : 22.0).r;
       content = Center(
         child: SizedBox(
           width: spinnerSize,
           height: spinnerSize,
           child: CircularProgressIndicator(
-            strokeWidth: 2.2,
+            strokeWidth: 2.2.w,
             valueColor: AlwaysStoppedAnimation<Color>(resolvedFgColor),
           ),
         ),
       );
-    } else if (widget.child != null) {
-      content = Center(child: widget.child);
-    } else if (widget.variant == AppButtonVariant.icon || widget.variant == AppButtonVariant.floating) {
-      content = Center(child: _buildItemWidget(widget.icon, resolvedFgColor));
+    } else if (child != null) {
+      content = Center(child: child);
+    } else if (variant == AppButtonVariant.icon || variant == AppButtonVariant.floating) {
+      content = Center(child: _buildItemWidget(icon, resolvedFgColor));
     } else {
-      final textWidget = widget.text != null
+      final textWidget = text != null
           ? Text(
-              widget.text!,
+              text!,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
-              style: widget.textStyle ??
-                  theme.textTheme.labelLarge?.copyWith(
-                    color: resolvedFgColor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: widget.size == AppButtonSize.small ? 13.sp : 15.sp,
-                  ),
+              style: textStyle ??
+                  (size == AppButtonSize.small
+                          ? AppTypography.buttonSmall
+                          : (size == AppButtonSize.large
+                              ? AppTypography.buttonLarge
+                              : AppTypography.buttonMedium))
+                      .copyWith(color: resolvedFgColor),
             )
           : null;
 
-      // استخراج الـ prefix والـ suffix بمرونة
-      final dynamic resolvedPrefixSource = widget.prefix ??
-          (widget.iconPosition == AppButtonIconPosition.start ? widget.icon : null);
-      final dynamic resolvedSuffixSource = widget.suffix ??
-          (widget.iconPosition == AppButtonIconPosition.end ? widget.icon : null);
+      final dynamic resolvedPrefixSource = prefix ??
+          (iconPosition == AppButtonIconPosition.start ? icon : null);
+      final dynamic resolvedSuffixSource = suffix ??
+          (iconPosition == AppButtonIconPosition.end ? icon : null);
 
       final Widget? prefixWidget = _buildItemWidget(resolvedPrefixSource, resolvedFgColor);
       final Widget? suffixWidget = _buildItemWidget(resolvedSuffixSource, resolvedFgColor);
@@ -712,67 +745,62 @@ class _CustomButtonState extends State<CustomButton> {
       }
     }
 
-    // 3. تحديد العرض والارتفاع
-    double? effectiveWidth = widget.width;
+    // 3. تحديد العرض النهائي
+    double? effectiveWidth = width;
     if (effectiveWidth == null) {
-      if (widget.variant == AppButtonVariant.icon || widget.variant == AppButtonVariant.floating) {
+      if (variant == AppButtonVariant.icon || variant == AppButtonVariant.floating) {
         effectiveWidth = _effectiveHeight;
-      } else if (widget.variant == AppButtonVariant.text) {
-        effectiveWidth = null; // Auto-fit
+      } else if (variant == AppButtonVariant.text) {
+        effectiveWidth = null;
       } else {
         effectiveWidth = double.infinity;
       }
     }
 
-    Widget buttonBody = AnimatedScale(
-      scale: _scale,
-      duration: const Duration(milliseconds: 110),
-      curve: Curves.easeOutCubic,
-      child: AnimatedOpacity(
-        opacity: isDisabled ? 0.55 : 1.0,
-        duration: const Duration(milliseconds: 150),
-        child: Container(
-          margin: widget.margin,
-          width: effectiveWidth,
-          height: _effectiveHeight,
-          decoration: BoxDecoration(
-            gradient: resolvedGradient,
-            color: resolvedGradient == null ? resolvedBgColor : null,
+    // 4. بناء هيكل الزر مع الحواف والظلال والتأثيرات
+    Widget buttonBody = AnimatedOpacity(
+      opacity: isDisabled ? 0.55 : 1.0,
+      duration: AppMotion.fast,
+      curve: AppMotion.emphasized,
+      child: Container(
+        margin: margin,
+        width: effectiveWidth,
+        height: _effectiveHeight,
+        decoration: BoxDecoration(
+          gradient: resolvedGradient,
+          color: resolvedGradient == null ? resolvedBgColor : null,
+          borderRadius: _effectiveBorderRadius,
+          border: resolvedBorder,
+          boxShadow: resolvedShadow,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
             borderRadius: _effectiveBorderRadius,
-            border: resolvedBorder,
-            boxShadow: resolvedShadow,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: _effectiveBorderRadius,
-              onTap: isDisabled ? null : _handleTap,
-              child: Padding(
-                padding: widget.padding ??
-                    (widget.variant == AppButtonVariant.text
-                        ? EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs)
-                        : EdgeInsets.symmetric(horizontal: AppSpacing.md)),
-                child: content,
-              ),
+            onTap: (enableScaleAnimation && !isDisabled) ? null : (isDisabled ? null : _handleTap),
+            child: Padding(
+              padding: padding ??
+                  (variant == AppButtonVariant.text
+                      ? EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs)
+                      : EdgeInsets.symmetric(horizontal: AppSpacing.buttonPaddingH / 1.5)),
+              child: content,
             ),
           ),
         ),
       ),
     );
 
-    // إضافة مستمع اللمس للـ Scale Animation
-    if (widget.enableScaleAnimation && !isDisabled) {
-      buttonBody = Listener(
-        onPointerDown: (_) => _animate(true),
-        onPointerUp: (_) => _animate(false),
-        onPointerCancel: (_) => _animate(false),
+    // 5. ربط تفاعل اللمس النابض مع CustomInteractiveBounce من lib/widgets
+    if (enableScaleAnimation && !isDisabled) {
+      buttonBody = CustomInteractiveBounce(
+        onTap: _handleTap,
         child: buttonBody,
       );
     }
 
-    // إضافة Tooltip إن وجد
-    if (widget.tooltip != null && widget.tooltip!.isNotEmpty) {
-      buttonBody = Tooltip(message: widget.tooltip!, child: buttonBody);
+    // 6. إضافة Tooltip إن وجد
+    if (tooltip != null && tooltip!.isNotEmpty) {
+      buttonBody = Tooltip(message: tooltip!, child: buttonBody);
     }
 
     return buttonBody;
@@ -781,8 +809,10 @@ class _CustomButtonState extends State<CustomButton> {
   Widget? _buildItemWidget(dynamic item, Color fallbackColor) {
     if (item == null) return null;
     if (item is IconData) {
-      final size = widget.iconSize ??
-          (widget.size == AppButtonSize.small ? 18.sp : (widget.variant == AppButtonVariant.icon ? 26.sp : 20.sp));
+      final size = iconSize ??
+          (this.size == AppButtonSize.small
+              ? 18.sp
+              : (variant == AppButtonVariant.icon ? 26.sp : 20.sp));
       return Icon(item, color: fallbackColor, size: size);
     }
     if (item is Widget) {

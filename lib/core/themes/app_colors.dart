@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
+/// ============================================================================
+/// نظام الألوان الموحد المركزي للمشروع بالكامل (Enterprise Unified Colors)
+/// ============================================================================
+/// يمثل المرجع الحصري والشامل لكافة ألوان التطبيق في مشروعي NetSales و NetSales API.
+/// يدعم الوضعين الفاتح والداكن (Light & Dark) ديناميكياً بدون أي تكرار أو تشتت.
 class AppColors {
-  // ── Primary ──
+  // ── 1. Primary Colors (هوية النظام الأساسية) ──
   final Color primary;
   final Color onPrimary;
   final Color primaryContainer;
@@ -11,7 +16,7 @@ class AppColors {
   final Color onPrimaryFixed;
   final Color onPrimaryFixedVariant;
 
-  // ── Secondary (Teal) ──
+  // ── 2. Secondary Colors (اللون الثانوي - تيل ناعم) ──
   final Color secondary;
   final Color onSecondary;
   final Color secondaryContainer;
@@ -21,7 +26,7 @@ class AppColors {
   final Color onSecondaryFixed;
   final Color onSecondaryFixedVariant;
 
-  // ── Tertiary (Green Mint) ──
+  // ── 3. Tertiary Colors (اللون التكميلي - أخضر نعناعي للأرصدة والشبكات) ──
   final Color tertiary;
   final Color onTertiary;
   final Color tertiaryContainer;
@@ -31,35 +36,35 @@ class AppColors {
   final Color onTertiaryFixed;
   final Color onTertiaryFixedVariant;
 
-  // ── Error ──
+  // ── 4. Error Colors (حالات الخطأ والرفض) ──
   final Color error;
   final Color onError;
   final Color errorContainer;
   final Color onErrorContainer;
   final Color onErrorVariant;
 
-  // ── Success ──
+  // ── 5. Success Colors (حالات النجاح والعمليات المعتمدة) ──
   final Color success;
   final Color onSuccess;
   final Color successContainer;
   final Color onSuccessContainer;
   final Color onSuccessVariant;
 
-  // ── Warning ──
+  // ── 6. Warning Colors (حالات التنبيه والانتظار) ──
   final Color warning;
   final Color onWarning;
   final Color warningContainer;
   final Color onWarningContainer;
   final Color onWarningVariant;
 
-  // ── Info ──
+  // ── 7. Info Colors (المعلومات والملاحظات) ──
   final Color info;
   final Color onInfo;
   final Color infoContainer;
   final Color onInfoContainer;
   final Color onInfoVariant;
 
-  // ── Surface ──
+  // ── 8. Surface & Surfaces Hierarchy (الخلفيات والبطاقات والأسطح) ──
   final Color surface;
   final Color onSurface;
   final Color surfaceVariant;
@@ -73,32 +78,36 @@ class AppColors {
   final Color surfaceContainerHigh;
   final Color surfaceContainerHighest;
 
-  // ── Background ──
+  // ── 9. Background Colors ──
   final Color background;
   final Color onBackground;
 
-  // ── Inverse ──
+  // ── 10. Inverse Colors ──
   final Color inverseSurface;
   final Color onInverseSurface;
   final Color inversePrimary;
 
-  // ── Outline ──
+  // ── 11. Outline & Borders ──
   final Color outline;
   final Color outlineVariant;
   final Color shadow;
   final Color scrim;
 
-  // ── Disabled ──
+  // ── 12. Disabled & States ──
   final Color disabled;
   final Color onDisabled;
 
-  // ── Divider ──
+  // ── 13. Dividers ──
   final Color divider;
 
-  // ── Gradient ──
+  // ── 14. Gradients (التدرجات اللونية الموحدة) ──
   final List<Color> primaryGradient;
+  final LinearGradient successGradient;
+  final LinearGradient errorGradient;
+  final LinearGradient warningGradient;
+  final LinearGradient infoGradient;
 
-  AppColors({
+  const AppColors({
     required this.primary,
     required this.onPrimary,
     required this.primaryContainer,
@@ -168,10 +177,22 @@ class AppColors {
     required this.onDisabled,
     required this.divider,
     required this.primaryGradient,
+    required this.successGradient,
+    required this.errorGradient,
+    required this.warningGradient,
+    required this.infoGradient,
   });
 
-  static final lightColors = AppColors(
-    // ── Primary ──
+  /// ── الوصول الموحد التلقائي حسب الثيم النشط في الشاشة ──
+  static AppColors of(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? darkColors : lightColors;
+  }
+
+  // ===========================================================================
+  // لوحة ألوان الوضع الفاتح (Light Palette)
+  // ===========================================================================
+  static const lightColors = AppColors(
     primary: Color(0xFF0D7A5F),
     onPrimary: Color(0xFFFFFFFF),
     primaryContainer: Color(0xFFB8F0E0),
@@ -181,7 +202,6 @@ class AppColors {
     onPrimaryFixed: Color(0xFF00382A),
     onPrimaryFixedVariant: Color(0xFF005C45),
 
-    // ── Secondary (Teal) ──
     secondary: Color(0xFF1ABC9C),
     onSecondary: Color(0xFFFFFFFF),
     secondaryContainer: Color(0xFFC8F5EC),
@@ -191,7 +211,6 @@ class AppColors {
     onSecondaryFixed: Color(0xFF004D3D),
     onSecondaryFixedVariant: Color(0xFF007A60),
 
-    // ── Tertiary (Green Mint) ──
     tertiary: Color(0xFF2ECC71),
     onTertiary: Color(0xFFFFFFFF),
     tertiaryContainer: Color(0xFFD0F5DD),
@@ -201,35 +220,30 @@ class AppColors {
     onTertiaryFixed: Color(0xFF004D25),
     onTertiaryFixedVariant: Color(0xFF006E38),
 
-    // ── Error ──
     error: Color(0xFFBA1A1A),
     onError: Color(0xFFFFFFFF),
     errorContainer: Color(0xFFFFDAD6),
     onErrorContainer: Color(0xFF410002),
     onErrorVariant: Color(0xFFFFDAD6),
 
-    // ── Success ──
     success: Color(0xFF2E7D32),
     onSuccess: Color(0xFFFFFFFF),
     successContainer: Color(0xFFC8E6C9),
     onSuccessContainer: Color(0xFF1B5E20),
     onSuccessVariant: Color(0xFFC8E6C9),
 
-    // ── Warning ──
     warning: Color(0xFFF57C00),
     onWarning: Color(0xFFFFFFFF),
     warningContainer: Color(0xFFFFE0B2),
     onWarningContainer: Color(0xFFE65100),
     onWarningVariant: Color(0xFFFFE0B2),
 
-    // ── Info ──
     info: Color(0xFF1976D2),
     onInfo: Color(0xFFFFFFFF),
     infoContainer: Color(0xFFBBDEFB),
     onInfoContainer: Color(0xFF0D47A1),
     onInfoVariant: Color(0xFFBBDEFB),
 
-    // ── Surface ──
     surface: Color(0xFFFAFDFB),
     onSurface: Color(0xFF191C1B),
     surfaceVariant: Color(0xFFDBE5E0),
@@ -243,34 +257,42 @@ class AppColors {
     surfaceContainerHigh: Color(0xFFE4EAE7),
     surfaceContainerHighest: Color(0xFFDEE4E1),
 
-    // ── Background ──
     background: Color(0xFFFAFDFB),
     onBackground: Color(0xFF191C1B),
 
-    // ── Inverse ──
     inverseSurface: Color(0xFF2D312F),
     onInverseSurface: Color(0xFFEFF1EF),
     inversePrimary: Color(0xFF8CD6C2),
 
-    // ── Outline ──
     outline: Color(0xFF6F7975),
     outlineVariant: Color(0xFFBFC9C4),
     shadow: Color(0xFF000000),
     scrim: Color(0xFF000000),
 
-    // ── Disabled ──
     disabled: Color(0xFFBFC9C4),
     onDisabled: Color(0xFF6F7975),
 
-    // ── Divider ──
     divider: Color(0xFFD5DBD8),
 
-    // ── Gradient ──
     primaryGradient: [Color(0xFF0D7A5F), Color(0xFF1ABC9C), Color(0xFF2ECC71)],
+    successGradient: LinearGradient(
+      colors: [Color(0xFF10B981), Color(0xFF059669)],
+    ),
+    errorGradient: LinearGradient(
+      colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
+    ),
+    warningGradient: LinearGradient(
+      colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+    ),
+    infoGradient: LinearGradient(
+      colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+    ),
   );
 
-  static final darkColors = AppColors(
-    // ── Primary ──
+  // ===========================================================================
+  // لوحة ألوان الوضع الداكن (Dark Palette)
+  // ===========================================================================
+  static const darkColors = AppColors(
     primary: Color(0xFF8CD6C2),
     onPrimary: Color(0xFF00382A),
     primaryContainer: Color(0xFF005C45),
@@ -280,7 +302,6 @@ class AppColors {
     onPrimaryFixed: Color(0xFF00382A),
     onPrimaryFixedVariant: Color(0xFFB8F0E0),
 
-    // ── Secondary (Teal) ──
     secondary: Color(0xFF9EE8D8),
     onSecondary: Color(0xFF004D3D),
     secondaryContainer: Color(0xFF007A60),
@@ -290,7 +311,6 @@ class AppColors {
     onSecondaryFixed: Color(0xFF004D3D),
     onSecondaryFixedVariant: Color(0xFFC8F5EC),
 
-    // ── Tertiary (Green Mint) ──
     tertiary: Color(0xFFA8E6BF),
     onTertiary: Color(0xFF004D25),
     tertiaryContainer: Color(0xFF006E38),
@@ -300,35 +320,30 @@ class AppColors {
     onTertiaryFixed: Color(0xFF004D25),
     onTertiaryFixedVariant: Color(0xFF006E38),
 
-    // ── Error ──
     error: Color(0xFFFFB4AB),
     onError: Color(0xFF690005),
     errorContainer: Color(0xFF93000A),
     onErrorContainer: Color(0xFFFFDAD6),
     onErrorVariant: Color(0xFFFFDAD6),
 
-    // ── Success ──
     success: Color(0xFF81C784),
     onSuccess: Color(0xFF1B5E20),
     successContainer: Color(0xFF2E7D32),
     onSuccessContainer: Color(0xFFC8E6C9),
     onSuccessVariant: Color(0xFFC8E6C9),
 
-    // ── Warning ──
     warning: Color(0xFFFFB74D),
     onWarning: Color(0xFF6D4C00),
     warningContainer: Color(0xFFF57C00),
     onWarningContainer: Color(0xFFFFE0B2),
     onWarningVariant: Color(0xFFFFE0B2),
 
-    // ── Info ──
     info: Color(0xFF90CAF9),
     onInfo: Color(0xFF0D47A1),
     infoContainer: Color(0xFF1976D2),
     onInfoContainer: Color(0xFFBBDEFB),
     onInfoVariant: Color(0xFFBBDEFB),
 
-    // ── Surface ──
     surface: Color(0xFF0A1F14),
     onSurface: Color(0xFFE0E3E1),
     surfaceVariant: Color(0xFF1A3A28),
@@ -342,29 +357,49 @@ class AppColors {
     surfaceContainerHigh: Color(0xFF124530),
     surfaceContainerHighest: Color(0xFF144A35),
 
-    // ── Background ──
     background: Color(0xFF050F0A),
     onBackground: Color(0xFFE0E3E1),
 
-    // ── Inverse ──
     inverseSurface: Color(0xFFE0E3E1),
     onInverseSurface: Color(0xFF191C1B),
     inversePrimary: Color(0xFF0D7A5F),
 
-    // ── Outline ──
     outline: Color(0xFF89938E),
     outlineVariant: Color(0xFF3F4945),
     shadow: Color(0xFF000000),
     scrim: Color(0xFF000000),
 
-    // ── Disabled ──
     disabled: Color(0xFF3F4945),
     onDisabled: Color(0xFF89938E),
 
-    // ── Divider ──
     divider: Color(0xFF1A3A28),
 
-    // ── Gradient ──
     primaryGradient: [Color(0xFF8CD6C2), Color(0xFF9EE8D8), Color(0xFFA8E6BF)],
+    successGradient: LinearGradient(
+      colors: [Color(0xFF10B981), Color(0xFF059669)],
+    ),
+    errorGradient: LinearGradient(
+      colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
+    ),
+    warningGradient: LinearGradient(
+      colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+    ),
+    infoGradient: LinearGradient(
+      colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+    ),
   );
+}
+
+/// ============================================================================
+/// امتداد فائق السهولة على BuildContext للوصول السريع والموحد للألوان
+/// ============================================================================
+extension AppColorsExtension on BuildContext {
+  /// الوصول المباشر لكافة ألوان النظام:
+  /// context.colors.primary
+  /// context.colors.success
+  /// context.colors.surface
+  AppColors get colors => AppColors.of(this);
+
+  /// للتوافقية العكسية مع أي استدعاءات سابقة:
+  AppColors get appColors => AppColors.of(this);
 }

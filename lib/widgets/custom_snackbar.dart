@@ -4,7 +4,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/themes/theme_extensions.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 
 enum SnackType { success, error, warning, info }
 
@@ -21,7 +21,7 @@ class CustomSnackbar {
 
     final context = Get.context ?? Get.overlayContext;
     if (context == null) return;
-    final themeColors = Theme.of(context).appColors;
+    final themeColors = context.colors;
 
     final backgroundGradient = type == SnackType.error
         ? themeColors.errorGradient
