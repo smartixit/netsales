@@ -12,13 +12,16 @@ import 'package:netsales/core/constants/app_constants.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_pages.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
+import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/custom_animation_overlay.dart';
+import 'package:netsales/widgets/custom_not_found.dart';
 import 'package:netsales/widgets/custom_snackbar.dart';
 
 void main() async {
@@ -108,24 +111,21 @@ void main() async {
   await StorageService.instance.init();
   Get.put<StorageService>(StorageService.instance, permanent: true);
 
-  // 2. تهيئة خدمات الهوية والصلاحيات الدائمة
+  // 2. تهيئة خدمات المظهر والهوية والصلاحيات الدائمة
+  final themeService = Get.put<ThemeService>(ThemeService(), permanent: true);
+  await themeService.init();
+
   Get.put<PermissionService>(PermissionService(), permanent: true);
-  final sessionService = Get.put<SessionService>(SessionService(), permanent: true);
+  final sessionService = Get.put<SessionService>(
+    SessionService(),
+    permanent: true,
+  );
   await sessionService.init();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
   ]);
-
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ),
-  );
 
   // 3. تشغيل الواجهة الرئيسية للتطبيق
   runApp(const MyApp());
@@ -134,90 +134,55 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  /// تحديد وضع الثيم الحالي بناءً على الإعدادات المخزنة
-  ThemeMode _resolveThemeMode() {
-    final mode = StorageService.instance.themeMode;
-    return switch (mode) {
-      'light' => ThemeMode.light,
-      'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
+    final themeService = ThemeService.to;
+
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
       builder: (context, child) {
-        return GetMaterialApp(
-          title: AppConstants.appNameEn,
-          debugShowCheckedModeBanner: false,
-          theme: AppThemes.light,
-          darkTheme: AppThemes.dark,
-          themeMode: _resolveThemeMode(),
-          initialBinding: InitialBinding(),
-          initialRoute: AppPages.initial,
-          getPages: AppPages.routes,
-          unknownRoute: GetPage(
-            name: '/not-found',
-            page: () => Builder(
-              builder: (ctx) {
-                final colors = ctx.colors;
-                return Scaffold(
-                  backgroundColor: colors.surface,
-                  body: Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(AppSpacing.xxl),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.error_outline_rounded,
-                            size: 56.r,
-                            color: colors.error,
-                          ),
-                          AppSpacing.vMd,
-                          Text(
-                            'الصفحة المطلوبة غير موجودة',
-                            style: AppTypography.titleMedium.copyWith(
-                              color: colors.onSurface,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
+        return Obx(() {
+          return GetMaterialApp(
+            title: AppConstants.appNameEn,
+            debugShowCheckedModeBanner: false,
+            theme: AppThemes.light,
+            darkTheme: AppThemes.dark,
+            themeMode: themeService.themeMode,
+            initialBinding: InitialBinding(),
+            initialRoute: AppPages.initial,
+            getPages: AppPages.routes,
+            unknownRoute: GetPage(
+              name: AppRoutes.notFound,
+              page: () => const CustomNotFound(),
             ),
-          ),
-          defaultTransition: Transition.rightToLeft,
-          locale: const Locale('ar'),
-          supportedLocales: const [Locale('en'), Locale('ar')],
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            FormBuilderLocalizations.delegate,
-          ],
-          textDirection: TextDirection.rtl,
-          builder: (ctx, appChild) {
-            final mediaQuery = MediaQuery.of(ctx);
-            // تحديد نطاق أمان لحجم الخط بين 85% كحد أدنى و115% كحد أقصى
-            // لحماية تناسق الواجهات من التشوه مع الحفاظ على إمكانية الوصول
-            return MediaQuery(
-              data: mediaQuery.copyWith(
-                textScaler: mediaQuery.textScaler.clamp(
-                  minScaleFactor: 0.85,
-                  maxScaleFactor: 1.15,
+            defaultTransition: Transition.rightToLeft,
+            // transitionDuration: AppMotion.page,
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('en'), Locale('ar')],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              FormBuilderLocalizations.delegate,
+            ],
+            textDirection: TextDirection.rtl,
+            builder: (ctx, appChild) {
+              final mediaQuery = MediaQuery.of(ctx);
+              // تحديد نطاق أمان لحجم الخط بين 85% كحد أدنى و115% كحد أقصى
+              // لحماية تناسق الواجهات من التشوه مع الحفاظ على إمكانية الوصول
+              return MediaQuery(
+                data: mediaQuery.copyWith(
+                  textScaler: mediaQuery.textScaler.clamp(
+                    minScaleFactor: 0.85,
+                    maxScaleFactor: 1.15,
+                  ),
                 ),
-              ),
-              child: appChild ?? const SizedBox.shrink(),
-            );
-          },
-        );
+                child: appChild ?? const SizedBox.shrink(),
+              );
+            },
+          );
+        });
       },
     );
   }

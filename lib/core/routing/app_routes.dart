@@ -55,4 +55,7 @@ abstract final class AppRoutes {
 
   // مسار الرفض والتنبيه الأمني
   static const String unauthorized = '/unauthorized';
+
+  // Not Found
+  static const String notFound = '/not-found';
 }

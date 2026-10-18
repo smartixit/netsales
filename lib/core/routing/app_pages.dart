@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_constants.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/custom_not_found.dart';
 // import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 
 /// ============================================================================
@@ -18,10 +19,10 @@ abstract final class AppPages {
 
   static final List<GetPage> routes = [
     // المسار المبدئي المؤقت أثناء إقلاع التطبيق قبل بناء واجهات الميزات
-    GetPage(
-      name: AppRoutes.initial,
-      page: () => const _AppBootPlaceholder(),
-    ),
+    GetPage(name: AppRoutes.initial, page: () => const _AppBootPlaceholder()),
+
+    // Not Found
+    GetPage(name: AppRoutes.notFound, page: () => const CustomNotFound()),
 
     // ========================================================================
     // 1. مسار البداية والفحص الأولي (Splash)
