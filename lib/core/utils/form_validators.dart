@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
-class AppValidators {
-  AppValidators._();
+class FormValidators {
+  FormValidators._();
 
   static FormFieldValidator<String> _transform(
     String Function(String value) transformer,

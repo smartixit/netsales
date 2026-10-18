@@ -4,7 +4,7 @@ import 'package:intl/intl.dart'
     hide TextDirection; // مهم: منع تعارض TextDirection مع Flutter
 
 /// ============================================================
-/// AppDateFormatter (نسخة intl)
+/// DateFormatter (نسخة intl)
 /// تنسيق شامل للتاريخ والوقت
 /// الميلادي عبر intl + الهجري عبر حزمة hijri
 ///
@@ -12,15 +12,15 @@ import 'package:intl/intl.dart'
 ///
 ///   void main() async {
 ///     WidgetsFlutterBinding.ensureInitialized();
-///     await AppDateFormatter.init();
+///     await DateFormatter.init();
 ///     runApp(const MyApp());
 ///   }
 /// ============================================================
 
 enum DateLang { ar, en }
 
-class AppDateFormatter {
-  AppDateFormatter._();
+class DateFormatter {
+  DateFormatter._();
 
   /// يجب استدعاؤها مرة واحدة في main() قبل runApp
   static Future<void> init() async {
@@ -358,23 +358,23 @@ class AppDateFormatter {
 // ============================================================
 
 extension DateTimeX on DateTime {
-  String toDate() => AppDateFormatter.date(this);
-  String toIso() => AppDateFormatter.iso(this);
-  String toTime() => AppDateFormatter.time(this);
-  String toTime24() => AppDateFormatter.time24(this);
-  String toFullDate() => AppDateFormatter.fullDate(this);
-  String toLongDate() => AppDateFormatter.longDate(this);
-  String toDateTime() => AppDateFormatter.dateTime(this);
-  String toHijri() => AppDateFormatter.hijri(this);
-  String toHijriShort() => AppDateFormatter.hijriShort(this);
-  String toTimeAgo() => AppDateFormatter.timeAgo(this);
-  String toSmart() => AppDateFormatter.smart(this);
-  String toApi() => AppDateFormatter.apiDateTime(this);
-  String formatAs(String pattern) => AppDateFormatter.format(this, pattern);
+  String toDate() => DateFormatter.date(this);
+  String toIso() => DateFormatter.iso(this);
+  String toTime() => DateFormatter.time(this);
+  String toTime24() => DateFormatter.time24(this);
+  String toFullDate() => DateFormatter.fullDate(this);
+  String toLongDate() => DateFormatter.longDate(this);
+  String toDateTime() => DateFormatter.dateTime(this);
+  String toHijri() => DateFormatter.hijri(this);
+  String toHijriShort() => DateFormatter.hijriShort(this);
+  String toTimeAgo() => DateFormatter.timeAgo(this);
+  String toSmart() => DateFormatter.smart(this);
+  String toApi() => DateFormatter.apiDateTime(this);
+  String formatAs(String pattern) => DateFormatter.format(this, pattern);
 
-  bool get isToday => AppDateFormatter.isToday(this);
-  bool get isYesterday => AppDateFormatter.isYesterday(this);
-  bool get isTomorrow => AppDateFormatter.isTomorrow(this);
+  bool get isToday => DateFormatter.isToday(this);
+  bool get isYesterday => DateFormatter.isYesterday(this);
+  bool get isTomorrow => DateFormatter.isTomorrow(this);
 }
 
 extension NullableDateTimeX on DateTime? {
@@ -384,5 +384,5 @@ extension NullableDateTimeX on DateTime? {
 }
 
 extension StringDateX on String {
-  DateTime? toDateOrNull() => AppDateFormatter.tryParse(this);
+  DateTime? toDateOrNull() => DateFormatter.tryParse(this);
 }

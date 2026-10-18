@@ -6,22 +6,37 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
-import 'package:netsales/widgets/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/animations/custome_theme_switcher.dart';
 
 /// ============================================================================
-/// زر تبديل المظهر التفاعلي (Animated 1-Click Theme Toggle Button)
+/// زر تبديل المظهر التفاعلي بأسلوب تليجرام (Telegram-Style Theme Toggle Button)
 /// ============================================================================
-/// يوفر حركة انسيابية مبهجة مستندة لنظام الحركة الموحد [AppMotion] مع ارتداد
-/// فيزيائي ناعم (Bounce) لتبديل المظهر بين الفاتح والداكن بنقرة واحدة.
-class ThemeToggleButton extends StatelessWidget {
+/// يطلق حركة انتشار دائرية خاطفة (Circular Reveal) تنبثق من موقع الزر
+/// وتتسع لتغطي الشاشة كاملة، مع ارتداد فيزيائي ناعم ودوران الأيقونة.
+class CustomThemeToggleButton extends StatelessWidget {
   final double? size;
   final EdgeInsetsGeometry? padding;
 
-  const ThemeToggleButton({
-    super.key,
-    this.size,
-    this.padding,
-  });
+  const CustomThemeToggleButton({super.key, this.size, this.padding});
+
+  void _onTap(BuildContext context) {
+    final switcher = CustomThemeSwitcher.of(context);
+
+    if (switcher != null) {
+      final renderBox = context.findRenderObject() as RenderBox?;
+      final origin = renderBox != null
+          ? renderBox.localToGlobal(renderBox.size.center(Offset.zero))
+          : Offset.zero;
+
+      switcher.switchTheme(
+        origin: origin,
+        onThemeChange: ThemeService.to.toggleTheme,
+      );
+    } else {
+      ThemeService.to.toggleTheme();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +47,11 @@ class ThemeToggleButton extends StatelessWidget {
       final colors = context.colors;
 
       return CustomInteractiveBounce(
-        onTap: themeService.toggleTheme,
+        onTap: () => _onTap(context),
         child: Tooltip(
-          message: isDark ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن',
+          message: isDark
+              ? 'التبديل إلى الوضع الفاتح'
+              : 'التبديل إلى الوضع الداكن',
           child: Container(
             padding: padding ?? EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(

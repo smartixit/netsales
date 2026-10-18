@@ -20,9 +20,10 @@ import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/widgets/custom_animation_overlay.dart';
 import 'package:netsales/widgets/custom_not_found.dart';
-import 'package:netsales/widgets/custom_snackbar.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/animations/custome_theme_switcher.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -178,7 +179,9 @@ class MyApp extends StatelessWidget {
                     maxScaleFactor: 1.15,
                   ),
                 ),
-                child: appChild ?? const SizedBox.shrink(),
+                child: CustomThemeSwitcher(
+                  child: appChild ?? const SizedBox.shrink(),
+                ),
               );
             },
           );

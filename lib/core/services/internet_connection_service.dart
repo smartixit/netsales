@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:netsales/widgets/custom_snackbar.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class InternetConnectionService {
   InternetConnectionService._();

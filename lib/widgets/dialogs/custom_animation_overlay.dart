@@ -15,7 +15,6 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/sound_service.dart';
-import 'package:netsales/widgets/buttons/custom_primary_button.dart';
 
 enum AnimationOverlayType { success, error, warning, info, network, loading }
 
