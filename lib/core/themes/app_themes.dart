@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_theme_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
 class AppThemes {
@@ -37,46 +36,6 @@ class AppThemes {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
-      extensions: [
-        AppThemeColors(
-          success: c.success,
-          onSuccess: c.onSuccess,
-          successContainer: c.successContainer,
-          onSuccessContainer: c.onSuccessContainer,
-          onSuccessVariant: c.onSuccessVariant,
-          warning: c.warning,
-          onWarning: c.onWarning,
-          warningContainer: c.warningContainer,
-          onWarningContainer: c.onWarningContainer,
-          onWarningVariant: c.onWarningVariant,
-          info: c.info,
-          onInfo: c.onInfo,
-          infoContainer: c.infoContainer,
-          onInfoContainer: c.onInfoContainer,
-          onInfoVariant: c.onInfoVariant,
-          error: c.error,
-          onError: c.onError,
-          errorContainer: c.errorContainer,
-          onErrorContainer: c.onErrorContainer,
-          onErrorVariant: c.onErrorVariant,
-
-          successGradient: const LinearGradient(
-            colors: [Color(0xff10B981), Color(0xff059669)],
-          ),
-
-          errorGradient: const LinearGradient(
-            colors: [Color(0xffEF4444), Color(0xffDC2626)],
-          ),
-
-          warningGradient: const LinearGradient(
-            colors: [Color(0xffF59E0B), Color(0xffD97706)],
-          ),
-
-          infoGradient: const LinearGradient(
-            colors: [Color(0xff3B82F6), Color(0xff2563EB)],
-          ),
-        ),
-      ],
 
       // ── Color Scheme ──
       colorScheme: ColorScheme(
