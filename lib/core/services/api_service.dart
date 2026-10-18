@@ -197,21 +197,29 @@ class ApiService {
     }
   }
 
-  /// طلب PUT عام للتعديل الشامل
+  /// طلب PUT عام للتعديل الشامل مع دعم مفتاح عدم التكرار (Idempotency Key)
   Future<ApiResponse<T>> put<T>(
     String endpoint, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     T Function(dynamic json)? fromJson,
+    String? idempotencyKey,
     Options? options,
     CancelToken? cancelToken,
   }) async {
     try {
+      final effectiveOptions = (options ?? Options()).copyWith(
+        extra: {
+          ...?options?.extra,
+          if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+        },
+      );
+
       final response = await _dio.put(
         endpoint,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: effectiveOptions,
         cancelToken: cancelToken,
       );
       return _processResponse<T>(response, fromJson);
@@ -222,21 +230,29 @@ class ApiService {
     }
   }
 
-  /// طلب PATCH عام للتعديل الجزئي
+  /// طلب PATCH عام للتعديل الجزئي مع دعم مفتاح عدم التكرار (Idempotency Key)
   Future<ApiResponse<T>> patch<T>(
     String endpoint, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     T Function(dynamic json)? fromJson,
+    String? idempotencyKey,
     Options? options,
     CancelToken? cancelToken,
   }) async {
     try {
+      final effectiveOptions = (options ?? Options()).copyWith(
+        extra: {
+          ...?options?.extra,
+          if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+        },
+      );
+
       final response = await _dio.patch(
         endpoint,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: effectiveOptions,
         cancelToken: cancelToken,
       );
       return _processResponse<T>(response, fromJson);
@@ -247,21 +263,29 @@ class ApiService {
     }
   }
 
-  /// طلب DELETE عام
+  /// طلب DELETE عام مع دعم مفتاح عدم التكرار (Idempotency Key)
   Future<ApiResponse<T>> delete<T>(
     String endpoint, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     T Function(dynamic json)? fromJson,
+    String? idempotencyKey,
     Options? options,
     CancelToken? cancelToken,
   }) async {
     try {
+      final effectiveOptions = (options ?? Options()).copyWith(
+        extra: {
+          ...?options?.extra,
+          if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+        },
+      );
+
       final response = await _dio.delete(
         endpoint,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: effectiveOptions,
         cancelToken: cancelToken,
       );
       return _processResponse<T>(response, fromJson);
@@ -272,13 +296,14 @@ class ApiService {
     }
   }
 
-  /// رفع ملف منفرد بصيغة MultipartFormData
+  /// رفع ملف منفرد بصيغة MultipartFormData مع دعم مفتاح عدم التكرار
   Future<ApiResponse<T>> uploadFile<T>(
     String endpoint, {
     required String filePath,
     required String fileField,
     Map<String, dynamic>? extraFields,
     T Function(dynamic json)? fromJson,
+    String? idempotencyKey,
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) async {
@@ -302,9 +327,16 @@ class ApiService {
         ...?extraFields,
       });
 
+      final effectiveOptions = Options(
+        extra: {
+          if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+        },
+      );
+
       final response = await _dio.post(
         endpoint,
         data: formData,
+        options: effectiveOptions,
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
       );
@@ -395,20 +427,42 @@ class ApiService {
     T Function(dynamic json)? fromJson,
   ) {
     final body = response.data;
+    final isIdempotentHit =
+        response.headers.value('X-Idempotency-Hit')?.toLowerCase() == 'true';
+    final idempotencyKey = response.headers.value('X-Idempotency-Key') ??
+        response.requestOptions.headers['X-Idempotency-Key']?.toString();
 
     if (body is Map<String, dynamic>) {
       if (fromJson != null) {
-        return ApiResponse<T>.fromJson(body, fromJson);
+        return ApiResponse<T>.fromJson(
+          body,
+          fromJson,
+          isIdempotentHit: isIdempotentHit,
+          idempotencyKey: idempotencyKey,
+        );
       }
-      return ApiResponse<T>.fromSimpleJson(body);
+      return ApiResponse<T>.fromSimpleJson(
+        body,
+        isIdempotentHit: isIdempotentHit,
+        idempotencyKey: idempotencyKey,
+      );
     }
 
     if (body is Map) {
       final map = Map<String, dynamic>.from(body);
       if (fromJson != null) {
-        return ApiResponse<T>.fromJson(map, fromJson);
+        return ApiResponse<T>.fromJson(
+          map,
+          fromJson,
+          isIdempotentHit: isIdempotentHit,
+          idempotencyKey: idempotencyKey,
+        );
       }
-      return ApiResponse<T>.fromSimpleJson(map);
+      return ApiResponse<T>.fromSimpleJson(
+        map,
+        isIdempotentHit: isIdempotentHit,
+        idempotencyKey: idempotencyKey,
+      );
     }
 
     final isSuccess = response.statusCode == 200 || response.statusCode == 201;
@@ -416,6 +470,8 @@ class ApiService {
       success: isSuccess,
       message: isSuccess ? 'تمت العملية بنجاح' : 'حدث خطأ في الاستجابة',
       data: isSuccess && fromJson != null && body != null ? fromJson(body) : null,
+      isIdempotentHit: isIdempotentHit,
+      idempotencyKey: idempotencyKey,
     );
   }
 
@@ -702,9 +758,14 @@ class _RetryInterceptor extends Interceptor {
         err.type == DioExceptionType.receiveTimeout;
 
     final isGetRequest = requestOptions.method.toUpperCase() == 'GET';
+    final hasIdempotencyKey =
+        requestOptions.headers['X-Idempotency-Key'] != null ||
+        requestOptions.extra['idempotency_key'] != null;
+
+    final isSafeToRetry = isGetRequest || hasIdempotencyKey;
 
     if ((isTransientStatus || isTimeout) &&
-        isGetRequest &&
+        isSafeToRetry &&
         retryCount < _maxRetries) {
       final nextRetry = retryCount + 1;
       final delayMs = 1000 * (1 << retryCount);

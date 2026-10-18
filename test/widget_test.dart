@@ -1,30 +1,36 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:get/get.dart';
+import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/storage_service.dart';
+import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() async {
+    Get.reset();
+    SharedPreferences.setMockInitialValues({});
+    await StorageService.instance.init();
+    Get.put<StorageService>(StorageService.instance, permanent: true);
+    final themeService = Get.put<ThemeService>(ThemeService(), permanent: true);
+    await themeService.init();
+    Get.put<PermissionService>(PermissionService(), permanent: true);
+    final sessionService = Get.put<SessionService>(
+      SessionService(),
+      permanent: true,
+    );
+    await sessionService.init();
+  });
+
+  testWidgets('NetSales application smoke test boots MyApp', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(MyApp), findsOneWidget);
   });
 }

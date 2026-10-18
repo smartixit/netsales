@@ -8,6 +8,12 @@ class ApiResponse<T> {
   final String? prevCursor;
   final Map<String, dynamic>? meta;
 
+  /// هل الاستجابة تم استرجاعها مباشرة من ذاكرة منع التكرار (X-Idempotency-Hit)
+  final bool isIdempotentHit;
+
+  /// مفتاح عدم التكرار المرتبط بهذه العملية إن وجد (X-Idempotency-Key)
+  final String? idempotencyKey;
+
   ApiResponse({
     required this.success,
     required this.message,
@@ -16,14 +22,18 @@ class ApiResponse<T> {
     this.nextCursor,
     this.prevCursor,
     this.meta,
+    this.isIdempotentHit = false,
+    this.idempotencyKey,
   });
 
   /// Factory to handle generic data parsing.
   /// [fromJsonT] is a callback that defines how to parse the 'data' field.
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,
-    T Function(Object? json) fromJsonT,
-  ) {
+    T Function(Object? json) fromJsonT, {
+    bool isIdempotentHit = false,
+    String? idempotencyKey,
+  }) {
     final metaMap = json['meta'] is Map<String, dynamic>
         ? json['meta'] as Map<String, dynamic>
         : (json['meta'] is Map
@@ -43,11 +53,17 @@ class ApiResponse<T> {
       nextCursor: nextCur,
       prevCursor: prevCur,
       meta: metaMap,
+      isIdempotentHit: isIdempotentHit,
+      idempotencyKey: idempotencyKey,
     );
   }
 
   /// Helper for empty or simple responses where data is null
-  factory ApiResponse.fromSimpleJson(Map<String, dynamic> json) {
+  factory ApiResponse.fromSimpleJson(
+    Map<String, dynamic> json, {
+    bool isIdempotentHit = false,
+    String? idempotencyKey,
+  }) {
     final metaMap = json['meta'] is Map<String, dynamic>
         ? json['meta'] as Map<String, dynamic>
         : (json['meta'] is Map
@@ -67,6 +83,8 @@ class ApiResponse<T> {
       nextCursor: nextCur,
       prevCursor: prevCur,
       meta: metaMap,
+      isIdempotentHit: isIdempotentHit,
+      idempotencyKey: idempotencyKey,
     );
   }
 
