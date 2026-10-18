@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
@@ -110,38 +111,44 @@ class StorageService {
   Future<bool> clear() => _p.clear();
   Set<String> getKeys() => _p.getKeys();
 
-  // // ============ اختصارات جاهزة (عدّلها حسب مشروعك) ============
+  // ============ اختصارات مساعدة للجلسة والتطبيق ============
 
-  // /// التوكن
-  // Future<bool> saveSession(String session) =>
-  //     setString(StorageKeys.session, session);
-  // String? get sessionToken => getString(StorageKeys.session);
-  // Future<bool> clearSessionToken() => remove(StorageKeys.session);
+  /// معرف الجلسة الحالية
+  Future<bool> saveSession(String session) =>
+      setString(StorageKeys.session, session);
+  String? get sessionId => getString(StorageKeys.session);
+  Future<bool> clearSession() => remove(StorageKeys.session);
 
-  // /// حالة تسجيل الدخول
-  // Future<bool> setLoggedIn(bool value) =>
-  //     setBool(StorageKeys.isLoggedIn, value);
-  // bool get isLoggedIn => getBoolOr(StorageKeys.isLoggedIn, false);
+  /// معرف الجهاز
+  Future<bool> saveDeviceUuid(String uuid) =>
+      setString(StorageKeys.deviceUuid, uuid);
+  String? get deviceUuid => getString(StorageKeys.deviceUuid);
 
-  // /// أول تشغيل (شاشات Onboarding)
-  // bool get isFirstLaunch => getBoolOr(StorageKeys.isFirstLaunch, true);
-  // Future<bool> setFirstLaunchDone() =>
-  //     setBool(StorageKeys.isFirstLaunch, false);
+  /// حالة تسجيل الدخول
+  Future<bool> setLoggedIn(bool value) =>
+      setBool(StorageKeys.isLoggedIn, value);
+  bool get isLoggedIn => getBoolOr(StorageKeys.isLoggedIn, false);
 
-  // /// الثيم: light | dark | system
-  // Future<bool> saveThemeMode(String mode) =>
-  //     setString(StorageKeys.themeMode, mode);
-  // String get themeMode => getStringOr(StorageKeys.themeMode, 'system');
+  /// أول تشغيل (شاشات Onboarding)
+  bool get isFirstLaunch => getBoolOr(StorageKeys.isFirstLaunch, true);
+  Future<bool> setFirstLaunchDone() =>
+      setBool(StorageKeys.isFirstLaunch, false);
 
-  // /// اللغة: ar | en
-  // Future<bool> saveLocale(String code) => setString(StorageKeys.locale, code);
-  // String get locale => getStringOr(StorageKeys.locale, 'ar');
+  /// الثيم: light | dark | system
+  Future<bool> saveThemeMode(String mode) =>
+      setString(StorageKeys.themeMode, mode);
+  String get themeMode => getStringOr(StorageKeys.themeMode, 'system');
 
-  // /// تسجيل الخروج: يمسح بيانات الجلسة فقط ويبقي الإعدادات (ثيم/لغة)
-  // Future<void> logout() async {
-  //   await remove(StorageKeys.session);
-  //   await remove(StorageKeys.userId);
-  //   await remove(StorageKeys.userData);
-  //   await setLoggedIn(false);
-  // }
+  /// اللغة: ar | en
+  Future<bool> saveLocale(String code) => setString(StorageKeys.locale, code);
+  String get locale => getStringOr(StorageKeys.locale, 'ar');
+
+  /// مسح بيانات الجلسة والمستخدم فقط عند تسجيل الخروج
+  Future<void> logout() async {
+    await remove(StorageKeys.session);
+    await remove(StorageKeys.userId);
+    await remove(StorageKeys.userData);
+    await setLoggedIn(false);
+  }
 }
+
