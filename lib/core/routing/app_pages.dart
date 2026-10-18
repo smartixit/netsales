@@ -1,18 +1,28 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_constants.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 // import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 
 /// ============================================================================
 /// سجل صفحات ومسارات التطبيق (Application Pages Register)
 /// ============================================================================
 /// يحتوي على قائمة مسارات GetPage وروابطها مع الـ Bindings والـ Middlewares.
-/// تم وضع الصفحات في حالة تعليق مؤقتاً لحين بناء شاشات ومتحكمات كل ميزة.
+/// تم وضع الصفحات المستقبلية في حالة تعليق مؤقتاً لحين بناء واجهات كل ميزة.
 abstract final class AppPages {
   AppPages._();
 
   static const String initial = AppRoutes.initial;
 
   static final List<GetPage> routes = [
+    // المسار المبدئي المؤقت أثناء إقلاع التطبيق قبل بناء واجهات الميزات
+    GetPage(
+      name: AppRoutes.initial,
+      page: () => const _AppBootPlaceholder(),
+    ),
+
     // ========================================================================
     // 1. مسار البداية والفحص الأولي (Splash)
     // ========================================================================
@@ -169,4 +179,31 @@ abstract final class AppPages {
     //   middlewares: [AuthGuard()],
     // ),
   ];
+}
+
+/// شاشة إقلاع خفيفة ومؤقتة ريثما يتم بناء شاشات وميزات التطبيق
+class _AppBootPlaceholder extends StatelessWidget {
+  const _AppBootPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Scaffold(
+      backgroundColor: colors.surface,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              AppConstants.appName,
+              style: AppTypography.headlineMedium.copyWith(
+                color: colors.primary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

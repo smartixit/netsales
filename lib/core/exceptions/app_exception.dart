@@ -81,3 +81,22 @@ class AppException implements Exception {
     return msg;
   }
 }
+
+/// استثناء عدم توفر الصلاحية المطلوبة
+class PermissionDeniedException extends AppException {
+  const PermissionDeniedException([
+    super.message = 'ليس لديك الصلاحية الكافية لتنفيذ هذا الإجراء',
+    dynamic details,
+  ]) : super(code: 'PERMISSION_DENIED', details: details);
+}
+
+/// استثناء عدم المصادقة أو انتهاء الجلسة
+class UnauthenticatedException extends AppException {
+  const UnauthenticatedException([
+    super.message = 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مجدداً',
+    dynamic details,
+  ]) : super(code: 'UNAUTHENTICATED', details: details);
+}
+
+
+

@@ -1,18 +1,23 @@
 import 'dart:developer';
 
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/bindings/initial_binding.dart';
 import 'package:netsales/core/constants/app_constants.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_pages.dart';
+import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_themes.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/custom_animation_overlay.dart';
 import 'package:netsales/widgets/custom_snackbar.dart';
 
@@ -64,41 +69,49 @@ void main() async {
     return true; // تم التعامل مع الخطأ بنجاح دون انهيار التطبيق
   };
 
-  // تخصيص شاشة الخطأ في الواجهات عند حدوث استثناء في بناء العناصر
+  // تخصيص شاشة الخطأ في الواجهات عند حدوث استثناء في بناء العناصر (Clean Design System)
   ErrorWidget.builder = (FlutterErrorDetails details) {
-    return Material(
-      color: Colors.white,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.warning_amber_rounded,
-                size: 56,
-                color: Colors.amber,
+    return Builder(
+      builder: (context) {
+        final colors = context.colors;
+        return Material(
+          color: colors.surface,
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(AppSpacing.xxl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 56.r,
+                    color: colors.warning,
+                  ),
+                  AppSpacing.vMd,
+                  Text(
+                    'حدث خطأ غير متوقع عند عرض هذه الشاشة',
+                    style: AppTypography.titleMedium.copyWith(
+                      color: colors.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'حدث خطأ غير متوقع عند عرض هذه الشاشة',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   };
 
-  // 1. تهيئة التخزين الأساسي - يجب انتظاره بشكل قاطع قبل أي خدمة تعتمد عليه
+  // 1. تهيئة التخزين الأساسي - يجب انتظاره قبل أي خدمة تعتمد عليه
   await StorageService.instance.init();
   Get.put<StorageService>(StorageService.instance, permanent: true);
+
+  // 2. تهيئة خدمات الهوية والصلاحيات الدائمة
+  Get.put<PermissionService>(PermissionService(), permanent: true);
+  final sessionService = Get.put<SessionService>(SessionService(), permanent: true);
+  await sessionService.init();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,
@@ -114,18 +127,27 @@ void main() async {
     ),
   );
 
-  // 2. تشغيل الواجهة فوراً لإنهاء شاشة النظام (Native Splash) فوراً وبدء واجهة فلاتر
+  // 3. تشغيل الواجهة الرئيسية للتطبيق
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  /// تحديد وضع الثيم الحالي بناءً على الإعدادات المخزنة
+  ThemeMode _resolveThemeMode() {
+    final mode = StorageService.instance.themeMode;
+    return switch (mode) {
+      'light' => ThemeMode.light,
+      'dark' => ThemeMode.dark,
+      _ => ThemeMode.system,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: Size(375, 812),
+      designSize: const Size(375, 812),
       minTextAdapt: true,
       builder: (context, child) {
         return GetMaterialApp(
@@ -133,56 +155,58 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppThemes.light,
           darkTheme: AppThemes.dark,
-          themeMode: ,
+          themeMode: _resolveThemeMode(),
           initialBinding: InitialBinding(),
           initialRoute: AppPages.initial,
           getPages: AppPages.routes,
           unknownRoute: GetPage(
             name: '/not-found',
-            page: () => const Scaffold(
-              body: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        size: 56,
-                        color: Colors.amber,
+            page: () => Builder(
+              builder: (ctx) {
+                final colors = ctx.colors;
+                return Scaffold(
+                  backgroundColor: colors.surface,
+                  body: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppSpacing.xxl),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.error_outline_rounded,
+                            size: 56.r,
+                            color: colors.error,
+                          ),
+                          AppSpacing.vMd,
+                          Text(
+                            'الصفحة المطلوبة غير موجودة',
+                            style: AppTypography.titleMedium.copyWith(
+                              color: colors.onSurface,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 16),
-                      Text(
-                        'الصفحة غير موجودة',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
           defaultTransition: Transition.rightToLeft,
-          // transitionDuration: const Duration(milliseconds: 500),
           locale: const Locale('ar'),
           supportedLocales: const [Locale('en'), Locale('ar')],
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
-
             FormBuilderLocalizations.delegate,
           ],
           textDirection: TextDirection.rtl,
-          builder: (context, child) {
-            final mediaQuery = MediaQuery.of(context);
+          builder: (ctx, appChild) {
+            final mediaQuery = MediaQuery.of(ctx);
             // تحديد نطاق أمان لحجم الخط بين 85% كحد أدنى و115% كحد أقصى
-            // للسماح بإمكانية الوصول المناسبة مع حماية تصميم الواجهات من التشوه
+            // لحماية تناسق الواجهات من التشوه مع الحفاظ على إمكانية الوصول
             return MediaQuery(
               data: mediaQuery.copyWith(
                 textScaler: mediaQuery.textScaler.clamp(
@@ -190,7 +214,7 @@ class MyApp extends StatelessWidget {
                   maxScaleFactor: 1.15,
                 ),
               ),
-              child: child ?? const SizedBox.shrink(),
+              child: appChild ?? const SizedBox.shrink(),
             );
           },
         );

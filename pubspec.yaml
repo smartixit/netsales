@@ -78,6 +78,7 @@ dependencies:
   credential_manager: 4.1.0
   flutter_native_contact_picker: ^0.0.11
   flutter_launcher_icons: ^0.14.4
+  shimmer: ^3.0.0
 
 dependency_overrides:
   archive: ^4.5.2
