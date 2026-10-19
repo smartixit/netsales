@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_motion.dart';
@@ -13,7 +14,7 @@ import 'package:netsales/widgets/cards/custom_action_card.dart';
 import 'package:netsales/widgets/dividers/custom_labeled_divider.dart';
 
 /// واجهة الترحيب واختيار الصفة (Welcome Screen)
-/// واجهة عرض نقية (Lean View) تعتمد حصرياً على الودجات المركزية ورموز الـ Core.
+/// واجهة عرض نقية (Lean View) تعتمد حصرياً على الودجات المركزية ورموز الـ Core والتصميم التكيفي.
 class WelcomeScreen extends GetView<WelcomeController> {
   const WelcomeScreen({super.key});
 
@@ -28,15 +29,22 @@ class WelcomeScreen extends GetView<WelcomeController> {
         height: double.infinity,
         decoration: BoxDecoration(gradient: AppGradients.surfaceMesh(context)),
         child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+          child: ResponsiveContentWrapper(
+            maxWidth: AppBreakpoints.maxFormWidth,
+            alignment: Alignment.center,
+            padding: EdgeInsets.zero,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.symmetric(
+                horizontal: context.responsive(
+                  mobile: AppSpacing.lg,
+                  tablet: AppSpacing.xl,
+                ),
+                vertical: AppSpacing.md,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                 AppSpacing.vLg,
 
                 // 1. الشعار المركزي الموحد (CustomBrandLogo)
@@ -154,6 +162,7 @@ class WelcomeScreen extends GetView<WelcomeController> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

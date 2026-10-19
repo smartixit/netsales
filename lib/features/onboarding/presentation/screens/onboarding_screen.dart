@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -27,7 +28,11 @@ class OnboardingScreen extends GetView<OnboardingController> {
           gradient: AppGradients.surfaceMesh(context),
         ),
         child: SafeArea(
-          child: Column(
+          child: ResponsiveContentWrapper(
+            maxWidth: AppBreakpoints.maxFormWidth,
+            padding: EdgeInsets.zero,
+            alignment: Alignment.center,
+            child: Column(
             children: [
               // 1. الشريط العلوي: الشعار المصغر وزر التخطي السريع
               Padding(
@@ -108,6 +113,7 @@ class OnboardingScreen extends GetView<OnboardingController> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
