@@ -7,6 +7,9 @@ class AppSpacing {
   /// Zero spacing
   static double get zero => 0.w;
 
+  /// Micro spacing (2)
+  static double get xxs => 2.w;
+
   /// Extra small spacing (4)
   static double get xs => 4.w;
 
@@ -80,6 +83,7 @@ class AppSpacing {
   static double get statusBarHeight => 24.h;
 
   /// Horizontal spacing shortcuts
+  static SizedBox get hXxs => SizedBox(width: xxs);
   static SizedBox get hXs => SizedBox(width: xs);
   static SizedBox get hSm => SizedBox(width: sm);
   static SizedBox get hMd => SizedBox(width: md);
@@ -88,6 +92,7 @@ class AppSpacing {
   static SizedBox get hXxl => SizedBox(width: xxl);
 
   /// Vertical spacing shortcuts
+  static SizedBox get vXxs => SizedBox(height: xxs);
   static SizedBox get vXs => SizedBox(height: xs);
   static SizedBox get vSm => SizedBox(height: sm);
   static SizedBox get vMd => SizedBox(height: md);

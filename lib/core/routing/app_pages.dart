@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_constants.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/routing/middlewares/auth_guard.dart';
+import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
+import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
+import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:netsales/features/onboarding/presentation/screens/welcome_screen.dart';
+import 'package:netsales/features/splash/presentation/bindings/splash_binding.dart';
+import 'package:netsales/features/splash/presentation/screens/splash_screen.dart';
 import 'package:netsales/widgets/custom_not_found.dart';
 import 'package:netsales/widgets/custom_unauthorized.dart';
-// import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 
 /// ============================================================================
 /// سجل صفحات ومسارات التطبيق (Application Pages Register)
@@ -19,8 +21,17 @@ abstract final class AppPages {
   static const String initial = AppRoutes.initial;
 
   static final List<GetPage> routes = [
-    // المسار المبدئي المؤقت أثناء إقلاع التطبيق قبل بناء واجهات الميزات
-    GetPage(name: AppRoutes.initial, page: () => const _AppBootPlaceholder()),
+    // 1. مسار البداية والفحص الأولي (Splash)
+    GetPage(
+      name: AppRoutes.initial,
+      page: () => const SplashScreen(),
+      binding: SplashBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.splash,
+      page: () => const SplashScreen(),
+      binding: SplashBinding(),
+    ),
 
     // Not Found
     GetPage(name: AppRoutes.notFound, page: () => const CustomNotFound()),
@@ -32,22 +43,20 @@ abstract final class AppPages {
     ),
 
     // ========================================================================
-    // 1. مسار البداية والفحص الأولي (Splash)
+    // 2. جولة التعريف والترحيب (Onboarding & Welcome)
     // ========================================================================
-    // GetPage(
-    //   name: AppRoutes.splash,
-    //   page: () => const SplashScreen(),
-    //   binding: SplashBinding(),
-    // ),
-
-    // ========================================================================
-    // 2. مسارات المصادقة (Authentication)
-    // ========================================================================
-    // GetPage(
-    //   name: AppRoutes.welcome,
-    //   page: () => const WelcomeScreen(),
-    //   middlewares: [GuestGuard()],
-    // ),
+    GetPage(
+      name: AppRoutes.onboarding,
+      page: () => const OnboardingScreen(),
+      binding: OnboardingBinding(),
+      middlewares: [GuestGuard()],
+    ),
+    GetPage(
+      name: AppRoutes.welcome,
+      page: () => const WelcomeScreen(),
+      binding: WelcomeBinding(),
+      middlewares: [GuestGuard()],
+    ),
     // GetPage(
     //   name: AppRoutes.login,
     //   page: () => const LoginScreen(),
@@ -187,31 +196,4 @@ abstract final class AppPages {
     //   middlewares: [AuthGuard()],
     // ),
   ];
-}
-
-/// شاشة إقلاع خفيفة ومؤقتة ريثما يتم بناء شاشات وميزات التطبيق
-class _AppBootPlaceholder extends StatelessWidget {
-  const _AppBootPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Scaffold(
-      backgroundColor: colors.surface,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              AppConstants.appName,
-              style: AppTypography.headlineMedium.copyWith(
-                color: colors.primary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

@@ -78,4 +78,20 @@ class AppElevation {
       offset: Offset(0, dy),
     ),
   ];
+
+  /// توهج ضوئي ملوّن محيطي (للعناصر المشعة، الهالات، وأشرطة التحميل الانسيابية)
+  static List<BoxShadow> glow(
+    BuildContext context,
+    Color color, {
+    double alpha = 0.25,
+    double blur = 16,
+    double spread = 0,
+  }) => <BoxShadow>[
+    BoxShadow(
+      color: color.withValues(alpha: _isDark(context) ? alpha * 0.7 : alpha),
+      blurRadius: blur,
+      spreadRadius: spread,
+      offset: Offset.zero,
+    ),
+  ];
 }

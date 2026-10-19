@@ -107,4 +107,18 @@ class AppGradients {
       stops: const [0.1, 0.5, 0.9],
     );
   }
+
+  /// تدرّج شريط التحميل الانسيابي (Flowing Progress Bar)
+  static LinearGradient flowingBar(BuildContext context) {
+    final scheme = _scheme(context);
+    return LinearGradient(
+      colors: [
+        scheme.primary.withValues(alpha: 0.35),
+        scheme.primary,
+        scheme.secondary,
+        scheme.primary.withValues(alpha: 0.35),
+      ],
+      stops: const [0.0, 0.45, 0.55, 1.0],
+    );
+  }
 }

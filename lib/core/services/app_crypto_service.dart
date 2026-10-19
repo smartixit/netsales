@@ -318,7 +318,6 @@ class AppCryptoService {
   /// ==========================================================================
   /// 5. التحقق من التوقيع الرقمي السيادي (Ed25519 Signature Verification)
   /// ==========================================================================
-  /// للتحقق من الكروت، كشوفات الحساب، أو QR Codes الموقعة رقمياً بمفتاح الخادم.
   bool verifyDigitalSignature({
     required Uint8List message,
     required Uint8List signature,
