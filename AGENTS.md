@@ -41,13 +41,13 @@ lib/
 └── features/
     └── [feature_name]/
         ├── data/
-        │   ├── data_sources/            # الاتصال بالشبكة (HttpService) أو التخزين المحلي
+        │   ├── datasources/            # الاتصال بالشبكة (HttpService) أو التخزين المحلي
         │   ├── interfaces/              # عقود ومنافذ مصادر البيانات
         │   └── models/                  # نماذج البيانات المتطابقة مع الـ JSON وتسلسل الحقول
         ├── domain/
         │   ├── entities/                # الكيانات الدومينية المجردة
         │   ├── repositories/            # عقود المستودعات الدومينية (Repository Contracts)
-        │   └── use_cases/               # حالات الاستخدام ومنطق الأعمال المجرد
+        │   └── usecases/               # حالات الاستخدام ومنطق الأعمال المجرد
         └── presentation/
             ├── bindings/                # حقن الاعتماديات لـ GetX (Bindings)
             ├── controllers/             # متحكمات واجهة المستخدم (GetxController)

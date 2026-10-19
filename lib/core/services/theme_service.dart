@@ -9,6 +9,10 @@ import 'package:netsales/core/services/storage_service.dart';
 /// تدير التبديل اللحظي بين الوضعين الفاتح والداكن بنقرة واحدة (One-Click Toggle)،
 /// مع الحفظ التلقائي في التخزين المحلي ومزامنة أشرطة النظام والاهتزاز اللمسي.
 class ThemeService extends GetxService {
+  ThemeService._();
+
+  static final ThemeService instance = ThemeService._();
+  
   static ThemeService get to => Get.find<ThemeService>();
 
   final Rx<ThemeMode> _themeMode = ThemeMode.system.obs;

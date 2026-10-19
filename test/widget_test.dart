@@ -15,14 +15,14 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await StorageService.instance.init();
     Get.put<StorageService>(StorageService.instance, permanent: true);
-    final themeService = Get.put<ThemeService>(ThemeService(), permanent: true);
-    await themeService.init();
-    Get.put<PermissionService>(PermissionService(), permanent: true);
-    final sessionService = Get.put<SessionService>(
-      SessionService(),
+    await ThemeService.instance.init();
+    Get.put<ThemeService>(ThemeService.instance, permanent: true);
+    Get.put<PermissionService>(PermissionService.instance, permanent: true);
+    await SessionService.instance.init();
+    Get.put<SessionService>(
+      SessionService.instance,
       permanent: true,
     );
-    await sessionService.init();
   });
 
   testWidgets('NetSales application smoke test boots MyApp', (

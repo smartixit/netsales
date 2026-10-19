@@ -22,15 +22,15 @@ void main() {
     await StorageService.instance.init();
     Get.put<StorageService>(StorageService.instance, permanent: true);
 
+    await sessionService.init();
     permissionService = Get.put<PermissionService>(
-      PermissionService(),
+      PermissionService.instance,
       permanent: true,
     );
     sessionService = Get.put<SessionService>(
-      SessionService(),
+      SessionService.instance,
       permanent: true,
     );
-    await sessionService.init();
   });
 
   group('AuthGuard Tests', () {

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/features/onboarding/domain/entities/onboarding_item.dart';
+import 'package:netsales/features/onboarding/domain/usecases/complete_onboarding_use_case.dart';
 
 /// متحكم جولة التعريف التفاعلية (OnboardingController)
 class OnboardingController extends GetxController {
+  final CompleteOnboardingUseCase _completeOnboardingUseCase;
+
+  OnboardingController(this._completeOnboardingUseCase);
+
   final PageController pageController = PageController();
   final RxInt currentPage = 0.obs;
 
@@ -60,7 +63,7 @@ class OnboardingController extends GetxController {
   }
 
   Future<void> completeOnboarding() async {
-    await StorageService.instance.setBool(StorageKeys.isFirstLaunch, false);
+    await _completeOnboardingUseCase();
     Get.offNamed(AppRoutes.welcome);
   }
 

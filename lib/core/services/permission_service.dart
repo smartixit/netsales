@@ -7,6 +7,10 @@ import 'package:netsales/core/constants/app_permissions.dart';
 /// توفر استعلاماً لحظياً بزمن ثابت O(1) عن صلاحيات وأدوار المستخدم الحالي،
 /// مع دعم تجاوز المشرف العام (Super Admin Bypass) تلقائياً.
 class PermissionService extends GetxService {
+  PermissionService._();
+
+  static PermissionService instance = PermissionService._();
+
   static PermissionService get to => Get.find<PermissionService>();
 
   final RxSet<String> _permissions = <String>{}.obs;

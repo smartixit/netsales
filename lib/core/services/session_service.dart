@@ -14,6 +14,10 @@ import 'package:netsales/core/services/storage_service.dart';
 /// تمثل المصدر الأوحد للحقيقة (Single Source of Truth) لحالة تسجيل الدخول
 /// وهوية المستخدم وصلاحياته النشطة، مع المعالجة التلقائية لانتهاء الجلسة.
 class SessionService extends GetxService {
+  SessionService._();
+
+  static SessionService instance = SessionService._();
+
   static SessionService get to => Get.find<SessionService>();
 
   final Rxn<UserModel> _user = Rxn<UserModel>();
@@ -51,7 +55,9 @@ class SessionService extends GetxService {
       _isAuthenticated.value = true;
 
       // استعادة الصلاحيات المخزنة
-      final cachedPermissions = storage.getStringList(StorageKeys.permissionsStorage);
+      final cachedPermissions = storage.getStringList(
+        StorageKeys.permissionsStorage,
+      );
       if (Get.isRegistered<PermissionService>()) {
         PermissionService.to.updateAccess(
           roleKey: cachedUser.role?.roleKey ?? '',
@@ -59,7 +65,9 @@ class SessionService extends GetxService {
         );
       }
 
-      log('🔑 [SessionService] Session restored for user #${cachedUser.userId} (${cachedUser.userFullName})');
+      log(
+        '🔑 [SessionService] Session restored for user #${cachedUser.userId} (${cachedUser.userFullName})',
+      );
     } else {
       _isAuthenticated.value = false;
       log('ℹ️ [SessionService] No active session found.');
@@ -67,7 +75,9 @@ class SessionService extends GetxService {
 
     // ربط انتهاء الصلاحية من عميل الشبكة تلقائياً
     ApiService.onUnauthorized = () {
-      log('⚠️ [SessionService] Unauthorized event received (401). Terminating session...');
+      log(
+        '⚠️ [SessionService] Unauthorized event received (401). Terminating session...',
+      );
       terminateSession();
     };
 
@@ -99,7 +109,9 @@ class SessionService extends GetxService {
       );
     }
 
-    log('✅ [SessionService] Session started successfully for user #${user.userId}');
+    log(
+      '✅ [SessionService] Session started successfully for user #${user.userId}',
+    );
   }
 
   /// تحديث بيانات المستخدم في الذاكرة والتخزين المحلي

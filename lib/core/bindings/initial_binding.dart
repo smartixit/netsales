@@ -1,19 +1,26 @@
 import 'package:get/get.dart';
-import 'package:netsales/core/services/app_crypto_service.dart';
-import 'package:netsales/core/services/permission_service.dart';
-import 'package:netsales/core/services/session_service.dart';
-import 'package:netsales/core/services/theme_service.dart';
+import 'package:netsales/core/services/api_service.dart';
+import 'package:netsales/core/services/internet_connection_service.dart';
+import 'package:netsales/core/services/sound_service.dart';
 
 /// ============================================================================
-/// حقن الاعتماديات الأولي للتطبيق (Initial Global Bindings)
+/// حقن الاعتماديات العام الموحد للتطبيق (Global Application Bindings)
 /// ============================================================================
-/// يضمن تسجيل الخدمات الأساسية في الذاكرة طوال دورة حياة التطبيق (Permanent).
+/// مخصص حصرياً للخدمات العامة المشتركة عبر التطبيق التي لا تعيق الإقلاع الأولي
+/// في main()، مع منع تكرار حقن الخدمات السيادية المحقونة مسبقاً (Zero Duplication).
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put<AppCryptoService>(AppCryptoService.instance, permanent: true);
-    Get.put<ThemeService>(ThemeService(), permanent: true);
-    Get.put<PermissionService>(PermissionService(), permanent: true);
-    Get.put<SessionService>(SessionService(), permanent: true);
+    // 1. عميل الاتصال الشبكي الموحد
+    Get.lazyPut<ApiService>(() => ApiService.instance, fenix: true);
+
+    // 2. خدمة مراقبة الاتصال بالإنترنت
+    Get.lazyPut<InternetConnectionService>(
+      () => InternetConnectionService.instance,
+      fenix: true,
+    );
+
+    // 3. خدمة المؤثرات الصوتية والتنبيهات
+    Get.lazyPut<SoundService>(() => SoundService.instance, fenix: true);
   }
 }

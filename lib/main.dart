@@ -14,6 +14,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_pages.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
+import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
@@ -113,20 +114,21 @@ void main() async {
   await StorageService.instance.init();
   Get.put<StorageService>(StorageService.instance, permanent: true);
 
-  // 2. تهيئة خدمة التشفير اللامتناظر ومزامنة المفاتيح العامة السيادية
+  // 2. تهيئة خدمة بصمة الجهاز السيادية (Enterprise Device Intelligence)
+  await DeviceService.instance.init();
+  Get.put<DeviceService>(DeviceService.instance, permanent: true);
+
+  // 3. تهيئة خدمة التشفير اللامتناظر ومزامنة المفاتيح العامة السيادية
   await AppCryptoService.instance.init();
   Get.put<AppCryptoService>(AppCryptoService.instance, permanent: true);
 
   // 3. تهيئة خدمات المظهر والهوية والصلاحيات الدائمة
-  final themeService = Get.put<ThemeService>(ThemeService(), permanent: true);
-  await themeService.init();
+  await ThemeService.instance.init();
+  Get.put<ThemeService>(ThemeService.instance, permanent: true);
 
-  Get.put<PermissionService>(PermissionService(), permanent: true);
-  final sessionService = Get.put<SessionService>(
-    SessionService(),
-    permanent: true,
-  );
-  await sessionService.init();
+  await SessionService.instance.init();
+  Get.put<SessionService>(SessionService.instance, permanent: true);
+  Get.put<PermissionService>(PermissionService.instance, permanent: true);
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,

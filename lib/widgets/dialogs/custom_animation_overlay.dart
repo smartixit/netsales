@@ -96,11 +96,9 @@ class CustomAnimationOverlay {
   /// يعني فعلياً أن Success انتهى بالكامل.
   static Future<void> showSuccess({
     String? message,
-    Duration? autoHide,
+    Duration autoHide = const Duration(milliseconds: 1400),
     bool force = false,
   }) {
-    final duration = autoHide ?? const Duration(seconds: 2);
-
     return _enqueue(() async {
       await _showOrReplace(
         type: AnimationOverlayType.success,
@@ -109,7 +107,7 @@ class CustomAnimationOverlay {
       );
 
       // انتظر مدة Success فعلياً.
-      await Future<void>.delayed(duration);
+      await Future<void>.delayed(autoHide);
 
       // أزل Success مباشرة داخل نفس Queue operation.
       //
@@ -272,9 +270,7 @@ class CustomAnimationOverlay {
     _route = route;
 
     if (type == AnimationOverlayType.success) {
-      SoundService.instance.playSound(
-        usageType: AndroidUsageType.alarm,
-      );
+      SoundService.instance.playSound(usageType: AndroidUsageType.alarm);
     }
 
     final navigator = Navigator.of(context, rootNavigator: true);
@@ -523,7 +519,6 @@ class CustomAnimationOverlay {
       },
 
       pageBuilder: (context, _, __) {
-
         final isAction = actionLabel != null && onAction != null;
 
         final allowBackToClose =
