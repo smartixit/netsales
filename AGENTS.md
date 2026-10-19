@@ -214,3 +214,27 @@ lib/
   - التحقق الدائم عبر فحص التحليل الساكن `flutter analyze` والتأكد من نتيجة `No issues found!`.
   - تشغيل واجتياز كافة اختبارات المشروع المؤتمتة `flutter test` دون أي إخفاق.
   - خلو الكود تماماً من أي ملفات مهجورة، أو استيرادات غير مستخدمة، أو تعليقات TODOs، أو نصوص تجريبية في بيئة الإنتاج.
+
+---
+
+## 16. منظومة التصميم التكيفي ونقاط الانقطاع المعيارية (Enterprise Adaptive Design System & Breakpoints)
+- **المرجع الحصري للتصميم التكيفي:** الاعتماد الحصري والمطلق على `AppBreakpoints` وملحقات `ResponsiveContext` (`context.isMobile`, `context.isTablet`, `context.isDesktop`, `context.responsive(...)`) لاتخاذ قرارات التكيف البصري والهيكلي عبر كافة المنصات (Android, iOS, Windows, macOS, Linux, Web).
+- **الفئات الست المعيارية للأجهزة (`AppDeviceSize`):**
+  - `mobileSmall` (< 360dp)
+  - `mobile` (360 - 599dp)
+  - `tablet` (600 - 899dp)
+  - `desktop` (900 - 1239dp)
+  - `desktopLarge` (1240 - 1599dp)
+  - `ultraWide` (>= 1600dp)
+- **سياسة منع تمدد المحتوى العشوائي (Content Constraint Policy):**
+  - يُحظر ترك نماذج واستمارات الإدخال وبطاقات الترحيب تتمدد بلا قيود على الشاشات الكبيرة؛ يجب استخدام `ResponsiveContentWrapper` أو التقييد بـ `AppBreakpoints.maxFormWidth` (540dp) مع التوسيط.
+  - تحديد أقصى اتساع للمحتوى الرئيسي واللوحات بـ `AppBreakpoints.maxContentWidth` (1200dp).
+- **التكيف الرأسي وتدوير الشاشة (Orientation & Height Guard):**
+  - فحص `context.isCompactHeight` و `context.isLandscape` لتجنب انهيارات التمرير (`RenderFlex overflow`) عند تدوير الأجهزة أفقياً.
+- **التنقل الهيكلي التكيفي (Adaptive Shell Navigation):**
+  - استخدام `NavigationBar` السفلي حصرياً للهواتف الرأسية (`context.usesBottomBar`).
+  - استخدام `NavigationRail` الجانبي المصغر للأجهزة اللوحية والهواتف الأفقية (`context.usesNavigationRail`).
+  - استخدام `NavigationDrawer` الكامل للشاشات المكتبية والويب (`context.usesNavigationDrawer`).
+- **ودجات التكيف الجاهزة:**
+  - استخدام `AdaptiveLayout` للفصل المعماري النظيف بين واجهات الموبايل والتابلت والديسكتوب.
+  - استخدام `AdaptiveSplitView` لتقسيم الشاشة لعمودين (Side Pane + Main Pane) على الشاشات الكبيرة والتراجع لعمود واحد تلقائياً على الهواتف.

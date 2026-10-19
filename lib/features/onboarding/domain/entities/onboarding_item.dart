@@ -7,6 +7,7 @@ class OnboardingItem {
   final String badge;
   final IconData icon;
   final String? animationAsset;
+  final String? imageAsset;
 
   const OnboardingItem({
     required this.title,
@@ -14,5 +15,6 @@ class OnboardingItem {
     required this.badge,
     required this.icon,
     this.animationAsset,
+    this.imageAsset,
   });
 }

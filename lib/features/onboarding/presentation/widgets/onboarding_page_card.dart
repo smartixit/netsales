@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/onboarding/domain/entities/onboarding_item.dart';
 
@@ -29,34 +30,28 @@ class OnboardingPageCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 1. الحاوية البصرية للرسوم المتحركة أو الأيقونة
+              // 1. الحاوية البصرية للرسوم المتحركة أو الصور التوضيحية
               ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: 200.h,
+                  maxHeight: 210.h,
                   maxWidth: 240.w,
                 ),
                 child: Center(
-                  child: item.animationAsset != null
-                      ? Lottie.asset(
-                          item.animationAsset!,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => _buildFallbackIcon(colors),
-                        )
-                      : _buildFallbackIcon(colors),
+                  child: _buildVisual(colors),
                 ),
               )
-              .animate()
-              .scale(
-                begin: const Offset(0.9, 0.9),
-                end: const Offset(1.0, 1.0),
-                duration: 500.ms,
-                curve: Curves.easeOutBack,
-              )
-              .fadeIn(duration: 400.ms),
+                  .animate()
+                  .scale(
+                    begin: const Offset(0.9, 0.9),
+                    end: const Offset(1.0, 1.0),
+                    duration: AppMotion.slow,
+                    curve: AppMotion.springy,
+                  )
+                  .fadeIn(duration: AppMotion.normal),
 
-          AppSpacing.vLg,
+              AppSpacing.vLg,
 
-          // 2. شارة التصنيف البصرية (Badge Pill)
+              // 2. شارة التصنيف البصرية (Badge Pill)
           Container(
             padding: EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
@@ -78,8 +73,13 @@ class OnboardingPageCard extends StatelessWidget {
             ),
           )
               .animate()
-              .fadeIn(duration: 400.ms)
-              .slideY(begin: 0.15, end: 0, duration: 400.ms),
+              .fadeIn(duration: AppMotion.normal)
+              .slideY(
+                begin: 0.15,
+                end: 0,
+                duration: AppMotion.normal,
+                curve: AppMotion.emphasized,
+              ),
 
           AppSpacing.vMd,
 
@@ -93,8 +93,13 @@ class OnboardingPageCard extends StatelessWidget {
             textAlign: TextAlign.center,
           )
               .animate()
-              .fadeIn(duration: 400.ms)
-              .slideY(begin: 0.15, end: 0, duration: 400.ms),
+              .fadeIn(duration: AppMotion.normal)
+              .slideY(
+                begin: 0.15,
+                end: 0,
+                duration: AppMotion.normal,
+                curve: AppMotion.emphasized,
+              ),
 
           AppSpacing.vSm,
 
@@ -111,13 +116,49 @@ class OnboardingPageCard extends StatelessWidget {
             ),
           )
               .animate()
-              .fadeIn(duration: 400.ms)
-              .slideY(begin: 0.15, end: 0, duration: 400.ms),
+              .fadeIn(duration: AppMotion.normal)
+              .slideY(
+                begin: 0.15,
+                end: 0,
+                duration: AppMotion.normal,
+                curve: AppMotion.emphasized,
+              ),
         ],
       ),
     ),
     ),
     );
+  }
+
+  Widget _buildVisual(AppColors colors) {
+    if (item.animationAsset != null) {
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 180.r,
+            height: 180.r,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colors.primaryContainer.withValues(alpha: 0.25),
+            ),
+          ),
+          Lottie.asset(
+            item.animationAsset!,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => _buildFallbackIcon(colors),
+          ),
+        ],
+      );
+    }
+    if (item.imageAsset != null) {
+      return Image.asset(
+        item.imageAsset!,
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => _buildFallbackIcon(colors),
+      );
+    }
+    return _buildFallbackIcon(colors);
   }
 
   Widget _buildFallbackIcon(AppColors colors) {

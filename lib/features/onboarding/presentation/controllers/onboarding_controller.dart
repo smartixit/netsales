@@ -20,7 +20,7 @@ class OnboardingController extends GetxController {
       description:
           'منصة مركزية متطورة تمنحك السيطرة المطلقة على باقات الخدمة، تسعير المنتجات، ومتابعة مؤشرات أداء المبيعات لحظة بلحظة.',
       icon: Icons.hub_rounded,
-      animationAsset: 'assets/animations/network.json',
+      animationAsset: 'assets/animations/onboarding_network.json',
     ),
     OnboardingItem(
       badge: 'توسع لا محدود',
@@ -28,7 +28,7 @@ class OnboardingController extends GetxController {
       description:
           'تنسيق لحظي يجمعك بوكلائك ومنافذ التوزيع، مع معالجة ذكية لطلبات التزويد وإدارة فورية للمحافظ الرقمية المشتركة.',
       icon: Icons.storefront_rounded,
-      animationAsset: 'assets/animations/loading.json',
+      animationAsset: 'assets/animations/onboarding_pos.json',
     ),
     OnboardingItem(
       badge: 'شفافية مالية',
@@ -36,7 +36,7 @@ class OnboardingController extends GetxController {
       description:
           'أصدر الفواتير الرسمية واطبع كشوفات الحسابات المعتمدة، مع رؤية مالية شاملة للإيرادات والأرباح تدعم قراراتك الاستراتيجية.',
       icon: Icons.analytics_rounded,
-      animationAsset: 'assets/animations/success.json',
+      animationAsset: 'assets/animations/onboarding_analytics.json',
     ),
   ];
 
