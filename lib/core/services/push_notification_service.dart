@@ -13,6 +13,7 @@ import 'package:netsales/core/enums/notification_type.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/sound_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 
 /// دالة المعالجة المعزولة في الخلفية عند وصول إشعار والتطبيق بالخلفية أو مغلق.
@@ -54,6 +55,8 @@ class PushNotificationService extends GetxService {
     description: 'تنبيهات فورية للعمليات المالية وكروت الشبكة والنشاطات الأمنية',
     importance: Importance.max,
     playSound: true,
+    sound: RawResourceAndroidNotificationSound('netsales_notification'),
+    audioAttributesUsage: AudioAttributesUsage.alarm,
     enableVibration: true,
     showBadge: true,
   );
@@ -263,6 +266,8 @@ class PushNotificationService extends GetxService {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       log('📥 [PushNotificationService] Foreground Message received: ${message.notification?.title}');
       _showLocalNotification(message);
+      // إطلاق النغمة المميزة فورياً عبر مجرى المنبه لتجاوز الوضع الصامت/الهزاز
+      SoundService.instance.playSound();
     });
 
     // 2. التفاعل مع النقر على الإشعار عند عودة التطبيق من الخلفية (Background)
@@ -300,6 +305,8 @@ class PushNotificationService extends GetxService {
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
+      sound: const RawResourceAndroidNotificationSound('netsales_notification'),
+      audioAttributesUsage: AudioAttributesUsage.alarm,
       enableVibration: true,
       icon: '@drawable/ic_notification',
     );
@@ -308,6 +315,7 @@ class PushNotificationService extends GetxService {
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
+      sound: 'netsales_notification.wav',
     );
 
     final notificationDetails = NotificationDetails(

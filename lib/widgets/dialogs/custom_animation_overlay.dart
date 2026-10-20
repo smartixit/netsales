@@ -6,7 +6,6 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
@@ -270,7 +269,7 @@ class CustomAnimationOverlay {
     _route = route;
 
     if (type == AnimationOverlayType.success) {
-      SoundService.instance.playSound(usageType: AndroidUsageType.alarm);
+      SoundService.instance.playSound(soundPath: 'sounds/success.mp3');
     }
 
     final navigator = Navigator.of(context, rootNavigator: true);

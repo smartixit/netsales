@@ -63,6 +63,10 @@ class LoginController extends GetxController {
           AppRoutes.verifyOtp,
           arguments: {
             'phone': phoneController.text,
+            'device_uuid': device.deviceUuid,
+            'device_name': device.deviceName,
+            'device_type': device.deviceType,
+            'fcm_token': fcmToken,
             if (result.message != null && result.message!.isNotEmpty)
               'message': result.message,
           },
