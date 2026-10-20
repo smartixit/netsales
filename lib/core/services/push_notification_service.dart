@@ -351,9 +351,9 @@ class PushNotificationService extends GetxService {
         Get.toNamed(AppRoutes.saleInvoices);
         break;
 
-      // case 'VOUCHER_REQUEST':
-      //   Get.toNamed(AppRoutes.voucherRequests);
-      //   break;
+      case 'VOUCHER_REQUEST':
+        Get.toNamed(AppRoutes.requests);
+        break;
 
       case 'WALLET':
       case 'WALLET_TRANSACTION':
@@ -370,8 +370,8 @@ class PushNotificationService extends GetxService {
 
       default:
         // إذا كان هناك إشعار عام بدون كيان محدد، ننتقل للوحة التحكم أو شاشة الإشعارات
-        if (Get.currentRoute != AppRoutes.dashboard) {
-          Get.toNamed(AppRoutes.dashboard);
+        if (Get.currentRoute != AppRoutes.notifications) {
+          Get.toNamed(AppRoutes.notifications);
         }
         break;
     }

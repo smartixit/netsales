@@ -31,46 +31,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDummyKeyForNetSalesProject1e503',
-    appId: '1:109659837222:web:netsalesappweb',
-    messagingSenderId: '109659837222',
+    apiKey: 'AIzaSyCZCVHRKz2NP5qyu3_Sce4T7fF0ZE66H_Q',
+    appId: '1:735757446098:web:5d84e11b58a0e728d8760b',
+    messagingSenderId: '735757446098',
     projectId: 'netsales-1e503',
     authDomain: 'netsales-1e503.firebaseapp.com',
-    storageBucket: 'netsales-1e503.appspot.com',
+    storageBucket: 'netsales-1e503.firebasestorage.app',
+    measurementId: 'G-K8HGPSQBB7',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDummyKeyForNetSalesProject1e503',
-    appId: '1:109659837222:android:netsalesapp',
-    messagingSenderId: '109659837222',
+    apiKey: 'AIzaSyDAUtXtC1T8UEZUaOXPAMr67NaNXcMovI8',
+    appId: '1:735757446098:android:8bc4bcf18c1f0ad1d8760b',
+    messagingSenderId: '735757446098',
     projectId: 'netsales-1e503',
-    storageBucket: 'netsales-1e503.appspot.com',
+    storageBucket: 'netsales-1e503.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDummyKeyForNetSalesProject1e503',
-    appId: '1:109659837222:ios:netsalesappios',
-    messagingSenderId: '109659837222',
+    apiKey: 'AIzaSyA1e98NJfqOWXZ4awlQTSyksSBEhIfolmY',
+    appId: '1:735757446098:ios:d567f823c4f15c59d8760b',
+    messagingSenderId: '735757446098',
     projectId: 'netsales-1e503',
-    storageBucket: 'netsales-1e503.appspot.com',
+    storageBucket: 'netsales-1e503.firebasestorage.app',
     iosBundleId: 'com.smartix.netsales',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDummyKeyForNetSalesProject1e503',
-    appId: '1:109659837222:ios:netsalesappios',
-    messagingSenderId: '109659837222',
+    apiKey: 'AIzaSyA1e98NJfqOWXZ4awlQTSyksSBEhIfolmY',
+    appId: '1:735757446098:ios:d567f823c4f15c59d8760b',
+    messagingSenderId: '735757446098',
     projectId: 'netsales-1e503',
-    storageBucket: 'netsales-1e503.appspot.com',
+    storageBucket: 'netsales-1e503.firebasestorage.app',
     iosBundleId: 'com.smartix.netsales',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDummyKeyForNetSalesProject1e503',
-    appId: '1:109659837222:web:netsalesappwin',
-    messagingSenderId: '109659837222',
+    apiKey: 'AIzaSyCZCVHRKz2NP5qyu3_Sce4T7fF0ZE66H_Q',
+    appId: '1:735757446098:web:59d8560d27bf31ddd8760b',
+    messagingSenderId: '735757446098',
     projectId: 'netsales-1e503',
     authDomain: 'netsales-1e503.firebaseapp.com',
-    storageBucket: 'netsales-1e503.appspot.com',
+    storageBucket: 'netsales-1e503.firebasestorage.app',
+    measurementId: 'G-TKWVRPTDVY',
   );
 }
