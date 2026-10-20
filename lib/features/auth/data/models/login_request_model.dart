@@ -1,5 +1,3 @@
-import 'dart:io';
-
 /// نموذج طلب تسجيل الدخول المطابق لـ LoginRequest في netsales_api
 class LoginRequestModel {
   final String userPhoneNumber;
@@ -16,16 +14,6 @@ class LoginRequestModel {
     this.deviceType,
   });
 
-  /// استنتاج نوع الجهاز المعتمد تلقائياً وفق Enums الواجهة الخلفية
-  static String detectDeviceType() {
-    if (Platform.isAndroid) return 'ANDROID';
-    if (Platform.isIOS) return 'IOS';
-    if (Platform.isWindows) return 'WINDOWS';
-    if (Platform.isMacOS) return 'MAC';
-    if (Platform.isLinux) return 'LINUX';
-    return 'UNKNOWN';
-  }
-
   Map<String, dynamic> toJson() {
     return {
       'user_phone_number': userPhoneNumber,
@@ -34,7 +22,7 @@ class LoginRequestModel {
         'device_uuid': deviceUuid,
       if (deviceName != null && deviceName!.isNotEmpty)
         'device_name': deviceName,
-      'device_type': deviceType ?? detectDeviceType(),
+      'device_type': deviceType ?? 'UNKNOWN',
     };
   }
 }

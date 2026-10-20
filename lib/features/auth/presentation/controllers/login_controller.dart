@@ -40,13 +40,12 @@ class LoginController extends GetxController {
         message: 'جاري تسجيل الدخول والتحقق من الحساب...',
       );
 
-      final device = DeviceService.instance;
-      final cleanPhone = phoneController.text.trim();
+      final device = DeviceService.to;
 
       // 2. تنفيذ حالة الاستخدام الدومينية ببيانات عتادية دقيقة
       final result = await _loginUseCase.execute(
         LoginParams(
-          phoneNumber: cleanPhone,
+          phoneNumber: phoneController.text,
           password: passwordController.text,
           deviceUuid: device.deviceUuid,
           deviceName: device.deviceName,
@@ -60,7 +59,7 @@ class LoginController extends GetxController {
         Get.toNamed(
           AppRoutes.verifyOtp,
           arguments: {
-            'phone': cleanPhone,
+            'phone': phoneController.text,
             if (result.message != null && result.message!.isNotEmpty)
               'message': result.message,
           },
@@ -75,7 +74,6 @@ class LoginController extends GetxController {
 
       // 5. التوجيه الفوري للوحة التحكم
       Get.offAllNamed(AppRoutes.dashboard);
-
     } catch (error) {
       // 6. إغلاق الـ Overlay فوراً وعرض رسالة الخطأ عبر CustomSnackbar
       await CustomAnimationOverlay.hide();
@@ -86,7 +84,6 @@ class LoginController extends GetxController {
         message: cleanMessage,
         type: SnackType.error,
       );
-
     } finally {
       // 7. الحزام الأمني النهائي: مضمون التنفيذ في كافة السيناريوهات
       isLoading.value = false;

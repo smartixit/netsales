@@ -119,10 +119,6 @@ class StorageService {
   String? get sessionId => getString(StorageKeys.session);
   Future<bool> clearSession() => remove(StorageKeys.session);
 
-  /// معرف الجهاز
-  Future<bool> saveDeviceUuid(String uuid) =>
-      setString(StorageKeys.deviceUuid, uuid);
-  String? get deviceUuid => getString(StorageKeys.deviceUuid);
 
   /// حالة تسجيل الدخول
   Future<bool> setLoggedIn(bool value) =>

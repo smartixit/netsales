@@ -54,6 +54,7 @@ dependencies:
   dropdown_button2: ^3.1.0
   image_picker: ^1.1.2
   device_info_plus: ^12.4.0
+  flutter_udid: ^4.1.4
   local_auth: ^2.3.0
   file_picker: ^11.0.2
   desktop_drop: ^0.7.1

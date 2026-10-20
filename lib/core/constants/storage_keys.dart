@@ -7,8 +7,6 @@ abstract final class StorageKeys {
   /// معرف الجلسة المعتمد لدى الخادم (X-Session-Id)
   static const String session = 'session_id';
 
-  /// المعرف الفريد للجهاز (X-Device-Uuid)
-  static const String deviceUuid = 'device_uuid';
 
   /// معرف المستخدم المسجل
   static const String userId = 'user_id';

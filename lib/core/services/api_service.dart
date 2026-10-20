@@ -10,6 +10,7 @@ import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
+import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/utils/connection_failure.dart';
@@ -611,9 +612,9 @@ class _SessionAuthInterceptor extends Interceptor {
       options.headers['X-Session-Id'] = sessionId;
     }
 
-    // حقن معرف الجهاز
-    final deviceUuid = storage.deviceUuid;
-    if (deviceUuid != null && deviceUuid.isNotEmpty) {
+    // حقن معرف الجهاز الدائم مباشرة من الذاكرة
+    final deviceUuid = DeviceService.instance.deviceUuid;
+    if (deviceUuid.isNotEmpty) {
       options.headers['X-Device-Uuid'] = deviceUuid;
     }
 
