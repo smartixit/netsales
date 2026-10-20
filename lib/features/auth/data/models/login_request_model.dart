@@ -2,14 +2,16 @@
 class LoginRequestModel {
   final String userPhoneNumber;
   final String userPassword;
-  final String? deviceUuid;
+  final String deviceUuid;
+  final String fcmToken;
   final String? deviceName;
   final String? deviceType;
 
   const LoginRequestModel({
     required this.userPhoneNumber,
     required this.userPassword,
-    this.deviceUuid,
+    required this.deviceUuid,
+    required this.fcmToken,
     this.deviceName,
     this.deviceType,
   });
@@ -18,8 +20,8 @@ class LoginRequestModel {
     return {
       'user_phone_number': userPhoneNumber,
       'user_password': userPassword,
-      if (deviceUuid != null && deviceUuid!.isNotEmpty)
-        'device_uuid': deviceUuid,
+      'device_uuid': deviceUuid,
+      'fcm_token': fcmToken,
       if (deviceName != null && deviceName!.isNotEmpty)
         'device_name': deviceName,
       'device_type': deviceType ?? 'UNKNOWN',

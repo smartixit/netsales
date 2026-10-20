@@ -6,7 +6,8 @@ abstract interface class AuthRepository {
   Future<AuthResultEntity> login({
     required String phoneNumber,
     required String password,
-    String? deviceUuid,
+    required String deviceUuid,
+    required String fcmToken,
     String? deviceName,
     String? deviceType,
   });

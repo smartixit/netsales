@@ -16,7 +16,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthResultEntity> login({
     required String phoneNumber,
     required String password,
-    String? deviceUuid,
+    required String deviceUuid,
+    required String fcmToken,
     String? deviceName,
     String? deviceType,
   }) async {
@@ -24,6 +25,7 @@ class AuthRepositoryImpl implements AuthRepository {
       userPhoneNumber: phoneNumber,
       userPassword: password,
       deviceUuid: deviceUuid,
+      fcmToken: fcmToken,
       deviceName: deviceName,
       deviceType: deviceType,
     );
@@ -44,11 +46,11 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     // إذا كانت المصادقة مباشرة وناجحة، نبدأ الجلسة فورياً في الذاكرة والتخزين الآمن
-    if (!data.require2fa && data.sessionId != null && data.user != null) {
+    if (!data.require2fa && data.user != null) {
       await SessionService.to.startSession(
         user: data.user!,
         session: UserSessionModel(
-          sessionId: data.sessionId!,
+          sessionId: data.sessionId,
           userId: data.user!.userId,
           deviceUuid: data.deviceUuid,
         ),

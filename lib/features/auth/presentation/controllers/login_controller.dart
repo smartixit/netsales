@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/device_service.dart';
+import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/features/auth/domain/usecases/login_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -41,13 +42,15 @@ class LoginController extends GetxController {
       );
 
       final device = DeviceService.to;
+      final fcmToken = await PushNotificationService.instance.getOrFetchFcmToken();
 
-      // 2. تنفيذ حالة الاستخدام الدومينية ببيانات عتادية دقيقة
+      // 2. تنفيذ حالة الاستخدام الدومينية ببيانات عتادية دقيقة ورمز FCM الفوري
       final result = await _loginUseCase.execute(
         LoginParams(
           phoneNumber: phoneController.text,
           password: passwordController.text,
           deviceUuid: device.deviceUuid,
+          fcmToken: fcmToken,
           deviceName: device.deviceName,
           deviceType: device.deviceType,
         ),

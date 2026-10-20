@@ -181,7 +181,7 @@ class DeviceService extends GetxService {
       try {
         final udid = await FlutterUdid.udid;
         if (udid.trim().isNotEmpty) {
-          _deviceUuid = 'dev-${udid.trim()}';
+          _deviceUuid = udid.trim();
           if (_deviceUuid.length > 64) {
             _deviceUuid = _deviceUuid.substring(0, 64);
           }

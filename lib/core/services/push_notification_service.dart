@@ -9,7 +9,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/config/firebase_options.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
-import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/enums/notification_type.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/session_service.dart';
@@ -62,6 +62,24 @@ class PushNotificationService extends GetxService {
 
   /// رمز الإشعارات الفورية الحالي للجهاز
   String? get fcmToken => _fcmToken;
+
+  /// جلب الرمز الحالي أو استخراجه من Firebase/Storage على الفور
+  Future<String> getOrFetchFcmToken() async {
+    if (_fcmToken != null && _fcmToken!.isNotEmpty) {
+      return _fcmToken!;
+    }
+    try {
+      final token = await _fcm.getToken();
+      if (token != null && token.isNotEmpty) {
+        _fcmToken = token;
+        return token;
+      }
+    } catch (e) {
+      log('⚠️ [PushNotificationService] Failed to fetch FCM token on-demand: $e');
+    }
+    return StorageService.instance.getString(StorageKeys.fcmTokenStorage) ??
+        'pending_fcm_token';
+  }
 
   /// تهيئة محرك الإشعارات
   Future<PushNotificationService> init() async {
@@ -324,56 +342,32 @@ class PushNotificationService extends GetxService {
     }
   }
 
-  /// توجيه المستخدم للشاشة المناسبة بحسب نوع الكيان ومعرفه
+  /// توجيه المستخدم للشاشة المناسبة بحسب نوع الإشعار ومعرفه
   void _dispatchPayloadNavigation(Map<String, dynamic> data) {
     if (data.isEmpty) return;
 
-    final actionType = data['action_type']?.toString().toUpperCase();
-    final entityType = data['entity_type']?.toString().toUpperCase();
-    final entityId = data['entity_id']?.toString();
     final route = data['route']?.toString();
+    final rawType = data['notification_type'] ?? data['entity_type'];
+    final entityId = data['entity_id']?.toString() ?? data['id']?.toString();
 
-    log('🎯 [PushNotificationService] Dispatching deep link: entityType=$entityType, entityId=$entityId, actionType=$actionType');
+    log('🎯 [PushNotificationService] Dispatching deep link: type=$rawType, entityId=$entityId');
 
     // 1. التوجيه المباشر بالمسار الصريح إن وُجد
     if (route != null && route.isNotEmpty) {
-      Get.toNamed(route);
+      Get.toNamed(route, arguments: {'entity_id': entityId});
       return;
     }
 
-    // 2. التوجيه بحسب نوع الكيان المعياري لنظام NetSales
-    switch (entityType) {
-      // case 'SUPPORT_TICKET':
-      //   Get.toNamed(AppRoutes.supportTickets);
-      //   break;
+    // 2. فك نوع الإشعار الدوميني الموحد والتوجيه للمسار المقابل
+    final notificationType = NotificationType.fromString(rawType?.toString());
+    final targetRoute = notificationType.defaultRoute;
 
-      case 'SALE_INVOICE':
-        Get.toNamed(AppRoutes.saleInvoices);
-        break;
-
-      case 'VOUCHER_REQUEST':
-        Get.toNamed(AppRoutes.requests);
-        break;
-
-      case 'WALLET':
-      case 'WALLET_TRANSACTION':
-        Get.toNamed(AppRoutes.dashboard);
-        break;
-
-      case 'NETWORK':
-        Get.toNamed(AppRoutes.networks);
-        break;
-
-      case 'POS':
-        Get.toNamed(AppRoutes.pos);
-        break;
-
-      default:
-        // إذا كان هناك إشعار عام بدون كيان محدد، ننتقل للوحة التحكم أو شاشة الإشعارات
-        if (Get.currentRoute != AppRoutes.notifications) {
-          Get.toNamed(AppRoutes.notifications);
-        }
-        break;
+    if (entityId != null && entityId.isNotEmpty) {
+      Get.toNamed(targetRoute, arguments: {'entity_id': entityId});
+    } else {
+      if (Get.currentRoute != targetRoute) {
+        Get.toNamed(targetRoute);
+      }
     }
   }
 }

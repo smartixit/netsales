@@ -15,7 +15,8 @@ class MockAuthRepository implements AuthRepository {
   Future<AuthResultEntity> login({
     required String phoneNumber,
     required String password,
-    String? deviceUuid,
+    required String deviceUuid,
+    required String fcmToken,
     String? deviceName,
     String? deviceType,
   }) async {
@@ -28,6 +29,7 @@ class MockAuthRepository implements AuthRepository {
         require2fa: true,
         userPhoneNumber: phoneNumber,
         deviceUuid: deviceUuid,
+        sessionId: '',
       );
     }
 
@@ -40,6 +42,8 @@ class MockAuthRepository implements AuthRepository {
         userPhoneNumber: phoneNumber,
       ),
       permissions: ['pos.view', 'sales.create'],
+      userPhoneNumber: phoneNumber,
+      deviceUuid: deviceUuid,
     );
   }
 }
@@ -48,32 +52,37 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Login Form Validators Tests', () {
-    test('phoneValidator rejects empty, invalid prefixes, or invalid lengths', () {
-      final validator = FormValidators.phoneValidator(fieldName: 'رقم الهاتف');
+    test(
+      'phoneValidator rejects empty, invalid prefixes, or invalid lengths',
+      () {
+        final validator = FormValidators.phoneValidator(
+          fieldName: 'رقم الهاتف',
+        );
 
-      expect(validator(null), isNotNull);
-      expect(validator(''), isNotNull);
+        expect(validator(null), isNotNull);
+        expect(validator(''), isNotNull);
 
-      // Not starting with 7
-      expect(validator('123456789'), contains('يبدأ بـ 7'));
-      expect(validator('672957881'), contains('يبدأ بـ 7'));
+        // Not starting with 7
+        expect(validator('123456789'), contains('يبدأ بـ 7'));
+        expect(validator('672957881'), contains('يبدأ بـ 7'));
 
-      // Incorrect length
-      expect(validator('77295788'), contains('9'));
-      expect(validator('7729578810'), contains('9'));
+        // Incorrect length
+        expect(validator('77295788'), contains('9'));
+        expect(validator('7729578810'), contains('9'));
 
-      // Valid numbers (Yemen Mobile, YOU, Sabafon, Y)
-      expect(validator('772957881'), isNull);
-      expect(validator('782957881'), isNull);
-      expect(validator('732957881'), isNull);
-      expect(validator('712957881'), isNull);
-      expect(validator('702957881'), isNull);
+        // Valid numbers (Yemen Mobile, YOU, Sabafon, Y)
+        expect(validator('772957881'), isNull);
+        expect(validator('782957881'), isNull);
+        expect(validator('732957881'), isNull);
+        expect(validator('712957881'), isNull);
+        expect(validator('702957881'), isNull);
 
-      // International or local prefix variants rejected by start rule
-      expect(validator('+967772957881'), contains('يبدأ بـ 7'));
-      expect(validator('00967772957881'), contains('يبدأ بـ 7'));
-      expect(validator('0772957881'), contains('يبدأ بـ 7'));
-    });
+        // International or local prefix variants rejected by start rule
+        expect(validator('+967772957881'), contains('يبدأ بـ 7'));
+        expect(validator('00967772957881'), contains('يبدأ بـ 7'));
+        expect(validator('0772957881'), contains('يبدأ بـ 7'));
+      },
+    );
 
     test('passwordValidator enforces required and password complexity', () {
       final validator = FormValidators.passwordValidator(
@@ -88,21 +97,26 @@ void main() {
   });
 
   group('Login Models and Data Mapping Tests', () {
-    test('LoginRequestModel serializes correctly with detected device type', () {
-      final model = LoginRequestModel(
-        userPhoneNumber: '772957881',
-        userPassword: 'SecretPassword',
-        deviceUuid: 'DEV-12345',
-        deviceName: 'Test Phone',
-      );
+    test(
+      'LoginRequestModel serializes correctly with detected device type',
+      () {
+        final model = LoginRequestModel(
+          userPhoneNumber: '772957881',
+          userPassword: 'SecretPassword',
+          deviceUuid: 'DEV-12345',
+          fcmToken: 'test-fcm-token-123',
+          deviceName: 'Test Phone',
+        );
 
-      final json = model.toJson();
-      expect(json['user_phone_number'], '772957881');
-      expect(json['user_password'], 'SecretPassword');
-      expect(json['device_uuid'], 'DEV-12345');
-      expect(json['device_name'], 'Test Phone');
-      expect(json['device_type'], isNotEmpty);
-    });
+        final json = model.toJson();
+        expect(json['user_phone_number'], '772957881');
+        expect(json['user_password'], 'SecretPassword');
+        expect(json['device_uuid'], 'DEV-12345');
+        expect(json['fcm_token'], 'test-fcm-token-123');
+        expect(json['device_name'], 'Test Phone');
+        expect(json['device_type'], isNotEmpty);
+      },
+    );
 
     test('LoginResponseModel parses direct success response', () {
       final rawJson = {
@@ -137,7 +151,7 @@ void main() {
       expect(response.isNewDevice, isTrue);
       expect(response.userPhoneNumber, '772957881');
       expect(response.deviceUuid, 'DEV-999');
-      expect(response.sessionId, isNull);
+      expect(response.sessionId, isEmpty);
     });
   });
 
@@ -150,6 +164,8 @@ void main() {
         const LoginParams(
           phoneNumber: '772957881',
           password: 'Password123',
+          deviceUuid: 'DEV-12345',
+          fcmToken: 'test-fcm-token-123',
         ),
       );
 
@@ -165,6 +181,8 @@ void main() {
         const LoginParams(
           phoneNumber: '772957881',
           password: 'Password123',
+          deviceUuid: 'DEV-12345',
+          fcmToken: 'test-fcm-token-123',
         ),
       );
 

@@ -83,7 +83,7 @@ class AppCryptoService {
   /// هل مفتاح التشفير العام للخادم متوفر
   bool get hasServerBoxKey => _serverBoxPublicKey != null;
 
-  /// هل التشفير مفعل فعلياً (تلقائياً في بيئة الإنتاج أو عند توفر مفتاح الخادم)
+  /// هل التشفير مفعّل فعلياً (تلقائياً في بيئة الإنتاج أو عند توفر مفتاح الخادم)
   bool get isEncryptionActive =>
       isReady && hasServerBoxKey && !AppEnvironment.isDev;
 
@@ -96,7 +96,9 @@ class AppCryptoService {
     try {
       _sodium = await SodiumInit.init(_loadPlatformDynamicLibrary);
       _isInitialized = true;
-      log('🔒 [Crypto] libsodium initialized successfully (version: ${_sodium?.version})');
+      log(
+        '🔒 [Crypto] libsodium initialized successfully (version: ${_sodium?.version})',
+      );
 
       // استرجاع المفاتيح المخزنة محلياً إن وجدت
       _restoreCachedKeys();
@@ -150,11 +152,7 @@ class AppCryptoService {
     try {
       final response = await dio.get(
         ApiConstants.securityPublicKeys,
-        options: Options(
-          headers: {
-            'X-Bypass-Encryption': 'true',
-          },
-        ),
+        options: Options(headers: {'X-Bypass-Encryption': 'true'}),
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -178,14 +176,18 @@ class AppCryptoService {
                   StorageKeys.serverBoxPublicKey,
                   hex,
                 );
-                log('🔑 [Crypto] Server Box Public Key synced: ${hex.substring(0, 16)}...');
+                log(
+                  '🔑 [Crypto] Server Box Public Key synced: ${hex.substring(0, 16)}...',
+                );
               } else if (crv == 'Ed25519' || kid == serverKeyId) {
                 _serverSignPublicKey = hexToBytes(hex);
                 await StorageService.instance.setString(
                   StorageKeys.serverSignPublicKey,
                   hex,
                 );
-                log('🔑 [Crypto] Server Sign Public Key synced: ${hex.substring(0, 16)}...');
+                log(
+                  '🔑 [Crypto] Server Sign Public Key synced: ${hex.substring(0, 16)}...',
+                );
               }
             }
           }
@@ -309,9 +311,7 @@ class AppCryptoService {
       return jsonDecode(jsonString);
     } catch (e, stack) {
       log('❌ [Crypto] Failed to unseal server response: $e\n$stack');
-      throw const AppException(
-        'فشل فك تشفير استجابة الخادم الآمنة.',
-      );
+      throw const AppException('فشل فك تشفير استجابة الخادم الآمنة.');
     }
   }
 

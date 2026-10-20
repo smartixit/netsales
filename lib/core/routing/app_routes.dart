@@ -6,7 +6,7 @@ abstract final class AppRoutes {
   AppRoutes._();
 
   // مسار البداية والتحقق الأولي
-  static const String initial = '/';
+  static const String initial = '/splash';
   static const String splash = '/splash';
 
   // مسارات المصادقة العامة (Public / Auth Routes)

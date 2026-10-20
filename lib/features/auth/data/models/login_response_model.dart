@@ -7,29 +7,36 @@ class LoginResponseModel extends AuthResultEntity {
     super.require2fa,
     super.isNewDevice,
     super.isPrimary,
-    super.sessionId,
+    required super.sessionId,
     super.user,
     super.permissions,
-    super.userPhoneNumber,
-    super.deviceUuid,
+    required super.userPhoneNumber,
+    required super.deviceUuid,
     super.message,
   });
 
   factory LoginResponseModel.fromJson(dynamic json, {String? message}) {
     if (json is! Map) {
-      return LoginResponseModel(message: message);
+      return LoginResponseModel(
+        sessionId: '',
+        userPhoneNumber: '',
+        deviceUuid: '',
+        message: message,
+      );
     }
 
     final map = Map<String, dynamic>.from(json);
     final is2fa = map['require_2fa'] == true;
+    final deviceUuid = (map['device_uuid'] ?? '').toString();
 
     if (is2fa) {
       return LoginResponseModel(
         require2fa: true,
         isNewDevice: map['is_new_device'] == true,
         isPrimary: map['is_primary'] == true,
-        userPhoneNumber: map['user_phone_number']?.toString(),
-        deviceUuid: map['device_uuid']?.toString(),
+        sessionId: (map['session_id'] ?? '').toString(),
+        userPhoneNumber: (map['user_phone_number'] ?? '').toString(),
+        deviceUuid: deviceUuid,
         message: message,
       );
     }
@@ -44,9 +51,13 @@ class LoginResponseModel extends AuthResultEntity {
         ? UserModel.fromJson(Map<String, dynamic>.from(rawUser))
         : null;
 
+    final userPhone = (map['user_phone_number'] ?? userModel?.userPhoneNumber ?? '').toString();
+
     return LoginResponseModel(
       require2fa: false,
-      sessionId: map['session_id']?.toString(),
+      sessionId: (map['session_id'] ?? '').toString(),
+      deviceUuid: deviceUuid,
+      userPhoneNumber: userPhone,
       user: userModel,
       permissions: permissionsList,
       message: message,

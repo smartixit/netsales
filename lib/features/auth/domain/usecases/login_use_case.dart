@@ -5,14 +5,16 @@ import 'package:netsales/features/auth/domain/repositories/auth_repository.dart'
 class LoginParams {
   final String phoneNumber;
   final String password;
-  final String? deviceUuid;
+  final String deviceUuid;
+  final String fcmToken;
   final String? deviceName;
   final String? deviceType;
 
   const LoginParams({
     required this.phoneNumber,
     required this.password,
-    this.deviceUuid,
+    required this.deviceUuid,
+    required this.fcmToken,
     this.deviceName,
     this.deviceType,
   });
@@ -29,6 +31,7 @@ class LoginUseCase {
       phoneNumber: params.phoneNumber,
       password: params.password,
       deviceUuid: params.deviceUuid,
+      fcmToken: params.fcmToken,
       deviceName: params.deviceName,
       deviceType: params.deviceType,
     );
