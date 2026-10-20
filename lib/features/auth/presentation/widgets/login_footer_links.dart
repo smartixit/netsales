@@ -29,7 +29,7 @@ class LoginFooterLinks extends GetView<LoginController> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'لا تملك حساباً في المنظومة؟',
+              'لا تملك حساباً في النظام؟',
               style: AppTypography.bodyMedium.copyWith(
                 color: colors.onSurfaceVariant,
               ),

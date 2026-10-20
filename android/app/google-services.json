@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "109659837222",
+    "project_id": "netsales-1e503",
+    "storage_bucket": "netsales-1e503.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:109659837222:android:netsalesapp",
+        "android_client_info": {
+          "package_name": "com.smartix.netsales"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDummyKeyForNetSalesProject1e503"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

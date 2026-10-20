@@ -16,6 +16,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
@@ -130,12 +131,16 @@ void main() async {
   Get.put<SessionService>(SessionService.instance, permanent: true);
   Get.put<PermissionService>(PermissionService.instance, permanent: true);
 
+  // 4. تهيئة خدمة الإشعارات المركزية وإشعارات الدفع (FCM & Local Notifications)
+  await PushNotificationService.instance.init();
+  Get.put<PushNotificationService>(PushNotificationService.instance, permanent: true);
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
   ]);
 
-  // 3. تشغيل الواجهة الرئيسية للتطبيق
+  // 5. تشغيل الواجهة الرئيسية للتطبيق
   runApp(const MyApp());
 }
 

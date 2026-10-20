@@ -4,6 +4,7 @@ class UserSessionModel {
   final int userId;
   final String? ipAddress;
   final String? userAgent;
+  final String? deviceUuid;
   final String? loggedAt;
   final String? lastActivityAt;
   final String? expiresAt;
@@ -13,6 +14,7 @@ class UserSessionModel {
     required this.userId,
     this.ipAddress,
     this.userAgent,
+    this.deviceUuid,
     this.loggedAt,
     this.lastActivityAt,
     this.expiresAt,
@@ -24,6 +26,7 @@ class UserSessionModel {
       userId: json['user_id'] as int? ?? 0,
       ipAddress: json['ip_address']?.toString(),
       userAgent: json['user_agent']?.toString(),
+      deviceUuid: json['device_uuid']?.toString(),
       loggedAt: json['logged_at']?.toString(),
       lastActivityAt: json['last_activity_at']?.toString(),
       expiresAt: json['expires_at']?.toString(),
@@ -36,6 +39,8 @@ class UserSessionModel {
       'user_id': userId,
       'ip_address': ipAddress,
       'user_agent': userAgent,
+      if (deviceUuid != null && deviceUuid!.isNotEmpty)
+        'device_uuid': deviceUuid,
       'logged_at': loggedAt,
       'last_activity_at': lastActivityAt,
       'expires_at': expiresAt,

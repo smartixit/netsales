@@ -5,7 +5,9 @@ import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/models/user_session_model.dart';
 import 'package:netsales/core/services/api_service.dart';
+import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 
 /// ============================================================================
@@ -51,6 +53,7 @@ class SessionService extends GetxService {
       _session.value = UserSessionModel(
         sessionId: sessionId,
         userId: cachedUser.userId,
+        deviceUuid: DeviceService.instance.deviceUuid,
       );
       _isAuthenticated.value = true;
 
@@ -63,6 +66,10 @@ class SessionService extends GetxService {
           roleKey: cachedUser.role?.roleKey ?? '',
           permissions: cachedPermissions,
         );
+      }
+
+      if (Get.isRegistered<PushNotificationService>()) {
+        PushNotificationService.to.syncTokenWithBackend();
       }
 
       log(
@@ -109,6 +116,10 @@ class SessionService extends GetxService {
       );
     }
 
+    if (Get.isRegistered<PushNotificationService>()) {
+      PushNotificationService.to.syncTokenWithBackend();
+    }
+
     log(
       '✅ [SessionService] Session started successfully for user #${user.userId}',
     );
@@ -139,6 +150,10 @@ class SessionService extends GetxService {
 
     if (Get.isRegistered<PermissionService>()) {
       PermissionService.to.clear();
+    }
+
+    if (Get.isRegistered<PushNotificationService>()) {
+      await PushNotificationService.to.clearFcmToken();
     }
 
     log('🚪 [SessionService] Session terminated.');

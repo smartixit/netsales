@@ -34,4 +34,7 @@ abstract final class StorageKeys {
 
   /// المفتاح العام السيادي للتحقق من التوقيع الرقمي (Ed25519 Sign Public Key)
   static const String serverSignPublicKey = 'server_sign_public_key';
+
+  /// آخر رمز إشعارات فورية تم مزامنته مع الخادم بنجاح
+  static const String fcmTokenStorage = 'fcm_token_storage';
 }

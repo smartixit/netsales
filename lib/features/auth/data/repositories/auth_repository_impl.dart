@@ -50,6 +50,7 @@ class AuthRepositoryImpl implements AuthRepository {
         session: UserSessionModel(
           sessionId: data.sessionId!,
           userId: data.user!.userId,
+          deviceUuid: data.deviceUuid,
         ),
         permissions: data.permissions,
       );
