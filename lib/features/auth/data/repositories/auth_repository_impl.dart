@@ -55,16 +55,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
 
-    return AuthResultEntity(
-      require2fa: data.require2fa,
-      isNewDevice: data.isNewDevice,
-      isPrimary: data.isPrimary,
-      sessionId: data.sessionId,
-      user: data.user,
-      permissions: data.permissions,
-      userPhoneNumber: data.userPhoneNumber,
-      deviceUuid: data.deviceUuid,
-      message: response.message,
-    );
+    // LoginResponseModel يرث مباشرة من AuthResultEntity (LSP)
+    return data;
   }
 }

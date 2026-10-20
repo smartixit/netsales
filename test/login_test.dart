@@ -5,7 +5,7 @@ import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/login_response_model.dart';
 import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
-import 'package:netsales/features/auth/domain/use_cases/login_use_case.dart';
+import 'package:netsales/features/auth/domain/usecases/login_use_case.dart';
 
 class MockAuthRepository implements AuthRepository {
   bool shouldSucceed = true;
@@ -153,7 +153,6 @@ void main() {
         ),
       );
 
-      expect(result.isDirectSuccess, isTrue);
       expect(result.sessionId, 'test-session-token-12345');
       expect(result.user?.userFullName, 'حسام خالد');
     });
@@ -170,7 +169,6 @@ void main() {
       );
 
       expect(result.require2fa, isTrue);
-      expect(result.isDirectSuccess, isFalse);
     });
   });
 }

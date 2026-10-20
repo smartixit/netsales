@@ -22,13 +22,11 @@ void main() {
     await StorageService.instance.init();
     Get.put<StorageService>(StorageService.instance, permanent: true);
 
+    sessionService = SessionService.instance;
     await sessionService.init();
+    Get.put<SessionService>(sessionService, permanent: true);
     permissionService = Get.put<PermissionService>(
       PermissionService.instance,
-      permanent: true,
-    );
-    sessionService = Get.put<SessionService>(
-      SessionService.instance,
       permanent: true,
     );
   });

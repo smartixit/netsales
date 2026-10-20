@@ -1,30 +1,23 @@
 import 'package:netsales/core/models/user_model.dart';
+import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
 
-/// نموذج استجابة تسجيل الدخول من netsales_api
-class LoginResponseModel {
-  final bool require2fa;
-  final bool isNewDevice;
-  final bool isPrimary;
-  final String? sessionId;
-  final UserModel? user;
-  final List<String> permissions;
-  final String? userPhoneNumber;
-  final String? deviceUuid;
-
+/// نموذج استجابة تسجيل الدخول من netsales_api يرث من الكيان الدوميني
+class LoginResponseModel extends AuthResultEntity {
   const LoginResponseModel({
-    this.require2fa = false,
-    this.isNewDevice = false,
-    this.isPrimary = false,
-    this.sessionId,
-    this.user,
-    this.permissions = const [],
-    this.userPhoneNumber,
-    this.deviceUuid,
+    super.require2fa,
+    super.isNewDevice,
+    super.isPrimary,
+    super.sessionId,
+    super.user,
+    super.permissions,
+    super.userPhoneNumber,
+    super.deviceUuid,
+    super.message,
   });
 
-  factory LoginResponseModel.fromJson(dynamic json) {
+  factory LoginResponseModel.fromJson(dynamic json, {String? message}) {
     if (json is! Map) {
-      return const LoginResponseModel();
+      return LoginResponseModel(message: message);
     }
 
     final map = Map<String, dynamic>.from(json);
@@ -37,13 +30,14 @@ class LoginResponseModel {
         isPrimary: map['is_primary'] == true,
         userPhoneNumber: map['user_phone_number']?.toString(),
         deviceUuid: map['device_uuid']?.toString(),
+        message: message,
       );
     }
 
     final rawPermissions = map['permissions'];
     final permissionsList = rawPermissions is List
         ? rawPermissions.map((e) => e.toString()).toList()
-        : <String>[];
+        : const <String>[];
 
     final rawUser = map['user'];
     final userModel = rawUser is Map
@@ -55,6 +49,21 @@ class LoginResponseModel {
       sessionId: map['session_id']?.toString(),
       user: userModel,
       permissions: permissionsList,
+      message: message,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'require_2fa': require2fa,
+      'is_new_device': isNewDevice,
+      'is_primary': isPrimary,
+      'session_id': sessionId,
+      'user': user?.toJson(),
+      'permissions': permissions,
+      'user_phone_number': userPhoneNumber,
+      'device_uuid': deviceUuid,
+      'message': message,
+    };
   }
 }

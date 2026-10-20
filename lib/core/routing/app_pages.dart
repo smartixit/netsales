@@ -1,14 +1,14 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
-import 'package:netsales/features/auth/presentations/bindings/login_binding.dart';
-import 'package:netsales/features/auth/presentations/screens/login_screen.dart';
-import 'package:netsales/features/onboarding/presentations/bindings/onboarding_binding.dart';
-import 'package:netsales/features/onboarding/presentations/bindings/welcome_binding.dart';
-import 'package:netsales/features/onboarding/presentations/screens/onboarding_screen.dart';
-import 'package:netsales/features/onboarding/presentations/screens/welcome_screen.dart';
-import 'package:netsales/features/splash/presentations/bindings/splash_binding.dart';
-import 'package:netsales/features/splash/presentations/screens/splash_screen.dart';
+import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
+import 'package:netsales/features/auth/presentation/screens/login_screen.dart';
+import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
+import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
+import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:netsales/features/onboarding/presentation/screens/welcome_screen.dart';
+import 'package:netsales/features/splash/presentation/bindings/splash_binding.dart';
+import 'package:netsales/features/splash/presentation/screens/splash_screen.dart';
 import 'package:netsales/widgets/custom_not_found.dart';
 import 'package:netsales/widgets/custom_unauthorized.dart';
 

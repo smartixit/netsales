@@ -7,7 +7,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/onboarding/presentations/controllers/welcome_controller.dart';
+import 'package:netsales/features/onboarding/presentation/controllers/welcome_controller.dart';
 import 'package:netsales/widgets/brand/custom_brand_logo.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_action_card.dart';

@@ -5,7 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/auth/presentations/controllers/login_controller.dart';
+import 'package:netsales/features/auth/presentation/controllers/login_controller.dart';
 import 'package:netsales/widgets/dividers/custom_labeled_divider.dart';
 
 /// تذييل شاشة تسجيل الدخول: رابط إنشاء حساب جديد وتأكيد الأمان

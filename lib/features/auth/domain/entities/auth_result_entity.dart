@@ -23,7 +23,4 @@ class AuthResultEntity {
     this.deviceUuid,
     this.message,
   });
-
-  /// هل تمت المصادقة بنجاح مباشر وأُنشئت الجلسة
-  bool get isDirectSuccess => !require2fa && sessionId != null && user != null;
 }

@@ -33,7 +33,7 @@
 ---
 
 ## 3. المعمارية الطبقية النظيفة الصارمة (Strict Layered Clean Architecture)
-يجب أن تتبع كافة ميزات التطبيق التقسيم الهيكلي الإلزامي التالي دون خلط في المسؤوليات:
+يجب أن تتبع كافة ميزات التطبيق التقسيم الهيكلي الإلزامي التالي المستمد من معيار Clean Architecture القياسي للمشاريع المؤسسية:
 ```
 lib/
 ├── core/                                # البنية التحتية المشتركة (config, constants, services, themes, utils)
@@ -41,23 +41,36 @@ lib/
 └── features/
     └── [feature_name]/
         ├── data/
-        │   ├── datasources/            # الاتصال بالشبكة (HttpService) أو التخزين المحلي
-        │   ├── interfaces/              # عقود ومنافذ مصادر البيانات
-        │   └── models/                  # نماذج البيانات المتطابقة مع الـ JSON وتسلسل الحقول
+        │   ├── datasources/            # *_data_source.dart (عقد) & *_data_source_impl.dart (تطبيق)
+        │   ├── models/                  # *_model.dart (يرث إجبارياً من Entity المقابلة)
+        │   └── repositories/           # *_repository_impl.dart (تطبيق مستودع الدومين)
         ├── domain/
-        │   ├── entities/                # الكيانات الدومينية المجردة
-        │   ├── repositories/            # عقود المستودعات الدومينية (Repository Contracts)
-        │   └── usecases/               # حالات الاستخدام ومنطق الأعمال المجرد
-        └── presentation/
-            ├── bindings/                # حقن الاعتماديات لـ GetX (Bindings)
-            ├── controllers/             # متحكمات واجهة المستخدم (GetxController)
-            ├── screens/                 # الشاشات الرئيسية
+        │   ├── entities/                # *_entity.dart (كائنات نقية، خالية تماماً من منطق الـ JSON)
+        │   ├── repositories/            # *_repository.dart (عقود المستودعات الدومينية المجردة)
+        │   └── usecases/               # *_use_case.dart (حالات الاستخدام الذرية لمنطق الأعمال)
+        └── presentation/                # طبقة العرض والواجهات (presentation)
+            ├── bindings/                # *_binding.dart (حقن التبعيات وفق سريان الاعتمادية)
+            ├── controllers/             # *_controller.dart (إدارة الحالة والتنسيق مع UseCases حصراً)
+            ├── screens/                 # *_screen.dart (الشاشات الرئيسية)
             └── widgets/                 # الودجات المخصصة للميزة حصراً
 ```
-- **اتجاه سريان الاعتمادية (Inward Dependency Rule):**
-  $$\text{Presentation} \longrightarrow \text{Domain Use Case} \longrightarrow \text{Domain Repository Contract} \longleftarrow \text{Data Repository Implementation} \longrightarrow \text{Data Source}$$
-  - يُحظر استدعاء Dio أو عميل الشبكة أو قاعدة البيانات أو الـ DataSource مباشرة داخل كلاسات الـ `Controller` أو الـ `Widget`.
-  - المتحكمات تنسق فقط مع الـ `Use Cases` أو عقود المستودعات المعتمدة.
+
+### القواعد المعمارية الحاكمة ومصفوفة الحدود الصارمة:
+1. **قاعدة سريان الاعتمادية للداخل (Inward Dependency Rule):**
+   $$\text{Presentation} \longrightarrow \text{Domain UseCases} \longrightarrow \text{Domain Repository Contract} \longleftarrow \text{Data Repository Implementation} \longrightarrow \text{Data Sources}$$
+   - طبقة الـ `Domain` هي مركز النظام النقي: **يُحظر حظرًا باتاً** أن تستورد أي ملف من `data/` أو `presentation/` أو أي حزمة خارجية (Dio, Storage, GetX, etc.).
+   - طبقة الـ `Presentation` تستدعي **حصراً** حالات الاستخدام (`UseCases`). **يُحظر حظرًا باتاً** استدعاء `ApiService` أو `StorageService` أو `DataSource` أو `Repository` مباشرة داخل أي `Controller` أو `Widget`.
+   - كلاسات الـ `Bindings` هي المكان الحصري المسموح له بتركيب سلسلة التبعيات: `DataSource` $\rightarrow$ `Repository` $\rightarrow$ `UseCase` $\rightarrow$ `Controller`.
+
+2. **قاعدة وراثة الموديل من الكيان (`Model extends Entity`):**
+   - كافة الموديلات في `data/models/` يجب أن ترث بالضرورة من الكيان المقابل في `domain/entities/` (`class UserModel extends UserEntity`).
+   - الكيان (`Entity`) يحمل الحقول ومنطق الأعمال النقي فقط (دون دوال `fromJson`/`toJson`).
+   - الموديل (`Model`) هو المسؤول الحصري عن تسلسل البيانات (`fromJson` / `toJson`).
+   - مستودع البيانات (`RepositoryImpl`) يعيد كائن الموديل مباشرة بصفته Polymorphic Entity دون تكرار نسخ الحقول يدوياً.
+
+3. **قواعد مصادر البيانات (`DataSources`):**
+   - تُقسّم داخل `data/datasources/` إلى عقد مجرد `*_data_source.dart` وتطبيق فعلي `*_data_source_impl.dart`.
+   - لا تتعامل مع الكيانات مباشرة، بل تستقبل وترجع كائنات الموديلات (`Models`) أو البيانات الأولية.
 
 ---
 

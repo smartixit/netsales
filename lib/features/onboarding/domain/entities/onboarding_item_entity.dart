@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 /// كيان بيانات شريحة التعريف في جولة البداية
-class OnboardingItem {
+class OnboardingItemEntity {
   final String title;
   final String description;
   final String badge;
@@ -9,7 +9,7 @@ class OnboardingItem {
   final String? animationAsset;
   final String? imageAsset;
 
-  const OnboardingItem({
+  const OnboardingItemEntity({
     required this.title,
     required this.description,
     required this.badge,

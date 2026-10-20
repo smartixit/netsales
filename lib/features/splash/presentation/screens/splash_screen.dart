@@ -6,7 +6,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/splash/presentations/widgets/splash_flowing_progress_bar.dart';
+import 'package:netsales/features/splash/presentation/widgets/splash_flowing_progress_bar.dart';
 import 'package:netsales/widgets/brand/custom_brand_logo.dart';
 
 /// شاشة الإقلاع الرئيسية للنظام (Splash Screen)
