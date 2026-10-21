@@ -164,7 +164,7 @@ class RegisterNetworkController extends GetxController {
         onConfirm: () => Get.offAllNamed(AppRoutes.login),
       );
 
-      SoundService.instance.playSound(soundPath: 'sounds/success.mp3');
+      SoundService.instance.playSound(soundPath: 'sounds/netsales_success.wav');
 
       if (Get.currentRoute != AppRoutes.login) {
         Get.offAllNamed(AppRoutes.login);
