@@ -2,18 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:pinput/pinput.dart';
 
+export 'package:pinput/pinput.dart'
+    show HapticFeedbackType, PinputAutovalidateMode, SmsRetriever;
+
 /// ============================================================================
-/// حقل إدخال رمز التحقق الموحد فائق المرونة (Enterprise Unified PIN/OTP Field)
+/// حقل إدخال رمز التحقق الموحد (Enterprise Unified PIN/OTP Field)
 /// ============================================================================
-/// مدمج كلياً مع:
-/// - مكتبة Pinput القياسية
-/// - نظام ألوان وثيم NetSales (context.colors.*)
-/// - flutter_screenutil (.w, .h, .r, .sp)
-/// - دعم الـ RTL/LTR مع فرض اتجاه الأرقام من اليسار لليمين
+/// مبني بدقة على نمط "Rounded With Shadows" القياسي المعتمد من حزمة Pinput الرسمية:
+/// - حواف مستديرة انسيابية تتحول بحركة ناعمة عند التركيز
+/// - ظلال عمق متكيفة بالكامل عبر AppElevation (دون ألوان أو أرقام سحرية)
+/// - مؤشر سفلي أنيق (Bottom Indicator Cursor)
+/// - دعم أصيل وشامل للتعبئة التلقائية (iOS OneTimeCode و Android SMS Autofill)
+/// - توافق تام مع flutter_screenutil والاتجاه العربي RTL مع إدخال LTR للأرقام
 class CustomPinField extends StatelessWidget {
   const CustomPinField({
     super.key,
@@ -33,6 +39,14 @@ class CustomPinField extends StatelessWidget {
     this.inputFormatters,
     this.boxWidth,
     this.boxHeight,
+    this.useShadows = true,
+    this.showCursor = false,
+    this.cursor,
+    this.separatorBuilder,
+    this.autofillHints = const [AutofillHints.oneTimeCode],
+    this.smsRetriever,
+    this.closeKeyboardWhenCompleted = true,
+    this.pinputAutovalidateMode = PinputAutovalidateMode.onSubmit,
   });
 
   /// عدد خانات الرمز (افتراضياً 6 خانات)
@@ -44,7 +58,7 @@ class CustomPinField extends StatelessWidget {
   /// عقدة التركيز
   final FocusNode? focusNode;
 
-  /// دالة التحقق من صحة القيمة (مثل FormValidators.otpValidator)
+  /// دالة التحقق من صحة القيمة
   final String? Function(String?)? validator;
 
   /// رد النداء عند اكتمال إدخال كامل خانات الرمز
@@ -77,19 +91,46 @@ class CustomPinField extends StatelessWidget {
   /// منسقات المدخلات
   final List<TextInputFormatter>? inputFormatters;
 
-  /// عرض كل خانة مخصصة (إن لم تُحدد، يتم الاعتماد على القياس المتجاوب 48.w)
+  /// عرض كل خانة مخصصة (إن لم يُحدد، يتكيف تلقائياً مع حجم الشاشة وعدد الخانات)
   final double? boxWidth;
 
-  /// ارتفاع كل خانة مخصصة (إن لم يُحدد، يتم الاعتماد على القياس المتجاوب 54.h)
+  /// ارتفاع كل خانة مخصصة (إن لم يُحدد، يعتمد 58.h افتراضياً)
   final double? boxHeight;
+
+  /// تفعيل الظلال لنمط "Rounded With Shadows"
+  final bool useShadows;
+
+  /// إظهار المؤشر
+  final bool showCursor;
+
+  /// مؤشر مخصص
+  final Widget? cursor;
+
+  /// فاصل مخصص بين الخانات
+  final Widget Function(int index)? separatorBuilder;
+
+  /// إشارات التعبئة التلقائية للوحة المفاتيح ونظام التشغيل (iOS/Android OTP Autofill)
+  final Iterable<String>? autofillHints;
+
+  /// كائن استخراج الرمز التلقائي من رسائل SMS على أندرويد
+  final SmsRetriever? smsRetriever;
+
+  /// إغلاق لوحة المفاتيح تلقائياً فور اكتمال الرمز
+  final bool closeKeyboardWhenCompleted;
+
+  /// نمط التحقق التلقائي
+  final PinputAutovalidateMode pinputAutovalidateMode;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final cellWidth = boxWidth ?? 48.w;
-    final cellHeight = boxHeight ?? 54.h;
+    // احتساب أبعاد الخانات بما يضمن عدم حدوث تجاوز في الشاشات الصغيرة
+    final defaultWidth = length <= 4 ? 60.w : 48.w;
+    final cellWidth = boxWidth ?? defaultWidth;
+    final cellHeight = boxHeight ?? 58.h;
 
+    // 1. الثيم الافتراضي: نمط Rounded With Shadows
     final defaultPinTheme = PinTheme(
       width: cellWidth,
       height: cellHeight,
@@ -98,52 +139,88 @@ class CustomPinField extends StatelessWidget {
         fontWeight: FontWeight.bold,
       ),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(AppRadius.md.r),
+        color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(AppRadius.lg.r),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.5),
+          color: colors.outlineVariant.withValues(alpha: 0.35),
           width: 1.w,
         ),
+        boxShadow: useShadows ? AppElevation.level1(context) : null,
       ),
     );
 
+    // 2. ثيم الخانة المركّز عليها: تحول الحواف المستديرة إلى حواف أصغر مع الظل البارز كما في Pinput الرسمي
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.sm.r),
         border: Border.all(
           color: colors.primary,
           width: 2.w,
         ),
-        color: colors.surface,
+        boxShadow: useShadows
+            ? [
+                ...AppElevation.level2(context),
+                ...AppElevation.glow(context, colors.primary, blur: 12.r, alpha: 0.18),
+              ]
+            : null,
       ),
     );
 
+    // 3. ثيم الخانة المكتملة (Submitted Pin Theme)
     final submittedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg.r),
         border: Border.all(
           color: colors.primary.withValues(alpha: 0.6),
           width: 1.5.w,
         ),
-        color: colors.surface,
+        boxShadow: useShadows ? AppElevation.level1(context) : null,
       ),
     );
 
+    // 4. ثيم حالة الخطأ
     final errorPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg.r),
         border: Border.all(
           color: colors.error,
           width: 1.5.w,
         ),
+        boxShadow: useShadows
+            ? AppElevation.glow(context, colors.error, blur: 10.r, alpha: 0.2)
+            : null,
       ),
     );
 
+    // 5. ثيم الحقل المعطل
     final disabledPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        color: colors.surfaceContainerHighest.withValues(alpha: 0.2),
+        color: colors.surfaceContainerHighest.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(AppRadius.lg.r),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.2),
+          color: colors.outlineVariant.withValues(alpha: 0.15),
         ),
+        boxShadow: null,
       ),
     );
+
+    // مؤشر الكتابة السفلي الأنيق المطابق لنموذج Rounded With Shadows
+    final effectiveCursor = cursor ??
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            width: 20.w,
+            height: 2.h,
+            margin: EdgeInsets.only(bottom: 10.h),
+            decoration: BoxDecoration(
+              color: colors.primary,
+              borderRadius: BorderRadius.circular(AppRadius.xs.r),
+            ),
+          ),
+        );
 
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -167,6 +244,15 @@ class CustomPinField extends StatelessWidget {
         validator: validator,
         onCompleted: onCompleted,
         onChanged: onChanged,
+        showCursor: showCursor,
+        cursor: effectiveCursor,
+        isCursorAnimationEnabled: true,
+        closeKeyboardWhenCompleted: closeKeyboardWhenCompleted,
+        pinputAutovalidateMode: pinputAutovalidateMode,
+        autofillHints: autofillHints,
+        smsRetriever: smsRetriever,
+        separatorBuilder: separatorBuilder ??
+            (index) => SizedBox(width: AppSpacing.xs),
       ),
     );
   }

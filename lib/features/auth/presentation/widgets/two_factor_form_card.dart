@@ -44,7 +44,6 @@ class TwoFactorFormCard extends StatelessWidget {
             CustomPinField(
               length: 6,
               controller: controller.otpController,
-              autofocus: true,
               validator: FormValidators.otpValidator(
                 fieldName: 'رمز الأمان',
                 length: 6,
