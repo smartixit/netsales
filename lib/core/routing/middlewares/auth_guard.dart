@@ -33,6 +33,18 @@ class AuthGuard extends GetMiddleware {
       return const RouteSettings(name: AppRoutes.login);
     }
 
+    // الحزام الأمني: منع الوصول لأي صفحة إذا كان تغيير كلمة المرور إلزامياً
+    if (SessionService.to.mustChangePassword && route != AppRoutes.resetPassword) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        CustomSnackbar.show(
+          title: 'تغيير كلمة المرور إلزامي',
+          message: 'يجب تعيين كلمة مرور جديدة لحسابك قبل متابعة استخدام النظام',
+          type: SnackType.warning,
+        );
+      });
+      return const RouteSettings(name: AppRoutes.resetPassword);
+    }
+
     return null;
   }
 }
@@ -45,6 +57,9 @@ class GuestGuard extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     if (Get.isRegistered<SessionService>() && SessionService.to.isAuthenticated) {
+      if (SessionService.to.mustChangePassword) {
+        return const RouteSettings(name: AppRoutes.resetPassword);
+      }
       return const RouteSettings(name: AppRoutes.dashboard);
     }
     return null;
@@ -87,6 +102,10 @@ class PermissionGuardMiddleware extends GetMiddleware {
         );
       });
       return const RouteSettings(name: AppRoutes.login);
+    }
+
+    if (SessionService.to.mustChangePassword && route != AppRoutes.resetPassword) {
+      return const RouteSettings(name: AppRoutes.resetPassword);
     }
 
     if (!Get.isRegistered<PermissionService>()) {

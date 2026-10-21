@@ -17,4 +17,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       fromJson: LoginResponseModel.fromJson,
     );
   }
+
+  @override
+  Future<ApiResponse<void>> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) {
+    return ApiService.instance.post<void>(
+      ApiConstants.updatePassword,
+      data: {
+        'current_password': currentPassword,
+        'new_password': newPassword,
+        'new_password_confirmation': confirmPassword,
+      },
+    );
+  }
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> getProfile() {
+    return ApiService.instance.get<Map<String, dynamic>>(
+      ApiConstants.me,
+      fromJson: (json) =>
+          json is Map ? Map<String, dynamic>.from(json) : <String, dynamic>{},
+    );
+  }
 }

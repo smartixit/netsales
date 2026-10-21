@@ -5,6 +5,7 @@ import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
 class LoginResponseModel extends AuthResultEntity {
   const LoginResponseModel({
     super.require2fa,
+    super.requirePasswordChange,
     super.isNewDevice,
     super.isPrimary,
     required super.sessionId,
@@ -52,9 +53,12 @@ class LoginResponseModel extends AuthResultEntity {
         : null;
 
     final userPhone = (map['user_phone_number'] ?? userModel?.userPhoneNumber ?? '').toString();
+    final mustChangePassword = map['require_password_change'] == true ||
+        userModel?.mustChangePassword == true;
 
     return LoginResponseModel(
       require2fa: false,
+      requirePasswordChange: mustChangePassword,
       sessionId: (map['session_id'] ?? '').toString(),
       deviceUuid: deviceUuid,
       userPhoneNumber: userPhone,
@@ -67,6 +71,7 @@ class LoginResponseModel extends AuthResultEntity {
   Map<String, dynamic> toJson() {
     return {
       'require_2fa': require2fa,
+      'require_password_change': requirePasswordChange,
       'is_new_device': isNewDevice,
       'is_primary': isPrimary,
       'session_id': sessionId,

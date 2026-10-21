@@ -46,6 +46,17 @@ class MockAuthRepository implements AuthRepository {
       deviceUuid: deviceUuid,
     );
   }
+
+  @override
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    if (!shouldSucceed) {
+      throw Exception('فشل تحديث كلمة المرور');
+    }
+  }
 }
 
 void main() {

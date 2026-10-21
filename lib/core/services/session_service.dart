@@ -39,6 +39,9 @@ class SessionService extends GetxService {
   /// حالة المصادقة النشطة
   bool get isAuthenticated => _isAuthenticated.value;
 
+  /// التحقق مما إذا كان المستخدم مجبراً على تغيير كلمة المرور قبل الوصول للوحة التحكم
+  bool get mustChangePassword => _user.value?.mustChangePassword ?? false;
+
   /// تهيئة الخدمة واستعادة بيانات الجلسة من التخزين المحلي عند إقلاع التطبيق
   Future<SessionService> init() async {
     final storage = StorageService.instance;
@@ -133,6 +136,28 @@ class SessionService extends GetxService {
       updatedUser,
       (u) => u.toJson(),
     );
+  }
+
+  /// تحديث حالة تغيير كلمة المرور عند اكتمال تعيين كلمة المرور الجديدة
+  Future<void> markPasswordChanged() async {
+    final current = _user.value;
+    if (current != null) {
+      final updated = UserModel(
+        userId: current.userId,
+        roleId: current.roleId,
+        userFullName: current.userFullName,
+        userProfileLogo: current.userProfileLogo,
+        userPhoneNumber: current.userPhoneNumber,
+        userEmail: current.userEmail,
+        user2faEnabled: current.user2faEnabled,
+        mustChangePassword: false,
+        status: current.status,
+        statusLabel: current.statusLabel,
+        lastLoginAt: current.lastLoginAt,
+        role: current.role,
+      );
+      await updateCurrentUser(updated);
+    }
   }
 
   /// إنهاء الجلسة بالكامل وتصفير الحالات والتخزين

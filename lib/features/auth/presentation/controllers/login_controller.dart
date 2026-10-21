@@ -74,12 +74,31 @@ class LoginController extends GetxController {
         return;
       }
 
-      // 4. حالة النجاح المباشر: عرض أنيميشن النجاح بالمدة الافتراضية المحددة في المكون الموحد
+      // 4. فحص بوابة التغيير الإلزامي لكلمة المرور (Mandatory Password Change Gate)
+      if (result.requirePasswordChange) {
+        await CustomAnimationOverlay.hide();
+        CustomSnackbar.show(
+          title: 'تغيير كلمة المرور إلزامي',
+          message: 'تم الدخول بكلمة مرور مؤقتة، يرجى تعيين كلمة مرور جديدة لحسابك للمتابعة.',
+          type: SnackType.warning,
+        );
+        Get.offAllNamed(
+          AppRoutes.resetPassword,
+          arguments: {
+            'is_forced': true,
+            'phone': phoneController.text,
+            'current_password': passwordController.text,
+          },
+        );
+        return;
+      }
+
+      // 5. حالة النجاح المباشر: عرض أنيميشن النجاح بالمدة الافتراضية المحددة في المكون الموحد
       await CustomAnimationOverlay.showSuccess(
         message: 'تم تسجيل الدخول بنجاح. مرحباً بك!',
       );
 
-      // 5. التوجيه الفوري للوحة التحكم
+      // 6. التوجيه الفوري للوحة التحكم
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (error) {
       // 6. إغلاق الـ Overlay فوراً وعرض رسالة الخطأ عبر CustomSnackbar

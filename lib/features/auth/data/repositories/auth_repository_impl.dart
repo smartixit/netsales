@@ -1,5 +1,8 @@
+import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/models/user_session_model.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:netsales/features/auth/data/models/login_request_model.dart';
@@ -60,5 +63,51 @@ class AuthRepositoryImpl implements AuthRepository {
 
     // LoginResponseModel يرث مباشرة من AuthResultEntity (LSP)
     return data;
+  }
+
+  @override
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    final response = await _remoteDataSource.updatePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
+    );
+
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+
+    // بعد نجاح تحديث كلمة المرور، نقوم بفك الحظر وتحديث بيانات المستخدم محلياً
+    await SessionService.to.markPasswordChanged();
+
+    // جلب الملف الشخصي والصلاحيات المحدثة لترقية الجلسة فورياً
+    try {
+      final profileResp = await _remoteDataSource.getProfile();
+      if (profileResp.success && profileResp.data != null) {
+        final profileData = profileResp.data!;
+        final rawUser = profileData['user'];
+        if (rawUser is Map) {
+          final updatedUser = UserModel.fromJson(Map<String, dynamic>.from(rawUser));
+          await SessionService.to.updateCurrentUser(updatedUser);
+        }
+        final rawPerms = profileData['permissions'];
+        final permissions = rawPerms is List
+            ? rawPerms.map((e) => e.toString()).toList()
+            : <String>[];
+        if (Get.isRegistered<PermissionService>()) {
+          final roleKey = profileData['role_key']?.toString() ?? '';
+          PermissionService.to.updateAccess(
+            roleKey: roleKey,
+            permissions: permissions,
+          );
+        }
+      }
+    } catch (_) {
+      // استمرار آمن في حال عدم توفر اتصال لحظي للملف الشخصي
+    }
   }
 }

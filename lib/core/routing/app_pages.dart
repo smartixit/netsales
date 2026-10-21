@@ -2,7 +2,9 @@ import 'package:get/get.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
+import 'package:netsales/features/auth/presentation/bindings/reset_password_binding.dart';
 import 'package:netsales/features/auth/presentation/screens/login_screen.dart';
+import 'package:netsales/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
 import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -64,6 +66,11 @@ abstract final class AppPages {
       page: () => const LoginScreen(),
       binding: LoginBinding(),
       middlewares: [GuestGuard()],
+    ),
+    GetPage(
+      name: AppRoutes.resetPassword,
+      page: () => const ResetPasswordScreen(),
+      binding: ResetPasswordBinding(),
     ),
     // GetPage(
     //   name: AppRoutes.registerNetwork,

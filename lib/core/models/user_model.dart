@@ -10,6 +10,7 @@ class UserModel {
   final String userPhoneNumber;
   final String? userEmail;
   final bool user2faEnabled;
+  final bool mustChangePassword;
   final String status;
   final String? statusLabel;
   final String? lastLoginAt;
@@ -23,6 +24,7 @@ class UserModel {
     required this.userPhoneNumber,
     this.userEmail,
     this.user2faEnabled = false,
+    this.mustChangePassword = false,
     this.status = 'ACTIVE',
     this.statusLabel,
     this.lastLoginAt,
@@ -46,7 +48,8 @@ class UserModel {
       userProfileLogo: json['user_profile_logo']?.toString(),
       userPhoneNumber: json['user_phone_number']?.toString() ?? '',
       userEmail: json['user_email']?.toString(),
-      user2faEnabled: json['user_2fa_enabled'] == true || json['user_2fa_enabled'] == 1,
+      user2faEnabled: json['user_2fa_enabled'] ?? false,
+      mustChangePassword: json['must_change_password'] ?? false,
       status: json['status']?.toString() ?? 'ACTIVE',
       statusLabel: json['status_label']?.toString(),
       lastLoginAt: json['last_login_at']?.toString(),
@@ -65,6 +68,7 @@ class UserModel {
       'user_phone_number': userPhoneNumber,
       'user_email': userEmail,
       'user_2fa_enabled': user2faEnabled,
+      'must_change_password': mustChangePassword,
       'status': status,
       'status_label': statusLabel,
       'last_login_at': lastLoginAt,

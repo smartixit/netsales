@@ -11,4 +11,11 @@ abstract interface class AuthRepository {
     String? deviceName,
     String? deviceType,
   });
+
+  /// تحديث كلمة المرور للمستخدم المسجل وتأكيد الهوية وتحديث الصلاحيات
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  });
 }
