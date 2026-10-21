@@ -10,6 +10,7 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/images/custom_cached_image.dart';
 
 /// أنماط عرض منتقي الصور الموحد
 enum ImagePickerVariant {
@@ -183,14 +184,10 @@ class CustomImagePicker extends StatelessWidget {
                             cacheHeight: (boxSize * 2.5).toInt(),
                           )
                         : (existingImageUrl != null && existingImageUrl!.isNotEmpty)
-                            ? Image.network(
-                                existingImageUrl!,
-                                width: boxSize,
-                                height: boxSize,
-                                fit: BoxFit.cover,
-                                cacheWidth: (boxSize * 2.5).toInt(),
-                                cacheHeight: (boxSize * 2.5).toInt(),
-                                errorBuilder: (_, __, ___) => _buildPlaceholderIcon(colors),
+                            ? CustomCachedImage.logo(
+                                url: existingImageUrl,
+                                size: boxSize,
+                                fallback: _buildPlaceholderIcon(colors),
                               )
                             : _buildPlaceholderIcon(colors),
                   ),
@@ -295,14 +292,10 @@ class CustomImagePicker extends StatelessWidget {
                             cacheHeight: (avatarRadius * 4).toInt(),
                           )
                         : (existingImageUrl != null && existingImageUrl!.isNotEmpty)
-                            ? Image.network(
-                                existingImageUrl!,
-                                width: avatarRadius * 2,
-                                height: avatarRadius * 2,
-                                fit: BoxFit.cover,
-                                cacheWidth: (avatarRadius * 4).toInt(),
-                                cacheHeight: (avatarRadius * 4).toInt(),
-                                errorBuilder: (_, __, ___) => _buildAvatarPlaceholder(colors),
+                            ? CustomCachedImage.avatar(
+                                url: existingImageUrl,
+                                radius: avatarRadius,
+                                fallback: _buildAvatarPlaceholder(colors),
                               )
                             : _buildAvatarPlaceholder(colors),
                   ),

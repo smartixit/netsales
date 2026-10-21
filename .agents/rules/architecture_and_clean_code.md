@@ -364,3 +364,31 @@ lib/
     - `DialogActionBar`: شريط الإجراءات المعتمد حصرياً على `CustomButton.primary` و `CustomButton.outline` و `CustomButton.danger`.
 - **الدوال الاستاتيكية المريحة:**
   - توفير دوال الاستدعاء السريعة للتوافقية (`CustomDialog.show(...)`, `CustomDialog.showPending(...)`, `CustomDialog.showConfirmation(...)`) مع انتقال فيزيائي ناعم مقيد بـ `AppMotion.fast`.
+
+---
+
+## 22. منظومة الكاش المركزية الموحدة ومعرض الوسائط واستعراض مستندات PDF (Enterprise AppCacheService & MediaGallery System)
+- **منع تشتت خدمات الكاش (Unified Cache Architecture):**
+  - **يُحظر حظرًا قاطعاً** إنشاء خدمات كاش متعددة متناثرة في النظام. المصدر الحصري والوحيد لإدارة الكاش هو `AppCacheService.instance` بالتعاون مع `NetSalesCacheManager.instance`.
+  - **قطاع كاش الوسائط والملفات:** تحميل وجلب وتخزين الملفات والصور ومستندات الـ PDF محلياً، مع حساب الحجم الفعلي للكاش، وحذف الكاش الفاسد فوراً (`Self-Healing`).
+  - **قطاع كاش البيانات الحية مع مدة الصلاحية (Data Cache with TTL):** تخزين الكائنات المؤقتة مع فترات انتهاء دقيقة وإمكانية الإبطال الجماعي بالوسوم (`invalidateByTag`).
+  - **التنظيف الشامل:** تفريغ آمن وشامل لكافة أنواع الكاش (`clearAllCache`) عند تسجيل الخروج لحماية الخصوصية.
+- **التطبيع الذري لروابط الوسائط ومنع تلويث الكاش (Anti-Cache Poisoning & URL Normalization):**
+  - التحويل التلقائي للمسارات النسبية (`networks/logos/...`, `users/avatars/...`) إلى روابط كاملة عبر `NetSalesDioFileService.normalizeMediaUrl`.
+  - الحقن الإلزامي لترويسات الجلسة والأمان (`X-Session-Id`, `X-Device-Uuid`, `Authorization: Bearer`).
+  - فحص صارم لكود الحالة ونوع المحتوى `Content-Type` لمنع حفظ استجابات الأخطاء JSON أو صفحات HTML في كاش الصور والملفات.
+- **المكون القياسي الموحد للصور الشبكية (`CustomCachedImage`):**
+  - الاعتماد الحصري على `CustomCachedImage` كبديل دائم لـ `Image.network` أو مكتبات الكاش الخام.
+  - الحماية القصوى للذاكرة عبر الـ Downsampling التلقائي بالأبعاد وكثافة البكسل لمنع الـ OOM.
+  - فئات مصنعية متخصصة: `CustomCachedImage.avatar(...)` و `CustomCachedImage.logo(...)`.
+- **معرض الوسائط والمستندات التفاعلي الموحد (`MediaGalleryViewer`):**
+  - الاعتماد الحصري على `MediaGalleryViewer` لاستعراض الصور ومستندات الـ PDF وجداول البيانات في نافذة تفاعلية واحدة دون مغادرة التطبيق إلى متصفحات الويب.
+  - **استعراض الـ PDF التفاعلي المدمج:** عرض كافة صفحات ملفات الـ PDF تفاعلياً داخل التطبيق عبر `PdfPreview` مع دعم التكبير والصفحات والطباعة المباشرة وحفظ الملف.
+  - **استعراض الصور:** دعم التكبير والتصغير المزدوج (`Double-tap Zoom`) باللمس المزدوج بنعومة `AppMotion.fast`.
+  - **الإغلاق بالسحب الرأسي:** دعم السحب للإغلاق (`Swipe-to-Dismiss`) مع تخفيت تدريجي للشفافية.
+  - **شريط المصغرات السفلي التفاعلي (`MediaGalleryFilmstrip`):** مستوحى من أحدث معايير WhatsApp لعرض مصغرات العناصر المتعددة مع التحديد والتوهج.
+  - **الالتزام الكامل بـ CustomButton:** كافة أزرار الترويسة والإجراءات (إغلاق، حفظ، مشاركة، طباعة، فتح خارجي) تعتمد حصرياً على `CustomButton.icon` و `CustomButton.primary`.
+  - **دوال الاستدعاء السريعة:**
+    - `MediaGalleryViewer.show(context, items: [...], initialIndex: 0)`
+    - `MediaGalleryViewer.showSingle(context, item)`
+    - `MediaGalleryViewer.showPickedFiles(context, files: [...], initialIndex: 0)`

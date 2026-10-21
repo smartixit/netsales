@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -55,7 +56,7 @@ class LoginFooterLinks extends GetView<LoginController> {
           children: [
             Icon(
               Icons.shield_outlined,
-              size: 16,
+              size: 16.r,
               color: colors.onSurfaceVariant.withValues(alpha: 0.7),
             ),
             AppSpacing.hXs,

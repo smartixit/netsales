@@ -9,6 +9,7 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/media_gallery/media_gallery_viewer.dart';
 
 /// بطاقة عرض الملف المرفق الفردي في النظام (FileCardItem)
 ///
@@ -115,14 +116,15 @@ class FileCardItem extends StatelessWidget {
       ),
     );
 
-    if (onTap != null) {
-      return CustomInteractiveBounce(
-        onTap: onTap!,
-        child: cardContent,
-      );
-    }
+    final effectiveOnTap = onTap ??
+        () {
+          MediaGalleryViewer.showPickedFiles(context, files: [file]);
+        };
 
-    return cardContent;
+    return CustomInteractiveBounce(
+      onTap: effectiveOnTap,
+      child: cardContent,
+    );
   }
 }
 
