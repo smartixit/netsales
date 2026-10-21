@@ -269,7 +269,7 @@ class CustomAnimationOverlay {
     _route = route;
 
     if (type == AnimationOverlayType.success) {
-      SoundService.instance.playSound(soundPath: 'sounds/success.mp3');
+      SoundService.instance.playSound(soundPath: 'sounds/netsales_success.wav');
     }
 
     final navigator = Navigator.of(context, rootNavigator: true);
