@@ -3,9 +3,12 @@ import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/login_response_model.dart';
+import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
 import 'package:netsales/features/auth/domain/usecases/login_use_case.dart';
+import 'package:netsales/features/auth/domain/usecases/resend_otp_use_case.dart';
+import 'package:netsales/features/auth/domain/usecases/verify_two_factor_use_case.dart';
 
 class MockAuthRepository implements AuthRepository {
   bool shouldSucceed = true;
@@ -72,6 +75,44 @@ class MockAuthRepository implements AuthRepository {
   }) async {
     if (!shouldSucceed) {
       throw Exception('كود التحقق غير صالح');
+    }
+  }
+
+  @override
+  Future<AuthResultEntity> verifyTwoFactor({
+    required String phoneNumber,
+    required String otp,
+    required String deviceUuid,
+    required String fcmToken,
+    String? deviceName,
+    String? deviceType,
+  }) async {
+    if (!shouldSucceed) {
+      throw Exception('رمز التحقق الثنائي غير صالح');
+    }
+
+    return AuthResultEntity(
+      require2fa: false,
+      sessionId: 'test-session-2fa-token',
+      user: UserModel(
+        userId: 1,
+        userFullName: 'حسام خالد',
+        userPhoneNumber: phoneNumber,
+      ),
+      permissions: ['pos.view', 'sales.create'],
+      userPhoneNumber: phoneNumber,
+      deviceUuid: deviceUuid,
+    );
+  }
+
+  @override
+  Future<void> resendOtp({
+    required String phoneNumber,
+    required String otpType,
+    required String deviceUuid,
+  }) async {
+    if (!shouldSucceed) {
+      throw Exception('فشل إعادة إرسال الرمز');
     }
   }
 }
@@ -215,6 +256,78 @@ void main() {
       );
 
       expect(result.require2fa, isTrue);
+    });
+  });
+
+  group('Two-Factor Authentication (2FA) Tests', () {
+    test('VerifyTwoFactorRequestModel serializes correctly to JSON', () {
+      const model = VerifyTwoFactorRequestModel(
+        userPhoneNumber: '772957881',
+        otp: '123456',
+        deviceUuid: 'DEV-UUID-999',
+        fcmToken: 'fcm-token-xyz',
+        deviceName: 'Samsung S24',
+        deviceType: 'ANDROID',
+      );
+
+      final json = model.toJson();
+      expect(json['user_phone_number'], '772957881');
+      expect(json['otp'], '123456');
+      expect(json['device_uuid'], 'DEV-UUID-999');
+      expect(json['fcm_token'], 'fcm-token-xyz');
+      expect(json['device_name'], 'Samsung S24');
+      expect(json['device_type'], 'ANDROID');
+    });
+
+    test('VerifyTwoFactorUseCase executes and returns valid AuthResultEntity', () async {
+      final repo = MockAuthRepository();
+      final useCase = VerifyTwoFactorUseCase(repo);
+
+      final result = await useCase.execute(
+        const VerifyTwoFactorParams(
+          phoneNumber: '772957881',
+          otp: '123456',
+          deviceUuid: 'DEV-UUID-999',
+          fcmToken: 'fcm-token-xyz',
+          deviceName: 'Samsung S24',
+          deviceType: 'ANDROID',
+        ),
+      );
+
+      expect(result.require2fa, isFalse);
+      expect(result.sessionId, 'test-session-2fa-token');
+      expect(result.user?.userId, 1);
+      expect(result.user?.userFullName, 'حسام خالد');
+    });
+
+    test('ResendOtpUseCase executes resend without error', () async {
+      final repo = MockAuthRepository();
+      final useCase = ResendOtpUseCase(repo);
+
+      expect(
+        () => useCase.execute(
+          const ResendOtpParams(
+            phoneNumber: '772957881',
+            otpType: 'OTP_2FA',
+            deviceUuid: 'DEV-UUID-999',
+          ),
+        ),
+        returnsNormally,
+      );
+    });
+
+    test('FormValidators.otpValidator validates 6-digit pin properly', () {
+      final validator = FormValidators.otpValidator(
+        fieldName: 'رمز التحقق',
+        length: 6,
+      );
+
+      expect(validator(null), isNotNull);
+      expect(validator(''), isNotNull);
+      expect(validator('12345'), contains('6'));
+      expect(validator('1234567'), contains('6'));
+      expect(validator('12345a'), contains('أرقام'));
+      expect(validator('123456'), isNull);
     });
   });
 }

@@ -6,6 +6,7 @@ import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:netsales/features/auth/data/models/login_request_model.dart';
+import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
 
@@ -127,6 +128,71 @@ class AuthRepositoryImpl implements AuthRepository {
     final response = await _remoteDataSource.verifyResetOtp(
       phoneNumber: phoneNumber,
       otp: otp,
+    );
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+  }
+
+  @override
+  Future<AuthResultEntity> verifyTwoFactor({
+    required String phoneNumber,
+    required String otp,
+    required String deviceUuid,
+    required String fcmToken,
+    String? deviceName,
+    String? deviceType,
+  }) async {
+    final request = VerifyTwoFactorRequestModel(
+      userPhoneNumber: phoneNumber,
+      otp: otp,
+      deviceUuid: deviceUuid,
+      fcmToken: fcmToken,
+      deviceName: deviceName,
+      deviceType: deviceType,
+    );
+
+    final response = await _remoteDataSource.verifyTwoFactor(request);
+
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+
+    final data = response.data;
+    if (data == null) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر استلام بيانات المصادقة من الخادم',
+      );
+    }
+
+    // التحقق الثنائي الناجح ينشئ جلسة جديدة للمستخدم
+    if (data.user != null) {
+      await SessionService.to.startSession(
+        user: data.user!,
+        session: UserSessionModel(
+          sessionId: data.sessionId,
+          userId: data.user!.userId,
+          deviceUuid: data.deviceUuid,
+        ),
+        permissions: data.permissions,
+      );
+    }
+
+    return data;
+  }
+
+  @override
+  Future<void> resendOtp({
+    required String phoneNumber,
+    required String otpType,
+    required String deviceUuid,
+  }) async {
+    final response = await _remoteDataSource.resendOtp(
+      phoneNumber: phoneNumber,
+      otpType: otpType,
+      deviceUuid: deviceUuid,
     );
     if (!response.success) {
       throw AppException(response.message);

@@ -27,4 +27,21 @@ abstract interface class AuthRepository {
     required String phoneNumber,
     required String otp,
   });
+
+  /// إتمام التحقق الثنائي وتأكيد ربط الجهاز وإنشاء الجلسة
+  Future<AuthResultEntity> verifyTwoFactor({
+    required String phoneNumber,
+    required String otp,
+    required String deviceUuid,
+    required String fcmToken,
+    String? deviceName,
+    String? deviceType,
+  });
+
+  /// إعادة إرسال رمز OTP محدد النوع
+  Future<void> resendOtp({
+    required String phoneNumber,
+    required String otpType,
+    required String deviceUuid,
+  });
 }

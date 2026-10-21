@@ -4,10 +4,12 @@ import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/reset_password_binding.dart';
+import 'package:netsales/features/auth/presentation/bindings/two_factor_auth_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/verify_otp_binding.dart';
 import 'package:netsales/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/login_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/reset_password_screen.dart';
+import 'package:netsales/features/auth/presentation/screens/two_factor_auth_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
@@ -86,6 +88,11 @@ abstract final class AppPages {
       name: AppRoutes.resetPassword,
       page: () => const ResetPasswordScreen(),
       binding: ResetPasswordBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.twoFactorAuth,
+      page: () => const TwoFactorAuthScreen(),
+      binding: TwoFactorAuthBinding(),
     ),
     // GetPage(
     //   name: AppRoutes.registerNetwork,

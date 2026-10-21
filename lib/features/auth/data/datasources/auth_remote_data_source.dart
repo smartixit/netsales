@@ -1,6 +1,7 @@
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/login_response_model.dart';
+import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 
 /// عقد مصدر البيانات البعيد للمصادقة والحسابات
 abstract interface class AuthRemoteDataSource {
@@ -24,5 +25,17 @@ abstract interface class AuthRemoteDataSource {
   Future<ApiResponse<void>> verifyResetOtp({
     required String phoneNumber,
     required String otp,
+  });
+
+  /// إتمام التحقق الثنائي وتأكيد الجهاز وإنشاء الجلسة
+  Future<ApiResponse<LoginResponseModel>> verifyTwoFactor(
+    VerifyTwoFactorRequestModel request,
+  );
+
+  /// إعادة إرسال رمز OTP محدد النوع (مثل OTP_2FA)
+  Future<ApiResponse<void>> resendOtp({
+    required String phoneNumber,
+    required String otpType,
+    required String deviceUuid,
   });
 }

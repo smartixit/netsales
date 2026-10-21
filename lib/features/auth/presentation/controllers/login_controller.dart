@@ -60,7 +60,7 @@ class LoginController extends GetxController {
       if (result.require2fa) {
         await CustomAnimationOverlay.hide();
         Get.toNamed(
-          AppRoutes.verifyOtp,
+          AppRoutes.twoFactorAuth,
           arguments: {
             'phone': phoneController.text,
             'device_uuid': device.deviceUuid,
