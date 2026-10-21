@@ -13,7 +13,7 @@
   - تدوير الحواف: استخدام `AppRadius.xs`, `AppRadius.sm`, `AppRadius.md`, `AppRadius.lg`, `AppRadius.full` حصراً.
   - جميع القياسات والمسافات والخطوط تدعم وتلتزم بـ `flutter_screenutil` (`.w`, `.h`, `.sp`, `.r`).
 - **الظلال ومستويات الارتفاع:** يُحظر حظرًا قاطعاً كتابة `BoxShadow(...)` يدوياً داخل أي شاشة أو ودجت. الاعتماد الحصري على `AppElevation.level0` حتى `level5`، والظلال الملونة عبر `AppElevation.tinted(...)`، والتوهج عبر `AppElevation.glow(...)`.
-- **التدرجات اللونية:** يُحظر حظرًا قاطعاً كتابة `LinearGradient(...)` عشوائية. الاعتماد الحصري على `AppGradients.*` (`surfaceMesh`, `financialHero`, `flowingBar`, `shimmer`, إلخ) مع التكيف التلقائي للمظهرين الفاتح والداكن.
+- **التدرجات اللونية:** يُحظر حظرًا قاطعاً كتابة `LinearGradient(...)` عشوائية. الاعتماد الحصري على `AppGradients.*` (`surfaceMesh`, `financialHero`, `flowingBar`, `shimmer`, `scrimOverlay`, إلخ) مع التكيف التلقائي للمظهرين الفاتح والداكن.
 - **الحركات والمدد الزمنية:** يُحظر حظرًا قاطعاً تحديد مدد زمنية `Duration(...)` أو منحنيات تسارع `Curves.*` عشوائية داخل الواجهات. الاعتماد الحصري على `AppMotion.*` ومراعاة إمكانية الوصول عبر `AppMotion.disabled(context)`.
 
 ---
@@ -388,6 +388,7 @@ lib/
   - **الإغلاق بالسحب الرأسي:** دعم السحب للإغلاق (`Swipe-to-Dismiss`) مع تخفيت تدريجي للشفافية.
   - **شريط المصغرات السفلي التفاعلي (`MediaGalleryFilmstrip`):** مستوحى من أحدث معايير WhatsApp لعرض مصغرات العناصر المتعددة مع التحديد والتوهج.
   - **الالتزام الكامل بـ CustomButton:** كافة أزرار الترويسة والإجراءات (إغلاق، حفظ، مشاركة، طباعة، فتح خارجي) تعتمد حصرياً على `CustomButton.icon` و `CustomButton.primary`.
+  - **الحفظ والتنزيل والفتح التلقائي:** حفظ الملفات والمستندات داخل مجلد التنزيلات العام للجهاز في مجلد مخصص باسم التطبيق `Downloads/NetSales` مع تعقيم وتوليد الأسماء النظيفة بدون تكرار الامتدادات، والفتح الفوري للملف تلقائياً عبر `OpenFilex.open()`.
   - **دوال الاستدعاء السريعة:**
     - `MediaGalleryViewer.show(context, items: [...], initialIndex: 0)`
     - `MediaGalleryViewer.showSingle(context, item)`

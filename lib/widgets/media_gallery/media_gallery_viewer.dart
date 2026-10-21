@@ -6,14 +6,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/models/app_picked_file.dart';
 import 'package:netsales/core/services/app_cache_service.dart';
+import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/widgets/media_gallery/models/media_gallery_item.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_gallery_filmstrip.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_gallery_header_overlay.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_viewer_item.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
-import 'package:open_filex/open_filex.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -170,25 +169,12 @@ class _MediaGalleryViewerState extends State<MediaGalleryViewer> {
         return;
       }
 
-      final dir = await getApplicationDocumentsDirectory();
-      final ext = item.url.split('.').last.split('?').first;
-      final safeExt = ext.isNotEmpty && ext.length <= 5 ? ext : 'bin';
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${item.title}.$safeExt';
-      final saveFile = File('${dir.path}/$fileName');
-      await saveFile.writeAsBytes(bytes);
-
-      CustomSnackbar.show(
-        title: 'تم الحفظ بنجاح',
-        message: 'تم حفظ الملف في مستندات التطبيق:\n${saveFile.path}',
-        type: SnackType.success,
-      );
-
-      await OpenFilex.open(saveFile.path);
-    } catch (e) {
-      CustomSnackbar.show(
-        title: 'خطأ أثناء الحفظ',
-        message: 'تعذر إتمام عملية الحفظ: $e',
-        type: SnackType.error,
+      await FileExportService.instance.saveFile(
+        bytes: bytes,
+        fileName: item.title,
+        extension: item.fileExtension,
+        autoOpen: true,
+        showFeedback: true,
       );
     } finally {
       if (mounted) {
@@ -212,15 +198,11 @@ class _MediaGalleryViewerState extends State<MediaGalleryViewer> {
         return;
       }
 
-      await Printing.sharePdf(
+      await FileExportService.instance.shareBytes(
         bytes: bytes,
-        filename: '${item.title}.pdf',
+        fileName: item.title,
+        extension: item.fileExtension,
       );
-    } catch (_) {
-      // مشاركة بديلة عبر فتح الملف في التطبيقات الخارجية
-      if (item.isLocalFile) {
-        await OpenFilex.open(item.url);
-      }
     } finally {
       if (mounted) {
         setState(() => _actionState = _ViewerActionState.none);
@@ -320,8 +302,8 @@ class _MediaGalleryViewerState extends State<MediaGalleryViewer> {
 
             // 2. ترويسة المعرض وأزرار الإجراءات العلوية
             AnimatedPositioned(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
+              duration: AppMotion.duration(context, AppMotion.fast),
+              curve: AppMotion.emphasized,
               top: _showOverlays ? 0 : -100.h,
               left: 0,
               right: 0,
@@ -342,8 +324,8 @@ class _MediaGalleryViewerState extends State<MediaGalleryViewer> {
 
             // 3. شريط المصغرات السفلي التفاعلي
             AnimatedPositioned(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
+              duration: AppMotion.duration(context, AppMotion.fast),
+              curve: AppMotion.emphasized,
               bottom: _showOverlays ? 0 : -90.h,
               left: 0,
               right: 0,
@@ -355,8 +337,8 @@ class _MediaGalleryViewerState extends State<MediaGalleryViewer> {
                   onItemTap: (index) {
                     _pageController.animateToPage(
                       index,
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeOutCubic,
+                      duration: AppMotion.duration(context, AppMotion.normal),
+                      curve: AppMotion.emphasized,
                     );
                   },
                 ),

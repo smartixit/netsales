@@ -121,4 +121,21 @@ class AppGradients {
       stops: const [0.0, 0.45, 0.55, 1.0],
     );
   }
+
+  /// تدرّج تعتيم (Scrim Overlay) لترويسات وتذييلات معارض الوسائط والنوافذ الكاملة
+  static LinearGradient scrimOverlay(
+    BuildContext context, {
+    bool fromTop = true,
+    double peakOpacity = 0.85,
+  }) {
+    final scrim = _scheme(context).scrim;
+    return LinearGradient(
+      begin: fromTop ? Alignment.topCenter : Alignment.bottomCenter,
+      end: fromTop ? Alignment.bottomCenter : Alignment.topCenter,
+      colors: [
+        scrim.withValues(alpha: peakOpacity),
+        scrim.withValues(alpha: 0.0),
+      ],
+    );
+  }
 }

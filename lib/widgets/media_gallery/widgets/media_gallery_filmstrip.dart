@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/media_gallery/models/media_gallery_item.dart';
@@ -55,8 +56,8 @@ class MediaGalleryFilmstrip extends StatelessWidget {
             return CustomInteractiveBounce(
               onTap: () => onItemTap(index),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
+                duration: AppMotion.duration(context, AppMotion.fast),
+                curve: AppMotion.emphasized,
                 width: 48.w,
                 height: 48.w,
                 decoration: BoxDecoration(

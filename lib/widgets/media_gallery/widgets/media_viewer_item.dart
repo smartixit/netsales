@@ -92,7 +92,7 @@ class _MediaViewerItemState extends State<MediaViewerItem>
     ).animate(
       CurvedAnimation(
         parent: _zoomAnimationController,
-        curve: Curves.easeOutCubic,
+        curve: AppMotion.emphasized,
       ),
     );
 

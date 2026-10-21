@@ -6,6 +6,7 @@ import 'package:netsales/core/cache/net_sales_cache_manager.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/services/app_cache_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 
 /// مكون موحد لعرض الصور الشبكية المحمية والمؤقتة مع حماية الذاكرة من الانهيار (CustomCachedImage)
 ///
@@ -113,8 +114,8 @@ class CustomCachedImage extends StatelessWidget {
       fit: fit,
       memCacheWidth: memWidth,
       memCacheHeight: memHeight,
-      fadeInDuration: const Duration(milliseconds: 200),
-      fadeOutDuration: const Duration(milliseconds: 100),
+      fadeInDuration: AppMotion.normal,
+      fadeOutDuration: AppMotion.fast,
       placeholder: (ctx, _) => placeholder ?? _buildPlaceholder(ctx),
       errorWidget: (ctx, errorUrl, error) {
         // تعافٍ ذاتي: حذف أي ملف فاسد من الكاش حتى لا يستمر الخطأ

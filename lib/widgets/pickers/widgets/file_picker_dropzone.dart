@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/models/app_picked_file.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
@@ -70,7 +71,8 @@ class _FilePickerDropzoneState extends State<FilePickerDropzone> {
       child: GestureDetector(
         onTap: widget.enabled ? widget.onBrowse : null,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: AppMotion.duration(context, AppMotion.fast),
+          curve: AppMotion.standard,
           width: double.infinity,
           padding: EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,

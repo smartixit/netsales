@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/media_gallery/models/media_gallery_item.dart';
@@ -51,14 +52,7 @@ class MediaGalleryHeaderOverlay extends StatelessWidget {
         right: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            colors.scrim.withValues(alpha: 0.85),
-            colors.scrim.withValues(alpha: 0.0),
-          ],
-        ),
+        gradient: AppGradients.scrimOverlay(context, fromTop: true),
       ),
       child: Row(
         children: [
