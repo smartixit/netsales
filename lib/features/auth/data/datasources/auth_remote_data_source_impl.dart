@@ -42,4 +42,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           json is Map ? Map<String, dynamic>.from(json) : <String, dynamic>{},
     );
   }
+
+  @override
+  Future<ApiResponse<void>> requestPasswordReset(String phoneNumber) {
+    return ApiService.instance.post<void>(
+      ApiConstants.passwordRequestReset,
+      data: {
+        'user_phone_number': phoneNumber,
+      },
+    );
+  }
+
+  @override
+  Future<ApiResponse<void>> verifyResetOtp({
+    required String phoneNumber,
+    required String otp,
+  }) {
+    return ApiService.instance.post<void>(
+      ApiConstants.passwordVerifyOtp,
+      data: {
+        'user_phone_number': phoneNumber,
+        'otp': otp,
+      },
+    );
+  }
 }

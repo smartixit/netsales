@@ -72,6 +72,28 @@ class FormValidators {
     );
   }
 
+  static FormFieldValidator<String> otpValidator({
+    String? fieldName,
+    int length = 6,
+    bool isRequired = true,
+  }) {
+    return _transform(
+      (value) => value.replaceAll(' ', ''),
+      FormBuilderValidators.compose([
+        if (isRequired) required(fieldName: fieldName ?? 'رمز التحقق'),
+        FormBuilderValidators.equalLength(
+          length,
+          errorText: 'رمز التحقق يجب أن يتكون من $length أرقام',
+          checkNullOrEmpty: false,
+        ),
+        FormBuilderValidators.numeric(
+          errorText: 'رمز التحقق يجب أن يحتوي على أرقام فقط',
+          checkNullOrEmpty: false,
+        ),
+      ]),
+    );
+  }
+
   static FormFieldValidator<String> addressValidator({
     String? fieldName,
     int minWordsCount = 1,

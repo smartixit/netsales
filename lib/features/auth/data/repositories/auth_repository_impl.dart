@@ -110,4 +110,26 @@ class AuthRepositoryImpl implements AuthRepository {
       // استمرار آمن في حال عدم توفر اتصال لحظي للملف الشخصي
     }
   }
+
+  @override
+  Future<void> requestPasswordReset(String phoneNumber) async {
+    final response = await _remoteDataSource.requestPasswordReset(phoneNumber);
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+  }
+
+  @override
+  Future<void> verifyResetOtp({
+    required String phoneNumber,
+    required String otp,
+  }) async {
+    final response = await _remoteDataSource.verifyResetOtp(
+      phoneNumber: phoneNumber,
+      otp: otp,
+    );
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+  }
 }

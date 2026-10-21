@@ -57,6 +57,23 @@ class MockAuthRepository implements AuthRepository {
       throw Exception('فشل تحديث كلمة المرور');
     }
   }
+
+  @override
+  Future<void> requestPasswordReset(String phoneNumber) async {
+    if (!shouldSucceed) {
+      throw Exception('فشل طلب استعادة كلمة المرور');
+    }
+  }
+
+  @override
+  Future<void> verifyResetOtp({
+    required String phoneNumber,
+    required String otp,
+  }) async {
+    if (!shouldSucceed) {
+      throw Exception('كود التحقق غير صالح');
+    }
+  }
 }
 
 void main() {

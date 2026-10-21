@@ -18,4 +18,13 @@ abstract interface class AuthRepository {
     required String newPassword,
     required String confirmPassword,
   });
+
+  /// طلب رمز التحقق لاستعادة كلمة المرور عبر SMS
+  Future<void> requestPasswordReset(String phoneNumber);
+
+  /// التحقق من رمز OTP واستلام كلمة المرور المؤقتة عبر SMS
+  Future<void> verifyResetOtp({
+    required String phoneNumber,
+    required String otp,
+  });
 }

@@ -16,4 +16,13 @@ abstract interface class AuthRemoteDataSource {
 
   /// جلب الملف الشخصي والصلاحيات المحدثة للمستخدم المسجل
   Future<ApiResponse<Map<String, dynamic>>> getProfile();
+
+  /// إرسال طلب استعادة كلمة المرور عبر رمز OTP
+  Future<ApiResponse<void>> requestPasswordReset(String phoneNumber);
+
+  /// التحقق من رمز OTP لاستعادة كلمة المرور
+  Future<ApiResponse<void>> verifyResetOtp({
+    required String phoneNumber,
+    required String otp,
+  });
 }
