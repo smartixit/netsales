@@ -5,6 +5,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
+import 'package:netsales/core/services/sound_service.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/usecases/get_directorates_use_case.dart';
@@ -162,6 +163,9 @@ class RegisterNetworkController extends GetxController {
         confirmLabel: 'الانتقال لتسجيل الدخول',
         onConfirm: () => Get.offAllNamed(AppRoutes.login),
       );
+
+      SoundService.instance.playSound(soundPath: 'sounds/success.mp3');
+
       if (Get.currentRoute != AppRoutes.login) {
         Get.offAllNamed(AppRoutes.login);
       }

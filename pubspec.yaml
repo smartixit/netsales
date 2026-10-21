@@ -83,6 +83,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   shimmer: ^3.0.0
   sodium: 3.4.6
+  smart_auth: ^3.2.0
 
 dependency_overrides:
   archive: ^4.5.2

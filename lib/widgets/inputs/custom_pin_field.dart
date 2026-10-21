@@ -1,13 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:pinput/pinput.dart';
 
+export 'package:netsales/core/services/sms_retriever_service.dart';
 export 'package:pinput/pinput.dart'
     show HapticFeedbackType, PinputAutovalidateMode, SmsRetriever;
 
@@ -45,6 +48,7 @@ class CustomPinField extends StatelessWidget {
     this.separatorBuilder,
     this.autofillHints = const [AutofillHints.oneTimeCode],
     this.smsRetriever,
+    this.enableSmsRetriever = true,
     this.closeKeyboardWhenCompleted = true,
     this.pinputAutovalidateMode = PinputAutovalidateMode.onSubmit,
   });
@@ -114,6 +118,9 @@ class CustomPinField extends StatelessWidget {
 
   /// كائن استخراج الرمز التلقائي من رسائل SMS على أندرويد
   final SmsRetriever? smsRetriever;
+
+  /// التفعيل التلقائي للاستماع للرمز عبر SMS Retriever API على منصة Android
+  final bool enableSmsRetriever;
 
   /// إغلاق لوحة المفاتيح تلقائياً فور اكتمال الرمز
   final bool closeKeyboardWhenCompleted;
@@ -222,6 +229,14 @@ class CustomPinField extends StatelessWidget {
           ),
         );
 
+    // استخراج أو تهيئة مستمع الرسائل التلقائي على أندرويد
+    final effectiveSmsRetriever = smsRetriever ??
+        (enableSmsRetriever &&
+                !kIsWeb &&
+                defaultTargetPlatform == TargetPlatform.android
+            ? SmsRetrieverService.instance.createRetriever()
+            : null);
+
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Pinput(
@@ -250,7 +265,7 @@ class CustomPinField extends StatelessWidget {
         closeKeyboardWhenCompleted: closeKeyboardWhenCompleted,
         pinputAutovalidateMode: pinputAutovalidateMode,
         autofillHints: autofillHints,
-        smsRetriever: smsRetriever,
+        smsRetriever: effectiveSmsRetriever,
         separatorBuilder: separatorBuilder ??
             (index) => SizedBox(width: AppSpacing.xs),
       ),
