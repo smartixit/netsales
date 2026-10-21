@@ -3,10 +3,11 @@ import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source_impl.dart';
 import 'package:netsales/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
+import 'package:netsales/features/auth/domain/usecases/reset_password_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/update_password_use_case.dart';
 import 'package:netsales/features/auth/presentation/controllers/reset_password_controller.dart';
 
-/// تسجيل وحقن اعتماديات شاشة تعيين/تغيير كلمة المرور
+/// تسجيل وحقن اعتماديات شاشة تعيين/تغيير وإعادة تعيين كلمة المرور
 class ResetPasswordBinding extends Bindings {
   @override
   void dependencies() {
@@ -26,8 +27,15 @@ class ResetPasswordBinding extends Bindings {
       () => UpdatePasswordUseCase(Get.find<AuthRepository>()),
     );
 
+    Get.lazyPut<ResetPasswordUseCase>(
+      () => ResetPasswordUseCase(Get.find<AuthRepository>()),
+    );
+
     Get.lazyPut<ResetPasswordController>(
-      () => ResetPasswordController(Get.find<UpdatePasswordUseCase>()),
+      () => ResetPasswordController(
+        Get.find<UpdatePasswordUseCase>(),
+        Get.find<ResetPasswordUseCase>(),
+      ),
     );
   }
 }

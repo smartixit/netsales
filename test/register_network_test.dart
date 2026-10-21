@@ -90,6 +90,15 @@ class MockRegisterNetworkAuthRepository implements AuthRepository {
       throw UnimplementedError();
 
   @override
+  Future<void> resetPassword({
+    required String phoneNumber,
+    required String otp,
+    required String newPassword,
+    required String confirmPassword,
+  }) =>
+      throw UnimplementedError();
+
+  @override
   Future<AuthResultEntity> login({
     required String phoneNumber,
     required String password,

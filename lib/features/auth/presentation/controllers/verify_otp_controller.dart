@@ -86,7 +86,27 @@ class VerifyOtpController extends GetxController {
     }
   }
 
-  /// إرسال رمز التحقق والتأكيد
+  /// التوجيه لتعيين كلمة مرور جديدة مباشرة باستخدام رمز التحقق OTP
+  void goToDirectReset([String? pin]) {
+    if (pin != null && pin.isNotEmpty) {
+      otpController.text = pin;
+    }
+
+    final form = formKey.currentState;
+    if (form == null || !form.validate()) {
+      return;
+    }
+
+    Get.toNamed(
+      AppRoutes.resetPassword,
+      arguments: {
+        'phone': phone,
+        'otp': otpController.text.trim(),
+      },
+    );
+  }
+
+  /// إرسال رمز التحقق واستلام كلمة مرور مؤقتة عبر SMS (المسار البديل)
   Future<void> submitOtp([String? pin]) async {
     if (pin != null && pin.isNotEmpty) {
       otpController.text = pin;

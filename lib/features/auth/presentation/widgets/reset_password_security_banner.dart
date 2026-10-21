@@ -4,30 +4,35 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
 /// بطاقة التنبيه الأمني المؤسسي في أعلى شاشة تغيير كلمة المرور (ResetPasswordSecurityBanner)
 class ResetPasswordSecurityBanner extends StatelessWidget {
   final bool isForced;
+  final bool isDirectReset;
 
   const ResetPasswordSecurityBanner({
     super.key,
     required this.isForced,
+    this.isDirectReset = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isWarning = isForced && !isDirectReset;
+    final animDuration = AppMotion.duration(context, AppMotion.normal);
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: isForced
+        color: isWarning
             ? colors.warning.withValues(alpha: 0.12)
             : colors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(
-          color: isForced
+          color: isWarning
               ? colors.warning.withValues(alpha: 0.3)
               : colors.primary.withValues(alpha: 0.2),
         ),
@@ -39,13 +44,13 @@ class ResetPasswordSecurityBanner extends StatelessWidget {
             padding: EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isForced
+              color: isWarning
                   ? colors.warning.withValues(alpha: 0.2)
                   : colors.primary.withValues(alpha: 0.15),
             ),
             child: Icon(
-              isForced ? Icons.shield_outlined : Icons.lock_reset_rounded,
-              color: isForced ? colors.warning : colors.primary,
+              isWarning ? Icons.shield_outlined : Icons.lock_reset_rounded,
+              color: isWarning ? colors.warning : colors.primary,
               size: 24.r,
             ),
           ),
@@ -55,9 +60,11 @@ class ResetPasswordSecurityBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isForced
-                      ? 'مطلوب تعيين كلمة مرور جديدة'
-                      : 'تحديث كلمة المرور لحسابك',
+                  isDirectReset
+                      ? 'تعيين كلمة مرور جديدة'
+                      : (isForced
+                          ? 'مطلوب تعيين كلمة مرور جديدة'
+                          : 'تحديث كلمة المرور لحسابك'),
                   style: AppTypography.titleSmall.copyWith(
                     color: colors.onSurface,
                     fontWeight: FontWeight.bold,
@@ -65,9 +72,11 @@ class ResetPasswordSecurityBanner extends StatelessWidget {
                 ),
                 AppSpacing.vXxs,
                 Text(
-                  isForced
-                      ? 'تم تسجيل الدخول باستخدام كلمة مرور مؤقتة عبر الرسائل القصيرة. لحماية بياناتك وعملياتك، يُلزم النظام تعيين كلمة مرور جديدة قبل المتابعة.'
-                      : 'احرص على اختيار كلمة مرور قوية وغير مستخدمة في تطبيقات أخرى.',
+                  isDirectReset
+                      ? 'أدخل كلمة مرور قوية وجديدة لحسابك، وتأكد من حفظها في مكان آمن لتسجيل الدخول.'
+                      : (isForced
+                          ? 'تم تسجيل الدخول باستخدام كلمة مرور مؤقتة عبر الرسائل القصيرة. لحماية بياناتك وعملياتك، يُلزم النظام تعيين كلمة مرور جديدة قبل المتابعة.'
+                          : 'احرص على اختيار كلمة مرور قوية وغير مستخدمة في تطبيقات أخرى.'),
                   style: AppTypography.bodySmall.copyWith(
                     color: colors.onSurfaceVariant,
                     height: 1.4,
@@ -78,6 +87,10 @@ class ResetPasswordSecurityBanner extends StatelessWidget {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1, end: 0);
+    ).animate().fadeIn(duration: animDuration).slideY(
+          begin: -0.1,
+          end: 0,
+          curve: AppMotion.standard,
+        );
   }
 }

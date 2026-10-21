@@ -8,6 +8,7 @@ import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/login_response_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_request_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_response_model.dart';
+import 'package:netsales/features/auth/data/models/reset_password_request_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 
 /// تطبيق مصدر البيانات البعيد للمصادقة عبر ApiService
@@ -69,6 +70,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'user_phone_number': phoneNumber,
         'otp': otp,
       },
+    );
+  }
+
+  @override
+  Future<ApiResponse<void>> resetPassword(ResetPasswordRequestModel request) {
+    return ApiService.instance.post<void>(
+      ApiConstants.passwordReset,
+      data: request.toJson(),
     );
   }
 

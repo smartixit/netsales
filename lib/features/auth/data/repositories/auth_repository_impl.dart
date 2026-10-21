@@ -7,6 +7,7 @@ import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_request_model.dart';
+import 'package:netsales/features/auth/data/models/reset_password_request_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
@@ -132,6 +133,26 @@ class AuthRepositoryImpl implements AuthRepository {
     final response = await _remoteDataSource.verifyResetOtp(
       phoneNumber: phoneNumber,
       otp: otp,
+    );
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String phoneNumber,
+    required String otp,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    final response = await _remoteDataSource.resetPassword(
+      ResetPasswordRequestModel(
+        userPhoneNumber: phoneNumber,
+        otp: otp,
+        password: newPassword,
+        passwordConfirmation: confirmPassword,
+      ),
     );
     if (!response.success) {
       throw AppException(response.message);

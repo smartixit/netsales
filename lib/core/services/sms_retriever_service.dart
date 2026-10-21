@@ -62,6 +62,16 @@ class SmsRetrieverService {
 
   final SmartAuth _smartAuth = SmartAuth.instance;
 
+  String? _cachedAppSignature;
+
+  /// القيمة المخزنة مؤقتاً في الذاكرة لبصمة التطبيق
+  String? get cachedAppSignature => _cachedAppSignature;
+
+  /// تهيئة مسبقة لبصمة التطبيق عند بدء التشغيل
+  Future<void> initSignature() async {
+    await getAppSignature();
+  }
+
   /// توليد كائن استماع جديد لـ Pinput
   SmsRetriever createRetriever({String matcher = r'\d{4,8}'}) {
     return AppSmsRetriever(smartAuth: _smartAuth, matcher: matcher);
@@ -70,13 +80,22 @@ class SmsRetrieverService {
   /// جلب بصمة التطبيق (11 محرفاً) الخاصة بـ SMS Retriever API
   /// وتدوينها في سجل التصحيح في وضع kDebugMode لنسخها في بيئة الخادم.
   Future<String?> getAppSignature() async {
+    if (_cachedAppSignature != null && _cachedAppSignature!.isNotEmpty) {
+      return _cachedAppSignature;
+    }
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      return null;
+    }
     try {
       final result = await _smartAuth.getAppSignature();
       final signature = result.data;
+      if (signature != null && signature.isNotEmpty) {
+        _cachedAppSignature = signature;
+      }
       if (kDebugMode) {
         debugPrint('====================================================');
         debugPrint('[NetSales SMS Retriever] App Signature Hash: $signature');
-        debugPrint('Use this 11-char hash in backend SMS_RETRIEVER_APP_HASH');
+        debugPrint('Dynamic injection: Sent automatically in X-App-Signature');
         debugPrint('====================================================');
       }
       return signature;

@@ -12,6 +12,7 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
+import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/utils/connection_failure.dart';
 import 'package:sodium/sodium.dart' show KeyPair;
@@ -622,6 +623,12 @@ class _SessionAuthInterceptor extends Interceptor {
     final idempotencyKey = options.extra['idempotency_key'];
     if (idempotencyKey != null) {
       options.headers['X-Idempotency-Key'] = idempotencyKey.toString();
+    }
+
+    // حقن بصمة التطبيق لنظام أندرويد تلقائياً لتمكين SMS Retriever API
+    final appSignature = SmsRetrieverService.instance.cachedAppSignature;
+    if (appSignature != null && appSignature.isNotEmpty) {
+      options.headers['X-App-Signature'] = appSignature;
     }
 
     // تجاوز التشفير أثناء بيئة التطوير والاختبار

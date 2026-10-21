@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/presentation/controllers/verify_otp_controller.dart';
@@ -24,6 +25,7 @@ class VerifyOtpFormCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final animDuration = AppMotion.duration(context, AppMotion.normal);
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.xl),
@@ -49,7 +51,7 @@ class VerifyOtpFormCard extends StatelessWidget {
                 fieldName: 'رمز التحقق',
                 length: 6,
               ),
-              onCompleted: (pin) => controller.submitOtp(pin),
+              onCompleted: (pin) => controller.goToDirectReset(pin),
             ),
 
             AppSpacing.vLg,
@@ -85,12 +87,25 @@ class VerifyOtpFormCard extends StatelessWidget {
 
             AppSpacing.vLg,
 
-            // زر تأكيد الرمز
+            // الإجراء الأساسي: تعيين كلمة مرور جديدة مباشرة
             Obx(
               () => CustomButton.primary(
-                text: 'تأكيد واستلام كلمة المرور',
-                icon: Icons.verified_user_outlined,
+                text: 'تعيين كلمة مرور جديدة',
+                icon: Icons.lock_reset_rounded,
                 iconSize: 20.r,
+                loading: controller.isLoading.value,
+                onPressed: () => controller.goToDirectReset(),
+              ),
+            ),
+
+            AppSpacing.vSm,
+
+            // المسار البديل: استلام كلمة مرور مؤقتة عبر SMS
+            Obx(
+              () => CustomButton.outline(
+                text: 'استلام كلمة مرور مؤقتة عبر SMS',
+                icon: Icons.sms_outlined,
+                iconSize: 18.r,
                 loading: controller.isLoading.value,
                 onPressed: () => controller.submitOtp(),
               ),
@@ -107,6 +122,10 @@ class VerifyOtpFormCard extends StatelessWidget {
           ],
         ),
       ),
-    ).animate().fadeIn(duration: 450.ms).slideY(begin: 0.1, end: 0);
+    ).animate().fadeIn(duration: animDuration).slideY(
+          begin: 0.1,
+          end: 0,
+          curve: AppMotion.standard,
+        );
   }
 }

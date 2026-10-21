@@ -3,15 +3,24 @@ import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/features/auth/domain/usecases/reset_password_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/update_password_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-/// متحكم شاشة تعيين/تغيير كلمة المرور الإلزامية والاختيارية (ResetPasswordController)
+/// متحكم شاشة تعيين/تغيير وإعادة تعيين كلمة المرور (ResetPasswordController)
+///
+/// يدعم وضعين تشغيليين:
+/// 1. وضع إعادة التعيين المباشر عبر رمز OTP (Direct Reset): عند استعادة كلمة المرور بدون جلسة سابقة.
+/// 2. وضع التغيير المسجل أو الإلزامي (In-App / Forced Change): عند وجود جلسة نشطة أو كلمة مرور مؤقتة.
 class ResetPasswordController extends GetxController {
-  ResetPasswordController(this._updatePasswordUseCase);
+  ResetPasswordController(
+    this._updatePasswordUseCase,
+    this._resetPasswordUseCase,
+  );
 
   final UpdatePasswordUseCase _updatePasswordUseCase;
+  final ResetPasswordUseCase _resetPasswordUseCase;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -26,8 +35,16 @@ class ResetPasswordController extends GetxController {
   final RxBool isConfirmPasswordVisible = false.obs;
   final RxBool isLoading = false.obs;
 
+  /// هل إعادة التعيين مباشرة عبر رمز OTP واستعادة كلمة المرور؟
+  late final bool isDirectReset;
+
+  /// كود التحقق OTP (في وضع إعادة التعيين المباشر)
+  late final String? otp;
+
   /// هل هذا التغيير إلزامي (مثل الدخول بكلمة مرور مؤقتة عبر SMS)؟
   late final bool isForced;
+
+  /// رقم هاتف المستخدم
   late final String? userPhone;
 
   // مؤشرات معايير قوة كلمة المرور اللحظية (NIST Standards)
@@ -43,13 +60,17 @@ class ResetPasswordController extends GetxController {
     super.onInit();
     final args = Get.arguments;
     if (args is Map) {
-      isForced = args['is_forced'] == true;
+      otp = args['otp']?.toString();
+      isDirectReset = otp != null && otp!.isNotEmpty;
+      isForced = !isDirectReset && args['is_forced'] == true;
       userPhone = args['phone']?.toString();
       final prefillCurrent = args['current_password']?.toString();
       if (prefillCurrent != null && prefillCurrent.isNotEmpty) {
         currentPasswordController.text = prefillCurrent;
       }
     } else {
+      otp = null;
+      isDirectReset = false;
       isForced = SessionService.to.mustChangePassword;
       userPhone = SessionService.to.currentUser?.userPhoneNumber;
     }
@@ -92,39 +113,79 @@ class ResetPasswordController extends GetxController {
       return;
     }
 
-    final currentPass = currentPasswordController.text;
     final newPass = newPasswordController.text;
     final confirmPass = confirmPasswordController.text;
 
-    if (currentPass == newPass) {
+    if (newPass != confirmPass) {
       CustomSnackbar.show(
-        title: 'كلمة المرور غير مقبولة',
-        message: 'يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمة المرور المؤقتة.',
+        title: 'عدم تطابق',
+        message: 'كلمة المرور وتأكيدها غير متطابقين.',
         type: SnackType.warning,
       );
       return;
     }
 
+    if (!isDirectReset) {
+      final currentPass = currentPasswordController.text;
+      if (currentPass == newPass) {
+        CustomSnackbar.show(
+          title: 'كلمة المرور غير مقبولة',
+          message:
+              'يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمة المرور الحالية.',
+          type: SnackType.warning,
+        );
+        return;
+      }
+    }
+
     try {
       isLoading.value = true;
       await CustomAnimationOverlay.showLoading(
-        message: 'جاري تعيين كلمة المرور وتأمين حسابك...',
+        message: isDirectReset
+            ? 'جاري اعتماد كلمة المرور الجديدة وتأمين الحساب...'
+            : 'جاري تعيين كلمة المرور وتأمين حسابك...',
       );
 
-      await _updatePasswordUseCase.execute(
-        UpdatePasswordParams(
-          currentPassword: currentPass,
-          newPassword: newPass,
-          confirmPassword: confirmPass,
-        ),
-      );
+      if (isDirectReset) {
+        if (userPhone == null || otp == null) {
+          throw AppException('بيانات الاستعادة أو رمز التحقق غير مكتملة.');
+        }
 
-      await CustomAnimationOverlay.showSuccess(
-        message: 'تم تعيين كلمة المرور الجديدة بنجاح! مرحباً بك في النظام.',
-      );
+        await _resetPasswordUseCase.execute(
+          ResetPasswordParams(
+            phoneNumber: userPhone!,
+            otp: otp!,
+            newPassword: newPass,
+            confirmPassword: confirmPass,
+          ),
+        );
 
-      // التوجيه الفوري للوحة التحكم بعد ترقية الجلسة وفك الحظر الإلزامي
-      Get.offAllNamed(AppRoutes.dashboard);
+        await CustomAnimationOverlay.showSuccess(
+          message:
+              'تم إعادة تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.',
+        );
+
+        // التوجيه لشاشة تسجيل الدخول مع تمرير رقم الهاتف الجاهز
+        Get.offAllNamed(
+          AppRoutes.login,
+          arguments: {'phone': userPhone},
+        );
+      } else {
+        await _updatePasswordUseCase.execute(
+          UpdatePasswordParams(
+            currentPassword: currentPasswordController.text,
+            newPassword: newPass,
+            confirmPassword: confirmPass,
+          ),
+        );
+
+        await CustomAnimationOverlay.showSuccess(
+          message: 'تم تعيين كلمة المرور الجديدة بنجاح! مرحباً بك في النظام.',
+        );
+
+        // التوجيه الفوري للوحة التحكم بعد ترقية الجلسة وفك الحظر الإلزامي
+        Get.offAllNamed(AppRoutes.dashboard);
+      }
     } catch (error) {
       await CustomAnimationOverlay.hide();
       final cleanMessage = AppException.sanitizeMessage(error);
@@ -143,7 +204,9 @@ class ResetPasswordController extends GetxController {
 
   /// إلغاء العملية أو تسجيل الخروج عند الرغبة بعدم المتابعة
   Future<void> abortOrLogout() async {
-    if (isForced) {
+    if (isDirectReset) {
+      Get.back();
+    } else if (isForced) {
       // إذا كان التغيير إجبارياً، الخروج يلغي الجلسة المؤقتة ويعيد المستخدم لشاشة الدخول
       await SessionService.to.terminateSession();
       Get.offAllNamed(AppRoutes.login);

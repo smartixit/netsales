@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
@@ -18,6 +19,7 @@ import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -134,6 +136,11 @@ void main() async {
   // 4. تهيئة خدمة الإشعارات المركزية وإشعارات الدفع (FCM & Local Notifications)
   await PushNotificationService.instance.init();
   Get.put<PushNotificationService>(PushNotificationService.instance, permanent: true);
+
+  // 5. تهيئة استرجاع بصمة التطبيق لنظام أندرويد في الخلفية (Zero-click SMS Retriever API)
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    unawaited(SmsRetrieverService.instance.initSignature());
+  }
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,

@@ -11,7 +11,7 @@ import 'package:netsales/features/auth/presentation/widgets/reset_password_form_
 import 'package:netsales/features/auth/presentation/widgets/reset_password_security_banner.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
-/// واجهة تعيين وتغيير كلمة المرور الإلزامية والاختيارية (ResetPasswordScreen)
+/// واجهة تعيين وتغيير كلمة المرور الإلزامية والاختيارية والمباشرة (ResetPasswordScreen)
 ///
 /// مبنية وفق نمط الـ Modular Composite View؛ حيث لا تحتوي على أي دوال مساعدة `_build...()`،
 /// بل تجمع ودجات مستقلة ومعزولة لإعادة البناء الذري والأداء الأقصى.
@@ -21,9 +21,10 @@ class ResetPasswordScreen extends GetView<ResetPasswordController> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isForcedNonDirect = !controller.isDirectReset && controller.isForced;
 
     return PopScope(
-      canPop: !controller.isForced,
+      canPop: !isForcedNonDirect,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
           controller.abortOrLogout();
@@ -37,10 +38,10 @@ class ResetPasswordScreen extends GetView<ResetPasswordController> {
           leading: Padding(
             padding: EdgeInsets.all(AppSpacing.xs),
             child: CustomButton.icon(
-              icon: controller.isForced
+              icon: isForcedNonDirect
                   ? Icons.logout_rounded
                   : Icons.arrow_back_ios_new_rounded,
-              tooltip: controller.isForced ? 'تسجيل الخروج' : 'رجوع',
+              tooltip: isForcedNonDirect ? 'تسجيل الخروج' : 'رجوع',
               iconSize: 18.r,
               dimension: 40.r,
               foregroundColor: colors.onSurface,
@@ -49,7 +50,9 @@ class ResetPasswordScreen extends GetView<ResetPasswordController> {
             ),
           ),
           title: Text(
-            controller.isForced ? 'تأمين الحساب' : 'تغيير كلمة المرور',
+            controller.isDirectReset
+                ? 'تعيين كلمة المرور'
+                : (controller.isForced ? 'تأمين الحساب' : 'تغيير كلمة المرور'),
             style: AppTypography.titleMedium.copyWith(color: colors.onSurface),
           ),
           centerTitle: true,
@@ -78,7 +81,10 @@ class ResetPasswordScreen extends GetView<ResetPasswordController> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // 1. شارة التنبيه الأمني المؤسسي
-                    ResetPasswordSecurityBanner(isForced: controller.isForced),
+                    ResetPasswordSecurityBanner(
+                      isForced: controller.isForced,
+                      isDirectReset: controller.isDirectReset,
+                    ),
 
                     AppSpacing.vLg,
 

@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/presentation/controllers/reset_password_controller.dart';
 import 'package:netsales/features/auth/presentation/widgets/password_requirement_item.dart';
@@ -24,6 +25,7 @@ class ResetPasswordFormCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final animDuration = AppMotion.duration(context, AppMotion.normal);
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.xl),
@@ -40,30 +42,31 @@ class ResetPasswordFormCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 1. كلمة المرور الحالية أو المؤقتة
-            CustomTextField(
-              controller: controller.currentPasswordController,
-              label: controller.isForced
-                  ? 'كلمة المرور المؤقتة (الحالية)'
-                  : 'كلمة المرور الحالية',
-              hint: '••••••••',
-              obscureText: true,
-              enablePasswordToggle: true,
-              keyboardType: TextInputType.visiblePassword,
-              textInputAction: TextInputAction.next,
-              prefixIcon: Icon(
-                Icons.lock_clock_rounded,
-                color: colors.primary,
-                size: 22.r,
-              ),
-              validator: FormValidators.required(
-                fieldName: controller.isForced
-                    ? 'كلمة المرور المؤقتة'
+            // 1. كلمة المرور الحالية أو المؤقتة (تُعرض فقط عند التغيير المسجل/الإلزامي وليس عند الاستعادة بالرمز)
+            if (!controller.isDirectReset) ...[
+              CustomTextField(
+                controller: controller.currentPasswordController,
+                label: controller.isForced
+                    ? 'كلمة المرور المؤقتة (الحالية)'
                     : 'كلمة المرور الحالية',
+                hint: '••••••••',
+                obscureText: true,
+                enablePasswordToggle: true,
+                keyboardType: TextInputType.visiblePassword,
+                textInputAction: TextInputAction.next,
+                prefixIcon: Icon(
+                  Icons.lock_clock_rounded,
+                  color: colors.primary,
+                  size: 22.r,
+                ),
+                validator: FormValidators.required(
+                  fieldName: controller.isForced
+                      ? 'كلمة المرور المؤقتة'
+                      : 'كلمة المرور الحالية',
+                ),
               ),
-            ),
-
-            AppSpacing.vLg,
+              AppSpacing.vLg,
+            ],
 
             // 2. كلمة المرور الجديدة
             CustomTextField(
@@ -98,43 +101,41 @@ class ResetPasswordFormCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.full),
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
                     child: LinearProgressIndicator(
                       value: score,
                       minHeight: 5.h,
-                      backgroundColor: colors.outlineVariant.withValues(alpha: 0.3),
+                      backgroundColor: colors.surfaceContainerHighest,
                       valueColor: AlwaysStoppedAnimation<Color>(meterColor),
                     ),
                   ),
-                  AppSpacing.vXs,
-                  // معايير كلمة المرور
-                  Container(
-                    padding: EdgeInsets.all(AppSpacing.sm),
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                    ),
-                    child: Column(
-                      children: [
-                        PasswordRequirementItem(
-                          isValid: controller.hasMinLength.value,
-                          label: '8 خانات على الأقل',
-                        ),
-                        PasswordRequirementItem(
-                          isValid: controller.hasUppercase.value &&
-                              controller.hasLowercase.value,
-                          label: 'أحرف كبيرة وصغيرة (A-z)',
-                        ),
-                        PasswordRequirementItem(
-                          isValid: controller.hasDigit.value,
-                          label: 'أرقام (0-9)',
-                        ),
-                        PasswordRequirementItem(
-                          isValid: controller.hasSpecialChar.value,
-                          label: 'رموز خاصة (!@#\$%^&*)',
-                        ),
-                      ],
-                    ),
+                  AppSpacing.vSm,
+                  // معايير قوة كلمة المرور المصنفة
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.xs,
+                    children: [
+                      PasswordRequirementItem(
+                        label: '8 أحرف على الأقل',
+                        isValid: controller.hasMinLength.value,
+                      ),
+                      PasswordRequirementItem(
+                        label: 'حرف كبير (A-Z)',
+                        isValid: controller.hasUppercase.value,
+                      ),
+                      PasswordRequirementItem(
+                        label: 'حرف صغير (a-z)',
+                        isValid: controller.hasLowercase.value,
+                      ),
+                      PasswordRequirementItem(
+                        label: 'رقم (0-9)',
+                        isValid: controller.hasDigit.value,
+                      ),
+                      PasswordRequirementItem(
+                        label: 'رمز خاص (!@#\$%)',
+                        isValid: controller.hasSpecialChar.value,
+                      ),
+                    ],
                   ),
                 ],
               );
@@ -168,7 +169,9 @@ class ResetPasswordFormCard extends StatelessWidget {
             // 5. زر الحفظ وتأكيد الهوية
             Obx(
               () => CustomButton.primary(
-                text: 'حفظ وتأمين الحساب',
+                text: controller.isDirectReset
+                    ? 'حفظ كلمة المرور والدخول'
+                    : 'حفظ وتأمين الحساب',
                 icon: Icons.check_circle_outline_rounded,
                 iconSize: 20.r,
                 loading: controller.isLoading.value,
@@ -180,12 +183,20 @@ class ResetPasswordFormCard extends StatelessWidget {
 
             // 6. زر الإلغاء
             CustomButton.text(
-              text: controller.isForced ? 'تسجيل الخروج والعودة لاحقاً' : 'إلغاء',
+              text: controller.isDirectReset
+                  ? 'رجوع'
+                  : (controller.isForced
+                      ? 'تسجيل الخروج والعودة لاحقاً'
+                      : 'إلغاء'),
               onPressed: controller.abortOrLogout,
             ),
           ],
         ),
       ),
-    ).animate().fadeIn(duration: 450.ms).slideY(begin: 0.1, end: 0);
+    ).animate().fadeIn(duration: animDuration).slideY(
+          begin: 0.1,
+          end: 0,
+          curve: AppMotion.standard,
+        );
   }
 }

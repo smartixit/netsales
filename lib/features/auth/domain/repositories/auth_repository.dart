@@ -31,6 +31,14 @@ abstract interface class AuthRepository {
     required String otp,
   });
 
+  /// اعتماد كلمة المرور الجديدة بعد استيفاء رمز التحقق OTP
+  Future<void> resetPassword({
+    required String phoneNumber,
+    required String otp,
+    required String newPassword,
+    required String confirmPassword,
+  });
+
   /// إتمام التحقق الثنائي وتأكيد ربط الجهاز وإنشاء الجلسة
   Future<AuthResultEntity> verifyTwoFactor({
     required String phoneNumber,

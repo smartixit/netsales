@@ -5,6 +5,7 @@ import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/login_response_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_request_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_response_model.dart';
+import 'package:netsales/features/auth/data/models/reset_password_request_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 
 /// عقد مصدر البيانات البعيد للمصادقة والحسابات
@@ -25,11 +26,14 @@ abstract interface class AuthRemoteDataSource {
   /// إرسال طلب استعادة كلمة المرور عبر رمز OTP
   Future<ApiResponse<void>> requestPasswordReset(String phoneNumber);
 
-  /// التحقق من رمز OTP لاستعادة كلمة المرور
+  /// التحقق من رمز OTP واستلام كلمة مرور مؤقتة عبر SMS
   Future<ApiResponse<void>> verifyResetOtp({
     required String phoneNumber,
     required String otp,
   });
+
+  /// اعتماد كلمة المرور الجديدة مباشرة مع رمز التحقق OTP
+  Future<ApiResponse<void>> resetPassword(ResetPasswordRequestModel request);
 
   /// إتمام التحقق الثنائي وتأكيد الجهاز وإنشاء الجلسة
   Future<ApiResponse<LoginResponseModel>> verifyTwoFactor(

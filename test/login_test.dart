@@ -82,6 +82,18 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> resetPassword({
+    required String phoneNumber,
+    required String otp,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    if (!shouldSucceed) {
+      throw Exception('فشل إعادة تعيين كلمة المرور');
+    }
+  }
+
+  @override
   Future<AuthResultEntity> verifyTwoFactor({
     required String phoneNumber,
     required String otp,
