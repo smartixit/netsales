@@ -54,33 +54,22 @@ class LoginFormCard extends GetView<LoginController> {
             AppSpacing.vLg,
 
             // 2. حقل كلمة المرور
-            Obx(
-              () => CustomTextField(
-                controller: controller.passwordController,
-                label: 'كلمة المرور',
-                hint: '••••••••',
-                obscureText: !controller.isPasswordVisible.value,
-                enablePasswordToggle: true,
-                keyboardType: TextInputType.visiblePassword,
-                textInputAction: TextInputAction.done,
-                prefixIcon: Icon(
-                  Icons.lock_outline_rounded,
-                  color: colors.primary,
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    controller.isPasswordVisible.value
-                        ? Icons.visibility_off_rounded
-                        : Icons.visibility_rounded,
-                    color: colors.onSurfaceVariant,
-                  ),
-                  onPressed: controller.togglePasswordVisibility,
-                ),
-                validator: FormValidators.passwordValidator(
-                  fieldName: 'كلمة المرور',
-                ),
-                onFieldSubmitted: (_) => controller.submitLogin(),
+            CustomTextField(
+              controller: controller.passwordController,
+              label: 'كلمة المرور',
+              hint: '••••••••',
+              obscureText: true,
+              enablePasswordToggle: true,
+              keyboardType: TextInputType.visiblePassword,
+              textInputAction: TextInputAction.done,
+              prefixIcon: Icon(
+                Icons.lock_outline_rounded,
+                color: colors.primary,
               ),
+              validator: FormValidators.passwordValidator(
+                fieldName: 'كلمة المرور',
+              ),
+              onFieldSubmitted: (_) => controller.submitLogin(),
             ),
 
             AppSpacing.vSm,
@@ -88,22 +77,16 @@ class LoginFormCard extends GetView<LoginController> {
             // 3. رابط نسيت كلمة المرور
             Align(
               alignment: Alignment.centerLeft,
-              child: TextButton(
+              child: CustomButton.text(
+                text: 'نسيت كلمة المرور؟',
                 onPressed: controller.goToForgotPassword,
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs,
-                    vertical: AppSpacing.xxs,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: colors.primary,
+                textStyle: AppTypography.labelLarge.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-                child: Text(
-                  'نسيت كلمة المرور؟',
-                  style: AppTypography.labelLarge.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xs,
+                  vertical: AppSpacing.xxs,
                 ),
               ),
             ),

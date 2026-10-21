@@ -6,6 +6,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/auth/presentation/controllers/login_controller.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/dividers/custom_labeled_divider.dart';
 
 /// تذييل شاشة تسجيل الدخول: رابط إنشاء حساب جديد وتأكيد الأمان
@@ -34,15 +35,14 @@ class LoginFooterLinks extends GetView<LoginController> {
                 color: colors.onSurfaceVariant,
               ),
             ),
-            TextButton(
+            CustomButton.text(
+              text: 'إنشاء حساب جديد',
               onPressed: controller.goToRegister,
-              child: Text(
-                'إنشاء حساب جديد',
-                style: AppTypography.titleSmall.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w700,
-                ),
+              foregroundColor: colors.primary,
+              textStyle: AppTypography.titleSmall.copyWith(
+                fontWeight: FontWeight.w700,
               ),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             ),
           ],
         ),

@@ -29,7 +29,6 @@ abstract final class ApiConstants {
   static const String login = '/auth/login';
   static const String registerNetwork = '/auth/register-network';
   static const String registerPos = '/auth/register-pos';
-  static const String register = '/auth/register';
   static const String passwordRequestReset = '/auth/password/request-reset';
   static const String passwordVerifyOtp = '/auth/password/verify-otp';
   static const String passwordReset = '/auth/password/reset';

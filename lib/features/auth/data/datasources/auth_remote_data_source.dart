@@ -1,6 +1,10 @@
 import 'package:netsales/core/models/api_response.dart';
+import 'package:netsales/features/auth/data/models/directorate_model.dart';
+import 'package:netsales/features/auth/data/models/governorate_model.dart';
 import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/login_response_model.dart';
+import 'package:netsales/features/auth/data/models/register_network_request_model.dart';
+import 'package:netsales/features/auth/data/models/register_network_response_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 
 /// عقد مصدر البيانات البعيد للمصادقة والحسابات
@@ -38,4 +42,15 @@ abstract interface class AuthRemoteDataSource {
     required String otpType,
     required String deviceUuid,
   });
+
+  /// جلب قائمة المحافظات المتاحة
+  Future<ApiResponse<List<GovernorateModel>>> getGovernorates();
+
+  /// جلب قائمة المديريات التابعة لمحافظة معينة
+  Future<ApiResponse<List<DirectorateModel>>> getDirectorates(int governorateId);
+
+  /// تقديم طلب تسجيل مزود شبكة جديد
+  Future<ApiResponse<RegisterNetworkResponseModel>> registerNetwork(
+    RegisterNetworkRequestModel request,
+  );
 }

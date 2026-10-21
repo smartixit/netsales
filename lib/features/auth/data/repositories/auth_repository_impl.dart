@@ -6,8 +6,12 @@ import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:netsales/features/auth/data/models/login_request_model.dart';
+import 'package:netsales/features/auth/data/models/register_network_request_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
+import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
+import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
+import 'package:netsales/features/auth/domain/entities/register_network_result_entity.dart';
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
 
 /// تطبيق مستودع المصادقة وتنسيق البيانات بين مصدر البيانات وإدارة الجلسات
@@ -197,5 +201,76 @@ class AuthRepositoryImpl implements AuthRepository {
     if (!response.success) {
       throw AppException(response.message);
     }
+  }
+
+  @override
+  Future<List<GovernorateEntity>> getGovernorates() async {
+    final response = await _remoteDataSource.getGovernorates();
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+    return response.data ?? [];
+  }
+
+  @override
+  Future<List<DirectorateEntity>> getDirectorates(int governorateId) async {
+    final response = await _remoteDataSource.getDirectorates(governorateId);
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+    return response.data ?? [];
+  }
+
+  @override
+  Future<RegisterNetworkResultEntity> registerNetwork({
+    required String networkName,
+    required int governorateId,
+    required int directorateId,
+    String? networkEmail,
+    String? networkAddress,
+    String? networkProfileLogoPath,
+    required String userFullName,
+    required String userPhoneNumber,
+    required String userPassword,
+    String? userEmail,
+    String? userProfileLogoPath,
+    required String deviceUuid,
+    required String fcmToken,
+    String? deviceName,
+    String? deviceType,
+  }) async {
+    final request = RegisterNetworkRequestModel(
+      networkName: networkName,
+      governorateId: governorateId,
+      directorateId: directorateId,
+      networkEmail: networkEmail,
+      networkAddress: networkAddress,
+      networkProfileLogoPath: networkProfileLogoPath,
+      userFullName: userFullName,
+      userPhoneNumber: userPhoneNumber,
+      userPassword: userPassword,
+      userEmail: userEmail,
+      userProfileLogoPath: userProfileLogoPath,
+      deviceUuid: deviceUuid,
+      fcmToken: fcmToken,
+      deviceName: deviceName,
+      deviceType: deviceType,
+    );
+
+    final response = await _remoteDataSource.registerNetwork(request);
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+
+    final data = response.data;
+    if (data == null) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر استلام نتيجة التسجيل من الخادم',
+      );
+    }
+
+    return data;
   }
 }

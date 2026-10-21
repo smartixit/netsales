@@ -18,17 +18,33 @@
 
 ---
 
-## 2. المكونات الموحدة الإلزامية (Mandatory Unified Components)
-- **الأزرار:** يُحظر إنشاء أزرار مخصصة غير قياسية أو استخدام أزرار Flutter الخام (`ElevatedButton`, `OutlinedButton`, `TextButton`, `InkWell`) مباشرة في الشاشات. يجب استخدام المكون القياسي الموحد `CustomButton` وفئاته المصنعية السبع:
-  - `CustomButton.primary` (الإجراءات الرئيسية)
-  - `CustomButton.secondary` (الإجراءات الثانوية)
-  - `CustomButton.outline` (الإجراءات المحددة)
-  - `CustomButton.text` (الإجراءات النصية الخفيفة)
-  - `CustomButton.danger` (الحذف والإجراءات الحساسة)
-  - `CustomButton.icon` (أزرار الأيقونات القياسية)
-  - `CustomButton.floating` (الأزرار العائمة)
-- **التفاعل الحركي الناعم (Micro-interactions):** يجب تغليف العناصر التفاعلية والبطاقات القابلة للنقر بمكون `CustomInteractiveBounce` لتوفير ارتداد فيزيائي ناعم وتغذية لمسية فورية.
-- **التنبيهات والرسائل:** استخدام `CustomSnackbar.show(...)` حصراً لجميع رسائل النظام وحالات الإشعار (`success`, `error`, `warning`, `info`)، مع تعقيم وتصفية رسائل الأخطاء عبر `AppException.sanitizeMessage`.
+## 2. المكونات الموحدة الإلزامية ومنع الأزرار الخام نهائياً (Mandatory Unified Components & Zero Raw Buttons Policy)
+- **الأزرار وعناصر التحكم اللمسية (Buttons & Touch Handlers):**
+  - **يُحظر حظرًا قاطعاً وباتاً** استخدام أزرار Flutter الخام (`ElevatedButton`, `OutlinedButton`, `TextButton`, `IconButton`, `FloatingActionButton`, `InkWell`, `GestureDetector`) مباشرة داخل أي شاشة أو ودجت.
+  - **المصدر الحصري والوحيد للأزرار:** المكون القياسي الموحد `CustomButton` وفئاته المصنعية السبع:
+    - `CustomButton.primary`: للإجراءات الرئيسية وتأكيد النماذج والعمليات الأساسية.
+    - `CustomButton.secondary`: للإجراءات الثانوية والخيارات البديلة.
+    - `CustomButton.outline`: للإجراءات المفرغة بحدود والإلغاء الأنيق.
+    - `CustomButton.text`: للإجراءات النصية الخفيفة والروابط التفاعلية (مثل "نسيت كلمة المرور؟", "إنشاء حساب جديد").
+    - `CustomButton.danger`: للحذف والإجراءات الحساسة والتدميرية.
+    - `CustomButton.icon`: للأزرار الأيقونية الدائرية والمربعة، وأزرار الرجوع القياسية في `AppBar.leading` مع الأبعاد الموحدة (`dimension: 40.r`, `iconSize: 18.r`, `backgroundColor: Colors.transparent`).
+    - `CustomButton.floating`: للأزرار العائمة.
+- **التفاعل الحركي الناعم (Micro-interactions):**
+  - يجب تغليف كافة العناصر التفاعلية والبطاقات القابلة للنقر بمكون `CustomInteractiveBounce` لتوفير ارتداد فيزيائي ناعم وتغذية لمسية فورية `HapticFeedback.lightImpact()`.
+- **التنبيهات والرسائل (System Snackbars & Notifications):**
+  - الاعتماد الحصري على `CustomSnackbar.show(...)` لكافة رسائل النظام وحالات الإشعار (`success`, `error`, `warning`, `info`)، مع تعقيم وتصفية رسائل الأخطاء عبر `AppException.sanitizeMessage`.
+- **حقول النصوص وكلمات المرور (Unified Text Inputs & Password Toggle):**
+  - الاعتماد التام على `CustomTextField`.
+  - لحقول كلمات المرور: تفعيل خاصية `enablePasswordToggle: true` المدمجة بالودجت. **يُحظر تماماً** تمرير `suffixIcon: IconButton(...)` يدوي مكرر لإظهار وإخفاء كلمة المرور.
+- **حقول رموز الأمان والتحقق الرقمي (PIN / OTP Fields):**
+  - الاعتماد الحصري على المكون الموحد `CustomPinField`، ويُحظر كتابة أو تضمين حزم Pin الخام (مثل `PinCodeTextField` أو `Pinput`) مباشرة داخل الشاشات.
+- **القوائم المنسدلة والبحث التفاعلي (Dropdowns & Selectors):**
+  - الاعتماد الحصري على المكون الموحد `CustomDropdown` المدعوم بالبحث والتحقق اللحظي، وحظر استخدام `DropdownButton` الخام.
+- **مربعات الحوار القياسية (Unified Dialogs & Approval States):**
+  - الاعتماد الحصري على المكون القياسي `CustomDialog` المصمم كـ `StatelessWidget` أصيل ومطابق لهندسة `CustomButton`.
+  - يُحظر استخدام `showDialog` أو `AlertDialog` الخام من Flutter في الشاشات.
+- **المرفقات والملفات والصور (Unified Media & File Pickers):**
+  - الاعتماد الحصري على `CustomImagePicker` لاختيار الشعارات والصور الشخصية، و `CustomFilePicker` لكافة الملفات والمستندات وجداول البيانات، مع إدارة كاملة عبر `FilePickerService`.
 
 ---
 
@@ -36,7 +52,7 @@
 يجب أن تتبع كافة ميزات التطبيق التقسيم الهيكلي الإلزامي التالي المستمد من معيار Clean Architecture القياسي للمشاريع المؤسسية:
 ```
 lib/
-├── core/                                # البنية التحتية المشتركة (config, constants, services, themes, utils)
+├── core/                                # البنية التحتية المشتركة (config, constants, services, themes, utils, models)
 ├── widgets/                             # الودجات العامة المشتركة لكافة شاشات التطبيق
 └── features/
     └── [feature_name]/
@@ -74,8 +90,21 @@ lib/
 
 ---
 
-## 4. فصل المسؤوليات وإدارة الحالة مع GetX
-- **الواجهات النحيفة (Lean Views):** الشاشات والودجات وظيفتها فقط رسم واجهة المستخدم والاستماع للحالة عبر `Obx` أو `GetBuilder`. يُحظر كتابة أي منطق أعمال أو طلبات شبكة أو عمليات حسابية معقدة داخل كلاسات الـ Widget.
+## 4. فصل المسؤوليات وإدارة الحالة والمعمارية التركيبية للشاشات (State Management & Modular Composite Screens)
+- **الواجهات النحيفة والمعمارية التركيبية (Lean Views & Composite Architecture):**
+  - الشاشات والودجات وظيفتها فقط رسم واجهة المستخدم والاستماع للحالة عبر `Obx` أو `GetBuilder`. يُحظر كتابة أي منطق أعمال أو طلبات شبكة أو عمليات حسابية معقدة داخل كلاسات الـ Widget.
+- **قاعدة الواجهات التركيبية وحظر دوال البناء المساعدة نهائياً (`Zero Screen Helper Methods Policy`):**
+  - **يُحظر حظرًا قاطعاً وباتاً** كتابة دوال مساعدة محلية مثل `Widget _buildHeader(...)`, `Widget _buildForm(...)`, `Widget _buildButtons(...)`, `Widget _buildSection(...)`, إلخ، داخل أي ملف شاشة (`*Screen`).
+  - **الأساس الهندسي والأدائي الصارم:**
+    - دوال البناء العادية لا تمتلك هوية (`Key`) أو دورة حياة خاصة في شجرة العناصر (`Element Tree`).
+    - تفقد محرك Flutter القدرة على التخزين المؤقت للثوابت (`const constructor optimizations`).
+    - تتسبب في إجبار Flutter على إعادة بناء كامل شجرة الشاشة بالكامل عند أي تحديث بسيط للحالة في GetX أو مع كل نبضة في حقول الإدخال، مما يسبب هدر الذاكرة، والـ Garbage Collection المتكرر، وسقوط الإطارات (Frame Drops / Jank).
+  - **المعيار الإلزامي البديل (Modular Decomposition):**
+    - يجب تفكيك كل شاشة إلى شريحة من الودجات المستقلة والمعزولة داخل مجلد `features/[feature_name]/presentation/widgets/`:
+      1. ودجات الترويسة والشعارات (مثل `RegisterHeaderSection`, `LoginHeaderSection`, `TwoFactorHeaderSection`, `VerifyOtpHeaderSection`).
+      2. ودجات البطاقات واستمارات الإدخال (مثل `NetworkInfoCard`, `OwnerInfoCard`, `LoginFormCard`, `TwoFactorFormCard`).
+      3. ودجات التذييل والروابط والإجراءات (مثل `RegisterSubmitSection`, `LoginFooterLinks`, `TwoFactorDeviceCard`).
+    - دور ملف الشاشة (`*Screen`) يقتصر فقط وحصراً على كونه "مجمّع تركيبي رشيق" (Lean Composite Assembler) يرتكز على `Scaffold`، ويحدد الحاوية التكيفية `ResponsiveContentWrapper`، ويرتب الودجات الفرعية المستقلة ذات الـ `const constructors`.
 - **المتحكمات (Controllers):** ترث حصراً من `GetxController`. هي المسؤولة عن إدارة حالة العرض، استقبال مدخلات المستخدم، استدعاء الـ Use Cases، ومعالجة أخطاء الواجهة والتحميل.
 - **إدارة دورة الحياة (Lifecycle):** تسجيل التبعيات عبر `Bindings` في المسارات، مع تنظيف الموارد في `onClose()`.
 
@@ -207,6 +236,9 @@ lib/
     - `lib/widgets/indicators/`: مؤشرات الصفحات والخطوات التفاعلية ذات التوسع الانسيابي (`CustomPageIndicator`).
     - `lib/widgets/feedback/`: أشرطة التقدم الانسيابية، مؤشرات التحميل والارتداد ومؤثرات Shimmer (`SplashFlowingProgressBar`, إلخ).
     - `lib/widgets/buttons/`: الأزرار الموحدة بكافة فئاتها المصنعية السبع (`CustomButton`).
+    - `lib/widgets/inputs/`: حقول الإدخال الموحدة (`CustomTextField`, `CustomPinField`, `CustomDropdown`).
+    - `lib/widgets/pickers/`: أدوات اختيار الصور والوسائط والمستندات وجهات الاتصال (`CustomFilePicker`, `CustomImagePicker`, `CustomContactPickerIconButton`).
+    - `lib/widgets/dialogs/`: مربعات الحوار التفاعلية وحالات التأكيد والاعتماد المعلق (`CustomDialog`).
 - **المعايير القياسية لبناء المكون المشترك:**
   - دعم التجاوب التام والنسبي مع الشاشات عبر `flutter_screenutil` (`.w`, `.h`, `.sp`, `.r`).
   - دعم التفاعل الحركي الفيزيائي الناعم عبر `CustomInteractiveBounce`.
@@ -251,3 +283,84 @@ lib/
 - **ودجات التكيف الجاهزة:**
   - استخدام `AdaptiveLayout` للفصل المعماري النظيف بين واجهات الموبايل والتابلت والديسكتوب.
   - استخدام `AdaptiveSplitView` لتقسيم الشاشة لعمودين (Side Pane + Main Pane) على الشاشات الكبيرة والتراجع لعمود واحد تلقائياً على الهواتف.
+
+---
+
+## 17. منظومة التقاط واختيار الوسائط وحماية الذاكرة من الانهيار (Enterprise CustomImagePicker & Zero-OOM Image Architecture)
+- **المكون القياسي الحصري لاختيار الصور:**
+  - الاعتماد الحصري على ودجت `CustomImagePicker` بفئتيه المصنعيتين:
+    - `CustomImagePicker.logo`: لاختيار شعار الشبكة، المتاجر، الفواتير، ونقاط البيع (بأبعاد دائرية أو مربعة أنيقة مع أيقونة متخصصة وحاوية متناسقة).
+    - `CustomImagePicker.avatar`: لاختيار الصورة الشخصية للمستخدم أو مالك الشبكة أو العميل.
+- **الحماية القصوى من انهيار الذاكرة العشوائية (Zero-OOM Protection Architecture):**
+  - فك تشفير صور الكاميرا الحديثة بدقتها الكاملة (12MP - 108MP) مباشرة في الذاكرة عبر `Image.file(file)` يستهلك ما بين 80 إلى 200 ميجابايت من الـ RAM لكل صورة غير مضغوطة، مما يسبب انهيار فوري للتطبيق على أجهزة الهواتف المتوسطة والضعيفة نتيجة الـ Out Of Memory (OOM Crash).
+  - **القاعدة الصارمة:** يُحظر عرض أي صورة محلية ملتقطة أو مختارة دون تقييد محرك التسييل عبر كاش الذاكرة بأبعاد تتطابق مع حاوية العرض:
+    ```dart
+    cacheWidth: (boxSize * 2.5).toInt(),
+    cacheHeight: (boxSize * 2.5).toInt(),
+    ```
+    مما يضغط استهلاك الذاكرة اللحظي بنسبة تزيد عن 95% (إلى أقل من 2 ميجابايت).
+- **التحقق الصارم من حجم الملف وحمايته:**
+  - فحص حجم الملف فور اختياره؛ وفي حال تجاوز 2MB يتم إلغاء العملية فوراً مع عرض رسالة تنبيهية للمستخدم عبر `CustomSnackbar.show(...)`.
+- **التوافقية العقدية التامة مع الواجهة الخلفية (Multipart vs JSON):**
+  - عند وجود ملفات ملتقطة، يتم إرسال طلب الإنشاء أو التعديل تلقائياً بصيغة `FormData` (Multipart) عبر حقول المطابقة في الواجهة الخلفية (`network_profile_logo`, `user_profile_logo`). وعند انعدام الملفات يتم الإرسال بصيغة `application/json` الخفيفة لتوفير استهلاك البيانات وسرعة المعالجة.
+
+---
+
+## 18. منظومة اختيار جهات الاتصال والأرقام المعتمدة (`CustomContactPickerIconButton`)
+- **منظومة اختيار جهات الاتصال (`CustomContactPickerIconButton`):**
+  - يُحظر استخدام أي حزم خارجية لاختيار الأرقام مباشرة في الشاشات.
+  - الاعتماد الحصري على `CustomContactPickerIconButton` كزر فرعي متكامل داخل حقول أرقام الهواتف (`suffixIcon` في `CustomTextField`).
+  - التنسيق مع `ContactPickerService` المعقم لتنظيف أرقام الهواتف واستخراج المفاتيح الدولية تلقائياً، والتحقق الصارم من الشبكات اليمنية المعتمدة (يمن موبايل، يو، سبأفون، واي، الهاتف الثابت).
+
+---
+
+## 19. معايير القياسات والتجاوب الموحدة مع ScreenUtil (Strict ScreenUtil Scaling Policy)
+- **أحجام الأيقونات وتدوير الحواف:** استخدام لاحقة `.r` حصراً (`iconSize: 20.r`, `borderRadius: AppRadius.md.r`).
+- **العروض والمسافات الأفقية وسمك الحدود:** استخدام لاحقة `.w` حصراً (`width: 320.w`, `borderWidth: 1.5.w`).
+- **الارتفاعات والمسافات الرأسية:** استخدام لاحقة `.h` حصراً (`height: 48.h`).
+- **الأحجام النصية:** استخدام لاحقة `.sp` المدمجة أصلاً في رموز `AppTypography`.
+- **المسافات الفاصلة بين العناصر:** الاعتماد الحصري على `AppSpacing.h*` للمسافات الأفقية و `AppSpacing.v*` للمسافات الرأسية، وحظر كتابة `SizedBox(width: 10)` أو `SizedBox(height: 15)` عشوائياً.
+
+---
+
+## 20. منظومة الملفات والمرفقات المركزية فائقة التخصيص وحظر التكرار (Enterprise File & Media System - FilePickerService & CustomFilePicker)
+- **حظر استدعاء حزم الملفات الخام في الشاشات والودجات:**
+  - **يُحظر حظرًا قاطعاً** استدعاء مكتبات `file_picker` أو `image_picker` بشكل مباشر داخل أي شاشة أو ودجت عرض.
+  - المصدر الحصري والوحيد لكافة عمليات اختيار الوسائط والملفات هو الخدمة المركزية الموحدة `FilePickerService.instance`.
+- **كائن الدومين النقي للملفات (`AppPickedFile`):**
+  - كافة عمليات الاختيار تعيد حصراً كائنات من نوع `AppPickedFile` المستقل والمجرد من الحزم الخارجية، والذي يوفر خصائص ذكية مدمجة (`sizeFormatted`, `isPdf`, `isSpreadsheet`, `isImage`, `isWord`, `isArchive`, `isText`, `toFile()`).
+- **الضوابط الصارمة للأحجام والسعة والعدد (Strict Enterprise Quotas):**
+  - **التحكم بسقف الحجم الفردي (`maxFileSizeBytes`):** التحقق التلقائي مع إطلاق تنبيه معقم باللغة العربية عبر `CustomSnackbar.show` يوضح اسم الملف وحجمه الفعلي والحد الأقصى المسموح.
+  - **التحكم بالسعة التراكمية المجمعة (`maxTotalSizeBytes`):** منع تجاوز إجمالي حجم المرفقات للحد المصرح به لتفادي استنزاف حزم البيانات وموارد الخادم.
+  - **التحكم بالعدد الأقصى (`maxFiles`):** منع اختيار أو إرفاق ملفات إضافية عند بلوغ السقف مع إشعار المستخدم فوراً.
+- **الحزام الأمني المؤسسي ضد الملفات الخبيثة (Malicious File Guard):**
+  - حظر وتصفية فوري لأي ملف تنفيذي أو برمجي (`.exe`, `.bat`, `.cmd`, `.sh`, `.php`, `.apk`, `.bin`, `.msi`, `.vbs`, `.ps1`) حتى في حال السماح بكافة الملفات (`FileTypePreset.anySafe`).
+- **المكون القياسي الموحد للمرفقات والملفات (`CustomFilePicker`):**
+  - الاعتماد الحصري على `CustomFilePicker` لعرض وإدارة ورفع المرفقات في أي شاشة بالأنماط الثلاثة:
+    - `FilePickerDisplayMode.dropzone`: مساحة سحب وإفلات تفاعلية تدعم `desktop_drop` على أنظمة سطح المكتب والويب.
+    - `FilePickerDisplayMode.button`: زر مدمج أنيق عبر `CustomButton.outline` مع عداد شارات للملفات المرفقة.
+    - `FilePickerDisplayMode.formCard`: بطاقة استمارة رسمية متكاملة مع التحقق الصارم `FormFieldValidator`.
+  - كل ملف مرفق يُعرض عبر `FileCardItem` مع وسم ملون متكيف بحسب النوع، واسمه، وحجمه، ومعاينة مصغرة للصور بحماية كاملة للذاكرة، وزر حذف قياسي مع ارتداد فيزيائي `CustomInteractiveBounce`.
+
+---
+
+## 21. معمارية مربعات الحوار التفاعلية ومطابقتها مع معيار CustomButton (Enterprise CustomDialog Architecture)
+- **المطابقة المعمارية الصارمة مع CustomButton:**
+  - يُحظر بناء الحوارات كـ Utility Classes تعتمد على دوال مساعدة `_buildXxx()` خاصة.
+  - `CustomDialog` هو **`StatelessWidget` أصيل ومستقل**، يمكن تضمينه في أي شجرة عناصر، أو معاينته في الاختبارات واللوحات، أو إطلاقه كنافذة منبثقة تفاعلية عبر محرك `Get.generalDialog`.
+- **الفئات المصنعية المتخصصة (Unified Dialog Factories):**
+  - `CustomDialog.confirmation(...)`: لحالات التحقق والتأكيد للعمليات التشغيلية والمالية.
+  - `CustomDialog.success(...)`: لتأكيد النجاح مع تدرج لوني أخضر وأنيميشن Lottie معبر.
+  - `CustomDialog.error(...)`: لتنبيهات الأخطاء والتعثرات.
+  - `CustomDialog.warning(...)`: للتحذيرات التنبيهية بالأصفر الداكن.
+  - `CustomDialog.info(...)`: للإرشادات التوجيهية والمعلومات العامة.
+  - `CustomDialog.pending(...)`: المخصص حصرياً لحالات انتظار الاعتماد والمراجعة الإدارية (`PENDING`) بعد التسجيل، مع توجيه صريح لصفحة تسجيل الدخول.
+  - `CustomDialog.danger(...)`: لإجراءات الحذف النهائي والتدمير بالأحمر الصريح مع زر `CustomButton.danger`.
+  - `CustomDialog.custom(...)`: للحوارات ذات المحتوى المعقد أو الاستمارات الداخلية.
+- **التفكيك الذري للمكونات (Zero Dialog Helper Methods):**
+  - تفكيك هيكل الحوار الداخلي إلى ودجات مستقلة ومعزولة تدعم الـ `const` في `widgets/dialogs/widgets/`:
+    - `DialogIconHeader`: الترويسة والتدرج اللوني والأنيميشن التفاعلي مع أيقونة طوارئ بديلة.
+    - `DialogBodyContent`: العناوين والرسائل والمحتوى المتكيف مع التمرير الرأسي الآمن لمنع أي Overflow.
+    - `DialogActionBar`: شريط الإجراءات المعتمد حصرياً على `CustomButton.primary` و `CustomButton.outline` و `CustomButton.danger`.
+- **الدوال الاستاتيكية المريحة:**
+  - توفير دوال الاستدعاء السريعة للتوافقية (`CustomDialog.show(...)`, `CustomDialog.showPending(...)`, `CustomDialog.showConfirmation(...)`) مع انتقال فيزيائي ناعم مقيد بـ `AppMotion.fast`.

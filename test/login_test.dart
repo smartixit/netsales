@@ -5,6 +5,9 @@ import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/login_response_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
+import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
+import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
+import 'package:netsales/features/auth/domain/entities/register_network_result_entity.dart';
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
 import 'package:netsales/features/auth/domain/usecases/login_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/resend_otp_use_case.dart';
@@ -114,6 +117,63 @@ class MockAuthRepository implements AuthRepository {
     if (!shouldSucceed) {
       throw Exception('فشل إعادة إرسال الرمز');
     }
+  }
+
+  @override
+  Future<List<GovernorateEntity>> getGovernorates() async {
+    if (!shouldSucceed) {
+      throw Exception('فشل جلب المحافظات');
+    }
+    return const [
+      GovernorateEntity(governorateId: 1, governorateName: 'صنعاء'),
+      GovernorateEntity(governorateId: 2, governorateName: 'عدن'),
+    ];
+  }
+
+  @override
+  Future<List<DirectorateEntity>> getDirectorates(int governorateId) async {
+    if (!shouldSucceed) {
+      throw Exception('فشل جلب المديريات');
+    }
+    return [
+      DirectorateEntity(
+        directorateId: 101,
+        governorateId: governorateId,
+        directorateName: 'مديرية التحرير',
+      ),
+    ];
+  }
+
+  @override
+  Future<RegisterNetworkResultEntity> registerNetwork({
+    required String networkName,
+    required int governorateId,
+    required int directorateId,
+    String? networkEmail,
+    String? networkAddress,
+    String? networkProfileLogoPath,
+    required String userFullName,
+    required String userPhoneNumber,
+    required String userPassword,
+    String? userEmail,
+    String? userProfileLogoPath,
+    required String deviceUuid,
+    required String fcmToken,
+    String? deviceName,
+    String? deviceType,
+  }) async {
+    if (!shouldSucceed) {
+      throw Exception('فشل تسجيل الشبكة');
+    }
+    return RegisterNetworkResultEntity(
+      success: true,
+      message: 'تم استلام طلبكم، سيتم مراجعة الطلب واشعاركم في حال قبول الطلب.',
+      networkId: 10,
+      networkName: networkName,
+      userId: 20,
+      userFullName: userFullName,
+      status: 'PENDING',
+    );
   }
 }
 

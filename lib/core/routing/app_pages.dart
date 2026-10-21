@@ -3,11 +3,13 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
+import 'package:netsales/features/auth/presentation/bindings/register_network_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/reset_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/two_factor_auth_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/verify_otp_binding.dart';
 import 'package:netsales/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/login_screen.dart';
+import 'package:netsales/features/auth/presentation/screens/register_network_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/two_factor_auth_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/verify_otp_screen.dart';
@@ -94,12 +96,12 @@ abstract final class AppPages {
       page: () => const TwoFactorAuthScreen(),
       binding: TwoFactorAuthBinding(),
     ),
-    // GetPage(
-    //   name: AppRoutes.registerNetwork,
-    //   page: () => const RegisterNetworkScreen(),
-    //   binding: AuthBinding(),
-    //   middlewares: [GuestGuard()],
-    // ),
+    GetPage(
+      name: AppRoutes.registerNetwork,
+      page: () => const RegisterNetworkScreen(),
+      binding: RegisterNetworkBinding(),
+      middlewares: [GuestGuard()],
+    ),
     // GetPage(
     //   name: AppRoutes.registerPos,
     //   page: () => const RegisterPosScreen(),

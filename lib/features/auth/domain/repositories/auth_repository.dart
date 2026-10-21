@@ -1,4 +1,7 @@
 import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
+import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
+import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
+import 'package:netsales/features/auth/domain/entities/register_network_result_entity.dart';
 
 /// عقد مستودع المصادقة الدوميني المجرد
 abstract interface class AuthRepository {
@@ -43,5 +46,30 @@ abstract interface class AuthRepository {
     required String phoneNumber,
     required String otpType,
     required String deviceUuid,
+  });
+
+  /// جلب قائمة المحافظات المتاحة
+  Future<List<GovernorateEntity>> getGovernorates();
+
+  /// جلب قائمة المديريات التابعة لمحافظة معينة
+  Future<List<DirectorateEntity>> getDirectorates(int governorateId);
+
+  /// تقديم طلب تسجيل مزود شبكة جديد
+  Future<RegisterNetworkResultEntity> registerNetwork({
+    required String networkName,
+    required int governorateId,
+    required int directorateId,
+    String? networkEmail,
+    String? networkAddress,
+    String? networkProfileLogoPath,
+    required String userFullName,
+    required String userPhoneNumber,
+    required String userPassword,
+    String? userEmail,
+    String? userProfileLogoPath,
+    required String deviceUuid,
+    required String fcmToken,
+    String? deviceName,
+    String? deviceType,
   });
 }
