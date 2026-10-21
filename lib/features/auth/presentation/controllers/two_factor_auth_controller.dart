@@ -36,6 +36,12 @@ class TwoFactorAuthController extends GetxController {
   final RxBool canResend = false.obs;
   Timer? _cooldownTimer;
 
+  /// تفعيل لوحة المفاتيح الرقمية المدمجة (افتراضياً مفعلة كالتطبيقات العالمية)
+  final RxBool isCustomKeyboard = true.obs;
+
+  /// تبديل نمط لوحة المفاتيح بين المدمجة وكيبورد النظام
+  void toggleKeyboard() => isCustomKeyboard.toggle();
+
   @override
   void onInit() {
     super.onInit();

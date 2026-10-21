@@ -10,6 +10,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/presentation/controllers/two_factor_auth_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_numeric_keyboard.dart';
 import 'package:netsales/widgets/inputs/custom_pin_field.dart';
 
 /// بطاقة إدخال رمز التحقق بخطوتين وتأكيد الجهاز (TwoFactorFormCard)
@@ -41,42 +42,86 @@ class TwoFactorFormCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // حقل إدخال الرمز الموحد (CustomPinField)
-            CustomPinField(
-              length: 6,
-              controller: controller.otpController,
-              validator: FormValidators.otpValidator(
-                fieldName: 'رمز الأمان',
+            Obx(
+              () => CustomPinField(
                 length: 6,
+                controller: controller.otpController,
+                autofocus: true,
+                useNativeKeyboard: !controller.isCustomKeyboard.value,
+                validator: FormValidators.otpValidator(
+                  fieldName: 'رمز الأمان',
+                  length: 6,
+                ),
+                onCompleted: (pin) => controller.submitOtp(pin),
               ),
-              onCompleted: (pin) => controller.submitOtp(pin),
             ),
 
-            AppSpacing.vLg,
+            AppSpacing.vMd,
 
-            // عداد التهدئة وزر إعادة الإرسال
+            // شريط مؤشر التهدئة وزر تبديل لوحة المفاتيح
             Obx(() {
-              if (controller.canResend.value) {
-                return CustomButton.text(
-                  text: 'إعادة إرسال رمز الأمان',
-                  icon: Icons.refresh_rounded,
-                  loading: controller.isResending.value,
-                  onPressed: controller.resendOtp,
-                );
-              }
               return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    Icons.timer_outlined,
-                    size: 16.r,
-                    color: colors.onSurfaceVariant,
-                  ),
-                  AppSpacing.hXs,
-                  Text(
-                    'إعادة الإرسال بعد ${controller.cooldownSeconds.value} ثانية',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: colors.onSurfaceVariant,
+                  // عداد التهدئة أو زر إعادة الإرسال
+                  if (controller.canResend.value)
+                    CustomButton.text(
+                      text: 'إعادة إرسال رمز الأمان',
+                      icon: Icons.refresh_rounded,
+                      loading: controller.isResending.value,
+                      onPressed: controller.resendOtp,
+                    )
+                  else
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.timer_outlined,
+                          size: 16.r,
+                          color: colors.onSurfaceVariant,
+                        ),
+                        AppSpacing.hXs,
+                        Text(
+                          'إعادة الإرسال بعد ${controller.cooldownSeconds.value} ثانية',
+                          style: AppTypography.labelMedium.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
+
+                  // زر تبديل نمط لوحة المفاتيح بين المدمجة وكيبورد النظام
+                  CustomButton.icon(
+                    icon: controller.isCustomKeyboard.value
+                        ? Icons.keyboard_outlined
+                        : Icons.dialpad_rounded,
+                    tooltip: controller.isCustomKeyboard.value
+                        ? 'استخدام لوحة مفاتيح النظام'
+                        : 'استخدام اللوحة الرقمية المدمجة',
+                    iconSize: 18.r,
+                    dimension: 36.r,
+                    foregroundColor: colors.onSurfaceVariant,
+                    backgroundColor:
+                        colors.surfaceContainerHighest.withValues(alpha: 0.35),
+                    onPressed: controller.toggleKeyboard,
+                  ),
+                ],
+              );
+            }),
+
+            // لوحة المفاتيح الرقمية المدمجة (تظهر عند تفعيل الوضع المدمج)
+            Obx(() {
+              if (!controller.isCustomKeyboard.value) {
+                return const SizedBox.shrink();
+              }
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppSpacing.vMd,
+                  CustomNumericKeyboard(
+                    controller: controller.otpController,
+                    maxLength: 6,
+                    onToggleKeyboard: controller.toggleKeyboard,
+                    onCompleted: (pin) => controller.submitOtp(pin),
                   ),
                 ],
               );

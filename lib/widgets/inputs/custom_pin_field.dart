@@ -51,6 +51,7 @@ class CustomPinField extends StatelessWidget {
     this.enableSmsRetriever = true,
     this.closeKeyboardWhenCompleted = true,
     this.pinputAutovalidateMode = PinputAutovalidateMode.onSubmit,
+    this.useNativeKeyboard = true,
   });
 
   /// عدد خانات الرمز (افتراضياً 6 خانات)
@@ -127,6 +128,9 @@ class CustomPinField extends StatelessWidget {
 
   /// نمط التحقق التلقائي
   final PinputAutovalidateMode pinputAutovalidateMode;
+
+  /// استخدام لوحة المفاتيح الأصلية للنظام (true) أو الاعتماد على لوحة مفاتيح رقمية مخصصة (false)
+  final bool useNativeKeyboard;
 
   @override
   Widget build(BuildContext context) {
@@ -246,6 +250,7 @@ class CustomPinField extends StatelessWidget {
         enabled: enabled,
         readOnly: readOnly,
         autofocus: autofocus,
+        useNativeKeyboard: useNativeKeyboard,
         obscureText: obscureText,
         obscuringCharacter: obscuringCharacter,
         defaultPinTheme: defaultPinTheme,
