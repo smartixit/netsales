@@ -8,6 +8,7 @@ import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/register_network_result_entity.dart';
+import 'package:netsales/features/auth/domain/entities/register_pos_result_entity.dart';
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
 import 'package:netsales/features/auth/domain/usecases/login_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/resend_otp_use_case.dart';
@@ -182,6 +183,38 @@ class MockAuthRepository implements AuthRepository {
       message: 'تم استلام طلبكم، سيتم مراجعة الطلب واشعاركم في حال قبول الطلب.',
       networkId: 10,
       networkName: networkName,
+      userId: 20,
+      userFullName: userFullName,
+      status: 'PENDING',
+    );
+  }
+
+  @override
+  Future<RegisterPosResultEntity> registerPos({
+    required String posName,
+    required int governorateId,
+    required int directorateId,
+    String? posEmail,
+    String? posAddress,
+    String? posProfileLogoPath,
+    required String userFullName,
+    required String userPhoneNumber,
+    required String userPassword,
+    String? userEmail,
+    String? userProfileLogoPath,
+    required String deviceUuid,
+    required String fcmToken,
+    String? deviceName,
+    String? deviceType,
+  }) async {
+    if (!shouldSucceed) {
+      throw Exception('فشل تسجيل نقطة البيع');
+    }
+    return RegisterPosResultEntity(
+      success: true,
+      message: 'تم استلام طلبكم بنجاح',
+      posId: 10,
+      posName: posName,
       userId: 20,
       userFullName: userFullName,
       status: 'PENDING',

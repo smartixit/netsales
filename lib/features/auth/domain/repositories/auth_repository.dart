@@ -2,6 +2,7 @@ import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/register_network_result_entity.dart';
+import 'package:netsales/features/auth/domain/entities/register_pos_result_entity.dart';
 
 /// عقد مستودع المصادقة الدوميني المجرد
 abstract interface class AuthRepository {
@@ -70,6 +71,25 @@ abstract interface class AuthRepository {
     String? networkEmail,
     String? networkAddress,
     String? networkProfileLogoPath,
+    required String userFullName,
+    required String userPhoneNumber,
+    required String userPassword,
+    String? userEmail,
+    String? userProfileLogoPath,
+    required String deviceUuid,
+    required String fcmToken,
+    String? deviceName,
+    String? deviceType,
+  });
+
+  /// تقديم طلب تسجيل نقطة بيع / وكيل جديد
+  Future<RegisterPosResultEntity> registerPos({
+    required String posName,
+    required int governorateId,
+    required int directorateId,
+    String? posEmail,
+    String? posAddress,
+    String? posProfileLogoPath,
     required String userFullName,
     required String userPhoneNumber,
     required String userPassword,

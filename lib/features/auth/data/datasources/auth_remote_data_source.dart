@@ -5,6 +5,8 @@ import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/login_response_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_request_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_response_model.dart';
+import 'package:netsales/features/auth/data/models/register_pos_request_model.dart';
+import 'package:netsales/features/auth/data/models/register_pos_response_model.dart';
 import 'package:netsales/features/auth/data/models/reset_password_request_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 
@@ -56,5 +58,10 @@ abstract interface class AuthRemoteDataSource {
   /// تقديم طلب تسجيل مزود شبكة جديد
   Future<ApiResponse<RegisterNetworkResponseModel>> registerNetwork(
     RegisterNetworkRequestModel request,
+  );
+
+  /// تقديم طلب تسجيل نقطة بيع / وكيل جديد
+  Future<ApiResponse<RegisterPosResponseModel>> registerPos(
+    RegisterPosRequestModel request,
   );
 }

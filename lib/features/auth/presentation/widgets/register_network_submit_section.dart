@@ -9,13 +9,10 @@ import 'package:netsales/features/auth/presentation/controllers/register_network
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// قسم زر إرسال طلب التسجيل وروابط التوجيه (RegisterSubmitSection)
-class RegisterSubmitSection extends StatelessWidget {
+class RegisterNetworkSubmitSection extends StatelessWidget {
   final RegisterNetworkController controller;
 
-  const RegisterSubmitSection({
-    super.key,
-    required this.controller,
-  });
+  const RegisterNetworkSubmitSection({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {

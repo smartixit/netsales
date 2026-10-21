@@ -13,13 +13,10 @@ import 'package:netsales/widgets/pickers/custom_contact_picker_icon_button.dart'
 import 'package:netsales/widgets/pickers/custom_image_picker.dart';
 
 /// بطاقة إدخال بيانات مالك ومسؤول الشبكة والصورة الشخصية (OwnerInfoCard)
-class OwnerInfoCard extends StatelessWidget {
+class NetworkOwnerInfoCard extends StatelessWidget {
   final RegisterNetworkController controller;
 
-  const OwnerInfoCard({
-    super.key,
-    required this.controller,
-  });
+  const NetworkOwnerInfoCard({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +27,7 @@ class OwnerInfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.4),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.4)),
         boxShadow: AppElevation.level1(context),
       ),
       child: Column(
@@ -40,11 +35,7 @@ class OwnerInfoCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.person_pin_rounded,
-                color: colors.primary,
-                size: 20.r,
-              ),
+              Icon(Icons.person_pin_rounded, color: colors.primary, size: 20.r),
               AppSpacing.hSm,
               Text(
                 'بيانات مسؤول ومالك الشبكة',

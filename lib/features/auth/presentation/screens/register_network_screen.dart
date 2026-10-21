@@ -7,9 +7,9 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/features/auth/presentation/controllers/register_network_controller.dart';
 import 'package:netsales/features/auth/presentation/widgets/network_info_card.dart';
-import 'package:netsales/features/auth/presentation/widgets/owner_info_card.dart';
-import 'package:netsales/features/auth/presentation/widgets/register_header_section.dart';
-import 'package:netsales/features/auth/presentation/widgets/register_submit_section.dart';
+import 'package:netsales/features/auth/presentation/widgets/network_owner_info_card.dart';
+import 'package:netsales/features/auth/presentation/widgets/register_network_header_section.dart';
+import 'package:netsales/features/auth/presentation/widgets/register_network_submit_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// واجهة تقديم طلب تسجيل مزود شبكة إنترنت جديد (RegisterNetworkScreen)
@@ -44,9 +44,7 @@ class RegisterNetworkScreen extends GetView<RegisterNetworkController> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: AppGradients.surfaceMesh(context),
-        ),
+        decoration: BoxDecoration(gradient: AppGradients.surfaceMesh(context)),
         child: SafeArea(
           child: ResponsiveContentWrapper(
             maxWidth: AppBreakpoints.maxFormWidth,
@@ -67,7 +65,7 @@ class RegisterNetworkScreen extends GetView<RegisterNetworkController> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // 1. ترويسة الشاشة المستقلة (RegisterHeaderSection)
-                    const RegisterHeaderSection(),
+                    const RegisterNetworkHeaderSection(),
 
                     AppSpacing.vLg,
 
@@ -77,12 +75,12 @@ class RegisterNetworkScreen extends GetView<RegisterNetworkController> {
                     AppSpacing.vLg,
 
                     // 3. بطاقة بيانات مالك ومسؤول الشبكة والصورة الشخصية (OwnerInfoCard)
-                    OwnerInfoCard(controller: controller),
+                    NetworkOwnerInfoCard(controller: controller),
 
                     AppSpacing.vXl,
 
                     // 4. أزرار إرسال الطلب والتوجيه الموحدة (RegisterSubmitSection)
-                    RegisterSubmitSection(controller: controller),
+                    RegisterNetworkSubmitSection(controller: controller),
 
                     AppSpacing.vLg,
                   ],

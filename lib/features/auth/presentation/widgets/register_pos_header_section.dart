@@ -6,9 +6,9 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
-/// ترويسة شاشة تسجيل مزود شبكة جديد (RegisterHeaderSection)
-class RegisterHeaderSection extends StatelessWidget {
-  const RegisterHeaderSection({super.key});
+/// ترويسة شاشة تسجيل نقطة بيع / وكيل جديد (RegisterPosHeaderSection)
+class RegisterPosHeaderSection extends StatelessWidget {
+  const RegisterPosHeaderSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +29,14 @@ class RegisterHeaderSection extends StatelessWidget {
             ),
           ),
           child: Icon(
-            Icons.wifi_tethering_rounded,
+            Icons.storefront_rounded,
             color: colors.primary,
             size: 32.r,
           ),
         ),
         AppSpacing.vMd,
         Text(
-          'تسجيل مزود شبكة جديد',
+          'تسجيل نقطة بيع جديدة',
           style: AppTypography.headlineSmall.copyWith(
             color: colors.onSurface,
             fontWeight: FontWeight.bold,
@@ -45,7 +45,7 @@ class RegisterHeaderSection extends StatelessWidget {
         ),
         AppSpacing.vXxs,
         Text(
-          'انضم لشبكة موفري خدمات الإنترنت وقم بإدارة كروتك ونقاط بيعك باحترافية',
+          'انضم كوكيل ونقطة بيع معتمدة وقم بإصدار وبيع كروت الإنترنت بكل سهولة وموثوقية',
           style: AppTypography.bodyMedium.copyWith(
             color: colors.onSurfaceVariant,
             height: 1.4,

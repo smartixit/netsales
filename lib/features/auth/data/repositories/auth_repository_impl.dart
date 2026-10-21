@@ -7,12 +7,14 @@ import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_request_model.dart';
+import 'package:netsales/features/auth/data/models/register_pos_request_model.dart';
 import 'package:netsales/features/auth/data/models/reset_password_request_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 import 'package:netsales/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/register_network_result_entity.dart';
+import 'package:netsales/features/auth/domain/entities/register_pos_result_entity.dart';
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
 
 /// تطبيق مستودع المصادقة وتنسيق البيانات بين مصدر البيانات وإدارة الجلسات
@@ -289,6 +291,59 @@ class AuthRepositoryImpl implements AuthRepository {
         response.message.isNotEmpty
             ? response.message
             : 'تعذر استلام نتيجة التسجيل من الخادم',
+      );
+    }
+
+    return data;
+  }
+
+  @override
+  Future<RegisterPosResultEntity> registerPos({
+    required String posName,
+    required int governorateId,
+    required int directorateId,
+    String? posEmail,
+    String? posAddress,
+    String? posProfileLogoPath,
+    required String userFullName,
+    required String userPhoneNumber,
+    required String userPassword,
+    String? userEmail,
+    String? userProfileLogoPath,
+    required String deviceUuid,
+    required String fcmToken,
+    String? deviceName,
+    String? deviceType,
+  }) async {
+    final request = RegisterPosRequestModel(
+      posName: posName,
+      governorateId: governorateId,
+      directorateId: directorateId,
+      posEmail: posEmail,
+      posAddress: posAddress,
+      posProfileLogoPath: posProfileLogoPath,
+      userFullName: userFullName,
+      userPhoneNumber: userPhoneNumber,
+      userPassword: userPassword,
+      userEmail: userEmail,
+      userProfileLogoPath: userProfileLogoPath,
+      deviceUuid: deviceUuid,
+      fcmToken: fcmToken,
+      deviceName: deviceName,
+      deviceType: deviceType,
+    );
+
+    final response = await _remoteDataSource.registerPos(request);
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+
+    final data = response.data;
+    if (data == null) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر استلام نتيجة تسجيل نقطة البيع من الخادم',
       );
     }
 

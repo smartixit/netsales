@@ -8,6 +8,8 @@ import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/login_response_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_request_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_response_model.dart';
+import 'package:netsales/features/auth/data/models/register_pos_request_model.dart';
+import 'package:netsales/features/auth/data/models/register_pos_response_model.dart';
 import 'package:netsales/features/auth/data/models/reset_password_request_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 
@@ -141,6 +143,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       ApiConstants.registerNetwork,
       data: requestData,
       fromJson: (json) => RegisterNetworkResponseModel.fromJson(
+        Map<String, dynamic>.from(json as Map),
+      ),
+    );
+  }
+
+  @override
+  Future<ApiResponse<RegisterPosResponseModel>> registerPos(
+    RegisterPosRequestModel request,
+  ) async {
+    final dynamic requestData = request.hasFiles
+        ? await request.toFormData()
+        : request.toJson();
+
+    return ApiService.instance.post<RegisterPosResponseModel>(
+      ApiConstants.registerPos,
+      data: requestData,
+      fromJson: (json) => RegisterPosResponseModel.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),
     );

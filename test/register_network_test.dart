@@ -7,6 +7,7 @@ import 'package:netsales/features/auth/data/models/register_network_response_mod
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/register_network_result_entity.dart';
+import 'package:netsales/features/auth/domain/entities/register_pos_result_entity.dart';
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
 import 'package:netsales/features/auth/domain/usecases/get_directorates_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/get_governorates_use_case.dart';
@@ -133,6 +134,26 @@ class MockRegisterNetworkAuthRepository implements AuthRepository {
     required String phoneNumber,
     required String otpType,
     required String deviceUuid,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  Future<RegisterPosResultEntity> registerPos({
+    required String posName,
+    required int governorateId,
+    required int directorateId,
+    String? posEmail,
+    String? posAddress,
+    String? posProfileLogoPath,
+    required String userFullName,
+    required String userPhoneNumber,
+    required String userPassword,
+    String? userEmail,
+    String? userProfileLogoPath,
+    required String deviceUuid,
+    required String fcmToken,
+    String? deviceName,
+    String? deviceType,
   }) =>
       throw UnimplementedError();
 }
