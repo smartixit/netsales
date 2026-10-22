@@ -7,6 +7,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/services/app_cache_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 
 /// مكون موحد لعرض الصور الشبكية المحمية والمؤقتة مع حماية الذاكرة من الانهيار (CustomCachedImage)
 ///
@@ -22,6 +23,8 @@ class CustomCachedImage extends StatelessWidget {
   final BoxFit fit;
   final BoxFit? errorFit;
   final Widget? fallback;
+  final String? fallbackText;
+  final TextStyle? fallbackTextStyle;
   final Widget? placeholder;
   final ValueChanged<Uint8List>? onLoaded;
   final bool enableMemCacheDownsampling;
@@ -35,6 +38,8 @@ class CustomCachedImage extends StatelessWidget {
     this.fit = BoxFit.cover,
     this.errorFit = BoxFit.cover,
     this.fallback,
+    this.fallbackText,
+    this.fallbackTextStyle,
     this.placeholder,
     this.onLoaded,
     this.enableMemCacheDownsampling = true,
@@ -46,6 +51,8 @@ class CustomCachedImage extends StatelessWidget {
     Key? key,
     required String? url,
     required double radius,
+    String? fallbackText,
+    TextStyle? fallbackTextStyle,
     Widget? fallback,
     ValueChanged<Uint8List>? onLoaded,
   }) {
@@ -57,6 +64,8 @@ class CustomCachedImage extends StatelessWidget {
       height: size,
       borderRadius: radius,
       fit: BoxFit.cover,
+      fallbackText: fallbackText,
+      fallbackTextStyle: fallbackTextStyle,
       fallback: fallback,
       onLoaded: onLoaded,
     );
@@ -68,6 +77,8 @@ class CustomCachedImage extends StatelessWidget {
     required String? url,
     required double size,
     double? borderRadius,
+    String? fallbackText,
+    TextStyle? fallbackTextStyle,
     Widget? fallback,
     ValueChanged<Uint8List>? onLoaded,
   }) {
@@ -78,6 +89,8 @@ class CustomCachedImage extends StatelessWidget {
       height: size,
       borderRadius: borderRadius ?? AppRadius.md,
       fit: BoxFit.contain,
+      fallbackText: fallbackText,
+      fallbackTextStyle: fallbackTextStyle,
       fallback: fallback,
       onLoaded: onLoaded,
     );
@@ -155,6 +168,10 @@ class CustomCachedImage extends StatelessWidget {
   }
 
   Widget _buildPlaceholder(BuildContext context) {
+    if (fallbackText != null && fallbackText!.trim().isNotEmpty) {
+      return _buildFallback(context);
+    }
+
     final colors = context.colors;
 
     return Container(
@@ -187,6 +204,28 @@ class CustomCachedImage extends StatelessWidget {
     }
 
     final colors = context.colors;
+
+    if (fallbackText != null && fallbackText!.trim().isNotEmpty) {
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: colors.primary.withValues(alpha: 0.12),
+          borderRadius: borderRadius != null
+              ? BorderRadius.circular(borderRadius!)
+              : null,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          fallbackText!.trim(),
+          style: fallbackTextStyle ??
+              AppTypography.labelMedium.copyWith(
+                color: colors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+      );
+    }
 
     return Container(
       width: width,

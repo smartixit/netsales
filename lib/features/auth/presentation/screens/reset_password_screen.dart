@@ -7,8 +7,8 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/auth/presentation/controllers/reset_password_controller.dart';
-import 'package:netsales/features/auth/presentation/widgets/reset_password_form_card.dart';
-import 'package:netsales/features/auth/presentation/widgets/reset_password_security_banner.dart';
+import 'package:netsales/features/auth/presentation/widgets/forgot_password/reset_password_form_card.dart';
+import 'package:netsales/features/auth/presentation/widgets/forgot_password/reset_password_security_banner.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// واجهة تعيين وتغيير كلمة المرور الإلزامية والاختيارية والمباشرة (ResetPasswordScreen)

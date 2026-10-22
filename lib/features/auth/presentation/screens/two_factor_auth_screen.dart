@@ -6,9 +6,9 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/features/auth/presentation/controllers/two_factor_auth_controller.dart';
-import 'package:netsales/features/auth/presentation/widgets/two_factor_device_card.dart';
-import 'package:netsales/features/auth/presentation/widgets/two_factor_form_card.dart';
-import 'package:netsales/features/auth/presentation/widgets/two_factor_header_section.dart';
+import 'package:netsales/features/auth/presentation/widgets/otp/two_factor_device_card.dart';
+import 'package:netsales/features/auth/presentation/widgets/otp/two_factor_form_card.dart';
+import 'package:netsales/features/auth/presentation/widgets/otp/two_factor_header_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// واجهة التحقق بخطوتين وتأكيد الجهاز (TwoFactorAuthScreen)

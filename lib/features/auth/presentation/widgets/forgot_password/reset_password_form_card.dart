@@ -9,7 +9,7 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/presentation/controllers/reset_password_controller.dart';
-import 'package:netsales/features/auth/presentation/widgets/password_requirement_item.dart';
+import 'package:netsales/features/auth/presentation/widgets/forgot_password/password_requirement_item.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 

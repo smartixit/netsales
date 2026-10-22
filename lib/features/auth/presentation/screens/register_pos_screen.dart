@@ -6,10 +6,10 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/features/auth/presentation/controllers/register_pos_controller.dart';
-import 'package:netsales/features/auth/presentation/widgets/pos_agent_info_card.dart';
-import 'package:netsales/features/auth/presentation/widgets/pos_info_card.dart';
-import 'package:netsales/features/auth/presentation/widgets/register_pos_header_section.dart';
-import 'package:netsales/features/auth/presentation/widgets/register_pos_submit_section.dart';
+import 'package:netsales/features/auth/presentation/widgets/register/pos_agent_info_card.dart';
+import 'package:netsales/features/auth/presentation/widgets/register/pos_info_card.dart';
+import 'package:netsales/features/auth/presentation/widgets/register/register_pos_header_section.dart';
+import 'package:netsales/features/auth/presentation/widgets/register/register_pos_submit_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// واجهة تقديم طلب تسجيل نقطة بيع / وكيل جديد (RegisterPosScreen)

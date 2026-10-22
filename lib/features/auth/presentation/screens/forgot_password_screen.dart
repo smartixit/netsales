@@ -6,8 +6,8 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/features/auth/presentation/controllers/forgot_password_controller.dart';
-import 'package:netsales/features/auth/presentation/widgets/forgot_password_form_card.dart';
-import 'package:netsales/features/auth/presentation/widgets/forgot_password_header_section.dart';
+import 'package:netsales/features/auth/presentation/widgets/forgot_password/forgot_password_form_card.dart';
+import 'package:netsales/features/auth/presentation/widgets/forgot_password/forgot_password_header_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// واجهة طلب استعادة كلمة المرور (ForgotPasswordScreen)

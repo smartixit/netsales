@@ -16,22 +16,30 @@ class HomeLayoutBinding extends Bindings {
   @override
   void dependencies() {
     // المتحكم الرئيسي للتنقل والتخطيط
-    Get.lazyPut<HomeLayoutController>(() => HomeLayoutController());
+    Get.lazyPut<HomeLayoutController>(
+      () => HomeLayoutController(),
+      fenix: true,
+    );
 
     // سلسلة تبعيات لوحة القيادة التجميعية (Dashboard Vertical Slice)
     Get.lazyPut<DashboardRemoteDataSource>(
       () => const DashboardRemoteDataSourceImpl(),
+      fenix: true,
     );
     Get.lazyPut<DashboardRepository>(
       () => DashboardRepositoryImpl(Get.find<DashboardRemoteDataSource>()),
+      fenix: true,
     );
     Get.lazyPut<GetDashboardOverviewUseCase>(
       () => GetDashboardOverviewUseCase(Get.find<DashboardRepository>()),
+      fenix: true,
     );
     Get.lazyPut<DashboardController>(
       () => DashboardController(
         getDashboardOverviewUseCase: Get.find<GetDashboardOverviewUseCase>(),
       ),
+      fenix: true,
     );
   }
 }
+

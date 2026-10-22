@@ -5,7 +5,7 @@ import 'package:netsales/features/home/presentation/controllers/home_layout_cont
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_view.dart';
 import 'package:netsales/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:netsales/features/home/presentation/widgets/home_offline_banner.dart';
-import 'package:netsales/features/home/presentation/widgets/tabs/home_tab_placeholder.dart';
+import 'package:netsales/features/home/presentation/widgets/home_tab_placeholder.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 import 'package:netsales/widgets/navigations/double_back_exit_scope.dart';
 

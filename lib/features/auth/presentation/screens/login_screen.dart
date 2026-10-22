@@ -5,9 +5,9 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/features/auth/presentation/controllers/login_controller.dart';
-import 'package:netsales/features/auth/presentation/widgets/login_footer_links.dart';
-import 'package:netsales/features/auth/presentation/widgets/login_form_card.dart';
-import 'package:netsales/features/auth/presentation/widgets/login_header_section.dart';
+import 'package:netsales/features/auth/presentation/widgets/login/login_footer_links.dart';
+import 'package:netsales/features/auth/presentation/widgets/login/login_form_card.dart';
+import 'package:netsales/features/auth/presentation/widgets/login/login_header_section.dart';
 
 /// واجهة تسجيل الدخول الرئيسية للنظام (Login Screen)
 class LoginScreen extends GetView<LoginController> {

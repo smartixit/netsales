@@ -43,7 +43,7 @@ class PushNotificationService extends GetxService {
 
   static PushNotificationService get to => Get.find<PushNotificationService>();
 
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  FirebaseMessaging get _fcm => FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 

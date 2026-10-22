@@ -42,6 +42,20 @@ class AppGradients {
     );
   }
 
+  /// Primary Gradient
+  static LinearGradient primaryGradient(BuildContext context) {
+    // final scheme = _scheme(context);
+    return LinearGradient(
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
+      colors: [
+        Color(0xFF003B32), // Deep Teal
+        Color(0xFF004D40), // Dark Teal
+        Color(0xFF00796B), // Muted Dark Teal
+      ],
+    );
+  }
+
   /// طبقة زجاجية للهيدر فوق المحتوى المتمرّر.
   static LinearGradient glassOverlay(BuildContext context) {
     final scheme = _scheme(context);

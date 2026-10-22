@@ -84,6 +84,7 @@ dependencies:
   shimmer: ^3.0.0
   sodium: 3.4.6
   smart_auth: ^3.2.0
+  sodium_libs: 3.4.6
 
 dependency_overrides:
   archive: ^4.5.2

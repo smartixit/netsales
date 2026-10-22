@@ -17,7 +17,7 @@ enum BrandLogoSize {
   lg(104, 16, 54),
 
   /// حجم بارز (Hero) لشاشات النجاح والعروض الكبيرة (130r)
-  hero(130, 20, 68);
+  hero(130, 0, 68);
 
   final double dimension;
   final double padding;
@@ -44,17 +44,17 @@ class CustomBrandLogo extends StatefulWidget {
 
   /// منشئات مصنعية ميسرة
   const CustomBrandLogo.sm({super.key})
-      : size = BrandLogoSize.sm,
-        withHalo = false;
+    : size = BrandLogoSize.sm,
+      withHalo = false;
 
   const CustomBrandLogo.md({super.key, this.withHalo = false})
-      : size = BrandLogoSize.md;
+    : size = BrandLogoSize.md;
 
   const CustomBrandLogo.lg({super.key, this.withHalo = true})
-      : size = BrandLogoSize.lg;
+    : size = BrandLogoSize.lg;
 
   const CustomBrandLogo.hero({super.key, this.withHalo = true})
-      : size = BrandLogoSize.hero;
+    : size = BrandLogoSize.hero;
 
   @override
   State<CustomBrandLogo> createState() => _CustomBrandLogoState();
@@ -76,17 +76,11 @@ class _CustomBrandLogoState extends State<CustomBrandLogo>
       )..repeat(reverse: true);
 
       _scaleAnimation = Tween<double>(begin: 0.94, end: 1.14).animate(
-        CurvedAnimation(
-          parent: _pulseController!,
-          curve: AppMotion.standard,
-        ),
+        CurvedAnimation(parent: _pulseController!, curve: AppMotion.standard),
       );
 
       _fadeAnimation = Tween<double>(begin: 0.06, end: 0.16).animate(
-        CurvedAnimation(
-          parent: _pulseController!,
-          curve: AppMotion.standard,
-        ),
+        CurvedAnimation(parent: _pulseController!, curve: AppMotion.standard),
       );
     }
   }
@@ -109,7 +103,7 @@ class _CustomBrandLogoState extends State<CustomBrandLogo>
       height: dim,
       padding: EdgeInsets.all(pad),
       decoration: BoxDecoration(
-        color: colors.surface,
+        // color: colors.surface,
         borderRadius: BorderRadius.circular(
           widget.size == BrandLogoSize.sm ? AppRadius.sm : AppRadius.xl,
         ),
@@ -132,11 +126,8 @@ class _CustomBrandLogoState extends State<CustomBrandLogo>
       child: Image.asset(
         'assets/images/brand_icon.png',
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => Icon(
-          Icons.hub_rounded,
-          size: iconSz,
-          color: colors.primary,
-        ),
+        errorBuilder: (_, __, ___) =>
+            Icon(Icons.hub_rounded, size: iconSz, color: colors.primary),
       ),
     );
 
@@ -155,8 +146,12 @@ class _CustomBrandLogoState extends State<CustomBrandLogo>
           animation: _pulseController!,
           builder: (context, child) {
             final isReducedMotion = AppMotion.disabled(context);
-            final scale = isReducedMotion ? 1.0 : (_scaleAnimation?.value ?? 1.0);
-            final alpha = isReducedMotion ? 0.08 : (_fadeAnimation?.value ?? 0.08);
+            final scale = isReducedMotion
+                ? 1.0
+                : (_scaleAnimation?.value ?? 1.0);
+            final alpha = isReducedMotion
+                ? 0.08
+                : (_fadeAnimation?.value ?? 0.08);
 
             return Transform.scale(
               scale: scale,

@@ -6,8 +6,8 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/features/auth/presentation/controllers/verify_otp_controller.dart';
-import 'package:netsales/features/auth/presentation/widgets/verify_otp_form_card.dart';
-import 'package:netsales/features/auth/presentation/widgets/verify_otp_header_section.dart';
+import 'package:netsales/features/auth/presentation/widgets/otp/verify_otp_form_card.dart';
+import 'package:netsales/features/auth/presentation/widgets/otp/verify_otp_header_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// واجهة التحقق من رمز الاستعادة OTP المعتمدة على Pinput (VerifyOtpScreen)

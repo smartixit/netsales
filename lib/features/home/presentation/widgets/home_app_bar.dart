@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -12,6 +11,7 @@ import 'package:netsales/features/home/presentation/controllers/home_layout_cont
 import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/buttons/custom_theme_toggle_button.dart';
+import 'package:netsales/widgets/images/custom_cached_image.dart';
 
 /// ============================================================================
 /// ترويسة التطبيق الرئيسية السياقية (HomeAppBar)
@@ -52,49 +52,53 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             children: [
               // 1. صورة أو بادئة الملف الشخصي للمستخدم
-              _UserAvatarWidget(
-                logoUrl: controller.userProfileLogo,
-                fullName: controller.userFullName,
-                onTap: () => controller.changeTab(3), // الذهاب للمزيد/الملف الشخصي
+              Obx(
+                () => _UserAvatarWidget(
+                  logoUrl: controller.userProfileLogo,
+                  fullName: controller.userFullName,
+                  onTap: () => controller.changeTab(3), // الذهاب للمزيد/الملف الشخصي
+                ),
               ),
 
               AppSpacing.hSm,
 
               // 2. اسم المستخدم المختصر وشارة الدور المعتمد
               Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      controller.userShortName,
-                      style: AppTypography.titleSmall.copyWith(
-                        color: colors.onSurface,
-                        fontWeight: FontWeight.bold,
+                child: Obx(
+                  () => Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        controller.userShortName,
+                        style: AppTypography.titleSmall.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    AppSpacing.vXxs,
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: AppSpacing.xs,
-                        vertical: 1.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.primaryContainer.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(AppRadius.xs),
-                      ),
-                      child: Text(
-                        controller.userRoleLabel,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: colors.onPrimaryContainer,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w600,
+                      AppSpacing.vXxs,
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xs,
+                          vertical: 1.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.primaryContainer.withValues(alpha: 0.6),
+                          borderRadius: AppRadius.xsRadius,
+                        ),
+                        child: Text(
+                          controller.userRoleLabel,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.onPrimaryContainer,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -149,38 +153,11 @@ class _UserAvatarWidget extends StatelessWidget {
           ),
         ),
         clipBehavior: Clip.antiAlias,
-        child: logoUrl != null && logoUrl!.trim().isNotEmpty
-            ? CachedNetworkImage(
-                imageUrl: logoUrl!.trim(),
-                fit: BoxFit.cover,
-                placeholder: (_, __) => Center(
-                  child: Text(
-                    initials,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                errorWidget: (_, __, ___) => Center(
-                  child: Text(
-                    initials,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              )
-            : Center(
-                child: Text(
-                  initials,
-                  style: AppTypography.labelMedium.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+        child: CustomCachedImage.avatar(
+          url: logoUrl,
+          radius: 21.r,
+          fallbackText: initials,
+        ),
       ),
     );
   }

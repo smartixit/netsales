@@ -5,7 +5,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/features/auth/domain/usecases/login_use_case.dart';
-import 'package:netsales/features/auth/presentation/widgets/pending_support_dialog_content.dart';
+import 'package:netsales/features/auth/presentation/widgets/register/pending_support_dialog_content.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';

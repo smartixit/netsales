@@ -42,7 +42,7 @@ class DashboardRecentOperationsFeed extends StatelessWidget {
             ),
             if (activities.isNotEmpty)
               Text(
-                'آخر ${activities.length} حركات',
+                'آخر ${activities.length} حركة',
                 style: AppTypography.labelSmall.copyWith(
                   color: colors.onSurfaceVariant,
                 ),
