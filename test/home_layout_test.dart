@@ -1,0 +1,233 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/models/role_model.dart';
+import 'package:netsales/core/models/user_model.dart';
+import 'package:netsales/core/models/user_session_model.dart';
+import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/storage_service.dart';
+import 'package:netsales/core/services/theme_service.dart';
+import 'package:netsales/core/themes/app_themes.dart';
+import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
+import 'package:netsales/features/home/presentation/models/home_quick_action.dart';
+import 'package:netsales/features/home/presentation/screens/home_layout_screen.dart';
+import 'package:netsales/features/home/presentation/widgets/home_quick_actions_sheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() async {
+    Get.reset();
+    SharedPreferences.setMockInitialValues({});
+    await StorageService.instance.init();
+    Get.put<StorageService>(StorageService.instance, permanent: true);
+    await ThemeService.instance.init();
+    Get.put<ThemeService>(ThemeService.instance, permanent: true);
+    Get.put<PermissionService>(PermissionService.instance, permanent: true);
+    await SessionService.instance.init();
+    Get.put<SessionService>(SessionService.instance, permanent: true);
+  });
+
+  Widget buildTestableWidget(Widget child) {
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      builder: (context, _) => GetMaterialApp(
+        theme: AppThemes.light,
+        home: child,
+      ),
+    );
+  }
+
+  void setupPhoneScreen(WidgetTester tester) {
+    tester.view.physicalSize = const Size(1125, 2436);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+  }
+
+  group('HomeQuickAction Model Tests', () {
+    test('instantiates cleanly with all fields', () {
+      const action = HomeQuickAction(
+        id: 'test_action',
+        title: 'إجراء تجريبي',
+        description: 'وصف الإجراء',
+        icon: Icons.star,
+        requiredPermission: 'test.permission',
+        targetRoute: '/test-route',
+      );
+
+      expect(action.id, 'test_action');
+      expect(action.title, 'إجراء تجريبي');
+      expect(action.description, 'وصف الإجراء');
+      expect(action.icon, Icons.star);
+      expect(action.requiredPermission, 'test.permission');
+      expect(action.targetRoute, '/test-route');
+    });
+  });
+
+  group('HomeLayoutController Business Logic Tests', () {
+    test('initial tab index is 0 and changeTab updates correctly', () {
+      final controller = HomeLayoutController();
+      Get.put(controller);
+
+      expect(controller.selectedIndex.value, 0);
+
+      controller.changeTab(2);
+      expect(controller.selectedIndex.value, 2);
+
+      // اختبار تجاهل المؤشرات الخارجة عن النطاق
+      controller.changeTab(-1);
+      expect(controller.selectedIndex.value, 2);
+      controller.changeTab(99);
+      expect(controller.selectedIndex.value, 2);
+    });
+
+    test('permission-driven quick actions filter dynamically based on permissions', () {
+      final permissionService = PermissionService.to;
+      final controller = HomeLayoutController();
+      Get.put(controller);
+
+      // في البداية: لا توجد صلاحيات
+      permissionService.updateAccess(roleKey: 'TEST_USER', permissions: []);
+      expect(controller.availableQuickActions.isEmpty, isTrue);
+      expect(controller.hasQuickActions, isFalse);
+
+      // منح صلاحية إنشاء مبيعات فقط (sales.create)
+      permissionService.updateAccess(
+        roleKey: 'POS_AGENT',
+        permissions: [AppPermissions.salesCreate],
+      );
+      expect(controller.availableQuickActions.length, 1);
+      expect(controller.isSingleAction, isTrue);
+      expect(controller.primaryQuickAction?.id, 'create_sale_invoice');
+
+      // منح صلاحيتين (sales.create و requests.create)
+      permissionService.updateAccess(
+        roleKey: 'POS_AGENT',
+        permissions: [AppPermissions.salesCreate, AppPermissions.requestsCreate],
+      );
+      expect(controller.availableQuickActions.length, 2);
+      expect(controller.isSingleAction, isFalse);
+
+      // ترقية المستخدم إلى المشرف العام (SUPER_ADMIN) -> كافة إجراءات الكتالوج متاحة
+      permissionService.updateAccess(
+        roleKey: AppRoles.superAdmin,
+        permissions: [],
+      );
+      expect(controller.availableQuickActions.length, 6);
+      expect(controller.hasQuickActions, isTrue);
+    });
+
+    test('canPopTab resets tab index to 0 before allowing pop', () {
+      final controller = HomeLayoutController();
+      Get.put(controller);
+
+      // عندما يكون في تبويب غير 0 (مثلاً 2)، يجب أن يعيد المستخدم للتبويب 0 ويرجع false
+      controller.changeTab(2);
+      final canPopFromTab2 = controller.canPopTab();
+      expect(canPopFromTab2, isFalse);
+      expect(controller.selectedIndex.value, 0);
+
+      // عندما يكون بالفعل في التبويب 0، يرجع true ليتولى DoubleBackExitScope الخروج
+      final canPopFromTab0 = controller.canPopTab();
+      expect(canPopFromTab0, isTrue);
+    });
+  });
+
+  group('HomeLayoutScreen & Widget Integration Tests', () {
+    testWidgets('renders HomeLayoutScreen with AppBar, Tabs, and FloatingNavBar', (
+      tester,
+    ) async {
+      setupPhoneScreen(tester);
+
+      // تهيئة مستخدم نشط في الجلسة مع الصلاحيات المصاحبة
+      await SessionService.to.startSession(
+        user: const UserModel(
+          userId: 1,
+          userFullName: 'أحمد صالح اليماني',
+          userPhoneNumber: '777123456',
+          status: 'ACTIVE',
+          role: RoleModel(
+            roleId: 2,
+            roleName: 'مزود شبكة معتمد',
+            roleKey: AppRoles.networkOwner,
+          ),
+        ),
+        session: const UserSessionModel(
+          sessionId: 'session_123',
+          userId: 1,
+          deviceUuid: 'device_123',
+        ),
+        permissions: [
+          AppPermissions.salesCreate,
+          AppPermissions.requestsApprove,
+          AppPermissions.voucherPackagesCreate,
+        ],
+      );
+
+      final controller = HomeLayoutController();
+      Get.put(controller);
+
+      await tester.pumpWidget(
+        buildTestableWidget(
+          const HomeLayoutScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // التحقق من ظهور ترويسة التطبيق واسم المستخدم ودوره
+      expect(find.text('أحمد صالح اليماني'), findsOneWidget);
+      expect(find.text('مزود شبكة معتمد'), findsOneWidget);
+
+      // التحقق من ظهور تسميات التبويبات الأربعة
+      expect(find.text('الرئيسية'), findsOneWidget);
+      expect(find.text('العمليات'), findsOneWidget);
+      expect(find.text('الشركاء'), findsOneWidget);
+      expect(find.text('المزيد'), findsOneWidget);
+
+      // النقر على تبويب العمليات وتغيير الصفحة
+      await tester.tap(find.text('العمليات'));
+      await tester.pumpAndSettle();
+      expect(controller.selectedIndex.value, 1);
+    });
+
+    testWidgets('center FAB opens HomeQuickActionsSheet when user has multiple permissions', (
+      tester,
+    ) async {
+      setupPhoneScreen(tester);
+
+      PermissionService.to.updateAccess(
+        roleKey: AppRoles.networkOwner,
+        permissions: [
+          AppPermissions.salesCreate,
+          AppPermissions.requestsApprove,
+        ],
+      );
+
+      final controller = HomeLayoutController();
+      Get.put(controller);
+
+      await tester.pumpWidget(
+        buildTestableWidget(
+          const HomeLayoutScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // النقر على الزر المركزي العائم
+      await tester.tap(find.byKey(const ValueKey('nav_center_fab')));
+      await tester.pumpAndSettle();
+
+      // التحقق من فتح نافذة الإجراءات السريعة
+      expect(find.byType(HomeQuickActionsSheet), findsOneWidget);
+      expect(find.text('الإجراءات السريعة المباشرة'), findsOneWidget);
+      expect(find.text('إصدار فاتورة مبيعات'), findsOneWidget);
+      expect(find.text('اعتماد طلبات الكروت'), findsOneWidget);
+    });
+  });
+}

@@ -15,6 +15,8 @@ import 'package:netsales/features/auth/presentation/screens/register_pos_screen.
 import 'package:netsales/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/two_factor_auth_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/verify_otp_screen.dart';
+import 'package:netsales/features/home/presentation/bindings/home_layout_binding.dart';
+import 'package:netsales/features/home/presentation/screens/home_layout_screen.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
 import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -114,18 +116,18 @@ abstract final class AppPages {
     // ========================================================================
     // 3. المسارات الرئيسية المحمية (Dashboard & Home Layout)
     // ========================================================================
-    // GetPage(
-    //   name: AppRoutes.dashboard,
-    //   page: () => const DashboardScreen(),
-    //   binding: DashboardBinding(),
-    //   middlewares: [AuthGuard()],
-    // ),
-    // GetPage(
-    //   name: AppRoutes.homeLayout,
-    //   page: () => const HomeLayoutScreen(),
-    //   binding: HomeLayoutBinding(),
-    //   middlewares: [AuthGuard()],
-    // ),
+    GetPage(
+      name: AppRoutes.dashboard,
+      page: () => const HomeLayoutScreen(),
+      binding: HomeLayoutBinding(),
+      middlewares: [AuthGuard()],
+    ),
+    GetPage(
+      name: AppRoutes.homeLayout,
+      page: () => const HomeLayoutScreen(),
+      binding: HomeLayoutBinding(),
+      middlewares: [AuthGuard()],
+    ),
 
     // ========================================================================
     // 4. قطاع الشبكات ومحافظها (Networks & Wallets)
