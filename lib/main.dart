@@ -22,6 +22,7 @@ import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -147,7 +148,22 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  // 5. تشغيل الواجهة الرئيسية للتطبيق
+  // 6. تهيئة خدمة الروابط الموحدة وربطها بالتنبيهات المركزية (UrlLauncherService)
+  UrlLauncherService.configure(
+    UrlLauncherConfig(
+      onMessage: (message, result) {
+        if (!result.isSuccess && Get.context != null) {
+          CustomSnackbar.show(
+            type: SnackType.error,
+            title: 'تنبيه',
+            message: message,
+          );
+        }
+      },
+    ),
+  );
+
+  // 7. تشغيل الواجهة الرئيسية للتطبيق
   runApp(const MyApp());
 }
 
