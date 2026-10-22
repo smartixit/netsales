@@ -5,6 +5,7 @@ import 'package:netsales/core/services/app_exit_service.dart';
 import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/sound_service.dart';
+import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/core/services/date_picker_service.dart';
 
 /// ============================================================================
@@ -48,6 +49,12 @@ class InitialBinding extends Bindings {
     // 7. خدمة منتقي التاريخ والوقت الموحدة
     Get.lazyPut<DatePickerService>(
       () => DatePickerService.instance,
+      fenix: true,
+    );
+
+    // 8. خدمة اختيار المرفقات والملفات الموحدة
+    Get.lazyPut<FilePickerService>(
+      () => FilePickerService.instance,
       fenix: true,
     );
   }

@@ -45,6 +45,15 @@
   - يُحظر استخدام `showDialog` أو `AlertDialog` الخام من Flutter في الشاشات.
 - **المرفقات والملفات والصور (Unified Media & File Pickers):**
   - الاعتماد الحصري على `CustomImagePicker` لاختيار الشعارات والصور الشخصية، و `CustomFilePicker` لكافة الملفات والمستندات وجداول البيانات، مع إدارة كاملة عبر `FilePickerService`.
+- **منتقي التاريخ والوقت المؤسسي (Unified Enterprise Date & Time Picker):**
+  - الاعتماد الحصري على الخدمة المركزية `DatePickerService` في `lib/core/services/` لاختيار التواريخ والأوقات بجميع أنماطها (`pickDate`, `pickDateRange`, `pickDateTime`, `pickMultiDates`).
+  - الاعتماد على `CustomDatePickerField` كحقل استمارة موحد متوافق مع `CustomTextField`.
+  - الاعتماد على `CustomDatePickerModal` في `lib/widgets/pickers/` كودجت العرض البصري المنفصل للنافذة السفلية ومربعات الحوار دون تسريب أي كود واجهات إلى طبقة `core/`.
+- **منظومة التوأمة المعمارية بين الخدمات المركزية والودجات البصرية (Twin Architecture: Service + Dedicated Widget):**
+  - كل تفاعل وتجربة مستخدم معقدة تتكون إجبارياً من توأم معماري مفصول الصلاحيات:
+    1. خدمة منطقية وسيطة في `lib/core/services/` (تدير البيانات، التخزين، الصلاحيات، الحسابات، التحقق، ودورة الحياة).
+    2. ويدجت بصري متخصص ومستقل في `lib/widgets/` (يتولى الرسم البصري، التحريك، التفاعل، وتطبيق سمات الثيم والتصميم).
+  - يُحظر دمج كود الواجهة داخل ملف الخدمة، ويُحظر استدعاء العمليات المعقدة أو الحزم الخارجية مباشرة من الودجت دون المرور بالخدمة المعتمدة.
 
 ---
 
@@ -393,3 +402,78 @@ lib/
     - `MediaGalleryViewer.show(context, items: [...], initialIndex: 0)`
     - `MediaGalleryViewer.showSingle(context, item)`
     - `MediaGalleryViewer.showPickedFiles(context, files: [...], initialIndex: 0)`
+
+---
+
+## 23. ميثاق معمارية منتقي التاريخ والوقت ومنظومة التنسيق وامتدادات DateTimeX (Enterprise DatePicker & Formatting System)
+- **معمارية منتقي التاريخ والوقت المؤسسي الموحد (DatePicker Architecture):**
+  - **الخدمة المركزية (`DatePickerService`):**
+    - تقيم حصرياً في `lib/core/services/date_picker_service.dart`.
+    - ترث حصراً من `GetxService` وتطبق النمط المؤسسي الموحد (`instance`, `to`, `init()`).
+    - هي المسؤولة الحصرية عن واجهات الاختيار البرمجية:
+      - `pickDate(...)`: لاختيار تاريخ مفرد.
+      - `pickDateRange(...)`: لاختيار نطاق زمني مع الفلاتر السريعة.
+      - `pickDateTime(...)`: لاختيار التاريخ والوقت معاً في واجهة موحدة.
+      - `pickMultiDates(...)`: لاختيار تواريخ متعددة متفرقة.
+    - تفوض عمليات العرض البصري للنافذة السفلية أو مربع الحوار حصرياً إلى `CustomDatePickerModal.showBottomSheet(...)` و `CustomDatePickerModal.showDialog(...)`.
+    - خالية تماماً من أي ودجات أو عناصر بناء لواجهة المستخدم.
+  - **الويدجت البصري المنفصل (`CustomDatePickerModal`):**
+    - يقيم حصرياً في `lib/widgets/pickers/custom_date_picker_modal.dart`.
+    - التفكيك الذري للمكونات المعزولة ذات الـ `const` بدون دوال مساعدة `_buildXxx()`:
+      - `_DatePickerHeader`: شريط الترويسة والأيقونة التفاعلية وعنوان الاختيار والتدرج اللوني.
+      - `_QuickPresetsBar` & `_PresetChip`: شريط الفلاتر السريعة للتواريخ (اليوم، أمس، آخر 7 أيام، هذا الشهر، إلخ) مع تغليف `CustomInteractiveBounce`.
+      - `_TimePickerSection` & `_TimeUnitCounter`: عدادات الساعات والدقائق التفاعلية مع دعم نظام 12 ساعة الصباحي/المسائي.
+      - `_DatePickerActions`: شريط أزرار التأكيد والإلغاء المعتمد حصرياً على `CustomButton.primary` و `CustomButton.outline`.
+  - **حقل الاستمارة الموحد (`CustomDatePickerField`):**
+    - يقيم حصرياً في `lib/widgets/pickers/custom_date_picker_field.dart`.
+    - يماثل `CustomTextField` في الهندسة والمظهر والتحقق `FormFieldValidator`، ويتصل مباشرة بـ `DatePickerService`.
+- **منظومة تنسيق التواريخ وامتدادات `DateTimeX` الموحدة وحظر التكرار:**
+  - الاعتماد الحصري على منسق التواريخ الموحد `DateFormatter` في `lib/core/utils/date_formatter.dart` وامتدادات `DateTimeX` التعبيرية (`date.toFullDate()`, `date.toLongDate()`, `date.toTime()`, `date.isToday`, `date.isYesterday`, إلخ).
+  - **يُحظر حظرًا باتاً ومطلقاً** إعادة تعريف مصفوفات أسماء الشهور أو أيام الأسبوع أو دوال تنسيق التواريخ يدوياً في أي ملف داخل المشروع.
+
+---
+
+## 24. الميثاق المعماري المؤسسي للخدمات المركزية والفصل الصارم للطبقات وسياسة الإقلاع الخفيف (Enterprise Services Architecture, Core-Widgets Boundary & Zero-Overhead Bootstrap)
+- **النمط المعماري المؤسسي الموحد لكافة الخدمات (Unified Singleton & GetxService Contract):**
+  - **إلزامية النمط الموحد لكافة الخدمات في `lib/core/services/` بلا استثناء:**
+    يجب أن ترث كل خدمة من `GetxService` وتطبق النمط الثلاثي الصارم:
+    ```dart
+    class ExampleService extends GetxService {
+      ExampleService._();
+      static final ExampleService instance = ExampleService._();
+      static ExampleService get to =>
+          Get.isRegistered<ExampleService>() ? Get.find<ExampleService>() : instance;
+
+      Future<ExampleService> init() async {
+        // منطق التهيئة إن وجد
+        return this;
+      }
+    }
+    ```
+  - **المزايا والأهداف الهندسية:**
+    - ضمان وجود نسخة مفردة محكمة (`Singleton`) تمنع هدر الذاكرة والتعارض.
+    - دعم الوصول المرن: البرمجي المباشر عبر `ExampleService.instance`، والتفاعلي عبر محقن التبعيات `ExampleService.to`.
+    - المنشئ الخاص `._()` يمنع التهيئة العشوائية من خارج الكلاس.
+  - **الشمولية الصارمة:** ينطبق هذا المعيار على كافة الخدمات الحالية والمستقبلية:
+    (`DatePickerService`, `FilePickerService`, `PushNotificationService`, `PublicSettingsService`, `AppExitService`, `SoundService`, `AppCacheService`, `ThemeService`, `LocalizationService`, إلخ).
+- **مصفوفة الفصل الصارم لمسؤوليات الطبقات (`lib/core/` مقابل `lib/widgets/`):**
+  - **طبقة البنية التحتية والخدمات (`lib/core/services/`):**
+    - مخصصة حصرياً لمنطق الأعمال البحت، التخزين، التشفير، دورة حياة الخدمات، أمان الجلسات، التنسيق، والتحقق.
+    - **يُحظر حظرًا باتاً ومطلقاً** كتابة أو تضمين أي كود واجهات بصرية (`StatelessWidget`, `StatefulWidget`, عناصر تخطيط `Column`/`Row`/`Container`, أزرار، تدرجات، ألوان، ثيمات بصرية) داخل أي ملف في مجلد `core/services/`.
+    - إذا احتاجت الخدمة إلى فتح واجهة تفاعلية منبثقة للمستخدم (مثل نافذة اختيار تاريخ، مشغل وسائط، حوار تأكيد خروج)، فإنها **تفوض العرض البصري حصرياً** لويدجت مستقل ونظيف يقيم في `lib/widgets/` (مثل `CustomDatePickerModal.showBottomSheet(...)`, `MediaGalleryViewer.show(...)`, `CustomDialog.show(...)`).
+  - **طبقة الودجات العامة المشتركة (`lib/widgets/`):**
+    - هي الحاضنة الحصرية والوحيدة لكافة شاشات وحاويات وودجات العرض والتفاعل البصري.
+    - خالية من أي منطق أعمال معقد أو مكالمات API مباشرة؛ وظيفتها استقبال المدخلات وتصدير الأحداث وتطبيق نظام التصميم بدقة.
+- **سياسة الإقلاع الخفيف ومنع حظر `main.dart` (Zero-Overhead Bootstrap & Lazy Self-Initialization):**
+  - **معيار الشركات العالمية الكبرى (Enterprise/FAANG Standard):** إبقاء دالة `void main()` رشيقة ونحيفة إلى أقصى حد لضمان أعلى سرعة لإظهار أول إطار بصري للتطبيق (Optimal Cold-Start / TTID - Time to Initial Display).
+  - **يُحظر حظرًا باتاً** حشو أو تعطيل `main()` قبل `runApp()` بتهيئة أدوات مساعدة أو منسقات نصوص (Formatters, Text Helpers, Math Utils, Date Utilities).
+  - كافة الأدوات المساعدة والمنسقات تعتمد **التهيئة الكسولة الذاتية (Lazy Self-Initialization via `ensureInitialized()`)**، بحيث تتهيأ ذاتياً في الخلفية عند أول طلب واستخدام فعلي في الذاكرة دون استهلاك أجزاء من الثانية أثناء الإقلاع البارد.
+  - **تسجيل الخدمات في `InitialBinding`:**
+    - تسجيل كافة الخدمات المركزية المشتركة حصرياً داخل `InitialBinding` باستخدام `Get.lazyPut<T>(() => T.instance, fenix: true)`.
+    - حظر استخدام `Get.putAsync` إلا للخدمات الحرجة التي لا يمكن للتطبيق العمل بدون بياناتها الأولية قبل تحميل الواجهة.
+- **سياسة حظر تكرار الأكواد والاعتماد الإلزامي على الـ Utils والـ Extensions (`Zero Redundancy & Extension-First Policy`):**
+  - **يُحظر حظرًا باتاً ومطلقاً** إعادة كتابة أو تكرار وظائف موجودة فعلياً في `lib/core/utils/` أو `lib/core/constants/`.
+  - الاعتماد الدائم على الأدوات المساعدة المركزية والامتدادات التعبيرية (`DateTimeX`, `StringX`, `NumX`) لجعل الكود أكثر فصاحة وقراءة واختصاراً.
+  - أي منطق متكرر بين أكثر من ملف يجب استخراجه فوراً في أداة مساعدة (`Util`) أو امتداد (`Extension`) نظيف ومختبر.
+
+

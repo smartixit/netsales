@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:netsales/core/models/app_picked_file.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -82,6 +83,9 @@ abstract class IFilePickerService {
 class FilePickerService implements IFilePickerService {
   FilePickerService._();
   static final FilePickerService instance = FilePickerService._();
+
+  static FilePickerService get to =>
+      Get.isRegistered<FilePickerService>() ? Get.find<FilePickerService>() : instance;
 
   final ImagePicker _imagePicker = ImagePicker();
 
