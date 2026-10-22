@@ -17,6 +17,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
@@ -134,7 +135,11 @@ void main() async {
   Get.put<SessionService>(SessionService.instance, permanent: true);
   Get.put<PermissionService>(PermissionService.instance, permanent: true);
 
-  // 4. تهيئة خدمة الإشعارات المركزية وإشعارات الدفع (FCM & Local Notifications)
+  // 4. تهيئة خدمة إعدادات النظام العامة وقنوات الدعم
+  await PublicSettingsService.instance.init();
+  Get.put<PublicSettingsService>(PublicSettingsService.instance, permanent: true);
+
+  // 5. تهيئة خدمة الإشعارات المركزية وإشعارات الدفع (FCM & Local Notifications)
   await PushNotificationService.instance.init();
   Get.put<PushNotificationService>(PushNotificationService.instance, permanent: true);
 

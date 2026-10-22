@@ -474,4 +474,9 @@ abstract final class ApiConstants {
   // ==========================================================================
   static const String adminNotificationsSend = '/admin/notifications/send';
   static const String adminNotificationsUser = '/admin/notifications/user';
+
+  // ==========================================================================
+  // 30. إعدادات النظام العامة (Public System Settings)
+  // ==========================================================================
+  static const String systemSettingsPublic = '/system-settings/public';
 }

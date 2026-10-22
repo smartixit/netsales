@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/device_service.dart';
+import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/sound_service.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/usecases/get_directorates_use_case.dart';
@@ -156,11 +158,17 @@ class RegisterNetworkController extends GetxController {
 
       await CustomAnimationOverlay.hide();
 
-      // إظهار حوار التأكيد والاعتماد بحالة PENDING والانتقال بعده لصفحة تسجيل الدخول
+      // إظهار حوار التأكيد والاعتماد بحالة PENDING مع خيار الدعم الهادئ والانتقال بعده لصفحة تسجيل الدخول
       await CustomDialog.showPending(
         title: 'تم استلام طلبكم بنجاح',
-        message: result.message,
+        message: '${result.message}\nيتم تدقيق ومراجعة الطلب والاعتماد عادة خلال ساعتين إلى 24 ساعة عمل.',
         confirmLabel: 'الانتقال لتسجيل الدخول',
+        secondaryActionLabel: 'هل لديك استفسار؟ تواصل مع الدعم',
+        secondaryActionIcon: Icons.support_agent_rounded,
+        onSecondaryAction: () => UrlLauncherService.openWhatsApp(
+          phoneNumber: PublicSettingsService.instance.supportWhatsApp,
+          message: 'مرحباً فريق الدعم، لقد قمت بتقديم طلب تسجيل مزود شبكة جديد في نظام NetSales وأود الاستفسار عن حالة الطلب.',
+        ),
         onConfirm: () => Get.offAllNamed(AppRoutes.login),
       );
 

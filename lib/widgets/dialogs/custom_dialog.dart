@@ -26,6 +26,9 @@ class CustomDialog extends StatelessWidget {
   final String? cancelLabel;
   final VoidCallback? onConfirm;
   final VoidCallback? onCancel;
+  final String? secondaryActionLabel;
+  final VoidCallback? onSecondaryAction;
+  final dynamic secondaryActionIcon;
   final bool canPop;
   final double? maxWidth;
   final Widget? customHeader;
@@ -41,6 +44,9 @@ class CustomDialog extends StatelessWidget {
     this.cancelLabel,
     this.onConfirm,
     this.onCancel,
+    this.secondaryActionLabel,
+    this.onSecondaryAction,
+    this.secondaryActionIcon,
     this.canPop = true,
     this.maxWidth,
     this.customHeader,
@@ -157,6 +163,9 @@ class CustomDialog extends StatelessWidget {
     required String message,
     String confirmLabel = 'الانتقال لتسجيل الدخول',
     VoidCallback? onConfirm,
+    String? secondaryActionLabel,
+    VoidCallback? onSecondaryAction,
+    dynamic secondaryActionIcon,
     bool canPop = false,
   }) =>
       CustomDialog(
@@ -166,6 +175,9 @@ class CustomDialog extends StatelessWidget {
         message: message,
         confirmLabel: confirmLabel,
         onConfirm: onConfirm,
+        secondaryActionLabel: secondaryActionLabel,
+        onSecondaryAction: onSecondaryAction,
+        secondaryActionIcon: secondaryActionIcon,
         canPop: canPop,
       );
 
@@ -201,6 +213,9 @@ class CustomDialog extends StatelessWidget {
     String? cancelLabel,
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
+    String? secondaryActionLabel,
+    VoidCallback? onSecondaryAction,
+    dynamic secondaryActionIcon,
     Widget? customHeader,
     bool canPop = true,
     double? maxWidth,
@@ -214,6 +229,9 @@ class CustomDialog extends StatelessWidget {
         cancelLabel: cancelLabel,
         onConfirm: onConfirm,
         onCancel: onCancel,
+        secondaryActionLabel: secondaryActionLabel,
+        onSecondaryAction: onSecondaryAction,
+        secondaryActionIcon: secondaryActionIcon,
         customHeader: customHeader,
         canPop: canPop,
         maxWidth: maxWidth,
@@ -230,6 +248,9 @@ class CustomDialog extends StatelessWidget {
       cancelLabel: cancelLabel,
       onConfirm: onConfirm,
       onCancel: onCancel,
+      secondaryActionLabel: secondaryActionLabel,
+      onSecondaryAction: onSecondaryAction,
+      secondaryActionIcon: secondaryActionIcon,
       canPop: canPop,
       maxWidth: maxWidth,
       customHeader: customHeader,
@@ -247,6 +268,9 @@ class CustomDialog extends StatelessWidget {
     String? cancelLabel,
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
+    String? secondaryActionLabel,
+    VoidCallback? onSecondaryAction,
+    dynamic secondaryActionIcon,
     bool canPop = true,
     double? maxWidth,
     Widget? customHeader,
@@ -268,6 +292,9 @@ class CustomDialog extends StatelessWidget {
             cancelLabel: cancelLabel,
             onConfirm: onConfirm,
             onCancel: onCancel,
+            secondaryActionLabel: secondaryActionLabel,
+            onSecondaryAction: onSecondaryAction,
+            secondaryActionIcon: secondaryActionIcon,
             canPop: canPop,
             maxWidth: maxWidth,
             customHeader: customHeader,
@@ -330,6 +357,9 @@ class CustomDialog extends StatelessWidget {
     required String message,
     String? confirmLabel,
     VoidCallback? onConfirm,
+    String? secondaryActionLabel,
+    VoidCallback? onSecondaryAction,
+    dynamic secondaryActionIcon,
     bool canPop = false,
   }) =>
       show(
@@ -338,6 +368,9 @@ class CustomDialog extends StatelessWidget {
         message: message,
         confirmLabel: confirmLabel ?? 'الانتقال لتسجيل الدخول',
         onConfirm: onConfirm,
+        secondaryActionLabel: secondaryActionLabel,
+        onSecondaryAction: onSecondaryAction,
+        secondaryActionIcon: secondaryActionIcon,
         canPop: canPop,
       );
 
@@ -433,6 +466,9 @@ class CustomDialog extends StatelessWidget {
                     cancelLabel: cancelLabel,
                     onConfirm: onConfirm,
                     onCancel: onCancel,
+                    secondaryActionLabel: secondaryActionLabel,
+                    onSecondaryAction: onSecondaryAction,
+                    secondaryActionIcon: secondaryActionIcon,
                   ),
                 ],
               ),

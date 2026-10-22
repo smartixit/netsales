@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
+import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/sound_service.dart';
 
 /// ============================================================================
@@ -27,6 +28,12 @@ class InitialBinding extends Bindings {
     // 4. خدمة الإشعارات المركزية المؤسسية (FCM & Local Notifications)
     Get.lazyPut<PushNotificationService>(
       () => PushNotificationService.instance,
+      fenix: true,
+    );
+
+    // 5. خدمة إعدادات النظام العامة وقنوات الدعم
+    Get.lazyPut<PublicSettingsService>(
+      () => PublicSettingsService.instance,
       fenix: true,
     );
   }

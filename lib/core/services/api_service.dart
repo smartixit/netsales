@@ -898,8 +898,8 @@ class _CryptoInterceptor extends Interceptor {
   /// فحص مسارات النظام العامة المستثناة من التشفير
   bool _isBypassEndpoint(String path) {
     return path.contains(ApiConstants.securityPublicKeys) ||
-        path.contains('/auth/health-check') ||
-        path.contains('/up') ||
-        path.contains('/files/');
+        path.contains(ApiConstants.systemSettingsPublic) ||
+        path.contains(ApiConstants.healthCheck) ||
+        path.contains(ApiConstants.file(path));
   }
 }

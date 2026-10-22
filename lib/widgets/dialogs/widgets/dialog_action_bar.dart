@@ -14,6 +14,9 @@ class DialogActionBar extends StatelessWidget {
   final String? cancelLabel;
   final VoidCallback? onConfirm;
   final VoidCallback? onCancel;
+  final String? secondaryActionLabel;
+  final VoidCallback? onSecondaryAction;
+  final dynamic secondaryActionIcon;
 
   const DialogActionBar({
     super.key,
@@ -22,6 +25,9 @@ class DialogActionBar extends StatelessWidget {
     this.cancelLabel,
     this.onConfirm,
     this.onCancel,
+    this.secondaryActionLabel,
+    this.onSecondaryAction,
+    this.secondaryActionIcon,
   });
 
   @override
@@ -80,6 +86,17 @@ class DialogActionBar extends StatelessWidget {
                 onCancel?.call();
               },
             ),
+
+          // 3. إجراء إضافي/ثانوي (مثل التواصل الهادئ مع الدعم الفني دون إغلاق الحوار)
+          if (secondaryActionLabel != null) ...[
+            if (hasConfirm || hasCancel) AppSpacing.vXs,
+            CustomButton.text(
+              text: secondaryActionLabel,
+              icon: secondaryActionIcon,
+              width: double.infinity,
+              onPressed: onSecondaryAction,
+            ),
+          ],
         ],
       ),
     );

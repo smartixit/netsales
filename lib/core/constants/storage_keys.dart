@@ -37,4 +37,7 @@ abstract final class StorageKeys {
 
   /// آخر رمز إشعارات فورية تم مزامنته مع الخادم بنجاح
   static const String fcmTokenStorage = 'fcm_token_storage';
+
+  /// إعدادات النظام العامة المخزنة محلياً (Public Settings Cache)
+  static const String publicSettings = 'public_settings_cache';
 }

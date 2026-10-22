@@ -5,7 +5,9 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/features/auth/domain/usecases/login_use_case.dart';
+import 'package:netsales/features/auth/presentation/widgets/pending_support_dialog_content.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم واجهة تسجيل الدخول (LoginController)
@@ -101,10 +103,17 @@ class LoginController extends GetxController {
       // 6. التوجيه الفوري للوحة التحكم
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (error) {
-      // 6. إغلاق الـ Overlay فوراً وعرض رسالة الخطأ عبر CustomSnackbar
+      // 6. إغلاق الـ Overlay فوراً وعرض رسالة الخطأ عبر CustomSnackbar أو حوار المراجعة المخصص
       await CustomAnimationOverlay.hide();
 
       final cleanMessage = AppException.sanitizeMessage(error);
+
+      // في حال كان الحساب أو الجهاز أو نقطة البيع لا يزال قيد المراجعة والاعتماد
+      if (cleanMessage.contains('قيد المراجعة')) {
+        await _showPendingSupportDialog(cleanMessage);
+        return;
+      }
+
       CustomSnackbar.show(
         title: 'تعذر تسجيل الدخول',
         message: cleanMessage,
@@ -117,6 +126,19 @@ class LoginController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
     }
+  }
+
+  /// عرض حوار المراجعة والاعتماد المخصص مع قنوات الدعم الفني المباشرة
+  Future<void> _showPendingSupportDialog(String message) async {
+    await CustomDialog.show(
+      type: DialogType.pending,
+      title: 'طلبكم قيد المراجعة والاعتماد',
+      content: PendingSupportDialogContent(
+        message: message,
+        phone: phoneController.text.trim(),
+      ),
+      cancelLabel: 'إغلاق',
+    );
   }
 
   /// التوجيه لصفحة استعادة كلمة المرور
