@@ -5,6 +5,7 @@ import 'package:netsales/core/services/app_exit_service.dart';
 import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/sound_service.dart';
+import 'package:netsales/core/services/date_picker_service.dart';
 
 /// ============================================================================
 /// حقن الاعتماديات العام الموحد للتطبيق (Global Application Bindings)
@@ -41,6 +42,12 @@ class InitialBinding extends Bindings {
     // 6. خدمة الخروج الآمن بالنقر المزدوج المستقلة
     Get.lazyPut<AppExitService>(
       () => AppExitService.instance,
+      fenix: true,
+    );
+
+    // 7. خدمة منتقي التاريخ والوقت الموحدة
+    Get.lazyPut<DatePickerService>(
+      () => DatePickerService.instance,
       fenix: true,
     );
   }

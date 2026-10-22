@@ -180,8 +180,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // التحقق من ظهور ترويسة التطبيق واسم المستخدم ودوره
-      expect(find.text('أحمد صالح اليماني'), findsOneWidget);
+      // التحقق من ظهور ترويسة التطبيق واسم المستخدم المختصر ودوره
+      expect(find.text('أحمد صالح'), findsOneWidget);
       expect(find.text('مزود شبكة معتمد'), findsOneWidget);
 
       // التحقق من ظهور تسميات التبويبات الأربعة

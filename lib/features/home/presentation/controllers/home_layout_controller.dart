@@ -7,6 +7,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/home/presentation/models/home_quick_action.dart';
 import 'package:netsales/features/home/presentation/widgets/home_quick_actions_sheet.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
@@ -141,6 +142,10 @@ class HomeLayoutController extends GetxController {
   /// اسم المستخدم الحالي الكامل
   String get userFullName =>
       SessionService.to.currentUser?.userFullName ?? 'المستخدم';
+
+  /// اسم المستخدم المختصر (الاسم الأول والثاني)
+  String get userShortName =>
+      userFullName.twoNames;
 
   /// رقم هاتف المستخدم الحالي
   String get userPhoneNumber =>

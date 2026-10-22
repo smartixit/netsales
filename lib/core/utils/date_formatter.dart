@@ -8,13 +8,6 @@ import 'package:intl/intl.dart'
 /// تنسيق شامل للتاريخ والوقت
 /// الميلادي عبر intl + الهجري عبر حزمة hijri
 ///
-/// التهيئة — إلزامية مرة واحدة في main():
-///
-///   void main() async {
-///     WidgetsFlutterBinding.ensureInitialized();
-///     await DateFormatter.init();
-///     runApp(const MyApp());
-///   }
 /// ============================================================
 
 enum DateLang { ar, en }
@@ -22,16 +15,25 @@ enum DateLang { ar, en }
 class DateFormatter {
   DateFormatter._();
 
-  /// يجب استدعاؤها مرة واحدة في main() قبل runApp
-  static Future<void> init() async {
-    await initializeDateFormatting('ar');
-    await initializeDateFormatting('en');
+  static final DateFormatter instance = DateFormatter._();
+
+  static bool _initialized = false;
+
+  /// تهيئة كسولة تلقائية عند الحاجة الأولى دون الحاجة لتعطيل إقلاع التطبيق في main()
+  static void ensureInitialized() {
+    if (_initialized) return;
+    _initialized = true;
+    initializeDateFormatting('ar', null);
+    initializeDateFormatting('en', null);
   }
 
   /// اجعلها true إذا أردت الأرقام المشرقية (١٢٣) في المخرجات العربية
   static bool arabicIndicDigits = false;
 
-  static String _locale(DateLang lang) => lang == DateLang.ar ? 'ar' : 'en';
+  static String _locale(DateLang lang) {
+    ensureInitialized();
+    return lang == DateLang.ar ? 'ar' : 'en';
+  }
 
   /// تحويل ٠١٢٣٤٥٦٧٨٩ إلى 0123456789 (intl بالعربية يُخرج أرقاماً مشرقية)
   static String _digits(String s) {

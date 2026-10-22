@@ -7,6 +7,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -59,14 +60,14 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
               AppSpacing.hSm,
 
-              // 2. اسم المستخدم وشارة الدور المعتمد
+              // 2. اسم المستخدم المختصر وشارة الدور المعتمد
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      controller.userFullName,
+                      controller.userShortName,
                       style: AppTypography.titleSmall.copyWith(
                         color: colors.onSurface,
                         fontWeight: FontWeight.bold,
@@ -132,9 +133,7 @@ class _UserAvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final initials = fullName.trim().isNotEmpty
-        ? fullName.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join()
-        : 'ن';
+    final initials = fullName.avatarInitial(fallback: 'ن');
 
     return CustomInteractiveBounce(
       onTap: onTap,
