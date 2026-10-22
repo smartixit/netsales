@@ -479,4 +479,9 @@ abstract final class ApiConstants {
   // 30. إعدادات النظام العامة (Public System Settings)
   // ==========================================================================
   static const String systemSettingsPublic = '/system-settings/public';
+
+  // ==========================================================================
+  // 31. لوحة القيادة والمؤشرات التجميعية (Dashboard Overview)
+  // ==========================================================================
+  static const String dashboardOverview = '/dashboard/overview';
 }

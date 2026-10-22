@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
+import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_view.dart';
 import 'package:netsales/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:netsales/features/home/presentation/widgets/home_offline_banner.dart';
 import 'package:netsales/features/home/presentation/widgets/tabs/home_tab_placeholder.dart';
@@ -41,12 +42,7 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
                   index: controller.selectedIndex.value,
                   children: const [
                     // Tab 0: لوحة القيادة والتوزيع (Dashboard)
-                    HomeTabPlaceholder(
-                      title: 'لوحة القيادة وإدارة التوزيع',
-                      subtitle:
-                          'مؤشرات مبيعات الشبكة، أرصدة نقاط البيع، والطلبات المعلقة',
-                      icon: Icons.grid_view_rounded,
-                    ),
+                    DashboardView(),
 
                     // Tab 1: فواتير المبيعات وطلبات التوريد (Operations)
                     HomeTabPlaceholder(

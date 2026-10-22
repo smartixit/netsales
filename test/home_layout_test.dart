@@ -11,11 +11,52 @@ import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/themes/app_themes.dart';
+import 'package:netsales/features/home/domain/entities/dashboard_overview_entity.dart';
+import 'package:netsales/features/home/domain/repositories/dashboard_repository.dart';
+import 'package:netsales/features/home/domain/usecases/get_dashboard_overview_use_case.dart';
+import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/home/presentation/models/home_quick_action.dart';
 import 'package:netsales/features/home/presentation/screens/home_layout_screen.dart';
 import 'package:netsales/features/home/presentation/widgets/home_quick_actions_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class FakeDashboardRepository implements DashboardRepository {
+  @override
+  Future<DashboardOverviewEntity> getOverview({
+    String period = 'today',
+    int? networkId,
+    int? posId,
+    bool refresh = false,
+  }) async {
+    return const DashboardOverviewEntity(
+      roleKey: 'NETWORK_OWNER',
+      roleLabel: 'لوحة قيادة المزود',
+      period: 'today',
+      context: DashboardContextEntity(
+        networkId: 1,
+        networkName: 'شبكة النورس الحديثة',
+        networkCode: 'NET-001',
+      ),
+      liquidity: DashboardLiquidityEntity(
+        balance: 150000.0,
+        currency: 'YER',
+        status: 'ACTIVE',
+      ),
+      kpis: {
+        'total_sales_amount': 25000.0,
+        'invoices_count': 12,
+        'total_cards_sold': 50,
+      },
+      alerts: [],
+      recentActivities: [],
+      telemetry: DashboardTelemetryEntity(
+        syncedAt: '2026-10-22 20:00:00',
+        serverTime: '20:00:00',
+      ),
+    );
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +71,15 @@ void main() {
     Get.put<PermissionService>(PermissionService.instance, permanent: true);
     await SessionService.instance.init();
     Get.put<SessionService>(SessionService.instance, permanent: true);
+
+    final fakeDashboardRepo = FakeDashboardRepository();
+    final getDashboardOverviewUseCase =
+        GetDashboardOverviewUseCase(fakeDashboardRepo);
+    Get.put<DashboardController>(
+      DashboardController(
+        getDashboardOverviewUseCase: getDashboardOverviewUseCase,
+      ),
+    );
   });
 
   Widget buildTestableWidget(Widget child) {
