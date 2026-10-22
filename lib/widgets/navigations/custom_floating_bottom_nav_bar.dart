@@ -1,275 +1,324 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
+import 'package:netsales/core/themes/app_motion.dart';
+import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
 
+/// ============================================================================
+/// نموذج بيانات عنصر التنقل لشريط التنقل العائم الموحد (CustomFloatingNavItem)
+/// ============================================================================
+class CustomFloatingNavItem {
+  /// الأيقونة في الحالة غير النشطة
+  final IconData icon;
 
-/// شريط التنقل السفلي العائم بتصميم زجاجي عصري
-/// واجهة رفيعة تُحقن تبعياتها عبر الـ constructor (لا `Get.find` داخل الواجهة).
+  /// الأيقونة في الحالة النشطة
+  final IconData activeIcon;
+
+  /// التسمية النصية للتبويب
+  final String label;
+
+  /// عداد الإشعارات أو التنبيهات على التبويب (اختياري)
+  final int? badgeCount;
+
+  /// تلميح إمكانية الوصول والتفاعل (اختياري)
+  final String? tooltip;
+
+  const CustomFloatingNavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    this.badgeCount,
+    this.tooltip,
+  });
+}
+
+/// ============================================================================
+/// شريط التنقل السفلي العائم بتصميم زجاجي موحد (CustomFloatingBottomNavBar)
+/// ============================================================================
+/// ودجت عامة نظيفة ومستقلة تماماً (Decoupled & Pure Generic UI Component)،
+/// خالية من أي تبعيات خاصة بمتحكمات معينة ومطابقة لمعايير ميثاق الكود النظيف.
 class CustomFloatingBottomNavBar extends StatelessWidget {
-  final HomeLayoutController controller;
-  final VoidCallback onCenterActionTap;
+  /// مؤشر التبويب النشط حالياً
+  final int currentIndex;
+
+  /// دالة تغيير التبويب عند النقر
+  final ValueChanged<int> onTap;
+
+  /// قائمة عناصر التبويب
+  final List<CustomFloatingNavItem> items;
+
+  /// دالة النقر على زر الإجراء المركزي العائم (اختياري)
+  final VoidCallback? onCenterActionTap;
+
+  /// أيقونة زر الإجراء المركزي العائم (افتراضياً Icons.add_rounded)
+  final IconData centerActionIcon;
+
+  /// تلميح زر الإجراء المركزي العائم
+  final String? centerActionTooltip;
 
   const CustomFloatingBottomNavBar({
     super.key,
-    required this.controller,
-    required this.onCenterActionTap,
+    required this.currentIndex,
+    required this.onTap,
+    required this.items,
+    this.onCenterActionTap,
+    this.centerActionIcon = Icons.add_rounded,
+    this.centerActionTooltip,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = context.colors;
+    final hasCenterAction = onCenterActionTap != null;
+    final halfLength = items.length ~/ 2;
 
     return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-      height: 72.h,
-      decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(
-          color: colorScheme.primary.withValues(alpha: 0.12),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.12),
-            blurRadius: 28,
-            spreadRadius: 2,
-            offset: const Offset(0, 10),
-          ),
-          BoxShadow(
-            color: colorScheme.primary.withValues(alpha: 0.08),
-            blurRadius: 16,
-            spreadRadius: -4,
-            offset: const Offset(0, 4),
-          ),
-        ],
+      margin: EdgeInsets.fromLTRB(
+        AppSpacing.cardPadding,
+        0,
+        AppSpacing.cardPadding,
+        AppSpacing.cardPadding,
       ),
-      child: Obx(() {
-        final current = controller.selectedIndex.value;
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _NavItem(
-              key: const ValueKey('nav_0'),
-              icon: Icons.grid_view_outlined,
-              activeIcon: Icons.grid_view_rounded,
-              label: 'الرئيسية',
-              index: 0,
-              current: current,
-              colorScheme: colorScheme,
-              onTap: () => controller.changeTab(0),
-            ),
-            _NavItem(
-              key: const ValueKey('nav_1'),
-              icon: Icons.receipt_long_outlined,
-              activeIcon: Icons.receipt_long_rounded,
-              label: 'المبيعات',
-              index: 1,
-              current: current,
-              colorScheme: colorScheme,
-              onTap: () => controller.changeTab(1),
-            ),
-            _buildCenterActionButton(context, colorScheme),
-            _NavItem(
-              key: const ValueKey('nav_2'),
-              icon: Icons.people_alt_outlined,
-              activeIcon: Icons.people_alt_rounded,
-              label: 'العملاء',
-              index: 2,
-              current: current,
-              colorScheme: colorScheme,
-              onTap: () => controller.changeTab(2),
-            ),
-            _NavItem(
-              key: const ValueKey('nav_3'),
-              icon: Icons.settings_outlined,
-              activeIcon: Icons.settings,
-              label: 'الإعدادات',
-              index: 3,
-              current: current,
-              colorScheme: colorScheme,
-              onTap: () => controller.changeTab(3),
+      height: 76.h,
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: colors.surface.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(AppRadius.xxxl),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: 0.5),
+          width: 1.w,
+        ),
+        boxShadow: AppElevation.level4(context),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          for (int i = 0; i < items.length; i++) ...[
+            if (hasCenterAction && i == halfLength)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+                child: FloatingCenterActionButton(
+                  key: const ValueKey('nav_center_fab'),
+                  icon: centerActionIcon,
+                  tooltip: centerActionTooltip,
+                  onTap: onCenterActionTap!,
+                ),
+              ),
+            Expanded(
+              child: FloatingNavBarItemWidget(
+                key: ValueKey('nav_item_$i'),
+                item: items[i],
+                index: i,
+                isSelected: currentIndex == i,
+                onTap: () => onTap(i),
+              ),
             ),
           ],
-        );
-      }),
-    );
-  }
-
-  Widget _buildCenterActionButton(
-    BuildContext context,
-    ColorScheme colorScheme,
-  ) {
-    return InteractiveBounce(
-      onTap: onCenterActionTap,
-      child: Container(
-        width: 52.w,
-        height: 52.w,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [colorScheme.primary, colorScheme.secondary],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.primary.withValues(alpha: 0.4),
-              blurRadius: 14,
-              spreadRadius: 1,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Icon(
-            Icons.add_rounded,
-            color: colorScheme.onPrimary,
-            size: 28.sp,
-          ),
-        ),
+        ],
       ),
     );
   }
 }
 
-class _NavItem extends StatefulWidget {
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
+/// ============================================================================
+/// ودجت عنصر التنقل المستقلة (FloatingNavBarItemWidget)
+/// ============================================================================
+class FloatingNavBarItemWidget extends StatelessWidget {
+  final CustomFloatingNavItem item;
   final int index;
-  final int current;
-  final ColorScheme colorScheme;
+  final bool isSelected;
   final VoidCallback onTap;
 
-  const _NavItem({
+  const FloatingNavBarItemWidget({
     super.key,
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
+    required this.item,
     required this.index,
-    required this.current,
-    required this.colorScheme,
+    required this.isSelected,
     required this.onTap,
   });
 
   @override
-  State<_NavItem> createState() => _NavItemState();
-}
+  Widget build(BuildContext context) {
+    final colors = context.colors;
 
-class _NavItemState extends State<_NavItem>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _scaleController;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _scaleController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 450),
-    );
-    _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _scaleController,
-        curve: Curves.easeOutBack,
-        reverseCurve: Curves.easeInOut,
+    return CustomInteractiveBounce(
+      onTap: onTap,
+      child: Tooltip(
+        message: item.tooltip ?? item.label,
+        child: AnimatedContainer(
+          duration: AppMotion.fast,
+          curve: AppMotion.standard,
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.xxs,
+            vertical: AppSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? colors.primary.withValues(alpha: 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            border: Border.all(
+              color: isSelected
+                  ? colors.primary.withValues(alpha: 0.25)
+                  : Colors.transparent,
+              width: 1.w,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              NavBadgeIconWidget(
+                item: item,
+                isSelected: isSelected,
+              ),
+              AppSpacing.vXxs,
+              AnimatedDefaultTextStyle(
+                duration: AppMotion.fast,
+                curve: AppMotion.standard,
+                style: AppTypography.labelSmall.copyWith(
+                  color: isSelected
+                      ? colors.primary
+                      : colors.onSurfaceVariant.withValues(alpha: 0.75),
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 10.sp,
+                ),
+                child: Text(
+                  item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
-    _scaleController.value = 1.0;
   }
+}
 
-  @override
-  void didUpdateWidget(_NavItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // عند اختيار العنصر حديثاً — نبضة ارتداد واضحة
-    if (oldWidget.current != widget.current && widget.current == widget.index) {
-      _scaleController.forward(from: 0.0);
-    }
-  }
+/// ============================================================================
+/// ودجت أيقونة التبويب مع شارة التنبيهات المستقلة (NavBadgeIconWidget)
+/// ============================================================================
+class NavBadgeIconWidget extends StatelessWidget {
+  final CustomFloatingNavItem item;
+  final bool isSelected;
 
-  @override
-  void dispose() {
-    _scaleController.dispose();
-    super.dispose();
-  }
+  const NavBadgeIconWidget({
+    super.key,
+    required this.item,
+    required this.isSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isSelected = widget.current == widget.index;
+    final colors = context.colors;
 
-    return GestureDetector(
-      onTapDown: (_) => _scaleController.reverse(),
-      onTapUp: (_) {
-        _scaleController.forward();
-        widget.onTap();
+    final iconWidget = AnimatedSwitcher(
+      duration: AppMotion.fast,
+      switchInCurve: AppMotion.springy,
+      switchOutCurve: AppMotion.standard,
+      transitionBuilder: (child, animation) {
+        return ScaleTransition(
+          scale: animation,
+          child: FadeTransition(opacity: animation, child: child),
+        );
       },
-      onTapCancel: () => _scaleController.forward(),
-      behavior: HitTestBehavior.opaque,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutBack,
-          width: 70.w,
-          padding: EdgeInsets.symmetric(vertical: 6.h),
-          decoration: isSelected
-              ? BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      widget.colorScheme.primary.withValues(alpha: 0.14),
-                      widget.colorScheme.secondary.withValues(alpha: 0.06),
-                    ],
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                  ),
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(
-                    color: widget.colorScheme.primary.withValues(alpha: 0.2),
-                    width: 1,
-                  ),
-                )
-              : null,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                switchInCurve: Curves.easeOutBack,
-                switchOutCurve: Curves.easeIn,
-                transitionBuilder: (child, animation) {
-                  return ScaleTransition(
-                    scale: animation,
-                    child: FadeTransition(opacity: animation, child: child),
-                  );
-                },
-                child: Icon(
-                  isSelected ? widget.activeIcon : widget.icon,
-                  key: ValueKey(isSelected),
-                  color: isSelected
-                      ? widget.colorScheme.primary
-                      : widget.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.7,
-                        ),
-                  size: 22.sp,
-                ),
+      child: Icon(
+        isSelected ? item.activeIcon : item.icon,
+        key: ValueKey('${item.label}_${isSelected ? 'active' : 'inactive'}'),
+        color: isSelected
+            ? colors.primary
+            : colors.onSurfaceVariant.withValues(alpha: 0.75),
+        size: 22.r,
+      ),
+    );
+
+    if (item.badgeCount == null || item.badgeCount! <= 0) {
+      return iconWidget;
+    }
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        iconWidget,
+        PositionedDirectional(
+          top: -2.h,
+          end: -6.w,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.xxs,
+              vertical: 1.h,
+            ),
+            decoration: BoxDecoration(
+              color: colors.error,
+              borderRadius: BorderRadius.circular(AppRadius.full),
+            ),
+            constraints: BoxConstraints(minWidth: 14.r, minHeight: 14.r),
+            child: Text(
+              item.badgeCount! > 99 ? '99+' : '${item.badgeCount}',
+              textAlign: TextAlign.center,
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onError,
+                fontSize: 9.sp,
+                height: 1.1,
               ),
-              SizedBox(height: 3.h),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutBack,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: isSelected
-                      ? widget.colorScheme.primary
-                      : widget.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.7,
-                        ),
-                  fontSize: isSelected ? 10.sp : 9.5.sp,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                ),
-                child: Text(widget.label),
-              ),
-            ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// ============================================================================
+/// ودجت زر الإجراء المركزي العائم المستقلة (FloatingCenterActionButton)
+/// ============================================================================
+class FloatingCenterActionButton extends StatelessWidget {
+  final IconData icon;
+  final String? tooltip;
+  final VoidCallback onTap;
+
+  const FloatingCenterActionButton({
+    super.key,
+    required this.icon,
+    this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return CustomInteractiveBounce(
+      onTap: onTap,
+      child: Tooltip(
+        message: tooltip ?? 'إجراء سريع',
+        child: Container(
+          width: 50.r,
+          height: 50.r,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: AppGradients.financialHero(context),
+            boxShadow: AppElevation.glow(
+              context,
+              colors.primary,
+              alpha: 0.4,
+              blur: 16.r,
+            ),
+          ),
+          child: Center(
+            child: Icon(
+              icon,
+              color: colors.onPrimary,
+              size: 24.r,
+            ),
           ),
         ),
       ),
