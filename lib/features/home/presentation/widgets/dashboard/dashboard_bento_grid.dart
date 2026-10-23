@@ -68,7 +68,7 @@ class DashboardBentoGrid extends StatelessWidget {
                 title: 'إجمالي المبيعات',
                 value: AmountFormatter.formatValue(curSales),
                 unit: 'ر.ي',
-                badgeText: '${isPositiveGrowth ? '+' : ''}${growthPct.toStringAsFixed(1)}%',
+                badgeText: '${isPositiveGrowth ? '+' : ''}${AmountFormatter.formatValue(growthPct, decimalPlaces: 1)}%',
                 isPositiveBadge: isPositiveGrowth,
               ),
             ),

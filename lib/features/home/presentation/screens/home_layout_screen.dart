@@ -6,6 +6,7 @@ import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_
 import 'package:netsales/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:netsales/widgets/feedback/custom_offline_banner.dart';
 import 'package:netsales/widgets/feedback/custom_tab_placeholder.dart';
+import 'package:netsales/features/operations/presentation/screens/operations_screen.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 import 'package:netsales/widgets/navigations/double_back_exit_scope.dart';
 
@@ -30,9 +31,7 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
           children: [
             // شريط التنبيه اللحظي لقطع الاتصال الشبكي
             Obx(
-              () => CustomOfflineBanner(
-                isOffline: !controller.isOnline.value,
-              ),
+              () => CustomOfflineBanner(isOffline: !controller.isOnline.value),
             ),
 
             // الحاوية متعددة التبويبات مع الحفاظ التام على الحالة (IndexedStack)
@@ -45,14 +44,8 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
                     DashboardView(),
 
                     // Tab 1: فواتير المبيعات وطلبات التوريد (Operations)
-                    CustomTabPlaceholder(
-                      title: 'مركز مبيعات وتوريد الكروت',
-                      subtitle:
-                          'فواتير مبيعات كروت الشبكة لنقاط البيع ومتابعة طلبات التوريد والاعتماد',
-                      icon: Icons.receipt_long_rounded,
-                    ),
+                    OperationsScreen(),
 
-                    // Tab 2: شبكة الشركاء ونقاط التوزيع (Hub)
                     CustomTabPlaceholder(
                       title: 'شبكة الشركاء ونقاط التوزيع',
                       subtitle:

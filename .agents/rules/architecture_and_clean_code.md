@@ -485,3 +485,20 @@ lib/
 - Generic widgets live in `lib/widgets/` and MUST be prefixed with `custom_` in both file and class name.
 - Feature-specific widgets stay in `features/[feature]/presentation/widgets/`.
 - Generic = no feature controller/entity/text/icon dependency; reusable across >=2 features.
+
+
+---
+
+## Skeleton Shimmer & State Widgets
+- Base: `CustomSkeletonShimmer` (context.colors, reduced-motion aware).
+- Variants: `CustomSkeletonCard`, `CustomSkeletonListTile`, `CustomSkeletonGrid`, `CustomSkeletonText`.
+- States: `CustomLoadingState`, `CustomEmptyState`, `CustomErrorState` (retry).
+- All in `lib/widgets/feedback/` with `custom_` prefix.
+
+
+---
+
+## Amount/Number Formatter Utils
+- Use `AmountFormatter` for all amount/number display.
+- Avoid `toStringAsFixed` in UI; use `AmountFormatter.formatValue(...)`.
+- Keep formatter project-agnostic and reusable.

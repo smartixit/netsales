@@ -485,3 +485,21 @@ lib/
 - أي ودجت عام (project-agnostic) في `lib/widgets/` يجب أن يبدأ اسم ملفه وكلاسه بـ `custom_` (مثل `CustomOfflineBanner`, `CustomTabPlaceholder`).
 - الودجات الخاصة بالميزة (feature-specific) تبقى في `features/[feature]/presentation/widgets/` بدون بادئة.
 - "عام" = لا يعتمد على controller/entity/text/icon خاص بالميزة، وقابل لإعادة الاستخدام في >=2 features.
+
+
+---
+
+## 26. Skeleton Shimmer & State Widgets (Loading/Empty/Error/Retry)
+- Reusable skeleton shimmer widgets live in `lib/widgets/feedback/` with `custom_` prefix.
+- `CustomSkeletonShimmer` wraps `Shimmer.fromColors` using `context.colors` (no hardcoded colors).
+- Respect reduced motion (`AppMotion.disabled(context)` -> disable shimmer).
+- State widgets: `CustomLoadingState`, `CustomEmptyState`, `CustomErrorState` (retry via `CustomButton`).
+- Use Lottie assets from `assets/animations/` (loading/error/no_data) for state widgets.
+
+
+---
+
+## 27. Amount/Number Formatter Utils (No toStringAsFixed in UI)
+- Use `AmountFormatter` (`lib/core/utils/amount_formatter.dart`) for all amount/number display.
+- Do not use `toStringAsFixed` in widgets/screens; use `AmountFormatter.formatValue(...)`.
+- Keep `AmountFormatter` project-agnostic and reusable.
