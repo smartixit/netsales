@@ -34,5 +34,10 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     expect(find.byType(MyApp), findsOneWidget);
+
+    // Dispose the widget tree to cancel infinite animation tickers/timers
+    // (CustomBrandLogo halo uses a repeating AnimationController).
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
   });
 }
