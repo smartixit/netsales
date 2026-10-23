@@ -11,6 +11,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
+import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
@@ -78,6 +79,8 @@ class ApiService {
   /// تسجيل المعترضات (Interceptors)
   void _configureInterceptors() {
     _dio.interceptors.addAll([
+      // 0. Centralized connectivity guard (fail-fast, no retries when offline)
+      _ConnectivityInterceptor(),
       _RetryInterceptor(_dio),
       _InfinityFreeChallengeInterceptor(_dio),
       _SessionAuthInterceptor(),
@@ -744,6 +747,28 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
 }
 
 /// معترض إعادة المحاولة التلقائية (Retry with Exponential Backoff) لطلبات GET الآمنة
+/// ============================================================================
+/// Centralized Connectivity Guard (Option C)
+/// ============================================================================
+/// Fail-fast when offline; keeps UI/controllers free from pre-checks.
+/// Uses InternetConnectionService (initialized in bootstrap).
+class _ConnectivityInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    if (!InternetConnectionService.instance.isConnected) {
+      handler.reject(
+        DioException(
+          requestOptions: options,
+          type: DioExceptionType.connectionError,
+          message: 'No internet connection',
+        ),
+      );
+      return;
+    }
+    handler.next(options);
+  }
+}
+
 class _RetryInterceptor extends Interceptor {
   final Dio _dio;
   static const int _maxRetries = 2;
