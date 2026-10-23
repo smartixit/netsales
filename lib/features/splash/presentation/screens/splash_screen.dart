@@ -16,13 +16,15 @@ class SplashScreen extends GetView<SplashController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    // Override: splash has a dark gradient background (force light icons).
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: Color(0xFF003B32),
+        systemNavigationBarColor: Colors.transparent,
         systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarDividerColor: Colors.transparent,
       ),
       child: Scaffold(
         backgroundColor: colors.surface,

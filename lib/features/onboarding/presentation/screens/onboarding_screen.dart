@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -19,22 +19,8 @@ class OnboardingScreen extends GetView<OnboardingController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: controller.theme.isDarkMode
-            ? Brightness.dark
-            : Brightness.light,
-        statusBarBrightness: controller.theme.isDarkMode
-            ? Brightness.dark
-            : Brightness.light,
-        systemNavigationBarColor: colors.surface,
-        systemNavigationBarIconBrightness: controller.theme.isDarkMode
-            ? Brightness.dark
-            : Brightness.light,
-      ),
-      child: Scaffold(
-        backgroundColor: colors.surface,
+    return Scaffold(
+      backgroundColor: colors.surface,
         body: Container(
           width: double.infinity,
           height: double.infinity,
@@ -121,7 +107,6 @@ class OnboardingScreen extends GetView<OnboardingController> {
             ),
           ),
         ),
-      ),
     );
   }
 }
