@@ -4,8 +4,8 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_view.dart';
 import 'package:netsales/features/home/presentation/widgets/home_app_bar.dart';
-import 'package:netsales/features/home/presentation/widgets/home_offline_banner.dart';
-import 'package:netsales/features/home/presentation/widgets/home_tab_placeholder.dart';
+import 'package:netsales/widgets/feedback/custom_offline_banner.dart';
+import 'package:netsales/widgets/feedback/custom_tab_placeholder.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 import 'package:netsales/widgets/navigations/double_back_exit_scope.dart';
 
@@ -30,7 +30,7 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
           children: [
             // شريط التنبيه اللحظي لقطع الاتصال الشبكي
             Obx(
-              () => HomeOfflineBanner(
+              () => CustomOfflineBanner(
                 isOffline: !controller.isOnline.value,
               ),
             ),
@@ -45,7 +45,7 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
                     DashboardView(),
 
                     // Tab 1: فواتير المبيعات وطلبات التوريد (Operations)
-                    HomeTabPlaceholder(
+                    CustomTabPlaceholder(
                       title: 'مركز مبيعات وتوريد الكروت',
                       subtitle:
                           'فواتير مبيعات كروت الشبكة لنقاط البيع ومتابعة طلبات التوريد والاعتماد',
@@ -53,7 +53,7 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
                     ),
 
                     // Tab 2: شبكة الشركاء ونقاط التوزيع (Hub)
-                    HomeTabPlaceholder(
+                    CustomTabPlaceholder(
                       title: 'شبكة الشركاء ونقاط التوزيع',
                       subtitle:
                           'إدارة نقاط البيع والوكلاء، شبكات الإنترنت، وباقات الكروت والخصومات',
@@ -61,7 +61,7 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
                     ),
 
                     // Tab 3: المحافظ والمالية والإعدادات (More)
-                    HomeTabPlaceholder(
+                    CustomTabPlaceholder(
                       title: 'المحافظ والمالية والإعدادات',
                       subtitle:
                           'محافظ الشبكات ونقاط البيع، المصروفات التشغيلية، والدعم الفني',

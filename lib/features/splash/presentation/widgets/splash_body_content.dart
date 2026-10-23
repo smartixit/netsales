@@ -6,7 +6,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/splash/presentation/controllers/splash_controller.dart';
-import 'package:netsales/features/splash/presentation/widgets/splash_loading_indicator_bar.dart';
+import 'package:netsales/widgets/feedback/custom_loading_indicator_bar.dart';
 import 'package:netsales/widgets/brand/custom_brand_logo.dart';
 
 class SplashBodyContent extends StatelessWidget {
@@ -71,7 +71,7 @@ class SplashBodyContent extends StatelessWidget {
           const Spacer(flex: 3),
 
           // 4. شريط التحميل الانسيابي المتحرك في الأسفل
-          const SplashLoadingIndicatorBar(),
+          const CustomLoadingIndicatorBar(),
           AppSpacing.vHuge,
         ],
       ),

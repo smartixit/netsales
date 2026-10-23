@@ -10,10 +10,10 @@ import 'package:netsales/core/themes/app_typography.dart';
 /// ============================================================================
 /// يظهر في أعلى الشاشة الرئيسية بانسيابية فور انقطاع الاتصال بالإنترنت
 /// ويختفي تلقائياً عند استعادة الاتصال دون إزعاج المستخدم بنوافذ معرقلة.
-class HomeOfflineBanner extends StatelessWidget {
+class CustomOfflineBanner extends StatelessWidget {
   final bool isOffline;
 
-  const HomeOfflineBanner({
+  const CustomOfflineBanner({
     super.key,
     required this.isOffline,
   });

@@ -6,8 +6,8 @@ import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
 /// عنصر متناسق لعرض شروط ومعايير قوة كلمة المرور بالاعتماد الكامل على ScreenUtil
-class PasswordRequirementItem extends StatelessWidget {
-  const PasswordRequirementItem({
+class CustomPasswordRequirementItem extends StatelessWidget {
+  const CustomPasswordRequirementItem({
     super.key,
     required this.isValid,
     required this.label,

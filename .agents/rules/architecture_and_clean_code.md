@@ -477,3 +477,11 @@ lib/
   - أي منطق متكرر بين أكثر من ملف يجب استخراجه فوراً في أداة مساعدة (`Util`) أو امتداد (`Extension`) نظيف ومختبر.
 
 
+
+
+---
+
+## Shared Generic Widgets (custom_ prefix)
+- Generic widgets live in `lib/widgets/` and MUST be prefixed with `custom_` in both file and class name.
+- Feature-specific widgets stay in `features/[feature]/presentation/widgets/`.
+- Generic = no feature controller/entity/text/icon dependency; reusable across >=2 features.

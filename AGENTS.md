@@ -477,3 +477,11 @@ lib/
   - أي منطق متكرر بين أكثر من ملف يجب استخراجه فوراً في أداة مساعدة (`Util`) أو امتداد (`Extension`) نظيف ومختبر.
 
 
+
+
+---
+
+## 25. بادئة `custom_` للودجات العامة (Generic Widgets)
+- أي ودجت عام (project-agnostic) في `lib/widgets/` يجب أن يبدأ اسم ملفه وكلاسه بـ `custom_` (مثل `CustomOfflineBanner`, `CustomTabPlaceholder`).
+- الودجات الخاصة بالميزة (feature-specific) تبقى في `features/[feature]/presentation/widgets/` بدون بادئة.
+- "عام" = لا يعتمد على controller/entity/text/icon خاص بالميزة، وقابل لإعادة الاستخدام في >=2 features.

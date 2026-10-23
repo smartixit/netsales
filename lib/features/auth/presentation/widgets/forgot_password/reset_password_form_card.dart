@@ -9,7 +9,7 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/presentation/controllers/reset_password_controller.dart';
-import 'package:netsales/features/auth/presentation/widgets/forgot_password/password_requirement_item.dart';
+import 'package:netsales/widgets/inputs/custom_password_requirement_item.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -115,23 +115,23 @@ class ResetPasswordFormCard extends StatelessWidget {
                     spacing: AppSpacing.sm,
                     runSpacing: AppSpacing.xs,
                     children: [
-                      PasswordRequirementItem(
+                      CustomPasswordRequirementItem(
                         label: '8 أحرف على الأقل',
                         isValid: controller.hasMinLength.value,
                       ),
-                      PasswordRequirementItem(
+                      CustomPasswordRequirementItem(
                         label: 'حرف كبير (A-Z)',
                         isValid: controller.hasUppercase.value,
                       ),
-                      PasswordRequirementItem(
+                      CustomPasswordRequirementItem(
                         label: 'حرف صغير (a-z)',
                         isValid: controller.hasLowercase.value,
                       ),
-                      PasswordRequirementItem(
+                      CustomPasswordRequirementItem(
                         label: 'رقم (0-9)',
                         isValid: controller.hasDigit.value,
                       ),
-                      PasswordRequirementItem(
+                      CustomPasswordRequirementItem(
                         label: 'رمز خاص (!@#\$%)',
                         isValid: controller.hasSpecialChar.value,
                       ),

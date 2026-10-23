@@ -9,12 +9,12 @@ import 'package:netsales/core/themes/app_typography.dart';
 /// ودجت التبويب المؤقتة الأنيقة (HomeTabPlaceholder)
 /// ============================================================================
 /// تُعرض داخل تبويبات HomeLayout لحين استكمال شريحة كل وحدة تالية في الخطة.
-class HomeTabPlaceholder extends StatelessWidget {
+class CustomTabPlaceholder extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
 
-  const HomeTabPlaceholder({
+  const CustomTabPlaceholder({
     super.key,
     required this.title,
     required this.subtitle,
