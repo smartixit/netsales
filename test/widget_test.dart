@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/services/permission_service.dart';
@@ -37,7 +38,7 @@ void main() {
 
     // Dispose the widget tree to cancel infinite animation tickers/timers
     // (CustomBrandLogo halo uses a repeating AnimationController).
-    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(const SizedBox());
     await tester.pump();
   });
 }
