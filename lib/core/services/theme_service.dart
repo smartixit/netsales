@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/services/storage_service.dart';
+import 'package:netsales/core/utils/system_ui_style_resolver.dart';
 
 /// ============================================================================
 /// خدمة إدارة المظهر التفاعلية (Enterprise Reactive Theme Service)
 /// ============================================================================
 /// تدير التبديل اللحظي بين الوضعين الفاتح والداكن بنقرة واحدة (One-Click Toggle)،
 /// مع الحفظ التلقائي في التخزين المحلي ومزامنة أشرطة النظام والاهتزاز اللمسي.
-class ThemeService extends GetxService {
+/// - تُراقب دورة حياة التطبيق (WidgetsBindingObserver) لإعادة تطبيق أشرطة
+///   النظام بعد background/foreground (Guaranteed).
+class ThemeService extends GetxService with WidgetsBindingObserver {
   ThemeService._();
 
   static final ThemeService instance = ThemeService._();
-  
+
   static ThemeService get to => Get.find<ThemeService>();
 
   final Rx<ThemeMode> _themeMode = ThemeMode.system.obs;
@@ -28,6 +31,26 @@ class ThemeService extends GetxService {
       return brightness == Brightness.dark;
     }
     return _themeMode.value == ThemeMode.dark;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  /// إعادة تطبيق أشرطة النظام بعد العودة من الخلفية (Guaranteed)
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      syncSystemOverlay(isDarkMode);
+    }
   }
 
   /// تهيئة الخدمة وقراءة الوضع المخزن مسبقاً عند إقلاع التطبيق
@@ -86,17 +109,23 @@ class ThemeService extends GetxService {
     StorageService.instance.saveThemeMode(stringValue);
   }
 
-  /// مزامنة ألوان أيقونات أشرطة النظام لمنع ظهور أيقونات بيضاء على خلفية فاتحة
+  /// مزامنة ألوان/أنماط أشرطة النظام (Single Source: SystemUiStyleResolver)
   void syncSystemOverlay(bool isDark) {
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarIconBrightness:
-            isDark ? Brightness.light : Brightness.dark,
-      ),
-    );
+    final ctx = Get.context;
+    if (ctx != null) {
+      SystemUiStyleResolver.apply(ctx);
+    } else {
+      // Fallback (bootstrap safety)
+      SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarIconBrightness:
+              isDark ? Brightness.light : Brightness.dark,
+        ),
+      );
+    }
   }
 }

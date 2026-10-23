@@ -24,6 +24,7 @@ import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
+import 'package:netsales/core/utils/system_ui_style_resolver.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -153,6 +154,9 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
+  // Edge-to-Edge (Android 15+ standard) — Guaranteed modern system bars
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
   // 6. تهيئة خدمة الروابط الموحدة وربطها بالتنبيهات المركزية (UrlLauncherService)
   UrlLauncherService.configure(
     UrlLauncherConfig(
@@ -212,15 +216,18 @@ class MyApp extends StatelessWidget {
               final mediaQuery = MediaQuery.of(ctx);
               // تحديد نطاق أمان لحجم الخط بين 85% كحد أدنى و115% كحد أقصى
               // لحماية تناسق الواجهات من التشوه مع الحفاظ على إمكانية الوصول
-              return MediaQuery(
-                data: mediaQuery.copyWith(
-                  textScaler: mediaQuery.textScaler.clamp(
-                    minScaleFactor: 0.85,
-                    maxScaleFactor: 1.15,
+              return AnnotatedRegion<SystemUiOverlayStyle>(
+                value: SystemUiStyleResolver.resolve(ctx),
+                child: MediaQuery(
+                  data: mediaQuery.copyWith(
+                    textScaler: mediaQuery.textScaler.clamp(
+                      minScaleFactor: 0.85,
+                      maxScaleFactor: 1.15,
+                    ),
                   ),
-                ),
-                child: CustomThemeSwitcher(
-                  child: appChild ?? const SizedBox.shrink(),
+                  child: CustomThemeSwitcher(
+                    child: appChild ?? const SizedBox.shrink(),
+                  ),
                 ),
               );
             },
