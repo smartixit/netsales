@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:netsales/core/cache/net_sales_cache_manager.dart';
+import 'package:netsales/core/cache/netsales_cache_manager.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/services/app_cache_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';

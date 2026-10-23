@@ -502,3 +502,10 @@ lib/
 - Use `AmountFormatter` for all amount/number display.
 - Avoid `toStringAsFixed` in UI; use `AmountFormatter.formatValue(...)`.
 - Keep formatter project-agnostic and reusable.
+
+
+---
+
+## File Size Formatter Utils
+- Use `FileSizeFormatter` for file/cache size display.
+- Avoid `toStringAsFixed` for sizes; centralize in `FileSizeFormatter`.

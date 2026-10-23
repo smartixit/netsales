@@ -2,9 +2,11 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:netsales/core/utils/file_size_formatter.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/painting.dart';
-import 'package:netsales/core/cache/net_sales_cache_manager.dart';
+import 'package:netsales/core/cache/netsales_cache_manager.dart';
 import 'package:netsales/core/config/app_environment.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -156,15 +158,7 @@ class AppCacheService {
   /// إرجاع حجم كاش الوسائط بصيغة عربية منسقة (ميجابايت / كيلوبايت)
   Future<String> getFormattedCacheSize() async {
     final bytes = await getCacheSizeBytes();
-    if (bytes <= 0) return '0.00 ميجابايت';
-
-    final mb = bytes / (1024 * 1024);
-    if (mb >= 1.0) {
-      return '${mb.toStringAsFixed(2)} ميجابايت';
-    }
-
-    final kb = bytes / 1024;
-    return '${kb.toStringAsFixed(1)} كيلوبايت';
+    return FileSizeFormatter.format(bytes);
   }
 
   /// تفريغ كاش الوسائط والملفات بالكامل من القرص والذاكرة

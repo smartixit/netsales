@@ -73,7 +73,6 @@ class SaleInvoiceModel extends SaleInvoiceEntity {
       'invoice_id': invoiceId,
       'network_id': networkId,
       'pos_id': posId,
-      'invoice_uuid': invoiceUuid,
       'sale_type': saleType,
       'invoice_total_amount': invoiceTotalAmount,
       'paid_amount': paidAmount,

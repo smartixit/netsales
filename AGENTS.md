@@ -503,3 +503,10 @@ lib/
 - Use `AmountFormatter` (`lib/core/utils/amount_formatter.dart`) for all amount/number display.
 - Do not use `toStringAsFixed` in widgets/screens; use `AmountFormatter.formatValue(...)`.
 - Keep `AmountFormatter` project-agnostic and reusable.
+
+
+---
+
+## 28. File Size Formatter Utils (No toStringAsFixed for sizes)
+- Use `FileSizeFormatter` (`lib/core/utils/file_size_formatter.dart`) for file/cache size display.
+- Do not use `toStringAsFixed` for sizes in UI/services; centralize in `FileSizeFormatter`.

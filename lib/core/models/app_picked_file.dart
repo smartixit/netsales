@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:netsales/core/utils/file_size_formatter.dart';
+
 /// كائن الدومين النقي للملفات والمرفقات المختارة في النظام (AppPickedFile)
 ///
 /// كائن قيمة غير قابل للتعديل (Immutable Value Object) يمثل أي ملف أو صورة تم اختيارها
@@ -48,20 +50,7 @@ class AppPickedFile {
   File toFile() => File(path);
 
   /// حجم الملف بتنسيق مقروء للبشر (مثل: 1.4 MB أو 520 KB)
-  String get sizeFormatted {
-    if (sizeBytes <= 0) return '0 B';
-    if (sizeBytes < 1024) return '$sizeBytes B';
-    if (sizeBytes < 1024 * 1024) {
-      final kb = sizeBytes / 1024;
-      return '${kb.toStringAsFixed(kb < 10 ? 1 : 0)} KB';
-    }
-    if (sizeBytes < 1024 * 1024 * 1024) {
-      final mb = sizeBytes / (1024 * 1024);
-      return '${mb.toStringAsFixed(mb < 10 ? 2 : 1)} MB';
-    }
-    final gb = sizeBytes / (1024 * 1024 * 1024);
-    return '${gb.toStringAsFixed(2)} GB';
-  }
+  String get sizeFormatted => FileSizeFormatter.format(sizeBytes);
 
   /// هل الملف صورة؟
   bool get isImage {

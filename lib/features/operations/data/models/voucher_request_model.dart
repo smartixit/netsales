@@ -72,7 +72,6 @@ class VoucherRequestModel extends VoucherRequestEntity {
       'request_id': requestId,
       'network_id': networkId,
       'pos_id': posId,
-      'request_uuid': requestUuid,
       'sale_type': saleType,
       'request_total_amount': requestTotalAmount,
       'status': status,
