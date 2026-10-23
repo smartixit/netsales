@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_view.dart';
 import 'package:netsales/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:netsales/widgets/feedback/custom_offline_banner.dart';
 import 'package:netsales/widgets/feedback/custom_tab_placeholder.dart';
 import 'package:netsales/features/operations/presentation/screens/operations_screen.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 import 'package:netsales/widgets/navigations/double_back_exit_scope.dart';
 
@@ -20,12 +20,10 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
 
     return DoubleBackExitScope(
       onFallback: () async => controller.canPopTab(),
-      child: Scaffold(
-        backgroundColor: colors.background,
+      child: CustomAppScaffold(
         appBar: HomeAppBar(controller: controller),
         body: Column(
           children: [

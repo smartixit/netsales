@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/sound_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_motion.dart';
@@ -63,18 +64,17 @@ class CustomDialog extends StatelessWidget {
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
     bool canPop = true,
-  }) =>
-      CustomDialog(
-        key: key,
-        type: DialogType.confirmation,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        onConfirm: onConfirm,
-        onCancel: onCancel,
-        canPop: canPop,
-      );
+  }) => CustomDialog(
+    key: key,
+    type: DialogType.confirmation,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel,
+    cancelLabel: cancelLabel,
+    onConfirm: onConfirm,
+    onCancel: onCancel,
+    canPop: canPop,
+  );
 
   /// 2. حوار نجاح العمليات (Success)
   factory CustomDialog.success({
@@ -84,16 +84,15 @@ class CustomDialog extends StatelessWidget {
     String? confirmLabel,
     VoidCallback? onConfirm,
     bool canPop = true,
-  }) =>
-      CustomDialog(
-        key: key,
-        type: DialogType.success,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel ?? 'حسناً',
-        onConfirm: onConfirm,
-        canPop: canPop,
-      );
+  }) => CustomDialog(
+    key: key,
+    type: DialogType.success,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel ?? 'حسناً',
+    onConfirm: onConfirm,
+    canPop: canPop,
+  );
 
   /// 3. حوار تنبيهات الأخطاء (Error)
   factory CustomDialog.error({
@@ -103,16 +102,15 @@ class CustomDialog extends StatelessWidget {
     String? confirmLabel,
     VoidCallback? onConfirm,
     bool canPop = true,
-  }) =>
-      CustomDialog(
-        key: key,
-        type: DialogType.error,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel ?? 'إغلاق',
-        onConfirm: onConfirm,
-        canPop: canPop,
-      );
+  }) => CustomDialog(
+    key: key,
+    type: DialogType.error,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel ?? 'إغلاق',
+    onConfirm: onConfirm,
+    canPop: canPop,
+  );
 
   /// 4. حوار التحذيرات التشغيلية (Warning)
   factory CustomDialog.warning({
@@ -124,18 +122,17 @@ class CustomDialog extends StatelessWidget {
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
     bool canPop = true,
-  }) =>
-      CustomDialog(
-        key: key,
-        type: DialogType.warning,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        onConfirm: onConfirm,
-        onCancel: onCancel,
-        canPop: canPop,
-      );
+  }) => CustomDialog(
+    key: key,
+    type: DialogType.warning,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel,
+    cancelLabel: cancelLabel,
+    onConfirm: onConfirm,
+    onCancel: onCancel,
+    canPop: canPop,
+  );
 
   /// 5. حوار إرشادي ومعلوماتي (Info)
   factory CustomDialog.info({
@@ -145,16 +142,15 @@ class CustomDialog extends StatelessWidget {
     String confirmLabel = 'فهمت ذلك',
     VoidCallback? onConfirm,
     bool canPop = true,
-  }) =>
-      CustomDialog(
-        key: key,
-        type: DialogType.info,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        onConfirm: onConfirm,
-        canPop: canPop,
-      );
+  }) => CustomDialog(
+    key: key,
+    type: DialogType.info,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel,
+    onConfirm: onConfirm,
+    canPop: canPop,
+  );
 
   /// 6. حوار مراجعة واعتماد الحساب بعد التسجيل (Pending Approval)
   factory CustomDialog.pending({
@@ -167,19 +163,18 @@ class CustomDialog extends StatelessWidget {
     VoidCallback? onSecondaryAction,
     dynamic secondaryActionIcon,
     bool canPop = false,
-  }) =>
-      CustomDialog(
-        key: key,
-        type: DialogType.pending,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        onConfirm: onConfirm,
-        secondaryActionLabel: secondaryActionLabel,
-        onSecondaryAction: onSecondaryAction,
-        secondaryActionIcon: secondaryActionIcon,
-        canPop: canPop,
-      );
+  }) => CustomDialog(
+    key: key,
+    type: DialogType.pending,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel,
+    onConfirm: onConfirm,
+    secondaryActionLabel: secondaryActionLabel,
+    onSecondaryAction: onSecondaryAction,
+    secondaryActionIcon: secondaryActionIcon,
+    canPop: canPop,
+  );
 
   /// 7. حوار الحذف والإجراءات التدميرية (Danger)
   factory CustomDialog.danger({
@@ -191,18 +186,17 @@ class CustomDialog extends StatelessWidget {
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
     bool canPop = true,
-  }) =>
-      CustomDialog(
-        key: key,
-        type: DialogType.danger,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        onConfirm: onConfirm,
-        onCancel: onCancel,
-        canPop: canPop,
-      );
+  }) => CustomDialog(
+    key: key,
+    type: DialogType.danger,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel,
+    cancelLabel: cancelLabel,
+    onConfirm: onConfirm,
+    onCancel: onCancel,
+    canPop: canPop,
+  );
 
   /// 8. حوار مخصص المحتوى (Custom)
   factory CustomDialog.custom({
@@ -219,23 +213,22 @@ class CustomDialog extends StatelessWidget {
     Widget? customHeader,
     bool canPop = true,
     double? maxWidth,
-  }) =>
-      CustomDialog(
-        key: key,
-        type: DialogType.custom,
-        title: title,
-        content: content,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        onConfirm: onConfirm,
-        onCancel: onCancel,
-        secondaryActionLabel: secondaryActionLabel,
-        onSecondaryAction: onSecondaryAction,
-        secondaryActionIcon: secondaryActionIcon,
-        customHeader: customHeader,
-        canPop: canPop,
-        maxWidth: maxWidth,
-      );
+  }) => CustomDialog(
+    key: key,
+    type: DialogType.custom,
+    title: title,
+    content: content,
+    confirmLabel: confirmLabel,
+    cancelLabel: cancelLabel,
+    onConfirm: onConfirm,
+    onCancel: onCancel,
+    secondaryActionLabel: secondaryActionLabel,
+    onSecondaryAction: onSecondaryAction,
+    secondaryActionIcon: secondaryActionIcon,
+    customHeader: customHeader,
+    canPop: canPop,
+    maxWidth: maxWidth,
+  );
 
   /// عرض الحوار كنافذة منبثقة تفاعلية عبر كائن الودجت
   Future<bool?> showDialog([BuildContext? context]) {
@@ -276,6 +269,9 @@ class CustomDialog extends StatelessWidget {
     Widget? customHeader,
     String? customAnimationPath,
   }) async {
+    if (type == DialogType.success) {
+      SoundService.instance.playSound(soundPath: 'sounds/netsales_success.wav');
+    }
     return Get.generalDialog<bool>(
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(alpha: 0.5),
@@ -327,30 +323,28 @@ class CustomDialog extends StatelessWidget {
     String cancelLabel = 'إلغاء',
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
-  }) =>
-      show(
-        type: DialogType.confirmation,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        onConfirm: onConfirm,
-        onCancel: onCancel,
-      );
+  }) => show(
+    type: DialogType.confirmation,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel,
+    cancelLabel: cancelLabel,
+    onConfirm: onConfirm,
+    onCancel: onCancel,
+  );
 
   static Future<bool?> showSuccess({
     required String title,
     required String message,
     String? confirmLabel,
     VoidCallback? onConfirm,
-  }) =>
-      show(
-        type: DialogType.success,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        onConfirm: onConfirm,
-      );
+  }) => show(
+    type: DialogType.success,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel,
+    onConfirm: onConfirm,
+  );
 
   static Future<bool?> showPending({
     required String title,
@@ -361,32 +355,30 @@ class CustomDialog extends StatelessWidget {
     VoidCallback? onSecondaryAction,
     dynamic secondaryActionIcon,
     bool canPop = false,
-  }) =>
-      show(
-        type: DialogType.pending,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel ?? 'الانتقال لتسجيل الدخول',
-        onConfirm: onConfirm,
-        secondaryActionLabel: secondaryActionLabel,
-        onSecondaryAction: onSecondaryAction,
-        secondaryActionIcon: secondaryActionIcon,
-        canPop: canPop,
-      );
+  }) => show(
+    type: DialogType.pending,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel ?? 'الانتقال لتسجيل الدخول',
+    onConfirm: onConfirm,
+    secondaryActionLabel: secondaryActionLabel,
+    onSecondaryAction: onSecondaryAction,
+    secondaryActionIcon: secondaryActionIcon,
+    canPop: canPop,
+  );
 
   static Future<bool?> showError({
     required String title,
     required String message,
     String? confirmLabel,
     VoidCallback? onConfirm,
-  }) =>
-      show(
-        type: DialogType.error,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        onConfirm: onConfirm,
-      );
+  }) => show(
+    type: DialogType.error,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel,
+    onConfirm: onConfirm,
+  );
 
   static Future<bool?> showWarning({
     required String title,
@@ -395,16 +387,15 @@ class CustomDialog extends StatelessWidget {
     String? cancelLabel,
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
-  }) =>
-      show(
-        type: DialogType.warning,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel ?? 'تأكيد',
-        cancelLabel: cancelLabel ?? 'إلغاء',
-        onConfirm: onConfirm,
-        onCancel: onCancel,
-      );
+  }) => show(
+    type: DialogType.warning,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel ?? 'تأكيد',
+    cancelLabel: cancelLabel ?? 'إلغاء',
+    onConfirm: onConfirm,
+    onCancel: onCancel,
+  );
 
   static Future<bool?> showDanger({
     required String title,
@@ -413,16 +404,15 @@ class CustomDialog extends StatelessWidget {
     String? cancelLabel,
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
-  }) =>
-      show(
-        type: DialogType.danger,
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel ?? 'حذف',
-        cancelLabel: cancelLabel ?? 'إلغاء',
-        onConfirm: onConfirm,
-        onCancel: onCancel,
-      );
+  }) => show(
+    type: DialogType.danger,
+    title: title,
+    message: message,
+    confirmLabel: confirmLabel ?? 'حذف',
+    cancelLabel: cancelLabel ?? 'إلغاء',
+    onConfirm: onConfirm,
+    onCancel: onCancel,
+  );
 
   @override
   Widget build(BuildContext context) {

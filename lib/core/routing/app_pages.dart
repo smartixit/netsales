@@ -23,6 +23,8 @@ import 'package:netsales/features/onboarding/presentation/screens/onboarding_scr
 import 'package:netsales/features/onboarding/presentation/screens/welcome_screen.dart';
 import 'package:netsales/features/splash/presentation/bindings/splash_binding.dart';
 import 'package:netsales/features/splash/presentation/screens/splash_screen.dart';
+import 'package:netsales/features/operations/presentation/screens/sale_invoice_details_screen.dart';
+import 'package:netsales/features/operations/presentation/screens/voucher_request_details_screen.dart';
 import 'package:netsales/widgets/feedback/custom_not_found.dart';
 import 'package:netsales/widgets/feedback/custom_unauthorized.dart';
 
@@ -37,6 +39,14 @@ abstract final class AppPages {
   static const String initial = AppRoutes.initial;
 
   static final List<GetPage> routes = [
+    GetPage(
+      name: AppRoutes.saleInvoiceDetails,
+      page: () => const SaleInvoiceDetailsScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.voucherRequestDetails,
+      page: () => const VoucherRequestDetailsScreen(),
+    ),
     // 1. مسار البداية والفحص الأولي (Splash)
     GetPage(
       name: AppRoutes.initial,

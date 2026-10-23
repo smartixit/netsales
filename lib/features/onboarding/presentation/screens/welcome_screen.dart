@@ -12,6 +12,7 @@ import 'package:netsales/widgets/brand/custom_brand_logo.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_action_card.dart';
 import 'package:netsales/widgets/dividers/custom_labeled_divider.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// واجهة الترحيب واختيار الصفة (Welcome Screen)
 /// واجهة عرض نقية (Lean View) تعتمد حصرياً على الودجات المركزية ورموز الـ Core والتصميم التكيفي.
@@ -22,7 +23,7 @@ class WelcomeScreen extends GetView<WelcomeController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Scaffold(
+    return CustomAppScaffold(
       backgroundColor: colors.surface,
       body: Container(
         width: double.infinity,

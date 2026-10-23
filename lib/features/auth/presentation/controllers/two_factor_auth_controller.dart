@@ -10,10 +10,7 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم شاشة التحقق بخطوتين وتأكيد ربط الجهاز (TwoFactorAuthController)
 class TwoFactorAuthController extends GetxController {
-  TwoFactorAuthController(
-    this._verifyTwoFactorUseCase,
-    this._resendOtpUseCase,
-  );
+  TwoFactorAuthController(this._verifyTwoFactorUseCase, this._resendOtpUseCase);
 
   final VerifyTwoFactorUseCase _verifyTwoFactorUseCase;
   final ResendOtpUseCase _resendOtpUseCase;
@@ -136,9 +133,7 @@ class TwoFactorAuthController extends GetxController {
 
     try {
       isLoading.value = true;
-      await CustomAnimationOverlay.showLoading(
-        message: 'جاري التحقق من الرمز وتأكيد الجهاز...',
-      );
+      await CustomAnimationOverlay.showLoading();
 
       final result = await _verifyTwoFactorUseCase.execute(
         VerifyTwoFactorParams(

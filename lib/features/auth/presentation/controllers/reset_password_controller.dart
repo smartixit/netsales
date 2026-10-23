@@ -140,11 +140,7 @@ class ResetPasswordController extends GetxController {
 
     try {
       isLoading.value = true;
-      await CustomAnimationOverlay.showLoading(
-        message: isDirectReset
-            ? 'جاري اعتماد كلمة المرور الجديدة وتأمين الحساب...'
-            : 'جاري تعيين كلمة المرور وتأمين حسابك...',
-      );
+      await CustomAnimationOverlay.showLoading();
 
       if (isDirectReset) {
         if (userPhone == null || otp == null) {

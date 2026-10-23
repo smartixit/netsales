@@ -4,7 +4,10 @@ import 'package:netsales/features/operations/data/datasources/operations_remote_
 import 'package:netsales/features/operations/data/repositories/operations_repository_impl.dart';
 import 'package:netsales/features/operations/domain/repositories/operations_repository.dart';
 import 'package:netsales/features/operations/domain/usecases/approve_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/cancel_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_sale_invoice_details_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_sale_invoices_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_voucher_request_details_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_voucher_requests_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
@@ -24,10 +27,6 @@ class OperationsBinding extends Bindings {
       () => GetSaleInvoicesUseCase(Get.find<OperationsRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetVoucherRequestsUseCase>(
-      () => GetVoucherRequestsUseCase(Get.find<OperationsRepository>()),
-      fenix: true,
-    );
     Get.lazyPut<ApproveVoucherRequestUseCase>(
       () => ApproveVoucherRequestUseCase(Get.find<OperationsRepository>()),
       fenix: true,
@@ -36,12 +35,32 @@ class OperationsBinding extends Bindings {
       () => RejectVoucherRequestUseCase(Get.find<OperationsRepository>()),
       fenix: true,
     );
+    Get.lazyPut<GetSaleInvoiceDetailsUseCase>(
+      () => GetSaleInvoiceDetailsUseCase(Get.find<OperationsRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<GetVoucherRequestsUseCase>(
+      () => GetVoucherRequestsUseCase(Get.find<OperationsRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<GetVoucherRequestDetailsUseCase>(
+      () => GetVoucherRequestDetailsUseCase(Get.find<OperationsRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<CancelVoucherRequestUseCase>(
+      () => CancelVoucherRequestUseCase(Get.find<OperationsRepository>()),
+      fenix: true,
+    );
     Get.lazyPut<OperationsController>(
       () => OperationsController(
         getSaleInvoicesUseCase: Get.find<GetSaleInvoicesUseCase>(),
         getVoucherRequestsUseCase: Get.find<GetVoucherRequestsUseCase>(),
         approveVoucherRequestUseCase: Get.find<ApproveVoucherRequestUseCase>(),
         rejectVoucherRequestUseCase: Get.find<RejectVoucherRequestUseCase>(),
+        getSaleInvoiceDetailsUseCase: Get.find<GetSaleInvoiceDetailsUseCase>(),
+        getVoucherRequestDetailsUseCase:
+            Get.find<GetVoucherRequestDetailsUseCase>(),
+        cancelVoucherRequestUseCase: Get.find<CancelVoucherRequestUseCase>(),
       ),
       fenix: true,
     );

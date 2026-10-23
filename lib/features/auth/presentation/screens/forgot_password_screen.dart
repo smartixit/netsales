@@ -9,6 +9,7 @@ import 'package:netsales/features/auth/presentation/controllers/forgot_password_
 import 'package:netsales/features/auth/presentation/widgets/forgot_password/forgot_password_form_card.dart';
 import 'package:netsales/features/auth/presentation/widgets/forgot_password/forgot_password_header_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// واجهة طلب استعادة كلمة المرور (ForgotPasswordScreen)
 ///
@@ -21,7 +22,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Scaffold(
+    return CustomAppScaffold(
       backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,

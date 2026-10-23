@@ -8,6 +8,7 @@ import 'package:netsales/features/auth/presentation/controllers/login_controller
 import 'package:netsales/features/auth/presentation/widgets/login/login_footer_links.dart';
 import 'package:netsales/features/auth/presentation/widgets/login/login_form_card.dart';
 import 'package:netsales/features/auth/presentation/widgets/login/login_header_section.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// واجهة تسجيل الدخول الرئيسية للنظام (Login Screen)
 class LoginScreen extends GetView<LoginController> {
@@ -17,7 +18,7 @@ class LoginScreen extends GetView<LoginController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Scaffold(
+    return CustomAppScaffold(
       backgroundColor: colors.surface,
       body: Container(
         width: double.infinity,

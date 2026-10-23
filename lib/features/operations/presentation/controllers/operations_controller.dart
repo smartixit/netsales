@@ -4,7 +4,10 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/domain/usecases/approve_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/cancel_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_sale_invoice_details_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_sale_invoices_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_voucher_request_details_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_voucher_requests_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -17,14 +20,20 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class OperationsController extends GetxController {
   final GetSaleInvoicesUseCase getSaleInvoicesUseCase;
   final GetVoucherRequestsUseCase getVoucherRequestsUseCase;
+  final GetSaleInvoiceDetailsUseCase getSaleInvoiceDetailsUseCase;
+  final GetVoucherRequestDetailsUseCase getVoucherRequestDetailsUseCase;
   final ApproveVoucherRequestUseCase approveVoucherRequestUseCase;
   final RejectVoucherRequestUseCase rejectVoucherRequestUseCase;
+  final CancelVoucherRequestUseCase cancelVoucherRequestUseCase;
 
   OperationsController({
     required this.getSaleInvoicesUseCase,
     required this.getVoucherRequestsUseCase,
+    required this.getSaleInvoiceDetailsUseCase,
+    required this.getVoucherRequestDetailsUseCase,
     required this.approveVoucherRequestUseCase,
     required this.rejectVoucherRequestUseCase,
+    required this.cancelVoucherRequestUseCase,
   });
 
   /// القطاع النشط: 0 لفواتير المبيعات، 1 لطلبات الكروت
@@ -44,6 +53,14 @@ class OperationsController extends GetxController {
 
   /// حالة تنفيذ إجراء الاعتماد أو الرفض
   final RxBool isSubmittingAction = false.obs;
+
+  final Rx<SaleInvoiceEntity?> selectedInvoice = Rx<SaleInvoiceEntity?>(null);
+  final RxBool isLoadingInvoiceDetails = false.obs;
+  final RxString invoiceDetailsError = ''.obs;
+
+  final Rx<VoucherRequestEntity?> selectedRequest = Rx<VoucherRequestEntity?>(null);
+  final RxBool isLoadingRequestDetails = false.obs;
+  final RxString requestDetailsError = ''.obs;
 
   /// حقل البحث الموحد
   final TextEditingController searchController = TextEditingController();
@@ -237,6 +254,57 @@ class OperationsController extends GetxController {
   }
 
   /// إحصائيات المؤشرات السريعة (Operations Mini KPIs)
+  Future<void> loadInvoiceDetails(int id) async {
+    isLoadingInvoiceDetails.value = true;
+    invoiceDetailsError.value = '';
+    try {
+      selectedInvoice.value = await getSaleInvoiceDetailsUseCase(id);
+    } catch (e) {
+      invoiceDetailsError.value = AppException.sanitizeMessage(e);
+    } finally {
+      isLoadingInvoiceDetails.value = false;
+    }
+  }
+
+  Future<void> loadRequestDetails(int id) async {
+    isLoadingRequestDetails.value = true;
+    requestDetailsError.value = '';
+    try {
+      selectedRequest.value = await getVoucherRequestDetailsUseCase(id);
+    } catch (e) {
+      requestDetailsError.value = AppException.sanitizeMessage(e);
+    } finally {
+      isLoadingRequestDetails.value = false;
+    }
+  }
+
+  Future<void> cancelRequest(int id) async {
+    isSubmittingAction.value = true;
+    try {
+      final updated = await cancelVoucherRequestUseCase(id);
+      final index = requests.indexWhere((r) => r.requestId == id);
+      if (index != -1) {
+        requests[index] = updated;
+      }
+      if (selectedRequest.value?.requestId == id) {
+        selectedRequest.value = updated;
+      }
+      CustomSnackbar.show(
+        title: 'تم الإلغاء',
+        message: 'تم إلغاء الطلب بنجاح',
+        type: SnackType.success,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ في الإلغاء',
+        message: AppException.sanitizeMessage(e),
+        type: SnackType.error,
+      );
+    } finally {
+      isSubmittingAction.value = false;
+    }
+  }
+
   double get totalInvoicesAmount =>
       invoices.fold(0.0, (sum, inv) => sum + inv.invoiceTotalAmount);
 

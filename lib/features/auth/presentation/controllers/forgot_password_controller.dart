@@ -26,9 +26,7 @@ class ForgotPasswordController extends GetxController {
 
     try {
       isLoading.value = true;
-      await CustomAnimationOverlay.showLoading(
-        message: 'جاري إرسال رمز التحقق إلى رقم هاتفك...',
-      );
+      await CustomAnimationOverlay.showLoading();
 
       final phone = phoneController.text.trim();
       await _requestPasswordResetUseCase.execute(phone);
@@ -38,12 +36,7 @@ class ForgotPasswordController extends GetxController {
       );
 
       // الانتقال لشاشة التحقق من الرمز مع تمرير رقم الهاتف
-      Get.toNamed(
-        AppRoutes.verifyOtp,
-        arguments: {
-          'phone': phone,
-        },
-      );
+      Get.toNamed(AppRoutes.verifyOtp, arguments: {'phone': phone});
     } catch (error) {
       await CustomAnimationOverlay.hide();
       final cleanMessage = AppException.sanitizeMessage(error);

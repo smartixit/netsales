@@ -9,6 +9,7 @@ import 'package:netsales/features/auth/presentation/controllers/verify_otp_contr
 import 'package:netsales/features/auth/presentation/widgets/otp/verify_otp_form_card.dart';
 import 'package:netsales/features/auth/presentation/widgets/otp/verify_otp_header_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// واجهة التحقق من رمز الاستعادة OTP المعتمدة على Pinput (VerifyOtpScreen)
 ///
@@ -21,7 +22,7 @@ class VerifyOtpScreen extends GetView<VerifyOtpController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Scaffold(
+    return CustomAppScaffold(
       backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,

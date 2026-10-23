@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/operations/presentation/widgets/sale_invoice_card.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
@@ -16,10 +17,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 class SaleInvoicesFeed extends StatelessWidget {
   final OperationsController controller;
 
-  const SaleInvoicesFeed({
-    super.key,
-    required this.controller,
-  });
+  const SaleInvoicesFeed({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -31,33 +29,26 @@ class SaleInvoicesFeed extends StatelessWidget {
         return Center(
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.giant),
-            child: CircularProgressIndicator(
-              color: colors.primary,
-            ),
+            child: CircularProgressIndicator(color: colors.primary),
           ),
         );
       }
 
       // 2. حالة الخطأ مع إمكانية إعادة المحاولة
-      if (controller.invoicesErrorMessage.isNotEmpty && controller.invoices.isEmpty) {
+      if (controller.invoicesErrorMessage.isNotEmpty &&
+          controller.invoices.isEmpty) {
         return Container(
           width: double.infinity,
           padding: EdgeInsets.all(AppSpacing.xl),
           decoration: BoxDecoration(
             color: colors.surface,
             borderRadius: AppRadius.lgRadius,
-            border: Border.all(
-              color: colors.error.withValues(alpha: 0.3),
-            ),
+            border: Border.all(color: colors.error.withValues(alpha: 0.3)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.cloud_off_rounded,
-                size: 48.r,
-                color: colors.error,
-              ),
+              Icon(Icons.cloud_off_rounded, size: 48.r, color: colors.error),
               AppSpacing.vMd,
               Text(
                 controller.invoicesErrorMessage.value,
@@ -131,9 +122,10 @@ class SaleInvoicesFeed extends StatelessWidget {
           final invoice = controller.invoices[index];
           return SaleInvoiceCard(
             invoice: invoice,
-            onTap: () {
-              // مسار تفاصيل الفاتورة عند النقر
-            },
+            onTap: () => Get.toNamed(
+              AppRoutes.saleInvoiceDetails,
+              arguments: invoice.invoiceId,
+            ),
           );
         },
       );

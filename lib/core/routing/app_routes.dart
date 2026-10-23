@@ -41,6 +41,8 @@ abstract final class AppRoutes {
 
   static const String sales = '/sales';
   static const String saleInvoices = '/sale-invoices';
+  static const String saleInvoiceDetails = '/sale-invoices/details';
+  static const String voucherRequestDetails = '/voucher-requests/details';
 
   static const String expenses = '/expenses';
   static const String bankAccounts = '/bank-accounts';

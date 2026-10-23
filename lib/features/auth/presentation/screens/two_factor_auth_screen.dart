@@ -10,6 +10,7 @@ import 'package:netsales/features/auth/presentation/widgets/otp/two_factor_devic
 import 'package:netsales/features/auth/presentation/widgets/otp/two_factor_form_card.dart';
 import 'package:netsales/features/auth/presentation/widgets/otp/two_factor_header_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// واجهة التحقق بخطوتين وتأكيد الجهاز (TwoFactorAuthScreen)
 ///
@@ -22,7 +23,7 @@ class TwoFactorAuthScreen extends GetView<TwoFactorAuthController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Scaffold(
+    return CustomAppScaffold(
       backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,

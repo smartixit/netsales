@@ -10,6 +10,7 @@ import 'package:netsales/features/auth/presentation/controllers/reset_password_c
 import 'package:netsales/features/auth/presentation/widgets/forgot_password/reset_password_form_card.dart';
 import 'package:netsales/features/auth/presentation/widgets/forgot_password/reset_password_security_banner.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// واجهة تعيين وتغيير كلمة المرور الإلزامية والاختيارية والمباشرة (ResetPasswordScreen)
 ///
@@ -30,7 +31,7 @@ class ResetPasswordScreen extends GetView<ResetPasswordController> {
           controller.abortOrLogout();
         }
       },
-      child: Scaffold(
+      child: CustomAppScaffold(
         backgroundColor: colors.surface,
         appBar: AppBar(
           backgroundColor: Colors.transparent,

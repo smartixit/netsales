@@ -11,6 +11,7 @@ import 'package:netsales/features/auth/presentation/widgets/register/network_own
 import 'package:netsales/features/auth/presentation/widgets/register/register_network_header_section.dart';
 import 'package:netsales/features/auth/presentation/widgets/register/register_network_submit_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// واجهة تقديم طلب تسجيل مزود شبكة إنترنت جديد (RegisterNetworkScreen)
 ///
@@ -23,7 +24,7 @@ class RegisterNetworkScreen extends GetView<RegisterNetworkController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Scaffold(
+    return CustomAppScaffold(
       backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,

@@ -39,12 +39,11 @@ class LoginController extends GetxController {
       isLoading.value = true;
 
       // 1. إطلاق شاشة التحميل المتدفقة مع Lottie Overlay
-      await CustomAnimationOverlay.showLoading(
-        message: 'جاري تسجيل الدخول والتحقق من الحساب...',
-      );
+      await CustomAnimationOverlay.showLoading();
 
       final device = DeviceService.to;
-      final fcmToken = await PushNotificationService.instance.getOrFetchFcmToken();
+      final fcmToken = await PushNotificationService.instance
+          .getOrFetchFcmToken();
 
       // 2. تنفيذ حالة الاستخدام الدومينية ببيانات عتادية دقيقة ورمز FCM الفوري
       final result = await _loginUseCase.execute(
@@ -81,7 +80,8 @@ class LoginController extends GetxController {
         await CustomAnimationOverlay.hide();
         CustomSnackbar.show(
           title: 'تغيير كلمة المرور إلزامي',
-          message: 'تم الدخول بكلمة مرور مؤقتة، يرجى تعيين كلمة مرور جديدة لحسابك للمتابعة.',
+          message:
+              'تم الدخول بكلمة مرور مؤقتة، يرجى تعيين كلمة مرور جديدة لحسابك للمتابعة.',
           type: SnackType.warning,
         );
         Get.offAllNamed(

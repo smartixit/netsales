@@ -105,10 +105,7 @@ class VerifyOtpController extends GetxController {
 
     Get.toNamed(
       AppRoutes.resetPassword,
-      arguments: {
-        'phone': phone,
-        'otp': otpController.text.trim(),
-      },
+      arguments: {'phone': phone, 'otp': otpController.text.trim()},
     );
   }
 
@@ -125,9 +122,7 @@ class VerifyOtpController extends GetxController {
 
     try {
       isLoading.value = true;
-      await CustomAnimationOverlay.showLoading(
-        message: 'جاري التحقق من الرمز وتوليد كلمة المرور المؤقتة...',
-      );
+      await CustomAnimationOverlay.showLoading();
 
       await _verifyResetOtpUseCase.execute(
         VerifyResetOtpParams(
@@ -142,12 +137,7 @@ class VerifyOtpController extends GetxController {
       );
 
       // التوجيه لشاشة تسجيل الدخول مع تمرير رقم الهاتف للدخول بكلمة المرور المؤقتة
-      Get.offAllNamed(
-        AppRoutes.login,
-        arguments: {
-          'phone': phone,
-        },
-      );
+      Get.offAllNamed(AppRoutes.login, arguments: {'phone': phone});
     } catch (error) {
       await CustomAnimationOverlay.hide();
       final cleanMessage = AppException.sanitizeMessage(error);

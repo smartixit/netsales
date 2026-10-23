@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/operations/presentation/widgets/voucher_request_card.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
@@ -45,6 +46,10 @@ class VoucherRequestsFeed extends GetView<OperationsController> {
             final req = controller.requests[index];
             return VoucherRequestCard(
               request: req,
+              onTap: () => Get.toNamed(
+                AppRoutes.voucherRequestDetails,
+                arguments: req.requestId,
+              ),
               onApprove: req.isPending
                   ? () => controller.approveRequest(req.requestId)
                   : null,

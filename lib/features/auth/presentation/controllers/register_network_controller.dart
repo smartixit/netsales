@@ -34,13 +34,15 @@ class RegisterNetworkController extends GetxController {
   // متحكمات حقول بيانات الشبكة
   final TextEditingController networkNameController = TextEditingController();
   final TextEditingController networkEmailController = TextEditingController();
-  final TextEditingController networkAddressController = TextEditingController();
+  final TextEditingController networkAddressController =
+      TextEditingController();
 
   // متحكمات حقول بيانات مالك الشبكة
   final TextEditingController ownerNameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   final TextEditingController ownerEmailController = TextEditingController();
 
   // قنوات القيمة التفاعلية للصور والشعارات (CustomImagePicker)
@@ -122,13 +124,11 @@ class RegisterNetworkController extends GetxController {
 
     try {
       isLoading.value = true;
-      await CustomAnimationOverlay.showLoading(
-        message: 'جاري رفع بيانات الشبكة وتقديم الطلب...',
-      );
+      await CustomAnimationOverlay.showLoading();
 
       final device = DeviceService.to;
-      final fcmToken =
-          await PushNotificationService.instance.getOrFetchFcmToken();
+      final fcmToken = await PushNotificationService.instance
+          .getOrFetchFcmToken();
 
       final params = RegisterNetworkParams(
         networkName: networkNameController.text.trim(),
@@ -161,13 +161,15 @@ class RegisterNetworkController extends GetxController {
       // إظهار حوار التأكيد والاعتماد بحالة PENDING مع خيار الدعم الهادئ والانتقال بعده لصفحة تسجيل الدخول
       await CustomDialog.showPending(
         title: 'تم استلام طلبكم بنجاح',
-        message: '${result.message}\nيتم تدقيق ومراجعة الطلب والاعتماد عادة خلال ساعتين إلى 24 ساعة عمل.',
+        message:
+            '${result.message}\nيتم تدقيق ومراجعة الطلب والاعتماد عادة خلال ساعتين إلى 24 ساعة عمل.',
         confirmLabel: 'الانتقال لتسجيل الدخول',
         secondaryActionLabel: 'هل لديك استفسار؟ تواصل مع الدعم',
         secondaryActionIcon: Icons.support_agent_rounded,
         onSecondaryAction: () => UrlLauncherService.openWhatsApp(
           phoneNumber: PublicSettingsService.instance.supportWhatsApp,
-          message: 'مرحباً فريق الدعم، لقد قمت بتقديم طلب تسجيل مزود شبكة جديد في نظام NetSales وأود الاستفسار عن حالة الطلب.',
+          message:
+              'مرحباً فريق الدعم، لقد قمت بتقديم طلب تسجيل مزود شبكة جديد في نظام NetSales وأود الاستفسار عن حالة الطلب.',
         ),
         onConfirm: () => Get.offAllNamed(AppRoutes.login),
       );

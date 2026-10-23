@@ -11,6 +11,7 @@ import 'package:netsales/features/auth/presentation/widgets/register/pos_info_ca
 import 'package:netsales/features/auth/presentation/widgets/register/register_pos_header_section.dart';
 import 'package:netsales/features/auth/presentation/widgets/register/register_pos_submit_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// واجهة تقديم طلب تسجيل نقطة بيع / وكيل جديد (RegisterPosScreen)
 ///
@@ -23,7 +24,7 @@ class RegisterPosScreen extends GetView<RegisterPosController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Scaffold(
+    return CustomAppScaffold(
       backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
