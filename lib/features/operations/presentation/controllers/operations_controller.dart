@@ -1,0 +1,248 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
+import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
+import 'package:netsales/features/operations/domain/usecases/approve_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_sale_invoices_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_voucher_requests_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
+
+/// ============================================================================
+/// متحكم مركز العمليات والمبيعات (OperationsController)
+/// ============================================================================
+/// يدير حالة التبديل بين فواتير المبيعات وطلبات الكروت، التصفية والبحث اللحظي،
+/// واستدعاء حالات الاستخدام المعتمدة وفق قواعد الكود النظيف.
+class OperationsController extends GetxController {
+  final GetSaleInvoicesUseCase getSaleInvoicesUseCase;
+  final GetVoucherRequestsUseCase getVoucherRequestsUseCase;
+  final ApproveVoucherRequestUseCase approveVoucherRequestUseCase;
+  final RejectVoucherRequestUseCase rejectVoucherRequestUseCase;
+
+  OperationsController({
+    required this.getSaleInvoicesUseCase,
+    required this.getVoucherRequestsUseCase,
+    required this.approveVoucherRequestUseCase,
+    required this.rejectVoucherRequestUseCase,
+  });
+
+  /// القطاع النشط: 0 لفواتير المبيعات، 1 لطلبات الكروت
+  final RxInt activeSegmentIndex = 0.obs;
+
+  /// حالات فواتير المبيعات
+  final RxList<SaleInvoiceEntity> invoices = <SaleInvoiceEntity>[].obs;
+  final RxBool isLoadingInvoices = false.obs;
+  final RxString invoicesErrorMessage = ''.obs;
+  final RxString selectedInvoiceFilter = 'ALL'.obs; // ALL, CASH, CREDIT, UNPAID
+
+  /// حالات طلبات توريد الكروت
+  final RxList<VoucherRequestEntity> requests = <VoucherRequestEntity>[].obs;
+  final RxBool isLoadingRequests = false.obs;
+  final RxString requestsErrorMessage = ''.obs;
+  final RxString selectedRequestFilter = 'ALL'.obs; // ALL, PENDING, APPROVED, REJECTED
+
+  /// حالة تنفيذ إجراء الاعتماد أو الرفض
+  final RxBool isSubmittingAction = false.obs;
+
+  /// حقل البحث الموحد
+  final TextEditingController searchController = TextEditingController();
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadInvoices();
+    loadRequests();
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
+  }
+
+  /// التبديل بين فواتير المبيعات وطلبات الكروت
+  void changeSegment(int index) {
+    if (activeSegmentIndex.value != index) {
+      activeSegmentIndex.value = index;
+    }
+  }
+
+  /// جلب فواتير مبيعات الكروت
+  Future<void> loadInvoices({bool isRefresh = false}) async {
+    if (!isRefresh) {
+      isLoadingInvoices.value = true;
+    }
+    invoicesErrorMessage.value = '';
+
+    try {
+      final String? saleTypeParam;
+      if (selectedInvoiceFilter.value == 'CASH' ||
+          selectedInvoiceFilter.value == 'CREDIT') {
+        saleTypeParam = selectedInvoiceFilter.value;
+      } else {
+        saleTypeParam = null;
+      }
+
+      final result = await getSaleInvoicesUseCase(
+        saleType: saleTypeParam,
+        search: searchController.text.trim(),
+      );
+
+      // تطبيق تصفية الفواتير غير المسددة محلياً إن اختيرت
+      if (selectedInvoiceFilter.value == 'UNPAID') {
+        invoices.value = result.where((inv) => !inv.isFullyPaid).toList();
+      } else {
+        invoices.value = result;
+      }
+    } catch (e) {
+      invoicesErrorMessage.value = AppException.sanitizeMessage(e);
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'خطأ في التحديث',
+          message: invoicesErrorMessage.value,
+          type: SnackType.error,
+        );
+      }
+    } finally {
+      isLoadingInvoices.value = false;
+    }
+  }
+
+  /// جلب طلبات توريد الكروت
+  Future<void> loadRequests({bool isRefresh = false}) async {
+    if (!isRefresh) {
+      isLoadingRequests.value = true;
+    }
+    requestsErrorMessage.value = '';
+
+    try {
+      final String? statusParam;
+      if (selectedRequestFilter.value != 'ALL') {
+        statusParam = selectedRequestFilter.value;
+      } else {
+        statusParam = null;
+      }
+
+      final result = await getVoucherRequestsUseCase(
+        status: statusParam,
+        search: searchController.text.trim(),
+      );
+
+      requests.value = result;
+    } catch (e) {
+      requestsErrorMessage.value = AppException.sanitizeMessage(e);
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'خطأ في التحديث',
+          message: requestsErrorMessage.value,
+          type: SnackType.error,
+        );
+      }
+    } finally {
+      isLoadingRequests.value = false;
+    }
+  }
+
+  /// تطبيق فلتر نوع الفاتورة
+  void filterInvoices(String filter) {
+    if (selectedInvoiceFilter.value != filter) {
+      selectedInvoiceFilter.value = filter;
+      loadInvoices();
+    }
+  }
+
+  /// تطبيق فلتر حالة طلب الكروت
+  void filterRequests(String filter) {
+    if (selectedRequestFilter.value != filter) {
+      selectedRequestFilter.value = filter;
+      loadRequests();
+    }
+  }
+
+  /// تنفيذ البحث عند تقديم النص
+  void onSearchSubmitted(String _) {
+    if (activeSegmentIndex.value == 0) {
+      loadInvoices();
+    } else {
+      loadRequests();
+    }
+  }
+
+  /// مسح نص البحث
+  void clearSearch() {
+    searchController.clear();
+    if (activeSegmentIndex.value == 0) {
+      loadInvoices();
+    } else {
+      loadRequests();
+    }
+  }
+
+  /// اعتماد طلب توريد الكروت
+  Future<void> approveRequest(int id, {String? notes}) async {
+    isSubmittingAction.value = true;
+    try {
+      final updated = await approveVoucherRequestUseCase(id, notes: notes);
+
+      final index = requests.indexWhere((r) => r.requestId == id);
+      if (index != -1) {
+        requests[index] = updated;
+      }
+
+      CustomSnackbar.show(
+        title: 'تم اعتماد الطلب بنجاح',
+        message: 'تم توريد باقات الكروت وتوليد فاتورة المبيعات آلياً',
+        type: SnackType.success,
+      );
+
+      // تحديث قائمة الفواتير لظهور الفاتورة المولدة حديثاً
+      loadInvoices(isRefresh: true);
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'تعذر اعتماد الطلب',
+        message: AppException.sanitizeMessage(e),
+        type: SnackType.error,
+      );
+    } finally {
+      isSubmittingAction.value = false;
+    }
+  }
+
+  /// رفض طلب توريد الكروت
+  Future<void> rejectRequest(int id, {required String reason}) async {
+    isSubmittingAction.value = true;
+    try {
+      final updated = await rejectVoucherRequestUseCase(id, reason: reason);
+
+      final index = requests.indexWhere((r) => r.requestId == id);
+      if (index != -1) {
+        requests[index] = updated;
+      }
+
+      CustomSnackbar.show(
+        title: 'تم رفض الطلب',
+        message: 'تم تسجيل سبب الرفض وإشعار نقطة البيع بنجاح',
+        type: SnackType.warning,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'تعذر رفض الطلب',
+        message: AppException.sanitizeMessage(e),
+        type: SnackType.error,
+      );
+    } finally {
+      isSubmittingAction.value = false;
+    }
+  }
+
+  /// إحصائيات المؤشرات السريعة (Operations Mini KPIs)
+  double get totalInvoicesAmount =>
+      invoices.fold(0.0, (sum, inv) => sum + inv.invoiceTotalAmount);
+
+  double get unpaidRemainingAmount =>
+      invoices.fold(0.0, (sum, inv) => sum + inv.remainingAmount);
+
+  int get pendingRequestsCount =>
+      requests.where((req) => req.isPending).length;
+}

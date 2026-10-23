@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
@@ -14,6 +16,7 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
 
   @override
   bool get isAuthenticated {
+    log('true...............');
     return SessionService.to.isAuthenticated;
   }
 }

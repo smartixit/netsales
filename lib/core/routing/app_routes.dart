@@ -7,7 +7,6 @@ abstract final class AppRoutes {
 
   // مسار البداية والتحقق الأولي
   static const String initial = '/splash';
-  static const String splash = '/splash';
 
   // مسارات المصادقة العامة (Public / Auth Routes)
   static const String onboarding = '/onboarding';

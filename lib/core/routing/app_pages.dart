@@ -43,11 +43,6 @@ abstract final class AppPages {
       page: () => const SplashScreen(),
       binding: SplashBinding(),
     ),
-    GetPage(
-      name: AppRoutes.splash,
-      page: () => const SplashScreen(),
-      binding: SplashBinding(),
-    ),
 
     // Not Found
     GetPage(name: AppRoutes.notFound, page: () => const CustomNotFound()),

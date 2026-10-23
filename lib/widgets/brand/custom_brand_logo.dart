@@ -17,7 +17,7 @@ enum BrandLogoSize {
   lg(104, 16, 54),
 
   /// حجم بارز (Hero) لشاشات النجاح والعروض الكبيرة (130r)
-  hero(130, 0, 68);
+  hero(130, 10, 68);
 
   final double dimension;
   final double padding;
@@ -105,7 +105,7 @@ class _CustomBrandLogoState extends State<CustomBrandLogo>
       decoration: BoxDecoration(
         // color: colors.surface,
         borderRadius: BorderRadius.circular(
-          widget.size == BrandLogoSize.sm ? AppRadius.sm : AppRadius.xl,
+          widget.size == BrandLogoSize.sm ? AppRadius.sm : AppRadius.xxl,
         ),
         border: Border.all(
           color: colors.outlineVariant.withValues(alpha: 0.4),

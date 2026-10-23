@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/features/onboarding/domain/entities/onboarding_item_entity.dart';
 import 'package:netsales/features/onboarding/domain/usecases/complete_onboarding_use_case.dart';
@@ -25,9 +26,12 @@ class OnboardingController extends GetxController {
 
   bool get isLastPage => currentPage.value == items.length - 1;
 
+  late ThemeService theme;
+
   @override
   void onInit() {
     super.onInit();
+     theme = ThemeService.to;
     // جلب شرائح العرض من خلال حالة الاستخدام الدومينية
     items = _getOnboardingItemsUseCase();
   }

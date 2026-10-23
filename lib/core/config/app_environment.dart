@@ -10,7 +10,7 @@ class AppEnvironment {
 
   static const String _envName = String.fromEnvironment(
     'APP_ENV',
-    defaultValue: 'dev',
+    defaultValue: 'prod',
   );
 
   static const String _baseUrlOverride = String.fromEnvironment('API_BASE_URL');

@@ -5,11 +5,14 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/features/splash/presentation/controllers/splash_controller.dart';
 import 'package:netsales/features/splash/presentation/widgets/splash_loading_indicator_bar.dart';
 import 'package:netsales/widgets/brand/custom_brand_logo.dart';
 
 class SplashBodyContent extends StatelessWidget {
-  const SplashBodyContent({super.key});
+  const SplashBodyContent({super.key, required this.controller});
+
+  final SplashController controller;
 
   @override
   Widget build(BuildContext context) {
