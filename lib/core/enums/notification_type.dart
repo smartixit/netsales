@@ -1,4 +1,5 @@
-import '../routing/app_routes.dart';
+
+import 'package:netsales/core/routing/app_routes.dart';
 
 /// الأنواع والتصنيفات الدومينية الموحدة للإشعارات والتنبيهات (Enterprise Notification Type Enum).
 ///

@@ -42,7 +42,7 @@ class OnboardingScreen extends GetView<OnboardingController> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const CustomBrandLogo.sm(),
+                        const CustomBrandLogo.md(),
                         AppSpacing.hSm,
                         Text(
                           'NetSales',

@@ -7,7 +7,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/operations/presentation/widgets/voucher_request_card.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_loading_state.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 
 class VoucherRequestsFeed extends GetView<OperationsController> {
   const VoucherRequestsFeed({super.key});
@@ -17,11 +17,14 @@ class VoucherRequestsFeed extends GetView<OperationsController> {
     final colors = context.colors;
 
     return Obx(() {
-      if (controller.isLoadingRequests.value) {
-        return const CustomLoadingState(message: 'جاري تحميل الطلبات...');
+      // 1. حالة التحميل الأولي عبر الهيكل التشكيلي الموحد (Skeleton Shimmer)
+      if (controller.isLoadingRequests.value && controller.requests.isEmpty) {
+        return const CustomSkeletonFeed(itemCount: 4, cardHeight: 120);
       }
 
-      if (controller.requestsErrorMessage.value.isNotEmpty) {
+      // 2. حالة الخطأ مع إمكانية إعادة المحاولة
+      if (controller.requestsErrorMessage.value.isNotEmpty &&
+          controller.requests.isEmpty) {
         return CustomErrorState(
           title: 'تعذر تحميل الطلبات',
           subtitle: controller.requestsErrorMessage.value,
@@ -29,19 +32,28 @@ class VoucherRequestsFeed extends GetView<OperationsController> {
         );
       }
 
+      // 3. حالة الفراغ الموحدة
       if (controller.requests.isEmpty) {
         return const CustomEmptyState(
-          title: 'لا توجد طلبات',
-          subtitle: 'لم يتم العثور على طلبات توريد.',
+          title: 'لا توجد طلبات توريد',
+          subtitle: 'لم يتم العثور على أي طلبات توريد تطابق معايير التصفية والبحث المحددة',
         );
       }
 
+      // 4. حالة النجاح وعرض قائمة الطلبات مع السحب للتحديث
       return RefreshIndicator(
         color: colors.primary,
         onRefresh: () => controller.loadRequests(isRefresh: true),
-        child: ListView.builder(
-          padding: EdgeInsets.all(AppSpacing.md),
+        child: ListView.separated(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding,
+            vertical: AppSpacing.xs,
+          ),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           itemCount: controller.requests.length,
+          separatorBuilder: (_, __) => AppSpacing.vSm,
           itemBuilder: (context, index) {
             final req = controller.requests[index];
             return VoucherRequestCard(

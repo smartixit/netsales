@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_bento_grid.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_header_section.dart';
@@ -11,7 +10,8 @@ import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_operational_radar.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_quick_shortcuts_bar.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_recent_operations_feed.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_skeleton_view.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
 
 /// ============================================================================
 /// واجهة لوحة القيادة التجميعية الرشيقة (DashboardView)
@@ -26,45 +26,17 @@ class DashboardView extends GetView<DashboardController> {
     final colors = context.colors;
 
     return Obx(() {
-      // 1. حالة التحميل الأولي
+      // 1. حالة التحميل الأولي عبر الهيكل التشكيلي الموحد (Skeleton Shimmer)
       if (controller.isLoading.value) {
-        return Center(
-          child: CircularProgressIndicator(
-            color: colors.primary,
-          ),
-        );
+        return const DashboardSkeletonView();
       }
 
-      // 2. حالة الخطأ مع إمكانية إعادة المحاولة
+      // 2. حالة الخطأ مع إمكانية إعادة المحاولة (الودجت الموحد §26)
       if (controller.errorMessage.isNotEmpty && controller.overview.value == null) {
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.all(AppSpacing.xl),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.cloud_off_rounded,
-                  size: 56,
-                  color: colors.error,
-                ),
-                AppSpacing.vMd,
-                Text(
-                  controller.errorMessage.value,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                AppSpacing.vLg,
-                CustomButton.primary(
-                  text: 'إعادة المحاولة',
-                  icon: Icons.refresh_rounded,
-                  onPressed: () => controller.loadDashboard(),
-                ),
-              ],
-            ),
-          ),
+        return CustomErrorState(
+          title: 'تعذر تحميل لوحة القيادة',
+          subtitle: controller.errorMessage.value,
+          onRetry: () => controller.loadDashboard(),
         );
       }
 

@@ -10,6 +10,7 @@ import 'package:netsales/features/operations/domain/usecases/get_sale_invoices_u
 import 'package:netsales/features/operations/domain/usecases/get_voucher_request_details_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_voucher_requests_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// ============================================================================
@@ -200,29 +201,36 @@ class OperationsController extends GetxController {
   Future<void> approveRequest(int id, {String? notes}) async {
     isSubmittingAction.value = true;
     try {
+      await CustomAnimationOverlay.showLoading(message: 'جاري اعتماد الطلب وتوليد الفاتورة...');
       final updated = await approveVoucherRequestUseCase(id, notes: notes);
 
       final index = requests.indexWhere((r) => r.requestId == id);
       if (index != -1) {
         requests[index] = updated;
       }
+      if (selectedRequest.value?.requestId == id) {
+        selectedRequest.value = updated;
+      }
 
-      CustomSnackbar.show(
-        title: 'تم اعتماد الطلب بنجاح',
-        message: 'تم توريد باقات الكروت وتوليد فاتورة المبيعات آلياً',
-        type: SnackType.success,
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم اعتماد طلب الكروت وتوليد الفاتورة بنجاح',
       );
 
       // تحديث قائمة الفواتير لظهور الفاتورة المولدة حديثاً
       loadInvoices(isRefresh: true);
     } catch (e) {
+      await CustomAnimationOverlay.hide();
+      final cleanMessage = AppException.sanitizeMessage(e);
       CustomSnackbar.show(
         title: 'تعذر اعتماد الطلب',
-        message: AppException.sanitizeMessage(e),
+        message: cleanMessage,
         type: SnackType.error,
       );
     } finally {
       isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 
@@ -230,26 +238,33 @@ class OperationsController extends GetxController {
   Future<void> rejectRequest(int id, {required String reason}) async {
     isSubmittingAction.value = true;
     try {
+      await CustomAnimationOverlay.showLoading(message: 'جاري رفض طلب التوريد...');
       final updated = await rejectVoucherRequestUseCase(id, reason: reason);
 
       final index = requests.indexWhere((r) => r.requestId == id);
       if (index != -1) {
         requests[index] = updated;
       }
+      if (selectedRequest.value?.requestId == id) {
+        selectedRequest.value = updated;
+      }
 
-      CustomSnackbar.show(
-        title: 'تم رفض الطلب',
-        message: 'تم تسجيل سبب الرفض وإشعار نقطة البيع بنجاح',
-        type: SnackType.warning,
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم رفض طلب توريد الكروت بنجاح',
       );
     } catch (e) {
+      await CustomAnimationOverlay.hide();
+      final cleanMessage = AppException.sanitizeMessage(e);
       CustomSnackbar.show(
         title: 'تعذر رفض الطلب',
-        message: AppException.sanitizeMessage(e),
+        message: cleanMessage,
         type: SnackType.error,
       );
     } finally {
       isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 
@@ -281,6 +296,7 @@ class OperationsController extends GetxController {
   Future<void> cancelRequest(int id) async {
     isSubmittingAction.value = true;
     try {
+      await CustomAnimationOverlay.showLoading(message: 'جاري إلغاء الطلب...');
       final updated = await cancelVoucherRequestUseCase(id);
       final index = requests.indexWhere((r) => r.requestId == id);
       if (index != -1) {
@@ -289,19 +305,23 @@ class OperationsController extends GetxController {
       if (selectedRequest.value?.requestId == id) {
         selectedRequest.value = updated;
       }
-      CustomSnackbar.show(
-        title: 'تم الإلغاء',
-        message: 'تم إلغاء الطلب بنجاح',
-        type: SnackType.success,
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم إلغاء طلب التوريد بنجاح',
       );
     } catch (e) {
+      await CustomAnimationOverlay.hide();
+      final cleanMessage = AppException.sanitizeMessage(e);
       CustomSnackbar.show(
-        title: 'خطأ في الإلغاء',
-        message: AppException.sanitizeMessage(e),
+        title: 'تعذر إلغاء الطلب',
+        message: cleanMessage,
         type: SnackType.error,
       );
     } finally {
       isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 

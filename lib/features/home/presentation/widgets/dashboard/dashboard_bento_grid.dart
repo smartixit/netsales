@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/cards/custom_kpi_card.dart';
 
 /// ============================================================================
 /// شبكة بينتو للمؤشرات التحليلية (DashboardBentoGrid)
@@ -59,10 +56,10 @@ class DashboardBentoGrid extends StatelessWidget {
         // الصف الأول: بطاقة المبيعات الكبرى + بطاقة الكروت المباعة
         Row(
           children: [
-            // بطاقة المبيعات مع نسبة النمو
+        // بطاقة المبيعات مع نسبة النمو
             Expanded(
               flex: 3,
-              child: _BentoCard(
+              child: CustomKpiCard.standard(
                 icon: Icons.trending_up_rounded,
                 iconColor: colors.primary,
                 title: 'إجمالي المبيعات',
@@ -76,7 +73,7 @@ class DashboardBentoGrid extends StatelessWidget {
             // بطاقة الكروت المباعة
             Expanded(
               flex: 2,
-              child: _BentoCard(
+              child: CustomKpiCard.standard(
                 icon: Icons.confirmation_number_outlined,
                 iconColor: colors.secondary,
                 title: 'الكروت المباعة',
@@ -94,7 +91,7 @@ class DashboardBentoGrid extends StatelessWidget {
           children: [
             // بطاقة نقاط البيع
             Expanded(
-              child: _BentoCard(
+              child: CustomKpiCard.standard(
                 icon: Icons.storefront_outlined,
                 iconColor: colors.tertiary,
                 title: 'نقاط البيع النشطة',
@@ -105,14 +102,21 @@ class DashboardBentoGrid extends StatelessWidget {
             AppSpacing.hMd,
             // بطاقة طلبات الكروت
             Expanded(
-              child: _BentoCard(
-                icon: Icons.inventory_2_outlined,
-                iconColor: pendingRequests > 0 ? colors.warning : colors.primary,
-                title: 'الطلبات المعلقة',
-                value: pendingRequests.toString(),
-                unit: 'طلب',
-                isHighlighted: pendingRequests > 0,
-              ),
+              child: pendingRequests > 0
+                  ? CustomKpiCard.highlighted(
+                      icon: Icons.inventory_2_outlined,
+                      iconColor: colors.warning,
+                      title: 'الطلبات المعلقة',
+                      value: pendingRequests.toString(),
+                      unit: 'طلب',
+                    )
+                  : CustomKpiCard.standard(
+                      icon: Icons.inventory_2_outlined,
+                      iconColor: colors.primary,
+                      title: 'الطلبات المعلقة',
+                      value: pendingRequests.toString(),
+                      unit: 'طلب',
+                    ),
             ),
           ],
         ),
@@ -121,120 +125,3 @@ class DashboardBentoGrid extends StatelessWidget {
   }
 }
 
-/// بطاقة ذرية داخل شبكة بينتو
-class _BentoCard extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String value;
-  final String unit;
-  final String? badgeText;
-  final bool isPositiveBadge;
-  final bool isHighlighted;
-
-  const _BentoCard({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.value,
-    required this.unit,
-    this.badgeText,
-    this.isPositiveBadge = true,
-    this.isHighlighted = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return CustomInteractiveBounce(
-      onTap: () {},
-      child: Container(
-        padding: EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: AppRadius.lgRadius,
-          border: Border.all(
-            color: isHighlighted
-                ? colors.warning.withValues(alpha: 0.5)
-                : colors.outlineVariant.withValues(alpha: 0.6),
-          ),
-          boxShadow: AppElevation.level1(context),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(AppSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.1),
-                    borderRadius: AppRadius.smRadius,
-                  ),
-                  child: Icon(icon, color: iconColor, size: 18.r),
-                ),
-                if (badgeText != null)
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xs,
-                      vertical: AppSpacing.xxs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isPositiveBadge
-                          ? colors.success.withValues(alpha: 0.12)
-                          : colors.error.withValues(alpha: 0.12),
-                      borderRadius: AppRadius.fullRadius,
-                    ),
-                    child: Text(
-                      badgeText!,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: isPositiveBadge ? colors.success : colors.error,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10.sp,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            AppSpacing.vSm,
-            Text(
-              title,
-              style: AppTypography.bodySmall.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            AppSpacing.vXxs,
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: AlignmentDirectional.centerStart,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    value,
-                    style: AppTypography.titleLarge.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  AppSpacing.hXs,
-                  Text(
-                    unit,
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
