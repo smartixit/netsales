@@ -42,7 +42,7 @@ class OnboardingScreen extends GetView<OnboardingController> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const CustomBrandLogo.md(),
+                        const CustomBrandLogo.sm(),
                         AppSpacing.hSm,
                         Text(
                           'NetSales',
@@ -92,7 +92,8 @@ class OnboardingScreen extends GetView<OnboardingController> {
                       // زر المتابعة أو البدء
                       CustomButton.primary(
                         text: isLast ? 'ابدأ الآن' : 'التالي',
-                        icon: Icons.arrow_back_rounded,
+                        icon: Icons.arrow_forward_rounded,
+                        iconPosition: AppButtonIconPosition.end,
                         onPressed: controller.nextPage,
                       ),
                     ],

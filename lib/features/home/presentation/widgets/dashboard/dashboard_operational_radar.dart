@@ -36,11 +36,7 @@ class DashboardOperationalRadar extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              Icons.radar_rounded,
-              size: 20.r,
-              color: colors.primary,
-            ),
+            Icon(Icons.radar_rounded, size: 20.r, color: colors.primary),
             AppSpacing.hSm,
             Text(
               'الرادار التشغيلي والتنبيهات',
@@ -80,14 +76,14 @@ class DashboardOperationalRadar extends StatelessWidget {
           final borderColor = isDanger
               ? colors.error.withValues(alpha: 0.4)
               : isWarning
-                  ? colors.warning.withValues(alpha: 0.4)
-                  : colors.primary.withValues(alpha: 0.3);
+              ? colors.warning.withValues(alpha: 0.4)
+              : colors.primary.withValues(alpha: 0.3);
 
           final iconColor = isDanger
               ? colors.error
               : isWarning
-                  ? colors.warning
-                  : colors.primary;
+              ? colors.warning
+              : colors.primary;
 
           return Padding(
             padding: EdgeInsets.only(bottom: AppSpacing.sm),
@@ -114,8 +110,8 @@ class DashboardOperationalRadar extends StatelessWidget {
                         isDanger
                             ? Icons.error_outline_rounded
                             : isWarning
-                                ? Icons.pending_actions_rounded
-                                : Icons.info_outline_rounded,
+                            ? Icons.pending_actions_rounded
+                            : Icons.info_outline_rounded,
                         color: iconColor,
                         size: 22.r,
                       ),
@@ -144,7 +140,7 @@ class DashboardOperationalRadar extends StatelessWidget {
                     ),
                     AppSpacing.hSm,
                     Icon(
-                      Icons.chevron_left_rounded,
+                      Icons.chevron_right_rounded,
                       color: colors.onSurfaceVariant,
                       size: 20.r,
                     ),

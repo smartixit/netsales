@@ -72,17 +72,14 @@ class RegisterNetworkScreen extends GetView<RegisterNetworkController> {
 
                     // 2. بطاقة بيانات الشبكة والشعار والموقع (NetworkInfoCard)
                     NetworkInfoCard(controller: controller),
-
                     AppSpacing.vLg,
 
                     // 3. بطاقة بيانات مالك ومسؤول الشبكة والصورة الشخصية (OwnerInfoCard)
                     NetworkOwnerInfoCard(controller: controller),
-
                     AppSpacing.vXl,
 
                     // 4. أزرار إرسال الطلب والتوجيه الموحدة (RegisterSubmitSection)
                     RegisterNetworkSubmitSection(controller: controller),
-
                     AppSpacing.vLg,
                   ],
                 ),

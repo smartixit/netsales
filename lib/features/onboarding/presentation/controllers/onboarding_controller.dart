@@ -16,8 +16,8 @@ class OnboardingController extends GetxController {
   OnboardingController({
     required GetOnboardingItemsUseCase getOnboardingItemsUseCase,
     required CompleteOnboardingUseCase completeOnboardingUseCase,
-  })  : _getOnboardingItemsUseCase = getOnboardingItemsUseCase,
-        _completeOnboardingUseCase = completeOnboardingUseCase;
+  }) : _getOnboardingItemsUseCase = getOnboardingItemsUseCase,
+       _completeOnboardingUseCase = completeOnboardingUseCase;
 
   final PageController pageController = PageController();
   final RxInt currentPage = 0.obs;
@@ -31,7 +31,7 @@ class OnboardingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-     theme = ThemeService.to;
+    theme = ThemeService.to;
     // جلب شرائح العرض من خلال حالة الاستخدام الدومينية
     items = _getOnboardingItemsUseCase();
   }
@@ -45,7 +45,7 @@ class OnboardingController extends GetxController {
       completeOnboarding();
     } else {
       pageController.nextPage(
-        duration: AppMotion.normal,
+        duration: AppMotion.page,
         curve: AppMotion.emphasized,
       );
     }

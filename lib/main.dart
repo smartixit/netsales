@@ -215,7 +215,7 @@ class MyApp extends StatelessWidget {
               name: AppRoutes.notFound,
               page: () => const CustomNotFound(),
             ),
-            defaultTransition: Transition.rightToLeft,
+            defaultTransition: Transition.leftToRight,
             // transitionDuration: AppMotion.page,
             locale: const Locale('ar'),
             supportedLocales: const [Locale('en'), Locale('ar')],

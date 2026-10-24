@@ -24,12 +24,12 @@ class CustomAppScaffold extends StatelessWidget {
     final colors = context.colors;
     return Scaffold(
       backgroundColor: backgroundColor ?? colors.background,
-      appBar:
-          appBar ??
-          AppBar(
-            title: Text(appBarTitle ?? ''),
-            backgroundColor: appBarBg ?? colors.surface,
-          ),
+      appBar: appBarTitle != null
+          ? AppBar(
+              title: Text(appBarTitle!),
+              backgroundColor: appBarBg ?? colors.surface,
+            )
+          : appBar,
       body: body,
       bottomNavigationBar: bottomNavigationBar,
     );

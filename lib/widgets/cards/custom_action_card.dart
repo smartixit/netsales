@@ -62,11 +62,7 @@ class CustomActionCard extends StatelessWidget {
                   width: 1.5,
                 ),
               ),
-              child: Icon(
-                icon,
-                color: accentColor,
-                size: 26.r,
-              ),
+              child: Icon(icon, color: accentColor, size: 26.r),
             ),
             AppSpacing.hMd,
 
@@ -131,8 +127,8 @@ class CustomActionCard extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  size: 14.r,
+                  Icons.chevron_right_rounded,
+                  size: 20.r,
                   color: colors.onSurfaceVariant,
                 ),
               ),

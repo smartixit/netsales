@@ -72,7 +72,8 @@ class SplashBodyContent extends StatelessWidget {
 
           // 4. شريط التحميل الانسيابي المتحرك في الأسفل
           const CustomLoadingIndicatorBar(),
-          AppSpacing.vHuge,
+          AppSpacing.vGiant,
+          AppSpacing.vGiant,
         ],
       ),
     );

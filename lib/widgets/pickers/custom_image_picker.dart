@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
@@ -11,6 +10,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// أنماط عرض منتقي الصور الموحد
 enum ImagePickerVariant {
@@ -369,148 +369,32 @@ class CustomImagePicker extends StatelessWidget {
 
   /// عرض النافذة السفلية لاختيار المصدر (Source BottomSheet)
   void _showSourceBottomSheet(BuildContext context, bool hasImage) {
-    final colors = context.colors;
-
-    Get.bottomSheet(
-      Container(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.xl,
-          AppSpacing.lg,
-          AppSpacing.xl,
-          AppSpacing.xxl,
+    CustomBottomSheet.showActions(
+      title: label,
+      items: [
+        CustomBottomSheetActionItem(
+          title: 'التقاط صورة بالكاميرا',
+          icon: Icons.camera_alt_outlined,
+          onTap: () => _pickImage(ImagePickerSource.camera),
         ),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppRadius.bottomSheet),
+        CustomBottomSheetActionItem(
+          title: 'اختيار من معرض الصور',
+          icon: Icons.photo_library_outlined,
+          onTap: () => _pickImage(ImagePickerSource.gallery),
+        ),
+        if (hasImage)
+          CustomBottomSheetActionItem(
+            title: 'حذف الصورة الحالية',
+            icon: Icons.delete_outline_rounded,
+            isDestructive: true,
+            onTap: () => _updateFile(null),
           ),
-          boxShadow: AppElevation.level4(context),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // مؤشر السحب
-              Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: colors.outlineVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-              ),
-              AppSpacing.vMd,
-
-              // عنوان النافذة
-              Text(
-                label,
-                style: AppTypography.titleMedium.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              AppSpacing.vLg,
-
-              // خيار الكاميرا
-              _buildSourceOption(
-                context,
-                title: 'التقاط صورة بالكاميرا',
-                icon: Icons.camera_alt_outlined,
-                onTap: () => _pickImage(ImagePickerSource.camera),
-              ),
-
-              AppSpacing.vSm,
-
-              // خيار المعرض
-              _buildSourceOption(
-                context,
-                title: 'اختيار من معرض الصور',
-                icon: Icons.photo_library_outlined,
-                onTap: () => _pickImage(ImagePickerSource.gallery),
-              ),
-
-              // خيار حذف الصورة إذا كانت موجودة
-              if (hasImage) ...[
-                AppSpacing.vSm,
-                _buildSourceOption(
-                  context,
-                  title: 'حذف الصورة الحالية',
-                  icon: Icons.delete_outline_rounded,
-                  isDestructive: true,
-                  onTap: () {
-                    Get.back();
-                    _updateFile(null);
-                  },
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
-  Widget _buildSourceOption(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required VoidCallback onTap,
-    bool isDestructive = false,
-  }) {
-    final colors = context.colors;
-    final itemColor = isDestructive ? colors.error : colors.onSurface;
-
-    return CustomInteractiveBounce(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        decoration: BoxDecoration(
-          color: isDestructive
-              ? colors.error.withValues(alpha: 0.08)
-              : colors.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: isDestructive
-                ? colors.error.withValues(alpha: 0.2)
-                : colors.outlineVariant.withValues(alpha: 0.3),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: itemColor,
-              size: 22.r,
-            ),
-            AppSpacing.hMd,
-            Expanded(
-              child: Text(
-                title,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: itemColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: itemColor.withValues(alpha: 0.5),
-              size: 14.r,
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 
   /// معالجة التقاط الصورة عبر الخدمة المركزية الموحدة
   Future<void> _pickImage(ImagePickerSource source) async {
-    Get.back(); // إغلاق الـ BottomSheet
-
     final picked = await FilePickerService.instance.pickImage(
       source: source,
       maxSizeBytes: 2 * 1024 * 1024, // 2MB
