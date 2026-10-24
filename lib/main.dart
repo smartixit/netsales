@@ -24,7 +24,6 @@ import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
-import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/utils/system_ui_style_resolver.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_themes.dart';
@@ -172,20 +171,20 @@ void main() async {
   // Edge-to-Edge (Android 15+ standard) — Guaranteed modern system bars
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  // 6. تهيئة خدمة الروابط الموحدة وربطها بالتنبيهات المركزية (UrlLauncherService)
-  UrlLauncherService.configure(
-    UrlLauncherConfig(
-      onMessage: (message, result) {
-        if (!result.isSuccess && Get.context != null) {
-          CustomSnackbar.show(
-            type: SnackType.error,
-            title: 'تنبيه',
-            message: message,
-          );
-        }
-      },
-    ),
-  );
+  // // 6. تهيئة خدمة الروابط الموحدة وربطها بالتنبيهات المركزية (UrlLauncherService)
+  // UrlLauncherService.configure(
+  //   UrlLauncherConfig(
+  //     onMessage: (message, result) {
+  //       if (!result.isSuccess && Get.context != null) {
+  //         CustomSnackbar.show(
+  //           type: SnackType.error,
+  //           title: 'تنبيه',
+  //           message: message,
+  //         );
+  //       }
+  //     },
+  //   ),
+  // );
 
   // 7. تشغيل الواجهة الرئيسية للتطبيق
   runApp(const MyApp());

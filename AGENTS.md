@@ -54,6 +54,15 @@
     1. خدمة منطقية وسيطة في `lib/core/services/` (تدير البيانات، التخزين، الصلاحيات، الحسابات، التحقق، ودورة الحياة).
     2. ويدجت بصري متخصص ومستقل في `lib/widgets/` (يتولى الرسم البصري، التحريك، التفاعل، وتطبيق سمات الثيم والتصميم).
   - يُحظر دمج كود الواجهة داخل ملف الخدمة، ويُحظر استدعاء العمليات المعقدة أو الحزم الخارجية مباشرة من الودجت دون المرور بالخدمة المعتمدة.
+- **بطاقات مؤشرات الأداء الرئيسية الموحدة (CustomKpiCard):**
+  - يُحظر حظراً قاطعاً بناء كلاسات KPI Card خاصة (`_MiniKpiCard`, `_BentoCard`, أو أي تسميات مشابهة) داخل أي ملف ميزة.
+  - المصدر الحصري والوحيد لجميع بطاقات KPI هو `CustomKpiCard` بفئاته المصنعية الثلاث (`compact`, `standard`, `highlighted`) في `lib/widgets/cards/custom_kpi_card.dart`.
+- **شريط التبديل القطاعي الموحد (CustomSegmentedBar):**
+  - يُحظر حظراً قاطعاً بناء أشرطة تبديل قطاعية خاصة بالميزات تحتوي على منطق رسم بصري مكرر.
+  - المصدر الحصري هو `CustomSegmentedBar` مع كائنات `CustomSegmentItem` في `lib/widgets/indicators/custom_segmented_bar.dart`، وتكتفي شاشات الميزات بغلاف رشيق (Lean Adapter) يربط الـ Controller عبر `Obx`.
+- **نمط التحميل التفاعلي للعمليات الحساسة في المتحكمات (CustomAnimationOverlay Pattern):**
+  - يُحظر حظراً قاطعاً استخدام `CircularProgressIndicator` الخام أثناء العمليات التدميرية والمالية (اعتماد، رفض، إلغاء، حذف، شحن).
+  - الاعتماد الحصري على `CustomAnimationOverlay.showLoading()` و `CustomAnimationOverlay.showSuccess(...)` مع إظهار `CustomSnackbar` حصرياً في كتلة `catch` للأخطاء.
 
 ---
 
@@ -240,9 +249,9 @@ lib/
 - **الهيكلية المعيارية لمجلد الودجات المشتركة (`lib/widgets/`):**
   - كافة المكونات المشتركة أو القابلة لإعادة الاستخدام يجب نقلها وتطويرها حصرياً داخل `lib/widgets/` مقسمة ومصنفة بحسب النطاق والوظيفة:
     - `lib/widgets/brand/`: شعارات وهوية النظام والعلامة التجارية المصممة بأحجام قياسية وتأثيرات هالة متناسقة (`CustomBrandLogo`).
-    - `lib/widgets/cards/`: بطاقات الإجراءات والتحديد والخيارات المشتركة المدعومة بالارتداد الفيزيائي والظلال القياسية (`CustomActionCard`).
+    - `lib/widgets/cards/`: بطاقات الإجراءات والتحديد ومؤشرات الأداء الرئيسية (KPI) المشتركة المدعومة بالارتداد الفيزيائي والظلال القياسية (`CustomActionCard`, `CustomKpiCard`).
     - `lib/widgets/dividers/`: الفواصل المزخرفة والموسومة بعناوين نصية (`CustomLabeledDivider`).
-    - `lib/widgets/indicators/`: مؤشرات الصفحات والخطوات التفاعلية ذات التوسع الانسيابي (`CustomPageIndicator`).
+    - `lib/widgets/indicators/`: مؤشرات الصفحات والخطوات التفاعلية ذات التوسع الانسيابي وأشرطة التبديل القطاعي الحية (`CustomPageIndicator`, `CustomSegmentedBar`).
     - `lib/widgets/feedback/`: أشرطة التقدم الانسيابية، مؤشرات التحميل والارتداد ومؤثرات Shimmer (`SplashFlowingProgressBar`, إلخ).
     - `lib/widgets/buttons/`: الأزرار الموحدة بكافة فئاتها المصنعية السبع (`CustomButton`).
     - `lib/widgets/inputs/`: حقول الإدخال الموحدة (`CustomTextField`, `CustomPinField`, `CustomDropdown`).
@@ -252,6 +261,9 @@ lib/
   - دعم التجاوب التام والنسبي مع الشاشات عبر `flutter_screenutil` (`.w`, `.h`, `.sp`, `.r`).
   - دعم التفاعل الحركي الفيزيائي الناعم عبر `CustomInteractiveBounce`.
   - دعم الاتجاه العربي (RTL) الصارم وتوافق دلالات الوصولية (Accessibility & Semantics).
+- **مبدأ الغلاف الرشيق للميزة (Lean Feature Adapter Principle):**
+  - إذا احتاجت ميزة معينة إلى تخصيص ودجت مشترك (ربطه بـ Controller، أو إرسال بيانات محددة له) فيجب إنشاء **غلاف رشيق** محلي (`features/[feature]/presentation/widgets/*`) يقتصر دوره على تحويل بيانات المتحكم إلى معاملات الودجت المشترك وتمرير الإجراء — بدون أي منطق رسم بصري مكرر.
+  - مثال: `OperationsSegmentedHeader` هو غلاف رشيق يربط `OperationsController` بـ `CustomSegmentedBar` المشترك.
 
 ---
 
@@ -510,3 +522,111 @@ lib/
 ## 28. File Size Formatter Utils (No toStringAsFixed for sizes)
 - Use `FileSizeFormatter` (`lib/core/utils/file_size_formatter.dart`) for file/cache size display.
 - Do not use `toStringAsFixed` for sizes in UI/services; centralize in `FileSizeFormatter`.
+
+
+---
+
+## 29. بطاقات مؤشرات الأداء الرئيسية الموحدة (CustomKpiCard — Factory Pattern KPI Cards)
+- **الحظر المطلق لبطاقات KPI الخاصة بالميزات:** يُحظر حظراً قاطعاً بناء كلاسات KPI Card خاصة (`_MiniKpiCard`, `_BentoCard`, أو أي تسميات مشابهة) داخل أي ملف ميزة. كل بطاقة KPI في المشروع يجب أن تتجسد حصراً عبر `CustomKpiCard` الموحد.
+- **الفئات المصنعية المتخصصة (Unified KPI Factories):**
+  ```dart
+  // 1. للشرائط الأفقية المضغوطة (OperationsKpiStrip، الشرائط الصغيرة)
+  CustomKpiCard.compact(
+    title: 'إجمالي المبيعات',
+    value: '12,500',
+    unit: 'ر.ي',
+    icon: Icons.payments_outlined,
+    iconColor: colors.primary,
+  )
+
+  // 2. لشبكات Bento وصفحات التحليل — يدعم badge النمو اختيارياً
+  CustomKpiCard.standard(
+    title: 'إجمالي المبيعات',
+    value: '12,500',
+    unit: 'ر.ي',
+    icon: Icons.trending_up_rounded,
+    iconColor: colors.primary,
+    badgeText: '+12.5%',
+    isPositiveBadge: true,
+  )
+
+  // 3. بطاقة standard مع إطار warning — للطلبات المعلقة والتحذيرات
+  CustomKpiCard.highlighted(
+    title: 'الطلبات المعلقة',
+    value: '5',
+    unit: 'طلب',
+    icon: Icons.inventory_2_outlined,
+    iconColor: colors.warning,
+  )
+  ```
+- **المبدأ المعماري:** نفس نمط `CustomButton` و `CustomDialog` — `StatelessWidget` أصيل يُستخدم مباشرةً في الشجرة مع factories محددة الأغراض. الملف: `lib/widgets/cards/custom_kpi_card.dart`.
+- **onTap اختياري:** يُغلَّف تلقائياً بـ `CustomInteractiveBounce` عند توفير `onTap` — لا داعي لتغليف يدوي.
+
+
+---
+
+## 30. شريط التبديل القطاعي الموحد (CustomSegmentedBar — Generic Segmented Tab Bar)
+- **الحظر المطلق لأشرطة التبديل الخاصة بالميزات:** يُحظر حظراً قاطعاً بناء أشرطة تبديل قطاعية (`SegmentedHeader`، `TabBar` خاص، أو ما شابهها) داخل أي ميزة تحتوي على منطق رسم بصري. كل شريط تبديل قطاعي يعتمد حصراً على `CustomSegmentedBar`.
+- **نموذج البيانات (`CustomSegmentItem`):**
+  ```dart
+  const CustomSegmentItem(
+    label: 'فواتير المبيعات',  // النص
+    count: 12,                 // عداد الشارة (0 = لا شارة)
+    highlightBadge: false,     // true = لون warning للفت الانتباه
+    icon: Icons.receipt,       // أيقونة اختيارية
+  )
+  ```
+- **الاستخدام الصحيح (مع Obx في الغلاف الرشيق):**
+  ```dart
+  Obx(() => CustomSegmentedBar(
+    selectedIndex: controller.activeSegmentIndex.value,
+    onSegmentChanged: controller.changeSegment,
+    items: [
+      CustomSegmentItem(label: 'فواتير المبيعات', count: controller.invoices.length),
+      CustomSegmentItem(
+        label: 'طلبات الكروت',
+        count: controller.pendingRequestsCount,
+        highlightBadge: controller.pendingRequestsCount > 0,
+      ),
+    ],
+  ))
+  ```
+- **القواعد الصارمة:**
+  - يجب توفير قطاعين على الأقل (`assert(items.length >= 2)`).
+  - كافة ألوان الشارة تشتق تلقائياً من `context.colors` — لا قيم لونية يدوية.
+  - الملف: `lib/widgets/indicators/custom_segmented_bar.dart`.
+
+
+---
+
+## 31. نمط CustomAnimationOverlay في المتحكمات (Controller Loading / Success / Error Pattern)
+- **الحظر المطلق لـ `CircularProgressIndicator` الخام في عمليات الـ CRUD الحساسة:** يُحظر عرض أي مؤشر تحميل بدائي أثناء العمليات التدميرية (اعتماد، رفض، إلغاء، حذف، شحن). المعيار الحصري هو نمط `CustomAnimationOverlay`.
+- **النمط الإلزامي الموحد لدوال الإجراءات في المتحكمات:**
+  ```dart
+  Future<void> someDestructiveAction() async {
+    try {
+      await CustomAnimationOverlay.showLoading();          // 1. شاشة تحميل كاملة
+      await _someUseCase(...);
+      await CustomAnimationOverlay.showSuccess(           // 2. نجاح مع رسالة
+        message: 'تمت العملية بنجاح',
+      );
+      // ... تحديث البيانات بعد الإغلاق التلقائي
+    } catch (error) {
+      await CustomAnimationOverlay.hide();                // 3. إخفاء عند الخطأ
+      final cleanMessage = AppException.sanitizeMessage(error);
+      CustomSnackbar.show(                               // 4. Snackbar للخطأ
+        message: cleanMessage,
+        type: SnackbarType.error,
+      );
+    } finally {
+      if (CustomAnimationOverlay.isShowing) {            // 5. حارس finally
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+  ```
+- **القواعد الصارمة:**
+  - `CustomAnimationOverlay.showLoading()` حصرياً للعمليات التدميرية والمالية — لا تُستخدم لتحميل القوائم العادية.
+  - `CustomSnackbar` يظهر فقط في `catch` للأخطاء — النجاح يُعرض عبر `CustomAnimationOverlay.showSuccess` حصراً.
+  - حارس `finally` إلزامي لمنع تجميد الـ overlay عند أي استثناء غير متوقع.
+  - هذا النمط موحد بالكامل مع ما طُبِّق في `auth` feature controllers وجميع متحكمات العمليات الحساسة.
