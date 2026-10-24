@@ -37,11 +37,13 @@ class NetworkOwnerInfoCard extends StatelessWidget {
             children: [
               Icon(Icons.person_pin_rounded, color: colors.primary, size: 20.r),
               AppSpacing.hSm,
-              Text(
-                'بيانات مسؤول ومالك الشبكة',
-                style: AppTypography.titleMedium.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'بيانات مسؤول ومالك الشبكة',
+                  style: AppTypography.titleMedium.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

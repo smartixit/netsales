@@ -49,11 +49,13 @@ class PosInfoCard extends StatelessWidget {
                 size: 20.r,
               ),
               AppSpacing.hSm,
-              Text(
-                'بيانات نقطة البيع والموقع',
-                style: AppTypography.titleMedium.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'بيانات نقطة البيع والموقع',
+                  style: AppTypography.titleMedium.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

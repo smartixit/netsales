@@ -7,6 +7,7 @@ import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/sound_service.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/core/services/date_picker_service.dart';
+import 'package:netsales/core/services/credential_service.dart';
 
 /// ============================================================================
 /// حقن الاعتماديات العام الموحد للتطبيق (Global Application Bindings)
@@ -55,6 +56,12 @@ class InitialBinding extends Bindings {
     // 8. خدمة اختيار المرفقات والملفات الموحدة
     Get.lazyPut<FilePickerService>(
       () => FilePickerService.instance,
+      fenix: true,
+    );
+
+    // 9. خدمة إدارة الاعتماد المشفرة والمصادقة الحيوية
+    Get.lazyPut<CredentialService>(
+      () => CredentialService.instance,
       fenix: true,
     );
   }

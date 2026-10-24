@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
@@ -318,7 +319,7 @@ class CustomButton extends StatelessWidget {
     height: height,
     padding: padding,
     margin: margin,
-    foregroundColor: foregroundColor,
+    foregroundColor: foregroundColor ?? Get.context!.colors.primary,
     textStyle: textStyle,
     child: child,
   );
@@ -698,7 +699,7 @@ class CustomButton extends StatelessWidget {
                   (size == AppButtonSize.small
                           ? AppTypography.buttonSmall
                           : (size == AppButtonSize.large
-                                ? AppTypography.buttonLarge
+                                ? AppTypography.buttonMedium
                                 : AppTypography.buttonMedium))
                       .copyWith(color: resolvedFgColor),
             )
@@ -719,15 +720,19 @@ class CustomButton extends StatelessWidget {
       );
 
       if (prefixWidget != null || suffixWidget != null) {
-        content = Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (prefixWidget != null) ...[prefixWidget, AppSpacing.hSm],
-            if (textWidget != null) Flexible(child: textWidget),
-            if (suffixWidget != null) ...[AppSpacing.hSm, suffixWidget],
-          ],
-        );
+        if (textWidget == null) {
+          content = Center(child: prefixWidget ?? suffixWidget);
+        } else {
+          content = Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (prefixWidget != null) ...[prefixWidget, AppSpacing.hSm],
+              Flexible(child: textWidget),
+              if (suffixWidget != null) ...[AppSpacing.hSm, suffixWidget],
+            ],
+          );
+        }
       } else if (textWidget != null) {
         content = Center(child: textWidget);
       } else {
@@ -741,7 +746,8 @@ class CustomButton extends StatelessWidget {
       if (variant == AppButtonVariant.icon ||
           variant == AppButtonVariant.floating) {
         effectiveWidth = _effectiveHeight;
-      } else if (variant == AppButtonVariant.text) {
+      } else if (variant == AppButtonVariant.text ||
+          size == AppButtonSize.small) {
         effectiveWidth = null;
       } else {
         effectiveWidth = double.infinity;
@@ -774,14 +780,17 @@ class CustomButton extends StatelessWidget {
             child: Padding(
               padding:
                   padding ??
-                  (variant == AppButtonVariant.text
-                      ? EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
-                        )
-                      : EdgeInsets.symmetric(
-                          horizontal: AppSpacing.buttonPaddingH / 1.5,
-                        )),
+                  (variant == AppButtonVariant.icon ||
+                          variant == AppButtonVariant.floating
+                      ? EdgeInsets.zero
+                      : (variant == AppButtonVariant.text
+                          ? EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            )
+                          : EdgeInsets.symmetric(
+                              horizontal: AppSpacing.buttonPaddingH / 1.5,
+                            ))),
               child: content,
             ),
           ),

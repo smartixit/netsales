@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -8,9 +7,8 @@ import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/auth/presentation/controllers/login_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/dividers/custom_labeled_divider.dart';
 
-/// تذييل شاشة تسجيل الدخول: رابط إنشاء حساب جديد وتأكيد الأمان
+/// تذييل شاشة تسجيل الدخول: رابط إنشاء حساب وتأكيد أمان الجلسة بهدوء ووقار
 class LoginFooterLinks extends GetView<LoginController> {
   const LoginFooterLinks({super.key});
 
@@ -21,17 +19,12 @@ class LoginFooterLinks extends GetView<LoginController> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 1. فاصل أنيق
-        const CustomLabeledDivider(label: 'أو إذا لم يكن لديك حساب'),
-
-        AppSpacing.vMd,
-
-        // 2. زر إنشاء حساب جديد
+        // 1. رابط إنشاء حساب جديد بهدوء وبدون فواصل مشتتة
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'لا تملك حساباً في النظام؟',
+              'ليس لديك حساب في النظام؟',
               style: AppTypography.bodyMedium.copyWith(
                 color: colors.onSurfaceVariant,
               ),
@@ -39,10 +32,10 @@ class LoginFooterLinks extends GetView<LoginController> {
             CustomButton.text(
               text: 'إنشاء حساب جديد',
               onPressed: controller.goToRegister,
-              foregroundColor: colors.primary,
-              textStyle: AppTypography.titleSmall.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              // foregroundColor: colors.primary,
+              // textStyle: AppTypography.titleSmall.copyWith(
+              //   fontWeight: FontWeight.w700,
+              // ),
               padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             ),
           ],
@@ -50,27 +43,25 @@ class LoginFooterLinks extends GetView<LoginController> {
 
         AppSpacing.vLg,
 
-        // 3. شارة الأمان السيادي
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.shield_outlined,
-              size: 16.r,
-              color: colors.onSurfaceVariant.withValues(alpha: 0.7),
-            ),
-            AppSpacing.hXs,
-            Text(
-              'محمي بتشفير سيادي وإدارة جلسات مشفرة',
-              style: AppTypography.bodySmall.copyWith(
-                color: colors.onSurfaceVariant.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
+        // 2. شارة الأمان السيادي الهادئة
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   children: [
+        //     Icon(
+        //       Icons.lock_outline_rounded,
+        //       size: 14.r,
+        //       color: colors.onSurfaceVariant.withValues(alpha: 0.6),
+        //     ),
+        //     AppSpacing.hXs,
+        //     Text(
+        //       'جلسة مؤمنة بنظام التشفير السيادي والرقابة',
+        //       style: AppTypography.bodySmall.copyWith(
+        //         color: colors.onSurfaceVariant.withValues(alpha: 0.6),
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ],
-    )
-        .animate()
-        .fadeIn(duration: AppMotion.normal);
+    ).animate().fadeIn(duration: AppMotion.normal);
   }
 }

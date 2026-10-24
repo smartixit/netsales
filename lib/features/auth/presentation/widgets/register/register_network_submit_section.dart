@@ -31,8 +31,10 @@ class RegisterNetworkSubmitSection extends StatelessWidget {
           );
         }),
         AppSpacing.vLg,
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: AppSpacing.xs,
           children: [
             Text(
               'لديك حساب مزود شبكة مسبقاً؟',
@@ -40,7 +42,6 @@ class RegisterNetworkSubmitSection extends StatelessWidget {
                 color: colors.onSurfaceVariant,
               ),
             ),
-            AppSpacing.hXs,
             CustomButton.text(
               text: 'تسجيل الدخول',
               onPressed: controller.goToLogin,

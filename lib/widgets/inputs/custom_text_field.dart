@@ -1,3 +1,5 @@
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -261,6 +263,8 @@ class _CustomTextFieldState extends State<CustomTextField>
                     _obscureText
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
+                    color: context.colors.onSuccessVariant.withValues(alpha: 0.5),
+                     size: 20.r,
                   ),
 
                   onPressed: () {

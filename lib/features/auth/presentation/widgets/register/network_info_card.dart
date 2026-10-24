@@ -49,11 +49,13 @@ class NetworkInfoCard extends StatelessWidget {
                 size: 20.r,
               ),
               AppSpacing.hSm,
-              Text(
-                'بيانات الشبكة والموقع',
-                style: AppTypography.titleMedium.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'بيانات الشبكة والموقع',
+                  style: AppTypography.titleMedium.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

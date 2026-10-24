@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/credential_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/features/auth/domain/usecases/login_use_case.dart';
@@ -22,6 +23,65 @@ class LoginController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxBool isPasswordVisible = false.obs;
+  final RxBool canCheckBiometrics = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _initBiometricsAndSavedCredentials();
+  }
+
+  /// فحص دعم المقاييس الحيوية واستعادة الاعتمادات المحفوظة بأمان
+  Future<void> _initBiometricsAndSavedCredentials() async {
+    try {
+      canCheckBiometrics.value =
+          await CredentialService.instance.canAuthenticateWithBiometrics();
+
+      // استعادة الاعتمادات المحفوظة بشكل مشفر وتعبئة رقم الهاتف إن وُجد
+      final savedPhone = await CredentialService.instance.getSavedPhone();
+      if (savedPhone != null &&
+          savedPhone.isNotEmpty &&
+          phoneController.text.isEmpty) {
+        phoneController.text = savedPhone;
+      }
+    } catch (_) {
+      canCheckBiometrics.value = false;
+    }
+  }
+
+  /// تسجيل الدخول السريع عبر المقاييس الحيوية (بصمة الإصبع / الوجه)
+  Future<void> authenticateWithBiometrics() async {
+    final result = await CredentialService.instance.authenticate(
+      reason: 'يرجى تأكيد هويتك للمتابعة إلى حسابك',
+    );
+
+    if (result.isSuccess) {
+      final savedCreds =
+          await CredentialService.instance.getSavedCredentials();
+
+      if (savedCreds != null) {
+        phoneController.text = savedCreds.phone;
+        passwordController.text = savedCreds.password;
+        await submitLogin();
+      } else if (phoneController.text.trim().isNotEmpty &&
+          passwordController.text.trim().isNotEmpty) {
+        await submitLogin();
+      } else {
+        CustomSnackbar.show(
+          title: 'المقاييس الحيوية مؤكدة',
+          message:
+              'يرجى إدخال كلمة المرور لتسجيل الدخول أول مرة وحفظ الاعتمادات بأمان.',
+          type: SnackType.info,
+        );
+      }
+    } else if (result.status != BiometricAuthStatus.canceled) {
+      CustomSnackbar.show(
+        title: 'تعذر التحقق الحيوي',
+        message: result.errorMessage ?? 'يرجى استخدام كلمة المرور لتسجيل الدخول.',
+        type: SnackType.warning,
+      );
+    }
+  }
 
   /// تبديل إظهار وإخفاء كلمة المرور
   void togglePasswordVisibility() {
@@ -95,7 +155,12 @@ class LoginController extends GetxController {
         return;
       }
 
-      // 5. حالة النجاح المباشر: عرض أنيميشن النجاح بالمدة الافتراضية المحددة في المكون الموحد
+      // 5. حالة النجاح المباشر: حفظ الاعتمادات بشكل مشفر وعرض أنيميشن النجاح
+      await CredentialService.instance.saveCredentials(
+        phone: phoneController.text.trim(),
+        password: passwordController.text,
+      );
+
       await CustomAnimationOverlay.showSuccess(
         message: 'تم تسجيل الدخول بنجاح. مرحباً بك!',
       );
