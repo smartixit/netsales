@@ -10,8 +10,8 @@ import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/presentation/controllers/reset_password_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_password_field.dart';
 import 'package:netsales/widgets/inputs/custom_password_requirement_item.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// بطاقة نموذج تعيين وتأكيد كلمة المرور الجديدة الهندسية الموحدة
 class ResetPasswordFormCard extends GetView<ResetPasswordController> {
@@ -38,15 +38,11 @@ class ResetPasswordFormCard extends GetView<ResetPasswordController> {
           children: [
             // 1. كلمة المرور الحالية أو المؤقتة (تُعرض فقط عند التغيير المسجل/الإلزامي وليس عند الاستعادة بالرمز)
             if (!controller.isDirectReset) ...[
-              CustomTextField(
+              CustomPasswordField(
                 controller: controller.currentPasswordController,
                 label: controller.isForced
                     ? 'كلمة المرور المؤقتة (الحالية)'
                     : 'كلمة المرور الحالية',
-                hint: '••••••••',
-                obscureText: true,
-                enablePasswordToggle: true,
-                keyboardType: TextInputType.visiblePassword,
                 textInputAction: TextInputAction.next,
                 prefixIcon: Icon(
                   Icons.lock_clock_rounded,
@@ -63,19 +59,8 @@ class ResetPasswordFormCard extends GetView<ResetPasswordController> {
             ],
 
             // 2. كلمة المرور الجديدة
-            CustomTextField(
+            CustomPasswordField.newPassword(
               controller: controller.newPasswordController,
-              label: 'كلمة المرور الجديدة',
-              hint: '••••••••',
-              obscureText: true,
-              enablePasswordToggle: true,
-              keyboardType: TextInputType.visiblePassword,
-              textInputAction: TextInputAction.next,
-              prefixIcon: Icon(
-                Icons.lock_outline_rounded,
-                color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-                size: 20.r,
-              ),
               validator: FormValidators.passwordValidator(
                 fieldName: 'كلمة المرور الجديدة',
                 minLength: 8,
@@ -137,14 +122,8 @@ class ResetPasswordFormCard extends GetView<ResetPasswordController> {
             AppSpacing.vLg,
 
             // 4. تأكيد كلمة المرور الجديدة
-            CustomTextField(
+            CustomPasswordField.confirm(
               controller: controller.confirmPasswordController,
-              label: 'تأكيد كلمة المرور الجديدة',
-              hint: '••••••••',
-              obscureText: true,
-              enablePasswordToggle: true,
-              keyboardType: TextInputType.visiblePassword,
-              textInputAction: TextInputAction.done,
               prefixIcon: Icon(
                 Icons.lock_reset_rounded,
                 color: colors.onSurfaceVariant.withValues(alpha: 0.5),

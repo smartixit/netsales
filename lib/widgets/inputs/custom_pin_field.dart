@@ -7,6 +7,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:pinput/pinput.dart';
 
@@ -15,15 +16,15 @@ export 'package:pinput/pinput.dart'
     show HapticFeedbackType, PinputAutovalidateMode, SmsRetriever;
 
 /// ============================================================================
-/// حقل إدخال رمز التحقق الموحد (Enterprise Unified PIN/OTP Field)
+/// حقل إدخال رمز التحقق المؤسسي الموحد (Enterprise Unified PIN/OTP Field)
 /// ============================================================================
-/// مبني بدقة على نمط "Rounded With Shadows" القياسي المعتمد من حزمة Pinput الرسمية:
-/// - حواف مستديرة انسيابية تتحول بحركة ناعمة عند التركيز
-/// - ظلال عمق متكيفة بالكامل عبر AppElevation (دون ألوان أو أرقام سحرية)
-/// - مؤشر سفلي أنيق (Bottom Indicator Cursor)
-/// - دعم أصيل وشامل للتعبئة التلقائية (iOS OneTimeCode و Android SMS Autofill)
-/// - توافق تام مع flutter_screenutil والاتجاه العربي RTL مع إدخال LTR للأرقام
-class CustomPinField extends StatelessWidget {
+/// مصمم وفق أرقى معايير التطبيقات العالمية الرائدة (Apple, Stripe, Telegram):
+/// 1. ثبات هندسي مطلق للحواف المستديرة (منع التشوه أو القفز البصري عند التركيز).
+/// 2. تجميع الخانات بنمط (3 - 3 Chunking) مع فاصل انسيابي ناعم لتسهيل القراءة.
+/// 3. اهتزاز فيزيائي ذكي عند الخطأ (Physics-based Horizontal Error Shake + Haptic).
+/// 4. مؤشر كتابة نابض وأنيق (Blinking Cursor).
+/// 5. تكامل أصيل ومباشر مع كيبورد النظام وخدمات استخراج الرمز التلقائي (iOS / Android SMS Autofill).
+class CustomPinField extends StatefulWidget {
   const CustomPinField({
     super.key,
     this.length = 6,
@@ -43,7 +44,7 @@ class CustomPinField extends StatelessWidget {
     this.boxWidth,
     this.boxHeight,
     this.useShadows = true,
-    this.showCursor = false,
+    this.showCursor = true,
     this.cursor,
     this.separatorBuilder,
     this.autofillHints = const [AutofillHints.oneTimeCode],
@@ -54,154 +55,179 @@ class CustomPinField extends StatelessWidget {
     this.useNativeKeyboard = true,
   });
 
-  /// عدد خانات الرمز (افتراضياً 6 خانات)
   final int length;
-
-  /// متحكم النص لحفظ وقراءة الرمز المدخل
   final TextEditingController? controller;
-
-  /// عقدة التركيز
   final FocusNode? focusNode;
-
-  /// دالة التحقق من صحة القيمة
   final String? Function(String?)? validator;
-
-  /// رد النداء عند اكتمال إدخال كامل خانات الرمز
   final ValueChanged<String>? onCompleted;
-
-  /// رد النداء عند كل تغيير في القيمة
   final ValueChanged<String>? onChanged;
-
-  /// التركيز التلقائي عند فتح الواجهة
   final bool autofocus;
-
-  /// حالة تفعيل الحقل
   final bool enabled;
-
-  /// للقراءة فقط
   final bool readOnly;
-
-  /// تمويه الرمز المدخل (مثل حقول PIN الحساسة)
   final bool obscureText;
-
-  /// حرف التمويه
   final String obscuringCharacter;
-
-  /// نمط الاهتزاز اللمسي الذكي
   final HapticFeedbackType hapticFeedbackType;
-
-  /// نوع لوحة المفاتيح
   final TextInputType keyboardType;
-
-  /// منسقات المدخلات
   final List<TextInputFormatter>? inputFormatters;
-
-  /// عرض كل خانة مخصصة (إن لم يُحدد، يتكيف تلقائياً مع حجم الشاشة وعدد الخانات)
   final double? boxWidth;
-
-  /// ارتفاع كل خانة مخصصة (إن لم يُحدد، يعتمد 58.h افتراضياً)
   final double? boxHeight;
-
-  /// تفعيل الظلال لنمط "Rounded With Shadows"
   final bool useShadows;
-
-  /// إظهار المؤشر
   final bool showCursor;
-
-  /// مؤشر مخصص
   final Widget? cursor;
-
-  /// فاصل مخصص بين الخانات
   final Widget Function(int index)? separatorBuilder;
-
-  /// إشارات التعبئة التلقائية للوحة المفاتيح ونظام التشغيل (iOS/Android OTP Autofill)
   final Iterable<String>? autofillHints;
-
-  /// كائن استخراج الرمز التلقائي من رسائل SMS على أندرويد
   final SmsRetriever? smsRetriever;
-
-  /// التفعيل التلقائي للاستماع للرمز عبر SMS Retriever API على منصة Android
   final bool enableSmsRetriever;
-
-  /// إغلاق لوحة المفاتيح تلقائياً فور اكتمال الرمز
   final bool closeKeyboardWhenCompleted;
-
-  /// نمط التحقق التلقائي
   final PinputAutovalidateMode pinputAutovalidateMode;
-
-  /// استخدام لوحة المفاتيح الأصلية للنظام (true) أو الاعتماد على لوحة مفاتيح رقمية مخصصة (false)
   final bool useNativeKeyboard;
+
+  @override
+  State<CustomPinField> createState() => CustomPinFieldState();
+}
+
+class CustomPinFieldState extends State<CustomPinField>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _shakeController;
+  late final Animation<Offset> _shakeAnimation;
+  late final String? Function(String?) _wrappedValidator;
+  bool _hadError = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: AppMotion.slow,
+    );
+
+    _shakeAnimation = _shakeController.drive(
+      TweenSequence<Offset>([
+        TweenSequenceItem(
+          tween: Tween(begin: Offset.zero, end: const Offset(-8, 0)),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween(begin: const Offset(-8, 0), end: const Offset(8, 0)),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween(begin: const Offset(8, 0), end: const Offset(-6, 0)),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween(begin: const Offset(-6, 0), end: const Offset(6, 0)),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween(begin: const Offset(6, 0), end: const Offset(-3, 0)),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween(begin: const Offset(-3, 0), end: const Offset(3, 0)),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween(begin: const Offset(3, 0), end: Offset.zero),
+          weight: 1,
+        ),
+      ]),
+    );
+
+    _wrappedValidator = (value) {
+      final error = widget.validator?.call(value);
+      if (error != null && !_hadError) {
+        shake();
+      }
+      _hadError = error != null;
+      return error;
+    };
+  }
+
+  /// إطلاق حركة الاهتزاز الفيزيائي اللمسي عند حدوث خطأ
+  void shake() {
+    HapticFeedback.mediumImpact();
+    _shakeController.forward(from: 0.0);
+  }
+
+  @override
+  void dispose() {
+    _shakeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    // احتساب أبعاد الخانات بما يضمن عدم حدوث تجاوز في الشاشات الصغيرة
-    final defaultWidth = length <= 4 ? 60.w : 48.w;
-    final cellWidth = boxWidth ?? defaultWidth;
-    final cellHeight = boxHeight ?? 58.h;
+    // أبعاد الخانات المتجاوبة بدقة مع إمكانية استيعاب فاصل الـ 3-3 دون طفحان
+    final defaultWidth = widget.length <= 4 ? 60.w : 46.w;
+    final cellWidth = widget.boxWidth ?? defaultWidth;
+    final cellHeight = widget.boxHeight ?? 56.h;
+    final cellRadius = BorderRadius.circular(AppRadius.md);
 
-    // 1. الثيم الافتراضي: نمط Rounded With Shadows
+    // 1. الثيم الافتراضي: حواف مستقرة وألوان نقية
     final defaultPinTheme = PinTheme(
       width: cellWidth,
       height: cellHeight,
       textStyle: AppTypography.titleLarge.copyWith(
         color: colors.onSurface,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w800,
       ),
       decoration: BoxDecoration(
         color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(AppRadius.lg.r),
+        borderRadius: cellRadius,
         border: Border.all(
           color: colors.outlineVariant.withValues(alpha: 0.35),
-          width: 1.w,
+          width: 1.2.w,
         ),
-        boxShadow: useShadows ? AppElevation.level1(context) : null,
+        boxShadow: widget.useShadows ? AppElevation.level1(context) : null,
       ),
     );
 
-    // 2. ثيم الخانة المركّز عليها: تحول الحواف المستديرة إلى حواف أصغر مع الظل البارز كما في Pinput الرسمي
+    // 2. ثيم الخانة المركّز عليها: نفس الحواف المستديرة بدون أي تشوه مع توهج هادئ
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.sm.r),
+        borderRadius: cellRadius,
         border: Border.all(
           color: colors.primary,
-          width: 2.w,
+          width: 1.8.w,
         ),
-        boxShadow: useShadows
+        boxShadow: widget.useShadows
             ? [
-                ...AppElevation.level2(context),
-                ...AppElevation.glow(context, colors.primary, blur: 12.r, alpha: 0.18),
+                ...AppElevation.level1(context),
+                ...AppElevation.glow(context, colors.primary, blur: 8.r, alpha: 0.15),
               ]
             : null,
       ),
     );
 
-    // 3. ثيم الخانة المكتملة (Submitted Pin Theme)
+    // 3. ثيم الخانة المكتملة
     final submittedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg.r),
+        borderRadius: cellRadius,
         border: Border.all(
-          color: colors.primary.withValues(alpha: 0.6),
-          width: 1.5.w,
+          color: colors.primary.withValues(alpha: 0.5),
+          width: 1.4.w,
         ),
-        boxShadow: useShadows ? AppElevation.level1(context) : null,
+        boxShadow: widget.useShadows ? AppElevation.level1(context) : null,
       ),
     );
 
-    // 4. ثيم حالة الخطأ
+    // 4. ثيم حالة الخطأ: توهج أحمر خفيف وحواف ثابتة
     final errorPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg.r),
+        borderRadius: cellRadius,
         border: Border.all(
           color: colors.error,
-          width: 1.5.w,
+          width: 1.8.w,
         ),
-        boxShadow: useShadows
-            ? AppElevation.glow(context, colors.error, blur: 10.r, alpha: 0.2)
+        boxShadow: widget.useShadows
+            ? AppElevation.glow(context, colors.error, blur: 8.r, alpha: 0.2)
             : null,
       ),
     );
@@ -210,7 +236,7 @@ class CustomPinField extends StatelessWidget {
     final disabledPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
         color: colors.surfaceContainerHighest.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppRadius.lg.r),
+        borderRadius: cellRadius,
         border: Border.all(
           color: colors.outlineVariant.withValues(alpha: 0.15),
         ),
@@ -218,61 +244,88 @@ class CustomPinField extends StatelessWidget {
       ),
     );
 
-    // مؤشر الكتابة السفلي الأنيق المطابق لنموذج Rounded With Shadows
-    final effectiveCursor = cursor ??
-        Align(
-          alignment: Alignment.bottomCenter,
+    // مؤشر الكتابة النابض كالتطبيقات العالمية
+    final effectiveCursor = widget.cursor ??
+        Center(
           child: Container(
-            width: 20.w,
-            height: 2.h,
-            margin: EdgeInsets.only(bottom: 10.h),
+            width: 2.w,
+            height: 22.h,
             decoration: BoxDecoration(
               color: colors.primary,
-              borderRadius: BorderRadius.circular(AppRadius.xs.r),
+              borderRadius: BorderRadius.circular(AppRadius.full),
             ),
           ),
         );
 
     // استخراج أو تهيئة مستمع الرسائل التلقائي على أندرويد
-    final effectiveSmsRetriever = smsRetriever ??
-        (enableSmsRetriever &&
+    final effectiveSmsRetriever = widget.smsRetriever ??
+        (widget.enableSmsRetriever &&
                 !kIsWeb &&
                 defaultTargetPlatform == TargetPlatform.android
             ? SmsRetrieverService.instance.createRetriever()
             : null);
 
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Pinput(
-        length: length,
-        controller: controller,
-        focusNode: focusNode,
-        enabled: enabled,
-        readOnly: readOnly,
-        autofocus: autofocus,
-        useNativeKeyboard: useNativeKeyboard,
-        obscureText: obscureText,
-        obscuringCharacter: obscuringCharacter,
-        defaultPinTheme: defaultPinTheme,
-        focusedPinTheme: focusedPinTheme,
-        submittedPinTheme: submittedPinTheme,
-        errorPinTheme: errorPinTheme,
-        disabledPinTheme: disabledPinTheme,
-        hapticFeedbackType: hapticFeedbackType,
-        keyboardType: keyboardType,
-        inputFormatters: inputFormatters ?? [FilteringTextInputFormatter.digitsOnly],
-        validator: validator,
-        onCompleted: onCompleted,
-        onChanged: onChanged,
-        showCursor: showCursor,
-        cursor: effectiveCursor,
-        isCursorAnimationEnabled: true,
-        closeKeyboardWhenCompleted: closeKeyboardWhenCompleted,
-        pinputAutovalidateMode: pinputAutovalidateMode,
-        autofillHints: autofillHints,
-        smsRetriever: effectiveSmsRetriever,
-        separatorBuilder: separatorBuilder ??
-            (index) => SizedBox(width: AppSpacing.xs),
+    // بناء فاصل التجميع 3 - 3 الذكي
+    Widget defaultSeparatorBuilder(int index) {
+      if (widget.length == 6 && index == 2) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+          child: Center(
+            child: Container(
+              width: 8.w,
+              height: 2.5.h,
+              decoration: BoxDecoration(
+                color: colors.outlineVariant.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(AppRadius.full),
+              ),
+            ),
+          ),
+        );
+      }
+      return SizedBox(width: AppSpacing.xxs);
+    }
+
+    return AnimatedBuilder(
+      animation: _shakeAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: _shakeAnimation.value,
+          child: child,
+        );
+      },
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Pinput(
+          length: widget.length,
+          controller: widget.controller,
+          focusNode: widget.focusNode,
+          enabled: widget.enabled,
+          readOnly: widget.readOnly,
+          autofocus: widget.autofocus,
+          useNativeKeyboard: widget.useNativeKeyboard,
+          obscureText: widget.obscureText,
+          obscuringCharacter: widget.obscuringCharacter,
+          defaultPinTheme: defaultPinTheme,
+          focusedPinTheme: focusedPinTheme,
+          submittedPinTheme: submittedPinTheme,
+          errorPinTheme: errorPinTheme,
+          disabledPinTheme: disabledPinTheme,
+          hapticFeedbackType: widget.hapticFeedbackType,
+          keyboardType: widget.keyboardType,
+          inputFormatters: widget.inputFormatters ??
+              [FilteringTextInputFormatter.digitsOnly],
+          validator: _wrappedValidator,
+          onCompleted: widget.onCompleted,
+          onChanged: widget.onChanged,
+          showCursor: widget.showCursor,
+          cursor: effectiveCursor,
+          isCursorAnimationEnabled: true,
+          closeKeyboardWhenCompleted: widget.closeKeyboardWhenCompleted,
+          pinputAutovalidateMode: widget.pinputAutovalidateMode,
+          autofillHints: widget.autofillHints,
+          smsRetriever: effectiveSmsRetriever,
+          separatorBuilder: widget.separatorBuilder ?? defaultSeparatorBuilder,
+        ),
       ),
     );
   }

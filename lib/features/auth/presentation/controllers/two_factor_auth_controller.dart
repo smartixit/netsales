@@ -166,6 +166,7 @@ class TwoFactorAuthController extends GetxController {
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (error) {
       await CustomAnimationOverlay.hide();
+      otpController.clear();
       final cleanMessage = AppException.sanitizeMessage(error);
       CustomSnackbar.show(
         title: 'رمز التحقق غير صحيح',

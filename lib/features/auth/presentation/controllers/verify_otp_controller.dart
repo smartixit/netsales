@@ -140,6 +140,7 @@ class VerifyOtpController extends GetxController {
       Get.offAllNamed(AppRoutes.login, arguments: {'phone': phone});
     } catch (error) {
       await CustomAnimationOverlay.hide();
+      otpController.clear();
       final cleanMessage = AppException.sanitizeMessage(error);
       CustomSnackbar.show(
         title: 'رمز التحقق غير صحيح',

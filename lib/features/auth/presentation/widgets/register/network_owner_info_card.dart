@@ -10,6 +10,7 @@ import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/presentation/controllers/register_network_controller.dart';
+import 'package:netsales/widgets/inputs/custom_password_field.dart';
 import 'package:netsales/widgets/inputs/custom_phone_field.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/pickers/custom_contact_picker_icon_button.dart';
@@ -135,17 +136,12 @@ class NetworkOwnerInfoCard extends GetView<RegisterNetworkController> {
 
           AppSpacing.vMd,
 
-          // كلمة المرور
-          CustomTextField(
+          // كلمة المرور الموحدة
+          CustomPasswordField(
             controller: controller.passwordController,
             label: 'كلمة المرور *',
             hint: '8 أحرف على الأقل',
-            prefixIcon: Icon(Icons.lock_outline_rounded, size: 20.r),
-            obscureText: true,
-            enablePasswordToggle: true,
-            validator: FormValidators.passwordValidator(
-              fieldName: 'كلمة المرور',
-            ),
+            textInputAction: TextInputAction.next,
           ),
 
           AppSpacing.vMd,

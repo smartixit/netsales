@@ -10,8 +10,8 @@ import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/presentation/controllers/login_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_password_field.dart';
 import 'package:netsales/widgets/inputs/custom_phone_field.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// بطاقة نموذج تسجيل الدخول المهندسة وفق أرقى المعايير العالمية وتجربة الاستخدام المريحة
 class LoginFormCard extends GetView<LoginController> {
@@ -45,21 +45,9 @@ class LoginFormCard extends GetView<LoginController> {
 
                   AppSpacing.vLg,
 
-                  // 2. حقل كلمة المرور مع دعم التعبئة التلقائية والإرسال المباشر
-                  CustomTextField(
+                  // 2. حقل كلمة المرور الموحد مع الإرسال المباشر
+                  CustomPasswordField(
                     controller: controller.passwordController,
-                    label: 'كلمة المرور',
-                    hint: '••••••••',
-                    obscureText: true,
-                    enablePasswordToggle: true,
-                    keyboardType: TextInputType.visiblePassword,
-                    textInputAction: TextInputAction.done,
-                    autofillHints: const [AutofillHints.password],
-                    prefixIcon: Icon(
-                      Icons.lock_outline_rounded,
-                      color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-                      size: 20.r,
-                    ),
                     validator: FormValidators.required(
                       fieldName: 'كلمة المرور',
                     ),
