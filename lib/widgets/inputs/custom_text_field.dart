@@ -3,6 +3,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 
 class CustomTextField extends StatefulWidget {
   const CustomTextField({
@@ -29,6 +30,7 @@ class CustomTextField extends StatefulWidget {
     this.allowSpaces,
     this.focusNode,
     this.autofillHints,
+    this.isRequired = true,
   });
 
   final TextEditingController controller;
@@ -74,6 +76,8 @@ class CustomTextField extends StatefulWidget {
   final FocusNode? focusNode;
 
   final Iterable<String>? autofillHints;
+
+  final bool isRequired;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -251,7 +255,27 @@ class _CustomTextFieldState extends State<CustomTextField>
         style: theme.textTheme.bodyLarge,
 
         decoration: InputDecoration(
-          labelText: widget.label,
+          label: widget.label.isNotEmpty
+              ? Text.rich(
+                  TextSpan(
+                    text: widget.label,
+                    style: AppTypography.inputLabel.copyWith(
+                      color: context.colors.onSurface,
+                    ),
+                    children: [
+                      if (widget.isRequired) ...[
+                        const WidgetSpan(child: SizedBox(width: 4)),
+                        TextSpan(
+                          text: '*',
+                          style: AppTypography.inputLabel.copyWith(
+                            color: context.colors.error,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                )
+              : null,
 
           hintText: widget.hint,
 
@@ -263,8 +287,10 @@ class _CustomTextFieldState extends State<CustomTextField>
                     _obscureText
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
-                    color: context.colors.onSuccessVariant.withValues(alpha: 0.5),
-                     size: 20.r,
+                    color: context.colors.onSuccessVariant.withValues(
+                      alpha: 0.5,
+                    ),
+                    size: 20.r,
                   ),
 
                   onPressed: () {

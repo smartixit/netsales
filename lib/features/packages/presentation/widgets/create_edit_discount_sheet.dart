@@ -56,11 +56,7 @@ class CreateEditDiscountSheet extends StatefulWidget {
           color: colors.secondaryContainer.withValues(alpha: 0.4),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          Icons.percent_rounded,
-          color: colors.secondary,
-          size: 20.r,
-        ),
+        child: Icon(Icons.percent_rounded, color: colors.secondary, size: 20.r),
       ),
       scrollable: true,
       child: CreateEditDiscountSheet(
@@ -93,8 +89,10 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
     final d = widget.discount;
 
     if (d != null) {
-      _selectedPos = widget.controller.posList
-              .firstWhereOrNull((p) => p.posId == d.posId) ??
+      _selectedPos =
+          widget.controller.posList.firstWhereOrNull(
+            (p) => p.posId == d.posId,
+          ) ??
           PosEntity(
             posId: d.posId,
             posUuid: '',
@@ -119,11 +117,9 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
           : '8',
     );
 
-    _selectedPackageId =
-        d?.packageId ?? widget.preselectedPackageId;
+    _selectedPackageId = d?.packageId ?? widget.preselectedPackageId;
 
-    if (_selectedPackageId == null &&
-        widget.controller.packages.isNotEmpty) {
+    if (_selectedPackageId == null && widget.controller.packages.isNotEmpty) {
       _selectedPackageId = widget.controller.packages.first.packageId;
     }
 
@@ -155,10 +151,12 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
     final posId = _selectedPos!.posId;
     final cashDisc =
         double.tryParse(AmountFormatter.clean(_cashDiscountController.text)) ??
-            0.0;
+        0.0;
     final creditDisc =
-        double.tryParse(AmountFormatter.clean(_creditDiscountController.text)) ??
-            0.0;
+        double.tryParse(
+          AmountFormatter.clean(_creditDiscountController.text),
+        ) ??
+        0.0;
 
     if (_selectedPackageId == null || _selectedPackageId! <= 0) {
       return;
@@ -194,10 +192,12 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
 
     final cashDiscVal =
         double.tryParse(AmountFormatter.clean(_cashDiscountController.text)) ??
-            0.0;
+        0.0;
     final creditDiscVal =
-        double.tryParse(AmountFormatter.clean(_creditDiscountController.text)) ??
-            0.0;
+        double.tryParse(
+          AmountFormatter.clean(_creditDiscountController.text),
+        ) ??
+        0.0;
 
     final netCash = basePrice - (basePrice * cashDiscVal / 100);
     final netCredit = basePrice - (basePrice * creditDiscVal / 100);
@@ -209,7 +209,7 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
         children: [
           // ── 1. اختيار الباقة المستهدفة ──
           Text(
-            'باقة الكروت المستهدفة بالخصم الاستثنائي *',
+            'باقة الكروت المستهدفة بالخصم الاستثنائي',
             style: AppTypography.labelSmall.copyWith(
               color: colors.onSurfaceVariant,
               fontWeight: FontWeight.bold,
@@ -253,7 +253,7 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
           // ── 2. اختيار وتحديد نقطة البيع / الوكيل الذكي ──
           Obx(
             () => CustomPosSelectorField(
-              label: 'نقطة البيع / الوكيل المخصص له الخصم *',
+              label: 'نقطة البيع / الوكيل المخصص له الخصم',
               selectedPos: _selectedPos,
               posList: widget.controller.posList,
               isLoading: widget.controller.isLoadingPosList.value,
@@ -276,7 +276,7 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
               Expanded(
                 child: CustomTextField(
                   controller: _cashDiscountController,
-                  label: 'نسبة خصم الكاش (%) *',
+                  label: 'نسبة خصم الكاش (%)',
                   hint: '15',
                   keyboardType: TextInputType.number,
                   prefixIcon: const Icon(Icons.percent_rounded),
@@ -289,7 +289,7 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
               Expanded(
                 child: CustomTextField(
                   controller: _creditDiscountController,
-                  label: 'نسبة خصم الآجل (%) *',
+                  label: 'نسبة خصم الآجل (%)',
                   hint: '8',
                   keyboardType: TextInputType.number,
                   prefixIcon: const Icon(Icons.percent_rounded),

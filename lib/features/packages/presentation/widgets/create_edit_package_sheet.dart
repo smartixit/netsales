@@ -58,10 +58,7 @@ class CreateEditPackageSheet extends StatefulWidget {
         ),
       ),
       scrollable: true,
-      child: CreateEditPackageSheet(
-        controller: controller,
-        package: package,
-      ),
+      child: CreateEditPackageSheet(controller: controller, package: package),
     );
   }
 
@@ -98,20 +95,25 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
           ? AmountFormatter.formatValue(p!.packageBalance!, decimalPlaces: 0)
           : '',
     );
-    _validityController =
-        TextEditingController(text: p?.packageValidity ?? '');
+    _validityController = TextEditingController(text: p?.packageValidity ?? '');
     _uptimeController = TextEditingController(text: p?.packageUptime ?? '');
     _voucherCountController = TextEditingController(
       text: (p?.packageVoucherCount ?? 51).toString(),
     );
     _cashDiscountController = TextEditingController(
       text: p != null
-          ? AmountFormatter.formatValue(p.packageDefaultCashDiscount, decimalPlaces: 0)
+          ? AmountFormatter.formatValue(
+              p.packageDefaultCashDiscount,
+              decimalPlaces: 0,
+            )
           : '10',
     );
     _creditDiscountController = TextEditingController(
       text: p != null
-          ? AmountFormatter.formatValue(p.packageDefaultCreditDiscount, decimalPlaces: 0)
+          ? AmountFormatter.formatValue(
+              p.packageDefaultCreditDiscount,
+              decimalPlaces: 0,
+            )
           : '5',
     );
 
@@ -158,16 +160,24 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
   }) {
     setState(() {
       _nameController.text = name;
-      _priceController.text =
-          AmountFormatter.formatValue(price, decimalPlaces: 0);
-      _balanceController.text =
-          AmountFormatter.formatValue(balance, decimalPlaces: 0);
+      _priceController.text = AmountFormatter.formatValue(
+        price,
+        decimalPlaces: 0,
+      );
+      _balanceController.text = AmountFormatter.formatValue(
+        balance,
+        decimalPlaces: 0,
+      );
       _validityController.text = validity;
       _uptimeController.text = uptime;
-      _cashDiscountController.text =
-          AmountFormatter.formatValue(cashDisc, decimalPlaces: 0);
-      _creditDiscountController.text =
-          AmountFormatter.formatValue(creditDisc, decimalPlaces: 0);
+      _cashDiscountController.text = AmountFormatter.formatValue(
+        cashDisc,
+        decimalPlaces: 0,
+      );
+      _creditDiscountController.text = AmountFormatter.formatValue(
+        creditDisc,
+        decimalPlaces: 0,
+      );
       _selectedColor = color;
     });
   }
@@ -177,16 +187,19 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
 
     final price =
         double.tryParse(AmountFormatter.clean(_priceController.text)) ?? 0.0;
-    final balance =
-        double.tryParse(AmountFormatter.clean(_balanceController.text));
+    final balance = double.tryParse(
+      AmountFormatter.clean(_balanceController.text),
+    );
     final voucherCount =
         int.tryParse(AmountFormatter.clean(_voucherCountController.text)) ?? 51;
     final cashDisc =
         double.tryParse(AmountFormatter.clean(_cashDiscountController.text)) ??
-            0.0;
+        0.0;
     final creditDisc =
-        double.tryParse(AmountFormatter.clean(_creditDiscountController.text)) ??
-            0.0;
+        double.tryParse(
+          AmountFormatter.clean(_creditDiscountController.text),
+        ) ??
+        0.0;
 
     // استخدام معرف أول شبكة تابعة للمستخدم أو المعرف المسجل بالباقة
     final networkId = widget.package?.networkId ?? 1;
@@ -224,10 +237,12 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
         double.tryParse(AmountFormatter.clean(_priceController.text)) ?? 0.0;
     final cashDiscVal =
         double.tryParse(AmountFormatter.clean(_cashDiscountController.text)) ??
-            0.0;
+        0.0;
     final creditDiscVal =
-        double.tryParse(AmountFormatter.clean(_creditDiscountController.text)) ??
-            0.0;
+        double.tryParse(
+          AmountFormatter.clean(_creditDiscountController.text),
+        ) ??
+        0.0;
 
     final netCash = priceVal - (priceVal * cashDiscVal / 100);
     final netCredit = priceVal - (priceVal * creditDiscVal / 100);
@@ -325,7 +340,7 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
           // ── 3. حقول إدخال البيانات الأساسية ──
           CustomTextField(
             controller: _nameController,
-            label: 'اسم باقة الكروت *',
+            label: 'اسم باقة الكروت',
             hint: 'مثال: باقة يومية 500 ريال',
             prefixIcon: const Icon(Icons.confirmation_number_outlined),
             validator: FormValidators.required(fieldName: 'اسم باقة الكروت'),
@@ -338,7 +353,7 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
               Expanded(
                 child: CustomTextField(
                   controller: _priceController,
-                  label: 'سعر البيع للجمهور (ر.ي) *',
+                  label: 'سعر البيع للجمهور (ر.ي)',
                   hint: '500',
                   keyboardType: TextInputType.number,
                   prefixIcon: const Icon(Icons.payments_outlined),
@@ -394,7 +409,7 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
               Expanded(
                 child: CustomTextField(
                   controller: _cashDiscountController,
-                  label: 'خصم الكاش الافتراضي (%) *',
+                  label: 'خصم الكاش الافتراضي (%)',
                   hint: '10',
                   keyboardType: TextInputType.number,
                   prefixIcon: const Icon(Icons.percent_rounded),
@@ -407,7 +422,7 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
               Expanded(
                 child: CustomTextField(
                   controller: _creditDiscountController,
-                  label: 'خصم الآجل الافتراضي (%) *',
+                  label: 'خصم الآجل الافتراضي (%)',
                   hint: '5',
                   keyboardType: TextInputType.number,
                   prefixIcon: const Icon(Icons.percent_rounded),
@@ -452,10 +467,7 @@ class _PresetChip extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _PresetChip({
-    required this.label,
-    required this.onTap,
-  });
+  const _PresetChip({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

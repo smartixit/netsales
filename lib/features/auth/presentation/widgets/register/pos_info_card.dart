@@ -25,186 +25,190 @@ class PosInfoCard extends GetView<RegisterPosController> {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
-        boxShadow: AppElevation.level1(context),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // رأس القسم مع مؤشر الخطوة
-          Row(
+          padding: EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            border: Border.all(
+              color: colors.outlineVariant.withValues(alpha: 0.3),
+            ),
+            boxShadow: AppElevation.level1(context),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 36.r,
-                height: 36.r,
-                decoration: BoxDecoration(
-                  color: colors.primaryContainer.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: Icon(
-                  Icons.storefront_rounded,
-                  color: colors.primary,
-                  size: 20.r,
-                ),
-              ),
-              AppSpacing.hSm,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'بيانات نقطة البيع والموقع',
-                      style: AppTypography.titleMedium.copyWith(
-                        color: colors.onSurface,
-                        fontWeight: FontWeight.w800,
-                      ),
+              // رأس القسم مع مؤشر الخطوة
+              Row(
+                children: [
+                  Container(
+                    width: 36.r,
+                    height: 36.r,
+                    decoration: BoxDecoration(
+                      color: colors.primaryContainer.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
-                    AppSpacing.vXxs,
-                    Text(
-                      'المعلومات التجارية وموقع المحل',
+                    child: Icon(
+                      Icons.storefront_rounded,
+                      color: colors.primary,
+                      size: 20.r,
+                    ),
+                  ),
+                  AppSpacing.hSm,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'بيانات نقطة البيع والموقع',
+                          style: AppTypography.titleMedium.copyWith(
+                            color: colors.onSurface,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        AppSpacing.vXxs,
+                        Text(
+                          'المعلومات التجارية وموقع المحل',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xxs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerHighest.withValues(
+                        alpha: 0.4,
+                      ),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                    ),
+                    child: Text(
+                      'الخطوة 1 من 2',
                       style: AppTypography.labelSmall.copyWith(
                         color: colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+
+              AppSpacing.vLg,
+
+              // منتقي شعار أو واجهة نقطة البيع
+              CustomImagePicker.logo(
+                label: 'شعار أو واجهة نقطة البيع',
+                hint: 'PNG, JPG حتى 2MB (اختياري)',
+                valueListenable: controller.posLogo,
+              ),
+
+              AppSpacing.vMd,
+
+              // اسم نقطة البيع
+              CustomTextField(
+                controller: controller.posNameController,
+                label: 'اسم نقطة البيع / المحل',
+                hint: 'مثال: سوبرماركت الأمانة / مركز النور',
+                prefixIcon: Icon(Icons.store_outlined, size: 20.r),
+                validator: FormValidators.required(fieldName: 'اسم نقطة البيع'),
+              ),
+
+              AppSpacing.vMd,
+
+              // اختيار المحافظة (CustomDropdown)
+              Obx(() {
+                final items = controller.governorates.map((gov) {
+                  return DropdownItem<GovernorateEntity>(
+                    value: gov,
+                    child: Text(
+                      gov.governorateName,
+                      style: AppTypography.bodyMedium,
+                    ),
+                  );
+                }).toList();
+
+                return CustomDropdown<GovernorateEntity>(
+                  label: 'المحافظة',
+                  hint: controller.isLoadingGovernorates.value
+                      ? 'جاري جلب المحافظات...'
+                      : 'اختر المحافظة',
+                  prefixIcon: Icons.map_outlined,
+                  items: items,
+                  valueListenable: controller.selectedGovernorate,
+                  itemSearchText: (gov) => gov.governorateName,
+                  onChanged: controller.onGovernorateChanged,
+                  validator: (gov) =>
+                      gov == null ? 'يرجى اختيار المحافظة.' : null,
+                );
+              }),
+
+              AppSpacing.vMd,
+
+              // اختيار المديرية (CustomDropdown متتالي)
+              Obx(() {
+                final items = controller.directorates.map((dir) {
+                  return DropdownItem<DirectorateEntity>(
+                    value: dir,
+                    child: Text(
+                      dir.directorateName,
+                      style: AppTypography.bodyMedium,
+                    ),
+                  );
+                }).toList();
+
+                final hasGov = controller.selectedGovernorate.value != null;
+
+                return CustomDropdown<DirectorateEntity>(
+                  label: 'المديرية',
+                  hint: controller.isLoadingDirectorates.value
+                      ? 'جاري جلب المديريات...'
+                      : (hasGov ? 'اختر المديرية' : 'اختر المحافظة أولاً'),
+                  prefixIcon: Icons.location_city_outlined,
+                  enabled: hasGov && !controller.isLoadingDirectorates.value,
+                  items: items,
+                  valueListenable: controller.selectedDirectorate,
+                  itemSearchText: (dir) => dir.directorateName,
+                  onChanged: controller.onDirectorateChanged,
+                  validator: (dir) =>
+                      dir == null ? 'يرجى اختيار المديرية.' : null,
+                );
+              }),
+
+              AppSpacing.vMd,
+
+              // العنوان التفصيلي لنقطة البيع
+              CustomTextField(
+                controller: controller.posAddressController,
+                label: 'العنوان التفصيلي',
+                hint: 'مثال: الشارع العام، بجوار مسجد الفاروق',
+                prefixIcon: Icon(Icons.place_outlined, size: 20.r),
+                validator: FormValidators.addressValidator(
+                  fieldName: 'عنوان نقطة البيع',
+                  isRequired: false,
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xxs,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Text(
-                  'الخطوة 1 من 2',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
+
+              AppSpacing.vMd,
+
+              // البريد الإلكتروني لنقطة البيع (اختياري)
+              CustomTextField(
+                controller: controller.posEmailController,
+                label: 'البريد الإلكتروني لنقطة البيع',
+                hint: 'pos@example.com',
+                prefixIcon: Icon(Icons.alternate_email_rounded, size: 20.r),
+                keyboardType: TextInputType.emailAddress,
+                validator: FormValidators.emailValidator(
+                  fieldName: 'بريد نقطة البيع',
+                  isRequired: false,
                 ),
               ),
             ],
           ),
-
-          AppSpacing.vLg,
-
-          // منتقي شعار أو واجهة نقطة البيع
-          CustomImagePicker.logo(
-            label: 'شعار أو واجهة نقطة البيع',
-            hint: 'PNG, JPG حتى 2MB (اختياري)',
-            valueListenable: controller.posLogo,
-          ),
-
-          AppSpacing.vMd,
-
-          // اسم نقطة البيع
-          CustomTextField(
-            controller: controller.posNameController,
-            label: 'اسم نقطة البيع / المحل *',
-            hint: 'مثال: سوبرماركت الأمانة / مركز النور',
-            prefixIcon: Icon(Icons.store_outlined, size: 20.r),
-            validator: FormValidators.required(fieldName: 'اسم نقطة البيع'),
-          ),
-
-          AppSpacing.vMd,
-
-          // اختيار المحافظة (CustomDropdown)
-          Obx(() {
-            final items = controller.governorates.map((gov) {
-              return DropdownItem<GovernorateEntity>(
-                value: gov,
-                child: Text(
-                  gov.governorateName,
-                  style: AppTypography.bodyMedium,
-                ),
-              );
-            }).toList();
-
-            return CustomDropdown<GovernorateEntity>(
-              label: 'المحافظة *',
-              hint: controller.isLoadingGovernorates.value
-                  ? 'جاري جلب المحافظات...'
-                  : 'اختر المحافظة',
-              prefixIcon: Icons.map_outlined,
-              items: items,
-              valueListenable: controller.selectedGovernorate,
-              itemSearchText: (gov) => gov.governorateName,
-              onChanged: controller.onGovernorateChanged,
-              validator: (gov) => gov == null ? 'يرجى اختيار المحافظة.' : null,
-            );
-          }),
-
-          AppSpacing.vMd,
-
-          // اختيار المديرية (CustomDropdown متتالي)
-          Obx(() {
-            final items = controller.directorates.map((dir) {
-              return DropdownItem<DirectorateEntity>(
-                value: dir,
-                child: Text(
-                  dir.directorateName,
-                  style: AppTypography.bodyMedium,
-                ),
-              );
-            }).toList();
-
-            final hasGov = controller.selectedGovernorate.value != null;
-
-            return CustomDropdown<DirectorateEntity>(
-              label: 'المديرية *',
-              hint: controller.isLoadingDirectorates.value
-                  ? 'جاري جلب المديريات...'
-                  : (hasGov ? 'اختر المديرية' : 'اختر المحافظة أولاً'),
-              prefixIcon: Icons.location_city_outlined,
-              enabled: hasGov && !controller.isLoadingDirectorates.value,
-              items: items,
-              valueListenable: controller.selectedDirectorate,
-              itemSearchText: (dir) => dir.directorateName,
-              onChanged: controller.onDirectorateChanged,
-              validator: (dir) => dir == null ? 'يرجى اختيار المديرية.' : null,
-            );
-          }),
-
-          AppSpacing.vMd,
-
-          // العنوان التفصيلي لنقطة البيع
-          CustomTextField(
-            controller: controller.posAddressController,
-            label: 'العنوان التفصيلي',
-            hint: 'مثال: الشارع العام، بجوار مسجد الفاروق',
-            prefixIcon: Icon(Icons.place_outlined, size: 20.r),
-            validator: FormValidators.addressValidator(
-              fieldName: 'عنوان نقطة البيع',
-              isRequired: false,
-            ),
-          ),
-
-          AppSpacing.vMd,
-
-          // البريد الإلكتروني لنقطة البيع (اختياري)
-          CustomTextField(
-            controller: controller.posEmailController,
-            label: 'البريد الإلكتروني لنقطة البيع',
-            hint: 'pos@example.com',
-            prefixIcon: Icon(Icons.alternate_email_rounded, size: 20.r),
-            keyboardType: TextInputType.emailAddress,
-            validator: FormValidators.emailValidator(
-              fieldName: 'بريد نقطة البيع',
-              isRequired: false,
-            ),
-          ),
-        ],
-      ),
-    )
+        )
         .animate()
         .fadeIn(duration: AppMotion.normal)
         .slideY(
