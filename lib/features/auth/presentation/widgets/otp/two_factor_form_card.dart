@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/presentation/controllers/two_factor_auth_controller.dart';
@@ -14,13 +15,8 @@ import 'package:netsales/widgets/inputs/custom_numeric_keyboard.dart';
 import 'package:netsales/widgets/inputs/custom_pin_field.dart';
 
 /// بطاقة إدخال رمز التحقق بخطوتين وتأكيد الجهاز (TwoFactorFormCard)
-class TwoFactorFormCard extends StatelessWidget {
-  final TwoFactorAuthController controller;
-
-  const TwoFactorFormCard({
-    super.key,
-    required this.controller,
-  });
+class TwoFactorFormCard extends GetView<TwoFactorAuthController> {
+  const TwoFactorFormCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +28,7 @@ class TwoFactorFormCard extends StatelessWidget {
         color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.5),
+          color: colors.outlineVariant.withValues(alpha: 0.3),
         ),
         boxShadow: AppElevation.level1(context),
       ),
@@ -41,7 +37,7 @@ class TwoFactorFormCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // حقل إدخال الرمز الموحد (CustomPinField)
+            // 1. حقل إدخال الرمز الموحد (CustomPinField)
             Obx(
               () => CustomPinField(
                 length: 6,
@@ -56,9 +52,9 @@ class TwoFactorFormCard extends StatelessWidget {
               ),
             ),
 
-            AppSpacing.vMd,
+            AppSpacing.vLg,
 
-            // شريط مؤشر التهدئة وزر تبديل لوحة المفاتيح
+            // 2. شريط مؤشر التهدئة وزر تبديل لوحة المفاتيح
             Obx(() {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,26 +66,43 @@ class TwoFactorFormCard extends StatelessWidget {
                       icon: Icons.refresh_rounded,
                       loading: controller.isResending.value,
                       onPressed: controller.resendOtp,
+                      foregroundColor: colors.primary,
+                      textStyle: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                     )
                   else
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.timer_outlined,
-                          size: 16.r,
-                          color: colors.onSurfaceVariant,
-                        ),
-                        AppSpacing.hXs,
-                        Text(
-                          'إعادة الإرسال بعد ${controller.cooldownSeconds.value} ثانية',
-                          style: AppTypography.labelMedium.copyWith(
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xxs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.timer_outlined,
+                            size: 14.r,
                             color: colors.onSurfaceVariant,
                           ),
-                        ),
-                      ],
+                          AppSpacing.hXxs,
+                          Text(
+                            'إعادة الإرسال بعد ${controller.cooldownSeconds.value} ث',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: colors.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
 
-                  // زر تبديل نمط لوحة المفاتيح بين المدمجة وكيبورد النظام
+                  // زر تبديل نمط لوحة المفاتيح
                   CustomButton.icon(
                     icon: controller.isCustomKeyboard.value
                         ? Icons.keyboard_outlined
@@ -108,7 +121,7 @@ class TwoFactorFormCard extends StatelessWidget {
               );
             }),
 
-            // لوحة المفاتيح الرقمية المدمجة (تظهر عند تفعيل الوضع المدمج)
+            // 3. لوحة المفاتيح الرقمية المدمجة
             Obx(() {
               if (!controller.isCustomKeyboard.value) {
                 return const SizedBox.shrink();
@@ -127,14 +140,15 @@ class TwoFactorFormCard extends StatelessWidget {
               );
             }),
 
-            AppSpacing.vLg,
+            AppSpacing.vXl,
 
-            // زر تأكيد الرمز والمصادقة
+            // 4. زر تأكيد الرمز والمصادقة
             Obx(
               () => CustomButton.primary(
                 text: 'تأكيد الجهاز والدخول',
                 icon: Icons.lock_open_rounded,
-                iconSize: 20.r,
+                size: AppButtonSize.large,
+                height: 52.h,
                 loading: controller.isLoading.value,
                 onPressed: () => controller.submitOtp(),
               ),
@@ -142,7 +156,7 @@ class TwoFactorFormCard extends StatelessWidget {
 
             AppSpacing.vSm,
 
-            // زر الإلغاء والعودة
+            // 5. زر الإلغاء والعودة
             CustomButton.text(
               text: 'إلغاء والعودة لتسجيل الدخول',
               icon: Icons.arrow_back_rounded,
@@ -151,6 +165,14 @@ class TwoFactorFormCard extends StatelessWidget {
           ],
         ),
       ),
-    ).animate().fadeIn(duration: 450.ms).slideY(begin: 0.1, end: 0);
+    )
+        .animate()
+        .fadeIn(duration: AppMotion.normal)
+        .slideY(
+          begin: 0.1,
+          end: 0,
+          duration: AppMotion.normal,
+          curve: AppMotion.emphasized,
+        );
   }
 }

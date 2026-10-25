@@ -65,21 +65,24 @@ class RegisterNetworkScreen extends GetView<RegisterNetworkController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 1. ترويسة الشاشة المستقلة (RegisterHeaderSection)
+                    // 1. ترويسة الشاشة المستقلة (RegisterNetworkHeaderSection)
                     const RegisterNetworkHeaderSection(),
 
                     AppSpacing.vLg,
 
                     // 2. بطاقة بيانات الشبكة والشعار والموقع (NetworkInfoCard)
-                    NetworkInfoCard(controller: controller),
+                    const NetworkInfoCard(),
+
                     AppSpacing.vLg,
 
-                    // 3. بطاقة بيانات مالك ومسؤول الشبكة والصورة الشخصية (OwnerInfoCard)
-                    NetworkOwnerInfoCard(controller: controller),
+                    // 3. بطاقة بيانات مالك ومسؤول الشبكة والصورة الشخصية (NetworkOwnerInfoCard)
+                    const NetworkOwnerInfoCard(),
+
                     AppSpacing.vXl,
 
-                    // 4. أزرار إرسال الطلب والتوجيه الموحدة (RegisterSubmitSection)
-                    RegisterNetworkSubmitSection(controller: controller),
+                    // 4. أزرار إرسال الطلب والتوجيه الموحدة (RegisterNetworkSubmitSection)
+                    const RegisterNetworkSubmitSection(),
+
                     AppSpacing.vLg,
                   ],
                 ),

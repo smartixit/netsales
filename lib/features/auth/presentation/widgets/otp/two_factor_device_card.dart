@@ -4,16 +4,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
 /// بطاقة معلومات الجهاز المطلوب تأكيده في التحقق بخطوتين (TwoFactorDeviceCard)
 class TwoFactorDeviceCard extends StatelessWidget {
-  final String displayDeviceName;
-
   const TwoFactorDeviceCard({
     super.key,
     required this.displayDeviceName,
   });
+
+  final String displayDeviceName;
 
   @override
   Widget build(BuildContext context) {
@@ -22,25 +23,25 @@ class TwoFactorDeviceCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
+        color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.4),
+          color: colors.outlineVariant.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
         children: [
           Container(
-            width: 44.r,
-            height: 44.r,
+            width: 40.r,
+            height: 40.r,
             decoration: BoxDecoration(
-              color: colors.primaryContainer.withValues(alpha: 0.4),
+              color: colors.primaryContainer.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Icon(
-              Icons.devices_rounded,
+              Icons.phonelink_lock_rounded,
               color: colors.primary,
-              size: 24.r,
+              size: 20.r,
             ),
           ),
           AppSpacing.hMd,
@@ -49,8 +50,8 @@ class TwoFactorDeviceCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'تأكيد الدخول من جهاز جديد',
-                  style: AppTypography.labelMedium.copyWith(
+                  'محاولة دخول من جهاز جديد',
+                  style: AppTypography.labelSmall.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
                 ),
@@ -59,7 +60,7 @@ class TwoFactorDeviceCard extends StatelessWidget {
                   displayDeviceName,
                   style: AppTypography.titleSmall.copyWith(
                     color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -67,6 +68,7 @@ class TwoFactorDeviceCard extends StatelessWidget {
               ],
             ),
           ),
+          AppSpacing.hSm,
           Container(
             padding: EdgeInsets.symmetric(
               horizontal: AppSpacing.sm,
@@ -76,19 +78,38 @@ class TwoFactorDeviceCard extends StatelessWidget {
               color: colors.warning.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppRadius.full),
               border: Border.all(
-                color: colors.warning.withValues(alpha: 0.3),
+                color: colors.warning.withValues(alpha: 0.25),
               ),
             ),
-            child: Text(
-              'غير مؤكد',
-              style: AppTypography.labelSmall.copyWith(
-                color: colors.warning,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.shield_outlined,
+                  size: 13.r,
+                  color: colors.warning,
+                ),
+                AppSpacing.hXxs,
+                Text(
+                  'يتطلب التوثيق',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.warning,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 420.ms);
+    )
+        .animate()
+        .fadeIn(duration: AppMotion.normal)
+        .slideY(
+          begin: 0.1,
+          end: 0,
+          duration: AppMotion.normal,
+          curve: AppMotion.emphasized,
+        );
   }
 }

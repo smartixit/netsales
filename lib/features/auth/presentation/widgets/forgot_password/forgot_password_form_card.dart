@@ -6,19 +6,15 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
-import 'package:netsales/core/utils/form_validators.dart';
+import 'package:netsales/core/themes/app_motion.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/auth/presentation/controllers/forgot_password_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/inputs/custom_phone_field.dart';
 
-/// بطاقة نموذج إدخال رقم الهاتف لاستعادة كلمة المرور (ForgotPasswordFormCard)
-class ForgotPasswordFormCard extends StatelessWidget {
-  final ForgotPasswordController controller;
-
-  const ForgotPasswordFormCard({
-    super.key,
-    required this.controller,
-  });
+/// بطاقة نموذج استعادة كلمة المرور الموحدة
+class ForgotPasswordFormCard extends GetView<ForgotPasswordController> {
+  const ForgotPasswordFormCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +26,7 @@ class ForgotPasswordFormCard extends StatelessWidget {
         color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.5),
+          color: colors.outlineVariant.withValues(alpha: 0.3),
         ),
         boxShadow: AppElevation.level1(context),
       ),
@@ -39,47 +35,62 @@ class ForgotPasswordFormCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // حقل رقم الهاتف المعتمد على FormValidators
-            CustomTextField(
+            // 1. حقل رقم الهاتف الموحد
+            CustomPhoneField(
               controller: controller.phoneController,
               label: 'رقم الهاتف المسجل',
-              hint: '77XXXXXXX',
-              keyboardType: TextInputType.phone,
               textInputAction: TextInputAction.done,
-              prefixIcon: Icon(
-                Icons.phone_iphone_rounded,
-                color: colors.primary,
-                size: 22.r,
-              ),
-              validator: FormValidators.phoneValidator(
-                fieldName: 'رقم الهاتف',
-              ),
               onFieldSubmitted: (_) => controller.submit(),
             ),
 
             AppSpacing.vXl,
 
-            // زر المتابعة
+            // 2. زر المتابعة الرئيسي
             Obx(
               () => CustomButton.primary(
                 text: 'إرسال رمز التحقق',
                 icon: Icons.send_rounded,
-                iconSize: 20.r,
+                size: AppButtonSize.large,
+                height: 52.h,
                 loading: controller.isLoading.value,
-                onPressed: controller.submit,
+                onPressed: controller.isLoading.value ? null : controller.submit,
               ),
             ),
 
-            AppSpacing.vSm,
+            AppSpacing.vLg,
 
-            // زر العودة لتسجيل الدخول
-            CustomButton.text(
-              text: 'تذكرت كلمة المرور؟ تسجيل الدخول',
-              onPressed: controller.goToLogin,
+            // 3. رابط العودة لتسجيل الدخول بهدوء
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'تذكرت كلمة المرور؟',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+                CustomButton.text(
+                  text: 'تسجيل الدخول',
+                  onPressed: controller.goToLogin,
+                  foregroundColor: colors.primary,
+                  textStyle: AppTypography.titleSmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                ),
+              ],
             ),
           ],
         ),
       ),
-    ).animate().fadeIn(duration: 450.ms).slideY(begin: 0.1, end: 0);
+    )
+        .animate()
+        .fadeIn(duration: AppMotion.normal)
+        .slideY(
+          begin: 0.1,
+          end: 0,
+          duration: AppMotion.normal,
+          curve: AppMotion.emphasized,
+        );
   }
 }

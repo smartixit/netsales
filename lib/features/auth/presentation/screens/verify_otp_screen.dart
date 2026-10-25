@@ -63,15 +63,16 @@ class VerifyOtpScreen extends GetView<VerifyOtpController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 1. قسم الترويسة والأيقونة الإرشادية
+                  // 1. قسم الترويسة ورقم الهاتف المقنع
                   VerifyOtpHeaderSection(
                     maskedPhone: controller.maskedPhone,
+                    onChangePhone: controller.goToChangePhone,
                   ),
 
                   AppSpacing.vXl,
 
                   // 2. بطاقة نموذج إدخال الرمز
-                  VerifyOtpFormCard(controller: controller),
+                  const VerifyOtpFormCard(),
 
                   AppSpacing.vLg,
                 ],

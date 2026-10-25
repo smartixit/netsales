@@ -69,7 +69,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
                   AppSpacing.vXl,
 
                   // 2. بطاقة النموذج المستقلة
-                  ForgotPasswordFormCard(controller: controller),
+                  const ForgotPasswordFormCard(),
 
                   AppSpacing.vLg,
                 ],

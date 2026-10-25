@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
-/// ترويسة شاشة طلب استعادة كلمة المرور (ForgotPasswordHeaderSection)
+/// ترويسة شاشة استعادة كلمة المرور الهندسية الرشيقة
 class ForgotPasswordHeaderSection extends StatelessWidget {
   const ForgotPasswordHeaderSection({super.key});
 
@@ -14,43 +16,74 @@ class ForgotPasswordHeaderSection extends StatelessWidget {
     final colors = context.colors;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // 1. أيقونة الاستعادة الهندسية الرشيقة
         Container(
-          width: 80.r,
-          height: 80.r,
+          width: 56.r,
+          height: 56.r,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: colors.primary.withValues(alpha: 0.1),
+            color: colors.primaryContainer.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(
-              color: colors.primary.withValues(alpha: 0.2),
-              width: 2.w,
+              color: colors.primary.withValues(alpha: 0.15),
             ),
           ),
           child: Icon(
             Icons.lock_reset_rounded,
             color: colors.primary,
-            size: 40.r,
+            size: 28.r,
           ),
-        ),
+        )
+            .animate()
+            .scale(
+              begin: const Offset(0.9, 0.9),
+              end: const Offset(1.0, 1.0),
+              duration: AppMotion.normal,
+              curve: AppMotion.springy,
+            )
+            .fadeIn(duration: AppMotion.normal),
+
         AppSpacing.vMd,
+
+        // 2. العنوان الرئيسي
         Text(
-          'نسيت كلمة المرور؟',
-          style: AppTypography.headlineSmall.copyWith(
+          'استعادة كلمة المرور',
+          style: AppTypography.headlineMedium.copyWith(
             color: colors.onSurface,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
           ),
           textAlign: TextAlign.center,
-        ),
+        )
+            .animate()
+            .fadeIn(duration: AppMotion.normal)
+            .slideY(
+              begin: 0.15,
+              end: 0,
+              duration: AppMotion.normal,
+              curve: AppMotion.emphasized,
+            ),
+
         AppSpacing.vXs,
+
+        // 3. النص الإرشادي الهادئ المريح
         Text(
-          'أدخل رقم هاتفك المسجل في النظام، وسنرسل لك رمز تحقق مؤقت (OTP) لتأكيد هويتك واستعادة الحساب.',
+          'أدخل رقم هاتفك المسجل لنرسل لك رمز التحقق السريع',
           style: AppTypography.bodyMedium.copyWith(
             color: colors.onSurfaceVariant,
-            height: 1.5,
           ),
           textAlign: TextAlign.center,
-        ),
+        )
+            .animate()
+            .fadeIn(duration: AppMotion.normal)
+            .slideY(
+              begin: 0.15,
+              end: 0,
+              duration: AppMotion.normal,
+              curve: AppMotion.emphasized,
+            ),
       ],
-    ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1, end: 0);
+    );
   }
 }

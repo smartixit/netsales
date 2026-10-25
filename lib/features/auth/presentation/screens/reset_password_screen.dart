@@ -90,7 +90,7 @@ class ResetPasswordScreen extends GetView<ResetPasswordController> {
                     AppSpacing.vLg,
 
                     // 2. بطاقة النموذج المستقلة
-                    ResetPasswordFormCard(controller: controller),
+                    const ResetPasswordFormCard(),
 
                     AppSpacing.vLg,
                   ],

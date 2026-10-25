@@ -79,9 +79,7 @@ class TwoFactorAuthScreen extends GetView<TwoFactorAuthController> {
                   AppSpacing.vLg,
 
                   // 3. بطاقة نموذج إدخال رمز التحقق
-                  TwoFactorFormCard(
-                    controller: controller,
-                  ),
+                  const TwoFactorFormCard(),
 
                   AppSpacing.vLg,
                 ],

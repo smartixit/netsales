@@ -54,6 +54,12 @@
     1. خدمة منطقية وسيطة في `lib/core/services/` (تدير البيانات، التخزين، الصلاحيات، الحسابات، التحقق، ودورة الحياة).
     2. ويدجت بصري متخصص ومستقل في `lib/widgets/` (يتولى الرسم البصري، التحريك، التفاعل، وتطبيق سمات الثيم والتصميم).
   - يُحظر دمج كود الواجهة داخل ملف الخدمة، ويُحظر استدعاء العمليات المعقدة أو الحزم الخارجية مباشرة من الودجت دون المرور بالخدمة المعتمدة.
+- **النوافذ السفلية المؤسسية الموحدة (CustomBottomSheet):**
+  - الاعتماد الحصري على المكون الموحد `CustomBottomSheet` وفئاته ودواله المصنعية (`show`, `showActions`, `showConfirmation`) في `lib/widgets/sheets/custom_bottom_sheet.dart`.
+  - يُحظر حظراً باتاً استدعاء `showModalBottomSheet` الخام من Flutter أو بناء بطاقات سفلية مكررة داخل الشاشات.
+- **شريط البحث والتصفية الموحد (CustomSearchFilterBar):**
+  - الاعتماد الحصري على المكون القياسي الموحد `CustomSearchFilterBar<T>` مع كائنات `CustomFilterItem<T>` في `lib/widgets/bars/custom_search_filter_bar.dart`.
+  - يُحظر حظراً قاطعاً بناء حقول بحث مدمجة بشرائح تصفية مكررة داخل أي شاشة ميزة، وتكتفي الميزات بغلاف رشيق (Lean Adapter) يربط الـ Controller عبر `Obx`.
 
 ---
 
@@ -620,3 +626,32 @@ lib/
   - `CustomSnackbar` يظهر فقط في `catch` للأخطاء — النجاح يُعرض عبر `CustomAnimationOverlay.showSuccess` حصراً.
   - حارس `finally` إلزامي لمنع تجميد الـ overlay عند أي استثناء غير متوقع.
   - هذا النمط موحد بالكامل مع ما طُبِّق في `auth` feature controllers وجميع متحكمات العمليات الحساسة.
+
+
+---
+
+## 28. النوافذ السفلية المؤسسية الموحدة (CustomBottomSheet — Unified Enterprise Bottom Sheet)
+- **الحظر المطلق للـ BottomSheets الخام أو المكررة:** يُحظر حظراً باتاً استخدام `showModalBottomSheet` الخام من Flutter أو بناء هياكل سفلية مكررة داخل أي شاشة ميزة.
+- **الفئات والأنماط المعمارية:**
+  - `CustomBottomSheet`: للنافذة العامة التي تحتضن أي محتوى فرعي مع ترويسة، مقبض سحب، وأزرار إجراءات موحدة (`primaryAction`, `secondaryAction`).
+  - `CustomBottomSheet.actions`: لقوائم الإجراءات والخيارات العمودية المتعددة بالاعتماد على عناصر `CustomBottomSheetActionItem`.
+  - `CustomBottomSheet.confirmation`: لنوافذ التأكيد على العمليات الحساسة مع أيقونة دلالية ملونة وخياري تأكيد وإلغاء.
+- **دوال العرض السريعة (Static Openers via GetX):**
+  - `CustomBottomSheet.show<T>(...)`: فتح النافذة المخصصة مباشرة مع دعم `isDismissible`, `enableDrag`, و `maxHeightFactor`.
+  - `CustomBottomSheet.showActions<T>(...)`: استعراض قائمة إجراءات سريعة وإغلاق تلقائي عند الاختيار.
+  - `CustomBottomSheet.showConfirmation<T>(...)`: نافذة تأكيد سريعة ترجع `bool` أو قيمة اختيارية.
+- **الملف المصدري الموحد:** `lib/widgets/sheets/custom_bottom_sheet.dart`.
+
+
+---
+
+## 29. شريط البحث والتصفية الموحد (CustomSearchFilterBar — Generic Search & Filter Bar)
+- **الحظر المطلق لأشرطة البحث والتصفية الخاصة بالميزات:** يُحظر حظراً قاطعاً إعادة بناء كود البحث ومصفوفات التصفية يدوياً داخل أي شاشة ميزة.
+- **المعمارية الجنيسة (`CustomSearchFilterBar<T>`):**
+  - يدعم نمط الـ Generics لكافة أنواع المفاتيح (`String`, `Enum`, `int`).
+  - يدمج حقل بحث موحد مع زر مسح تفاعلي، وزر إجراء اختياري (`actionButton`).
+  - شريط شرائح تصفية أفقي قابل للتمرير مع عناصر `CustomFilterItem<T>`.
+  - تفاعل فيزيائي ناعم عبر `CustomInteractiveBounce` وشارات عددية ذكية (`count`, `highlightBadge`).
+- **نمط الاستخدام في شاشات الميزات (Lean Adapter Pattern):**
+  - تكتفي شاشة الميزة بإنشاء غلاف رشيق وخفيف يربط المتحكم `Controller` مع `CustomSearchFilterBar` عبر `Obx`.
+- **الملف المصدري الموحد:** `lib/widgets/bars/custom_search_filter_bar.dart`.

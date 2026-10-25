@@ -123,24 +123,24 @@ class CustomImagePicker extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label.isNotEmpty) ...[
-          Row(
-            children: [
-              Text(
-                label,
-                style: AppTypography.inputLabel.copyWith(
-                  color: colors.onSurface,
-                ),
+          Text.rich(
+            TextSpan(
+              text: label,
+              style: AppTypography.inputLabel.copyWith(
+                color: colors.onSurface,
               ),
-              if (isRequired) ...[
-                AppSpacing.hXxs,
-                Text(
-                  '*',
-                  style: AppTypography.inputLabel.copyWith(
-                    color: colors.error,
+              children: [
+                if (isRequired) ...[
+                  const WidgetSpan(child: SizedBox(width: 4)),
+                  TextSpan(
+                    text: '*',
+                    style: AppTypography.inputLabel.copyWith(
+                      color: colors.error,
+                    ),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
           AppSpacing.vXs,
         ],

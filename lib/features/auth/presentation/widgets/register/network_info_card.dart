@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
@@ -16,53 +17,87 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/pickers/custom_image_picker.dart';
 
 /// بطاقة إدخال بيانات الشبكة والموقع الجغرافي والشعار (NetworkInfoCard)
-class NetworkInfoCard extends StatelessWidget {
-  final RegisterNetworkController controller;
-
-  const NetworkInfoCard({
-    super.key,
-    required this.controller,
-  });
+class NetworkInfoCard extends GetView<RegisterNetworkController> {
+  const NetworkInfoCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.4),
+          color: colors.outlineVariant.withValues(alpha: 0.3),
         ),
         boxShadow: AppElevation.level1(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // رأس القسم مع مؤشر الخطوة
           Row(
             children: [
-              Icon(
-                Icons.hub_outlined,
-                color: colors.primary,
-                size: 20.r,
+              Container(
+                width: 36.r,
+                height: 36.r,
+                decoration: BoxDecoration(
+                  color: colors.primaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Icon(
+                  Icons.hub_rounded,
+                  color: colors.primary,
+                  size: 20.r,
+                ),
               ),
               AppSpacing.hSm,
               Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'بيانات الشبكة والموقع',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    AppSpacing.vXxs,
+                    Text(
+                      'المعلومات الأساسية وموقع التغطية',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xxs,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
                 child: Text(
-                  'بيانات الشبكة والموقع',
-                  style: AppTypography.titleMedium.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
+                  'الخطوة 1 من 2',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          AppSpacing.vMd,
 
-          // منتقي شعار الشبكة المؤسسي (CustomImagePicker.logo)
+          AppSpacing.vLg,
+
+          // منتقي شعار الشبكة المؤسسي
           CustomImagePicker.logo(
             label: 'شعار الشبكة',
             hint: 'PNG, JPG حتى 2MB (اختياري)',
@@ -169,6 +204,14 @@ class NetworkInfoCard extends StatelessWidget {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 450.ms);
+    )
+        .animate()
+        .fadeIn(duration: AppMotion.normal)
+        .slideY(
+          begin: 0.1,
+          end: 0,
+          duration: AppMotion.normal,
+          curve: AppMotion.emphasized,
+        );
   }
 }

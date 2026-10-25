@@ -1,75 +1,137 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 
-/// قسم الترويسة مع رقم الهاتف المقنع في شاشة التحقق OTP (VerifyOtpHeaderSection)
+/// قسم ترويسة شاشة التحقق OTP الهندسية
 class VerifyOtpHeaderSection extends StatelessWidget {
-  final String maskedPhone;
-
   const VerifyOtpHeaderSection({
     super.key,
     required this.maskedPhone,
+    this.onChangePhone,
   });
+
+  final String maskedPhone;
+  final VoidCallback? onChangePhone;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // 1. أيقونة الرمز الهندسية المعتمدة
         Container(
-          width: 80.r,
-          height: 80.r,
+          width: 56.r,
+          height: 56.r,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: colors.primary.withValues(alpha: 0.1),
+            color: colors.primaryContainer.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(
-              color: colors.primary.withValues(alpha: 0.2),
-              width: 2.w,
+              color: colors.primary.withValues(alpha: 0.15),
             ),
           ),
           child: Icon(
-            Icons.sms_outlined,
+            Icons.sms_rounded,
             color: colors.primary,
-            size: 40.r,
+            size: 28.r,
           ),
-        ),
+        )
+            .animate()
+            .scale(
+              begin: const Offset(0.9, 0.9),
+              end: const Offset(1.0, 1.0),
+              duration: AppMotion.normal,
+              curve: AppMotion.springy,
+            )
+            .fadeIn(duration: AppMotion.normal),
+
         AppSpacing.vMd,
+
+        // 2. العنوان الرئيسي
         Text(
-          'رمز التحقق (OTP)',
-          style: AppTypography.headlineSmall.copyWith(
+          'رمز التحقق',
+          style: AppTypography.headlineMedium.copyWith(
             color: colors.onSurface,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
           ),
           textAlign: TextAlign.center,
-        ),
-        AppSpacing.vXs,
-        RichText(
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            style: AppTypography.bodyMedium.copyWith(
-              color: colors.onSurfaceVariant,
-              height: 1.5,
+        )
+            .animate()
+            .fadeIn(duration: AppMotion.normal)
+            .slideY(
+              begin: 0.15,
+              end: 0,
+              duration: AppMotion.normal,
+              curve: AppMotion.emphasized,
             ),
-            children: [
-              const TextSpan(
-                text: 'تم إرسال رمز التحقق المكون من 6 أرقام إلى\nرقم الهاتف ',
+
+        AppSpacing.vXs,
+
+        // 3. النص الإرشادي الهادئ ورقم الهاتف المقنع
+        Text(
+          'تم إرسال رمز التحقق المكون من 6 أرقام إلى',
+          style: AppTypography.bodyMedium.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+          textAlign: TextAlign.center,
+        )
+            .animate()
+            .fadeIn(duration: AppMotion.normal)
+            .slideY(
+              begin: 0.15,
+              end: 0,
+              duration: AppMotion.normal,
+              curve: AppMotion.emphasized,
+            ),
+
+        AppSpacing.vXxs,
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              maskedPhone,
+              style: AppTypography.titleSmall.copyWith(
+                color: colors.primary,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
               ),
-              TextSpan(
-                text: maskedPhone,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+            ),
+            if (onChangePhone != null) ...[
+              AppSpacing.hXs,
+              CustomButton.text(
+                text: 'تغيير الرقم',
+                onPressed: onChangePhone,
+                foregroundColor: colors.onSurfaceVariant,
+                textStyle: AppTypography.labelMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xxs,
+                  vertical: AppSpacing.xxs,
                 ),
               ),
             ],
-          ),
-        ),
+          ],
+        )
+            .animate()
+            .fadeIn(duration: AppMotion.normal)
+            .slideY(
+              begin: 0.15,
+              end: 0,
+              duration: AppMotion.normal,
+              curve: AppMotion.emphasized,
+            ),
       ],
-    ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1, end: 0);
+    );
   }
 }

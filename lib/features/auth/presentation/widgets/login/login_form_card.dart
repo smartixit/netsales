@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -8,10 +7,10 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_motion.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/presentation/controllers/login_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_phone_field.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// بطاقة نموذج تسجيل الدخول المهندسة وفق أرقى المعايير العالمية وتجربة الاستخدام المريحة
@@ -38,53 +37,10 @@ class LoginFormCard extends GetView<LoginController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 1. حقل رقم الهاتف مع بادئة الدولة المدمجة وكشف المشغل التلقائي
-                  CustomTextField(
+                  // 1. حقل رقم الهاتف الموحد
+                  CustomPhoneField(
                     controller: controller.phoneController,
-                    label: 'رقم الهاتف',
-                    hint: '77XXXXXXX',
-                    keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.next,
-                    autofillHints: const [AutofillHints.telephoneNumber],
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(9),
-                    ],
-                    suffixIcon: Padding(
-                      padding: EdgeInsetsDirectional.only(
-                        start: AppSpacing.sm,
-                        end: AppSpacing.xs,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 1.w,
-                            height: 20.h,
-                            color: colors.outlineVariant.withValues(alpha: 0.5),
-                          ),
-                          AppSpacing.hXs,
-                          Text('🇾🇪', style: AppTypography.titleMedium),
-                          AppSpacing.hXxs,
-                          Text(
-                            '+967',
-                            style: AppTypography.labelLarge.copyWith(
-                              color: colors.onSurfaceVariant,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          AppSpacing.hXs,
-                        ],
-                      ),
-                    ),
-                    prefixIcon: Icon(
-                      Icons.phone_iphone_rounded,
-                      color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-                      size: 20.r,
-                    ),
-                    validator: FormValidators.phoneValidator(
-                      fieldName: 'رقم الهاتف',
-                    ),
                   ),
 
                   AppSpacing.vLg,

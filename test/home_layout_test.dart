@@ -19,6 +19,17 @@ import 'package:netsales/features/home/presentation/controllers/home_layout_cont
 import 'package:netsales/features/home/presentation/models/home_quick_action.dart';
 import 'package:netsales/features/home/presentation/screens/home_layout_screen.dart';
 import 'package:netsales/features/home/presentation/widgets/home_quick_actions_sheet.dart';
+import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
+import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
+import 'package:netsales/features/operations/domain/repositories/operations_repository.dart';
+import 'package:netsales/features/operations/domain/usecases/approve_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/cancel_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_sale_invoice_details_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_sale_invoices_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_voucher_request_details_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_voucher_requests_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FakeDashboardRepository implements DashboardRepository {
@@ -58,6 +69,48 @@ class FakeDashboardRepository implements DashboardRepository {
   }
 }
 
+class FakeOperationsRepository implements OperationsRepository {
+  @override
+  Future<List<SaleInvoiceEntity>> getSaleInvoices({
+    int? networkId,
+    int? posId,
+    String? saleType,
+    String? search,
+    int perPage = 20,
+    int page = 1,
+  }) async => [];
+
+  @override
+  Future<SaleInvoiceEntity> getSaleInvoiceDetails(int id) =>
+      throw UnimplementedError();
+
+  @override
+  Future<List<VoucherRequestEntity>> getVoucherRequests({
+    int? networkId,
+    int? posId,
+    String? status,
+    String? search,
+    int perPage = 20,
+    int page = 1,
+  }) async => [];
+
+  @override
+  Future<VoucherRequestEntity> getVoucherRequestDetails(int id) =>
+      throw UnimplementedError();
+
+  @override
+  Future<VoucherRequestEntity> approveVoucherRequest(int id, {String? notes}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<VoucherRequestEntity> rejectVoucherRequest(int id, {required String reason}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<VoucherRequestEntity> cancelVoucherRequest(int id, {String? reason}) =>
+      throw UnimplementedError();
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -75,11 +128,26 @@ void main() {
     final fakeDashboardRepo = FakeDashboardRepository();
     final getDashboardOverviewUseCase =
         GetDashboardOverviewUseCase(fakeDashboardRepo);
-    Get.put<DashboardController>(
-      DashboardController(
-        getDashboardOverviewUseCase: getDashboardOverviewUseCase,
-      ),
+    final dashboardController = DashboardController(
+      getDashboardOverviewUseCase: getDashboardOverviewUseCase,
     );
+    await dashboardController.loadDashboard();
+    Get.put<DashboardController>(dashboardController);
+
+    final fakeOpsRepo = FakeOperationsRepository();
+    final opsController = OperationsController(
+      getSaleInvoicesUseCase: GetSaleInvoicesUseCase(fakeOpsRepo),
+      getVoucherRequestsUseCase: GetVoucherRequestsUseCase(fakeOpsRepo),
+      getSaleInvoiceDetailsUseCase: GetSaleInvoiceDetailsUseCase(fakeOpsRepo),
+      getVoucherRequestDetailsUseCase:
+          GetVoucherRequestDetailsUseCase(fakeOpsRepo),
+      approveVoucherRequestUseCase: ApproveVoucherRequestUseCase(fakeOpsRepo),
+      rejectVoucherRequestUseCase: RejectVoucherRequestUseCase(fakeOpsRepo),
+      cancelVoucherRequestUseCase: CancelVoucherRequestUseCase(fakeOpsRepo),
+    );
+    await opsController.loadInvoices();
+    await opsController.loadRequests();
+    Get.put<OperationsController>(opsController);
   });
 
   Widget buildTestableWidget(Widget child) {
@@ -228,7 +296,8 @@ void main() {
           const HomeLayoutScreen(),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       // التحقق من ظهور ترويسة التطبيق واسم المستخدم المختصر ودوره
       expect(find.text('أحمد صالح'), findsOneWidget);
@@ -242,7 +311,8 @@ void main() {
 
       // النقر على تبويب العمليات وتغيير الصفحة
       await tester.tap(find.text('العمليات'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(controller.selectedIndex.value, 1);
     });
 
@@ -267,11 +337,13 @@ void main() {
           const HomeLayoutScreen(),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       // النقر على الزر المركزي العائم
       await tester.tap(find.byKey(const ValueKey('nav_center_fab')));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       // التحقق من فتح نافذة الإجراءات السريعة
       expect(find.byType(HomeQuickActionsSheet), findsOneWidget);

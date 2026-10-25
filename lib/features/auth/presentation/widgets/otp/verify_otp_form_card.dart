@@ -14,19 +14,13 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_numeric_keyboard.dart';
 import 'package:netsales/widgets/inputs/custom_pin_field.dart';
 
-/// بطاقة نموذج إدخال رمز التحقق OTP (VerifyOtpFormCard)
-class VerifyOtpFormCard extends StatelessWidget {
-  final VerifyOtpController controller;
-
-  const VerifyOtpFormCard({
-    super.key,
-    required this.controller,
-  });
+/// بطاقة نموذج إدخال رمز التحقق OTP الهندسية الموحدة
+class VerifyOtpFormCard extends GetView<VerifyOtpController> {
+  const VerifyOtpFormCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final animDuration = AppMotion.duration(context, AppMotion.normal);
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.xl),
@@ -34,7 +28,7 @@ class VerifyOtpFormCard extends StatelessWidget {
         color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.5),
+          color: colors.outlineVariant.withValues(alpha: 0.3),
         ),
         boxShadow: AppElevation.level1(context),
       ),
@@ -43,7 +37,7 @@ class VerifyOtpFormCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // حقل إدخال الرمز الموحد (CustomPinField)
+            // 1. حقل إدخال الرمز الموحد (CustomPinField)
             Obx(
               () => CustomPinField(
                 length: 6,
@@ -58,40 +52,57 @@ class VerifyOtpFormCard extends StatelessWidget {
               ),
             ),
 
-            AppSpacing.vMd,
+            AppSpacing.vLg,
 
-            // شريط مؤشر التهدئة وزر تبديل لوحة المفاتيح
+            // 2. شريط مؤشر التهدئة وزر تبديل لوحة المفاتيح
             Obx(() {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // عداد التهدئة أو زر إعادة الإرسال
+                  // مؤقت التهدئة أو زر إعادة الإرسال
                   if (controller.canResend.value)
                     CustomButton.text(
                       text: 'إعادة إرسال الرمز',
                       icon: Icons.refresh_rounded,
                       loading: controller.isResending.value,
                       onPressed: controller.resendOtp,
+                      foregroundColor: colors.primary,
+                      textStyle: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                     )
                   else
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.timer_outlined,
-                          size: 16.r,
-                          color: colors.onSurfaceVariant,
-                        ),
-                        AppSpacing.hXs,
-                        Text(
-                          'إعادة الإرسال بعد ${controller.cooldownSeconds.value} ثانية',
-                          style: AppTypography.labelMedium.copyWith(
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xxs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.timer_outlined,
+                            size: 14.r,
                             color: colors.onSurfaceVariant,
                           ),
-                        ),
-                      ],
+                          AppSpacing.hXxs,
+                          Text(
+                            'إعادة الإرسال بعد ${controller.cooldownSeconds.value} ث',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: colors.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
 
-                  // زر تبديل نمط لوحة المفاتيح بين المدمجة وكيبورد النظام
+                  // زر تبديل نمط لوحة المفاتيح
                   CustomButton.icon(
                     icon: controller.isCustomKeyboard.value
                         ? Icons.keyboard_outlined
@@ -102,15 +113,14 @@ class VerifyOtpFormCard extends StatelessWidget {
                     iconSize: 18.r,
                     dimension: 36.r,
                     foregroundColor: colors.onSurfaceVariant,
-                    backgroundColor:
-                        colors.surfaceContainerHighest.withValues(alpha: 0.35),
+                    backgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.35),
                     onPressed: controller.toggleKeyboard,
                   ),
                 ],
               );
             }),
 
-            // لوحة المفاتيح الرقمية المدمجة (تظهر عند تفعيل الوضع المدمج)
+            // 3. لوحة المفاتيح الرقمية المدمجة
             Obx(() {
               if (!controller.isCustomKeyboard.value) {
                 return const SizedBox.shrink();
@@ -129,14 +139,15 @@ class VerifyOtpFormCard extends StatelessWidget {
               );
             }),
 
-            AppSpacing.vLg,
+            AppSpacing.vXl,
 
-            // الإجراء الأساسي: تعيين كلمة مرور جديدة مباشرة
+            // 4. الإجراء الأساسي: تعيين كلمة مرور جديدة مباشرة
             Obx(
               () => CustomButton.primary(
                 text: 'تعيين كلمة مرور جديدة',
                 icon: Icons.lock_reset_rounded,
-                iconSize: 20.r,
+                size: AppButtonSize.large,
+                height: 52.h,
                 loading: controller.isLoading.value,
                 onPressed: () => controller.goToDirectReset(),
               ),
@@ -144,32 +155,27 @@ class VerifyOtpFormCard extends StatelessWidget {
 
             AppSpacing.vSm,
 
-            // المسار البديل: استلام كلمة مرور مؤقتة عبر SMS
+            // 5. المسار البديل: استلام كلمة مرور مؤقتة عبر SMS
             Obx(
               () => CustomButton.outline(
                 text: 'استلام كلمة مرور مؤقتة عبر SMS',
                 icon: Icons.sms_outlined,
-                iconSize: 18.r,
+                size: AppButtonSize.medium,
                 loading: controller.isLoading.value,
                 onPressed: () => controller.submitOtp(),
               ),
             ),
-
-            AppSpacing.vSm,
-
-            // زر تعديل رقم الهاتف
-            CustomButton.text(
-              text: 'تعديل رقم الهاتف',
-              icon: Icons.edit_outlined,
-              onPressed: controller.goToChangePhone,
-            ),
           ],
         ),
       ),
-    ).animate().fadeIn(duration: animDuration).slideY(
+    )
+        .animate()
+        .fadeIn(duration: AppMotion.normal)
+        .slideY(
           begin: 0.1,
           end: 0,
-          curve: AppMotion.standard,
+          duration: AppMotion.normal,
+          curve: AppMotion.emphasized,
         );
   }
 }

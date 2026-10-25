@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
@@ -16,53 +17,87 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/pickers/custom_image_picker.dart';
 
 /// بطاقة إدخال بيانات نقطة البيع والموقع الجغرافي والشعار (PosInfoCard)
-class PosInfoCard extends StatelessWidget {
-  final RegisterPosController controller;
-
-  const PosInfoCard({
-    super.key,
-    required this.controller,
-  });
+class PosInfoCard extends GetView<RegisterPosController> {
+  const PosInfoCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.4),
+          color: colors.outlineVariant.withValues(alpha: 0.3),
         ),
         boxShadow: AppElevation.level1(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // رأس القسم مع مؤشر الخطوة
           Row(
             children: [
-              Icon(
-                Icons.storefront_outlined,
-                color: colors.primary,
-                size: 20.r,
+              Container(
+                width: 36.r,
+                height: 36.r,
+                decoration: BoxDecoration(
+                  color: colors.primaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Icon(
+                  Icons.storefront_rounded,
+                  color: colors.primary,
+                  size: 20.r,
+                ),
               ),
               AppSpacing.hSm,
               Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'بيانات نقطة البيع والموقع',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    AppSpacing.vXxs,
+                    Text(
+                      'المعلومات التجارية وموقع المحل',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xxs,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
                 child: Text(
-                  'بيانات نقطة البيع والموقع',
-                  style: AppTypography.titleMedium.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
+                  'الخطوة 1 من 2',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          AppSpacing.vMd,
 
-          // منتقي شعار أو واجهة نقطة البيع (CustomImagePicker.logo)
+          AppSpacing.vLg,
+
+          // منتقي شعار أو واجهة نقطة البيع
           CustomImagePicker.logo(
             label: 'شعار أو واجهة نقطة البيع',
             hint: 'PNG, JPG حتى 2MB (اختياري)',
@@ -169,6 +204,14 @@ class PosInfoCard extends StatelessWidget {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 450.ms);
+    )
+        .animate()
+        .fadeIn(duration: AppMotion.normal)
+        .slideY(
+          begin: 0.1,
+          end: 0,
+          duration: AppMotion.normal,
+          curve: AppMotion.emphasized,
+        );
   }
 }

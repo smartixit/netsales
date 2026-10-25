@@ -7,79 +7,87 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
-/// بطاقة التنبيه الأمني المؤسسي في أعلى شاشة تغيير كلمة المرور (ResetPasswordSecurityBanner)
+/// شارة التنبيه الأمني المؤسسي الأنيقة في شاشة تعيين كلمة المرور
 class ResetPasswordSecurityBanner extends StatelessWidget {
-  final bool isForced;
-  final bool isDirectReset;
-
   const ResetPasswordSecurityBanner({
     super.key,
     required this.isForced,
     this.isDirectReset = false,
   });
 
+  final bool isForced;
+  final bool isDirectReset;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isWarning = isForced && !isDirectReset;
-    final animDuration = AppMotion.duration(context, AppMotion.normal);
+
+    final title = isDirectReset
+        ? 'تعيين كلمة مرور جديدة'
+        : (isForced
+            ? 'مطلوب تعيين كلمة مرور جديدة'
+            : 'تحديث كلمة المرور لحسابك');
+
+    final subtitle = isDirectReset
+        ? 'أدخل كلمة مرور قوية وجديدة لحسابك للمتابعة.'
+        : (isForced
+            ? 'تم الدخول بكلمة مؤقتة، يُلزم النظام تعيين كلمة مرور شخصية للمتابعة.'
+            : 'احرص على اختيار كلمة مرور قوية لحماية حسابك.');
 
     return Container(
-      padding: EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
         color: isWarning
-            ? colors.warning.withValues(alpha: 0.12)
-            : colors.primary.withValues(alpha: 0.08),
+            ? colors.warningContainer.withValues(alpha: 0.35)
+            : colors.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(
           color: isWarning
-              ? colors.warning.withValues(alpha: 0.3)
-              : colors.primary.withValues(alpha: 0.2),
+              ? colors.warning.withValues(alpha: 0.25)
+              : colors.primary.withValues(alpha: 0.15),
         ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(AppSpacing.sm),
+            width: 38.r,
+            height: 38.r,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isWarning
-                  ? colors.warning.withValues(alpha: 0.2)
-                  : colors.primary.withValues(alpha: 0.15),
+                  ? colors.warning.withValues(alpha: 0.15)
+                  : colors.primary.withValues(alpha: 0.12),
             ),
+            alignment: Alignment.center,
             child: Icon(
               isWarning ? Icons.shield_outlined : Icons.lock_reset_rounded,
               color: isWarning ? colors.warning : colors.primary,
-              size: 24.r,
+              size: 20.r,
             ),
           ),
-          AppSpacing.hMd,
+          AppSpacing.hSm,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  isDirectReset
-                      ? 'تعيين كلمة مرور جديدة'
-                      : (isForced
-                          ? 'مطلوب تعيين كلمة مرور جديدة'
-                          : 'تحديث كلمة المرور لحسابك'),
+                  title,
                   style: AppTypography.titleSmall.copyWith(
                     color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 AppSpacing.vXxs,
                 Text(
-                  isDirectReset
-                      ? 'أدخل كلمة مرور قوية وجديدة لحسابك، وتأكد من حفظها في مكان آمن لتسجيل الدخول.'
-                      : (isForced
-                          ? 'تم تسجيل الدخول باستخدام كلمة مرور مؤقتة عبر الرسائل القصيرة. لحماية بياناتك وعملياتك، يُلزم النظام تعيين كلمة مرور جديدة قبل المتابعة.'
-                          : 'احرص على اختيار كلمة مرور قوية وغير مستخدمة في تطبيقات أخرى.'),
+                  subtitle,
                   style: AppTypography.bodySmall.copyWith(
                     color: colors.onSurfaceVariant,
-                    height: 1.4,
+                    height: 1.35,
                   ),
                 ),
               ],
@@ -87,10 +95,13 @@ class ResetPasswordSecurityBanner extends StatelessWidget {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: animDuration).slideY(
-          begin: -0.1,
+    )
+        .animate()
+        .fadeIn(duration: AppMotion.normal)
+        .slideY(
+          begin: -0.08,
           end: 0,
-          curve: AppMotion.standard,
+          curve: AppMotion.emphasized,
         );
   }
 }

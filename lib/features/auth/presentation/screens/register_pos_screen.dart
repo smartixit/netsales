@@ -73,17 +73,17 @@ class RegisterPosScreen extends GetView<RegisterPosController> {
                     AppSpacing.vLg,
 
                     // 2. بطاقة بيانات نقطة البيع والشعار والموقع (PosInfoCard)
-                    PosInfoCard(controller: controller),
+                    const PosInfoCard(),
 
                     AppSpacing.vLg,
 
                     // 3. بطاقة بيانات وكيل ومسؤول نقطة البيع والصورة الشخصية (PosAgentInfoCard)
-                    PosAgentInfoCard(controller: controller),
+                    const PosAgentInfoCard(),
 
                     AppSpacing.vXl,
 
                     // 4. أزرار إرسال الطلب والتوجيه الموحدة (RegisterPosSubmitSection)
-                    RegisterPosSubmitSection(controller: controller),
+                    const RegisterPosSubmitSection(),
 
                     AppSpacing.vLg,
                   ],
