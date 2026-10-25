@@ -33,7 +33,7 @@ class OnboardingPageCard extends StatelessWidget {
                       maxHeight: 210.h,
                       maxWidth: 240.w,
                     ),
-                    child: Center(child: _buildVisual(colors)),
+                    child: Center(child: _OnboardingVisual(item: item)),
                   )
                   .animate()
                   .scale(
@@ -124,8 +124,18 @@ class OnboardingPageCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildVisual(AppColors colors) {
+/// ودجت بصري متخصص لعرض الرسوم المتحركة أو الصورة لشريحة التعريف
+class _OnboardingVisual extends StatelessWidget {
+  final OnboardingItemEntity item;
+
+  const _OnboardingVisual({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
     if (item.animationAsset != null) {
       return Stack(
         alignment: Alignment.center,
@@ -141,7 +151,7 @@ class OnboardingPageCard extends StatelessWidget {
           Lottie.asset(
             item.animationAsset!,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => _buildFallbackIcon(colors),
+            errorBuilder: (_, __, ___) => _OnboardingFallbackIcon(icon: item.icon),
           ),
         ],
       );
@@ -150,13 +160,23 @@ class OnboardingPageCard extends StatelessWidget {
       return Image.asset(
         item.imageAsset!,
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => _buildFallbackIcon(colors),
+        errorBuilder: (_, __, ___) => _OnboardingFallbackIcon(icon: item.icon),
       );
     }
-    return _buildFallbackIcon(colors);
+    return _OnboardingFallbackIcon(icon: item.icon);
   }
+}
 
-  Widget _buildFallbackIcon(AppColors colors) {
+/// ودجت أيقونة بديلة لشريحة التعريف عند تعذر تحميل الرسوم
+class _OnboardingFallbackIcon extends StatelessWidget {
+  final IconData icon;
+
+  const _OnboardingFallbackIcon({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Container(
       width: 140.r,
       height: 140.r,
@@ -168,7 +188,7 @@ class OnboardingPageCard extends StatelessWidget {
           width: 2,
         ),
       ),
-      child: Icon(item.icon, size: 64.r, color: colors.primary),
+      child: Icon(icon, size: 64.r, color: colors.primary),
     );
   }
 }

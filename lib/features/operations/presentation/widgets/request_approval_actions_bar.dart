@@ -67,42 +67,34 @@ class RequestApprovalActionsBar extends StatelessWidget {
   }
 
   void _showApproveConfirmation(BuildContext context) {
-    Get.bottomSheet(
-      CustomBottomSheet.confirmation(
-        title: 'تأكيد اعتماد طلب التوريد',
-        message:
-            'هل أنت متأكد من اعتماد طلب التوريد وتوليد فاتورة مبيعات جديدة؟ سيتم قيد العملية في حساب نقطة البيع فوراً.',
-        confirmLabel: 'تأكيد واعتماد',
-        cancelLabel: 'تراجع',
-        leadingIcon: Icon(
-          Icons.verified_rounded,
-          color: context.colors.primary,
-          size: 24.r,
-        ),
-        onConfirm: () => controller.approveRequest(request.requestId),
+    CustomBottomSheet.showConfirmation(
+      title: 'تأكيد اعتماد طلب التوريد',
+      message:
+          'هل أنت متأكد من اعتماد طلب التوريد وتوليد فاتورة مبيعات جديدة؟ سيتم قيد العملية في حساب نقطة البيع فوراً.',
+      confirmLabel: 'تأكيد واعتماد',
+      cancelLabel: 'تراجع',
+      leadingIcon: Icon(
+        Icons.verified_rounded,
+        color: context.colors.primary,
+        size: 24.r,
       ),
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      onConfirm: () => controller.approveRequest(request.requestId),
     );
   }
 
   void _showCancelConfirmation(BuildContext context) {
-    Get.bottomSheet(
-      CustomBottomSheet.confirmation(
-        title: 'إلغاء طلب التوريد',
-        message: 'هل أنت متأكد من رغبتك في إلغاء هذا الطلب نهائياً؟',
-        confirmLabel: 'نعم، إلغاء الطلب',
-        cancelLabel: 'تراجع',
-        isDestructive: true,
-        leadingIcon: Icon(
-          Icons.warning_amber_rounded,
-          color: context.colors.error,
-          size: 24.r,
-        ),
-        onConfirm: () => controller.cancelRequest(request.requestId),
+    CustomBottomSheet.showConfirmation(
+      title: 'إلغاء طلب التوريد',
+      message: 'هل أنت متأكد من رغبتك في إلغاء هذا الطلب نهائياً؟',
+      confirmLabel: 'نعم، إلغاء الطلب',
+      cancelLabel: 'تراجع',
+      isDestructive: true,
+      leadingIcon: Icon(
+        Icons.warning_amber_rounded,
+        color: context.colors.error,
+        size: 24.r,
       ),
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      onConfirm: () => controller.cancelRequest(request.requestId),
     );
   }
 

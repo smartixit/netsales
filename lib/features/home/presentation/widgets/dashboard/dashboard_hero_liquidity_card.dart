@@ -54,7 +54,7 @@ class DashboardHeroLiquidityCard extends StatelessWidget {
             child: Icon(
               Icons.account_balance_wallet_rounded,
               size: 140.r,
-              color: Colors.white.withValues(alpha: 0.08),
+              color: colors.onPrimary.withValues(alpha: 0.08),
             ),
           ),
 
@@ -98,7 +98,7 @@ class DashboardHeroLiquidityCard extends StatelessWidget {
                         vertical: AppSpacing.xxs,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: colors.onPrimary.withValues(alpha: 0.2),
                         borderRadius: AppRadius.fullRadius,
                       ),
                       child: Text(

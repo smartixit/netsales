@@ -127,8 +127,11 @@ class CustomAppScaffold extends StatelessWidget {
     if (appBar != null) return appBar;
 
     final hasTitle =
-        appBarTitle != null || appBarSubtitle != null || appBarTitleWidget != null;
-    final hasLeading = leading != null || showBackButton || onBackPressed != null;
+        appBarTitle != null ||
+        appBarSubtitle != null ||
+        appBarTitleWidget != null;
+    final hasLeading =
+        leading != null || showBackButton || onBackPressed != null;
     final hasActions = actions != null && actions!.isNotEmpty;
 
     if (!hasTitle && !hasLeading && !hasActions) {
@@ -141,7 +144,7 @@ class CustomAppScaffold extends StatelessWidget {
     Widget? leadingWidget = leading;
     if (leadingWidget == null && (showBackButton || onBackPressed != null)) {
       leadingWidget = Padding(
-        padding: EdgeInsets.all(AppSpacing.xs),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: CustomButton.icon(
           icon: Icons.arrow_back_ios_new_rounded,
           tooltip: 'رجوع',
@@ -197,6 +200,7 @@ class CustomAppScaffold extends StatelessWidget {
       backgroundColor: appBarBg ?? Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
+      leadingWidth: 60.w,
       leading: leadingWidget,
       flexibleSpace: enableGlassAppBar
           ? ClipRect(
@@ -208,35 +212,29 @@ class CustomAppScaffold extends StatelessWidget {
               ),
             )
           : null,
-      actions: hasActions
-          ? [
-              ...actions!,
-              AppSpacing.hXs,
-            ]
-          : null,
+      actions: hasActions ? [...actions!, AppSpacing.hXs] : null,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final effectiveGradient = backgroundGradient ??
+    final effectiveGradient =
+        backgroundGradient ??
         (useSurfaceMesh ? AppGradients.surfaceMesh(context) : null);
 
     final builtAppBar = _buildAppBar(context);
 
     // عندما يكون الهيدر شفافاً أو نستخدم التدرج الشبكي، يمتد المحتوى تلقائياً خلف الـ AppBar لمنع القص الحاد
-    final effectiveExtend = extendBodyBehindAppBar ??
+    final effectiveExtend =
+        extendBodyBehindAppBar ??
         (effectiveGradient != null &&
             (appBarBg == null || appBarBg == Colors.transparent));
 
     Widget content = body;
 
     if (contentPadding != null) {
-      content = Padding(
-        padding: contentPadding!,
-        child: content,
-      );
+      content = Padding(padding: contentPadding!, child: content);
     }
 
     if (maxWidth != null) {
