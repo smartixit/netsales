@@ -14,7 +14,8 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_loading_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/toasts/custom_snackbar.dart';
+import 'package:netsales/core/services/invoice_receipt_pdf_service.dart';
+import 'package:netsales/widgets/sheets/invoice_print_format_sheet.dart';
 
 /// ============================================================================
 /// شاشة تفاصيل فاتورة المبيعات والسند الرقمي (SaleInvoiceDetailsScreen)
@@ -60,12 +61,12 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
       actions: [
         CustomButton.icon(
           icon: Icons.share_outlined,
+          tooltip: 'مشاركة السند',
           onPressed: () {
-            CustomSnackbar.show(
-              title: 'مشاركة الفاتورة',
-              message: 'سيتم تصدير سند الفاتورة الرقمي قريباً',
-              type: SnackType.info,
-            );
+            final invoice = _controller.selectedInvoice.value;
+            if (invoice != null) {
+              InvoicePrintFormatSheet.show(context, invoice: invoice);
+            }
           },
           dimension: 40.r,
           iconSize: 18.r,
@@ -140,13 +141,10 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
                           child: CustomButton.outline(
                             text: 'طباعة الإيصال',
                             icon: Icons.print_outlined,
-                            onPressed: () {
-                              CustomSnackbar.show(
-                                title: 'طباعة الإيصال',
-                                message: 'جاري تجهيز أمر الطباعة اللاسلكية...',
-                                type: SnackType.info,
-                              );
-                            },
+                            onPressed: () => InvoicePrintFormatSheet.show(
+                              context,
+                              invoice: invoice,
+                            ),
                           ),
                         ),
                         AppSpacing.hSm,
@@ -154,13 +152,11 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
                           child: CustomButton.primary(
                             text: 'مشاركة السند',
                             icon: Icons.share_rounded,
-                            onPressed: () {
-                              CustomSnackbar.show(
-                                title: 'مشاركة السند',
-                                message: 'تم إعداد السند للمشاركة بصيغة PDF',
-                                type: SnackType.success,
-                              );
-                            },
+                            onPressed: () => InvoiceReceiptPdfService.instance.shareSaleInvoice(
+                              context,
+                              invoice,
+                              format: InvoicePrintFormat.standardA4,
+                            ),
                           ),
                         ),
                       ],

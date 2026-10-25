@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/models/app_picked_file.dart';
@@ -6,6 +7,7 @@ import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
 import 'package:netsales/widgets/pickers/widgets/file_card_item.dart';
 import 'package:netsales/widgets/pickers/widgets/file_picker_dropzone.dart';
 
@@ -24,7 +26,7 @@ enum FilePickerDisplayMode {
 /// منتقي المرفقات والملفات المؤسسي فائق التخصيص (CustomFilePicker)
 ///
 /// يدعم تحديد سقف عدد الملفات، سقف الأحجام، تصفية الامتدادات، الحماية الأمنية،
-/// والسحب والإفلات على الحاسوب والويب، متوافقاً 100% مع معايير كود النظام الموحد.
+/// والسحب والإفلات على الحاسوب والويب، مع هيكل وميضي احترافي (Skeleton Shimmer) أثناء المعالجة والتحميل.
 class CustomFilePicker extends StatefulWidget {
   final List<AppPickedFile>? initialFiles;
   final ValueChanged<List<AppPickedFile>>? onFilesChanged;
@@ -122,6 +124,7 @@ class CustomFilePicker extends StatefulWidget {
 
 class _CustomFilePickerState extends State<CustomFilePicker> {
   late final List<AppPickedFile> _files;
+  bool _isPicking = false;
 
   @override
   void initState() {
@@ -143,27 +146,34 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
   bool get _canAddMore => _files.length < widget.maxFiles;
 
   Future<void> _pickFiles() async {
-    if (widget.readOnly || !_canAddMore) return;
+    if (widget.readOnly || !_canAddMore || _isPicking) return;
 
-    final remainingSlots = widget.maxFiles - _files.length;
-    final pickedList = await FilePickerService.instance.pickMultiFiles(
-      allowedExtensions: widget.allowedExtensions,
-      preset: widget.preset,
-      maxFiles: remainingSlots,
-      maxSizeBytes: widget.maxFileSizeBytes,
-      maxTotalSizeBytes: widget.maxTotalSizeBytes,
-    );
+    setState(() => _isPicking = true);
+    try {
+      final remainingSlots = widget.maxFiles - _files.length;
+      final pickedList = await FilePickerService.instance.pickMultiFiles(
+        allowedExtensions: widget.allowedExtensions,
+        preset: widget.preset,
+        maxFiles: remainingSlots,
+        maxSizeBytes: widget.maxFileSizeBytes,
+        maxTotalSizeBytes: widget.maxTotalSizeBytes,
+      );
 
-    if (pickedList.isNotEmpty) {
-      setState(() {
-        _files.addAll(pickedList);
-      });
-      widget.onFilesChanged?.call(List.unmodifiable(_files));
+      if (pickedList.isNotEmpty) {
+        setState(() {
+          _files.addAll(pickedList);
+        });
+        widget.onFilesChanged?.call(List.unmodifiable(_files));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPicking = false);
+      }
     }
   }
 
   void _handleDroppedFiles(List<AppPickedFile> dropped) {
-    if (widget.readOnly || !_canAddMore) return;
+    if (widget.readOnly || !_canAddMore || _isPicking) return;
 
     final remainingSlots = widget.maxFiles - _files.length;
     final toAdd = dropped.take(remainingSlots).toList();
@@ -177,7 +187,7 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
   }
 
   void _removeFile(int index) {
-    if (widget.readOnly) return;
+    if (widget.readOnly || _isPicking) return;
     setState(() {
       _files.removeAt(index);
     });
@@ -214,6 +224,7 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
                 FilePickerDropzone(
                   onBrowse: _pickFiles,
                   onDroppedFiles: _handleDroppedFiles,
+                  enabled: !_isPicking,
                   subtitle: widget.hint ??
                       'الحد الأقصى: ${widget.maxFiles} ملفات (${widget.maxFileSizeBytes ~/ (1024 * 1024)}MB لكل ملف)',
                 )
@@ -223,7 +234,8 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
                   child: CustomButton.outline(
                     text: widget.maxFiles > 1 ? 'إرفاق ملفات' : 'إرفاق ملف',
                     icon: Icons.attach_file_rounded,
-                    onPressed: _pickFiles,
+                    loading: _isPicking,
+                    onPressed: _isPicking ? null : _pickFiles,
                   ),
                 ),
             ],
@@ -239,27 +251,97 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
               ),
             ],
 
-            // 4. قائمة الملفات المرفقة
-            if (_files.isNotEmpty) ...[
+            // 4. قائمة الملفات المرفقة مع بطاقة الـ Skeleton الوميضية أثناء المعالجة
+            if (_files.isNotEmpty || _isPicking) ...[
               AppSpacing.vMd,
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: _files.length,
+                itemCount: _files.length + (_isPicking ? 1 : 0),
                 separatorBuilder: (_, __) => AppSpacing.vSm,
                 itemBuilder: (context, index) {
-                  final file = _files[index];
-                  return FileCardItem(
-                    file: file,
-                    readOnly: widget.readOnly,
-                    onRemove: () => _removeFile(index),
-                  );
+                  if (index < _files.length) {
+                    final file = _files[index];
+                    return FileCardItem(
+                      file: file,
+                      readOnly: widget.readOnly,
+                      onRemove: () => _removeFile(index),
+                    );
+                  }
+                  return _buildFileSkeletonCard(colors);
                 },
               ),
             ],
           ],
         );
       },
+    );
+  }
+
+  /// هيكل وميضي يحاكي بطاقة الملف الفردي بدقة (File Card Skeleton)
+  Widget _buildFileSkeletonCard(AppColors colors) {
+    return CustomSkeletonShimmer(
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: 0.35),
+            width: 1.w,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44.r,
+              height: 44.r,
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+            ),
+            AppSpacing.hMd,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 140.w,
+                    height: 14.h,
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(AppRadius.xs),
+                    ),
+                  ),
+                  AppSpacing.vXs,
+                  Container(
+                    width: 80.w,
+                    height: 10.h,
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(AppRadius.xs),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            AppSpacing.hSm,
+            Container(
+              width: 32.r,
+              height: 32.r,
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHigh,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

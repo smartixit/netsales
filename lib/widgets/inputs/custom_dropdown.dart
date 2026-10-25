@@ -72,6 +72,7 @@ class CustomDropdown<T> extends StatefulWidget {
     this.showScanner = false,
     this.onScannerTap,
     this.onScanResult,
+    this.isRequired = true,
   });
 
   final List<DropdownItem<T>> items;
@@ -117,6 +118,8 @@ class CustomDropdown<T> extends StatefulWidget {
 
   /// استدعاء اختياري عند التقاط نص من الماسح.
   final ValueChanged<String>? onScanResult;
+
+  final bool isRequired;
 
   @override
   State<CustomDropdown<T>> createState() => _CustomDropdownState<T>();
@@ -354,10 +357,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     return [
       DropdownItem<T>(
         value: currentValue,
-        child: Text(
-          text,
-          style: AppTypography.bodyMedium,
-        ),
+        child: Text(text, style: AppTypography.bodyMedium),
       ),
       ...widget.items,
     ];
@@ -380,14 +380,27 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
         autovalidateMode: AutovalidateMode.onUserInteraction,
         onChanged: widget.enabled ? _handleChange : null,
         decoration: InputDecoration(
-          labelText: widget.label,
+          label: widget.label != null
+              ? Text.rich(
+                  TextSpan(
+                    text: widget.label,
+                    children: [
+                      if (widget.isRequired) ...[
+                        const WidgetSpan(child: SizedBox(width: 4)),
+                        TextSpan(
+                          text: '*',
+                          style: AppTypography.inputLabel.copyWith(
+                            color: context.colors.error,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                )
+              : null,
           prefixIcon: widget.prefixIcon == null
               ? null
-              : Icon(
-                  widget.prefixIcon,
-                  color: colors.primary,
-                  size: 20.r,
-                ),
+              : Icon(widget.prefixIcon, color: colors.primary, size: 20.r),
           contentPadding: EdgeInsetsDirectional.only(
             start: AppSpacing.inputPadding,
             top: AppSpacing.inputPadding,
@@ -452,7 +465,8 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
                           ),
                         ),
                       ),
-                      if (widget.showScanner && widget.onScannerTap != null) ...[
+                      if (widget.showScanner &&
+                          widget.onScannerTap != null) ...[
                         SizedBox(width: AppSpacing.sm),
                         IconButton.filledTonal(
                           tooltip: 'مسح رمز QR',

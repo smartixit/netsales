@@ -260,7 +260,7 @@ class _CustomTextFieldState extends State<CustomTextField>
                     text: widget.label,
                     children: [
                       if (widget.isRequired) ...[
-                        const WidgetSpan(child: SizedBox(width: 2)),
+                        const WidgetSpan(child: SizedBox(width: 4)),
                         TextSpan(
                           text: '*',
                           style: AppTypography.inputLabel.copyWith(

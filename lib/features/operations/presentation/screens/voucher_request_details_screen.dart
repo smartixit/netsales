@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
@@ -9,10 +10,12 @@ import 'package:netsales/features/operations/presentation/widgets/request_hero_b
 import 'package:netsales/features/operations/presentation/widgets/request_items_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_notes_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_parties_card.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_loading_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/sheets/invoice_print_format_sheet.dart';
 
 /// ============================================================================
 /// شاشة تفاصيل طلب توريد الكروت (VoucherRequestDetailsScreen)
@@ -55,6 +58,22 @@ class _VoucherRequestDetailsScreenState extends State<VoucherRequestDetailsScree
       appBarTitle: 'تفاصيل طلب التوريد',
       centerTitle: true,
       useSurfaceMesh: true,
+      actions: [
+        CustomButton.icon(
+          icon: Icons.share_outlined,
+          tooltip: 'طباعة ومشاركة الطلب',
+          onPressed: () {
+            final request = _controller.selectedRequest.value;
+            if (request != null) {
+              InvoicePrintFormatSheet.show(context, request: request);
+            }
+          },
+          dimension: 40.r,
+          iconSize: 18.r,
+          backgroundColor: Colors.transparent,
+        ),
+        AppSpacing.hXs,
+      ],
       body: Obx(() {
         if (_controller.isLoadingRequestDetails.value) {
           return const CustomLoadingState(
@@ -120,6 +139,17 @@ class _VoucherRequestDetailsScreenState extends State<VoucherRequestDetailsScree
                     RequestApprovalActionsBar(
                       request: request,
                       controller: _controller,
+                    ),
+
+                    // 5. زر طباعة ومشاركة سند الطلب
+                    AppSpacing.vSm,
+                    CustomButton.outline(
+                      text: 'طباعة ومشاركة سند الطلب',
+                      icon: Icons.print_rounded,
+                      onPressed: () => InvoicePrintFormatSheet.show(
+                        context,
+                        request: request,
+                      ),
                     ),
 
                     AppSpacing.vXl,
