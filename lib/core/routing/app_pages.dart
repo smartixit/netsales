@@ -24,6 +24,7 @@ import 'package:netsales/features/onboarding/presentation/screens/onboarding_scr
 import 'package:netsales/features/onboarding/presentation/screens/welcome_screen.dart';
 import 'package:netsales/features/splash/presentation/bindings/splash_binding.dart';
 import 'package:netsales/features/splash/presentation/screens/splash_screen.dart';
+import 'package:netsales/features/operations/presentation/bindings/operations_binding.dart';
 import 'package:netsales/features/operations/presentation/screens/sale_invoice_details_screen.dart';
 import 'package:netsales/features/operations/presentation/screens/voucher_request_details_screen.dart';
 import 'package:netsales/features/packages/presentation/bindings/packages_binding.dart';
@@ -197,24 +198,24 @@ abstract final class AppPages {
     // ========================================================================
     // 7. طلبات الكروت وفواتير المبيعات (Requests & Sales)
     // ========================================================================
-    // GetPage(
-    //   name: AppRoutes.requests,
-    //   page: () => const RequestsScreen(),
-    //   binding: RequestsBinding(),
-    //   middlewares: [
-    //     AuthGuard(),
-    //     PermissionGuardMiddleware(requiredPermission: AppPermissions.requestsView),
-    //   ],
-    // ),
-    // GetPage(
-    //   name: AppRoutes.sales,
-    //   page: () => const SalesScreen(),
-    //   binding: SalesBinding(),
-    //   middlewares: [
-    //     AuthGuard(),
-    //     PermissionGuardMiddleware(requiredPermission: AppPermissions.salesView),
-    //   ],
-    // ),
+    GetPage(
+      name: AppRoutes.saleInvoiceDetails,
+      page: () => const SaleInvoiceDetailsScreen(),
+      binding: OperationsBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.salesView),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.voucherRequestDetails,
+      page: () => const VoucherRequestDetailsScreen(),
+      binding: OperationsBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.requestsView),
+      ],
+    ),
 
     // ========================================================================
     // 8. المصروفات والاشتراكات والدعم (Expenses, Subscriptions & Support)
