@@ -57,12 +57,13 @@ class LoginFormCard extends GetView<LoginController> {
                   // AppSpacing.vSm,
 
                   // 3. رابط استعادة كلمة المرور بمحاذاة طبيعية لجهة القراءة
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: CustomButton.text(
-                      text: 'نسيت كلمة المرور؟',
-                      onPressed: controller.goToForgotPassword,
-                    ),
+                  Row(
+                    children: [
+                      CustomButton.text(
+                        text: 'نسيت كلمة المرور؟',
+                        onPressed: controller.goToForgotPassword,
+                      ),
+                    ],
                   ),
 
                   AppSpacing.vSm,

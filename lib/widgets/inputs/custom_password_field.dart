@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -82,8 +80,6 @@ class CustomPasswordField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return CustomTextField(
       controller: controller,
       label: label,
@@ -99,16 +95,9 @@ class CustomPasswordField extends StatelessWidget {
       onChanged: onChanged,
       onFieldSubmitted: onFieldSubmitted,
       autofillHints: autofillHints,
-      prefixIcon: prefixIcon ??
-          Icon(
-            Icons.lock_outline_rounded,
-            color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-            size: 20.r,
-          ),
-      validator: validator ??
-          FormValidators.passwordValidator(
-            fieldName: label.replaceAll('*', '').trim(),
-          ),
+      prefixIcon: prefixIcon ?? Icon(Icons.lock_outline_rounded),
+      validator:
+          validator ?? FormValidators.passwordValidator(fieldName: label),
     );
   }
 }

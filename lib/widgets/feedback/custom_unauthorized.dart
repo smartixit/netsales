@@ -6,6 +6,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// ============================================================================
 /// شاشة الرفض والتنبيه الأمني (Custom Unauthorized Screen)
@@ -18,10 +19,9 @@ class CustomUnauthorized extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Scaffold(
-      backgroundColor: colors.surface,
-      body: SafeArea(
-        child: Center(
+    return CustomAppScaffold(
+      useSurfaceMesh: true,
+      body: Center(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
             child: Column(
@@ -67,7 +67,6 @@ class CustomUnauthorized extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }

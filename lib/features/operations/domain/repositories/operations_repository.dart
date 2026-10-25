@@ -46,4 +46,22 @@ abstract class OperationsRepository {
 
   /// إلغاء طلب توريد كروت من قبل نقطة البيع
   Future<VoucherRequestEntity> cancelVoucherRequest(int id);
+
+  /// إنشاء طلب توريد كروت جديد
+  Future<VoucherRequestEntity> createVoucherRequest({
+    required int networkId,
+    required int posId,
+    required String saleType,
+    required List<Map<String, dynamic>> items,
+    String? requestNote,
+  });
+
+  /// إنشاء وتوليد فاتورة مبيعات مباشرة
+  Future<SaleInvoiceEntity> createSaleInvoice({
+    required int networkId,
+    required int posId,
+    required String saleType,
+    required List<Map<String, dynamic>> items,
+    double? paidAmount,
+  });
 }

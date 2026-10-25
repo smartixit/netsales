@@ -341,7 +341,7 @@ class AppThemes {
         color: colors.onSurfaceVariant.withValues(alpha: 0.6),
       ),
       errorStyle: AppTypography.errorText.copyWith(color: colors.error),
-      prefixIconColor: colors.onSurfaceVariant,
+      prefixIconColor: colors.primary,
       suffixIconColor: colors.onSurfaceVariant,
       counterStyle: AppTypography.helperText,
     );

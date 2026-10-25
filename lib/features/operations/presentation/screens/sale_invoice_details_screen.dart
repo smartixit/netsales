@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/invoice_financial_summary_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/invoice_hero_bond_card.dart';
@@ -54,41 +53,26 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
     final colors = context.colors;
 
     return CustomAppScaffold(
-      appBar: AppBar(
-        title: Text(
-          'تفاصيل فاتورة المبيعات',
-          style: AppTypography.titleMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: colors.surface,
-        elevation: 0,
-        centerTitle: true,
-        leading: CustomButton.icon(
-          icon: Icons.arrow_back_rounded,
-          onPressed: () => Get.back(),
+      showBackButton: true,
+      appBarTitle: 'تفاصيل فاتورة المبيعات',
+      centerTitle: true,
+      useSurfaceMesh: true,
+      actions: [
+        CustomButton.icon(
+          icon: Icons.share_outlined,
+          onPressed: () {
+            CustomSnackbar.show(
+              title: 'مشاركة الفاتورة',
+              message: 'سيتم تصدير سند الفاتورة الرقمي قريباً',
+              type: SnackType.info,
+            );
+          },
           dimension: 40.r,
           iconSize: 18.r,
           backgroundColor: Colors.transparent,
         ),
-        actions: [
-          CustomButton.icon(
-            icon: Icons.share_outlined,
-            onPressed: () {
-              CustomSnackbar.show(
-                title: 'مشاركة الفاتورة',
-                message: 'سيتم تصدير سند الفاتورة الرقمي قريباً',
-                type: SnackType.info,
-              );
-            },
-            dimension: 40.r,
-            iconSize: 18.r,
-            backgroundColor: Colors.transparent,
-          ),
-          AppSpacing.hXs,
-        ],
-      ),
+        AppSpacing.hXs,
+      ],
       body: Obx(() {
         if (_controller.isLoadingInvoiceDetails.value) {
           return const CustomLoadingState(

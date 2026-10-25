@@ -15,6 +15,7 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/pickers/custom_pos_selector_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// ============================================================================
 /// نافذة معالج إنشاء وتعديل خصم نقطة البيع (CreateEditDiscountSheet)
@@ -162,8 +163,20 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
       return;
     }
 
-    // شبكة المالك (افتراضياً 1 أو من الباقة المختارة)
-    final networkId = widget.discount?.networkId ?? 1;
+    // استنتاج معرف الشبكة من الباقة المختارة أو الخصم قيد التعديل
+    final selectedPkg = widget.controller.packages.firstWhereOrNull(
+      (p) => p.packageId == _selectedPackageId,
+    );
+    final int? networkId = widget.discount?.networkId ?? selectedPkg?.networkId;
+
+    if (networkId == null) {
+      CustomSnackbar.show(
+        title: 'تنبيه النطاق',
+        message: 'لا يمكن حفظ الخصم: لم يتم العثور على شبكة مرتبطة بالباقة المختارة.',
+        type: SnackType.warning,
+      );
+      return;
+    }
 
     final success = await widget.controller.saveDiscount(
       discountId: widget.discount?.discountId,

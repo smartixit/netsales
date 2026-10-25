@@ -43,14 +43,6 @@ abstract final class AppPages {
   static const String initial = AppRoutes.initial;
 
   static final List<GetPage> routes = [
-    GetPage(
-      name: AppRoutes.saleInvoiceDetails,
-      page: () => const SaleInvoiceDetailsScreen(),
-    ),
-    GetPage(
-      name: AppRoutes.voucherRequestDetails,
-      page: () => const VoucherRequestDetailsScreen(),
-    ),
     // 1. مسار البداية والفحص الأولي (Splash)
     GetPage(
       name: AppRoutes.initial,

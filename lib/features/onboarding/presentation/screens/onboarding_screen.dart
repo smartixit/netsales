@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:netsales/features/onboarding/presentation/widgets/onboarding_page_card.dart';
@@ -21,13 +20,9 @@ class OnboardingScreen extends GetView<OnboardingController> {
     final colors = context.colors;
 
     return CustomAppScaffold(
-      backgroundColor: colors.surface,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(gradient: AppGradients.surfaceMesh(context)),
-        child: SafeArea(
-          child: Column(
+      useSurfaceMesh: true,
+      safeArea: true,
+      body: Column(
             children: [
               // 1. الشريط العلوي: الشعار المصغر وزر التخطي السريع
               Padding(
@@ -102,8 +97,6 @@ class OnboardingScreen extends GetView<OnboardingController> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
+        );
+      }
+    }

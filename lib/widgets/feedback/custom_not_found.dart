@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class CustomNotFound extends StatelessWidget {
   const CustomNotFound({super.key});
@@ -10,8 +11,8 @@ class CustomNotFound extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Scaffold(
-      backgroundColor: colors.surface,
+    return CustomAppScaffold(
+      useSurfaceMesh: true,
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),

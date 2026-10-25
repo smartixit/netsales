@@ -10,6 +10,9 @@ import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/home/presentation/models/home_quick_action.dart';
 import 'package:netsales/features/home/presentation/widgets/home_quick_actions_sheet.dart';
+import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/create_voucher_request_sheet.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 
 /// ============================================================================
@@ -213,6 +216,36 @@ class HomeLayoutController extends GetxController {
       return;
     }
 
+    final context = Get.context;
+
+    // 1. طلب توريد باقات كروت من الشبكة (سياقي فوري عبر Bottom Sheet)
+    if (action.id == 'create_voucher_request') {
+      if (context != null) {
+        CreateVoucherRequestSheet.show(context);
+      }
+      return;
+    }
+
+    // 2. إصدار فاتورة مبيعات مباشرة (سياقي فوري عبر Bottom Sheet)
+    if (action.id == 'create_sale_invoice') {
+      if (context != null) {
+        CreateSaleInvoiceSheet.show(context);
+      }
+      return;
+    }
+
+    // 3. اعتماد طلبات الكروت (التوجيه لقطاع طلبات الكروت المعلقة)
+    if (action.id == 'approve_voucher_requests') {
+      changeTab(1); // تبويب العمليات
+      if (Get.isRegistered<OperationsController>()) {
+        final ops = Get.find<OperationsController>();
+        ops.changeSegment(1); // قطاع طلبات الكروت
+        ops.filterRequests('PENDING'); // تصفية الطلبات المعلقة
+      }
+      return;
+    }
+
+    // 4. التوجيه العادي للمسارات الأخرى إن وُجدت
     if (action.targetRoute != null) {
       Get.toNamed(action.targetRoute!);
     }

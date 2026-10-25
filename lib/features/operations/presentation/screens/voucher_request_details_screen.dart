@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_approval_actions_bar.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_hero_bond_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_items_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_notes_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_parties_card.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_loading_state.dart';
@@ -54,25 +51,10 @@ class _VoucherRequestDetailsScreenState extends State<VoucherRequestDetailsScree
     final colors = context.colors;
 
     return CustomAppScaffold(
-      appBar: AppBar(
-        title: Text(
-          'تفاصيل طلب التوريد',
-          style: AppTypography.titleMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: colors.surface,
-        elevation: 0,
-        centerTitle: true,
-        leading: CustomButton.icon(
-          icon: Icons.arrow_back_rounded,
-          onPressed: () => Get.back(),
-          dimension: 40.r,
-          iconSize: 18.r,
-          backgroundColor: Colors.transparent,
-        ),
-      ),
+      showBackButton: true,
+      appBarTitle: 'تفاصيل طلب التوريد',
+      centerTitle: true,
+      useSurfaceMesh: true,
       body: Obx(() {
         if (_controller.isLoadingRequestDetails.value) {
           return const CustomLoadingState(

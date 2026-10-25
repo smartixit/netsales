@@ -51,10 +51,10 @@ class VerifyOtpFormCard extends GetView<VerifyOtpController> {
                   text: 'إعادة إرسال رمز التحقق',
                   icon: Icons.refresh_rounded,
                   loading: controller.isResending.value,
-                  foregroundColor: colors.primary,
-                  textStyle: AppTypography.labelLarge.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  // foregroundColor: colors.primary,
+                  // textStyle: AppTypography.labelLarge.copyWith(
+                  //   fontWeight: FontWeight.w700,
+                  // ),
                   onPressed: controller.resendOtp,
                 );
               }
@@ -111,7 +111,7 @@ class VerifyOtpFormCard extends GetView<VerifyOtpController> {
               child: CustomButton.text(
                 text: 'استلام كلمة مرور مؤقتة عبر SMS',
                 icon: Icons.sms_outlined,
-                foregroundColor: colors.onSurfaceVariant,
+                // foregroundColor: colors.onSurfaceVariant,
                 loading: controller.isLoading.value,
                 onPressed: () => controller.submitOtp(),
               ),

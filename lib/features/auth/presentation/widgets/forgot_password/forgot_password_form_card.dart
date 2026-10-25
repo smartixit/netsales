@@ -21,69 +21,71 @@ class ForgotPasswordFormCard extends GetView<ForgotPasswordController> {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
-        boxShadow: AppElevation.level1(context),
-      ),
-      child: Form(
-        key: controller.formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 1. حقل رقم الهاتف الموحد
-            CustomPhoneField(
-              controller: controller.phoneController,
-              label: 'رقم الهاتف المسجل',
-              textInputAction: TextInputAction.done,
-              onFieldSubmitted: (_) => controller.submit(),
+          padding: EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            border: Border.all(
+              color: colors.outlineVariant.withValues(alpha: 0.3),
             ),
-
-            AppSpacing.vXl,
-
-            // 2. زر المتابعة الرئيسي
-            Obx(
-              () => CustomButton.primary(
-                text: 'إرسال رمز التحقق',
-                icon: Icons.send_rounded,
-                size: AppButtonSize.large,
-                height: 52.h,
-                loading: controller.isLoading.value,
-                onPressed: controller.isLoading.value ? null : controller.submit,
-              ),
-            ),
-
-            AppSpacing.vLg,
-
-            // 3. رابط العودة لتسجيل الدخول بهدوء
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            boxShadow: AppElevation.level1(context),
+          ),
+          child: Form(
+            key: controller.formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'تذكرت كلمة المرور؟',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: colors.onSurfaceVariant,
+                // 1. حقل رقم الهاتف الموحد
+                CustomPhoneField(
+                  controller: controller.phoneController,
+                  label: 'رقم الهاتف',
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => controller.submit(),
+                ),
+
+                AppSpacing.vXl,
+
+                // 2. زر المتابعة الرئيسي
+                Obx(
+                  () => CustomButton.primary(
+                    text: 'إرسال رمز التحقق',
+                    icon: Icons.send_rounded,
+                    size: AppButtonSize.large,
+                    height: 52.h,
+                    loading: controller.isLoading.value,
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : controller.submit,
                   ),
                 ),
-                CustomButton.text(
-                  text: 'تسجيل الدخول',
-                  onPressed: controller.goToLogin,
-                  foregroundColor: colors.primary,
-                  textStyle: AppTypography.titleSmall.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+
+                AppSpacing.vLg,
+
+                // 3. رابط العودة لتسجيل الدخول بهدوء
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'تذكرت كلمة المرور؟',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                    CustomButton.text(
+                      text: 'تسجيل الدخول',
+                      onPressed: controller.goToLogin,
+                      // foregroundColor: colors.primary,
+                      // textStyle: AppTypography.titleSmall.copyWith(
+                      //   fontWeight: FontWeight.w700,
+                      // ),
+                      // padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    )
+          ),
+        )
         .animate()
         .fadeIn(duration: AppMotion.normal)
         .slideY(

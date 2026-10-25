@@ -39,4 +39,20 @@ abstract class OperationsRemoteDataSource {
   });
 
   Future<ApiResponse<VoucherRequestModel>> cancelVoucherRequest(int id);
+
+  Future<ApiResponse<VoucherRequestModel>> createVoucherRequest({
+    required int networkId,
+    required int posId,
+    required String saleType,
+    required List<Map<String, dynamic>> items,
+    String? requestNote,
+  });
+
+  Future<ApiResponse<SaleInvoiceModel>> createSaleInvoice({
+    required int networkId,
+    required int posId,
+    required String saleType,
+    required List<Map<String, dynamic>> items,
+    double? paidAmount,
+  });
 }

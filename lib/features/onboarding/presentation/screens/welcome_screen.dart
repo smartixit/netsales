@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/onboarding/presentation/controllers/welcome_controller.dart';
@@ -24,28 +23,20 @@ class WelcomeScreen extends GetView<WelcomeController> {
     final colors = context.colors;
 
     return CustomAppScaffold(
-      backgroundColor: colors.surface,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(gradient: AppGradients.surfaceMesh(context)),
-        child: SafeArea(
-          child: ResponsiveContentWrapper(
-            maxWidth: AppBreakpoints.maxFormWidth,
-            alignment: Alignment.center,
-            padding: EdgeInsets.zero,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                horizontal: context.responsive(
-                  mobile: AppSpacing.lg,
-                  tablet: AppSpacing.xl,
-                ),
-                vertical: AppSpacing.md,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
+      useSurfaceMesh: true,
+      maxWidth: AppBreakpoints.maxFormWidth,
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.symmetric(
+          horizontal: context.responsive(
+            mobile: AppSpacing.lg,
+            tablet: AppSpacing.xl,
+          ),
+          vertical: AppSpacing.md,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
                 AppSpacing.vLg,
 
                 // 1. الشعار المركزي الموحد (CustomBrandLogo)
@@ -161,9 +152,6 @@ class WelcomeScreen extends GetView<WelcomeController> {
               ],
             ),
           ),
-        ),
-      ),
-    ),
-  );
-}
-}
+        );
+      }
+    }

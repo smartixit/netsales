@@ -9,10 +9,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 
 /// ترويسة شاشة التحقق بخطوتين وتأكيد الجهاز (TwoFactorHeaderSection)
 class TwoFactorHeaderSection extends StatelessWidget {
-  const TwoFactorHeaderSection({
-    super.key,
-    required this.maskedPhone,
-  });
+  const TwoFactorHeaderSection({super.key, required this.maskedPhone});
 
   final String maskedPhone;
 
@@ -26,21 +23,21 @@ class TwoFactorHeaderSection extends StatelessWidget {
       children: [
         // 1. الأيقونة الأمنية المعتمدة
         Container(
-          width: 56.r,
-          height: 56.r,
-          decoration: BoxDecoration(
-            color: colors.primaryContainer.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(
-              color: colors.primary.withValues(alpha: 0.15),
-            ),
-          ),
-          child: Icon(
-            Icons.security_rounded,
-            color: colors.primary,
-            size: 28.r,
-          ),
-        )
+              width: 56.r,
+              height: 56.r,
+              decoration: BoxDecoration(
+                color: colors.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: 0.15),
+                ),
+              ),
+              child: Icon(
+                Icons.security_rounded,
+                color: colors.primary,
+                size: 28.r,
+              ),
+            )
             .animate()
             .scale(
               begin: const Offset(0.9, 0.9),
@@ -54,13 +51,13 @@ class TwoFactorHeaderSection extends StatelessWidget {
 
         // 2. العنوان الرئيسي
         Text(
-          'التحقق بخطوتين (2FA)',
-          style: AppTypography.headlineMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.w800,
-          ),
-          textAlign: TextAlign.center,
-        )
+              'التحقق بخطوتين (2FA)',
+              style: AppTypography.headlineMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
+              ),
+              textAlign: TextAlign.center,
+            )
             .animate()
             .fadeIn(duration: AppMotion.normal)
             .slideY(
@@ -74,12 +71,12 @@ class TwoFactorHeaderSection extends StatelessWidget {
 
         // 3. النص الإرشادي ورقم الهاتف
         Text(
-          'تم إرسال رمز الأمان المكون من 6 أرقام إلى',
-          style: AppTypography.bodyMedium.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        )
+              'تم إرسال رمز الأمان المكون من 6 أرقام إلى',
+              style: AppTypography.bodyMedium.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            )
             .animate()
             .fadeIn(duration: AppMotion.normal)
             .slideY(
@@ -92,13 +89,14 @@ class TwoFactorHeaderSection extends StatelessWidget {
         AppSpacing.vXxs,
 
         Text(
-          maskedPhone,
-          style: AppTypography.titleSmall.copyWith(
-            color: colors.primary,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-          ),
-        )
+              maskedPhone,
+              textDirection: TextDirection.ltr,
+              style: AppTypography.titleSmall.copyWith(
+                color: colors.primary,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+              ),
+            )
             .animate()
             .fadeIn(duration: AppMotion.normal)
             .slideY(

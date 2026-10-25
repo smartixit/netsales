@@ -114,4 +114,47 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
       fromJson: (json) => VoucherRequestModel.fromJson(json as Map<String, dynamic>),
     );
   }
+
+  @override
+  Future<ApiResponse<VoucherRequestModel>> createVoucherRequest({
+    required int networkId,
+    required int posId,
+    required String saleType,
+    required List<Map<String, dynamic>> items,
+    String? requestNote,
+  }) {
+    return ApiService.instance.post<VoucherRequestModel>(
+      ApiConstants.voucherRequests,
+      data: {
+        'network_id': networkId,
+        'pos_id': posId,
+        'sale_type': saleType,
+        'items': items,
+        if (requestNote != null && requestNote.trim().isNotEmpty)
+          'request_note': requestNote.trim(),
+      },
+      fromJson: (json) => VoucherRequestModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Future<ApiResponse<SaleInvoiceModel>> createSaleInvoice({
+    required int networkId,
+    required int posId,
+    required String saleType,
+    required List<Map<String, dynamic>> items,
+    double? paidAmount,
+  }) {
+    return ApiService.instance.post<SaleInvoiceModel>(
+      ApiConstants.saleInvoices,
+      data: {
+        'network_id': networkId,
+        'pos_id': posId,
+        'sale_type': saleType,
+        'items': items,
+        if (paidAmount != null) 'paid_amount': paidAmount,
+      },
+      fromJson: (json) => SaleInvoiceModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
 }

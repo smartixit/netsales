@@ -25,6 +25,7 @@ import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/utils/system_ui_style_resolver.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_themes.dart';
@@ -221,8 +222,8 @@ class MyApp extends StatelessWidget {
               name: AppRoutes.notFound,
               page: () => const CustomNotFound(),
             ),
-            defaultTransition: Transition.leftToRight,
-            // transitionDuration: AppMotion.page,
+            defaultTransition: Transition.fadeIn,
+            transitionDuration: AppMotion.page,
             locale: const Locale('ar'),
             supportedLocales: const [Locale('en'), Locale('ar')],
             localizationsDelegates: const [

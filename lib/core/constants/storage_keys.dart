@@ -7,7 +7,6 @@ abstract final class StorageKeys {
   /// معرف الجلسة المعتمد لدى الخادم (X-Session-Id)
   static const String session = 'session_id';
 
-
   /// معرف المستخدم المسجل
   static const String userId = 'user_id';
 
@@ -40,4 +39,11 @@ abstract final class StorageKeys {
 
   /// إعدادات النظام العامة المخزنة محلياً (Public Settings Cache)
   static const String publicSettings = 'public_settings_cache';
+
+  /// سياق الشبكة ونقطة البيع النشطة للمزود والوكيل
+  static const String activeNetworkId = 'active_network_id';
+  static const String activePosId = 'active_pos_id';
+  static const String activeNetworkName = 'active_network_name';
+  static const String activePosName = 'active_pos_name';
 }
+

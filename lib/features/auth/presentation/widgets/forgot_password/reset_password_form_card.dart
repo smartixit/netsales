@@ -46,8 +46,6 @@ class ResetPasswordFormCard extends GetView<ResetPasswordController> {
                 textInputAction: TextInputAction.next,
                 prefixIcon: Icon(
                   Icons.lock_clock_rounded,
-                  color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-                  size: 20.r,
                 ),
                 validator: FormValidators.required(
                   fieldName: controller.isForced
@@ -126,8 +124,6 @@ class ResetPasswordFormCard extends GetView<ResetPasswordController> {
               controller: controller.confirmPasswordController,
               prefixIcon: Icon(
                 Icons.lock_reset_rounded,
-                color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-                size: 20.r,
               ),
               validator: FormValidators.confirmPasswordValidator(
                 fieldName: 'تأكيد كلمة المرور',
@@ -162,7 +158,7 @@ class ResetPasswordFormCard extends GetView<ResetPasswordController> {
                       ? 'تسجيل الخروج والعودة لاحقاً'
                       : 'إلغاء'),
               onPressed: controller.abortOrLogout,
-              foregroundColor: colors.onSurfaceVariant,
+              // foregroundColor: colors.onSurfaceVariant,
             ),
           ],
         ),

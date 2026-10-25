@@ -5,6 +5,8 @@ import 'package:netsales/features/operations/domain/entities/sale_invoice_entity
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/domain/usecases/approve_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/cancel_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/create_sale_invoice_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/create_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_sale_invoice_details_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_sale_invoices_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_voucher_request_details_use_case.dart';
@@ -26,6 +28,8 @@ class OperationsController extends GetxController {
   final ApproveVoucherRequestUseCase approveVoucherRequestUseCase;
   final RejectVoucherRequestUseCase rejectVoucherRequestUseCase;
   final CancelVoucherRequestUseCase cancelVoucherRequestUseCase;
+  final CreateVoucherRequestUseCase createVoucherRequestUseCase;
+  final CreateSaleInvoiceUseCase createSaleInvoiceUseCase;
 
   OperationsController({
     required this.getSaleInvoicesUseCase,
@@ -35,6 +39,8 @@ class OperationsController extends GetxController {
     required this.approveVoucherRequestUseCase,
     required this.rejectVoucherRequestUseCase,
     required this.cancelVoucherRequestUseCase,
+    required this.createVoucherRequestUseCase,
+    required this.createSaleInvoiceUseCase,
   });
 
   /// القطاع النشط: 0 لفواتير المبيعات، 1 لطلبات الكروت
@@ -317,6 +323,90 @@ class OperationsController extends GetxController {
         message: cleanMessage,
         type: SnackType.error,
       );
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  Future<VoucherRequestEntity?> createVoucherRequest({
+    required int networkId,
+    required int posId,
+    required String saleType,
+    required List<Map<String, dynamic>> items,
+    String? requestNote,
+  }) async {
+    isSubmittingAction.value = true;
+    try {
+      await CustomAnimationOverlay.showLoading(message: 'جاري إرسال طلب توريد الكروت...');
+      final newRequest = await createVoucherRequestUseCase(
+        networkId: networkId,
+        posId: posId,
+        saleType: saleType,
+        items: items,
+        requestNote: requestNote,
+      );
+
+      requests.insert(0, newRequest);
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم إرسال طلب توريد الكروت بنجاح',
+      );
+
+      return newRequest;
+    } catch (e) {
+      await CustomAnimationOverlay.hide();
+      final cleanMessage = AppException.sanitizeMessage(e);
+      CustomSnackbar.show(
+        title: 'تعذر إرسال الطلب',
+        message: cleanMessage,
+        type: SnackType.error,
+      );
+      return null;
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  Future<SaleInvoiceEntity?> createSaleInvoice({
+    required int networkId,
+    required int posId,
+    required String saleType,
+    required List<Map<String, dynamic>> items,
+    double? paidAmount,
+  }) async {
+    isSubmittingAction.value = true;
+    try {
+      await CustomAnimationOverlay.showLoading(message: 'جاري إصدار فاتورة المبيعات والتسوية...');
+      final newInvoice = await createSaleInvoiceUseCase(
+        networkId: networkId,
+        posId: posId,
+        saleType: saleType,
+        items: items,
+        paidAmount: paidAmount,
+      );
+
+      invoices.insert(0, newInvoice);
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم إصدار فاتورة المبيعات وتسوية الرصيد بنجاح',
+      );
+
+      return newInvoice;
+    } catch (e) {
+      await CustomAnimationOverlay.hide();
+      final cleanMessage = AppException.sanitizeMessage(e);
+      CustomSnackbar.show(
+        title: 'تعذر إصدار الفاتورة',
+        message: cleanMessage,
+        type: SnackType.error,
+      );
+      return null;
     } finally {
       isSubmittingAction.value = false;
       if (CustomAnimationOverlay.isShowing) {

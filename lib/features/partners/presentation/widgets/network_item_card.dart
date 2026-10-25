@@ -194,14 +194,12 @@ class NetworkItemCard extends StatelessWidget {
             // 3. عدادات نقاط البيع والباقات
             Row(
               children: [
-                _buildCountChip(
-                  context,
+                _CountChip(
                   icon: Icons.storefront_outlined,
                   label: '${network.posCount ?? 0} نقطة بيع',
                 ),
                 AppSpacing.hXs,
-                _buildCountChip(
-                  context,
+                _CountChip(
                   icon: Icons.confirmation_number_outlined,
                   label: '${network.packagesCount ?? 0} باقة كروت',
                 ),
@@ -244,12 +242,20 @@ class NetworkItemCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildCountChip(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-  }) {
+/// شريحة عدادات مخصصة لعرض إحصائيات الشبكة بنمط نقي ومستقل
+class _CountChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _CountChip({
+    required this.icon,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),

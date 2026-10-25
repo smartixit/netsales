@@ -51,10 +51,10 @@ class TwoFactorFormCard extends GetView<TwoFactorAuthController> {
                   text: 'إعادة إرسال رمز الأمان',
                   icon: Icons.refresh_rounded,
                   loading: controller.isResending.value,
-                  foregroundColor: colors.primary,
-                  textStyle: AppTypography.labelLarge.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  // foregroundColor: colors.primary,
+                  // textStyle: AppTypography.labelLarge.copyWith(
+                  //   fontWeight: FontWeight.w700,
+                  // ),
                   onPressed: controller.resendOtp,
                 );
               }
@@ -110,7 +110,7 @@ class TwoFactorFormCard extends GetView<TwoFactorAuthController> {
             child: CustomButton.text(
               text: 'إلغاء والعودة لتسجيل الدخول',
               icon: Icons.arrow_back_rounded,
-              foregroundColor: colors.onSurfaceVariant,
+              // foregroundColor: colors.onSurfaceVariant,
               onPressed: controller.cancelAndGoBack,
             ),
           ),

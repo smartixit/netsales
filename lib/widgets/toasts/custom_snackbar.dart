@@ -64,23 +64,29 @@ class CustomSnackbar {
 
     Get.rawSnackbar(
       shouldIconPulse: true,
-      titleText: Text(
-        title,
-        style: AppTypography.titleMedium.copyWith(
-          color: titleColor,
-          fontWeight: FontWeight.w700,
+      titleText: Padding(
+        padding: EdgeInsetsDirectional.only(end: AppSpacing.md),
+        child: Text(
+          title,
+          style: AppTypography.titleMedium.copyWith(
+            color: titleColor,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
-      messageText: Text(
-        cleanMessage,
-        style: AppTypography.bodyMedium.copyWith(color: subtitleColor),
+      messageText: Padding(
+        padding: EdgeInsetsDirectional.only(end: AppSpacing.md),
+        child: Text(
+          cleanMessage,
+          style: AppTypography.bodyMedium.copyWith(color: subtitleColor),
+        ),
       ),
       backgroundGradient: backgroundGradient,
       snackPosition: position,
       margin: EdgeInsets.all(AppSpacing.md),
       borderRadius: AppRadius.md,
       icon: Padding(
-        padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        padding: EdgeInsetsDirectional.only(start: AppSpacing.lg),
         child: Icon(iconData, color: iconColor),
       ),
       duration: const Duration(seconds: 4),

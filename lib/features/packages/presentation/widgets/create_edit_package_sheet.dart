@@ -7,13 +7,16 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/form_validators.dart';
+import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
 import 'package:netsales/features/packages/presentation/controllers/packages_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// ============================================================================
 /// نافذة معالج إنشاء وتعديل باقة الكروت الذكية (CreateEditPackageSheet)
@@ -23,11 +26,13 @@ import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 class CreateEditPackageSheet extends StatefulWidget {
   final PackagesController controller;
   final VoucherPackageEntity? package;
+  final int? preselectedNetworkId;
 
   const CreateEditPackageSheet({
     super.key,
     required this.controller,
     this.package,
+    this.preselectedNetworkId,
   });
 
   /// الدالة المصنعية المركزية لعرض النافذة
@@ -35,6 +40,7 @@ class CreateEditPackageSheet extends StatefulWidget {
     BuildContext context, {
     required PackagesController controller,
     VoucherPackageEntity? package,
+    int? preselectedNetworkId,
   }) {
     final isEdit = package != null;
     final colors = context.colors;
@@ -58,7 +64,11 @@ class CreateEditPackageSheet extends StatefulWidget {
         ),
       ),
       scrollable: true,
-      child: CreateEditPackageSheet(controller: controller, package: package),
+      child: CreateEditPackageSheet(
+        controller: controller,
+        package: package,
+        preselectedNetworkId: preselectedNetworkId,
+      ),
     );
   }
 
@@ -77,6 +87,7 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
   late final TextEditingController _voucherCountController;
   late final TextEditingController _cashDiscountController;
   late final TextEditingController _creditDiscountController;
+  late final ValueNotifier<int?> _selectedNetworkIdNotifier;
 
   String _selectedColor = '0xFF0D7A5F';
 
@@ -84,6 +95,14 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
   void initState() {
     super.initState();
     final p = widget.package;
+
+    final initialNetworkId = widget.package?.networkId ??
+        widget.preselectedNetworkId ??
+        (widget.controller.networks.length == 1
+            ? widget.controller.networks.first.networkId
+            : SessionService.to.activeNetworkId);
+    _selectedNetworkIdNotifier = ValueNotifier<int?>(initialNetworkId);
+
     _nameController = TextEditingController(text: p?.packageName ?? '');
     _priceController = TextEditingController(
       text: p != null
@@ -136,6 +155,7 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
     _cashDiscountController.removeListener(_onFieldChanged);
     _creditDiscountController.removeListener(_onFieldChanged);
 
+    _selectedNetworkIdNotifier.dispose();
     _nameController.dispose();
     _priceController.dispose();
     _balanceController.dispose();
@@ -201,8 +221,21 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
         ) ??
         0.0;
 
-    // استخدام معرف أول شبكة تابعة للمستخدم أو المعرف المسجل بالباقة
-    final networkId = widget.package?.networkId ?? 1;
+    // تحديد معرف الشبكة من الباقة قيد التعديل أو الاختيار الصريح أو الشبكة الوحيدة أو السياق النشط
+    final int? networkId = widget.package?.networkId ??
+        _selectedNetworkIdNotifier.value ??
+        (widget.controller.networks.length == 1
+            ? widget.controller.networks.first.networkId
+            : SessionService.to.activeNetworkId);
+
+    if (networkId == null) {
+      CustomSnackbar.show(
+        title: 'تنبيه النطاق',
+        message: 'لا يمكن حفظ الباقة: يرجى تحديد الشبكة التابعة لها الباقة أولاً.',
+        type: SnackType.warning,
+      );
+      return;
+    }
 
     final success = await widget.controller.savePackage(
       packageId: widget.package?.packageId,
@@ -337,7 +370,46 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
 
           AppSpacing.vMd,
 
-          // ── 3. حقول إدخال البيانات الأساسية ──
+          // ── 3. اختيار الشبكة (في حال امتلاك المزود لأكثر من شبكة) ──
+          if (!isEdit)
+            Obx(() {
+              if (widget.controller.networks.length > 1) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: CustomDropdown<int>(
+                    label: 'الشبكة التابعة لها الباقة *',
+                    hint: 'اختر الشبكة',
+                    prefixIcon: Icons.cell_tower_rounded,
+                    valueListenable: _selectedNetworkIdNotifier,
+                    items: widget.controller.networks
+                        .map(
+                          (net) => DropdownItem<int>(
+                            value: net.networkId,
+                            child: Text(net.networkName),
+                          ),
+                        )
+                        .toList(),
+                    itemSearchText: (id) =>
+                        widget.controller.networks
+                            .firstWhereOrNull((n) => n.networkId == id)
+                            ?.networkName ??
+                        '',
+                    onChanged: (id) {
+                      _selectedNetworkIdNotifier.value = id;
+                    },
+                    validator: (val) {
+                      if (val == null) {
+                        return 'يرجى اختيار الشبكة التابعة لها الباقة أولاً';
+                      }
+                      return null;
+                    },
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
+
+          // ── 4. حقول إدخال البيانات الأساسية ──
           CustomTextField(
             controller: _nameController,
             label: 'اسم باقة الكروت',

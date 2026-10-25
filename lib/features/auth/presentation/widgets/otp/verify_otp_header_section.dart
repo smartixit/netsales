@@ -29,21 +29,17 @@ class VerifyOtpHeaderSection extends StatelessWidget {
       children: [
         // 1. أيقونة الرمز الهندسية المعتمدة
         Container(
-          width: 56.r,
-          height: 56.r,
-          decoration: BoxDecoration(
-            color: colors.primaryContainer.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(
-              color: colors.primary.withValues(alpha: 0.15),
-            ),
-          ),
-          child: Icon(
-            Icons.sms_rounded,
-            color: colors.primary,
-            size: 28.r,
-          ),
-        )
+              width: 56.r,
+              height: 56.r,
+              decoration: BoxDecoration(
+                color: colors.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: 0.15),
+                ),
+              ),
+              child: Icon(Icons.sms_rounded, color: colors.primary, size: 28.r),
+            )
             .animate()
             .scale(
               begin: const Offset(0.9, 0.9),
@@ -57,13 +53,13 @@ class VerifyOtpHeaderSection extends StatelessWidget {
 
         // 2. العنوان الرئيسي
         Text(
-          'رمز التحقق',
-          style: AppTypography.headlineMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.w800,
-          ),
-          textAlign: TextAlign.center,
-        )
+              'رمز التحقق',
+              style: AppTypography.headlineMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
+              ),
+              textAlign: TextAlign.center,
+            )
             .animate()
             .fadeIn(duration: AppMotion.normal)
             .slideY(
@@ -77,12 +73,12 @@ class VerifyOtpHeaderSection extends StatelessWidget {
 
         // 3. النص الإرشادي الهادئ ورقم الهاتف المقنع
         Text(
-          'تم إرسال رمز التحقق المكون من 6 أرقام إلى',
-          style: AppTypography.bodyMedium.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        )
+              'تم إرسال رمز التحقق المكون من 6 أرقام إلى',
+              style: AppTypography.bodyMedium.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            )
             .animate()
             .fadeIn(duration: AppMotion.normal)
             .slideY(
@@ -95,34 +91,35 @@ class VerifyOtpHeaderSection extends StatelessWidget {
         AppSpacing.vXxs,
 
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              maskedPhone,
-              style: AppTypography.titleSmall.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-              ),
-            ),
-            if (onChangePhone != null) ...[
-              AppSpacing.hXs,
-              CustomButton.text(
-                text: 'تغيير الرقم',
-                onPressed: onChangePhone,
-                foregroundColor: colors.onSurfaceVariant,
-                textStyle: AppTypography.labelMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                  decoration: TextDecoration.underline,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  maskedPhone,
+                  textDirection: TextDirection.ltr,
+                  style: AppTypography.titleSmall.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                  ),
                 ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xxs,
-                  vertical: AppSpacing.xxs,
-                ),
-              ),
-            ],
-          ],
-        )
+                if (onChangePhone != null) ...[
+                  AppSpacing.hXs,
+                  CustomButton.text(
+                    text: 'تغيير الرقم',
+                    onPressed: onChangePhone,
+                    // foregroundColor: colors.onSurfaceVariant,
+                    // textStyle: AppTypography.labelMedium.copyWith(
+                    //   fontWeight: FontWeight.w600,
+                    //   decoration: TextDecoration.underline,
+                    // ),
+                    // padding: EdgeInsets.symmetric(
+                    //   horizontal: AppSpacing.xxs,
+                    //   vertical: AppSpacing.xxs,
+                    // ),
+                  ),
+                ],
+              ],
+            )
             .animate()
             .fadeIn(duration: AppMotion.normal)
             .slideY(

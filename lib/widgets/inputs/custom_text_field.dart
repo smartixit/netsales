@@ -1,4 +1,3 @@
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:flutter/material.dart';
@@ -259,12 +258,9 @@ class _CustomTextFieldState extends State<CustomTextField>
               ? Text.rich(
                   TextSpan(
                     text: widget.label,
-                    style: AppTypography.inputLabel.copyWith(
-                      color: context.colors.onSurface,
-                    ),
                     children: [
                       if (widget.isRequired) ...[
-                        const WidgetSpan(child: SizedBox(width: 4)),
+                        const WidgetSpan(child: SizedBox(width: 2)),
                         TextSpan(
                           text: '*',
                           style: AppTypography.inputLabel.copyWith(
@@ -287,10 +283,9 @@ class _CustomTextFieldState extends State<CustomTextField>
                     _obscureText
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
-                    color: context.colors.onSuccessVariant.withValues(
+                    color: context.colors.onSurfaceVariant.withValues(
                       alpha: 0.5,
                     ),
-                    size: 20.r,
                   ),
 
                   onPressed: () {

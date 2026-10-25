@@ -15,7 +15,9 @@ import 'package:netsales/features/packages/domain/usecases/toggle_voucher_packag
 import 'package:netsales/features/packages/domain/usecases/toggle_voucher_package_status_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/update_voucher_package_discount_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/update_voucher_package_use_case.dart';
+import 'package:netsales/features/partners/domain/entities/network_entity.dart';
 import 'package:netsales/features/partners/domain/entities/pos_entity.dart';
+import 'package:netsales/features/partners/domain/usecases/get_networks_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_pos_list_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -42,6 +44,7 @@ class PackagesController extends GetxController {
       deleteVoucherPackageDiscountUseCase;
   final GetEffectiveDiscountUseCase getEffectiveDiscountUseCase;
   final GetPosListUseCase getPosListUseCase;
+  final GetNetworksUseCase getNetworksUseCase;
 
   PackagesController({
     required this.getVoucherPackagesUseCase,
@@ -57,6 +60,7 @@ class PackagesController extends GetxController {
     required this.deleteVoucherPackageDiscountUseCase,
     required this.getEffectiveDiscountUseCase,
     required this.getPosListUseCase,
+    required this.getNetworksUseCase,
   });
 
   /// القطاع النشط: 0 لباقات الكروت، 1 لخصومات نقاط البيع
@@ -77,6 +81,10 @@ class PackagesController extends GetxController {
   final RxList<PosEntity> posList = <PosEntity>[].obs;
   final RxBool isLoadingPosList = false.obs;
 
+  // ── شبكات المزود المتاحة (للاختيار والتصفية الذكية متعددة الكيانات) ──
+  final RxList<NetworkEntity> networks = <NetworkEntity>[].obs;
+  final RxBool isLoadingNetworks = false.obs;
+
   // ── البحث والتصفية ──
   final TextEditingController searchController = TextEditingController();
   final RxString selectedFilter = 'ALL'.obs; // ALL, ACTIVE, INACTIVE
@@ -84,9 +92,22 @@ class PackagesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    loadNetworks();
     loadPackages();
     loadDiscounts();
     loadPosList();
+  }
+
+  Future<void> loadNetworks() async {
+    isLoadingNetworks.value = true;
+    try {
+      final result = await getNetworksUseCase(status: 'ACTIVE');
+      networks.assignAll(result);
+    } catch (_) {
+      // Graceful
+    } finally {
+      isLoadingNetworks.value = false;
+    }
   }
 
   @override

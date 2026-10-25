@@ -20,6 +20,7 @@ import 'package:netsales/features/partners/data/datasources/partners_remote_data
 import 'package:netsales/features/partners/data/datasources/partners_remote_data_source_impl.dart';
 import 'package:netsales/features/partners/data/repositories/partners_repository_impl.dart';
 import 'package:netsales/features/partners/domain/repositories/partners_repository.dart';
+import 'package:netsales/features/partners/domain/usecases/get_networks_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_pos_list_use_case.dart';
 
 /// ============================================================================
@@ -101,6 +102,12 @@ class PackagesBinding extends Bindings {
         fenix: true,
       );
     }
+    if (!Get.isRegistered<GetNetworksUseCase>()) {
+      Get.lazyPut<GetNetworksUseCase>(
+        () => GetNetworksUseCase(Get.find<PartnersRepository>()),
+        fenix: true,
+      );
+    }
 
     // 6. Controller
     Get.lazyPut<PackagesController>(
@@ -125,6 +132,7 @@ class PackagesBinding extends Bindings {
             Get.find<DeleteVoucherPackageDiscountUseCase>(),
         getEffectiveDiscountUseCase: Get.find<GetEffectiveDiscountUseCase>(),
         getPosListUseCase: Get.find<GetPosListUseCase>(),
+        getNetworksUseCase: Get.find<GetNetworksUseCase>(),
       ),
     );
   }

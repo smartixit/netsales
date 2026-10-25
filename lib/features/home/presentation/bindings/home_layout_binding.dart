@@ -7,6 +7,7 @@ import 'package:netsales/features/home/domain/usecases/get_dashboard_overview_us
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/operations/presentation/bindings/operations_binding.dart';
+import 'package:netsales/features/packages/presentation/bindings/packages_binding.dart';
 import 'package:netsales/features/partners/presentation/bindings/partners_binding.dart';
 import 'package:netsales/features/more/presentation/bindings/more_binding.dart';
 
@@ -46,6 +47,9 @@ class HomeLayoutBinding extends Bindings {
 
     // Operations Vertical Slice
     OperationsBinding().dependencies();
+
+    // Packages & Voucher Catalog Slice
+    PackagesBinding().dependencies();
 
     // Partners & Distribution Network Vertical Slice
     PartnersBinding().dependencies();

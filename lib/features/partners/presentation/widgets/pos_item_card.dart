@@ -5,11 +5,12 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
 import 'package:netsales/features/partners/domain/entities/pos_entity.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
 import 'package:netsales/features/partners/presentation/widgets/reject_partner_dialog.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
 /// بطاقة استعراض نقطة البيع / الوكيل (PosItemCard)
@@ -246,6 +247,21 @@ class PosItemCard extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ],
+
+            // 5. إجراء إصدار فاتورة مبيعات مباشرة لنقطة البيع المفعلة
+            if (pos.isActive) ...[
+              AppSpacing.vSm,
+              CustomButton.outline(
+                text: 'إصدار فاتورة مبيعات',
+                icon: Icons.receipt_long_rounded,
+                height: 38.h,
+                onPressed: () => CreateSaleInvoiceSheet.show(
+                  context,
+                  preselectedPosId: pos.posId,
+                  preselectedPosName: pos.posName,
+                ),
               ),
             ],
           ],

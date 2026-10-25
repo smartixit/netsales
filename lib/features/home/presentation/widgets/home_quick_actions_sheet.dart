@@ -41,11 +41,7 @@ class HomeQuickActionsSheet extends StatelessWidget {
           color: colors.primary.withValues(alpha: 0.12),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          Icons.bolt_rounded,
-          color: colors.primary,
-          size: 20.r,
-        ),
+        child: Icon(Icons.bolt_rounded, color: colors.primary, size: 20.r),
       ),
       scrollable: true,
       actions: [
@@ -56,10 +52,7 @@ class HomeQuickActionsSheet extends StatelessWidget {
           ),
         ),
       ],
-      child: HomeQuickActionsSheet(
-        actions: actions,
-        onActionTap: onActionTap,
-      ),
+      child: HomeQuickActionsSheet(actions: actions, onActionTap: onActionTap),
     );
   }
 
@@ -88,10 +81,7 @@ class _QuickActionCard extends StatelessWidget {
   final HomeQuickAction action;
   final VoidCallback onTap;
 
-  const _QuickActionCard({
-    required this.action,
-    required this.onTap,
-  });
+  const _QuickActionCard({required this.action, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -119,11 +109,7 @@ class _QuickActionCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Center(
-                child: Icon(
-                  action.icon,
-                  color: colors.primary,
-                  size: 22.r,
-                ),
+                child: Icon(action.icon, color: colors.primary, size: 22.r),
               ),
             ),
             AppSpacing.hMd,

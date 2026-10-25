@@ -157,4 +157,58 @@ class OperationsRepositoryImpl implements OperationsRepository {
           : 'تعذر إلغاء طلب الكروت',
     );
   }
+
+  @override
+  Future<VoucherRequestEntity> createVoucherRequest({
+    required int networkId,
+    required int posId,
+    required String saleType,
+    required List<Map<String, dynamic>> items,
+    String? requestNote,
+  }) async {
+    final response = await _remoteDataSource.createVoucherRequest(
+      networkId: networkId,
+      posId: posId,
+      saleType: saleType,
+      items: items,
+      requestNote: requestNote,
+    );
+
+    if (response.data != null) {
+      return response.data!;
+    }
+
+    throw AppException(
+      response.message.isNotEmpty
+          ? response.message
+          : 'تعذر إنشاء طلب توريد الكروت',
+    );
+  }
+
+  @override
+  Future<SaleInvoiceEntity> createSaleInvoice({
+    required int networkId,
+    required int posId,
+    required String saleType,
+    required List<Map<String, dynamic>> items,
+    double? paidAmount,
+  }) async {
+    final response = await _remoteDataSource.createSaleInvoice(
+      networkId: networkId,
+      posId: posId,
+      saleType: saleType,
+      items: items,
+      paidAmount: paidAmount,
+    );
+
+    if (response.data != null) {
+      return response.data!;
+    }
+
+    throw AppException(
+      response.message.isNotEmpty
+          ? response.message
+          : 'تعذر إنشاء فاتورة المبيعات',
+    );
+  }
 }

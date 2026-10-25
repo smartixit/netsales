@@ -67,7 +67,12 @@ class CustomPhoneField extends StatelessWidget {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(9),
       ],
-      prefixIcon: Padding(
+      prefixIcon:
+          suffixIcon ??
+          Icon(
+            Icons.phone_iphone_rounded,
+          ),
+      suffixIcon: Padding(
         padding: EdgeInsetsDirectional.only(
           start: AppSpacing.sm,
           end: AppSpacing.xs,
@@ -75,37 +80,28 @@ class CustomPhoneField extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              '🇾🇪',
-              style: AppTypography.titleMedium,
-            ),
-            AppSpacing.hXxs,
-            Text(
-              '+967',
-              style: AppTypography.labelLarge.copyWith(
-                color: colors.onSurfaceVariant,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
             AppSpacing.hXs,
             Container(
               width: 1.w,
               height: 20.h,
               color: colors.outlineVariant.withValues(alpha: 0.5),
             ),
+            AppSpacing.hXs,
+            Text(
+              '+967',
+              textDirection: TextDirection.ltr,
+              style: AppTypography.labelLarge.copyWith(
+                color: colors.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            AppSpacing.hXs,
+            Text('🇾🇪', style: AppTypography.titleMedium),
+            AppSpacing.hXs,
           ],
         ),
       ),
-      suffixIcon: suffixIcon ??
-          Icon(
-            Icons.phone_iphone_rounded,
-            color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-            size: 20.r,
-          ),
-      validator: validator ??
-          FormValidators.phoneValidator(
-            fieldName: label,
-          ),
+      validator: validator ?? FormValidators.phoneValidator(fieldName: label),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/sale_invoice_card.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
@@ -39,11 +40,13 @@ class SaleInvoicesFeed extends StatelessWidget {
         );
       }
 
-      // 3. حالة الفراغ (الودجت الموحد)
+      // 3. حالة الفراغ (الودجت الموحد) مع إمكانية إصدار فاتورة فوراً
       if (controller.invoices.isEmpty) {
-        return const CustomEmptyState(
+        return CustomEmptyState(
           title: 'لا توجد فواتير مبيعات مسجلة',
           subtitle: 'لم يتم العثور على أي فواتير تطابق معايير التصفية والبحث المحددة',
+          actionLabel: 'إصدار فاتورة جديدة',
+          onAction: () => CreateSaleInvoiceSheet.show(context),
         );
       }
 
