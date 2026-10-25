@@ -84,7 +84,7 @@ class ApiService {
       _RetryInterceptor(_dio),
       _InfinityFreeChallengeInterceptor(_dio),
       _SessionAuthInterceptor(),
-      _CryptoInterceptor(),
+      _CryptoInterceptor(_dio),
     ]);
   }
 
@@ -834,6 +834,10 @@ class _RetryInterceptor extends Interceptor {
 /// 3. فك تشفير استجابات الخادم الآمنة (NTS_ENC_...) بالمفتاح المؤقت للطلب.
 /// 4. مسح وتحرير المفتاح المؤقت من الذاكرة فور انتهاء دورة الطلب في finally.
 class _CryptoInterceptor extends Interceptor {
+  final Dio _dio;
+
+  _CryptoInterceptor(this._dio);
+
   @override
   void onRequest(
     RequestOptions options,
@@ -846,7 +850,15 @@ class _CryptoInterceptor extends Interceptor {
         options.extra['bypass_encryption'] == true ||
         _isBypassEndpoint(options.path);
 
-    if (isBypassed || !crypto.isEncryptionActive) {
+    if (isBypassed) {
+      return handler.next(options);
+    }
+
+    if (!crypto.isReady) {
+      await crypto.init();
+    }
+
+    if (!crypto.isReady) {
       return handler.next(options);
     }
 
@@ -857,6 +869,9 @@ class _CryptoInterceptor extends Interceptor {
       if (['POST', 'PUT', 'PATCH'].contains(method) &&
           options.data != null &&
           options.data is! FormData) {
+        if (!crypto.hasServerBoxKey) {
+          await crypto.syncServerPublicKeys(dio: _dio);
+        }
         final sealed = crypto.sealRequestPayload(options.data);
         options.data = sealed.body;
         options.headers['X-Client-Public-Key'] = sealed.clientPublicKeyHex;
@@ -900,6 +915,15 @@ class _CryptoInterceptor extends Interceptor {
         }
       } catch (e, stack) {
         log('❌ [CryptoInterceptor] Decryption failed for ${response.requestOptions.uri}: $e\n$stack');
+        handler.reject(
+          DioException(
+            requestOptions: response.requestOptions,
+            response: response,
+            type: DioExceptionType.badResponse,
+            error: const AppException('فشل فك تشفير استجابة الخادم الآمنة.'),
+          ),
+        );
+        return;
       } finally {
         // تحرير الذاكرة الآمنة ومسح المفتاح المؤقت للطلب فوراً
         keyPair.dispose();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/more/presentation/controllers/more_controller.dart';
@@ -86,7 +87,7 @@ class MoreScreen extends GetView<MoreController> {
                         iconBgColor: colors.tertiaryContainer.withValues(alpha: 0.35),
                         title: 'باقات الكروت والخصومات',
                         subtitle: 'إعداد فئات الباقات وخصومات نقاط التوزيع',
-                        onTap: () {},
+                        onTap: () => Get.toNamed(AppRoutes.voucherPackages),
                       ),
                     ],
                   ),

@@ -14,6 +14,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_pages.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
@@ -127,6 +128,11 @@ void main() async {
   // 3. تهيئة خدمة التشفير اللامتناظر ومزامنة المفاتيح العامة السيادية
   await AppCryptoService.instance.init();
   Get.put<AppCryptoService>(AppCryptoService.instance, permanent: true);
+  unawaited(
+    AppCryptoService.instance.syncServerPublicKeys(
+      dio: ApiService.instance.dio,
+    ),
+  );
 
   // 3. تهيئة خدمات المظهر والهوية والصلاحيات الدائمة
   await ThemeService.instance.init();

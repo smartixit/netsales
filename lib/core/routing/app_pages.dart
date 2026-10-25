@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
@@ -25,6 +26,8 @@ import 'package:netsales/features/splash/presentation/bindings/splash_binding.da
 import 'package:netsales/features/splash/presentation/screens/splash_screen.dart';
 import 'package:netsales/features/operations/presentation/screens/sale_invoice_details_screen.dart';
 import 'package:netsales/features/operations/presentation/screens/voucher_request_details_screen.dart';
+import 'package:netsales/features/packages/presentation/bindings/packages_binding.dart';
+import 'package:netsales/features/packages/presentation/screens/voucher_packages_hub_screen.dart';
 import 'package:netsales/widgets/feedback/custom_not_found.dart';
 import 'package:netsales/widgets/feedback/custom_unauthorized.dart';
 
@@ -179,17 +182,17 @@ abstract final class AppPages {
     // ),
 
     // ========================================================================
-    // 6. باقات كروت الشبكة (Voucher Packages)
+    // 6. باقات كروت الشبكة والخصومات (Voucher Packages & Discounts Hub)
     // ========================================================================
-    // GetPage(
-    //   name: AppRoutes.voucherPackages,
-    //   page: () => const VoucherPackagesScreen(),
-    //   binding: VoucherPackagesBinding(),
-    //   middlewares: [
-    //     AuthGuard(),
-    //     PermissionGuardMiddleware(requiredPermission: AppPermissions.voucherPackagesView),
-    //   ],
-    // ),
+    GetPage(
+      name: AppRoutes.voucherPackages,
+      page: () => const VoucherPackagesHubScreen(),
+      binding: PackagesBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.voucherPackagesView),
+      ],
+    ),
 
     // ========================================================================
     // 7. طلبات الكروت وفواتير المبيعات (Requests & Sales)

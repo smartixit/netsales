@@ -6,7 +6,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:netsales/core/config/app_environment.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -83,9 +82,8 @@ class AppCryptoService {
   /// هل مفتاح التشفير العام للخادم متوفر
   bool get hasServerBoxKey => _serverBoxPublicKey != null;
 
-  /// هل التشفير مفعّل فعلياً (تلقائياً في بيئة الإنتاج أو عند توفر مفتاح الخادم)
-  bool get isEncryptionActive =>
-      isReady && hasServerBoxKey && !AppEnvironment.isDev;
+  /// هل التشفير مفعّل فعلياً (تلقائياً بمجرد جاهزية مكتبة التشفير السيادية عبر كافة البيئات)
+  bool get isEncryptionActive => isReady;
 
   /// ==========================================================================
   /// 1. تهيئة مكتبة التشفير libsodium (Cross-Platform Dynamic Library Loader)

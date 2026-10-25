@@ -267,11 +267,24 @@ class FormValidators {
   static FormFieldValidator<String> percentageValidator({
     String? fieldName,
     bool isRequired = true,
+    num min = 0,
+    num max = 100,
   }) {
+    final name = fieldName ?? 'النسبة المئوية';
     return FormBuilderValidators.compose([
-      if (isRequired) required(fieldName: fieldName),
-      FormBuilderValidators.integer(
-        errorText: '$fieldName يجب ان يكون نسبة مئوية صحيحة',
+      if (isRequired) required(fieldName: name),
+      FormBuilderValidators.numeric(
+        errorText: '$name يجب أن تكون قيمة رقمية صحيحة',
+        checkNullOrEmpty: false,
+      ),
+      FormBuilderValidators.min(
+        min,
+        errorText: '$name يجب ألا تقل عن $min%',
+        checkNullOrEmpty: false,
+      ),
+      FormBuilderValidators.max(
+        max,
+        errorText: '$name يجب ألا تتجاوز $max%',
         checkNullOrEmpty: false,
       ),
     ]);
