@@ -7,7 +7,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_motion.dart';
-import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/media_gallery/models/media_gallery_item.dart';
 

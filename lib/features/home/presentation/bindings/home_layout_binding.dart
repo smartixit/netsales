@@ -8,6 +8,7 @@ import 'package:netsales/features/home/presentation/controllers/dashboard_contro
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/operations/presentation/bindings/operations_binding.dart';
 import 'package:netsales/features/partners/presentation/bindings/partners_binding.dart';
+import 'package:netsales/features/more/presentation/bindings/more_binding.dart';
 
 /// ============================================================================
 /// رابط حقن تبعيات الشاشة الرئيسية (HomeLayoutBinding)
@@ -48,6 +49,9 @@ class HomeLayoutBinding extends Bindings {
 
     // Partners & Distribution Network Vertical Slice
     PartnersBinding().dependencies();
+
+    // More & Financial Hub Vertical Slice
+    MoreBinding().dependencies();
   }
 }
 

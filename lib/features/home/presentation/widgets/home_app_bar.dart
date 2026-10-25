@@ -8,7 +8,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
-import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/buttons/custom_theme_toggle_button.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';

@@ -8,7 +8,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/partners/domain/entities/pos_entity.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
 import 'package:netsales/features/partners/presentation/widgets/reject_partner_dialog.dart';
-import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// ============================================================================

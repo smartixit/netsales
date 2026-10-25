@@ -4,9 +4,9 @@ import 'package:netsales/features/home/presentation/controllers/home_layout_cont
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_view.dart';
 import 'package:netsales/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:netsales/widgets/feedback/custom_offline_banner.dart';
-import 'package:netsales/widgets/feedback/custom_tab_placeholder.dart';
 import 'package:netsales/features/operations/presentation/screens/operations_screen.dart';
 import 'package:netsales/features/partners/presentation/screens/partners_screen.dart';
+import 'package:netsales/features/more/presentation/screens/more_screen.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 import 'package:netsales/widgets/navigations/double_back_exit_scope.dart';
@@ -48,13 +48,8 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
                     // Tab 2: شبكة الشركاء ونقاط التوزيع (Partners & Distribution)
                     PartnersScreen(),
 
-                    // Tab 3: المحافظ والمالية والإعدادات (More)
-                    CustomTabPlaceholder(
-                      title: 'المحافظ والمالية والإعدادات',
-                      subtitle:
-                          'محافظ الشبكات ونقاط البيع، المصروفات التشغيلية، والدعم الفني',
-                      icon: Icons.widgets_rounded,
-                    ),
+                    // Tab 3: المحافظ والمالية والإعدادات (More & Financial Hub)
+                    MoreScreen(),
                   ],
                 ),
               ),

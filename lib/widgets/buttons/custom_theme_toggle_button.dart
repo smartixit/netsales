@@ -6,8 +6,8 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
-import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
-import 'package:netsales/widgets/animations/custome_theme_switcher.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/interactions/custome_theme_switcher.dart';
 
 /// ============================================================================
 /// زر تبديل المظهر التفاعلي بأسلوب تليجرام (Telegram-Style Theme Toggle Button)

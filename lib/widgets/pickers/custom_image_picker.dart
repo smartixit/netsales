@@ -7,7 +7,7 @@ import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';

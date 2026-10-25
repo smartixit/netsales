@@ -6,7 +6,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/home/domain/entities/dashboard_overview_entity.dart';
-import 'package:netsales/widgets/animations/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
 /// رادار التنبيهات والعمليات العاجلة (DashboardOperationalRadar)
