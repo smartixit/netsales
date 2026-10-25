@@ -7,6 +7,7 @@ import 'package:netsales/features/home/domain/usecases/get_dashboard_overview_us
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/operations/presentation/bindings/operations_binding.dart';
+import 'package:netsales/features/partners/presentation/bindings/partners_binding.dart';
 
 /// ============================================================================
 /// رابط حقن تبعيات الشاشة الرئيسية (HomeLayoutBinding)
@@ -44,6 +45,9 @@ class HomeLayoutBinding extends Bindings {
 
     // Operations Vertical Slice
     OperationsBinding().dependencies();
+
+    // Partners & Distribution Network Vertical Slice
+    PartnersBinding().dependencies();
   }
 }
 

@@ -6,6 +6,7 @@ import 'package:netsales/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:netsales/widgets/feedback/custom_offline_banner.dart';
 import 'package:netsales/widgets/feedback/custom_tab_placeholder.dart';
 import 'package:netsales/features/operations/presentation/screens/operations_screen.dart';
+import 'package:netsales/features/partners/presentation/screens/partners_screen.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 import 'package:netsales/widgets/navigations/double_back_exit_scope.dart';
@@ -44,12 +45,8 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
                     // Tab 1: فواتير المبيعات وطلبات التوريد (Operations)
                     OperationsScreen(),
 
-                    CustomTabPlaceholder(
-                      title: 'شبكة الشركاء ونقاط التوزيع',
-                      subtitle:
-                          'إدارة نقاط البيع والوكلاء، شبكات الإنترنت، وباقات الكروت والخصومات',
-                      icon: Icons.hub_rounded,
-                    ),
+                    // Tab 2: شبكة الشركاء ونقاط التوزيع (Partners & Distribution)
+                    PartnersScreen(),
 
                     // Tab 3: المحافظ والمالية والإعدادات (More)
                     CustomTabPlaceholder(

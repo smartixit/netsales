@@ -1,0 +1,60 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
+import 'package:netsales/features/partners/presentation/widgets/network_pos_feed.dart';
+import 'package:netsales/features/partners/presentation/widgets/networks_feed.dart';
+import 'package:netsales/features/partners/presentation/widgets/partners_search_filter_bar.dart';
+import 'package:netsales/features/partners/presentation/widgets/partners_segmented_header.dart';
+import 'package:netsales/features/partners/presentation/widgets/partners_stats_header.dart';
+import 'package:netsales/features/partners/presentation/widgets/pos_list_feed.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+
+/// ============================================================================
+/// شاشة الشركاء وشبكة التوزيع المجمعة (PartnersScreen)
+/// ============================================================================
+/// مجمّع تركيبي رشيق (Lean Composite Assembler) لإدارة مزودي الشبكات، نقاط البيع،
+/// وعقود الربط والتوزيع، خالٍ تماماً من دوال البناء المساعدة طبقاً لـ AGENTS.md.
+class PartnersScreen extends GetView<PartnersController> {
+  const PartnersScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomAppScaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 1. رأس التبويب القطاعي (مزودو الشبكات | نقاط البيع | عقود التوزيع)
+            PartnersSegmentedHeader(controller: controller),
+            AppSpacing.vSm,
+
+            // 2. شريط البحث والتصفية المزدوج
+            PartnersSearchFilterBar(controller: controller),
+            AppSpacing.vSm,
+
+            // 3. شريط المؤشرات الرقمية الحيوية
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+              child: PartnersStatsHeader(controller: controller),
+            ),
+            AppSpacing.vSm,
+
+            // 4. الحاوية التفاعلية لقوائم البيانات حسب التبويب النشط
+            Expanded(
+              child: Obx(() {
+                final tab = controller.activeSegmentIndex.value;
+                if (tab == 0) {
+                  return NetworksFeed(controller: controller);
+                } else if (tab == 1) {
+                  return PosListFeed(controller: controller);
+                } else {
+                  return NetworkPosFeed(controller: controller);
+                }
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
