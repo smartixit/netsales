@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:get/get.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -66,6 +67,7 @@ class InternetConnectionService {
     _stateSubscription ??= InternetConnectionService.instance.statusStream.listen((
       connected,
     ) {
+      if (Get.context == null) return;
       if (!connected) {
         CustomSnackbar.show(
           title: "لا يوجد اتصال بالإنترنت",

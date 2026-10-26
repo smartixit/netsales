@@ -14,11 +14,11 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_pages.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
@@ -117,47 +117,35 @@ void main() async {
     );
   };
 
-  // 1. تهيئة التخزين الأساسي - يجب انتظاره قبل أي خدمة تعتمد عليه
+  // 1. تهيئة التخزين الأساسي السريع (Fast Local Storage)
   await StorageService.instance.init();
   Get.put<StorageService>(StorageService.instance, permanent: true);
 
-  // 2. تهيئة خدمة بصمة الجهاز السيادية (Enterprise Device Intelligence)
-  await DeviceService.instance.init();
-  Get.put<DeviceService>(DeviceService.instance, permanent: true);
-
-  // 3. تهيئة خدمة التشفير اللامتناظر ومزامنة المفاتيح العامة السيادية
-  await AppCryptoService.instance.init();
-  Get.put<AppCryptoService>(AppCryptoService.instance, permanent: true);
-  unawaited(
-    AppCryptoService.instance.syncServerPublicKeys(
-      dio: ApiService.instance.dio,
-    ),
-  );
-
-  // 3. تهيئة خدمات المظهر والهوية والصلاحيات الدائمة
+  // 2. تهيئة خدمات المظهر والهوية والصلاحيات الفورية
   await ThemeService.instance.init();
   Get.put<ThemeService>(ThemeService.instance, permanent: true);
-
-  // تفعيل مراقبة الاتصال بالإنترنت (Global listener for offline snackbar)
-  await InternetConnectionService.instance.initialize();
-  Get.put<InternetConnectionService>(
-    InternetConnectionService.instance,
-    permanent: true,
-  );
-  InternetConnectionService.instance.showInternetConnectionState();
 
   Get.put<PermissionService>(PermissionService.instance, permanent: true);
   await SessionService.instance.init();
   Get.put<SessionService>(SessionService.instance, permanent: true);
 
-  // 4. تهيئة خدمة الإشعارات المركزية وإشعارات الدفع (FCM & Local Notifications)
-  await PushNotificationService.instance.init();
+  // 3. تسجيل الخدمات العامة الدائمة في حاوية GetX لضمان استقرار التبعيات
+  Get.put<DeviceService>(DeviceService.instance, permanent: true);
+  Get.put<AppCryptoService>(AppCryptoService.instance, permanent: true);
+  Get.put<InternetConnectionService>(
+    InternetConnectionService.instance,
+    permanent: true,
+  );
   Get.put<PushNotificationService>(
     PushNotificationService.instance,
     permanent: true,
   );
+  Get.put<PublicSettingsService>(
+    PublicSettingsService.instance,
+    permanent: true,
+  );
 
-  // 5. تهيئة استرجاع بصمة التطبيق لنظام أندرويد في الخلفية (Zero-click SMS Retriever API)
+  // 4. تهيئة استرجاع بصمة التطبيق لنظام أندرويد في الخلفية دون تعطيل
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
     unawaited(SmsRetrieverService.instance.initSignature());
   }
@@ -166,11 +154,14 @@ void main() async {
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
   ]);
+  
 
   // Edge-to-Edge (Android 15+ standard) — Guaranteed modern system bars
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  // 7. تشغيل الواجهة الرئيسية للتطبيق
+  // 5. إطلاق الواجهة الرئيسية فوراً (Instant Native Splash Dismissal & Fast First Frame)
+  // ملاحظة: الخدمات الثقيلة (Firebase/FCM, Libsodium, DeviceInfo, Ping) تُهيأ
+  // بالتوازي وبشكل غير حاجب داخل SplashController أثناء دوران شاشة الإقلاع الأنيقة.
   runApp(const MyApp());
 }
 

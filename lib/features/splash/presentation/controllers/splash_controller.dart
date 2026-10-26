@@ -1,8 +1,15 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/api_service.dart';
+import 'package:netsales/core/services/app_crypto_service.dart';
+import 'package:netsales/core/services/device_service.dart';
+import 'package:netsales/core/services/internet_connection_service.dart';
+import 'package:netsales/core/services/public_settings_service.dart';
+import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/features/splash/domain/usecases/determine_boot_destination_use_case.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -13,8 +20,8 @@ class SplashController extends GetxController {
 
   SplashController(this._determineBootDestinationUseCase);
 
-  /// مدة ظهور شاشة الإقلاع الأدنى لضمان استمتاع المستخدم بالهوية البصرية
-  static const Duration minSplashDuration = Duration(seconds: 5);
+  /// مدة ظهور شاشة الإقلاع الأدنى لضمان استمتاع المستخدم بالهوية البصرية وانسيابية الحركة
+  static const Duration minSplashDuration = Duration(milliseconds: 1800);
 
   bool _isDisposed = false;
 
@@ -28,7 +35,32 @@ class SplashController extends GetxController {
 
   Future<void> _bootstrapApp() async {
     try {
-      await Future.delayed(minSplashDuration);
+      final stopwatch = Stopwatch()..start();
+
+      // 1. تشغيل التهيئة المتوازية للخدمات غير الحرجة أثناء عرض شاشة الإقلاع الأنيقة
+      await Future.wait([
+        DeviceService.instance.init(),
+        AppCryptoService.instance.init(),
+        PushNotificationService.instance.init(),
+        PublicSettingsService.instance.init(),
+        InternetConnectionService.instance.initialize(),
+      ]);
+
+      // مزامنة مفاتيح السيرفر السيادية في الخلفية فور جاهزية محرك التشفير
+      unawaited(
+        AppCryptoService.instance.syncServerPublicKeys(
+          dio: ApiService.instance.dio,
+        ),
+      );
+
+      // تفعيل مراقبة الاتصال الشبكي بعد اكتمال واجهات التطبيق بأمان
+      InternetConnectionService.instance.showInternetConnectionState();
+
+      // 2. ضمان بقاء شاشة الإقلاع للمدة البصرية المطلوبة دون تقطيع أو وميض
+      final elapsed = stopwatch.elapsed;
+      if (elapsed < minSplashDuration) {
+        await Future.delayed(minSplashDuration - elapsed);
+      }
       if (_isDisposed) return;
 
       final destination = await _determineBootDestinationUseCase();
@@ -58,3 +90,4 @@ class SplashController extends GetxController {
     super.onClose();
   }
 }
+

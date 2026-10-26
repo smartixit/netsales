@@ -50,11 +50,17 @@ class PublicSettingsService extends GetxService {
       ? _settings.value.appSupportEmail
       : AppConstants.supportEmail;
 
+  @override
+  void onInit() {
+    super.onInit();
+    init();
+  }
+
   /// تهيئة الخدمة مع القراءة الفورية من التخزين المحلي ثم التحديث من الخادم
   Future<void> init() async {
-    _loadFromLocalCache();
     // جلب أحدث الإعدادات من الخادم في الخلفية دون تعطيل الإقلاع
     unawaited(fetchSettings());
+    _loadFromLocalCache();
   }
 
   /// تحميل الإعدادات من التخزين المحلي إن وجدت
