@@ -8,7 +8,7 @@ import 'package:netsales/core/models/app_picked_file.dart';
 import 'package:netsales/core/services/app_cache_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/widgets/media_gallery/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_gallery_filmstrip.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_gallery_header_overlay.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_viewer_item.dart';

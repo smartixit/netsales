@@ -11,7 +11,8 @@ class PermissionService extends GetxService {
 
   static PermissionService instance = PermissionService._();
 
-  static PermissionService get to => Get.find<PermissionService>();
+  static PermissionService get to =>
+      Get.isRegistered<PermissionService>() ? Get.find<PermissionService>() : instance;
 
   final RxSet<String> _permissions = <String>{}.obs;
   final RxString _roleKey = ''.obs;

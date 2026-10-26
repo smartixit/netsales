@@ -73,7 +73,8 @@ class CredentialService extends GetxService {
 
   static final CredentialService instance = CredentialService._();
 
-  static CredentialService get to => Get.find<CredentialService>();
+  static CredentialService get to =>
+      Get.isRegistered<CredentialService>() ? Get.find<CredentialService>() : instance;
 
   static const String _keyPhone = 'nts_secure_cred_phone';
   static const String _keyPassword = 'nts_secure_cred_password';

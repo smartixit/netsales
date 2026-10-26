@@ -7,7 +7,6 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/form_validators.dart';
-import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
 import 'package:netsales/features/packages/presentation/controllers/packages_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -100,7 +99,7 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
         widget.preselectedNetworkId ??
         (widget.controller.networks.length == 1
             ? widget.controller.networks.first.networkId
-            : SessionService.to.activeNetworkId);
+            : null);
     _selectedNetworkIdNotifier = ValueNotifier<int?>(initialNetworkId);
 
     _nameController = TextEditingController(text: p?.packageName ?? '');
@@ -221,12 +220,12 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
         ) ??
         0.0;
 
-    // تحديد معرف الشبكة من الباقة قيد التعديل أو الاختيار الصريح أو الشبكة الوحيدة أو السياق النشط
+    // تحديد معرف الشبكة من الباقة قيد التعديل أو الاختيار الصريح أو الشبكة الوحيدة
     final int? networkId = widget.package?.networkId ??
         _selectedNetworkIdNotifier.value ??
         (widget.controller.networks.length == 1
             ? widget.controller.networks.first.networkId
-            : SessionService.to.activeNetworkId);
+            : null);
 
     if (networkId == null) {
       CustomSnackbar.show(

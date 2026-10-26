@@ -16,7 +16,8 @@ class ThemeService extends GetxService with WidgetsBindingObserver {
 
   static final ThemeService instance = ThemeService._();
 
-  static ThemeService get to => Get.find<ThemeService>();
+  static ThemeService get to =>
+      Get.isRegistered<ThemeService>() ? Get.find<ThemeService>() : instance;
 
   final Rx<ThemeMode> _themeMode = ThemeMode.system.obs;
 

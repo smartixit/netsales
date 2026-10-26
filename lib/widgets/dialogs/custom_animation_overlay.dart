@@ -95,9 +95,11 @@ class CustomAnimationOverlay {
   /// يعني فعلياً أن Success انتهى بالكامل.
   static Future<void> showSuccess({
     String? message,
-    Duration autoHide = const Duration(milliseconds: 1400),
+    Duration? autoHide,
     bool force = false,
   }) {
+    final duration = autoHide ?? const Duration(seconds: 2);
+
     return _enqueue(() async {
       await _showOrReplace(
         type: AnimationOverlayType.success,
@@ -106,7 +108,7 @@ class CustomAnimationOverlay {
       );
 
       // انتظر مدة Success فعلياً.
-      await Future<void>.delayed(autoHide);
+      await Future<void>.delayed(duration);
 
       // أزل Success مباشرة داخل نفس Queue operation.
       //

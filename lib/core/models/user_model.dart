@@ -53,8 +53,8 @@ class UserModel {
       status: json['status']?.toString() ?? 'ACTIVE',
       statusLabel: json['status_label']?.toString(),
       lastLoginAt: json['last_login_at']?.toString(),
-      role: json['role'] is Map<String, dynamic>
-          ? RoleModel.fromJson(json['role'] as Map<String, dynamic>)
+      role: json['role'] is Map
+          ? RoleModel.fromJson(Map<String, dynamic>.from(json['role'] as Map))
           : null,
     );
   }

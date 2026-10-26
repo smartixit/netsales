@@ -5,7 +5,7 @@ import 'package:netsales/core/cache/netsales_cache_manager.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/models/app_picked_file.dart';
 import 'package:netsales/core/services/app_cache_service.dart';
-import 'package:netsales/widgets/media_gallery/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item.dart';
 
 void main() {
   group('NetSalesDioFileService URL Normalization & MIME Tests', () {

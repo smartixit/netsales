@@ -41,7 +41,10 @@ class PushNotificationService extends GetxService {
 
   static final PushNotificationService instance = PushNotificationService._();
 
-  static PushNotificationService get to => Get.find<PushNotificationService>();
+  static PushNotificationService get to =>
+      Get.isRegistered<PushNotificationService>()
+      ? Get.find<PushNotificationService>()
+      : instance;
 
   FirebaseMessaging get _fcm => FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
@@ -50,16 +53,17 @@ class PushNotificationService extends GetxService {
   /// القناة الافتراضية عالية الأهمية لنظام أندرويد
   static const AndroidNotificationChannel highImportanceChannel =
       AndroidNotificationChannel(
-    'netsales_high_importance',
-    'إشعارات نظام مبيعات الشبكة الفورية',
-    description: 'تنبيهات فورية للعمليات المالية وكروت الشبكة والنشاطات الأمنية',
-    importance: Importance.max,
-    playSound: true,
-    sound: RawResourceAndroidNotificationSound('netsales_notification'),
-    audioAttributesUsage: AudioAttributesUsage.alarm,
-    enableVibration: true,
-    showBadge: true,
-  );
+        'netsales_high_importance',
+        'إشعارات نظام مبيعات الشبكة الفورية',
+        description:
+            'تنبيهات فورية للعمليات المالية وكروت الشبكة والنشاطات الأمنية',
+        importance: Importance.max,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound('netsales_notification'),
+        audioAttributesUsage: AudioAttributesUsage.alarm,
+        enableVibration: true,
+        showBadge: true,
+      );
 
   String? _fcmToken;
 
@@ -78,7 +82,9 @@ class PushNotificationService extends GetxService {
         return token;
       }
     } catch (e) {
-      log('⚠️ [PushNotificationService] Failed to fetch FCM token on-demand: $e');
+      log(
+        '⚠️ [PushNotificationService] Failed to fetch FCM token on-demand: $e',
+      );
     }
     return StorageService.instance.getString(StorageKeys.fcmTokenStorage) ??
         'pending_fcm_token';
@@ -117,7 +123,9 @@ class PushNotificationService extends GetxService {
       // 8. فحص الرسالة الأولية في حال فُتح التطبيق من إشعار وهو مغلق (Terminated State)
       await _checkInitialMessage();
 
-      log('✅ [PushNotificationService] Initialized enterprise push engine successfully.');
+      log(
+        '✅ [PushNotificationService] Initialized enterprise push engine successfully.',
+      );
     } catch (e, stack) {
       log('⚠️ [PushNotificationService] Initialization error: $e\n$stack');
     }
@@ -127,8 +135,9 @@ class PushNotificationService extends GetxService {
 
   /// تهيئة إعدادات الإشعارات المحلية لنظامي Android و iOS
   Future<void> _initLocalNotifications() async {
-    const androidSettings =
-        AndroidInitializationSettings('@drawable/ic_notification');
+    const androidSettings = AndroidInitializationSettings(
+      '@drawable/ic_notification',
+    );
     const darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -150,13 +159,15 @@ class PushNotificationService extends GetxService {
     );
 
     // تسجيل القناة عالية الأهمية لدى نظام أندرويد
-    final androidImplementation =
-        _localNotifications.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final androidImplementation = _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
 
     if (androidImplementation != null) {
-      await androidImplementation
-          .createNotificationChannel(highImportanceChannel);
+      await androidImplementation.createNotificationChannel(
+        highImportanceChannel,
+      );
     }
   }
 
@@ -172,12 +183,16 @@ class PushNotificationService extends GetxService {
 
       final isAuthorized =
           settings.authorizationStatus == AuthorizationStatus.authorized ||
-              settings.authorizationStatus == AuthorizationStatus.provisional;
+          settings.authorizationStatus == AuthorizationStatus.provisional;
 
-      log('📱 [PushNotificationService] Authorization Status: ${settings.authorizationStatus}');
+      log(
+        '📱 [PushNotificationService] Authorization Status: ${settings.authorizationStatus}',
+      );
       return isAuthorized;
     } catch (e) {
-      log('⚠️ [PushNotificationService] Error requesting notification permissions: $e');
+      log(
+        '⚠️ [PushNotificationService] Error requesting notification permissions: $e',
+      );
       return false;
     }
   }
@@ -187,7 +202,9 @@ class PushNotificationService extends GetxService {
     try {
       _fcmToken = await _fcm.getToken();
       if (_fcmToken != null && _fcmToken!.isNotEmpty) {
-        log('🔑 [PushNotificationService] FCM Token acquired: ${_fcmToken!.substring(0, 16)}...');
+        log(
+          '🔑 [PushNotificationService] FCM Token acquired: ${_fcmToken!.substring(0, 16)}...',
+        );
         // مزامنة الرمز مع الخادم إذا كان المستخدم مسجلاً بالفعل
         if (SessionService.to.isAuthenticated) {
           await syncTokenWithBackend();
@@ -196,7 +213,9 @@ class PushNotificationService extends GetxService {
 
       // الاستماع لتحديث وتدوير الرمز بواسطة خدمات جوجل
       _fcm.onTokenRefresh.listen((newToken) async {
-        log('🔄 [PushNotificationService] FCM Token rotated by Google Services.');
+        log(
+          '🔄 [PushNotificationService] FCM Token rotated by Google Services.',
+        );
         _fcmToken = newToken;
         if (SessionService.to.isAuthenticated) {
           await syncTokenWithBackend(force: true);
@@ -238,11 +257,15 @@ class PushNotificationService extends GetxService {
 
       if (response.success) {
         await storage.setString(StorageKeys.fcmTokenStorage, token);
-        log('📡 [PushNotificationService] FCM Token synced with server for device: ${device.deviceUuid}');
+        log(
+          '📡 [PushNotificationService] FCM Token synced with server for device: ${device.deviceUuid}',
+        );
         return true;
       }
     } catch (e) {
-      log('⚠️ [PushNotificationService] Failed to sync FCM token with server: $e');
+      log(
+        '⚠️ [PushNotificationService] Failed to sync FCM token with server: $e',
+      );
     }
 
     return false;
@@ -264,7 +287,9 @@ class PushNotificationService extends GetxService {
   void _setupMessageListeners() {
     // 1. استقبال الرسائل أثناء استخدام التطبيق في المقدمة (Foreground)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      log('📥 [PushNotificationService] Foreground Message received: ${message.notification?.title}');
+      log(
+        '📥 [PushNotificationService] Foreground Message received: ${message.notification?.title}',
+      );
       _showLocalNotification(message);
       // إطلاق النغمة المميزة فورياً عبر مجرى المنبه لتجاوز الوضع الصامت/الهزاز
       SoundService.instance.playSound();
@@ -282,7 +307,9 @@ class PushNotificationService extends GetxService {
     try {
       final initialMessage = await _fcm.getInitialMessage();
       if (initialMessage != null) {
-        log('🚀 [PushNotificationService] App launched from terminated state via notification.');
+        log(
+          '🚀 [PushNotificationService] App launched from terminated state via notification.',
+        );
         // ننتظر قليلاً حتى تكتمل جاهزية شجرة التوجيه والواجهات
         Future.delayed(const Duration(milliseconds: 600), () {
           _handleMessageNavigation(initialMessage);
@@ -346,7 +373,9 @@ class PushNotificationService extends GetxService {
       final Map<String, dynamic> data = jsonDecode(payloadString);
       _dispatchPayloadNavigation(data);
     } catch (e) {
-      log('⚠️ [PushNotificationService] Error decoding notification payload: $e');
+      log(
+        '⚠️ [PushNotificationService] Error decoding notification payload: $e',
+      );
     }
   }
 
@@ -358,7 +387,9 @@ class PushNotificationService extends GetxService {
     final rawType = data['notification_type'] ?? data['entity_type'];
     final entityId = data['entity_id']?.toString() ?? data['id']?.toString();
 
-    log('🎯 [PushNotificationService] Dispatching deep link: type=$rawType, entityId=$entityId');
+    log(
+      '🎯 [PushNotificationService] Dispatching deep link: type=$rawType, entityId=$entityId',
+    );
 
     // 1. التوجيه المباشر بالمسار الصريح إن وُجد
     if (route != null && route.isNotEmpty) {

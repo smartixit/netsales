@@ -37,7 +37,7 @@ class VerifyOtpFormCard extends GetView<VerifyOtpController> {
                 fieldName: 'رمز التحقق',
                 length: 6,
               ),
-              onCompleted: (pin) => controller.goToDirectReset(pin),
+              onCompleted: (pin) => controller.submitOtp(pin),
             ),
           ),
 
@@ -91,30 +91,15 @@ class VerifyOtpFormCard extends GetView<VerifyOtpController> {
 
           AppSpacing.vXxl,
 
-          // 3. الإجراء الأساسي المباشر
+          // 3. الإجراء الأساسي الموحد (التحقق الفعلي مع الخادم)
           Obx(
             () => CustomButton.primary(
-              text: 'متابعة وتعيين كلمة المرور',
-              icon: Icons.arrow_forward_rounded,
+              text: 'التحقق وتأكيد الاستعادة',
+              icon: Icons.check_circle_outline_rounded,
               size: AppButtonSize.large,
               height: 52.h,
               loading: controller.isLoading.value,
-              onPressed: () => controller.goToDirectReset(),
-            ),
-          ),
-
-          AppSpacing.vMd,
-
-          // 4. المسار البديل (رابط نصي خفيف غير منافس)
-          Obx(
-            () => Center(
-              child: CustomButton.text(
-                text: 'استلام كلمة مرور مؤقتة عبر SMS',
-                icon: Icons.sms_outlined,
-                // foregroundColor: colors.onSurfaceVariant,
-                loading: controller.isLoading.value,
-                onPressed: () => controller.submitOtp(),
-              ),
+              onPressed: () => controller.submitOtp(),
             ),
           ),
         ],

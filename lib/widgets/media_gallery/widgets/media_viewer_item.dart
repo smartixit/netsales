@@ -8,7 +8,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
-import 'package:netsales/widgets/media_gallery/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_document_viewer_card.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_pdf_viewer_card.dart';
 

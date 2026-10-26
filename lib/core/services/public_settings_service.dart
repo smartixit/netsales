@@ -19,7 +19,8 @@ class PublicSettingsService extends GetxService {
 
   static final PublicSettingsService instance = PublicSettingsService._();
 
-  static PublicSettingsService get to => Get.find<PublicSettingsService>();
+  static PublicSettingsService get to =>
+      Get.isRegistered<PublicSettingsService>() ? Get.find<PublicSettingsService>() : instance;
 
   final Rx<PublicSettingsModel> _settings = const PublicSettingsModel(
     appName: AppConstants.appName,

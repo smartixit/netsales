@@ -6,7 +6,6 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
@@ -93,8 +92,8 @@ class _CreateVoucherRequestSheetState extends State<CreateVoucherRequestSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedNetworkId = widget.networkId ?? SessionService.to.activeNetworkId;
-    _selectedPosId = widget.posId ?? SessionService.to.activePosId;
+    _selectedNetworkId = widget.networkId;
+    _selectedPosId = widget.posId;
     _networkIdNotifier = ValueNotifier<int?>(_selectedNetworkId);
     _loadInitialData();
   }
@@ -113,9 +112,6 @@ class _CreateVoucherRequestSheetState extends State<CreateVoucherRequestSheet> {
     });
 
     try {
-      // إذا لم يكن معرف نقطة البيع محدداً، نحاول استعادته من الجلسة
-      _selectedPosId ??= SessionService.to.activePosId;
-
       // إذا لم تكن الشبكة محددة، نجلب الشبكات المرتبطة بنقطة البيع
       if (_selectedNetworkId == null && _selectedPosId != null) {
         if (Get.isRegistered<GetNetworkPosListUseCase>()) {

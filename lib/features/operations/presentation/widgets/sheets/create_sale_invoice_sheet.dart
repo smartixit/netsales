@@ -6,7 +6,6 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
@@ -95,7 +94,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedNetworkId = widget.networkId ?? SessionService.to.activeNetworkId;
+    _selectedNetworkId = widget.networkId;
     _networkIdNotifier = ValueNotifier<int?>(_selectedNetworkId);
     _selectedPosId = widget.preselectedPosId;
     _selectedPosName = widget.preselectedPosName;
@@ -119,17 +118,9 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
       // 1. جلب شبكات المزود المتاحة
       if (Get.isRegistered<GetNetworksUseCase>()) {
         _networks = await Get.find<GetNetworksUseCase>()();
-        if (_selectedNetworkId == null) {
-          if (_networks.length == 1) {
-            _selectedNetworkId = _networks.first.networkId;
-            _networkIdNotifier.value = _selectedNetworkId;
-          } else if (_networks.isNotEmpty) {
-            final match = _networks.firstWhereOrNull(
-              (n) => n.networkId == SessionService.to.activeNetworkId,
-            );
-            _selectedNetworkId = match?.networkId ?? _networks.first.networkId;
-            _networkIdNotifier.value = _selectedNetworkId;
-          }
+        if (_selectedNetworkId == null && _networks.isNotEmpty) {
+          _selectedNetworkId = _networks.first.networkId;
+          _networkIdNotifier.value = _selectedNetworkId;
         }
       }
 

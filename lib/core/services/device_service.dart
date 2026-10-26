@@ -22,7 +22,8 @@ class DeviceService extends GetxService {
 
   static final DeviceService instance = DeviceService._();
 
-  static DeviceService get to => Get.find<DeviceService>();
+  static DeviceService get to =>
+      Get.isRegistered<DeviceService>() ? Get.find<DeviceService>() : instance;
 
   final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
 

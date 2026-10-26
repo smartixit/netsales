@@ -20,17 +20,12 @@ class SessionService extends GetxService {
 
   static SessionService instance = SessionService._();
 
-  static SessionService get to => Get.find<SessionService>();
+  static SessionService get to =>
+      Get.isRegistered<SessionService>() ? Get.find<SessionService>() : instance;
 
   final Rxn<UserModel> _user = Rxn<UserModel>();
   final Rxn<UserSessionModel> _session = Rxn<UserSessionModel>();
   final RxBool _isAuthenticated = false.obs;
-
-  // سياق الكيان التشغيلي الفعال (شبكة أو نقطة بيع)
-  final RxnInt _activeNetworkId = RxnInt();
-  final RxnString _activeNetworkName = RxnString();
-  final RxnInt _activePosId = RxnInt();
-  final RxnString _activePosName = RxnString();
 
   /// بيانات المستخدم الحالي المسجل
   UserModel? get currentUser => _user.value;
@@ -44,18 +39,6 @@ class SessionService extends GetxService {
 
   /// حالة المصادقة النشطة
   bool get isAuthenticated => _isAuthenticated.value;
-
-  /// معرف الشبكة النشطة الفعال
-  int? get activeNetworkId => _activeNetworkId.value;
-
-  /// اسم الشبكة النشطة الفعال
-  String? get activeNetworkName => _activeNetworkName.value;
-
-  /// معرف نقطة البيع النشطة الفعال
-  int? get activePosId => _activePosId.value;
-
-  /// اسم نقطة البيع النشطة الفعال
-  String? get activePosName => _activePosName.value;
 
   /// التحقق مما إذا كان المستخدم مجبراً على تغيير كلمة المرور قبل الوصول للوحة التحكم
   bool get mustChangePassword => _user.value?.mustChangePassword ?? false;
@@ -77,13 +60,6 @@ class SessionService extends GetxService {
         deviceUuid: DeviceService.instance.deviceUuid,
       );
       _isAuthenticated.value = true;
-
-      // استعادة سياق الكيان النشط للمستخدم
-      _activeNetworkId.value = storage.getInt(StorageKeys.activeNetworkId);
-      _activeNetworkName.value =
-          storage.getString(StorageKeys.activeNetworkName);
-      _activePosId.value = storage.getInt(StorageKeys.activePosId);
-      _activePosName.value = storage.getString(StorageKeys.activePosName);
 
       // استعادة الصلاحيات المخزنة
       final cachedPermissions = storage.getStringList(
@@ -185,32 +161,6 @@ class SessionService extends GetxService {
     }
   }
 
-  /// تحديث وتخزين سياق الكيان النشط للمستخدم (شبكة أو نقطة بيع)
-  Future<void> updateActiveTenantContext({
-    int? networkId,
-    String? networkName,
-    int? posId,
-    String? posName,
-  }) async {
-    final storage = StorageService.instance;
-    if (networkId != null) {
-      _activeNetworkId.value = networkId;
-      await storage.setInt(StorageKeys.activeNetworkId, networkId);
-    }
-    if (networkName != null) {
-      _activeNetworkName.value = networkName;
-      await storage.setString(StorageKeys.activeNetworkName, networkName);
-    }
-    if (posId != null) {
-      _activePosId.value = posId;
-      await storage.setInt(StorageKeys.activePosId, posId);
-    }
-    if (posName != null) {
-      _activePosName.value = posName;
-      await storage.setString(StorageKeys.activePosName, posName);
-    }
-  }
-
   /// إنهاء الجلسة بالكامل وتصفير الحالات والتخزين
   Future<void> terminateSession() async {
     final storage = StorageService.instance;
@@ -218,19 +168,11 @@ class SessionService extends GetxService {
     await storage.remove(StorageKeys.userId);
     await storage.remove(StorageKeys.userData);
     await storage.remove(StorageKeys.permissionsStorage);
-    await storage.remove(StorageKeys.activeNetworkId);
-    await storage.remove(StorageKeys.activeNetworkName);
-    await storage.remove(StorageKeys.activePosId);
-    await storage.remove(StorageKeys.activePosName);
     await storage.setLoggedIn(false);
 
     _user.value = null;
     _session.value = null;
     _isAuthenticated.value = false;
-    _activeNetworkId.value = null;
-    _activeNetworkName.value = null;
-    _activePosId.value = null;
-    _activePosName.value = null;
 
     if (Get.isRegistered<PermissionService>()) {
       PermissionService.to.clear();

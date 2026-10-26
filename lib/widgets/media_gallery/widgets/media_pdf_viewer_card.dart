@@ -10,7 +10,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/media_gallery/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:printing/printing.dart';
 

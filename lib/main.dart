@@ -19,7 +19,6 @@ import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
-import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
@@ -147,18 +146,11 @@ void main() async {
   );
   InternetConnectionService.instance.showInternetConnectionState();
 
+  Get.put<PermissionService>(PermissionService.instance, permanent: true);
   await SessionService.instance.init();
   Get.put<SessionService>(SessionService.instance, permanent: true);
-  Get.put<PermissionService>(PermissionService.instance, permanent: true);
 
-  // 4. تهيئة خدمة إعدادات النظام العامة وقنوات الدعم
-  await PublicSettingsService.instance.init();
-  Get.put<PublicSettingsService>(
-    PublicSettingsService.instance,
-    permanent: true,
-  );
-
-  // 5. تهيئة خدمة الإشعارات المركزية وإشعارات الدفع (FCM & Local Notifications)
+  // 4. تهيئة خدمة الإشعارات المركزية وإشعارات الدفع (FCM & Local Notifications)
   await PushNotificationService.instance.init();
   Get.put<PushNotificationService>(
     PushNotificationService.instance,
@@ -177,21 +169,6 @@ void main() async {
 
   // Edge-to-Edge (Android 15+ standard) — Guaranteed modern system bars
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
-  // // 6. تهيئة خدمة الروابط الموحدة وربطها بالتنبيهات المركزية (UrlLauncherService)
-  // UrlLauncherService.configure(
-  //   UrlLauncherConfig(
-  //     onMessage: (message, result) {
-  //       if (!result.isSuccess && Get.context != null) {
-  //         CustomSnackbar.show(
-  //           type: SnackType.error,
-  //           title: 'تنبيه',
-  //           message: message,
-  //         );
-  //       }
-  //     },
-  //   ),
-  // );
 
   // 7. تشغيل الواجهة الرئيسية للتطبيق
   runApp(const MyApp());

@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
-import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/home/domain/entities/dashboard_overview_entity.dart';
 import 'package:netsales/features/home/domain/usecases/get_dashboard_overview_use_case.dart';
 
@@ -53,16 +52,6 @@ class DashboardController extends GetxController {
         refresh: isRefresh,
       );
       overview.value = result;
-
-      // مزامنة سياق الكيان النشط في SessionService
-      if (result.context.networkId != null || result.context.posId != null) {
-        SessionService.to.updateActiveTenantContext(
-          networkId: result.context.networkId,
-          networkName: result.context.networkName,
-          posId: result.context.posId,
-          posName: result.context.posName,
-        );
-      }
     } catch (e) {
       errorMessage.value = AppException.sanitizeMessage(e);
     } finally {
