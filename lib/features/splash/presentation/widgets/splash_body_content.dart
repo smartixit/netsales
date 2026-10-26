@@ -33,7 +33,9 @@ class SplashBodyContent extends StatelessWidget {
           Text(
                 AppConstants.appName,
                 style: AppTypography.headlineMedium.copyWith(
-                  color: colors.onPrimary,
+                  color: controller.isDarkMode
+                      ? colors.surfaceVariant
+                      : colors.surfaceVariant,
                   fontWeight: FontWeight.w700,
                 ),
                 textAlign: TextAlign.center,
@@ -54,7 +56,9 @@ class SplashBodyContent extends StatelessWidget {
                 child: Text(
                   'المنظومة الذكية لإدارة مبيعات الشبكات ونقاط البيع',
                   style: AppTypography.bodyMedium.copyWith(
-                    color: colors.surfaceVariant,
+                    color: controller.isDarkMode
+                        ? colors.surfaceDim
+                        : colors.surfaceDim,
                   ),
                   textAlign: TextAlign.center,
                 ),

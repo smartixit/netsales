@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/features/splash/domain/usecases/determine_boot_destination_use_case.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -13,17 +14,17 @@ class SplashController extends GetxController {
   SplashController(this._determineBootDestinationUseCase);
 
   /// مدة ظهور شاشة الإقلاع الأدنى لضمان استمتاع المستخدم بالهوية البصرية
-  static const Duration minSplashDuration = Duration(seconds: 4);
+  static const Duration minSplashDuration = Duration(seconds: 5);
 
   bool _isDisposed = false;
-
-  late String appName;
 
   @override
   void onInit() {
     super.onInit();
     _bootstrapApp();
   }
+
+  bool get isDarkMode => ThemeService.to.isDarkMode;
 
   Future<void> _bootstrapApp() async {
     try {

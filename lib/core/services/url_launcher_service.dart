@@ -26,7 +26,7 @@ enum UrlLaunchType {
 /// تفضيل تطبيق الخرائط والملاحة الجغرافية (MapPlatformPreference)
 /// ============================================================================
 enum MapPlatformPreference {
-  /// الاختيار التلقائي الأنسب للمنصة (Google Maps على Android/Web/Desktop، و Apple Maps على iOS/macOS)
+  /// الاختيار التلقائي الأنسب للنظام (Google Maps على Android/Web/Desktop، و Apple Maps على iOS/macOS)
   auto,
 
   /// خرائط جوجل (Google Maps)
@@ -181,7 +181,7 @@ class UrlLauncherService {
   /// [url]: الرابط المراد فتحه (مثال: 'https://smartix.net' أو 'google.com').
   /// [mode]: نمط الفتح (داخل التطبيق عبر Custom Tabs أو خارجي في المتصفح).
   /// [headers]: ترويسات HTTP إضافية عند الحاجة.
-  /// [webWindowName]: اسم نافذة المتصفح على منصة الويب ('_blank', '_self').
+  /// [webWindowName]: اسم نافذة المتصفح على نظام الويب ('_blank', '_self').
   static Future<UrlLaunchResult> openUrl(
     String url, {
     LaunchMode? mode,
@@ -407,7 +407,8 @@ class UrlLauncherService {
         type: UrlLaunchType.email,
         mode: LaunchMode.externalApplication,
         fallbackText: cleanTo,
-        fallbackMessage: 'تعذر فتح تطبيق البريد. تم نسخ عنوان البريد إلى الحافظة.',
+        fallbackMessage:
+            'تعذر فتح تطبيق البريد. تم نسخ عنوان البريد إلى الحافظة.',
       );
     } catch (e, stackTrace) {
       return _handleUnexpectedError(
@@ -437,7 +438,9 @@ class UrlLauncherService {
   }) async {
     try {
       final cleanLabel = label?.trim() ?? '';
-      final encodedLabel = cleanLabel.isNotEmpty ? Uri.encodeComponent(cleanLabel) : '';
+      final encodedLabel = cleanLabel.isNotEmpty
+          ? Uri.encodeComponent(cleanLabel)
+          : '';
 
       Uri uri;
 
@@ -451,11 +454,15 @@ class UrlLauncherService {
           break;
 
         case MapPlatformPreference.waze:
-          uri = Uri.parse('https://waze.com/ul?ll=$latitude,$longitude&navigate=yes');
+          uri = Uri.parse(
+            'https://waze.com/ul?ll=$latitude,$longitude&navigate=yes',
+          );
           break;
 
         case MapPlatformPreference.openStreetMap:
-          uri = Uri.parse('https://www.openstreetmap.org/?mlat=$latitude&mlon=$longitude#map=16/$latitude/$longitude');
+          uri = Uri.parse(
+            'https://www.openstreetmap.org/?mlat=$latitude&mlon=$longitude#map=16/$latitude/$longitude',
+          );
           break;
 
         case MapPlatformPreference.googleMaps:
@@ -475,7 +482,9 @@ class UrlLauncherService {
                   : 'https://maps.apple.com/?ll=$latitude,$longitude',
             );
           } else {
-            uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
+            uri = Uri.parse(
+              'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
+            );
           }
           break;
       }
@@ -485,7 +494,8 @@ class UrlLauncherService {
         type: UrlLaunchType.mapCoordinates,
         mode: LaunchMode.externalApplication,
         fallbackText: '$latitude, $longitude',
-        fallbackMessage: 'تعذر فتح تطبيق الخرائط. تم نسخ الإحداثيات إلى الحافظة.',
+        fallbackMessage:
+            'تعذر فتح تطبيق الخرائط. تم نسخ الإحداثيات إلى الحافظة.',
       );
     } catch (e, stackTrace) {
       return _handleUnexpectedError(
@@ -516,7 +526,9 @@ class UrlLauncherService {
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
         uri = Uri.parse('https://maps.apple.com/?q=$encodedQuery');
       } else {
-        uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$encodedQuery');
+        uri = Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=$encodedQuery',
+        );
       }
 
       return await _launchInternal(
@@ -634,7 +646,7 @@ class UrlLauncherService {
 
   /// فتح حساب أو صفحة على منصات التواصل الاجتماعي المختلفة
   ///
-  /// [platform]: نوع المنصة (Facebook, Instagram, X/Twitter, LinkedIn, YouTube, TikTok, GitHub).
+  /// [platform]: نوع النظام (Facebook, Instagram, X/Twitter, LinkedIn, YouTube, TikTok, GitHub).
   /// [usernameOrId]: اسم الحساب أو المعرف أو مسار الصفحة.
   static Future<UrlLaunchResult> openSocialProfile({
     required SocialNetwork platform,
@@ -706,7 +718,7 @@ class UrlLauncherService {
   // 6. متاجر التطبيقات وتحديثات النظام (App Stores & Updates)
   // ===========================================================================
 
-  /// فتح صفحة التطبيق في متجر التطبيقات الرسمي بحسب المنصة الحالية
+  /// فتح صفحة التطبيق في متجر التطبيقات الرسمي بحسب النظام الحالية
   ///
   /// يدعم تلقائياً كلاً من:
   /// - Google Play Store (Android)
@@ -736,10 +748,14 @@ class UrlLauncherService {
             try {
               final canOpenMarket = await canLaunchUrl(uri);
               if (!canOpenMarket) {
-                uri = Uri.parse('https://play.google.com/store/apps/details?id=$androidPackageName');
+                uri = Uri.parse(
+                  'https://play.google.com/store/apps/details?id=$androidPackageName',
+                );
               }
             } catch (_) {
-              uri = Uri.parse('https://play.google.com/store/apps/details?id=$androidPackageName');
+              uri = Uri.parse(
+                'https://play.google.com/store/apps/details?id=$androidPackageName',
+              );
             }
           }
         } else if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -750,7 +766,9 @@ class UrlLauncherService {
         } else if (defaultTargetPlatform == TargetPlatform.windows) {
           storeName = 'Microsoft Store';
           if (windowsStoreId != null && windowsStoreId.isNotEmpty) {
-            uri = Uri.parse('ms-windows-store://pdp/?ProductId=$windowsStoreId');
+            uri = Uri.parse(
+              'ms-windows-store://pdp/?ProductId=$windowsStoreId',
+            );
           }
         } else if (defaultTargetPlatform == TargetPlatform.macOS) {
           storeName = 'Mac App Store';
@@ -760,15 +778,19 @@ class UrlLauncherService {
         }
       }
 
-      // إذا لم يتحدد رابط بناءً على المنصة، نعتمد رابط جوجل بلاي كرابط افتراضي للويب
-      if (uri == null && androidPackageName != null && androidPackageName.isNotEmpty) {
-        uri = Uri.parse('https://play.google.com/store/apps/details?id=$androidPackageName');
+      // إذا لم يتحدد رابط بناءً على النظام، نعتمد رابط جوجل بلاي كرابط افتراضي للويب
+      if (uri == null &&
+          androidPackageName != null &&
+          androidPackageName.isNotEmpty) {
+        uri = Uri.parse(
+          'https://play.google.com/store/apps/details?id=$androidPackageName',
+        );
       }
 
       if (uri == null) {
         return _fail(
           type: UrlLaunchType.appStore,
-          message: 'لم يتم توفير معرف المتجر المناسب للمنصة الحالية.',
+          message: 'لم يتم توفير معرف المتجر المناسب للنظام الحالية.',
         );
       }
 
@@ -823,14 +845,18 @@ class UrlLauncherService {
         }
         final segments = cleanPath.split('/');
         cleanHost = segments.first;
-        cleanPath = segments.length > 1 ? '/${segments.sublist(1).join('/')}' : '';
+        cleanPath = segments.length > 1
+            ? '/${segments.sublist(1).join('/')}'
+            : '';
       }
 
       final uri = Uri(
         scheme: cleanScheme,
         host: cleanHost,
         path: cleanPath,
-        queryParameters: queryParameters?.map((k, v) => MapEntry(k, v.toString())),
+        queryParameters: queryParameters?.map(
+          (k, v) => MapEntry(k, v.toString()),
+        ),
       );
 
       return await _launchInternal(
@@ -853,7 +879,10 @@ class UrlLauncherService {
   // ===========================================================================
 
   /// نسخ النص أو الرابط إلى حافظة الجهاز مع توفير تأكيد
-  static Future<bool> copyToClipboard(String text, {String? confirmationMessage}) async {
+  static Future<bool> copyToClipboard(
+    String text, {
+    String? confirmationMessage,
+  }) async {
     try {
       await Clipboard.setData(ClipboardData(text: text));
       if (instance._config.enableLogging) {
@@ -894,7 +923,9 @@ class UrlLauncherService {
       final canLaunch = await canLaunchUrl(uri);
       if (!canLaunch) {
         if (instance._config.enableLogging) {
-          developer.log('[UrlLauncherService] canLaunchUrl returned false for $uri');
+          developer.log(
+            '[UrlLauncherService] canLaunchUrl returned false for $uri',
+          );
         }
 
         // في حال تعذر الفتح وكان هناك نص بديل وخاصية النسخ مفعلة، نقوم بنسخه للحافظة
@@ -904,7 +935,9 @@ class UrlLauncherService {
           await copyToClipboard(fallbackText);
         }
 
-        final failureMessage = fallbackMessage ?? 'لا يتوفر تطبيق متوافق لفتح هذا الرابط على جهازك.';
+        final failureMessage =
+            fallbackMessage ??
+            'لا يتوفر تطبيق متوافق لفتح هذا الرابط على جهازك.';
         final result = UrlLaunchResult.failure(
           type: type,
           uri: uri,
@@ -979,7 +1012,8 @@ class UrlLauncherService {
       await copyToClipboard(fallbackText.trim());
     }
 
-    final message = fallbackMessage ?? 'حدث خطأ غير متوقع أثناء معالجة أو تشغيل الرابط.';
+    final message =
+        fallbackMessage ?? 'حدث خطأ غير متوقع أثناء معالجة أو تشغيل الرابط.';
     final result = UrlLaunchResult.failure(
       type: type,
       message: message,

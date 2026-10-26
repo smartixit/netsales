@@ -158,6 +158,7 @@ class RegisterNetworkController extends GetxController {
 
       await CustomAnimationOverlay.hide();
 
+      SoundService.instance.playSound(soundPath: 'sounds/netsales_success.wav');
       // إظهار حوار التأكيد والاعتماد بحالة PENDING مع خيار الدعم الهادئ والانتقال بعده لصفحة تسجيل الدخول
       await CustomDialog.showPending(
         title: 'تم استلام طلبكم بنجاح',
@@ -174,7 +175,6 @@ class RegisterNetworkController extends GetxController {
         onConfirm: () => Get.offAllNamed(AppRoutes.login),
       );
 
-      SoundService.instance.playSound(soundPath: 'sounds/netsales_success.wav');
 
       if (Get.currentRoute != AppRoutes.login) {
         Get.offAllNamed(AppRoutes.login);

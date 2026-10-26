@@ -15,7 +15,7 @@ class OnboardingLocalDataSourceImpl implements OnboardingLocalDataSource {
         badge: 'كفاءة تشغيلية',
         title: 'أدِر مبيعات شبكتك بذكاء واحترافية',
         description:
-            'منصة مركزية متطورة تمنحك السيطرة المطلقة على باقات الخدمة، تسعير المنتجات، ومتابعة مؤشرات أداء المبيعات لحظة بلحظة.',
+            'نظام مركزية متطورة تمنحك السيطرة المطلقة على باقات الخدمة، تسعير المنتجات، ومتابعة مؤشرات أداء المبيعات لحظة بلحظة.',
         icon: Icons.hub_rounded,
         animationAsset: 'assets/animations/onboarding_network.json',
       ),

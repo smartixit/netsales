@@ -16,7 +16,7 @@ import 'package:netsales/core/utils/idempotency_helper.dart';
 ///    - إلغاء التثبيت وإعادة التثبيت (Uninstall & Reinstall).
 ///    - عبر iOS Keychain في هواتف آبل، و MediaDrm/Android ID في أجهزة أندرويد.
 /// 2. صياغة اسم مقروء ومعبّر للجهاز (مثل: Samsung Galaxy S24 Ultra (Android 14)).
-/// 3. تحديد نوع المنصة المعتمد في الواجهة الخلفية (ANDROID, IOS, WINDOWS, MAC, LINUX, WEB).
+/// 3. تحديد نوع النظام المعتمد في الواجهة الخلفية (ANDROID, IOS, WINDOWS, MAC, LINUX, WEB).
 class DeviceService extends GetxService {
   DeviceService._();
 
@@ -108,8 +108,9 @@ class DeviceService extends GetxService {
     _brand = android.brand.isNotEmpty ? android.brand : android.manufacturer;
     _model = android.model;
     _osVersion = 'Android ${android.version.release}';
-    _hardwareFingerprint =
-        android.fingerprint.isNotEmpty ? android.fingerprint : android.id;
+    _hardwareFingerprint = android.fingerprint.isNotEmpty
+        ? android.fingerprint
+        : android.id;
 
     final formattedBrand = _capitalize(_brand);
     _deviceName = '$formattedBrand $_model ($_osVersion)'.trim();
@@ -164,7 +165,7 @@ class DeviceService extends GetxService {
     _deviceName = linux.prettyName.isNotEmpty ? linux.prettyName : linux.name;
   }
 
-  /// وضع الاحتياط في حال تعذر الوصول لمنفذ المنصة
+  /// وضع الاحتياط في حال تعذر الوصول لمنفذ النظام
   void _fallbackDeviceInfo() {
     _deviceType = 'UNKNOWN';
     _brand = 'Generic';

@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/services/sound_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_motion.dart';
@@ -269,9 +268,6 @@ class CustomDialog extends StatelessWidget {
     Widget? customHeader,
     String? customAnimationPath,
   }) async {
-    if (type == DialogType.success) {
-      SoundService.instance.playSound(soundPath: 'sounds/netsales_success.wav');
-    }
     return Get.generalDialog<bool>(
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(alpha: 0.5),

@@ -72,7 +72,7 @@ class ContactPickerService {
   static final FlutterNativeContactPicker _picker =
       FlutterNativeContactPicker();
 
-  /// يتحقق مما إذا كانت منصة التشغيل تدعم منتقي جهات الاتصال الأصلي
+  /// يتحقق مما إذا كانت نظام التشغيل تدعم منتقي جهات الاتصال الأصلي
   static bool get isSupported => Platform.isAndroid || Platform.isIOS;
 
   /// يفتح منتقي جهات الاتصال الأصلي ويعيد النتيجة المطهّرة
@@ -87,7 +87,8 @@ class ContactPickerService {
         return null;
       }
 
-      final rawPhone = contact.selectedPhoneNumber ??
+      final rawPhone =
+          contact.selectedPhoneNumber ??
           (contact.phoneNumbers != null && contact.phoneNumbers!.isNotEmpty
               ? contact.phoneNumbers!.first
               : null);

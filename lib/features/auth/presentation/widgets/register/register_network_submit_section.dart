@@ -37,7 +37,7 @@ class RegisterNetworkSubmitSection extends GetView<RegisterNetworkController> {
 
             // 2. إشعار الموافقة على الشروط والخصوصية
             Text(
-              'بالضغط على "إرسال طلب التسجيل"، أنت توافق على شروط الخدمة وسياسة الخصوصية الخاصة بمنصة NetSales.',
+              'بالضغط على "إرسال طلب التسجيل"، أنت توافق على شروط الخدمة وسياسة الخصوصية الخاصة بنظام NetSales.',
               style: AppTypography.labelSmall.copyWith(
                 color: colors.onSurfaceVariant.withValues(alpha: 0.75),
                 height: 1.4,
