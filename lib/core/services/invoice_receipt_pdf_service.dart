@@ -7,6 +7,7 @@ import 'package:printing/printing.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
+import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// أنماط الطباعة المعتمدة للفواتير والسندات المالية
@@ -115,19 +116,19 @@ class InvoiceReceiptPdfService {
     }
   }
 
-  /// مشاركة ملف PDF لفاتورة المبيعات عبر تطبيقات النظام
-  Future<void> shareSaleInvoice(
+  /// مشاركة ملف PDF لفاتورة المبيعات عبر تطبيقات النظام مع اعتماد FileExportService
+  Future<bool> shareSaleInvoice(
     BuildContext context,
     SaleInvoiceEntity invoice, {
     InvoicePrintFormat format = InvoicePrintFormat.standardA4,
   }) async {
     try {
       final bytes = await generateSaleInvoicePdf(invoice, format: format);
-      final filename = 'NetSales_INV_${invoice.invoiceUuid}.pdf';
-
-      await Printing.sharePdf(
+      return await FileExportService.instance.shareBytes(
         bytes: bytes,
-        filename: filename,
+        fileName: 'فاتورة-مبيعات-#${invoice.invoiceUuid}',
+        extension: 'pdf',
+        namingStrategy: FileNamingStrategy.invoice,
       );
     } catch (e) {
       CustomSnackbar.show(
@@ -135,7 +136,23 @@ class InvoiceReceiptPdfService {
         message: 'حدث خطأ أثناء تصدير ومشاركة السند: $e',
         type: SnackType.error,
       );
+      return false;
     }
+  }
+
+  /// حفظ فاتورة المبيعات في مجلد التنزيلات بالجهاز عبر FileExportService
+  Future<FileExportResult> saveSaleInvoiceLocally(
+    BuildContext context,
+    SaleInvoiceEntity invoice, {
+    InvoicePrintFormat format = InvoicePrintFormat.standardA4,
+  }) async {
+    final bytes = await generateSaleInvoicePdf(invoice, format: format);
+    return await FileExportService.instance.saveFile(
+      bytes: bytes,
+      fileName: 'فاتورة-مبيعات-#${invoice.invoiceUuid}',
+      extension: 'pdf',
+      namingStrategy: FileNamingStrategy.invoice,
+    );
   }
 
   // ===========================================================================
@@ -204,19 +221,19 @@ class InvoiceReceiptPdfService {
     }
   }
 
-  /// مشاركة ملف PDF لطلب التوريد
-  Future<void> shareVoucherRequest(
+  /// مشاركة ملف PDF لطلب التوريد عبر تطبيقات النظام مع اعتماد FileExportService
+  Future<bool> shareVoucherRequest(
     BuildContext context,
     VoucherRequestEntity request, {
     InvoicePrintFormat format = InvoicePrintFormat.standardA4,
   }) async {
     try {
       final bytes = await generateVoucherRequestPdf(request, format: format);
-      final filename = 'NetSales_REQ_${request.requestUuid}.pdf';
-
-      await Printing.sharePdf(
+      return await FileExportService.instance.shareBytes(
         bytes: bytes,
-        filename: filename,
+        fileName: 'طلب-توريد-#${request.requestUuid}',
+        extension: 'pdf',
+        namingStrategy: FileNamingStrategy.invoice,
       );
     } catch (e) {
       CustomSnackbar.show(
@@ -224,7 +241,23 @@ class InvoiceReceiptPdfService {
         message: 'حدث خطأ أثناء تصدير ومشاركة الطلب: $e',
         type: SnackType.error,
       );
+      return false;
     }
+  }
+
+  /// حفظ طلب التوريد في مجلد التنزيلات بالجهاز عبر FileExportService
+  Future<FileExportResult> saveVoucherRequestLocally(
+    BuildContext context,
+    VoucherRequestEntity request, {
+    InvoicePrintFormat format = InvoicePrintFormat.standardA4,
+  }) async {
+    final bytes = await generateVoucherRequestPdf(request, format: format);
+    return await FileExportService.instance.saveFile(
+      bytes: bytes,
+      fileName: 'طلب-توريد-#${request.requestUuid}',
+      extension: 'pdf',
+      namingStrategy: FileNamingStrategy.invoice,
+    );
   }
 
   // ===========================================================================
@@ -416,7 +449,7 @@ class InvoiceReceiptPdfService {
                     ),
                     pw.SizedBox(height: 2),
                     pw.Text(
-                      'رقم المعاملة: #${invoice.invoiceUuid}',
+                      'كود المعاملة: #${invoice.invoiceUuid}',
                       style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
                     ),
                   ],

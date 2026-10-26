@@ -108,6 +108,15 @@ class _InvoicePrintFormatSheetState extends State<InvoicePrintFormatSheet> {
         ),
 
         AppSpacing.vSm,
+
+        // 4. خيار حفظ المستند محلياً في مجلد التنزيلات
+        CustomButton.text(
+          text: 'حفظ نسخة في مجلد التنزيلات بالجهاز',
+          icon: Icons.download_rounded,
+          onPressed: _handleSave,
+        ),
+
+        AppSpacing.vSm,
       ],
     );
   }
@@ -150,6 +159,31 @@ class _InvoicePrintFormatSheetState extends State<InvoicePrintFormatSheet> {
         );
       } else if (widget.request != null) {
         await InvoiceReceiptPdfService.instance.shareVoucherRequest(
+          context,
+          widget.request!,
+          format: _selectedFormat,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
+    }
+  }
+
+  Future<void> _handleSave() async {
+    setState(() => _isProcessing = true);
+    Get.back();
+
+    try {
+      if (widget.invoice != null) {
+        await InvoiceReceiptPdfService.instance.saveSaleInvoiceLocally(
+          context,
+          widget.invoice!,
+          format: _selectedFormat,
+        );
+      } else if (widget.request != null) {
+        await InvoiceReceiptPdfService.instance.saveVoucherRequestLocally(
           context,
           widget.request!,
           format: _selectedFormat,
