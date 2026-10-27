@@ -354,20 +354,8 @@ class CustomBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final mediaQuery = MediaQuery.of(context);
-    final bottomInset = mediaQuery.viewInsets.bottom;
-    final systemBottomPadding = mediaQuery.padding.bottom;
-    final screenHeight = mediaQuery.size.height;
-
-    // أقصى ارتفاع متاح للنافذة:
-    // عند إغلاق الكيبورد: نسبة مئوية من ارتفاع الشاشة (الافتراضي 88%)
-    // عند فتح الكيبورد: كامل الارتفاع المتاح مع ترك هامش علوي بسيط لشريط الحالة
-    final effectiveMaxHeight = bottomInset > 0
-        ? screenHeight * 0.95
-        : screenHeight * (maxHeightFactor ?? 0.88);
-
-    // المسافة السفلية: نراعي شريط التنقل فقط عند إغلاق الكيبورد
-    // (لأن الكيبورد يعيد تحجيم نافذة التطبيق تلقائياً عبر adjustResize)
-    final bottomPadding = bottomInset > 0 ? 0.0 : systemBottomPadding;
+    final effectiveMaxHeight =
+        mediaQuery.size.height * (maxHeightFactor ?? 0.88);
 
     return Container(
       constraints: BoxConstraints(maxHeight: effectiveMaxHeight),
@@ -378,10 +366,9 @@ class CustomBottomSheet extends StatelessWidget {
         ),
         boxShadow: AppElevation.level5(context),
       ),
-      padding: EdgeInsets.only(bottom: bottomPadding),
       child: SafeArea(
         top: false,
-        bottom: false,
+        bottom: true,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -68,7 +68,6 @@ class VoucherRequestsFeed extends StatelessWidget {
       // تجميع الطلبات زمنياً
       final groups = _groupRequests(ctrl.requests);
       final groupKeys = groups.keys.toList();
-      final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
       // 4. السجل المالي المصنف زمنياً مع السحب للتحديث
       return RefreshIndicator(
@@ -77,7 +76,7 @@ class VoucherRequestsFeed extends StatelessWidget {
         child: ListView.separated(
           padding: EdgeInsets.only(
             top: AppSpacing.xs,
-            bottom: isKeyboardOpen ? 20.h : 130.h,
+            bottom: 130.h,
           ),
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),

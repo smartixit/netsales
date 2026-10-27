@@ -62,17 +62,13 @@ class SaleInvoicesFeed extends StatelessWidget {
       // تجميع الفواتير زمنياً
       final groups = _groupInvoices(controller.invoices);
       final groupKeys = groups.keys.toList();
-      final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
       // 4. السجل المالي المصنف زمنياً مع السحب للتحديث
       return RefreshIndicator(
         color: colors.primary,
         onRefresh: () => controller.loadInvoices(isRefresh: true),
         child: ListView.separated(
-          padding: EdgeInsets.only(
-            top: AppSpacing.xs,
-            bottom: isKeyboardOpen ? 20.h : 130.h,
-          ),
+          padding: EdgeInsets.only(top: AppSpacing.xs, bottom: 130.h),
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
@@ -119,10 +115,11 @@ class SaleInvoicesFeed extends StatelessWidget {
                     () => SaleInvoiceLedgerTile(
                       key: ValueKey(invoice.invoiceId),
                       invoice: invoice,
-                      isExpanded: controller.expandedInvoiceId.value ==
+                      isExpanded:
+                          controller.expandedInvoiceId.value ==
                           invoice.invoiceId,
-                      onToggleExpand: () => controller
-                          .toggleInvoiceExpansion(invoice.invoiceId),
+                      onToggleExpand: () =>
+                          controller.toggleInvoiceExpansion(invoice.invoiceId),
                       onTap: () => Get.toNamed(
                         AppRoutes.saleInvoiceDetails,
                         arguments: invoice.invoiceId,
