@@ -154,20 +154,14 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
     // جلب باقات الشبكة
     if (Get.isRegistered<GetVoucherPackagesUseCase>()) {
       final pkgUseCase = Get.find<GetVoucherPackagesUseCase>();
-      _packages = await pkgUseCase(
-        networkId: netId,
-        status: true,
-      );
+      _packages = await pkgUseCase(networkId: netId, status: true);
     }
 
     // جلب نقاط البيع المرتبطة بالشبكة إذا لم تكن محددة مسبقاً
     if (_selectedPosId == null &&
         Get.isRegistered<GetNetworkPosListUseCase>()) {
       final posUseCase = Get.find<GetNetworkPosListUseCase>();
-      _linkedPosList = await posUseCase(
-        networkId: netId,
-        status: true,
-      );
+      _linkedPosList = await posUseCase(networkId: netId, status: true);
       if (_linkedPosList.isNotEmpty) {
         _selectedPosId = _linkedPosList.first.posId;
         _posIdNotifier.value = _selectedPosId;
@@ -175,10 +169,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
       }
     } else if (Get.isRegistered<GetNetworkPosListUseCase>()) {
       final posUseCase = Get.find<GetNetworkPosListUseCase>();
-      _linkedPosList = await posUseCase(
-        networkId: netId,
-        status: true,
-      );
+      _linkedPosList = await posUseCase(networkId: netId, status: true);
     }
 
     if (mounted) {
@@ -233,10 +224,20 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
     });
   }
 
+  void _setExactQuantity(int packageId, int quantity) {
+    setState(() {
+      if (quantity > 0) {
+        _packageQuantities[packageId] = quantity;
+      } else {
+        _packageQuantities.remove(packageId);
+      }
+      _syncPaidAmount();
+    });
+  }
+
   void _syncPaidAmount() {
     if (_saleType == 'CASH') {
-      _paidAmountController.text =
-          AmountFormatter.formatValue(_totalNetAmount);
+      _paidAmountController.text = AmountFormatter.formatValue(_totalNetAmount);
     }
   }
 
@@ -365,10 +366,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
             itemSearchText: (id) =>
                 _networks
                     .cast<NetworkEntity?>()
-                    .firstWhere(
-                      (n) => n?.networkId == id,
-                      orElse: () => null,
-                    )
+                    .firstWhere((n) => n?.networkId == id, orElse: () => null)
                     ?.networkName ??
                 '',
             onChanged: _onNetworkChanged,
@@ -399,8 +397,9 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
             setState(() {
               _saleType = newType;
               if (newType == 'CASH') {
-                _paidAmountController.text =
-                    AmountFormatter.formatValue(_totalNetAmount);
+                _paidAmountController.text = AmountFormatter.formatValue(
+                  _totalNetAmount,
+                );
               } else {
                 _paidAmountController.clear();
               }
@@ -442,7 +441,9 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
                 Expanded(
                   child: Text(
                     _loadError,
-                    style: AppTypography.bodySmall.copyWith(color: colors.error),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.error,
+                    ),
                   ),
                 ),
               ],
@@ -506,6 +507,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
                 onDecrement: () => _decrementQuantity(pkg.packageId),
                 onAddPreset: (preset) =>
                     _addPresetQuantity(pkg.packageId, preset),
+                onSetQuantity: (qty) => _setExactQuantity(pkg.packageId, qty),
               );
             },
           ),
@@ -519,11 +521,13 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
             label: 'المبلغ المسدد نقداً الآن (إن وجد)',
             hint: '0.00',
             controller: _paidAmountController,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: const [AmountTextInputFormatter()],
-            prefixIcon:
-                Icon(Icons.paid_outlined, color: colors.primary, size: 20.r),
+            prefixIcon: Icon(
+              Icons.paid_outlined,
+              color: colors.primary,
+              size: 20.r,
+            ),
             onChanged: (_) => setState(() {}),
           ),
           AppSpacing.vMd,

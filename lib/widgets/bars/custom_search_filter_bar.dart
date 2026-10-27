@@ -110,7 +110,8 @@ class CustomSearchFilterBar<T> extends StatelessWidget {
                 Expanded(
                   child: CustomTextField(
                     controller: searchController,
-                    label: searchLabel ?? 'بحث...',
+                    label: searchLabel ?? '',
+                    isRequired: false,
                     hint: searchHint,
                     prefixIcon: Icon(
                       Icons.search_rounded,
@@ -118,23 +119,23 @@ class CustomSearchFilterBar<T> extends StatelessWidget {
                       size: 20.r,
                     ),
                     suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                            valueListenable: searchController,
-                            builder: (context, value, _) {
-                              if (value.text.isEmpty) return const SizedBox.shrink();
-                              return IconButton(
-                                icon: Icon(
-                                  Icons.close_rounded,
-                                  size: 18.r,
-                                  color: colors.onSurfaceVariant,
-                                ),
-                                onPressed: () {
-                                  searchController.clear();
-                                  onSearchClear?.call();
-                                  onSearchChanged?.call('');
-                                },
-                              );
-                            },
+                      valueListenable: searchController,
+                      builder: (context, value, _) {
+                        if (value.text.isEmpty) return const SizedBox.shrink();
+                        return IconButton(
+                          icon: Icon(
+                            Icons.close_rounded,
+                            size: 18.r,
+                            color: colors.onSurfaceVariant,
                           ),
+                          onPressed: () {
+                            searchController.clear();
+                            onSearchClear?.call();
+                            onSearchChanged?.call('');
+                          },
+                        );
+                      },
+                    ),
                     textInputAction: TextInputAction.search,
                     onChanged: onSearchChanged,
                     onFieldSubmitted: onSearchSubmitted,
@@ -145,12 +146,14 @@ class CustomSearchFilterBar<T> extends StatelessWidget {
                   CustomInteractiveBounce(
                     onTap: onFilterButtonPressed!,
                     child: Container(
-                      width: 48.r,
-                      height: 48.r,
+                      width: 42.r,
+                      height: 42.r,
                       decoration: BoxDecoration(
                         color: isFilterButtonActive
                             ? colors.primary.withValues(alpha: 0.15)
-                            : colors.surfaceContainerHighest.withValues(alpha: 0.4),
+                            : colors.surfaceContainerHighest.withValues(
+                                alpha: 0.4,
+                              ),
                         borderRadius: BorderRadius.circular(AppRadius.md),
                         border: Border.all(
                           color: isFilterButtonActive
@@ -171,10 +174,7 @@ class CustomSearchFilterBar<T> extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (trailing != null) ...[
-                  AppSpacing.hXs,
-                  trailing!,
-                ],
+                if (trailing != null) ...[AppSpacing.hXs, trailing!],
               ],
             ),
           ],
@@ -270,8 +270,8 @@ class _FilterChipWidget<T> extends StatelessWidget {
                   color: item.highlightBadge
                       ? colors.warning.withValues(alpha: 0.2)
                       : (isSelected
-                          ? colors.primary.withValues(alpha: 0.2)
-                          : colors.surfaceContainerHighest),
+                            ? colors.primary.withValues(alpha: 0.2)
+                            : colors.surfaceContainerHighest),
                   borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
                 child: Text(
@@ -280,7 +280,9 @@ class _FilterChipWidget<T> extends StatelessWidget {
                     fontSize: 10.sp,
                     color: item.highlightBadge
                         ? colors.warning
-                        : (isSelected ? colors.primary : colors.onSurfaceVariant),
+                        : (isSelected
+                              ? colors.primary
+                              : colors.onSurfaceVariant),
                     fontWeight: FontWeight.bold,
                   ),
                 ),

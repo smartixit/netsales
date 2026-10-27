@@ -59,7 +59,7 @@ class AppSpacing {
   static double get buttonPaddingV => 14.h;
 
   /// Input padding
-  static double get inputPadding => 16.w;
+  static double get inputPadding => 12.w;
 
   /// List item spacing
   static double get listItemSpacing => 12.w;

@@ -8,12 +8,15 @@ import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 /// A reusable skeleton placeholder for scrollable feeds and detail screens,
 /// composed of stacked [CustomSkeletonCard] placeholders.
 /// Respects reduced motion via [CustomSkeletonCard] -> [CustomSkeletonShimmer].
+/// Uses a scrollable [ListView] to prevent any layout overflow under constrained
+/// viewports (e.g. keyboard active or small screens).
 class CustomSkeletonFeed extends StatelessWidget {
   const CustomSkeletonFeed({
     super.key,
     this.itemCount = 3,
     this.cardHeight = 120,
     this.padding,
+    this.physics,
   });
 
   /// Number of skeleton cards to render.
@@ -25,24 +28,20 @@ class CustomSkeletonFeed extends StatelessWidget {
   /// Optional outer padding override.
   final EdgeInsetsGeometry? padding;
 
+  /// Optional scroll physics.
+  final ScrollPhysics? physics;
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding:
-          padding ??
-          EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenPadding,
-            vertical: AppSpacing.xl,
+    return ListView.separated(
+      padding: padding ?? EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      physics: physics ??
+          const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
           ),
-      child: Column(
-        children: List.generate(
-          itemCount,
-          (index) => Padding(
-            padding: EdgeInsets.only(bottom: AppSpacing.sm),
-            child: CustomSkeletonCard(height: cardHeight),
-          ),
-        ),
-      ),
+      itemCount: itemCount,
+      separatorBuilder: (_, __) => AppSpacing.vSm,
+      itemBuilder: (context, index) => CustomSkeletonCard(height: cardHeight),
     );
   }
 }

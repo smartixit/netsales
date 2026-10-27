@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
@@ -10,9 +11,11 @@ import 'package:netsales/features/operations/domain/entities/sale_invoice_entity
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
-/// عنصر صف فاتورة المبيعات في السجل المالي (SaleInvoiceLedgerTile)
+/// سند فاتورة المبيعات السيادي الفاخر (SaleInvoiceLedgerTile)
 /// ============================================================================
-/// يعرض حركة الفاتورة بسلاسة وتصميم تنفيذي مفتوح متوافق كلياً مع كافة أحجام الشاشات.
+/// يجسد فاتورة المبيعات كسند مالي سيادي فاخر (Sovereign Financial Bond)،
+/// يقسم البطاقة إلى ترويسة تنفيذية للهوية، وفاصل شعري ناعم، ورصيف مالي فخم،
+/// مع تدرج محيطي دقيق ومرونة استثنائية عبر كافة الشاشات دون أي تكدس أو شارات مبعثرة.
 class SaleInvoiceLedgerTile extends StatelessWidget {
   final SaleInvoiceEntity invoice;
   final VoidCallback onTap;
@@ -40,189 +43,299 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
         : (invoice.createdAt != null
               ? DateTime.tryParse(invoice.createdAt!)
               : null);
-    final timeStr = dt != null ? DateFormatter.time(dt) : '';
+    final dateStr = dt != null
+        ? DateFormatter.dateTime(dt)
+        : (invoice.invoiceDate ?? '');
 
-    final subtitleParts = [
-      invoice.invoiceUuid,
-      if (timeStr.isNotEmpty) timeStr,
-      if (invoice.totalCardsCount > 0) '${invoice.totalCardsCount} كرت',
-    ].join(' • ');
+    // اللون المحوري للحركة المالية (نقدي زمردي / آجل كهرماني)
+    final themeColor = isCash ? colors.primary : colors.warning;
 
     return CustomInteractiveBounce(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: 12.h,
+        margin: EdgeInsets.only(bottom: 10.h),
+        decoration: BoxDecoration(
+          borderRadius: AppRadius.lgRadius,
+          boxShadow: AppElevation.level1(context),
         ),
-        color: Colors.transparent,
-        child: Row(
-          children: [
-            // 1. أيقونة نقطة البيع بهالة لونية ناعمة وشارة نوع البيع
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  width: 38.r,
-                  height: 38.r,
-                  decoration: BoxDecoration(
-                    color: colors.primary.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.storefront_rounded,
-                    color: colors.primary,
-                    size: 19.r,
-                  ),
-                ),
-                Positioned(
-                  bottom: -1.r,
-                  right: -1.r,
-                  child: Container(
-                    width: 13.r,
-                    height: 13.r,
-                    decoration: BoxDecoration(
-                      color: isCash ? colors.primary : colors.warning,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: colors.surface, width: 2.r),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      isCash ? Icons.check_rounded : Icons.schedule_rounded,
-                      color: colors.surface,
-                      size: 7.r,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            AppSpacing.hSm,
-
-            // 2. الهوية والمعلومات (نقطة البيع + الشبكة + رقم المرجع)
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          invoice.posName ?? 'نقطة بيع #${invoice.posId}',
-                          style: AppTypography.titleSmall.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.w800,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      AppSpacing.hXs,
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6.w,
-                          vertical: 1.5.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isCash
-                              ? colors.primary.withValues(alpha: 0.09)
-                              : colors.warning.withValues(alpha: 0.12),
-                          borderRadius: AppRadius.fullRadius,
-                        ),
-                        child: Text(
-                          isCash ? 'نقدي' : 'آجل',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: isCash ? colors.primary : colors.warning,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 9.sp,
-                          ),
-                        ),
-                      ),
+        child: ClipRRect(
+          borderRadius: AppRadius.lgRadius,
+          child: Stack(
+            children: [
+              // وعاء البطاقة الأساسي مع التوهج المحيطي الناعم
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      themeColor.withValues(alpha: 0.05),
+                      colors.surface.withValues(alpha: 0.35),
+                      colors.surfaceContainerLowest,
                     ],
+                    stops: const [0.0, 0.40, 1.0],
                   ),
-                  AppSpacing.vXxs,
-                  Text(
-                    subtitleParts,
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant.withValues(alpha: 0.8),
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'monospace',
-                      fontSize: 9.5.sp,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  borderRadius: AppRadius.lgRadius,
+                  border: Border.all(
+                    color: colors.outlineVariant.withValues(alpha: 0.28),
+                    width: 1.w,
                   ),
-                ],
-              ),
-            ),
-
-            AppSpacing.hSm,
-
-            // 3. الجزء المالي (المبلغ الإجمالي + كبسولة السداد)
-            ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 100.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
+                ),
+                padding: EdgeInsetsDirectional.only(
+                  start: 16.w,
+                  end: 14.w,
+                  top: 12.h,
+                  bottom: 12.h,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 1. الترويسة التنفيذية: هوية نقطة البيع وشارة الحالة الموحدة
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          formattedTotal,
-                          style: AppTypography.titleSmall.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.2,
+                        // أيقونة نقطة البيع بوعاء سكويركل ذو توهج لوني
+                        Container(
+                          width: 38.r,
+                          height: 38.r,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                themeColor.withValues(alpha: 0.16),
+                                themeColor.withValues(alpha: 0.05),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(
+                              color: themeColor.withValues(alpha: 0.25),
+                              width: 0.8.w,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.storefront_rounded,
+                            color: themeColor,
+                            size: 19.r,
                           ),
                         ),
-                        AppSpacing.hXxs,
-                        Text(
-                          'ر.ي',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 10.sp,
+                        AppSpacing.hSm,
+                        // اسم نقطة البيع وبيانات السند المرجعية
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                invoice.posName ?? 'نقطة بيع #${invoice.posId}',
+                                style: AppTypography.titleSmall.copyWith(
+                                  color: colors.onSurface,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13.5.sp,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              AppSpacing.vXxs,
+                              Row(
+                                children: [
+                                  Flexible(
+                                    flex: 2,
+                                    child: Text(
+                                      '#${invoice.invoiceUuid}',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: colors.onSurfaceVariant,
+                                        fontWeight: FontWeight.w700,
+                                        fontFamily: 'monospace',
+                                        fontSize: 9.5.sp,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (dateStr.isNotEmpty) ...[
+                                    Text(
+                                      ' • ',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: colors.onSurfaceVariant
+                                            .withValues(alpha: 0.5),
+                                        fontSize: 9.5.sp,
+                                      ),
+                                    ),
+                                    Flexible(
+                                      flex: 3,
+                                      child: Text(
+                                        dateStr,
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: colors.onSurfaceVariant
+                                                  .withValues(alpha: 0.7),
+                                              fontSize: 9.5.sp,
+                                            ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        AppSpacing.hXs,
+                        // كبسولة حالة السداد الزجاجية الموحدة
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 4.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                (isFullyPaid ? colors.primary : colors.warning)
+                                    .withValues(alpha: 0.1),
+                            borderRadius: AppRadius.fullRadius,
+                            border: Border.all(
+                              color:
+                                  (isFullyPaid
+                                          ? colors.primary
+                                          : colors.warning)
+                                      .withValues(alpha: 0.25),
+                              width: 0.8.w,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 5.5.r,
+                                height: 5.5.r,
+                                decoration: BoxDecoration(
+                                  color: isFullyPaid
+                                      ? colors.primary
+                                      : colors.warning,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              AppSpacing.hXxs,
+                              Text(
+                                isFullyPaid
+                                    ? 'مسددة'
+                                    : (invoice.remainingAmount > 0
+                                          ? 'متبقي: $formattedRemaining'
+                                          : 'آجل'),
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: isFullyPaid
+                                      ? colors.primary
+                                      : colors.warning,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 10.sp,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  AppSpacing.vXxs,
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 6.w,
-                      vertical: 2.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isFullyPaid
-                          ? colors.surfaceContainerHighest
-                          : colors.warning.withValues(alpha: 0.12),
-                      borderRadius: AppRadius.fullRadius,
-                    ),
-                    child: Text(
-                      isFullyPaid ? 'خالصة' : 'متبقي: $formattedRemaining',
-                      style: AppTypography.labelSmall.copyWith(
-                        color: isFullyPaid
-                            ? colors.onSurfaceVariant
-                            : colors.warning,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 9.sp,
+
+                    // 2. الفاصل البصري الشعري الناعم
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 10.h),
+                      height: 0.8.h,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            colors.outlineVariant.withValues(alpha: 0.35),
+                            colors.outlineVariant.withValues(alpha: 0.05),
+                          ],
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+
+                    // 3. الرصيف المالي والمكاني: المبلغ الإجمالي والمعلومات الفرعية
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // الرقم المالي المحوري وتفاصيل البيع
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: AlignmentDirectional.centerStart,
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      formattedTotal,
+                                      style: AppTypography.titleMedium.copyWith(
+                                        color: colors.onSurface,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 18.sp,
+                                        letterSpacing: -0.3,
+                                      ),
+                                    ),
+                                    AppSpacing.hXxs,
+                                    Text(
+                                      'ر.ي',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: colors.onSurfaceVariant,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 11.sp,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              AppSpacing.vXxs,
+                              Text(
+                                '${invoice.totalCardsCount > 0 ? "${invoice.totalCardsCount} كرت • " : ""}${isCash ? "بيع نقدي" : "بيع آجل"}',
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // مؤشر الانتقال للتفاصيل
+                        Container(
+                          width: 28.r,
+                          height: 28.r,
+                          decoration: BoxDecoration(
+                            color: colors.surfaceContainerHighest.withValues(
+                              alpha: 0.4,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 11.r,
+                            color: colors.onSurfaceVariant.withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              // شريط الهوية السيادي الجانبي ممتد على كامل الحافة وبنفس انحناء زوايا الكرت
+              PositionedDirectional(
+                start: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(width: 4.w, color: themeColor),
+              ),
+            ],
+          ),
         ),
       ),
     );

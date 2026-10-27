@@ -10,10 +10,7 @@ import 'package:netsales/widgets/bars/custom_search_filter_bar.dart';
 class OperationsSearchAndFilterBar extends StatelessWidget {
   final OperationsController controller;
 
-  const OperationsSearchAndFilterBar({
-    super.key,
-    required this.controller,
-  });
+  const OperationsSearchAndFilterBar({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +22,25 @@ class OperationsSearchAndFilterBar extends StatelessWidget {
               CustomFilterItem<String>(label: 'الكل', value: 'ALL'),
               CustomFilterItem<String>(label: 'مبيعات نقدية', value: 'CASH'),
               CustomFilterItem<String>(label: 'مبيعات آجلة', value: 'CREDIT'),
-              CustomFilterItem<String>(label: 'غير مسددة (مديونية)', value: 'UNPAID'),
+              CustomFilterItem<String>(
+                label: 'غير مسددة (مديونية)',
+                value: 'UNPAID',
+              ),
             ]
           : const [
               CustomFilterItem<String>(label: 'كافة الطلبات', value: 'ALL'),
-              CustomFilterItem<String>(label: 'بانتظار الاعتماد', value: 'PENDING'),
-              CustomFilterItem<String>(label: 'طلبات معتمدة', value: 'APPROVED'),
-              CustomFilterItem<String>(label: 'طلبات مرفوضة', value: 'REJECTED'),
+              CustomFilterItem<String>(
+                label: 'بانتظار الاعتماد',
+                value: 'PENDING',
+              ),
+              CustomFilterItem<String>(
+                label: 'طلبات معتمدة',
+                value: 'APPROVED',
+              ),
+              CustomFilterItem<String>(
+                label: 'طلبات مرفوضة',
+                value: 'REJECTED',
+              ),
             ];
 
       final selectedFilter = isInvoiceTab
@@ -40,8 +49,10 @@ class OperationsSearchAndFilterBar extends StatelessWidget {
 
       return CustomSearchFilterBar<String>(
         searchController: controller.searchController,
-        searchLabel: 'البحث في العمليات',
-        searchHint: 'ابحث برقم المرجع أو اسم نقطة البيع أو الشبكة...',
+        searchHint: isInvoiceTab
+            ? 'ابحث برقم الفاتورة، نقطة البيع، أو المرجع...'
+            : 'ابحث برقم الطلب، نقطة البيع، أو المرجع...',
+        onSearchChanged: controller.onSearchChanged,
         onSearchClear: controller.clearSearch,
         onSearchSubmitted: controller.onSearchSubmitted,
         filterItems: filterItems,

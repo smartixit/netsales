@@ -30,6 +30,8 @@ class CustomTextField extends StatefulWidget {
     this.focusNode,
     this.autofillHints,
     this.isRequired = true,
+    this.isDense = true,
+    this.contentPadding,
   });
 
   final TextEditingController controller;
@@ -77,6 +79,10 @@ class CustomTextField extends StatefulWidget {
   final Iterable<String>? autofillHints;
 
   final bool isRequired;
+
+  final bool isDense;
+
+  final EdgeInsetsGeometry? contentPadding;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();

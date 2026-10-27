@@ -446,12 +446,23 @@ class CustomBottomSheet extends StatelessWidget {
               Flexible(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: padding ?? EdgeInsets.zero,
+                  padding:
+                      padding ??
+                      EdgeInsets.symmetric(
+                        vertical: AppSpacing.bottomSheetPadding,
+                      ),
                   child: child,
                 ),
               )
             else
-              Padding(padding: padding ?? EdgeInsets.zero, child: child),
+              Padding(
+                padding:
+                    padding ??
+                    EdgeInsets.symmetric(
+                      vertical: AppSpacing.bottomSheetPadding,
+                    ),
+                child: child,
+              ),
 
             // 4. أزرار الإجراءات السفلية (Action Buttons)
             if (actions != null && actions!.isNotEmpty) ...[

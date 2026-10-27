@@ -18,20 +18,20 @@ class SaleInvoiceCard extends StatelessWidget {
   final SaleInvoiceEntity invoice;
   final VoidCallback? onTap;
 
-  const SaleInvoiceCard({
-    super.key,
-    required this.invoice,
-    this.onTap,
-  });
+  const SaleInvoiceCard({super.key, required this.invoice, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isCash = invoice.isCash;
     final isFullyPaid = invoice.isFullyPaid;
-    final formattedTotal = AmountFormatter.formatValue(invoice.invoiceTotalAmount);
+    final formattedTotal = AmountFormatter.formatValue(
+      invoice.invoiceTotalAmount,
+    );
     final formattedPaid = AmountFormatter.formatValue(invoice.paidAmount);
-    final formattedRemaining = AmountFormatter.formatValue(invoice.remainingAmount);
+    final formattedRemaining = AmountFormatter.formatValue(
+      invoice.remainingAmount,
+    );
 
     return CustomInteractiveBounce(
       onTap: onTap ?? () {},
@@ -206,12 +206,14 @@ class SaleInvoiceCard extends StatelessWidget {
                         ),
                         child: Text(
                           isFullyPaid
-                              ? 'خالصة السداد'
+                              ? 'مدفوعة'
                               : (invoice.remainingAmount > 0
-                                  ? 'متبقي: $formattedRemaining ر.ي'
-                                  : 'غير مسددة'),
+                                    ? 'متبقي: $formattedRemaining ر.ي'
+                                    : 'غير مسددة'),
                           style: AppTypography.labelSmall.copyWith(
-                            color: isFullyPaid ? colors.primary : colors.warning,
+                            color: isFullyPaid
+                                ? colors.primary
+                                : colors.warning,
                             fontWeight: FontWeight.w800,
                             fontSize: 10.sp,
                           ),

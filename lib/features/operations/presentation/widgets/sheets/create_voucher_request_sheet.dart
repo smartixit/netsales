@@ -212,6 +212,16 @@ class _CreateVoucherRequestSheetState extends State<CreateVoucherRequestSheet> {
     });
   }
 
+  void _setExactQuantity(int packageId, int quantity) {
+    setState(() {
+      if (quantity > 0) {
+        _packageQuantities[packageId] = quantity;
+      } else {
+        _packageQuantities.remove(packageId);
+      }
+    });
+  }
+
   int get _totalVoucherCount {
     return _packageQuantities.values.fold(0, (sum, count) => sum + count);
   }
@@ -447,6 +457,8 @@ class _CreateVoucherRequestSheetState extends State<CreateVoucherRequestSheet> {
                 onDecrement: () => _decrementQuantity(pkg.packageId),
                 onAddPreset: (preset) =>
                     _addPresetQuantity(pkg.packageId, preset),
+                onSetQuantity: (qty) =>
+                    _setExactQuantity(pkg.packageId, qty),
               );
             },
           ),

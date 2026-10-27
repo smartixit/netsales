@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
@@ -11,9 +12,11 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
-/// عنصر صف طلب التوريد في السجل المالي (VoucherRequestLedgerTile)
+/// سند طلب التوريد السيادي الفاخر (VoucherRequestLedgerTile)
 /// ============================================================================
-/// يعرض طلب التوريد داخل السجل المتصل مع إبراز حالة المراجعة المباشرة.
+/// يجسد طلب توريد الكروت كسند سيادي فاخر (Sovereign Financial Bond)،
+/// يربط بين هوية طالب التوريد، وكبسولة الحالة المتوهجة، والرقم المالي،
+/// وأزرار القرار الأيقونية المدمجة بحرية وانسيابية تامة دون أي ازدحام.
 class VoucherRequestLedgerTile extends StatelessWidget {
   final VoucherRequestEntity request;
   final VoidCallback onTap;
@@ -34,206 +37,334 @@ class VoucherRequestLedgerTile extends StatelessWidget {
     final isPending = request.isPending;
     final isApproved = request.isApproved;
     final isRejected = request.isRejected;
-    final formattedTotal = AmountFormatter.formatValue(request.requestTotalAmount);
+    final formattedTotal = AmountFormatter.formatValue(
+      request.requestTotalAmount,
+    );
 
-    final dt = request.requestDate != null
-        ? DateTime.tryParse(request.requestDate!)
-        : (request.createdAt != null ? DateTime.tryParse(request.createdAt!) : null);
-    final timeStr = dt != null ? DateFormatter.time(dt) : '';
+    final dt = request.createdAt != null
+        ? DateTime.tryParse(request.createdAt!)
+        : null;
+    final dateStr = dt != null ? DateFormatter.dateTime(dt) : '';
 
+    // لون حالة التوريد
     final statusColor = isPending
         ? colors.warning
         : (isApproved
-            ? colors.primary
-            : (isRejected ? colors.error : colors.onSurfaceVariant));
-
-    final subtitleParts = [
-      request.requestUuid,
-      if (timeStr.isNotEmpty) timeStr,
-      if (request.totalCardsCount > 0) '${request.totalCardsCount} كرت',
-    ].join(' • ');
+              ? colors.primary
+              : (isRejected ? colors.error : colors.onSurfaceVariant));
 
     return CustomInteractiveBounce(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: 12.h,
+        margin: EdgeInsets.only(bottom: 10.h),
+        decoration: BoxDecoration(
+          borderRadius: AppRadius.lgRadius,
+          boxShadow: AppElevation.level1(context),
         ),
-        color: Colors.transparent,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                // 1. أيقونة التوريد بهالة لونية ناعمة
-                Container(
-                  width: 38.r,
-                  height: 38.r,
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
+        child: ClipRRect(
+          borderRadius: AppRadius.lgRadius,
+          child: Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      statusColor.withValues(alpha: 0.05),
+                      colors.surface.withValues(alpha: 0.35),
+                      colors.surfaceContainerLowest,
+                    ],
+                    stops: const [0.0, 0.40, 1.0],
                   ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    isPending
-                        ? Icons.hourglass_top_rounded
-                        : (isApproved
-                            ? Icons.check_circle_outline_rounded
-                            : Icons.cancel_outlined),
-                    color: statusColor,
-                    size: 19.r,
+                  borderRadius: AppRadius.lgRadius,
+                  border: Border.all(
+                    color: isPending
+                        ? colors.warning.withValues(alpha: 0.35)
+                        : colors.outlineVariant.withValues(alpha: 0.28),
+                    width: 1.w,
                   ),
                 ),
-
-                AppSpacing.hSm,
-
-                // 2. الهوية والمعلومات
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              request.posName ?? 'نقطة بيع #${request.posId}',
-                              style: AppTypography.titleSmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w800,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                padding: EdgeInsetsDirectional.only(
+                  start: 16.w,
+                  end: 14.w,
+                  top: 12.h,
+                  bottom: 12.h,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 1. الترويسة التنفيذية: اسم نقطة البيع وشارة الحالة
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // أيقونة حالة التوريد سكويركل
+                        Container(
+                          width: 38.r,
+                          height: 38.r,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                statusColor.withValues(alpha: 0.16),
+                                statusColor.withValues(alpha: 0.05),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.25),
+                              width: 0.8.w,
                             ),
                           ),
-                          AppSpacing.hXs,
+                          alignment: Alignment.center,
+                          child: Icon(
+                            isPending
+                                ? Icons.hourglass_top_rounded
+                                : (isApproved
+                                      ? Icons.check_circle_outline_rounded
+                                      : Icons.cancel_outlined),
+                            color: statusColor,
+                            size: 19.r,
+                          ),
+                        ),
+                        AppSpacing.hSm,
+                        // اسم نقطة البيع ورمز الطلب
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                request.posName ?? 'نقطة بيع #${request.posId}',
+                                style: AppTypography.titleSmall.copyWith(
+                                  color: colors.onSurface,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13.5.sp,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              AppSpacing.vXxs,
+                              Row(
+                                children: [
+                                  Flexible(
+                                    flex: 2,
+                                    child: Text(
+                                      '#${request.requestUuid}',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: colors.onSurfaceVariant,
+                                        fontWeight: FontWeight.w700,
+                                        fontFamily: 'monospace',
+                                        fontSize: 9.5.sp,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (dateStr.isNotEmpty) ...[
+                                    Text(
+                                      ' • ',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: colors.onSurfaceVariant
+                                            .withValues(alpha: 0.5),
+                                        fontSize: 9.5.sp,
+                                      ),
+                                    ),
+                                    Flexible(
+                                      flex: 3,
+                                      child: Text(
+                                        dateStr,
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: colors.onSurfaceVariant
+                                                  .withValues(alpha: 0.7),
+                                              fontSize: 9.5.sp,
+                                            ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        AppSpacing.hXs,
+                        // كبسولة حالة الطلب الزجاجية
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 4.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.1),
+                            borderRadius: AppRadius.fullRadius,
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.25),
+                              width: 0.8.w,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 5.5.r,
+                                height: 5.5.r,
+                                decoration: BoxDecoration(
+                                  color: statusColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              AppSpacing.hXxs,
+                              Text(
+                                request.statusLabel,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: statusColor,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 10.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // 2. الفاصل البصري الشعري الناعم
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 10.h),
+                      height: 0.8.h,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            colors.outlineVariant.withValues(alpha: 0.35),
+                            colors.outlineVariant.withValues(alpha: 0.05),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // 3. الرصيف المالي والمكاني: المبلغ الإجمالي وإجراءات القرار
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // الرقم المالي المحوري وتفاصيل عدد الكروت
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: AlignmentDirectional.centerStart,
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      formattedTotal,
+                                      style: AppTypography.titleMedium.copyWith(
+                                        color: colors.onSurface,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 18.sp,
+                                        letterSpacing: -0.3,
+                                      ),
+                                    ),
+                                    AppSpacing.hXxs,
+                                    Text(
+                                      'ر.ي',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: colors.onSurfaceVariant,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 11.sp,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              AppSpacing.vXxs,
+                              Text(
+                                '${request.totalCardsCount} كرت مطلوب • ${request.isCash ? "دفع نقدي" : "دفع آجل"}',
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // أزرار القرار الأيقونية المدمجة أو سهم التفاصيل
+                        if (isPending &&
+                            (onApprove != null || onReject != null)) ...[
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (onReject != null) ...[
+                                CustomButton.icon(
+                                  icon: Icons.close_rounded,
+                                  dimension: 34.r,
+                                  iconSize: 17.r,
+                                  foregroundColor: colors.error,
+                                  backgroundColor: colors.error.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  tooltip: 'رفض الطلب',
+                                  onPressed: onReject!,
+                                ),
+                                AppSpacing.hXs,
+                              ],
+                              if (onApprove != null)
+                                CustomButton.icon(
+                                  icon: Icons.check_rounded,
+                                  dimension: 34.r,
+                                  iconSize: 17.r,
+                                  foregroundColor: colors.primary,
+                                  backgroundColor: colors.primary.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  tooltip: 'اعتماد الطلب',
+                                  onPressed: onApprove!,
+                                ),
+                            ],
+                          ),
+                        ] else ...[
                           Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 6.w,
-                              vertical: 1.5.h,
-                            ),
+                            width: 28.r,
+                            height: 28.r,
                             decoration: BoxDecoration(
-                              color: (request.isCash ? colors.primary : colors.tertiary)
-                                  .withValues(alpha: 0.1),
-                              borderRadius: AppRadius.fullRadius,
+                              color: colors.surfaceContainerHighest.withValues(
+                                alpha: 0.4,
+                              ),
+                              shape: BoxShape.circle,
                             ),
-                            child: Text(
-                              request.isCash ? 'نقدي' : 'آجل',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: request.isCash
-                                    ? colors.primary
-                                    : colors.tertiary,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 9.sp,
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 11.r,
+                              color: colors.onSurfaceVariant.withValues(
+                                alpha: 0.6,
                               ),
                             ),
                           ),
                         ],
-                      ),
-                      AppSpacing.vXxs,
-                      Text(
-                        subtitleParts,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: colors.onSurfaceVariant.withValues(alpha: 0.8),
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'monospace',
-                          fontSize: 9.5.sp,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-
-                AppSpacing.hSm,
-
-                // 3. الجزء المالي والحالة
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 100.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              formattedTotal,
-                              style: AppTypography.titleSmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            AppSpacing.hXxs,
-                            Text(
-                              'ر.ي',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.onSurfaceVariant,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 10.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      AppSpacing.vXxs,
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.12),
-                          borderRadius: AppRadius.fullRadius,
-                        ),
-                        child: Text(
-                          request.statusLabel,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: statusColor,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 9.sp,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            // 4. أزرار القرار السريع للطلبات المعلقة
-            if (isPending && (onApprove != null || onReject != null)) ...[
-              AppSpacing.vSm,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (onReject != null) ...[
-                    CustomButton.text(
-                      text: 'رفض',
-                      size: AppButtonSize.small,
-                      foregroundColor: colors.error,
-                      onPressed: onReject!,
+                      ],
                     ),
-                    AppSpacing.hSm,
                   ],
-                  if (onApprove != null)
-                    CustomButton.primary(
-                      text: 'اعتماد الطلب',
-                      size: AppButtonSize.small,
-                      icon: Icons.check_rounded,
-                      onPressed: onApprove!,
-                    ),
-                ],
+                ),
+              ),
+
+              // شريط الحالة السيادي الجانبي ممتد على كامل الحافة وبنفس انحناء زوايا الكرت
+              PositionedDirectional(
+                start: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(width: 4.w, color: statusColor),
               ),
             ],
-          ],
+          ),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -69,8 +70,9 @@ class OperationsController extends GetxController {
   final RxBool isLoadingRequestDetails = false.obs;
   final RxString requestDetailsError = ''.obs;
 
-  /// حقل البحث الموحد
+  /// حقل البحث الموحد ومؤقت التهدئة
   final TextEditingController searchController = TextEditingController();
+  Timer? _searchDebounceTimer;
 
   @override
   void onInit() {
@@ -81,6 +83,7 @@ class OperationsController extends GetxController {
 
   @override
   void onClose() {
+    _searchDebounceTimer?.cancel();
     searchController.dispose();
     super.onClose();
   }
@@ -94,9 +97,7 @@ class OperationsController extends GetxController {
 
   /// جلب فواتير مبيعات الكروت
   Future<void> loadInvoices({bool isRefresh = false}) async {
-    if (!isRefresh) {
-      isLoadingInvoices.value = true;
-    }
+    isLoadingInvoices.value = true;
     invoicesErrorMessage.value = '';
 
     try {
@@ -135,9 +136,7 @@ class OperationsController extends GetxController {
 
   /// جلب طلبات توريد الكروت
   Future<void> loadRequests({bool isRefresh = false}) async {
-    if (!isRefresh) {
-      isLoadingRequests.value = true;
-    }
+    isLoadingRequests.value = true;
     requestsErrorMessage.value = '';
 
     try {
@@ -184,8 +183,21 @@ class OperationsController extends GetxController {
     }
   }
 
+  /// تنفيذ البحث الحي بتهدئة تلقائية تمنع الحمل الزائد وتظهر الـ Shimmer فورياً
+  void onSearchChanged(String query) {
+    _searchDebounceTimer?.cancel();
+    _searchDebounceTimer = Timer(const Duration(milliseconds: 350), () {
+      if (activeSegmentIndex.value == 0) {
+        loadInvoices();
+      } else {
+        loadRequests();
+      }
+    });
+  }
+
   /// تنفيذ البحث عند تقديم النص
   void onSearchSubmitted(String _) {
+    _searchDebounceTimer?.cancel();
     if (activeSegmentIndex.value == 0) {
       loadInvoices();
     } else {
@@ -195,6 +207,7 @@ class OperationsController extends GetxController {
 
   /// مسح نص البحث
   void clearSearch() {
+    _searchDebounceTimer?.cancel();
     searchController.clear();
     if (activeSegmentIndex.value == 0) {
       loadInvoices();

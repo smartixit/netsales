@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
@@ -31,9 +29,13 @@ class SaleInvoicesFeed extends StatelessWidget {
     final colors = context.colors;
 
     return Obx(() {
-      // 1. حالة التحميل الأولي (الهيكل التشكيلي الموحد)
-      if (controller.isLoadingInvoices.value && controller.invoices.isEmpty) {
-        return const CustomSkeletonFeed(itemCount: 4, cardHeight: 90);
+      // 1. حالة التحميل (الهيكل التشكيلي الموحد المتوافق تماماً في الحجم والهوامش)
+      if (controller.isLoadingInvoices.value) {
+        return const CustomSkeletonFeed(
+          itemCount: 4,
+          cardHeight: 110,
+          padding: EdgeInsets.zero,
+        );
       }
 
       // 2. حالة الخطأ مع إمكانية إعادة المحاولة (الودجت الموحد)
@@ -50,7 +52,8 @@ class SaleInvoicesFeed extends StatelessWidget {
       if (controller.invoices.isEmpty) {
         return CustomEmptyState(
           title: 'لا توجد فواتير مبيعات مسجلة',
-          subtitle: 'لم يتم العثور على أي فواتير تطابق معايير التصفية والبحث المحددة',
+          subtitle:
+              'لم يتم العثور على أي فواتير تطابق معايير التصفية والبحث المحددة',
           actionLabel: 'إصدار فاتورة جديدة',
           onAction: () => CreateSaleInvoiceSheet.show(context),
         );
@@ -59,6 +62,7 @@ class SaleInvoicesFeed extends StatelessWidget {
       // تجميع الفواتير زمنياً
       final groups = _groupInvoices(controller.invoices);
       final groupKeys = groups.keys.toList();
+      final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
       // 4. السجل المالي المصنف زمنياً مع السحب للتحديث
       return RefreshIndicator(
@@ -67,13 +71,13 @@ class SaleInvoicesFeed extends StatelessWidget {
         child: ListView.separated(
           padding: EdgeInsets.only(
             top: AppSpacing.xs,
-            bottom: 130.h,
+            bottom: isKeyboardOpen ? 20.h : 130.h,
           ),
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
           itemCount: groupKeys.length,
-          separatorBuilder: (_, __) => AppSpacing.vMd,
+          separatorBuilder: (_, __) => AppSpacing.vSm,
           itemBuilder: (context, groupIndex) {
             final key = groupKeys[groupIndex];
             final groupItems = groups[key]!;
@@ -109,35 +113,14 @@ class SaleInvoicesFeed extends StatelessWidget {
                   ),
                 ),
 
-                // سطح السجل المالي المتصل
-                Container(
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: AppRadius.lgRadius,
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.28),
-                      width: 1.w,
+                // بطاقات الفواتير المستقلة الفاخرة بدون تزاحم
+                ...groupItems.map(
+                  (invoice) => SaleInvoiceLedgerTile(
+                    invoice: invoice,
+                    onTap: () => Get.toNamed(
+                      AppRoutes.saleInvoiceDetails,
+                      arguments: invoice.invoiceId,
                     ),
-                    boxShadow: AppElevation.level1(context),
-                  ),
-                  child: Column(
-                    children: [
-                      for (int i = 0; i < groupItems.length; i++) ...[
-                        if (i > 0)
-                          Divider(
-                            height: 1.h,
-                            indent: 56.w,
-                            color: colors.outlineVariant.withValues(alpha: 0.18),
-                          ),
-                        SaleInvoiceLedgerTile(
-                          invoice: groupItems[i],
-                          onTap: () => Get.toNamed(
-                            AppRoutes.saleInvoiceDetails,
-                            arguments: groupItems[i].invoiceId,
-                          ),
-                        ),
-                      ],
-                    ],
                   ),
                 ),
               ],
@@ -149,7 +132,9 @@ class SaleInvoicesFeed extends StatelessWidget {
   }
 
   /// تجميع الفواتير بحسب سياق التاريخ
-  Map<String, List<SaleInvoiceEntity>> _groupInvoices(List<SaleInvoiceEntity> list) {
+  Map<String, List<SaleInvoiceEntity>> _groupInvoices(
+    List<SaleInvoiceEntity> list,
+  ) {
     final Map<String, List<SaleInvoiceEntity>> result = {};
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

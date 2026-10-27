@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
@@ -31,9 +29,13 @@ class VoucherRequestsFeed extends GetView<OperationsController> {
     final colors = context.colors;
 
     return Obx(() {
-      // 1. حالة التحميل الأولي عبر الهيكل التشكيلي الموحد (Skeleton Shimmer)
-      if (controller.isLoadingRequests.value && controller.requests.isEmpty) {
-        return const CustomSkeletonFeed(itemCount: 4, cardHeight: 90);
+      // 1. حالة التحميل (الهيكل التشكيلي الموحد المتوافق تماماً في الحجم والهوامش)
+      if (controller.isLoadingRequests.value) {
+        return const CustomSkeletonFeed(
+          itemCount: 4,
+          cardHeight: 115,
+          padding: EdgeInsets.zero,
+        );
       }
 
       // 2. حالة الخطأ مع إمكانية إعادة المحاولة
@@ -60,6 +62,7 @@ class VoucherRequestsFeed extends GetView<OperationsController> {
       // تجميع الطلبات زمنياً
       final groups = _groupRequests(controller.requests);
       final groupKeys = groups.keys.toList();
+      final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
       // 4. السجل المالي المصنف زمنياً مع السحب للتحديث
       return RefreshIndicator(
@@ -68,13 +71,13 @@ class VoucherRequestsFeed extends GetView<OperationsController> {
         child: ListView.separated(
           padding: EdgeInsets.only(
             top: AppSpacing.xs,
-            bottom: 130.h,
+            bottom: isKeyboardOpen ? 20.h : 130.h,
           ),
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
           itemCount: groupKeys.length,
-          separatorBuilder: (_, __) => AppSpacing.vMd,
+          separatorBuilder: (_, __) => AppSpacing.vSm,
           itemBuilder: (context, groupIndex) {
             final key = groupKeys[groupIndex];
             final groupItems = groups[key]!;
@@ -110,65 +113,44 @@ class VoucherRequestsFeed extends GetView<OperationsController> {
                   ),
                 ),
 
-                // سطح السجل المالي المتصل
-                Container(
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: AppRadius.lgRadius,
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.28),
-                      width: 1.w,
+                // بطاقات طلبات التوريد المستقلة الفاخرة بدون تزاحم
+                ...groupItems.map(
+                  (request) => VoucherRequestLedgerTile(
+                    request: request,
+                    onTap: () => Get.toNamed(
+                      AppRoutes.voucherRequestDetails,
+                      arguments: request.requestId,
                     ),
-                    boxShadow: AppElevation.level1(context),
-                  ),
-                  child: Column(
-                    children: [
-                      for (int i = 0; i < groupItems.length; i++) ...[
-                        if (i > 0)
-                          Divider(
-                            height: 1.h,
-                            indent: 56.w,
-                            color: colors.outlineVariant.withValues(alpha: 0.18),
-                          ),
-                        VoucherRequestLedgerTile(
-                          request: groupItems[i],
-                          onTap: () => Get.toNamed(
-                            AppRoutes.voucherRequestDetails,
-                            arguments: groupItems[i].requestId,
-                          ),
-                          onApprove: groupItems[i].isPending
-                              ? () {
-                                  CustomBottomSheet.showConfirmation(
-                                    title: 'تأكيد اعتماد طلب التوريد',
-                                    message:
-                                        'سيتم اعتماد طلب التوريد ${groupItems[i].requestUuid} وتوليد فاتورة مبيعات جديدة بقيمة ${AmountFormatter.formatValue(groupItems[i].requestTotalAmount)} ر.ي.',
-                                    confirmLabel: 'اعتماد وتوليد الفاتورة',
-                                    cancelLabel: 'تراجع',
-                                    onConfirm: () => controller.approveRequest(
-                                      groupItems[i].requestId,
-                                    ),
-                                  );
-                                }
-                              : null,
-                          onReject: groupItems[i].isPending
-                              ? () {
-                                  CustomBottomSheet.showConfirmation(
-                                    title: 'تأكيد رفض طلب التوريد',
-                                    message:
-                                        'هل أنت متأكد من رغبتك في رفض طلب التوريد ${groupItems[i].requestUuid}؟',
-                                    confirmLabel: 'رفض الطلب',
-                                    cancelLabel: 'إلغاء',
-                                    isDestructive: true,
-                                    onConfirm: () => controller.rejectRequest(
-                                      groupItems[i].requestId,
-                                      reason: 'تم الرفض بواسطة الإدارة',
-                                    ),
-                                  );
-                                }
-                              : null,
-                        ),
-                      ],
-                    ],
+                    onApprove: request.isPending
+                        ? () {
+                            CustomBottomSheet.showConfirmation(
+                              title: 'تأكيد اعتماد طلب التوريد',
+                              message:
+                                  'سيتم اعتماد طلب التوريد ${request.requestUuid} وتوليد فاتورة مبيعات جديدة بقيمة ${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي.',
+                              confirmLabel: 'اعتماد وتوليد الفاتورة',
+                              cancelLabel: 'تراجع',
+                              onConfirm: () => controller.approveRequest(
+                                request.requestId,
+                              ),
+                            );
+                          }
+                        : null,
+                    onReject: request.isPending
+                        ? () {
+                            CustomBottomSheet.showConfirmation(
+                              title: 'تأكيد رفض طلب التوريد',
+                              message:
+                                  'هل أنت متأكد من رغبتك في رفض طلب التوريد ${request.requestUuid}؟',
+                              confirmLabel: 'رفض الطلب',
+                              cancelLabel: 'إلغاء',
+                              isDestructive: true,
+                              onConfirm: () => controller.rejectRequest(
+                                request.requestId,
+                                reason: 'تم الرفض بواسطة الإدارة',
+                              ),
+                            );
+                          }
+                        : null,
                   ),
                 ),
               ],

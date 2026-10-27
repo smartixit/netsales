@@ -1,3 +1,5 @@
+import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
+
 /// ============================================================================
 /// كيان باقة كروت الإنترنت (VoucherPackageEntity)
 /// ============================================================================
@@ -58,6 +60,22 @@ class VoucherPackageEntity {
   /// سعر الشراء الافتراضي الصافي لنقطة البيع بالدفع الآجل
   double get defaultEffectiveCreditPrice =>
       packageVoucherPrice - defaultCreditDiscountAmount;
+
+  /// عدد كروت نصف الورقة مقرباً للأعلى (مثال: 51 -> 26)
+  int get halfSheetVoucherCount =>
+      VoucherSheetCalculator.halfSheetCards(packageVoucherCount);
+
+  /// حساب عدد الكروت الفعلي لعدد محدد من الأوراق (مثال: 1.5 ورقة -> 77 كرت)
+  int vouchersForSheets(double sheets) =>
+      VoucherSheetCalculator.cardsForSheets(sheets, packageVoucherCount);
+
+  /// التوصيف النصي المقروء لكمية الكروت (مثال: 77 -> "ورقة ونصف")
+  String describeSheetQuantity(int cards) =>
+      VoucherSheetCalculator.describe(cards, packageVoucherCount);
+
+  /// كبسولات الأوراق السريعة المقترحة للباقة
+  List<VoucherSheetPreset> get sheetPresets =>
+      VoucherSheetCalculator.getPresets(packageVoucherCount);
 
   /// نسخة معدلة من الكيان
   VoucherPackageEntity copyWith({
