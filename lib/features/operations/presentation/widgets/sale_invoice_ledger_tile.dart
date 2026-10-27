@@ -4,30 +4,55 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
+import 'package:netsales/features/operations/presentation/widgets/operations_items_accordion_deck.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
 /// سند فاتورة المبيعات السيادي الفاخر (SaleInvoiceLedgerTile)
 /// ============================================================================
 /// يجسد فاتورة المبيعات كسند مالي سيادي فاخر (Sovereign Financial Bond)،
-/// يقسم البطاقة إلى ترويسة تنفيذية للهوية، وفاصل شعري ناعم، ورصيف مالي فخم،
-/// مع تدرج محيطي دقيق ومرونة استثنائية عبر كافة الشاشات دون أي تكدس أو شارات مبعثرة.
-class SaleInvoiceLedgerTile extends StatelessWidget {
+/// يدعم التوسيع الأكورديوني المنسدل السلس (Accordion Inline Expand) لعرض تفاصيل
+/// الباقات المضمنة فوراً دون مغادرة السجل الرئيسي، مع تصميم تكيفي عالي الدقة.
+class SaleInvoiceLedgerTile extends StatefulWidget {
   final SaleInvoiceEntity invoice;
   final VoidCallback onTap;
+  final bool? isExpanded;
+  final VoidCallback? onToggleExpand;
 
   const SaleInvoiceLedgerTile({
     super.key,
     required this.invoice,
     required this.onTap,
+    this.isExpanded,
+    this.onToggleExpand,
   });
 
   @override
+  State<SaleInvoiceLedgerTile> createState() => _SaleInvoiceLedgerTileState();
+}
+
+class _SaleInvoiceLedgerTileState extends State<SaleInvoiceLedgerTile> {
+  bool _internalExpanded = false;
+  bool get _isExpanded => widget.isExpanded ?? _internalExpanded;
+
+  void _handleToggle() {
+    if (widget.onToggleExpand != null) {
+      widget.onToggleExpand!();
+    } else {
+      setState(() {
+        _internalExpanded = !_internalExpanded;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final invoice = widget.invoice;
     final colors = context.colors;
     final isCash = invoice.isCash;
     final isFullyPaid = invoice.isFullyPaid;
@@ -50,8 +75,25 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
     // اللون المحوري للحركة المالية (نقدي زمردي / آجل كهرماني)
     final themeColor = isCash ? colors.primary : colors.warning;
 
+    // تجهيز النص التكيفي للباقات
+    final hasMultiplePackages = invoice.items.length > 1;
+    final String packageSummaryText;
+    if (invoice.items.isEmpty) {
+      packageSummaryText = isCash ? 'بيع نقدي' : 'بيع آجل';
+    } else if (invoice.items.length == 1) {
+      final item = invoice.items.first;
+      final pkgName = item.packageName?.isNotEmpty == true
+          ? item.packageName!
+          : 'باقة كروت';
+      packageSummaryText =
+          '$pkgName (${item.voucherCount} كرت) • ${isCash ? "بيع نقدي" : "بيع آجل"}';
+    } else {
+      packageSummaryText =
+          '${invoice.items.length} باقات مختلفة (${invoice.totalCardsCount} كرت) • ${isCash ? "بيع نقدي" : "بيع آجل"}';
+    }
+
     return CustomInteractiveBounce(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
         margin: EdgeInsets.only(bottom: 10.h),
         decoration: BoxDecoration(
@@ -137,101 +179,78 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               AppSpacing.vXxs,
-                              Row(
-                                children: [
-                                  Flexible(
-                                    flex: 2,
-                                    child: Text(
-                                      '#${invoice.invoiceUuid}',
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: colors.onSurfaceVariant,
-                                        fontWeight: FontWeight.w700,
-                                        fontFamily: 'monospace',
-                                        fontSize: 9.5.sp,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  if (dateStr.isNotEmpty) ...[
-                                    Text(
-                                      ' • ',
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: colors.onSurfaceVariant
-                                            .withValues(alpha: 0.5),
-                                        fontSize: 9.5.sp,
-                                      ),
-                                    ),
-                                    Flexible(
-                                      flex: 3,
-                                      child: Text(
-                                        dateStr,
-                                        style: AppTypography.labelSmall
-                                            .copyWith(
-                                              color: colors.onSurfaceVariant
-                                                  .withValues(alpha: 0.7),
-                                              fontSize: 9.5.sp,
-                                            ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ],
+                              Text(
+                                dateStr.isNotEmpty
+                                    ? '#${invoice.invoiceUuid} • $dateStr'
+                                    : '#${invoice.invoiceUuid}',
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 9.5.sp,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
                         ),
                         AppSpacing.hXs,
                         // كبسولة حالة السداد الزجاجية الموحدة
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                (isFullyPaid ? colors.primary : colors.warning)
-                                    .withValues(alpha: 0.1),
-                            borderRadius: AppRadius.fullRadius,
-                            border: Border.all(
-                              color:
-                                  (isFullyPaid
-                                          ? colors.primary
-                                          : colors.warning)
-                                      .withValues(alpha: 0.25),
-                              width: 0.8.w,
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 100.w),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 4.h,
                             ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 5.5.r,
-                                height: 5.5.r,
-                                decoration: BoxDecoration(
-                                  color: isFullyPaid
-                                      ? colors.primary
-                                      : colors.warning,
-                                  shape: BoxShape.circle,
-                                ),
+                            decoration: BoxDecoration(
+                              color:
+                                  (isFullyPaid ? colors.primary : colors.warning)
+                                      .withValues(alpha: 0.1),
+                              borderRadius: AppRadius.fullRadius,
+                              border: Border.all(
+                                color:
+                                    (isFullyPaid
+                                            ? colors.primary
+                                            : colors.warning)
+                                        .withValues(alpha: 0.25),
+                                width: 0.8.w,
                               ),
-                              AppSpacing.hXxs,
-                              Text(
-                                isFullyPaid
-                                    ? 'مسددة'
-                                    : (invoice.remainingAmount > 0
-                                          ? 'متبقي: $formattedRemaining'
-                                          : 'آجل'),
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: isFullyPaid
-                                      ? colors.primary
-                                      : colors.warning,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 10.sp,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 5.5.r,
+                                  height: 5.5.r,
+                                  decoration: BoxDecoration(
+                                    color: isFullyPaid
+                                        ? colors.primary
+                                        : colors.warning,
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
-                              ),
-                            ],
+                                AppSpacing.hXxs,
+                                Flexible(
+                                  child: Text(
+                                    isFullyPaid
+                                        ? 'مسددة'
+                                        : (invoice.remainingAmount > 0
+                                              ? 'متبقي: $formattedRemaining'
+                                              : 'آجل'),
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: isFullyPaid
+                                          ? colors.primary
+                                          : colors.warning,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 10.sp,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -292,37 +311,106 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
                               ),
                               AppSpacing.vXxs,
                               Text(
-                                '${invoice.totalCardsCount > 0 ? "${invoice.totalCardsCount} كرت • " : ""}${isCash ? "بيع نقدي" : "بيع آجل"}',
+                                packageSummaryText,
                                 style: AppTypography.labelSmall.copyWith(
                                   color: colors.onSurfaceVariant,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 10.sp,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
                         ),
-                        // مؤشر الانتقال للتفاصيل
-                        Container(
-                          width: 28.r,
-                          height: 28.r,
-                          decoration: BoxDecoration(
-                            color: colors.surfaceContainerHighest.withValues(
-                              alpha: 0.4,
+                        AppSpacing.hXs,
+                        // أزرار الإجراء: كبسولة طي/عرض البنود ومؤشر الانتقال للتفاصيل
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (hasMultiplePackages) ...[
+                              CustomInteractiveBounce(
+                                onTap: _handleToggle,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8.w,
+                                    vertical: 4.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: themeColor.withValues(alpha: 0.08),
+                                    borderRadius: AppRadius.fullRadius,
+                                    border: Border.all(
+                                      color: themeColor.withValues(alpha: 0.25),
+                                      width: 0.8.w,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _isExpanded
+                                            ? 'طي البنود'
+                                            : 'عرض البنود',
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: themeColor,
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 9.5.sp,
+                                            ),
+                                      ),
+                                      AppSpacing.hXxs,
+                                      Icon(
+                                        _isExpanded
+                                            ? Icons.keyboard_arrow_up_rounded
+                                            : Icons.keyboard_arrow_down_rounded,
+                                        size: 13.r,
+                                        color: themeColor,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              AppSpacing.hXs,
+                            ],
+                            // مؤشر الانتقال للتفاصيل
+                            Container(
+                              width: 28.r,
+                              height: 28.r,
+                              decoration: BoxDecoration(
+                                color: colors.surfaceContainerHighest
+                                    .withValues(alpha: 0.4),
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                size: 11.r,
+                                color: colors.onSurfaceVariant.withValues(
+                                  alpha: 0.6,
+                                ),
+                              ),
                             ),
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 11.r,
-                            color: colors.onSurfaceVariant.withValues(
-                              alpha: 0.6,
-                            ),
-                          ),
+                          ],
                         ),
                       ],
                     ),
+
+                    // 4. درج تفكيك الباقات المنسدل الأكورديون المدمج
+                    if (hasMultiplePackages)
+                      AnimatedSize(
+                        duration: AppMotion.normal,
+                        curve: AppMotion.standard,
+                        alignment: Alignment.topCenter,
+                        child: _isExpanded
+                            ? OperationsItemsAccordionDeck(
+                                items: invoice.items
+                                    .map(OperationAccordionItem.fromInvoiceItem)
+                                    .toList(),
+                                themeColor: themeColor,
+                                onDetailsTap: widget.onTap,
+                              )
+                            : const SizedBox.shrink(),
+                      ),
                   ],
                 ),
               ),

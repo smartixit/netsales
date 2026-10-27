@@ -584,5 +584,339 @@ void main() {
         controller.isLoadingRequests.value = false;
       },
     );
+
+    testWidgets(
+      'SaleInvoiceLedgerTile smoothly expands and collapses multi-package items',
+      (tester) async {
+        const multiItemInvoice = SaleInvoiceEntity(
+          invoiceId: 555,
+          networkId: 1,
+          posId: 202,
+          invoiceUuid: 'INV-MULTI-001',
+          saleType: 'CASH',
+          saleTypeLabel: 'نقدي',
+          invoiceTotalAmount: 95000.0,
+          paidAmount: 95000.0,
+          remainingAmount: 0.0,
+          paymentStatus: 'PAID',
+          paymentStatusLabel: 'مسددة',
+          isFullyPaid: true,
+          createdBy: 1,
+          posName: 'مركز الأمل للاتصالات',
+          items: [
+            SaleInvoiceItemEntity(
+              itemId: 1,
+              invoiceId: 555,
+              packageId: 1,
+              packageName: 'باقة الفرسان الذهبية',
+              voucherCount: 51,
+              voucherPrice: 1000.0,
+              itemDiscount: 10.0,
+              itemTotalAmount: 45900.0,
+            ),
+            SaleInvoiceItemEntity(
+              itemId: 2,
+              invoiceId: 555,
+              packageId: 2,
+              packageName: 'باقة الأوائل الفضية',
+              voucherCount: 102,
+              voucherPrice: 500.0,
+              itemDiscount: 5.0,
+              itemTotalAmount: 48450.0,
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(
+          createHarness(
+            screenSize: const Size(375, 700),
+            child: SingleChildScrollView(
+              child: SaleInvoiceLedgerTile(
+                invoice: multiItemInvoice,
+                onTap: () {},
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // 1. يظهر عدد الباقات المجمعة مع زر عرض البنود
+        expect(find.text('2 باقات مختلفة (153 كرت) • بيع نقدي'), findsOneWidget);
+        expect(find.text('عرض البنود'), findsOneWidget);
+
+        // 2. النقر على عرض البنود للتوسيع
+        await tester.tap(find.text('عرض البنود'));
+        await tester.pumpAndSettle();
+
+        // 3. التحقق من ظهور أسماء الباقات ومحتوياتها
+        expect(find.text('طي البنود'), findsOneWidget);
+        expect(find.text('باقة الفرسان الذهبية'), findsOneWidget);
+        expect(find.text('باقة الأوائل الفضية'), findsOneWidget);
+        expect(find.textContaining('51 كرت'), findsOneWidget);
+        expect(find.textContaining('102 كرت'), findsOneWidget);
+
+        // 4. النقر على طي البنود
+        await tester.tap(find.text('طي البنود'));
+        await tester.pumpAndSettle();
+        expect(find.text('عرض البنود'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'SaleInvoicesFeed enforces exclusive single-open accordion (opening card 2 closes card 1)',
+      (tester) async {
+        const inv1 = SaleInvoiceEntity(
+          invoiceId: 701,
+          networkId: 1,
+          posId: 202,
+          invoiceUuid: 'INV-EXC-001',
+          saleType: 'CASH',
+          saleTypeLabel: 'نقدي',
+          invoiceTotalAmount: 50000.0,
+          paidAmount: 50000.0,
+          remainingAmount: 0.0,
+          paymentStatus: 'PAID',
+          paymentStatusLabel: 'مسددة',
+          isFullyPaid: true,
+          createdBy: 1,
+          posName: 'نقطة الأمانة',
+          createdAt: '2026-10-27 10:00:00',
+          items: [
+            SaleInvoiceItemEntity(
+              itemId: 1,
+              invoiceId: 701,
+              packageId: 1,
+              packageName: 'باقة الفرسان الذهبية',
+              voucherCount: 51,
+              voucherPrice: 1000.0,
+              itemDiscount: 0.0,
+              itemTotalAmount: 51000.0,
+            ),
+            SaleInvoiceItemEntity(
+              itemId: 2,
+              invoiceId: 701,
+              packageId: 2,
+              packageName: 'باقة الأوائل الفضية',
+              voucherCount: 26,
+              voucherPrice: 500.0,
+              itemDiscount: 0.0,
+              itemTotalAmount: 13000.0,
+            ),
+          ],
+        );
+
+        const inv2 = SaleInvoiceEntity(
+          invoiceId: 702,
+          networkId: 1,
+          posId: 202,
+          invoiceUuid: 'INV-EXC-002',
+          saleType: 'CREDIT',
+          saleTypeLabel: 'آجل',
+          invoiceTotalAmount: 60000.0,
+          paidAmount: 20000.0,
+          remainingAmount: 40000.0,
+          paymentStatus: 'PARTIAL',
+          paymentStatusLabel: 'مسددة جزئياً',
+          isFullyPaid: false,
+          createdBy: 1,
+          posName: 'نقطة المجد',
+          createdAt: '2026-10-27 11:00:00',
+          items: [
+            SaleInvoiceItemEntity(
+              itemId: 3,
+              invoiceId: 702,
+              packageId: 3,
+              packageName: 'باقة النخبة البرونزية',
+              voucherCount: 51,
+              voucherPrice: 800.0,
+              itemDiscount: 0.0,
+              itemTotalAmount: 40800.0,
+            ),
+            SaleInvoiceItemEntity(
+              itemId: 4,
+              invoiceId: 702,
+              packageId: 4,
+              packageName: 'باقة الأوائل الفضية',
+              voucherCount: 51,
+              voucherPrice: 500.0,
+              itemDiscount: 0.0,
+              itemTotalAmount: 25500.0,
+            ),
+          ],
+        );
+
+        controller.invoices.assignAll([inv1, inv2]);
+        controller.expandedInvoiceId.value = null;
+
+        await tester.pumpWidget(
+          createHarness(
+            screenSize: const Size(375, 800),
+            child: SaleInvoicesFeed(controller: controller),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // في البداية كلاهما مغلق: يوجد زران لـ "عرض البنود"
+        expect(find.text('عرض البنود'), findsNWidgets(2));
+        expect(find.text('طي البنود'), findsNothing);
+
+        // 1. فتح الكرت الأول (inv1)
+        await tester.tap(find.text('عرض البنود').first);
+        await tester.pumpAndSettle();
+
+        expect(controller.expandedInvoiceId.value, equals(701));
+        expect(find.text('طي البنود'), findsOneWidget);
+        expect(find.text('باقة الفرسان الذهبية'), findsOneWidget);
+
+        // 2. فتح الكرت الثاني (inv2) — يجب أن يُغلق الكرت الأول تلقائياً!
+        await tester.tap(find.text('عرض البنود'));
+        await tester.pumpAndSettle();
+
+        expect(controller.expandedInvoiceId.value, equals(702));
+        expect(find.text('طي البنود'), findsOneWidget);
+        expect(find.text('باقة النخبة البرونزية'), findsOneWidget);
+        // تم إغلاق الكرت الأول تلقائياً
+        expect(find.text('باقة الفرسان الذهبية'), findsNothing);
+
+        // 3. النقر على طي البنود للكرت الثاني — يغلق الكرت
+        await tester.tap(find.text('طي البنود'));
+        await tester.pumpAndSettle();
+
+        expect(controller.expandedInvoiceId.value, isNull);
+        expect(find.text('عرض البنود'), findsNWidgets(2));
+        expect(find.text('طي البنود'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'VoucherRequestsFeed enforces exclusive single-open accordion (opening card 2 closes card 1)',
+      (tester) async {
+        final repository = FakeOperationsRepository();
+        final controller = OperationsController(
+          getSaleInvoicesUseCase: GetSaleInvoicesUseCase(repository),
+          getVoucherRequestsUseCase: GetVoucherRequestsUseCase(repository),
+          getSaleInvoiceDetailsUseCase: GetSaleInvoiceDetailsUseCase(repository),
+          getVoucherRequestDetailsUseCase: GetVoucherRequestDetailsUseCase(repository),
+          approveVoucherRequestUseCase: ApproveVoucherRequestUseCase(repository),
+          rejectVoucherRequestUseCase: RejectVoucherRequestUseCase(repository),
+          cancelVoucherRequestUseCase: CancelVoucherRequestUseCase(repository),
+          createVoucherRequestUseCase: CreateVoucherRequestUseCase(repository),
+          createSaleInvoiceUseCase: CreateSaleInvoiceUseCase(repository),
+        );
+
+        const req1 = VoucherRequestEntity(
+          requestId: 801,
+          networkId: 1,
+          posId: 201,
+          requestUuid: 'REQ-EXC-001',
+          saleType: 'CASH',
+          saleTypeLabel: 'نقدي',
+          status: 'PENDING',
+          statusLabel: 'قيد الانتظار',
+          requestTotalAmount: 30000.0,
+          createdBy: 1,
+          posName: 'نقطة الأمل الحديثة',
+          createdAt: '2026-10-27 10:30:00',
+          items: [
+            VoucherRequestItemEntity(
+              itemId: 10,
+              requestId: 801,
+              packageId: 1,
+              packageName: 'باقة الفرسان الذهبية',
+              voucherCount: 51,
+              voucherPrice: 1000.0,
+              itemDiscount: 0.0,
+              itemTotalAmount: 51000.0,
+            ),
+            VoucherRequestItemEntity(
+              itemId: 11,
+              requestId: 801,
+              packageId: 2,
+              packageName: 'باقة الواحة الفضية',
+              voucherCount: 26,
+              voucherPrice: 500.0,
+              itemDiscount: 0.0,
+              itemTotalAmount: 13000.0,
+            ),
+          ],
+        );
+
+        const req2 = VoucherRequestEntity(
+          requestId: 802,
+          networkId: 1,
+          posId: 202,
+          requestUuid: 'REQ-EXC-002',
+          saleType: 'CREDIT',
+          saleTypeLabel: 'آجل',
+          status: 'PENDING',
+          statusLabel: 'قيد الانتظار',
+          requestTotalAmount: 60000.0,
+          createdBy: 1,
+          posName: 'نقطة المجد',
+          createdAt: '2026-10-27 11:00:00',
+          items: [
+            VoucherRequestItemEntity(
+              itemId: 12,
+              requestId: 802,
+              packageId: 3,
+              packageName: 'باقة النخبة البرونزية',
+              voucherCount: 51,
+              voucherPrice: 800.0,
+              itemDiscount: 0.0,
+              itemTotalAmount: 40800.0,
+            ),
+            VoucherRequestItemEntity(
+              itemId: 13,
+              requestId: 802,
+              packageId: 4,
+              packageName: 'باقة الأوائل الفضية',
+              voucherCount: 51,
+              voucherPrice: 500.0,
+              itemDiscount: 0.0,
+              itemTotalAmount: 25500.0,
+            ),
+          ],
+        );
+
+        controller.requests.assignAll([req1, req2]);
+        controller.expandedRequestId.value = null;
+
+        await tester.pumpWidget(
+          createHarness(
+            screenSize: const Size(375, 800),
+            child: VoucherRequestsFeed(controller: controller),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('عرض البنود'), findsNWidgets(2));
+        expect(find.text('طي البنود'), findsNothing);
+
+        // 1. فتح طلب التوريد الأول
+        await tester.tap(find.text('عرض البنود').first);
+        await tester.pumpAndSettle();
+
+        expect(controller.expandedRequestId.value, equals(801));
+        expect(find.text('طي البنود'), findsOneWidget);
+        expect(find.text('باقة الفرسان الذهبية'), findsOneWidget);
+
+        // 2. فتح طلب التوريد الثاني — إغلاق الأول تلقائياً
+        await tester.tap(find.text('عرض البنود'));
+        await tester.pumpAndSettle();
+
+        expect(controller.expandedRequestId.value, equals(802));
+        expect(find.text('طي البنود'), findsOneWidget);
+        expect(find.text('باقة النخبة البرونزية'), findsOneWidget);
+        expect(find.text('باقة الفرسان الذهبية'), findsNothing);
+
+        // 3. طي الطلب الثاني
+        await tester.tap(find.text('طي البنود'));
+        await tester.pumpAndSettle();
+
+        expect(controller.expandedRequestId.value, isNull);
+        expect(find.text('عرض البنود'), findsNWidgets(2));
+        expect(find.text('طي البنود'), findsNothing);
+      },
+    );
   });
 }

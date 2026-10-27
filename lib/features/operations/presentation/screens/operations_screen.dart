@@ -42,7 +42,7 @@ class OperationsScreen extends GetView<OperationsController> {
               if (controller.activeSegmentIndex.value == 0) {
                 return SaleInvoicesFeed(controller: controller);
               }
-              return const VoucherRequestsFeed();
+              return VoucherRequestsFeed(controller: controller);
             }),
           ),
         ],

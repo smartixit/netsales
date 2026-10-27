@@ -113,13 +113,20 @@ class SaleInvoicesFeed extends StatelessWidget {
                   ),
                 ),
 
-                // بطاقات الفواتير المستقلة الفاخرة بدون تزاحم
+                // بطاقات الفواتير المستقلة الفاخرة بنمط الأكورديون الحصري
                 ...groupItems.map(
-                  (invoice) => SaleInvoiceLedgerTile(
-                    invoice: invoice,
-                    onTap: () => Get.toNamed(
-                      AppRoutes.saleInvoiceDetails,
-                      arguments: invoice.invoiceId,
+                  (invoice) => Obx(
+                    () => SaleInvoiceLedgerTile(
+                      key: ValueKey(invoice.invoiceId),
+                      invoice: invoice,
+                      isExpanded: controller.expandedInvoiceId.value ==
+                          invoice.invoiceId,
+                      onToggleExpand: () => controller
+                          .toggleInvoiceExpansion(invoice.invoiceId),
+                      onTap: () => Get.toNamed(
+                        AppRoutes.saleInvoiceDetails,
+                        arguments: invoice.invoiceId,
+                      ),
                     ),
                   ),
                 ),

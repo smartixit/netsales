@@ -21,16 +21,22 @@ import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 /// ============================================================================
 /// تعرض طلبات التوريد مجمعة زمنياً داخل أسطح مالية متصلة ومريحة للعين،
 /// مع تأكيدات هادئة للاعتماد والرفض المباشر.
-class VoucherRequestsFeed extends GetView<OperationsController> {
-  const VoucherRequestsFeed({super.key});
+class VoucherRequestsFeed extends StatelessWidget {
+  final OperationsController? controller;
+
+  const VoucherRequestsFeed({super.key, this.controller});
+
+  OperationsController get _activeController =>
+      controller ?? Get.find<OperationsController>();
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final ctrl = _activeController;
 
     return Obx(() {
       // 1. حالة التحميل (الهيكل التشكيلي الموحد المتوافق تماماً في الحجم والهوامش)
-      if (controller.isLoadingRequests.value) {
+      if (ctrl.isLoadingRequests.value) {
         return const CustomSkeletonFeed(
           itemCount: 4,
           cardHeight: 115,
@@ -39,17 +45,17 @@ class VoucherRequestsFeed extends GetView<OperationsController> {
       }
 
       // 2. حالة الخطأ مع إمكانية إعادة المحاولة
-      if (controller.requestsErrorMessage.value.isNotEmpty &&
-          controller.requests.isEmpty) {
+      if (ctrl.requestsErrorMessage.value.isNotEmpty &&
+          ctrl.requests.isEmpty) {
         return CustomErrorState(
           title: 'تعذر تحميل الطلبات',
-          subtitle: controller.requestsErrorMessage.value,
-          onRetry: () => controller.loadRequests(isRefresh: true),
+          subtitle: ctrl.requestsErrorMessage.value,
+          onRetry: () => ctrl.loadRequests(isRefresh: true),
         );
       }
 
       // 3. حالة الفراغ الموحدة
-      if (controller.requests.isEmpty) {
+      if (ctrl.requests.isEmpty) {
         return CustomEmptyState(
           title: 'لا توجد طلبات توريد',
           subtitle:
@@ -60,14 +66,14 @@ class VoucherRequestsFeed extends GetView<OperationsController> {
       }
 
       // تجميع الطلبات زمنياً
-      final groups = _groupRequests(controller.requests);
+      final groups = _groupRequests(ctrl.requests);
       final groupKeys = groups.keys.toList();
       final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
       // 4. السجل المالي المصنف زمنياً مع السحب للتحديث
       return RefreshIndicator(
         color: colors.primary,
-        onRefresh: () => controller.loadRequests(isRefresh: true),
+        onRefresh: () => ctrl.loadRequests(isRefresh: true),
         child: ListView.separated(
           padding: EdgeInsets.only(
             top: AppSpacing.xs,
@@ -113,44 +119,51 @@ class VoucherRequestsFeed extends GetView<OperationsController> {
                   ),
                 ),
 
-                // بطاقات طلبات التوريد المستقلة الفاخرة بدون تزاحم
+                // بطاقات طلبات التوريد المستقلة الفاخرة بنمط الأكورديون الحصري
                 ...groupItems.map(
-                  (request) => VoucherRequestLedgerTile(
-                    request: request,
-                    onTap: () => Get.toNamed(
-                      AppRoutes.voucherRequestDetails,
-                      arguments: request.requestId,
+                  (request) => Obx(
+                    () => VoucherRequestLedgerTile(
+                      key: ValueKey(request.requestId),
+                      request: request,
+                      isExpanded: ctrl.expandedRequestId.value ==
+                          request.requestId,
+                      onToggleExpand: () => ctrl
+                          .toggleRequestExpansion(request.requestId),
+                      onTap: () => Get.toNamed(
+                        AppRoutes.voucherRequestDetails,
+                        arguments: request.requestId,
+                      ),
+                      onApprove: request.isPending
+                          ? () {
+                              CustomBottomSheet.showConfirmation(
+                                title: 'تأكيد اعتماد طلب التوريد',
+                                message:
+                                    'سيتم اعتماد طلب التوريد ${request.requestUuid} وتوليد فاتورة مبيعات جديدة بقيمة ${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي.',
+                                confirmLabel: 'اعتماد وتوليد الفاتورة',
+                                cancelLabel: 'تراجع',
+                                onConfirm: () => ctrl.approveRequest(
+                                  request.requestId,
+                                ),
+                              );
+                            }
+                          : null,
+                      onReject: request.isPending
+                          ? () {
+                              CustomBottomSheet.showConfirmation(
+                                title: 'تأكيد رفض طلب التوريد',
+                                message:
+                                    'هل أنت متأكد من رغبتك في رفض طلب التوريد ${request.requestUuid}؟',
+                                confirmLabel: 'رفض الطلب',
+                                cancelLabel: 'إلغاء',
+                                isDestructive: true,
+                                onConfirm: () => ctrl.rejectRequest(
+                                  request.requestId,
+                                  reason: 'تم الرفض بواسطة الإدارة',
+                                ),
+                              );
+                            }
+                          : null,
                     ),
-                    onApprove: request.isPending
-                        ? () {
-                            CustomBottomSheet.showConfirmation(
-                              title: 'تأكيد اعتماد طلب التوريد',
-                              message:
-                                  'سيتم اعتماد طلب التوريد ${request.requestUuid} وتوليد فاتورة مبيعات جديدة بقيمة ${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي.',
-                              confirmLabel: 'اعتماد وتوليد الفاتورة',
-                              cancelLabel: 'تراجع',
-                              onConfirm: () => controller.approveRequest(
-                                request.requestId,
-                              ),
-                            );
-                          }
-                        : null,
-                    onReject: request.isPending
-                        ? () {
-                            CustomBottomSheet.showConfirmation(
-                              title: 'تأكيد رفض طلب التوريد',
-                              message:
-                                  'هل أنت متأكد من رغبتك في رفض طلب التوريد ${request.requestUuid}؟',
-                              confirmLabel: 'رفض الطلب',
-                              cancelLabel: 'إلغاء',
-                              isDestructive: true,
-                              onConfirm: () => controller.rejectRequest(
-                                request.requestId,
-                                reason: 'تم الرفض بواسطة الإدارة',
-                              ),
-                            );
-                          }
-                        : null,
                   ),
                 ),
               ],

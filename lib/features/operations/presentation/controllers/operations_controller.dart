@@ -70,6 +70,30 @@ class OperationsController extends GetxController {
   final RxBool isLoadingRequestDetails = false.obs;
   final RxString requestDetailsError = ''.obs;
 
+  /// معرف الفاتورة الموسعة حالياً في السجل المالي (حصري — كرت واحد فقط مفتوح في الوقت الواحد)
+  final RxnInt expandedInvoiceId = RxnInt();
+
+  /// تبديل حالة توسيع بنود الفاتورة حصرياً
+  void toggleInvoiceExpansion(int invoiceId) {
+    if (expandedInvoiceId.value == invoiceId) {
+      expandedInvoiceId.value = null;
+    } else {
+      expandedInvoiceId.value = invoiceId;
+    }
+  }
+
+  /// معرف طلب التوريد الموسع حالياً في السجل (حصري — كرت واحد فقط مفتوح في الوقت الواحد)
+  final RxnInt expandedRequestId = RxnInt();
+
+  /// تبديل حالة توسيع بنود طلب التوريد حصرياً
+  void toggleRequestExpansion(int requestId) {
+    if (expandedRequestId.value == requestId) {
+      expandedRequestId.value = null;
+    } else {
+      expandedRequestId.value = requestId;
+    }
+  }
+
   /// حقل البحث الموحد ومؤقت التهدئة
   final TextEditingController searchController = TextEditingController();
   Timer? _searchDebounceTimer;
