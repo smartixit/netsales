@@ -125,22 +125,23 @@ class DashboardHeroLiquidityCard extends StatelessWidget {
                       if (isNegative)
                         Text(
                           '- ',
-                          style: AppTypography.displayMedium.copyWith(
+                          style: AppTypography.headlineSmall.copyWith(
                             color: colors.onPrimary,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       Text(
                         formattedBalance,
-                        style: AppTypography.displayMedium.copyWith(
+                        style: AppTypography.headlineSmall.copyWith(
                           color: colors.onPrimary,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
                         ),
                       ),
                       AppSpacing.hSm,
                       Text(
                         liquidity.currency,
-                        style: AppTypography.titleMedium.copyWith(
+                        style: AppTypography.titleSmall.copyWith(
                           color: colors.onPrimary.withValues(alpha: 0.85),
                           fontWeight: FontWeight.w600,
                         ),
@@ -149,7 +150,7 @@ class DashboardHeroLiquidityCard extends StatelessWidget {
                   ),
                 ),
 
-                AppSpacing.vLg,
+                AppSpacing.vMd,
 
                 // زر الإجراء السريع (تسوية / تغذية المحفظة)
                 Align(

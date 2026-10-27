@@ -30,7 +30,8 @@ class DashboardMultiEntityDeck extends StatefulWidget {
   });
 
   @override
-  State<DashboardMultiEntityDeck> createState() => _DashboardMultiEntityDeckState();
+  State<DashboardMultiEntityDeck> createState() =>
+      _DashboardMultiEntityDeckState();
 }
 
 class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
@@ -60,15 +61,46 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
       final isMasked = widget.controller.isPrivacyMasked.value;
       final hasMultiple = widget.controller.hasMultipleNetworks;
 
-      // في حال عدم وجود شبكات في المحفظة، الاعتماد على بطاقة السيولة الافتراضية
+      // 1. في حال كان المستخدم مديراً عاماً للنظام (Super Admin)
+      if (widget.controller.isSuperAdmin) {
+        final kpis = widget.controller.kpis;
+        final networksKpi = (kpis['networks'] as Map<String, dynamic>?) ?? {};
+        final posKpi = (kpis['pos'] as Map<String, dynamic>?) ?? {};
+        final totalNetworks = (networksKpi['total'] as num?)?.toInt() ?? 0;
+        final approvedNetworks =
+            (networksKpi['approved'] as num?)?.toInt() ?? 0;
+        final totalPos = (posKpi['total'] as num?)?.toInt() ?? 0;
+        final approvedPos = (posKpi['approved'] as num?)?.toInt() ?? 0;
+
+        return SizedBox(
+          height: 200.h,
+          child: _SuperAdminPlatformHeroCard(
+            balance: liquidity?.balance ?? 0.0,
+            currency: liquidity?.currency ?? 'YER',
+            totalNetworks: totalNetworks,
+            approvedNetworks: approvedNetworks,
+            totalPos: totalPos,
+            approvedPos: approvedPos,
+            isMasked: isMasked,
+            onActionTap: widget.onActionTap,
+          ),
+        );
+      }
+
+      // 2. في حال عدم وجود شبكات في المحفظة، الاعتماد على بطاقة السيولة الافتراضية
       if (networks.isEmpty) {
         if (liquidity == null) return const SizedBox.shrink();
+        final isPos = widget.controller.isPosAgent;
         return SizedBox(
-          height: 224.h,
+          height: 200.h,
           child: _SingleEntityCard(
             cardIndex: 0,
-            title: widget.controller.contextData?.displayName ?? 'الشبكة التشغيلية',
-            code: widget.controller.contextData?.displayCode ?? '',
+            title:
+                widget.controller.contextData?.displayName ??
+                (isPos ? 'نقطة البيع المعتمدة' : 'الشبكة التشغيلية'),
+            code:
+                widget.controller.contextData?.displayCode ??
+                (isPos ? 'POS AGENT' : ''),
             logoUrl: null,
             balance: liquidity.balance,
             currency: liquidity.currency,
@@ -86,7 +118,7 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
         final net = networks.first;
         final isNegative = net.walletBalance < 0;
         return SizedBox(
-          height: 224.h,
+          height: 200.h,
           child: _SingleEntityCard(
             title: net.networkName,
             code: net.networkCode,
@@ -108,8 +140,9 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
       return Column(
         children: [
           SizedBox(
-            height: 228.h,
+            height: 206.h,
             child: PageView.builder(
+              clipBehavior: Clip.none,
               controller: _pageController,
               itemCount: networks.length,
               physics: const BouncingScrollPhysics(),
@@ -218,7 +251,7 @@ class _SingleEntityCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      height: 224.h,
+      height: 200.h,
       decoration: BoxDecoration(
         gradient: isNegative
             ? LinearGradient(
@@ -258,10 +291,11 @@ class _SingleEntityCard extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      width: 38.r,
-                      height: 38.r,
+                      width: 36.r,
+                      height: 36.r,
+                      padding: EdgeInsets.all(AppSpacing.xxs),
                       decoration: BoxDecoration(
-                        color: colors.onPrimary.withValues(alpha: 0.15),
+                        color: colors.surface,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: colors.onPrimary.withValues(alpha: 0.25),
@@ -271,7 +305,7 @@ class _SingleEntityCard extends StatelessWidget {
                       clipBehavior: Clip.antiAlias,
                       child: CustomCachedImage.avatar(
                         url: logoUrl,
-                        radius: 19.r,
+                        radius: 18.r,
                         fallbackText: title.isNotEmpty ? title[0] : 'ش',
                       ),
                     ),
@@ -322,7 +356,7 @@ class _SingleEntityCard extends StatelessWidget {
                   ],
                 ),
 
-                AppSpacing.vSm,
+                AppSpacing.vXs,
 
                 // 2. الرصيد المالي المستقل للشبكة
                 Column(
@@ -334,77 +368,87 @@ class _SingleEntityCard extends StatelessWidget {
                           : 'رصيد محفظة الشبكة المتاح',
                       style: AppTypography.labelSmall.copyWith(
                         color: colors.onPrimary.withValues(alpha: 0.8),
+                        fontSize: 10.5.sp,
                       ),
                     ),
                     AppSpacing.vXxs,
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (isNegative && !isMasked)
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          if (isNegative && !isMasked)
+                            Text(
+                              '- ',
+                              style: AppTypography.headlineSmall.copyWith(
+                                color: colors.onPrimary,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                           Text(
-                            '- ',
-                            style: AppTypography.displayMedium.copyWith(
-                              color: colors.onPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        Flexible(
-                          child: Text(
                             formattedBalance,
-                            style: AppTypography.displayMedium.copyWith(
+                            style: AppTypography.headlineSmall.copyWith(
                               color: colors.onPrimary,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: isMasked ? 3.0 : 0.0,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: isMasked ? 2.5 : -0.5,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        AppSpacing.hSm,
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 4.h),
-                          child: Text(
+                          AppSpacing.hSm,
+                          Text(
                             currency,
-                            style: AppTypography.titleMedium.copyWith(
+                            style: AppTypography.titleSmall.copyWith(
                               color: colors.onPrimary.withValues(alpha: 0.85),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
 
-                AppSpacing.vSm,
+                AppSpacing.vXs,
 
                 // 3. النبض الميداني المباشر والإجراء السريع
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // إحصائيات سريعة للكيان
-                    Row(
-                      children: [
-                        _MicroMetricBadge(
-                          icon: Icons.storefront_outlined,
-                          label: '$activePosCount نقطة',
+                    Flexible(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _MicroMetricBadge(
+                              icon: Icons.storefront_outlined,
+                              label: '$activePosCount نقطة',
+                            ),
+                            if (pendingRequestsCount > 0) ...[
+                              AppSpacing.hXs,
+                              _MicroMetricBadge(
+                                icon: Icons.pending_actions_rounded,
+                                label: '$pendingRequestsCount معلق',
+                                isWarning: true,
+                              ),
+                            ],
+                          ],
                         ),
-                        if (pendingRequestsCount > 0) ...[
-                          AppSpacing.hXs,
-                          _MicroMetricBadge(
-                            icon: Icons.pending_actions_rounded,
-                            label: '$pendingRequestsCount طلب معلق',
-                            isWarning: true,
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
-
+                    AppSpacing.hSm,
                     // زر الإجراء السريع
                     CustomButton.secondary(
-                      text: isNegative ? 'تسوية الحساب' : 'سجل المحفظة',
-                      icon: isNegative ? Icons.payment_rounded : Icons.history_rounded,
+                      text: isNegative ? 'تسوية' : 'سجل المحفظة',
+                      icon: isNegative
+                          ? Icons.payment_rounded
+                          : Icons.account_balance_wallet_outlined,
                       size: AppButtonSize.small,
+                      height: 32.h,
+                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                       onPressed: onActionTap,
                     ),
                   ],
@@ -435,10 +479,7 @@ class _MicroMetricBadge extends StatelessWidget {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: 3.h,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3.h),
       decoration: BoxDecoration(
         color: isWarning
             ? colors.warning.withValues(alpha: 0.28)
@@ -460,6 +501,239 @@ class _MicroMetricBadge extends StatelessWidget {
               color: isWarning ? colors.warningContainer : colors.onPrimary,
               fontSize: 10.sp,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// ============================================================================
+/// بطاقة السيادة النقدية والتداول للمنظومة لمدير النظام الأعلى (Super Admin Hero)
+/// ============================================================================
+class _SuperAdminPlatformHeroCard extends StatelessWidget {
+  final double balance;
+  final String currency;
+  final int totalNetworks;
+  final int approvedNetworks;
+  final int totalPos;
+  final int approvedPos;
+  final bool isMasked;
+  final VoidCallback? onActionTap;
+
+  const _SuperAdminPlatformHeroCard({
+    required this.balance,
+    required this.currency,
+    required this.totalNetworks,
+    required this.approvedNetworks,
+    required this.totalPos,
+    required this.approvedPos,
+    required this.isMasked,
+    this.onActionTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final formattedBalance = isMasked
+        ? '••••••••'
+        : AmountFormatter.formatValue(balance.abs());
+
+    return Container(
+      width: double.infinity,
+      height: 200.h,
+      decoration: BoxDecoration(
+        gradient: AppGradients.entitySapphire(context),
+        borderRadius: AppRadius.xlRadius,
+        boxShadow: AppElevation.tinted(context, const Color(0xFF1C426F)),
+      ),
+      child: Stack(
+        children: [
+          // علامة مائية سيادية هندسية
+          PositionedDirectional(
+            end: -20.r,
+            bottom: -20.r,
+            child: Icon(
+              Icons.shield_rounded,
+              size: 160.r,
+              color: colors.onPrimary.withValues(alpha: 0.06),
+            ),
+          ),
+
+          Padding(
+            padding: EdgeInsets.all(AppSpacing.cardPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // 1. ترويسة المنظومة السيادية
+                Row(
+                  children: [
+                    Container(
+                      width: 36.r,
+                      height: 36.r,
+                      decoration: BoxDecoration(
+                        color: colors.onPrimary.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colors.onPrimary.withValues(alpha: 0.25),
+                          width: 1.w,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.admin_panel_settings_rounded,
+                        size: 20.r,
+                        color: colors.onPrimary,
+                      ),
+                    ),
+                    AppSpacing.hSm,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'منصة NetSales المركزية',
+                            style: AppTypography.titleSmall.copyWith(
+                              color: colors.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'النظرة السيادية الشاملة للمنظومة',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: colors.onPrimary.withValues(alpha: 0.75),
+                              fontSize: 10.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: 2.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.onPrimary.withValues(alpha: 0.18),
+                        borderRadius: AppRadius.fullRadius,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6.r,
+                            height: 6.r,
+                            decoration: BoxDecoration(
+                              color: colors.success,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          AppSpacing.hXxs,
+                          Text(
+                            'المنظومة نشطة',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: colors.onPrimary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 10.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                AppSpacing.vXs,
+
+                // 2. إجمالي حجم التداول والسيولة النقدية في المنظومة
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'إجمالي حجم التداول والسيولة النقدية للمنظومة',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onPrimary.withValues(alpha: 0.8),
+                        fontSize: 10.5.sp,
+                      ),
+                    ),
+                    AppSpacing.vXxs,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            formattedBalance,
+                            style: AppTypography.headlineSmall.copyWith(
+                              color: colors.onPrimary,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: isMasked ? 2.5 : -0.5,
+                            ),
+                          ),
+                          AppSpacing.hSm,
+                          Text(
+                            currency,
+                            style: AppTypography.titleSmall.copyWith(
+                              color: colors.onPrimary.withValues(alpha: 0.85),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                AppSpacing.vXs,
+
+                // 3. شريط مؤشرات أسطول المنظومة والزر الإجرائي
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _MicroMetricBadge(
+                              icon: Icons.cell_tower_rounded,
+                              label: '$approvedNetworks/$totalNetworks شبكة',
+                            ),
+                            AppSpacing.hXs,
+                            _MicroMetricBadge(
+                              icon: Icons.point_of_sale_rounded,
+                              label: '$approvedPos/$totalPos نقطة بيع',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    AppSpacing.hXs,
+                    CustomButton.primary(
+                      text: 'إدارة المنظومة',
+                      icon: Icons.arrow_back_ios_rounded,
+                      size: AppButtonSize.small,
+                      height: 32.h,
+                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                      foregroundColor: colors.primary,
+                      backgroundColor: colors.surface,
+                      textStyle: AppTypography.labelSmall.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11.sp,
+                      ),
+                      onPressed: onActionTap,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_view.dart';
@@ -34,51 +33,44 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
         body: Builder(
           builder: (bodyContext) {
             final mediaQuery = MediaQuery.of(bodyContext);
-            final topPadding = mediaQuery.padding.top + 68.h;
+            final appBarBottom = mediaQuery.padding.top;
 
-            return MediaQuery(
-              data: mediaQuery.copyWith(
-                viewPadding: mediaQuery.viewPadding.copyWith(
-                  bottom: mediaQuery.padding.bottom,
+            return Stack(
+              children: [
+                // الحاوية متعددة التبويبات الممتدة بكامل الشاشة Edge-to-Edge خلف الـ AppBar الزجاجي
+                Positioned.fill(
+                  child: Obx(
+                    () => IndexedStack(
+                      index: controller.selectedIndex.value,
+                      children: const [
+                        // Tab 0: لوحة القيادة والتوزيع (Dashboard)
+                        DashboardView(),
+
+                        // Tab 1: فواتير المبيعات وطلبات التوريد (Operations)
+                        OperationsScreen(),
+
+                        // Tab 2: شبكة الشركاء ونقاط التوزيع (Partners & Distribution)
+                        PartnersScreen(),
+
+                        // Tab 3: المحافظ والمالية والإعدادات (More & Financial Hub)
+                        MoreScreen(),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              child: Stack(
-                children: [
-                  // الحاوية متعددة التبويبات الممتدة بكامل الشاشة خلف الـ AppBar الزجاجي
-                  Positioned.fill(
-                    child: Obx(
-                      () => IndexedStack(
-                        index: controller.selectedIndex.value,
-                        children: const [
-                          // Tab 0: لوحة القيادة والتوزيع (Dashboard)
-                          DashboardView(),
 
-                          // Tab 1: فواتير المبيعات وطلبات التوريد (Operations)
-                          OperationsScreen(),
-
-                          // Tab 2: شبكة الشركاء ونقاط التوزيع (Partners & Distribution)
-                          PartnersScreen(),
-
-                          // Tab 3: المحافظ والمالية والإعدادات (More & Financial Hub)
-                          MoreScreen(),
-                        ],
-                      ),
+                // شريط التنبيه اللحظي لقطع الاتصال الشبكي أسفل الـ AppBar الزجاجي مباشرة
+                Positioned(
+                  top: appBarBottom,
+                  left: 0,
+                  right: 0,
+                  child: Obx(
+                    () => CustomOfflineBanner(
+                      isOffline: !controller.isOnline.value,
                     ),
                   ),
-
-                  // شريط التنبيه اللحظي لقطع الاتصال الشبكي أسفل الـ AppBar الزجاجي
-                  Positioned(
-                    top: topPadding,
-                    left: 0,
-                    right: 0,
-                    child: Obx(
-                      () => CustomOfflineBanner(
-                        isOffline: !controller.isOnline.value,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),

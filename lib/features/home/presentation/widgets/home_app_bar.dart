@@ -30,7 +30,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   const HomeAppBar({super.key, required this.controller});
 
   @override
-  Size get preferredSize => Size.fromHeight(68.h);
+  Size get preferredSize => Size.fromHeight(70.h);
 
   String _getTimeBasedGreeting() {
     final hour = DateTime.now().hour;
@@ -66,7 +66,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.xs,
+                vertical: AppSpacing.md,
               ),
               child: Row(
                 children: [

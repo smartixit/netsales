@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
@@ -8,34 +7,32 @@ import 'package:netsales/features/operations/presentation/widgets/operations_sea
 import 'package:netsales/features/operations/presentation/widgets/operations_segmented_header.dart';
 import 'package:netsales/features/operations/presentation/widgets/sale_invoices_feed.dart';
 import 'package:netsales/features/operations/presentation/widgets/voucher_requests_feed.dart';
+import 'package:netsales/widgets/foundation/home_tab_shell.dart';
 
 class OperationsScreen extends GetView<OperationsController> {
   const OperationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final topPadding = MediaQuery.paddingOf(context).top + 68.h + AppSpacing.xs;
-
-    return Padding(
-      padding: EdgeInsets.only(top: topPadding),
+    return HomeTabShell.fixed(
       child: Column(
         children: [
           OperationsSegmentedHeader(controller: controller),
-        AppSpacing.vSm,
-        OperationsSearchAndFilterBar(controller: controller),
-        AppSpacing.vSm,
-        OperationsKpiSummaryStrip(controller: controller),
-        AppSpacing.vSm,
-        Expanded(
-          child: Obx(() {
-            if (controller.activeSegmentIndex.value == 0) {
-              return SaleInvoicesFeed(controller: controller);
-            }
-            return const VoucherRequestsFeed();
-          }),
-        ),
-      ],
-    ),
-  );
+          AppSpacing.vSm,
+          OperationsSearchAndFilterBar(controller: controller),
+          AppSpacing.vSm,
+          OperationsKpiSummaryStrip(controller: controller),
+          AppSpacing.vSm,
+          Expanded(
+            child: Obx(() {
+              if (controller.activeSegmentIndex.value == 0) {
+                return SaleInvoicesFeed(controller: controller);
+              }
+              return const VoucherRequestsFeed();
+            }),
+          ),
+        ],
+      ),
+    );
   }
 }

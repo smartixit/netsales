@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/themes/app_breakpoints.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_distribution_performance.dart';
@@ -18,6 +15,7 @@ import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_voucher_request_sheet.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/foundation/home_tab_shell.dart';
 
 /// ============================================================================
 /// واجهة لوحة القيادة التجميعية الرشيقة (DashboardView)
@@ -29,11 +27,10 @@ class DashboardView extends GetView<DashboardController> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return Obx(() {
-      // 1. حالة التحميل الأولي عبر الهيكل التشكيلي الموحد (Skeleton Shimmer)
-      if (controller.isLoading.value) {
+      // 1. حالة التحميل الأولي أو السحب للتحديث عبر الهيكل التشكيلي الموحد (Skeleton Shimmer)
+      if ((controller.isLoading.value && controller.overview.value == null) ||
+          controller.isRefreshing.value) {
         return const DashboardSkeletonView();
       }
 
@@ -53,25 +50,13 @@ class DashboardView extends GetView<DashboardController> {
       }
 
       final isMasked = controller.isPrivacyMasked.value;
-      final topPadding = MediaQuery.paddingOf(context).top + 68.h;
 
       // 3. حالة النجاح وعرض الشاشة التنفيذية المتكاملة
-      return RefreshIndicator(
-        color: colors.primary,
-        edgeOffset: topPadding,
+      return HomeTabShell.scrollable(
         onRefresh: () => controller.loadDashboard(isRefresh: true),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          padding: EdgeInsets.only(
-            top: topPadding + AppSpacing.xs,
-            bottom: 100.h,
-          ),
-          child: ResponsiveContentWrapper(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
                 // 1. منصة بطاقات الكيانات الشبكية المستقلة (Multi-Entity Horizon Deck)
                 DashboardMultiEntityDeck(
                   controller: controller,
@@ -110,6 +95,17 @@ class DashboardView extends GetView<DashboardController> {
 
                 // 6. منصة العمليات والإجراءات السريعة
                 DashboardQuickShortcutsBar(
+                  isSuperAdmin: controller.isSuperAdmin,
+                  onManageNetworksTap: () {
+                    if (Get.isRegistered<HomeLayoutController>()) {
+                      Get.find<HomeLayoutController>().changeTab(2);
+                    }
+                  },
+                  onAuditOperationsTap: () {
+                    if (Get.isRegistered<HomeLayoutController>()) {
+                      Get.find<HomeLayoutController>().changeTab(1);
+                    }
+                  },
                   onNewInvoiceTap: () => CreateSaleInvoiceSheet.show(context),
                   onNewRequestTap: () =>
                       CreateVoucherRequestSheet.show(context),
@@ -137,8 +133,6 @@ class DashboardView extends GetView<DashboardController> {
                   isMasked: isMasked,
                 ),
               ],
-            ),
-          ),
         ),
       );
     });

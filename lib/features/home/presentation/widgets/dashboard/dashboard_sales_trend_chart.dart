@@ -94,7 +94,9 @@ class DashboardSalesTrendChart extends StatelessWidget {
 
       final isMasked = controller.isPrivacyMasked.value;
       final kpis = overview.kpis;
-      final salesData = (kpis['sales'] as Map<String, dynamic>?) ?? {};
+      final salesData = (kpis['platform_sales'] as Map<String, dynamic>?) ??
+          (kpis['sales'] as Map<String, dynamic>?) ??
+          {};
 
       final currentAmount = (salesData['current_amount'] as num?)?.toDouble() ?? 0.0;
       final growth = (salesData['growth_percentage'] as num?)?.toDouble() ?? 0.0;
@@ -147,7 +149,9 @@ class DashboardSalesTrendChart extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'إجمالي مبيعات التوزيع الميداني',
+                        controller.isSuperAdmin
+                            ? 'إجمالي تداول فواتير المنظومة'
+                            : 'إجمالي مبيعات التوزيع الميداني',
                         style: AppTypography.labelMedium.copyWith(
                           color: colors.onSurfaceVariant,
                           fontWeight: FontWeight.w600,

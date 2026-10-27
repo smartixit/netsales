@@ -5,7 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_list_tile.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_text.dart';
+import 'package:netsales/widgets/foundation/home_tab_shell.dart';
 
 /// ============================================================================
 /// DashboardSkeletonView — Skeleton shimmer placeholder for the dashboard
@@ -21,66 +21,68 @@ class DashboardSkeletonView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final topPadding = MediaQuery.paddingOf(context).top + 68.h;
-
-    return SingleChildScrollView(
+    return HomeTabShell.scrollable(
       physics: const NeverScrollableScrollPhysics(),
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.screenPadding,
-          right: AppSpacing.screenPadding,
-          top: topPadding + AppSpacing.md,
-          bottom: 100.h,
-        ),
-        child: CustomSkeletonShimmer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. هيكل ترويسة الكيان (سطران نصيان متفاوتين)
-              const CustomSkeletonText(lines: 1),
-              AppSpacing.vMd,
-              const CustomSkeletonText(lines: 1),
-
-              AppSpacing.vLg,
-
-              // 2. هيكل بطاقة السيولة المالية المركزية
+      useHorizontalPadding: true,
+      child: CustomSkeletonShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+              // 1. هيكل بطاقة الكيان الشبكي المستقل (Multi-Entity Deck Blueprint)
               Container(
                 width: double.infinity,
-                height: 140.h,
+                height: 200.h,
                 decoration: BoxDecoration(
                   color: colors.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(AppRadius.lg.r),
+                  borderRadius: AppRadius.xlRadius,
                 ),
               ),
 
               AppSpacing.vLg,
 
-              // 3. هيكل الرادار/التنبيهات (بلاطات قائمة)
-              const CustomSkeletonListTile(hasLeading: true, lines: 2),
-              AppSpacing.vMd,
-              const CustomSkeletonListTile(hasLeading: true, lines: 2),
+              // 2. هيكل شريط الفترات الزمنية الزجاجي (Segmented Bar Blueprint)
+              Container(
+                width: double.infinity,
+                height: 38.h,
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHigh,
+                  borderRadius: AppRadius.fullRadius,
+                ),
+              ),
 
               AppSpacing.vLg,
 
-              // 4. هيكل شبكة البينتو (صفان من البلاطات)
+              // 3. هيكل المخطط البياني الانسيابي (Sales Trend Chart Blueprint)
+              Container(
+                width: double.infinity,
+                height: 190.h,
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHigh,
+                  borderRadius: AppRadius.lgRadius,
+                ),
+              ),
+
+              AppSpacing.vLg,
+
+              // 4. هيكل مصفوفة كفاءة التوزيع الميداني (Bento Distribution Grid)
               Row(
                 children: [
                   Expanded(
                     child: Container(
-                      height: 96.h,
+                      height: 110.h,
                       decoration: BoxDecoration(
                         color: colors.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(AppRadius.md.r),
+                        borderRadius: AppRadius.lgRadius,
                       ),
                     ),
                   ),
                   AppSpacing.hMd,
                   Expanded(
                     child: Container(
-                      height: 96.h,
+                      height: 110.h,
                       decoration: BoxDecoration(
                         color: colors.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(AppRadius.md.r),
+                        borderRadius: AppRadius.lgRadius,
                       ),
                     ),
                   ),
@@ -89,14 +91,13 @@ class DashboardSkeletonView extends StatelessWidget {
 
               AppSpacing.vLg,
 
-              // 5. هيكل تغذية العمليات الأخيرة
-              const CustomSkeletonListTile(hasLeading: false, lines: 1),
+              // 5. هيكل سجل العمليات الأخيرة (Recent Feed Tiles)
+              const CustomSkeletonListTile(hasLeading: true, lines: 2),
               AppSpacing.vMd,
-              const CustomSkeletonListTile(hasLeading: false, lines: 1),
+              const CustomSkeletonListTile(hasLeading: true, lines: 2),
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

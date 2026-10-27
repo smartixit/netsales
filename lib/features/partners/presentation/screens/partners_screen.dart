@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
@@ -9,6 +8,7 @@ import 'package:netsales/features/partners/presentation/widgets/partners_search_
 import 'package:netsales/features/partners/presentation/widgets/partners_segmented_header.dart';
 import 'package:netsales/features/partners/presentation/widgets/partners_stats_header.dart';
 import 'package:netsales/features/partners/presentation/widgets/pos_list_feed.dart';
+import 'package:netsales/widgets/foundation/home_tab_shell.dart';
 
 /// ============================================================================
 /// شاشة الشركاء وشبكة التوزيع المجمعة (PartnersScreen)
@@ -20,12 +20,9 @@ class PartnersScreen extends GetView<PartnersController> {
 
   @override
   Widget build(BuildContext context) {
-    final topPadding = MediaQuery.paddingOf(context).top + 68.h + AppSpacing.xs;
-
-    return Padding(
-      padding: EdgeInsets.only(top: topPadding),
+    return HomeTabShell.fixed(
       child: Column(
-        children: [
+      children: [
         // 1. رأس التبويب القطاعي (مزودو الشبكات | نقاط البيع | عقود التوزيع)
         PartnersSegmentedHeader(controller: controller),
         AppSpacing.vSm,
@@ -57,5 +54,5 @@ class PartnersScreen extends GetView<PartnersController> {
       ],
     ),
   );
-  }
+}
 }

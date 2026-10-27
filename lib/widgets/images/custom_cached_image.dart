@@ -196,11 +196,7 @@ class CustomCachedImage extends StatelessWidget {
 
   Widget _buildFallback(BuildContext context) {
     if (fallback != null) {
-      return SizedBox(
-        width: width,
-        height: height,
-        child: fallback,
-      );
+      return SizedBox(width: width, height: height, child: fallback);
     }
 
     final colors = context.colors;
@@ -218,7 +214,8 @@ class CustomCachedImage extends StatelessWidget {
         alignment: Alignment.center,
         child: Text(
           fallbackText!.trim(),
-          style: fallbackTextStyle ??
+          style:
+              fallbackTextStyle ??
               AppTypography.labelMedium.copyWith(
                 color: colors.primary,
                 fontWeight: FontWeight.bold,
@@ -259,7 +256,7 @@ class CustomCachedImageProvider extends CachedNetworkImageProvider {
     super.scale,
     super.headers,
   }) : super(
-          NetSalesDioFileService.normalizeMediaUrl(url),
-          cacheManager: NetSalesCacheManager.instance,
-        );
+         NetSalesDioFileService.normalizeMediaUrl(url),
+         cacheManager: NetSalesCacheManager.instance,
+       );
 }

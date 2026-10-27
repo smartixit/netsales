@@ -301,23 +301,27 @@ class _StandardLayout extends StatelessWidget {
                 child: Icon(card.icon, color: iconColor, size: 18.r),
               ),
               if (card.badgeText != null)
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs,
-                    vertical: AppSpacing.xxs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: card.isPositiveBadge
-                        ? colors.success.withValues(alpha: 0.12)
-                        : colors.error.withValues(alpha: 0.12),
-                    borderRadius: AppRadius.fullRadius,
-                  ),
-                  child: Text(
-                    card.badgeText!,
-                    style: AppTypography.labelSmall.copyWith(
-                      color: card.isPositiveBadge ? colors.success : colors.error,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10.sp,
+                Flexible(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
+                      vertical: AppSpacing.xxs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: card.isPositiveBadge
+                          ? colors.success.withValues(alpha: 0.12)
+                          : colors.error.withValues(alpha: 0.12),
+                      borderRadius: AppRadius.fullRadius,
+                    ),
+                    child: Text(
+                      card.badgeText!,
+                      style: AppTypography.labelSmall.copyWith(
+                        color: card.isPositiveBadge ? colors.success : colors.error,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10.sp,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),

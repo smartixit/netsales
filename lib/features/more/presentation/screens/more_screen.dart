@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -13,6 +12,7 @@ import 'package:netsales/features/more/presentation/widgets/more_menu_tile.dart'
 import 'package:netsales/features/more/presentation/widgets/more_profile_hero_card.dart';
 import 'package:netsales/features/more/presentation/widgets/more_quick_metrics_row.dart';
 import 'package:netsales/features/more/presentation/widgets/more_wallet_card.dart';
+import 'package:netsales/widgets/foundation/home_tab_shell.dart';
 
 /// ============================================================================
 /// شاشة قطاع المزيد والمركز المالي (MoreScreen)
@@ -25,23 +25,11 @@ class MoreScreen extends GetView<MoreController> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final topPadding = MediaQuery.paddingOf(context).top + 68.h + AppSpacing.sm;
 
-    return RefreshIndicator(
-      color: colors.primary,
-      edgeOffset: MediaQuery.paddingOf(context).top + 68.h,
+    return HomeTabShell.scrollable(
+      useHorizontalPadding: true,
       onRefresh: () => controller.loadOverview(isRefresh: true),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        padding: EdgeInsets.only(
-          left: AppSpacing.screenPadding,
-          right: AppSpacing.screenPadding,
-          top: topPadding,
-          bottom: 100.h,
-        ),
-        child: Obx(
+      child: Obx(
           () => Column(
             children: [
               // 1. بطاقة الهوية الشخصية ومظهر التطبيق
@@ -180,7 +168,6 @@ class MoreScreen extends GetView<MoreController> {
               // 7. قسم تسجيل الخروج الآمن
               MoreLogoutSection(controller: controller),
             ],
-          ),
         ),
       ),
     );

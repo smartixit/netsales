@@ -27,7 +27,8 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
     return ApiService.instance.get<DashboardOverviewModel>(
       ApiConstants.dashboardOverview,
       queryParameters: queryParameters,
-      fromJson: (json) => DashboardOverviewModel.fromJson(json as Map<String, dynamic>),
+      fromJson: (json) =>
+          DashboardOverviewModel.fromJson(json as Map<String, dynamic>),
     );
   }
 }

@@ -34,7 +34,8 @@ class CustomToast {
     final context = Get.context ?? Get.overlayContext;
     if (context == null) return;
 
-    final overlay = Overlay.maybeOf(context) ??
+    final overlay =
+        Overlay.maybeOf(context) ??
         Get.key.currentState?.overlay ??
         Navigator.maybeOf(context)?.overlay;
 
@@ -46,7 +47,7 @@ class CustomToast {
     final entry = OverlayEntry(
       builder: (toastContext) {
         final colors = toastContext.colors;
-        final effectiveBottom = bottomOffset ?? 96.h;
+        final effectiveBottom = bottomOffset ?? 150.h;
 
         return Positioned(
           bottom: effectiveBottom,
@@ -54,60 +55,61 @@ class CustomToast {
           right: AppSpacing.lg,
           child: Align(
             alignment: Alignment.bottomCenter,
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                constraints: BoxConstraints(maxWidth: 340.w),
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.sm,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.inverseSurface,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                  boxShadow: AppElevation.level3(toastContext),
-                  border: Border.all(
-                    color: colors.outlineVariant.withValues(alpha: 0.2),
-                    width: 1.r,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(
-                        icon,
-                        size: 18.r,
-                        color: iconColor ?? colors.onInverseSurface,
-                      ),
-                      AppSpacing.hSm,
-                    ],
-                    Flexible(
-                      child: Text(
-                        message,
-                        textAlign: TextAlign.center,
-                        style: AppTypography.labelLarge.copyWith(
-                          color: textColor ?? colors.onInverseSurface,
+            child:
+                Material(
+                      color: Colors.transparent,
+                      child: Container(
+                        constraints: BoxConstraints(maxWidth: 340.w),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
+                          vertical: AppSpacing.sm,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        decoration: BoxDecoration(
+                          color: colors.inverseSurface,
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                          boxShadow: AppElevation.level3(toastContext),
+                          border: Border.all(
+                            color: colors.outlineVariant.withValues(alpha: 0.2),
+                            width: 1.r,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (icon != null) ...[
+                              Icon(
+                                icon,
+                                size: 18.r,
+                                color: iconColor ?? colors.onInverseSurface,
+                              ),
+                              AppSpacing.hSm,
+                            ],
+                            Flexible(
+                              child: Text(
+                                message,
+                                textAlign: TextAlign.center,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: textColor ?? colors.onInverseSurface,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    )
+                    .animate()
+                    .fadeIn(
+                      duration: AppMotion.normal,
+                      curve: AppMotion.decelerate,
+                    )
+                    .slideY(
+                      begin: 0.3,
+                      end: 0,
+                      duration: AppMotion.normal,
+                      curve: AppMotion.decelerate,
                     ),
-                  ],
-                ),
-              ),
-            )
-                .animate()
-                .fadeIn(
-                  duration: AppMotion.normal,
-                  curve: AppMotion.decelerate,
-                )
-                .slideY(
-                  begin: 0.3,
-                  end: 0,
-                  duration: AppMotion.normal,
-                  curve: AppMotion.decelerate,
-                ),
           ),
         );
       },

@@ -8,6 +8,9 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
+import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
+import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
 /// مصفوفة أداء وتغطية التوزيع الميداني (DashboardDistributionPerformance)
@@ -32,6 +35,28 @@ class DashboardDistributionPerformance extends StatelessWidget {
 
       final isMasked = controller.isPrivacyMasked.value;
       final kpis = overview.kpis;
+
+      // حالة مدير النظام الأعلى: عرض مصفوفة أسطول المنظومة
+      if (controller.isSuperAdmin) {
+        final networksKpi = (kpis['networks'] as Map<String, dynamic>?) ?? {};
+        final totalNetworks = (networksKpi['total'] as num?)?.toInt() ?? 0;
+        final approvedNetworks = (networksKpi['approved'] as num?)?.toInt() ?? 0;
+        final pendingNetworks = (networksKpi['pending'] as num?)?.toInt() ?? 0;
+
+        final posKpi = (kpis['pos'] as Map<String, dynamic>?) ?? {};
+        final totalPos = (posKpi['total'] as num?)?.toInt() ?? 0;
+        final approvedPos = (posKpi['approved'] as num?)?.toInt() ?? 0;
+        final pendingPos = (posKpi['pending'] as num?)?.toInt() ?? 0;
+
+        return _SuperAdminFleetBento(
+          totalNetworks: totalNetworks,
+          approvedNetworks: approvedNetworks,
+          pendingNetworks: pendingNetworks,
+          totalPos: totalPos,
+          approvedPos: approvedPos,
+          pendingPos: pendingPos,
+        );
+      }
 
       // 1. استخراج بيانات المبيعات
       final salesData = (kpis['sales'] as Map<String, dynamic>?) ?? {};
@@ -388,3 +413,218 @@ class DashboardDistributionPerformance extends StatelessWidget {
     });
   }
 }
+
+/// ============================================================================
+/// ودجت مصفوفة أسطول المنظومة لمدير النظام الأعلى (Super Admin Fleet Bento)
+/// ============================================================================
+class _SuperAdminFleetBento extends StatelessWidget {
+  final int totalNetworks;
+  final int approvedNetworks;
+  final int pendingNetworks;
+  final int totalPos;
+  final int approvedPos;
+  final int pendingPos;
+
+  const _SuperAdminFleetBento({
+    required this.totalNetworks,
+    required this.approvedNetworks,
+    required this.pendingNetworks,
+    required this.totalPos,
+    required this.approvedPos,
+    required this.pendingPos,
+  });
+
+  void _navigateToPartners(int segmentIndex) {
+    if (Get.isRegistered<HomeLayoutController>()) {
+      Get.find<HomeLayoutController>().changeTab(2); // تبويب الشركاء
+      if (Get.isRegistered<PartnersController>()) {
+        Get.find<PartnersController>().changeSegment(segmentIndex);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // عنوان القسم
+        Row(
+          children: [
+            Container(
+              width: 28.r,
+              height: 28.r,
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: 0.1),
+                borderRadius: AppRadius.xsRadius,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.hub_rounded,
+                size: 16.r,
+                color: colors.primary,
+              ),
+            ),
+            AppSpacing.hSm,
+            Text(
+              'مصفوفة أسطول التوزيع والشبكات',
+              style: AppTypography.titleMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+
+        AppSpacing.vMd,
+
+        // صف البطاقتين
+        Row(
+          children: [
+            // 1. أسطول شبكات الإنترنت
+            Expanded(
+              child: _FleetTile(
+                title: 'شبكات الإنترنت',
+                activeCount: approvedNetworks,
+                totalCount: totalNetworks,
+                pendingCount: pendingNetworks,
+                icon: Icons.cell_tower_rounded,
+                iconColor: colors.primary,
+                iconBgColor: colors.primaryContainer.withValues(alpha: 0.4),
+                onTap: () => _navigateToPartners(0),
+              ),
+            ),
+
+            AppSpacing.hMd,
+
+            // 2. أسطول نقاط البيع
+            Expanded(
+              child: _FleetTile(
+                title: 'نقاط التوزيع الميداني',
+                activeCount: approvedPos,
+                totalCount: totalPos,
+                pendingCount: pendingPos,
+                icon: Icons.point_of_sale_rounded,
+                iconColor: colors.secondary,
+                iconBgColor: colors.secondaryContainer.withValues(alpha: 0.4),
+                onTap: () => _navigateToPartners(1),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _FleetTile extends StatelessWidget {
+  final String title;
+  final int activeCount;
+  final int totalCount;
+  final int pendingCount;
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBgColor;
+  final VoidCallback onTap;
+
+  const _FleetTile({
+    required this.title,
+    required this.activeCount,
+    required this.totalCount,
+    required this.pendingCount,
+    required this.icon,
+    required this.iconColor,
+    required this.iconBgColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return CustomInteractiveBounce(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(AppSpacing.cardPadding),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: AppRadius.lgRadius,
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: 0.3),
+            width: 1.w,
+          ),
+          boxShadow: AppElevation.level1(context),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 36.r,
+                  height: 36.r,
+                  decoration: BoxDecoration(
+                    color: iconBgColor,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(icon, color: iconColor, size: 20.r),
+                ),
+                if (pendingCount > 0)
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
+                      vertical: 2.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.warning.withValues(alpha: 0.2),
+                      borderRadius: AppRadius.fullRadius,
+                    ),
+                    child: Text(
+                      '$pendingCount معلق',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.warning,
+                        fontSize: 9.5.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            AppSpacing.vSm,
+            Text(
+              title,
+              style: AppTypography.labelMedium.copyWith(
+                color: colors.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            AppSpacing.vXxs,
+            Text(
+              '$activeCount نشطة',
+              style: AppTypography.titleLarge.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
+                fontSize: 18.sp,
+              ),
+            ),
+            AppSpacing.vXxs,
+            Text(
+              'من إجمالي $totalCount مسجلة',
+              style: AppTypography.bodySmall.copyWith(
+                color: colors.onSurfaceVariant,
+                fontSize: 11.sp,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

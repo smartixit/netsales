@@ -36,17 +36,31 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
 
       final isMasked = controller.isPrivacyMasked.value;
       final kpis = overview.kpis;
-      final requests = (kpis['requests'] as Map<String, dynamic>?) ?? {};
-      final pendingCount = (requests['pending_count'] as num?)?.toInt() ?? 0;
-      final pendingTotalAmount = (requests['pending_total_amount'] as num?)?.toDouble() ?? 0.0;
+      final requests = (kpis['requests'] as Map<String, dynamic>?) ??
+          (kpis['pending_requests'] as Map<String, dynamic>?) ??
+          {};
+      final pendingCount = (requests['pending_count'] as num?)?.toInt() ??
+          (requests['count'] as num?)?.toInt() ??
+          0;
+      final pendingTotalAmount =
+          (requests['pending_total_amount'] as num?)?.toDouble() ?? 0.0;
+
+      final networksKpi = (kpis['networks'] as Map<String, dynamic>?) ?? {};
+      final pendingNetworks = (networksKpi['pending'] as num?)?.toInt() ?? 0;
+      final posKpi = (kpis['pos'] as Map<String, dynamic>?) ?? {};
+      final pendingPos = (posKpi['pending'] as num?)?.toInt() ?? 0;
+
       final alerts = overview.alerts;
 
       final formattedPendingAmount = isMasked
           ? '••••••'
           : '${AmountFormatter.formatValue(pendingTotalAmount, decimalPlaces: 0)} ر.ي';
 
-      // 1. في حال وجود طلبات معلقة من نقاط البيع
-      if (pendingCount > 0) {
+      final hasSuperAdminPending = controller.isSuperAdmin &&
+          (pendingNetworks > 0 || pendingPos > 0 || pendingCount > 0);
+
+      // 1. في حال وجود اعتمادات أو طلبات معلقة
+      if (pendingCount > 0 || hasSuperAdminPending) {
         return Container(
           padding: EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
@@ -90,7 +104,9 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'مركز الاعتمادات والطلبات العاجلة',
+                          controller.isSuperAdmin
+                              ? 'مركز الاعتمادات والرقابة السيادية'
+                              : 'مركز الاعتمادات والطلبات العاجلة',
                           style: AppTypography.titleSmall.copyWith(
                             color: colors.onSurface,
                             fontWeight: FontWeight.w800,
@@ -98,7 +114,9 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
                         ),
                         AppSpacing.vXxs,
                         Text(
-                          'نقاط البيع بانتظار تزويدها بالكروت لمواصلة البيع',
+                          controller.isSuperAdmin
+                              ? 'يوجد ${pendingNetworks > 0 ? "$pendingNetworks شبكة و" : ""}${pendingPos > 0 ? " $pendingPos نقطة بيع و" : ""} $pendingCount طلب كروت بانتظار الاعتماد'
+                              : 'نقاط البيع بانتظار تزويدها بالكروت لمواصلة البيع',
                           style: AppTypography.bodySmall.copyWith(
                             color: colors.onSurfaceVariant,
                             fontSize: 11.sp,
@@ -117,7 +135,7 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
                       borderRadius: AppRadius.fullRadius,
                     ),
                     child: Text(
-                      '$pendingCount معلق',
+                      '${controller.isSuperAdmin ? (pendingNetworks + pendingPos + pendingCount) : pendingCount} معلق',
                       style: AppTypography.labelSmall.copyWith(
                         color: colors.warning,
                         fontWeight: FontWeight.w800,

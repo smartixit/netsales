@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/home/domain/entities/dashboard_overview_entity.dart';
@@ -41,6 +40,12 @@ class DashboardController extends GetxController {
     {'key': 'this_year', 'label': 'هذا العام'},
   ];
 
+  /// ذاكرة تخزين مؤقتة سريعة لكل شبكة لتفادي إعادة التحميل (Instant In-Memory Cache)
+  final Map<int, DashboardOverviewEntity> _networkCache = {};
+
+  /// مؤشر خلفي هادئ لتحديث بيانات الشبكة دون مساس بالشاشة أو الهيكل البصري
+  final RxBool isSwitchingNetwork = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -53,23 +58,40 @@ class DashboardController extends GetxController {
   }
 
   /// جلب بيانات لوحة القيادة للشبكة المحددة أو الافتراضية
-  Future<void> loadDashboard({bool isRefresh = false, int? networkId}) async {
+  Future<void> loadDashboard({
+    bool isRefresh = false,
+    int? networkId,
+    bool silent = false,
+  }) async {
     if (isRefresh) {
       isRefreshing.value = true;
-    } else {
+      // مسح الكاش المحلي لإجبار جلب بيانات حية وطازجة 100% من الباكيند
+      _networkCache.clear();
+    } else if (!silent && overview.value == null) {
       isLoading.value = true;
+    }
+
+    if (silent) {
+      isSwitchingNetwork.value = true;
     }
     errorMessage.value = '';
 
     final targetNetworkId = networkId ?? selectedNetworkId.value;
 
     try {
-      log(targetNetworkId.toString());
       final result = await _getDashboardOverviewUseCase(
         period: selectedPeriod.value,
         networkId: targetNetworkId,
         refresh: isRefresh,
       );
+
+      // حفظ النتيجة في الذاكرة السريعة
+      if (result.context.networkId != null) {
+        _networkCache[result.context.networkId!] = result;
+      } else if (targetNetworkId != null) {
+        _networkCache[targetNetworkId] = result;
+      }
+
       overview.value = result;
 
       // ضبط المعرف المختار تلقائياً إن لم يكن محدداً مسبقاً
@@ -78,21 +100,25 @@ class DashboardController extends GetxController {
       }
     } catch (e) {
       log(e.toString());
-      errorMessage.value = AppException.sanitizeMessage(e);
+      if (overview.value == null) {
+        errorMessage.value = AppException.sanitizeMessage(e);
+      }
     } finally {
       isLoading.value = false;
       isRefreshing.value = false;
+      isSwitchingNetwork.value = false;
     }
   }
 
-  /// تبديل الفترة الزمنية وإعادة الجلب التلقائي
+  /// تبديل الفترة الزمنية وإعادة الجلب التلقائي بهدوء
   void changePeriod(String period) {
     if (selectedPeriod.value == period) return;
     selectedPeriod.value = period;
-    loadDashboard(networkId: selectedNetworkId.value);
+    loadDashboard(networkId: selectedNetworkId.value, silent: true);
   }
 
   /// التفاعل مع تحريك بطاقة الكيان الشبكي المستقل (Multi-Entity Horizon Deck)
+  /// انتقال حركي لحظي (Instant Client-Side Transition) بدون وميض أو إعادة تحميل كاملة
   void onNetworkCardChanged(int index) {
     final list = networks;
     if (index < 0 || index >= list.length) return;
@@ -101,14 +127,19 @@ class DashboardController extends GetxController {
       return;
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (selectedNetworkIndex.value != index) {
-        selectedNetworkIndex.value = index;
-        final targetId = list[index].networkId;
-        selectedNetworkId.value = targetId;
-        loadDashboard(networkId: targetId);
-      }
-    });
+    selectedNetworkIndex.value = index;
+    final targetId = list[index].networkId;
+    selectedNetworkId.value = targetId;
+
+    // 1. في حال توفر البيانات في الكاش السريع، يتم تطبيقها فوراً (0ms)
+    if (_networkCache.containsKey(targetId)) {
+      overview.value = _networkCache[targetId];
+      // تحديث هادئ في الخلفية لمزامنة أي عمليات جديدة
+      loadDashboard(networkId: targetId, silent: true);
+    } else {
+      // 2. جلب هادئ في الخلفية مع بقاء الشاشة والبطاقات ثابتة دون أي وميض
+      loadDashboard(networkId: targetId, silent: true);
+    }
   }
 
   /// قائمة الشبكات المستقلة ضمن المحفظة

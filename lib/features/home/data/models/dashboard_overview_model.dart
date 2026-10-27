@@ -67,7 +67,7 @@ class DashboardNetworkSummaryModel extends DashboardNetworkSummaryEntity {
       networkName: (json['network_name'] as String?) ?? '',
       networkCode: (json['network_code'] as String?) ?? '',
       networkProfileLogo: json['network_profile_logo'] as String?,
-      status: (json['status'] as String?) ?? 'ACTIVE',
+      status: json['status']?.toString() ?? 'ACTIVE',
       walletBalance: ((json['wallet_balance'] ?? 0.0) as num).toDouble(),
       currency: (json['currency'] as String?) ?? 'YER',
       activePosCount: (json['active_pos_count'] as num?)?.toInt() ?? 0,
@@ -103,14 +103,14 @@ class DashboardContextModel extends DashboardContextEntity {
 
   factory DashboardContextModel.fromJson(Map<String, dynamic> json) {
     return DashboardContextModel(
-      networkId: json['network_id'] as int?,
+      networkId: (json['network_id'] as num?)?.toInt(),
       networkName: json['network_name'] as String?,
       networkCode: json['network_code'] as String?,
-      posId: json['pos_id'] as int?,
+      posId: (json['pos_id'] as num?)?.toInt(),
       posName: json['pos_name'] as String?,
       posCode: json['pos_code'] as String?,
-      status: json['status'] as String?,
-      statusLabel: json['status_label'] as String?,
+      status: json['status']?.toString(),
+      statusLabel: json['status_label']?.toString(),
     );
   }
 }
@@ -125,10 +125,15 @@ class DashboardLiquidityModel extends DashboardLiquidityEntity {
   });
 
   factory DashboardLiquidityModel.fromJson(Map<String, dynamic> json) {
+    final rawStatus = json['status'];
+    final statusStr = rawStatus is bool
+        ? (rawStatus ? 'ACTIVE' : 'INACTIVE')
+        : rawStatus?.toString() ?? 'ACTIVE';
+
     return DashboardLiquidityModel(
       balance: ((json['balance'] ?? 0.0) as num).toDouble(),
       currency: (json['currency'] as String?) ?? 'YER',
-      status: (json['status'] as String?) ?? 'ACTIVE',
+      status: statusStr,
       isOverdrawn: (json['is_overdrawn'] as bool?) ?? false,
       debitAmount: ((json['debit_amount'] ?? 0.0) as num).toDouble(),
     );
@@ -149,11 +154,11 @@ class DashboardAlertModel extends DashboardAlertEntity {
 
   factory DashboardAlertModel.fromJson(Map<String, dynamic> json) {
     return DashboardAlertModel(
-      id: (json['id'] as String?) ?? '',
-      type: (json['type'] as String?) ?? 'INFO',
-      severity: (json['severity'] as String?) ?? 'INFO',
-      title: (json['title'] as String?) ?? '',
-      message: (json['message'] as String?) ?? '',
+      id: json['id']?.toString() ?? '',
+      type: json['type']?.toString() ?? 'INFO',
+      severity: json['severity']?.toString() ?? 'INFO',
+      title: json['title']?.toString() ?? '',
+      message: json['message']?.toString() ?? '',
       count: ((json['count'] ?? 0) as num).toInt(),
       actionUrl: json['action_url'] as String?,
       actionLabel: json['action_label'] as String?,
@@ -183,9 +188,9 @@ class DashboardActivityModel extends DashboardActivityEntity {
       title: (json['title'] as String?) ?? '',
       partyName: (json['party_name'] as String?) ?? '',
       amount: ((json['amount'] ?? 0.0) as num).toDouble(),
-      status: (json['status'] as String?) ?? '',
-      statusLabel: (json['status_label'] as String?) ?? '',
-      saleType: (json['sale_type'] as String?) ?? 'CASH',
+      status: json['status']?.toString() ?? '',
+      statusLabel: json['status_label']?.toString() ?? '',
+      saleType: json['sale_type']?.toString() ?? 'CASH',
       createdAt: json['created_at'] as String?,
     );
   }

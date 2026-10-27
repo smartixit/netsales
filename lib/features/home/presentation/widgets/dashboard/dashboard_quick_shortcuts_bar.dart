@@ -13,16 +13,22 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 /// رصيف إجراءات تنفيذي مدمج يتيح للمشغل إصدار الفواتير وطلب الكروت
 /// وإدارة الوكلاء والمحافظ بأسرع مسار نقر وبدون تعقيد.
 class DashboardQuickShortcutsBar extends StatelessWidget {
+  final bool isSuperAdmin;
   final VoidCallback? onNewInvoiceTap;
   final VoidCallback? onNewRequestTap;
+  final VoidCallback? onManageNetworksTap;
   final VoidCallback? onManagePosTap;
+  final VoidCallback? onAuditOperationsTap;
   final VoidCallback? onWalletTap;
 
   const DashboardQuickShortcutsBar({
     super.key,
+    this.isSuperAdmin = false,
     this.onNewInvoiceTap,
     this.onNewRequestTap,
+    this.onManageNetworksTap,
     this.onManagePosTap,
+    this.onAuditOperationsTap,
     this.onWalletTap,
   });
 
@@ -51,7 +57,9 @@ class DashboardQuickShortcutsBar extends StatelessWidget {
             ),
             AppSpacing.hSm,
             Text(
-              'العمليات والإجراءات الميدانية',
+              isSuperAdmin
+                  ? 'الإجراءات والرقابة السيادية'
+                  : 'العمليات والإجراءات الميدانية',
               style: AppTypography.titleMedium.copyWith(
                 color: colors.onSurface,
                 fontWeight: FontWeight.w800,
@@ -63,55 +71,103 @@ class DashboardQuickShortcutsBar extends StatelessWidget {
         AppSpacing.vMd,
 
         // شبكة البطاقات التنفيذية الذكية (2 في كل صف)
-        Row(
-          children: [
-            Expanded(
-              child: _ExecutiveActionTile(
-                icon: Icons.receipt_long_rounded,
-                title: 'فاتورة مبيعات',
-                subtitle: 'إصدار كاش / آجل',
-                color: colors.primary,
-                onTap: onNewInvoiceTap,
+        if (isSuperAdmin) ...[
+          Row(
+            children: [
+              Expanded(
+                child: _ExecutiveActionTile(
+                  icon: Icons.cell_tower_rounded,
+                  title: 'إدارة الشبكات',
+                  subtitle: 'مراجعة واعتماد المزودين',
+                  color: colors.primary,
+                  onTap: onManageNetworksTap,
+                ),
               ),
-            ),
-            AppSpacing.hSm,
-            Expanded(
-              child: _ExecutiveActionTile(
-                icon: Icons.inventory_2_rounded,
-                title: 'توريد كروت',
-                subtitle: 'طلب رصيد شبكي',
-                color: colors.secondary,
-                onTap: onNewRequestTap,
+              AppSpacing.hSm,
+              Expanded(
+                child: _ExecutiveActionTile(
+                  icon: Icons.point_of_sale_rounded,
+                  title: 'نقاط التوزيع',
+                  subtitle: 'مراجعة واعتماد الوكلاء',
+                  color: colors.secondary,
+                  onTap: onManagePosTap,
+                ),
               ),
-            ),
-          ],
-        ),
-
-        AppSpacing.vSm,
-
-        Row(
-          children: [
-            Expanded(
-              child: _ExecutiveActionTile(
-                icon: Icons.storefront_rounded,
-                title: 'نقاط التوزيع',
-                subtitle: 'متابعة الوكلاء',
-                color: colors.tertiary,
-                onTap: onManagePosTap,
+            ],
+          ),
+          AppSpacing.vSm,
+          Row(
+            children: [
+              Expanded(
+                child: _ExecutiveActionTile(
+                  icon: Icons.receipt_long_rounded,
+                  title: 'العمليات والفوترة',
+                  subtitle: 'سجل تداول المنظومة',
+                  color: colors.tertiary,
+                  onTap: onAuditOperationsTap,
+                ),
               ),
-            ),
-            AppSpacing.hSm,
-            Expanded(
-              child: _ExecutiveActionTile(
-                icon: Icons.account_balance_wallet_rounded,
-                title: 'إدارة المحفظة',
-                subtitle: 'الرصيد والتحويل',
-                color: colors.warning,
-                onTap: onWalletTap,
+              AppSpacing.hSm,
+              Expanded(
+                child: _ExecutiveActionTile(
+                  icon: Icons.account_balance_wallet_rounded,
+                  title: 'المركز المالي',
+                  subtitle: 'إشراف ورقابة المحافظ',
+                  color: colors.warning,
+                  onTap: onWalletTap,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ] else ...[
+          Row(
+            children: [
+              Expanded(
+                child: _ExecutiveActionTile(
+                  icon: Icons.receipt_long_rounded,
+                  title: 'فاتورة مبيعات',
+                  subtitle: 'إصدار كاش / آجل',
+                  color: colors.primary,
+                  onTap: onNewInvoiceTap,
+                ),
+              ),
+              AppSpacing.hSm,
+              Expanded(
+                child: _ExecutiveActionTile(
+                  icon: Icons.inventory_2_rounded,
+                  title: 'توريد كروت',
+                  subtitle: 'طلب رصيد شبكي',
+                  color: colors.secondary,
+                  onTap: onNewRequestTap,
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.vSm,
+          Row(
+            children: [
+              Expanded(
+                child: _ExecutiveActionTile(
+                  icon: Icons.storefront_rounded,
+                  title: 'نقاط التوزيع',
+                  subtitle: 'متابعة الوكلاء',
+                  color: colors.tertiary,
+                  onTap: onManagePosTap,
+                ),
+              ),
+              AppSpacing.hSm,
+              Expanded(
+                child: _ExecutiveActionTile(
+                  icon: Icons.account_balance_wallet_rounded,
+                  title: 'إدارة المحفظة',
+                  subtitle: 'الرصيد والتحويل',
+                  color: colors.warning,
+                  onTap: onWalletTap,
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
