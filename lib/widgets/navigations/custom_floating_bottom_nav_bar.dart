@@ -159,7 +159,7 @@ class FloatingNavBarItemWidget extends StatelessWidget {
           curve: AppMotion.standard,
           padding: EdgeInsets.symmetric(
             horizontal: AppSpacing.xxs,
-            vertical: AppSpacing.xs,
+            vertical: AppSpacing.sm,
           ),
           decoration: BoxDecoration(
             color: isSelected

@@ -125,9 +125,8 @@ class _VoucherRequestDetailsScreenState
             ),
             child: ResponsiveContentWrapper(
               child: Padding(
-                padding: EdgeInsets.only(
-                  top: CustomAppScaffold.topBarHeight(context) + AppSpacing.xs,
-                  bottom: AppSpacing.xl,
+                padding: EdgeInsets.symmetric(
+                  vertical: AppSpacing.appBarHeight,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -407,13 +407,16 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
             bottom: AppSpacing.inputPadding,
             end: AppSpacing.sm,
           ),
+          labelStyle: AppTypography.bodyMedium.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
         ),
         hint: widget.hint == null
             ? null
             : Text(
                 widget.hint!,
                 style: AppTypography.bodyMedium.copyWith(
-                  color: colors.onSurfaceVariant,
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
               ),
         iconStyleData: IconStyleData(

@@ -310,7 +310,6 @@ class AppThemes {
         borderRadius: BorderRadius.circular(AppRadius.input),
         borderSide: BorderSide(color: colors.outline, width: 1.w),
       ),
-
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.input),
         borderSide: BorderSide(

@@ -112,6 +112,10 @@ class CustomSearchFilterBar<T> extends StatelessWidget {
                     controller: searchController,
                     label: searchLabel ?? '',
                     isRequired: false,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 14.w,
+                      vertical: 10.h,
+                    ),
                     hint: searchHint,
                     prefixIcon: Icon(
                       Icons.search_rounded,

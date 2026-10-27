@@ -59,7 +59,7 @@ class AppSpacing {
   static double get buttonPaddingV => 14.h;
 
   /// Input padding
-  static double get inputPadding => 12.w;
+  static double get inputPadding => 14.w;
 
   /// List item spacing
   static double get listItemSpacing => 12.w;
@@ -74,7 +74,7 @@ class AppSpacing {
   static double get bottomSheetPadding => 24.w;
 
   /// App bar height
-  static double get appBarHeight => 56.h;
+  static double get appBarHeight => 100.h;
 
   /// Bottom nav height
   static double get bottomNavHeight => 80.h;

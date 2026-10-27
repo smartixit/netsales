@@ -82,8 +82,8 @@ class _PackageQuantityInputSheetState extends State<PackageQuantityInputSheet> {
     _sheetsController = TextEditingController(
       text: initialSheets > 0
           ? (initialSheets % 1 == 0
-              ? initialSheets.toInt().toString()
-              : initialSheets.toStringAsFixed(1))
+                ? initialSheets.toInt().toString()
+                : initialSheets.toStringAsFixed(1))
           : '',
     );
 
@@ -115,7 +115,9 @@ class _PackageQuantityInputSheetState extends State<PackageQuantityInputSheet> {
     if (parsedSheets != null && parsedSheets >= 0) {
       final calculatedCards = widget.package.vouchersForSheets(parsedSheets);
       setState(() => _currentCards = calculatedCards);
-      _cardsController.text = calculatedCards > 0 ? calculatedCards.toString() : '';
+      _cardsController.text = calculatedCards > 0
+          ? calculatedCards.toString()
+          : '';
     }
 
     _isUpdatingFromSheets = false;
@@ -141,8 +143,9 @@ class _PackageQuantityInputSheetState extends State<PackageQuantityInputSheet> {
         final b = VoucherSheetCalculator.breakdown(parsedCards, sheetSize);
         if (b.isExactSheetOrHalf) {
           final frac = b.fullSheets + (b.hasHalfSheet ? 0.5 : 0.0);
-          _sheetsController.text =
-              frac % 1 == 0 ? frac.toInt().toString() : frac.toStringAsFixed(1);
+          _sheetsController.text = frac % 1 == 0
+              ? frac.toInt().toString()
+              : frac.toStringAsFixed(1);
         } else {
           final approx = parsedCards / sheetSize;
           _sheetsController.text = approx.toStringAsFixed(2);
@@ -266,9 +269,9 @@ class _PackageQuantityInputSheetState extends State<PackageQuantityInputSheet> {
                 controller: _sheetsController,
                 label: 'عدد الأوراق',
                 hint: 'مثال: 1.5',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                isDense: true,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: _onSheetsChanged,
                 prefixIcon: Icon(
                   Icons.receipt_long_rounded,
@@ -285,7 +288,6 @@ class _PackageQuantityInputSheetState extends State<PackageQuantityInputSheet> {
                 label: 'إجمالي الكروت',
                 hint: 'مثال: 77',
                 keyboardType: TextInputType.number,
-                isDense: true,
                 onChanged: _onCardsChanged,
                 prefixIcon: Icon(
                   Icons.style_outlined,

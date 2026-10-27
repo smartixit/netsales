@@ -24,7 +24,7 @@ class CustomEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Center(
+    return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.xl),
         child: Column(
@@ -57,11 +57,8 @@ class CustomEmptyState extends StatelessWidget {
               ),
             ],
             if (actionLabel != null && onAction != null) ...[
-              AppSpacing.vLg,
-              CustomButton.primary(
-                text: actionLabel!,
-                onPressed: onAction!,
-              ),
+              AppSpacing.vXs,
+              CustomButton.text(text: actionLabel!, onPressed: onAction!),
             ],
           ],
         ),

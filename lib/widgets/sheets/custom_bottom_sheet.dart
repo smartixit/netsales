@@ -43,6 +43,7 @@ class CustomBottomSheet extends StatelessWidget {
   final Widget? leadingIcon;
   final Widget child;
   final List<Widget>? actions;
+  final Widget? stickyFooter;
   final bool showDragHandle;
   final bool showCloseButton;
   final bool scrollable;
@@ -56,6 +57,7 @@ class CustomBottomSheet extends StatelessWidget {
     this.leadingIcon,
     required this.child,
     this.actions,
+    this.stickyFooter,
     this.showDragHandle = true,
     this.showCloseButton = true,
     this.scrollable = false,
@@ -263,6 +265,7 @@ class CustomBottomSheet extends StatelessWidget {
     String? subtitle,
     Widget? leadingIcon,
     List<Widget>? actions,
+    Widget? stickyFooter,
     bool showDragHandle = true,
     bool showCloseButton = true,
     bool scrollable = false,
@@ -279,6 +282,7 @@ class CustomBottomSheet extends StatelessWidget {
         subtitle: subtitle,
         leadingIcon: leadingIcon,
         actions: actions,
+        stickyFooter: stickyFooter,
         showDragHandle: showDragHandle,
         showCloseButton: showCloseButton,
         scrollable: scrollable,
@@ -351,11 +355,19 @@ class CustomBottomSheet extends StatelessWidget {
     final colors = context.colors;
     final mediaQuery = MediaQuery.of(context);
     final bottomInset = mediaQuery.viewInsets.bottom;
-    final bottomPadding = mediaQuery.padding.bottom;
+    final systemBottomPadding = mediaQuery.padding.bottom;
+    final screenHeight = mediaQuery.size.height;
 
-    final effectiveMaxHeight = maxHeightFactor != null
-        ? mediaQuery.size.height * maxHeightFactor!
-        : mediaQuery.size.height * 0.88;
+    // أقصى ارتفاع متاح للنافذة:
+    // عند إغلاق الكيبورد: نسبة مئوية من ارتفاع الشاشة (الافتراضي 88%)
+    // عند فتح الكيبورد: كامل الارتفاع المتاح مع ترك هامش علوي بسيط لشريط الحالة
+    final effectiveMaxHeight = bottomInset > 0
+        ? screenHeight * 0.95
+        : screenHeight * (maxHeightFactor ?? 0.88);
+
+    // المسافة السفلية: نراعي شريط التنقل فقط عند إغلاق الكيبورد
+    // (لأن الكيبورد يعيد تحجيم نافذة التطبيق تلقائياً عبر adjustResize)
+    final bottomPadding = bottomInset > 0 ? 0.0 : systemBottomPadding;
 
     return Container(
       constraints: BoxConstraints(maxHeight: effectiveMaxHeight),
@@ -366,12 +378,7 @@ class CustomBottomSheet extends StatelessWidget {
         ),
         boxShadow: AppElevation.level5(context),
       ),
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.cardPadding,
-        AppSpacing.sm,
-        AppSpacing.cardPadding,
-        AppSpacing.cardPadding + bottomPadding + bottomInset,
-      ),
+      padding: EdgeInsets.only(bottom: bottomPadding),
       child: SafeArea(
         top: false,
         bottom: false,
@@ -380,14 +387,14 @@ class CustomBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // 1. مقبض السحب الموحد (Unified Drag Handle)
-            if (showDragHandle) ...[
+            if (showDragHandle)
               Center(
                 child: Container(
                   width: 44.w,
                   height: 4.h,
                   margin: EdgeInsets.only(
-                    top: AppSpacing.xs,
-                    bottom: AppSpacing.sm,
+                    top: AppSpacing.sm,
+                    bottom: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
                     color: colors.outlineVariant.withValues(alpha: 0.5),
@@ -395,80 +402,119 @@ class CustomBottomSheet extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
 
-            // 2. ترويسة النافذة (Header)
+            // 2. ترويسة النافذة الثابتة (Fixed Header)
             if (title != null) ...[
-              Row(
-                children: [
-                  if (leadingIcon != null) ...[leadingIcon!, AppSpacing.hSm],
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title!,
-                          style: AppTypography.titleMedium.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (subtitle != null) ...[
-                          AppSpacing.vXxs,
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.cardPadding,
+                  AppSpacing.xs,
+                  AppSpacing.cardPadding,
+                  AppSpacing.xs,
+                ),
+                child: Row(
+                  children: [
+                    if (leadingIcon != null) ...[leadingIcon!, AppSpacing.hSm],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                           Text(
-                            subtitle!,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: colors.onSurfaceVariant,
+                            title!,
+                            style: AppTypography.titleMedium.copyWith(
+                              color: colors.onSurface,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
+                          if (subtitle != null) ...[
+                            AppSpacing.vXxs,
+                            Text(
+                              subtitle!,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                  if (showCloseButton)
-                    CustomButton.icon(
-                      icon: Icons.close_rounded,
-                      dimension: 34.r,
-                      iconSize: 18.r,
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: colors.onSurfaceVariant,
-                      shape: AppButtonShape.circle,
-                      onPressed: () => Get.back(),
-                    ),
-                ],
+                    if (showCloseButton)
+                      CustomButton.icon(
+                        icon: Icons.close_rounded,
+                        dimension: 34.r,
+                        iconSize: 18.r,
+                        backgroundColor: Colors.transparent,
+                        foregroundColor: colors.onSurfaceVariant,
+                        shape: AppButtonShape.circle,
+                        onPressed: () => Get.back(),
+                      ),
+                  ],
+                ),
               ),
-              AppSpacing.vMd,
+              Divider(
+                height: 1.h,
+                thickness: 1.h,
+                color: colors.outlineVariant.withValues(alpha: 0.25),
+              ),
             ],
 
-            // 3. المحتوى الرئيسي (Body Content)
-            if (scrollable)
-              Flexible(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding:
-                      padding ??
-                      EdgeInsets.symmetric(
-                        vertical: AppSpacing.bottomSheetPadding,
-                      ),
-                  child: child,
-                ),
-              )
-            else
-              Padding(
+            // 3. المحتوى الرئيسي (Auto-Wrapping Scrollable Body Content)
+            // Flexible مع FlexFit.loose يضمن:
+            // - إذا كان المحتوى قصيراً: يأخذ حجم محتوياته بدقة (Wrap Content).
+            // - إذا كبر المحتوى أو فُتح الكيبورد: يتحول للتمرير بسلاسة ويمنع أي RenderFlex overflow نهائياً!
+            Flexible(
+              fit: FlexFit.loose,
+              child: SingleChildScrollView(
+                physics: scrollable
+                    ? const BouncingScrollPhysics()
+                    : const ClampingScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding:
                     padding ??
                     EdgeInsets.symmetric(
-                      vertical: AppSpacing.bottomSheetPadding,
+                      horizontal: AppSpacing.cardPadding,
+                      vertical: AppSpacing.sm,
                     ),
                 child: child,
               ),
+            ),
 
-            // 4. أزرار الإجراءات السفلية (Action Buttons)
-            if (actions != null && actions!.isNotEmpty) ...[
-              AppSpacing.vMd,
-              Row(children: actions!),
-            ],
+            // 4. الذيل المثبت الدائم (Sticky Footer)
+            if (stickyFooter != null)
+              Container(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: colors.outlineVariant.withValues(alpha: 0.3),
+                      width: 1.w,
+                    ),
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.cardPadding,
+                  vertical: AppSpacing.sm,
+                ),
+                child: stickyFooter!,
+              ),
+
+            // 5. أزرار الإجراءات السفلية البسيطة (Legacy Actions Row)
+            if (actions != null && actions!.isNotEmpty)
+              Container(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: colors.outlineVariant.withValues(alpha: 0.25),
+                      width: 1.w,
+                    ),
+                  ),
+                ),
+                padding: EdgeInsets.all(AppSpacing.cardPadding),
+                child: Row(children: actions!),
+              ),
           ],
         ),
       ),

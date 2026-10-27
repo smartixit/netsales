@@ -25,7 +25,7 @@ class CustomLoadingState extends StatelessWidget {
       return skeleton!;
     }
 
-    return Center(
+    return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

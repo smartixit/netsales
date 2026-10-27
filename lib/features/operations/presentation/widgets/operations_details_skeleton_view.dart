@@ -5,7 +5,6 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
-import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// ============================================================================
 /// OperationsDetailsSkeletonView — Skeleton shimmer placeholder for details
@@ -18,13 +17,12 @@ class OperationsDetailsSkeletonView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final topPadding = CustomAppScaffold.topBarHeight(context) + AppSpacing.xs;
 
     return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
       child: ResponsiveContentWrapper(
         child: Padding(
-          padding: EdgeInsets.only(top: topPadding, bottom: AppSpacing.xl),
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.appBarHeight),
           child: CustomSkeletonShimmer(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

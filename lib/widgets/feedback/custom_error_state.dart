@@ -24,7 +24,7 @@ class CustomErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Center(
+    return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.xl),
         child: Column(
@@ -57,8 +57,8 @@ class CustomErrorState extends StatelessWidget {
               ),
             ],
             if (onRetry != null) ...[
-              AppSpacing.vLg,
-              CustomButton.primary(
+              AppSpacing.vXs,
+              CustomButton.text(
                 text: retryLabel,
                 icon: Icons.refresh_rounded,
                 onPressed: onRetry!,
