@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/theme_service.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -65,7 +66,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             bottom: false,
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
+                horizontal: context.screenMargin,
                 vertical: AppSpacing.md,
               ),
               child: Row(

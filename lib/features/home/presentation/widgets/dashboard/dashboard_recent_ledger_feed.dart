@@ -28,6 +28,22 @@ class DashboardRecentLedgerFeed extends StatelessWidget {
     required this.isMasked,
   });
 
+  String? _formatActivityTime(String? rawDate) {
+    if (rawDate == null || rawDate.isEmpty) return null;
+    try {
+      final parsed = DateTime.tryParse(rawDate);
+      if (parsed == null) return rawDate;
+      final local = parsed.toLocal();
+      final h = local.hour;
+      final m = local.minute.toString().padLeft(2, '0');
+      final period = h >= 12 ? 'م' : 'ص';
+      final displayHour = h > 12 ? h - 12 : (h == 0 ? 12 : h);
+      return '$displayHour:$m $period';
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -35,39 +51,49 @@ class DashboardRecentLedgerFeed extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ترويسة القسم وزر استعراض السجل الكامل
+        // ترويسة القسم السيادية متجاوبة ومحمية 100% من التجاوز
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
               child: Row(
                 children: [
-                  Container(
-                    width: 28.r,
-                    height: 28.r,
-                    decoration: BoxDecoration(
-                      color: colors.primary.withValues(alpha: 0.1),
-                      borderRadius: AppRadius.xsRadius,
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.history_rounded,
-                      size: 16.r,
-                      color: colors.primary,
-                    ),
-                  ),
-                  AppSpacing.hSm,
-                  Expanded(
+                  Flexible(
                     child: Text(
                       'أحدث العمليات والحركات',
                       style: AppTypography.titleMedium.copyWith(
                         color: colors.onSurface,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  if (activities.isNotEmpty) ...[
+                    AppSpacing.hXs,
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6.w,
+                        vertical: 2.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainerHighest,
+                        borderRadius: AppRadius.fullRadius,
+                        border: Border.all(
+                          color: colors.outlineVariant.withValues(alpha: 0.2),
+                          width: 0.8.w,
+                        ),
+                      ),
+                      child: Text(
+                        '${activities.length}',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 10.sp,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -103,13 +129,14 @@ class DashboardRecentLedgerFeed extends StatelessWidget {
                 color: colors.outlineVariant.withValues(alpha: 0.25),
                 width: 1.w,
               ),
+              boxShadow: AppElevation.level1(context),
             ),
             alignment: Alignment.center,
             child: Column(
               children: [
                 Icon(
                   Icons.receipt_long_outlined,
-                  size: 40.r,
+                  size: 36.r,
                   color: colors.onSurfaceVariant.withValues(alpha: 0.4),
                 ),
                 AppSpacing.vSm,
@@ -124,147 +151,236 @@ class DashboardRecentLedgerFeed extends StatelessWidget {
             ),
           )
         else
-          // قائمة بطاقات القيود والعمليات
-          ...activities.map((activity) {
-            final isInvoice = activity.isInvoice;
-            final isCash = activity.saleType == 'CASH';
+          // حاوية دفتر الأستاذ الموحد (Sovereign Integrated Ledger Group)
+          Container(
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: AppRadius.lgRadius,
+              border: Border.all(
+                color: colors.outlineVariant.withValues(alpha: 0.25),
+                width: 1.w,
+              ),
+              boxShadow: AppElevation.level1(context),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: activities.length,
+              separatorBuilder: (context, index) => Divider(
+                height: 1.h,
+                thickness: 0.8.w,
+                indent: 58.w,
+                endIndent: AppSpacing.md,
+                color: colors.outlineVariant.withValues(alpha: 0.15),
+              ),
+              itemBuilder: (context, index) {
+                final activity = activities[index];
+                final isInvoice = activity.isInvoice;
+                final isCash = activity.saleType == 'CASH';
 
-            final iconData = isInvoice
-                ? (isCash
-                      ? Icons.point_of_sale_rounded
-                      : Icons.receipt_long_rounded)
-                : Icons.inventory_2_rounded;
+                final iconData = isInvoice
+                    ? (isCash
+                          ? Icons.arrow_downward_rounded
+                          : Icons.schedule_rounded)
+                    : Icons.inventory_2_rounded;
 
-            final accentColor = isInvoice
-                ? (isCash ? colors.success : colors.warning)
-                : colors.primary;
+                final accentColor = isInvoice
+                    ? (isCash ? colors.success : colors.warning)
+                    : colors.primary;
 
-            final formattedAmount = isMasked
-                ? '••••••'
-                : '${AmountFormatter.formatValue(activity.amount, decimalPlaces: 0)} ر.ي';
+                final typeBadgeLabel = isInvoice
+                    ? (isCash ? 'نقداً' : 'آجل')
+                    : 'توريد';
 
-            return Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.sm),
-              child: CustomInteractiveBounce(
-                onTap: () {
-                  if (activity.isInvoice) {
-                    Get.toNamed(
-                      '${AppRoutes.saleInvoices}/${activity.id}',
-                      parameters: {'uuid': activity.uuid},
-                    );
-                  } else {
-                    Get.toNamed(
-                      AppRoutes.requests,
-                      parameters: {'uuid': activity.uuid},
-                    );
-                  }
-                },
-                child: Container(
-                  padding: EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: AppRadius.lgRadius,
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.25),
-                      width: 1.w,
+                final timeText = _formatActivityTime(activity.createdAt);
+
+                final formattedAmount = isMasked
+                    ? '••••••'
+                    : AmountFormatter.formatValue(
+                        activity.amount,
+                        decimalPlaces: 0,
+                      );
+
+                return CustomInteractiveBounce(
+                  onTap: () {
+                    if (activity.isInvoice) {
+                      Get.toNamed(
+                        '${AppRoutes.saleInvoices}/${activity.id}',
+                        parameters: {'uuid': activity.uuid},
+                      );
+                    } else {
+                      Get.toNamed(
+                        AppRoutes.requests,
+                        parameters: {'uuid': activity.uuid},
+                      );
+                    }
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 10.h,
                     ),
-                    boxShadow: AppElevation.level1(context),
-                  ),
-                  child: Row(
-                    children: [
-                      // أيقونة نوع القيد والعملية
-                      Container(
-                        width: 42.r,
-                        height: 42.r,
-                        decoration: BoxDecoration(
-                          color: accentColor.withValues(alpha: 0.12),
-                          borderRadius: AppRadius.mdRadius,
-                          border: Border.all(
-                            color: accentColor.withValues(alpha: 0.25),
-                            width: 1.w,
+                    child: Row(
+                      children: [
+                        // أيقونة شارة التدفق المالي المعمارية
+                        Container(
+                          width: 36.r,
+                          height: 36.r,
+                          decoration: BoxDecoration(
+                            color: accentColor.withValues(alpha: 0.12),
+                            borderRadius: AppRadius.mdRadius,
+                            border: Border.all(
+                              color: accentColor.withValues(alpha: 0.22),
+                              width: 1.w,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(iconData, size: 18.r, color: accentColor),
+                        ),
+
+                        AppSpacing.hSm,
+
+                        // تفاصيل العملية والطرف الثاني والتوقيت (محمية ومقيدة بالكامل)
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      activity.title,
+                                      style: AppTypography.labelMedium.copyWith(
+                                        color: colors.onSurface,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  AppSpacing.hXxs,
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 4.w,
+                                      vertical: 1.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: accentColor.withValues(alpha: 0.1),
+                                      borderRadius: AppRadius.xsRadius,
+                                    ),
+                                    child: Text(
+                                      typeBadgeLabel,
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: accentColor,
+                                        fontSize: 8.5.sp,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              AppSpacing.vXxs,
+                              Row(
+                                children: [
+                                  Icon(
+                                    isInvoice
+                                        ? Icons.storefront_outlined
+                                        : Icons.hub_outlined,
+                                    size: 11.r,
+                                    color: colors.onSurfaceVariant.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                  ),
+                                  AppSpacing.hXxs,
+                                  Expanded(
+                                    child: Text(
+                                      '${activity.partyName.isNotEmpty ? activity.partyName : (isInvoice ? 'عميل مباشر' : 'طلب توريد داخلي')}${timeText != null ? ' • $timeText' : ''}',
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: colors.onSurfaceVariant,
+                                        fontSize: 10.sp,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                        alignment: Alignment.center,
-                        child: Icon(iconData, size: 20.r, color: accentColor),
-                      ),
 
-                      AppSpacing.hSm,
+                        AppSpacing.hXs,
 
-                      // عنوان الحركة واسم الطرف الثاني
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        // القيمة المالية المحاسبية وشارة الحالة
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                              activity.title,
-                              style: AppTypography.titleSmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w800,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                if (isInvoice && isCash && !isMasked)
+                                  Text(
+                                    '+',
+                                    style: AppTypography.labelMedium.copyWith(
+                                      color: colors.success,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                Text(
+                                  formattedAmount,
+                                  style: AppTypography.labelMedium.copyWith(
+                                    color: isCash
+                                        ? colors.success
+                                        : colors.onSurface,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: isMasked ? 2.0 : -0.2,
+                                  ),
+                                ),
+                                AppSpacing.hXxs,
+                                Text(
+                                  'ر.ي',
+                                  style: AppTypography.labelSmall.copyWith(
+                                    color: colors.onSurfaceVariant,
+                                    fontSize: 9.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                             AppSpacing.vXxs,
                             Text(
-                              activity.partyName.isNotEmpty
-                                  ? activity.partyName
-                                  : (isInvoice
-                                        ? 'عميل مباشر'
-                                        : 'طلب توريد داخلي'),
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.onSurfaceVariant,
-                                fontSize: 11.sp,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      AppSpacing.hSm,
-
-                      // المبلغ المالي وشارة الحالة
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            formattedAmount,
-                            style: AppTypography.titleSmall.copyWith(
-                              color: colors.onSurface,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: isMasked ? 2.0 : 0.0,
-                            ),
-                          ),
-                          AppSpacing.vXxs,
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xs,
-                              vertical: 1.5.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: accentColor.withValues(alpha: 0.1),
-                              borderRadius: AppRadius.xsRadius,
-                            ),
-                            child: Text(
                               activity.statusLabel.isNotEmpty
                                   ? activity.statusLabel
                                   : activity.status,
                               style: AppTypography.labelSmall.copyWith(
-                                color: accentColor,
-                                fontSize: 9.5.sp,
-                                fontWeight: FontWeight.w700,
+                                color: colors.onSurfaceVariant.withValues(
+                                  alpha: 0.7,
+                                ),
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+
+                        AppSpacing.hXxs,
+
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 10.r,
+                          color: colors.onSurfaceVariant.withValues(alpha: 0.3),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            );
-          }),
+                );
+              },
+            ),
+          ),
       ],
     );
   }

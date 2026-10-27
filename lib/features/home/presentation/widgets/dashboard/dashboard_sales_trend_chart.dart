@@ -26,10 +26,7 @@ class _SalesTrendDataPoint {
 class DashboardSalesTrendChart extends StatelessWidget {
   final DashboardController controller;
 
-  const DashboardSalesTrendChart({
-    super.key,
-    required this.controller,
-  });
+  const DashboardSalesTrendChart({super.key, required this.controller});
 
   List<_SalesTrendDataPoint> _resolveTrendPoints({
     required String period,
@@ -94,14 +91,19 @@ class DashboardSalesTrendChart extends StatelessWidget {
 
       final isMasked = controller.isPrivacyMasked.value;
       final kpis = overview.kpis;
-      final salesData = (kpis['platform_sales'] as Map<String, dynamic>?) ??
+      final salesData =
+          (kpis['platform_sales'] as Map<String, dynamic>?) ??
           (kpis['sales'] as Map<String, dynamic>?) ??
           {};
 
-      final currentAmount = (salesData['current_amount'] as num?)?.toDouble() ?? 0.0;
-      final growth = (salesData['growth_percentage'] as num?)?.toDouble() ?? 0.0;
-      final cashAmount = (salesData['cash_sales_amount'] as num?)?.toDouble() ?? 0.0;
-      final creditAmount = (salesData['credit_sales_amount'] as num?)?.toDouble() ?? 0.0;
+      final currentAmount =
+          (salesData['current_amount'] as num?)?.toDouble() ?? 0.0;
+      final growth =
+          (salesData['growth_percentage'] as num?)?.toDouble() ?? 0.0;
+      final cashAmount =
+          (salesData['cash_sales_amount'] as num?)?.toDouble() ?? 0.0;
+      final creditAmount =
+          (salesData['credit_sales_amount'] as num?)?.toDouble() ?? 0.0;
       final invoicesCount = (salesData['invoices_count'] as num?)?.toInt() ?? 0;
       final periodKey = controller.selectedPeriod.value;
 
@@ -126,12 +128,12 @@ class DashboardSalesTrendChart extends StatelessWidget {
           : '${AmountFormatter.formatValue(creditAmount, decimalPlaces: 0)} ر.ي';
 
       return Container(
-        padding: EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.cardPadding),
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: AppRadius.lgRadius,
           border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.3),
+            color: colors.outlineVariant.withValues(alpha: 0.25),
             width: 1.w,
           ),
           boxShadow: AppElevation.level1(context),
@@ -196,7 +198,9 @@ class DashboardSalesTrendChart extends StatelessWidget {
                       Text(
                         '${growth.abs().toStringAsFixed(1)}%',
                         style: AppTypography.labelSmall.copyWith(
-                          color: isPositiveGrowth ? colors.success : colors.error,
+                          color: isPositiveGrowth
+                              ? colors.success
+                              : colors.error,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -208,26 +212,35 @@ class DashboardSalesTrendChart extends StatelessWidget {
 
             AppSpacing.vSm,
 
-            // 2. كبسولات توزيع النقد والآجل وعدد الفواتير
-            Row(
+            // 2. كبسولات توزيع النقد والآجل وعدد الفواتير (تجاوب انسيابي تام)
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                _FinancialSplitChip(
-                  label: 'نقد',
-                  amount: formattedCash,
-                  dotColor: colors.success,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _FinancialSplitChip(
+                      label: 'نقد',
+                      amount: formattedCash,
+                      dotColor: colors.success,
+                    ),
+                    AppSpacing.hXs,
+                    _FinancialSplitChip(
+                      label: 'آجل',
+                      amount: formattedCredit,
+                      dotColor: colors.warning,
+                    ),
+                  ],
                 ),
-                AppSpacing.hSm,
-                _FinancialSplitChip(
-                  label: 'آجل',
-                  amount: formattedCredit,
-                  dotColor: colors.warning,
-                ),
-                const Spacer(),
                 Text(
                   '$invoicesCount فاتورة',
                   style: AppTypography.labelSmall.copyWith(
                     color: colors.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
+                    fontSize: 10.5.sp,
                   ),
                 ),
               ],
@@ -256,12 +269,52 @@ class DashboardSalesTrendChart extends StatelessWidget {
                 ),
                 tooltipBehavior: TooltipBehavior(
                   enable: true,
-                  canShowMarker: true,
-                  format: 'point.x : point.y ر.ي',
-                  textStyle: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  builder:
+                      (
+                        dynamic data,
+                        dynamic point,
+                        dynamic series,
+                        int pointIndex,
+                        int seriesIndex,
+                      ) {
+                        final item = data as _SalesTrendDataPoint;
+                        return Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.inverseSurface,
+                            borderRadius: AppRadius.smRadius,
+                            boxShadow: AppElevation.level2(context),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                item.label,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.onInverseSurface.withValues(
+                                    alpha: 0.75,
+                                  ),
+                                  fontSize: 10.sp,
+                                ),
+                              ),
+                              AppSpacing.vXxs,
+                              Text(
+                                isMasked
+                                    ? '••••••'
+                                    : '${AmountFormatter.formatValue(item.amount, decimalPlaces: 0)} ر.ي',
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: colors.onInverseSurface,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                 ),
                 series: <CartesianSeries<_SalesTrendDataPoint, String>>[
                   SplineAreaSeries<_SalesTrendDataPoint, String>(
@@ -316,10 +369,7 @@ class _FinancialSplitChip extends StatelessWidget {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: 3.h,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3.h),
       decoration: BoxDecoration(
         color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
         borderRadius: AppRadius.fullRadius,
@@ -334,10 +384,7 @@ class _FinancialSplitChip extends StatelessWidget {
           Container(
             width: 7.r,
             height: 7.r,
-            decoration: BoxDecoration(
-              color: dotColor,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
           ),
           AppSpacing.hXs,
           Text(

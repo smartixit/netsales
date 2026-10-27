@@ -61,7 +61,9 @@ class HomeTabShell extends StatelessWidget {
       final effectivePadding =
           (contentPadding as EdgeInsets?) ??
           EdgeInsets.symmetric(
-            horizontal: useHorizontalPadding ? AppSpacing.screenPadding : 0,
+            horizontal: (!useResponsiveWrapper && useHorizontalPadding)
+                ? context.screenMargin
+                : 0,
           );
 
       final scrollView = SingleChildScrollView(
@@ -92,10 +94,13 @@ class HomeTabShell extends StatelessWidget {
     }
 
     // 2. نمط الشاشات الهيكلية الثابتة ذات القوائم الداخلية (Operations / Partners)
+    final fixedHorizontalPadding =
+        useHorizontalPadding ? context.screenMargin : 0.0;
+
     return Padding(
       padding: EdgeInsets.only(
-        left: useHorizontalPadding ? AppSpacing.screenPadding : 0,
-        right: useHorizontalPadding ? AppSpacing.screenPadding : 0,
+        left: fixedHorizontalPadding,
+        right: fixedHorizontalPadding,
         top: topInset,
         bottom: bottomInset,
       ),

@@ -23,81 +23,80 @@ class DashboardSkeletonView extends StatelessWidget {
 
     return HomeTabShell.scrollable(
       physics: const NeverScrollableScrollPhysics(),
-      useHorizontalPadding: true,
       child: CustomSkeletonShimmer(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-              // 1. هيكل بطاقة الكيان الشبكي المستقل (Multi-Entity Deck Blueprint)
-              Container(
-                width: double.infinity,
-                height: 200.h,
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerHigh,
-                  borderRadius: AppRadius.xlRadius,
-                ),
+            // 1. هيكل بطاقة الكيان الشبكي المستقل (Multi-Entity Deck Blueprint)
+            Container(
+              width: double.infinity,
+              height: 200.h,
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHigh,
+                borderRadius: AppRadius.xlRadius,
               ),
+            ),
 
-              AppSpacing.vLg,
+            AppSpacing.vLg,
 
-              // 2. هيكل شريط الفترات الزمنية الزجاجي (Segmented Bar Blueprint)
-              Container(
-                width: double.infinity,
-                height: 38.h,
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerHigh,
-                  borderRadius: AppRadius.fullRadius,
-                ),
+            // 2. هيكل شريط الفترات الزمنية الزجاجي (Segmented Bar Blueprint)
+            Container(
+              width: double.infinity,
+              height: 38.h,
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHigh,
+                borderRadius: AppRadius.fullRadius,
               ),
+            ),
 
-              AppSpacing.vLg,
+            AppSpacing.vLg,
 
-              // 3. هيكل المخطط البياني الانسيابي (Sales Trend Chart Blueprint)
-              Container(
-                width: double.infinity,
-                height: 190.h,
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerHigh,
-                  borderRadius: AppRadius.lgRadius,
-                ),
+            // 3. هيكل المخطط البياني الانسيابي (Sales Trend Chart Blueprint)
+            Container(
+              width: double.infinity,
+              height: 190.h,
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHigh,
+                borderRadius: AppRadius.lgRadius,
               ),
+            ),
 
-              AppSpacing.vLg,
+            AppSpacing.vLg,
 
-              // 4. هيكل مصفوفة كفاءة التوزيع الميداني (Bento Distribution Grid)
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 110.h,
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerHigh,
-                        borderRadius: AppRadius.lgRadius,
-                      ),
+            // 4. هيكل مصفوفة كفاءة التوزيع الميداني (Bento Distribution Grid)
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 110.h,
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerHigh,
+                      borderRadius: AppRadius.lgRadius,
                     ),
                   ),
-                  AppSpacing.hMd,
-                  Expanded(
-                    child: Container(
-                      height: 110.h,
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerHigh,
-                        borderRadius: AppRadius.lgRadius,
-                      ),
+                ),
+                AppSpacing.hMd,
+                Expanded(
+                  child: Container(
+                    height: 110.h,
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerHigh,
+                      borderRadius: AppRadius.lgRadius,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
 
-              AppSpacing.vLg,
+            AppSpacing.vLg,
 
-              // 5. هيكل سجل العمليات الأخيرة (Recent Feed Tiles)
-              const CustomSkeletonListTile(hasLeading: true, lines: 2),
-              AppSpacing.vMd,
-              const CustomSkeletonListTile(hasLeading: true, lines: 2),
-            ],
-          ),
+            // 5. هيكل سجل العمليات الأخيرة (Recent Feed Tiles)
+            const CustomSkeletonListTile(hasLeading: true, lines: 2),
+            AppSpacing.vMd,
+            const CustomSkeletonListTile(hasLeading: true, lines: 2),
+          ],
         ),
-      );
+      ),
+    );
   }
 }

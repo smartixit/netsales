@@ -84,29 +84,52 @@ class DashboardDistributionPerformance extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // عنوان القسم
+          // ترويسة القسم السيادية الراقية
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 28.r,
-                height: 28.r,
-                decoration: BoxDecoration(
-                  color: colors.primary.withValues(alpha: 0.1),
-                  borderRadius: AppRadius.xsRadius,
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.grid_view_rounded,
-                  size: 16.r,
-                  color: colors.primary,
-                ),
-              ),
-              AppSpacing.hSm,
               Text(
                 'مصفوفة كفاءة التوزيع الميداني',
                 style: AppTypography.titleMedium.copyWith(
                   color: colors.onSurface,
                   fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: 3.h,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHighest,
+                  borderRadius: AppRadius.fullRadius,
+                  border: Border.all(
+                    color: colors.outlineVariant.withValues(alpha: 0.25),
+                    width: 0.8.w,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6.r,
+                      height: 6.r,
+                      decoration: BoxDecoration(
+                        color: colors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    AppSpacing.hXs,
+                    Text(
+                      'تحليل حي',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10.sp,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -114,9 +137,9 @@ class DashboardDistributionPerformance extends StatelessWidget {
 
           AppSpacing.vMd,
 
-          // 1. بطاقة توازن النقد والآجل في السوق
+          // 1. بطاقة توازن النقد والآجل في السوق (Executive Cash vs Credit Bento)
           Container(
-            padding: EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.cardPadding),
             decoration: BoxDecoration(
               color: colors.surface,
               borderRadius: AppRadius.lgRadius,
@@ -133,27 +156,38 @@ class DashboardDistributionPerformance extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'توازن التحصيل والائتمان الميداني',
+                      'توازن السيولة والائتمان الميداني',
                       style: AppTypography.labelMedium.copyWith(
                         color: colors.onSurfaceVariant,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    Text(
-                      '${(cashRatio * 100).toStringAsFixed(0)}% نقداً',
-                      style: AppTypography.labelSmall.copyWith(
-                        color: colors.success,
-                        fontWeight: FontWeight.w800,
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xs,
+                        vertical: 2.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.success.withValues(alpha: 0.12),
+                        borderRadius: AppRadius.fullRadius,
+                      ),
+                      child: Text(
+                        '${(cashRatio * 100).toStringAsFixed(0)}% نقداً',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.success,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ],
                 ),
                 AppSpacing.vSm,
-                // شريط التقدم المزدوج (نقد مقابل آجل)
+                // شريط التدفق المالي المزدوج (Dual Flow Track)
                 ClipRRect(
                   borderRadius: AppRadius.fullRadius,
-                  child: SizedBox(
+                  child: Container(
                     height: 8.h,
+                    color: colors.surfaceContainerHighest,
                     child: Row(
                       children: [
                         Expanded(
@@ -168,62 +202,113 @@ class DashboardDistributionPerformance extends StatelessWidget {
                     ),
                   ),
                 ),
-                AppSpacing.vSm,
+                AppSpacing.vMd,
+                // كبسولات التفصيل المالي
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 8.r,
-                            height: 8.r,
-                            decoration: BoxDecoration(
-                              color: colors.success,
-                              shape: BoxShape.circle,
-                            ),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+                          borderRadius: AppRadius.smRadius,
+                          border: Border.all(
+                            color: colors.outlineVariant.withValues(alpha: 0.15),
+                            width: 0.8.w,
                           ),
-                          AppSpacing.hXs,
-                          Expanded(
-                            child: Text(
-                              'نقد: ${isMasked ? '••••' : AmountFormatter.formatValue(cashAmount, decimalPlaces: 0)} ر.ي',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w600,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 8.r,
+                              height: 8.r,
+                              decoration: BoxDecoration(
+                                color: colors.success,
+                                shape: BoxShape.circle,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
+                            AppSpacing.hXs,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'تحصيل نقدي',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: colors.onSurfaceVariant,
+                                      fontSize: 10.sp,
+                                    ),
+                                  ),
+                                  Text(
+                                    isMasked ? '••••••' : '${AmountFormatter.formatValue(cashAmount, decimalPlaces: 0)} ر.ي',
+                                    style: AppTypography.labelMedium.copyWith(
+                                      color: colors.onSurface,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     AppSpacing.hSm,
                     Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
-                            width: 8.r,
-                            height: 8.r,
-                            decoration: BoxDecoration(
-                              color: colors.warning,
-                              shape: BoxShape.circle,
-                            ),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+                          borderRadius: AppRadius.smRadius,
+                          border: Border.all(
+                            color: colors.outlineVariant.withValues(alpha: 0.15),
+                            width: 0.8.w,
                           ),
-                          AppSpacing.hXs,
-                          Flexible(
-                            child: Text(
-                              'آجل: ${isMasked ? '••••' : AmountFormatter.formatValue(creditAmount, decimalPlaces: 0)} ر.ي',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w600,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 8.r,
+                              height: 8.r,
+                              decoration: BoxDecoration(
+                                color: colors.warning,
+                                shape: BoxShape.circle,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
+                            AppSpacing.hXs,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'ائتمان آجل',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: colors.onSurfaceVariant,
+                                      fontSize: 10.sp,
+                                    ),
+                                  ),
+                                  Text(
+                                    isMasked ? '••••••' : '${AmountFormatter.formatValue(creditAmount, decimalPlaces: 0)} ر.ي',
+                                    style: AppTypography.labelMedium.copyWith(
+                                      color: colors.onSurface,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -237,103 +322,113 @@ class DashboardDistributionPerformance extends StatelessWidget {
           // 2. شبكة المؤشرات المتجاورة: تغطية نقاط البيع + الباقة الأكثر طلباً
           Row(
             children: [
-              // كارت تغطية نقاط البيع
+              // كارت تغطية نقاط البيع مع ارتداد تفاعلي
               Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: AppRadius.lgRadius,
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.25),
-                      width: 1.w,
+                child: CustomInteractiveBounce(
+                  onTap: () {
+                    if (Get.isRegistered<HomeLayoutController>()) {
+                      Get.find<HomeLayoutController>().changeTab(2);
+                      if (Get.isRegistered<PartnersController>()) {
+                        Get.find<PartnersController>().changeSegment(1);
+                      }
+                    }
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(AppSpacing.cardPadding),
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: AppRadius.lgRadius,
+                      border: Border.all(
+                        color: colors.outlineVariant.withValues(alpha: 0.25),
+                        width: 1.w,
+                      ),
+                      boxShadow: AppElevation.level1(context),
                     ),
-                    boxShadow: AppElevation.level1(context),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            width: 32.r,
-                            height: 32.r,
-                            decoration: BoxDecoration(
-                              color: colors.primary.withValues(alpha: 0.12),
-                              borderRadius: AppRadius.smRadius,
-                            ),
-                            alignment: Alignment.center,
-                            child: Icon(
-                              Icons.storefront_rounded,
-                              size: 18.r,
-                              color: colors.primary,
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xs,
-                              vertical: 2.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.primary.withValues(alpha: 0.1),
-                              borderRadius: AppRadius.xsRadius,
-                            ),
-                            child: Text(
-                              '${(posCoverageRatio * 100).toStringAsFixed(0)}%',
-                              style: AppTypography.labelSmall.copyWith(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              width: 32.r,
+                              height: 32.r,
+                              decoration: BoxDecoration(
+                                color: colors.primary.withValues(alpha: 0.12),
+                                borderRadius: AppRadius.smRadius,
+                              ),
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.storefront_rounded,
+                                size: 18.r,
                                 color: colors.primary,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 10.sp,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      AppSpacing.vSm,
-                      Text(
-                        'نقاط البيع النشطة',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: colors.onSurfaceVariant,
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: AppSpacing.xs,
+                                vertical: 2.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withValues(alpha: 0.1),
+                                borderRadius: AppRadius.fullRadius,
+                              ),
+                              child: Text(
+                                '${(posCoverageRatio * 100).toStringAsFixed(0)}%',
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.primary,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 10.sp,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      AppSpacing.vXxs,
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              '$activePos',
-                              style: AppTypography.titleLarge.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w800,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                        AppSpacing.vSm,
+                        Text(
+                          'تغطية نقاط البيع',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 2.h),
-                            child: Text(
-                              ' / $totalPos نقطة',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.onSurfaceVariant,
+                        ),
+                        AppSpacing.vXxs,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                '$activePos',
+                                style: AppTypography.titleLarge.copyWith(
+                                  color: colors.onSurface,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
-                            ),
+                              AppSpacing.hXxs,
+                              Text(
+                                '/ $totalPos نشطة',
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
 
               AppSpacing.hSm,
 
-              // كارت الباقة المتصدرة
+              // كارت الباقة المتصدرة (Hero Sovereign Package)
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.all(AppSpacing.md),
+                  padding: EdgeInsets.all(AppSpacing.cardPadding),
                   decoration: BoxDecoration(
                     color: colors.surface,
                     borderRadius: AppRadius.lgRadius,
@@ -364,21 +459,32 @@ class DashboardDistributionPerformance extends StatelessWidget {
                             ),
                           ),
                           if (vouchersSoldCount > 0)
-                            Text(
-                              '$vouchersSoldCount كرت',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.secondary,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 10.sp,
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: AppSpacing.xs,
+                                vertical: 2.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.secondary.withValues(alpha: 0.1),
+                                borderRadius: AppRadius.fullRadius,
+                              ),
+                              child: Text(
+                                '$vouchersSoldCount كرت',
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.secondary,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 10.sp,
+                                ),
                               ),
                             ),
                         ],
                       ),
                       AppSpacing.vSm,
                       Text(
-                        'الباقة الأكثر طلباً',
+                        'الأعلى طلباً',
                         style: AppTypography.labelSmall.copyWith(
                           color: colors.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       AppSpacing.vXxs,
@@ -388,17 +494,21 @@ class DashboardDistributionPerformance extends StatelessWidget {
                           color: colors.onSurface,
                           fontWeight: FontWeight.w800,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (topRevenue > 0) ...[
                         AppSpacing.vXxs,
-                        Text(
-                          formattedTopRevenue,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w600,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(
+                            formattedTopRevenue,
+                            style: AppTypography.labelSmall.copyWith(
+                              color: colors.onSurfaceVariant,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
@@ -450,29 +560,52 @@ class _SuperAdminFleetBento extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // عنوان القسم
+        // ترويسة سيادية راقية
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              width: 28.r,
-              height: 28.r,
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.1),
-                borderRadius: AppRadius.xsRadius,
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.hub_rounded,
-                size: 16.r,
-                color: colors.primary,
-              ),
-            ),
-            AppSpacing.hSm,
             Text(
               'مصفوفة أسطول التوزيع والشبكات',
               style: AppTypography.titleMedium.copyWith(
                 color: colors.onSurface,
                 fontWeight: FontWeight.w800,
+                letterSpacing: -0.2,
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 3.h,
+              ),
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHighest,
+                borderRadius: AppRadius.fullRadius,
+                border: Border.all(
+                  color: colors.outlineVariant.withValues(alpha: 0.25),
+                  width: 0.8.w,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 6.r,
+                    height: 6.r,
+                    decoration: BoxDecoration(
+                      color: colors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  AppSpacing.hXs,
+                  Text(
+                    'المنظومة كاملة',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10.sp,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

@@ -12,6 +12,7 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
 /// منصة بطاقات الكيانات الشبكية المستقلة (DashboardMultiEntityDeck)
@@ -184,7 +185,7 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(networks.length, (index) {
               final isSelected = currentIndex == index;
-              return GestureDetector(
+              return CustomInteractiveBounce(
                 onTap: () {
                   _pageController.animateToPage(
                     index,
@@ -546,7 +547,7 @@ class _SuperAdminPlatformHeroCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: AppGradients.entitySapphire(context),
         borderRadius: AppRadius.xlRadius,
-        boxShadow: AppElevation.tinted(context, const Color(0xFF1C426F)),
+        boxShadow: AppElevation.tinted(context, colors.primary),
       ),
       child: Stack(
         children: [

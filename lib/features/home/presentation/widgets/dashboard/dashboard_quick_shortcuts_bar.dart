@@ -39,30 +39,58 @@ class DashboardQuickShortcutsBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ترويسة الرصيف التنفيذي (محمية ومتجاوبة)
         Row(
           children: [
-            Container(
-              width: 28.r,
-              height: 28.r,
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.1),
-                borderRadius: AppRadius.xsRadius,
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.bolt_rounded,
-                size: 16.r,
-                color: colors.primary,
+            Expanded(
+              child: Text(
+                isSuperAdmin
+                    ? 'الإجراءات والرقابة السيادية'
+                    : 'العمليات والإجراءات الميدانية',
+                style: AppTypography.titleMedium.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             AppSpacing.hSm,
-            Text(
-              isSuperAdmin
-                  ? 'الإجراءات والرقابة السيادية'
-                  : 'العمليات والإجراءات الميدانية',
-              style: AppTypography.titleMedium.copyWith(
-                color: colors.onSurface,
-                fontWeight: FontWeight.w800,
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 3.h,
+              ),
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHighest,
+                borderRadius: AppRadius.fullRadius,
+                border: Border.all(
+                  color: colors.outlineVariant.withValues(alpha: 0.25),
+                  width: 0.8.w,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 6.r,
+                    height: 6.r,
+                    decoration: BoxDecoration(
+                      color: colors.secondary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  AppSpacing.hXs,
+                  Text(
+                    'مسار سريع',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10.sp,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -70,7 +98,7 @@ class DashboardQuickShortcutsBar extends StatelessWidget {
 
         AppSpacing.vMd,
 
-        // شبكة البطاقات التنفيذية الذكية (2 في كل صف)
+        // شبكة البطاقات التنفيذية الذكية (2 في كل صف بتصميم عمودي تنفيذي مانع للاقتصاص)
         if (isSuperAdmin) ...[
           Row(
             children: [
@@ -173,7 +201,7 @@ class DashboardQuickShortcutsBar extends StatelessWidget {
   }
 }
 
-/// بطاقة إجراء تنفيذي مصغرة أنيقة
+/// بطاقة إجراء تنفيذي رشيقة بهندسة عمودية تمنع اقتصاص النصوص
 class _ExecutiveActionTile extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -196,10 +224,7 @@ class _ExecutiveActionTile extends StatelessWidget {
     return CustomInteractiveBounce(
       onTap: onTap ?? () {},
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
+        padding: EdgeInsets.all(AppSpacing.cardPadding),
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: AppRadius.lgRadius,
@@ -209,52 +234,52 @@ class _ExecutiveActionTile extends StatelessWidget {
           ),
           boxShadow: AppElevation.level1(context),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 38.r,
-              height: 38.r,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: AppRadius.mdRadius,
-                border: Border.all(
-                  color: color.withValues(alpha: 0.25),
-                  width: 1.w,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 36.r,
+                  height: 36.r,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: AppRadius.mdRadius,
+                    border: Border.all(
+                      color: color.withValues(alpha: 0.22),
+                      width: 1.w,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(icon, color: color, size: 19.r),
                 ),
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                icon,
-                color: color,
-                size: 20.r,
-              ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 11.r,
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.35),
+                ),
+              ],
             ),
-            AppSpacing.hSm,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  AppSpacing.vXxs,
-                  Text(
-                    subtitle,
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                      fontSize: 10.sp,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+            AppSpacing.vSm,
+            Text(
+              title,
+              style: AppTypography.labelMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            AppSpacing.vXxs,
+            Text(
+              subtitle,
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurfaceVariant,
+                fontSize: 10.sp,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

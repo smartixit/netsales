@@ -14,17 +14,14 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
-/// مركز الاعتمادات والعمليات التشغيلية العاجلة (DashboardUrgentApprovalsHub)
+/// منصة القرارات والاعتمادات السيادية العاجلة (DashboardUrgentApprovalsHub)
 /// ============================================================================
-/// منصة توجيه تشغيلية تركز على طلبات نقاط البيع المعلقة وتنبيهات السيولة الحرجة،
-/// مع أزرار تنفيذية مباشرة تحافظ على وتيرة التوزيع الميداني بدون انقطاع.
+/// مركز توجيه تنفيذي راقٍ يركز على تصفية الطلبات المعلقة وتنبيهات السيولة،
+/// يتيح للمشغل اتخاذ القرار بلمسة واحدة دون التشتت في تفاصيل ثانوية.
 class DashboardUrgentApprovalsHub extends StatelessWidget {
   final DashboardController controller;
 
-  const DashboardUrgentApprovalsHub({
-    super.key,
-    required this.controller,
-  });
+  const DashboardUrgentApprovalsHub({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +33,12 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
 
       final isMasked = controller.isPrivacyMasked.value;
       final kpis = overview.kpis;
-      final requests = (kpis['requests'] as Map<String, dynamic>?) ??
+      final requests =
+          (kpis['requests'] as Map<String, dynamic>?) ??
           (kpis['pending_requests'] as Map<String, dynamic>?) ??
           {};
-      final pendingCount = (requests['pending_count'] as num?)?.toInt() ??
+      final pendingCount =
+          (requests['pending_count'] as num?)?.toInt() ??
           (requests['count'] as num?)?.toInt() ??
           0;
       final pendingTotalAmount =
@@ -56,124 +55,147 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
           ? '••••••'
           : '${AmountFormatter.formatValue(pendingTotalAmount, decimalPlaces: 0)} ر.ي';
 
-      final hasSuperAdminPending = controller.isSuperAdmin &&
+      final hasSuperAdminPending =
+          controller.isSuperAdmin &&
           (pendingNetworks > 0 || pendingPos > 0 || pendingCount > 0);
 
-      // 1. في حال وجود اعتمادات أو طلبات معلقة
+      // 1. في حال وجود اعتمادات أو طلبات معلقة (منصة القرارات الفورية)
       if (pendingCount > 0 || hasSuperAdminPending) {
+        final totalPending = controller.isSuperAdmin
+            ? (pendingNetworks + pendingPos + pendingCount)
+            : pendingCount;
+
         return Container(
-          padding: EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             color: colors.surface,
             borderRadius: AppRadius.lgRadius,
             border: Border.all(
-              color: colors.warning.withValues(alpha: 0.45),
-              width: 1.2.w,
+              color: colors.warning.withValues(alpha: 0.35),
+              width: 1.w,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: colors.warning.withValues(alpha: 0.12),
-                blurRadius: 12.r,
-                offset: Offset(0, 4.h),
-              ),
-            ],
+            boxShadow: AppElevation.tinted(context, colors.warning),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ترويسة التنبيه العاجل
-              Row(
-                children: [
-                  Container(
-                    width: 38.r,
-                    height: 38.r,
-                    decoration: BoxDecoration(
-                      color: colors.warning.withValues(alpha: 0.15),
-                      borderRadius: AppRadius.mdRadius,
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.pending_actions_rounded,
-                      color: colors.warning,
-                      size: 22.r,
-                    ),
-                  ),
-                  AppSpacing.hSm,
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          controller.isSuperAdmin
-                              ? 'مركز الاعتمادات والرقابة السيادية'
-                              : 'مركز الاعتمادات والطلبات العاجلة',
-                          style: AppTypography.titleSmall.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.w800,
-                          ),
+              // الشريط العلوي المدمج للقرار العاجل
+              Padding(
+                padding: EdgeInsets.all(AppSpacing.cardPadding),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 40.r,
+                      height: 40.r,
+                      decoration: BoxDecoration(
+                        color: colors.warning.withValues(alpha: 0.12),
+                        borderRadius: AppRadius.mdRadius,
+                        border: Border.all(
+                          color: colors.warning.withValues(alpha: 0.25),
+                          width: 1.w,
                         ),
-                        AppSpacing.vXxs,
-                        Text(
-                          controller.isSuperAdmin
-                              ? 'يوجد ${pendingNetworks > 0 ? "$pendingNetworks شبكة و" : ""}${pendingPos > 0 ? " $pendingPos نقطة بيع و" : ""} $pendingCount طلب كروت بانتظار الاعتماد'
-                              : 'نقاط البيع بانتظار تزويدها بالكروت لمواصلة البيع',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontSize: 11.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.xxs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colors.warning.withValues(alpha: 0.2),
-                      borderRadius: AppRadius.fullRadius,
-                    ),
-                    child: Text(
-                      '${controller.isSuperAdmin ? (pendingNetworks + pendingPos + pendingCount) : pendingCount} معلق',
-                      style: AppTypography.labelSmall.copyWith(
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.pending_actions_rounded,
                         color: colors.warning,
-                        fontWeight: FontWeight.w800,
+                        size: 22.r,
                       ),
                     ),
-                  ),
-                ],
+                    AppSpacing.hSm,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  controller.isSuperAdmin
+                                      ? 'مركز الرقابة والاعتمادات السيادية'
+                                      : 'طلبات التوريد المعلقة',
+                                  style: AppTypography.titleSmall.copyWith(
+                                    color: colors.onSurface,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              AppSpacing.hXs,
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.xs,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colors.warning.withValues(alpha: 0.15),
+                                  borderRadius: AppRadius.fullRadius,
+                                ),
+                                child: Text(
+                                  '$totalPending إجراء عاجل',
+                                  style: AppTypography.labelSmall.copyWith(
+                                    color: colors.warning,
+                                    fontSize: 9.5.sp,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          AppSpacing.vXxs,
+                          Text(
+                            controller.isSuperAdmin
+                                ? 'يوجد ${pendingNetworks > 0 ? "$pendingNetworks شبكة و" : ""}${pendingPos > 0 ? " $pendingPos نقطة بيع و" : ""} $pendingCount طلب كروت بانتظار الاعتماد'
+                                : 'نقاط البيع الميدانية بانتظار توريد الكروت لمواصلة العمليات',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: colors.onSurfaceVariant,
+                              fontSize: 11.sp,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
-              AppSpacing.vMd,
-
-              // تفاصيل المبالغ والإجراء الفوري
+              // شريط التنفيذ الفوري واستعراض المبالغ
               Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
+                  horizontal: AppSpacing.cardPadding,
                   vertical: AppSpacing.sm,
                 ),
                 decoration: BoxDecoration(
                   color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
-                  borderRadius: AppRadius.mdRadius,
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(AppRadius.lg),
+                  ),
+                  border: Border(
+                    top: BorderSide(
+                      color: colors.outlineVariant.withValues(alpha: 0.2),
+                      width: 0.8.w,
+                    ),
+                  ),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'إجمالي المبالغ المطلوبة',
+                            'المبلغ المطلوب',
                             style: AppTypography.labelSmall.copyWith(
                               color: colors.onSurfaceVariant,
+                              fontSize: 10.sp,
                             ),
                           ),
-                          AppSpacing.vXxs,
                           Text(
                             formattedPendingAmount,
-                            style: AppTypography.titleMedium.copyWith(
+                            style: AppTypography.titleSmall.copyWith(
                               color: colors.onSurface,
                               fontWeight: FontWeight.w800,
                             ),
@@ -186,8 +208,9 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
                     AppSpacing.hSm,
                     CustomButton.primary(
                       text: 'معاينة واعتماد',
-                      icon: Icons.arrow_back_rounded,
+                      icon: Icons.arrow_forward_rounded,
                       size: AppButtonSize.small,
+                      iconPosition: AppButtonIconPosition.end,
                       onPressed: () {
                         if (Get.isRegistered<HomeLayoutController>()) {
                           Get.find<HomeLayoutController>().changeTab(1);
@@ -202,7 +225,7 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
         );
       }
 
-      // 2. في حال وجود تنبيهات أخرى (مثل انخفاض رصيد المحفظة المركزية)
+      // 2. في حال وجود تنبيهات تشغيلية أخرى (مثل انخفاض الرصيد)
       if (alerts.isNotEmpty) {
         final alert = alerts.first;
         final isDanger = alert.severity == 'DANGER';
@@ -228,23 +251,25 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
               color: colors.surface,
               borderRadius: AppRadius.lgRadius,
               border: Border.all(
-                color: accentColor.withValues(alpha: 0.35),
+                color: accentColor.withValues(alpha: 0.3),
                 width: 1.w,
               ),
-              boxShadow: AppElevation.level1(context),
+              boxShadow: AppElevation.tinted(context, accentColor),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 36.r,
-                  height: 36.r,
+                  width: 38.r,
+                  height: 38.r,
                   decoration: BoxDecoration(
                     color: accentColor.withValues(alpha: 0.12),
                     borderRadius: AppRadius.mdRadius,
                   ),
                   alignment: Alignment.center,
                   child: Icon(
-                    isDanger ? Icons.warning_amber_rounded : Icons.info_outline_rounded,
+                    isDanger
+                        ? Icons.warning_amber_rounded
+                        : Icons.info_outline_rounded,
                     color: accentColor,
                     size: 20.r,
                   ),
@@ -286,56 +311,42 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
         );
       }
 
-      // 3. حالة الاستقرار التشغيلي التام للمنظومة
+      // 3. حالة الاستقرار التشغيلي التام للمنظومة (مؤشر ناعم وأنيق)
       return Container(
         padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: colors.surface,
+          color: colors.surfaceContainerHighest.withValues(alpha: 0.25),
           borderRadius: AppRadius.lgRadius,
           border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.25),
-            width: 1.w,
+            color: colors.outlineVariant.withValues(alpha: 0.2),
+            width: 0.8.w,
           ),
         ),
         child: Row(
           children: [
             Container(
-              width: 32.r,
-              height: 32.r,
+              width: 8.r,
+              height: 8.r,
               decoration: BoxDecoration(
-                color: colors.success.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.check_circle_outline_rounded,
                 color: colors.success,
-                size: 18.r,
+                shape: BoxShape.circle,
+                boxShadow: AppElevation.tinted(context, colors.success),
               ),
             ),
             AppSpacing.hSm,
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'شبكة التوزيع الميداني مستقرة',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    'كافة طلبات التوريد معتمدة ولا توجد معلقات تتطلب إجراءً عاجلاً',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                      fontSize: 10.5.sp,
-                    ),
-                  ),
-                ],
+              child: Text(
+                'شبكة التوزيع مستقرة • كافة طلبات التوريد والاعتمادات منجزة',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

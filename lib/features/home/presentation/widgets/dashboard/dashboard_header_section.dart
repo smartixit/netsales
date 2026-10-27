@@ -2,25 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
-/// شريط النطاق الزمني والتحليلات التنفيذية (DashboardHeaderSection)
+/// شريط الأفق التنفيذي والتحكم بالنطاق الزمني (DashboardHeaderSection)
 /// ============================================================================
-/// يوفر شريط تبديل فترات زمنية عائم بنمط Segmented Glass Controls فائق النعومة،
-/// يربط حركة المبيعات وتغطية التوزيع بالفترة المحددة لحظياً.
+/// يوفر شريط تبديل انسيابي بنمط Executive Horizon Controls،
+/// يربط حركة المبيعات وتغطية التوزيع بالفترة المحددة لحظياً مع تفاعل لمسي ناعم.
 class DashboardHeaderSection extends StatelessWidget {
   final DashboardController controller;
 
-  const DashboardHeaderSection({
-    super.key,
-    required this.controller,
-  });
+  const DashboardHeaderSection({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -36,54 +35,50 @@ class DashboardHeaderSection extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. شريط العنوان والسياق التحليلي
+          // 1. ترويسة السياق التحليلي الموحد بدون أيقونات مكررة
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-            Expanded(
-              child: Row(
-                children: [
-                  Container(
-                    width: 28.r,
-                    height: 28.r,
-                    decoration: BoxDecoration(
-                      color: colors.primary.withValues(alpha: 0.1),
-                      borderRadius: AppRadius.xsRadius,
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.insights_rounded,
-                      size: 16.r,
-                      color: colors.primary,
-                    ),
-                  ),
-                  AppSpacing.hSm,
-                  Expanded(
-                    child: Text(
-                      'مؤشرات أداء التوزيع',
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'نظرة الأداء والتوزيع الميداني',
                       style: AppTypography.titleMedium.copyWith(
                         color: colors.onSurface,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                    AppSpacing.vXxs,
+                    Text(
+                      'تحليلات فورية ومؤشرات النشاط التشغيلي المباشر',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                        fontSize: 10.5.sp,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            AppSpacing.hXs,
-              // شارة الفترة المحددة النشطة
+              AppSpacing.hSm,
+              // شارة خضراء تفاعلية تدل على التحديث اللحظي المباشر
               Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSpacing.sm,
-                  vertical: 3.h,
+                  vertical: 4.h,
                 ),
                 decoration: BoxDecoration(
-                  color: colors.surfaceContainerHighest.withValues(alpha: 0.45),
+                  color: colors.success.withValues(alpha: 0.1),
                   borderRadius: AppRadius.fullRadius,
                   border: Border.all(
-                    color: colors.outlineVariant.withValues(alpha: 0.3),
+                    color: colors.success.withValues(alpha: 0.25),
                     width: 0.8.w,
                   ),
                 ),
@@ -94,17 +89,18 @@ class DashboardHeaderSection extends StatelessWidget {
                       width: 6.r,
                       height: 6.r,
                       decoration: BoxDecoration(
-                        color: colors.primary,
+                        color: colors.success,
                         shape: BoxShape.circle,
+                        boxShadow: AppElevation.tinted(context, colors.success),
                       ),
                     ),
                     AppSpacing.hXs,
                     Text(
                       selectedPeriodLabel,
                       style: AppTypography.labelSmall.copyWith(
-                        color: colors.onSurface,
+                        color: colors.success,
                         fontSize: 10.5.sp,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -115,15 +111,15 @@ class DashboardHeaderSection extends StatelessWidget {
 
           AppSpacing.vSm,
 
-          // 2. شريط التبديل القطاعي الزجاجي للفترات الزمنية (Segmented Glass Horizon Bar)
+          // 2. كبسولة التبديل القطاعية الفاخرة للفترات الزمنية
           Container(
             padding: EdgeInsets.all(3.r),
             decoration: BoxDecoration(
-              color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+              color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
               borderRadius: AppRadius.fullRadius,
               border: Border.all(
-                color: colors.outlineVariant.withValues(alpha: 0.25),
-                width: 1.w,
+                color: colors.outlineVariant.withValues(alpha: 0.2),
+                width: 0.8.w,
               ),
             ),
             child: SingleChildScrollView(
@@ -140,31 +136,31 @@ class DashboardHeaderSection extends StatelessWidget {
                         controller.changePeriod(p['key']!);
                       },
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 220),
-                        curve: Curves.easeOutCubic,
+                        duration: AppMotion.fast,
+                        curve: AppMotion.standard,
                         padding: EdgeInsets.symmetric(
                           horizontal: AppSpacing.md,
-                          vertical: 7.h,
+                          vertical: 6.h,
                         ),
                         decoration: BoxDecoration(
-                          color: isSelected ? colors.primary : Colors.transparent,
+                          color: isSelected
+                              ? colors.primary
+                              : Colors.transparent,
                           borderRadius: AppRadius.fullRadius,
                           boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: colors.primary.withValues(alpha: 0.3),
-                                    blurRadius: 6.r,
-                                    offset: Offset(0, 2.h),
-                                  ),
-                                ]
+                              ? AppElevation.tinted(context, colors.primary)
                               : null,
                         ),
                         child: Text(
                           p['label']!,
                           style: AppTypography.labelMedium.copyWith(
-                            color: isSelected ? colors.onPrimary : colors.onSurfaceVariant,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                            fontSize: 11.5.sp,
+                            color: isSelected
+                                ? colors.onPrimary
+                                : colors.onSurfaceVariant,
+                            fontWeight: isSelected
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            fontSize: 11.sp,
                           ),
                         ),
                       ),

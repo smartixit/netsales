@@ -518,7 +518,7 @@ class AppThemes {
         color: colors.inverseSurface,
         borderRadius: AppRadius.lgRadius,
       ),
-      textStyle: AppTypography.labelMedium.copyWith(
+      textStyle: AppTypography.labelSmall.copyWith(
         color: colors.onInverseSurface,
       ),
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),

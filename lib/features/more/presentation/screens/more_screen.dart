@@ -27,7 +27,6 @@ class MoreScreen extends GetView<MoreController> {
     final colors = context.colors;
 
     return HomeTabShell.scrollable(
-      useHorizontalPadding: true,
       onRefresh: () => controller.loadOverview(isRefresh: true),
       child: Obx(
           () => Column(
