@@ -121,7 +121,7 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
           height: 200.h,
           child: _SingleEntityCard(
             title: net.networkName,
-            code: net.networkCode,
+            code: net.networkUuid,
             logoUrl: net.networkProfileLogo,
             balance: net.walletBalance,
             currency: net.currency,
@@ -162,7 +162,7 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
                   child: _SingleEntityCard(
                     cardIndex: index,
                     title: net.networkName,
-                    code: net.networkCode,
+                    code: net.networkUuid,
                     logoUrl: net.networkProfileLogo,
                     balance: net.walletBalance,
                     currency: net.currency,

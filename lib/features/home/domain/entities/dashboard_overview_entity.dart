@@ -33,7 +33,6 @@ class DashboardNetworkSummaryEntity {
   final int networkId;
   final String networkUuid;
   final String networkName;
-  final String networkCode;
   final String? networkProfileLogo;
   final String status;
   final double walletBalance;
@@ -45,7 +44,6 @@ class DashboardNetworkSummaryEntity {
     required this.networkId,
     required this.networkUuid,
     required this.networkName,
-    required this.networkCode,
     this.networkProfileLogo,
     required this.status,
     required this.walletBalance,
@@ -53,32 +51,34 @@ class DashboardNetworkSummaryEntity {
     required this.activePosCount,
     required this.pendingRequestsCount,
   });
+
+  String get networkCode => networkUuid;
 }
 
 /// سياق الكيان الحالي (شبكة أو نقطة بيع)
 class DashboardContextEntity {
   final int? networkId;
+  final String? networkUuid;
   final String? networkName;
-  final String? networkCode;
   final int? posId;
+  final String? posUuid;
   final String? posName;
-  final String? posCode;
   final String? status;
   final String? statusLabel;
 
   const DashboardContextEntity({
     this.networkId,
+    this.networkUuid,
     this.networkName,
-    this.networkCode,
     this.posId,
+    this.posUuid,
     this.posName,
-    this.posCode,
     this.status,
     this.statusLabel,
   });
 
   String get displayName => networkName ?? posName ?? 'منظومة NetSales';
-  String get displayCode => networkCode ?? posCode ?? '';
+  String get displayCode => networkUuid ?? posUuid ?? '';
   bool get isNetwork => networkId != null;
   bool get isPos => posId != null;
 }

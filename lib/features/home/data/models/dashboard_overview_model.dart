@@ -27,17 +27,27 @@ class DashboardOverviewModel extends DashboardOverviewEntity {
         (json['context'] as Map<String, dynamic>?) ?? {},
       ),
       networks: ((json['networks'] as List<dynamic>?) ?? [])
-          .map((item) => DashboardNetworkSummaryModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) => DashboardNetworkSummaryModel.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
           .toList(),
       liquidity: DashboardLiquidityModel.fromJson(
         (json['liquidity'] as Map<String, dynamic>?) ?? {},
       ),
       kpis: (json['kpis'] as Map<String, dynamic>?) ?? {},
       alerts: ((json['alerts'] as List<dynamic>?) ?? [])
-          .map((item) => DashboardAlertModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                DashboardAlertModel.fromJson(item as Map<String, dynamic>),
+          )
           .toList(),
       recentActivities: ((json['recent_activities'] as List<dynamic>?) ?? [])
-          .map((item) => DashboardActivityModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                DashboardActivityModel.fromJson(item as Map<String, dynamic>),
+          )
           .toList(),
       telemetry: DashboardTelemetryModel.fromJson(
         (json['telemetry'] as Map<String, dynamic>?) ?? {},
@@ -51,7 +61,6 @@ class DashboardNetworkSummaryModel extends DashboardNetworkSummaryEntity {
     required super.networkId,
     required super.networkUuid,
     required super.networkName,
-    required super.networkCode,
     super.networkProfileLogo,
     required super.status,
     required super.walletBalance,
@@ -65,38 +74,37 @@ class DashboardNetworkSummaryModel extends DashboardNetworkSummaryEntity {
       networkId: (json['network_id'] as num?)?.toInt() ?? 0,
       networkUuid: (json['network_uuid'] as String?) ?? '',
       networkName: (json['network_name'] as String?) ?? '',
-      networkCode: (json['network_code'] as String?) ?? '',
       networkProfileLogo: json['network_profile_logo'] as String?,
       status: json['status']?.toString() ?? 'ACTIVE',
       walletBalance: ((json['wallet_balance'] ?? 0.0) as num).toDouble(),
       currency: (json['currency'] as String?) ?? 'YER',
       activePosCount: (json['active_pos_count'] as num?)?.toInt() ?? 0,
-      pendingRequestsCount: (json['pending_requests_count'] as num?)?.toInt() ?? 0,
+      pendingRequestsCount:
+          (json['pending_requests_count'] as num?)?.toInt() ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'network_id': networkId,
-        'network_uuid': networkUuid,
-        'network_name': networkName,
-        'network_code': networkCode,
-        'network_profile_logo': networkProfileLogo,
-        'status': status,
-        'wallet_balance': walletBalance,
-        'currency': currency,
-        'active_pos_count': activePosCount,
-        'pending_requests_count': pendingRequestsCount,
-      };
+    'network_id': networkId,
+    'network_uuid': networkUuid,
+    'network_name': networkName,
+    'network_profile_logo': networkProfileLogo,
+    'status': status,
+    'wallet_balance': walletBalance,
+    'currency': currency,
+    'active_pos_count': activePosCount,
+    'pending_requests_count': pendingRequestsCount,
+  };
 }
 
 class DashboardContextModel extends DashboardContextEntity {
   const DashboardContextModel({
     super.networkId,
+    super.networkUuid,
     super.networkName,
-    super.networkCode,
     super.posId,
+    super.posUuid,
     super.posName,
-    super.posCode,
     super.status,
     super.statusLabel,
   });
@@ -104,11 +112,11 @@ class DashboardContextModel extends DashboardContextEntity {
   factory DashboardContextModel.fromJson(Map<String, dynamic> json) {
     return DashboardContextModel(
       networkId: (json['network_id'] as num?)?.toInt(),
+      networkUuid: json['network_uuid'] as String?,
       networkName: json['network_name'] as String?,
-      networkCode: json['network_code'] as String?,
       posId: (json['pos_id'] as num?)?.toInt(),
+      posUuid: json['pos_uuid'] as String?,
       posName: json['pos_name'] as String?,
-      posCode: json['pos_code'] as String?,
       status: json['status']?.toString(),
       statusLabel: json['status_label']?.toString(),
     );
