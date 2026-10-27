@@ -8,7 +8,6 @@ import 'package:netsales/features/partners/presentation/widgets/partners_search_
 import 'package:netsales/features/partners/presentation/widgets/partners_segmented_header.dart';
 import 'package:netsales/features/partners/presentation/widgets/partners_stats_header.dart';
 import 'package:netsales/features/partners/presentation/widgets/pos_list_feed.dart';
-import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// ============================================================================
 /// شاشة الشركاء وشبكة التوزيع المجمعة (PartnersScreen)
@@ -20,41 +19,37 @@ class PartnersScreen extends GetView<PartnersController> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomAppScaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 1. رأس التبويب القطاعي (مزودو الشبكات | نقاط البيع | عقود التوزيع)
-            PartnersSegmentedHeader(controller: controller),
-            AppSpacing.vSm,
+    return Column(
+      children: [
+        // 1. رأس التبويب القطاعي (مزودو الشبكات | نقاط البيع | عقود التوزيع)
+        PartnersSegmentedHeader(controller: controller),
+        AppSpacing.vSm,
 
-            // 2. شريط البحث والتصفية المزدوج
-            PartnersSearchFilterBar(controller: controller),
-            AppSpacing.vSm,
+        // 2. شريط البحث والتصفية المزدوج
+        PartnersSearchFilterBar(controller: controller),
+        AppSpacing.vSm,
 
-            // 3. شريط المؤشرات الرقمية الحيوية
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
-              child: PartnersStatsHeader(controller: controller),
-            ),
-            AppSpacing.vSm,
-
-            // 4. الحاوية التفاعلية لقوائم البيانات حسب التبويب النشط
-            Expanded(
-              child: Obx(() {
-                final tab = controller.activeSegmentIndex.value;
-                if (tab == 0) {
-                  return NetworksFeed(controller: controller);
-                } else if (tab == 1) {
-                  return PosListFeed(controller: controller);
-                } else {
-                  return NetworkPosFeed(controller: controller);
-                }
-              }),
-            ),
-          ],
+        // 3. شريط المؤشرات الرقمية الحيوية
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+          child: PartnersStatsHeader(controller: controller),
         ),
-      ),
+        AppSpacing.vSm,
+
+        // 4. الحاوية التفاعلية لقوائم البيانات حسب التبويب النشط
+        Expanded(
+          child: Obx(() {
+            final tab = controller.activeSegmentIndex.value;
+            if (tab == 0) {
+              return NetworksFeed(controller: controller);
+            } else if (tab == 1) {
+              return PosListFeed(controller: controller);
+            } else {
+              return NetworkPosFeed(controller: controller);
+            }
+          }),
+        ),
+      ],
     );
   }
 }

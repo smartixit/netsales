@@ -7,34 +7,29 @@ import 'package:netsales/features/operations/presentation/widgets/operations_sea
 import 'package:netsales/features/operations/presentation/widgets/operations_segmented_header.dart';
 import 'package:netsales/features/operations/presentation/widgets/sale_invoices_feed.dart';
 import 'package:netsales/features/operations/presentation/widgets/voucher_requests_feed.dart';
-import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class OperationsScreen extends GetView<OperationsController> {
   const OperationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return CustomAppScaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            OperationsSegmentedHeader(controller: controller),
-            AppSpacing.vSm,
-            OperationsSearchAndFilterBar(controller: controller),
-            AppSpacing.vSm,
-            OperationsKpiSummaryStrip(controller: controller),
-            AppSpacing.vSm,
-            Expanded(
-              child: Obx(() {
-                if (controller.activeSegmentIndex.value == 0) {
-                  return SaleInvoicesFeed(controller: controller);
-                }
-                return const VoucherRequestsFeed();
-              }),
-            ),
-          ],
+    return Column(
+      children: [
+        OperationsSegmentedHeader(controller: controller),
+        AppSpacing.vSm,
+        OperationsSearchAndFilterBar(controller: controller),
+        AppSpacing.vSm,
+        OperationsKpiSummaryStrip(controller: controller),
+        AppSpacing.vSm,
+        Expanded(
+          child: Obx(() {
+            if (controller.activeSegmentIndex.value == 0) {
+              return SaleInvoicesFeed(controller: controller);
+            }
+            return const VoucherRequestsFeed();
+          }),
         ),
-      ),
+      ],
     );
   }
 }

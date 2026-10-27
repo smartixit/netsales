@@ -77,50 +77,53 @@ class CustomFloatingBottomNavBar extends StatelessWidget {
     final hasCenterAction = onCenterActionTap != null;
     final halfLength = items.length ~/ 2;
 
-    return Container(
-      margin: EdgeInsets.fromLTRB(
-        AppSpacing.cardPadding,
-        0,
-        AppSpacing.cardPadding,
-        AppSpacing.cardPadding,
-      ),
-      height: 76.h,
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-      decoration: BoxDecoration(
-        color: colors.surface.withValues(alpha: 0.94),
-        borderRadius: BorderRadius.circular(AppRadius.xxxl),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.5),
-          width: 1.w,
+    return SafeArea(
+      top: false,
+      child: Container(
+        margin: EdgeInsets.fromLTRB(
+          AppSpacing.cardPadding,
+          0,
+          AppSpacing.cardPadding,
+          AppSpacing.cardPadding,
         ),
-        boxShadow: AppElevation.level4(context),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          for (int i = 0; i < items.length; i++) ...[
-            if (hasCenterAction && i == halfLength)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-                child: FloatingCenterActionButton(
-                  key: const ValueKey('nav_center_fab'),
-                  icon: centerActionIcon,
-                  tooltip: centerActionTooltip,
-                  onTap: onCenterActionTap!,
+        height: 76.h,
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+        decoration: BoxDecoration(
+          color: colors.surface.withValues(alpha: 0.94),
+          borderRadius: BorderRadius.circular(AppRadius.xxxl),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: 0.5),
+            width: 1.w,
+          ),
+          boxShadow: AppElevation.level4(context),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            for (int i = 0; i < items.length; i++) ...[
+              if (hasCenterAction && i == halfLength)
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+                  child: FloatingCenterActionButton(
+                    key: const ValueKey('nav_center_fab'),
+                    icon: centerActionIcon,
+                    tooltip: centerActionTooltip,
+                    onTap: onCenterActionTap!,
+                  ),
+                ),
+              Expanded(
+                child: FloatingNavBarItemWidget(
+                  key: ValueKey('nav_item_$i'),
+                  item: items[i],
+                  index: i,
+                  isSelected: currentIndex == i,
+                  onTap: () => onTap(i),
                 ),
               ),
-            Expanded(
-              child: FloatingNavBarItemWidget(
-                key: ValueKey('nav_item_$i'),
-                item: items[i],
-                index: i,
-                isSelected: currentIndex == i,
-                onTap: () => onTap(i),
-              ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -174,10 +177,7 @@ class FloatingNavBarItemWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              NavBadgeIconWidget(
-                item: item,
-                isSelected: isSelected,
-              ),
+              NavBadgeIconWidget(item: item, isSelected: isSelected),
               AppSpacing.vXxs,
               AnimatedDefaultTextStyle(
                 duration: AppMotion.fast,
@@ -314,11 +314,7 @@ class FloatingCenterActionButton extends StatelessWidget {
             ),
           ),
           child: Center(
-            child: Icon(
-              icon,
-              color: colors.onPrimary,
-              size: 24.r,
-            ),
+            child: Icon(icon, color: colors.onPrimary, size: 24.r),
           ),
         ),
       ),

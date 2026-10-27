@@ -7,6 +7,7 @@ class DashboardOverviewEntity {
   final String roleLabel;
   final String period;
   final DashboardContextEntity context;
+  final List<DashboardNetworkSummaryEntity> networks;
   final DashboardLiquidityEntity liquidity;
   final Map<String, dynamic> kpis;
   final List<DashboardAlertEntity> alerts;
@@ -18,11 +19,39 @@ class DashboardOverviewEntity {
     required this.roleLabel,
     required this.period,
     required this.context,
+    this.networks = const [],
     required this.liquidity,
     required this.kpis,
     required this.alerts,
     required this.recentActivities,
     required this.telemetry,
+  });
+}
+
+/// ملخص الكيان الشبكي المستقل ضمن محفظة شبكات المزود أو الوكيل
+class DashboardNetworkSummaryEntity {
+  final int networkId;
+  final String networkUuid;
+  final String networkName;
+  final String networkCode;
+  final String? networkProfileLogo;
+  final String status;
+  final double walletBalance;
+  final String currency;
+  final int activePosCount;
+  final int pendingRequestsCount;
+
+  const DashboardNetworkSummaryEntity({
+    required this.networkId,
+    required this.networkUuid,
+    required this.networkName,
+    required this.networkCode,
+    this.networkProfileLogo,
+    required this.status,
+    required this.walletBalance,
+    required this.currency,
+    required this.activePosCount,
+    required this.pendingRequestsCount,
   });
 }
 

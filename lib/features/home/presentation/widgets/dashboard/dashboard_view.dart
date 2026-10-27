@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
-import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_bento_grid.dart';
+import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
+import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_distribution_performance.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_header_section.dart';
-import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_hero_liquidity_card.dart';
-import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_operational_radar.dart';
+import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_multi_entity_deck.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_quick_shortcuts_bar.dart';
-import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_recent_operations_feed.dart';
+import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_recent_ledger_feed.dart';
+import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_sales_trend_chart.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_skeleton_view.dart';
+import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_urgent_approvals_hub.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/create_voucher_request_sheet.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 
 /// ============================================================================
 /// واجهة لوحة القيادة التجميعية الرشيقة (DashboardView)
 /// ============================================================================
-/// تمثل التجميع الرشيق (Lean Composite Assembler) لودجات لوحة القيادة
-/// دون أي دوال مساعدة محلية، مع إدارة كاملة لحالات التحميل والخطأ والسحب للتحديث.
+/// تمثل التجميع الرشيق (Lean Composite Assembler) لودجات لوحة القيادة التنفيذية
+/// وفق ميثاق الهندسة النظيفة الصارم، مع هيكل بصري عالمي لإدارة مبيعات التوزيع.
 class DashboardView extends GetView<DashboardController> {
   const DashboardView({super.key});
 
@@ -32,7 +38,8 @@ class DashboardView extends GetView<DashboardController> {
       }
 
       // 2. حالة الخطأ مع إمكانية إعادة المحاولة (الودجت الموحد §26)
-      if (controller.errorMessage.isNotEmpty && controller.overview.value == null) {
+      if (controller.errorMessage.isNotEmpty &&
+          controller.overview.value == null) {
         return CustomErrorState(
           title: 'تعذر تحميل لوحة القيادة',
           subtitle: controller.errorMessage.value,
@@ -45,7 +52,9 @@ class DashboardView extends GetView<DashboardController> {
         return const SizedBox.shrink();
       }
 
-      // 3. حالة النجاح وعرض البيانات الكاملة
+      final isMasked = controller.isPrivacyMasked.value;
+
+      // 3. حالة النجاح وعرض الشاشة التنفيذية المتكاملة
       return RefreshIndicator(
         color: colors.primary,
         onRefresh: () => controller.loadDashboard(isRefresh: true),
@@ -54,53 +63,77 @@ class DashboardView extends GetView<DashboardController> {
             parent: BouncingScrollPhysics(),
           ),
           child: ResponsiveContentWrapper(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.md,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 1. ترويسة الكيان ومنتقي الفترات
-                  DashboardHeaderSection(controller: controller),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. منصة بطاقات الكيانات الشبكية المستقلة (Multi-Entity Horizon Deck)
+                DashboardMultiEntityDeck(
+                  controller: controller,
+                  onActionTap: () {
+                    if (controller.isNetworkOwner) {
+                      Get.toNamed(AppRoutes.networkWallets);
+                    } else if (controller.isPosAgent) {
+                      Get.toNamed(AppRoutes.posWallets);
+                    } else if (Get.isRegistered<HomeLayoutController>()) {
+                      Get.find<HomeLayoutController>().changeTab(3);
+                    }
+                  },
+                ),
 
-                  AppSpacing.vLg,
+                AppSpacing.vLg,
 
-                  // 2. بطاقة السيولة المالية المركزية
-                  DashboardHeroLiquidityCard(
-                    liquidity: overview.liquidity,
-                  ),
+                // 2. شريط النطاق الزمني والتحليلات التنفيذية
+                DashboardHeaderSection(controller: controller),
 
-                  AppSpacing.vLg,
+                AppSpacing.vMd,
 
-                  // 3. رادار التنبيهات والطلبات المعلقة (إن وجدت)
-                  if (overview.alerts.isNotEmpty) ...[
-                    DashboardOperationalRadar(
-                      alerts: overview.alerts,
-                    ),
-                    AppSpacing.vLg,
-                  ],
+                // 3. المخطط البياني الانسيابي لحجم المبيعات والتوزيع (Sales & Distribution Chart)
+                DashboardSalesTrendChart(controller: controller),
 
-                  // 4. شريط الإجراءات والعمليات السريعة
-                  const DashboardQuickShortcutsBar(),
+                AppSpacing.vLg,
 
-                  AppSpacing.vLg,
+                // 4. مركز الاعتمادات والعمليات التشغيلية العاجلة
+                DashboardUrgentApprovalsHub(controller: controller),
 
-                  // 5. شبكة بينتو للمؤشرات التحليلية
-                  DashboardBentoGrid(kpis: overview.kpis),
+                AppSpacing.vLg,
 
-                  AppSpacing.vLg,
+                // 5. مصفوفة أداء وتغطية التوزيع الميداني (Bento Distribution Performance)
+                DashboardDistributionPerformance(controller: controller),
 
-                  // 6. شريط العمليات والحركات الأخيرة
-                  DashboardRecentOperationsFeed(
-                    activities: overview.recentActivities,
-                  ),
+                AppSpacing.vLg,
 
-                  // مسافة سفلية مريحة تعلو شريط التنقل العائم
-                  AppSpacing.vHuge,
-                ],
-              ),
+                // 6. منصة العمليات والإجراءات السريعة
+                DashboardQuickShortcutsBar(
+                  onNewInvoiceTap: () => CreateSaleInvoiceSheet.show(context),
+                  onNewRequestTap: () =>
+                      CreateVoucherRequestSheet.show(context),
+                  onManagePosTap: () {
+                    if (Get.isRegistered<HomeLayoutController>()) {
+                      Get.find<HomeLayoutController>().changeTab(2);
+                    }
+                  },
+                  onWalletTap: () {
+                    if (controller.isNetworkOwner) {
+                      Get.toNamed(AppRoutes.networkWallets);
+                    } else if (controller.isPosAgent) {
+                      Get.toNamed(AppRoutes.posWallets);
+                    } else if (Get.isRegistered<HomeLayoutController>()) {
+                      Get.find<HomeLayoutController>().changeTab(3);
+                    }
+                  },
+                ),
+
+                AppSpacing.vLg,
+
+                // 7. سجل العمليات الميدانية والتحصيل المباشر
+                DashboardRecentLedgerFeed(
+                  activities: overview.recentActivities,
+                  isMasked: isMasked,
+                ),
+
+                // مسافة سفلية مريحة تعلو شريط التنقل العائم
+                SizedBox(height: 100.h),
+              ],
             ),
           ),
         ),

@@ -12,10 +12,12 @@ import 'package:netsales/widgets/cards/custom_kpi_card.dart';
 /// وعدد الكروت المباعة، وحالة نقاط البيع مع مؤشرات الصعود والهبوط.
 class DashboardBentoGrid extends StatelessWidget {
   final Map<String, dynamic> kpis;
+  final bool isMasked;
 
   const DashboardBentoGrid({
     super.key,
     required this.kpis,
+    this.isMasked = false,
   });
 
   @override
@@ -41,11 +43,15 @@ class DashboardBentoGrid extends StatelessWidget {
     final requests = (kpis['requests'] as Map<String, dynamic>?) ?? {};
     final pendingRequests = ((requests['pending_count'] ?? 0) as num).toInt();
 
+    final formattedSales = isMasked
+        ? '••••••••'
+        : AmountFormatter.formatValue(curSales);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'مؤشرات الأداء التراكمية',
+          'مؤشرات الأداء للشبكة المحددة',
           style: AppTypography.titleMedium.copyWith(
             color: colors.onSurface,
             fontWeight: FontWeight.bold,
@@ -56,14 +62,14 @@ class DashboardBentoGrid extends StatelessWidget {
         // الصف الأول: بطاقة المبيعات الكبرى + بطاقة الكروت المباعة
         Row(
           children: [
-        // بطاقة المبيعات مع نسبة النمو
+            // بطاقة المبيعات مع نسبة النمو
             Expanded(
               flex: 3,
               child: CustomKpiCard.standard(
                 icon: Icons.trending_up_rounded,
                 iconColor: colors.primary,
                 title: 'إجمالي المبيعات',
-                value: AmountFormatter.formatValue(curSales),
+                value: formattedSales,
                 unit: 'ر.ي',
                 badgeText: '${isPositiveGrowth ? '+' : ''}${AmountFormatter.formatValue(growthPct, decimalPlaces: 1)}%',
                 isPositiveBadge: isPositiveGrowth,

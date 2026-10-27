@@ -3,14 +3,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
-/// شريط الاختصارات السريعة (DashboardQuickShortcutsBar)
+/// منصة العمليات والإجراءات السريعة (DashboardQuickShortcutsBar)
 /// ============================================================================
-/// يتيح للمستخدم الوصول المباشر للعمليات التشغيلية بنقرة واحدة
-/// دون إجباره على التنقل بين القوائم المعقدة.
+/// رصيف إجراءات تنفيذي مدمج يتيح للمشغل إصدار الفواتير وطلب الكروت
+/// وإدارة الوكلاء والمحافظ بأسرع مسار نقر وبدون تعقيد.
 class DashboardQuickShortcutsBar extends StatelessWidget {
   final VoidCallback? onNewInvoiceTap;
   final VoidCallback? onNewRequestTap;
@@ -32,40 +33,82 @@ class DashboardQuickShortcutsBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'الإجراءات السريعة',
-          style: AppTypography.titleMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        AppSpacing.vMd,
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _ShortcutItem(
-              icon: Icons.post_add_rounded,
-              label: 'فاتورة جديدة',
-              color: colors.primary,
-              onTap: onNewInvoiceTap,
+            Container(
+              width: 28.r,
+              height: 28.r,
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: 0.1),
+                borderRadius: AppRadius.xsRadius,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.bolt_rounded,
+                size: 16.r,
+                color: colors.primary,
+              ),
             ),
-            _ShortcutItem(
-              icon: Icons.add_shopping_cart_rounded,
-              label: 'طلب كروت',
-              color: colors.secondary,
-              onTap: onNewRequestTap,
+            AppSpacing.hSm,
+            Text(
+              'العمليات والإجراءات الميدانية',
+              style: AppTypography.titleMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-            _ShortcutItem(
-              icon: Icons.storefront_rounded,
-              label: 'نقاط البيع',
-              color: colors.tertiary,
-              onTap: onManagePosTap,
+          ],
+        ),
+
+        AppSpacing.vMd,
+
+        // شبكة البطاقات التنفيذية الذكية (2 في كل صف)
+        Row(
+          children: [
+            Expanded(
+              child: _ExecutiveActionTile(
+                icon: Icons.receipt_long_rounded,
+                title: 'فاتورة مبيعات',
+                subtitle: 'إصدار كاش / آجل',
+                color: colors.primary,
+                onTap: onNewInvoiceTap,
+              ),
             ),
-            _ShortcutItem(
-              icon: Icons.account_balance_wallet_rounded,
-              label: 'شحن المحفظة',
-              color: colors.warning,
-              onTap: onWalletTap,
+            AppSpacing.hSm,
+            Expanded(
+              child: _ExecutiveActionTile(
+                icon: Icons.inventory_2_rounded,
+                title: 'توريد كروت',
+                subtitle: 'طلب رصيد شبكي',
+                color: colors.secondary,
+                onTap: onNewRequestTap,
+              ),
+            ),
+          ],
+        ),
+
+        AppSpacing.vSm,
+
+        Row(
+          children: [
+            Expanded(
+              child: _ExecutiveActionTile(
+                icon: Icons.storefront_rounded,
+                title: 'نقاط التوزيع',
+                subtitle: 'متابعة الوكلاء',
+                color: colors.tertiary,
+                onTap: onManagePosTap,
+              ),
+            ),
+            AppSpacing.hSm,
+            Expanded(
+              child: _ExecutiveActionTile(
+                icon: Icons.account_balance_wallet_rounded,
+                title: 'إدارة المحفظة',
+                subtitle: 'الرصيد والتحويل',
+                color: colors.warning,
+                onTap: onWalletTap,
+              ),
             ),
           ],
         ),
@@ -74,15 +117,18 @@ class DashboardQuickShortcutsBar extends StatelessWidget {
   }
 }
 
-class _ShortcutItem extends StatelessWidget {
+/// بطاقة إجراء تنفيذي مصغرة أنيقة
+class _ExecutiveActionTile extends StatelessWidget {
   final IconData icon;
-  final String label;
+  final String title;
+  final String subtitle;
   final Color color;
   final VoidCallback? onTap;
 
-  const _ShortcutItem({
+  const _ExecutiveActionTile({
     required this.icon,
-    required this.label,
+    required this.title,
+    required this.subtitle,
     required this.color,
     this.onTap,
   });
@@ -91,37 +137,68 @@ class _ShortcutItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Expanded(
-      child: CustomInteractiveBounce(
-        onTap: onTap ?? () {},
-        child: Column(
+    return CustomInteractiveBounce(
+      onTap: onTap ?? () {},
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: AppRadius.lgRadius,
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: 0.25),
+            width: 1.w,
+          ),
+          boxShadow: AppElevation.level1(context),
+        ),
+        child: Row(
           children: [
             Container(
-              width: 52.r,
-              height: 52.r,
+              width: 38.r,
+              height: 38.r,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.12),
-                borderRadius: AppRadius.xlRadius,
+                borderRadius: AppRadius.mdRadius,
                 border: Border.all(
                   color: color.withValues(alpha: 0.25),
+                  width: 1.w,
                 ),
               ),
+              alignment: Alignment.center,
               child: Icon(
                 icon,
                 color: color,
-                size: 24.r,
+                size: 20.r,
               ),
             ),
-            AppSpacing.vXs,
-            Text(
-              label,
-              style: AppTypography.labelSmall.copyWith(
-                color: colors.onSurface,
-                fontWeight: FontWeight.w600,
+            AppSpacing.hSm,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  AppSpacing.vXxs,
+                  Text(
+                    subtitle,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      fontSize: 10.sp,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -129,4 +206,3 @@ class _ShortcutItem extends StatelessWidget {
     );
   }
 }
-

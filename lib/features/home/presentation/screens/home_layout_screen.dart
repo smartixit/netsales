@@ -21,49 +21,69 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
 
   @override
   Widget build(BuildContext context) {
-
     return DoubleBackExitScope(
       onFallback: () async => controller.canPopTab(),
       child: CustomAppScaffold(
+        useSurfaceMesh: true,
+        extendBodyBehindAppBar: false,
+        extendBody: true,
+        safeAreaBottom: false,
         appBar: HomeAppBar(controller: controller),
-        body: Column(
-          children: [
-            // شريط التنبيه اللحظي لقطع الاتصال الشبكي
-            Obx(
-              () => CustomOfflineBanner(isOffline: !controller.isOnline.value),
-            ),
-
-            // الحاوية متعددة التبويبات مع الحفاظ التام على الحالة (IndexedStack)
-            Expanded(
-              child: Obx(
-                () => IndexedStack(
-                  index: controller.selectedIndex.value,
-                  children: const [
-                    // Tab 0: لوحة القيادة والتوزيع (Dashboard)
-                    DashboardView(),
-
-                    // Tab 1: فواتير المبيعات وطلبات التوريد (Operations)
-                    OperationsScreen(),
-
-                    // Tab 2: شبكة الشركاء ونقاط التوزيع (Partners & Distribution)
-                    PartnersScreen(),
-
-                    // Tab 3: المحافظ والمالية والإعدادات (More & Financial Hub)
-                    MoreScreen(),
-                  ],
+        body: Builder(
+          builder: (bodyContext) {
+            final mediaQuery = MediaQuery.of(bodyContext);
+            return MediaQuery(
+              data: mediaQuery.copyWith(
+                viewPadding: mediaQuery.viewPadding.copyWith(
+                  bottom: mediaQuery.padding.bottom,
                 ),
               ),
-            ),
-          ],
+              child: Column(
+                children: [
+                  // شريط التنبيه اللحظي لقطع الاتصال الشبكي
+                  Obx(
+                    () => CustomOfflineBanner(
+                      isOffline: !controller.isOnline.value,
+                    ),
+                  ),
+
+                  // الحاوية متعددة التبويبات مع الحفاظ التام على الحالة (IndexedStack)
+                  Expanded(
+                    child: Obx(
+                      () => IndexedStack(
+                        index: controller.selectedIndex.value,
+                        children: const [
+                          // Tab 0: لوحة القيادة والتوزيع (Dashboard)
+                          DashboardView(),
+
+                          // Tab 1: فواتير المبيعات وطلبات التوريد (Operations)
+                          OperationsScreen(),
+
+                          // Tab 2: شبكة الشركاء ونقاط التوزيع (Partners & Distribution)
+                          PartnersScreen(),
+
+                          // Tab 3: المحافظ والمالية والإعدادات (More & Financial Hub)
+                          MoreScreen(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-        bottomNavigationBar: Obx(
-          () => CustomFloatingBottomNavBar(
-            currentIndex: controller.selectedIndex.value,
-            onTap: controller.changeTab,
-            items: controller.navItems,
-            onCenterActionTap: controller.hasQuickActions
-                ? () => controller.onCenterFabPressed(context)
-                : null,
+        bottomNavigationBar: ColoredBox(
+          color: Colors.transparent,
+          child: Obx(
+            () => CustomFloatingBottomNavBar(
+              currentIndex: controller.selectedIndex.value,
+              onTap: controller.changeTab,
+              items: controller.navItems,
+              onCenterActionTap: controller.hasQuickActions
+                  ? () => controller.onCenterFabPressed(context)
+                  : null,
+            ),
           ),
         ),
       ),

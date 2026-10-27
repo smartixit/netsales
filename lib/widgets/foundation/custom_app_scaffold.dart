@@ -37,6 +37,7 @@ class CustomAppScaffold extends StatelessWidget {
     this.backgroundColor,
     this.useSurfaceMesh = false,
     this.backgroundGradient,
+    this.extendBody = false,
     this.extendBodyBehindAppBar,
     this.enableGlassAppBar = true,
     this.safeArea = true,
@@ -97,6 +98,9 @@ class CustomAppScaffold extends StatelessWidget {
 
   /// تدرج خلفية مخصص
   final Gradient? backgroundGradient;
+
+  /// امتداد المحتوى لأسفل الشاشة خلف الشريط السفلي العائم (Floating Bottom Bar)
+  final bool extendBody;
 
   /// امتداد المحتوى خلف شريط الـ AppBar لمنع أي حد قاطع
   final bool? extendBodyBehindAppBar;
@@ -225,10 +229,11 @@ class CustomAppScaffold extends StatelessWidget {
 
     final builtAppBar = _buildAppBar(context);
 
-    // عندما يكون الهيدر شفافاً أو نستخدم التدرج الشبكي، يمتد المحتوى تلقائياً خلف الـ AppBar لمنع القص الحاد
+    // عندما يكون الهيدر التلقائي شفافاً أو نستخدم التدرج الشبكي، يمتد المحتوى تلقائياً خلف الـ AppBar لمنع القص الحاد
     final effectiveExtend =
         extendBodyBehindAppBar ??
-        (effectiveGradient != null &&
+        (appBar == null &&
+            effectiveGradient != null &&
             (appBarBg == null || appBarBg == Colors.transparent));
 
     Widget content = body;
@@ -260,6 +265,7 @@ class CustomAppScaffold extends StatelessWidget {
           : (backgroundColor ?? colors.surface),
       appBar: builtAppBar,
       extendBodyBehindAppBar: effectiveExtend,
+      extendBody: extendBody,
       body: content,
       bottomNavigationBar: bottomNavigationBar,
       floatingActionButton: floatingActionButton,

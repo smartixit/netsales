@@ -16,11 +16,13 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 class DashboardRecentOperationsFeed extends StatelessWidget {
   final List<DashboardActivityEntity> activities;
   final ValueChanged<DashboardActivityEntity>? onActivityTap;
+  final bool isMasked;
 
   const DashboardRecentOperationsFeed({
     super.key,
     required this.activities,
     this.onActivityTap,
+    this.isMasked = false,
   });
 
   @override
@@ -92,6 +94,7 @@ class DashboardRecentOperationsFeed extends StatelessWidget {
               final item = activities[index];
               return _ActivityItemTile(
                 activity: item,
+                isMasked: isMasked,
                 onTap: () => onActivityTap?.call(item),
               );
             },
@@ -104,17 +107,21 @@ class DashboardRecentOperationsFeed extends StatelessWidget {
 class _ActivityItemTile extends StatelessWidget {
   final DashboardActivityEntity activity;
   final VoidCallback? onTap;
+  final bool isMasked;
 
   const _ActivityItemTile({
     required this.activity,
     this.onTap,
+    this.isMasked = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isInvoice = activity.isInvoice;
-    final formattedAmount = AmountFormatter.formatValue(activity.amount);
+    final formattedAmount = isMasked
+        ? '••••••••'
+        : AmountFormatter.formatValue(activity.amount);
 
     return CustomInteractiveBounce(
       onTap: onTap ?? () {},

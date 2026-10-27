@@ -10,6 +10,7 @@ class DashboardOverviewModel extends DashboardOverviewEntity {
     required super.roleLabel,
     required super.period,
     required super.context,
+    super.networks = const [],
     required super.liquidity,
     required super.kpis,
     required super.alerts,
@@ -25,6 +26,9 @@ class DashboardOverviewModel extends DashboardOverviewEntity {
       context: DashboardContextModel.fromJson(
         (json['context'] as Map<String, dynamic>?) ?? {},
       ),
+      networks: ((json['networks'] as List<dynamic>?) ?? [])
+          .map((item) => DashboardNetworkSummaryModel.fromJson(item as Map<String, dynamic>))
+          .toList(),
       liquidity: DashboardLiquidityModel.fromJson(
         (json['liquidity'] as Map<String, dynamic>?) ?? {},
       ),
@@ -40,6 +44,49 @@ class DashboardOverviewModel extends DashboardOverviewEntity {
       ),
     );
   }
+}
+
+class DashboardNetworkSummaryModel extends DashboardNetworkSummaryEntity {
+  const DashboardNetworkSummaryModel({
+    required super.networkId,
+    required super.networkUuid,
+    required super.networkName,
+    required super.networkCode,
+    super.networkProfileLogo,
+    required super.status,
+    required super.walletBalance,
+    required super.currency,
+    required super.activePosCount,
+    required super.pendingRequestsCount,
+  });
+
+  factory DashboardNetworkSummaryModel.fromJson(Map<String, dynamic> json) {
+    return DashboardNetworkSummaryModel(
+      networkId: (json['network_id'] as num?)?.toInt() ?? 0,
+      networkUuid: (json['network_uuid'] as String?) ?? '',
+      networkName: (json['network_name'] as String?) ?? '',
+      networkCode: (json['network_code'] as String?) ?? '',
+      networkProfileLogo: json['network_profile_logo'] as String?,
+      status: (json['status'] as String?) ?? 'ACTIVE',
+      walletBalance: ((json['wallet_balance'] ?? 0.0) as num).toDouble(),
+      currency: (json['currency'] as String?) ?? 'YER',
+      activePosCount: (json['active_pos_count'] as num?)?.toInt() ?? 0,
+      pendingRequestsCount: (json['pending_requests_count'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'network_id': networkId,
+        'network_uuid': networkUuid,
+        'network_name': networkName,
+        'network_code': networkCode,
+        'network_profile_logo': networkProfileLogo,
+        'status': status,
+        'wallet_balance': walletBalance,
+        'currency': currency,
+        'active_pos_count': activePosCount,
+        'pending_requests_count': pendingRequestsCount,
+      };
 }
 
 class DashboardContextModel extends DashboardContextEntity {
