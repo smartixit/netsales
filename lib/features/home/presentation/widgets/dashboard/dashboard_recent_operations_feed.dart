@@ -227,4 +227,3 @@ class _ActivityItemTile extends StatelessWidget {
     );
   }
 }
-

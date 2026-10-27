@@ -207,12 +207,9 @@ class CustomAppScaffold extends StatelessWidget {
       leadingWidth: 60.w,
       leading: leadingWidget,
       flexibleSpace: enableGlassAppBar
-          ? ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Container(
-                  color: (appBarBg ?? colors.surface).withValues(alpha: 0.15),
-                ),
+          ? _GlassAppBarBackground(
+              backgroundColor: (appBarBg ?? colors.surface).withValues(
+                alpha: 0.82,
               ),
             )
           : null,
@@ -284,5 +281,67 @@ class CustomAppScaffold extends StatelessWidget {
     }
 
     return scaffold;
+  }
+}
+
+/// ودجت لإدارة خلفية الـ AppBar الزجاجية بذكاء
+///
+/// يمنع تشويش وخرابيش البكسلات الناتجة عن تعارض [BackdropFilter] مع طبقات GPU
+/// والـ Shimmer أثناء حركة الانتقال بين الشاشات (Route Transition Animation).
+class _GlassAppBarBackground extends StatefulWidget {
+  final Color backgroundColor;
+
+  const _GlassAppBarBackground({
+    required this.backgroundColor,
+  });
+
+  @override
+  State<_GlassAppBarBackground> createState() => _GlassAppBarBackgroundState();
+}
+
+class _GlassAppBarBackgroundState extends State<_GlassAppBarBackground> {
+  Animation<double>? _routeAnimation;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final modalRoute = ModalRoute.of(context);
+    final anim = modalRoute?.animation;
+    if (anim != _routeAnimation) {
+      _routeAnimation?.removeStatusListener(_onAnimationStatusChanged);
+      _routeAnimation = anim;
+      _routeAnimation?.addStatusListener(_onAnimationStatusChanged);
+    }
+  }
+
+  void _onAnimationStatusChanged(AnimationStatus status) {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _routeAnimation?.removeStatusListener(_onAnimationStatusChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isRouteAnimating =
+        _routeAnimation != null && !_routeAnimation!.isCompleted;
+
+    // أثناء انتقال الشاشة (أول 300ms)، نعتمد تدرج glassOverlay الزجاجي الناعم
+    // لتجنب تشويش وخرابيش الـ GPU Framebuffer في BackdropFilter أثناء حركة الطبقة.
+    if (isRouteAnimating) {
+      return Container(
+        decoration: BoxDecoration(gradient: AppGradients.glassOverlay(context)),
+      );
+    }
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
+        child: Container(color: widget.backgroundColor),
+      ),
+    );
   }
 }

@@ -9,9 +9,10 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 
 /// ============================================================================
-/// بطاقة الملخص المالي ومطابقة الحساب (InvoiceFinancialSummaryCard)
+/// بطاقة الملخص المالي ومطابقة الحساب السيادية (InvoiceFinancialSummaryCard)
 /// ============================================================================
-/// تعرض تفاصيل الحساب المالي للفاتورة: الإجمالي، المدفوع، والمتبقي بدقة متناهية.
+/// تعرض تفاصيل الحساب المالي للفاتورة بدقة محاسبية متناهية:
+/// الإجمالي، المسدد، والمتبقي مع إشعار المطابقة والتسوية المعتمد.
 class InvoiceFinancialSummaryCard extends StatelessWidget {
   final SaleInvoiceEntity invoice;
 
@@ -24,6 +25,8 @@ class InvoiceFinancialSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final hasRemaining = invoice.hasRemaining;
+    final isCash = invoice.isCash;
+    final themeColor = isCash ? colors.primary : colors.warning;
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.md),
@@ -31,7 +34,8 @@ class InvoiceFinancialSummaryCard extends StatelessWidget {
         color: colors.surface,
         borderRadius: AppRadius.lgRadius,
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.5),
+          color: colors.outlineVariant.withValues(alpha: 0.28),
+          width: 1.w,
         ),
         boxShadow: AppElevation.level1(context),
       ),
@@ -40,17 +44,27 @@ class InvoiceFinancialSummaryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.account_balance_wallet_rounded,
-                color: colors.primary,
-                size: 18.r,
+              Container(
+                width: 26.r,
+                height: 26.r,
+                decoration: BoxDecoration(
+                  color: themeColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.account_balance_wallet_rounded,
+                  color: themeColor,
+                  size: 15.r,
+                ),
               ),
               AppSpacing.hXs,
               Text(
                 'الملخص المالي ومطابقة الحساب',
                 style: AppTypography.titleSmall.copyWith(
                   color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12.5.sp,
                 ),
               ),
             ],
@@ -59,8 +73,8 @@ class InvoiceFinancialSummaryCard extends StatelessWidget {
           AppSpacing.vMd,
 
           // 1. الإجمالي المطلوب
-          _SummaryRow(
-            label: 'إجمالي قيمة الفاتورة',
+          _SummaryLedgerRow(
+            label: 'إجمالي قيمة الفاتورة المعتمدة',
             value: AmountFormatter.formatValue(invoice.invoiceTotalAmount),
             currency: 'ر.ي',
             isBold: true,
@@ -69,91 +83,68 @@ class InvoiceFinancialSummaryCard extends StatelessWidget {
           AppSpacing.vSm,
 
           // 2. المبلغ المدفوع
-          _SummaryRow(
-            label: 'المبلغ المدفوع (المسدد)',
+          _SummaryLedgerRow(
+            label: 'المبلغ المسدد (المدفوع)',
             value: AmountFormatter.formatValue(invoice.paidAmount),
             currency: 'ر.ي',
-            valueColor: colors.success,
+            valueColor: colors.primary,
           ),
 
           AppSpacing.vSm,
           Divider(
-            thickness: 0.8,
-            color: colors.outlineVariant.withValues(alpha: 0.3),
+            thickness: 0.6.h,
+            color: colors.outlineVariant.withValues(alpha: 0.25),
           ),
           AppSpacing.vSm,
 
-          // 3. المتبقي بذمة العميل مع بطاقة الحالة
+          // 3. المتبقي بذمة العميل
+          _SummaryLedgerRow(
+            label: 'المتبقي بذمة نقطة البيع',
+            value: AmountFormatter.formatValue(invoice.remainingAmount),
+            currency: 'ر.ي',
+            valueColor: hasRemaining ? colors.warning : colors.onSurfaceVariant,
+            isBold: hasRemaining,
+          ),
+
+          AppSpacing.vMd,
+
+          // 4. بطاقة حالة التسوية السيادية
           Container(
             padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
+              horizontal: 12.w,
+              vertical: 8.h,
             ),
             decoration: BoxDecoration(
-              color: hasRemaining
-                  ? colors.warning.withValues(alpha: 0.08)
-                  : colors.success.withValues(alpha: 0.08),
+              color: (hasRemaining ? colors.warning : colors.primary)
+                  .withValues(alpha: 0.08),
               borderRadius: AppRadius.mdRadius,
               border: Border.all(
-                color: hasRemaining
-                    ? colors.warning.withValues(alpha: 0.3)
-                    : colors.success.withValues(alpha: 0.3),
+                color: (hasRemaining ? colors.warning : colors.primary)
+                    .withValues(alpha: 0.25),
+                width: 0.8.w,
               ),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      hasRemaining
-                          ? Icons.warning_amber_rounded
-                          : Icons.check_circle_rounded,
-                      color: hasRemaining ? colors.warning : colors.success,
-                      size: 20.r,
-                    ),
-                    AppSpacing.hSm,
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          hasRemaining ? 'المتبقي بذمة الوكيل' : 'حالة الحساب',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                          ),
-                        ),
-                        Text(
-                          hasRemaining
-                              ? 'مستحق السداد آجل'
-                              : 'الفاتورة مسددة بالكامل',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: hasRemaining ? colors.warning : colors.success,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                Icon(
+                  hasRemaining
+                      ? Icons.warning_amber_rounded
+                      : Icons.verified_rounded,
+                  size: 18.r,
+                  color: hasRemaining ? colors.warning : colors.primary,
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      AmountFormatter.formatValue(invoice.remainingAmount),
-                      style: AppTypography.titleMedium.copyWith(
-                        color: hasRemaining ? colors.warning : colors.success,
-                        fontWeight: FontWeight.bold,
-                      ),
+                AppSpacing.hSm,
+                Expanded(
+                  child: Text(
+                    hasRemaining
+                        ? 'يتبقى مبلغ ${AmountFormatter.formatValue(invoice.remainingAmount)} ر.ي مقيد كدين آجل في ذمة نقطة البيع'
+                        : 'تم سداد ومطابقة كامل قيمة الفاتورة بنجاح ودون أي ذمم معلقة',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: hasRemaining ? colors.warning : colors.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10.sp,
                     ),
-                    AppSpacing.hXxs,
-                    Text(
-                      'ر.ي',
-                      style: AppTypography.labelSmall.copyWith(
-                        color: hasRemaining ? colors.warning : colors.success,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -164,14 +155,14 @@ class InvoiceFinancialSummaryCard extends StatelessWidget {
   }
 }
 
-class _SummaryRow extends StatelessWidget {
+class _SummaryLedgerRow extends StatelessWidget {
   final String label;
   final String value;
   final String currency;
   final Color? valueColor;
   final bool isBold;
 
-  const _SummaryRow({
+  const _SummaryLedgerRow({
     required this.label,
     required this.value,
     required this.currency,
@@ -188,28 +179,33 @@ class _SummaryRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTypography.bodySmall.copyWith(
-            color: colors.onSurfaceVariant,
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          style: AppTypography.labelSmall.copyWith(
+            color: colors.onSurfaceVariant.withValues(alpha: 0.8),
+            fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
+            fontSize: 11.sp,
           ),
         ),
         Row(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
             Text(
               value,
-              style: AppTypography.bodyMedium.copyWith(
+              style: (isBold ? AppTypography.titleSmall : AppTypography.bodySmall)
+                  .copyWith(
                 color: valueColor ?? colors.onSurface,
-                fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+                fontWeight: isBold ? FontWeight.w900 : FontWeight.w700,
+                fontSize: isBold ? 14.sp : 12.sp,
               ),
             ),
             AppSpacing.hXxs,
             Text(
               currency,
               style: AppTypography.labelSmall.copyWith(
-                color: colors.onSurfaceVariant,
-                fontSize: 10.sp,
+                color: colors.onSurfaceVariant.withValues(alpha: 0.6),
+                fontSize: 9.5.sp,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],

@@ -15,6 +15,7 @@ import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/sound_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 
 /// دالة المعالجة المعزولة في الخلفية عند وصول إشعار والتطبيق بالخلفية أو مغلق.
 /// يجب أن تكون في المستوى الأعلى (Top-Level) ومحمية بـ @pragma('vm:entry-point').
@@ -336,6 +337,8 @@ class PushNotificationService extends GetxService {
       audioAttributesUsage: AudioAttributesUsage.alarm,
       enableVibration: true,
       icon: '@drawable/ic_notification',
+      largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+      color: AppColors.lightColors.primary,
     );
 
     const darwinDetails = DarwinNotificationDetails(

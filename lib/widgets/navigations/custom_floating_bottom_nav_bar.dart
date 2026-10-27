@@ -104,7 +104,7 @@ class CustomFloatingBottomNavBar extends StatelessWidget {
             for (int i = 0; i < items.length; i++) ...[
               if (hasCenterAction && i == halfLength)
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                   child: FloatingCenterActionButton(
                     key: const ValueKey('nav_center_fab'),
                     icon: centerActionIcon,

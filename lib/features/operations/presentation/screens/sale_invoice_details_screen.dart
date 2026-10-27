@@ -5,30 +5,31 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
+import 'package:netsales/features/operations/presentation/widgets/invoice_details_action_dock.dart';
 import 'package:netsales/features/operations/presentation/widgets/invoice_financial_summary_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/invoice_hero_bond_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/invoice_items_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/invoice_parties_card.dart';
+import 'package:netsales/features/operations/presentation/widgets/operations_details_skeleton_view.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_loading_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/core/services/invoice_receipt_pdf_service.dart';
 import 'package:netsales/widgets/sheets/invoice_print_format_sheet.dart';
 
 /// ============================================================================
-/// شاشة تفاصيل فاتورة المبيعات والسند الرقمي (SaleInvoiceDetailsScreen)
+/// شاشة تفاصيل فاتورة المبيعات والسند الرقمي السيادي (SaleInvoiceDetailsScreen)
 /// ============================================================================
 /// تعرض فاتورة مبيعات كروت الشبكة بنمط السند المالي الرقمي عالي الدقة:
-/// مجمّع تركيبي رشيق خالٍ تماماً من دوال البناء الفرعية، ويدعم التجاوب والتحديث اللحظي.
+/// مجمّع تركيبي رشيق خالٍ تماماً من دوال البناء الفرعية، مزود برصيف إجراءات عائم دائم.
 class SaleInvoiceDetailsScreen extends StatefulWidget {
   final int? invoiceId;
 
   const SaleInvoiceDetailsScreen({super.key, this.invoiceId});
 
   @override
-  State<SaleInvoiceDetailsScreen> createState() => _SaleInvoiceDetailsScreenState();
+  State<SaleInvoiceDetailsScreen> createState() =>
+      _SaleInvoiceDetailsScreenState();
 }
 
 class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
@@ -39,7 +40,8 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
   void initState() {
     super.initState();
     _controller = Get.find<OperationsController>();
-    _id = widget.invoiceId ??
+    _id =
+        widget.invoiceId ??
         (Get.arguments is int
             ? Get.arguments as int
             : int.tryParse(Get.parameters['id'] ?? ''));
@@ -58,10 +60,11 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
       appBarTitle: 'تفاصيل فاتورة المبيعات',
       centerTitle: true,
       useSurfaceMesh: true,
+      extendBodyBehindAppBar: true,
       actions: [
         CustomButton.icon(
           icon: Icons.share_outlined,
-          tooltip: 'مشاركة السند',
+          tooltip: 'خيارات الطباعة والمشاركة',
           onPressed: () {
             final invoice = _controller.selectedInvoice.value;
             if (invoice != null) {
@@ -74,18 +77,25 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
         ),
         AppSpacing.hXs,
       ],
+      bottomNavigationBar: Obx(() {
+        final invoice = _controller.selectedInvoice.value;
+        if (invoice == null || _controller.isLoadingInvoiceDetails.value) {
+          return const SizedBox.shrink();
+        }
+        return InvoiceDetailsActionDock(invoice: invoice);
+      }),
       body: Obx(() {
         if (_controller.isLoadingInvoiceDetails.value) {
-          return const CustomLoadingState(
-            message: 'جاري تحميل تفاصيل الفاتورة والسند المالي...',
-          );
+          return const OperationsDetailsSkeletonView();
         }
 
         if (_controller.invoiceDetailsError.value.isNotEmpty) {
           return CustomErrorState(
             title: 'تعذر تحميل بيانات الفاتورة',
             subtitle: _controller.invoiceDetailsError.value,
-            onRetry: _id == null ? null : () => _controller.loadInvoiceDetails(_id!),
+            onRetry: _id == null
+                ? null
+                : () => _controller.loadInvoiceDetails(_id!),
           );
         }
 
@@ -110,7 +120,10 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
             ),
             child: ResponsiveContentWrapper(
               child: Padding(
-                padding: EdgeInsets.all(AppSpacing.screenPadding),
+                padding: EdgeInsets.only(
+                  top: CustomAppScaffold.topBarHeight(context) + AppSpacing.xs,
+                  bottom: AppSpacing.xl,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -119,12 +132,12 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
 
                     AppSpacing.vMd,
 
-                    // 2. بطاقة أطراف المعاملة المالية (الشبكة والوكيل)
+                    // 2. بطاقة أطراف المعاملة المالية السيادية
                     InvoicePartiesCard(invoice: invoice),
 
                     AppSpacing.vMd,
 
-                    // 3. بطاقة بنود كروت الإنترنت المباعة
+                    // 3. بطاقة بنود كروت الإنترنت المُباعة مع المحاذاة الدقيقة
                     InvoiceItemsCard(invoice: invoice),
 
                     AppSpacing.vMd,
@@ -133,36 +146,6 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
                     InvoiceFinancialSummaryCard(invoice: invoice),
 
                     AppSpacing.vLg,
-
-                    // 5. شريط الإجراءات والطباعة
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CustomButton.outline(
-                            text: 'طباعة الإيصال',
-                            icon: Icons.print_outlined,
-                            onPressed: () => InvoicePrintFormatSheet.show(
-                              context,
-                              invoice: invoice,
-                            ),
-                          ),
-                        ),
-                        AppSpacing.hSm,
-                        Expanded(
-                          child: CustomButton.primary(
-                            text: 'مشاركة السند',
-                            icon: Icons.share_rounded,
-                            onPressed: () => InvoiceReceiptPdfService.instance.shareSaleInvoice(
-                              context,
-                              invoice,
-                              format: InvoicePrintFormat.standardA4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    AppSpacing.vXl,
                   ],
                 ),
               ),

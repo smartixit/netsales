@@ -28,6 +28,13 @@
         <meta-data
             android:name="flutter_local_notifications.default_icon"
             android:resource="@drawable/ic_notification" />
+        <!-- الأيقونة واللون الافتراضي لإشعارات Firebase Push في الخلفية -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/splash_primary" />
         <!-- القناة الافتراضية لإشعارات فايربيس ذات الأولوية العالية -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"

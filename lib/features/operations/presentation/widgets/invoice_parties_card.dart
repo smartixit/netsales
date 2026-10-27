@@ -8,9 +8,10 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 
 /// ============================================================================
-/// بطاقة أطراف العملية المالية (InvoicePartiesCard)
+/// بطاقة أطراف العملية المالية السيادية (InvoicePartiesCard)
 /// ============================================================================
-/// تعرض طرفي المعاملة المالية: الشبكة المصدّرة للرصيد ونقطة البيع المستلمة.
+/// تعرض طرفي المعاملة المالية بنمط سجل التبادل والتحويل المؤسسي:
+/// شبكة الإنترنت المزوّدة ونقطة البيع المستلمة مع رموز التعريف وأدوار الصلاحية.
 class InvoicePartiesCard extends StatelessWidget {
   final SaleInvoiceEntity invoice;
 
@@ -22,6 +23,8 @@ class InvoicePartiesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isCash = invoice.isCash;
+    final themeColor = isCash ? colors.primary : colors.warning;
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.md),
@@ -29,54 +32,69 @@ class InvoicePartiesCard extends StatelessWidget {
         color: colors.surface,
         borderRadius: AppRadius.lgRadius,
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.5),
+          color: colors.outlineVariant.withValues(alpha: 0.28),
+          width: 1.w,
         ),
         boxShadow: AppElevation.level1(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── ترويسة مسار المعاملة ──
           Row(
             children: [
-              Icon(
-                Icons.swap_horiz_rounded,
-                color: colors.primary,
-                size: 18.r,
+              Container(
+                width: 26.r,
+                height: 26.r,
+                decoration: BoxDecoration(
+                  color: themeColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.swap_horiz_rounded,
+                  color: themeColor,
+                  size: 16.r,
+                ),
               ),
               AppSpacing.hXs,
               Text(
-                'أطراف المعاملة المالية',
+                'مسار أطراف المعاملة المالية',
                 style: AppTypography.titleSmall.copyWith(
                   color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12.5.sp,
                 ),
               ),
             ],
           ),
           AppSpacing.vMd,
+
+          // ── بطاقتا الطرفين المتجاورتان ──
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // طرف الشبكة المصدّرة
+              // 1. طرف الشبكة المزودة
               Expanded(
-                child: _PartyTile(
+                child: _PartyLedgerPod(
                   icon: Icons.wifi_tethering_rounded,
-                  iconBg: colors.primary.withValues(alpha: 0.12),
-                  iconColor: colors.primary,
+                  accentColor: colors.primary,
                   roleLabel: 'شبكة الإنترنت المصدّرة',
                   partyName: invoice.networkName ?? 'الشبكة #${invoice.networkId}',
-                  badgeText: 'المزوّد',
+                  idBadge: 'المزوّد',
                 ),
               ),
+
               AppSpacing.hSm,
-              // نقطة البيع المستلمة
+
+              // 2. نقطة البيع المستلمة
               Expanded(
-                child: _PartyTile(
+                child: _PartyLedgerPod(
                   icon: Icons.storefront_rounded,
-                  iconBg: colors.secondary.withValues(alpha: 0.12),
-                  iconColor: colors.secondary,
+                  accentColor: themeColor,
                   roleLabel: 'نقطة البيع المستلمة',
                   partyName: invoice.posName ?? 'نقطة بيع #${invoice.posId}',
-                  badgeText: invoice.posCode != null ? '#${invoice.posCode}' : 'الوكيل',
+                  idBadge: invoice.posCode != null ? '#${invoice.posCode}' : 'الوكيل',
                 ),
               ),
             ],
@@ -87,21 +105,19 @@ class InvoicePartiesCard extends StatelessWidget {
   }
 }
 
-class _PartyTile extends StatelessWidget {
+class _PartyLedgerPod extends StatelessWidget {
   final IconData icon;
-  final Color iconBg;
-  final Color iconColor;
+  final Color accentColor;
   final String roleLabel;
   final String partyName;
-  final String badgeText;
+  final String idBadge;
 
-  const _PartyTile({
+  const _PartyLedgerPod({
     required this.icon,
-    required this.iconBg,
-    required this.iconColor,
+    required this.accentColor,
     required this.roleLabel,
     required this.partyName,
-    required this.badgeText,
+    required this.idBadge,
   });
 
   @override
@@ -111,10 +127,11 @@ class _PartyTile extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerLow.withValues(alpha: 0.6),
+        color: colors.surfaceContainerHighest.withValues(alpha: 0.25),
         borderRadius: AppRadius.mdRadius,
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.3),
+          color: colors.outlineVariant.withValues(alpha: 0.2),
+          width: 0.8.w,
         ),
       ),
       child: Column(
@@ -124,29 +141,43 @@ class _PartyTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                width: 28.r,
-                height: 28.r,
+                width: 30.r,
+                height: 30.r,
                 decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: AppRadius.smRadius,
+                  gradient: LinearGradient(
+                    colors: [
+                      accentColor.withValues(alpha: 0.18),
+                      accentColor.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Icon(icon, color: iconColor, size: 16.r),
+                alignment: Alignment.center,
+                child: Icon(
+                  icon,
+                  color: accentColor,
+                  size: 16.r,
+                ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 6.w,
+                  vertical: 2.h,
+                ),
                 decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: AppRadius.xsRadius,
+                  color: accentColor.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.fullRadius,
                   border: Border.all(
-                    color: colors.outlineVariant.withValues(alpha: 0.4),
+                    color: accentColor.withValues(alpha: 0.22),
+                    width: 0.7.w,
                   ),
                 ),
                 child: Text(
-                  badgeText,
+                  idBadge,
                   style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
+                    color: accentColor,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 9.sp,
                   ),
                 ),
               ),
@@ -156,8 +187,9 @@ class _PartyTile extends StatelessWidget {
           Text(
             roleLabel,
             style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant,
-              fontSize: 10.sp,
+              color: colors.onSurfaceVariant.withValues(alpha: 0.65),
+              fontWeight: FontWeight.w600,
+              fontSize: 9.5.sp,
             ),
           ),
           AppSpacing.vXxs,
@@ -165,9 +197,10 @@ class _PartyTile extends StatelessWidget {
             partyName,
             style: AppTypography.bodySmall.copyWith(
               color: colors.onSurface,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
+              fontSize: 12.sp,
             ),
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ],

@@ -116,16 +116,12 @@ class PosAgentSelectorCard extends StatelessWidget {
         value: link.posId,
         child: Text(
           link.posName ?? 'نقطة بيع #${link.posId}',
-          style: AppTypography.bodyMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.w600,
-          ),
         ),
       );
     }).toList();
 
     return CustomDropdown<int>(
-      label: 'نقطة البيع المستلمة للكروت *',
+      label: 'نقطة البيع المستلمة للكروت',
       hint: 'اختر نقطة البيع',
       prefixIcon: Icons.storefront_rounded,
       valueListenable: posIdNotifier,
@@ -133,10 +129,7 @@ class PosAgentSelectorCard extends StatelessWidget {
       itemSearchText: (posId) =>
           linkedPosList
               .cast<NetworkPosEntity?>()
-              .firstWhere(
-                (p) => p?.posId == posId,
-                orElse: () => null,
-              )
+              .firstWhere((p) => p?.posId == posId, orElse: () => null)
               ?.posName ??
           '',
       onChanged: (posId) {

@@ -44,10 +44,7 @@ class InvoiceReceiptPdfService {
       _boldFont = pw.Font.ttf(boldData);
     }
 
-    return pw.ThemeData.withFont(
-      base: _regularFont,
-      bold: _boldFont,
-    );
+    return pw.ThemeData.withFont(base: _regularFont, bold: _boldFont);
   }
 
   // ===========================================================================
@@ -315,10 +312,37 @@ class InvoiceReceiptPdfService {
             children: [
               pw.TableRow(
                 children: [
-                  pw.Text('الباقة', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
-                  pw.Text('الكمية', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.center),
-                  pw.Text('السعر', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.center),
-                  pw.Text('الإجمالي', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.left),
+                  pw.Text(
+                    'الباقة',
+                    style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    'الكمية',
+                    style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                  pw.Text(
+                    'السعر',
+                    style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                  pw.Text(
+                    'الإجمالي',
+                    style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.left,
+                  ),
                 ],
               ),
               ...invoice.items.map((item) {
@@ -326,16 +350,15 @@ class InvoiceReceiptPdfService {
                   children: [
                     pw.Padding(
                       padding: const pw.EdgeInsets.symmetric(vertical: 2),
-                      child: pw.Text(item.packageName ?? 'باقة كروت', style: const pw.TextStyle(fontSize: 8)),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.symmetric(vertical: 2),
-                      child: pw.Text('${item.voucherCount}', style: const pw.TextStyle(fontSize: 8), textAlign: pw.TextAlign.center),
+                      child: pw.Text(
+                        item.packageName ?? 'باقة كروت',
+                        style: const pw.TextStyle(fontSize: 8),
+                      ),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.symmetric(vertical: 2),
                       child: pw.Text(
-                        AmountFormatter.formatValue(item.voucherPrice, decimalPlaces: 0),
+                        '${item.voucherCount}',
                         style: const pw.TextStyle(fontSize: 8),
                         textAlign: pw.TextAlign.center,
                       ),
@@ -343,7 +366,21 @@ class InvoiceReceiptPdfService {
                     pw.Padding(
                       padding: const pw.EdgeInsets.symmetric(vertical: 2),
                       child: pw.Text(
-                        AmountFormatter.formatValue(item.itemTotalAmount, decimalPlaces: 0),
+                        AmountFormatter.formatValue(
+                          item.voucherPrice,
+                          decimalPlaces: 0,
+                        ),
+                        style: const pw.TextStyle(fontSize: 8),
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+                      child: pw.Text(
+                        AmountFormatter.formatValue(
+                          item.itemTotalAmount,
+                          decimalPlaces: 0,
+                        ),
                         style: const pw.TextStyle(fontSize: 8),
                         textAlign: pw.TextAlign.left,
                       ),
@@ -375,7 +412,10 @@ class InvoiceReceiptPdfService {
               '${AmountFormatter.formatValue(invoice.remainingAmount)} ر.ي',
               isBold: true,
             ),
-          _buildThermalKeyValue('إجمالي الكروت:', '${invoice.totalCardsCount} كرت'),
+          _buildThermalKeyValue(
+            'إجمالي الكروت:',
+            '${invoice.totalCardsCount} كرت',
+          ),
 
           pw.SizedBox(height: 6),
           _buildDashedLine(),
@@ -445,12 +485,18 @@ class InvoiceReceiptPdfService {
                     pw.SizedBox(height: 4),
                     pw.Text(
                       'فاتورة مبيعات وسند تسليم كروت إنترنت',
-                      style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700),
+                      style: const pw.TextStyle(
+                        fontSize: 11,
+                        color: PdfColors.grey700,
+                      ),
                     ),
                     pw.SizedBox(height: 2),
                     pw.Text(
                       'كود المعاملة: #${invoice.invoiceUuid}',
-                      style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -466,7 +512,10 @@ class InvoiceReceiptPdfService {
                     pw.SizedBox(height: 4),
                     pw.Text(
                       invoice.invoiceDate ?? '',
-                      style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+                      style: const pw.TextStyle(
+                        fontSize: 9,
+                        color: PdfColors.grey700,
+                      ),
                     ),
                   ],
                 ),
@@ -485,7 +534,9 @@ class InvoiceReceiptPdfService {
                     padding: const pw.EdgeInsets.all(10),
                     decoration: pw.BoxDecoration(
                       border: pw.Border.all(color: PdfColors.grey300),
-                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(6),
+                      ),
                     ),
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -501,10 +552,19 @@ class InvoiceReceiptPdfService {
                         pw.SizedBox(height: 4),
                         pw.Text(
                           invoice.networkName ?? 'غير محدد',
-                          style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+                          style: pw.TextStyle(
+                            fontSize: 11,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
                         ),
                         pw.SizedBox(height: 2),
-                        pw.Text('معرف الشبكة: #${invoice.networkId}', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                        pw.Text(
+                          'معرف الشبكة: #${invoice.networkId}',
+                          style: const pw.TextStyle(
+                            fontSize: 9,
+                            color: PdfColors.grey700,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -515,7 +575,9 @@ class InvoiceReceiptPdfService {
                     padding: const pw.EdgeInsets.all(10),
                     decoration: pw.BoxDecoration(
                       border: pw.Border.all(color: PdfColors.grey300),
-                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(6),
+                      ),
                     ),
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -531,10 +593,19 @@ class InvoiceReceiptPdfService {
                         pw.SizedBox(height: 4),
                         pw.Text(
                           invoice.posName ?? 'غير محدد',
-                          style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+                          style: pw.TextStyle(
+                            fontSize: 11,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
                         ),
                         pw.SizedBox(height: 2),
-                        pw.Text('رمز النقطة: ${invoice.posCode ?? '#${invoice.posId}'}', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                        pw.Text(
+                          'رمز النقطة: ${invoice.posCode ?? '#${invoice.posId}'}',
+                          style: const pw.TextStyle(
+                            fontSize: 9,
+                            color: PdfColors.grey700,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -546,8 +617,12 @@ class InvoiceReceiptPdfService {
 
             // جدول البنود التفصيلي
             pw.Text(
-              'بنود كروت الإنترنت المباعة:',
-              style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: primaryColor),
+              'بنود كروت الإنترنت المُباعة:',
+              style: pw.TextStyle(
+                fontSize: 11,
+                fontWeight: pw.FontWeight.bold,
+                color: primaryColor,
+              ),
             ),
             pw.SizedBox(height: 6),
 
@@ -580,9 +655,16 @@ class InvoiceReceiptPdfService {
                       _buildTableCell('${index + 1}'),
                       _buildTableCell(item.packageName ?? 'باقة كروت'),
                       _buildTableCell('${item.voucherCount}'),
-                      _buildTableCell('${AmountFormatter.formatValue(item.voucherPrice)} ر.ي'),
-                      _buildTableCell('${AmountFormatter.formatValue(item.itemDiscount)} ر.ي'),
-                      _buildTableCell('${AmountFormatter.formatValue(item.itemTotalAmount)} ر.ي', isBold: true),
+                      _buildTableCell(
+                        '${AmountFormatter.formatValue(item.voucherPrice)} ر.ي',
+                      ),
+                      _buildTableCell(
+                        '${AmountFormatter.formatValue(item.itemDiscount)} ر.ي',
+                      ),
+                      _buildTableCell(
+                        '${AmountFormatter.formatValue(item.itemTotalAmount)} ر.ي',
+                        isBold: true,
+                      ),
                     ],
                   );
                 }),
@@ -603,17 +685,40 @@ class InvoiceReceiptPdfService {
                     decoration: pw.BoxDecoration(
                       color: PdfColors.grey50,
                       border: pw.Border.all(color: PdfColors.grey200),
-                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(6),
+                      ),
                     ),
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('تفاصيل المعاملة:', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(
+                          'تفاصيل المعاملة:',
+                          style: pw.TextStyle(
+                            fontSize: 10,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
                         pw.SizedBox(height: 4),
-                        pw.Text('• طريقة البيع: ${invoice.saleTypeLabel}', style: const pw.TextStyle(fontSize: 9)),
-                        pw.Text('• حالة السداد: ${invoice.paymentStatusLabel}', style: const pw.TextStyle(fontSize: 9)),
-                        pw.Text('• إجمالي الكروت المستلمة: ${invoice.totalCardsCount} كرت', style: const pw.TextStyle(fontSize: 9)),
-                        pw.Text('• الرقم المرجعي للعملية (UUID): ${invoice.invoiceUuid}', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
+                        pw.Text(
+                          '• طريقة البيع: ${invoice.saleTypeLabel}',
+                          style: const pw.TextStyle(fontSize: 9),
+                        ),
+                        pw.Text(
+                          '• حالة السداد: ${invoice.paymentStatusLabel}',
+                          style: const pw.TextStyle(fontSize: 9),
+                        ),
+                        pw.Text(
+                          '• إجمالي الكروت المستلمة: ${invoice.totalCardsCount} كرت',
+                          style: const pw.TextStyle(fontSize: 9),
+                        ),
+                        pw.Text(
+                          '• الرقم المرجعي للعملية (UUID): ${invoice.invoiceUuid}',
+                          style: const pw.TextStyle(
+                            fontSize: 8,
+                            color: PdfColors.grey700,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -625,16 +730,29 @@ class InvoiceReceiptPdfService {
                     padding: const pw.EdgeInsets.all(12),
                     decoration: pw.BoxDecoration(
                       border: pw.Border.all(color: primaryColor, width: 1.2),
-                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(6),
+                      ),
                     ),
                     child: pw.Column(
                       children: [
-                        _buildA4SummaryRow('الإجمالي:', '${AmountFormatter.formatValue(invoice.invoiceTotalAmount)} ر.ي', isTotal: true),
+                        _buildA4SummaryRow(
+                          'الإجمالي:',
+                          '${AmountFormatter.formatValue(invoice.invoiceTotalAmount)} ر.ي',
+                          isTotal: true,
+                        ),
                         pw.Divider(color: PdfColors.grey300),
-                        _buildA4SummaryRow('المدفوع:', '${AmountFormatter.formatValue(invoice.paidAmount)} ر.ي'),
+                        _buildA4SummaryRow(
+                          'المدفوع:',
+                          '${AmountFormatter.formatValue(invoice.paidAmount)} ر.ي',
+                        ),
                         if (invoice.hasRemaining) ...[
                           pw.Divider(color: PdfColors.grey300),
-                          _buildA4SummaryRow('المتبقي:', '${AmountFormatter.formatValue(invoice.remainingAmount)} ر.ي', isBold: true),
+                          _buildA4SummaryRow(
+                            'المتبقي:',
+                            '${AmountFormatter.formatValue(invoice.remainingAmount)} ر.ي',
+                            isBold: true,
+                          ),
                         ],
                       ],
                     ),
@@ -651,16 +769,34 @@ class InvoiceReceiptPdfService {
               children: [
                 pw.Column(
                   children: [
-                    pw.Text('توقيع وختم المزود', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(
+                      'توقيع وختم المزود',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
                     pw.SizedBox(height: 35),
-                    pw.Text('................................', style: const pw.TextStyle(fontSize: 8)),
+                    pw.Text(
+                      '................................',
+                      style: const pw.TextStyle(fontSize: 8),
+                    ),
                   ],
                 ),
                 pw.Column(
                   children: [
-                    pw.Text('توقيع وكيل نقطة البيع المستلم', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(
+                      'توقيع وكيل نقطة البيع المستلم',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
                     pw.SizedBox(height: 35),
-                    pw.Text('................................', style: const pw.TextStyle(fontSize: 8)),
+                    pw.Text(
+                      '................................',
+                      style: const pw.TextStyle(fontSize: 8),
+                    ),
                   ],
                 ),
               ],
@@ -720,10 +856,37 @@ class InvoiceReceiptPdfService {
             children: [
               pw.TableRow(
                 children: [
-                  pw.Text('الباقة', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
-                  pw.Text('الكمية', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.center),
-                  pw.Text('السعر', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.center),
-                  pw.Text('الإجمالي', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.left),
+                  pw.Text(
+                    'الباقة',
+                    style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    'الكمية',
+                    style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                  pw.Text(
+                    'السعر',
+                    style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                  pw.Text(
+                    'الإجمالي',
+                    style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.left,
+                  ),
                 ],
               ),
               ...request.items.map((item) {
@@ -731,16 +894,15 @@ class InvoiceReceiptPdfService {
                   children: [
                     pw.Padding(
                       padding: const pw.EdgeInsets.symmetric(vertical: 2),
-                      child: pw.Text(item.packageName ?? 'باقة كروت', style: const pw.TextStyle(fontSize: 8)),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.symmetric(vertical: 2),
-                      child: pw.Text('${item.voucherCount}', style: const pw.TextStyle(fontSize: 8), textAlign: pw.TextAlign.center),
+                      child: pw.Text(
+                        item.packageName ?? 'باقة كروت',
+                        style: const pw.TextStyle(fontSize: 8),
+                      ),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.symmetric(vertical: 2),
                       child: pw.Text(
-                        AmountFormatter.formatValue(item.voucherPrice, decimalPlaces: 0),
+                        '${item.voucherCount}',
                         style: const pw.TextStyle(fontSize: 8),
                         textAlign: pw.TextAlign.center,
                       ),
@@ -748,7 +910,21 @@ class InvoiceReceiptPdfService {
                     pw.Padding(
                       padding: const pw.EdgeInsets.symmetric(vertical: 2),
                       child: pw.Text(
-                        AmountFormatter.formatValue(item.itemTotalAmount, decimalPlaces: 0),
+                        AmountFormatter.formatValue(
+                          item.voucherPrice,
+                          decimalPlaces: 0,
+                        ),
+                        style: const pw.TextStyle(fontSize: 8),
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+                      child: pw.Text(
+                        AmountFormatter.formatValue(
+                          item.itemTotalAmount,
+                          decimalPlaces: 0,
+                        ),
                         style: const pw.TextStyle(fontSize: 8),
                         textAlign: pw.TextAlign.left,
                       ),
@@ -769,9 +945,13 @@ class InvoiceReceiptPdfService {
             isBold: true,
             fontSize: 10,
           ),
-          _buildThermalKeyValue('إجمالي الكروت المطلوبة:', '${request.totalCardsCount} كرت'),
+          _buildThermalKeyValue(
+            'إجمالي الكروت المطلوبة:',
+            '${request.totalCardsCount} كرت',
+          ),
 
-          if (request.requestNote != null && request.requestNote!.trim().isNotEmpty) ...[
+          if (request.requestNote != null &&
+              request.requestNote!.trim().isNotEmpty) ...[
             pw.SizedBox(height: 2),
             _buildThermalKeyValue('ملاحظات:', request.requestNote!.trim()),
           ],
@@ -823,15 +1003,28 @@ class InvoiceReceiptPdfService {
                   children: [
                     pw.Text(
                       request.networkName ?? 'منظومة NetSales',
-                      style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: primaryColor),
+                      style: pw.TextStyle(
+                        fontSize: 18,
+                        fontWeight: pw.FontWeight.bold,
+                        color: primaryColor,
+                      ),
                     ),
                     pw.SizedBox(height: 4),
                     pw.Text(
                       'سند طلب توريد باقات كروت إنترنت',
-                      style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700),
+                      style: const pw.TextStyle(
+                        fontSize: 11,
+                        color: PdfColors.grey700,
+                      ),
                     ),
                     pw.SizedBox(height: 2),
-                    pw.Text('كود الطلب: #${request.requestUuid}', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(
+                      'كود الطلب: #${request.requestUuid}',
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
                 pw.BarcodeWidget(
@@ -853,14 +1046,29 @@ class InvoiceReceiptPdfService {
                     padding: const pw.EdgeInsets.all(10),
                     decoration: pw.BoxDecoration(
                       border: pw.Border.all(color: PdfColors.grey300),
-                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(6),
+                      ),
                     ),
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('المزود المطلوب منه:', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: primaryColor)),
+                        pw.Text(
+                          'المزود المطلوب منه:',
+                          style: pw.TextStyle(
+                            fontSize: 10,
+                            fontWeight: pw.FontWeight.bold,
+                            color: primaryColor,
+                          ),
+                        ),
                         pw.SizedBox(height: 4),
-                        pw.Text(request.networkName ?? 'غير محدد', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(
+                          request.networkName ?? 'غير محدد',
+                          style: pw.TextStyle(
+                            fontSize: 11,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -871,14 +1079,29 @@ class InvoiceReceiptPdfService {
                     padding: const pw.EdgeInsets.all(10),
                     decoration: pw.BoxDecoration(
                       border: pw.Border.all(color: PdfColors.grey300),
-                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(6),
+                      ),
                     ),
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('الوكيل مقدم الطلب:', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: primaryColor)),
+                        pw.Text(
+                          'الوكيل مقدم الطلب:',
+                          style: pw.TextStyle(
+                            fontSize: 10,
+                            fontWeight: pw.FontWeight.bold,
+                            color: primaryColor,
+                          ),
+                        ),
                         pw.SizedBox(height: 4),
-                        pw.Text(request.posName ?? 'غير محدد', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(
+                          request.posName ?? 'غير محدد',
+                          style: pw.TextStyle(
+                            fontSize: 11,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -915,8 +1138,13 @@ class InvoiceReceiptPdfService {
                       _buildTableCell('${index + 1}'),
                       _buildTableCell(item.packageName ?? 'باقة كروت'),
                       _buildTableCell('${item.voucherCount}'),
-                      _buildTableCell('${AmountFormatter.formatValue(item.voucherPrice)} ر.ي'),
-                      _buildTableCell('${AmountFormatter.formatValue(item.itemTotalAmount)} ر.ي', isBold: true),
+                      _buildTableCell(
+                        '${AmountFormatter.formatValue(item.voucherPrice)} ر.ي',
+                      ),
+                      _buildTableCell(
+                        '${AmountFormatter.formatValue(item.itemTotalAmount)} ر.ي',
+                        isBold: true,
+                      ),
                     ],
                   );
                 }),
@@ -928,16 +1156,28 @@ class InvoiceReceiptPdfService {
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('حالة الطلب: ${request.statusLabel}', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  'حالة الطلب: ${request.statusLabel}',
+                  style: pw.TextStyle(
+                    fontSize: 10,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
                 pw.Container(
                   padding: const pw.EdgeInsets.all(10),
                   decoration: pw.BoxDecoration(
                     border: pw.Border.all(color: primaryColor),
-                    borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(6),
+                    ),
                   ),
                   child: pw.Text(
                     'الإجمالي المطلوب: ${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي',
-                    style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: primaryColor),
+                    style: pw.TextStyle(
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                      color: primaryColor,
+                    ),
                   ),
                 ),
               ],
@@ -1001,7 +1241,9 @@ class InvoiceReceiptPdfService {
         text,
         style: pw.TextStyle(
           fontSize: isHeader ? 9 : 8.5,
-          fontWeight: (isHeader || isBold) ? pw.FontWeight.bold : pw.FontWeight.normal,
+          fontWeight: (isHeader || isBold)
+              ? pw.FontWeight.bold
+              : pw.FontWeight.normal,
         ),
         textAlign: isHeader ? pw.TextAlign.center : pw.TextAlign.right,
       ),
@@ -1023,15 +1265,21 @@ class InvoiceReceiptPdfService {
             label,
             style: pw.TextStyle(
               fontSize: isTotal ? 11 : 9.5,
-              fontWeight: (isBold || isTotal) ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontWeight: (isBold || isTotal)
+                  ? pw.FontWeight.bold
+                  : pw.FontWeight.normal,
             ),
           ),
           pw.Text(
             value,
             style: pw.TextStyle(
               fontSize: isTotal ? 11 : 9.5,
-              fontWeight: (isBold || isTotal) ? pw.FontWeight.bold : pw.FontWeight.normal,
-              color: isTotal ? const PdfColor.fromInt(0xFF1E3A8A) : PdfColors.black,
+              fontWeight: (isBold || isTotal)
+                  ? pw.FontWeight.bold
+                  : pw.FontWeight.normal,
+              color: isTotal
+                  ? const PdfColor.fromInt(0xFF1E3A8A)
+                  : PdfColors.black,
             ),
           ),
         ],

@@ -376,7 +376,7 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
                 return Padding(
                   padding: EdgeInsets.only(bottom: AppSpacing.sm),
                   child: CustomDropdown<int>(
-                    label: 'الشبكة التابعة لها الباقة *',
+                    label: 'الشبكة التابعة لها الباقة',
                     hint: 'اختر الشبكة',
                     prefixIcon: Icons.cell_tower_rounded,
                     valueListenable: _selectedNetworkIdNotifier,

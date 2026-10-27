@@ -21,7 +21,7 @@ class SplashController extends GetxController {
   SplashController(this._determineBootDestinationUseCase);
 
   /// مدة ظهور شاشة الإقلاع الأدنى لضمان استمتاع المستخدم بالهوية البصرية وانسيابية الحركة
-  static const Duration minSplashDuration = Duration(milliseconds: 1800);
+  static const Duration minSplashDuration = Duration(milliseconds: 3000);
 
   bool _isDisposed = false;
 
@@ -90,4 +90,3 @@ class SplashController extends GetxController {
     super.onClose();
   }
 }
-

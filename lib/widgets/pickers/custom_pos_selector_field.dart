@@ -27,7 +27,7 @@ class CustomPosSelectorField extends StatelessWidget {
 
   const CustomPosSelectorField({
     super.key,
-    this.label = 'نقطة البيع / الوكيل *',
+    this.label = 'نقطة البيع / الوكيل',
     required this.selectedPos,
     required this.posList,
     required this.onPosChanged,
@@ -94,8 +94,8 @@ class CustomPosSelectorField extends StatelessWidget {
                 color: hasError
                     ? colors.error
                     : selectedPos != null
-                        ? colors.primary.withValues(alpha: 0.5)
-                        : colors.outlineVariant,
+                    ? colors.primary.withValues(alpha: 0.5)
+                    : colors.outlineVariant,
                 width: selectedPos != null || hasError ? 1.5.w : 1.w,
               ),
             ),
@@ -114,9 +114,7 @@ class CustomPosSelectorField extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 4.w),
             child: Text(
               errorText!,
-              style: AppTypography.labelSmall.copyWith(
-                color: colors.error,
-              ),
+              style: AppTypography.labelSmall.copyWith(color: colors.error),
             ),
           ),
         ],
@@ -426,6 +424,7 @@ class _CustomPosPickerModalState extends State<CustomPosPickerModal> {
           ConstrainedBox(
             constraints: BoxConstraints(maxHeight: 360.h),
             child: ListView.separated(
+              padding: EdgeInsets.zero,
               shrinkWrap: true,
               physics: const BouncingScrollPhysics(),
               itemCount: filtered.length,
@@ -466,9 +465,10 @@ class _PosModalItemTile extends StatelessWidget {
 
     final phone = pos.posPhoneNumber ?? '';
     final agent = pos.agentName ?? '';
-    final location = [pos.governorateName, pos.directorateName]
-        .where((s) => s != null && s.isNotEmpty)
-        .join(' - ');
+    final location = [
+      pos.governorateName,
+      pos.directorateName,
+    ].where((s) => s != null && s.isNotEmpty).join(' - ');
 
     return CustomInteractiveBounce(
       onTap: onTap,

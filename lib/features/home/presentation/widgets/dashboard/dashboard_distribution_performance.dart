@@ -218,7 +218,7 @@ class DashboardDistributionPerformance extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
+                          vertical: AppSpacing.sm,
                         ),
                         decoration: BoxDecoration(
                           color: colors.surfaceContainerHighest.withValues(
@@ -246,6 +246,8 @@ class DashboardDistributionPerformance extends StatelessWidget {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'تحصيل نقدي',
@@ -277,7 +279,7 @@ class DashboardDistributionPerformance extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
+                          vertical: AppSpacing.sm,
                         ),
                         decoration: BoxDecoration(
                           color: colors.surfaceContainerHighest.withValues(
@@ -305,6 +307,8 @@ class DashboardDistributionPerformance extends StatelessWidget {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'ائتمان آجل',

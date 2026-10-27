@@ -8,9 +8,9 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 
 /// ============================================================================
-/// بطاقة أطراف طلب التوريد (RequestPartiesCard)
+/// بطاقة أطراف طلب التوريد السيادية (RequestPartiesCard)
 /// ============================================================================
-/// تعرض تفاصيل نقطة البيع الطالبة وشبكة الإنترنت المزودة للخدمة.
+/// تعرض طرفي طلب التوريد: نقطة البيع الطالبة للكروت وشبكة الإنترنت المزودة المعتمدة.
 class RequestPartiesCard extends StatelessWidget {
   final VoucherRequestEntity request;
 
@@ -22,6 +22,11 @@ class RequestPartiesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isPending = request.isPending;
+    final isApproved = request.isApproved;
+    final statusColor = isPending
+        ? colors.warning
+        : (isApproved ? colors.primary : colors.error);
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.md),
@@ -29,7 +34,8 @@ class RequestPartiesCard extends StatelessWidget {
         color: colors.surface,
         borderRadius: AppRadius.lgRadius,
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.5),
+          color: colors.outlineVariant.withValues(alpha: 0.28),
+          width: 1.w,
         ),
         boxShadow: AppElevation.level1(context),
       ),
@@ -38,45 +44,57 @@ class RequestPartiesCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.swap_horiz_rounded,
-                color: colors.primary,
-                size: 18.r,
+              Container(
+                width: 26.r,
+                height: 26.r,
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.swap_horiz_rounded,
+                  color: statusColor,
+                  size: 16.r,
+                ),
               ),
               AppSpacing.hXs,
               Text(
-                'أطراف طلب التوريد',
+                'مسار أطراف طلب التوريد',
                 style: AppTypography.titleSmall.copyWith(
                   color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12.5.sp,
                 ),
               ),
             ],
           ),
           AppSpacing.vMd,
+
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // نقطة البيع الطالبة
+              // 1. نقطة البيع الطالبة
               Expanded(
-                child: _PartyTile(
+                child: _PartyLedgerPod(
                   icon: Icons.storefront_rounded,
-                  iconBg: colors.secondary.withValues(alpha: 0.12),
-                  iconColor: colors.secondary,
+                  accentColor: statusColor,
                   roleLabel: 'نقطة البيع الطالبة',
                   partyName: request.posName ?? 'نقطة بيع #${request.posId}',
-                  badgeText: request.posCode != null ? '#${request.posCode}' : 'الوكيل',
+                  idBadge: request.posCode != null ? '#${request.posCode}' : 'الوكيل',
                 ),
               ),
+
               AppSpacing.hSm,
-              // شبكة الإنترنت المزوّدة
+
+              // 2. شبكة الإنترنت المزودة
               Expanded(
-                child: _PartyTile(
+                child: _PartyLedgerPod(
                   icon: Icons.wifi_tethering_rounded,
-                  iconBg: colors.primary.withValues(alpha: 0.12),
-                  iconColor: colors.primary,
-                  roleLabel: 'الشبكة المزوّدة',
+                  accentColor: colors.primary,
+                  roleLabel: 'شبكة الإنترنت المزوّدة',
                   partyName: request.networkName ?? 'الشبكة #${request.networkId}',
-                  badgeText: 'المزوّد',
+                  idBadge: 'المزوّد',
                 ),
               ),
             ],
@@ -87,21 +105,19 @@ class RequestPartiesCard extends StatelessWidget {
   }
 }
 
-class _PartyTile extends StatelessWidget {
+class _PartyLedgerPod extends StatelessWidget {
   final IconData icon;
-  final Color iconBg;
-  final Color iconColor;
+  final Color accentColor;
   final String roleLabel;
   final String partyName;
-  final String badgeText;
+  final String idBadge;
 
-  const _PartyTile({
+  const _PartyLedgerPod({
     required this.icon,
-    required this.iconBg,
-    required this.iconColor,
+    required this.accentColor,
     required this.roleLabel,
     required this.partyName,
-    required this.badgeText,
+    required this.idBadge,
   });
 
   @override
@@ -111,10 +127,11 @@ class _PartyTile extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerLow.withValues(alpha: 0.6),
+        color: colors.surfaceContainerHighest.withValues(alpha: 0.25),
         borderRadius: AppRadius.mdRadius,
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.3),
+          color: colors.outlineVariant.withValues(alpha: 0.2),
+          width: 0.8.w,
         ),
       ),
       child: Column(
@@ -124,29 +141,43 @@ class _PartyTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                width: 28.r,
-                height: 28.r,
+                width: 30.r,
+                height: 30.r,
                 decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: AppRadius.smRadius,
+                  gradient: LinearGradient(
+                    colors: [
+                      accentColor.withValues(alpha: 0.18),
+                      accentColor.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Icon(icon, color: iconColor, size: 16.r),
+                alignment: Alignment.center,
+                child: Icon(
+                  icon,
+                  color: accentColor,
+                  size: 16.r,
+                ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 6.w,
+                  vertical: 2.h,
+                ),
                 decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: AppRadius.xsRadius,
+                  color: accentColor.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.fullRadius,
                   border: Border.all(
-                    color: colors.outlineVariant.withValues(alpha: 0.4),
+                    color: accentColor.withValues(alpha: 0.22),
+                    width: 0.7.w,
                   ),
                 ),
                 child: Text(
-                  badgeText,
+                  idBadge,
                   style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
+                    color: accentColor,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 9.sp,
                   ),
                 ),
               ),
@@ -156,8 +187,9 @@ class _PartyTile extends StatelessWidget {
           Text(
             roleLabel,
             style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant,
-              fontSize: 10.sp,
+              color: colors.onSurfaceVariant.withValues(alpha: 0.65),
+              fontWeight: FontWeight.w600,
+              fontSize: 9.5.sp,
             ),
           ),
           AppSpacing.vXxs,
@@ -165,9 +197,10 @@ class _PartyTile extends StatelessWidget {
             partyName,
             style: AppTypography.bodySmall.copyWith(
               color: colors.onSurface,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
+              fontSize: 12.sp,
             ),
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ],

@@ -19,6 +19,7 @@ import 'package:netsales/features/partners/domain/entities/network_entity.dart';
 import 'package:netsales/features/partners/domain/entities/network_pos_entity.dart';
 import 'package:netsales/features/partners/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_networks_use_case.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -351,7 +352,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
         // 0. اختيار الشبكة (في حال تعدد شبكات المزود وعدم التحديد المسبق)
         if (widget.networkId == null && _networks.length > 1) ...[
           CustomDropdown<int>(
-            label: 'الشبكة الموردة للكروت *',
+            label: 'الشبكة الموردة للكروت',
             hint: 'اختر الشبكة',
             prefixIcon: Icons.cell_tower_rounded,
             valueListenable: _networkIdNotifier,
@@ -410,18 +411,11 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
 
         // 3. باقات الكروت المتاحة
         if (_isLoading) ...[
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-            child: Center(
-              child: SizedBox(
-                width: 28.r,
-                height: 28.r,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation(colors.primary),
-                ),
-              ),
-            ),
+          const CustomSkeletonFeed(
+            itemCount: 2,
+            cardHeight: 70,
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
           ),
         ] else if (_loadError.isNotEmpty) ...[
           Container(
@@ -488,6 +482,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
           ),
           AppSpacing.vXs,
           ListView.separated(
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _packages.length,

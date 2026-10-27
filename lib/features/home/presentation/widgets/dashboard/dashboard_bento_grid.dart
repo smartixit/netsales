@@ -9,7 +9,7 @@ import 'package:netsales/widgets/cards/custom_kpi_card.dart';
 /// شبكة بينتو للمؤشرات التحليلية (DashboardBentoGrid)
 /// ============================================================================
 /// تصميم شبكي متناسق (Bento Grid) يعرض إحصائيات المبيعات، ومعدل النمو،
-/// وعدد الكروت المباعة، وحالة نقاط البيع مع مؤشرات الصعود والهبوط.
+/// وعدد الكروت المُباعة، وحالة نقاط البيع مع مؤشرات الصعود والهبوط.
 class DashboardBentoGrid extends StatelessWidget {
   final Map<String, dynamic> kpis;
   final bool isMasked;
@@ -59,7 +59,7 @@ class DashboardBentoGrid extends StatelessWidget {
         ),
         AppSpacing.vMd,
 
-        // الصف الأول: بطاقة المبيعات الكبرى + بطاقة الكروت المباعة
+        // الصف الأول: بطاقة المبيعات الكبرى + بطاقة الكروت المُباعة
         Row(
           children: [
             // بطاقة المبيعات مع نسبة النمو
@@ -71,18 +71,19 @@ class DashboardBentoGrid extends StatelessWidget {
                 title: 'إجمالي المبيعات',
                 value: formattedSales,
                 unit: 'ر.ي',
-                badgeText: '${isPositiveGrowth ? '+' : ''}${AmountFormatter.formatValue(growthPct, decimalPlaces: 1)}%',
+                badgeText:
+                    '${isPositiveGrowth ? '+' : ''}${AmountFormatter.formatValue(growthPct, decimalPlaces: 1)}%',
                 isPositiveBadge: isPositiveGrowth,
               ),
             ),
             AppSpacing.hMd,
-            // بطاقة الكروت المباعة
+            // بطاقة الكروت المُباعة
             Expanded(
               flex: 2,
               child: CustomKpiCard.standard(
                 icon: Icons.confirmation_number_outlined,
                 iconColor: colors.secondary,
-                title: 'الكروت المباعة',
+                title: 'الكروت المُباعة',
                 value: vouchersSold.toString(),
                 unit: 'كرت',
               ),
@@ -130,4 +131,3 @@ class DashboardBentoGrid extends StatelessWidget {
     );
   }
 }
-
