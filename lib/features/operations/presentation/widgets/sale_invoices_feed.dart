@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
+import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
-import 'package:netsales/features/operations/presentation/widgets/sale_invoice_card.dart';
+import 'package:netsales/features/operations/presentation/widgets/sale_invoice_ledger_tile.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 
 /// ============================================================================
-/// قائمة تدفق فواتير المبيعات (SaleInvoicesFeed)
+/// قائمة تدفق فواتير المبيعات بالسجل السيادي المصنف (SaleInvoicesFeed)
 /// ============================================================================
-/// تدير حالات التحميل، الفراغ، الخطأ، وعرض قائمة الفواتير التفاعلية.
+/// تعرض فواتير المبيعات مجمعة زمنياً داخل أسطح مالية متصلة ومفتوحة
+/// مما يضاعف مساحة الرؤية ويمنح تجربة تصفح هادئة ومريحة للعين.
 class SaleInvoicesFeed extends StatelessWidget {
   final OperationsController controller;
 
@@ -21,13 +28,12 @@ class SaleInvoicesFeed extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final colors = context.colors;
 
     return Obx(() {
       // 1. حالة التحميل الأولي (الهيكل التشكيلي الموحد)
       if (controller.isLoadingInvoices.value && controller.invoices.isEmpty) {
-        return const CustomSkeletonFeed(itemCount: 4, cardHeight: 110);
+        return const CustomSkeletonFeed(itemCount: 4, cardHeight: 90);
       }
 
       // 2. حالة الخطأ مع إمكانية إعادة المحاولة (الودجت الموحد)
@@ -40,7 +46,7 @@ class SaleInvoicesFeed extends StatelessWidget {
         );
       }
 
-      // 3. حالة الفراغ (الودجت الموحد) مع إمكانية إصدار فاتورة فوراً
+      // 3. حالة الفراغ الموحدة
       if (controller.invoices.isEmpty) {
         return CustomEmptyState(
           title: 'لا توجد فواتير مبيعات مسجلة',
@@ -50,32 +56,129 @@ class SaleInvoicesFeed extends StatelessWidget {
         );
       }
 
-      // 4. حالة النجاح وعرض قائمة الفواتير مع السحب للتحديث
+      // تجميع الفواتير زمنياً
+      final groups = _groupInvoices(controller.invoices);
+      final groupKeys = groups.keys.toList();
+
+      // 4. السجل المالي المصنف زمنياً مع السحب للتحديث
       return RefreshIndicator(
         color: colors.primary,
         onRefresh: () => controller.loadInvoices(isRefresh: true),
         child: ListView.separated(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenPadding,
-            vertical: AppSpacing.xs,
+          padding: EdgeInsets.only(
+            top: AppSpacing.xs,
+            bottom: 130.h,
           ),
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          itemCount: controller.invoices.length,
-          separatorBuilder: (_, __) => AppSpacing.vSm,
-          itemBuilder: (context, index) {
-            final invoice = controller.invoices[index];
-            return SaleInvoiceCard(
-              invoice: invoice,
-              onTap: () => Get.toNamed(
-                AppRoutes.saleInvoiceDetails,
-                arguments: invoice.invoiceId,
-              ),
+          itemCount: groupKeys.length,
+          separatorBuilder: (_, __) => AppSpacing.vMd,
+          itemBuilder: (context, groupIndex) {
+            final key = groupKeys[groupIndex];
+            final groupItems = groups[key]!;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ترويسة المجموعة الزمنية
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: AppSpacing.xs,
+                    right: AppSpacing.xs,
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        key,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 11.sp,
+                        ),
+                      ),
+                      AppSpacing.hXs,
+                      Text(
+                        '(${groupItems.length})',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant.withValues(alpha: 0.6),
+                          fontSize: 10.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // سطح السجل المالي المتصل
+                Container(
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: AppRadius.lgRadius,
+                    border: Border.all(
+                      color: colors.outlineVariant.withValues(alpha: 0.28),
+                      width: 1.w,
+                    ),
+                    boxShadow: AppElevation.level1(context),
+                  ),
+                  child: Column(
+                    children: [
+                      for (int i = 0; i < groupItems.length; i++) ...[
+                        if (i > 0)
+                          Divider(
+                            height: 1.h,
+                            indent: 56.w,
+                            color: colors.outlineVariant.withValues(alpha: 0.18),
+                          ),
+                        SaleInvoiceLedgerTile(
+                          invoice: groupItems[i],
+                          onTap: () => Get.toNamed(
+                            AppRoutes.saleInvoiceDetails,
+                            arguments: groupItems[i].invoiceId,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
             );
           },
         ),
       );
     });
+  }
+
+  /// تجميع الفواتير بحسب سياق التاريخ
+  Map<String, List<SaleInvoiceEntity>> _groupInvoices(List<SaleInvoiceEntity> list) {
+    final Map<String, List<SaleInvoiceEntity>> result = {};
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    for (final inv in list) {
+      final dt = inv.invoiceDate != null
+          ? DateTime.tryParse(inv.invoiceDate!)
+          : (inv.createdAt != null ? DateTime.tryParse(inv.createdAt!) : null);
+
+      final String groupKey;
+      if (dt == null) {
+        groupKey = 'معاملات سابقة';
+      } else {
+        final dateOnly = DateTime(dt.year, dt.month, dt.day);
+        if (dateOnly == today) {
+          groupKey = 'اليوم';
+        } else if (dateOnly == yesterday) {
+          groupKey = 'أمس';
+        } else if (today.difference(dateOnly).inDays < 7) {
+          groupKey = 'هذا الأسبوع';
+        } else {
+          groupKey = DateFormatter.monthName(dt);
+        }
+      }
+
+      result.putIfAbsent(groupKey, () => []).add(inv);
+    }
+
+    return result;
   }
 }

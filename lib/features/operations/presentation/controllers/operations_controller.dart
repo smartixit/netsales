@@ -418,9 +418,18 @@ class OperationsController extends GetxController {
   double get totalInvoicesAmount =>
       invoices.fold(0.0, (sum, inv) => sum + inv.invoiceTotalAmount);
 
+  double get totalPaidAmount =>
+      invoices.fold(0.0, (sum, inv) => sum + inv.paidAmount);
+
   double get unpaidRemainingAmount =>
       invoices.fold(0.0, (sum, inv) => sum + inv.remainingAmount);
 
+  double get totalRequestsAmount =>
+      requests.fold(0.0, (sum, req) => sum + req.requestTotalAmount);
+
   int get pendingRequestsCount =>
       requests.where((req) => req.isPending).length;
+
+  int get approvedRequestsCount =>
+      requests.where((req) => req.isApproved).length;
 }

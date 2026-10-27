@@ -20,10 +20,7 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 class DashboardDistributionPerformance extends StatelessWidget {
   final DashboardController controller;
 
-  const DashboardDistributionPerformance({
-    super.key,
-    required this.controller,
-  });
+  const DashboardDistributionPerformance({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +37,8 @@ class DashboardDistributionPerformance extends StatelessWidget {
       if (controller.isSuperAdmin) {
         final networksKpi = (kpis['networks'] as Map<String, dynamic>?) ?? {};
         final totalNetworks = (networksKpi['total'] as num?)?.toInt() ?? 0;
-        final approvedNetworks = (networksKpi['approved'] as num?)?.toInt() ?? 0;
+        final approvedNetworks =
+            (networksKpi['approved'] as num?)?.toInt() ?? 0;
         final pendingNetworks = (networksKpi['pending'] as num?)?.toInt() ?? 0;
 
         final posKpi = (kpis['pos'] as Map<String, dynamic>?) ?? {};
@@ -60,21 +58,31 @@ class DashboardDistributionPerformance extends StatelessWidget {
 
       // 1. استخراج بيانات المبيعات
       final salesData = (kpis['sales'] as Map<String, dynamic>?) ?? {};
-      final cashAmount = (salesData['cash_sales_amount'] as num?)?.toDouble() ?? 0.0;
-      final creditAmount = (salesData['credit_sales_amount'] as num?)?.toDouble() ?? 0.0;
-      final totalSales = (salesData['current_amount'] as num?)?.toDouble() ?? (cashAmount + creditAmount);
-      final cashRatio = totalSales > 0 ? (cashAmount / totalSales).clamp(0.0, 1.0) : 0.0;
+      final cashAmount =
+          (salesData['cash_sales_amount'] as num?)?.toDouble() ?? 0.0;
+      final creditAmount =
+          (salesData['credit_sales_amount'] as num?)?.toDouble() ?? 0.0;
+      final totalSales =
+          (salesData['current_amount'] as num?)?.toDouble() ??
+          (cashAmount + creditAmount);
+      final cashRatio = totalSales > 0
+          ? (cashAmount / totalSales).clamp(0.0, 1.0)
+          : 0.0;
 
       // 2. استخراج بيانات نقاط البيع
       final posData = (kpis['pos_network'] as Map<String, dynamic>?) ?? {};
       final activePos = (posData['active_count'] as num?)?.toInt() ?? 0;
       final totalPos = (posData['total_count'] as num?)?.toInt() ?? 0;
-      final posCoverageRatio = totalPos > 0 ? (activePos / totalPos).clamp(0.0, 1.0) : 0.0;
+      final posCoverageRatio = totalPos > 0
+          ? (activePos / totalPos).clamp(0.0, 1.0)
+          : 0.0;
 
       // 3. استخراج بيانات الباقة الأكثر طلباً
       final topPackage = (kpis['top_package'] as Map<String, dynamic>?);
-      final packageName = topPackage?['package_name'] as String? ?? 'لا توجد مبيعات';
-      final vouchersSoldCount = (topPackage?['vouchers_sold_count'] as num?)?.toInt() ?? 0;
+      final packageName =
+          topPackage?['package_name'] as String? ?? 'لا توجد مبيعات';
+      final vouchersSoldCount =
+          (topPackage?['vouchers_sold_count'] as num?)?.toInt() ?? 0;
       final topRevenue = (topPackage?['revenue'] as num?)?.toDouble() ?? 0.0;
 
       final formattedTopRevenue = isMasked
@@ -213,10 +221,14 @@ class DashboardDistributionPerformance extends StatelessWidget {
                           vertical: AppSpacing.xs,
                         ),
                         decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+                          color: colors.surfaceContainerHighest.withValues(
+                            alpha: 0.5,
+                          ),
                           borderRadius: AppRadius.smRadius,
                           border: Border.all(
-                            color: colors.outlineVariant.withValues(alpha: 0.15),
+                            color: colors.outlineVariant.withValues(
+                              alpha: 0.15,
+                            ),
                             width: 0.8.w,
                           ),
                         ),
@@ -243,7 +255,9 @@ class DashboardDistributionPerformance extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    isMasked ? '••••••' : '${AmountFormatter.formatValue(cashAmount, decimalPlaces: 0)} ر.ي',
+                                    isMasked
+                                        ? '••••••'
+                                        : '${AmountFormatter.formatValue(cashAmount, decimalPlaces: 0)} ر.ي',
                                     style: AppTypography.labelMedium.copyWith(
                                       color: colors.onSurface,
                                       fontWeight: FontWeight.w800,
@@ -266,10 +280,14 @@ class DashboardDistributionPerformance extends StatelessWidget {
                           vertical: AppSpacing.xs,
                         ),
                         decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+                          color: colors.surfaceContainerHighest.withValues(
+                            alpha: 0.5,
+                          ),
                           borderRadius: AppRadius.smRadius,
                           border: Border.all(
-                            color: colors.outlineVariant.withValues(alpha: 0.15),
+                            color: colors.outlineVariant.withValues(
+                              alpha: 0.15,
+                            ),
                             width: 0.8.w,
                           ),
                         ),
@@ -296,7 +314,9 @@ class DashboardDistributionPerformance extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    isMasked ? '••••••' : '${AmountFormatter.formatValue(creditAmount, decimalPlaces: 0)} ر.ي',
+                                    isMasked
+                                        ? '••••••'
+                                        : '${AmountFormatter.formatValue(creditAmount, decimalPlaces: 0)} ر.ي',
                                     style: AppTypography.labelMedium.copyWith(
                                       color: colors.onSurface,
                                       fontWeight: FontWeight.w800,
@@ -494,7 +514,7 @@ class DashboardDistributionPerformance extends StatelessWidget {
                           color: colors.onSurface,
                           fontWeight: FontWeight.w800,
                         ),
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (topRevenue > 0) ...[
@@ -760,4 +780,3 @@ class _FleetTile extends StatelessWidget {
     );
   }
 }
-

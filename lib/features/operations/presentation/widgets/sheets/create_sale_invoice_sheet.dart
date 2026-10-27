@@ -8,16 +8,19 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/components/invoice_financial_summary_card.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/components/operations_sale_type_bar.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/components/package_selection_card.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/components/pos_agent_selector_card.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/components/sheet_action_dock.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
 import 'package:netsales/features/packages/domain/usecases/get_voucher_packages_use_case.dart';
 import 'package:netsales/features/partners/domain/entities/network_entity.dart';
 import 'package:netsales/features/partners/domain/entities/network_pos_entity.dart';
 import 'package:netsales/features/partners/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_networks_use_case.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -78,10 +81,11 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
   final Map<int, int> _packageQuantities = {};
 
   int? _selectedNetworkId;
-  List<NetworkEntity> _networks = [];
   late final ValueNotifier<int?> _networkIdNotifier;
+  List<NetworkEntity> _networks = [];
 
   int? _selectedPosId;
+  late final ValueNotifier<int?> _posIdNotifier;
   String? _selectedPosName;
 
   String _saleType = 'CASH'; // CASH or CREDIT
@@ -97,6 +101,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
     _selectedNetworkId = widget.networkId;
     _networkIdNotifier = ValueNotifier<int?>(_selectedNetworkId);
     _selectedPosId = widget.preselectedPosId;
+    _posIdNotifier = ValueNotifier<int?>(_selectedPosId);
     _selectedPosName = widget.preselectedPosName;
     _loadInitialData();
   }
@@ -104,6 +109,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
   @override
   void dispose() {
     _networkIdNotifier.dispose();
+    _posIdNotifier.dispose();
     _paidAmountController.dispose();
     super.dispose();
   }
@@ -164,6 +170,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
       );
       if (_linkedPosList.isNotEmpty) {
         _selectedPosId = _linkedPosList.first.posId;
+        _posIdNotifier.value = _selectedPosId;
         _selectedPosName = _linkedPosList.first.posName;
       }
     } else if (Get.isRegistered<GetNetworkPosListUseCase>()) {
@@ -191,6 +198,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
       _linkedPosList.clear();
       if (widget.preselectedPosId == null) {
         _selectedPosId = null;
+        _posIdNotifier.value = null;
         _selectedPosName = null;
       }
       _isLoading = true;
@@ -217,9 +225,18 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
     });
   }
 
+  void _addPresetQuantity(int packageId, int amount) {
+    setState(() {
+      _packageQuantities[packageId] =
+          (_packageQuantities[packageId] ?? 0) + amount;
+      _syncPaidAmount();
+    });
+  }
+
   void _syncPaidAmount() {
     if (_saleType == 'CASH') {
-      _paidAmountController.text = AmountFormatter.formatValue(_totalNetAmount);
+      _paidAmountController.text =
+          AmountFormatter.formatValue(_totalNetAmount);
     }
   }
 
@@ -347,7 +364,11 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
                 .toList(),
             itemSearchText: (id) =>
                 _networks
-                    .firstWhereOrNull((n) => n.networkId == id)
+                    .cast<NetworkEntity?>()
+                    .firstWhere(
+                      (n) => n?.networkId == id,
+                      orElse: () => null,
+                    )
                     ?.networkName ??
                 '',
             onChanged: _onNetworkChanged,
@@ -356,14 +377,15 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
         ],
 
         // 1. اختيار أو عرض نقطة البيع
-        _PosAgentTargetCard(
-          selectedPosId: _selectedPosId,
+        PosAgentSelectorCard(
+          posIdNotifier: _posIdNotifier,
           selectedPosName: _selectedPosName,
           linkedPosList: _linkedPosList,
           isPreselected: widget.preselectedPosId != null,
           onPosSelected: (pos) {
             setState(() {
               _selectedPosId = pos.posId;
+              _posIdNotifier.value = pos.posId;
               _selectedPosName = pos.posName;
             });
           },
@@ -371,13 +393,14 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
         AppSpacing.vMd,
 
         // 2. مفتاح نمط البيع (كاش أو آجل)
-        _SaleTypeSegmentedBar(
+        OperationsSaleTypeBar(
           selectedSaleType: _saleType,
           onChanged: (newType) {
             setState(() {
               _saleType = newType;
               if (newType == 'CASH') {
-                _paidAmountController.text = AmountFormatter.formatValue(_totalNetAmount);
+                _paidAmountController.text =
+                    AmountFormatter.formatValue(_totalNetAmount);
               } else {
                 _paidAmountController.clear();
               }
@@ -403,14 +426,18 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
           ),
         ] else if (_loadError.isNotEmpty) ...[
           Container(
-            padding: EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.cardPadding),
             decoration: BoxDecoration(
               color: colors.error.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderRadius: AppRadius.mdRadius,
             ),
             child: Row(
               children: [
-                Icon(Icons.error_outline_rounded, color: colors.error, size: 20.r),
+                Icon(
+                  Icons.error_outline_rounded,
+                  color: colors.error,
+                  size: 20.r,
+                ),
                 AppSpacing.hSm,
                 Expanded(
                   child: Text(
@@ -423,25 +450,40 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
           ),
         ] else if (_packages.isEmpty) ...[
           Container(
-            padding: EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.cardPadding),
             decoration: BoxDecoration(
               color: colors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderRadius: AppRadius.mdRadius,
             ),
             child: Center(
               child: Text(
                 'لا توجد باقات كروت نشطة مسجلة لهذه الشبكة',
-                style: AppTypography.bodyMedium.copyWith(color: colors.onSurfaceVariant),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
               ),
             ),
           ),
         ] else ...[
-          Text(
-            'باقات الكروت المراد إصدارها',
-            style: AppTypography.labelLarge.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'باقات الكروت المراد إصدارها',
+                style: AppTypography.labelLarge.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              if (_totalVoucherCount > 0)
+                Text(
+                  '$_totalVoucherCount كرت محدد',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+            ],
           ),
           AppSpacing.vXs,
           ListView.separated(
@@ -456,12 +498,14 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
                   ? pkg.packageDefaultCashDiscount
                   : pkg.packageDefaultCreditDiscount;
 
-              return _InvoicePackageItemCard(
+              return PackageSelectionCard(
                 package: pkg,
                 quantity: qty,
                 discountPercent: discountPercent,
                 onIncrement: () => _incrementQuantity(pkg.packageId),
                 onDecrement: () => _decrementQuantity(pkg.packageId),
+                onAddPreset: (preset) =>
+                    _addPresetQuantity(pkg.packageId, preset),
               );
             },
           ),
@@ -475,9 +519,11 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
             label: 'المبلغ المسدد نقداً الآن (إن وجد)',
             hint: '0.00',
             controller: _paidAmountController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: const [AmountTextInputFormatter()],
-            prefixIcon: Icon(Icons.paid_outlined, color: colors.primary, size: 20.r),
+            prefixIcon:
+                Icon(Icons.paid_outlined, color: colors.primary, size: 20.r),
             onChanged: (_) => setState(() {}),
           ),
           AppSpacing.vMd,
@@ -485,7 +531,7 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
 
         // 5. السند المالي الرقمي اللحظي
         if (_totalVoucherCount > 0) ...[
-          _DirectInvoiceSummaryBond(
+          InvoiceFinancialSummaryCard(
             voucherCount: _totalVoucherCount,
             grossAmount: _totalGrossAmount,
             discountAmount: _totalDiscountAmount,
@@ -497,558 +543,16 @@ class _CreateSaleInvoiceSheetState extends State<CreateSaleInvoiceSheet> {
           AppSpacing.vLg,
         ],
 
-        // 6. أزرار الإجراء
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: CustomButton.primary(
-                text: 'إصدار الفاتورة والتسوية',
-                icon: Icons.check_circle_rounded,
-                onPressed: _totalVoucherCount > 0 && _selectedPosId != null
-                    ? _submitInvoice
-                    : null,
-              ),
-            ),
-            AppSpacing.hSm,
-            Expanded(
-              child: CustomButton.outline(
-                text: 'إلغاء',
-                onPressed: () => Get.back(),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// بطاقة تحديد أو استعراض نقطة البيع
-class _PosAgentTargetCard extends StatelessWidget {
-  final int? selectedPosId;
-  final String? selectedPosName;
-  final List<NetworkPosEntity> linkedPosList;
-  final bool isPreselected;
-  final ValueChanged<NetworkPosEntity> onPosSelected;
-
-  const _PosAgentTargetCard({
-    required this.selectedPosId,
-    required this.selectedPosName,
-    required this.linkedPosList,
-    required this.isPreselected,
-    required this.onPosSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    if (isPreselected || linkedPosList.isEmpty) {
-      return Container(
-        padding: EdgeInsets.all(AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.5),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36.r,
-              height: 36.r,
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.storefront_rounded,
-                color: colors.primary,
-                size: 18.r,
-              ),
-            ),
-            AppSpacing.hSm,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'الوكيل / نقطة البيع',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    selectedPosName ?? 'نقطة بيع محددة',
-                    style: AppTypography.titleSmall.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      padding: EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'اختر نقطة البيع المستلمة للكروت:',
-            style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-          AppSpacing.vXs,
-          DropdownButtonHideUnderline(
-            child: DropdownButton<int>(
-              isExpanded: true,
-              value: selectedPosId,
-              icon: Icon(Icons.arrow_drop_down_rounded, color: colors.primary),
-              items: linkedPosList.map((link) {
-                return DropdownMenuItem<int>(
-                  value: link.posId,
-                  child: Text(
-                    link.posName ?? 'نقطة بيع #${link.posId}',
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                );
-              }).toList(),
-              onChanged: (newId) {
-                if (newId != null) {
-                  final found = linkedPosList.firstWhere((l) => l.posId == newId);
-                  onPosSelected(found);
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// شريط التبديل بين كاش وآجل
-class _SaleTypeSegmentedBar extends StatelessWidget {
-  final String selectedSaleType;
-  final ValueChanged<String> onChanged;
-
-  const _SaleTypeSegmentedBar({
-    required this.selectedSaleType,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Container(
-      padding: EdgeInsets.all(AppSpacing.xxs),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: CustomInteractiveBounce(
-              onTap: () => onChanged('CASH'),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: selectedSaleType == 'CASH'
-                      ? colors.primary
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.payments_rounded,
-                      size: 16.r,
-                      color: selectedSaleType == 'CASH'
-                          ? colors.onPrimary
-                          : colors.onSurfaceVariant,
-                    ),
-                    AppSpacing.hXs,
-                    Text(
-                      'بيع نقدي (CASH)',
-                      style: AppTypography.buttonMedium.copyWith(
-                        color: selectedSaleType == 'CASH'
-                            ? colors.onPrimary
-                            : colors.onSurfaceVariant,
-                        fontWeight: selectedSaleType == 'CASH'
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          AppSpacing.hXs,
-          Expanded(
-            child: CustomInteractiveBounce(
-              onTap: () => onChanged('CREDIT'),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: selectedSaleType == 'CREDIT'
-                      ? colors.error
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.credit_score_rounded,
-                      size: 16.r,
-                      color: selectedSaleType == 'CREDIT'
-                          ? colors.onError
-                          : colors.onSurfaceVariant,
-                    ),
-                    AppSpacing.hXs,
-                    Text(
-                      'بيع آجل (CREDIT)',
-                      style: AppTypography.buttonMedium.copyWith(
-                        color: selectedSaleType == 'CREDIT'
-                            ? colors.onError
-                            : colors.onSurfaceVariant,
-                        fontWeight: selectedSaleType == 'CREDIT'
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// بطاقة الباقة مع العداد
-class _InvoicePackageItemCard extends StatelessWidget {
-  final VoucherPackageEntity package;
-  final int quantity;
-  final double discountPercent;
-  final VoidCallback onIncrement;
-  final VoidCallback onDecrement;
-
-  const _InvoicePackageItemCard({
-    required this.package,
-    required this.quantity,
-    required this.discountPercent,
-    required this.onIncrement,
-    required this.onDecrement,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final isSelected = quantity > 0;
-    final unitPrice = package.packageVoucherPrice;
-    final unitNet = unitPrice - (unitPrice * (discountPercent / 100));
-
-    return Container(
-      padding: EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? colors.primary.withValues(alpha: 0.05)
-            : colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: isSelected
-              ? colors.primary
-              : colors.outlineVariant.withValues(alpha: 0.5),
-          width: isSelected ? 1.5.w : 1.w,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 8.w,
-            height: 48.h,
-            decoration: BoxDecoration(
-              color: package.packageColor != null &&
-                      package.packageColor!.startsWith('#')
-                  ? Color(int.parse(
-                      package.packageColor!.replaceFirst('#', '0xFF')))
-                  : colors.primary,
-              borderRadius: BorderRadius.circular(AppRadius.xs),
-            ),
-          ),
-          AppSpacing.hSm,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  package.packageName,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                AppSpacing.vXxs,
-                Row(
-                  children: [
-                    Text(
-                      '${AmountFormatter.formatValue(unitPrice)} ر.ي',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                    if (discountPercent > 0) ...[
-                      AppSpacing.hXs,
-                      Text(
-                        '(${AmountFormatter.formatValue(unitNet)} بعد الخصم)',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CustomInteractiveBounce(
-                onTap: onDecrement,
-                child: Container(
-                  width: 32.r,
-                  height: 32.r,
-                  decoration: BoxDecoration(
-                    color: quantity > 0
-                        ? colors.surfaceContainerHigh
-                        : colors.surfaceContainerLow,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.remove_rounded,
-                      size: 16.r,
-                      color: quantity > 0 ? colors.onSurface : colors.outline,
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                constraints: BoxConstraints(minWidth: 36.w),
-                alignment: Alignment.center,
-                child: Text(
-                  '$quantity',
-                  style: AppTypography.titleMedium.copyWith(
-                    color: isSelected ? colors.primary : colors.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              CustomInteractiveBounce(
-                onTap: onIncrement,
-                child: Container(
-                  width: 32.r,
-                  height: 32.r,
-                  decoration: BoxDecoration(
-                    color: colors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.add_rounded,
-                      size: 16.r,
-                      color: colors.onPrimary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// بطاقة السند المالي الرقمي اللحظي
-class _DirectInvoiceSummaryBond extends StatelessWidget {
-  final int voucherCount;
-  final double grossAmount;
-  final double discountAmount;
-  final double netAmount;
-  final double paidAmount;
-  final double remainingDebt;
-  final String saleType;
-
-  const _DirectInvoiceSummaryBond({
-    required this.voucherCount,
-    required this.grossAmount,
-    required this.discountAmount,
-    required this.netAmount,
-    required this.paidAmount,
-    required this.remainingDebt,
-    required this.saleType,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Container(
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainer,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.8),
-          width: 1.w,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'التسوية المالية للفاتورة',
-                style: AppTypography.titleSmall.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xs,
-                  vertical: 2.h,
-                ),
-                decoration: BoxDecoration(
-                  color: remainingDebt <= 0.001
-                      ? colors.primary.withValues(alpha: 0.12)
-                      : colors.error.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppRadius.xs),
-                ),
-                child: Text(
-                  remainingDebt <= 0.001 ? 'مسددة بالكامل' : 'تسوية ذمة آجلة',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: remainingDebt <= 0.001 ? colors.primary : colors.error,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          AppSpacing.vSm,
-          Divider(color: colors.outlineVariant.withValues(alpha: 0.4)),
-          AppSpacing.vXs,
-          _InvoiceSummaryLine(
-            label: 'إجمالي عدد الكروت:',
-            value: '$voucherCount كرت',
-          ),
-          AppSpacing.vXxs,
-          _InvoiceSummaryLine(
-            label: 'المبلغ الإجمالي:',
-            value: '${AmountFormatter.formatValue(grossAmount)} ر.ي',
-          ),
-          if (discountAmount > 0) ...[
-            AppSpacing.vXxs,
-            _InvoiceSummaryLine(
-              label: 'الخصم المطبق:',
-              value: '- ${AmountFormatter.formatValue(discountAmount)} ر.ي',
-              isHighlight: true,
-            ),
-          ],
-          AppSpacing.vXxs,
-          _InvoiceSummaryLine(
-            label: 'الصافي المطلوب:',
-            value: '${AmountFormatter.formatValue(netAmount)} ر.ي',
-          ),
-          AppSpacing.vXxs,
-          _InvoiceSummaryLine(
-            label: 'المسدد نقداً:',
-            value: '${AmountFormatter.formatValue(paidAmount)} ر.ي',
-          ),
-          if (remainingDebt > 0.001) ...[
-            AppSpacing.vXxs,
-            _InvoiceSummaryLine(
-              label: 'متبقي دين آجل على المحفظة:',
-              value: '${AmountFormatter.formatValue(remainingDebt)} ر.ي',
-              isDebt: true,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _InvoiceSummaryLine extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isHighlight;
-  final bool isDebt;
-
-  const _InvoiceSummaryLine({
-    required this.label,
-    required this.value,
-    this.isHighlight = false,
-    this.isDebt = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: AppTypography.bodySmall.copyWith(
-            color: isDebt ? colors.error : colors.onSurfaceVariant,
-            fontWeight: isDebt ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-        Text(
-          value,
-          style: AppTypography.bodyMedium.copyWith(
-            color: isDebt
-                ? colors.error
-                : (isHighlight ? colors.tertiary : colors.onSurface),
-            fontWeight: FontWeight.bold,
-          ),
+        // 6. رصيف الإجراء والاعتماد
+        SheetActionDock(
+          totalCount: _totalVoucherCount,
+          netAmount: _totalNetAmount,
+          actionLabel: 'إصدار الفاتورة والتسوية',
+          actionIcon: Icons.check_circle_rounded,
+          onAction: _totalVoucherCount > 0 && _selectedPosId != null
+              ? _submitInvoice
+              : null,
+          onCancel: () => Get.back(),
         ),
       ],
     );
