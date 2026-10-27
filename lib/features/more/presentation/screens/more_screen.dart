@@ -25,17 +25,21 @@ class MoreScreen extends GetView<MoreController> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final topPadding = MediaQuery.paddingOf(context).top + 68.h + AppSpacing.sm;
 
     return RefreshIndicator(
       color: colors.primary,
+      edgeOffset: MediaQuery.paddingOf(context).top + 68.h,
       onRefresh: () => controller.loadOverview(isRefresh: true),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.screenPadding,
-          vertical: AppSpacing.sm,
+        padding: EdgeInsets.only(
+          left: AppSpacing.screenPadding,
+          right: AppSpacing.screenPadding,
+          top: topPadding,
+          bottom: 100.h,
         ),
         child: Obx(
           () => Column(
@@ -175,8 +179,6 @@ class MoreScreen extends GetView<MoreController> {
 
               // 7. قسم تسجيل الخروج الآمن
               MoreLogoutSection(controller: controller),
-
-              SizedBox(height: 100.h),
             ],
           ),
         ),

@@ -24,6 +24,84 @@ class AppGradients {
     );
   }
 
+  // ===========================================================================
+  // باقة التدرجات الملكية لبطاقات الكيانات والشبكات (Executive Card Palette)
+  // ===========================================================================
+
+  /// 1. الزمرد الملكي الفاخر (Royal Deep Emerald)
+  static LinearGradient entityEmerald(BuildContext context) {
+    return const LinearGradient(
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
+      colors: [Color(0xFF042F24), Color(0xFF084838), Color(0xFF0D6852)],
+      stops: [0.0, 0.52, 1.0],
+    );
+  }
+
+  /// 2. الياقوت الكحلي والنيلي الليلي (Midnight Sapphire Navy)
+  static LinearGradient entitySapphire(BuildContext context) {
+    return const LinearGradient(
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
+      colors: [Color(0xFF0A1828), Color(0xFF132843), Color(0xFF1C426F)],
+      stops: [0.0, 0.52, 1.0],
+    );
+  }
+
+  /// 3. التيتانيوم والأوبسيديان الفاحم (Obsidian Black & Platinum Titanium)
+  static LinearGradient entityObsidian(BuildContext context) {
+    return const LinearGradient(
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
+      colors: [Color(0xFF14171A), Color(0xFF20262E), Color(0xFF333B45)],
+      stops: [0.0, 0.52, 1.0],
+    );
+  }
+
+  /// 4. الجمشت الأرجواني المخملي (Imperial Amethyst & Deep Velvet Plum)
+  static LinearGradient entityAmethyst(BuildContext context) {
+    return const LinearGradient(
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
+      colors: [Color(0xFF220A35), Color(0xFF351252), Color(0xFF4F1A77)],
+      stops: [0.0, 0.52, 1.0],
+    );
+  }
+
+  /// 5. البرونز والنحاس العتيق (Champagne Bronze & Deep Amber)
+  static LinearGradient entityAmberBronze(BuildContext context) {
+    return const LinearGradient(
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
+      colors: [Color(0xFF28170B), Color(0xFF3E2310), Color(0xFF5D361B)],
+      stops: [0.0, 0.52, 1.0],
+    );
+  }
+
+  /// اختيار تدرج البطاقة ديناميكياً وفق ترتيب الكيان
+  static LinearGradient entityCardGradient(BuildContext context, int index) {
+    final gradients = [
+      entityEmerald(context),
+      entitySapphire(context),
+      entityObsidian(context),
+      entityAmethyst(context),
+      entityAmberBronze(context),
+    ];
+    return gradients[index % gradients.length];
+  }
+
+  /// لون التوهج الظلي المقترن بهوية تدرج البطاقة
+  static Color entityAccentColor(int index) {
+    const accentColors = [
+      Color(0xFF0D6852),
+      Color(0xFF1C426F),
+      Color(0xFF333B45),
+      Color(0xFF4F1A77),
+      Color(0xFF5D361B),
+    ];
+    return accentColors[index % accentColors.length];
+  }
+
   /// خلفية ناعمة للشاشات — إحساس Mesh بلا تكلفة رسم عالية.
   static LinearGradient surfaceMesh(BuildContext context) {
     final scheme = _scheme(context);

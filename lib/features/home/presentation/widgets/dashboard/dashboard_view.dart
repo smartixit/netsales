@@ -53,14 +53,20 @@ class DashboardView extends GetView<DashboardController> {
       }
 
       final isMasked = controller.isPrivacyMasked.value;
+      final topPadding = MediaQuery.paddingOf(context).top + 68.h;
 
       // 3. حالة النجاح وعرض الشاشة التنفيذية المتكاملة
       return RefreshIndicator(
         color: colors.primary,
+        edgeOffset: topPadding,
         onRefresh: () => controller.loadDashboard(isRefresh: true),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
+          ),
+          padding: EdgeInsets.only(
+            top: topPadding + AppSpacing.xs,
+            bottom: 100.h,
           ),
           child: ResponsiveContentWrapper(
             child: Column(
@@ -130,9 +136,6 @@ class DashboardView extends GetView<DashboardController> {
                   activities: overview.recentActivities,
                   isMasked: isMasked,
                 ),
-
-                // مسافة سفلية مريحة تعلو شريط التنقل العائم
-                SizedBox(height: 100.h),
               ],
             ),
           ),

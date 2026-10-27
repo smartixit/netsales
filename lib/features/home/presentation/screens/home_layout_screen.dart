@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_view.dart';
@@ -25,30 +26,26 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
       onFallback: () async => controller.canPopTab(),
       child: CustomAppScaffold(
         useSurfaceMesh: true,
-        extendBodyBehindAppBar: false,
+        extendBodyBehindAppBar: true,
         extendBody: true,
+        safeAreaTop: false,
         safeAreaBottom: false,
         appBar: HomeAppBar(controller: controller),
         body: Builder(
           builder: (bodyContext) {
             final mediaQuery = MediaQuery.of(bodyContext);
+            final topPadding = mediaQuery.padding.top + 68.h;
+
             return MediaQuery(
               data: mediaQuery.copyWith(
                 viewPadding: mediaQuery.viewPadding.copyWith(
                   bottom: mediaQuery.padding.bottom,
                 ),
               ),
-              child: Column(
+              child: Stack(
                 children: [
-                  // شريط التنبيه اللحظي لقطع الاتصال الشبكي
-                  Obx(
-                    () => CustomOfflineBanner(
-                      isOffline: !controller.isOnline.value,
-                    ),
-                  ),
-
-                  // الحاوية متعددة التبويبات مع الحفاظ التام على الحالة (IndexedStack)
-                  Expanded(
+                  // الحاوية متعددة التبويبات الممتدة بكامل الشاشة خلف الـ AppBar الزجاجي
+                  Positioned.fill(
                     child: Obx(
                       () => IndexedStack(
                         index: controller.selectedIndex.value,
@@ -65,6 +62,18 @@ class HomeLayoutScreen extends GetView<HomeLayoutController> {
                           // Tab 3: المحافظ والمالية والإعدادات (More & Financial Hub)
                           MoreScreen(),
                         ],
+                      ),
+                    ),
+                  ),
+
+                  // شريط التنبيه اللحظي لقطع الاتصال الشبكي أسفل الـ AppBar الزجاجي
+                  Positioned(
+                    top: topPadding,
+                    left: 0,
+                    right: 0,
+                    child: Obx(
+                      () => CustomOfflineBanner(
+                        isOffline: !controller.isOnline.value,
                       ),
                     ),
                   ),

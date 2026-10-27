@@ -1,33 +1,33 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
-import 'package:netsales/widgets/buttons/custom_theme_toggle_button.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/interactions/custome_theme_switcher.dart';
 
 /// ============================================================================
-/// ترويسة التطبيق التنفيذية الموحدة (HomeAppBar)
+/// ترويسة التطبيق التنفيذية الفاخرة (HomeAppBar - Quiet Luxury Direction)
 /// ============================================================================
-/// منصة قيادة علوية فاخرة تعكس الحضور التنفيذي للمستخدم:
-/// - هوية بصرية متميزة مع مؤشر اتصال ومزامنة لحظية حية.
-/// - تحية زمنية ذكية تتكيف مع أوقات اليوم.
-/// - رصيف إجراءات زجاجي مدمج (Frosted Action Dock) يجمع أدوات الخصوصية والثيم والإشعارات.
+/// تصميم هادئ، واثق، وعالمي يعكس الحضور التنفيذي والسيادي لمنظومة NetSales:
+/// - تأثير زجاجي بلوري حقيقي (True Frosted Glass) بانسيابية كاملة خلف الشريط.
+/// - هوية تنفيذية واضحة: صورة شخصية بإطار متدرج ناعم ومؤشر مزامنة حي مدمج.
+/// - تدرج هرمي أنيق: تحية ذكية وشارة دور مدمجة مع اسم تنفيذي عريض.
+/// - أزرار تحكم زجاجية حرة (Floating Glass Action Orbs) بديلة عن الأرصفة الصندوقية.
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final HomeLayoutController controller;
 
-  const HomeAppBar({
-    super.key,
-    required this.controller,
-  });
+  const HomeAppBar({super.key, required this.controller});
 
   @override
   Size get preferredSize => Size.fromHeight(68.h);
@@ -48,99 +48,76 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     final colors = context.colors;
     final greeting = _getTimeBasedGreeting();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface.withValues(alpha: 0.96),
-        border: Border(
-          bottom: BorderSide(
-            color: colors.outlineVariant.withValues(alpha: 0.2),
-            width: 1.w,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenPadding,
-            vertical: AppSpacing.xs,
-          ),
-          child: Row(
-            children: [
-              // 1. الصورة الرمزية للمستخدم مع مؤشر المزامنة الحية المضيء
-              Obx(
-                () => _ExecutiveUserAvatar(
-                  logoUrl: controller.userProfileLogo,
-                  fullName: controller.userFullName,
-                  onTap: () => controller.changeTab(3),
-                ),
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colors.surface.withValues(alpha: 0.72),
+            border: Border(
+              bottom: BorderSide(
+                color: colors.outlineVariant.withValues(alpha: 0.15),
+                width: 1.w,
               ),
+            ),
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+                vertical: AppSpacing.xs,
+              ),
+              child: Row(
+                children: [
+                  // 1. الأفاتار التنفيذي الفاخر مع مؤشر المزامنة الحية
+                  Obx(
+                    () => _ExecutiveAvatarOrb(
+                      logoUrl: controller.userProfileLogo,
+                      fullName: controller.userFullName,
+                      onTap: () => controller.changeTab(3),
+                    ),
+                  ),
 
-              AppSpacing.hSm,
+                  AppSpacing.hSm,
 
-              // 2. التحية الزمنية الذكية واسم المستخدم وشارة الدور المعتمد
-              Expanded(
-                child: Obx(
-                  () => Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            greeting,
-                            style: AppTypography.labelSmall.copyWith(
-                              color: colors.onSurfaceVariant,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          AppSpacing.hXs,
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xs,
-                              vertical: 1.5.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.primary.withValues(alpha: 0.1),
-                              borderRadius: AppRadius.xsRadius,
-                              border: Border.all(
-                                color: colors.primary.withValues(alpha: 0.2),
-                                width: 0.8.w,
-                              ),
-                            ),
-                            child: Text(
-                              controller.userRoleLabel,
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.primary,
-                                fontSize: 9.5.sp,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
+                  // 2. الهوية التنفيذية: التحية الذكية، شارة الدور، واسم المستخدم
+                  Expanded(
+                    child: Obx(
+                      () => _ExecutiveGreetingIdentity(
+                        greeting: greeting,
+                        userShortName: controller.userShortName,
+                        roleLabel: controller.userRoleLabel,
                       ),
-                      AppSpacing.vXxs,
-                      Text(
-                        controller.userShortName,
-                        style: AppTypography.titleMedium.copyWith(
-                          color: colors.onSurface,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.2,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+
+                  AppSpacing.hXs,
+
+                  // 3. أزرار التحكم الزجاجية الحرة المتناسقة (Floating Glass Orbs)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // أداة الخصوصية اللحظية (حجب/إظهار الأرصدة)
+                      const _PrivacyActionOrb(),
+
+                      AppSpacing.hXs,
+
+                      // أداة تبديل المظهر التفاعلية بأسلوب تليجرام
+                      const _ThemeActionOrb(),
+
+                      AppSpacing.hXs,
+
+                      // جرس الإشعارات مع شارة التنبيهات غير المقروءة
+                      _NotificationActionOrb(
+                        unreadCount: controller.unreadNotificationsCount,
+                        onTap: () => Get.toNamed(AppRoutes.notifications),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
-
-              AppSpacing.hSm,
-
-              // 3. رصيف الإجراءات الزجاجي المدمج (Frosted Action Dock)
-              _FrostedActionDock(controller: controller),
-            ],
+            ),
           ),
         ),
       ),
@@ -149,14 +126,14 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 /// ============================================================================
-/// ودجت الصورة الرمزية التنفيذية مع هالة ضوئية ومؤشر اتصال حي
+/// ودجت الأفاتار التنفيذي بهالة متدرجة ناعمة ومؤشر مزامنة مدمج
 /// ============================================================================
-class _ExecutiveUserAvatar extends StatelessWidget {
+class _ExecutiveAvatarOrb extends StatelessWidget {
   final String? logoUrl;
   final String fullName;
   final VoidCallback onTap;
 
-  const _ExecutiveUserAvatar({
+  const _ExecutiveAvatarOrb({
     required this.logoUrl,
     required this.fullName,
     required this.onTap,
@@ -169,130 +146,218 @@ class _ExecutiveUserAvatar extends StatelessWidget {
 
     return CustomInteractiveBounce(
       onTap: onTap,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: 44.r,
-            height: 44.r,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  colors.primary.withValues(alpha: 0.3),
-                  colors.primaryContainer.withValues(alpha: 0.15),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(
-                color: colors.primary.withValues(alpha: 0.35),
-                width: 1.2.w,
-              ),
-            ),
-            padding: EdgeInsets.all(2.r),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(11.r),
-              child: CustomCachedImage.avatar(
-                url: logoUrl,
-                radius: 20.r,
-                fallbackText: initials,
-              ),
-            ),
-          ),
-          // نقطة المزامنة الخضراء الحية (Live Pulse Indicator)
-          PositionedDirectional(
-            bottom: -1.h,
-            end: -1.w,
-            child: Container(
-              width: 12.r,
-              height: 12.r,
+      child: Tooltip(
+        message: 'الملف الشخصي والمركز المالي',
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            // الإطار الخارجي الناعم
+            Container(
+              width: 44.r,
+              height: 44.r,
               decoration: BoxDecoration(
-                color: colors.success,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colors.primary.withValues(alpha: 0.28),
+                    colors.primaryContainer.withValues(alpha: 0.10),
+                  ],
+                ),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: colors.surface,
-                  width: 2.w,
+                  color: colors.primary.withValues(alpha: 0.35),
+                  width: 1.2.w,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: colors.success.withValues(alpha: 0.45),
-                    blurRadius: 5.r,
-                    spreadRadius: 1.r,
+                    color: colors.primary.withValues(alpha: 0.08),
+                    blurRadius: 8.r,
+                    offset: Offset(0, 2.h),
                   ),
                 ],
               ),
+              padding: EdgeInsets.all(2.r),
+              child: ClipOval(
+                child: CustomCachedImage.avatar(
+                  url: logoUrl,
+                  radius: 20.r,
+                  fallbackText: initials,
+                ),
+              ),
             ),
-          ),
-        ],
+
+            // مؤشر الاتصال والمزامنة الحية المدمج في الزاوية
+            PositionedDirectional(
+              bottom: 0,
+              end: 0,
+              child: Container(
+                width: 11.r,
+                height: 11.r,
+                decoration: BoxDecoration(
+                  color: colors.success,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colors.surface, width: 2.w),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors.success.withValues(alpha: 0.5),
+                      blurRadius: 4.r,
+                      spreadRadius: 0.5.r,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 /// ============================================================================
-/// رصيف الإجراءات الزجاجي المدمج (Frosted Action Dock)
+/// ودجت الترحيب والهوية التنفيذية بتسلسل هرمي واضح ومريح
 /// ============================================================================
-class _FrostedActionDock extends StatelessWidget {
-  final HomeLayoutController controller;
+class _ExecutiveGreetingIdentity extends StatelessWidget {
+  final String greeting;
+  final String userShortName;
+  final String roleLabel;
 
-  const _FrostedActionDock({required this.controller});
+  const _ExecutiveGreetingIdentity({
+    required this.greeting,
+    required this.userShortName,
+    required this.roleLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Container(
-      height: 38.h,
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest.withValues(alpha: 0.45),
-        borderRadius: AppRadius.fullRadius,
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-          width: 1.w,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // السطر العلوي: التحية + نقطة الفصل + الدور الوظيفي
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              greeting,
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurfaceVariant,
+                fontSize: 10.5.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              child: Text(
+                '•',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.outlineVariant.withValues(alpha: 0.8),
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Flexible(
+              child: Text(
+                roleLabel,
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.primary,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.1,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // أداة حجب الأرقام والخصوصية بنقرة واحدة
-          const _PrivacyToggleDockAction(),
 
-          _DockDivider(),
+        AppSpacing.vXxs,
 
-          // أداة تبديل الوضع الليلي / الفاتح
-          const CustomThemeToggleButton(),
-
-          _DockDivider(),
-
-          // جرس الإشعارات مع شارة العداد اللحظي
-          _NotificationBellDockAction(
-            unreadCount: controller.unreadNotificationsCount,
-            onTap: () => Get.toNamed(AppRoutes.notifications),
+        // السطر الأساسي: الاسم التنفيذي العريض
+        Text(
+          userShortName,
+          style: AppTypography.titleMedium.copyWith(
+            color: colors.onSurface,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
+            fontSize: 15.sp,
           ),
-        ],
-      ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }
 
-/// فاصل رأسي نحيف داخل رصيف الإجراءات
-class _DockDivider extends StatelessWidget {
+/// ============================================================================
+/// الحاوية الأساسية للزر الزجاجي الحر (Floating Glass Action Orb)
+/// ============================================================================
+class _GlassActionOrb extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final String? tooltip;
+
+  const _GlassActionOrb({
+    required this.child,
+    required this.onTap,
+    this.backgroundColor,
+    this.borderColor,
+    this.tooltip,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 1.w,
-      height: 16.h,
-      margin: EdgeInsets.symmetric(horizontal: 2.w),
-      color: context.colors.outlineVariant.withValues(alpha: 0.25),
+    final colors = context.colors;
+    final effectiveBg =
+        backgroundColor ??
+        colors.surfaceContainerHighest.withValues(alpha: 0.32);
+    final effectiveBorder =
+        borderColor ?? colors.outlineVariant.withValues(alpha: 0.18);
+
+    final orb = CustomInteractiveBounce(
+      onTap: onTap,
+      child: Container(
+        width: 38.r,
+        height: 38.r,
+        decoration: BoxDecoration(
+          color: effectiveBg,
+          shape: BoxShape.circle,
+          border: Border.all(color: effectiveBorder, width: 1.w),
+          boxShadow: [
+            BoxShadow(
+              color: colors.shadow.withValues(alpha: 0.03),
+              blurRadius: 6.r,
+              offset: Offset(0, 2.h),
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: child,
+      ),
     );
+
+    if (tooltip != null) {
+      return Tooltip(message: tooltip!, child: orb);
+    }
+    return orb;
   }
 }
 
-/// أداة الخصوصية المدمجة في الرصيف
-class _PrivacyToggleDockAction extends StatelessWidget {
-  const _PrivacyToggleDockAction();
+/// ============================================================================
+/// زر الخصوصية وحجب الأرقام الزجاجي الحر
+/// ============================================================================
+class _PrivacyActionOrb extends StatelessWidget {
+  const _PrivacyActionOrb();
 
   @override
   Widget build(BuildContext context) {
@@ -304,23 +369,92 @@ class _PrivacyToggleDockAction extends StatelessWidget {
 
     return Obx(() {
       final isMasked = dashboardCtrl.isPrivacyMasked.value;
-      return CustomInteractiveBounce(
+      return _GlassActionOrb(
+        tooltip: isMasked ? 'إظهار الأرصدة المالية' : 'إخفاء الأرصدة المالية',
+        backgroundColor: isMasked
+            ? colors.primary.withValues(alpha: 0.14)
+            : colors.surfaceContainerHighest.withValues(alpha: 0.32),
+        borderColor: isMasked
+            ? colors.primary.withValues(alpha: 0.32)
+            : colors.outlineVariant.withValues(alpha: 0.18),
         onTap: () {
           HapticFeedback.lightImpact();
           dashboardCtrl.togglePrivacyMask();
         },
-        child: Container(
-          width: 32.r,
-          height: 32.r,
-          decoration: BoxDecoration(
-            color: isMasked ? colors.primary.withValues(alpha: 0.15) : Colors.transparent,
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
+        child: Icon(
+          isMasked ? Icons.visibility_off_rounded : Icons.visibility_outlined,
+          size: 19.r,
+          color: isMasked ? colors.primary : colors.onSurfaceVariant,
+        ),
+      );
+    });
+  }
+}
+
+/// ============================================================================
+/// زر تبديل المظهر الزجاجي الحر بتأثير Circular Reveal
+/// ============================================================================
+class _ThemeActionOrb extends StatelessWidget {
+  const _ThemeActionOrb();
+
+  void _onTap(BuildContext context) {
+    final switcher = CustomThemeSwitcher.of(context);
+
+    if (switcher != null) {
+      final renderBox = context.findRenderObject() as RenderBox?;
+      final origin = renderBox != null
+          ? renderBox.localToGlobal(renderBox.size.center(Offset.zero))
+          : Offset.zero;
+
+      switcher.switchTheme(
+        origin: origin,
+        onThemeChange: ThemeService.to.toggleTheme,
+      );
+    } else {
+      ThemeService.to.toggleTheme();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeService = ThemeService.to;
+
+    return Obx(() {
+      final isDark = themeService.isDarkMode;
+      final colors = context.colors;
+
+      return _GlassActionOrb(
+        tooltip: isDark
+            ? 'التبديل إلى الوضع الفاتح'
+            : 'التبديل إلى الوضع الداكن',
+        onTap: () => _onTap(context),
+        child: AnimatedSwitcher(
+          duration: AppMotion.duration(context, AppMotion.slow),
+          transitionBuilder: (child, animation) {
+            return RotationTransition(
+              turns: Tween<double>(begin: 0.75, end: 1.0).animate(
+                CurvedAnimation(parent: animation, curve: AppMotion.springy),
+              ),
+              child: FadeTransition(
+                opacity: CurvedAnimation(
+                  parent: animation,
+                  curve: AppMotion.standard,
+                ),
+                child: ScaleTransition(
+                  scale: CurvedAnimation(
+                    parent: animation,
+                    curve: AppMotion.emphasized,
+                  ),
+                  child: child,
+                ),
+              ),
+            );
+          },
           child: Icon(
-            isMasked ? Icons.visibility_off_rounded : Icons.visibility_outlined,
-            size: 18.r,
-            color: isMasked ? colors.primary : colors.onSurfaceVariant,
+            isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+            key: ValueKey<bool>(isDark),
+            size: 19.r,
+            color: isDark ? colors.warning : colors.onSurfaceVariant,
           ),
         ),
       );
@@ -328,12 +462,14 @@ class _PrivacyToggleDockAction extends StatelessWidget {
   }
 }
 
-/// جرس الإشعارات المدمج في الرصيف مع الشارة
-class _NotificationBellDockAction extends StatelessWidget {
+/// ============================================================================
+/// زر جرس الإشعارات الزجاجي الحر مع شارة العداد اللحظي
+/// ============================================================================
+class _NotificationActionOrb extends StatelessWidget {
   final RxInt unreadCount;
   final VoidCallback onTap;
 
-  const _NotificationBellDockAction({
+  const _NotificationActionOrb({
     required this.unreadCount,
     required this.onTap,
   });
@@ -342,49 +478,44 @@ class _NotificationBellDockAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return CustomInteractiveBounce(
-      onTap: onTap,
-      child: Container(
-        width: 32.r,
-        height: 32.r,
-        alignment: Alignment.center,
+    return Obx(() {
+      final count = unreadCount.value;
+
+      return _GlassActionOrb(
+        tooltip: count > 0 ? '$count إشعارات جديدة' : 'الإشعارات',
+        onTap: onTap,
         child: Stack(
           clipBehavior: Clip.none,
           alignment: Alignment.center,
           children: [
             Icon(
               Icons.notifications_none_rounded,
-              size: 19.r,
-              color: colors.onSurface,
+              size: 20.r,
+              color: colors.onSurfaceVariant,
             ),
-            Obx(() {
-              final count = unreadCount.value;
-              if (count <= 0) return const SizedBox.shrink();
-
-              return PositionedDirectional(
-                top: 3.h,
-                end: 3.w,
+            if (count > 0)
+              PositionedDirectional(
+                top: -2.h,
+                end: -2.w,
                 child: Container(
-                  width: 8.r,
-                  height: 8.r,
+                  width: 8.5.r,
+                  height: 8.5.r,
                   decoration: BoxDecoration(
                     color: colors.error,
                     shape: BoxShape.circle,
-                    border: Border.all(color: colors.surface, width: 1.5.w),
+                    border: Border.all(color: colors.surface, width: 1.8.w),
                     boxShadow: [
                       BoxShadow(
-                        color: colors.error.withValues(alpha: 0.5),
-                        blurRadius: 3.r,
+                        color: colors.error.withValues(alpha: 0.55),
+                        blurRadius: 4.r,
                       ),
                     ],
                   ),
                 ),
-              );
-            }),
+              ),
           ],
         ),
-      ),
-    );
+      );
+    });
   }
 }
-

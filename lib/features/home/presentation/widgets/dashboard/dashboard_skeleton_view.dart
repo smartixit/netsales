@@ -21,12 +21,16 @@ class DashboardSkeletonView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    final topPadding = MediaQuery.paddingOf(context).top + 68.h;
+
     return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.screenPadding,
-          vertical: AppSpacing.md,
+        padding: EdgeInsets.only(
+          left: AppSpacing.screenPadding,
+          right: AppSpacing.screenPadding,
+          top: topPadding + AppSpacing.md,
+          bottom: 100.h,
         ),
         child: CustomSkeletonShimmer(
           child: Column(

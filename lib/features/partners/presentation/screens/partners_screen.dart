@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
@@ -19,8 +20,12 @@ class PartnersScreen extends GetView<PartnersController> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
+    final topPadding = MediaQuery.paddingOf(context).top + 68.h + AppSpacing.xs;
+
+    return Padding(
+      padding: EdgeInsets.only(top: topPadding),
+      child: Column(
+        children: [
         // 1. رأس التبويب القطاعي (مزودو الشبكات | نقاط البيع | عقود التوزيع)
         PartnersSegmentedHeader(controller: controller),
         AppSpacing.vSm,
@@ -50,6 +55,7 @@ class PartnersScreen extends GetView<PartnersController> {
           }),
         ),
       ],
-    );
+    ),
+  );
   }
 }

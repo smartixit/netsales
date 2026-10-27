@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
@@ -13,9 +14,13 @@ class OperationsScreen extends GetView<OperationsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        OperationsSegmentedHeader(controller: controller),
+    final topPadding = MediaQuery.paddingOf(context).top + 68.h + AppSpacing.xs;
+
+    return Padding(
+      padding: EdgeInsets.only(top: topPadding),
+      child: Column(
+        children: [
+          OperationsSegmentedHeader(controller: controller),
         AppSpacing.vSm,
         OperationsSearchAndFilterBar(controller: controller),
         AppSpacing.vSm,
@@ -30,6 +35,7 @@ class OperationsScreen extends GetView<OperationsController> {
           }),
         ),
       ],
-    );
+    ),
+  );
   }
 }

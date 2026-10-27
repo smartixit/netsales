@@ -66,6 +66,7 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
         return SizedBox(
           height: 224.h,
           child: _SingleEntityCard(
+            cardIndex: 0,
             title: widget.controller.contextData?.displayName ?? 'الشبكة التشغيلية',
             code: widget.controller.contextData?.displayCode ?? '',
             logoUrl: null,
@@ -126,6 +127,7 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
                     vertical: isSelected ? 0 : 6.h,
                   ),
                   child: _SingleEntityCard(
+                    cardIndex: index,
                     title: net.networkName,
                     code: net.networkCode,
                     logoUrl: net.networkProfileLogo,
@@ -181,6 +183,7 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
 
 /// بطاقة الكيان المستقل المصرفية الفخمة
 class _SingleEntityCard extends StatelessWidget {
+  final int cardIndex;
   final String title;
   final String code;
   final String? logoUrl;
@@ -193,6 +196,7 @@ class _SingleEntityCard extends StatelessWidget {
   final VoidCallback? onActionTap;
 
   const _SingleEntityCard({
+    this.cardIndex = 0,
     required this.title,
     required this.code,
     required this.logoUrl,
@@ -222,11 +226,14 @@ class _SingleEntityCard extends StatelessWidget {
                 begin: AlignmentDirectional.topStart,
                 end: AlignmentDirectional.bottomEnd,
               )
-            : AppGradients.financialHero(context),
+            : AppGradients.entityCardGradient(context, cardIndex),
         borderRadius: AppRadius.xlRadius,
         boxShadow: isNegative
             ? AppElevation.tinted(context, colors.error)
-            : AppElevation.tinted(context, colors.primary),
+            : AppElevation.tinted(
+                context,
+                AppGradients.entityAccentColor(cardIndex),
+              ),
       ),
       child: Stack(
         children: [

@@ -294,7 +294,7 @@ class AppColors {
   // ===========================================================================
   static const darkColors = AppColors(
     primary: Color(0xFF8CD6C2),
-    onPrimary: Color(0xFF191C1B),
+    onPrimary: Color(0xFF00382A),
     primaryContainer: Color(0xFF005C45),
     onPrimaryContainer: Color(0xFFB8F0E0),
     primaryFixed: Color(0xFFB8F0E0),
