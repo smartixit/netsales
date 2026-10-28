@@ -5,35 +5,38 @@ import 'package:netsales/features/partners/domain/entities/pos_wallet_entity.dar
 import 'package:netsales/features/partners/domain/usecases/get_pos_wallet_logs_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_pos_wallet_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/transfer_pos_wallet_balance_use_case.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// ============================================================================
 /// متحكم نافذة المحفظة التوزيعية الثنائية (PosWalletSheetController)
 /// ============================================================================
-/// يدير عرض بيانات المحفظة المسترجعة من الخادم، سجل العمليات، وإجراء التحويل البيني.
-/// يلتزم بمبدأ عدم إجراء أي عمليات حسابية مالية في الواجهة، واعتبار الخادم المصدر الحصري للحقيقة.
+/// يدير عرض بيانات المحفظة المسترجعة من الخادم، سجل العمليات، وإجراء التحويل البيني
+/// مصاغ وفق النمط المعماري القياسي الموحد المعتمد في OperationsController.
 class PosWalletSheetController extends GetxController {
-  final GetPosWalletUseCase _getPosWalletUseCase;
-  final TransferPosWalletBalanceUseCase _transferPosWalletBalanceUseCase;
-  final GetPosWalletLogsUseCase _getPosWalletLogsUseCase;
+  final GetPosWalletUseCase getPosWalletUseCase;
+  final TransferPosWalletBalanceUseCase transferPosWalletBalanceUseCase;
+  final GetPosWalletLogsUseCase getPosWalletLogsUseCase;
 
   PosWalletSheetController({
-    required GetPosWalletUseCase getPosWalletUseCase,
-    required TransferPosWalletBalanceUseCase transferPosWalletBalanceUseCase,
-    required GetPosWalletLogsUseCase getPosWalletLogsUseCase,
-  })  : _getPosWalletUseCase = getPosWalletUseCase,
-        _transferPosWalletBalanceUseCase = transferPosWalletBalanceUseCase,
-        _getPosWalletLogsUseCase = getPosWalletLogsUseCase;
+    required this.getPosWalletUseCase,
+    required this.transferPosWalletBalanceUseCase,
+    required this.getPosWalletLogsUseCase,
+  });
 
+  /// حالات تحميل البيانات والعمليات
   final RxBool isLoading = false.obs;
-  final RxBool isTransferring = false.obs;
-  final RxnString errorMessage = RxnString();
+  final RxBool isSubmittingAction = false.obs;
+  final RxString errorMessage = ''.obs;
 
+  /// بيانات المحفظة المسترجعة وسجل القيود
   final Rxn<PosWalletEntity> posWallet = Rxn<PosWalletEntity>();
   final RxList<PosWalletLogEntity> logs = <PosWalletLogEntity>[].obs;
 
-  final RxInt selectedTab = 0.obs; // 0: Overview & Ledger, 1: Transfer
-  final RxInt transferDirection = 0.obs; // 0: Feed (From Network to POS), 1: Collect (From POS to Network)
+  /// التبويب النشط: 0 للملخص والقيود، 1 للتحويل
+  final RxInt selectedTab = 0.obs;
+  /// اتجاه التحويل: 0 تغذية (من الشبكة لنقطة البيع)، 1 توريد (من نقطة البيع للشبكة)
+  final RxInt transferDirection = 0.obs;
 
   final TextEditingController amountController = TextEditingController();
   final TextEditingController statementController = TextEditingController();
@@ -48,7 +51,7 @@ class PosWalletSheetController extends GetxController {
     super.onClose();
   }
 
-  /// تهيئة النافذة بمعرفات الشبكة ونقطة البيع وجلب البيانات
+  /// تهيئة المتحكم ببيانات نقطة البيع والشبكة
   Future<void> init({
     required int networkId,
     required int posId,
@@ -58,35 +61,54 @@ class PosWalletSheetController extends GetxController {
     selectedTab.value = 0;
     amountController.clear();
     statementController.clear();
-    errorMessage.value = null;
+    errorMessage.value = '';
 
-    await loadWalletAndLogs();
+    await loadWalletData();
   }
 
-  /// جلب بيانات المحفظة وسجل القيود من الخادم
-  Future<void> loadWalletAndLogs() async {
+  /// جلب بيانات المحفظة وسجل القيود دفعة واحدة
+  Future<void> loadWalletData({bool isRefresh = false}) async {
     if (currentNetworkId == null || currentPosId == null) return;
 
-    isLoading.value = true;
-    errorMessage.value = null;
+    if (!isRefresh) isLoading.value = true;
+    errorMessage.value = '';
 
     try {
-      final wallet = await _getPosWalletUseCase(
-        networkId: currentNetworkId!,
-        posId: currentPosId!,
-      );
-      posWallet.value = wallet;
+      final results = await Future.wait([
+        getPosWalletUseCase(
+          networkId: currentNetworkId!,
+          posId: currentPosId!,
+        ),
+        getPosWalletLogsUseCase(
+          networkId: currentNetworkId!,
+          posId: currentPosId!,
+        ),
+      ]);
 
-      final logsList = await _getPosWalletLogsUseCase(
-        networkId: currentNetworkId!,
-        posId: currentPosId!,
-      );
-      logs.assignAll(logsList);
+      posWallet.value = results[0] as PosWalletEntity;
+      logs.assignAll(results[1] as List<PosWalletLogEntity>);
     } catch (e) {
-      errorMessage.value = e is AppException ? e.message : 'تعذر تحميل بيانات المحفظة';
+      errorMessage.value = AppException.sanitizeMessage(e);
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'خطأ في التحديث',
+          message: errorMessage.value,
+          type: SnackType.error,
+        );
+      }
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// تبديل التبويب بين الكشف والتحويل
+  void changeTab(int index) {
+    selectedTab.value = index;
+  }
+
+  /// تبديل اتجاه التحويل
+  void changeTransferDirection(int direction) {
+    transferDirection.value = direction;
   }
 
   /// تنفيذ عملية التحويل المالي المشترك عبر الخادم
@@ -105,21 +127,27 @@ class PosWalletSheetController extends GetxController {
 
     if (currentNetworkId == null || currentPosId == null) return;
 
-    isTransferring.value = true;
+    isSubmittingAction.value = true;
+    final isFeed = transferDirection.value == 0;
 
     try {
+      await CustomAnimationOverlay.showLoading(
+        message: isFeed
+            ? 'جارٍ تحويل وتغذية الرصيد إلى نقطة البيع...'
+            : 'جارٍ توريد واسترجاع الرصيد إلى الشبكة...',
+      );
+
       final statement = statementController.text.trim();
-      final isFeed = transferDirection.value == 0;
 
       if (isFeed) {
-        await _transferPosWalletBalanceUseCase.transferFromNetwork(
+        await transferPosWalletBalanceUseCase.transferFromNetwork(
           networkId: currentNetworkId!,
           posId: currentPosId!,
           amount: amount,
           statement: statement.isNotEmpty ? statement : null,
         );
       } else {
-        await _transferPosWalletBalanceUseCase.transferToNetwork(
+        await transferPosWalletBalanceUseCase.transferToNetwork(
           networkId: currentNetworkId!,
           posId: currentPosId!,
           amount: amount,
@@ -127,28 +155,29 @@ class PosWalletSheetController extends GetxController {
         );
       }
 
-      CustomSnackbar.show(
-        title: 'تم التحويل بنجاح',
+      await loadWalletData(isRefresh: true);
+
+      await CustomAnimationOverlay.showSuccess(
         message: isFeed
             ? 'تم تحويل وتغذية الرصيد إلى نقطة البيع وتسجيل القيود.'
             : 'تم توريد واسترجاع الرصيد إلى الشبكة بنجاح.',
-        type: SnackType.success,
       );
 
       amountController.clear();
       statementController.clear();
-      selectedTab.value = 0; // Return to ledger tab
-
-      // Refresh wallet and logs directly from server
-      await loadWalletAndLogs();
+      selectedTab.value = 0;
     } catch (e) {
+      await CustomAnimationOverlay.hide();
       CustomSnackbar.show(
-        title: 'فشل التحويل',
-        message: e is AppException ? e.message : 'تعذر تنفيذ عملية التحويل المالي',
+        title: 'تعذر تنفيذ التحويل',
+        message: AppException.sanitizeMessage(e),
         type: SnackType.error,
       );
     } finally {
-      isTransferring.value = false;
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 }

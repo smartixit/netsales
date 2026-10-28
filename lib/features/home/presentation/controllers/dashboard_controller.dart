@@ -1,11 +1,14 @@
 import 'dart:developer';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/home/domain/entities/dashboard_overview_entity.dart';
 import 'package:netsales/features/home/domain/usecases/get_dashboard_overview_use_case.dart';
+import 'package:netsales/features/operations/domain/entities/sales_trend_point_entity.dart';
+import 'package:netsales/features/operations/domain/usecases/get_sales_trend_use_case.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 
 /// ============================================================================
@@ -14,11 +17,13 @@ import 'package:netsales/features/home/presentation/controllers/home_layout_cont
 /// يدير حالة العرض، استقبال مدخلات المستخدم، استدعاء حالة الاستخدام حصراً،
 /// ومعالجة أخطاء الواجهة والتحميل وحالة الفراغ وفق معايير Clean Architecture.
 class DashboardController extends GetxController {
-  final GetDashboardOverviewUseCase _getDashboardOverviewUseCase;
+  final GetDashboardOverviewUseCase getDashboardOverviewUseCase;
+  final GetSalesTrendUseCase getSalesTrendUseCase;
 
   DashboardController({
-    required GetDashboardOverviewUseCase getDashboardOverviewUseCase,
-  }) : _getDashboardOverviewUseCase = getDashboardOverviewUseCase;
+    required this.getDashboardOverviewUseCase,
+    required this.getSalesTrendUseCase,
+  });
 
   // ── الحالات التفاعلية المراقبة (Observable States) ──
   final RxBool isLoading = true.obs;
@@ -26,6 +31,10 @@ class DashboardController extends GetxController {
   final RxString errorMessage = ''.obs;
   final Rxn<DashboardOverviewEntity> overview = Rxn<DashboardOverviewEntity>();
   final RxString selectedPeriod = 'today'.obs;
+
+  /// سلسلة مبيعات حقيقية (من الخادم) — display-only.
+  final RxList<SalesTrendPointEntity> trendPoints =
+      <SalesTrendPointEntity>[].obs;
 
   /// مؤشر بطاقة الشبكة المحددة في لوحة القيادة المستقلة
   final RxInt selectedNetworkIndex = 0.obs;
@@ -95,7 +104,7 @@ class DashboardController extends GetxController {
     final targetNetworkId = networkId ?? selectedNetworkId.value;
 
     try {
-      final result = await _getDashboardOverviewUseCase(
+      final result = await getDashboardOverviewUseCase(
         period: selectedPeriod.value,
         networkId: targetNetworkId,
         refresh: isRefresh,
@@ -114,10 +123,17 @@ class DashboardController extends GetxController {
       if (selectedNetworkId.value == null && result.context.networkId != null) {
         selectedNetworkId.value = result.context.networkId;
       }
-    } catch (e) {
-      log(e.toString());
+    } catch (error) {
+      final cleanMessage = AppException.sanitizeMessage(error);
       if (overview.value == null) {
-        errorMessage.value = AppException.sanitizeMessage(e);
+        errorMessage.value = cleanMessage;
+      }
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'خطأ في التحديث',
+          message: cleanMessage,
+          type: SnackType.error,
+        );
       }
     } finally {
       isLoading.value = false;
@@ -127,6 +143,21 @@ class DashboardController extends GetxController {
   }
 
   /// تبديل الفترة الزمنية وإعادة الجلب التلقائي بهدوء
+  /// جلب سلسلة مبيعات حقيقية (من الخادم) للرسم البياني.
+  /// نمط موحد: try/catch مع AppException.sanitizeMessage (display-only، غير حرج).
+  Future<void> loadTrend({String period = 'daily'}) async {
+    try {
+      final result = await _getSalesTrendUseCase(
+        period: period,
+      );
+      trendPoints.assignAll(result);
+    } catch (error) {
+      // سلسلة المبيعات غير حرجية (عرض فقط) — لا نُعطل الواجهة.
+      // نظّف رسالة الخطأ وفق الميثاق (AppException.sanitizeMessage) دون إظهار Snackbar.
+      AppException.sanitizeMessage(error);
+    }
+  }
+
   void changePeriod(String period) {
     if (selectedPeriod.value == period) return;
     selectedPeriod.value = period;

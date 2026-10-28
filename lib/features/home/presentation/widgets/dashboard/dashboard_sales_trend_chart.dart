@@ -108,12 +108,12 @@ class DashboardSalesTrendChart extends StatelessWidget {
       final periodKey = controller.selectedPeriod.value;
 
       final isPositiveGrowth = growth >= 0;
-      final points = _resolveTrendPoints(
-        period: periodKey,
-        totalAmount: currentAmount,
-        cashAmount: cashAmount,
-        creditAmount: creditAmount,
-      );
+      // Real time-series from backend (no fabricated data).
+      final points = controller.trendPoints.isEmpty
+          ? const <_SalesTrendDataPoint>[]
+          : controller.trendPoints
+              .map((p) => _SalesTrendDataPoint(p.period, p.total))
+              .toList();
 
       final formattedTotal = isMasked
           ? '••••••'

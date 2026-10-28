@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
@@ -18,6 +20,8 @@ import 'package:netsales/features/more/domain/usecases/get_user_sessions_use_cas
 import 'package:netsales/features/more/domain/usecases/logout_use_case.dart';
 import 'package:netsales/features/more/domain/usecases/terminate_session_use_case.dart';
 import 'package:netsales/features/more/domain/usecases/toggle_bank_account_status_use_case.dart';
+import 'package:netsales/features/partners/domain/entities/network_entity.dart';
+import 'package:netsales/features/partners/domain/usecases/get_networks_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -26,51 +30,59 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 /// متحكم قطاع المزيد والمركز المالي (MoreController)
 /// ============================================================================
 /// يدير حالة شاشة المزيد، ملخص المحفظة، بيانات المستخدم، الحسابات المصرفية،
-/// النفقات التشغيلية، الجلسات المصرح بها، وإجراء تسجيل الخروج الآمن.
+/// النفقات التشغيلية، الجلسات المصرح بها، وإجراء تسجيل الخروج الآمن
+/// مصاغ وفق النمط المعماري القياسي الموحد المعتمد في OperationsController.
 class MoreController extends GetxController {
-  final GetMoreOverviewUseCase _getMoreOverviewUseCase;
-  final LogoutUseCase _logoutUseCase;
-  final GetBankAccountsUseCase _getBankAccountsUseCase;
-  final ToggleBankAccountStatusUseCase _toggleBankAccountStatusUseCase;
-  final GetExpensesUseCase _getExpensesUseCase;
-  final CreateExpenseUseCase _createExpenseUseCase;
-  final GetUserSessionsUseCase _getUserSessionsUseCase;
-  final TerminateSessionUseCase _terminateSessionUseCase;
+  final GetMoreOverviewUseCase getMoreOverviewUseCase;
+  final LogoutUseCase logoutUseCase;
+  final GetBankAccountsUseCase getBankAccountsUseCase;
+  final ToggleBankAccountStatusUseCase toggleBankAccountStatusUseCase;
+  final GetExpensesUseCase getExpensesUseCase;
+  final CreateExpenseUseCase createExpenseUseCase;
+  final GetUserSessionsUseCase getUserSessionsUseCase;
+  final TerminateSessionUseCase terminateSessionUseCase;
+  final GetNetworksUseCase getNetworksUseCase;
 
   MoreController({
-    required GetMoreOverviewUseCase getMoreOverviewUseCase,
-    required LogoutUseCase logoutUseCase,
-    required GetBankAccountsUseCase getBankAccountsUseCase,
-    required ToggleBankAccountStatusUseCase toggleBankAccountStatusUseCase,
-    required GetExpensesUseCase getExpensesUseCase,
-    required CreateExpenseUseCase createExpenseUseCase,
-    required GetUserSessionsUseCase getUserSessionsUseCase,
-    required TerminateSessionUseCase terminateSessionUseCase,
-  })  : _getMoreOverviewUseCase = getMoreOverviewUseCase,
-        _logoutUseCase = logoutUseCase,
-        _getBankAccountsUseCase = getBankAccountsUseCase,
-        _toggleBankAccountStatusUseCase = toggleBankAccountStatusUseCase,
-        _getExpensesUseCase = getExpensesUseCase,
-        _createExpenseUseCase = createExpenseUseCase,
-        _getUserSessionsUseCase = getUserSessionsUseCase,
-        _terminateSessionUseCase = terminateSessionUseCase;
+    required this.getMoreOverviewUseCase,
+    required this.logoutUseCase,
+    required this.getBankAccountsUseCase,
+    required this.toggleBankAccountStatusUseCase,
+    required this.getExpensesUseCase,
+    required this.createExpenseUseCase,
+    required this.getUserSessionsUseCase,
+    required this.terminateSessionUseCase,
+    required this.getNetworksUseCase,
+  });
 
+  /// الحالات المراقبة للنظرة التجميعية
   final Rxn<MoreOverviewEntity> overview = Rxn<MoreOverviewEntity>();
   final RxBool isLoading = false.obs;
+  final RxString overviewErrorMessage = ''.obs;
   final RxBool isBalanceHidden = false.obs;
 
-  // الحسابات المصرفية
+  /// الحسابات المصرفية
   final RxList<BankAccountEntity> bankAccounts = <BankAccountEntity>[].obs;
   final RxBool isLoadingBankAccounts = false.obs;
+  final RxString bankAccountsErrorMessage = ''.obs;
 
-  // المصروفات التشغيلية
+  /// المصروفات التشغيلية
   final RxList<ExpenseEntity> expenses = <ExpenseEntity>[].obs;
   final RxBool isLoadingExpenses = false.obs;
-  final RxBool isCreatingExpense = false.obs;
+  final RxString expensesErrorMessage = ''.obs;
 
-  // الجلسات والأجهزة المصرح بها
+  /// شبكات المنشأة المتاحة لقيد النفقات واختيار الشبكة المحددة
+  final RxList<NetworkEntity> availableNetworks = <NetworkEntity>[].obs;
+  final RxBool isLoadingNetworks = false.obs;
+  final RxnInt selectedExpenseNetworkId = RxnInt();
+
+  /// الجلسات والأجهزة المصرح بها
   final RxList<UserSessionEntity> userSessions = <UserSessionEntity>[].obs;
   final RxBool isLoadingSessions = false.obs;
+  final RxString sessionsErrorMessage = ''.obs;
+
+  /// حالة تنفيذ إجراء متزامن
+  final RxBool isSubmittingAction = false.obs;
 
   void toggleBalanceVisibility() {
     isBalanceHidden.value = !isBalanceHidden.value;
@@ -103,27 +115,42 @@ class MoreController extends GetxController {
   /// جلب وتحديث النظرة المالية والتشغيلية المجمعة
   Future<void> loadOverview({bool isRefresh = false}) async {
     if (!isRefresh) isLoading.value = true;
+    overviewErrorMessage.value = '';
+
     try {
-      final result = await _getMoreOverviewUseCase();
+      final result = await getMoreOverviewUseCase();
       overview.value = result;
-    } catch (_) {
-      // إخفاق صامت والاعتماد على الحالة الافتراضية
+    } catch (e) {
+      overviewErrorMessage.value = AppException.sanitizeMessage(e);
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'خطأ في التحديث',
+          message: overviewErrorMessage.value,
+          type: SnackType.error,
+        );
+      }
     } finally {
       isLoading.value = false;
     }
   }
 
   /// جلب الحسابات المصرفية المعتمدة للمنشأة
-  Future<void> loadBankAccounts() async {
+  Future<void> loadBankAccounts({bool isRefresh = false}) async {
     isLoadingBankAccounts.value = true;
+    bankAccountsErrorMessage.value = '';
+
     try {
-      final result = await _getBankAccountsUseCase();
+      final result = await getBankAccountsUseCase();
       bankAccounts.assignAll(result);
     } catch (e) {
-      CustomSnackbar.showError(
-        title: 'الحسابات المصرفية',
-        message: 'تعذر جلب قائمة الحسابات المصرفية: ${e.toString()}',
-      );
+      bankAccountsErrorMessage.value = AppException.sanitizeMessage(e);
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'خطأ في التحديث',
+          message: bankAccountsErrorMessage.value,
+          type: SnackType.error,
+        );
+      }
     } finally {
       isLoadingBankAccounts.value = false;
     }
@@ -131,35 +158,64 @@ class MoreController extends GetxController {
 
   /// تفعيل أو تعطيل حساب مصرفي
   Future<void> toggleBankAccountStatus(int bankAccountId) async {
+    isSubmittingAction.value = true;
     try {
-      final updated = await _toggleBankAccountStatusUseCase(bankAccountId);
-      final index = bankAccounts.indexWhere((a) => a.id == bankAccountId);
-      if (index != -1) {
-        bankAccounts[index] = updated;
+      await CustomAnimationOverlay.showLoading(message: 'جارٍ تحديث حالة الحساب المصرفي...');
+      final success = await toggleBankAccountStatusUseCase(bankAccountId);
+      if (success) {
+        await loadBankAccounts(isRefresh: true);
+        await CustomAnimationOverlay.showSuccess(
+          message: 'تم تحديث حالة الحساب المصرفي بنجاح.',
+        );
       }
-      CustomSnackbar.showSuccess(
-        title: 'الحسابات المصرفية',
-        message: 'تم تحديث حالة الحساب المصرفي بنجاح',
-      );
     } catch (e) {
-      CustomSnackbar.showError(
-        title: 'الحساب المصرفي',
-        message: 'فشل تغيير حالة الحساب: ${e.toString()}',
+      await CustomAnimationOverlay.hide();
+      CustomSnackbar.show(
+        title: 'تعذر تعديل الحساب',
+        message: AppException.sanitizeMessage(e),
+        type: SnackType.error,
       );
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  /// جلب شبكات المنشأة المتاحة لاختيار الشبكة بدقة عند قيد المصروف
+  Future<void> loadNetworksForExpenses() async {
+    isLoadingNetworks.value = true;
+    try {
+      final result = await getNetworksUseCase();
+      availableNetworks.assignAll(result);
+      if (selectedExpenseNetworkId.value == null && availableNetworks.isNotEmpty) {
+        selectedExpenseNetworkId.value = availableNetworks.first.networkId;
+      }
+    } catch (_) {
+      // إخفاق صامت والاعتماد على الاختيار اليدوي
+    } finally {
+      isLoadingNetworks.value = false;
     }
   }
 
   /// جلب المصروفات التشغيلية
-  Future<void> loadExpenses() async {
+  Future<void> loadExpenses({bool isRefresh = false}) async {
     isLoadingExpenses.value = true;
+    expensesErrorMessage.value = '';
+
     try {
-      final result = await _getExpensesUseCase();
+      final result = await getExpensesUseCase();
       expenses.assignAll(result);
     } catch (e) {
-      CustomSnackbar.showError(
-        title: 'المصروفات التشغيلية',
-        message: 'تعذر جلب سجل النفقات: ${e.toString()}',
-      );
+      expensesErrorMessage.value = AppException.sanitizeMessage(e);
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'خطأ في التحديث',
+          message: expensesErrorMessage.value,
+          type: SnackType.error,
+        );
+      }
     } finally {
       isLoadingExpenses.value = false;
     }
@@ -167,48 +223,63 @@ class MoreController extends GetxController {
 
   /// قيد وتسجيل مصروف تشغيلي جديد
   Future<bool> createExpense({
-    required String title,
-    required double amount,
-    required String category,
+    required int networkId,
+    required double totalAmount,
+    String? expenseDate,
     String? notes,
   }) async {
-    isCreatingExpense.value = true;
+    isSubmittingAction.value = true;
     try {
-      final newExpense = await _createExpenseUseCase(
-        title: title,
-        amount: amount,
-        category: category,
+      await CustomAnimationOverlay.showLoading(message: 'جارٍ قيد المصروف التشغيلي...');
+      final success = await createExpenseUseCase(
+        networkId: networkId,
+        totalAmount: totalAmount,
+        expenseDate: expenseDate,
         notes: notes,
       );
-      expenses.insert(0, newExpense);
-      loadOverview(isRefresh: true);
-      CustomSnackbar.showSuccess(
-        title: 'المصروفات التشغيلية',
-        message: 'تم تسجيل المصروف التشغيلي بنجاح',
-      );
-      return true;
+      if (success) {
+        await loadExpenses(isRefresh: true);
+        loadOverview(isRefresh: true);
+        await CustomAnimationOverlay.showSuccess(
+          message: 'تم تسجيل المصروف التشغيلي بنجاح.',
+        );
+        return true;
+      }
+      return false;
     } catch (e) {
-      CustomSnackbar.showError(
-        title: 'قيد المصروف',
-        message: 'تعذر حفظ المصروف: ${e.toString()}',
+      await CustomAnimationOverlay.hide();
+      CustomSnackbar.show(
+        title: 'تعذر قيد المصروف',
+        message: AppException.sanitizeMessage(e),
+        type: SnackType.error,
       );
       return false;
     } finally {
-      isCreatingExpense.value = false;
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 
   /// جلب قائمة الجلسات والأجهزة المصرح بها
-  Future<void> loadUserSessions() async {
+  Future<void> loadUserSessions({bool isRefresh = false}) async {
     isLoadingSessions.value = true;
+    sessionsErrorMessage.value = '';
+
     try {
-      final result = await _getUserSessionsUseCase();
+      final uid = currentUser?.userId ?? 0;
+      final result = await getUserSessionsUseCase(uid);
       userSessions.assignAll(result);
     } catch (e) {
-      CustomSnackbar.showError(
-        title: 'إدارة الجلسات',
-        message: 'تعذر استعراض الجلسات النشطة: ${e.toString()}',
-      );
+      sessionsErrorMessage.value = AppException.sanitizeMessage(e);
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'خطأ في التحديث',
+          message: sessionsErrorMessage.value,
+          type: SnackType.error,
+        );
+      }
     } finally {
       isLoadingSessions.value = false;
     }
@@ -224,24 +295,29 @@ class MoreController extends GetxController {
     );
 
     if (confirmed == true) {
-      CustomAnimationOverlay.showLoading(message: 'جارٍ إنهاء الجلسة...');
+      isSubmittingAction.value = true;
       try {
-        final success = await _terminateSessionUseCase(sessionId);
-        await CustomAnimationOverlay.hide();
+        await CustomAnimationOverlay.showLoading(message: 'جارٍ إنهاء الجلسة...');
+        final success = await terminateSessionUseCase(sessionId);
         if (success) {
           userSessions.removeWhere((s) => s.sessionId == sessionId);
           loadOverview(isRefresh: true);
-          CustomSnackbar.showSuccess(
-            title: 'إدارة الجلسات',
-            message: 'تم إلغاء صلاحية الجلسة وإخراج الجهاز بنجاح',
+          await CustomAnimationOverlay.showSuccess(
+            message: 'تم إلغاء صلاحية الجلسة وإخراج الجهاز بنجاح.',
           );
         }
       } catch (e) {
         await CustomAnimationOverlay.hide();
-        CustomSnackbar.showError(
-          title: 'إنهاء الجلسة',
-          message: 'تعذر إنهاء الجلسة: ${e.toString()}',
+        CustomSnackbar.show(
+          title: 'تعذر إنهاء الجلسة',
+          message: AppException.sanitizeMessage(e),
+          type: SnackType.error,
         );
+      } finally {
+        isSubmittingAction.value = false;
+        if (CustomAnimationOverlay.isShowing) {
+          await CustomAnimationOverlay.hide();
+        }
       }
     }
   }
@@ -258,7 +334,7 @@ class MoreController extends GetxController {
     if (confirmed == true) {
       CustomAnimationOverlay.showLoading(message: 'جارٍ إنهاء الجلسة بأمان...');
       try {
-        await _logoutUseCase();
+        await logoutUseCase();
         await CustomAnimationOverlay.showSuccess(
           message: 'تم تسجيل الخروج بنجاح. نراك قريباً!',
         );

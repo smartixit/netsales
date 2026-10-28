@@ -4,6 +4,7 @@ import 'package:netsales/features/home/data/datasources/dashboard_remote_data_so
 import 'package:netsales/features/home/data/repositories/dashboard_repository_impl.dart';
 import 'package:netsales/features/home/domain/repositories/dashboard_repository.dart';
 import 'package:netsales/features/home/domain/usecases/get_dashboard_overview_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_sales_trend_use_case.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/operations/presentation/bindings/operations_binding.dart';
@@ -41,6 +42,7 @@ class HomeLayoutBinding extends Bindings {
     Get.lazyPut<DashboardController>(
       () => DashboardController(
         getDashboardOverviewUseCase: Get.find<GetDashboardOverviewUseCase>(),
+        getSalesTrendUseCase: Get.find<GetSalesTrendUseCase>(),
       ),
       fenix: true,
     );

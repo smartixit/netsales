@@ -8,6 +8,7 @@ import 'package:netsales/features/operations/domain/usecases/cancel_voucher_requ
 import 'package:netsales/features/operations/domain/usecases/get_sale_invoice_details_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_sale_invoices_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_voucher_request_details_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/get_sales_trend_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_voucher_requests_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/create_sale_invoice_use_case.dart';
@@ -63,6 +64,10 @@ class OperationsBinding extends Bindings {
     );
     Get.lazyPut<GetVoucherRequestDetailsUseCase>(
       () => GetVoucherRequestDetailsUseCase(Get.find<OperationsRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<GetSalesTrendUseCase>(
+      () => GetSalesTrendUseCase(Get.find<OperationsRepository>()),
       fenix: true,
     );
     Get.lazyPut<CancelVoucherRequestUseCase>(

@@ -1,5 +1,6 @@
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/operations/data/models/sale_invoice_model.dart';
+import 'package:netsales/features/operations/data/models/sales_trend_point_model.dart';
 import 'package:netsales/features/operations/data/models/voucher_request_model.dart';
 
 /// ============================================================================
@@ -16,6 +17,14 @@ abstract class OperationsRemoteDataSource {
   });
 
   Future<ApiResponse<SaleInvoiceModel>> getSaleInvoiceDetails(int id);
+
+  Future<ApiResponse<List<SalesTrendPointModel>>> getSalesTrend({
+    String period = 'daily',
+    int? networkId,
+    int? posId,
+    String? fromDate,
+    String? toDate,
+  });
 
   Future<ApiResponse<List<VoucherRequestModel>>> getVoucherRequests({
     int? networkId,

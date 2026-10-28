@@ -90,7 +90,7 @@ class PosWalletManagementSheet extends StatelessWidget {
         );
       }
 
-      if (errorMessage != null) {
+      if (errorMessage.isNotEmpty) {
         return Padding(
           padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 16.w),
           child: Column(
@@ -108,7 +108,7 @@ class PosWalletManagementSheet extends StatelessWidget {
               CustomButton.outline(
                 text: 'إعادة المحاولة',
                 icon: Icons.refresh_rounded,
-                onPressed: controller.loadWalletAndLogs,
+                onPressed: () => controller.loadWalletData(),
               ),
             ],
           ),
@@ -597,7 +597,7 @@ class _TransferSection extends StatelessWidget {
 
     return Obx(() {
       final direction = controller.transferDirection.value;
-      final isTransferring = controller.isTransferring.value;
+      final isSubmitting = controller.isSubmittingAction.value;
       final isFeed = direction == 0;
 
       return Column(
@@ -695,8 +695,8 @@ class _TransferSection extends StatelessWidget {
             icon: isFeed
                 ? Icons.check_circle_outline_rounded
                 : Icons.download_done_rounded,
-            loading: isTransferring,
-            onPressed: isTransferring ? null : controller.executeTransfer,
+            loading: isSubmitting,
+            onPressed: isSubmitting ? null : controller.executeTransfer,
           ),
         ],
       );

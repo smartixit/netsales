@@ -225,6 +225,7 @@ abstract final class ApiConstants {
   // ==========================================================================
   static const String saleInvoices = '/sale-invoices';
   static const String saleInvoicesTrashed = '/sale-invoices/trashed';
+  static const String saleInvoicesTrend = '/sale-invoices/trend';
   static String saleInvoice(int id) => '/sale-invoices/$id';
   static String saleInvoiceRestore(int id) => '/sale-invoices/$id/restore';
   static String saleInvoiceForceDelete(int id) => '/sale-invoices/$id/force';

@@ -3,6 +3,7 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/operations/data/datasources/operations_remote_data_source.dart';
 import 'package:netsales/features/operations/data/models/sale_invoice_model.dart';
+import 'package:netsales/features/operations/data/models/sales_trend_point_model.dart';
 import 'package:netsales/features/operations/data/models/voucher_request_model.dart';
 
 /// ============================================================================
@@ -42,6 +43,30 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
     return ApiService.instance.get<SaleInvoiceModel>(
       ApiConstants.saleInvoice(id),
       fromJson: (json) => SaleInvoiceModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Future<ApiResponse<List<SalesTrendPointModel>>> getSalesTrend({
+    String period = 'daily',
+    int? networkId,
+    int? posId,
+    String? fromDate,
+    String? toDate,
+  }) {
+    final queryParameters = <String, dynamic>{
+      'period': period,
+      if (networkId != null) 'network_id': networkId,
+      if (posId != null) 'pos_id': posId,
+      if (fromDate != null && fromDate.isNotEmpty) 'from_date': fromDate,
+      if (toDate != null && toDate.isNotEmpty) 'to_date': toDate,
+    };
+
+    return ApiService.instance.getList<SalesTrendPointModel>(
+      ApiConstants.saleInvoicesTrend,
+      queryParameters: queryParameters,
+      fromJson: (json) =>
+          SalesTrendPointModel.fromJson(json as Map<String, dynamic>),
     );
   }
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -26,7 +27,7 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 /// متحكم مركز باقات الكروت والخصومات المخصصة (PackagesController)
 /// ============================================================================
 /// يدير حالة التبديل بين الباقات والخصومات، مؤشرات الأداء الحيوية، والعمليات
-/// الفورية وفق المبدأ الحاكم (أقل احتكاك ممكن وتصفير الحسابات الذهنية).
+/// الفورية وفق النمط المعماري القياسي الموحد المعتمد في OperationsController.
 class PackagesController extends GetxController {
   final GetVoucherPackagesUseCase getVoucherPackagesUseCase;
   final GetVoucherPackageDetailsUseCase getVoucherPackageDetailsUseCase;
@@ -77,17 +78,21 @@ class PackagesController extends GetxController {
   final RxBool isLoadingDiscounts = false.obs;
   final RxString discountsError = ''.obs;
 
-  // ── نقاط البيع والوكلاء المتاحون (لاختيار الوكيل بدون إدخال أرقام معرفات يدوية) ──
+  // ── نقاط البيع والوكلاء المتاحون ──
   final RxList<PosEntity> posList = <PosEntity>[].obs;
   final RxBool isLoadingPosList = false.obs;
 
-  // ── شبكات المزود المتاحة (للاختيار والتصفية الذكية متعددة الكيانات) ──
+  // ── شبكات المزود المتاحة ──
   final RxList<NetworkEntity> networks = <NetworkEntity>[].obs;
   final RxBool isLoadingNetworks = false.obs;
+
+  // ── حالة تنفيذ الإجراءات ──
+  final RxBool isSubmittingAction = false.obs;
 
   // ── البحث والتصفية ──
   final TextEditingController searchController = TextEditingController();
   final RxString selectedFilter = 'ALL'.obs; // ALL, ACTIVE, INACTIVE
+  Timer? _searchDebounceTimer;
 
   @override
   void onInit() {
@@ -98,20 +103,9 @@ class PackagesController extends GetxController {
     loadPosList();
   }
 
-  Future<void> loadNetworks() async {
-    isLoadingNetworks.value = true;
-    try {
-      final result = await getNetworksUseCase(status: 'ACTIVE');
-      networks.assignAll(result);
-    } catch (_) {
-      // Graceful
-    } finally {
-      isLoadingNetworks.value = false;
-    }
-  }
-
   @override
   void onClose() {
+    _searchDebounceTimer?.cancel();
     searchController.dispose();
     super.onClose();
   }
@@ -120,6 +114,39 @@ class PackagesController extends GetxController {
   void changeSegment(int index) {
     if (activeSegmentIndex.value != index) {
       activeSegmentIndex.value = index;
+    }
+  }
+
+  /// تنفيذ البحث الحي بتهدئة تلقائية
+  void onSearchChanged(String _) {
+    _searchDebounceTimer?.cancel();
+    _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+      if (activeSegmentIndex.value == 0) {
+        loadPackages();
+      } else {
+        loadDiscounts();
+      }
+    });
+  }
+
+  /// تنفيذ البحث عند التقديم المباشر
+  void onSearchSubmitted(String _) {
+    _searchDebounceTimer?.cancel();
+    if (activeSegmentIndex.value == 0) {
+      loadPackages();
+    } else {
+      loadDiscounts();
+    }
+  }
+
+  /// مسح نص البحث
+  void clearSearch() {
+    _searchDebounceTimer?.cancel();
+    searchController.clear();
+    if (activeSegmentIndex.value == 0) {
+      loadPackages();
+    } else {
+      loadDiscounts();
     }
   }
 
@@ -182,8 +209,20 @@ class PackagesController extends GetxController {
   // عمليات باقات الكروت (Packages Actions)
   // ==========================================================================
 
+  Future<void> loadNetworks() async {
+    isLoadingNetworks.value = true;
+    try {
+      final result = await getNetworksUseCase(status: 'ACTIVE');
+      networks.assignAll(result);
+    } catch (_) {
+      // إخفاق صامت والاعتماد على الخيارات المتاحة
+    } finally {
+      isLoadingNetworks.value = false;
+    }
+  }
+
   Future<void> loadPackages({bool isRefresh = false}) async {
-    if (!isRefresh) isLoadingPackages.value = true;
+    isLoadingPackages.value = true;
     packagesError.value = '';
 
     try {
@@ -237,8 +276,9 @@ class PackagesController extends GetxController {
 
   /// حذف باقة كروت
   Future<void> deletePackage(int packageId) async {
-    await CustomAnimationOverlay.showLoading();
+    isSubmittingAction.value = true;
     try {
+      await CustomAnimationOverlay.showLoading(message: 'جارٍ حذف باقة الكروت...');
       await deleteVoucherPackageUseCase(packageId);
       packages.removeWhere((pkg) => pkg.packageId == packageId);
       await CustomAnimationOverlay.showSuccess(
@@ -251,10 +291,15 @@ class PackagesController extends GetxController {
         message: AppException.sanitizeMessage(e),
         type: SnackType.error,
       );
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 
-  /// إنشاء باقة كروت جديدة
+  /// إنشاء أو تعديل باقة كروت
   Future<bool> savePackage({
     int? packageId,
     required int networkId,
@@ -269,8 +314,14 @@ class PackagesController extends GetxController {
     required double packageDefaultCreditDiscount,
     bool? status,
   }) async {
-    await CustomAnimationOverlay.showLoading();
+    isSubmittingAction.value = true;
     try {
+      await CustomAnimationOverlay.showLoading(
+        message: packageId != null && packageId > 0
+            ? 'جارٍ حفظ تعديلات الباقة...'
+            : 'جارٍ إنشاء باقة الكروت...',
+      );
+
       if (packageId != null && packageId > 0) {
         final updated = await updateVoucherPackageUseCase(
           packageId: packageId,
@@ -321,6 +372,11 @@ class PackagesController extends GetxController {
         type: SnackType.error,
       );
       return false;
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 
@@ -329,7 +385,7 @@ class PackagesController extends GetxController {
   // ==========================================================================
 
   Future<void> loadDiscounts({bool isRefresh = false}) async {
-    if (!isRefresh) isLoadingDiscounts.value = true;
+    isLoadingDiscounts.value = true;
     discountsError.value = '';
 
     try {
@@ -353,14 +409,14 @@ class PackagesController extends GetxController {
     }
   }
 
-  /// جلب قائمة نقاط البيع والوكلاء النشطين للاختيار الذكي
+  /// جلب قائمة نقاط البيع والوكلاء النشطين
   Future<void> loadPosList() async {
     isLoadingPosList.value = true;
     try {
       final result = await getPosListUseCase(status: 'ACTIVE');
       posList.assignAll(result);
     } catch (_) {
-      // Ignored or logged
+      // إخفاق صامت
     } finally {
       isLoadingPosList.value = false;
     }
@@ -397,8 +453,9 @@ class PackagesController extends GetxController {
 
   /// حذف خصم مخصص
   Future<void> deleteDiscount(int discountId) async {
-    await CustomAnimationOverlay.showLoading();
+    isSubmittingAction.value = true;
     try {
+      await CustomAnimationOverlay.showLoading(message: 'جارٍ حذف الخصم المخصص...');
       await deleteVoucherPackageDiscountUseCase(discountId);
       discounts.removeWhere((d) => d.discountId == discountId);
       await CustomAnimationOverlay.showSuccess(
@@ -411,6 +468,11 @@ class PackagesController extends GetxController {
         message: AppException.sanitizeMessage(e),
         type: SnackType.error,
       );
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 
@@ -424,8 +486,14 @@ class PackagesController extends GetxController {
     required double discountCredit,
     bool? status,
   }) async {
-    await CustomAnimationOverlay.showLoading();
+    isSubmittingAction.value = true;
     try {
+      await CustomAnimationOverlay.showLoading(
+        message: discountId != null && discountId > 0
+            ? 'جارٍ تحديث الخصم المخصص...'
+            : 'جارٍ تسجيل الخصم المخصص...',
+      );
+
       if (discountId != null && discountId > 0) {
         final updated = await updateVoucherPackageDiscountUseCase(
           discountId: discountId,
@@ -464,11 +532,18 @@ class PackagesController extends GetxController {
         type: SnackType.error,
       );
       return false;
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 
   /// تحديث التصفية والبحث
   void updateFilter(String filter) {
-    selectedFilter.value = filter;
+    if (selectedFilter.value != filter) {
+      selectedFilter.value = filter;
+    }
   }
 }

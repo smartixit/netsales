@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
+import 'package:netsales/features/operations/domain/entities/sales_trend_point_entity.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/domain/repositories/operations_repository.dart';
 import 'package:netsales/features/operations/domain/usecases/approve_voucher_request_use_case.dart';
@@ -106,6 +107,11 @@ class FakeOperationsRepository implements OperationsRepository {
 
   @override
   Future<void> deleteVoucherRequest(int id) async {}
+
+  @override
+  Future<List<SalesTrendPointEntity>> getSalesTrend({String period = 'daily', int? networkId, int? posId, String? fromDate, String? toDate}) {
+    return Future.value([]);
+  }
 }
 
 void main() {
