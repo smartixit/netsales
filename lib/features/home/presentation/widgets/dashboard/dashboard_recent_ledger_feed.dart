@@ -8,6 +8,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/home/domain/entities/dashboard_overview_entity.dart';
 import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -30,18 +31,9 @@ class DashboardRecentLedgerFeed extends StatelessWidget {
 
   String? _formatActivityTime(String? rawDate) {
     if (rawDate == null || rawDate.isEmpty) return null;
-    try {
-      final parsed = DateTime.tryParse(rawDate);
-      if (parsed == null) return rawDate;
-      final local = parsed.toLocal();
-      final h = local.hour;
-      final m = local.minute.toString().padLeft(2, '0');
-      final period = h >= 12 ? 'م' : 'ص';
-      final displayHour = h > 12 ? h - 12 : (h == 0 ? 12 : h);
-      return '$displayHour:$m $period';
-    } catch (_) {
-      return null;
-    }
+    final parsed = DateFormatter.tryParse(rawDate);
+    if (parsed == null) return rawDate;
+    return DateFormatter.time(parsed.toLocal());
   }
 
   @override

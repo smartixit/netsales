@@ -141,7 +141,7 @@ class RequestItemsCard extends StatelessWidget {
                   SizedBox(
                     width: 85.w,
                     child: Text(
-                      'التقديري (ر.ي)',
+                      '(ر.ي)',
                       style: AppTypography.labelSmall.copyWith(
                         color: colors.onSurfaceVariant.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w800,
@@ -156,107 +156,21 @@ class RequestItemsCard extends StatelessWidget {
 
             AppSpacing.vXs,
 
-            ListView.separated(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: items.length,
-              separatorBuilder: (_, __) => Divider(
-                height: 12.h,
-                thickness: 0.6.h,
-                color: colors.outlineVariant.withValues(alpha: 0.2),
-              ),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                final unitPrice = AmountFormatter.formatValue(
-                  item.voucherPrice,
-                );
-                final lineTotal = AmountFormatter.formatValue(
-                  item.itemTotalAmount,
-                );
-
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 3.h),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // رقم البند
-                      Container(
-                        width: 22.r,
-                        height: 22.r,
-                        decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withValues(
-                            alpha: 0.5,
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${index + 1}',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 9.5.sp,
-                          ),
-                        ),
-                      ),
-                      AppSpacing.hSm,
-
-                      // اسم الباقة والكمية
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.packageName?.isNotEmpty == true
-                                  ? item.packageName!
-                                  : 'باقة كروت #${item.packageId}',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 12.sp,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            AppSpacing.vXxs,
-                            Text(
-                              '${item.voucherCount} كرت مطلوب × $unitPrice ر.ي',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.onSurfaceVariant.withValues(
-                                  alpha: 0.7,
-                                ),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 10.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      AppSpacing.hXs,
-
-                      // المبلغ التقديري بمحاذاة قياسية ثابتة (85.w)
-                      SizedBox(
-                        width: 85.w,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: AlignmentDirectional.centerEnd,
-                          child: Text(
-                            lineTotal,
-                            style: AppTypography.titleSmall.copyWith(
-                              color: colors.onSurface,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5.sp,
-                            ),
-                            textAlign: TextAlign.end,
-                          ),
-                        ),
-                      ),
-                    ],
+            Column(
+              children: [
+                for (int index = 0; index < items.length; index++) ...[
+                  if (index > 0)
+                    Divider(
+                      height: 12.h,
+                      thickness: 0.6.h,
+                      color: colors.outlineVariant.withValues(alpha: 0.2),
+                    ),
+                  _RequestItemRow(
+                    index: index,
+                    item: items[index],
                   ),
-                );
-              },
+                ],
+              ],
             ),
           ],
         ],
@@ -264,3 +178,100 @@ class RequestItemsCard extends StatelessWidget {
     );
   }
 }
+
+/// ودجت مستقل لبند كروت طلب التوريد
+class _RequestItemRow extends StatelessWidget {
+  final int index;
+  final VoucherRequestItemEntity item;
+
+  const _RequestItemRow({
+    required this.index,
+    required this.item,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final unitPrice = AmountFormatter.formatValue(item.voucherPrice);
+    final lineTotal = AmountFormatter.formatValue(item.itemTotalAmount);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 3.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // رقم البند
+          Container(
+            width: 22.r,
+            height: 22.r,
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              '${index + 1}',
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurfaceVariant,
+                fontWeight: FontWeight.w800,
+                fontSize: 9.5.sp,
+              ),
+            ),
+          ),
+          AppSpacing.hSm,
+
+          // اسم الباقة والكمية
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.packageName?.isNotEmpty == true
+                      ? item.packageName!
+                      : 'باقة كروت #${item.packageId}',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.sp,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                AppSpacing.vXxs,
+                Text(
+                  '${item.voucherCount} كرت مطلوب × $unitPrice ر.ي',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10.sp,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          AppSpacing.hXs,
+
+          // المبلغ بمحاذاة قياسية ثابتة (85.w)
+          SizedBox(
+            width: 85.w,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerEnd,
+              child: Text(
+                lineTotal,
+                style: AppTypography.titleSmall.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13.5.sp,
+                ),
+                textAlign: TextAlign.end,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

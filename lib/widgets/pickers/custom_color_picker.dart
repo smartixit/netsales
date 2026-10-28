@@ -92,11 +92,7 @@ class CustomColorPicker extends StatelessWidget {
     final confirmedHex = await CustomBottomSheet.show<String>(
       title: title,
       subtitle: 'اختر درجة اللون المناسبة أو استخدم عجلة الألوان الدقيقة',
-      leadingIcon: Icon(
-        Icons.palette_rounded,
-        color: context.colors.primary,
-        size: 22.r,
-      ),
+      leadingIcon: Icons.palette_rounded,
       child: StatefulBuilder(
         builder: (context, setModalState) {
           final colors = context.colors;

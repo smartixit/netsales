@@ -18,41 +18,22 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 /// يجسد فاتورة المبيعات كسند مالي سيادي فاخر (Sovereign Financial Bond)،
 /// يدعم التوسيع الأكورديوني المنسدل السلس (Accordion Inline Expand) لعرض تفاصيل
 /// الباقات المضمنة فوراً دون مغادرة السجل الرئيسي، مع تصميم تكيفي عالي الدقة.
-class SaleInvoiceLedgerTile extends StatefulWidget {
+class SaleInvoiceLedgerTile extends StatelessWidget {
   final SaleInvoiceEntity invoice;
   final VoidCallback onTap;
-  final bool? isExpanded;
+  final bool isExpanded;
   final VoidCallback? onToggleExpand;
 
   const SaleInvoiceLedgerTile({
     super.key,
     required this.invoice,
     required this.onTap,
-    this.isExpanded,
+    this.isExpanded = false,
     this.onToggleExpand,
   });
 
   @override
-  State<SaleInvoiceLedgerTile> createState() => _SaleInvoiceLedgerTileState();
-}
-
-class _SaleInvoiceLedgerTileState extends State<SaleInvoiceLedgerTile> {
-  bool _internalExpanded = false;
-  bool get _isExpanded => widget.isExpanded ?? _internalExpanded;
-
-  void _handleToggle() {
-    if (widget.onToggleExpand != null) {
-      widget.onToggleExpand!();
-    } else {
-      setState(() {
-        _internalExpanded = !_internalExpanded;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final invoice = widget.invoice;
     final colors = context.colors;
     final isCash = invoice.isCash;
     final isFullyPaid = invoice.isFullyPaid;
@@ -63,11 +44,7 @@ class _SaleInvoiceLedgerTileState extends State<SaleInvoiceLedgerTile> {
       invoice.remainingAmount,
     );
 
-    final dt = invoice.invoiceDate != null
-        ? DateTime.tryParse(invoice.invoiceDate!)
-        : (invoice.createdAt != null
-              ? DateTime.tryParse(invoice.createdAt!)
-              : null);
+    final dt = DateFormatter.tryParse(invoice.invoiceDate ?? invoice.createdAt ?? '');
     final dateStr = dt != null
         ? DateFormatter.dateTime(dt)
         : (invoice.invoiceDate ?? '');
@@ -93,7 +70,7 @@ class _SaleInvoiceLedgerTileState extends State<SaleInvoiceLedgerTile> {
     }
 
     return CustomInteractiveBounce(
-      onTap: widget.onTap,
+      onTap: onTap,
       child: Container(
         margin: EdgeInsets.only(bottom: 10.h),
         decoration: BoxDecoration(
@@ -330,7 +307,7 @@ class _SaleInvoiceLedgerTileState extends State<SaleInvoiceLedgerTile> {
                           children: [
                             if (hasMultiplePackages) ...[
                               CustomInteractiveBounce(
-                                onTap: _handleToggle,
+                                onTap: () => onToggleExpand?.call(),
                                 child: Container(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 8.w,
@@ -348,7 +325,7 @@ class _SaleInvoiceLedgerTileState extends State<SaleInvoiceLedgerTile> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        _isExpanded
+                                        isExpanded
                                             ? 'طي البنود'
                                             : 'عرض البنود',
                                         style: AppTypography.labelSmall
@@ -360,7 +337,7 @@ class _SaleInvoiceLedgerTileState extends State<SaleInvoiceLedgerTile> {
                                       ),
                                       AppSpacing.hXxs,
                                       Icon(
-                                        _isExpanded
+                                        isExpanded
                                             ? Icons.keyboard_arrow_up_rounded
                                             : Icons.keyboard_arrow_down_rounded,
                                         size: 13.r,
@@ -401,13 +378,13 @@ class _SaleInvoiceLedgerTileState extends State<SaleInvoiceLedgerTile> {
                         duration: AppMotion.normal,
                         curve: AppMotion.standard,
                         alignment: Alignment.topCenter,
-                        child: _isExpanded
+                        child: isExpanded
                             ? OperationsItemsAccordionDeck(
                                 items: invoice.items
                                     .map(OperationAccordionItem.fromInvoiceItem)
                                     .toList(),
                                 themeColor: themeColor,
-                                onDetailsTap: widget.onTap,
+                                onDetailsTap: onTap,
                               )
                             : const SizedBox.shrink(),
                       ),

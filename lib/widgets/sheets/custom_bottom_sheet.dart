@@ -40,7 +40,7 @@ class CustomBottomSheetActionItem {
 class CustomBottomSheet extends StatelessWidget {
   final String? title;
   final String? subtitle;
-  final Widget? leadingIcon;
+  final IconData? leadingIcon;
   final Widget child;
   final List<Widget>? actions;
   final Widget? stickyFooter;
@@ -70,7 +70,7 @@ class CustomBottomSheet extends StatelessWidget {
     Key? key,
     required String title,
     String? subtitle,
-    Widget? leadingIcon,
+    IconData? leadingIcon,
     required List<CustomBottomSheetActionItem> items,
     bool showDragHandle = true,
     bool showCloseButton = true,
@@ -196,7 +196,7 @@ class CustomBottomSheet extends StatelessWidget {
     Key? key,
     required String title,
     required String message,
-    Widget? leadingIcon,
+    IconData? leadingIcon,
     String confirmLabel = 'تأكيد',
     String cancelLabel = 'إلغاء',
     VoidCallback? onConfirm,
@@ -263,7 +263,7 @@ class CustomBottomSheet extends StatelessWidget {
     required Widget child,
     String? title,
     String? subtitle,
-    Widget? leadingIcon,
+    IconData? leadingIcon,
     List<Widget>? actions,
     Widget? stickyFooter,
     bool showDragHandle = true,
@@ -302,7 +302,7 @@ class CustomBottomSheet extends StatelessWidget {
   static Future<T?> showActions<T>({
     required String title,
     String? subtitle,
-    Widget? leadingIcon,
+    IconData? leadingIcon,
     required List<CustomBottomSheetActionItem> items,
     bool isDismissible = true,
     bool enableDrag = true,
@@ -325,7 +325,7 @@ class CustomBottomSheet extends StatelessWidget {
   static Future<T?> showConfirmation<T>({
     required String title,
     required String message,
-    Widget? leadingIcon,
+    IconData? leadingIcon,
     String confirmLabel = 'تأكيد',
     String cancelLabel = 'إلغاء',
     VoidCallback? onConfirm,
@@ -401,7 +401,21 @@ class CustomBottomSheet extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    if (leadingIcon != null) ...[leadingIcon!, AppSpacing.hSm],
+                    if (leadingIcon != null) ...[
+                      Container(
+                        padding: EdgeInsets.all(AppSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: context.colors.primary.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          leadingIcon,
+                          color: context.colors.primary,
+                          size: 20.r,
+                        ),
+                      ),
+                      AppSpacing.hSm,
+                    ],
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

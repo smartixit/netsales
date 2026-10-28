@@ -21,35 +21,9 @@ import 'package:netsales/widgets/sheets/invoice_print_format_sheet.dart';
 /// شاشة تفاصيل فاتورة المبيعات والسند الرقمي السيادي (SaleInvoiceDetailsScreen)
 /// ============================================================================
 /// تعرض فاتورة مبيعات كروت الشبكة بنمط السند المالي الرقمي عالي الدقة:
-/// مجمّع تركيبي رشيق خالٍ تماماً من دوال البناء الفرعية، مزود برصيف إجراءات عائم دائم.
-class SaleInvoiceDetailsScreen extends StatefulWidget {
-  final int? invoiceId;
-
-  const SaleInvoiceDetailsScreen({super.key, this.invoiceId});
-
-  @override
-  State<SaleInvoiceDetailsScreen> createState() =>
-      _SaleInvoiceDetailsScreenState();
-}
-
-class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
-  late final OperationsController _controller;
-  int? _id;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = Get.find<OperationsController>();
-    _id =
-        widget.invoiceId ??
-        (Get.arguments is int
-            ? Get.arguments as int
-            : int.tryParse(Get.parameters['id'] ?? ''));
-
-    if (_id != null) {
-      _controller.loadInvoiceDetails(_id!);
-    }
-  }
+/// مجمّع تركيبي رشيق خالٍ تماماً من دوال البناء الفرعية أو استدعاءات الشبكة داخل الواجهة.
+class SaleInvoiceDetailsScreen extends GetView<OperationsController> {
+  const SaleInvoiceDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +40,7 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
           icon: Icons.share_outlined,
           tooltip: 'خيارات الطباعة والمشاركة',
           onPressed: () {
-            final invoice = _controller.selectedInvoice.value;
+            final invoice = controller.selectedInvoice.value;
             if (invoice != null) {
               InvoicePrintFormatSheet.show(context, invoice: invoice);
             }
@@ -78,28 +52,26 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
         AppSpacing.hXs,
       ],
       bottomNavigationBar: Obx(() {
-        final invoice = _controller.selectedInvoice.value;
-        if (invoice == null || _controller.isLoadingInvoiceDetails.value) {
+        final invoice = controller.selectedInvoice.value;
+        if (invoice == null || controller.isLoadingInvoiceDetails.value) {
           return const SizedBox.shrink();
         }
         return InvoiceDetailsActionDock(invoice: invoice);
       }),
       body: Obx(() {
-        if (_controller.isLoadingInvoiceDetails.value) {
+        if (controller.isLoadingInvoiceDetails.value) {
           return const OperationsDetailsSkeletonView();
         }
 
-        if (_controller.invoiceDetailsError.value.isNotEmpty) {
+        if (controller.invoiceDetailsError.value.isNotEmpty) {
           return CustomErrorState(
             title: 'تعذر تحميل بيانات الفاتورة',
-            subtitle: _controller.invoiceDetailsError.value,
-            onRetry: _id == null
-                ? null
-                : () => _controller.loadInvoiceDetails(_id!),
+            subtitle: controller.invoiceDetailsError.value,
+            onRetry: controller.refreshCurrentInvoice,
           );
         }
 
-        final invoice = _controller.selectedInvoice.value;
+        final invoice = controller.selectedInvoice.value;
         if (invoice == null) {
           return const CustomEmptyState(
             title: 'الفاتورة غير متوفرة',
@@ -109,11 +81,7 @@ class _SaleInvoiceDetailsScreenState extends State<SaleInvoiceDetailsScreen> {
 
         return RefreshIndicator(
           color: colors.primary,
-          onRefresh: () async {
-            if (_id != null) {
-              await _controller.loadInvoiceDetails(_id!);
-            }
-          },
+          onRefresh: controller.refreshCurrentInvoice,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),

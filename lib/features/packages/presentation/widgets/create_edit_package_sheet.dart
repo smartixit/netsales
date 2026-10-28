@@ -42,26 +42,13 @@ class CreateEditPackageSheet extends StatefulWidget {
     int? preselectedNetworkId,
   }) {
     final isEdit = package != null;
-    final colors = context.colors;
 
     return CustomBottomSheet.show<void>(
       title: isEdit ? 'تعديل باقة الكروت' : 'إنشاء باقة كروت جديدة',
       subtitle: isEdit
           ? 'تعديل أسعار ومواصفات باقة "${package.packageName}"'
           : 'حدد مواصفات الباقة أو اختر قالباً سريعاً بنقرة واحدة',
-      leadingIcon: Container(
-        width: 38.r,
-        height: 38.r,
-        decoration: BoxDecoration(
-          color: colors.primaryContainer.withValues(alpha: 0.35),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          Icons.confirmation_number_outlined,
-          color: colors.primary,
-          size: 20.r,
-        ),
-      ),
+      leadingIcon: Icons.confirmation_number_outlined,
       scrollable: true,
       child: CreateEditPackageSheet(
         controller: controller,
@@ -95,7 +82,8 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
     super.initState();
     final p = widget.package;
 
-    final initialNetworkId = widget.package?.networkId ??
+    final initialNetworkId =
+        widget.package?.networkId ??
         widget.preselectedNetworkId ??
         (widget.controller.networks.length == 1
             ? widget.controller.networks.first.networkId
@@ -221,7 +209,8 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
         0.0;
 
     // تحديد معرف الشبكة من الباقة قيد التعديل أو الاختيار الصريح أو الشبكة الوحيدة
-    final int? networkId = widget.package?.networkId ??
+    final int? networkId =
+        widget.package?.networkId ??
         _selectedNetworkIdNotifier.value ??
         (widget.controller.networks.length == 1
             ? widget.controller.networks.first.networkId
@@ -230,7 +219,8 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
     if (networkId == null) {
       CustomSnackbar.show(
         title: 'تنبيه النطاق',
-        message: 'لا يمكن حفظ الباقة: يرجى تحديد الشبكة التابعة لها الباقة أولاً.',
+        message:
+            'لا يمكن حفظ الباقة: يرجى تحديد الشبكة التابعة لها الباقة أولاً.',
         type: SnackType.warning,
       );
       return;

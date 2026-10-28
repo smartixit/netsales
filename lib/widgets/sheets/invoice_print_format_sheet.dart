@@ -21,11 +21,11 @@ class InvoicePrintFormatSheet extends StatefulWidget {
   final SaleInvoiceEntity? invoice;
   final VoucherRequestEntity? request;
 
-  const InvoicePrintFormatSheet({
-    super.key,
-    this.invoice,
-    this.request,
-  }) : assert(invoice != null || request != null, 'يجب تمرير فاتورة أو طلب توريد');
+  const InvoicePrintFormatSheet({super.key, this.invoice, this.request})
+    : assert(
+        invoice != null || request != null,
+        'يجب تمرير فاتورة أو طلب توريد',
+      );
 
   /// الدالة المصنعية المركزية لفتح النافذة
   static Future<void> show(
@@ -34,22 +34,18 @@ class InvoicePrintFormatSheet extends StatefulWidget {
     VoucherRequestEntity? request,
   }) {
     return CustomBottomSheet.show(
-      title: invoice != null ? 'خيارات طباعة ومشاركة الفاتورة' : 'خيارات طباعة ومشاركة الطلب',
+      title: invoice != null
+          ? 'خيارات طباعة ومشاركة الفاتورة'
+          : 'خيارات طباعة ومشاركة الطلب',
       subtitle: 'اختر نسق السند المناسب للطباعة الحرارية أو التصدير الرسمي',
-      leadingIcon: Icon(
-        Icons.print_outlined,
-        color: context.colors.primary,
-        size: 22.r,
-      ),
-      child: InvoicePrintFormatSheet(
-        invoice: invoice,
-        request: request,
-      ),
+      leadingIcon: Icons.print_outlined,
+      child: InvoicePrintFormatSheet(invoice: invoice, request: request),
     );
   }
 
   @override
-  State<InvoicePrintFormatSheet> createState() => _InvoicePrintFormatSheetState();
+  State<InvoicePrintFormatSheet> createState() =>
+      _InvoicePrintFormatSheetState();
 }
 
 class _InvoicePrintFormatSheetState extends State<InvoicePrintFormatSheet> {
@@ -65,10 +61,12 @@ class _InvoicePrintFormatSheetState extends State<InvoicePrintFormatSheet> {
         // 1. بطاقة خيار الطابعة الحرارية 80mm
         _FormatOptionCard(
           title: 'طابعة إيصالات حرارية (POS 80mm)',
-          subtitle: 'تنسيق شريطي مضغوط مناسب لطابعات البلوتوث والمحمولة ونقاط التوزيع',
+          subtitle:
+              'تنسيق شريطي مضغوط مناسب لطابعات البلوتوث والمحمولة ونقاط التوزيع',
           icon: Icons.receipt_long_rounded,
           isSelected: _selectedFormat == InvoicePrintFormat.thermal80,
-          onTap: () => setState(() => _selectedFormat = InvoicePrintFormat.thermal80),
+          onTap: () =>
+              setState(() => _selectedFormat = InvoicePrintFormat.thermal80),
         ),
 
         AppSpacing.vSm,
@@ -76,10 +74,12 @@ class _InvoicePrintFormatSheetState extends State<InvoicePrintFormatSheet> {
         // 2. بطاقة خيار السند المالي الرسمي A4
         _FormatOptionCard(
           title: 'سند رسمي مؤسسي (A4 قياسي)',
-          subtitle: 'تنسيق متكامل بكامل التفاصيل والبيانات المالية مناسب للأرشفة ومشاركة الـ PDF',
+          subtitle:
+              'تنسيق متكامل بكامل التفاصيل والبيانات المالية مناسب للأرشفة ومشاركة الـ PDF',
           icon: Icons.description_outlined,
           isSelected: _selectedFormat == InvoicePrintFormat.standardA4,
-          onTap: () => setState(() => _selectedFormat = InvoicePrintFormat.standardA4),
+          onTap: () =>
+              setState(() => _selectedFormat = InvoicePrintFormat.standardA4),
         ),
 
         AppSpacing.vLg,
@@ -217,8 +217,12 @@ class _FormatOptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final borderColor = isSelected ? colors.primary : colors.outlineVariant.withValues(alpha: 0.4);
-    final bgColor = isSelected ? colors.primaryContainer.withValues(alpha: 0.25) : colors.surface;
+    final borderColor = isSelected
+        ? colors.primary
+        : colors.outlineVariant.withValues(alpha: 0.4);
+    final bgColor = isSelected
+        ? colors.primaryContainer.withValues(alpha: 0.25)
+        : colors.surface;
 
     return CustomInteractiveBounce(
       onTap: onTap,
@@ -228,10 +232,7 @@ class _FormatOptionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: AppRadius.mdRadius,
-          border: Border.all(
-            color: borderColor,
-            width: isSelected ? 1.5 : 1.0,
-          ),
+          border: Border.all(color: borderColor, width: isSelected ? 1.5 : 1.0),
         ),
         child: Row(
           children: [
@@ -259,7 +260,9 @@ class _FormatOptionCard extends StatelessWidget {
                     title,
                     style: AppTypography.titleSmall.copyWith(
                       color: isSelected ? colors.primary : colors.onSurface,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w600,
                     ),
                   ),
                   AppSpacing.vXxs,
@@ -275,7 +278,9 @@ class _FormatOptionCard extends StatelessWidget {
             ),
             AppSpacing.hSm,
             Icon(
-              isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+              isSelected
+                  ? Icons.radio_button_checked_rounded
+                  : Icons.radio_button_off_rounded,
               color: isSelected ? colors.primary : colors.outlineVariant,
               size: 22.r,
             ),

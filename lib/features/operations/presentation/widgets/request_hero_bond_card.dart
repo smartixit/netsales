@@ -41,8 +41,8 @@ class RequestHeroBondCard extends StatelessWidget {
 
     final formattedTotal = AmountFormatter.formatValue(request.requestTotalAmount);
 
-    final dt = request.createdAt != null ? DateTime.tryParse(request.createdAt!) : null;
-    final dateStr = dt != null ? DateFormatter.dateTime(dt) : (request.createdAt ?? '');
+    final dt = DateFormatter.tryParse(request.requestDate ?? request.createdAt ?? '');
+    final dateStr = dt != null ? DateFormatter.dateTime(dt) : (request.requestDate ?? request.createdAt ?? '');
 
     return Container(
       decoration: BoxDecoration(
@@ -202,7 +202,7 @@ class RequestHeroBondCard extends StatelessWidget {
                     ),
                   ),
 
-                  // ── 2. إجمالي القيمة التقديرية للطلب ──
+                  // ── 2. إجمالي القيمة للطلب ──
                   Padding(
                     padding: EdgeInsetsDirectional.only(
                       start: 16.w,
@@ -214,7 +214,7 @@ class RequestHeroBondCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'إجمالي القيمة التقديرية للطلب',
+                          'إجمالي الطلب',
                           style: AppTypography.labelSmall.copyWith(
                             color: colors.onSurfaceVariant.withValues(alpha: 0.75),
                             fontWeight: FontWeight.w600,

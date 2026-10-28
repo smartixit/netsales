@@ -43,9 +43,7 @@ class InvoiceHeroBondCard extends StatelessWidget {
     final totalAmount = invoice.invoiceTotalAmount > 0 ? invoice.invoiceTotalAmount : 1.0;
     final paidRatio = (invoice.paidAmount / totalAmount).clamp(0.0, 1.0);
 
-    final dt = invoice.invoiceDate != null
-        ? DateTime.tryParse(invoice.invoiceDate!)
-        : (invoice.createdAt != null ? DateTime.tryParse(invoice.createdAt!) : null);
+    final dt = DateFormatter.tryParse(invoice.invoiceDate ?? invoice.createdAt ?? '');
     final dateStr = dt != null ? DateFormatter.dateTime(dt) : (invoice.invoiceDate ?? '');
 
     return Container(

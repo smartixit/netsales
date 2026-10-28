@@ -7,6 +7,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/components/package_quantity_input_sheet.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
@@ -171,25 +172,16 @@ class PackageSelectionCard extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CustomInteractiveBounce(
-                      onTap: onDecrement,
-                      child: Container(
-                        width: 32.r,
-                        height: 32.r,
-                        decoration: BoxDecoration(
-                          color: colors.surface,
-                          borderRadius: AppRadius.xsRadius,
-                          border: Border.all(
-                            color: colors.outlineVariant.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.remove_rounded,
-                          size: 16.r,
-                          color: colors.onSurface,
-                        ),
-                      ),
+                    CustomButton.icon(
+                      icon: Icons.remove_rounded,
+                      dimension: 32.r,
+                      iconSize: 16.r,
+                      backgroundColor: colors.surface,
+                      foregroundColor: colors.onSurface,
+                      borderColor: colors.outlineVariant.withValues(alpha: 0.4),
+                      borderWidth: 1.w,
+                      shape: AppButtonShape.rounded,
+                      onPressed: onDecrement,
                     ),
                     // رقم الكمية قابل للنقر لفتح حوار الإدخال المباشر
                     CustomInteractiveBounce(
@@ -223,65 +215,31 @@ class PackageSelectionCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    CustomInteractiveBounce(
-                      onTap: onIncrement,
-                      child: Container(
-                        width: 32.r,
-                        height: 32.r,
-                        decoration: BoxDecoration(
-                          color: colors.primary,
-                          borderRadius: AppRadius.xsRadius,
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.add_rounded,
-                          size: 16.r,
-                          color: colors.onPrimary,
-                        ),
-                      ),
+                    CustomButton.icon(
+                      icon: Icons.add_rounded,
+                      dimension: 32.r,
+                      iconSize: 16.r,
+                      backgroundColor: colors.primary,
+                      foregroundColor: colors.onPrimary,
+                      shape: AppButtonShape.rounded,
+                      onPressed: onIncrement,
                     ),
                   ],
                 )
               else
-                CustomInteractiveBounce(
-                  onTap: () {
+                CustomButton.outline(
+                  text: 'تحديد كمية',
+                  icon: Icons.add_rounded,
+                  iconSize: 14.r,
+                  height: 32.h,
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                  onPressed: () {
                     if (onSetQuantity != null) {
                       onSetQuantity!(1);
                     } else {
                       onIncrement();
                     }
                   },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colors.surface,
-                      borderRadius: AppRadius.smRadius,
-                      border: Border.all(
-                        color: colors.outlineVariant.withValues(alpha: 0.4),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.add_rounded,
-                          size: 15.r,
-                          color: colors.primary,
-                        ),
-                        AppSpacing.hXxs,
-                        Text(
-                          'تحديد كمية',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
             ],
           ),

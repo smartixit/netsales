@@ -30,19 +30,11 @@ class HomeQuickActionsSheet extends StatelessWidget {
     required List<HomeQuickAction> actions,
     required ValueChanged<HomeQuickAction> onActionTap,
   }) {
-    final colors = context.colors;
 
     return CustomBottomSheet.show<void>(
       title: 'الإجراءات السريعة المباشرة',
       subtitle: 'اختر الإجراء الذي ترغب بتنفيذه فوراً بدون مغادرة سياقك',
-      leadingIcon: Container(
-        padding: EdgeInsets.all(AppSpacing.xs),
-        decoration: BoxDecoration(
-          color: colors.primary.withValues(alpha: 0.12),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(Icons.bolt_rounded, color: colors.primary, size: 20.r),
-      ),
+      leadingIcon: Icons.bolt_rounded,
       scrollable: true,
       actions: [
         Expanded(

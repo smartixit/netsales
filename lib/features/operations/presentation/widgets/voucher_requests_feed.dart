@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
-import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_voucher_request_sheet.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/reject_voucher_request_sheet.dart';
 import 'package:netsales/features/operations/presentation/widgets/voucher_request_ledger_tile.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
@@ -65,8 +63,8 @@ class VoucherRequestsFeed extends StatelessWidget {
         );
       }
 
-      // تجميع الطلبات زمنياً
-      final groups = _groupRequests(ctrl.requests);
+      // تجميع الطلبات زمنياً عبر المتحكم المعتمد
+      final groups = ctrl.groupedRequests;
       final groupKeys = groups.keys.toList();
 
       // 4. السجل المالي المصنف زمنياً مع السحب للتحديث
@@ -128,10 +126,7 @@ class VoucherRequestsFeed extends StatelessWidget {
                           request.requestId,
                       onToggleExpand: () => ctrl
                           .toggleRequestExpansion(request.requestId),
-                      onTap: () => Get.toNamed(
-                        AppRoutes.voucherRequestDetails,
-                        arguments: request.requestId,
-                      ),
+                      onTap: () => ctrl.openRequestDetails(request.requestId),
                       onApprove: request.isPending
                           ? () {
                               CustomBottomSheet.showConfirmation(
@@ -140,6 +135,7 @@ class VoucherRequestsFeed extends StatelessWidget {
                                     'سيتم اعتماد طلب التوريد ${request.requestUuid} وتوليد فاتورة مبيعات جديدة بقيمة ${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي.',
                                 confirmLabel: 'اعتماد وتوليد الفاتورة',
                                 cancelLabel: 'تراجع',
+                                leadingIcon: Icons.verified_rounded,
                                 onConfirm: () => ctrl.approveRequest(
                                   request.requestId,
                                 ),
@@ -147,20 +143,12 @@ class VoucherRequestsFeed extends StatelessWidget {
                             }
                           : null,
                       onReject: request.isPending
-                          ? () {
-                              CustomBottomSheet.showConfirmation(
-                                title: 'تأكيد رفض طلب التوريد',
-                                message:
-                                    'هل أنت متأكد من رغبتك في رفض طلب التوريد ${request.requestUuid}؟',
-                                confirmLabel: 'رفض الطلب',
-                                cancelLabel: 'إلغاء',
-                                isDestructive: true,
-                                onConfirm: () => ctrl.rejectRequest(
-                                  request.requestId,
-                                  reason: 'تم الرفض بواسطة الإدارة',
-                                ),
-                              );
-                            }
+                          ? () => RejectVoucherRequestSheet.show(
+                              context,
+                              requestId: request.requestId,
+                              requestUuid: request.requestUuid,
+                              controller: ctrl,
+                            )
                           : null,
                     ),
                   ),
@@ -172,40 +160,5 @@ class VoucherRequestsFeed extends StatelessWidget {
       );
     });
   }
-
-  /// تجميع طلبات التوريد بحسب سياق التاريخ
-  Map<String, List<VoucherRequestEntity>> _groupRequests(
-    List<VoucherRequestEntity> list,
-  ) {
-    final Map<String, List<VoucherRequestEntity>> result = {};
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-
-    for (final req in list) {
-      final dt = req.requestDate != null
-          ? DateTime.tryParse(req.requestDate!)
-          : (req.createdAt != null ? DateTime.tryParse(req.createdAt!) : null);
-
-      final String groupKey;
-      if (dt == null) {
-        groupKey = 'طلبات سابقة';
-      } else {
-        final dateOnly = DateTime(dt.year, dt.month, dt.day);
-        if (dateOnly == today) {
-          groupKey = 'اليوم';
-        } else if (dateOnly == yesterday) {
-          groupKey = 'أمس';
-        } else if (today.difference(dateOnly).inDays < 7) {
-          groupKey = 'هذا الأسبوع';
-        } else {
-          groupKey = DateFormatter.monthName(dt);
-        }
-      }
-
-      result.putIfAbsent(groupKey, () => []).add(req);
-    }
-
-    return result;
-  }
 }
+

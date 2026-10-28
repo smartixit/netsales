@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
-import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/sale_invoice_ledger_tile.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
@@ -59,8 +56,8 @@ class SaleInvoicesFeed extends StatelessWidget {
         );
       }
 
-      // تجميع الفواتير زمنياً
-      final groups = _groupInvoices(controller.invoices);
+      // تجميع الفواتير زمنياً عبر المتحكم المعتمد
+      final groups = controller.groupedInvoices;
       final groupKeys = groups.keys.toList();
 
       // 4. السجل المالي المصنف زمنياً مع السحب للتحديث
@@ -120,10 +117,7 @@ class SaleInvoicesFeed extends StatelessWidget {
                           invoice.invoiceId,
                       onToggleExpand: () =>
                           controller.toggleInvoiceExpansion(invoice.invoiceId),
-                      onTap: () => Get.toNamed(
-                        AppRoutes.saleInvoiceDetails,
-                        arguments: invoice.invoiceId,
-                      ),
+                      onTap: () => controller.openInvoiceDetails(invoice.invoiceId),
                     ),
                   ),
                 ),
@@ -133,41 +127,5 @@ class SaleInvoicesFeed extends StatelessWidget {
         ),
       );
     });
-  }
-
-  /// تجميع الفواتير بحسب سياق التاريخ
-  Map<String, List<SaleInvoiceEntity>> _groupInvoices(
-    List<SaleInvoiceEntity> list,
-  ) {
-    final Map<String, List<SaleInvoiceEntity>> result = {};
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-
-    for (final inv in list) {
-      final dt = inv.invoiceDate != null
-          ? DateTime.tryParse(inv.invoiceDate!)
-          : (inv.createdAt != null ? DateTime.tryParse(inv.createdAt!) : null);
-
-      final String groupKey;
-      if (dt == null) {
-        groupKey = 'معاملات سابقة';
-      } else {
-        final dateOnly = DateTime(dt.year, dt.month, dt.day);
-        if (dateOnly == today) {
-          groupKey = 'اليوم';
-        } else if (dateOnly == yesterday) {
-          groupKey = 'أمس';
-        } else if (today.difference(dateOnly).inDays < 7) {
-          groupKey = 'هذا الأسبوع';
-        } else {
-          groupKey = DateFormatter.monthName(dt);
-        }
-      }
-
-      result.putIfAbsent(groupKey, () => []).add(inv);
-    }
-
-    return result;
   }
 }

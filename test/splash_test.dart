@@ -19,6 +19,12 @@ class MockSplashDataSource implements SplashLocalDataSource {
 
   @override
   bool get isAuthenticated => _isAuthenticated;
+
+  @override
+  Future<void> initializeInfrastructureServices() {
+    // TODO: implement initializeInfrastructureServices
+    throw UnimplementedError();
+  }
 }
 
 void main() {

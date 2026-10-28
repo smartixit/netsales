@@ -6,7 +6,7 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/operations_details_skeleton_view.dart';
-import 'package:netsales/features/operations/presentation/widgets/request_approval_actions_bar.dart';
+import 'package:netsales/features/operations/presentation/widgets/request_audit_status_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_details_action_dock.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_hero_bond_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_items_card.dart';
@@ -23,35 +23,8 @@ import 'package:netsales/widgets/sheets/invoice_print_format_sheet.dart';
 /// ============================================================================
 /// مجمّع تركيبي رشيق يعرض تفاصيل طلب التوريد بنمط السند الرقمي المعتمد:
 /// يتيح المراجعة الفورية، اعتماد وتوليد الفاتورة، أو الرفض والإلغاء مع رصيف قرارات عائم.
-class VoucherRequestDetailsScreen extends StatefulWidget {
-  final int? requestId;
-
-  const VoucherRequestDetailsScreen({super.key, this.requestId});
-
-  @override
-  State<VoucherRequestDetailsScreen> createState() =>
-      _VoucherRequestDetailsScreenState();
-}
-
-class _VoucherRequestDetailsScreenState
-    extends State<VoucherRequestDetailsScreen> {
-  late final OperationsController _controller;
-  int? _id;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = Get.find<OperationsController>();
-    _id =
-        widget.requestId ??
-        (Get.arguments is int
-            ? Get.arguments as int
-            : int.tryParse(Get.parameters['id'] ?? ''));
-
-    if (_id != null) {
-      _controller.loadRequestDetails(_id!);
-    }
-  }
+class VoucherRequestDetailsScreen extends GetView<OperationsController> {
+  const VoucherRequestDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +41,7 @@ class _VoucherRequestDetailsScreenState
           icon: Icons.share_outlined,
           tooltip: 'طباعة ومشاركة الطلب',
           onPressed: () {
-            final request = _controller.selectedRequest.value;
+            final request = controller.selectedRequest.value;
             if (request != null) {
               InvoicePrintFormatSheet.show(context, request: request);
             }
@@ -80,31 +53,29 @@ class _VoucherRequestDetailsScreenState
         AppSpacing.hXs,
       ],
       bottomNavigationBar: Obx(() {
-        final request = _controller.selectedRequest.value;
-        if (request == null || _controller.isLoadingRequestDetails.value) {
+        final request = controller.selectedRequest.value;
+        if (request == null || controller.isLoadingRequestDetails.value) {
           return const SizedBox.shrink();
         }
         return RequestDetailsActionDock(
           request: request,
-          controller: _controller,
+          controller: controller,
         );
       }),
       body: Obx(() {
-        if (_controller.isLoadingRequestDetails.value) {
+        if (controller.isLoadingRequestDetails.value) {
           return const OperationsDetailsSkeletonView();
         }
 
-        if (_controller.requestDetailsError.value.isNotEmpty) {
+        if (controller.requestDetailsError.value.isNotEmpty) {
           return CustomErrorState(
             title: 'تعذر تحميل بيانات الطلب',
-            subtitle: _controller.requestDetailsError.value,
-            onRetry: _id == null
-                ? null
-                : () => _controller.loadRequestDetails(_id!),
+            subtitle: controller.requestDetailsError.value,
+            onRetry: controller.refreshCurrentRequest,
           );
         }
 
-        final request = _controller.selectedRequest.value;
+        final request = controller.selectedRequest.value;
         if (request == null) {
           return const CustomEmptyState(
             title: 'الطلب غير متوفر',
@@ -114,11 +85,7 @@ class _VoucherRequestDetailsScreenState
 
         return RefreshIndicator(
           color: colors.primary,
-          onRefresh: () async {
-            if (_id != null) {
-              await _controller.loadRequestDetails(_id!);
-            }
-          },
+          onRefresh: controller.refreshCurrentRequest,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
@@ -154,10 +121,7 @@ class _VoucherRequestDetailsScreenState
                     // 5. سجل التدقيق والاعتماد للطلبات المعالجة
                     if (!request.isPending) ...[
                       AppSpacing.vMd,
-                      RequestApprovalActionsBar(
-                        request: request,
-                        controller: _controller,
-                      ),
+                      RequestAuditStatusCard(request: request),
                     ],
 
                     AppSpacing.vLg,

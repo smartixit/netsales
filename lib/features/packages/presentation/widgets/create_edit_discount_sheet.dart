@@ -43,22 +43,13 @@ class CreateEditDiscountSheet extends StatefulWidget {
     PosEntity? preselectedPos,
   }) {
     final isEdit = discount != null;
-    final colors = context.colors;
 
     return CustomBottomSheet.show<void>(
       title: isEdit ? 'تعديل الخصم المخصص' : 'تخصيص خصم استثنائي لوكيل',
       subtitle: isEdit
           ? 'تعديل نسب الخصم لنقطة البيع على الباقة'
           : 'حدد نقطة البيع والباقة والنسب مع احتساب فوري للتكلفة',
-      leadingIcon: Container(
-        width: 38.r,
-        height: 38.r,
-        decoration: BoxDecoration(
-          color: colors.secondaryContainer.withValues(alpha: 0.4),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(Icons.percent_rounded, color: colors.secondary, size: 20.r),
-      ),
+      leadingIcon: Icons.percent_rounded,
       scrollable: true,
       child: CreateEditDiscountSheet(
         controller: controller,
@@ -172,7 +163,8 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
     if (networkId == null) {
       CustomSnackbar.show(
         title: 'تنبيه النطاق',
-        message: 'لا يمكن حفظ الخصم: لم يتم العثور على شبكة مرتبطة بالباقة المختارة.',
+        message:
+            'لا يمكن حفظ الخصم: لم يتم العثور على شبكة مرتبطة بالباقة المختارة.',
         type: SnackType.warning,
       );
       return;

@@ -307,24 +307,10 @@ class CustomPosPickerModal extends StatefulWidget {
     required List<PosEntity> posList,
     int? selectedPosId,
   }) {
-    final colors = context.colors;
-
     return CustomBottomSheet.show<PosEntity>(
       title: 'اختيار نقطة البيع / الوكيل',
       subtitle: 'ابحث بالاسم أو رقم الهاتف أو الموقع الجغرافي للاختيار الفوري',
-      leadingIcon: Container(
-        width: 38.r,
-        height: 38.r,
-        decoration: BoxDecoration(
-          color: colors.primaryContainer.withValues(alpha: 0.35),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          Icons.storefront_rounded,
-          color: colors.primary,
-          size: 20.r,
-        ),
-      ),
+      leadingIcon: Icons.storefront_rounded,
       scrollable: true,
       child: CustomPosPickerModal(
         posList: posList,

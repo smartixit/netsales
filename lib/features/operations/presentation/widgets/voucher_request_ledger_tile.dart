@@ -19,12 +19,12 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 /// يجسد طلب توريد الكروت كسند سيادي فاخر (Sovereign Financial Bond)،
 /// يدعم التوسيع الأكورديوني المنسدل السلس (Accordion Inline Expand) لعرض تفاصيل
 /// الباقات المضمنة فوراً دون مغادرة السجل الرئيسي، مع تصميم تكيفي عالي الدقة.
-class VoucherRequestLedgerTile extends StatefulWidget {
+class VoucherRequestLedgerTile extends StatelessWidget {
   final VoucherRequestEntity request;
   final VoidCallback onTap;
   final VoidCallback? onApprove;
   final VoidCallback? onReject;
-  final bool? isExpanded;
+  final bool isExpanded;
   final VoidCallback? onToggleExpand;
 
   const VoucherRequestLedgerTile({
@@ -33,32 +33,12 @@ class VoucherRequestLedgerTile extends StatefulWidget {
     required this.onTap,
     this.onApprove,
     this.onReject,
-    this.isExpanded,
+    this.isExpanded = false,
     this.onToggleExpand,
   });
 
   @override
-  State<VoucherRequestLedgerTile> createState() =>
-      _VoucherRequestLedgerTileState();
-}
-
-class _VoucherRequestLedgerTileState extends State<VoucherRequestLedgerTile> {
-  bool _internalExpanded = false;
-  bool get _isExpanded => widget.isExpanded ?? _internalExpanded;
-
-  void _handleToggle() {
-    if (widget.onToggleExpand != null) {
-      widget.onToggleExpand!();
-    } else {
-      setState(() {
-        _internalExpanded = !_internalExpanded;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final request = widget.request;
     final colors = context.colors;
     final isPending = request.isPending;
     final isApproved = request.isApproved;
@@ -67,9 +47,7 @@ class _VoucherRequestLedgerTileState extends State<VoucherRequestLedgerTile> {
       request.requestTotalAmount,
     );
 
-    final dt = request.createdAt != null
-        ? DateTime.tryParse(request.createdAt!)
-        : null;
+    final dt = DateFormatter.tryParse(request.requestDate ?? request.createdAt ?? '');
     final dateStr = dt != null ? DateFormatter.dateTime(dt) : '';
 
     // لون حالة التوريد
@@ -97,7 +75,7 @@ class _VoucherRequestLedgerTileState extends State<VoucherRequestLedgerTile> {
     }
 
     return CustomInteractiveBounce(
-      onTap: widget.onTap,
+      onTap: onTap,
       child: Container(
         margin: EdgeInsets.only(bottom: 10.h),
         decoration: BoxDecoration(
@@ -325,7 +303,7 @@ class _VoucherRequestLedgerTileState extends State<VoucherRequestLedgerTile> {
                           children: [
                             if (hasMultiplePackages) ...[
                               CustomInteractiveBounce(
-                                onTap: _handleToggle,
+                                onTap: () => onToggleExpand?.call(),
                                 child: Container(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 6.w,
@@ -345,7 +323,7 @@ class _VoucherRequestLedgerTileState extends State<VoucherRequestLedgerTile> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        _isExpanded
+                                        isExpanded
                                             ? 'طي البنود'
                                             : 'عرض البنود',
                                         style: AppTypography.labelSmall
@@ -357,7 +335,7 @@ class _VoucherRequestLedgerTileState extends State<VoucherRequestLedgerTile> {
                                       ),
                                       AppSpacing.hXxs,
                                       Icon(
-                                        _isExpanded
+                                        isExpanded
                                             ? Icons.keyboard_arrow_up_rounded
                                             : Icons.keyboard_arrow_down_rounded,
                                         size: 13.r,
@@ -370,9 +348,9 @@ class _VoucherRequestLedgerTileState extends State<VoucherRequestLedgerTile> {
                               AppSpacing.hXxs,
                             ],
                             if (isPending &&
-                                (widget.onApprove != null ||
-                                    widget.onReject != null)) ...[
-                              if (widget.onReject != null) ...[
+                                (onApprove != null ||
+                                    onReject != null)) ...[
+                              if (onReject != null) ...[
                                 CustomButton.icon(
                                   icon: Icons.close_rounded,
                                   dimension: 30.r,
@@ -382,11 +360,11 @@ class _VoucherRequestLedgerTileState extends State<VoucherRequestLedgerTile> {
                                     alpha: 0.1,
                                   ),
                                   tooltip: 'رفض الطلب',
-                                  onPressed: widget.onReject!,
+                                  onPressed: onReject!,
                                 ),
                                 AppSpacing.hXxs,
                               ],
-                              if (widget.onApprove != null)
+                              if (onApprove != null)
                                 CustomButton.icon(
                                   icon: Icons.check_rounded,
                                   dimension: 30.r,
@@ -396,7 +374,7 @@ class _VoucherRequestLedgerTileState extends State<VoucherRequestLedgerTile> {
                                     alpha: 0.12,
                                   ),
                                   tooltip: 'اعتماد الطلب',
-                                  onPressed: widget.onApprove!,
+                                  onPressed: onApprove!,
                                 ),
                             ] else ...[
                               Container(
@@ -428,13 +406,13 @@ class _VoucherRequestLedgerTileState extends State<VoucherRequestLedgerTile> {
                         duration: AppMotion.normal,
                         curve: AppMotion.standard,
                         alignment: Alignment.topCenter,
-                        child: _isExpanded
+                        child: isExpanded
                             ? OperationsItemsAccordionDeck(
                                 items: request.items
                                     .map(OperationAccordionItem.fromRequestItem)
                                     .toList(),
                                 themeColor: statusColor,
-                                onDetailsTap: widget.onTap,
+                                onDetailsTap: onTap,
                               )
                             : const SizedBox.shrink(),
                       ),

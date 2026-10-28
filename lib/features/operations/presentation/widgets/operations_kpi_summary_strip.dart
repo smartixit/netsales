@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
+import 'package:netsales/widgets/cards/custom_kpi_card.dart';
 
 /// ============================================================================
 /// شريط السيولة والنبض المالي الرشيق (OperationsKpiSummaryStrip)
 /// ============================================================================
-/// كبسولة أفقية مدمجة ومنخفضة الارتفاع (~42dp) توفر قراءة فورية للسيولة اليومية
-/// ومسار التوريد دون استهلاك مساحة الشاشة الرأسية أو إجهاد العين.
+/// يعتمد حصرياً على الودجت القياسي الموحد [CustomKpiCard.compact] لعرض مؤشرات
+/// المبيعات والسيولة النقدية ومسار التوريد طبقاً لميثاق الكود النظيف.
 class OperationsKpiSummaryStrip extends StatelessWidget {
   final OperationsController controller;
 
@@ -28,206 +26,61 @@ class OperationsKpiSummaryStrip extends StatelessWidget {
     return Obx(() {
       final isInvoiceTab = controller.activeSegmentIndex.value == 0;
 
-      return Container(
-        height: 40.h,
-        padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
-          borderRadius: AppRadius.mdRadius,
-          border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.22),
-            width: 0.8.w,
+      if (isInvoiceTab) {
+        return Row(
+          children: [
+            Expanded(
+              child: CustomKpiCard.compact(
+                title: 'إجمالي المبيعات',
+                value: AmountFormatter.formatValue(controller.totalInvoicesAmount),
+                unit: 'ر.ي',
+                icon: Icons.payments_outlined,
+                iconColor: colors.primary,
+              ),
+            ),
+            AppSpacing.hSm,
+            Expanded(
+              child: CustomKpiCard.compact(
+                title: 'الآجل القائم',
+                value: AmountFormatter.formatValue(
+                  controller.unpaidRemainingAmount,
+                ),
+                unit: 'ر.ي',
+                icon: Icons.pending_actions_rounded,
+                iconColor: controller.unpaidRemainingAmount > 0
+                    ? colors.warning
+                    : colors.primary,
+              ),
+            ),
+          ],
+        );
+      }
+
+      return Row(
+        children: [
+          Expanded(
+            child: CustomKpiCard.compact(
+              title: 'بانتظار القرار',
+              value: controller.pendingRequestsCount.toString(),
+              unit: 'طلب',
+              icon: Icons.hourglass_top_rounded,
+              iconColor: controller.pendingRequestsCount > 0
+                  ? colors.warning
+                  : colors.primary,
+            ),
           ),
-        ),
-        child: isInvoiceTab
-            ? _InvoicesSlimPulse(controller: controller)
-            : _RequestsSlimPulse(controller: controller),
+          AppSpacing.hSm,
+          Expanded(
+            child: CustomKpiCard.compact(
+              title: 'طلبات معتمدة',
+              value: controller.approvedRequestsCount.toString(),
+              unit: 'طلب',
+              icon: Icons.check_circle_outline_rounded,
+              iconColor: colors.primary,
+            ),
+          ),
+        ],
       );
     });
-  }
-}
-
-class _InvoicesSlimPulse extends StatelessWidget {
-  final OperationsController controller;
-
-  const _InvoicesSlimPulse({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final totalSales = controller.totalInvoicesAmount;
-    final unpaidRemaining = controller.unpaidRemainingAmount;
-
-    return Row(
-      children: [
-        // 1. إجمالي مبيعات التداول
-        Expanded(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.trending_up_rounded,
-                  color: colors.primary,
-                  size: 16.r,
-                ),
-                AppSpacing.hXxs,
-                Text(
-                  'المبيعات: ',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontSize: 10.sp,
-                  ),
-                ),
-                Text(
-                  '${AmountFormatter.formatValue(totalSales)} ر.ي',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 10.5.sp,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // فاصل عمودي ناعم
-        Container(
-          width: 1.w,
-          height: 18.h,
-          margin: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
-
-        // 2. الآجل القائم (المديونية)
-        Expanded(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.pending_actions_rounded,
-                  color: unpaidRemaining > 0 ? colors.warning : colors.primary,
-                  size: 15.r,
-                ),
-                AppSpacing.hXxs,
-                Text(
-                  'الآجل القائم: ',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontSize: 10.sp,
-                  ),
-                ),
-                Text(
-                  '${AmountFormatter.formatValue(unpaidRemaining)} ر.ي',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: unpaidRemaining > 0 ? colors.warning : colors.primary,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 10.5.sp,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RequestsSlimPulse extends StatelessWidget {
-  final OperationsController controller;
-
-  const _RequestsSlimPulse({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final pendingCount = controller.pendingRequestsCount;
-    final approvedCount = controller.approvedRequestsCount;
-
-    return Row(
-      children: [
-        // 1. الطلبات بانتظار القرار
-        Expanded(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: Row(
-              children: [
-                Container(
-                  width: 7.r,
-                  height: 7.r,
-                  decoration: BoxDecoration(
-                    color: pendingCount > 0 ? colors.warning : colors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                AppSpacing.hXxs,
-                Text(
-                  'بانتظار القرار: ',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontSize: 10.sp,
-                  ),
-                ),
-                Text(
-                  '$pendingCount طلب',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: pendingCount > 0 ? colors.warning : colors.onSurface,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 10.5.sp,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // فاصل عمودي ناعم
-        Container(
-          width: 1.w,
-          height: 18.h,
-          margin: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
-
-        // 2. المعتمدة
-        Expanded(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.task_alt_rounded,
-                  color: colors.primary,
-                  size: 15.r,
-                ),
-                AppSpacing.hXxs,
-                Text(
-                  'معتمدة: ',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontSize: 10.sp,
-                  ),
-                ),
-                Text(
-                  '$approvedCount من ${controller.requests.length}',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 10.5.sp,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

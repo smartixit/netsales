@@ -113,7 +113,7 @@ class RequestFinancialSummaryCard extends StatelessWidget {
           ],
           AppSpacing.vXxs,
           _SummaryLine(
-            label: 'الصافي التقديري للطلب:',
+            label: 'الصافي:',
             value: '${AmountFormatter.formatValue(netAmount)} ر.ي',
             isBold: true,
           ),

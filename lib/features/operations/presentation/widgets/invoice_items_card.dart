@@ -154,134 +154,21 @@ class InvoiceItemsCard extends StatelessWidget {
 
             AppSpacing.vXs,
 
-            ListView.separated(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: items.length,
-              separatorBuilder: (_, __) => Divider(
-                height: 12.h,
-                thickness: 0.6.h,
-                color: colors.outlineVariant.withValues(alpha: 0.2),
-              ),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                final unitPrice = AmountFormatter.formatValue(
-                  item.voucherPrice,
-                );
-                final lineTotal = AmountFormatter.formatValue(
-                  item.itemTotalAmount,
-                );
-
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 3.h),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // رقم البند
-                      Container(
-                        width: 22.r,
-                        height: 22.r,
-                        decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withValues(
-                            alpha: 0.5,
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${index + 1}',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 9.5.sp,
-                          ),
-                        ),
-                      ),
-                      AppSpacing.hSm,
-
-                      // اسم الباقة وسعر الوحدة والخصم
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.packageName?.isNotEmpty == true
-                                  ? item.packageName!
-                                  : 'باقة كروت #${item.packageId}',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 12.sp,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            AppSpacing.vXxs,
-                            Row(
-                              children: [
-                                Text(
-                                  '${item.voucherCount} كرت × $unitPrice ر.ي',
-                                  style: AppTypography.labelSmall.copyWith(
-                                    color: colors.onSurfaceVariant.withValues(
-                                      alpha: 0.7,
-                                    ),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 10.sp,
-                                  ),
-                                ),
-                                if (item.itemDiscount > 0) ...[
-                                  AppSpacing.hXs,
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 5.w,
-                                      vertical: 1.h,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colors.primary.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      borderRadius: AppRadius.fullRadius,
-                                    ),
-                                    child: Text(
-                                      'خصم: ${AmountFormatter.formatValue(item.itemDiscount)}',
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: colors.primary,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 8.5.sp,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      AppSpacing.hXs,
-
-                      // المبلغ الصافي بمحاذاة قياسية ثابتة (85.w)
-                      SizedBox(
-                        width: 85.w,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: AlignmentDirectional.centerEnd,
-                          child: Text(
-                            lineTotal,
-                            style: AppTypography.titleSmall.copyWith(
-                              color: colors.onSurface,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5.sp,
-                            ),
-                            textAlign: TextAlign.end,
-                          ),
-                        ),
-                      ),
-                    ],
+            Column(
+              children: [
+                for (int index = 0; index < items.length; index++) ...[
+                  if (index > 0)
+                    Divider(
+                      height: 12.h,
+                      thickness: 0.6.h,
+                      color: colors.outlineVariant.withValues(alpha: 0.2),
+                    ),
+                  _InvoiceItemRow(
+                    index: index,
+                    item: items[index],
                   ),
-                );
-              },
+                ],
+              ],
             ),
           ],
         ],
@@ -289,3 +176,125 @@ class InvoiceItemsCard extends StatelessWidget {
     );
   }
 }
+
+/// ودجت مستقل لبند كروت الفاتورة
+class _InvoiceItemRow extends StatelessWidget {
+  final int index;
+  final SaleInvoiceItemEntity item;
+
+  const _InvoiceItemRow({
+    required this.index,
+    required this.item,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final unitPrice = AmountFormatter.formatValue(item.voucherPrice);
+    final lineTotal = AmountFormatter.formatValue(item.itemTotalAmount);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 3.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // رقم البند
+          Container(
+            width: 22.r,
+            height: 22.r,
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              '${index + 1}',
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurfaceVariant,
+                fontWeight: FontWeight.w800,
+                fontSize: 9.5.sp,
+              ),
+            ),
+          ),
+          AppSpacing.hSm,
+
+          // اسم الباقة وسعر الوحدة والخصم
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.packageName?.isNotEmpty == true
+                      ? item.packageName!
+                      : 'باقة كروت #${item.packageId}',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.sp,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                AppSpacing.vXxs,
+                Row(
+                  children: [
+                    Text(
+                      '${item.voucherCount} كرت × $unitPrice ر.ي',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 10.sp,
+                      ),
+                    ),
+                    if (item.itemDiscount > 0) ...[
+                      AppSpacing.hXs,
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 5.w,
+                          vertical: 1.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.primary.withValues(alpha: 0.1),
+                          borderRadius: AppRadius.fullRadius,
+                        ),
+                        child: Text(
+                          'خصم: ${AmountFormatter.formatValue(item.itemDiscount)}',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 8.5.sp,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          AppSpacing.hXs,
+
+          // المبلغ الصافي بمحاذاة قياسية ثابتة (85.w)
+          SizedBox(
+            width: 85.w,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerEnd,
+              child: Text(
+                lineTotal,
+                style: AppTypography.titleSmall.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13.5.sp,
+                ),
+                textAlign: TextAlign.end,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

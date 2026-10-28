@@ -12,6 +12,8 @@ import 'package:netsales/features/operations/domain/usecases/get_voucher_request
 import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/create_sale_invoice_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/create_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/presentation/controllers/create_sale_invoice_controller.dart';
+import 'package:netsales/features/operations/presentation/controllers/create_voucher_request_controller.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/packages/data/datasources/packages_remote_data_source.dart';
 import 'package:netsales/features/packages/data/datasources/packages_remote_data_source_impl.dart';
@@ -130,6 +132,25 @@ class OperationsBinding extends Bindings {
         cancelVoucherRequestUseCase: Get.find<CancelVoucherRequestUseCase>(),
         createVoucherRequestUseCase: Get.find<CreateVoucherRequestUseCase>(),
         createSaleInvoiceUseCase: Get.find<CreateSaleInvoiceUseCase>(),
+      ),
+      fenix: true,
+    );
+
+    Get.lazyPut<CreateSaleInvoiceController>(
+      () => CreateSaleInvoiceController(
+        getNetworksUseCase: Get.find<GetNetworksUseCase>(),
+        getVoucherPackagesUseCase: Get.find<GetVoucherPackagesUseCase>(),
+        getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
+        createSaleInvoiceUseCase: Get.find<CreateSaleInvoiceUseCase>(),
+      ),
+      fenix: true,
+    );
+
+    Get.lazyPut<CreateVoucherRequestController>(
+      () => CreateVoucherRequestController(
+        getVoucherPackagesUseCase: Get.find<GetVoucherPackagesUseCase>(),
+        getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
+        createVoucherRequestUseCase: Get.find<CreateVoucherRequestUseCase>(),
       ),
       fenix: true,
     );

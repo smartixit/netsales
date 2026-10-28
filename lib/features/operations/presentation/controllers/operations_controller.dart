@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/domain/usecases/approve_voucher_request_use_case.dart';
@@ -98,17 +100,65 @@ class OperationsController extends GetxController {
   final TextEditingController searchController = TextEditingController();
   Timer? _searchDebounceTimer;
 
+  /// حقل إدخال سبب الرفض المدار في دورة حياة المتحكم لمنع تسرب الذاكرة
+  final TextEditingController rejectReasonController = TextEditingController();
+
+  int? get currentInvoiceId =>
+      selectedInvoice.value?.invoiceId ??
+      (Get.arguments is int
+          ? Get.arguments as int
+          : int.tryParse(Get.parameters['id'] ?? ''));
+
+  int? get currentRequestId =>
+      selectedRequest.value?.requestId ??
+      (Get.arguments is int
+          ? Get.arguments as int
+          : int.tryParse(Get.parameters['id'] ?? ''));
+
   @override
   void onInit() {
     super.onInit();
     loadInvoices();
     loadRequests();
+
+    final route = Get.currentRoute;
+    if (route == AppRoutes.saleInvoiceDetails && currentInvoiceId != null) {
+      loadInvoiceDetails(currentInvoiceId!);
+    } else if (route == AppRoutes.voucherRequestDetails &&
+        currentRequestId != null) {
+      loadRequestDetails(currentRequestId!);
+    }
+  }
+
+  void openInvoiceDetails(int id) {
+    loadInvoiceDetails(id);
+    Get.toNamed(AppRoutes.saleInvoiceDetails, arguments: id);
+  }
+
+  void openRequestDetails(int id) {
+    loadRequestDetails(id);
+    Get.toNamed(AppRoutes.voucherRequestDetails, arguments: id);
+  }
+
+  Future<void> refreshCurrentInvoice() async {
+    final id = currentInvoiceId;
+    if (id != null) {
+      await loadInvoiceDetails(id);
+    }
+  }
+
+  Future<void> refreshCurrentRequest() async {
+    final id = currentRequestId;
+    if (id != null) {
+      await loadRequestDetails(id);
+    }
   }
 
   @override
   void onClose() {
     _searchDebounceTimer?.cancel();
     searchController.dispose();
+    rejectReasonController.dispose();
     super.onClose();
   }
 
@@ -278,11 +328,17 @@ class OperationsController extends GetxController {
   }
 
   /// رفض طلب توريد الكروت
-  Future<void> rejectRequest(int id, {required String reason}) async {
+  Future<void> rejectRequest(int id, {String? reason}) async {
     isSubmittingAction.value = true;
+    final finalReason = (reason != null && reason.trim().isNotEmpty)
+        ? reason.trim()
+        : (rejectReasonController.text.trim().isNotEmpty
+            ? rejectReasonController.text.trim()
+            : 'مرفوض من قبل الإدارة');
+
     try {
       await CustomAnimationOverlay.showLoading(message: 'جاري رفض طلب التوريد...');
-      final updated = await rejectVoucherRequestUseCase(id, reason: reason);
+      final updated = await rejectVoucherRequestUseCase(id, reason: finalReason);
 
       final index = requests.indexWhere((r) => r.requestId == id);
       if (index != -1) {
@@ -291,6 +347,8 @@ class OperationsController extends GetxController {
       if (selectedRequest.value?.requestId == id) {
         selectedRequest.value = updated;
       }
+
+      rejectReasonController.clear();
 
       await CustomAnimationOverlay.showSuccess(
         message: 'تم رفض طلب توريد الكروت بنجاح',
@@ -469,4 +527,58 @@ class OperationsController extends GetxController {
 
   int get approvedRequestsCount =>
       requests.where((req) => req.isApproved).length;
+
+  /// تجميع الفواتير بحسب سياق التاريخ عبر DateFormatter الموحد
+  Map<String, List<SaleInvoiceEntity>> get groupedInvoices {
+    final Map<String, List<SaleInvoiceEntity>> result = {};
+    final now = DateTime.now();
+
+    for (final inv in invoices) {
+      final dt = DateFormatter.tryParse(inv.invoiceDate ?? inv.createdAt ?? '');
+
+      final String groupKey;
+      if (dt == null) {
+        groupKey = 'معاملات سابقة';
+      } else if (dt.isToday) {
+        groupKey = 'اليوم';
+      } else if (dt.isYesterday) {
+        groupKey = 'أمس';
+      } else if (DateFormatter.daysBetween(dt, now).abs() < 7) {
+        groupKey = 'هذا الأسبوع';
+      } else {
+        groupKey = DateFormatter.monthName(dt);
+      }
+
+      result.putIfAbsent(groupKey, () => []).add(inv);
+    }
+
+    return result;
+  }
+
+  /// تجميع طلبات التوريد بحسب سياق التاريخ عبر DateFormatter الموحد
+  Map<String, List<VoucherRequestEntity>> get groupedRequests {
+    final Map<String, List<VoucherRequestEntity>> result = {};
+    final now = DateTime.now();
+
+    for (final req in requests) {
+      final dt = DateFormatter.tryParse(req.requestDate ?? req.createdAt ?? '');
+
+      final String groupKey;
+      if (dt == null) {
+        groupKey = 'طلبات سابقة';
+      } else if (dt.isToday) {
+        groupKey = 'اليوم';
+      } else if (dt.isYesterday) {
+        groupKey = 'أمس';
+      } else if (DateFormatter.daysBetween(dt, now).abs() < 7) {
+        groupKey = 'هذا الأسبوع';
+      } else {
+        groupKey = DateFormatter.monthName(dt);
+      }
+
+      result.putIfAbsent(groupKey, () => []).add(req);
+    }
+
+    return result;
+  }
 }
