@@ -1,4 +1,5 @@
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
+import 'package:netsales/features/operations/domain/entities/sales_trend_point_entity.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 
 /// ============================================================================
@@ -18,6 +19,14 @@ abstract class OperationsRepository {
 
   /// جلب تفاصيل فاتورة بيع محددة مع بنود الباقات
   Future<SaleInvoiceEntity> getSaleInvoiceDetails(int id);
+
+  Future<List<SalesTrendPointEntity>> getSalesTrend({
+    String period = 'daily',
+    int? networkId,
+    int? posId,
+    String? fromDate,
+    String? toDate,
+  });
 
   /// جلب قائمة طلبات توريد الكروت مع الفلترة والبحث
   Future<List<VoucherRequestEntity>> getVoucherRequests({

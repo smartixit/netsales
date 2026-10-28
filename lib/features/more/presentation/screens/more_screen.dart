@@ -75,7 +75,7 @@ class MoreScreen extends GetView<MoreController> {
                   ),
                   title: 'الحسابات المصرفية',
                   subtitle: 'إدارة وتغذية الحسابات البنكية المعتمدة',
-                  onTap: () {},
+                  onTap: () => BankAccountsSheet.show(context),
                 ),
                 MoreMenuTile(
                   icon: Icons.payments_rounded,
@@ -85,7 +85,7 @@ class MoreScreen extends GetView<MoreController> {
                   ),
                   title: 'المصروفات التشغيلية',
                   subtitle: 'تسجيل وتتبع نفقات وإيصالات المنشأة',
-                  onTap: () {},
+                  onTap: () => OperationalExpensesSheet.show(context),
                 ),
                 MoreMenuTile(
                   icon: Icons.confirmation_number_rounded,
@@ -114,7 +114,7 @@ class MoreScreen extends GetView<MoreController> {
                   ),
                   title: 'اشتراك وخطة النظام',
                   subtitle: 'تفاصيل الخطة السحابية وتجديد الترخيص',
-                  onTap: () {},
+                  onTap: () => SubscriptionDetailsSheet.show(context),
                 ),
                 MoreMenuTile(
                   icon: Icons.support_agent_rounded,
@@ -160,7 +160,7 @@ class MoreScreen extends GetView<MoreController> {
                       ),
                     ),
                   ),
-                  onTap: () {},
+                  onTap: () => AuthorizedSessionsSheet.show(context),
                 ),
                 MoreMenuTile(
                   icon: Icons.notifications_active_outlined,

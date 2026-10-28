@@ -1,6 +1,7 @@
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/operations/data/datasources/operations_remote_data_source.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
+import 'package:netsales/features/operations/domain/entities/sales_trend_point_entity.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/domain/repositories/operations_repository.dart';
 
@@ -250,6 +251,35 @@ class OperationsRepositoryImpl implements OperationsRepository {
           ? response.message
           : 'تعذر حذف طلب الكروت',
     );
+  }
+
+  @override
+  Future<List<SalesTrendPointEntity>> getSalesTrend({
+    String period = 'daily',
+    int? networkId,
+    int? posId,
+    String? fromDate,
+    String? toDate,
+  }) async {
+    final response = await _remoteDataSource.getSalesTrend(
+      period: period,
+      networkId: networkId,
+      posId: posId,
+      fromDate: fromDate,
+      toDate: toDate,
+    );
+
+    if (response.data != null) {
+      return response.data!
+          .map((m) => SalesTrendPointEntity(
+                period: m.period,
+                total: m.total,
+                count: m.count,
+              ))
+          .toList();
+    }
+
+    throw AppException('failed');
   }
 }
 

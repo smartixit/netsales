@@ -71,10 +71,10 @@ class MoreController extends GetxController {
   final RxBool isLoadingExpenses = false.obs;
   final RxString expensesErrorMessage = ''.obs;
 
-  /// شبكات المنشأة المتاحة لقيد النفقات واختيار الشبكة المحددة
+  /// شبكات المنشأة المتاحة لقيد النفقات واختيار الشبكة المحددة عبر ValueNotifier
   final RxList<NetworkEntity> availableNetworks = <NetworkEntity>[].obs;
   final RxBool isLoadingNetworks = false.obs;
-  final RxnInt selectedExpenseNetworkId = RxnInt();
+  final ValueNotifier<int?> selectedExpenseNetworkId = ValueNotifier<int?>(null);
 
   /// الجلسات والأجهزة المصرح بها
   final RxList<UserSessionEntity> userSessions = <UserSessionEntity>[].obs;
@@ -110,6 +110,12 @@ class MoreController extends GetxController {
   void onInit() {
     super.onInit();
     loadOverview();
+  }
+
+  @override
+  void onClose() {
+    selectedExpenseNetworkId.dispose();
+    super.onClose();
   }
 
   /// جلب وتحديث النظرة المالية والتشغيلية المجمعة
@@ -197,6 +203,12 @@ class MoreController extends GetxController {
     } finally {
       isLoadingNetworks.value = false;
     }
+  }
+
+  /// تغيير الشبكة المحددة لقيد المصروف مطابق لنمط CreateSaleInvoiceController
+  void onExpenseNetworkChanged(int? newNetId) {
+    if (newNetId == null || newNetId == selectedExpenseNetworkId.value) return;
+    selectedExpenseNetworkId.value = newNetId;
   }
 
   /// جلب المصروفات التشغيلية

@@ -28,59 +28,6 @@ class DashboardSalesTrendChart extends StatelessWidget {
 
   const DashboardSalesTrendChart({super.key, required this.controller});
 
-  List<_SalesTrendDataPoint> _resolveTrendPoints({
-    required String period,
-    required double totalAmount,
-    required double cashAmount,
-    required double creditAmount,
-  }) {
-    // توزيع نقاط استدلالية انسيابية متناسبة مع نوع الفترة والمبالغ المسجلة
-    if (totalAmount <= 0.001) {
-      return const [
-        _SalesTrendDataPoint('01', 0),
-        _SalesTrendDataPoint('02', 0),
-        _SalesTrendDataPoint('03', 0),
-        _SalesTrendDataPoint('04', 0),
-        _SalesTrendDataPoint('05', 0),
-      ];
-    }
-
-    switch (period) {
-      case 'this_week':
-        return [
-          _SalesTrendDataPoint('السبت', totalAmount * 0.12),
-          _SalesTrendDataPoint('الأحد', totalAmount * 0.18),
-          _SalesTrendDataPoint('الإثنين', totalAmount * 0.15),
-          _SalesTrendDataPoint('الثلاثاء', totalAmount * 0.22),
-          _SalesTrendDataPoint('الأربعاء', totalAmount * 0.14),
-          _SalesTrendDataPoint('الخميس', totalAmount * 0.19),
-        ];
-      case 'this_month':
-      case 'last_30_days':
-        return [
-          _SalesTrendDataPoint('أسبوع 1', totalAmount * 0.20),
-          _SalesTrendDataPoint('أسبوع 2', totalAmount * 0.28),
-          _SalesTrendDataPoint('أسبوع 3', totalAmount * 0.24),
-          _SalesTrendDataPoint('أسبوع 4', totalAmount * 0.28),
-        ];
-      case 'this_year':
-        return [
-          _SalesTrendDataPoint('الربع 1', totalAmount * 0.22),
-          _SalesTrendDataPoint('الربع 2', totalAmount * 0.26),
-          _SalesTrendDataPoint('الربع 3', totalAmount * 0.24),
-          _SalesTrendDataPoint('الربع 4', totalAmount * 0.28),
-        ];
-      default: // 'today'
-        return [
-          _SalesTrendDataPoint('08 ص', totalAmount * 0.10),
-          _SalesTrendDataPoint('11 ص', totalAmount * 0.25),
-          _SalesTrendDataPoint('02 م', totalAmount * 0.18),
-          _SalesTrendDataPoint('05 م', totalAmount * 0.27),
-          _SalesTrendDataPoint('08 م', totalAmount * 0.20),
-        ];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -105,7 +52,7 @@ class DashboardSalesTrendChart extends StatelessWidget {
       final creditAmount =
           (salesData['credit_sales_amount'] as num?)?.toDouble() ?? 0.0;
       final invoicesCount = (salesData['invoices_count'] as num?)?.toInt() ?? 0;
-      final periodKey = controller.selectedPeriod.value;
+
 
       final isPositiveGrowth = growth >= 0;
       // Real time-series from backend (no fabricated data).

@@ -10,9 +10,11 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/more/domain/entities/expense_entity.dart';
 import 'package:netsales/features/more/presentation/controllers/more_controller.dart';
+import 'package:netsales/features/partners/domain/entities/network_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -29,6 +31,7 @@ class OperationalExpensesSheet extends StatefulWidget {
   static Future<void> show(BuildContext context) {
     final controller = Get.find<MoreController>();
     controller.loadExpenses();
+    controller.loadNetworksForExpenses();
 
     return CustomBottomSheet.show<void>(
       title: 'المصروفات والنفقات التشغيلية',
@@ -58,6 +61,16 @@ class _OperationalExpensesSheetState extends State<OperationalExpensesSheet> {
   }
 
   Future<void> _submitExpense(MoreController controller) async {
+    final networkId = controller.selectedExpenseNetworkId.value;
+    if (networkId == null) {
+      CustomSnackbar.show(
+        title: 'تحديد الشبكة',
+        message: 'يرجى اختيار الشبكة التابع لها المصروف أولاً.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
     final amountText = _amountController.text.trim();
     final amount = double.tryParse(amountText);
 
@@ -70,11 +83,8 @@ class _OperationalExpensesSheetState extends State<OperationalExpensesSheet> {
       return;
     }
 
-    // الاعتماد على معرف المستخدم أو المعرف الافتراضي
-    final userId = controller.currentUser?.userId ?? 1;
-
     final success = await controller.createExpense(
-      networkId: userId,
+      networkId: networkId,
       totalAmount: amount,
       notes: _notesController.text.trim().isNotEmpty
           ? _notesController.text.trim()
@@ -90,7 +100,6 @@ class _OperationalExpensesSheetState extends State<OperationalExpensesSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final controller = Get.find<MoreController>();
 
     return Column(
@@ -123,6 +132,8 @@ class _OperationalExpensesSheetState extends State<OperationalExpensesSheet> {
   }
 
   Widget _buildExpensesList(BuildContext context, MoreController controller) {
+    final colors = context.colors;
+
     return Obx(() {
       final isLoading = controller.isLoadingExpenses.value;
       final errorMessage = controller.expensesErrorMessage.value;
@@ -194,10 +205,37 @@ class _OperationalExpensesSheetState extends State<OperationalExpensesSheet> {
 
     return Obx(() {
       final isSubmitting = controller.isSubmittingAction.value;
+      final networks = controller.availableNetworks;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // 0. اختيار الشبكة التابع لها المصروف مطابق لأسلوب sales_sheet
+          if (networks.length > 1) ...[
+            CustomDropdown<int>(
+              label: 'الشبكة التابع لها المصروف',
+              hint: 'اختر الشبكة',
+              prefixIcon: Icons.cell_tower_rounded,
+              valueListenable: controller.selectedExpenseNetworkId,
+              items: networks
+                  .map(
+                    (net) => DropdownItem<int>(
+                      value: net.networkId,
+                      child: Text(net.networkName),
+                    ),
+                  )
+                  .toList(),
+              itemSearchText: (id) =>
+                  networks
+                      .cast<NetworkEntity?>()
+                      .firstWhere((n) => n?.networkId == id, orElse: () => null)
+                      ?.networkName ??
+                  '',
+              onChanged: controller.onExpenseNetworkChanged,
+            ),
+            AppSpacing.vMd,
+          ],
+
           CustomTextField(
             controller: _amountController,
             label: 'مبلغ المصروف التشغيلي',

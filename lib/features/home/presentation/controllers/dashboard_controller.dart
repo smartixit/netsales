@@ -1,4 +1,4 @@
-import 'dart:developer';
+
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -147,7 +147,7 @@ class DashboardController extends GetxController {
   /// نمط موحد: try/catch مع AppException.sanitizeMessage (display-only، غير حرج).
   Future<void> loadTrend({String period = 'daily'}) async {
     try {
-      final result = await _getSalesTrendUseCase(
+      final result = await getSalesTrendUseCase(
         period: period,
       );
       trendPoints.assignAll(result);

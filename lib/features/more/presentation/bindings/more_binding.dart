@@ -12,6 +12,11 @@ import 'package:netsales/features/more/domain/usecases/logout_use_case.dart';
 import 'package:netsales/features/more/domain/usecases/terminate_session_use_case.dart';
 import 'package:netsales/features/more/domain/usecases/toggle_bank_account_status_use_case.dart';
 import 'package:netsales/features/more/presentation/controllers/more_controller.dart';
+import 'package:netsales/features/partners/data/datasources/partners_remote_data_source.dart';
+import 'package:netsales/features/partners/data/datasources/partners_remote_data_source_impl.dart';
+import 'package:netsales/features/partners/data/repositories/partners_repository_impl.dart';
+import 'package:netsales/features/partners/domain/repositories/partners_repository.dart';
+import 'package:netsales/features/partners/domain/usecases/get_networks_use_case.dart';
 
 /// ============================================================================
 /// رابط حقن تبعيات قطاع المزيد (MoreBinding)
@@ -71,16 +76,38 @@ class MoreBinding extends Bindings {
       fenix: true,
     );
 
+    // تسجيل حالات استخدام شبكات الشركاء إن لم تكن مسجلة مسبقاً لاختيار شبكة المصروف
+    if (!Get.isRegistered<PartnersRemoteDataSource>()) {
+      Get.lazyPut<PartnersRemoteDataSource>(
+        () => const PartnersRemoteDataSourceImpl(),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<PartnersRepository>()) {
+      Get.lazyPut<PartnersRepository>(
+        () => PartnersRepositoryImpl(Get.find<PartnersRemoteDataSource>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<GetNetworksUseCase>()) {
+      Get.lazyPut<GetNetworksUseCase>(
+        () => GetNetworksUseCase(Get.find<PartnersRepository>()),
+        fenix: true,
+      );
+    }
+
     Get.lazyPut<MoreController>(
       () => MoreController(
         getMoreOverviewUseCase: Get.find<GetMoreOverviewUseCase>(),
         logoutUseCase: Get.find<LogoutUseCase>(),
         getBankAccountsUseCase: Get.find<GetBankAccountsUseCase>(),
-        toggleBankAccountStatusUseCase: Get.find<ToggleBankAccountStatusUseCase>(),
+        toggleBankAccountStatusUseCase:
+            Get.find<ToggleBankAccountStatusUseCase>(),
         getExpensesUseCase: Get.find<GetExpensesUseCase>(),
         createExpenseUseCase: Get.find<CreateExpenseUseCase>(),
         getUserSessionsUseCase: Get.find<GetUserSessionsUseCase>(),
         terminateSessionUseCase: Get.find<TerminateSessionUseCase>(),
+        getNetworksUseCase: Get.find<GetNetworksUseCase>(),
       ),
       fenix: true,
     );
