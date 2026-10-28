@@ -64,4 +64,16 @@ abstract class OperationsRepository {
     required List<Map<String, dynamic>> items,
     double? paidAmount,
   });
+
+  /// تعديل طلب توريد كروت قيد الانتظار
+  Future<VoucherRequestEntity> updateVoucherRequest(
+    int id, {
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? requestNote,
+  });
+
+  /// حذف طلب توريد كروت قيد الانتظار أو الملغي
+  Future<void> deleteVoucherRequest(int id);
 }
+

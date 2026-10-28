@@ -41,14 +41,23 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (_) => _controller.forward(),
-      onPointerUp: (_) => _controller.reverse(),
-      onPointerCancel: (_) => _controller.reverse(),
-      child: GestureDetector(
+    if (AppMotion.disabled(context)) {
+      return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
-        child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
+        child: widget.child,
+      );
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) => _controller.reverse(),
+      onTapCancel: () => _controller.reverse(),
+      onTap: widget.onTap,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: widget.child,
       ),
     );
   }

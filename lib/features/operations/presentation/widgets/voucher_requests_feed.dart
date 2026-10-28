@@ -7,12 +7,15 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_voucher_request_sheet.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/edit_voucher_request_sheet.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/reject_voucher_request_sheet.dart';
 import 'package:netsales/features/operations/presentation/widgets/voucher_request_ledger_tile.dart';
+import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
+import 'package:netsales/widgets/sheets/invoice_print_format_sheet.dart';
 
 /// ============================================================================
 /// قائمة تدفق طلبات توريد الكروت بالسجل السيادي المصنف (VoucherRequestsFeed)
@@ -150,6 +153,48 @@ class VoucherRequestsFeed extends StatelessWidget {
                               controller: ctrl,
                             )
                           : null,
+                      onEdit: request.isPending
+                          ? () => EditVoucherRequestSheet.show(
+                              context,
+                              request: request,
+                            )
+                          : null,
+                      onCancel: request.isPending
+                          ? () async {
+                              final confirmed =
+                                  await CustomDialog.showConfirmation(
+                                title: 'تأكيد إلغاء الطلب',
+                                message:
+                                    'هل أنت متأكد من رغبتك في إلغاء طلب التوريد #${request.requestUuid}؟',
+                                confirmLabel: 'نعم، إلغاء الطلب',
+                                cancelLabel: 'تراجع',
+                              );
+                              if (confirmed == true) {
+                                await ctrl.cancelRequest(request.requestId);
+                              }
+                            }
+                          : null,
+                      onDelete: (request.isPending || request.isCancelled)
+                          ? () async {
+                              final confirmed = await CustomDialog.showDanger(
+                                title: 'تأكيد حذف الطلب',
+                                message:
+                                    'هل أنت متأكد من رغبتك في حذف طلب التوريد #${request.requestUuid}؟ لن تتمكن من استرجاعه بعد الحذف.',
+                                confirmLabel: 'نعم، حذف نهائي',
+                                cancelLabel: 'إلغاء',
+                              );
+                              if (confirmed == true) {
+                                await ctrl.deleteRequest(
+                                  request.requestId,
+                                  requestUuid: request.requestUuid,
+                                );
+                              }
+                            }
+                          : null,
+                      onShare: () => InvoicePrintFormatSheet.show(
+                        context,
+                        request: request,
+                      ),
                     ),
                   ),
                 ),

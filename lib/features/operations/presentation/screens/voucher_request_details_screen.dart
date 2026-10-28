@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
@@ -8,15 +7,14 @@ import 'package:netsales/features/operations/presentation/controllers/operations
 import 'package:netsales/features/operations/presentation/widgets/operations_details_skeleton_view.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_audit_status_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_details_action_dock.dart';
+import 'package:netsales/features/operations/presentation/widgets/request_details_app_bar_actions.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_hero_bond_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_items_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_notes_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_parties_card.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/sheets/invoice_print_format_sheet.dart';
 
 /// ============================================================================
 /// شاشة تفاصيل طلب توريد الكروت السيادية (VoucherRequestDetailsScreen)
@@ -37,20 +35,7 @@ class VoucherRequestDetailsScreen extends GetView<OperationsController> {
       useSurfaceMesh: true,
       extendBodyBehindAppBar: true,
       actions: [
-        CustomButton.icon(
-          icon: Icons.share_outlined,
-          tooltip: 'طباعة ومشاركة الطلب',
-          onPressed: () {
-            final request = controller.selectedRequest.value;
-            if (request != null) {
-              InvoicePrintFormatSheet.show(context, request: request);
-            }
-          },
-          dimension: 40.r,
-          iconSize: 18.r,
-          backgroundColor: Colors.transparent,
-        ),
-        AppSpacing.hXs,
+        RequestDetailsAppBarActions(controller: controller),
       ],
       bottomNavigationBar: Obx(() {
         final request = controller.selectedRequest.value;

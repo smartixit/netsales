@@ -15,6 +15,8 @@ import 'package:netsales/features/operations/domain/usecases/get_sale_invoices_u
 import 'package:netsales/features/operations/domain/usecases/get_voucher_request_details_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_voucher_requests_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/update_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/delete_voucher_request_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -33,6 +35,8 @@ class OperationsController extends GetxController {
   final CancelVoucherRequestUseCase cancelVoucherRequestUseCase;
   final CreateVoucherRequestUseCase createVoucherRequestUseCase;
   final CreateSaleInvoiceUseCase createSaleInvoiceUseCase;
+  final UpdateVoucherRequestUseCase updateVoucherRequestUseCase;
+  final DeleteVoucherRequestUseCase deleteVoucherRequestUseCase;
 
   OperationsController({
     required this.getSaleInvoicesUseCase,
@@ -44,6 +48,8 @@ class OperationsController extends GetxController {
     required this.cancelVoucherRequestUseCase,
     required this.createVoucherRequestUseCase,
     required this.createSaleInvoiceUseCase,
+    required this.updateVoucherRequestUseCase,
+    required this.deleteVoucherRequestUseCase,
   });
 
   /// القطاع النشط: 0 لفواتير المبيعات، 1 لطلبات الكروت
@@ -418,6 +424,84 @@ class OperationsController extends GetxController {
         message: cleanMessage,
         type: SnackType.error,
       );
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  /// حذف طلب كروت قيد الانتظار أو ملغي
+  Future<void> deleteRequest(int id, {String? requestUuid}) async {
+    isSubmittingAction.value = true;
+    try {
+      await CustomAnimationOverlay.showLoading(message: 'جاري حذف الطلب...');
+      await deleteVoucherRequestUseCase(id);
+      requests.removeWhere((r) => r.requestId == id);
+      if (selectedRequest.value?.requestId == id) {
+        selectedRequest.value = null;
+      }
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم حذف طلب الكروت بنجاح',
+      );
+      if (Get.currentRoute == AppRoutes.voucherRequestDetails) {
+        Get.back();
+      }
+    } catch (e) {
+      await CustomAnimationOverlay.hide();
+      final cleanMessage = AppException.sanitizeMessage(e);
+      CustomSnackbar.show(
+        title: 'تعذر حذف الطلب',
+        message: cleanMessage,
+        type: SnackType.error,
+      );
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  /// تعديل طلب كروت قيد الانتظار
+  Future<bool> updateRequest(
+    int id, {
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? requestNote,
+  }) async {
+    isSubmittingAction.value = true;
+    try {
+      await CustomAnimationOverlay.showLoading(message: 'جاري حفظ تعديلات الطلب...');
+      final updated = await updateVoucherRequestUseCase(
+        id,
+        saleType: saleType,
+        items: items,
+        requestNote: requestNote,
+      );
+      final index = requests.indexWhere((r) => r.requestId == id);
+      if (index != -1) {
+        requests[index] = updated;
+      }
+      if (selectedRequest.value?.requestId == id) {
+        selectedRequest.value = updated;
+      }
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم تعديل طلب الكروت بنجاح',
+      );
+      return true;
+    } catch (e) {
+      await CustomAnimationOverlay.hide();
+      final cleanMessage = AppException.sanitizeMessage(e);
+      CustomSnackbar.show(
+        title: 'تعذر تعديل الطلب',
+        message: cleanMessage,
+        type: SnackType.error,
+      );
+      return false;
     } finally {
       isSubmittingAction.value = false;
       if (CustomAnimationOverlay.isShowing) {

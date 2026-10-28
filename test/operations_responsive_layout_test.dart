@@ -10,11 +10,13 @@ import 'package:netsales/features/operations/domain/usecases/approve_voucher_req
 import 'package:netsales/features/operations/domain/usecases/cancel_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/create_sale_invoice_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/create_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/delete_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_sale_invoice_details_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_sale_invoices_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_voucher_request_details_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/get_voucher_requests_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/update_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/operations_kpi_summary_strip.dart';
 import 'package:netsales/features/operations/presentation/widgets/operations_search_and_filter_bar.dart';
@@ -93,6 +95,17 @@ class FakeOperationsRepository implements OperationsRepository {
     required List<Map<String, dynamic>> items,
     double? paidAmount,
   }) => throw UnimplementedError();
+
+  @override
+  Future<VoucherRequestEntity> updateVoucherRequest(
+    int id, {
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? requestNote,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<void> deleteVoucherRequest(int id) async {}
 }
 
 void main() {
@@ -182,6 +195,8 @@ void main() {
       cancelVoucherRequestUseCase: CancelVoucherRequestUseCase(repo),
       createVoucherRequestUseCase: CreateVoucherRequestUseCase(repo),
       createSaleInvoiceUseCase: CreateSaleInvoiceUseCase(repo),
+      updateVoucherRequestUseCase: UpdateVoucherRequestUseCase(repo),
+      deleteVoucherRequestUseCase: DeleteVoucherRequestUseCase(repo),
     );
     controller.invoices.assignAll([dummyInvoice]);
     controller.requests.assignAll([dummyRequest]);
@@ -245,8 +260,8 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(tester.takeException(), isNull);
-          expect(find.text('فواتير المبيعات'), findsOneWidget);
-          expect(find.text('طلبات التوريد'), findsOneWidget);
+          expect(find.text('الفواتير'), findsOneWidget);
+          expect(find.text('الطلبات'), findsOneWidget);
         },
       );
 
@@ -627,13 +642,21 @@ void main() {
           ],
         );
 
+        bool isExpanded = false;
         await tester.pumpWidget(
           createHarness(
             screenSize: const Size(375, 700),
             child: SingleChildScrollView(
-              child: SaleInvoiceLedgerTile(
-                invoice: multiItemInvoice,
-                onTap: () {},
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  return SaleInvoiceLedgerTile(
+                    invoice: multiItemInvoice,
+                    isExpanded: isExpanded,
+                    onToggleExpand: () =>
+                        setState(() => isExpanded = !isExpanded),
+                    onTap: () {},
+                  );
+                },
               ),
             ),
           ),
@@ -802,6 +825,8 @@ void main() {
           cancelVoucherRequestUseCase: CancelVoucherRequestUseCase(repository),
           createVoucherRequestUseCase: CreateVoucherRequestUseCase(repository),
           createSaleInvoiceUseCase: CreateSaleInvoiceUseCase(repository),
+          updateVoucherRequestUseCase: UpdateVoucherRequestUseCase(repository),
+          deleteVoucherRequestUseCase: DeleteVoucherRequestUseCase(repository),
         );
 
         const req1 = VoucherRequestEntity(

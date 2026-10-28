@@ -747,7 +747,8 @@ class CustomButton extends StatelessWidget {
           variant == AppButtonVariant.floating) {
         effectiveWidth = _effectiveHeight;
       } else if (variant == AppButtonVariant.text ||
-          size == AppButtonSize.small) {
+          size == AppButtonSize.small ||
+          (height != null && height! <= 42.h)) {
         effectiveWidth = null;
       } else {
         effectiveWidth = double.infinity;

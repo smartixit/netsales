@@ -12,8 +12,11 @@ import 'package:netsales/features/operations/domain/usecases/get_voucher_request
 import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/create_sale_invoice_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/create_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/update_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/delete_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/presentation/controllers/create_sale_invoice_controller.dart';
 import 'package:netsales/features/operations/presentation/controllers/create_voucher_request_controller.dart';
+import 'package:netsales/features/operations/presentation/controllers/edit_voucher_request_controller.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/packages/data/datasources/packages_remote_data_source.dart';
 import 'package:netsales/features/packages/data/datasources/packages_remote_data_source_impl.dart';
@@ -74,6 +77,14 @@ class OperationsBinding extends Bindings {
       () => CreateSaleInvoiceUseCase(Get.find<OperationsRepository>()),
       fenix: true,
     );
+    Get.lazyPut<UpdateVoucherRequestUseCase>(
+      () => UpdateVoucherRequestUseCase(Get.find<OperationsRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<DeleteVoucherRequestUseCase>(
+      () => DeleteVoucherRequestUseCase(Get.find<OperationsRepository>()),
+      fenix: true,
+    );
 
     // تسجيل التبعيات المساعدة للفوترة وتوريد الكروت إن لم تكن مسجلة مسبقاً
     if (!Get.isRegistered<PackagesRemoteDataSource>()) {
@@ -132,6 +143,8 @@ class OperationsBinding extends Bindings {
         cancelVoucherRequestUseCase: Get.find<CancelVoucherRequestUseCase>(),
         createVoucherRequestUseCase: Get.find<CreateVoucherRequestUseCase>(),
         createSaleInvoiceUseCase: Get.find<CreateSaleInvoiceUseCase>(),
+        updateVoucherRequestUseCase: Get.find<UpdateVoucherRequestUseCase>(),
+        deleteVoucherRequestUseCase: Get.find<DeleteVoucherRequestUseCase>(),
       ),
       fenix: true,
     );
@@ -151,6 +164,14 @@ class OperationsBinding extends Bindings {
         getVoucherPackagesUseCase: Get.find<GetVoucherPackagesUseCase>(),
         getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
         createVoucherRequestUseCase: Get.find<CreateVoucherRequestUseCase>(),
+      ),
+      fenix: true,
+    );
+
+    Get.lazyPut<EditVoucherRequestController>(
+      () => EditVoucherRequestController(
+        getVoucherPackagesUseCase: Get.find<GetVoucherPackagesUseCase>(),
+        updateVoucherRequestUseCase: Get.find<UpdateVoucherRequestUseCase>(),
       ),
       fenix: true,
     );

@@ -242,6 +242,7 @@ class CreateSaleInvoiceSheet extends StatelessWidget {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
+              isRequired: false,
               inputFormatters: const [AmountTextInputFormatter()],
               prefixIcon: Icon(
                 Icons.paid_outlined,

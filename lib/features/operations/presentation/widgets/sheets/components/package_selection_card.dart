@@ -230,6 +230,7 @@ class PackageSelectionCard extends StatelessWidget {
                 CustomButton.outline(
                   text: 'تحديد كمية',
                   icon: Icons.add_rounded,
+                  size: AppButtonSize.small,
                   iconSize: 14.r,
                   height: 32.h,
                   padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),

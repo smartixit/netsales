@@ -55,4 +55,13 @@ abstract class OperationsRemoteDataSource {
     required List<Map<String, dynamic>> items,
     double? paidAmount,
   });
+
+  Future<ApiResponse<VoucherRequestModel>> updateVoucherRequest(
+    int id, {
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? requestNote,
+  });
+
+  Future<ApiResponse<void>> deleteVoucherRequest(int id);
 }

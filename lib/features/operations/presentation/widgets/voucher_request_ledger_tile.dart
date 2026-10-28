@@ -24,6 +24,10 @@ class VoucherRequestLedgerTile extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onApprove;
   final VoidCallback? onReject;
+  final VoidCallback? onEdit;
+  final VoidCallback? onCancel;
+  final VoidCallback? onDelete;
+  final VoidCallback? onShare;
   final bool isExpanded;
   final VoidCallback? onToggleExpand;
 
@@ -33,6 +37,10 @@ class VoucherRequestLedgerTile extends StatelessWidget {
     required this.onTap,
     this.onApprove,
     this.onReject,
+    this.onEdit,
+    this.onCancel,
+    this.onDelete,
+    this.onShare,
     this.isExpanded = false,
     this.onToggleExpand,
   });
@@ -226,6 +234,13 @@ class VoucherRequestLedgerTile extends StatelessWidget {
                             ),
                           ),
                         ),
+                        if (onEdit != null ||
+                            onCancel != null ||
+                            onDelete != null ||
+                            onShare != null) ...[
+                          AppSpacing.hXxs,
+                          _buildTileOverflowMenu(context, colors),
+                        ],
                       ],
                     ),
 
@@ -430,6 +445,125 @@ class VoucherRequestLedgerTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTileOverflowMenu(BuildContext context, AppColors colors) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        popupMenuTheme: PopupMenuThemeData(
+          color: colors.surfaceContainerHighest,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppRadius.mdRadius,
+            side: BorderSide(
+              color: colors.outline.withValues(alpha: 0.12),
+            ),
+          ),
+          elevation: 4,
+          shadowColor: AppElevation.level3(context).first.color,
+        ),
+      ),
+      child: PopupMenuButton<String>(
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints(minWidth: 135.w),
+        icon: Icon(
+          Icons.more_vert_rounded,
+          color: colors.onSurfaceVariant,
+          size: 18.r,
+        ),
+        tooltip: 'خيارات الطلب',
+        position: PopupMenuPosition.under,
+        onSelected: (value) {
+          switch (value) {
+            case 'edit':
+              onEdit?.call();
+              break;
+            case 'cancel':
+              onCancel?.call();
+              break;
+            case 'delete':
+              onDelete?.call();
+              break;
+            case 'share':
+              onShare?.call();
+              break;
+          }
+        },
+        itemBuilder: (ctx) => [
+          if (request.isPending && onEdit != null)
+            PopupMenuItem<String>(
+              value: 'edit',
+              child: Row(
+                children: [
+                  Icon(Icons.edit_outlined, color: colors.primary, size: 16.r),
+                  AppSpacing.hSm,
+                  Text(
+                    'تعديل الطلب',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (request.isPending && onCancel != null)
+            PopupMenuItem<String>(
+              value: 'cancel',
+              child: Row(
+                children: [
+                  Icon(Icons.block_outlined, color: colors.warning, size: 16.r),
+                  AppSpacing.hSm,
+                  Text(
+                    'إلغاء الطلب',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.warning,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if ((request.isPending || request.isCancelled) && onDelete != null)
+            PopupMenuItem<String>(
+              value: 'delete',
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.delete_outline_rounded,
+                    color: colors.error,
+                    size: 16.r,
+                  ),
+                  AppSpacing.hSm,
+                  Text(
+                    'حذف الطلب',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (onShare != null)
+            PopupMenuItem<String>(
+              value: 'share',
+              child: Row(
+                children: [
+                  Icon(Icons.share_outlined, color: colors.primary, size: 16.r),
+                  AppSpacing.hSm,
+                  Text(
+                    'طباعة ومشاركة',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

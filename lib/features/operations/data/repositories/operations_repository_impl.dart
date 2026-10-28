@@ -211,4 +211,45 @@ class OperationsRepositoryImpl implements OperationsRepository {
           : 'تعذر إنشاء فاتورة المبيعات',
     );
   }
+
+  @override
+  Future<VoucherRequestEntity> updateVoucherRequest(
+    int id, {
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? requestNote,
+  }) async {
+    final response = await _remoteDataSource.updateVoucherRequest(
+      id,
+      saleType: saleType,
+      items: items,
+      requestNote: requestNote,
+    );
+
+    if (response.data != null) {
+      return response.data!;
+    }
+
+    throw AppException(
+      response.message.isNotEmpty
+          ? response.message
+          : 'تعذر تعديل طلب الكروت',
+    );
+  }
+
+  @override
+  Future<void> deleteVoucherRequest(int id) async {
+    final response = await _remoteDataSource.deleteVoucherRequest(id);
+
+    if (response.success) {
+      return;
+    }
+
+    throw AppException(
+      response.message.isNotEmpty
+          ? response.message
+          : 'تعذر حذف طلب الكروت',
+    );
+  }
 }
+
