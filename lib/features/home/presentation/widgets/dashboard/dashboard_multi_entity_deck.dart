@@ -20,7 +20,7 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 /// تطبق المعيار العالمي لإدارة الكيانات المتعددة المستقلة (Multi-Entity Horizon Deck)،
 /// حيث تحتفظ كل شبكة بذمتها المالية وبياناتها التشغيلية الخاصة دون خلط أو دمج مضلل،
 /// مع دعم الانتقال الحركي السلس ومزامنة البيانات اللحظية والخصوصية.
-class DashboardMultiEntityDeck extends StatefulWidget {
+class DashboardMultiEntityDeck extends StatelessWidget {
   final DashboardController controller;
   final VoidCallback? onActionTap;
 
@@ -31,59 +31,26 @@ class DashboardMultiEntityDeck extends StatefulWidget {
   });
 
   @override
-  State<DashboardMultiEntityDeck> createState() =>
-      _DashboardMultiEntityDeckState();
-}
-
-class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
-  late final PageController _pageController;
-
-  @override
-  void initState() {
-    super.initState();
-    final initialIndex = widget.controller.selectedNetworkIndex.value;
-    _pageController = PageController(
-      initialPage: initialIndex,
-      viewportFraction: widget.controller.hasMultipleNetworks ? 0.92 : 1.0,
-    );
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final networks = widget.controller.networks;
-      final liquidity = widget.controller.liquidity;
-      final isMasked = widget.controller.isPrivacyMasked.value;
-      final hasMultiple = widget.controller.hasMultipleNetworks;
+      final networks = controller.networks;
+      final liquidity = controller.liquidity;
+      final isMasked = controller.isPrivacyMasked.value;
+      final hasMultiple = controller.hasMultipleNetworks;
 
       // 1. في حال كان المستخدم مديراً عاماً للنظام (Super Admin)
-      if (widget.controller.isSuperAdmin) {
-        final kpis = widget.controller.kpis;
-        final networksKpi = (kpis['networks'] as Map<String, dynamic>?) ?? {};
-        final posKpi = (kpis['pos'] as Map<String, dynamic>?) ?? {};
-        final totalNetworks = (networksKpi['total'] as num?)?.toInt() ?? 0;
-        final approvedNetworks =
-            (networksKpi['approved'] as num?)?.toInt() ?? 0;
-        final totalPos = (posKpi['total'] as num?)?.toInt() ?? 0;
-        final approvedPos = (posKpi['approved'] as num?)?.toInt() ?? 0;
-
+      if (controller.isSuperAdmin) {
         return SizedBox(
           height: 200.h,
           child: _SuperAdminPlatformHeroCard(
             balance: liquidity?.balance ?? 0.0,
             currency: liquidity?.currency ?? 'YER',
-            totalNetworks: totalNetworks,
-            approvedNetworks: approvedNetworks,
-            totalPos: totalPos,
-            approvedPos: approvedPos,
+            totalNetworks: controller.totalNetworksCount,
+            approvedNetworks: controller.approvedNetworksCount,
+            totalPos: controller.totalPosCount,
+            approvedPos: controller.approvedPosCount,
             isMasked: isMasked,
-            onActionTap: widget.onActionTap,
+            onActionTap: onActionTap,
           ),
         );
       }
@@ -91,16 +58,16 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
       // 2. في حال عدم وجود شبكات في المحفظة، الاعتماد على بطاقة السيولة الافتراضية
       if (networks.isEmpty) {
         if (liquidity == null) return const SizedBox.shrink();
-        final isPos = widget.controller.isPosAgent;
+        final isPos = controller.isPosAgent;
         return SizedBox(
           height: 200.h,
           child: _SingleEntityCard(
             cardIndex: 0,
             title:
-                widget.controller.contextData?.displayName ??
+                controller.contextData?.displayName ??
                 (isPos ? 'نقطة البيع المعتمدة' : 'الشبكة التشغيلية'),
             code:
-                widget.controller.contextData?.displayCode ??
+                controller.contextData?.displayCode ??
                 (isPos ? 'POS AGENT' : ''),
             logoUrl: null,
             balance: liquidity.balance,
@@ -109,7 +76,7 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
             pendingRequestsCount: 0,
             isNegative: liquidity.balance < 0 || liquidity.isOverdrawn,
             isMasked: isMasked,
-            onActionTap: widget.onActionTap,
+            onActionTap: onActionTap,
           ),
         );
       }
@@ -130,13 +97,13 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
             pendingRequestsCount: net.pendingRequestsCount,
             isNegative: isNegative,
             isMasked: isMasked,
-            onActionTap: widget.onActionTap,
+            onActionTap: onActionTap,
           ),
         );
       }
 
       // في حال تعدد الشبكات: عرض Deck تفاعلي أفقي مستقل لكل كيان
-      final currentIndex = widget.controller.selectedNetworkIndex.value;
+      final currentIndex = controller.selectedNetworkIndex.value;
 
       return Column(
         children: [
@@ -144,10 +111,10 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
             height: 206.h,
             child: PageView.builder(
               clipBehavior: Clip.none,
-              controller: _pageController,
+              controller: controller.networkPageController,
               itemCount: networks.length,
               physics: const BouncingScrollPhysics(),
-              onPageChanged: widget.controller.onNetworkCardChanged,
+              onPageChanged: controller.onNetworkCardChanged,
               itemBuilder: (context, index) {
                 final net = networks[index];
                 final isNegative = net.walletBalance < 0;
@@ -171,7 +138,7 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
                     pendingRequestsCount: net.pendingRequestsCount,
                     isNegative: isNegative,
                     isMasked: isMasked,
-                    onActionTap: widget.onActionTap,
+                    onActionTap: onActionTap,
                   ),
                 );
               },
@@ -187,7 +154,7 @@ class _DashboardMultiEntityDeckState extends State<DashboardMultiEntityDeck> {
               final isSelected = currentIndex == index;
               return CustomInteractiveBounce(
                 onTap: () {
-                  _pageController.animateToPage(
+                  controller.networkPageController.animateToPage(
                     index,
                     duration: AppMotion.normal,
                     curve: AppMotion.standard,

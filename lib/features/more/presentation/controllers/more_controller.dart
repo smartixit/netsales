@@ -28,6 +28,11 @@ class MoreController extends GetxController {
 
   final Rxn<MoreOverviewEntity> overview = Rxn<MoreOverviewEntity>();
   final RxBool isLoading = false.obs;
+  final RxBool isBalanceHidden = false.obs;
+
+  void toggleBalanceVisibility() {
+    isBalanceHidden.value = !isBalanceHidden.value;
+  }
 
   /// بيانات المستخدم الحالي المسجل من خدمة الجلسات المعتمدة
   UserModel? get currentUser => SessionService.to.currentUser;

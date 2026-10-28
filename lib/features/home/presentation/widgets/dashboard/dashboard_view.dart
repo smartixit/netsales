@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
-import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_distribution_performance.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_header_section.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_multi_entity_deck.dart';
@@ -60,15 +58,7 @@ class DashboardView extends GetView<DashboardController> {
                 // 1. منصة بطاقات الكيانات الشبكية المستقلة (Multi-Entity Horizon Deck)
                 DashboardMultiEntityDeck(
                   controller: controller,
-                  onActionTap: () {
-                    if (controller.isNetworkOwner) {
-                      Get.toNamed(AppRoutes.networkWallets);
-                    } else if (controller.isPosAgent) {
-                      Get.toNamed(AppRoutes.posWallets);
-                    } else if (Get.isRegistered<HomeLayoutController>()) {
-                      Get.find<HomeLayoutController>().changeTab(3);
-                    }
-                  },
+                  onActionTap: controller.navigateToWallets,
                 ),
 
                 AppSpacing.vLg,
@@ -96,33 +86,13 @@ class DashboardView extends GetView<DashboardController> {
                 // 6. منصة العمليات والإجراءات السريعة
                 DashboardQuickShortcutsBar(
                   isSuperAdmin: controller.isSuperAdmin,
-                  onManageNetworksTap: () {
-                    if (Get.isRegistered<HomeLayoutController>()) {
-                      Get.find<HomeLayoutController>().changeTab(2);
-                    }
-                  },
-                  onAuditOperationsTap: () {
-                    if (Get.isRegistered<HomeLayoutController>()) {
-                      Get.find<HomeLayoutController>().changeTab(1);
-                    }
-                  },
+                  onManageNetworksTap: controller.navigateToPartners,
+                  onAuditOperationsTap: controller.navigateToOperations,
                   onNewInvoiceTap: () => CreateSaleInvoiceSheet.show(context),
                   onNewRequestTap: () =>
                       CreateVoucherRequestSheet.show(context),
-                  onManagePosTap: () {
-                    if (Get.isRegistered<HomeLayoutController>()) {
-                      Get.find<HomeLayoutController>().changeTab(2);
-                    }
-                  },
-                  onWalletTap: () {
-                    if (controller.isNetworkOwner) {
-                      Get.toNamed(AppRoutes.networkWallets);
-                    } else if (controller.isPosAgent) {
-                      Get.toNamed(AppRoutes.posWallets);
-                    } else if (Get.isRegistered<HomeLayoutController>()) {
-                      Get.find<HomeLayoutController>().changeTab(3);
-                    }
-                  },
+                  onManagePosTap: controller.navigateToPartners,
+                  onWalletTap: controller.navigateToWallets,
                 ),
 
                 AppSpacing.vLg,

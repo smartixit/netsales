@@ -12,6 +12,7 @@ import 'package:netsales/features/operations/domain/entities/voucher_request_ent
 import 'package:netsales/features/operations/presentation/widgets/operations_items_accordion_deck.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/menus/custom_popup_menu.dart';
 
 /// ============================================================================
 /// سند طلب التوريد السيادي الفاخر (VoucherRequestLedgerTile)
@@ -450,121 +451,59 @@ class VoucherRequestLedgerTile extends StatelessWidget {
   }
 
   Widget _buildTileOverflowMenu(BuildContext context, AppColors colors) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        popupMenuTheme: PopupMenuThemeData(
-          color: colors.surfaceContainerHighest,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.mdRadius,
-            side: BorderSide(
-              color: colors.outline.withValues(alpha: 0.12),
-            ),
+    return CustomPopupMenu<String>(
+      tooltip: 'خيارات الطلب',
+      triggerIcon: Icons.more_vert_rounded,
+      triggerIconSize: 18.r,
+      triggerDimension: 32.r,
+      triggerBackgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+      onSelected: (value) {
+        switch (value) {
+          case 'edit':
+            onEdit?.call();
+            break;
+          case 'cancel':
+            onCancel?.call();
+            break;
+          case 'delete':
+            onDelete?.call();
+            break;
+          case 'share':
+            onShare?.call();
+            break;
+        }
+      },
+      items: [
+        if (request.isPending && onEdit != null)
+          CustomPopupItem<String>(
+            value: 'edit',
+            label: 'تعديل الطلب',
+            icon: Icons.edit_outlined,
+            iconColor: colors.primary,
           ),
-          elevation: 4,
-          shadowColor: AppElevation.level3(context).first.color,
-        ),
-      ),
-      child: PopupMenuButton<String>(
-        padding: EdgeInsets.zero,
-        constraints: BoxConstraints(minWidth: 135.w),
-        icon: Icon(
-          Icons.more_vert_rounded,
-          color: colors.onSurfaceVariant,
-          size: 18.r,
-        ),
-        tooltip: 'خيارات الطلب',
-        position: PopupMenuPosition.under,
-        onSelected: (value) {
-          switch (value) {
-            case 'edit':
-              onEdit?.call();
-              break;
-            case 'cancel':
-              onCancel?.call();
-              break;
-            case 'delete':
-              onDelete?.call();
-              break;
-            case 'share':
-              onShare?.call();
-              break;
-          }
-        },
-        itemBuilder: (ctx) => [
-          if (request.isPending && onEdit != null)
-            PopupMenuItem<String>(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit_outlined, color: colors.primary, size: 16.r),
-                  AppSpacing.hSm,
-                  Text(
-                    'تعديل الطلب',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (request.isPending && onCancel != null)
-            PopupMenuItem<String>(
-              value: 'cancel',
-              child: Row(
-                children: [
-                  Icon(Icons.block_outlined, color: colors.warning, size: 16.r),
-                  AppSpacing.hSm,
-                  Text(
-                    'إلغاء الطلب',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.warning,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if ((request.isPending || request.isCancelled) && onDelete != null)
-            PopupMenuItem<String>(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.delete_outline_rounded,
-                    color: colors.error,
-                    size: 16.r,
-                  ),
-                  AppSpacing.hSm,
-                  Text(
-                    'حذف الطلب',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.error,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (onShare != null)
-            PopupMenuItem<String>(
-              value: 'share',
-              child: Row(
-                children: [
-                  Icon(Icons.share_outlined, color: colors.primary, size: 16.r),
-                  AppSpacing.hSm,
-                  Text(
-                    'طباعة ومشاركة',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
+        if (request.isPending && onCancel != null)
+          CustomPopupItem<String>(
+            value: 'cancel',
+            label: 'إلغاء الطلب',
+            icon: Icons.block_outlined,
+            iconColor: colors.warning,
+            textColor: colors.warning,
+          ),
+        if ((request.isPending || request.isCancelled) && onDelete != null)
+          CustomPopupItem<String>(
+            value: 'delete',
+            label: 'حذف الطلب',
+            icon: Icons.delete_outline_rounded,
+            isDestructive: true,
+          ),
+        if (onShare != null)
+          CustomPopupItem<String>(
+            value: 'share',
+            label: 'طباعة ومشاركة',
+            icon: Icons.share_outlined,
+            iconColor: colors.primary,
+          ),
+      ],
     );
   }
 }

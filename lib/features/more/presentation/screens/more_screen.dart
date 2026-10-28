@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -12,10 +13,11 @@ import 'package:netsales/features/more/presentation/widgets/more_menu_tile.dart'
 import 'package:netsales/features/more/presentation/widgets/more_profile_hero_card.dart';
 import 'package:netsales/features/more/presentation/widgets/more_quick_metrics_row.dart';
 import 'package:netsales/features/more/presentation/widgets/more_wallet_card.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/home_tab_shell.dart';
 
 /// ============================================================================
-/// شاشة قطاع المزيد والمركز المالي (MoreScreen)
+/// شاشة قطاع المزيد والمركز المالي التنفيذية (MoreScreen)
 /// ============================================================================
 /// مجمّع تركيبي رشيق (Lean Composite Assembler) لقطاع المزيد، يجمع الهوية المالية،
 /// ملخصات الحساب، مجموعات القوائم، وتأكيد تسجيل الخروج، خالٍ تماماً من دوال البناء المساعدة.
@@ -28,147 +30,154 @@ class MoreScreen extends GetView<MoreController> {
 
     return HomeTabShell.scrollable(
       onRefresh: () => controller.loadOverview(isRefresh: true),
-      child: Obx(
-          () => Column(
-            children: [
-              // 1. بطاقة الهوية الشخصية ومظهر التطبيق
-              MoreProfileHeroCard(user: controller.currentUser),
+      child: Obx(() {
+        if (controller.isLoading.value && controller.overview.value == null) {
+          return const CustomSkeletonFeed(itemCount: 4, cardHeight: 110);
+        }
 
-              AppSpacing.vMd,
+        return Column(
+          children: [
+            // 1. بطاقة الهوية الشخصية ومظهر التطبيق
+            MoreProfileHeroCard(user: controller.currentUser),
 
-              // 2. بطاقة المحفظة المالية التشغيلية
-              MoreWalletCard(wallet: controller.wallet),
+            AppSpacing.vMd,
 
-              AppSpacing.vMd,
+            // 2. بطاقة المحفظة المالية التشغيلية المتقدمة
+            MoreWalletCard(
+              wallet: controller.wallet,
+              controller: controller,
+            ),
 
-              // 3. شريط المؤشرات الحيوية السريعة
-              MoreQuickMetricsRow(
-                totalExpenses: controller.totalExpenses,
-                subscription: controller.subscription,
-                support: controller.support,
-              ),
+            AppSpacing.vMd,
 
-              AppSpacing.vLg,
+            // 3. شريط المؤشرات الحيوية السريعة
+            MoreQuickMetricsRow(
+              totalExpenses: controller.totalExpenses,
+              subscription: controller.subscription,
+              support: controller.support,
+            ),
 
-              // 4. مجموعة القوائم الأولى: الإدارة والعمليات المالية
-              MoreMenuGroup(
-                title: 'الإدارة والعمليات المالية',
-                items: [
-                  MoreMenuTile(
-                    icon: Icons.account_balance_outlined,
-                    iconColor: colors.primary,
-                    iconBgColor: colors.primaryContainer.withValues(
-                      alpha: 0.35,
-                    ),
-                    title: 'الحسابات المصرفية',
-                    subtitle: 'إدارة وتغذية الحسابات البنكية المعتمدة',
-                    onTap: () {},
+            AppSpacing.vLg,
+
+            // 4. مجموعة القوائم الأولى: الإدارة والعمليات المالية
+            MoreMenuGroup(
+              title: 'الإدارة والعمليات المالية',
+              items: [
+                MoreMenuTile(
+                  icon: Icons.account_balance_rounded,
+                  iconColor: colors.primary,
+                  iconBgColor: colors.primaryContainer.withValues(
+                    alpha: 0.35,
                   ),
-                  MoreMenuTile(
-                    icon: Icons.payments_outlined,
-                    iconColor: colors.secondary,
-                    iconBgColor: colors.secondaryContainer.withValues(
-                      alpha: 0.35,
-                    ),
-                    title: 'المصروفات التشغيلية',
-                    subtitle: 'تسجيل وتتبع نفقات وإيصالات المنشأة',
-                    onTap: () {},
+                  title: 'الحسابات المصرفية',
+                  subtitle: 'إدارة وتغذية الحسابات البنكية المعتمدة',
+                  onTap: () {},
+                ),
+                MoreMenuTile(
+                  icon: Icons.payments_rounded,
+                  iconColor: colors.secondary,
+                  iconBgColor: colors.secondaryContainer.withValues(
+                    alpha: 0.35,
                   ),
-                  MoreMenuTile(
-                    icon: Icons.confirmation_number_outlined,
-                    iconColor: colors.tertiary,
-                    iconBgColor: colors.tertiaryContainer.withValues(
-                      alpha: 0.35,
-                    ),
-                    title: 'باقات الكروت والخصومات',
-                    subtitle: 'إعداد فئات الباقات وخصومات نقاط التوزيع',
-                    onTap: () => Get.toNamed(AppRoutes.voucherPackages),
+                  title: 'المصروفات التشغيلية',
+                  subtitle: 'تسجيل وتتبع نفقات وإيصالات المنشأة',
+                  onTap: () {},
+                ),
+                MoreMenuTile(
+                  icon: Icons.confirmation_number_rounded,
+                  iconColor: colors.tertiary,
+                  iconBgColor: colors.tertiaryContainer.withValues(
+                    alpha: 0.35,
                   ),
-                ],
-              ),
+                  title: 'باقات الكروت والخصومات',
+                  subtitle: 'إعداد فئات الباقات وخصومات نقاط التوزيع',
+                  onTap: () => Get.toNamed(AppRoutes.voucherPackages),
+                ),
+              ],
+            ),
 
-              AppSpacing.vMd,
+            AppSpacing.vMd,
 
-              // 5. مجموعة القوائم الثانية: الخدمات والدعم المؤسسي
-              MoreMenuGroup(
-                title: 'الخدمات والدعم والاشتراكات',
-                items: [
-                  MoreMenuTile(
-                    icon: Icons.workspace_premium_outlined,
-                    iconColor: colors.success,
-                    iconBgColor: colors.successContainer.withValues(
-                      alpha: 0.35,
-                    ),
-                    title: 'اشتراك وخطة النظام',
-                    subtitle: 'تفاصيل الخطة السحابية وتجديد الترخيص',
-                    onTap: () {},
+            // 5. مجموعة القوائم الثانية: الخدمات والدعم المؤسسي
+            MoreMenuGroup(
+              title: 'الخدمات والدعم والاشتراكات',
+              items: [
+                MoreMenuTile(
+                  icon: Icons.workspace_premium_rounded,
+                  iconColor: colors.success,
+                  iconBgColor: colors.successContainer.withValues(
+                    alpha: 0.35,
                   ),
-                  MoreMenuTile(
-                    icon: Icons.support_agent_outlined,
-                    iconColor: colors.warning,
-                    iconBgColor: colors.warningContainer.withValues(
-                      alpha: 0.35,
-                    ),
-                    title: 'مركز الدعم والمساعدة',
-                    subtitle: 'فتح تذاكر فنية ومتابعة الردود المباشرة',
-                    onTap: () {},
+                  title: 'اشتراك وخطة النظام',
+                  subtitle: 'تفاصيل الخطة السحابية وتجديد الترخيص',
+                  onTap: () {},
+                ),
+                MoreMenuTile(
+                  icon: Icons.support_agent_rounded,
+                  iconColor: colors.warning,
+                  iconBgColor: colors.warningContainer.withValues(
+                    alpha: 0.35,
                   ),
-                ],
-              ),
+                  title: 'مركز الدعم والمساعدة',
+                  subtitle: 'فتح تذاكر فنية ومتابعة الردود المباشرة',
+                  onTap: () {},
+                ),
+              ],
+            ),
 
-              AppSpacing.vMd,
+            AppSpacing.vMd,
 
-              // 6. مجموعة القوائم الثالثة: الأمان والجلسات والنظام
-              MoreMenuGroup(
-                title: 'الأمان والجلسات والأجهزة',
-                items: [
-                  MoreMenuTile(
-                    icon: Icons.devices_outlined,
-                    iconColor: colors.primary,
-                    iconBgColor: colors.primaryContainer.withValues(
-                      alpha: 0.35,
+            // 6. مجموعة القوائم الثالثة: الأجهزة والجلسات والتفضيلات
+            MoreMenuGroup(
+              title: 'الأجهزة والجلسات والتفضيلات',
+              items: [
+                MoreMenuTile(
+                  icon: Icons.devices_rounded,
+                  iconColor: colors.primary,
+                  iconBgColor: colors.primaryContainer.withValues(
+                    alpha: 0.35,
+                  ),
+                  title: 'الأجهزة والجلسات المصرح بها',
+                  subtitle: 'إدارة الأجهزة الموثوقة ومتابعة النشاط',
+                  trailing: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 2.h,
                     ),
-                    title: 'الأجهزة والجلسات النشطة',
-                    subtitle: 'إدارة الأجهزة الموثوقة ومتابعة النشاط',
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
+                    decoration: BoxDecoration(
+                      color: colors.primaryContainer.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                    ),
+                    child: Text(
+                      '${controller.activeSessionsCount} نشط',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.primary,
+                        fontWeight: FontWeight.bold,
                       ),
-                      decoration: BoxDecoration(
-                        color: colors.primaryContainer.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(AppRadius.full),
-                      ),
-                      child: Text(
-                        '${controller.activeSessionsCount} نشط',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ),
-                    onTap: () {},
                   ),
-                  MoreMenuTile(
-                    icon: Icons.notifications_none_outlined,
-                    iconColor: colors.secondary,
-                    iconBgColor: colors.secondaryContainer.withValues(
-                      alpha: 0.35,
-                    ),
-                    title: 'إعدادات الإشعارات والتنبيهات',
-                    subtitle: 'تخصيص الرسائل النصية القصيرة وتنبيهات الرصيد',
-                    onTap: () {},
+                  onTap: () {},
+                ),
+                MoreMenuTile(
+                  icon: Icons.notifications_active_outlined,
+                  iconColor: colors.secondary,
+                  iconBgColor: colors.secondaryContainer.withValues(
+                    alpha: 0.35,
                   ),
-                ],
-              ),
+                  title: 'إعدادات الإشعارات والتنبيهات',
+                  subtitle: 'تخصيص الرسائل النصية القصيرة وتنبيهات الرصيد',
+                  onTap: () {},
+                ),
+              ],
+            ),
 
-              AppSpacing.vLg,
+            AppSpacing.vLg,
 
-              // 7. قسم تسجيل الخروج الآمن
-              MoreLogoutSection(controller: controller),
-            ],
-        ),
-      ),
+            // 7. قسم تسجيل الخروج الآمن
+            MoreLogoutSection(controller: controller),
+          ],
+        );
+      }),
     );
   }
 }

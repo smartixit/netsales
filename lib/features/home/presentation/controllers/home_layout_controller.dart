@@ -30,6 +30,18 @@ class HomeLayoutController extends GetxController {
   /// عداد الإشعارات غير المقروءة
   final RxInt unreadNotificationsCount = 0.obs;
 
+  /// نص التحية الزمني المحسوب مركزياً وفق التوقيت الفعلي
+  String get timeBasedGreeting {
+    final hour = DateTime.now().hour;
+    if (hour >= 4 && hour < 12) {
+      return 'صباح الخير';
+    } else if (hour >= 12 && hour < 17) {
+      return 'طاب يومك';
+    } else {
+      return 'مساء الخير';
+    }
+  }
+
   /// اشتراك متابعة حالة الشبكة
   StreamSubscription<bool>? _networkSubscription;
 

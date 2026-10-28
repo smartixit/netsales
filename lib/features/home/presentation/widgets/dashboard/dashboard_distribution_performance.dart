@@ -31,59 +31,33 @@ class DashboardDistributionPerformance extends StatelessWidget {
       if (overview == null) return const SizedBox.shrink();
 
       final isMasked = controller.isPrivacyMasked.value;
-      final kpis = overview.kpis;
 
       // حالة مدير النظام الأعلى: عرض مصفوفة أسطول المنظومة
       if (controller.isSuperAdmin) {
-        final networksKpi = (kpis['networks'] as Map<String, dynamic>?) ?? {};
-        final totalNetworks = (networksKpi['total'] as num?)?.toInt() ?? 0;
-        final approvedNetworks =
-            (networksKpi['approved'] as num?)?.toInt() ?? 0;
-        final pendingNetworks = (networksKpi['pending'] as num?)?.toInt() ?? 0;
-
-        final posKpi = (kpis['pos'] as Map<String, dynamic>?) ?? {};
-        final totalPos = (posKpi['total'] as num?)?.toInt() ?? 0;
-        final approvedPos = (posKpi['approved'] as num?)?.toInt() ?? 0;
-        final pendingPos = (posKpi['pending'] as num?)?.toInt() ?? 0;
-
         return _SuperAdminFleetBento(
-          totalNetworks: totalNetworks,
-          approvedNetworks: approvedNetworks,
-          pendingNetworks: pendingNetworks,
-          totalPos: totalPos,
-          approvedPos: approvedPos,
-          pendingPos: pendingPos,
+          totalNetworks: controller.totalNetworksCount,
+          approvedNetworks: controller.approvedNetworksCount,
+          pendingNetworks: controller.pendingNetworksCount,
+          totalPos: controller.totalPosCount,
+          approvedPos: controller.approvedPosCount,
+          pendingPos: controller.pendingPosCount,
         );
       }
 
-      // 1. استخراج بيانات المبيعات
-      final salesData = (kpis['sales'] as Map<String, dynamic>?) ?? {};
-      final cashAmount =
-          (salesData['cash_sales_amount'] as num?)?.toDouble() ?? 0.0;
-      final creditAmount =
-          (salesData['credit_sales_amount'] as num?)?.toDouble() ?? 0.0;
-      final totalSales =
-          (salesData['current_amount'] as num?)?.toDouble() ??
-          (cashAmount + creditAmount);
-      final cashRatio = totalSales > 0
-          ? (cashAmount / totalSales).clamp(0.0, 1.0)
-          : 0.0;
+      // 1. مؤشرات المبيعات ونسبة التحصيل النقدي
+      final cashAmount = controller.cashSalesAmount;
+      final creditAmount = controller.creditSalesAmount;
+      final cashRatio = controller.cashRatio;
 
-      // 2. استخراج بيانات نقاط البيع
-      final posData = (kpis['pos_network'] as Map<String, dynamic>?) ?? {};
-      final activePos = (posData['active_count'] as num?)?.toInt() ?? 0;
-      final totalPos = (posData['total_count'] as num?)?.toInt() ?? 0;
-      final posCoverageRatio = totalPos > 0
-          ? (activePos / totalPos).clamp(0.0, 1.0)
-          : 0.0;
+      // 2. مؤشرات أسطول نقاط البيع وتغطية التوزيع
+      final activePos = controller.activeNetworkPosCount;
+      final totalPos = controller.totalNetworkPosCount;
+      final posCoverageRatio = controller.posCoverageRatio;
 
-      // 3. استخراج بيانات الباقة الأكثر طلباً
-      final topPackage = (kpis['top_package'] as Map<String, dynamic>?);
-      final packageName =
-          topPackage?['package_name'] as String? ?? 'لا توجد مبيعات';
-      final vouchersSoldCount =
-          (topPackage?['vouchers_sold_count'] as num?)?.toInt() ?? 0;
-      final topRevenue = (topPackage?['revenue'] as num?)?.toDouble() ?? 0.0;
+      // 3. مؤشرات الباقة الأكثر طلباً في السوق
+      final packageName = controller.topPackageName;
+      final vouchersSoldCount = controller.topPackageVouchersSoldCount;
+      final topRevenue = controller.topPackageRevenue;
 
       final formattedTopRevenue = isMasked
           ? '••••••'

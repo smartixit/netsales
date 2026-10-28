@@ -5,15 +5,18 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
 import 'package:netsales/features/partners/domain/entities/network_pos_entity.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/dialogs/custom_dialog.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
-/// بطاقة عقد الشراكة والتوزيع (NetworkPosItemCard)
+/// بطاقة عقد الشراكة والتوزيع المحدثة (NetworkPosItemCard)
 /// ============================================================================
-/// بطاقة تفاعلية توضح علاقة الربط والتوزيع بين الشبكة ونقطة البيع مع زر تبديل الحالة.
+/// تصميم انسيابي يحاكي السندات والعقود التجارية الذكية (Connected Distribution Bond)،
+/// يربط طرفي الشراكة (الشبكة ونقطة البيع) مع إمكانية التبديل اللحظي للحالة وإصدار الفواتير.
 class NetworkPosItemCard extends StatelessWidget {
   final NetworkPosEntity link;
   final PartnersController controller;
@@ -28,187 +31,345 @@ class NetworkPosItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final statusBg = link.isActive ? colors.successContainer : colors.errorContainer;
-    final statusFg = link.isActive ? colors.success : colors.error;
+    final statusColor = link.isActive ? colors.success : colors.error;
+    final statusBgColor =
+        link.isActive ? colors.successContainer : colors.errorContainer;
+    final statusIcon =
+        link.isActive ? Icons.verified_rounded : Icons.pause_circle_outline;
 
     return CustomInteractiveBounce(
       onTap: () {},
       child: Container(
         margin: EdgeInsets.only(bottom: 12.h),
-        padding: EdgeInsets.all(14.r),
         decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: AppRadius.lgRadius,
           boxShadow: AppElevation.level1(context),
-          border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.35),
-            width: 1.r,
-          ),
         ),
-        child: Column(
-          children: [
-            // 1. محور الربط الثنائي بين الشبكة ونقطة البيع
-            Row(
-              children: [
-                // جانب الشبكة
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(8.r),
-                    decoration: BoxDecoration(
-                      color: colors.primaryContainer.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                    ),
-                    child: Row(
+        child: ClipRRect(
+          borderRadius: AppRadius.lgRadius,
+          child: Stack(
+            children: [
+              // وعاء البطاقة مع التدرج الشبكي
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      statusColor.withValues(alpha: 0.06),
+                      colors.surface.withValues(alpha: 0.40),
+                      colors.surfaceContainerLowest,
+                    ],
+                    stops: const [0.0, 0.45, 1.0],
+                  ),
+                  borderRadius: AppRadius.lgRadius,
+                  border: Border.all(
+                    color: colors.outlineVariant.withValues(alpha: 0.28),
+                    width: 1.w,
+                  ),
+                ),
+                padding: EdgeInsetsDirectional.only(
+                  start: 16.w,
+                  end: 14.w,
+                  top: 14.h,
+                  bottom: 14.h,
+                ),
+                child: Column(
+                  children: [
+                    // 1. جسر الربط الثنائي بين طرفي العقد (الشبكة <---> نقطة البيع)
+                    Row(
                       children: [
-                        Icon(
-                          Icons.wifi_tethering_rounded,
-                          color: colors.primary,
-                          size: 18.r,
-                        ),
-                        SizedBox(width: 6.w),
+                        // طرف مزود الشبكة
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 8.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.primaryContainer
+                                  .withValues(alpha: 0.28),
+                              borderRadius: BorderRadius.circular(10.r),
+                              border: Border.all(
+                                color: colors.primary.withValues(alpha: 0.22),
+                                width: 0.8.w,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(5.r),
+                                  decoration: BoxDecoration(
+                                    color: colors.primary
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.wifi_tethering_rounded,
+                                    color: colors.primary,
+                                    size: 16.r,
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'مزود الشبكة',
+                                        style:
+                                            AppTypography.labelSmall.copyWith(
+                                          color: colors.primary,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 9.sp,
+                                        ),
+                                      ),
+                                      AppSpacing.vXxs,
+                                      Text(
+                                        link.networkName ??
+                                            'شبكة #${link.networkId}',
+                                        style:
+                                            AppTypography.bodySmall.copyWith(
+                                          color: colors.onSurface,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // أيقونة الارتباط المركزية المتوهجة
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 6.w),
+                          child: Container(
+                            width: 32.r,
+                            height: 32.r,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  statusColor.withValues(alpha: 0.16),
+                                  colors.surfaceContainerHighest,
+                                ],
+                              ),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: statusColor.withValues(alpha: 0.35),
+                                width: 1.w,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.swap_horiz_rounded,
+                              size: 18.r,
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
+
+                        // طرف نقطة التوزيع / الوكيل
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 8.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.secondaryContainer
+                                  .withValues(alpha: 0.28),
+                              borderRadius: BorderRadius.circular(10.r),
+                              border: Border.all(
+                                color: colors.secondary.withValues(alpha: 0.22),
+                                width: 0.8.w,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(5.r),
+                                  decoration: BoxDecoration(
+                                    color: colors.secondary
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.storefront_rounded,
+                                    color: colors.secondary,
+                                    size: 16.r,
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'نقطة التوزيع',
+                                        style:
+                                            AppTypography.labelSmall.copyWith(
+                                          color: colors.secondary,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 9.sp,
+                                        ),
+                                      ),
+                                      AppSpacing.vXxs,
+                                      Text(
+                                        link.posName ?? 'نقطة #${link.posId}',
+                                        style:
+                                            AppTypography.bodySmall.copyWith(
+                                          color: colors.onSurface,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    AppSpacing.vSm,
+                    Divider(
+                      color: colors.outlineVariant.withValues(alpha: 0.18),
+                      height: 1.h,
+                    ),
+                    AppSpacing.vSm,
+
+                    // 2. تفاصيل الموقع الجغرافي وشارة الحالة الموحدة
+                    Row(
+                      children: [
+                        if (link.governorateName != null &&
+                            link.governorateName!.isNotEmpty) ...[
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 13.r,
+                            color: colors.onSurfaceVariant,
+                          ),
+                          SizedBox(width: 3.w),
+                          Expanded(
+                            child: Text(
+                              '${link.governorateName ?? ''} • ${link.directorateName ?? ''}',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: colors.onSurfaceVariant,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ] else
+                          const Spacer(),
+
+                        // شارة الحالة
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 9.w,
+                            vertical: 3.5.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusBgColor,
+                            borderRadius: AppRadius.fullRadius,
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.25),
+                              width: 0.8.w,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
+                              Icon(statusIcon,
+                                  size: 11.r, color: statusColor),
+                              SizedBox(width: 4.w),
                               Text(
-                                'الشبكة',
+                                link.statusLabel,
                                 style: AppTypography.labelSmall.copyWith(
-                                  color: colors.onSurfaceVariant,
+                                  color: statusColor,
+                                  fontWeight: FontWeight.w800,
                                   fontSize: 10.sp,
                                 ),
-                              ),
-                              Text(
-                                link.networkName ?? 'شبكة #${link.networkId}',
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: colors.onSurface,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
 
-                // أيقونة الارتباط في المنتصف
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w),
-                  child: Container(
-                    padding: EdgeInsets.all(6.r),
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainerHighest,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.swap_horiz_rounded,
-                      size: 18.r,
-                      color: link.isActive ? colors.primary : colors.onSurfaceVariant,
-                    ),
-                  ),
-                ),
+                    AppSpacing.vSm,
 
-                // جانب نقطة البيع
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(8.r),
-                    decoration: BoxDecoration(
-                      color: colors.secondaryContainer.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                    ),
-                    child: Row(
+                    // 3. أزرار التحكم والعمليات المباشرة
+                    Row(
                       children: [
-                        Icon(
-                          Icons.storefront_rounded,
-                          color: colors.secondary,
-                          size: 18.r,
-                        ),
-                        SizedBox(width: 6.w),
+                        // زر إصدار فاتورة مبيعات سريعة
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'نقطة البيع',
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: colors.onSurfaceVariant,
-                                  fontSize: 10.sp,
-                                ),
-                              ),
-                              Text(
-                                link.posName ?? 'نقطة #${link.posId}',
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: colors.onSurface,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                          child: CustomButton.primary(
+                            text: 'إصدار فاتورة مبيعات',
+                            icon: Icons.receipt_long_rounded,
+                            height: 36.h,
+                            onPressed: () => CreateSaleInvoiceSheet.show(
+                              context,
+                              preselectedPosId: link.posId,
+                              preselectedPosName: link.posName,
+                            ),
                           ),
+                        ),
+
+                        AppSpacing.hSm,
+
+                        // زر تبديل حالة عقد الشراكة (تجميد / تفعيل)
+                        CustomButton.outline(
+                          text: link.isActive ? 'تجميد' : 'تفعيل',
+                          icon: link.isActive
+                              ? Icons.pause_circle_outline_rounded
+                              : Icons.play_circle_outline_rounded,
+                          height: 36.h,
+                          onPressed: () async {
+                            final confirmed =
+                                await CustomDialog.showConfirmation(
+                              title: link.isActive
+                                  ? 'تأكيد تجميد العقد'
+                                  : 'تأكيد تفعيل العقد',
+                              message: link.isActive
+                                  ? 'هل أنت متأكد من تجميد عقد الارتباط بين "${link.networkName}" و"${link.posName}"؟ لن يتمكن الوكيل من طلب الكروت مؤقتاً.'
+                                  : 'هل أنت متأكد من إعادة تفعيل عقد الارتباط بين "${link.networkName}" و"${link.posName}"؟',
+                              confirmLabel: link.isActive
+                                  ? 'نعم، تجميد العقد'
+                                  : 'نعم، تفعيل العقد',
+                              cancelLabel: 'إلغاء',
+                            );
+                            if (confirmed == true) {
+                              await controller
+                                  .toggleLinkStatus(link.networkPosId);
+                            }
+                          },
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
 
-            AppSpacing.vSm,
-            Divider(color: colors.outlineVariant.withValues(alpha: 0.2)),
-            AppSpacing.vXs,
-
-            // 2. الموقع وشارة الحالة وزر التبديل
-            Row(
-              children: [
-                // المنطقة الجغرافية
-                if (link.governorateName != null &&
-                    link.governorateName!.isNotEmpty) ...[
-                  Icon(
-                    Icons.location_on_outlined,
-                    size: 13.r,
-                    color: colors.onSurfaceVariant,
-                  ),
-                  SizedBox(width: 2.w),
-                  Text(
-                    '${link.governorateName ?? ''} - ${link.directorateName ?? ''}',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-                const Spacer(),
-
-                // شارة الحالة
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                  decoration: BoxDecoration(
-                    color: statusBg,
-                    borderRadius: BorderRadius.circular(AppRadius.full),
-                  ),
-                  child: Text(
-                    link.statusLabel,
-                    style: AppTypography.labelSmall.copyWith(
-                      color: statusFg,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              // الشريط العمودي الدلالي لحالة العقد
+              PositionedDirectional(
+                start: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: 4.w,
+                  color: statusColor,
                 ),
-                AppSpacing.hSm,
-
-                // زر تبديل الحالة
-                CustomButton.outline(
-                  text: link.isActive ? 'تجميد' : 'تفعيل',
-                  icon: link.isActive ? Icons.pause_circle_outline : Icons.play_circle_outline,
-                  height: 32.h,
-                  onPressed: () => controller.toggleLinkStatus(link.networkPosId),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

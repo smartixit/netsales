@@ -1,9 +1,12 @@
 import 'dart:developer';
 
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/home/domain/entities/dashboard_overview_entity.dart';
 import 'package:netsales/features/home/domain/usecases/get_dashboard_overview_use_case.dart';
+import 'package:netsales/features/home/presentation/controllers/home_layout_controller.dart';
 
 /// ============================================================================
 /// متحكم شاشة لوحة القيادة التجميعية (DashboardController)
@@ -46,10 +49,23 @@ class DashboardController extends GetxController {
   /// مؤشر خلفي هادئ لتحديث بيانات الشبكة دون مساس بالشاشة أو الهيكل البصري
   final RxBool isSwitchingNetwork = false.obs;
 
+  /// متحكم تقليب بطاقات الشبكات المستقلة المدار مركزياً
+  late final PageController networkPageController;
+
   @override
   void onInit() {
     super.onInit();
+    networkPageController = PageController(
+      initialPage: selectedNetworkIndex.value,
+      viewportFraction: 0.92,
+    );
     loadDashboard();
+  }
+
+  @override
+  void onClose() {
+    networkPageController.dispose();
+    super.onClose();
   }
 
   /// تبديل حالة حجب الأرقام المالية للخصوصية
@@ -170,4 +186,80 @@ class DashboardController extends GetxController {
   List<DashboardActivityEntity> get recentActivities =>
       overview.value?.recentActivities ?? [];
   Map<String, dynamic> get kpis => overview.value?.kpis ?? {};
+  Map<String, dynamic> get salesKpi =>
+      (kpis['sales'] as Map<String, dynamic>?) ?? const {};
+  double get cashSalesAmount =>
+      (salesKpi['cash_sales_amount'] as num?)?.toDouble() ?? 0.0;
+  double get creditSalesAmount =>
+      (salesKpi['credit_sales_amount'] as num?)?.toDouble() ?? 0.0;
+  double get totalSalesAmount =>
+      (salesKpi['current_amount'] as num?)?.toDouble() ??
+      (cashSalesAmount + creditSalesAmount);
+  double get cashRatio => totalSalesAmount > 0
+      ? (cashSalesAmount / totalSalesAmount).clamp(0.0, 1.0)
+      : 0.0;
+
+  /// مؤشرات شبكات التوزيع (Super Admin)
+  Map<String, dynamic> get networksKpi =>
+      (kpis['networks'] as Map<String, dynamic>?) ?? const {};
+  int get totalNetworksCount => (networksKpi['total'] as num?)?.toInt() ?? 0;
+  int get approvedNetworksCount =>
+      (networksKpi['approved'] as num?)?.toInt() ?? 0;
+  int get pendingNetworksCount =>
+      (networksKpi['pending'] as num?)?.toInt() ?? 0;
+
+  /// مؤشرات أسطول نقاط البيع الميدانية (Super Admin / Network Owner)
+  Map<String, dynamic> get posKpi =>
+      (kpis['pos'] as Map<String, dynamic>?) ?? const {};
+  int get totalPosCount => (posKpi['total'] as num?)?.toInt() ?? 0;
+  int get approvedPosCount => (posKpi['approved'] as num?)?.toInt() ?? 0;
+  int get pendingPosCount => (posKpi['pending'] as num?)?.toInt() ?? 0;
+
+  /// مؤشرات تغطية ونشاط نقاط بيع الشبكة (POS Coverage)
+  Map<String, dynamic> get posNetworkKpi =>
+      (kpis['pos_network'] as Map<String, dynamic>?) ?? const {};
+  int get activeNetworkPosCount =>
+      (posNetworkKpi['active_count'] as num?)?.toInt() ?? 0;
+  int get totalNetworkPosCount =>
+      (posNetworkKpi['total_count'] as num?)?.toInt() ?? 0;
+  double get posCoverageRatio => totalNetworkPosCount > 0
+      ? (activeNetworkPosCount / totalNetworkPosCount).clamp(0.0, 1.0)
+      : 0.0;
+
+  /// مؤشرات الباقة الأكثر طلباً في السوق
+  Map<String, dynamic>? get topPackageKpi =>
+      (kpis['top_package'] as Map<String, dynamic>?);
+  String get topPackageName =>
+      topPackageKpi?['package_name'] as String? ?? 'لا توجد مبيعات';
+  int get topPackageVouchersSoldCount =>
+      (topPackageKpi?['vouchers_sold_count'] as num?)?.toInt() ?? 0;
+  double get topPackageRevenue =>
+      (topPackageKpi?['revenue'] as num?)?.toDouble() ?? 0.0;
+
+  // ── دوال التنقل المركزية الآمنة (Centralized Navigation Dispatchers) ──
+
+  /// التوجيه السلس إلى شاشات المحافظ والحسابات المالية
+  void navigateToWallets() {
+    if (isNetworkOwner) {
+      Get.toNamed(AppRoutes.networkWallets);
+    } else if (isPosAgent) {
+      Get.toNamed(AppRoutes.posWallets);
+    } else if (Get.isRegistered<HomeLayoutController>()) {
+      Get.find<HomeLayoutController>().changeTab(3);
+    }
+  }
+
+  /// التوجيه إلى تبويب إدارة الشركاء ونقاط البيع
+  void navigateToPartners() {
+    if (Get.isRegistered<HomeLayoutController>()) {
+      Get.find<HomeLayoutController>().changeTab(2);
+    }
+  }
+
+  /// التوجيه إلى تبويب فواتير المبيعات وطلبات التوريد
+  void navigateToOperations() {
+    if (Get.isRegistered<HomeLayoutController>()) {
+      Get.find<HomeLayoutController>().changeTab(1);
+    }
+  }
 }

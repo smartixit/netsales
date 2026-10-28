@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
-/// عنصر قائمة تفاعلي لقطاع المزيد (MoreMenuTile)
+/// عنصر قائمة تفاعلي مصقول لقطاع المزيد (MoreMenuTile)
 /// ============================================================================
-/// يمثل عنصراً قياسياً تفاعلياً مع ارتداد فيزيائي وأيقونة لونية مخصصة.
+/// عنصر قياسي عالي التجاوب مع ارتداد فيزيائي، وأيقونة سكويركل بلون دلالي.
 class MoreMenuTile extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -37,23 +36,26 @@ class MoreMenuTile extends StatelessWidget {
     return CustomInteractiveBounce(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 14.w),
         child: Row(
           children: [
-            // أيقونة البند
+            // أيقونة البند بسكويركل ذو حد خفيف
             Container(
-              width: 38.r,
-              height: 38.r,
+              width: 40.r,
+              height: 40.r,
               decoration: BoxDecoration(
                 color: iconBgColor,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-              ),
-              child: Center(
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 20.r,
+                borderRadius: BorderRadius.circular(11.r),
+                border: Border.all(
+                  color: iconColor.withValues(alpha: 0.22),
+                  width: 0.8.w,
                 ),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 20.r,
               ),
             ),
 
@@ -76,6 +78,7 @@ class MoreMenuTile extends StatelessWidget {
                     subtitle,
                     style: AppTypography.bodySmall.copyWith(
                       color: colors.onSurfaceVariant,
+                      fontSize: 11.sp,
                     ),
                   ),
                 ],
@@ -86,8 +89,8 @@ class MoreMenuTile extends StatelessWidget {
             trailing ??
                 Icon(
                   Icons.arrow_back_ios_new_rounded,
-                  size: 14.r,
-                  color: colors.onSurfaceVariant.withValues(alpha: 0.6),
+                  size: 13.r,
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
           ],
         ),

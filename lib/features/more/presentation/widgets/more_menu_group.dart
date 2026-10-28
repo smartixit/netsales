@@ -8,9 +8,9 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/more/presentation/widgets/more_menu_tile.dart';
 
 /// ============================================================================
-/// مجموعة قوائم قطاع المزيد (MoreMenuGroup)
+/// مجموعة قوائم قطاع المزيد التنفيذية (MoreMenuGroup)
 /// ============================================================================
-/// حاوية منظمة تجمع بنود القوائم ذات الصلة داخل بطاقة Bento موحدة.
+/// حاوية Bento مصقولة تجمع البنود ذات الصلة داخل وعاء زجاجي موحد.
 class MoreMenuGroup extends StatelessWidget {
   final String title;
   final List<MoreMenuTile> items;
@@ -29,12 +29,12 @@ class MoreMenuGroup extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          padding: EdgeInsets.symmetric(horizontal: 6.w),
           child: Text(
             title,
-            style: AppTypography.labelMedium.copyWith(
+            style: AppTypography.titleSmall.copyWith(
               color: colors.primary,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
               letterSpacing: 0.2,
             ),
           ),
@@ -42,26 +42,36 @@ class MoreMenuGroup extends StatelessWidget {
         AppSpacing.vXs,
         Container(
           decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                colors.surface.withValues(alpha: 0.45),
+                colors.surfaceContainerLowest,
+              ],
+            ),
+            borderRadius: AppRadius.lgRadius,
             boxShadow: AppElevation.level1(context),
             border: Border.all(
-              color: colors.outlineVariant.withValues(alpha: 0.35),
-              width: 1.r,
+              color: colors.outlineVariant.withValues(alpha: 0.28),
+              width: 1.w,
             ),
           ),
-          child: Column(
-            children: [
-              for (int i = 0; i < items.length; i++) ...[
-                items[i],
-                if (i < items.length - 1)
-                  Divider(
-                    color: colors.outlineVariant.withValues(alpha: 0.2),
-                    height: 1.h,
-                    indent: 56.w,
-                  ),
+          child: ClipRRect(
+            borderRadius: AppRadius.lgRadius,
+            child: Column(
+              children: [
+                for (int i = 0; i < items.length; i++) ...[
+                  items[i],
+                  if (i < items.length - 1)
+                    Divider(
+                      color: colors.outlineVariant.withValues(alpha: 0.16),
+                      height: 1.h,
+                      indent: 58.w,
+                    ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ],

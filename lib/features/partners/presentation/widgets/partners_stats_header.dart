@@ -8,7 +8,7 @@ import 'package:netsales/widgets/cards/custom_kpi_card.dart';
 /// ============================================================================
 /// شريط المؤشرات الحيوية للشركاء (PartnersStatsHeader)
 /// ============================================================================
-/// يعرض مؤشرات KPI ديناميكية سريعة تتغير تلقائياً حسب التبويب النشط.
+/// يعرض مؤشرات KPI ديناميكية سريعة تتغير تلقائياً وبسلاسة حسب التبويب النشط.
 class PartnersStatsHeader extends StatelessWidget {
   final PartnersController controller;
 
@@ -35,58 +35,63 @@ class PartnersStatsHeader extends StatelessWidget {
         title1 = 'إجمالي الشبكات';
         val1 = '${controller.totalNetworksCount}';
         u1 = 'شبكة';
-        icon1 = Icons.hub_outlined;
+        icon1 = Icons.hub_rounded;
         col1 = colors.primary;
 
         title2 = 'شبكات مفعّلة';
         val2 = '${controller.activeNetworksCount}';
         u2 = 'مفعّلة';
-        icon2 = Icons.check_circle_outline;
+        icon2 = Icons.verified_rounded;
         col2 = colors.success;
 
         title3 = 'قيد المراجعة';
         val3 = '${controller.pendingNetworksCount}';
         u3 = 'معلقة';
-        icon3 = Icons.hourglass_top_outlined;
-        col3 = controller.pendingNetworksCount > 0 ? colors.warning : colors.onSurfaceVariant;
+        icon3 = Icons.pending_actions_rounded;
+        col3 = controller.pendingNetworksCount > 0
+            ? colors.warning
+            : colors.onSurfaceVariant;
       } else if (tab == 1) {
         // نقاط البيع والوكلاء
-        title1 = 'إجمالي نقاط البيع';
+        title1 = 'إجمالي الوكلاء';
         val1 = '${controller.totalPosCount}';
-        u1 = 'نقطة';
-        icon1 = Icons.storefront_outlined;
+        u1 = 'وكيل';
+        icon1 = Icons.storefront_rounded;
         col1 = colors.primary;
 
-        title2 = 'نقاط مفعّلة';
+        title2 = 'وكلاء نشطون';
         val2 = '${controller.activePosCount}';
-        u2 = 'مفعّلة';
-        icon2 = Icons.check_circle_outline;
+        u2 = 'مفعّل';
+        icon2 = Icons.check_circle_rounded;
         col2 = colors.success;
 
-        title3 = 'قيد المراجعة';
+        title3 = 'بانتظار الاعتماد';
         val3 = '${controller.pendingPosCount}';
-        u3 = 'معلقة';
-        icon3 = Icons.hourglass_top_outlined;
-        col3 = controller.pendingPosCount > 0 ? colors.warning : colors.onSurfaceVariant;
+        u3 = 'معلق';
+        icon3 = Icons.hourglass_top_rounded;
+        col3 = controller.pendingPosCount > 0
+            ? colors.warning
+            : colors.onSurfaceVariant;
       } else {
         // عقود الشراكة والتوزيع
-        final inactiveCount = controller.totalLinksCount - controller.activeLinksCount;
-        title1 = 'إجمالي العقود';
+        final inactiveCount =
+            controller.totalLinksCount - controller.activeLinksCount;
+        title1 = 'عقود التوزيع';
         val1 = '${controller.totalLinksCount}';
         u1 = 'عقد';
-        icon1 = Icons.swap_horiz_outlined;
+        icon1 = Icons.swap_horiz_rounded;
         col1 = colors.primary;
 
-        title2 = 'عقود نشطة';
+        title2 = 'عقود سارية';
         val2 = '${controller.activeLinksCount}';
         u2 = 'نشط';
-        icon2 = Icons.link;
+        icon2 = Icons.link_rounded;
         col2 = colors.success;
 
-        title3 = 'عقود معطلة';
+        title3 = 'عقود مجمدة';
         val3 = '$inactiveCount';
         u3 = 'مجمد';
-        icon3 = Icons.link_off;
+        icon3 = Icons.link_off_rounded;
         col3 = inactiveCount > 0 ? colors.error : colors.onSurfaceVariant;
       }
 

@@ -33,21 +33,10 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => Size.fromHeight(70.h);
 
-  String _getTimeBasedGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour >= 4 && hour < 12) {
-      return 'صباح الخير';
-    } else if (hour >= 12 && hour < 17) {
-      return 'طاب يومك';
-    } else {
-      return 'مساء الخير';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final greeting = _getTimeBasedGreeting();
+    final greeting = controller.timeBasedGreeting;
 
     return ClipRect(
       child: BackdropFilter(
