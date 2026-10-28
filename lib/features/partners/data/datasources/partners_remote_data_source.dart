@@ -2,6 +2,7 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/partners/data/models/network_model.dart';
 import 'package:netsales/features/partners/data/models/network_pos_model.dart';
 import 'package:netsales/features/partners/data/models/pos_model.dart';
+import 'package:netsales/features/partners/data/models/pos_wallet_model.dart';
 
 /// ============================================================================
 /// عقد مصدر البيانات البعيد للشركاء والتوزيع (PartnersRemoteDataSource)
@@ -52,4 +53,34 @@ abstract class PartnersRemoteDataSource {
 
   /// رفض طلب تسجيل نقطة بيع مع توثيق السبب
   Future<ApiResponse<void>> rejectPos(int posId, String reason);
+
+  /// استرجاع بيانات المحفظة الثنائية لنقطة البيع مع شبكة محددة
+  Future<ApiResponse<PosWalletModel>> getPosWallet({
+    required int networkId,
+    required int posId,
+  });
+
+  /// تحويل وشحن رصيد من محفظة الشبكة إلى محفظة نقطة البيع
+  Future<ApiResponse<dynamic>> transferNetworkToPos({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+  });
+
+  /// استرجاع أو توريد رصيد من محفظة نقطة البيع إلى محفظة الشبكة
+  Future<ApiResponse<dynamic>> transferPosToNetwork({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+  });
+
+  /// استرجاع سجل دفتر الأستاذ لحركات محفظة نقطة البيع
+  Future<ApiResponse<List<PosWalletLogModel>>> getPosWalletLogs({
+    required int walletId,
+    int page = 1,
+    int perPage = 20,
+  });
 }
+

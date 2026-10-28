@@ -3,6 +3,7 @@ import 'package:netsales/features/partners/data/datasources/partners_remote_data
 import 'package:netsales/features/partners/domain/entities/network_entity.dart';
 import 'package:netsales/features/partners/domain/entities/network_pos_entity.dart';
 import 'package:netsales/features/partners/domain/entities/pos_entity.dart';
+import 'package:netsales/features/partners/domain/entities/pos_wallet_entity.dart';
 import 'package:netsales/features/partners/domain/repositories/partners_repository.dart';
 
 /// ============================================================================
@@ -166,5 +167,104 @@ class PartnersRepositoryImpl implements PartnersRepository {
     }
 
     return true;
+  }
+
+  @override
+  Future<PosWalletEntity?> getPosWallet({
+    required int networkId,
+    required int posId,
+  }) async {
+    final response = await _remoteDataSource.getPosWallet(
+      networkId: networkId,
+      posId: posId,
+    );
+
+    if (!response.success) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر جلب بيانات محفظة نقطة البيع المشتركة',
+      );
+    }
+
+    return response.data;
+  }
+
+  @override
+  Future<bool> transferNetworkToPos({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+  }) async {
+    final response = await _remoteDataSource.transferNetworkToPos(
+      networkId: networkId,
+      posId: posId,
+      amount: amount,
+      statement: statement,
+    );
+
+    if (!response.success) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'فشل تحويل الرصيد إلى محفظة نقطة البيع',
+      );
+    }
+
+    return true;
+  }
+
+  @override
+  Future<bool> transferPosToNetwork({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+  }) async {
+    final response = await _remoteDataSource.transferPosToNetwork(
+      networkId: networkId,
+      posId: posId,
+      amount: amount,
+      statement: statement,
+    );
+
+    if (!response.success) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'فشل استرجاع الرصيد من نقطة البيع إلى الشبكة',
+      );
+    }
+
+    return true;
+  }
+
+  @override
+  Future<List<PosWalletLogEntity>> getPosWalletLogs({
+    required int networkId,
+    required int posId,
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    // First retrieve wallet to get wallet_id directly from backend
+    final wallet = await getPosWallet(networkId: networkId, posId: posId);
+    if (wallet == null) return <PosWalletLogEntity>[];
+
+    final response = await _remoteDataSource.getPosWalletLogs(
+      walletId: wallet.walletId,
+      page: page,
+      perPage: perPage,
+    );
+
+    if (!response.success) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر جلب سجل دفتر الأستاذ لمحفظة نقطة البيع',
+      );
+    }
+
+    return response.data ?? <PosWalletLogEntity>[];
   }
 }

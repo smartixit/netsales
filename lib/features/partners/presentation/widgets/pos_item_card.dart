@@ -10,8 +10,10 @@ import 'package:netsales/features/operations/presentation/widgets/sheets/create_
 import 'package:netsales/features/partners/domain/entities/pos_entity.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
 import 'package:netsales/features/partners/presentation/widgets/reject_partner_dialog.dart';
+import 'package:netsales/features/partners/presentation/widgets/sheets/pos_wallet_management_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/menus/custom_popup_menu.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// ============================================================================
@@ -473,6 +475,21 @@ class _PosOptionsButton extends StatelessWidget {
                 preselectedPosName: pos.posName,
               );
               break;
+            case 'wallet':
+              final networkId = controller.networks.isNotEmpty
+                  ? controller.networks.first.networkId
+                  : 1;
+              final networkName = controller.networks.isNotEmpty
+                  ? controller.networks.first.networkName
+                  : null;
+              PosWalletManagementSheet.show(
+                context,
+                networkId: networkId,
+                posId: pos.posId,
+                posName: pos.posName,
+                networkName: networkName,
+              );
+              break;
             case 'copy_uuid':
               Clipboard.setData(ClipboardData(text: pos.posUuid));
               CustomSnackbar.show(
@@ -495,11 +512,28 @@ class _PosOptionsButton extends StatelessWidget {
         },
         itemBuilder: (ctx) => [
           PopupMenuItem<String>(
+            value: 'wallet',
+            child: Row(
+              children: [
+                Icon(Icons.account_balance_wallet_rounded,
+                    color: colors.primary, size: 16.r),
+                AppSpacing.hSm,
+                Text(
+                  'المحفظة والتحويل المالي',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem<String>(
             value: 'invoice',
             child: Row(
               children: [
                 Icon(Icons.receipt_long_rounded,
-                    color: colors.primary, size: 16.r),
+                    color: colors.secondary, size: 16.r),
                 AppSpacing.hSm,
                 Text(
                   'إصدار فاتورة مبيعات',

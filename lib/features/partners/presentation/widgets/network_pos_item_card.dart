@@ -8,6 +8,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
 import 'package:netsales/features/partners/domain/entities/network_pos_entity.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
+import 'package:netsales/features/partners/presentation/widgets/sheets/pos_wallet_management_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -309,10 +310,30 @@ class NetworkPosItemCard extends StatelessWidget {
                     // 3. أزرار التحكم والعمليات المباشرة
                     Row(
                       children: [
+                        // زر إدارة المحفظة المشتركة والتحويل المالي
+                        Expanded(
+                          flex: 5,
+                          child: CustomButton.secondary(
+                            text: 'المحفظة المشتركة',
+                            icon: Icons.account_balance_wallet_rounded,
+                            height: 36.h,
+                            onPressed: () => PosWalletManagementSheet.show(
+                              context,
+                              networkId: link.networkId,
+                              posId: link.posId,
+                              posName: link.posName ?? 'نقطة البيع',
+                              networkName: link.networkName,
+                            ),
+                          ),
+                        ),
+
+                        AppSpacing.hSm,
+
                         // زر إصدار فاتورة مبيعات سريعة
                         Expanded(
+                          flex: 5,
                           child: CustomButton.primary(
-                            text: 'إصدار فاتورة مبيعات',
+                            text: 'فاتورة كروت',
                             icon: Icons.receipt_long_rounded,
                             height: 36.h,
                             onPressed: () => CreateSaleInvoiceSheet.show(

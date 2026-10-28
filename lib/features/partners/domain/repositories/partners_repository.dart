@@ -1,6 +1,7 @@
 import 'package:netsales/features/partners/domain/entities/network_entity.dart';
 import 'package:netsales/features/partners/domain/entities/network_pos_entity.dart';
 import 'package:netsales/features/partners/domain/entities/pos_entity.dart';
+import 'package:netsales/features/partners/domain/entities/pos_wallet_entity.dart';
 
 /// ============================================================================
 /// عقد مستودع الشركاء ونقاط التوزيع الدوميني المجرد (PartnersRepository)
@@ -51,4 +52,35 @@ abstract class PartnersRepository {
 
   /// رفض طلب تسجيل نقطة بيع جديدة مع ذكر السبب
   Future<bool> rejectPos(int posId, String reason);
+
+  /// جلب بيانات المحفظة الثنائية المشتركة لنقطة البيع مع شبكة معينة
+  Future<PosWalletEntity?> getPosWallet({
+    required int networkId,
+    required int posId,
+  });
+
+  /// تحويل وشحن رصيد من محفظة الشبكة إلى محفظة نقطة البيع
+  Future<bool> transferNetworkToPos({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+  });
+
+  /// استرجاع أو توريد رصيد من محفظة نقطة البيع إلى محفظة الشبكة
+  Future<bool> transferPosToNetwork({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+  });
+
+  /// جلب سجل دفتر الأستاذ لحركات محفظة نقطة البيع المشتركة
+  Future<List<PosWalletLogEntity>> getPosWalletLogs({
+    required int networkId,
+    required int posId,
+    int page = 1,
+    int perPage = 20,
+  });
 }
+

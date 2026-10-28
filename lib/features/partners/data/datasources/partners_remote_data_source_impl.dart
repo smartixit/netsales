@@ -5,6 +5,7 @@ import 'package:netsales/features/partners/data/datasources/partners_remote_data
 import 'package:netsales/features/partners/data/models/network_model.dart';
 import 'package:netsales/features/partners/data/models/network_pos_model.dart';
 import 'package:netsales/features/partners/data/models/pos_model.dart';
+import 'package:netsales/features/partners/data/models/pos_wallet_model.dart';
 
 /// ============================================================================
 /// تطبيق مصدر البيانات البعيد للشركاء (PartnersRemoteDataSourceImpl)
@@ -132,6 +133,73 @@ class PartnersRemoteDataSourceImpl implements PartnersRemoteDataSource {
     return ApiService.instance.post<void>(
       ApiConstants.posReject(posId),
       data: {'rejection_reason': reason},
+    );
+  }
+
+  @override
+  Future<ApiResponse<PosWalletModel>> getPosWallet({
+    required int networkId,
+    required int posId,
+  }) {
+    return ApiService.instance.get<PosWalletModel>(
+      ApiConstants.posWalletByNetworkPos(networkId, posId),
+      fromJson: (json) =>
+          PosWalletModel.fromJson(Map<String, dynamic>.from(json as Map)),
+    );
+  }
+
+  @override
+  Future<ApiResponse<dynamic>> transferNetworkToPos({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+  }) {
+    return ApiService.instance.post<dynamic>(
+      ApiConstants.posWalletTransferFromNetwork,
+      data: {
+        'network_id': networkId,
+        'pos_id': posId,
+        'amount': amount,
+        if (statement != null && statement.trim().isNotEmpty)
+          'statement': statement.trim(),
+      },
+    );
+  }
+
+  @override
+  Future<ApiResponse<dynamic>> transferPosToNetwork({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+  }) {
+    return ApiService.instance.post<dynamic>(
+      ApiConstants.posWalletTransferToNetwork,
+      data: {
+        'network_id': networkId,
+        'pos_id': posId,
+        'amount': amount,
+        if (statement != null && statement.trim().isNotEmpty)
+          'statement': statement.trim(),
+      },
+    );
+  }
+
+  @override
+  Future<ApiResponse<List<PosWalletLogModel>>> getPosWalletLogs({
+    required int walletId,
+    int page = 1,
+    int perPage = 20,
+  }) {
+    return ApiService.instance.getList<PosWalletLogModel>(
+      ApiConstants.posWalletLogs(walletId),
+      queryParameters: {
+        'page': page,
+        'per_page': perPage,
+      },
+      fromJson: (json) =>
+          PosWalletLogModel.fromJson(Map<String, dynamic>.from(json as Map)),
     );
   }
 }
