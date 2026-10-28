@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 
+/// الرسوميات الخلفية الدائرية المتراكبة لشاشة الإقلاع
 class SplashCircleVector extends StatelessWidget {
   const SplashCircleVector({super.key});
 
@@ -11,11 +13,11 @@ class SplashCircleVector extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-          top: -80,
-          left: -60,
+          top: -80.h,
+          left: -60.w,
           child: Container(
-            width: 260,
-            height: 260,
+            width: 260.r,
+            height: 260.r,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: colors.surface.withValues(alpha: 0.06),
@@ -23,11 +25,11 @@ class SplashCircleVector extends StatelessWidget {
           ),
         ),
         Positioned(
-          top: -30,
-          left: -20,
+          top: -30.h,
+          left: -20.w,
           child: Container(
-            width: 180,
-            height: 180,
+            width: 180.r,
+            height: 180.r,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: colors.surface.withValues(alpha: 0.04),
@@ -35,11 +37,11 @@ class SplashCircleVector extends StatelessWidget {
           ),
         ),
         Positioned(
-          bottom: -100,
-          right: -60,
+          bottom: -100.h,
+          right: -60.w,
           child: Container(
-            width: 300,
-            height: 300,
+            width: 300.r,
+            height: 300.r,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: colors.surface.withValues(alpha: 0.05),
@@ -47,11 +49,11 @@ class SplashCircleVector extends StatelessWidget {
           ),
         ),
         Positioned(
-          bottom: -40,
-          right: 20,
+          bottom: -40.h,
+          right: 20.w,
           child: Container(
-            width: 160,
-            height: 160,
+            width: 160.r,
+            height: 160.r,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: colors.surface.withValues(alpha: 0.03),
@@ -62,3 +64,4 @@ class SplashCircleVector extends StatelessWidget {
     );
   }
 }
+

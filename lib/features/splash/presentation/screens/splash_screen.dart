@@ -34,8 +34,11 @@ class SplashScreen extends GetView<SplashController> {
           decoration: BoxDecoration(
             gradient: AppGradients.primaryGradient(context),
           ),
-          child: Stack(
-            children: [const SplashCircleVector(), SplashBodyContent(controller: controller,)],
+          child: const Stack(
+            children: [
+              SplashCircleVector(),
+              SplashBodyContent(),
+            ],
           ),
         ),
       ),

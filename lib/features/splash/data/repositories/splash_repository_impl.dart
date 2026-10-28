@@ -9,6 +9,11 @@ class SplashRepositoryImpl implements SplashRepository {
   const SplashRepositoryImpl(this._dataSource);
 
   @override
+  Future<void> initializeServices() {
+    return _dataSource.initializeInfrastructureServices();
+  }
+
+  @override
   Future<String> getBootDestination() async {
     // 1. إذا كان أول تشغيل للتطبيق -> توجيه لجولة التعريف (Onboarding)
     if (_dataSource.isFirstLaunch) {

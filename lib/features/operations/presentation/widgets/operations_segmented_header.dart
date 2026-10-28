@@ -41,12 +41,12 @@ class OperationsSegmentedHeader extends StatelessWidget {
               onSegmentChanged: controller.changeSegment,
               items: [
                 CustomSegmentItem(
-                  label: 'فواتير المبيعات',
+                  label: 'الفواتير',
                   count: controller.invoices.length,
                   icon: Icons.receipt_long_rounded,
                 ),
                 CustomSegmentItem(
-                  label: 'طلبات التوريد',
+                  label: 'الطلبات',
                   count: controller.pendingRequestsCount,
                   highlightBadge: controller.pendingRequestsCount > 0,
                   icon: Icons.inventory_2_rounded,
