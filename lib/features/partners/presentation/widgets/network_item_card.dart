@@ -13,6 +13,7 @@ import 'package:netsales/features/partners/presentation/controllers/partners_con
 import 'package:netsales/features/partners/presentation/widgets/reject_partner_dialog.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/menus/custom_popup_menu.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// ============================================================================
@@ -449,104 +450,49 @@ class _NetworkOptionsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Theme(
-      data: Theme.of(context).copyWith(
-        popupMenuTheme: PopupMenuThemeData(
-          color: colors.surfaceContainerHighest,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.mdRadius,
-            side: BorderSide(
-              color: colors.outline.withValues(alpha: 0.12),
-            ),
-          ),
-          elevation: 4,
-          shadowColor: AppElevation.level3(context).first.color,
+    return CustomPopupMenu<String>(
+      tooltip: 'خيارات الشبكة',
+      onSelected: (value) {
+        switch (value) {
+          case 'filter_pos':
+            controller.searchController.text = network.networkName;
+            controller.onSearchSubmitted(network.networkName);
+            controller.changeSegment(1);
+            break;
+          case 'packages':
+            Get.toNamed(AppRoutes.voucherPackages);
+            break;
+          case 'copy_uuid':
+            Clipboard.setData(ClipboardData(text: network.networkUuid));
+            CustomSnackbar.show(
+              title: 'تم النسخ',
+              message: 'تم نسخ معرّف الشبكة #${network.networkUuid} بنجاح.',
+              type: SnackType.info,
+            );
+            break;
+        }
+      },
+      items: [
+        CustomPopupItem<String>(
+          value: 'filter_pos',
+          label: 'عرض وكلاء الشبكة',
+          icon: Icons.storefront_outlined,
+          iconColor: colors.primary,
         ),
-      ),
-      child: PopupMenuButton<String>(
-        padding: EdgeInsets.zero,
-        constraints: BoxConstraints(minWidth: 150.w),
-        icon: Icon(
-          Icons.more_vert_rounded,
-          color: colors.onSurfaceVariant,
-          size: 19.r,
+        CustomPopupItem<String>(
+          value: 'packages',
+          label: 'إدارة الباقات والخصومات',
+          icon: Icons.confirmation_number_outlined,
+          iconColor: colors.secondary,
         ),
-        tooltip: 'خيارات الشبكة',
-        position: PopupMenuPosition.under,
-        onSelected: (value) {
-          switch (value) {
-            case 'filter_pos':
-              controller.searchController.text = network.networkName;
-              controller.onSearchSubmitted(network.networkName);
-              controller.changeSegment(1);
-              break;
-            case 'copy_uuid':
-              Clipboard.setData(ClipboardData(text: network.networkUuid));
-              CustomSnackbar.show(
-                title: 'تم النسخ',
-                message: 'تم نسخ معرّف الشبكة #${network.networkUuid} بنجاح.',
-                type: SnackType.info,
-              );
-              break;
-            case 'packages':
-              Get.toNamed(AppRoutes.voucherPackages);
-              break;
-          }
-        },
-        itemBuilder: (ctx) => [
-          PopupMenuItem<String>(
-            value: 'filter_pos',
-            child: Row(
-              children: [
-                Icon(Icons.storefront_outlined,
-                    color: colors.primary, size: 16.r),
-                AppSpacing.hSm,
-                Text(
-                  'عرض وكلاء الشبكة',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          PopupMenuItem<String>(
-            value: 'packages',
-            child: Row(
-              children: [
-                Icon(Icons.confirmation_number_outlined,
-                    color: colors.secondary, size: 16.r),
-                AppSpacing.hSm,
-                Text(
-                  'إدارة الباقات والخصومات',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          PopupMenuItem<String>(
-            value: 'copy_uuid',
-            child: Row(
-              children: [
-                Icon(Icons.copy_rounded,
-                    color: colors.onSurfaceVariant, size: 16.r),
-                AppSpacing.hSm,
-                Text(
-                  'نسخ معرّف الشبكة',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        const CustomPopupDivider<String>(),
+        CustomPopupItem<String>(
+          value: 'copy_uuid',
+          label: 'نسخ معرّف الشبكة (#${network.networkUuid})',
+          icon: Icons.copy_rounded,
+          iconColor: colors.onSurfaceVariant,
+        ),
+      ],
     );
   }
 }

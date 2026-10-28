@@ -442,146 +442,81 @@ class _PosOptionsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Theme(
-      data: Theme.of(context).copyWith(
-        popupMenuTheme: PopupMenuThemeData(
-          color: colors.surfaceContainerHighest,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.mdRadius,
-            side: BorderSide(
-              color: colors.outline.withValues(alpha: 0.12),
-            ),
-          ),
-          elevation: 4,
-          shadowColor: AppElevation.level3(context).first.color,
-        ),
-      ),
-      child: PopupMenuButton<String>(
-        padding: EdgeInsets.zero,
-        constraints: BoxConstraints(minWidth: 150.w),
-        icon: Icon(
-          Icons.more_vert_rounded,
-          color: colors.onSurfaceVariant,
-          size: 19.r,
-        ),
-        tooltip: 'خيارات الوكيل',
-        position: PopupMenuPosition.under,
-        onSelected: (value) {
-          switch (value) {
-            case 'invoice':
-              CreateSaleInvoiceSheet.show(
-                context,
-                preselectedPosId: pos.posId,
-                preselectedPosName: pos.posName,
-              );
-              break;
-            case 'wallet':
-              final networkId = controller.networks.isNotEmpty
-                  ? controller.networks.first.networkId
-                  : 1;
-              final networkName = controller.networks.isNotEmpty
-                  ? controller.networks.first.networkName
-                  : null;
-              PosWalletManagementSheet.show(
-                context,
-                networkId: networkId,
-                posId: pos.posId,
-                posName: pos.posName,
-                networkName: networkName,
-              );
-              break;
-            case 'copy_uuid':
-              Clipboard.setData(ClipboardData(text: pos.posUuid));
+    return CustomPopupMenu<String>(
+      tooltip: 'خيارات الوكيل',
+      onSelected: (value) {
+        switch (value) {
+          case 'wallet':
+            final networkId = controller.networks.isNotEmpty
+                ? controller.networks.first.networkId
+                : 1;
+            final networkName = controller.networks.isNotEmpty
+                ? controller.networks.first.networkName
+                : null;
+            PosWalletManagementSheet.show(
+              context,
+              networkId: networkId,
+              posId: pos.posId,
+              posName: pos.posName,
+              networkName: networkName,
+            );
+            break;
+          case 'invoice':
+            CreateSaleInvoiceSheet.show(
+              context,
+              preselectedPosId: pos.posId,
+              preselectedPosName: pos.posName,
+            );
+            break;
+          case 'copy_uuid':
+            Clipboard.setData(ClipboardData(text: pos.posUuid));
+            CustomSnackbar.show(
+              title: 'تم النسخ',
+              message: 'تم نسخ معرّف الوكيل #${pos.posUuid} بنجاح.',
+              type: SnackType.info,
+            );
+            break;
+          case 'copy_phone':
+            if (pos.posPhoneNumber != null) {
+              Clipboard.setData(ClipboardData(text: pos.posPhoneNumber!));
               CustomSnackbar.show(
                 title: 'تم النسخ',
-                message: 'تم نسخ معرّف الوكيل #${pos.posUuid} بنجاح.',
+                message: 'تم نسخ رقم الهاتف بنجاح.',
                 type: SnackType.info,
               );
-              break;
-            case 'copy_phone':
-              if (pos.posPhoneNumber != null) {
-                Clipboard.setData(ClipboardData(text: pos.posPhoneNumber!));
-                CustomSnackbar.show(
-                  title: 'تم النسخ',
-                  message: 'تم نسخ رقم الهاتف بنجاح.',
-                  type: SnackType.info,
-                );
-              }
-              break;
-          }
-        },
-        itemBuilder: (ctx) => [
-          PopupMenuItem<String>(
-            value: 'wallet',
-            child: Row(
-              children: [
-                Icon(Icons.account_balance_wallet_rounded,
-                    color: colors.primary, size: 16.r),
-                AppSpacing.hSm,
-                Text(
-                  'المحفظة والتحويل المالي',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
+            }
+            break;
+        }
+      },
+      items: [
+        CustomPopupItem<String>(
+          value: 'wallet',
+          label: 'المحفظة والتحويل المالي',
+          icon: Icons.account_balance_wallet_rounded,
+          iconColor: colors.primary,
+        ),
+        CustomPopupItem<String>(
+          value: 'invoice',
+          label: 'إصدار فاتورة مبيعات',
+          icon: Icons.receipt_long_rounded,
+          iconColor: colors.secondary,
+        ),
+        const CustomPopupDivider<String>(),
+        CustomPopupItem<String>(
+          value: 'copy_uuid',
+          label: 'نسخ معرّف الوكيل (#${pos.posUuid})',
+          icon: Icons.copy_rounded,
+          iconColor: colors.onSurfaceVariant,
+        ),
+        if (pos.posPhoneNumber != null)
+          CustomPopupItem<String>(
+            value: 'copy_phone',
+            label: 'نسخ رقم الهاتف',
+            subtitle: pos.posPhoneNumber,
+            icon: Icons.phone_outlined,
+            iconColor: colors.secondary,
           ),
-          PopupMenuItem<String>(
-            value: 'invoice',
-            child: Row(
-              children: [
-                Icon(Icons.receipt_long_rounded,
-                    color: colors.secondary, size: 16.r),
-                AppSpacing.hSm,
-                Text(
-                  'إصدار فاتورة مبيعات',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (pos.posPhoneNumber != null)
-            PopupMenuItem<String>(
-              value: 'copy_phone',
-              child: Row(
-                children: [
-                  Icon(Icons.phone_outlined,
-                      color: colors.secondary, size: 16.r),
-                  AppSpacing.hSm,
-                  Text(
-                    'نسخ رقم الهاتف',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          PopupMenuItem<String>(
-            value: 'copy_uuid',
-            child: Row(
-              children: [
-                Icon(Icons.copy_rounded,
-                    color: colors.onSurfaceVariant, size: 16.r),
-                AppSpacing.hSm,
-                Text(
-                  'نسخ معرّف الوكيل',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
