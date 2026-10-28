@@ -82,7 +82,7 @@ class CreateSaleInvoiceSheet extends StatelessWidget {
       final grossAmount = controller.totalGrossAmount;
       final discountAmount = controller.totalDiscountAmount;
       final netAmount = controller.totalNetAmount;
-      final paidAmount = controller.paidAmount;
+      final paidAmount = controller.paidAmount ?? (saleType == 'CASH' ? netAmount : 0.0);
       final remainingDebt = controller.remainingDebtAmount;
 
       return Column(

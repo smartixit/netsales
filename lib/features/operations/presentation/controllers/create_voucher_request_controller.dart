@@ -153,10 +153,12 @@ class CreateVoucherRequestController extends GetxController {
     }
   }
 
+  // DISPLAY-ONLY PREVIEW (quantity): backend recomputes totals.
   int get totalVoucherCount {
     return packageQuantities.values.fold(0, (sum, count) => sum + count);
   }
 
+  // DISPLAY-ONLY PREVIEW: non-authoritative; backend recomputes from items.
   double get totalGrossAmount {
     double total = 0.0;
     for (final pkg in packages) {
@@ -168,6 +170,7 @@ class CreateVoucherRequestController extends GetxController {
     return total;
   }
 
+  // DISPLAY-ONLY PREVIEW: non-authoritative; backend uses effective discount.
   double get totalDiscountAmount {
     double discount = 0.0;
     for (final pkg in packages) {
@@ -218,14 +221,10 @@ class CreateVoucherRequestController extends GetxController {
     for (final pkg in packages) {
       final qty = packageQuantities[pkg.packageId] ?? 0;
       if (qty > 0) {
-        final percent = saleType.value == 'CASH'
-            ? pkg.packageDefaultCashDiscount
-            : pkg.packageDefaultCreditDiscount;
+        // NOTE: only package_id + voucher_count sent; backend uses catalog price & effective discount.
         items.add({
           'package_id': pkg.packageId,
-          'voucher_price': pkg.packageVoucherPrice,
           'voucher_count': qty,
-          'item_discount': percent,
         });
       }
     }

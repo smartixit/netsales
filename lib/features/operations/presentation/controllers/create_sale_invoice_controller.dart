@@ -211,10 +211,12 @@ class CreateSaleInvoiceController extends GetxController {
     }
   }
 
+  // DISPLAY-ONLY PREVIEW (quantity, not money): backend recomputes totals.
   int get totalVoucherCount {
     return packageQuantities.values.fold(0, (sum, count) => sum + count);
   }
 
+  // DISPLAY-ONLY PREVIEW: non-authoritative; backend recomputes from items.
   double get totalGrossAmount {
     double total = 0.0;
     for (final pkg in packages) {
@@ -226,6 +228,7 @@ class CreateSaleInvoiceController extends GetxController {
     return total;
   }
 
+  // DISPLAY-ONLY PREVIEW: non-authoritative; backend uses effective discount.
   double get totalDiscountAmount {
     double discount = 0.0;
     for (final pkg in packages) {
@@ -243,15 +246,19 @@ class CreateSaleInvoiceController extends GetxController {
 
   double get totalNetAmount => totalGrossAmount - totalDiscountAmount;
 
-  double get paidAmount {
-    if (saleType.value == 'CASH') return totalNetAmount;
+  // DISPLAY-ONLY PREVIEW: backend is authoritative for paid/remaining.
+  // For cash, send null so backend sets paid = total (remaining = 0).
+  double? get paidAmount {
+    if (saleType.value == 'CASH') return null;
     final cleaned = AmountFormatter.clean(paidAmountController.text);
-    final parsed = double.tryParse(cleaned);
-    return parsed ?? 0.0;
+    return double.tryParse(cleaned);
   }
 
-  double get remainingDebtAmount =>
-      (totalNetAmount - paidAmount).clamp(0.0, double.infinity);
+  double get remainingDebtAmount {
+    if (saleType.value == 'CASH') return 0.0;
+    final paid = paidAmount ?? 0.0;
+    return (totalNetAmount - paid).clamp(0.0, double.infinity);
+  }
 
   /// إرسال واعتماد فاتورة المبيعات
   Future<SaleInvoiceEntity?> submitInvoice() async {
@@ -286,14 +293,11 @@ class CreateSaleInvoiceController extends GetxController {
     for (final pkg in packages) {
       final qty = packageQuantities[pkg.packageId] ?? 0;
       if (qty > 0) {
-        final percent = saleType.value == 'CASH'
-            ? pkg.packageDefaultCashDiscount
-            : pkg.packageDefaultCreditDiscount;
+        // NOTE: only package_id + voucher_count are sent; backend uses catalog price
+        // and effective discount (server-authoritative, display-only preview above).
         items.add({
           'package_id': pkg.packageId,
-          'voucher_price': pkg.packageVoucherPrice,
           'voucher_count': qty,
-          'item_discount': percent,
         });
       }
     }

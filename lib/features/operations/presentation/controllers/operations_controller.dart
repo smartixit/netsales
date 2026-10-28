@@ -594,18 +594,21 @@ class OperationsController extends GetxController {
     }
   }
 
+  // DISPLAY-ONLY aggregation of backend-fetched data (not authoritative; not sent).
   double get totalInvoicesAmount =>
       invoices.fold(0.0, (sum, inv) => sum + inv.invoiceTotalAmount);
 
   double get totalPaidAmount =>
       invoices.fold(0.0, (sum, inv) => sum + inv.paidAmount);
 
+  // DISPLAY-ONLY aggregation of backend-fetched data (not authoritative; not sent).
   double get unpaidRemainingAmount =>
       invoices.fold(0.0, (sum, inv) => sum + inv.remainingAmount);
 
   double get totalRequestsAmount =>
       requests.fold(0.0, (sum, req) => sum + req.requestTotalAmount);
 
+  // DISPLAY-ONLY count of backend-fetched requests (not authoritative; not sent).
   int get pendingRequestsCount =>
       requests.where((req) => req.isPending).length;
 

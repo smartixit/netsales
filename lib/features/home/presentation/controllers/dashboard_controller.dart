@@ -192,9 +192,11 @@ class DashboardController extends GetxController {
       (salesKpi['cash_sales_amount'] as num?)?.toDouble() ?? 0.0;
   double get creditSalesAmount =>
       (salesKpi['credit_sales_amount'] as num?)?.toDouble() ?? 0.0;
+  // DISPLAY-ONLY fallback sum of backend-fetched amounts (not authoritative).
   double get totalSalesAmount =>
       (salesKpi['current_amount'] as num?)?.toDouble() ??
       (cashSalesAmount + creditSalesAmount);
+  // DISPLAY-ONLY ratio (inputs backend-provided; not sent).
   double get cashRatio => totalSalesAmount > 0
       ? (cashSalesAmount / totalSalesAmount).clamp(0.0, 1.0)
       : 0.0;
@@ -222,6 +224,7 @@ class DashboardController extends GetxController {
       (posNetworkKpi['active_count'] as num?)?.toInt() ?? 0;
   int get totalNetworkPosCount =>
       (posNetworkKpi['total_count'] as num?)?.toInt() ?? 0;
+  // DISPLAY-ONLY ratio (inputs backend-provided; not sent).
   double get posCoverageRatio => totalNetworkPosCount > 0
       ? (activeNetworkPosCount / totalNetworkPosCount).clamp(0.0, 1.0)
       : 0.0;

@@ -22,8 +22,7 @@ class MockSplashDataSource implements SplashLocalDataSource {
 
   @override
   Future<void> initializeInfrastructureServices() {
-    // TODO: implement initializeInfrastructureServices
-    throw UnimplementedError();
+    return Future.value();
   }
 }
 

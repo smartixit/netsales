@@ -114,11 +114,13 @@ class EditVoucherRequestController extends GetxController {
   }
 
   /// إجمالي عدد الكروت المختارة
+  // DISPLAY-ONLY PREVIEW (quantity): backend recomputes totals.
   int get totalVoucherCount {
     return packageQuantities.values.fold(0, (sum, count) => sum + count);
   }
 
   /// إجمالي المبلغ الإجمالي قبل الخصم
+  // DISPLAY-ONLY PREVIEW: non-authoritative; backend recomputes from items.
   double get totalGrossAmount {
     double total = 0.0;
     for (final entry in packageQuantities.entries) {
@@ -131,6 +133,7 @@ class EditVoucherRequestController extends GetxController {
   }
 
   /// إجمالي مبالغ الخصم المطبقة
+  // DISPLAY-ONLY PREVIEW: non-authoritative; backend uses effective discount.
   double get totalDiscountAmount {
     double totalDiscount = 0.0;
     final isCash = saleType.value == 'CASH';
@@ -182,19 +185,10 @@ class EditVoucherRequestController extends GetxController {
       await CustomAnimationOverlay.showLoading(message: 'جاري حفظ تعديلات الطلب...');
 
       final items = packageQuantities.entries.map((entry) {
-        final pkg = packages.firstWhereOrNull((p) => p.packageId == entry.key);
-        final isCash = saleType.value == 'CASH';
-        final discount = pkg != null
-            ? (isCash
-                ? pkg.packageDefaultCashDiscount
-                : pkg.packageDefaultCreditDiscount)
-            : 0.0;
-
+        // NOTE: only package_id + voucher_count sent; backend uses catalog price & effective discount.
         return {
           'package_id': entry.key,
           'voucher_count': entry.value,
-          if (pkg != null) 'voucher_price': pkg.packageVoucherPrice,
-          'item_discount': discount,
         };
       }).toList();
 

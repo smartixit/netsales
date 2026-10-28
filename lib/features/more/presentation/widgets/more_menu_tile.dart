@@ -88,7 +88,7 @@ class MoreMenuTile extends StatelessWidget {
             // العنصر اللاحق (Badge أو سهم الانتقال لليمين في RTL)
             trailing ??
                 Icon(
-                  Icons.arrow_back_ios_new_rounded,
+                  Icons.arrow_forward_ios_rounded,
                   size: 13.r,
                   color: colors.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
