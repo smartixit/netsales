@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -12,6 +13,8 @@ import 'package:netsales/features/partners/presentation/widgets/sheets/pos_walle
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/menus/custom_popup_menu.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// ============================================================================
 /// بطاقة عقد الشراكة والتوزيع المحدثة (NetworkPosItemCard)
@@ -310,9 +313,24 @@ class NetworkPosItemCard extends StatelessWidget {
                     // 3. أزرار التحكم والعمليات المباشرة
                     Row(
                       children: [
+                        // زر إصدار فاتورة مبيعات سريعة
+                        Expanded(
+                          child: CustomButton.primary(
+                            text: 'فاتورة كروت',
+                            icon: Icons.receipt_long_rounded,
+                            height: 36.h,
+                            onPressed: () => CreateSaleInvoiceSheet.show(
+                              context,
+                              preselectedPosId: link.posId,
+                              preselectedPosName: link.posName,
+                            ),
+                          ),
+                        ),
+
+                        AppSpacing.hSm,
+
                         // زر إدارة المحفظة المشتركة والتحويل المالي
                         Expanded(
-                          flex: 5,
                           child: CustomButton.secondary(
                             text: 'المحفظة المشتركة',
                             icon: Icons.account_balance_wallet_rounded,
@@ -329,49 +347,61 @@ class NetworkPosItemCard extends StatelessWidget {
 
                         AppSpacing.hSm,
 
-                        // زر إصدار فاتورة مبيعات سريعة
-                        Expanded(
-                          flex: 5,
-                          child: CustomButton.primary(
-                            text: 'فاتورة كروت',
-                            icon: Icons.receipt_long_rounded,
-                            height: 36.h,
-                            onPressed: () => CreateSaleInvoiceSheet.show(
-                              context,
-                              preselectedPosId: link.posId,
-                              preselectedPosName: link.posName,
-                            ),
-                          ),
-                        ),
-
-                        AppSpacing.hSm,
-
-                        // زر تبديل حالة عقد الشراكة (تجميد / تفعيل)
-                        CustomButton.outline(
-                          text: link.isActive ? 'تجميد' : 'تفعيل',
-                          icon: link.isActive
-                              ? Icons.pause_circle_outline_rounded
-                              : Icons.play_circle_outline_rounded,
-                          height: 36.h,
-                          onPressed: () async {
-                            final confirmed =
-                                await CustomDialog.showConfirmation(
-                              title: link.isActive
-                                  ? 'تأكيد تجميد العقد'
-                                  : 'تأكيد تفعيل العقد',
-                              message: link.isActive
-                                  ? 'هل أنت متأكد من تجميد عقد الارتباط بين "${link.networkName}" و"${link.posName}"؟ لن يتمكن الوكيل من طلب الكروت مؤقتاً.'
-                                  : 'هل أنت متأكد من إعادة تفعيل عقد الارتباط بين "${link.networkName}" و"${link.posName}"؟',
-                              confirmLabel: link.isActive
-                                  ? 'نعم، تجميد العقد'
-                                  : 'نعم، تفعيل العقد',
-                              cancelLabel: 'إلغاء',
-                            );
-                            if (confirmed == true) {
-                              await controller
-                                  .toggleLinkStatus(link.networkPosId);
+                        // قائمة خيارات العقد المنبثقة الموحدة
+                        CustomPopupMenu<String>(
+                          tooltip: 'خيارات العقد',
+                          onSelected: (value) async {
+                            if (value == 'toggle') {
+                              final confirmed =
+                                  await CustomDialog.showConfirmation(
+                                title: link.isActive
+                                    ? 'تأكيد تجميد العقد'
+                                    : 'تأكيد تفعيل العقد',
+                                message: link.isActive
+                                    ? 'هل أنت متأكد من تجميد عقد الارتباط بين "${link.networkName}" و"${link.posName}"؟ لن يتمكن الوكيل من طلب الكروت مؤقتاً.'
+                                    : 'هل أنت متأكد من إعادة تفعيل عقد الارتباط بين "${link.networkName}" و"${link.posName}"؟',
+                                confirmLabel: link.isActive
+                                    ? 'نعم، تجميد العقد'
+                                    : 'نعم، تفعيل العقد',
+                                cancelLabel: 'إلغاء',
+                              );
+                              if (confirmed == true) {
+                                await controller
+                                    .toggleLinkStatus(link.networkPosId);
+                              }
+                            } else if (value == 'copy') {
+                              Clipboard.setData(
+                                ClipboardData(text: link.networkPosId.toString()),
+                              );
+                              CustomSnackbar.show(
+                                title: 'تم النسخ',
+                                message:
+                                    'تم نسخ معرّف العقد #${link.networkPosId} بنجاح.',
+                                type: SnackType.info,
+                              );
                             }
                           },
+                          items: [
+                            CustomPopupItem<String>(
+                              value: 'toggle',
+                              label: link.isActive
+                                  ? 'تجميد عقد الشراكة'
+                                  : 'تفعيل عقد الشراكة',
+                              icon: link.isActive
+                                  ? Icons.pause_circle_outline_rounded
+                                  : Icons.play_circle_outline_rounded,
+                              iconColor:
+                                  link.isActive ? colors.error : colors.success,
+                              isDestructive: link.isActive,
+                            ),
+                            const CustomPopupDivider<String>(),
+                            CustomPopupItem<String>(
+                              value: 'copy',
+                              label: 'نسخ معرّف العقد (#${link.networkPosId})',
+                              icon: Icons.copy_rounded,
+                              iconColor: colors.onSurfaceVariant,
+                            ),
+                          ],
                         ),
                       ],
                     ),
