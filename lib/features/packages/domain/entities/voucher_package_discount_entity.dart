@@ -3,6 +3,8 @@
 /// ============================================================================
 /// كائن نقي يمثل نسبة الخصم المخصصة الاستثنائية لنقطة بيع معينة على باقة محددة،
 /// خالٍ من أي ارتباط بقواعد التسلسل أو الحزم الخارجية.
+/// القيم المالية المشتقة (effectiveCashPrice, cashSavings, ...) تأتي جاهزة من
+/// الخادم (Single Source of Truth) ولا تُحتسب داخل العميل.
 class VoucherPackageDiscountEntity {
   final int discountId;
   final int networkId;
@@ -17,7 +19,13 @@ class VoucherPackageDiscountEntity {
   final String? networkName;
   final String? posName;
   final String? packageName;
+
+  // Server-authoritative derived monetary values (Display-Only, AGENTS.md §34)
   final double? originalPackagePrice;
+  final double? effectiveCashPrice;
+  final double? effectiveCreditPrice;
+  final double? cashSavings;
+  final double? creditSavings;
 
   const VoucherPackageDiscountEntity({
     required this.discountId,
@@ -34,29 +42,14 @@ class VoucherPackageDiscountEntity {
     this.posName,
     this.packageName,
     this.originalPackagePrice,
+    this.effectiveCashPrice,
+    this.effectiveCreditPrice,
+    this.cashSavings,
+    this.creditSavings,
   });
 
   /// فحص تفعيل الخصم المخصص
   bool get isActive => status;
-
-  /// احتساب السعر الصافي بالريال لنقطة البيع عند الشراء النقدي
-  double getEffectiveCashPrice(double basePrice) {
-    final discountAmount = (basePrice * discountCash) / 100;
-    return basePrice - discountAmount;
-  }
-
-  /// احتساب السعر الصافي بالريال لنقطة البيع عند الشراء الآجل
-  double getEffectiveCreditPrice(double basePrice) {
-    final discountAmount = (basePrice * discountCredit) / 100;
-    return basePrice - discountAmount;
-  }
-
-  /// مقدار التوفير المالي (ربح نقطة البيع) بالريال عند الدفع النقدي
-  double getCashSavings(double basePrice) => (basePrice * discountCash) / 100;
-
-  /// مقدار التوفير المالي (ربح نقطة البيع) بالريال عند الدفع الآجل
-  double getCreditSavings(double basePrice) =>
-      (basePrice * discountCredit) / 100;
 
   /// نسخة معدلة من الكيان
   VoucherPackageDiscountEntity copyWith({
@@ -74,6 +67,10 @@ class VoucherPackageDiscountEntity {
     String? posName,
     String? packageName,
     double? originalPackagePrice,
+    double? effectiveCashPrice,
+    double? effectiveCreditPrice,
+    double? cashSavings,
+    double? creditSavings,
   }) {
     return VoucherPackageDiscountEntity(
       discountId: discountId ?? this.discountId,
@@ -90,6 +87,10 @@ class VoucherPackageDiscountEntity {
       posName: posName ?? this.posName,
       packageName: packageName ?? this.packageName,
       originalPackagePrice: originalPackagePrice ?? this.originalPackagePrice,
+      effectiveCashPrice: effectiveCashPrice ?? this.effectiveCashPrice,
+      effectiveCreditPrice: effectiveCreditPrice ?? this.effectiveCreditPrice,
+      cashSavings: cashSavings ?? this.cashSavings,
+      creditSavings: creditSavings ?? this.creditSavings,
     );
   }
 }

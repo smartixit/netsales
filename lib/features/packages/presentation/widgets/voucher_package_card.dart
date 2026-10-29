@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -43,6 +45,9 @@ class VoucherPackageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final brandColor = package.parsedColor ?? colors.primary;
+    final canEdit = PermissionService.to.can(AppPermissions.voucherPackagesEdit);
+    final canDelete = PermissionService.to.can(AppPermissions.voucherPackagesDelete);
+    final canCreate = PermissionService.to.can(AppPermissions.voucherPackagesCreate);
 
     return CustomInteractiveBounce(
       onTap: onEdit,
@@ -129,52 +134,53 @@ class VoucherPackageCard extends StatelessWidget {
                           ),
                         ),
                         AppSpacing.hSm,
-                        // زر تبديل الحالة المباشر
-                        CustomInteractiveBounce(
-                          onTap: onToggleStatus,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 10.w,
-                              vertical: 4.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: package.isActive
-                                  ? colors.successContainer.withValues(alpha: 0.4)
-                                  : colors.errorContainer.withValues(alpha: 0.4),
-                              borderRadius:
-                                  BorderRadius.circular(AppRadius.full),
-                              border: Border.all(
-                                color: package.isActive
-                                    ? colors.success.withValues(alpha: 0.3)
-                                    : colors.error.withValues(alpha: 0.3),
+                        // زر تبديل الحالة المباشر (محمي بصلاحية التعديل)
+                        if (canEdit)
+                          CustomInteractiveBounce(
+                            onTap: onToggleStatus,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 4.h,
                               ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  package.isActive
-                                      ? Icons.check_circle_rounded
-                                      : Icons.pause_circle_rounded,
-                                  size: 14.r,
+                              decoration: BoxDecoration(
+                                color: package.isActive
+                                    ? colors.successContainer.withValues(alpha: 0.4)
+                                    : colors.errorContainer.withValues(alpha: 0.4),
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.full),
+                                border: Border.all(
                                   color: package.isActive
-                                      ? colors.success
-                                      : colors.error,
+                                      ? colors.success.withValues(alpha: 0.3)
+                                      : colors.error.withValues(alpha: 0.3),
                                 ),
-                                AppSpacing.hXxs,
-                                Text(
-                                  package.isActive ? 'مفعلة' : 'معطلة',
-                                  style: AppTypography.labelSmall.copyWith(
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    package.isActive
+                                        ? Icons.check_circle_rounded
+                                        : Icons.pause_circle_rounded,
+                                    size: 14.r,
                                     color: package.isActive
                                         ? colors.success
                                         : colors.error,
-                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                              ],
+                                  AppSpacing.hXxs,
+                                  Text(
+                                    package.isActive ? 'مفعلة' : 'معطلة',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: package.isActive
+                                          ? colors.success
+                                          : colors.error,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
 
@@ -261,7 +267,7 @@ class VoucherPackageCard extends StatelessWidget {
                                 ),
                                 AppSpacing.vXxs,
                                 Text(
-                                  '${AmountFormatter.formatValue(package.defaultEffectiveCashPrice, decimalPlaces: 0)} ر.ي',
+                                  '${AmountFormatter.formatValue(package.effectiveCashPrice, decimalPlaces: 0)} ر.ي',
                                   style: AppTypography.bodySmall.copyWith(
                                     color: colors.success,
                                     fontWeight: FontWeight.bold,
@@ -288,7 +294,7 @@ class VoucherPackageCard extends StatelessWidget {
                                 ),
                                 AppSpacing.vXxs,
                                 Text(
-                                  '${AmountFormatter.formatValue(package.defaultEffectiveCreditPrice, decimalPlaces: 0)} ر.ي',
+                                  '${AmountFormatter.formatValue(package.effectiveCreditPrice, decimalPlaces: 0)} ر.ي',
                                   style: AppTypography.bodySmall.copyWith(
                                     color: colors.secondary,
                                     fontWeight: FontWeight.bold,
@@ -306,23 +312,26 @@ class VoucherPackageCard extends StatelessWidget {
                     // شريط الإجراءات والعمليات السريعة
                     Row(
                       children: [
-                        Expanded(
-                          child: CustomButton.outline(
-                            text: 'تخصيص خصم لوكيل',
-                            icon: Icons.add_circle_outline_rounded,
-                            size: AppButtonSize.small,
-                            onPressed: onAddDiscount,
+                        if (canCreate)
+                          Expanded(
+                            child: CustomButton.outline(
+                              text: 'تخصيص خصم لوكيل',
+                              icon: Icons.add_circle_outline_rounded,
+                              size: AppButtonSize.small,
+                              onPressed: onAddDiscount,
+                            ),
                           ),
-                        ),
-                        AppSpacing.hSm,
-                        CustomButton.icon(
-                          icon: Icons.edit_outlined,
+                        if (canEdit) AppSpacing.hXs,
+                        if (canEdit)
+                          CustomButton.icon(
+                            icon: Icons.edit_outlined,
                           size: AppButtonSize.small,
                           onPressed: onEdit,
                         ),
-                        AppSpacing.hXs,
-                        CustomButton.icon(
-                          icon: Icons.delete_outline_rounded,
+                        if (canDelete) AppSpacing.hXs,
+                        if (canDelete)
+                          CustomButton.icon(
+                            icon: Icons.delete_outline_rounded,
                           foregroundColor: colors.error,
                           size: AppButtonSize.small,
                           onPressed: onDelete,

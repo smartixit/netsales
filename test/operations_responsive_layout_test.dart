@@ -180,6 +180,7 @@ void main() {
     packageId: 1,
     networkId: 1,
     packageName: 'باقة الفرسان الذهبية 15 جيجا غير محدودة',
+    packageVoucherCount: 51,
     packageVoucherPrice: 1500.0,
     packageDefaultCashDiscount: 15.0,
     packageDefaultCreditDiscount: 8.0,

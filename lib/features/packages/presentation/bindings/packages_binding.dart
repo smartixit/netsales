@@ -7,8 +7,6 @@ import 'package:netsales/features/packages/domain/usecases/create_voucher_packag
 import 'package:netsales/features/packages/domain/usecases/create_voucher_package_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/delete_voucher_package_discount_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/delete_voucher_package_use_case.dart';
-import 'package:netsales/features/packages/domain/usecases/get_effective_discount_use_case.dart';
-import 'package:netsales/features/packages/domain/usecases/get_voucher_package_details_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/get_voucher_package_discounts_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/get_voucher_packages_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/toggle_voucher_package_discount_status_use_case.dart';
@@ -45,9 +43,6 @@ class PackagesBinding extends Bindings {
     Get.lazyPut<GetVoucherPackagesUseCase>(
       () => GetVoucherPackagesUseCase(Get.find<PackagesRepository>()),
     );
-    Get.lazyPut<GetVoucherPackageDetailsUseCase>(
-      () => GetVoucherPackageDetailsUseCase(Get.find<PackagesRepository>()),
-    );
     Get.lazyPut<CreateVoucherPackageUseCase>(
       () => CreateVoucherPackageUseCase(Get.find<PackagesRepository>()),
     );
@@ -78,9 +73,6 @@ class PackagesBinding extends Bindings {
     );
     Get.lazyPut<DeleteVoucherPackageDiscountUseCase>(
       () => DeleteVoucherPackageDiscountUseCase(Get.find<PackagesRepository>()),
-    );
-    Get.lazyPut<GetEffectiveDiscountUseCase>(
-      () => GetEffectiveDiscountUseCase(Get.find<PackagesRepository>()),
     );
 
     // 5. Partners Dependencies (للاختيار الذكي لنقاط البيع والوكلاء)
@@ -113,8 +105,6 @@ class PackagesBinding extends Bindings {
     Get.lazyPut<PackagesController>(
       () => PackagesController(
         getVoucherPackagesUseCase: Get.find<GetVoucherPackagesUseCase>(),
-        getVoucherPackageDetailsUseCase:
-            Get.find<GetVoucherPackageDetailsUseCase>(),
         createVoucherPackageUseCase: Get.find<CreateVoucherPackageUseCase>(),
         updateVoucherPackageUseCase: Get.find<UpdateVoucherPackageUseCase>(),
         toggleVoucherPackageStatusUseCase:
@@ -130,7 +120,6 @@ class PackagesBinding extends Bindings {
             Get.find<ToggleVoucherPackageDiscountStatusUseCase>(),
         deleteVoucherPackageDiscountUseCase:
             Get.find<DeleteVoucherPackageDiscountUseCase>(),
-        getEffectiveDiscountUseCase: Get.find<GetEffectiveDiscountUseCase>(),
         getPosListUseCase: Get.find<GetPosListUseCase>(),
         getNetworksUseCase: Get.find<GetNetworksUseCase>(),
       ),

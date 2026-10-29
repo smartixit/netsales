@@ -1,10 +1,10 @@
-import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
-
 /// ============================================================================
 /// كيان باقة كروت الإنترنت (VoucherPackageEntity)
 /// ============================================================================
 /// كائن نقي يمثل بيانات باقة الكروت، الأسعار، الحصص، الصلاحية، ونسب الخصم
 /// الافتراضية، خالٍ تماماً من أي اعتماديات خارجية أو منطق تسلسل JSON.
+/// القيم المالية المشتقة (cashDiscountAmount, effectiveCashPrice, ...) تأتي
+/// جاهزة من الخادم (Single Source of Truth) ولا تُحتسب في العميل.
 class VoucherPackageEntity {
   final int packageId;
   final int networkId;
@@ -23,6 +23,12 @@ class VoucherPackageEntity {
   final String? updatedAt;
   final String? networkName;
 
+  // Server-authoritative derived monetary values (Display-Only, AGENTS.md §34)
+  final double cashDiscountAmount;
+  final double creditDiscountAmount;
+  final double effectiveCashPrice;
+  final double effectiveCreditPrice;
+
   const VoucherPackageEntity({
     required this.packageId,
     required this.networkId,
@@ -31,7 +37,7 @@ class VoucherPackageEntity {
     this.packageBalance,
     this.packageUptime,
     this.packageValidity,
-    this.packageVoucherCount = 51,
+    this.packageVoucherCount = 0,
     required this.packageVoucherPrice,
     required this.packageDefaultCashDiscount,
     required this.packageDefaultCreditDiscount,
@@ -40,42 +46,14 @@ class VoucherPackageEntity {
     this.createdAt,
     this.updatedAt,
     this.networkName,
+    this.cashDiscountAmount = 0.0,
+    this.creditDiscountAmount = 0.0,
+    this.effectiveCashPrice = 0.0,
+    this.effectiveCreditPrice = 0.0,
   });
 
   /// فحص تفعيل الباقة
   bool get isActive => status;
-
-  /// قيمة الخصم الافتراضي بالريال للدفع النقدي
-  double get defaultCashDiscountAmount =>
-      (packageVoucherPrice * packageDefaultCashDiscount) / 100;
-
-  /// سعر الشراء الافتراضي الصافي لنقطة البيع بالدفع النقدي
-  double get defaultEffectiveCashPrice =>
-      packageVoucherPrice - defaultCashDiscountAmount;
-
-  /// قيمة الخصم الافتراضي بالريال للدفع الآجل
-  double get defaultCreditDiscountAmount =>
-      (packageVoucherPrice * packageDefaultCreditDiscount) / 100;
-
-  /// سعر الشراء الافتراضي الصافي لنقطة البيع بالدفع الآجل
-  double get defaultEffectiveCreditPrice =>
-      packageVoucherPrice - defaultCreditDiscountAmount;
-
-  /// عدد كروت نصف الورقة مقرباً للأعلى (مثال: 51 -> 26)
-  int get halfSheetVoucherCount =>
-      VoucherSheetCalculator.halfSheetCards(packageVoucherCount);
-
-  /// حساب عدد الكروت الفعلي لعدد محدد من الأوراق (مثال: 1.5 ورقة -> 77 كرت)
-  int vouchersForSheets(double sheets) =>
-      VoucherSheetCalculator.cardsForSheets(sheets, packageVoucherCount);
-
-  /// التوصيف النصي المقروء لكمية الكروت (مثال: 77 -> "ورقة ونصف")
-  String describeSheetQuantity(int cards) =>
-      VoucherSheetCalculator.describe(cards, packageVoucherCount);
-
-  /// كبسولات الأوراق السريعة المقترحة للباقة
-  List<VoucherSheetPreset> get sheetPresets =>
-      VoucherSheetCalculator.getPresets(packageVoucherCount);
 
   /// نسخة معدلة من الكيان
   VoucherPackageEntity copyWith({
@@ -95,6 +73,10 @@ class VoucherPackageEntity {
     String? createdAt,
     String? updatedAt,
     String? networkName,
+    double? cashDiscountAmount,
+    double? creditDiscountAmount,
+    double? effectiveCashPrice,
+    double? effectiveCreditPrice,
   }) {
     return VoucherPackageEntity(
       packageId: packageId ?? this.packageId,
@@ -115,6 +97,10 @@ class VoucherPackageEntity {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       networkName: networkName ?? this.networkName,
+      cashDiscountAmount: cashDiscountAmount ?? this.cashDiscountAmount,
+      creditDiscountAmount: creditDiscountAmount ?? this.creditDiscountAmount,
+      effectiveCashPrice: effectiveCashPrice ?? this.effectiveCashPrice,
+      effectiveCreditPrice: effectiveCreditPrice ?? this.effectiveCreditPrice,
     );
   }
 }

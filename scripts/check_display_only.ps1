@@ -17,15 +17,15 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $lib = Join-Path $root 'lib'
 
-$violations = @()
+$violations = [System.Collections.Generic.List[object]]::new()
 
 function Add-Violation($file, $line, $rule, $snippet) {
-    $violations += [PSCustomObject]@{
+    $script:violations.Add([PSCustomObject]@{
         File    = $file
         Line    = $line
         Rule    = $rule
         Snippet = $snippet.Trim()
-    }
+    }) | Out-Null
 }
 
 # --- 1. LinearGradient outside app_gradients.dart ---

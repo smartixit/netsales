@@ -76,7 +76,10 @@ class PackageQuantityInputController extends GetxController {
 
     final parsedSheets = double.tryParse(cleaned);
     if (parsedSheets != null && parsedSheets >= 0) {
-      final calculatedCards = package.vouchersForSheets(parsedSheets);
+      final calculatedCards = VoucherSheetCalculator.cardsForSheets(
+        parsedSheets,
+        package.packageVoucherCount,
+      );
       currentCards.value = calculatedCards;
       cardsController.text = calculatedCards > 0
           ? calculatedCards.toString()
@@ -172,10 +175,10 @@ class PackageQuantityInputSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final sheetSize = package.packageVoucherCount;
-    final halfSheet = package.halfSheetVoucherCount;
+    final halfSheet = VoucherSheetCalculator.halfSheetCards(sheetSize);
     final unitPrice = package.packageVoucherPrice;
     final unitNet = unitPrice - (unitPrice * (discountPercent / 100));
-    final presets = package.sheetPresets;
+    final presets = VoucherSheetCalculator.getPresets(sheetSize);
 
     return GetBuilder<PackageQuantityInputController>(
       init: PackageQuantityInputController(
@@ -394,7 +397,10 @@ class PackageQuantityInputSheet extends StatelessWidget {
                           ),
                           AppSpacing.vXxs,
                           Text(
-                            package.describeSheetQuantity(currentCards),
+                            VoucherSheetCalculator.describe(
+                              currentCards,
+                              package.packageVoucherCount,
+                            ),
                             style: AppTypography.labelSmall.copyWith(
                               color: colors.primary,
                               fontWeight: FontWeight.w700,

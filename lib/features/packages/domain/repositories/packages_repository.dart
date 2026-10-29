@@ -1,4 +1,3 @@
-import 'package:netsales/features/packages/domain/entities/effective_discount_entity.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_discount_entity.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
 
@@ -14,9 +13,6 @@ abstract interface class PackagesRepository {
     bool? status,
     String? search,
   });
-
-  /// جلب تفاصيل باقة كروت محددة
-  Future<VoucherPackageEntity> getVoucherPackageDetails(int packageId);
 
   /// إنشاء باقة كروت جديدة
   Future<VoucherPackageEntity> createVoucherPackage({
@@ -88,11 +84,4 @@ abstract interface class PackagesRepository {
 
   /// حذف خصم مخصص
   Future<bool> deleteVoucherPackageDiscount(int discountId);
-
-  /// احتساب الخصم الفعلي المطبق لنقطة بيع على باقة
-  Future<EffectiveDiscountEntity> getEffectiveDiscount({
-    required int networkId,
-    required int posId,
-    required int packageId,
-  });
 }

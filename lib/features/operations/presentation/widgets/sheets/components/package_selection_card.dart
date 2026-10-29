@@ -5,6 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/components/package_quantity_input_sheet.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -61,8 +62,8 @@ class PackageSelectionCard extends StatelessWidget {
     final unitPrice = package.packageVoucherPrice;
     final unitNet = unitPrice - (unitPrice * (discountPercent / 100));
     final sheetSize = package.packageVoucherCount;
-    final halfSheet = package.halfSheetVoucherCount;
-    final presets = package.sheetPresets;
+    final halfSheet = VoucherSheetCalculator.halfSheetCards(sheetSize);
+    final presets = VoucherSheetCalculator.getPresets(sheetSize);
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.cardPadding),
@@ -202,7 +203,10 @@ class PackageSelectionCard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              package.describeSheetQuantity(quantity),
+                              VoucherSheetCalculator.describe(
+                                quantity,
+                                package.packageVoucherCount,
+                              ),
                               style: AppTypography.labelSmall.copyWith(
                                 color: colors.primary,
                                 fontWeight: FontWeight.w700,

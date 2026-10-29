@@ -21,6 +21,10 @@ class VoucherPackageDiscountModel extends VoucherPackageDiscountEntity {
     super.posName,
     super.packageName,
     super.originalPackagePrice,
+    super.effectiveCashPrice,
+    super.effectiveCreditPrice,
+    super.cashSavings,
+    super.creditSavings,
   });
 
   /// تحويل كائن JSON إلى VoucherPackageDiscountModel
@@ -37,11 +41,9 @@ class VoucherPackageDiscountModel extends VoucherPackageDiscountEntity {
     }
 
     String? pkgName;
-    double? pkgPrice;
     if (json['voucher_package'] is Map<String, dynamic>) {
       final pkgMap = json['voucher_package'] as Map<String, dynamic>;
       pkgName = pkgMap['package_name'] as String?;
-      pkgPrice = (pkgMap['package_voucher_price'] as num?)?.toDouble();
     }
 
     return VoucherPackageDiscountModel(
@@ -58,7 +60,14 @@ class VoucherPackageDiscountModel extends VoucherPackageDiscountEntity {
       networkName: netName,
       posName: pName,
       packageName: pkgName,
-      originalPackagePrice: pkgPrice,
+      // Server-authoritative derived monetary values (Display-Only, AGENTS.md §34)
+      originalPackagePrice:
+          (json['original_package_price'] as num?)?.toDouble(),
+      effectiveCashPrice: (json['effective_cash_price'] as num?)?.toDouble(),
+      effectiveCreditPrice:
+          (json['effective_credit_price'] as num?)?.toDouble(),
+      cashSavings: (json['cash_savings'] as num?)?.toDouble(),
+      creditSavings: (json['credit_savings'] as num?)?.toDouble(),
     );
   }
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -33,14 +35,12 @@ class PackageDiscountCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final origPrice = discount.originalPackagePrice;
-    final hasPrice = origPrice != null && origPrice > 0;
-    final netCash = hasPrice ? discount.getEffectiveCashPrice(origPrice) : null;
-    final netCredit =
-        hasPrice ? discount.getEffectiveCreditPrice(origPrice) : null;
-    final cashSavings = hasPrice ? discount.getCashSavings(origPrice) : null;
-    final creditSavings =
-        hasPrice ? discount.getCreditSavings(origPrice) : null;
+    final canEdit = PermissionService.to.can(AppPermissions.voucherPackagesEdit);
+    final canDelete = PermissionService.to.can(AppPermissions.voucherPackagesDelete);
+    final netCash = discount.effectiveCashPrice;
+    final netCredit = discount.effectiveCreditPrice;
+    final cashSavings = discount.cashSavings;
+    final creditSavings = discount.creditSavings;
 
     return CustomInteractiveBounce(
       onTap: onEdit,
@@ -119,9 +119,10 @@ class PackageDiscountCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                AppSpacing.hSm,
-                // زر تبديل الحالة
-                CustomInteractiveBounce(
+                if (canEdit) AppSpacing.hSm,
+                if (canEdit)
+                  // زر تبديل الحالة
+                  CustomInteractiveBounce(
                   onTap: onToggleStatus,
                   child: Container(
                     padding: EdgeInsets.symmetric(
@@ -198,10 +199,10 @@ class PackageDiscountCard extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (netCash != null) ...[
+                        if (netCash != null && cashSavings != null) ...[
                           AppSpacing.vXxs,
                           Text(
-                            'يدفع: ${AmountFormatter.formatValue(netCash, decimalPlaces: 0)} ر.ي (ربح ${AmountFormatter.formatValue(cashSavings!, decimalPlaces: 0)} ر.ي)',
+                            'يدفع: ${AmountFormatter.formatValue(netCash, decimalPlaces: 0)} ر.ي (ربح ${AmountFormatter.formatValue(cashSavings, decimalPlaces: 0)} ر.ي)',
                             style: AppTypography.labelSmall.copyWith(
                               color: colors.onSurfaceVariant,
                             ),
@@ -235,10 +236,10 @@ class PackageDiscountCard extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (netCredit != null) ...[
+                        if (netCredit != null && creditSavings != null) ...[
                           AppSpacing.vXxs,
                           Text(
-                            'يدفع: ${AmountFormatter.formatValue(netCredit, decimalPlaces: 0)} ر.ي (ربح ${AmountFormatter.formatValue(creditSavings!, decimalPlaces: 0)} ر.ي)',
+                            'يدفع: ${AmountFormatter.formatValue(netCredit, decimalPlaces: 0)} ر.ي (ربح ${AmountFormatter.formatValue(creditSavings, decimalPlaces: 0)} ر.ي)',
                             style: AppTypography.labelSmall.copyWith(
                               color: colors.onSurfaceVariant,
                             ),
@@ -256,21 +257,23 @@ class PackageDiscountCard extends StatelessWidget {
             // ── شريط الإجراءات ──
             Row(
               children: [
-                Expanded(
-                  child: CustomButton.outline(
-                    text: 'تعديل نسب الخصم',
-                    icon: Icons.edit_outlined,
-                    size: AppButtonSize.small,
-                    onPressed: onEdit,
+                if (canEdit)
+                  Expanded(
+                    child: CustomButton.outline(
+                      text: 'تعديل نسب الخصم',
+                      icon: Icons.edit_outlined,
+                      size: AppButtonSize.small,
+                      onPressed: onEdit,
+                    ),
                   ),
-                ),
-                AppSpacing.hSm,
-                CustomButton.icon(
-                  icon: Icons.delete_outline_rounded,
-                  foregroundColor: colors.error,
-                  size: AppButtonSize.small,
-                  onPressed: onDelete,
-                ),
+                if (canEdit) AppSpacing.hSm,
+                if (canDelete)
+                  CustomButton.icon(
+                    icon: Icons.delete_outline_rounded,
+                    foregroundColor: colors.error,
+                    size: AppButtonSize.small,
+                    onPressed: onDelete,
+                  ),
               ],
             ),
           ],

@@ -266,6 +266,8 @@ class _CreateEditPackageSheetState extends State<CreateEditPackageSheet> {
         ) ??
         0.0;
 
+    // DISPLAY-ONLY (UI-only, non-authoritative): live echo of the values the
+    // user is currently typing. The backend recomputes and owns final money.
     final netCash = priceVal - (priceVal * cashDiscVal / 100);
     final netCredit = priceVal - (priceVal * creditDiscVal / 100);
 
@@ -584,6 +586,7 @@ class _MarginPreviewBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    // DISPLAY-ONLY (UI-only, non-authoritative) preview of the typed inputs.
     final cashSavings = price - netCash;
     final creditSavings = price - netCredit;
 

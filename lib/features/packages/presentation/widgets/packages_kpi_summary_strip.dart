@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -26,7 +25,7 @@ class PackagesKpiSummaryStrip extends StatelessWidget {
       final isPackagesTab = controller.activeSegmentIndex.value == 0;
 
       return SizedBox(
-        height: 80.h,
+        height: AppSpacing.kpiStripHeight,
         child: ListView(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),

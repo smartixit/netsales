@@ -2,7 +2,6 @@ import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/packages/data/datasources/packages_remote_data_source.dart';
-import 'package:netsales/features/packages/data/models/effective_discount_model.dart';
 import 'package:netsales/features/packages/data/models/voucher_package_discount_model.dart';
 import 'package:netsales/features/packages/data/models/voucher_package_model.dart';
 
@@ -28,18 +27,6 @@ class PackagesRemoteDataSourceImpl implements PackagesRemoteDataSource {
     return ApiService.instance.getList<VoucherPackageModel>(
       ApiConstants.voucherPackages,
       queryParameters: queryParams,
-      fromJson: (json) => VoucherPackageModel.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
-    );
-  }
-
-  @override
-  Future<ApiResponse<VoucherPackageModel>> getVoucherPackageDetails(
-    int packageId,
-  ) {
-    return ApiService.instance.get<VoucherPackageModel>(
-      ApiConstants.voucherPackage(packageId),
       fromJson: (json) => VoucherPackageModel.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),
@@ -160,27 +147,6 @@ class PackagesRemoteDataSourceImpl implements PackagesRemoteDataSource {
   Future<ApiResponse<void>> deleteVoucherPackageDiscount(int discountId) {
     return ApiService.instance.delete<void>(
       ApiConstants.voucherPackageDiscount(discountId),
-    );
-  }
-
-  @override
-  Future<ApiResponse<EffectiveDiscountModel>> getEffectiveDiscount({
-    required int networkId,
-    required int posId,
-    required int packageId,
-  }) {
-    final queryParams = <String, dynamic>{
-      'network_id': networkId,
-      'pos_id': posId,
-      'package_id': packageId,
-    };
-
-    return ApiService.instance.get<EffectiveDiscountModel>(
-      ApiConstants.voucherPackageDiscountsEffective,
-      queryParameters: queryParams,
-      fromJson: (json) => EffectiveDiscountModel.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
     );
   }
 }

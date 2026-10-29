@@ -14,7 +14,7 @@ class VoucherPackageModel extends VoucherPackageEntity {
     super.packageBalance,
     super.packageUptime,
     super.packageValidity,
-    super.packageVoucherCount = 51,
+    super.packageVoucherCount,
     required super.packageVoucherPrice,
     required super.packageDefaultCashDiscount,
     required super.packageDefaultCreditDiscount,
@@ -23,6 +23,10 @@ class VoucherPackageModel extends VoucherPackageEntity {
     super.createdAt,
     super.updatedAt,
     super.networkName,
+    super.cashDiscountAmount,
+    super.creditDiscountAmount,
+    super.effectiveCashPrice,
+    super.effectiveCreditPrice,
   });
 
   /// تحويل كائن JSON إلى VoucherPackageModel
@@ -35,13 +39,22 @@ class VoucherPackageModel extends VoucherPackageEntity {
       packageBalance: (json['package_balance'] as num?)?.toDouble(),
       packageUptime: json['package_uptime']?.toString(),
       packageValidity: json['package_validity']?.toString(),
-      packageVoucherCount: json['package_voucher_count'] as int? ?? 51,
+      packageVoucherCount: json['package_voucher_count'] as int? ?? 0,
       packageVoucherPrice:
           (json['package_voucher_price'] as num?)?.toDouble() ?? 0.0,
       packageDefaultCashDiscount:
           (json['package_default_cash_discount'] as num?)?.toDouble() ?? 0.0,
       packageDefaultCreditDiscount:
           (json['package_default_credit_discount'] as num?)?.toDouble() ?? 0.0,
+      // Server-authoritative derived monetary values (Display-Only, AGENTS.md §34)
+      cashDiscountAmount:
+          (json['cash_discount_amount'] as num?)?.toDouble() ?? 0.0,
+      creditDiscountAmount:
+          (json['credit_discount_amount'] as num?)?.toDouble() ?? 0.0,
+      effectiveCashPrice:
+          (json['effective_cash_price'] as num?)?.toDouble() ?? 0.0,
+      effectiveCreditPrice:
+          (json['effective_credit_price'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as bool? ?? true,
       createdBy: json['created_by'] as int?,
       createdAt: json['created_at'] as String?,

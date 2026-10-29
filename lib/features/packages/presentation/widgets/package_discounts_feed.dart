@@ -8,6 +8,8 @@ import 'package:netsales/features/packages/presentation/widgets/create_edit_disc
 import 'package:netsales/features/packages/presentation/widgets/package_discount_card.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/custom_loading_state.dart';
 
 /// ============================================================================
 /// قائمة تغذية خصومات نقاط البيع المخصصة (PackageDiscountsFeed)
@@ -26,20 +28,15 @@ class PackageDiscountsFeed extends StatelessWidget {
 
     return Obx(() {
       if (controller.isLoadingDiscounts.value && controller.discounts.isEmpty) {
-        return Center(
-          child: CircularProgressIndicator(color: colors.primary),
-        );
+        return const CustomLoadingState();
       }
 
       if (controller.discountsError.value.isNotEmpty &&
           controller.discounts.isEmpty) {
-        return Center(
-          child: CustomEmptyState(
-            title: 'تعذر جلب قائمة الخصومات',
-            subtitle: controller.discountsError.value,
-            actionLabel: 'إعادة المحاولة',
-            onAction: () => controller.loadDiscounts(isRefresh: true),
-          ),
+        return CustomErrorState(
+          title: 'تعذر جلب قائمة الخصومات',
+          subtitle: controller.discountsError.value,
+          onRetry: () => controller.loadDiscounts(isRefresh: true),
         );
       }
 

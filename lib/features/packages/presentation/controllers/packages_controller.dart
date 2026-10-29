@@ -2,14 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_discount_entity.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
 import 'package:netsales/features/packages/domain/usecases/create_voucher_package_discount_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/create_voucher_package_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/delete_voucher_package_discount_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/delete_voucher_package_use_case.dart';
-import 'package:netsales/features/packages/domain/usecases/get_effective_discount_use_case.dart';
-import 'package:netsales/features/packages/domain/usecases/get_voucher_package_details_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/get_voucher_package_discounts_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/get_voucher_packages_use_case.dart';
 import 'package:netsales/features/packages/domain/usecases/toggle_voucher_package_discount_status_use_case.dart';
@@ -30,7 +29,6 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 /// الفورية وفق النمط المعماري القياسي الموحد المعتمد في OperationsController.
 class PackagesController extends GetxController {
   final GetVoucherPackagesUseCase getVoucherPackagesUseCase;
-  final GetVoucherPackageDetailsUseCase getVoucherPackageDetailsUseCase;
   final CreateVoucherPackageUseCase createVoucherPackageUseCase;
   final UpdateVoucherPackageUseCase updateVoucherPackageUseCase;
   final ToggleVoucherPackageStatusUseCase toggleVoucherPackageStatusUseCase;
@@ -43,13 +41,11 @@ class PackagesController extends GetxController {
       toggleVoucherPackageDiscountStatusUseCase;
   final DeleteVoucherPackageDiscountUseCase
       deleteVoucherPackageDiscountUseCase;
-  final GetEffectiveDiscountUseCase getEffectiveDiscountUseCase;
   final GetPosListUseCase getPosListUseCase;
   final GetNetworksUseCase getNetworksUseCase;
 
   PackagesController({
     required this.getVoucherPackagesUseCase,
-    required this.getVoucherPackageDetailsUseCase,
     required this.createVoucherPackageUseCase,
     required this.updateVoucherPackageUseCase,
     required this.toggleVoucherPackageStatusUseCase,
@@ -59,7 +55,6 @@ class PackagesController extends GetxController {
     required this.updateVoucherPackageDiscountUseCase,
     required this.toggleVoucherPackageDiscountStatusUseCase,
     required this.deleteVoucherPackageDiscountUseCase,
-    required this.getEffectiveDiscountUseCase,
     required this.getPosListUseCase,
     required this.getNetworksUseCase,
   });
@@ -120,7 +115,7 @@ class PackagesController extends GetxController {
   /// تنفيذ البحث الحي بتهدئة تلقائية
   void onSearchChanged(String _) {
     _searchDebounceTimer?.cancel();
-    _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+    _searchDebounceTimer = Timer(AppMotion.searchDebounce, () {
       if (activeSegmentIndex.value == 0) {
         loadPackages();
       } else {
@@ -158,6 +153,9 @@ class PackagesController extends GetxController {
   int get activePackagesCount =>
       packages.where((pkg) => pkg.isActive).length;
 
+  // DISPLAY-ONLY (UI-only, non-authoritative): aggregate of the prices of the
+  // packages currently loaded on the client. Not sent to the backend; backend
+  // remains the authority for any authoritative average.
   double get averagePackagePrice {
     if (packages.isEmpty) return 0.0;
     final total = packages.fold<double>(

@@ -9,6 +9,8 @@ import 'package:netsales/features/packages/presentation/widgets/create_edit_pack
 import 'package:netsales/features/packages/presentation/widgets/voucher_package_card.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/custom_loading_state.dart';
 
 /// ============================================================================
 /// قائمة تغذية باقات كروت الإنترنت (VoucherPackagesFeed)
@@ -27,20 +29,15 @@ class VoucherPackagesFeed extends StatelessWidget {
 
     return Obx(() {
       if (controller.isLoadingPackages.value && controller.packages.isEmpty) {
-        return Center(
-          child: CircularProgressIndicator(color: colors.primary),
-        );
+        return const CustomLoadingState();
       }
 
       if (controller.packagesError.value.isNotEmpty &&
           controller.packages.isEmpty) {
-        return Center(
-          child: CustomEmptyState(
-            title: 'تعذر جلب باقات الكروت',
-            subtitle: controller.packagesError.value,
-            actionLabel: 'إعادة المحاولة',
-            onAction: () => controller.loadPackages(isRefresh: true),
-          ),
+        return CustomErrorState(
+          title: 'تعذر جلب باقات الكروت',
+          subtitle: controller.packagesError.value,
+          onRetry: () => controller.loadPackages(isRefresh: true),
         );
       }
 

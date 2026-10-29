@@ -79,6 +79,9 @@ class AppSpacing {
   /// Bottom nav height
   static double get bottomNavHeight => 80.h;
 
+  /// ارتفاع شريط مؤشرات الأداء (KPI) (80)
+  static double get kpiStripHeight => 80.h;
+
   /// Status bar height
   static double get statusBarHeight => 24.h;
 

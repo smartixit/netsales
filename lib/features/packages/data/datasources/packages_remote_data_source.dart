@@ -1,5 +1,4 @@
 import 'package:netsales/core/models/api_response.dart';
-import 'package:netsales/features/packages/data/models/effective_discount_model.dart';
 import 'package:netsales/features/packages/data/models/voucher_package_discount_model.dart';
 import 'package:netsales/features/packages/data/models/voucher_package_model.dart';
 
@@ -13,11 +12,6 @@ abstract interface class PackagesRemoteDataSource {
     bool? status,
     String? search,
   });
-
-  /// جلب تفاصيل باقة كروت
-  Future<ApiResponse<VoucherPackageModel>> getVoucherPackageDetails(
-    int packageId,
-  );
 
   /// إنشاء باقة كروت
   Future<ApiResponse<VoucherPackageModel>> createVoucherPackage(
@@ -65,11 +59,4 @@ abstract interface class PackagesRemoteDataSource {
 
   /// حذف خصم مخصص
   Future<ApiResponse<void>> deleteVoucherPackageDiscount(int discountId);
-
-  /// احتساب الخصم الفعلي لنقطة بيع على باقة
-  Future<ApiResponse<EffectiveDiscountModel>> getEffectiveDiscount({
-    required int networkId,
-    required int posId,
-    required int packageId,
-  });
 }

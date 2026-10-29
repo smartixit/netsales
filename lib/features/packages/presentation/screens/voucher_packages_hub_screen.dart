@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/packages/presentation/controllers/packages_controller.dart';
 import 'package:netsales/features/packages/presentation/widgets/create_edit_discount_sheet.dart';
@@ -10,6 +11,7 @@ import 'package:netsales/features/packages/presentation/widgets/packages_kpi_sum
 import 'package:netsales/features/packages/presentation/widgets/packages_search_and_filter_bar.dart';
 import 'package:netsales/features/packages/presentation/widgets/packages_segmented_header.dart';
 import 'package:netsales/features/packages/presentation/widgets/voucher_packages_feed.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
@@ -72,21 +74,24 @@ class VoucherPackagesHubScreen extends GetView<PackagesController> {
           ),
         ],
       ),
-      floatingActionButton: Obx(
-        () => CustomButton.floating(
-          icon: Icons.add_rounded,
-          tooltip: controller.activeSegmentIndex.value == 0
-              ? 'إنشاء باقة كروت جديدة'
-              : 'تخصيص خصم استثنائي لوكيل',
-          onPressed: () {
-            if (controller.activeSegmentIndex.value == 0) {
-              CreateEditPackageSheet.show(context, controller: controller);
-            } else {
-              CreateEditDiscountSheet.show(context, controller: controller);
-            }
-          },
-        ),
-      ),
+      floatingActionButton:
+          PermissionService.to.can(AppPermissions.voucherPackagesCreate)
+              ? Obx(
+                  () => CustomButton.floating(
+                    icon: Icons.add_rounded,
+                    tooltip: controller.activeSegmentIndex.value == 0
+                        ? 'إنشاء باقة كروت جديدة'
+                        : 'تخصيص خصم استثنائي لوكيل',
+                    onPressed: () {
+                      if (controller.activeSegmentIndex.value == 0) {
+                        CreateEditPackageSheet.show(context, controller: controller);
+                      } else {
+                        CreateEditDiscountSheet.show(context, controller: controller);
+                      }
+                    },
+                  ),
+                )
+              : null,
     );
   }
 }

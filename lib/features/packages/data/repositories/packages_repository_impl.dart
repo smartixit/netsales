@@ -1,6 +1,5 @@
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/packages/data/datasources/packages_remote_data_source.dart';
-import 'package:netsales/features/packages/domain/entities/effective_discount_entity.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_discount_entity.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
 import 'package:netsales/features/packages/domain/repositories/packages_repository.dart';
@@ -26,18 +25,6 @@ class PackagesRepositoryImpl implements PackagesRepository {
       status: status,
       search: search,
     );
-
-    if (!response.success || response.data == null) {
-      throw AppException(response.message);
-    }
-
-    return response.data!;
-  }
-
-  @override
-  Future<VoucherPackageEntity> getVoucherPackageDetails(int packageId) async {
-    final response =
-        await remoteDataSource.getVoucherPackageDetails(packageId);
 
     if (!response.success || response.data == null) {
       throw AppException(response.message);
@@ -248,24 +235,5 @@ class PackagesRepositoryImpl implements PackagesRepository {
     }
 
     return true;
-  }
-
-  @override
-  Future<EffectiveDiscountEntity> getEffectiveDiscount({
-    required int networkId,
-    required int posId,
-    required int packageId,
-  }) async {
-    final response = await remoteDataSource.getEffectiveDiscount(
-      networkId: networkId,
-      posId: posId,
-      packageId: packageId,
-    );
-
-    if (!response.success || response.data == null) {
-      throw AppException(response.message);
-    }
-
-    return response.data!;
   }
 }
