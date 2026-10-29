@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/features/partners/domain/entities/network_entity.dart';
 import 'package:netsales/features/partners/domain/entities/network_pos_entity.dart';
 import 'package:netsales/features/partners/domain/entities/pos_entity.dart';
@@ -182,7 +183,7 @@ class PartnersController extends GetxController {
   /// تنفيذ البحث الحي بتهدئة تلقائية تمنع الحمل الزائد وتحدث العرض بسلاسة
   void onSearchChanged(String query) {
     _searchDebounceTimer?.cancel();
-    _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+    _searchDebounceTimer = Timer(AppMotion.searchDebounce, () {
       searchQuery.value = query;
     });
   }

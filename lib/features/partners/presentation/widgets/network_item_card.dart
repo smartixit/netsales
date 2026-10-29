@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/partners/domain/entities/network_entity.dart';
@@ -73,16 +74,7 @@ class NetworkItemCard extends StatelessWidget {
               // وعاء البطاقة مع التدرج الشبكي المحيطي
               Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                    colors: [
-                      statusColor.withValues(alpha: 0.06),
-                      colors.surface.withValues(alpha: 0.40),
-                      colors.surfaceContainerLowest,
-                    ],
-                    stops: const [0.0, 0.45, 1.0],
-                  ),
+                  gradient: AppGradients.statusTint(context, statusColor),
                   borderRadius: AppRadius.lgRadius,
                   border: Border.all(
                     color: colors.outlineVariant.withValues(alpha: 0.28),
@@ -107,14 +99,7 @@ class NetworkItemCard extends StatelessWidget {
                           width: 42.r,
                           height: 42.r,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                colors.primary.withValues(alpha: 0.18),
-                                colors.primary.withValues(alpha: 0.05),
-                              ],
-                            ),
+                            color: colors.primary.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
                               color: colors.primary.withValues(alpha: 0.28),
@@ -153,7 +138,7 @@ class NetworkItemCard extends StatelessWidget {
                                     size: 13.r,
                                     color: colors.onSurfaceVariant,
                                   ),
-                                  SizedBox(width: 3.w),
+                                  AppSpacing.hXxs,
                                   Expanded(
                                     child: Text(
                                       '${network.governorateName ?? ''} • ${network.directorateName ?? ''}',
@@ -194,7 +179,7 @@ class NetworkItemCard extends StatelessWidget {
                                 size: 12.r,
                                 color: statusColor,
                               ),
-                              SizedBox(width: 4.w),
+                              AppSpacing.hXs,
                               Text(
                                 network.statusLabel,
                                 style: AppTypography.labelSmall.copyWith(
@@ -224,7 +209,7 @@ class NetworkItemCard extends StatelessWidget {
                           size: 14.r,
                           color: colors.onSurfaceVariant,
                         ),
-                        SizedBox(width: 4.w),
+                        AppSpacing.hXs,
                         Expanded(
                           child: Text(
                             network.ownerName ?? 'غير محدد',
@@ -270,7 +255,7 @@ class NetworkItemCard extends StatelessWidget {
                                     size: 12.r,
                                     color: colors.primary,
                                   ),
-                                  SizedBox(width: 3.w),
+                                  AppSpacing.hXxs,
                                   Text(
                                     network.networkPhoneNumber!,
                                     style: AppTypography.labelSmall.copyWith(
@@ -419,7 +404,7 @@ class _NetworkCountBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 12.r, color: color),
-          SizedBox(width: 4.w),
+          AppSpacing.hXs,
           Text(
             label,
             style: AppTypography.labelSmall.copyWith(

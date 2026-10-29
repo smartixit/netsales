@@ -565,6 +565,72 @@ lib/
 - Use `FileSizeFormatter` (`lib/core/utils/file_size_formatter.dart`) for file/cache size display.
 - Do not use `toStringAsFixed` for sizes in UI/services; centralize in `FileSizeFormatter`.
 
+---
+
+## 34. Frontend Display-Only Policy (No Financial Arithmetic in Client)
+
+### 34.1 — Principle
+- **Frontend = Input + Render.** Backend is the Single Source of Truth for all financial values (totals, discounts, net, remaining, ratios, aggregations).
+- The frontend MUST NOT compute, derive, or send authoritative financial values. It sends only **user inputs** (selections, quantities, typed amounts) and displays **backend-provided** values.
+
+### 34.2 — Prohibited in Frontend (controllers / widgets / screens)
+- **Arithmetic on monetary fields**: `+ - * /` on identifiers matching `*Amount`, `*Price`, `*Discount`, `*Total`, `*Balance`, `*Debt` — except in formatters (`AmountFormatter`, `FileSizeFormatter`) and explicitly documented display helpers.
+- **Sending computed totals**: submission payloads (`items`, `paid_amount`) must NOT include `invoice_total_amount`, `remaining_amount`, `total_net_amount`, `total_gross_amount`, `total_discount_amount`. Only `package_id`, `voucher_count`, and user-typed `paid_amount` (or null for cash) are allowed. Backend recomputes.
+- **Trusting client price/discount**: frontend MUST NOT send `voucher_price` or `item_discount` as authoritative. Backend uses catalog price (`voucher_packages.package_voucher_price`) and effective discount (server). If sent, backend ignores them.
+- **Fabricated data**: no `totalAmount * 0.XX` or synthetic trend points. Use real backend time-series or remove the widget.
+- **Comparisons on money**: `remainingAmount > 0`, `balance > 0`, etc. for gating actions should use backend-provided flags (`is_fully_paid`, `has_remaining`, `is_overdrawn`). Display predicates are allowed if documented as non-authoritative.
+
+### 34.3 — Allowed (Display Helpers, non-authoritative)
+- Formatters: `AmountFormatter`, `FileSizeFormatter`.
+- UI-only ratios for layout (e.g., `paidRatio` for progress bar) — must be documented as "UI-only, non-authoritative".
+- Count aggregations of loaded lists (e.g., `totalNetworksCount`) — display only, not sent.
+- Packaging convenience (e.g., `VoucherSheetCalculator`) — UI convenience, not financial.
+
+### 34.4 — Enforcement
+- **Lint/CI**: grep-based check (see `scripts/check_display_only.*`) flags violations.
+- **Tests**: unit tests verify submission payloads contain no computed totals/discounts/remaining/price.
+- **Code review**: any new monetary arithmetic in frontend requires justification + backend authority confirmation.
+
+### 34.5 — Unified Controller Style
+- All controllers MUST follow the same pattern:
+  - `final UseCaseType fieldName;` (public, no underscore) with `required this.fieldName` constructor shorthand.
+  - `RxBool isLoading`, `RxString errorMessage` (entity-suffixed where multiple entities).
+  - `try/catch/finally` with `AppException.sanitizeMessage` in catch.
+  - `CustomSnackbar.show` on refresh errors.
+  - `CustomAnimationOverlay.showLoading/showSuccess` for destructive/financial actions + `CustomSnackbar` in catch + finally hide guard.
+- No `log()` from `dart:developer` — use `AppException.sanitizeMessage`.
+- No `StatefulWidget` for pure reactive state — use GetX (Rx + Obx). StatefulWidget only for resource lifecycle (`TextEditingController`, `AnimationController`, `GlobalKey`).
+
+### 34.6 — Design Tokens (No Magic Values)
+- Colors: `context.colors.*` only.
+- Typography: `AppTypography.*` only.
+- Spacing: `AppSpacing.h*/v*` only (no `SizedBox(width: X.w)`).
+- Radius: `AppRadius.*`.
+- Elevation: `AppElevation.*`.
+- Gradients: `AppGradients.*` only (no `LinearGradient(...)` in features).
+- Motion: `AppMotion.*` (no `Duration(...)` / `Curves.*` in UI).
+- Icons: `.r` suffix; widths: `.w`; heights: `.h`; text: `.sp`.
+
+### 34.7 — Unified Components
+- Buttons: `CustomButton.*` only (no raw `ElevatedButton`/`InkWell`/`GestureDetector`).
+- Inputs: `CustomTextField`, `CustomPinField`, `CustomDropdown`.
+- Dialogs: `CustomDialog.*`.
+- Snackbars: `CustomSnackbar.show`.
+- Pickers: `CustomImagePicker`, `CustomFilePicker`, `DatePickerService`.
+- KPI cards: `CustomKpiCard.*`.
+- Segmented bars: `CustomSegmentedBar`.
+- Search/filter: `CustomSearchFilterBar`.
+- Bottom sheets: `CustomBottomSheet`.
+- State widgets: `CustomLoadingState`, `CustomEmptyState`, `CustomErrorState`, skeleton shimmers.
+- Animation overlay: `CustomAnimationOverlay` for destructive/financial actions.
+
+### 34.8 — Layer Separation (Strict)
+- Domain: pure, no JSON, no external packages.
+- Data: models extend entities; repositories implement domain contracts.
+- Presentation: controllers use UseCases only (no Repository/DataSource/ApiService direct). Bindings wire dependencies.
+- No logic in views/widgets — lean composite assemblers only.
+- No helper methods `_buildXxx()` in screens — decompose into feature widgets.
+
 
 ---
 

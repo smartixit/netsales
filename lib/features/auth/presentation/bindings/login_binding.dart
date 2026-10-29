@@ -10,20 +10,17 @@ import 'package:netsales/features/auth/presentation/controllers/login_controller
 class LoginBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<AuthRemoteDataSource>(
-      () => const AuthRemoteDataSourceImpl(),
-    );
+    Get.lazyPut<AuthRemoteDataSource>(() => const AuthRemoteDataSourceImpl());
 
     Get.lazyPut<AuthRepository>(
       () => AuthRepositoryImpl(Get.find<AuthRemoteDataSource>()),
     );
 
-    Get.lazyPut<LoginUseCase>(
-      () => LoginUseCase(Get.find<AuthRepository>()),
-    );
+    Get.lazyPut<LoginUseCase>(() => LoginUseCase(Get.find<AuthRepository>()));
 
     Get.lazyPut<LoginController>(
       () => LoginController(Get.find<LoginUseCase>()),
+      fenix: true,
     );
   }
 }

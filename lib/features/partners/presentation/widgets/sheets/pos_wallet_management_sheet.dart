@@ -162,7 +162,7 @@ class PosWalletManagementSheet extends StatelessWidget {
               children: [
                 Icon(Icons.history_rounded,
                     size: 18.r, color: colors.onSurfaceVariant),
-                SizedBox(width: 6.w),
+                AppSpacing.hXs,
                 Text(
                   'سجل دفتر الأستاذ للحركات البينية',
                   style: AppTypography.titleSmall.copyWith(
@@ -287,7 +287,7 @@ class _WalletFinancialCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (networkName != null) ...[
-                      SizedBox(height: 2.h),
+                      AppSpacing.vXxs,
                       Text(
                         'مرتبط بشبكة: $networkName',
                         style: AppTypography.bodySmall.copyWith(
@@ -315,7 +315,7 @@ class _WalletFinancialCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(badgeIcon, size: 13.r, color: badgeColor),
-                    SizedBox(width: 4.w),
+                    AppSpacing.hXs,
                     Text(
                       wallet.accountingStatusLabel,
                       style: AppTypography.labelSmall.copyWith(
@@ -372,7 +372,7 @@ class _WalletFinancialCard extends StatelessWidget {
                   icon: Icons.check_circle_outline_rounded,
                 ),
               ),
-              SizedBox(width: 10.w),
+              AppSpacing.hMd,
               Expanded(
                 child: _MetricSubBox(
                   label: 'مديونية مستحقة',
@@ -403,7 +403,7 @@ class _WalletFinancialCard extends StatelessWidget {
                 children: [
                   Icon(Icons.copy_rounded,
                       size: 11.r, color: colors.onSurfaceVariant),
-                  SizedBox(width: 4.w),
+                  AppSpacing.hXs,
                   Text(
                     'معرّف المحفظة: #${wallet.walletUuid}',
                     style: AppTypography.labelSmall.copyWith(
@@ -455,7 +455,7 @@ class _MetricSubBox extends StatelessWidget {
           Row(
             children: [
               Icon(icon, size: 12.r, color: valueColor),
-              SizedBox(width: 4.w),
+              AppSpacing.hXs,
               Text(
                 label,
                 style: AppTypography.labelSmall.copyWith(
@@ -465,7 +465,7 @@ class _MetricSubBox extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 3.h),
+          AppSpacing.vXxs,
           Text(
             value,
             style: AppTypography.labelMedium.copyWith(
@@ -526,7 +526,7 @@ class _WalletLogTile extends StatelessWidget {
             ),
             child: Icon(signIcon, size: 16.r, color: signColor),
           ),
-          SizedBox(width: 10.w),
+          AppSpacing.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -540,7 +540,7 @@ class _WalletLogTile extends StatelessWidget {
                 ),
                 if (log.logStatement != null &&
                     log.logStatement!.trim().isNotEmpty) ...[
-                  SizedBox(height: 2.h),
+                  AppSpacing.vXxs,
                   Text(
                     log.logStatement!,
                     style: AppTypography.labelSmall.copyWith(
@@ -551,7 +551,7 @@ class _WalletLogTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                SizedBox(height: 2.h),
+                AppSpacing.vXxs,
                 Text(
                   dateStr,
                   style: AppTypography.labelSmall.copyWith(
@@ -640,7 +640,7 @@ class _TransferSection extends StatelessWidget {
                   size: 20.r,
                   color: isFeed ? colors.primary : colors.secondary,
                 ),
-                SizedBox(width: 8.w),
+                AppSpacing.hSm,
                 Expanded(
                   child: Text(
                     isFeed

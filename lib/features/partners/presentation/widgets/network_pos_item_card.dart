@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
@@ -56,16 +57,7 @@ class NetworkPosItemCard extends StatelessWidget {
               // وعاء البطاقة مع التدرج الشبكي
               Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                    colors: [
-                      statusColor.withValues(alpha: 0.06),
-                      colors.surface.withValues(alpha: 0.40),
-                      colors.surfaceContainerLowest,
-                    ],
-                    stops: const [0.0, 0.45, 1.0],
-                  ),
+                  gradient: AppGradients.statusTint(context, statusColor),
                   borderRadius: AppRadius.lgRadius,
                   border: Border.all(
                     color: colors.outlineVariant.withValues(alpha: 0.28),
@@ -114,7 +106,7 @@ class NetworkPosItemCard extends StatelessWidget {
                                     size: 16.r,
                                   ),
                                 ),
-                                SizedBox(width: 8.w),
+                                AppSpacing.hSm,
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -156,12 +148,7 @@ class NetworkPosItemCard extends StatelessWidget {
                             width: 32.r,
                             height: 32.r,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  statusColor.withValues(alpha: 0.16),
-                                  colors.surfaceContainerHighest,
-                                ],
-                              ),
+                              color: colors.surfaceContainerHighest,
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: statusColor.withValues(alpha: 0.35),
@@ -207,7 +194,7 @@ class NetworkPosItemCard extends StatelessWidget {
                                     size: 16.r,
                                   ),
                                 ),
-                                SizedBox(width: 8.w),
+                                AppSpacing.hSm,
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -260,7 +247,7 @@ class NetworkPosItemCard extends StatelessWidget {
                             size: 13.r,
                             color: colors.onSurfaceVariant,
                           ),
-                          SizedBox(width: 3.w),
+                          AppSpacing.hXxs,
                           Expanded(
                             child: Text(
                               '${link.governorateName ?? ''} • ${link.directorateName ?? ''}',
@@ -293,7 +280,7 @@ class NetworkPosItemCard extends StatelessWidget {
                             children: [
                               Icon(statusIcon,
                                   size: 11.r, color: statusColor),
-                              SizedBox(width: 4.w),
+                              AppSpacing.hXs,
                               Text(
                                 link.statusLabel,
                                 style: AppTypography.labelSmall.copyWith(

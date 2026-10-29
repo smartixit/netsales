@@ -215,6 +215,20 @@ class AppGradients {
   }
 
   /// تدرّج تعتيم (Scrim Overlay) لترويسات وتذييلات معارض الوسائط والنوافذ الكاملة
+  static LinearGradient statusTint(BuildContext context, Color statusColor) {
+    final scheme = _scheme(context);
+    return LinearGradient(
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
+      colors: [
+        statusColor.withValues(alpha: 0.06),
+        scheme.surface.withValues(alpha: 0.40),
+        scheme.surfaceContainerLowest,
+      ],
+      stops: const [0.0, 0.5, 1.0],
+    );
+  }
+
   static LinearGradient scrimOverlay(
     BuildContext context, {
     bool fromTop = true,
