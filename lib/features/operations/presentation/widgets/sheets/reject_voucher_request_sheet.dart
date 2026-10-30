@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -59,6 +60,7 @@ class RejectVoucherRequestSheet extends StatelessWidget {
           hint: 'مثال: الرصيد غير كافٍ أو خطأ في تحديد كمية الباقات...',
           prefixIcon: const Icon(Icons.comment_outlined),
           maxLines: 2,
+          validator: FormValidators.customTextValidator(fieldName: 'سبب الرفض'),
         ),
         AppSpacing.vLg,
         Row(

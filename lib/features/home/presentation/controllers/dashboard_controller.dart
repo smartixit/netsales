@@ -4,6 +4,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
+import 'package:netsales/core/utils/dashboard_trend_window.dart';
 import 'package:netsales/features/home/domain/entities/dashboard_overview_entity.dart';
 import 'package:netsales/features/home/domain/usecases/get_dashboard_overview_use_case.dart';
 import 'package:netsales/features/operations/domain/entities/sales_trend_point_entity.dart';
@@ -151,37 +152,8 @@ class DashboardController extends GetxController {
   /// الواجهة الخلفية تقبل `daily | weekly | monthly` مع `from_date` و`to_date`.
   ({String period, DateTime fromDate, DateTime toDate}) _trendWindowFor(
     String periodKey,
-  ) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    switch (periodKey) {
-      case 'yesterday':
-        final day = today.subtract(const Duration(days: 1));
-        return (period: 'daily', fromDate: day, toDate: day);
-      case 'this_week':
-        final start = today.subtract(Duration(days: today.weekday - 1));
-        return (
-          period: 'daily',
-          fromDate: start,
-          toDate: start.add(const Duration(days: 6)),
-        );
-      case 'this_month':
-        return (
-          period: 'daily',
-          fromDate: DateTime(today.year, today.month, 1),
-          toDate: DateTime(today.year, today.month + 1, 0),
-        );
-      case 'this_year':
-        return (
-          period: 'monthly',
-          fromDate: DateTime(today.year, 1, 1),
-          toDate: DateTime(today.year, 12, 31),
-        );
-      default:
-        return (period: 'daily', fromDate: today, toDate: today);
-    }
-  }
+  ) =>
+      DashboardTrendWindow.resolve(periodKey);
 
   /// جلب سلسلة مبيعات حقيقية (من الخادم) للرسم البياني.
   /// نمط موحد: try/catch مع AppException.sanitizeMessage (display-only، غير حرج).

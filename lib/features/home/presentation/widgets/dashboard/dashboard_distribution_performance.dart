@@ -154,7 +154,7 @@ class DashboardDistributionPerformance extends StatelessWidget {
                         borderRadius: AppRadius.fullRadius,
                       ),
                       child: Text(
-                        '${(cashRatio * 100).toStringAsFixed(0)}% نقداً',
+                        '${AmountFormatter.formatValue(cashRatio * 100, decimalPlaces: 0)}% نقداً',
                         style: AppTypography.labelSmall.copyWith(
                           color: colors.success,
                           fontWeight: FontWeight.w800,
@@ -372,7 +372,7 @@ class DashboardDistributionPerformance extends StatelessWidget {
                                 borderRadius: AppRadius.fullRadius,
                               ),
                               child: Text(
-                                '${(posCoverageRatio * 100).toStringAsFixed(0)}%',
+                                '${AmountFormatter.formatValue(posCoverageRatio * 100, decimalPlaces: 0)}%',
                                 style: AppTypography.labelSmall.copyWith(
                                   color: colors.primary,
                                   fontWeight: FontWeight.w800,

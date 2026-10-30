@@ -33,8 +33,8 @@ class ResetPasswordBinding extends Bindings {
 
     Get.lazyPut<ResetPasswordController>(
       () => ResetPasswordController(
-        Get.find<UpdatePasswordUseCase>(),
-        Get.find<ResetPasswordUseCase>(),
+        updatePasswordUseCase: Get.find<UpdatePasswordUseCase>(),
+        resetPasswordUseCase: Get.find<ResetPasswordUseCase>(),
       ),
     );
   }

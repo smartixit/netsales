@@ -8,9 +8,9 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم شاشة طلب استعادة كلمة المرور (ForgotPasswordController)
 class ForgotPasswordController extends GetxController {
-  ForgotPasswordController(this._requestPasswordResetUseCase);
+  ForgotPasswordController({required this.requestPasswordResetUseCase});
 
-  final RequestPasswordResetUseCase _requestPasswordResetUseCase;
+  final RequestPasswordResetUseCase requestPasswordResetUseCase;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController phoneController = TextEditingController();
@@ -29,7 +29,7 @@ class ForgotPasswordController extends GetxController {
       await CustomAnimationOverlay.showLoading();
 
       final phone = phoneController.text.trim();
-      await _requestPasswordResetUseCase.execute(phone);
+      await requestPasswordResetUseCase.execute(phone);
 
       // الحارس يمنع عرض النجاح والتنقّل بعد إغلاق الشاشة أثناء الطلب.
       if (isClosed) return;

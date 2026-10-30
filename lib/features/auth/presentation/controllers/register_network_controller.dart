@@ -19,15 +19,15 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم شاشة تقديم طلب تسجيل مزود شبكة جديد (RegisterNetworkController)
 class RegisterNetworkController extends GetxController {
-  RegisterNetworkController(
-    this._getGovernoratesUseCase,
-    this._getDirectoratesUseCase,
-    this._registerNetworkUseCase,
-  );
+  RegisterNetworkController({
+    required this.getGovernoratesUseCase,
+    required this.getDirectoratesUseCase,
+    required this.registerNetworkUseCase,
+  });
 
-  final GetGovernoratesUseCase _getGovernoratesUseCase;
-  final GetDirectoratesUseCase _getDirectoratesUseCase;
-  final RegisterNetworkUseCase _registerNetworkUseCase;
+  final GetGovernoratesUseCase getGovernoratesUseCase;
+  final GetDirectoratesUseCase getDirectoratesUseCase;
+  final RegisterNetworkUseCase registerNetworkUseCase;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -72,7 +72,7 @@ class RegisterNetworkController extends GetxController {
   Future<void> fetchGovernorates() async {
     try {
       isLoadingGovernorates.value = true;
-      final result = await _getGovernoratesUseCase.execute();
+      final result = await getGovernoratesUseCase.execute();
       if (isClosed) return;
       governorates.assignAll(result);
     } catch (e) {
@@ -98,7 +98,7 @@ class RegisterNetworkController extends GetxController {
 
     try {
       isLoadingDirectorates.value = true;
-      final result = await _getDirectoratesUseCase.execute(gov.governorateId);
+      final result = await getDirectoratesUseCase.execute(gov.governorateId);
       if (isClosed) return;
       directorates.assignAll(result);
     } catch (e) {
@@ -160,7 +160,7 @@ class RegisterNetworkController extends GetxController {
         deviceType: device.deviceType,
       );
 
-      final result = await _registerNetworkUseCase.execute(params);
+      final result = await registerNetworkUseCase.execute(params);
 
       // الحارس يمنع الحوار والتنقّل بعد إغلاق الشاشة أثناء الطلب.
       if (isClosed) return;

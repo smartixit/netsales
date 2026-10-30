@@ -123,7 +123,7 @@ class DashboardMultiEntityDeck extends StatelessWidget {
 
                 return AnimatedContainer(
                   duration: AppMotion.normal,
-                  curve: AppMotion.standard,
+                  curve: AppMotion.emphasized,
                   margin: EdgeInsets.symmetric(
                     horizontal: AppSpacing.xs,
                     vertical: isSelected ? 0 : 6.h,
@@ -158,12 +158,12 @@ class DashboardMultiEntityDeck extends StatelessWidget {
                   controller.networkPageController.animateToPage(
                     index,
                     duration: AppMotion.normal,
-                    curve: AppMotion.standard,
+                    curve: AppMotion.emphasized,
                   );
                 },
                 child: AnimatedContainer(
-                  duration: AppMotion.fast,
-                  curve: AppMotion.standard,
+                  duration: AppMotion.normal,
+                  curve: AppMotion.emphasized,
                   margin: EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
                   height: 6.h,
                   width: isSelected ? 24.w : 6.w,
@@ -223,8 +223,9 @@ class _SingleEntityCard extends StatelessWidget {
       height: 200.h,
       decoration: BoxDecoration(
         gradient: isNegative
-            ? LinearGradient(
-                colors: [colors.error, colors.error.withValues(alpha: 0.82)],
+            ? AppGradients.fromColors(
+                context,
+                [colors.error, colors.error.withValues(alpha: 0.82)],
                 begin: AlignmentDirectional.topStart,
                 end: AlignmentDirectional.bottomEnd,
               )

@@ -38,9 +38,9 @@ class RegisterNetworkBinding extends Bindings {
 
     Get.lazyPut<RegisterNetworkController>(
       () => RegisterNetworkController(
-        Get.find<GetGovernoratesUseCase>(),
-        Get.find<GetDirectoratesUseCase>(),
-        Get.find<RegisterNetworkUseCase>(),
+        getGovernoratesUseCase: Get.find<GetGovernoratesUseCase>(),
+        getDirectoratesUseCase: Get.find<GetDirectoratesUseCase>(),
+        registerNetworkUseCase: Get.find<RegisterNetworkUseCase>(),
       ),
     );
   }

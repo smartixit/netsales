@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/auth/domain/usecases/request_password_reset_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/verify_reset_otp_use_case.dart';
@@ -10,13 +11,13 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم شاشة التحقق من كود الاستعادة OTP (VerifyOtpController)
 class VerifyOtpController extends GetxController {
-  VerifyOtpController(
-    this._verifyResetOtpUseCase,
-    this._requestPasswordResetUseCase,
-  );
+  VerifyOtpController({
+    required this.verifyResetOtpUseCase,
+    required this.requestPasswordResetUseCase,
+  });
 
-  final VerifyResetOtpUseCase _verifyResetOtpUseCase;
-  final RequestPasswordResetUseCase _requestPasswordResetUseCase;
+  final VerifyResetOtpUseCase verifyResetOtpUseCase;
+  final RequestPasswordResetUseCase requestPasswordResetUseCase;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController otpController = TextEditingController();
@@ -56,7 +57,7 @@ class VerifyOtpController extends GetxController {
     canResend.value = false;
     cooldownSeconds.value = 60;
     _cooldownTimer?.cancel();
-    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _cooldownTimer = Timer.periodic(AppMotion.cooldownTick, (timer) {
       if (cooldownSeconds.value > 0) {
         cooldownSeconds.value--;
       } else {
@@ -72,7 +73,7 @@ class VerifyOtpController extends GetxController {
 
     try {
       isResending.value = true;
-      await _requestPasswordResetUseCase.execute(phone);
+      await requestPasswordResetUseCase.execute(phone);
       // قد تُغلق الشاشة أثناء الإرسال، فلا يجوز بدء مؤقت دورة إعادة الإرسال بعد
       // أن ألغاه onClose، وإلا بقي مؤقتاً دورياً لا يُلغى أبداً.
       if (isClosed) return;
@@ -110,7 +111,7 @@ class VerifyOtpController extends GetxController {
       isLoading.value = true;
       await CustomAnimationOverlay.showLoading();
 
-      await _verifyResetOtpUseCase.execute(
+      await verifyResetOtpUseCase.execute(
         VerifyResetOtpParams(
           phoneNumber: phone,
           otp: otpController.text.trim(),

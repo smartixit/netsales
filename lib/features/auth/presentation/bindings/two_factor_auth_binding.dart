@@ -33,8 +33,8 @@ class TwoFactorAuthBinding extends Bindings {
 
     Get.lazyPut<TwoFactorAuthController>(
       () => TwoFactorAuthController(
-        Get.find<VerifyTwoFactorUseCase>(),
-        Get.find<ResendOtpUseCase>(),
+        verifyTwoFactorUseCase: Get.find<VerifyTwoFactorUseCase>(),
+        resendOtpUseCase: Get.find<ResendOtpUseCase>(),
       ),
     );
   }

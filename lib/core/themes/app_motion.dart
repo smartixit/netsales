@@ -26,9 +26,11 @@ class AppMotion {
 
   /// مدة الـ Debounce الافتراضية لحقول البحث المرتبطة بالـ API
   static const Duration searchDebounce = Duration(milliseconds: 400);
+  static const Duration cooldownTick = Duration(seconds: 1);
 
   /// دورة توهّج الهياكل العظمية (Skeleton Shimmer)
   static const Duration shimmer = Duration(milliseconds: 1400);
+  static const Duration splashMinimum = Duration(milliseconds: 2500);
 
   // ── المنحنيات (Curves — Material 3) ──
 

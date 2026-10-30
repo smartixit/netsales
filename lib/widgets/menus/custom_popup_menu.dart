@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
 /// كائن عنصر القائمة المنسدلة الموحدة (CustomPopupItem)
@@ -175,7 +176,9 @@ class CustomPopupMenu<T> extends StatelessWidget {
           onCanceled?.call();
         },
         itemBuilder: (popupContext) => _buildMenuItems(popupContext, colors),
-        child: trigger ?? _buildDefaultTrigger(context, colors),
+        child: CustomInteractiveBounce(
+          child: trigger ?? _buildDefaultTrigger(context, colors),
+        ),
       ),
     );
   }

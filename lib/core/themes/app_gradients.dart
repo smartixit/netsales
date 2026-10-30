@@ -207,6 +207,19 @@ class AppGradients {
         ],
       );
     }
+    /// تدرج من قائمة ألوان مخصصة (للحالات الديناميكية) — يمنع كتابة LinearGradient في الميزات
+    static LinearGradient fromColors(
+      BuildContext context,
+      List<Color> colors, {
+      AlignmentGeometry begin = AlignmentDirectional.topStart,
+      AlignmentGeometry end = AlignmentDirectional.bottomEnd,
+    }) {
+      return LinearGradient(
+        begin: begin,
+        end: end,
+        colors: colors,
+      );
+    }
   /// Primary Gradient
   static LinearGradient primaryGradient(BuildContext context) {
     // final scheme = _scheme(context);
@@ -310,8 +323,8 @@ class AppGradients {
     double peakOpacity = 0.35,
   }) {
     return LinearGradient(
-      begin: AlignmentDirectional.topCenter,
-      end: AlignmentDirectional.bottomCenter,
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
       colors: [
         seriesColor.withValues(alpha: peakOpacity),
         seriesColor.withValues(alpha: 0.0),

@@ -19,15 +19,15 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم شاشة تقديم طلب تسجيل نقطة بيع / وكيل جديد (RegisterPosController)
 class RegisterPosController extends GetxController {
-  RegisterPosController(
-    this._getGovernoratesUseCase,
-    this._getDirectoratesUseCase,
-    this._registerPosUseCase,
-  );
+  RegisterPosController({
+    required this.getGovernoratesUseCase,
+    required this.getDirectoratesUseCase,
+    required this.registerPosUseCase,
+  });
 
-  final GetGovernoratesUseCase _getGovernoratesUseCase;
-  final GetDirectoratesUseCase _getDirectoratesUseCase;
-  final RegisterPosUseCase _registerPosUseCase;
+  final GetGovernoratesUseCase getGovernoratesUseCase;
+  final GetDirectoratesUseCase getDirectoratesUseCase;
+  final RegisterPosUseCase registerPosUseCase;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -71,7 +71,7 @@ class RegisterPosController extends GetxController {
   Future<void> fetchGovernorates() async {
     try {
       isLoadingGovernorates.value = true;
-      final result = await _getGovernoratesUseCase.execute();
+      final result = await getGovernoratesUseCase.execute();
       if (isClosed) return;
       governorates.assignAll(result);
     } catch (e) {
@@ -97,7 +97,7 @@ class RegisterPosController extends GetxController {
 
     try {
       isLoadingDirectorates.value = true;
-      final result = await _getDirectoratesUseCase.execute(gov.governorateId);
+      final result = await getDirectoratesUseCase.execute(gov.governorateId);
       if (isClosed) return;
       directorates.assignAll(result);
     } catch (e) {
@@ -159,7 +159,7 @@ class RegisterPosController extends GetxController {
         deviceType: device.deviceType,
       );
 
-      final result = await _registerPosUseCase.execute(params);
+      final result = await registerPosUseCase.execute(params);
 
       // الحارس يمنع الحوار والتنقّل بعد إغلاق الشاشة أثناء الطلب.
       if (isClosed) return;

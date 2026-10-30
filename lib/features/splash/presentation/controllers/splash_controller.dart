@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:get/get.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/splash/domain/usecases/determine_boot_destination_use_case.dart';
@@ -14,16 +15,16 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 /// - خلو تام من أي تبعيات للبنية التحتية أو الخدمات المباشرة.
 /// - التنسيق عبر حالات الاستخدام (Use Cases) المحقونة حصراً.
 class SplashController extends GetxController {
-  final InitializeAppUseCase _initializeAppUseCase;
-  final DetermineBootDestinationUseCase _determineBootDestinationUseCase;
+  final InitializeAppUseCase initializeAppUseCase;
+  final DetermineBootDestinationUseCase determineBootDestinationUseCase;
 
-  SplashController(
-    this._initializeAppUseCase,
-    this._determineBootDestinationUseCase,
-  );
+  SplashController({
+    required this.initializeAppUseCase,
+    required this.determineBootDestinationUseCase,
+  });
 
   /// مدة ظهور شاشة الإقلاع الأدنى لضمان استمتاع المستخدم بالهوية البصرية وانسيابية الحركة
-  static const Duration minSplashDuration = Duration(milliseconds: 2500);
+  static const Duration minSplashDuration = AppMotion.splashMinimum;
 
   bool _isDisposed = false;
 
@@ -38,7 +39,7 @@ class SplashController extends GetxController {
       final stopwatch = Stopwatch()..start();
 
       // 1. تشغيل تهيئة البنية التحتية عبر حالة الاستخدام المعزولة
-      await _initializeAppUseCase();
+      await initializeAppUseCase();
 
       // 2. ضمان بقاء شاشة الإقلاع للمدة البصرية المطلوبة دون وميض حاد
       final elapsed = stopwatch.elapsed;
@@ -48,7 +49,7 @@ class SplashController extends GetxController {
       if (_isDisposed) return;
 
       // 3. اتخاذ قرار مسار التوجيه التالي
-      final destination = await _determineBootDestinationUseCase();
+      final destination = await determineBootDestinationUseCase();
       if (_isDisposed) return;
 
       log('🚀 [SplashController] Bootstrapping complete. Navigating to: $destination');

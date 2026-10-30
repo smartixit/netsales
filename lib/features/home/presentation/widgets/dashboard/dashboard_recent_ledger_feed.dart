@@ -104,7 +104,7 @@ class DashboardRecentLedgerFeed extends StatelessWidget {
           ],
         ),
 
-        AppSpacing.vMd,
+        AppSpacing.vSm,
 
         // في حال عدم وجود عمليات
         if (activities.isEmpty)

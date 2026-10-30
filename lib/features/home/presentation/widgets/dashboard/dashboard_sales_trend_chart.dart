@@ -155,7 +155,7 @@ class DashboardSalesTrendChart extends StatelessWidget {
                       ),
                       AppSpacing.hXxs,
                       Text(
-                        '${growth.abs().toStringAsFixed(1)}%',
+                        '${AmountFormatter.formatValue(growth.abs(), decimalPlaces: 1)}%',
                         style: AppTypography.labelSmall.copyWith(
                           color: isPositiveGrowth
                               ? colors.success

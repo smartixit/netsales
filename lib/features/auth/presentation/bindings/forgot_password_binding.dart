@@ -27,7 +27,7 @@ class ForgotPasswordBinding extends Bindings {
     );
 
     Get.lazyPut<ForgotPasswordController>(
-      () => ForgotPasswordController(Get.find<RequestPasswordResetUseCase>()),
+      () => ForgotPasswordController(requestPasswordResetUseCase: Get.find<RequestPasswordResetUseCase>()),
     );
   }
 }

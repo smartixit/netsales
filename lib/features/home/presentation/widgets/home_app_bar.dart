@@ -9,6 +9,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
@@ -148,13 +149,14 @@ class _ExecutiveAvatarOrb extends StatelessWidget {
               width: 44.r,
               height: 44.r,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
+                gradient: AppGradients.fromColors(
+                  context,
+                  [
                     colors.primary.withValues(alpha: 0.28),
                     colors.primaryContainer.withValues(alpha: 0.10),
                   ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
                 border: Border.all(

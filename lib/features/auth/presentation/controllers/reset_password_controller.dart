@@ -14,13 +14,13 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 /// 1. وضع إعادة التعيين المباشر عبر رمز OTP (Direct Reset): عند استعادة كلمة المرور بدون جلسة سابقة.
 /// 2. وضع التغيير المسجل أو الإلزامي (In-App / Forced Change): عند وجود جلسة نشطة أو كلمة مرور مؤقتة.
 class ResetPasswordController extends GetxController {
-  ResetPasswordController(
-    this._updatePasswordUseCase,
-    this._resetPasswordUseCase,
-  );
+  ResetPasswordController({
+    required this.updatePasswordUseCase,
+    required this.resetPasswordUseCase,
+  });
 
-  final UpdatePasswordUseCase _updatePasswordUseCase;
-  final ResetPasswordUseCase _resetPasswordUseCase;
+  final UpdatePasswordUseCase updatePasswordUseCase;
+  final ResetPasswordUseCase resetPasswordUseCase;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -147,7 +147,7 @@ class ResetPasswordController extends GetxController {
           throw AppException('بيانات الاستعادة أو رمز التحقق غير مكتملة.');
         }
 
-        await _resetPasswordUseCase.execute(
+        await resetPasswordUseCase.execute(
           ResetPasswordParams(
             phoneNumber: userPhone!,
             otp: otp!,
@@ -171,7 +171,7 @@ class ResetPasswordController extends GetxController {
           arguments: {'phone': userPhone},
         );
       } else {
-        await _updatePasswordUseCase.execute(
+        await updatePasswordUseCase.execute(
           UpdatePasswordParams(
             currentPassword: currentPasswordController.text,
             newPassword: newPass,

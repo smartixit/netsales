@@ -49,8 +49,6 @@ class CreateSaleInvoiceController extends GetxController {
 
   final TextEditingController paidAmountController = TextEditingController();
 
-  int? _initialPreselectedPosId;
-
   @override
   void onClose() {
     selectedNetworkId.dispose();
@@ -65,7 +63,6 @@ class CreateSaleInvoiceController extends GetxController {
     int? preselectedPosId,
     String? preselectedPosName,
   }) async {
-    _initialPreselectedPosId = preselectedPosId;
     selectedNetworkId.value = networkId;
     selectedPosId.value = preselectedPosId;
     selectedPosName.value = preselectedPosName;
@@ -144,10 +141,12 @@ class CreateSaleInvoiceController extends GetxController {
     packages.clear();
     linkedPosList.clear();
 
-    if (_initialPreselectedPosId == null) {
-      selectedPosId.value = null;
-      selectedPosName.value = null;
-    }
+    // Always reset POS selection when network changes (even if preselected),
+    // because the preselected POS belongs to the previous network and is
+    // invalid for the new network. loadDataForNetwork will auto-select the
+    // first POS of the new network.
+    selectedPosId.value = null;
+    selectedPosName.value = null;
 
     isLoading.value = true;
     loadDataForNetwork(newNetId);

@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 
 class CustomInteractiveBounce extends StatefulWidget {
   final Widget child;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const CustomInteractiveBounce({
     super.key,
     required this.child,
-    required this.onTap,
+    this.onTap,
   });
 
   @override
@@ -48,9 +48,18 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) => _controller.reverse(),
-      onTapCancel: () => _controller.reverse(),
+      onTapDown: (_) {
+        _controller.duration = const Duration(milliseconds: 80);
+        _controller.forward();
+      },
+      onTapUp: (_) {
+        _controller.duration = AppMotion.fast;
+        _controller.reverse();
+      },
+      onTapCancel: () {
+        _controller.duration = AppMotion.fast;
+        _controller.reverse();
+      },
       onTap: widget.onTap,
       child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
     );

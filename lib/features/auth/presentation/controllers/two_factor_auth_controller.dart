@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/auth/domain/usecases/resend_otp_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/verify_two_factor_use_case.dart';
@@ -10,10 +11,13 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم شاشة التحقق بخطوتين وتأكيد ربط الجهاز (TwoFactorAuthController)
 class TwoFactorAuthController extends GetxController {
-  TwoFactorAuthController(this._verifyTwoFactorUseCase, this._resendOtpUseCase);
+  TwoFactorAuthController({
+    required this.verifyTwoFactorUseCase,
+    required this.resendOtpUseCase,
+  });
 
-  final VerifyTwoFactorUseCase _verifyTwoFactorUseCase;
-  final ResendOtpUseCase _resendOtpUseCase;
+  final VerifyTwoFactorUseCase verifyTwoFactorUseCase;
+  final ResendOtpUseCase resendOtpUseCase;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController otpController = TextEditingController();
@@ -78,7 +82,7 @@ class TwoFactorAuthController extends GetxController {
     canResend.value = false;
     cooldownSeconds.value = 60;
     _cooldownTimer?.cancel();
-    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _cooldownTimer = Timer.periodic(AppMotion.cooldownTick, (timer) {
       if (cooldownSeconds.value > 0) {
         cooldownSeconds.value--;
       } else {
@@ -94,7 +98,7 @@ class TwoFactorAuthController extends GetxController {
 
     try {
       isResending.value = true;
-      await _resendOtpUseCase.execute(
+      await resendOtpUseCase.execute(
         ResendOtpParams(
           phoneNumber: phone,
           otpType: 'OTP_2FA',
@@ -138,7 +142,7 @@ class TwoFactorAuthController extends GetxController {
       isLoading.value = true;
       await CustomAnimationOverlay.showLoading();
 
-      final result = await _verifyTwoFactorUseCase.execute(
+      final result = await verifyTwoFactorUseCase.execute(
         VerifyTwoFactorParams(
           phoneNumber: phone,
           otp: otpController.text.trim(),

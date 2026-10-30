@@ -13,9 +13,9 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم واجهة تسجيل الدخول (LoginController)
 class LoginController extends GetxController {
-  LoginController(this._loginUseCase);
+  LoginController({required this.loginUseCase});
 
-  final LoginUseCase _loginUseCase;
+  final LoginUseCase loginUseCase;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController phoneController = TextEditingController();
@@ -116,7 +116,7 @@ class LoginController extends GetxController {
       if (isClosed) return;
 
       // 2. تنفيذ حالة الاستخدام الدومينية ببيانات عتادية دقيقة ورمز FCM الفوري
-      final result = await _loginUseCase.execute(
+      final result = await loginUseCase.execute(
         LoginParams(
           phoneNumber: phoneController.text,
           password: passwordController.text,

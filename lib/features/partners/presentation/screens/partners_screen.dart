@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
 import 'package:netsales/features/partners/presentation/widgets/network_pos_feed.dart';
 import 'package:netsales/features/partners/presentation/widgets/networks_feed.dart';
+import 'package:netsales/features/partners/presentation/widgets/partners_network_filter.dart';
 import 'package:netsales/features/partners/presentation/widgets/partners_search_filter_bar.dart';
 import 'package:netsales/features/partners/presentation/widgets/partners_segmented_header.dart';
 import 'package:netsales/features/partners/presentation/widgets/partners_stats_header.dart';
@@ -26,6 +27,9 @@ class PartnersScreen extends GetView<PartnersController> {
         // 1. رأس التبويب القطاعي (مزودو الشبكات | نقاط البيع | عقود التوزيع)
         PartnersSegmentedHeader(controller: controller),
         AppSpacing.vSm,
+
+        // 1.5. فلتر الشبكة (لعقود الربط فقط)
+        PartnersNetworkFilter(controller: controller),
 
         // 2. شريط البحث والتصفية المزدوج
         PartnersSearchFilterBar(controller: controller),

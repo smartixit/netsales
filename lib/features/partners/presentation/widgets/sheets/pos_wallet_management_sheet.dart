@@ -373,7 +373,7 @@ class _WalletFinancialCard extends StatelessWidget {
                 child: _MetricSubBox(
                   label: 'رصيد دائن متاح',
                   value:
-                      '${AmountFormatter.format(wallet.creditAmount.toStringAsFixed(2))} ر.ي',
+                      '${AmountFormatter.formatValue(wallet.creditAmount)} ر.ي',
                   valueColor: colors.success,
                   icon: Icons.check_circle_outline_rounded,
                 ),
@@ -383,7 +383,7 @@ class _WalletFinancialCard extends StatelessWidget {
                 child: _MetricSubBox(
                   label: 'مديونية مستحقة',
                   value:
-                      '${AmountFormatter.format(wallet.debitAmount.toStringAsFixed(2))} ر.ي',
+                      '${AmountFormatter.formatValue(wallet.debitAmount)} ر.ي',
                   valueColor: colors.error,
                   icon: Icons.info_outline_rounded,
                 ),
@@ -573,7 +573,7 @@ class _WalletLogTile extends StatelessWidget {
             ),
           ),
           Text(
-            '$prefix${AmountFormatter.format(log.logAmount.toStringAsFixed(2))} ر.ي',
+            '$prefix${AmountFormatter.formatValue(log.logAmount)} ر.ي',
             style: AppTypography.labelLarge.copyWith(
               color: signColor,
               fontWeight: FontWeight.bold,

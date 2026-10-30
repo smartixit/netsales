@@ -33,8 +33,8 @@ class VerifyOtpBinding extends Bindings {
 
     Get.lazyPut<VerifyOtpController>(
       () => VerifyOtpController(
-        Get.find<VerifyResetOtpUseCase>(),
-        Get.find<RequestPasswordResetUseCase>(),
+        verifyResetOtpUseCase: Get.find<VerifyResetOtpUseCase>(),
+        requestPasswordResetUseCase: Get.find<RequestPasswordResetUseCase>(),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/home/domain/entities/dashboard_quick_action_entity.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -71,6 +72,7 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return CustomInteractiveBounce(
       onTap: action.onTap ?? () {},
       child: Container(
@@ -79,10 +81,11 @@ class _ActionCard extends StatelessWidget {
         // height: 100.h,
         decoration: BoxDecoration(
           borderRadius: AppRadius.xlRadius,
-          gradient: LinearGradient(
+          gradient: AppGradients.fromColors(
+            context,
+            [action.gradientColors.first, action.gradientColors.last],
             begin: AlignmentDirectional.topStart,
             end: AlignmentDirectional.bottomEnd,
-            colors: [action.gradientColors.first, action.gradientColors.last],
           ),
           boxShadow: [
             BoxShadow(
@@ -103,7 +106,7 @@ class _ActionCard extends StatelessWidget {
                 height: min(70.w, 77),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.lightColors.surface.withValues(alpha: 0.10),
+                  color: colors.surface.withValues(alpha: 0.10),
                 ),
               ),
             ),
@@ -116,7 +119,7 @@ class _ActionCard extends StatelessWidget {
                 height: min(44.w, 48),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.lightColors.surface.withValues(alpha: 0.06),
+                  color: colors.surface.withValues(alpha: 0.06),
                 ),
               ),
             ),
@@ -135,14 +138,14 @@ class _ActionCard extends StatelessWidget {
                     height: min(44.w, 48),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.lightColors.surface.withValues(
+                      color: colors.surface.withValues(
                         alpha: 0.22,
                       ),
                     ),
                     child: Center(
                       child: Icon(
                         action.icon,
-                        color: Colors.white,
+                        color: colors.onPrimary,
                         size: 22.sp,
                       ),
                     ),
@@ -153,7 +156,7 @@ class _ActionCard extends StatelessWidget {
                     style: AppTypography.bodySmall.copyWith(
                       fontSize: 11.5.sp,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: colors.onPrimary,
                       height: 1.3,
                       letterSpacing: -0.2,
                     ),

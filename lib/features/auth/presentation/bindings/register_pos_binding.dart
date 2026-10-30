@@ -38,9 +38,9 @@ class RegisterPosBinding extends Bindings {
 
     Get.lazyPut<RegisterPosController>(
       () => RegisterPosController(
-        Get.find<GetGovernoratesUseCase>(),
-        Get.find<GetDirectoratesUseCase>(),
-        Get.find<RegisterPosUseCase>(),
+        getGovernoratesUseCase: Get.find<GetGovernoratesUseCase>(),
+        getDirectoratesUseCase: Get.find<GetDirectoratesUseCase>(),
+        registerPosUseCase: Get.find<RegisterPosUseCase>(),
       ),
     );
   }

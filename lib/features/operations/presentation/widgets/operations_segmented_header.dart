@@ -18,10 +18,7 @@ import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 class OperationsSegmentedHeader extends StatelessWidget {
   final OperationsController controller;
 
-  const OperationsSegmentedHeader({
-    super.key,
-    required this.controller,
-  });
+  const OperationsSegmentedHeader({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -51,26 +48,29 @@ class OperationsSegmentedHeader extends StatelessWidget {
             ),
           ),
 
-          AppSpacing.hSm,
-
           // 2. زر الإجراء السريع السياقي المدمج (محمي بصلاحية الإنشاء)
           if (isInvoiceTab
               ? PermissionService.to.can(AppPermissions.salesCreate)
               : PermissionService.to.can(AppPermissions.requestsCreate))
-            CustomButton.primary(
-              text: isInvoiceTab ? 'فاتورة' : 'طلب توريد',
-              icon: isInvoiceTab
-                  ? Icons.add_rounded
-                  : Icons.add_shopping_cart_rounded,
-              height: 42.h,
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              onPressed: () {
-                if (isInvoiceTab) {
-                  CreateSaleInvoiceSheet.show(context);
-                } else {
-                  CreateVoucherRequestSheet.show(context);
-                }
-              },
+            Row(
+              children: [
+                AppSpacing.hSm,
+                CustomButton.primary(
+                  text: isInvoiceTab ? 'فاتورة' : 'طلب توريد',
+                  icon: isInvoiceTab
+                      ? Icons.add_rounded
+                      : Icons.add_shopping_cart_rounded,
+                  height: 42.h,
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  onPressed: () {
+                    if (isInvoiceTab) {
+                      CreateSaleInvoiceSheet.show(context);
+                    } else {
+                      CreateVoucherRequestSheet.show(context);
+                    }
+                  },
+                ),
+              ],
             ),
         ],
       );

@@ -28,13 +28,14 @@ class DashboardView extends GetView<DashboardController> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final List<DashboardQuickActionEntity> actions = [
       DashboardQuickActionEntity(
         icon: Icons.receipt_long_outlined,
         label: 'فاتورة مبيعات',
         gradientColors: [
-          AppColors.lightColors.onPrimaryFixed,
-          AppColors.lightColors.primary,
+          colors.onPrimaryFixed,
+          colors.primary,
         ],
         permission: AppPermissions.salesCreate,
         onTap: () => CreateSaleInvoiceSheet.show(context),
@@ -43,8 +44,8 @@ class DashboardView extends GetView<DashboardController> {
         icon: Icons.inventory_2_outlined,
         label: 'توريد كروت',
         gradientColors: [
-          AppColors.lightColors.onInfoContainer,
-          AppColors.lightColors.info,
+          colors.onInfoContainer,
+          colors.info,
         ],
         permission: AppPermissions.voucherPackagesCreate,
         onTap: () => CreateVoucherRequestSheet.show(context),
@@ -53,8 +54,8 @@ class DashboardView extends GetView<DashboardController> {
         icon: Icons.storefront_outlined,
         label: 'نقاط التوزيع',
         gradientColors: [
-          AppColors.lightColors.onErrorContainer,
-          AppColors.lightColors.error,
+          colors.onErrorContainer,
+          colors.error,
         ],
         permission: AppPermissions.posView,
         onTap: controller.navigateToPartners,
@@ -64,8 +65,8 @@ class DashboardView extends GetView<DashboardController> {
         icon: Icons.account_balance_wallet_outlined,
         label: 'إدارة المحفظة',
         gradientColors: [
-          AppColors.lightColors.onWarningContainer,
-          AppColors.lightColors.warning,
+          colors.onWarningContainer,
+          colors.warning,
         ],
         permission: AppPermissions.networkWalletsView,
         onTap: controller.navigateToWallets,

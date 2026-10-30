@@ -63,6 +63,9 @@ class PartnersController extends GetxController {
   /// فلتر الحالة المعتمد
   final RxString selectedStatusFilter = 'ALL'.obs;
 
+  /// فلتر الشبكة المعتمد (null = جميع الشبكات)
+  final ValueNotifier<int?> selectedNetworkId = ValueNotifier<int?>(null);
+
   /// حقل البحث الموحد ومؤقت التهدئة للبحث الحي التلقائي
   final TextEditingController searchController = TextEditingController();
   final RxString searchQuery = ''.obs;
@@ -82,6 +85,7 @@ class PartnersController extends GetxController {
     _searchDebounceTimer?.cancel();
     searchController.dispose();
     rejectReasonController.dispose();
+    selectedNetworkId.dispose();
     super.onClose();
   }
 
@@ -157,7 +161,9 @@ class PartnersController extends GetxController {
     networkPosListErrorMessage.value = '';
 
     try {
-      final result = await getNetworkPosListUseCase();
+      final result = await getNetworkPosListUseCase(
+        networkId: selectedNetworkId.value,
+      );
       networkPosList.assignAll(result);
     } catch (e) {
       networkPosListErrorMessage.value = AppException.sanitizeMessage(e);
@@ -189,16 +195,22 @@ class PartnersController extends GetxController {
   }
 
   /// تنفيذ البحث عند التقديم المباشر
+  void clearSearch() {
+    _searchDebounceTimer?.cancel();
+    searchController.clear();
+    searchQuery.value = '';
+  }
+
   void onSearchSubmitted(String query) {
     _searchDebounceTimer?.cancel();
     searchQuery.value = query;
   }
 
-  /// مسح نص البحث
-  void clearSearch() {
-    _searchDebounceTimer?.cancel();
-    searchController.clear();
-    searchQuery.value = '';
+  /// تغيير فلتر الشبكة (null = جميع الشبكات)
+  void onNetworkFilterChanged(int? networkId) {
+    if (selectedNetworkId.value == networkId) return;
+    selectedNetworkId.value = networkId;
+    loadNetworkPosList(isRefresh: true);
   }
 
   // ============================================================================
