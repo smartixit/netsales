@@ -40,7 +40,7 @@ class MoreProfileHeroCard extends StatelessWidget {
         : 'U';
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.buttonPaddingV),
       decoration: BoxDecoration(
         gradient: AppGradients.moreHero(context),
         borderRadius: AppRadius.lgRadius,

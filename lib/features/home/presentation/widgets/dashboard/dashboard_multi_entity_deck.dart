@@ -110,6 +110,7 @@ class DashboardMultiEntityDeck extends StatelessWidget {
           SizedBox(
             height: 206.h,
             child: PageView.builder(
+              padEnds: false,
               clipBehavior: Clip.none,
               controller: controller.networkPageController,
               itemCount: networks.length,

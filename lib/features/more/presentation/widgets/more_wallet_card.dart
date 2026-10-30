@@ -35,7 +35,7 @@ class MoreWalletCard extends StatelessWidget {
     final isOverdrawn = wallet?.isOverdrawn ?? false;
 
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
         gradient: AppGradients.moreHero(context),
         borderRadius: AppRadius.lgRadius,

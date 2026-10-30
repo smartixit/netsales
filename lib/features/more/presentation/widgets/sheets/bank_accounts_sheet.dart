@@ -145,7 +145,7 @@ class _BankAccountCard extends StatelessWidget {
     final isActive = account.isActive;
 
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.card),
@@ -314,7 +314,7 @@ class _BankAccountCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${AmountFormatter.format(account.accountBalance.toStringAsFixed(2))} ${account.accountCurrency}',
+                '${AmountFormatter.formatValue(account.accountBalance)} ${account.accountCurrency}',
                 style: AppTypography.titleSmall.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.bold,

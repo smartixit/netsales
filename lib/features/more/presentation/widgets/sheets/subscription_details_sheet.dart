@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/public_settings_service.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/more/presentation/controllers/more_controller.dart';
+import 'package:netsales/features/more/presentation/widgets/sheets/components/subscription_limit_row.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// ============================================================================
 /// نافذة تفاصيل اشتراك النظام السحابي (SubscriptionDetailsSheet)
@@ -32,10 +34,10 @@ class SubscriptionDetailsSheet extends StatelessWidget {
   }
 
   Future<void> _contactSupport() async {
-    final uri = Uri.parse('https://wa.me/967770000000');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    await UrlLauncherService.openWhatsApp(
+      phoneNumber: PublicSettingsService.to.supportWhatsApp,
+      message: 'أرغب في ترقية خطة الاشتراك أو تجديد الترخيص (NetSales).',
+    );
   }
 
   @override
@@ -45,7 +47,7 @@ class SubscriptionDetailsSheet extends StatelessWidget {
     final subscription = controller.subscription;
 
     final expiryDateStr = subscription?.endDate != null
-        ? DateFormat('yyyy/MM/dd').format(subscription!.endDate!)
+        ? DateFormatter.date(subscription!.endDate!)
         : 'غير محدد (نشط دائماً)';
 
     final planName = subscription?.planName ?? 'الباقة المؤسسية المتقدمة';
@@ -123,7 +125,7 @@ class SubscriptionDetailsSheet extends StatelessWidget {
 
         // مؤشرات حدود العمليات
         Container(
-          padding: EdgeInsets.all(16.r),
+          padding: EdgeInsets.all(AppSpacing.cardPadding),
           decoration: BoxDecoration(
             color: colors.surface,
             borderRadius: BorderRadius.circular(AppRadius.card),
@@ -133,8 +135,7 @@ class SubscriptionDetailsSheet extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildLimitRow(
-                context,
+              SubscriptionLimitRow(
                 title: 'الأيام المتبقية في الخطة الحالية',
                 value: '$daysRemaining يوم',
                 icon: Icons.hourglass_top_rounded,
@@ -142,8 +143,7 @@ class SubscriptionDetailsSheet extends StatelessWidget {
               AppSpacing.vMd,
               const Divider(height: 1),
               AppSpacing.vMd,
-              _buildLimitRow(
-                context,
+              const SubscriptionLimitRow(
                 title: 'تزامن الأجهزة والجلسات الفورية',
                 value: 'مفتوح وغير محدود',
                 icon: Icons.sync_rounded,
@@ -151,8 +151,7 @@ class SubscriptionDetailsSheet extends StatelessWidget {
               AppSpacing.vMd,
               const Divider(height: 1),
               AppSpacing.vMd,
-              _buildLimitRow(
-                context,
+              const SubscriptionLimitRow(
                 title: 'الدعم الفني المباشر',
                 value: 'دعم مؤسسي مخصص 24/7',
                 icon: Icons.support_agent_rounded,
@@ -173,32 +172,4 @@ class SubscriptionDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildLimitRow(
-    BuildContext context, {
-    required String title,
-    required String value,
-    required IconData icon,
-  }) {
-    final colors = context.colors;
-
-    return Row(
-      children: [
-        Icon(icon, color: colors.primary, size: 22.r),
-        AppSpacing.hMd,
-        Expanded(
-          child: Text(
-            title,
-            style: AppTypography.bodyMedium,
-          ),
-        ),
-        Text(
-          value,
-          style: AppTypography.titleSmall.copyWith(
-            fontWeight: FontWeight.bold,
-            color: colors.primary,
-          ),
-        ),
-      ],
-    );
-  }
 }

@@ -130,7 +130,7 @@ class _SessionCard extends StatelessWidget {
         : 'الآن';
 
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.card),

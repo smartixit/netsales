@@ -48,10 +48,7 @@ class PosWalletManagementSheet extends StatelessWidget {
     String? networkName,
   }) {
     final controller = Get.find<PosWalletSheetController>();
-    controller.init(
-      networkId: networkId,
-      posId: posId,
-    );
+    controller.init(networkId: networkId, posId: posId);
 
     return CustomBottomSheet.show<void>(
       title: 'محفظة الوكيل التوزيعية المشتركة',
@@ -95,13 +92,17 @@ class PosWalletManagementSheet extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 16.w),
           child: Column(
             children: [
-              Icon(Icons.error_outline_rounded,
-                  size: 48.r, color: colors.error),
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48.r,
+                color: colors.error,
+              ),
               AppSpacing.vMd,
               Text(
                 errorMessage,
-                style: AppTypography.bodyMedium
-                    .copyWith(color: colors.onSurfaceVariant),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
                 textAlign: TextAlign.center,
               ),
               AppSpacing.vLg,
@@ -121,8 +122,9 @@ class PosWalletManagementSheet extends StatelessWidget {
           child: Center(
             child: Text(
               'لا توجد بيانات محفظة مسجلة لهذا العقد حالياً.',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: colors.onSurfaceVariant),
+              style: AppTypography.bodyMedium.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
             ),
           ),
         );
@@ -160,8 +162,11 @@ class PosWalletManagementSheet extends StatelessWidget {
             // 2. ترويسة سجل العمليات
             Row(
               children: [
-                Icon(Icons.history_rounded,
-                    size: 18.r, color: colors.onSurfaceVariant),
+                Icon(
+                  Icons.history_rounded,
+                  size: 18.r,
+                  color: colors.onSurfaceVariant,
+                ),
                 AppSpacing.hXs,
                 Text(
                   'سجل دفتر الأستاذ للحركات البينية',
@@ -188,8 +193,9 @@ class PosWalletManagementSheet extends StatelessWidget {
                 child: Center(
                   child: Text(
                     'لا توجد حركات مالية مسجلة حتى الآن.',
-                    style: AppTypography.bodySmall
-                        .copyWith(color: colors.onSurfaceVariant),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
                 ),
               )
@@ -348,7 +354,7 @@ class _WalletFinancialCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${AmountFormatter.format(wallet.walletBalance.toStringAsFixed(2))} ر.ي',
+                  '${AmountFormatter.formatValue(wallet.walletBalance)} ر.ي',
                   style: AppTypography.titleLarge.copyWith(
                     color: badgeColor,
                     fontWeight: FontWeight.bold,
@@ -401,8 +407,11 @@ class _WalletFinancialCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.copy_rounded,
-                      size: 11.r, color: colors.onSurfaceVariant),
+                  Icon(
+                    Icons.copy_rounded,
+                    size: 11.r,
+                    color: colors.onSurfaceVariant,
+                  ),
                   AppSpacing.hXs,
                   Text(
                     'معرّف المحفظة: #${wallet.walletUuid}',
@@ -495,15 +504,16 @@ class _WalletLogTile extends StatelessWidget {
     final isCredit = log.isCredit;
 
     final signColor = isCredit ? colors.success : colors.error;
-    final signIcon =
-        isCredit ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
+    final signIcon = isCredit
+        ? Icons.arrow_downward_rounded
+        : Icons.arrow_upward_rounded;
     final prefix = isCredit ? '+' : '-';
 
     final dateStr = log.logDate != null
         ? DateFormat('yyyy/MM/dd • HH:mm', 'ar').format(log.logDate!)
         : (log.createdAt != null
-            ? DateFormat('yyyy/MM/dd • HH:mm', 'ar').format(log.createdAt!)
-            : '—');
+              ? DateFormat('yyyy/MM/dd • HH:mm', 'ar').format(log.createdAt!)
+              : '—');
 
     return Container(
       padding: EdgeInsets.all(12.r),
@@ -634,9 +644,7 @@ class _TransferSection extends StatelessWidget {
             child: Row(
               children: [
                 Icon(
-                  isFeed
-                      ? Icons.outbox_rounded
-                      : Icons.move_to_inbox_rounded,
+                  isFeed ? Icons.outbox_rounded : Icons.move_to_inbox_rounded,
                   size: 20.r,
                   color: isFeed ? colors.primary : colors.secondary,
                 ),
@@ -691,7 +699,9 @@ class _TransferSection extends StatelessWidget {
 
           // زر تنفيذ العملية
           CustomButton.primary(
-            text: isFeed ? 'تأكيد تحويل الرصيد للوكيل' : 'تأكيد توريد واسترجاع الرصيد',
+            text: isFeed
+                ? 'تأكيد تحويل الرصيد للوكيل'
+                : 'تأكيد توريد واسترجاع الرصيد',
             icon: isFeed
                 ? Icons.check_circle_outline_rounded
                 : Icons.download_done_rounded,

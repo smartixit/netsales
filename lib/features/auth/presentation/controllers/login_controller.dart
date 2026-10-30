@@ -34,17 +34,21 @@ class LoginController extends GetxController {
   /// فحص دعم المقاييس الحيوية واستعادة الاعتمادات المحفوظة بأمان
   Future<void> _initBiometricsAndSavedCredentials() async {
     try {
-      canCheckBiometrics.value =
+      final canAuthenticate =
           await CredentialService.instance.canAuthenticateWithBiometrics();
+      if (isClosed) return;
+      canCheckBiometrics.value = canAuthenticate;
 
       // استعادة الاعتمادات المحفوظة بشكل مشفر وتعبئة رقم الهاتف إن وُجد
       final savedPhone = await CredentialService.instance.getSavedPhone();
+      if (isClosed) return;
       if (savedPhone != null &&
           savedPhone.isNotEmpty &&
           phoneController.text.isEmpty) {
         phoneController.text = savedPhone;
       }
     } catch (_) {
+      if (isClosed) return;
       canCheckBiometrics.value = false;
     }
   }
@@ -54,10 +58,14 @@ class LoginController extends GetxController {
     final result = await CredentialService.instance.authenticate(
       reason: 'يرجى تأكيد هويتك للمتابعة إلى حسابك',
     );
+    // قد تُزال الشاشة أثناء نافذة التحقق الحيوي، فتُحرَّر متحكمات النص في onClose.
+    if (isClosed) return;
 
     if (result.isSuccess) {
       final savedCreds =
           await CredentialService.instance.getSavedCredentials();
+      // نفس الحارس بعد كل عملية غير متزامنة قبل أي كتابة في متحكمات النص.
+      if (isClosed) return;
 
       if (savedCreds != null) {
         phoneController.text = savedCreds.phone;
