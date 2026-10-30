@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -147,9 +145,7 @@ class DashboardController extends GetxController {
   /// نمط موحد: try/catch مع AppException.sanitizeMessage (display-only، غير حرج).
   Future<void> loadTrend({String period = 'daily'}) async {
     try {
-      final result = await getSalesTrendUseCase(
-        period: period,
-      );
+      final result = await getSalesTrendUseCase(period: period);
       trendPoints.assignAll(result);
     } catch (error) {
       // سلسلة المبيعات غير حرجية (عرض فقط) — لا نُعطل الواجهة.

@@ -24,47 +24,49 @@ class CustomErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 160.w,
-              height: 160.w,
-              child: Lottie.asset(
-                'assets/animations/error.json',
-                repeat: true,
+    return Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 160.w,
+                height: 160.w,
+                child: Lottie.asset(
+                  'assets/animations/error.json',
+                  repeat: true,
+                ),
               ),
-            ),
-            AppSpacing.vMd,
-            Text(
-              title,
-              style: AppTypography.titleMedium.copyWith(
-                color: colors.onSurface,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (subtitle != null) ...[
-              AppSpacing.vXs,
+              AppSpacing.vMd,
               Text(
-                subtitle!,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: colors.onSurfaceVariant,
+                title,
+                style: AppTypography.titleMedium.copyWith(
+                  color: colors.onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),
+              if (subtitle != null) ...[
+                AppSpacing.vXs,
+                Text(
+                  subtitle!,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (onRetry != null) ...[
+                AppSpacing.vXs,
+                CustomButton.text(
+                  text: retryLabel,
+                  icon: Icons.refresh_rounded,
+                  onPressed: onRetry!,
+                ),
+              ],
             ],
-            if (onRetry != null) ...[
-              AppSpacing.vXs,
-              CustomButton.text(
-                text: retryLabel,
-                icon: Icons.refresh_rounded,
-                onPressed: onRetry!,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

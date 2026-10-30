@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// ============================================================================
 /// يُعرّف إجراءً سريعاً يمكن للمستخدم تنفيذه من خلال الزر المركزي العائم
 /// بناءً على الصلاحيات الممنوحة له من الواجهة الخلفية.
-class HomeQuickAction {
+class HomeQuickActionEntity {
   /// المعرف الفريد للإجراء
   final String id;
 
@@ -27,7 +27,7 @@ class HomeQuickAction {
   /// الدالة المخصصة للتنفيذ (اختياري)
   final VoidCallback? onExecute;
 
-  const HomeQuickAction({
+  const HomeQuickActionEntity({
     required this.id,
     required this.title,
     required this.description,

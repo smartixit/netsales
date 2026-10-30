@@ -5,7 +5,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/home/presentation/models/home_quick_action.dart';
+import 'package:netsales/features/home/domain/entities/home_quick_action_entity.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -15,8 +15,8 @@ import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 /// ============================================================================
 /// نافذة سفلية عصرية تعتمد على [CustomBottomSheet] وتعرض حصراً الإجراءات المصرح بها للمستخدم.
 class HomeQuickActionsSheet extends StatelessWidget {
-  final List<HomeQuickAction> actions;
-  final ValueChanged<HomeQuickAction> onActionTap;
+  final List<HomeQuickActionEntity> actions;
+  final ValueChanged<HomeQuickActionEntity> onActionTap;
 
   const HomeQuickActionsSheet({
     super.key,
@@ -27,10 +27,9 @@ class HomeQuickActionsSheet extends StatelessWidget {
   /// عرض النافذة السفلية المنبثقة
   static Future<void> show(
     BuildContext context, {
-    required List<HomeQuickAction> actions,
-    required ValueChanged<HomeQuickAction> onActionTap,
+    required List<HomeQuickActionEntity> actions,
+    required ValueChanged<HomeQuickActionEntity> onActionTap,
   }) {
-
     return CustomBottomSheet.show<void>(
       title: 'الإجراءات السريعة المباشرة',
       subtitle: 'اختر الإجراء الذي ترغب بتنفيذه فوراً بدون مغادرة سياقك',
@@ -70,7 +69,7 @@ class HomeQuickActionsSheet extends StatelessWidget {
 
 /// بطاقة الإجراء الفردية المستقلة
 class _QuickActionCard extends StatelessWidget {
-  final HomeQuickAction action;
+  final HomeQuickActionEntity action;
   final VoidCallback onTap;
 
   const _QuickActionCard({required this.action, required this.onTap});

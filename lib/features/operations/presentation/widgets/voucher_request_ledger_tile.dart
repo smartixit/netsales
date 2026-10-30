@@ -56,7 +56,9 @@ class VoucherRequestLedgerTile extends StatelessWidget {
       request.requestTotalAmount,
     );
 
-    final dt = DateFormatter.tryParse(request.requestDate ?? request.createdAt ?? '');
+    final dt = DateFormatter.tryParse(
+      request.requestDate ?? request.createdAt ?? '',
+    );
     final dateStr = dt != null ? DateFormatter.dateTime(dt) : '';
 
     // لون حالة التوريد
@@ -180,7 +182,9 @@ class VoucherRequestLedgerTile extends StatelessWidget {
                                     ? '#${request.requestUuid} • $dateStr'
                                     : '#${request.requestUuid}',
                                 style: AppTypography.labelSmall.copyWith(
-                                  color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+                                  color: colors.onSurfaceVariant.withValues(
+                                    alpha: 0.7,
+                                  ),
                                   fontWeight: FontWeight.w700,
                                   fontSize: 9.5.sp,
                                 ),
@@ -239,7 +243,7 @@ class VoucherRequestLedgerTile extends StatelessWidget {
                             onCancel != null ||
                             onDelete != null ||
                             onShare != null) ...[
-                          AppSpacing.hXxs,
+                          AppSpacing.hXs,
                           _buildTileOverflowMenu(context, colors),
                         ],
                       ],
@@ -339,9 +343,7 @@ class VoucherRequestLedgerTile extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        isExpanded
-                                            ? 'طي البنود'
-                                            : 'عرض البنود',
+                                        isExpanded ? 'طي البنود' : 'عرض البنود',
                                         style: AppTypography.labelSmall
                                             .copyWith(
                                               color: statusColor,
@@ -364,13 +366,13 @@ class VoucherRequestLedgerTile extends StatelessWidget {
                               AppSpacing.hXxs,
                             ],
                             if (isPending &&
-                                (onApprove != null ||
-                                    onReject != null)) ...[
+                                (onApprove != null || onReject != null)) ...[
                               if (onReject != null) ...[
                                 CustomButton.icon(
                                   icon: Icons.close_rounded,
-                                  dimension: 30.r,
-                                  iconSize: 15.r,
+                                  // dimension: 30.r,
+                                  // iconSize: 15.r,
+                                  size: AppButtonSize.small,
                                   foregroundColor: colors.error,
                                   backgroundColor: colors.error.withValues(
                                     alpha: 0.1,
@@ -378,13 +380,14 @@ class VoucherRequestLedgerTile extends StatelessWidget {
                                   tooltip: 'رفض الطلب',
                                   onPressed: onReject!,
                                 ),
-                                AppSpacing.hXxs,
+                                AppSpacing.hSm,
                               ],
                               if (onApprove != null)
                                 CustomButton.icon(
                                   icon: Icons.check_rounded,
-                                  dimension: 30.r,
-                                  iconSize: 15.r,
+                                  // dimension: 30.r,
+                                  // iconSize: 15.r,
+                                  size: AppButtonSize.small,
                                   foregroundColor: colors.primary,
                                   backgroundColor: colors.primary.withValues(
                                     alpha: 0.12,
@@ -456,7 +459,9 @@ class VoucherRequestLedgerTile extends StatelessWidget {
       triggerIcon: Icons.more_vert_rounded,
       triggerIconSize: 18.r,
       triggerDimension: 32.r,
-      triggerBackgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+      triggerBackgroundColor: colors.surfaceContainerHighest.withValues(
+        alpha: 0.5,
+      ),
       onSelected: (value) {
         switch (value) {
           case 'edit':

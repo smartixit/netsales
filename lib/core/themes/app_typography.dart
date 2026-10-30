@@ -285,7 +285,7 @@ class AppTypography {
   static TextStyle get caption => TextStyle(
     fontFamily: fontFamily,
     fontSize: 12.sp,
-    fontWeight: regular,
+    fontWeight: medium,
     letterSpacing: 0.2.sp,
     height: 1.35.h,
   );

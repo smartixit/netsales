@@ -59,14 +59,7 @@ class SubscriptionDetailsSheet extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(20.r),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                colors.primary,
-                colors.primary.withValues(alpha: 0.8),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: colors.primary,
             borderRadius: BorderRadius.circular(AppRadius.card),
             boxShadow: AppElevation.level3(context),
           ),

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/more/presentation/widgets/more_menu_tile.dart';
@@ -42,14 +43,7 @@ class MoreMenuGroup extends StatelessWidget {
         AppSpacing.vXs,
         Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-              colors: [
-                colors.surface.withValues(alpha: 0.45),
-                colors.surfaceContainerLowest,
-              ],
-            ),
+            gradient: AppGradients.surfaceMesh(context),
             borderRadius: AppRadius.lgRadius,
             boxShadow: AppElevation.level1(context),
             border: Border.all(

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/features/home/domain/entities/dashboard_quick_action_entity.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_distribution_performance.dart';
 import 'package:netsales/features/home/presentation/widgets/dashboard/dashboard_header_section.dart';
@@ -25,6 +28,50 @@ class DashboardView extends GetView<DashboardController> {
 
   @override
   Widget build(BuildContext context) {
+    final List<DashboardQuickActionEntity> actions = [
+      DashboardQuickActionEntity(
+        icon: Icons.receipt_long_outlined,
+        label: 'فاتورة مبيعات',
+        gradientColors: [
+          AppColors.lightColors.onPrimaryFixed,
+          AppColors.lightColors.primary,
+        ],
+        permission: AppPermissions.salesCreate,
+        onTap: () => CreateSaleInvoiceSheet.show(context),
+      ),
+      DashboardQuickActionEntity(
+        icon: Icons.inventory_2_outlined,
+        label: 'توريد كروت',
+        gradientColors: [
+          AppColors.lightColors.onInfoContainer,
+          AppColors.lightColors.info,
+        ],
+        permission: AppPermissions.voucherPackagesCreate,
+        onTap: () => CreateVoucherRequestSheet.show(context),
+      ),
+      DashboardQuickActionEntity(
+        icon: Icons.storefront_outlined,
+        label: 'نقاط التوزيع',
+        gradientColors: [
+          AppColors.lightColors.onErrorContainer,
+          AppColors.lightColors.error,
+        ],
+        permission: AppPermissions.posView,
+        onTap: controller.navigateToPartners,
+      ),
+
+      DashboardQuickActionEntity(
+        icon: Icons.account_balance_wallet_outlined,
+        label: 'إدارة المحفظة',
+        gradientColors: [
+          AppColors.lightColors.onWarningContainer,
+          AppColors.lightColors.warning,
+        ],
+        permission: AppPermissions.networkWalletsView,
+        onTap: controller.navigateToWallets,
+      ),
+    ];
+
     return Obx(() {
       // 1. حالة التحميل الأولي أو السحب للتحديث عبر الهيكل التشكيلي الموحد (Skeleton Shimmer)
       if ((controller.isLoading.value && controller.overview.value == null) ||
@@ -55,54 +102,45 @@ class DashboardView extends GetView<DashboardController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-                // 1. منصة بطاقات الكيانات الشبكية المستقلة (Multi-Entity Horizon Deck)
-                DashboardMultiEntityDeck(
-                  controller: controller,
-                  onActionTap: controller.navigateToWallets,
-                ),
+            // 1. منصة بطاقات الكيانات الشبكية المستقلة (Multi-Entity Horizon Deck)
+            DashboardMultiEntityDeck(
+              controller: controller,
+              onActionTap: controller.navigateToWallets,
+            ),
 
-                AppSpacing.vLg,
+            AppSpacing.vLg,
 
-                // 2. شريط النطاق الزمني والتحليلات التنفيذية
-                DashboardHeaderSection(controller: controller),
+            // 6. منصة العمليات والإجراءات السريعة
+            DashboardQuickShortcutsBar(actions: actions),
 
-                AppSpacing.vMd,
+            AppSpacing.vLg,
 
-                // 3. المخطط البياني الانسيابي لحجم المبيعات والتوزيع (Sales & Distribution Chart)
-                DashboardSalesTrendChart(controller: controller),
+            // 4. مركز الاعتمادات والعمليات التشغيلية العاجلة
+            DashboardUrgentApprovalsHub(controller: controller),
 
-                AppSpacing.vLg,
+            AppSpacing.vLg,
 
-                // 4. مركز الاعتمادات والعمليات التشغيلية العاجلة
-                DashboardUrgentApprovalsHub(controller: controller),
+            // 2. شريط النطاق الزمني والتحليلات التنفيذية
+            DashboardHeaderSection(controller: controller),
 
-                AppSpacing.vLg,
+            AppSpacing.vMd,
 
-                // 5. مصفوفة أداء وتغطية التوزيع الميداني (Bento Distribution Performance)
-                DashboardDistributionPerformance(controller: controller),
+            // 3. المخطط البياني الانسيابي لحجم المبيعات والتوزيع (Sales & Distribution Chart)
+            DashboardSalesTrendChart(controller: controller),
 
-                AppSpacing.vLg,
+            AppSpacing.vLg,
 
-                // 6. منصة العمليات والإجراءات السريعة
-                DashboardQuickShortcutsBar(
-                  isSuperAdmin: controller.isSuperAdmin,
-                  onManageNetworksTap: controller.navigateToPartners,
-                  onAuditOperationsTap: controller.navigateToOperations,
-                  onNewInvoiceTap: () => CreateSaleInvoiceSheet.show(context),
-                  onNewRequestTap: () =>
-                      CreateVoucherRequestSheet.show(context),
-                  onManagePosTap: controller.navigateToPartners,
-                  onWalletTap: controller.navigateToWallets,
-                ),
+            // 5. مصفوفة أداء وتغطية التوزيع الميداني (Bento Distribution Performance)
+            DashboardDistributionPerformance(controller: controller),
 
-                AppSpacing.vLg,
+            AppSpacing.vLg,
 
-                // 7. سجل العمليات الميدانية والتحصيل المباشر
-                DashboardRecentLedgerFeed(
-                  activities: overview.recentActivities,
-                  isMasked: isMasked,
-                ),
-              ],
+            // 7. سجل العمليات الميدانية والتحصيل المباشر
+            DashboardRecentLedgerFeed(
+              activities: overview.recentActivities,
+              isMasked: isMasked,
+            ),
+          ],
         ),
       );
     });

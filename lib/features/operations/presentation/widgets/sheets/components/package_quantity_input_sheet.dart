@@ -177,7 +177,14 @@ class PackageQuantityInputSheet extends StatelessWidget {
     final sheetSize = package.packageVoucherCount;
     final halfSheet = VoucherSheetCalculator.halfSheetCards(sheetSize);
     final unitPrice = package.packageVoucherPrice;
-    final unitNet = unitPrice - (unitPrice * (discountPercent / 100));
+    // DISPLAY-ONLY (UI-only, non-authoritative): select the backend-provided
+    // effective price that corresponds to the discount percent in effect.
+    final effectiveUnitPrice = discountPercent == package.packageDefaultCashDiscount
+        ? package.effectiveCashPrice
+        : (discountPercent == package.packageDefaultCreditDiscount
+            ? package.effectiveCreditPrice
+            : unitPrice);
+    final unitNet = effectiveUnitPrice > 0 ? effectiveUnitPrice : unitPrice;
     final presets = VoucherSheetCalculator.getPresets(sheetSize);
 
     return GetBuilder<PackageQuantityInputController>(

@@ -120,6 +120,20 @@ class AppGradients {
     );
   }
 
+  /// تدرج بطاقة "المزيد" (3 محطات)
+  static LinearGradient moreHero(BuildContext context) {
+    final scheme = _scheme(context);
+    return LinearGradient(
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
+      colors: [
+        scheme.primary.withValues(alpha: _isDark(context) ? 0.12 : 0.08),
+        scheme.surface.withValues(alpha: _isDark(context) ? 0.65 : 0.50),
+        scheme.surfaceContainerLowest,
+      ],
+      stops: const [0.0, 0.45, 1.0],
+    );
+  }
   /// Primary Gradient
   static LinearGradient primaryGradient(BuildContext context) {
     // final scheme = _scheme(context);

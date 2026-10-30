@@ -12,7 +12,8 @@ class CustomInteractiveBounce extends StatefulWidget {
   });
 
   @override
-  State<CustomInteractiveBounce> createState() => _CustomInteractiveBounceState();
+  State<CustomInteractiveBounce> createState() =>
+      _CustomInteractiveBounceState();
 }
 
 class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
@@ -23,14 +24,10 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: AppMotion.fast,
+    _controller = AnimationController(vsync: this, duration: AppMotion.fast);
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.93).animate(
+      CurvedAnimation(parent: _controller, curve: AppMotion.emphasized),
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.93,
-    ).animate(CurvedAnimation(parent: _controller, curve: AppMotion.emphasized));
   }
 
   @override
@@ -55,10 +52,7 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
       onTapUp: (_) => _controller.reverse(),
       onTapCancel: () => _controller.reverse(),
       onTap: widget.onTap,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: widget.child,
-      ),
+      child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
     );
   }
 }

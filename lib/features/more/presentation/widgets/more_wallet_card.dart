@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -36,16 +37,7 @@ class MoreWalletCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            colors.primary.withValues(alpha: 0.12),
-            colors.surface.withValues(alpha: 0.65),
-            colors.surfaceContainerLowest,
-          ],
-          stops: const [0.0, 0.45, 1.0],
-        ),
+        gradient: AppGradients.moreHero(context),
         borderRadius: AppRadius.lgRadius,
         boxShadow: AppElevation.level2(context),
         border: Border.all(
@@ -60,75 +52,47 @@ class MoreWalletCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 36.r,
-                    height: 36.r,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          colors.primary.withValues(alpha: 0.22),
-                          colors.primary.withValues(alpha: 0.06),
-                        ],
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36.r,
+                      height: 36.r,
+                      decoration: BoxDecoration(
+                        color: colors.primaryContainer.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(
+                          color: colors.primary.withValues(alpha: 0.25),
+                          width: 0.8.w,
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(
-                        color: colors.primary.withValues(alpha: 0.25),
-                        width: 0.8.w,
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.account_balance_wallet_rounded,
+                        color: colors.primary,
+                        size: 19.r,
                       ),
                     ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.account_balance_wallet_rounded,
-                      color: colors.primary,
-                      size: 19.r,
+                    AppSpacing.hSm,
+                    Expanded(
+                      child: Text(
+                        'رصيد المحفظة التشغيلية',
+                        maxLines: 1,
+                        style: AppTypography.titleSmall.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.bold,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
-                  ),
-                  AppSpacing.hSm,
-                  Text(
-                    'رصيد المحفظة التشغيلية',
-                    style: AppTypography.titleSmall.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
               // أدوات الأمان والخصوصية
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // زر إخفاء وإظهار الرصيد لحماية الخصوصية
-                  Obx(
-                    () => CustomInteractiveBounce(
-                      onTap: controller.toggleBalanceVisibility,
-                      child: Container(
-                        padding: EdgeInsets.all(6.r),
-                        decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest
-                              .withValues(alpha: 0.6),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: colors.outlineVariant
-                                .withValues(alpha: 0.25),
-                            width: 0.6.w,
-                          ),
-                        ),
-                        child: Icon(
-                          controller.isBalanceHidden.value
-                              ? Icons.visibility_off_rounded
-                              : Icons.visibility_rounded,
-                          size: 16.r,
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  AppSpacing.hXs,
-
                   // شارة حالة أمان المحفظة
                   Container(
                     padding: EdgeInsets.symmetric(
@@ -156,12 +120,13 @@ class MoreWalletCard extends StatelessWidget {
                           size: 11.r,
                           color: isOverdrawn ? colors.warning : colors.success,
                         ),
-                        SizedBox(width: 4.w),
+                        AppSpacing.hXxs,
                         Text(
                           isOverdrawn ? 'رصيد مكشوف' : 'محفظة مؤمنة',
                           style: AppTypography.labelSmall.copyWith(
-                            color:
-                                isOverdrawn ? colors.warning : colors.success,
+                            color: isOverdrawn
+                                ? colors.warning
+                                : colors.success,
                             fontWeight: FontWeight.w800,
                             fontSize: 9.5.sp,
                           ),
@@ -179,25 +144,56 @@ class MoreWalletCard extends StatelessWidget {
           // 2. الرصيد المالي المنسق بخط Hero مع دعم وضع الخصوصية
           Obx(
             () => Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
               children: [
-                Text(
-                  controller.isBalanceHidden.value
-                      ? '••••••••'
-                      : AmountFormatter.formatValue(balance),
-                  style: AppTypography.currencyHero.copyWith(
-                    color: isOverdrawn ? colors.error : colors.onSurface,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 26.sp,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      controller.isBalanceHidden.value
+                          ? '••••••••'
+                          : AmountFormatter.formatValue(balance),
+                      style: AppTypography.currencyHero.copyWith(
+                        color: isOverdrawn ? colors.error : colors.onSurface,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 26.sp,
+                      ),
+                    ),
+                    AppSpacing.hXs,
+                    Text(
+                      wallet?.currency ?? 'ر.ي',
+                      style: AppTypography.currencySymbol.copyWith(
+                        color: colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 6.w),
-                Text(
-                  wallet?.currency ?? 'ر.ي',
-                  style: AppTypography.currencySymbol.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
+
+                AppSpacing.hSm,
+
+                // زر إخفاء وإظهار الرصيد لحماية الخصوصية
+                Obx(
+                  () => CustomInteractiveBounce(
+                    onTap: controller.toggleBalanceVisibility,
+                    child: Container(
+                      padding: EdgeInsets.all(6.r),
+                      decoration: BoxDecoration(
+                        color: colors.primaryContainer.withValues(alpha: 0.3),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colors.primary.withValues(alpha: 0.25),
+                          width: 0.6.w,
+                        ),
+                      ),
+                      child: Icon(
+                        controller.isBalanceHidden.value
+                            ? Icons.visibility_off_rounded
+                            : Icons.visibility_rounded,
+                        size: 16.r,
+                        color: colors.primary,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -225,7 +221,7 @@ class MoreWalletCard extends StatelessWidget {
                     size: 13.r,
                     color: colors.warning,
                   ),
-                  SizedBox(width: 6.w),
+                  AppSpacing.hXs,
                   Text(
                     'المديونية المستحقة: ${AmountFormatter.formatValue(wallet!.debitAmount)} ${wallet!.currency}',
                     style: AppTypography.bodySmall.copyWith(

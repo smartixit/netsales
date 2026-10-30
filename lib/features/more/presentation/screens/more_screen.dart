@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -36,7 +38,11 @@ class MoreScreen extends GetView<MoreController> {
       onRefresh: () => controller.loadOverview(isRefresh: true),
       child: Obx(() {
         if (controller.isLoading.value && controller.overview.value == null) {
-          return const CustomSkeletonFeed(itemCount: 4, cardHeight: 110);
+          return CustomSkeletonFeed(
+            shrinkWrap: true,
+            itemCount: 8,
+            cardHeight: 110,
+          );
         }
 
         return Column(
@@ -47,10 +53,7 @@ class MoreScreen extends GetView<MoreController> {
             AppSpacing.vMd,
 
             // 2. بطاقة المحفظة المالية التشغيلية المتقدمة
-            MoreWalletCard(
-              wallet: controller.wallet,
-              controller: controller,
-            ),
+            MoreWalletCard(wallet: controller.wallet, controller: controller),
 
             AppSpacing.vMd,
 
@@ -67,36 +70,41 @@ class MoreScreen extends GetView<MoreController> {
             MoreMenuGroup(
               title: 'الإدارة والعمليات المالية',
               items: [
-                MoreMenuTile(
-                  icon: Icons.account_balance_rounded,
-                  iconColor: colors.primary,
-                  iconBgColor: colors.primaryContainer.withValues(
-                    alpha: 0.35,
+                if (PermissionService.to.can(AppPermissions.bankAccountsView))
+                  MoreMenuTile(
+                    icon: Icons.account_balance_rounded,
+                    iconColor: colors.primary,
+                    iconBgColor: colors.primaryContainer.withValues(
+                      alpha: 0.35,
+                    ),
+                    title: 'الحسابات المصرفية',
+                    subtitle: 'إدارة وتغذية الحسابات البنكية المعتمدة',
+                    onTap: () => BankAccountsSheet.show(context),
                   ),
-                  title: 'الحسابات المصرفية',
-                  subtitle: 'إدارة وتغذية الحسابات البنكية المعتمدة',
-                  onTap: () => BankAccountsSheet.show(context),
-                ),
-                MoreMenuTile(
-                  icon: Icons.payments_rounded,
-                  iconColor: colors.secondary,
-                  iconBgColor: colors.secondaryContainer.withValues(
-                    alpha: 0.35,
+                if (PermissionService.to.can(AppPermissions.expensesView))
+                  MoreMenuTile(
+                    icon: Icons.payments_rounded,
+                    iconColor: colors.secondary,
+                    iconBgColor: colors.secondaryContainer.withValues(
+                      alpha: 0.35,
+                    ),
+                    title: 'المصروفات التشغيلية',
+                    subtitle: 'تسجيل وتتبع نفقات وإيصالات المنشأة',
+                    onTap: () => OperationalExpensesSheet.show(context),
                   ),
-                  title: 'المصروفات التشغيلية',
-                  subtitle: 'تسجيل وتتبع نفقات وإيصالات المنشأة',
-                  onTap: () => OperationalExpensesSheet.show(context),
-                ),
-                MoreMenuTile(
-                  icon: Icons.confirmation_number_rounded,
-                  iconColor: colors.tertiary,
-                  iconBgColor: colors.tertiaryContainer.withValues(
-                    alpha: 0.35,
+                if (PermissionService.to.can(
+                  AppPermissions.voucherPackagesView,
+                ))
+                  MoreMenuTile(
+                    icon: Icons.confirmation_number_rounded,
+                    iconColor: colors.tertiary,
+                    iconBgColor: colors.tertiaryContainer.withValues(
+                      alpha: 0.35,
+                    ),
+                    title: 'باقات الكروت والخصومات',
+                    subtitle: 'إعداد فئات الباقات وخصومات نقاط التوزيع',
+                    onTap: () => Get.toNamed(AppRoutes.voucherPackages),
                   ),
-                  title: 'باقات الكروت والخصومات',
-                  subtitle: 'إعداد فئات الباقات وخصومات نقاط التوزيع',
-                  onTap: () => Get.toNamed(AppRoutes.voucherPackages),
-                ),
               ],
             ),
 
@@ -106,26 +114,17 @@ class MoreScreen extends GetView<MoreController> {
             MoreMenuGroup(
               title: 'الخدمات والدعم والاشتراكات',
               items: [
-                MoreMenuTile(
-                  icon: Icons.workspace_premium_rounded,
-                  iconColor: colors.success,
-                  iconBgColor: colors.successContainer.withValues(
-                    alpha: 0.35,
+                if (PermissionService.to.can(AppPermissions.subscriptionsView))
+                  MoreMenuTile(
+                    icon: Icons.workspace_premium_rounded,
+                    iconColor: colors.success,
+                    iconBgColor: colors.successContainer.withValues(
+                      alpha: 0.35,
+                    ),
+                    title: 'اشتراك وخطة النظام',
+                    subtitle: 'تفاصيل الخطة السحابية وتجديد الترخيص',
+                    onTap: () => SubscriptionDetailsSheet.show(context),
                   ),
-                  title: 'اشتراك وخطة النظام',
-                  subtitle: 'تفاصيل الخطة السحابية وتجديد الترخيص',
-                  onTap: () => SubscriptionDetailsSheet.show(context),
-                ),
-                MoreMenuTile(
-                  icon: Icons.support_agent_rounded,
-                  iconColor: colors.warning,
-                  iconBgColor: colors.warningContainer.withValues(
-                    alpha: 0.35,
-                  ),
-                  title: 'مركز الدعم والمساعدة',
-                  subtitle: 'فتح تذاكر فنية ومتابعة الردود المباشرة',
-                  onTap: () {},
-                ),
               ],
             ),
 
@@ -138,9 +137,7 @@ class MoreScreen extends GetView<MoreController> {
                 MoreMenuTile(
                   icon: Icons.devices_rounded,
                   iconColor: colors.primary,
-                  iconBgColor: colors.primaryContainer.withValues(
-                    alpha: 0.35,
-                  ),
+                  iconBgColor: colors.primaryContainer.withValues(alpha: 0.35),
                   title: 'الأجهزة والجلسات المصرح بها',
                   subtitle: 'إدارة الأجهزة الموثوقة ومتابعة النشاط',
                   trailing: Container(
@@ -161,16 +158,6 @@ class MoreScreen extends GetView<MoreController> {
                     ),
                   ),
                   onTap: () => AuthorizedSessionsSheet.show(context),
-                ),
-                MoreMenuTile(
-                  icon: Icons.notifications_active_outlined,
-                  iconColor: colors.secondary,
-                  iconBgColor: colors.secondaryContainer.withValues(
-                    alpha: 0.35,
-                  ),
-                  title: 'إعدادات الإشعارات والتنبيهات',
-                  subtitle: 'تخصيص الرسائل النصية القصيرة وتنبيهات الرصيد',
-                  onTap: () {},
                 ),
               ],
             ),

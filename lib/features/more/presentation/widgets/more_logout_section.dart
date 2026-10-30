@@ -52,7 +52,7 @@ class MoreLogoutSection extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
               ),
-              SizedBox(width: 6.w),
+              AppSpacing.hXs,
               Text(
                 'منظومة NetSales المؤسسية • v1.0.0',
                 style: AppTypography.labelSmall.copyWith(

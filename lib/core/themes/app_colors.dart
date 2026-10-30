@@ -293,8 +293,8 @@ class AppColors {
   // لوحة ألوان الوضع الداكن (Dark Palette)
   // ===========================================================================
   static const darkColors = AppColors(
-    primary: Color(0xFF8CD6C2),
-    onPrimary: Color(0xFF00382A),
+    primary: Color(0xFF0D7A5F),
+    onPrimary: Color(0xFFFFFFFF),
     primaryContainer: Color(0xFF005C45),
     onPrimaryContainer: Color(0xFFB8F0E0),
     primaryFixed: Color(0xFFB8F0E0),
@@ -302,7 +302,7 @@ class AppColors {
     onPrimaryFixed: Color(0xFF00382A),
     onPrimaryFixedVariant: Color(0xFFB8F0E0),
 
-    secondary: Color(0xFF9EE8D8),
+    secondary: Color(0xFF1ABC9C),
     onSecondary: Color(0xFF004D3D),
     secondaryContainer: Color(0xFF007A60),
     onSecondaryContainer: Color(0xFFC8F5EC),

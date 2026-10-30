@@ -73,7 +73,7 @@ class DashboardUrgentApprovalsHub extends StatelessWidget {
               color: colors.warning.withValues(alpha: 0.35),
               width: 1.w,
             ),
-            boxShadow: AppElevation.tinted(context, colors.warning),
+            boxShadow: AppElevation.glow(context, colors.warning),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -8,7 +8,7 @@ import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
-import 'package:netsales/features/home/presentation/models/home_quick_action.dart';
+import 'package:netsales/features/home/domain/entities/home_quick_action_entity.dart';
 import 'package:netsales/features/home/presentation/widgets/home_quick_actions_sheet.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
@@ -47,39 +47,39 @@ class HomeLayoutController extends GetxController {
 
   /// عناصر شريط التنقل السفلي الموحد
   List<CustomFloatingNavItem> get navItems => const [
-        CustomFloatingNavItem(
-          icon: Icons.grid_view_outlined,
-          activeIcon: Icons.grid_view_rounded,
-          label: 'الرئيسية',
-          tooltip: 'لوحة المؤشرات وإحصائيات التوزيع',
-        ),
-        CustomFloatingNavItem(
-          icon: Icons.receipt_long_outlined,
-          activeIcon: Icons.receipt_long_rounded,
-          label: 'العمليات',
-          tooltip: 'فواتير مبيعات وطلبات توريد الكروت',
-        ),
-        CustomFloatingNavItem(
-          icon: Icons.hub_outlined,
-          activeIcon: Icons.hub_rounded,
-          label: 'الشركاء',
-          tooltip: 'إدارة الشبكات ونقاط البيع وباقات التوزيع',
-        ),
-        CustomFloatingNavItem(
-          icon: Icons.widgets_outlined,
-          activeIcon: Icons.widgets_rounded,
-          label: 'المزيد',
-          tooltip: 'المحافظ والمصروفات والدعم الفني والإعدادات',
-        ),
-      ];
+    CustomFloatingNavItem(
+      icon: Icons.grid_view_outlined,
+      activeIcon: Icons.grid_view_rounded,
+      label: 'الرئيسية',
+      tooltip: 'لوحة المؤشرات وإحصائيات التوزيع',
+    ),
+    CustomFloatingNavItem(
+      icon: Icons.receipt_long_outlined,
+      activeIcon: Icons.receipt_long_rounded,
+      label: 'العمليات',
+      tooltip: 'فواتير مبيعات وطلبات توريد الكروت',
+    ),
+    CustomFloatingNavItem(
+      icon: Icons.hub_outlined,
+      activeIcon: Icons.hub_rounded,
+      label: 'الشركاء',
+      tooltip: 'إدارة الشبكات ونقاط البيع وباقات التوزيع',
+    ),
+    CustomFloatingNavItem(
+      icon: Icons.widgets_outlined,
+      activeIcon: Icons.widgets_rounded,
+      label: 'المزيد',
+      tooltip: 'المحافظ والمصروفات والدعم الفني والإعدادات',
+    ),
+  ];
 
   /// قائمة الإجراءات السريعة المتاحة للمستخدم بناءً على صلاحياته الحالية
-  List<HomeQuickAction> get availableQuickActions {
+  List<HomeQuickActionEntity> get availableQuickActions {
     final permissionService = PermissionService.to;
 
-    final catalog = <HomeQuickAction>[
+    final catalog = <HomeQuickActionEntity>[
       // 1. إصدار فاتورة مبيعات لنقطة بيع (sales.create)
-      HomeQuickAction(
+      HomeQuickActionEntity(
         id: 'create_sale_invoice',
         title: 'إصدار فاتورة مبيعات',
         description: 'توزيع وتوريد باقات كروت لنقطة بيع',
@@ -89,7 +89,7 @@ class HomeLayoutController extends GetxController {
       ),
 
       // 2. طلب توريد باقات كروت من الشبكة (requests.create)
-      HomeQuickAction(
+      HomeQuickActionEntity(
         id: 'create_voucher_request',
         title: 'طلب توريد كروت',
         description: 'إرسال طلب باقات كروت جديدة لمزود الشبكة',
@@ -99,7 +99,7 @@ class HomeLayoutController extends GetxController {
       ),
 
       // 3. مراجعة واعتماد طلبات نقاط البيع (requests.approve)
-      HomeQuickAction(
+      HomeQuickActionEntity(
         id: 'approve_voucher_requests',
         title: 'اعتماد طلبات الكروت',
         description: 'مراجعة وتوريد طلبات الكروت لنقاط البيع',
@@ -109,7 +109,7 @@ class HomeLayoutController extends GetxController {
       ),
 
       // 4. تعريف باقة كروت للشبكة (voucher_packages.create)
-      HomeQuickAction(
+      HomeQuickActionEntity(
         id: 'create_voucher_package',
         title: 'إضافة باقة كروت',
         description: 'تعريف باقة كروت جديدة وأسعار توزيعها',
@@ -119,7 +119,7 @@ class HomeLayoutController extends GetxController {
       ),
 
       // 5. تغذية ومقاصة محفظة نقطة بيع (pos_wallets.manage)
-      HomeQuickAction(
+      HomeQuickActionEntity(
         id: 'manage_pos_wallet',
         title: 'شحن رصيد محفظة',
         description: 'تغذية رصيد أو تسوية حساب نقطة بيع',
@@ -129,7 +129,7 @@ class HomeLayoutController extends GetxController {
       ),
 
       // 6. تسجيل سند مصروف تشغيلي (expenses.create)
-      HomeQuickAction(
+      HomeQuickActionEntity(
         id: 'create_expense',
         title: 'تسجيل سند مصروف',
         description: 'إضافة بند مصروفات تشغيلية أو صيانة للشبكة',
@@ -151,7 +151,7 @@ class HomeLayoutController extends GetxController {
   bool get isSingleAction => availableQuickActions.length == 1;
 
   /// الإجراء الرئيسي الوحيد إن وجد
-  HomeQuickAction? get primaryQuickAction =>
+  HomeQuickActionEntity? get primaryQuickAction =>
       hasQuickActions ? availableQuickActions.first : null;
 
   /// اسم المستخدم الحالي الكامل
@@ -159,8 +159,7 @@ class HomeLayoutController extends GetxController {
       SessionService.to.currentUser?.userFullName ?? 'المستخدم';
 
   /// اسم المستخدم المختصر (الاسم الأول والثاني)
-  String get userShortName =>
-      userFullName.twoNames;
+  String get userShortName => userFullName.twoNames;
 
   /// رقم هاتف المستخدم الحالي
   String get userPhoneNumber =>
@@ -173,8 +172,7 @@ class HomeLayoutController extends GetxController {
       'عضو معتمد';
 
   /// مسار صورة الملف الشخصي أو الشعار
-  String? get userProfileLogo =>
-      SessionService.to.currentUser?.userProfileLogo;
+  String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;
 
   @override
   void onInit() {
@@ -191,10 +189,10 @@ class HomeLayoutController extends GetxController {
   /// متابعة حالة الاتصال بالإنترنت لحظياً
   void _initNetworkMonitoring() {
     isOnline.value = InternetConnectionService.instance.isConnected;
-    _networkSubscription =
-        InternetConnectionService.instance.statusStream.listen((connected) {
-      isOnline.value = connected;
-    });
+    _networkSubscription = InternetConnectionService.instance.statusStream
+        .listen((connected) {
+          isOnline.value = connected;
+        });
   }
 
   /// تغيير التبويب النشط
@@ -222,7 +220,7 @@ class HomeLayoutController extends GetxController {
   }
 
   /// تنفيذ الإجراء السريع المحدد
-  void executeQuickAction(HomeQuickAction action) {
+  void executeQuickAction(HomeQuickActionEntity action) {
     if (action.onExecute != null) {
       action.onExecute!();
       return;

@@ -517,9 +517,7 @@ class AppThemes {
         color: colors.inverseSurface,
         borderRadius: AppRadius.lgRadius,
       ),
-      textStyle: AppTypography.labelSmall.copyWith(
-        color: colors.onInverseSurface,
-      ),
+      textStyle: AppTypography.caption.copyWith(color: colors.onInverseSurface),
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       waitDuration: const Duration(milliseconds: 500),
       showDuration: const Duration(seconds: 2),

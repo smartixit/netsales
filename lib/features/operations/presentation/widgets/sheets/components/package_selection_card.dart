@@ -60,7 +60,15 @@ class PackageSelectionCard extends StatelessWidget {
     final colors = context.colors;
     final isSelected = quantity > 0;
     final unitPrice = package.packageVoucherPrice;
-    final unitNet = unitPrice - (unitPrice * (discountPercent / 100));
+    // DISPLAY-ONLY (UI-only, non-authoritative): select the backend-provided
+    // effective price that corresponds to the discount percent in effect,
+    // instead of recomputing money on the client.
+    final effectiveUnitPrice = discountPercent == package.packageDefaultCashDiscount
+        ? package.effectiveCashPrice
+        : (discountPercent == package.packageDefaultCreditDiscount
+            ? package.effectiveCreditPrice
+            : unitPrice);
+    final unitNet = effectiveUnitPrice > 0 ? effectiveUnitPrice : unitPrice;
     final sheetSize = package.packageVoucherCount;
     final halfSheet = VoucherSheetCalculator.halfSheetCards(sheetSize);
     final presets = VoucherSheetCalculator.getPresets(sheetSize);

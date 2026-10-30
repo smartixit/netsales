@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/more/domain/entities/bank_account_entity.dart';
 import 'package:netsales/features/more/presentation/controllers/more_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -51,7 +53,11 @@ class BankAccountsSheet extends StatelessWidget {
       if (isLoading && accounts.isEmpty) {
         return Padding(
           padding: EdgeInsets.symmetric(vertical: 24.h),
-          child: const CustomSkeletonFeed(itemCount: 3, cardHeight: 140),
+          child: const CustomSkeletonFeed(
+            shrinkWrap: true,
+            itemCount: 3,
+            cardHeight: 140,
+          ),
         );
       }
 
@@ -60,13 +66,17 @@ class BankAccountsSheet extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 16.w),
           child: Column(
             children: [
-              Icon(Icons.error_outline_rounded,
-                  size: 48.r, color: colors.error),
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48.r,
+                color: colors.error,
+              ),
               AppSpacing.vMd,
               Text(
                 errorMessage,
-                style: AppTypography.bodyMedium
-                    .copyWith(color: colors.onSurfaceVariant),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
                 textAlign: TextAlign.center,
               ),
               AppSpacing.vLg,
@@ -86,8 +96,9 @@ class BankAccountsSheet extends StatelessWidget {
           child: Center(
             child: Text(
               'لا توجد حسابات مصرفية معتمدة مسجلة حالياً.',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: colors.onSurfaceVariant),
+              style: AppTypography.bodyMedium.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
             ),
           ),
         );
@@ -117,10 +128,7 @@ class _BankAccountCard extends StatelessWidget {
   final BankAccountEntity account;
   final VoidCallback onToggleStatus;
 
-  const _BankAccountCard({
-    required this.account,
-    required this.onToggleStatus,
-  });
+  const _BankAccountCard({required this.account, required this.onToggleStatus});
 
   void _copyToClipboard(BuildContext context, String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
@@ -193,49 +201,52 @@ class _BankAccountCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // شارة الحالة مع زر التبديل
-              CustomInteractiveBounce(
-                onTap: onToggleStatus,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 4.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: (isActive ? colors.success : colors.outlineVariant)
-                        .withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(AppRadius.full),
-                    border: Border.all(
-                      color: isActive ? colors.success : colors.outlineVariant,
-                      width: 1,
+              // شارة الحالة مع زر التبديل (محمي بصلاحية bank_accounts.manage)
+              if (PermissionService.to.can(AppPermissions.bankAccountsManage))
+                CustomInteractiveBounce(
+                  onTap: onToggleStatus,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
                     ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isActive
-                            ? Icons.check_circle_rounded
-                            : Icons.pause_circle_rounded,
-                        size: 14.r,
+                    decoration: BoxDecoration(
+                      color: (isActive ? colors.success : colors.outlineVariant)
+                          .withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                      border: Border.all(
                         color: isActive
                             ? colors.success
-                            : colors.onSurfaceVariant,
+                            : colors.outlineVariant,
+                        width: 1,
                       ),
-                      AppSpacing.hXs,
-                      Text(
-                        isActive ? 'نشط' : 'معطل',
-                        style: AppTypography.labelSmall.copyWith(
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isActive
+                              ? Icons.check_circle_rounded
+                              : Icons.pause_circle_rounded,
+                          size: 14.r,
                           color: isActive
                               ? colors.success
                               : colors.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
-                    ],
+                        AppSpacing.hXs,
+                        Text(
+                          isActive ? 'نشط' : 'معطل',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: isActive
+                                ? colors.success
+                                : colors.onSurfaceVariant,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
 

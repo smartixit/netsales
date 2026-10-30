@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_theme_toggle_button.dart';
@@ -16,10 +17,7 @@ import 'package:netsales/widgets/buttons/custom_theme_toggle_button.dart';
 class MoreProfileHeroCard extends StatelessWidget {
   final UserModel? user;
 
-  const MoreProfileHeroCard({
-    super.key,
-    required this.user,
-  });
+  const MoreProfileHeroCard({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +32,8 @@ class MoreProfileHeroCard extends StatelessWidget {
     final roleIcon = user?.isNetworkOwner == true
         ? Icons.wifi_tethering_rounded
         : (user?.isPosAgent == true
-            ? Icons.storefront_rounded
-            : Icons.business_center_rounded);
+              ? Icons.storefront_rounded
+              : Icons.business_center_rounded);
 
     final initial = fullName.trim().isNotEmpty
         ? fullName.trim().characters.first
@@ -44,16 +42,7 @@ class MoreProfileHeroCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            colors.primary.withValues(alpha: 0.08),
-            colors.surface.withValues(alpha: 0.50),
-            colors.surfaceContainerLowest,
-          ],
-          stops: const [0.0, 0.45, 1.0],
-        ),
+        gradient: AppGradients.moreHero(context),
         borderRadius: AppRadius.lgRadius,
         boxShadow: AppElevation.level1(context),
         border: Border.all(
@@ -68,14 +57,7 @@ class MoreProfileHeroCard extends StatelessWidget {
             width: 52.r,
             height: 52.r,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  colors.primary.withValues(alpha: 0.25),
-                  colors.primary.withValues(alpha: 0.08),
-                ],
-              ),
+              color: colors.primaryContainer.withValues(alpha: 0.4),
               shape: BoxShape.circle,
               border: Border.all(
                 color: colors.primary.withValues(alpha: 0.35),
@@ -128,7 +110,7 @@ class MoreProfileHeroCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(roleIcon, size: 11.r, color: colors.primary),
-                          SizedBox(width: 4.w),
+                          AppSpacing.hXxs,
                           Text(
                             roleName,
                             style: AppTypography.labelSmall.copyWith(
@@ -151,7 +133,7 @@ class MoreProfileHeroCard extends StatelessWidget {
                         size: 12.r,
                         color: colors.onSurfaceVariant,
                       ),
-                      SizedBox(width: 4.w),
+                      AppSpacing.hXxs,
                       Text(
                         phone,
                         style: AppTypography.bodySmall.copyWith(

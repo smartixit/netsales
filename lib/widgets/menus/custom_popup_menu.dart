@@ -49,19 +49,14 @@ class CustomPopupDivider<T> extends CustomPopupEntry<T> {
   final double? indent;
   final double? endIndent;
 
-  const CustomPopupDivider({
-    this.indent,
-    this.endIndent,
-  });
+  const CustomPopupDivider({this.indent, this.endIndent});
 }
 
 /// عنوان نصي لتجميع الخيارات ضمن تصنيف معين
 class CustomPopupSectionHeader<T> extends CustomPopupEntry<T> {
   final String title;
 
-  const CustomPopupSectionHeader({
-    required this.title,
-  });
+  const CustomPopupSectionHeader({required this.title});
 }
 
 /// ============================================================================
@@ -197,50 +192,35 @@ class CustomPopupMenu<T> extends StatelessWidget {
       height: dimension,
       decoration: BoxDecoration(
         color: bgColor,
-        shape: BoxShape.circle,
+        // shape: BoxShape.circle,
+        borderRadius: AppRadius.mdRadius,
         border: Border.all(
           color: colors.outline.withValues(alpha: 0.12),
           width: 1.w,
         ),
-        boxShadow: AppElevation.level1(context),
+        // boxShadow: AppElevation.level1(context),
       ),
       alignment: Alignment.center,
-      child: Icon(
-        triggerIcon,
-        size: iconSize,
-        color: iconColor,
-      ),
+      child: Icon(triggerIcon, size: iconSize, color: iconColor),
     );
   }
 
   /// تحويل العناصر المجردة إلى مدخلات PopupMenuEntry قياسية
   List<PopupMenuEntry<T>> _buildMenuItems(
-      BuildContext context, AppColors colors) {
+    BuildContext context,
+    AppColors colors,
+  ) {
     final entries = <PopupMenuEntry<T>>[];
 
     for (int i = 0; i < items.length; i++) {
       final item = items[i];
 
       if (item is CustomPopupDivider<T>) {
-        entries.add(
-          PopupMenuDivider(
-            height: 10.h,
-          ),
-        );
+        entries.add(PopupMenuDivider(height: 10.h));
       } else if (item is CustomPopupSectionHeader<T>) {
-        entries.add(
-          _PopupHeaderEntry<T>(
-            title: item.title,
-            colors: colors,
-          ),
-        );
+        entries.add(_PopupHeaderEntry<T>(title: item.title, colors: colors));
       } else if (item is CustomPopupItem<T>) {
-        entries.add(
-          _PopupItemEntry<T>(
-            item: item,
-            colors: colors,
-          ),
-        );
+        entries.add(_PopupItemEntry<T>(item: item, colors: colors));
       }
     }
 
@@ -252,27 +232,22 @@ class CustomPopupMenu<T> extends StatelessWidget {
 /// ودجت العنصر التفاعلي داخل القائمة (Rich Styled Popup Item Entry)
 /// ============================================================================
 class _PopupItemEntry<T> extends PopupMenuItem<T> {
-  _PopupItemEntry({
-    required CustomPopupItem<T> item,
-    required AppColors colors,
-  }) : super(
-          value: item.value,
-          enabled: item.enabled,
-          height: item.subtitle != null ? 52.h : 42.h,
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-          onTap: item.onTap,
-          child: _PopupItemContent(item: item, colors: colors),
-        );
+  _PopupItemEntry({required CustomPopupItem<T> item, required AppColors colors})
+    : super(
+        value: item.value,
+        enabled: item.enabled,
+        height: item.subtitle != null ? 52.h : 42.h,
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+        onTap: item.onTap,
+        child: _PopupItemContent(item: item, colors: colors),
+      );
 }
 
 class _PopupItemContent<T> extends StatelessWidget {
   final CustomPopupItem<T> item;
   final AppColors colors;
 
-  const _PopupItemContent({
-    required this.item,
-    required this.colors,
-  });
+  const _PopupItemContent({required this.item, required this.colors});
 
   @override
   Widget build(BuildContext context) {
@@ -280,14 +255,14 @@ class _PopupItemContent<T> extends StatelessWidget {
     final effectiveColor = !item.enabled
         ? colors.outline
         : item.isDestructive
-            ? colors.error
-            : (item.iconColor ?? item.textColor ?? colors.onSurface);
+        ? colors.error
+        : (item.iconColor ?? item.textColor ?? colors.onSurface);
 
     final effectiveTextColor = !item.enabled
         ? colors.outline
         : item.isDestructive
-            ? colors.error
-            : (item.textColor ?? colors.onSurface);
+        ? colors.error
+        : (item.textColor ?? colors.onSurface);
 
     return Row(
       children: [
@@ -309,11 +284,7 @@ class _PopupItemContent<T> extends StatelessWidget {
               ),
             ),
             alignment: Alignment.center,
-            child: Icon(
-              item.icon,
-              size: 15.r,
-              color: effectiveColor,
-            ),
+            child: Icon(item.icon, size: 15.r, color: effectiveColor),
           ),
           AppSpacing.hSm,
         ],
@@ -328,8 +299,9 @@ class _PopupItemContent<T> extends StatelessWidget {
                 item.label,
                 style: AppTypography.labelMedium.copyWith(
                   color: effectiveTextColor,
-                  fontWeight:
-                      item.isDestructive ? FontWeight.w700 : FontWeight.w600,
+                  fontWeight: item.isDestructive
+                      ? FontWeight.w700
+                      : FontWeight.w600,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -351,10 +323,7 @@ class _PopupItemContent<T> extends StatelessWidget {
         ),
 
         // العنصر التابع إن وجد
-        if (item.trailing != null) ...[
-          AppSpacing.hXs,
-          item.trailing!,
-        ],
+        if (item.trailing != null) ...[AppSpacing.hXs, item.trailing!],
       ],
     );
   }
@@ -367,10 +336,7 @@ class _PopupHeaderEntry<T> extends PopupMenuEntry<T> {
   final String title;
   final AppColors colors;
 
-  const _PopupHeaderEntry({
-    required this.title,
-    required this.colors,
-  });
+  const _PopupHeaderEntry({required this.title, required this.colors});
 
   @override
   double get height => 26.h;

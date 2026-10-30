@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/more/domain/entities/user_session_entity.dart';
 import 'package:netsales/features/more/presentation/controllers/more_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -126,7 +126,7 @@ class _SessionCard extends StatelessWidget {
     final isCurrent = session.isCurrentSession;
 
     final lastActive = session.lastActivityAt != null
-        ? DateFormat('yyyy/MM/dd - hh:mm a').format(session.lastActivityAt!)
+        ? DateFormatter.apiDateTime(session.lastActivityAt!)
         : 'الآن';
 
     return Container(
