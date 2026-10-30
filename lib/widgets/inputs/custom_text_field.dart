@@ -153,26 +153,26 @@ class _CustomTextFieldState extends State<CustomTextField>
       return error;
     };
 
-    // No focus listener: mutation during teardown is the root cause of
-    // "A TextEditingController was used after being disposed".
+    _effectiveFocusNode.addListener(_handleFocusChange);
   }
 
   @override
   void dispose() {
     _shakeController.dispose();
+    _effectiveFocusNode.removeListener(_handleFocusChange);
     if (_isInternalFocusNode) {
       _effectiveFocusNode.dispose();
     }
     super.dispose();
   }
 
-  void _normalizeText() {
-    // Defensive guard: never touch a controller after the widget is gone.
-    if (!mounted) return;
-    final text = widget.controller.text;
-    final trimmed = text.trim();
-    if (text != trimmed) {
-      widget.controller.text = trimmed;
+  void _handleFocusChange() {
+    if (!_effectiveFocusNode.hasFocus) {
+      final text = widget.controller.text;
+      final trimmed = text.trim();
+      if (text != trimmed) {
+        widget.controller.text = trimmed;
+      }
     }
   }
 
@@ -240,14 +240,13 @@ class _CustomTextFieldState extends State<CustomTextField>
 
         onChanged: widget.onChanged,
 
-        onEditingComplete: () {
-          _normalizeText();
-          widget.onFieldSubmitted?.call(widget.controller.text);
+        onFieldSubmitted: (value) {
+          final trimmed = widget.controller.text.trim();
+          if (widget.controller.text != trimmed) {
+            widget.controller.text = trimmed;
+          }
+          widget.onFieldSubmitted?.call(trimmed);
         },
-
-        onTapOutside: (_) => _normalizeText(),
-
-        onFieldSubmitted: null,
 
         validator: _effectiveValidator,
 
