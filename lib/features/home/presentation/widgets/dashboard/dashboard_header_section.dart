@@ -123,6 +123,7 @@ class DashboardHeaderSection extends StatelessWidget {
               ),
             ),
             child: SingleChildScrollView(
+              clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               child: Row(
@@ -136,7 +137,7 @@ class DashboardHeaderSection extends StatelessWidget {
                         controller.changePeriod(p['key']!);
                       },
                       child: AnimatedContainer(
-                        duration: AppMotion.fast,
+                        duration: AppMotion.normal,
                         curve: AppMotion.standard,
                         padding: EdgeInsets.symmetric(
                           horizontal: AppSpacing.md,
@@ -148,7 +149,7 @@ class DashboardHeaderSection extends StatelessWidget {
                               : Colors.transparent,
                           borderRadius: AppRadius.fullRadius,
                           boxShadow: isSelected
-                              ? AppElevation.tinted(context, colors.primary)
+                              ? AppElevation.glow(context, colors.primary)
                               : null,
                         ),
                         child: Text(

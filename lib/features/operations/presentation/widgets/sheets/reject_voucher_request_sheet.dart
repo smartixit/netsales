@@ -81,8 +81,8 @@ class RejectVoucherRequestSheet extends StatelessWidget {
                   text: 'تأكيد الرفض',
                   icon: Icons.cancel_rounded,
                   onPressed: () {
-                    Get.back();
                     controller.rejectRequest(requestId);
+                    // Get.back();
                   },
                 ),
               ),
