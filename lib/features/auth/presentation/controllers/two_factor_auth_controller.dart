@@ -101,6 +101,9 @@ class TwoFactorAuthController extends GetxController {
           deviceUuid: deviceUuid,
         ),
       );
+      // قد تُغلق الشاشة أثناء الإرسال، فلا يجوز بدء مؤقت دورة إعادة الإرسال بعد
+      // أن ألغاه onClose، وإلا بقي مؤقتاً دورياً لا يُلغى أبداً.
+      if (isClosed) return;
       _startCooldownTimer();
 
       CustomSnackbar.show(
@@ -146,9 +149,13 @@ class TwoFactorAuthController extends GetxController {
         ),
       );
 
+      // الحارس يمنع التنقّل وعرض النجاح بعد إغلاق الشاشة أثناء الطلب.
+      if (isClosed) return;
+
       // فحص بوابة تغيير كلمة المرور الإلزامي
       if (result.requirePasswordChange) {
         await CustomAnimationOverlay.hide();
+        if (isClosed) return;
         CustomSnackbar.show(
           title: 'تغيير كلمة المرور إلزامي',
           message:
@@ -163,9 +170,12 @@ class TwoFactorAuthController extends GetxController {
         message: 'تم تأكيد الجهاز والمصادقة بنجاح!',
       );
 
+      if (isClosed) return;
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (error) {
       await CustomAnimationOverlay.hide();
+      // الحارس يمنع الكتابة في متحكم OTP محرَّر بعد إغلاق الشاشة أثناء الطلب.
+      if (isClosed) return;
       otpController.clear();
       final cleanMessage = AppException.sanitizeMessage(error);
       CustomSnackbar.show(

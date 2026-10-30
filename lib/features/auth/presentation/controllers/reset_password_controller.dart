@@ -156,12 +156,16 @@ class ResetPasswordController extends GetxController {
           ),
         );
 
+        // الحارس يمنع عرض النجاح والتنقّل بعد إغلاق الشاشة أثناء الطلب.
+        if (isClosed) return;
+
         await CustomAnimationOverlay.showSuccess(
           message:
               'تم إعادة تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.',
         );
 
         // التوجيه لشاشة تسجيل الدخول مع تمرير رقم الهاتف الجاهز
+        if (isClosed) return;
         Get.offAllNamed(
           AppRoutes.login,
           arguments: {'phone': userPhone},
@@ -175,15 +179,20 @@ class ResetPasswordController extends GetxController {
           ),
         );
 
+        // نفس الحارس في مسار التغيير المسجل أو الإلزامي.
+        if (isClosed) return;
+
         await CustomAnimationOverlay.showSuccess(
           message: 'تم تعيين كلمة المرور الجديدة بنجاح! مرحباً بك في النظام.',
         );
 
         // التوجيه الفوري للوحة التحكم بعد ترقية الجلسة وفك الحظر الإلزامي
+        if (isClosed) return;
         Get.offAllNamed(AppRoutes.dashboard);
       }
     } catch (error) {
       await CustomAnimationOverlay.hide();
+      if (isClosed) return;
       final cleanMessage = AppException.sanitizeMessage(error);
       CustomSnackbar.show(
         title: 'تعذر تعيين كلمة المرور',
@@ -205,6 +214,8 @@ class ResetPasswordController extends GetxController {
     } else if (isForced) {
       // إذا كان التغيير إجبارياً، الخروج يلغي الجلسة المؤقتة ويعيد المستخدم لشاشة الدخول
       await SessionService.to.terminateSession();
+      // قد تُزال الشاشة أثناء إنهاء الجلسة، فلا يجوز التنقّل بعد ذلك.
+      if (isClosed) return;
       Get.offAllNamed(AppRoutes.login);
     } else {
       Get.back();

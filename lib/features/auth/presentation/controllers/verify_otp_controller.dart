@@ -73,6 +73,9 @@ class VerifyOtpController extends GetxController {
     try {
       isResending.value = true;
       await _requestPasswordResetUseCase.execute(phone);
+      // قد تُغلق الشاشة أثناء الإرسال، فلا يجوز بدء مؤقت دورة إعادة الإرسال بعد
+      // أن ألغاه onClose، وإلا بقي مؤقتاً دورياً لا يُلغى أبداً.
+      if (isClosed) return;
       _startCooldownTimer();
 
       CustomSnackbar.show(
@@ -114,15 +117,21 @@ class VerifyOtpController extends GetxController {
         ),
       );
 
+      // الحارس يمنع التنقّل وعرض النجاح بعد إغلاق الشاشة أثناء الطلب.
+      if (isClosed) return;
+
       await CustomAnimationOverlay.showSuccess(
         message:
             'تم التحقق بنجاح! تم إرسال كلمة المرور المؤقتة الجديدة إلى هاتفك عبر رسالة SMS.',
       );
 
       // التوجيه لشاشة تسجيل الدخول مع تمرير رقم الهاتف للدخول بكلمة المرور المؤقتة
+      if (isClosed) return;
       Get.offAllNamed(AppRoutes.login, arguments: {'phone': phone});
     } catch (error) {
       await CustomAnimationOverlay.hide();
+      // الحارس يمنع الكتابة في متحكم OTP محرَّر بعد إغلاق الشاشة أثناء الطلب.
+      if (isClosed) return;
       otpController.clear();
       final cleanMessage = AppException.sanitizeMessage(error);
       CustomSnackbar.show(

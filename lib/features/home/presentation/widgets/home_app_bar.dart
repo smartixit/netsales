@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/theme_service.dart';
@@ -320,6 +321,7 @@ class _GlassActionOrb extends StatelessWidget {
         width: 38.r,
         height: 38.r,
         decoration: BoxDecoration(
+          borderRadius: AppRadius.mdRadius,
           color: effectiveBg,
           shape: BoxShape.circle,
           border: Border.all(color: effectiveBorder, width: 1.w),

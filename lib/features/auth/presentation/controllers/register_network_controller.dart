@@ -73,9 +73,11 @@ class RegisterNetworkController extends GetxController {
     try {
       isLoadingGovernorates.value = true;
       final result = await _getGovernoratesUseCase.execute();
+      if (isClosed) return;
       governorates.assignAll(result);
     } catch (e) {
       final message = AppException.sanitizeMessage(e);
+      if (isClosed) return;
       CustomSnackbar.show(
         type: SnackType.error,
         title: 'تعذر جلب المحافظات',
@@ -97,9 +99,11 @@ class RegisterNetworkController extends GetxController {
     try {
       isLoadingDirectorates.value = true;
       final result = await _getDirectoratesUseCase.execute(gov.governorateId);
+      if (isClosed) return;
       directorates.assignAll(result);
     } catch (e) {
       final message = AppException.sanitizeMessage(e);
+      if (isClosed) return;
       CustomSnackbar.show(
         type: SnackType.error,
         title: 'تعذر جلب المديريات',
@@ -129,6 +133,8 @@ class RegisterNetworkController extends GetxController {
       final device = DeviceService.to;
       final fcmToken = await PushNotificationService.instance
           .getOrFetchFcmToken();
+      // لا تُرسل طلب التسجيل إذا غادر المستخدم الشاشة أثناء جلب رمز الإشعارات.
+      if (isClosed) return;
 
       final params = RegisterNetworkParams(
         networkName: networkNameController.text.trim(),
@@ -156,6 +162,9 @@ class RegisterNetworkController extends GetxController {
 
       final result = await _registerNetworkUseCase.execute(params);
 
+      // الحارس يمنع الحوار والتنقّل بعد إغلاق الشاشة أثناء الطلب.
+      if (isClosed) return;
+
       await CustomAnimationOverlay.hide();
 
       SoundService.instance.playSound(soundPath: 'sounds/netsales_success.wav');
@@ -175,12 +184,16 @@ class RegisterNetworkController extends GetxController {
         onConfirm: () => Get.offAllNamed(AppRoutes.login),
       );
 
+      // قد تُغلق الشاشة أثناء عرض الحوار، فلا يجوز التنقّل بعد ذلك.
+      if (isClosed) return;
 
       if (Get.currentRoute != AppRoutes.login) {
         Get.offAllNamed(AppRoutes.login);
       }
     } catch (e) {
       await CustomAnimationOverlay.hide();
+      // الحارس يمنع إظهار التنبيه بعد إغلاق الشاشة أثناء الطلب.
+      if (isClosed) return;
       final cleanMessage = AppException.sanitizeMessage(e);
       CustomSnackbar.show(
         type: SnackType.error,

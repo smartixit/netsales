@@ -31,14 +31,21 @@ class ForgotPasswordController extends GetxController {
       final phone = phoneController.text.trim();
       await _requestPasswordResetUseCase.execute(phone);
 
+      // الحارس يمنع عرض النجاح والتنقّل بعد إغلاق الشاشة أثناء الطلب.
+      if (isClosed) return;
+
       await CustomAnimationOverlay.showSuccess(
         message: 'تم إرسال رمز التحقق بنجاح!',
       );
+
+      // الحارس يمنع التنقّل إذا أُغلقت الشاشة أثناء عرض النجاح.
+      if (isClosed) return;
 
       // الانتقال لشاشة التحقق من الرمز مع تمرير رقم الهاتف
       Get.toNamed(AppRoutes.verifyOtp, arguments: {'phone': phone});
     } catch (error) {
       await CustomAnimationOverlay.hide();
+      if (isClosed) return;
       final cleanMessage = AppException.sanitizeMessage(error);
       CustomSnackbar.show(
         title: 'تعذر إرسال الرمز',

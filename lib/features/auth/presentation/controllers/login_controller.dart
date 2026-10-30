@@ -112,6 +112,8 @@ class LoginController extends GetxController {
       final device = DeviceService.to;
       final fcmToken = await PushNotificationService.instance
           .getOrFetchFcmToken();
+      // لا تُكمل عملية الدخول إذا غادر المستخدم الشاشة أثناء جلب رمز الإشعارات.
+      if (isClosed) return;
 
       // 2. تنفيذ حالة الاستخدام الدومينية ببيانات عتادية دقيقة ورمز FCM الفوري
       final result = await _loginUseCase.execute(
@@ -124,6 +126,9 @@ class LoginController extends GetxController {
           deviceType: device.deviceType,
         ),
       );
+
+      // الحارس يمنع التنقّل والحفظ وعرض النجاح بعد إغلاق الشاشة أثناء الطلب.
+      if (isClosed) return;
 
       // 3. فحص حالة التحقق الثنائي (2FA)
       if (result.require2fa) {
@@ -174,10 +179,14 @@ class LoginController extends GetxController {
       );
 
       // 6. التوجيه الفوري للوحة التحكم
+      if (isClosed) return;
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (error) {
       // 6. إغلاق الـ Overlay فوراً وعرض رسالة الخطأ عبر CustomSnackbar أو حوار المراجعة المخصص
       await CustomAnimationOverlay.hide();
+
+      // الحارس يمنع التنبيه والحوار بعد إغلاق الشاشة أثناء الطلب.
+      if (isClosed) return;
 
       final cleanMessage = AppException.sanitizeMessage(error);
 

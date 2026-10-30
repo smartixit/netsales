@@ -185,19 +185,19 @@ class CustomPopupMenu<T> extends StatelessWidget {
     final dimension = triggerDimension ?? 36.r;
     final iconSize = triggerIconSize ?? 18.r;
     final iconColor = triggerIconColor ?? colors.onSurfaceVariant;
-    final bgColor = triggerBackgroundColor ?? colors.surfaceContainerLow;
+    // final bgColor = triggerBackgroundColor ?? colors.surfaceContainerLow;
 
     return Container(
       width: dimension,
       height: dimension,
       decoration: BoxDecoration(
-        color: bgColor,
+        // color: bgColor,
         // shape: BoxShape.circle,
         borderRadius: AppRadius.mdRadius,
-        border: Border.all(
-          color: colors.outline.withValues(alpha: 0.12),
-          width: 1.w,
-        ),
+        // border: Border.all(
+        //   color: colors.outline.withValues(alpha: 0.12),
+        //   width: 1.w,
+        // ),
         // boxShadow: AppElevation.level1(context),
       ),
       alignment: Alignment.center,
