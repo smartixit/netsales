@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
@@ -40,24 +42,24 @@ class NetworkItemCard extends StatelessWidget {
     final statusColor = network.isActive
         ? colors.success
         : (network.isPending
-            ? colors.warning
-            : (network.isRejected ? colors.error : colors.onSurfaceVariant));
+              ? colors.warning
+              : (network.isRejected ? colors.error : colors.onSurfaceVariant));
 
     final statusBgColor = network.isActive
         ? colors.successContainer
         : (network.isPending
-            ? colors.warningContainer
-            : (network.isRejected
-                ? colors.errorContainer
-                : colors.surfaceContainerHighest));
+              ? colors.warningContainer
+              : (network.isRejected
+                    ? colors.errorContainer
+                    : colors.surfaceContainerHighest));
 
     final statusIcon = network.isActive
         ? Icons.verified_rounded
         : (network.isPending
-            ? Icons.hourglass_top_rounded
-            : (network.isRejected
-                ? Icons.cancel_outlined
-                : Icons.pause_circle_outline));
+              ? Icons.hourglass_top_rounded
+              : (network.isRejected
+                    ? Icons.cancel_outlined
+                    : Icons.pause_circle_outline));
 
     return CustomInteractiveBounce(
       onTap: () {},
@@ -174,11 +176,7 @@ class NetworkItemCard extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                statusIcon,
-                                size: 12.r,
-                                color: statusColor,
-                              ),
+                              Icon(statusIcon, size: 12.r, color: statusColor),
                               AppSpacing.hXs,
                               Text(
                                 network.statusLabel,
@@ -232,8 +230,7 @@ class NetworkItemCard extends StatelessWidget {
                               );
                               CustomSnackbar.show(
                                 title: 'تم النسخ',
-                                message:
-                                    'تم نسخ رقم هاتف مزود الشبكة بنجاح.',
+                                message: 'تم نسخ رقم هاتف مزود الشبكة بنجاح.',
                                 type: SnackType.info,
                               );
                             },
@@ -297,34 +294,52 @@ class NetworkItemCard extends StatelessWidget {
                     ),
 
                     // 4. أزرار الإجراءات للطلبات قيد المراجعة
-                    if (network.isPending) ...[
+                    if (network.isPending &&
+                        (PermissionService.to.can(
+                              AppPermissions.networksApprove,
+                            ) ||
+                            PermissionService.to.can(
+                              AppPermissions.networksReject,
+                            ))) ...[
                       AppSpacing.vMd,
                       Row(
                         children: [
-                          Expanded(
-                            child: CustomButton.primary(
-                              text: 'اعتماد الشبكة',
-                              icon: Icons.check_circle_outline_rounded,
-                              height: 38.h,
-                              onPressed: () =>
-                                  controller.confirmApproveNetwork(network),
-                            ),
-                          ),
-                          AppSpacing.hSm,
-                          Expanded(
-                            child: CustomButton.danger(
-                              text: 'رفض الطلب',
-                              icon: Icons.cancel_outlined,
-                              height: 38.h,
-                              onPressed: () => RejectPartnerDialog.show(
-                                context,
-                                isNetwork: true,
-                                id: network.networkId,
-                                name: network.networkName,
-                                controller: controller,
+                          if (PermissionService.to.can(
+                            AppPermissions.networksApprove,
+                          ))
+                            Expanded(
+                              child: CustomButton.primary(
+                                text: 'اعتماد الشبكة',
+                                icon: Icons.check_circle_outline_rounded,
+                                height: 38.h,
+                                onPressed: () =>
+                                    controller.confirmApproveNetwork(network),
                               ),
                             ),
-                          ),
+                          if (PermissionService.to.can(
+                                AppPermissions.networksApprove,
+                              ) &&
+                              PermissionService.to.can(
+                                AppPermissions.networksReject,
+                              ))
+                            AppSpacing.hSm,
+                          if (PermissionService.to.can(
+                            AppPermissions.networksReject,
+                          ))
+                            Expanded(
+                              child: CustomButton.danger(
+                                text: 'رفض الطلب',
+                                icon: Icons.cancel_outlined,
+                                height: 38.h,
+                                onPressed: () => RejectPartnerDialog.show(
+                                  context,
+                                  isNetwork: true,
+                                  id: network.networkId,
+                                  name: network.networkName,
+                                  controller: controller,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ],
@@ -360,10 +375,7 @@ class NetworkItemCard extends StatelessWidget {
                 start: 0,
                 top: 0,
                 bottom: 0,
-                child: Container(
-                  width: 4.w,
-                  color: statusColor,
-                ),
+                child: Container(width: 4.w, color: statusColor),
               ),
             ],
           ),

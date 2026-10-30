@@ -51,41 +51,46 @@ class RejectVoucherRequestSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CustomTextField(
-          controller: controller.rejectReasonController,
-          label: 'سبب الرفض',
-          hint: 'مثال: الرصيد غير كافٍ أو خطأ في تحديد كمية الباقات...',
-          prefixIcon: const Icon(Icons.comment_outlined),
-          maxLines: 2,
-          validator: FormValidators.customTextValidator(fieldName: 'سبب الرفض'),
-        ),
-        AppSpacing.vLg,
-        Row(
-          children: [
-            Expanded(
-              child: CustomButton.outline(
-                text: 'تراجع',
-                onPressed: () => Get.back(),
-              ),
+    return Form(
+      key: controller.formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomTextField(
+            controller: controller.rejectReasonController,
+            label: 'سبب الرفض',
+            hint: 'مثال: الرصيد غير كافٍ أو خطأ في تحديد كمية الباقات...',
+            prefixIcon: const Icon(Icons.comment_outlined),
+            maxLines: 2,
+            validator: FormValidators.customTextValidator(
+              fieldName: 'سبب الرفض',
             ),
-            AppSpacing.hSm,
-            Expanded(
-              child: CustomButton.danger(
-                text: 'تأكيد الرفض',
-                icon: Icons.cancel_rounded,
-                onPressed: () {
-                  Get.back();
-                  controller.rejectRequest(requestId);
-                },
+          ),
+          AppSpacing.vLg,
+          Row(
+            children: [
+              Expanded(
+                child: CustomButton.outline(
+                  text: 'تراجع',
+                  onPressed: () => Get.back(),
+                ),
               ),
-            ),
-          ],
-        ),
-        AppSpacing.vSm,
-      ],
+              AppSpacing.hSm,
+              Expanded(
+                child: CustomButton.danger(
+                  text: 'تأكيد الرفض',
+                  icon: Icons.cancel_rounded,
+                  onPressed: () {
+                    Get.back();
+                    controller.rejectRequest(requestId);
+                  },
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.vSm,
+        ],
+      ),
     );
   }
 }

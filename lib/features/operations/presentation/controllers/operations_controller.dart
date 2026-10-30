@@ -56,6 +56,8 @@ class OperationsController extends GetxController {
   /// القطاع النشط: 0 لفواتير المبيعات، 1 لطلبات الكروت
   final RxInt activeSegmentIndex = 0.obs;
 
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   /// حالات فواتير المبيعات
   final RxList<SaleInvoiceEntity> invoices = <SaleInvoiceEntity>[].obs;
   final RxBool isLoadingInvoices = false.obs;
@@ -66,7 +68,8 @@ class OperationsController extends GetxController {
   final RxList<VoucherRequestEntity> requests = <VoucherRequestEntity>[].obs;
   final RxBool isLoadingRequests = false.obs;
   final RxString requestsErrorMessage = ''.obs;
-  final RxString selectedRequestFilter = 'ALL'.obs; // ALL, PENDING, APPROVED, REJECTED
+  final RxString selectedRequestFilter =
+      'ALL'.obs; // ALL, PENDING, APPROVED, REJECTED
 
   /// حالة تنفيذ إجراء الاعتماد أو الرفض
   final RxBool isSubmittingAction = false.obs;
@@ -75,7 +78,9 @@ class OperationsController extends GetxController {
   final RxBool isLoadingInvoiceDetails = false.obs;
   final RxString invoiceDetailsError = ''.obs;
 
-  final Rx<VoucherRequestEntity?> selectedRequest = Rx<VoucherRequestEntity?>(null);
+  final Rx<VoucherRequestEntity?> selectedRequest = Rx<VoucherRequestEntity?>(
+    null,
+  );
   final RxBool isLoadingRequestDetails = false.obs;
   final RxString requestDetailsError = ''.obs;
 
@@ -301,7 +306,9 @@ class OperationsController extends GetxController {
   Future<void> approveRequest(int id, {String? notes}) async {
     isSubmittingAction.value = true;
     try {
-      await CustomAnimationOverlay.showLoading(message: 'جاري اعتماد الطلب وتوليد الفاتورة...');
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري اعتماد الطلب وتوليد الفاتورة...',
+      );
       final updated = await approveVoucherRequestUseCase(id, notes: notes);
 
       final index = requests.indexWhere((r) => r.requestId == id);
@@ -336,16 +343,26 @@ class OperationsController extends GetxController {
 
   /// رفض طلب توريد الكروت
   Future<void> rejectRequest(int id, {String? reason}) async {
+    final form = formKey.currentState;
+    if (form == null || !form.validate()) {
+      return;
+    }
+
     isSubmittingAction.value = true;
     final finalReason = (reason != null && reason.trim().isNotEmpty)
         ? reason.trim()
         : (rejectReasonController.text.trim().isNotEmpty
-            ? rejectReasonController.text.trim()
-            : 'مرفوض من قبل الإدارة');
+              ? rejectReasonController.text.trim()
+              : 'مرفوض من قبل الإدارة');
 
     try {
-      await CustomAnimationOverlay.showLoading(message: 'جاري رفض طلب التوريد...');
-      final updated = await rejectVoucherRequestUseCase(id, reason: finalReason);
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري رفض طلب التوريد...',
+      );
+      final updated = await rejectVoucherRequestUseCase(
+        id,
+        reason: finalReason,
+      );
 
       final index = requests.indexWhere((r) => r.requestId == id);
       if (index != -1) {
@@ -475,7 +492,9 @@ class OperationsController extends GetxController {
   }) async {
     isSubmittingAction.value = true;
     try {
-      await CustomAnimationOverlay.showLoading(message: 'جاري حفظ تعديلات الطلب...');
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري حفظ تعديلات الطلب...',
+      );
       final updated = await updateVoucherRequestUseCase(
         id,
         saleType: saleType,
@@ -520,7 +539,9 @@ class OperationsController extends GetxController {
   }) async {
     isSubmittingAction.value = true;
     try {
-      await CustomAnimationOverlay.showLoading(message: 'جاري إرسال طلب توريد الكروت...');
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري إرسال طلب توريد الكروت...',
+      );
       final newRequest = await createVoucherRequestUseCase(
         networkId: networkId,
         posId: posId,
@@ -562,7 +583,9 @@ class OperationsController extends GetxController {
   }) async {
     isSubmittingAction.value = true;
     try {
-      await CustomAnimationOverlay.showLoading(message: 'جاري إصدار فاتورة المبيعات والتسوية...');
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري إصدار فاتورة المبيعات والتسوية...',
+      );
       final newInvoice = await createSaleInvoiceUseCase(
         networkId: networkId,
         posId: posId,
@@ -610,8 +633,7 @@ class OperationsController extends GetxController {
       requests.fold(0.0, (sum, req) => sum + req.requestTotalAmount);
 
   // DISPLAY-ONLY count of backend-fetched requests (not authoritative; not sent).
-  int get pendingRequestsCount =>
-      requests.where((req) => req.isPending).length;
+  int get pendingRequestsCount => requests.where((req) => req.isPending).length;
 
   int get approvedRequestsCount =>
       requests.where((req) => req.isApproved).length;

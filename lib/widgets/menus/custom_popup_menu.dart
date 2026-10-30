@@ -5,8 +5,8 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ============================================================================
 /// كائن عنصر القائمة المنسدلة الموحدة (CustomPopupItem)
@@ -176,7 +176,7 @@ class CustomPopupMenu<T> extends StatelessWidget {
           onCanceled?.call();
         },
         itemBuilder: (popupContext) => _buildMenuItems(popupContext, colors),
-        child: CustomInteractiveBounce(
+        child: _BouncyTrigger(
           child: trigger ?? _buildDefaultTrigger(context, colors),
         ),
       ),
@@ -333,8 +333,59 @@ class _PopupItemContent<T> extends StatelessWidget {
 }
 
 /// ============================================================================
-/// ودجت ترويسة القسم داخل القائمة (Section Header)
+/// ودجت الارتداد (Bounce) للمُطلِق — يستخدم Listener (pointer events) لتجنب
+/// اعتراض الضغط (tap) من PopupMenuButton، مع الحفاظ على تأثير الارتداد.
 /// ============================================================================
+class _BouncyTrigger extends StatefulWidget {
+  final Widget child;
+
+  const _BouncyTrigger({required this.child});
+
+  @override
+  State<_BouncyTrigger> createState() => _BouncyTriggerState();
+}
+
+class _BouncyTriggerState extends State<_BouncyTrigger>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: AppMotion.fast);
+    _scale = Tween<double>(begin: 1.0, end: 0.93).animate(
+      CurvedAnimation(parent: _controller, curve: AppMotion.emphasized),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (AppMotion.disabled(context)) return widget.child;
+
+    return Listener(
+      onPointerDown: (_) {
+        _controller.duration = const Duration(milliseconds: 80);
+        _controller.forward();
+      },
+      onPointerUp: (_) {
+        _controller.duration = AppMotion.fast;
+        _controller.reverse();
+      },
+      onPointerCancel: (_) {
+        _controller.duration = AppMotion.fast;
+        _controller.reverse();
+      },
+      child: ScaleTransition(scale: _scale, child: widget.child),
+    );
+  }
+}
 class _PopupHeaderEntry<T> extends PopupMenuEntry<T> {
   final String title;
   final AppColors colors;

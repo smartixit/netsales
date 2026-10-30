@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
@@ -287,7 +289,8 @@ class PosItemCard extends StatelessWidget {
                     ),
 
                     // 4. أزرار الإجراءات للطلبات قيد المراجعة
-                    if (pos.isPending) ...[
+                    if (pos.isPending &&
+                        PermissionService.to.can(AppPermissions.posEdit)) ...[
                       AppSpacing.vMd,
                       Row(
                         children: [
