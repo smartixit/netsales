@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
@@ -266,7 +267,7 @@ class OperationsController extends GetxController {
   /// تنفيذ البحث الحي بتهدئة تلقائية تمنع الحمل الزائد وتظهر الـ Shimmer فورياً
   void onSearchChanged(String query) {
     _searchDebounceTimer?.cancel();
-    _searchDebounceTimer = Timer(const Duration(milliseconds: 350), () {
+    _searchDebounceTimer = Timer(AppMotion.slow, () {
       if (activeSegmentIndex.value == 0) {
         loadInvoices();
       } else {

@@ -13,16 +13,27 @@ class CustomEmptyState extends StatelessWidget {
     this.subtitle,
     this.actionLabel,
     this.onAction,
-  });
+  }) : compact = false;
+
+  /// نسخة مضغوطة مخصّصة للحاويات محدودة الارتفاع (المخططات، الشرائط، البطاقات)
+  /// بلا رسوم Lottie ولا تمرير، مع الحفاظ على نفس الهوية النصية.
+  const CustomEmptyState.compact({super.key, required this.title})
+    : subtitle = null,
+      actionLabel = null,
+      onAction = null,
+      compact = true;
 
   final String title;
   final String? subtitle;
   final String? actionLabel;
   final VoidCallback? onAction;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+
+    if (compact) return _CompactEmptyStateBody(title: title);
 
     return SingleChildScrollView(
       child: Padding(
@@ -62,6 +73,40 @@ class CustomEmptyState extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// جسم الحالة الفارغة المضغوطة — أيقونة هادئة ونص توجيهي بلا رسوم متحركة.
+class _CompactEmptyStateBody extends StatelessWidget {
+  const _CompactEmptyStateBody({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.insights_rounded,
+            size: 20.r,
+            color: colors.onSurfaceVariant.withValues(alpha: 0.45),
+          ),
+          AppSpacing.vXs,
+          Text(
+            title,
+            style: AppTypography.labelSmall.copyWith(
+              color: colors.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

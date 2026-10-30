@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
@@ -50,23 +52,26 @@ class RequestDetailsActionDock extends StatelessWidget {
         child: isPending
             ? Row(
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: CustomButton.danger(
-                      text: 'رفض الطلب',
-                      icon: Icons.close_rounded,
-                      onPressed: () => _showRejectSheet(context),
+                  if (PermissionService.to.can(AppPermissions.requestsReject)) ...[
+                    Expanded(
+                      flex: 2,
+                      child: CustomButton.danger(
+                        text: 'رفض الطلب',
+                        icon: Icons.close_rounded,
+                        onPressed: () => _showRejectSheet(context),
+                      ),
                     ),
-                  ),
-                  AppSpacing.hSm,
-                  Expanded(
-                    flex: 3,
-                    child: CustomButton.primary(
-                      text: 'اعتماد وتوليد الفاتورة',
-                      icon: Icons.check_circle_outline_rounded,
-                      onPressed: () => _showApproveConfirmation(context),
+                    AppSpacing.hSm,
+                  ],
+                  if (PermissionService.to.can(AppPermissions.requestsApprove))
+                    Expanded(
+                      flex: 3,
+                      child: CustomButton.primary(
+                        text: 'اعتماد وتوليد الفاتورة',
+                        icon: Icons.check_circle_outline_rounded,
+                        onPressed: () => _showApproveConfirmation(context),
+                      ),
                     ),
-                  ),
                 ],
               )
             : CustomButton.outline(

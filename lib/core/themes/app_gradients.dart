@@ -134,6 +134,79 @@ class AppGradients {
       stops: const [0.0, 0.45, 1.0],
     );
   }
+    /// تدرج Hero ب3 محطات (accent خفيف → surface → surfaceContainerLowest) — للبطاقات Hero في operations
+    static LinearGradient accentHero3(BuildContext context, Color accent) {
+      final scheme = _scheme(context);
+      return LinearGradient(
+        begin: Alignment.topRight,
+        end: Alignment.bottomLeft,
+        colors: [
+          accent.withValues(alpha: 0.06),
+          scheme.surface.withValues(alpha: 0.40),
+          scheme.surfaceContainerLowest,
+        ],
+        stops: const [0.0, 0.40, 1.0],
+      );
+    }
+
+    /// تدرج Badge ب2 محطات (accent 0.18 → accent 0.06) — للشارات داخل Hero
+    static LinearGradient accentBadge(BuildContext context, Color accent) {
+      return LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          accent.withValues(alpha: 0.18),
+          accent.withValues(alpha: 0.06),
+        ],
+      );
+    }
+
+    /// تدرج Soft ب2 محطات (accent 0.18 → accent 0.05) — لبطاقات parties
+    static LinearGradient accentSoft(BuildContext context, Color accent) {
+      return LinearGradient(
+        colors: [
+          accent.withValues(alpha: 0.18),
+          accent.withValues(alpha: 0.05),
+        ],
+      );
+    }
+
+    /// تدرج Ledger Hero ب3 محطات (accent 0.05 → surface 0.35 → surfaceContainerLowest)
+    static LinearGradient ledgerHero3(BuildContext context, Color accent) {
+      final scheme = _scheme(context);
+      return LinearGradient(
+        begin: Alignment.topRight,
+        end: Alignment.bottomLeft,
+        colors: [
+          accent.withValues(alpha: 0.05),
+          scheme.surface.withValues(alpha: 0.35),
+          scheme.surfaceContainerLowest,
+        ],
+        stops: const [0.0, 0.40, 1.0],
+      );
+    }
+
+    /// تدرج Ledger Badge ب2 محطات (accent 0.16 → accent 0.05)
+    static LinearGradient ledgerBadge(BuildContext context, Color accent) {
+      return LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          accent.withValues(alpha: 0.16),
+          accent.withValues(alpha: 0.05),
+        ],
+      );
+    }
+
+    /// تدرج Outline Soft ب2 محطات (accent 0.35 → accent 0.05)
+    static LinearGradient outlineSoft(BuildContext context, Color accent) {
+      return LinearGradient(
+        colors: [
+          accent.withValues(alpha: 0.35),
+          accent.withValues(alpha: 0.05),
+        ],
+      );
+    }
   /// Primary Gradient
   static LinearGradient primaryGradient(BuildContext context) {
     // final scheme = _scheme(context);
@@ -225,6 +298,24 @@ class AppGradients {
         scheme.primary.withValues(alpha: 0.35),
       ],
       stops: const [0.0, 0.45, 0.55, 1.0],
+    );
+  }
+
+  /// تعبئة المساحة أسفل خطوط المخططات البيانية (Area / Spline Area Fill).
+  /// يتلاشى من لون السلسلة إلى الشفافية الكاملة ليبقى المخطط مقروءاً في
+  /// الوضعين الفاتح والداكن دون أي لون صريح.
+  static LinearGradient chartAreaFill(
+    BuildContext context,
+    Color seriesColor, {
+    double peakOpacity = 0.35,
+  }) {
+    return LinearGradient(
+      begin: AlignmentDirectional.topCenter,
+      end: AlignmentDirectional.bottomCenter,
+      colors: [
+        seriesColor.withValues(alpha: peakOpacity),
+        seriesColor.withValues(alpha: 0.0),
+      ],
     );
   }
 

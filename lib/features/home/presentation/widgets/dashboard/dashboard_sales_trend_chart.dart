@@ -5,9 +5,12 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/home/presentation/controllers/dashboard_controller.dart';
+import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 /// نموذج بيانات نقطة في المخطط المالي
@@ -16,6 +19,15 @@ class _SalesTrendDataPoint {
   final double amount;
 
   const _SalesTrendDataPoint(this.label, this.amount);
+}
+
+/// تنسيق تسمية المحور القادمة من الخادم لعرض مختصر مقروء:
+/// `YYYY-MM-DD` ← `dd/MM` و `YYYY-MM` ← `MM/yyyy`، وأي صيغة أخرى تبقى كما هي.
+String _formatTrendLabel(String raw) {
+  final isMonthly = RegExp(r'^\d{4}-\d{2}$').hasMatch(raw);
+  final parsed = DateFormatter.tryParse(isMonthly ? '$raw-01' : raw);
+  if (parsed == null) return raw;
+  return DateFormatter.format(parsed, isMonthly ? 'MM/yyyy' : 'dd/MM');
 }
 
 /// ============================================================================
@@ -55,12 +67,12 @@ class DashboardSalesTrendChart extends StatelessWidget {
 
 
       final isPositiveGrowth = growth >= 0;
-      // Real time-series from backend (no fabricated data).
-      final points = controller.trendPoints.isEmpty
-          ? const <_SalesTrendDataPoint>[]
-          : controller.trendPoints
-              .map((p) => _SalesTrendDataPoint(p.period, p.total))
-              .toList();
+      // سلسلة زمنية حقيقية من الخادم (بدون أي بيانات مُصنّعة).
+      final points = controller.trendPoints
+          .map(
+            (p) => _SalesTrendDataPoint(_formatTrendLabel(p.period), p.total),
+          )
+          .toList(growable: false);
 
       final formattedTotal = isMasked
           ? '••••••'
@@ -198,99 +210,102 @@ class DashboardSalesTrendChart extends StatelessWidget {
             // 3. المخطط البياني الانسيابي (Syncfusion Spline Area Chart)
             SizedBox(
               height: 140.h,
-              child: SfCartesianChart(
-                margin: EdgeInsets.zero,
-                plotAreaBorderWidth: 0,
-                primaryXAxis: CategoryAxis(
-                  majorGridLines: const MajorGridLines(width: 0),
-                  axisLine: const AxisLine(width: 0),
-                  majorTickLines: const MajorTickLines(size: 0),
-                  labelStyle: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant.withValues(alpha: 0.7),
-                    fontSize: 10.sp,
-                  ),
-                ),
-                primaryYAxis: NumericAxis(
-                  isVisible: false,
-                  majorGridLines: const MajorGridLines(width: 0),
-                ),
-                tooltipBehavior: TooltipBehavior(
-                  enable: true,
-                  builder:
-                      (
-                        dynamic data,
-                        dynamic point,
-                        dynamic series,
-                        int pointIndex,
-                        int seriesIndex,
-                      ) {
-                        final item = data as _SalesTrendDataPoint;
-                        return Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                            vertical: AppSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.inverseSurface,
-                            borderRadius: AppRadius.smRadius,
-                            boxShadow: AppElevation.level2(context),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                item.label,
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: colors.onInverseSurface.withValues(
-                                    alpha: 0.75,
-                                  ),
-                                  fontSize: 10.sp,
+              child: points.isEmpty
+                  ? const CustomEmptyState.compact(
+                      title: 'لا توجد مبيعات مسجّلة في هذه الفترة',
+                    )
+                  : SfCartesianChart(
+                      margin: EdgeInsets.zero,
+                      plotAreaBorderWidth: 0,
+                      primaryXAxis: CategoryAxis(
+                        majorGridLines: const MajorGridLines(width: 0),
+                        axisLine: const AxisLine(width: 0),
+                        majorTickLines: const MajorTickLines(size: 0),
+                        labelIntersectAction: AxisLabelIntersectAction.hide,
+                        labelStyle: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+                          fontSize: 10.sp,
+                        ),
+                      ),
+                      primaryYAxis: NumericAxis(
+                        isVisible: false,
+                        majorGridLines: const MajorGridLines(width: 0),
+                      ),
+                      tooltipBehavior: TooltipBehavior(
+                        enable: true,
+                        builder:
+                            (
+                              dynamic data,
+                              dynamic point,
+                              dynamic series,
+                              int pointIndex,
+                              int seriesIndex,
+                            ) {
+                              final item = data as _SalesTrendDataPoint;
+                              return Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.sm,
+                                  vertical: AppSpacing.xs,
                                 ),
-                              ),
-                              AppSpacing.vXxs,
-                              Text(
-                                isMasked
-                                    ? '••••••'
-                                    : '${AmountFormatter.formatValue(item.amount, decimalPlaces: 0)} ر.ي',
-                                style: AppTypography.labelMedium.copyWith(
-                                  color: colors.onInverseSurface,
-                                  fontWeight: FontWeight.w800,
+                                decoration: BoxDecoration(
+                                  color: colors.inverseSurface,
+                                  borderRadius: AppRadius.smRadius,
+                                  boxShadow: AppElevation.level2(context),
                                 ),
-                              ),
-                            ],
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      item.label,
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: colors.onInverseSurface.withValues(
+                                          alpha: 0.75,
+                                        ),
+                                        fontSize: 10.sp,
+                                      ),
+                                    ),
+                                    AppSpacing.vXxs,
+                                    Text(
+                                      isMasked
+                                          ? '••••••'
+                                          : '${AmountFormatter.formatValue(item.amount, decimalPlaces: 0)} ر.ي',
+                                      style: AppTypography.labelMedium.copyWith(
+                                        color: colors.onInverseSurface,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                      ),
+                      series: <CartesianSeries<_SalesTrendDataPoint, String>>[
+                        SplineAreaSeries<_SalesTrendDataPoint, String>(
+                          dataSource: points,
+                          xValueMapper: (_SalesTrendDataPoint data, _) =>
+                              data.label,
+                          yValueMapper: (_SalesTrendDataPoint data, _) =>
+                              data.amount,
+                          name: 'المبيعات',
+                          borderColor: colors.primary,
+                          borderWidth: 2.2.w,
+                          gradient: AppGradients.chartAreaFill(
+                            context,
+                            colors.primary,
                           ),
-                        );
-                      },
-                ),
-                series: <CartesianSeries<_SalesTrendDataPoint, String>>[
-                  SplineAreaSeries<_SalesTrendDataPoint, String>(
-                    dataSource: points,
-                    xValueMapper: (_SalesTrendDataPoint data, _) => data.label,
-                    yValueMapper: (_SalesTrendDataPoint data, _) => data.amount,
-                    name: 'المبيعات',
-                    borderColor: colors.primary,
-                    borderWidth: 2.2.w,
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        colors.primary.withValues(alpha: 0.35),
-                        colors.primary.withValues(alpha: 0.0),
+                          markerSettings: MarkerSettings(
+                            isVisible: points.length <= 12,
+                            height: 5.r,
+                            width: 5.r,
+                            shape: DataMarkerType.circle,
+                            borderWidth: 1.5.w,
+                            borderColor: colors.primary,
+                            color: colors.surface,
+                          ),
+                        ),
                       ],
                     ),
-                    markerSettings: MarkerSettings(
-                      isVisible: currentAmount > 0,
-                      height: 5.r,
-                      width: 5.r,
-                      shape: DataMarkerType.circle,
-                      borderWidth: 1.5.w,
-                      borderColor: colors.primary,
-                      color: colors.surface,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),

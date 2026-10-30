@@ -323,7 +323,7 @@ class _GlassActionOrb extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: AppRadius.mdRadius,
           color: effectiveBg,
-          shape: BoxShape.circle,
+          // shape: BoxShape.circle,
           border: Border.all(color: effectiveBorder, width: 1.w),
           boxShadow: [
             BoxShadow(

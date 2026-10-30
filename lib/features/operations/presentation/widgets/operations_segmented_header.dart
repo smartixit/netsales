@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_voucher_request_sheet.dart';
@@ -51,22 +53,25 @@ class OperationsSegmentedHeader extends StatelessWidget {
 
           AppSpacing.hSm,
 
-          // 2. زر الإجراء السريع السياقي المدمج
-          CustomButton.primary(
-            text: isInvoiceTab ? 'فاتورة' : 'طلب توريد',
-            icon: isInvoiceTab
-                ? Icons.add_rounded
-                : Icons.add_shopping_cart_rounded,
-            height: 42.h,
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            onPressed: () {
-              if (isInvoiceTab) {
-                CreateSaleInvoiceSheet.show(context);
-              } else {
-                CreateVoucherRequestSheet.show(context);
-              }
-            },
-          ),
+          // 2. زر الإجراء السريع السياقي المدمج (محمي بصلاحية الإنشاء)
+          if (isInvoiceTab
+              ? PermissionService.to.can(AppPermissions.salesCreate)
+              : PermissionService.to.can(AppPermissions.requestsCreate))
+            CustomButton.primary(
+              text: isInvoiceTab ? 'فاتورة' : 'طلب توريد',
+              icon: isInvoiceTab
+                  ? Icons.add_rounded
+                  : Icons.add_shopping_cart_rounded,
+              height: 42.h,
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              onPressed: () {
+                if (isInvoiceTab) {
+                  CreateSaleInvoiceSheet.show(context);
+                } else {
+                  CreateVoucherRequestSheet.show(context);
+                }
+              },
+            ),
         ],
       );
     });

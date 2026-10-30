@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -130,7 +132,8 @@ class VoucherRequestsFeed extends StatelessWidget {
                       onToggleExpand: () => ctrl
                           .toggleRequestExpansion(request.requestId),
                       onTap: () => ctrl.openRequestDetails(request.requestId),
-                      onApprove: request.isPending
+                      onApprove: request.isPending &&
+                              PermissionService.to.can(AppPermissions.requestsApprove)
                           ? () {
                               CustomBottomSheet.showConfirmation(
                                 title: 'تأكيد اعتماد طلب التوريد',
@@ -145,7 +148,8 @@ class VoucherRequestsFeed extends StatelessWidget {
                               );
                             }
                           : null,
-                      onReject: request.isPending
+                      onReject: request.isPending &&
+                              PermissionService.to.can(AppPermissions.requestsReject)
                           ? () => RejectVoucherRequestSheet.show(
                               context,
                               requestId: request.requestId,
@@ -153,13 +157,15 @@ class VoucherRequestsFeed extends StatelessWidget {
                               controller: ctrl,
                             )
                           : null,
-                      onEdit: request.isPending
+                      onEdit: request.isPending &&
+                              PermissionService.to.can(AppPermissions.requestsEdit)
                           ? () => EditVoucherRequestSheet.show(
                               context,
                               request: request,
                             )
                           : null,
-                      onCancel: request.isPending
+                      onCancel: request.isPending &&
+                              PermissionService.to.can(AppPermissions.requestsEdit)
                           ? () async {
                               final confirmed =
                                   await CustomDialog.showConfirmation(
@@ -174,7 +180,8 @@ class VoucherRequestsFeed extends StatelessWidget {
                               }
                             }
                           : null,
-                      onDelete: (request.isPending || request.isCancelled)
+                      onDelete: (request.isPending || request.isCancelled) &&
+                              PermissionService.to.can(AppPermissions.requestsDelete)
                           ? () async {
                               final confirmed = await CustomDialog.showDanger(
                                 title: 'تأكيد حذف الطلب',

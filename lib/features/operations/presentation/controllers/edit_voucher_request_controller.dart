@@ -126,7 +126,7 @@ class EditVoucherRequestController extends GetxController {
     for (final entry in packageQuantities.entries) {
       final pkg = packages.firstWhereOrNull((p) => p.packageId == entry.key);
       if (pkg != null) {
-        total += pkg.packageVoucherPrice * entry.value;
+        total += pkg.packageVoucherPrice * entry.value; // DISPLAY-ONLY non-authoritative
       }
     }
     return total;
@@ -145,7 +145,7 @@ class EditVoucherRequestController extends GetxController {
         final discountPercent = isCash
             ? pkg.packageDefaultCashDiscount
             : pkg.packageDefaultCreditDiscount;
-        totalDiscount += lineGross * (discountPercent / 100);
+        totalDiscount += lineGross * (discountPercent / 100); // DISPLAY-ONLY non-authoritative
       }
     }
     return totalDiscount;

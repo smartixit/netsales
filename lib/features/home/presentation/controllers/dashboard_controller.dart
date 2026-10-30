@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/home/domain/entities/dashboard_overview_entity.dart';
 import 'package:netsales/features/home/domain/usecases/get_dashboard_overview_use_case.dart';
 import 'package:netsales/features/operations/domain/entities/sales_trend_point_entity.dart';
@@ -121,6 +122,9 @@ class DashboardController extends GetxController {
       if (selectedNetworkId.value == null && result.context.networkId != null) {
         selectedNetworkId.value = result.context.networkId;
       }
+
+      // جلب سلسلة المخطط بعد تأكيد هوية الشبكة المعروضة والفترة المختارة.
+      loadTrend(networkId: selectedNetworkId.value);
     } catch (error) {
       final cleanMessage = AppException.sanitizeMessage(error);
       if (overview.value == null) {
@@ -140,16 +144,65 @@ class DashboardController extends GetxController {
     }
   }
 
-  /// تبديل الفترة الزمنية وإعادة الجلب التلقائي بهدوء
+  /// معرّف آخر طلب لسلسلة المخطط — يمنع استجابة قديمة من تجاوز الأحدث.
+  int _trendRequestId = 0;
+
+  /// نطاق استعلام سلسلة المبيعات المطابق لنافذة الفترة المعروضة في المؤشرات.
+  /// الواجهة الخلفية تقبل `daily | weekly | monthly` مع `from_date` و`to_date`.
+  ({String period, DateTime fromDate, DateTime toDate}) _trendWindowFor(
+    String periodKey,
+  ) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    switch (periodKey) {
+      case 'yesterday':
+        final day = today.subtract(const Duration(days: 1));
+        return (period: 'daily', fromDate: day, toDate: day);
+      case 'this_week':
+        final start = today.subtract(Duration(days: today.weekday - 1));
+        return (
+          period: 'daily',
+          fromDate: start,
+          toDate: start.add(const Duration(days: 6)),
+        );
+      case 'this_month':
+        return (
+          period: 'daily',
+          fromDate: DateTime(today.year, today.month, 1),
+          toDate: DateTime(today.year, today.month + 1, 0),
+        );
+      case 'this_year':
+        return (
+          period: 'monthly',
+          fromDate: DateTime(today.year, 1, 1),
+          toDate: DateTime(today.year, 12, 31),
+        );
+      default:
+        return (period: 'daily', fromDate: today, toDate: today);
+    }
+  }
+
   /// جلب سلسلة مبيعات حقيقية (من الخادم) للرسم البياني.
   /// نمط موحد: try/catch مع AppException.sanitizeMessage (display-only، غير حرج).
-  Future<void> loadTrend({String period = 'daily'}) async {
+  Future<void> loadTrend({int? networkId}) async {
+    final requestId = ++_trendRequestId;
+    final window = _trendWindowFor(selectedPeriod.value);
+
     try {
-      final result = await getSalesTrendUseCase(period: period);
+      final result = await getSalesTrendUseCase(
+        period: window.period,
+        networkId: networkId ?? selectedNetworkId.value,
+        fromDate: DateFormatter.iso(window.fromDate),
+        toDate: DateFormatter.iso(window.toDate),
+      );
+      // تجاهل الاستجابة إن أُغلق المتحكم أو تجاوزها طلب أحدث.
+      if (isClosed || requestId != _trendRequestId) return;
       trendPoints.assignAll(result);
     } catch (error) {
       // سلسلة المبيعات غير حرجية (عرض فقط) — لا نُعطل الواجهة.
       // نظّف رسالة الخطأ وفق الميثاق (AppException.sanitizeMessage) دون إظهار Snackbar.
+      if (isClosed) return;
       AppException.sanitizeMessage(error);
     }
   }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
@@ -55,8 +57,10 @@ class RequestDetailsAppBarActions extends StatelessWidget {
             backgroundColor: Colors.transparent,
           ),
 
-          // 3. القائمة السياقية للعمليات المتقدمة (تعديل / إلغاء / حذف)
-          if (request.isPending || request.isCancelled)
+          // 3. القائمة السياقية للعمليات المتقدمة (تعديل / إلغاء / حذف) — محمية بالصلاحيات
+          if ((request.isPending || request.isCancelled) &&
+              (PermissionService.to.can(AppPermissions.requestsEdit) ||
+                  PermissionService.to.can(AppPermissions.requestsDelete)))
             _buildOverflowMenu(context, colors, request),
 
           AppSpacing.hXs,
@@ -78,14 +82,14 @@ class RequestDetailsAppBarActions extends StatelessWidget {
       triggerBackgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.6),
       onSelected: (value) => _handleAction(context, value, request),
       items: [
-        if (request.isPending)
+        if (request.isPending && PermissionService.to.can(AppPermissions.requestsEdit))
           CustomPopupItem<String>(
             value: 'edit',
             label: 'تعديل الطلب',
             icon: Icons.edit_outlined,
             iconColor: colors.primary,
           ),
-        if (request.isPending)
+        if (request.isPending && PermissionService.to.can(AppPermissions.requestsEdit))
           CustomPopupItem<String>(
             value: 'cancel',
             label: 'إلغاء الطلب',
@@ -93,7 +97,8 @@ class RequestDetailsAppBarActions extends StatelessWidget {
             iconColor: colors.warning,
             textColor: colors.warning,
           ),
-        if (request.isPending || request.isCancelled)
+        if ((request.isPending || request.isCancelled) &&
+            PermissionService.to.can(AppPermissions.requestsDelete))
           CustomPopupItem<String>(
             value: 'delete',
             label: 'حذف الطلب',

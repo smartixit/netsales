@@ -213,7 +213,7 @@ class OperationsItemsAccordionDeck extends StatelessWidget {
                   Padding(
                     padding: EdgeInsetsDirectional.only(start: 11.w),
                     child: Text(
-                      '${item.voucherCount} كرت${hasDiscount ? " • خصم ${item.itemDiscount.toStringAsFixed(item.itemDiscount.truncateToDouble() == item.itemDiscount ? 0 : 1)}%" : ""}',
+                      '${item.voucherCount} كرت${hasDiscount ? " • خصم ${AmountFormatter.formatValue(item.itemDiscount, decimalPlaces: item.itemDiscount.truncateToDouble() == item.itemDiscount ? 0 : 1)}%" : ""}',
                       style: AppTypography.labelSmall.copyWith(
                         color: colors.onSurfaceVariant,
                         fontWeight: FontWeight.w700,

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -44,7 +45,9 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
       invoice.remainingAmount,
     );
 
-    final dt = DateFormatter.tryParse(invoice.invoiceDate ?? invoice.createdAt ?? '');
+    final dt = DateFormatter.tryParse(
+      invoice.invoiceDate ?? invoice.createdAt ?? '',
+    );
     final dateStr = dt != null
         ? DateFormatter.dateTime(dt)
         : (invoice.invoiceDate ?? '');
@@ -84,16 +87,7 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
               // وعاء البطاقة الأساسي مع التوهج المحيطي الناعم
               Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                    colors: [
-                      themeColor.withValues(alpha: 0.05),
-                      colors.surface.withValues(alpha: 0.35),
-                      colors.surfaceContainerLowest,
-                    ],
-                    stops: const [0.0, 0.40, 1.0],
-                  ),
+                  gradient: AppGradients.ledgerHero3(context, themeColor),
                   borderRadius: AppRadius.lgRadius,
                   border: Border.all(
                     color: colors.outlineVariant.withValues(alpha: 0.28),
@@ -118,13 +112,9 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
                           width: 38.r,
                           height: 38.r,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                themeColor.withValues(alpha: 0.16),
-                                themeColor.withValues(alpha: 0.05),
-                              ],
+                            gradient: AppGradients.ledgerBadge(
+                              context,
+                              themeColor,
                             ),
                             borderRadius: BorderRadius.circular(10.r),
                             border: Border.all(
@@ -161,7 +151,9 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
                                     ? '#${invoice.invoiceUuid} • $dateStr'
                                     : '#${invoice.invoiceUuid}',
                                 style: AppTypography.labelSmall.copyWith(
-                                  color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+                                  color: colors.onSurfaceVariant.withValues(
+                                    alpha: 0.7,
+                                  ),
                                   fontWeight: FontWeight.w700,
                                   fontSize: 9.5.sp,
                                 ),
@@ -182,7 +174,9 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color:
-                                  (isFullyPaid ? colors.primary : colors.warning)
+                                  (isFullyPaid
+                                          ? colors.primary
+                                          : colors.warning)
                                       .withValues(alpha: 0.1),
                               borderRadius: AppRadius.fullRadius,
                               border: Border.all(
@@ -238,11 +232,9 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
                       margin: EdgeInsets.symmetric(vertical: 10.h),
                       height: 0.8.h,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            colors.outlineVariant.withValues(alpha: 0.35),
-                            colors.outlineVariant.withValues(alpha: 0.05),
-                          ],
+                        gradient: AppGradients.outlineSoft(
+                          context,
+                          colors.outlineVariant,
                         ),
                       ),
                     ),
@@ -325,9 +317,7 @@ class SaleInvoiceLedgerTile extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        isExpanded
-                                            ? 'طي البنود'
-                                            : 'عرض البنود',
+                                        isExpanded ? 'طي البنود' : 'عرض البنود',
                                         style: AppTypography.labelSmall
                                             .copyWith(
                                               color: themeColor,

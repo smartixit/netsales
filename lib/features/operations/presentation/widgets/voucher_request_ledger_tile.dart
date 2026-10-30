@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -99,16 +100,7 @@ class VoucherRequestLedgerTile extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                    colors: [
-                      statusColor.withValues(alpha: 0.05),
-                      colors.surface.withValues(alpha: 0.35),
-                      colors.surfaceContainerLowest,
-                    ],
-                    stops: const [0.0, 0.40, 1.0],
-                  ),
+                  gradient: AppGradients.ledgerHero3(context, statusColor),
                   borderRadius: AppRadius.lgRadius,
                   border: Border.all(
                     color: isPending
@@ -135,13 +127,9 @@ class VoucherRequestLedgerTile extends StatelessWidget {
                           width: 38.r,
                           height: 38.r,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                statusColor.withValues(alpha: 0.16),
-                                statusColor.withValues(alpha: 0.05),
-                              ],
+                            gradient: AppGradients.ledgerBadge(
+                              context,
+                              statusColor,
                             ),
                             borderRadius: BorderRadius.circular(10.r),
                             border: Border.all(
@@ -254,11 +242,9 @@ class VoucherRequestLedgerTile extends StatelessWidget {
                       margin: EdgeInsets.symmetric(vertical: 10.h),
                       height: 0.8.h,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            colors.outlineVariant.withValues(alpha: 0.35),
-                            colors.outlineVariant.withValues(alpha: 0.05),
-                          ],
+                        gradient: AppGradients.outlineSoft(
+                          context,
+                          colors.outlineVariant,
                         ),
                       ),
                     ),

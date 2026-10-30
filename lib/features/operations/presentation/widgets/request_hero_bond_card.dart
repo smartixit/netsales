@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -61,16 +62,7 @@ class RequestHeroBondCard extends StatelessWidget {
             // وعاء السند الأساسي مع التوهج المحيطي الناعم
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
-                  colors: [
-                    statusColor.withValues(alpha: 0.06),
-                    colors.surface.withValues(alpha: 0.4),
-                    colors.surfaceContainerLowest,
-                  ],
-                  stops: const [0.0, 0.40, 1.0],
-                ),
+                gradient: AppGradients.accentHero3(context, statusColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -91,14 +83,7 @@ class RequestHeroBondCard extends StatelessWidget {
                           width: 42.r,
                           height: 42.r,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                statusColor.withValues(alpha: 0.18),
-                                statusColor.withValues(alpha: 0.06),
-                              ],
-                            ),
+                            gradient: AppGradients.accentBadge(context, statusColor),
                             borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
                               color: statusColor.withValues(alpha: 0.28),

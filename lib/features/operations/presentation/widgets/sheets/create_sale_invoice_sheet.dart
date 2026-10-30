@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -274,7 +276,9 @@ class CreateSaleInvoiceSheet extends StatelessWidget {
             netAmount: netAmount,
             actionLabel: 'إصدار الفاتورة والتسوية',
             actionIcon: Icons.check_circle_rounded,
-            onAction: totalVouchers > 0 && selectedPosId != null
+            onAction: totalVouchers > 0 &&
+                    selectedPosId != null &&
+                    PermissionService.to.can(AppPermissions.salesCreate)
                 ? () async {
                     final result = await controller.submitInvoice();
                     if (result != null) {

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
@@ -46,7 +47,7 @@ class PackageQuantityInputController extends GetxController {
       text: initialSheets > 0
           ? (initialSheets % 1 == 0
                 ? initialSheets.toInt().toString()
-                : initialSheets.toStringAsFixed(1))
+                : AmountFormatter.formatValue(initialSheets, decimalPlaces: 1))
           : '',
     );
 
@@ -111,10 +112,10 @@ class PackageQuantityInputController extends GetxController {
           final frac = b.fullSheets + (b.hasHalfSheet ? 0.5 : 0.0);
           sheetsController.text = frac % 1 == 0
               ? frac.toInt().toString()
-              : frac.toStringAsFixed(1);
+              : AmountFormatter.formatValue(frac, decimalPlaces: 1);
         } else {
           final approx = parsedCards / sheetSize;
-          sheetsController.text = approx.toStringAsFixed(2);
+          sheetsController.text = AmountFormatter.formatValue(approx, decimalPlaces: 2);
         }
       }
     }
@@ -126,7 +127,7 @@ class PackageQuantityInputController extends GetxController {
     currentCards.value = preset.cards;
     sheetsController.text = preset.sheets % 1 == 0
         ? preset.sheets.toInt().toString()
-        : preset.sheets.toStringAsFixed(1);
+        : AmountFormatter.formatValue(preset.sheets, decimalPlaces: 1);
     cardsController.text = preset.cards.toString();
   }
 }
@@ -335,7 +336,7 @@ class PackageQuantityInputSheet extends StatelessWidget {
                   return CustomInteractiveBounce(
                     onTap: () => controller.applyPreset(preset),
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
+                      duration: AppMotion.fast,
                       padding: EdgeInsets.symmetric(
                         horizontal: 10.w,
                         vertical: 5.h,

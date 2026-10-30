@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
@@ -247,7 +249,8 @@ class CreateVoucherRequestSheet extends StatelessWidget {
             netAmount: netAmount,
             actionLabel: 'إرسال طلب التوريد',
             actionIcon: Icons.send_rounded,
-            onAction: totalVouchers > 0
+            onAction: totalVouchers > 0 &&
+                    PermissionService.to.can(AppPermissions.requestsCreate)
                 ? () async {
                     final result = await controller.submitRequest();
                     if (result != null) {

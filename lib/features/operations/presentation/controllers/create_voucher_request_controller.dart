@@ -164,7 +164,7 @@ class CreateVoucherRequestController extends GetxController {
     for (final pkg in packages) {
       final qty = packageQuantities[pkg.packageId] ?? 0;
       if (qty > 0) {
-        total += pkg.packageVoucherPrice * qty;
+        total += pkg.packageVoucherPrice * qty; // DISPLAY-ONLY non-authoritative
       }
     }
     return total;
@@ -180,7 +180,7 @@ class CreateVoucherRequestController extends GetxController {
             ? pkg.packageDefaultCashDiscount
             : pkg.packageDefaultCreditDiscount;
         final gross = pkg.packageVoucherPrice * qty;
-        discount += gross * (percent / 100);
+        discount += gross * (percent / 100); // DISPLAY-ONLY non-authoritative
       }
     }
     return discount;

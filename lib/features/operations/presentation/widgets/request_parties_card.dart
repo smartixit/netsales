@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
@@ -144,12 +145,7 @@ class _PartyLedgerPod extends StatelessWidget {
                 width: 30.r,
                 height: 30.r,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      accentColor.withValues(alpha: 0.18),
-                      accentColor.withValues(alpha: 0.05),
-                    ],
-                  ),
+                  gradient: AppGradients.accentSoft(context, accentColor),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 alignment: Alignment.center,
