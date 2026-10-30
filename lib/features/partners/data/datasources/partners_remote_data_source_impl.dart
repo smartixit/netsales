@@ -95,6 +95,24 @@ class PartnersRemoteDataSourceImpl implements PartnersRemoteDataSource {
   }
 
   @override
+  Future<ApiResponse<NetworkPosModel>> createNetworkPos({
+    required int networkId,
+    required String posUuid,
+    bool status = true,
+  }) {
+    return ApiService.instance.post<NetworkPosModel>(
+      ApiConstants.networkPos,
+      data: {
+        'network_id': networkId,
+        'pos_uuid': posUuid,
+        'status': status,
+      },
+      fromJson: (json) =>
+          NetworkPosModel.fromJson(Map<String, dynamic>.from(json as Map)),
+    );
+  }
+
+  @override
   Future<ApiResponse<NetworkPosModel>> toggleNetworkPosStatus(int networkPosId) {
     return ApiService.instance.post<NetworkPosModel>(
       ApiConstants.networkPosToggleStatus(networkPosId),

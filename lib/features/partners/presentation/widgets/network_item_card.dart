@@ -13,7 +13,8 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/partners/domain/entities/network_entity.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
-import 'package:netsales/features/partners/presentation/widgets/reject_partner_dialog.dart';
+import 'package:netsales/features/partners/presentation/widgets/sheets/reject_partner_sheet.dart';
+import 'package:netsales/features/partners/presentation/widgets/sheets/partner_details_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/menus/custom_popup_menu.dart';
@@ -62,7 +63,11 @@ class NetworkItemCard extends StatelessWidget {
                     : Icons.pause_circle_outline));
 
     return CustomInteractiveBounce(
-      onTap: () {},
+      onTap: () => PartnerDetailsSheet.show(
+        context,
+        network: network,
+        controller: controller,
+      ),
       child: Container(
         margin: EdgeInsets.only(bottom: 12.h),
         decoration: BoxDecoration(
@@ -270,21 +275,22 @@ class NetworkItemCard extends StatelessWidget {
 
                     AppSpacing.vSm,
 
-                    // 3. شريط مؤشرات الوكلاء والباقات والمعرف
-                    Row(
+                    // 3. شريط مؤشرات الوكلاء والباقات والمعرف المتكيف
+                    Wrap(
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         _NetworkCountBadge(
                           icon: Icons.storefront_outlined,
                           label: '${network.posCount ?? 0} نقطة بيع',
                           color: colors.secondary,
                         ),
-                        AppSpacing.hXs,
                         _NetworkCountBadge(
                           icon: Icons.confirmation_number_outlined,
                           label: '${network.packagesCount ?? 0} باقة كروت',
                           color: colors.tertiary,
                         ),
-                        const Spacer(),
                         _NetworkCountBadge(
                           icon: Icons.tag_rounded,
                           label: '#${network.networkUuid}',
@@ -331,7 +337,7 @@ class NetworkItemCard extends StatelessWidget {
                                 text: 'رفض الطلب',
                                 icon: Icons.cancel_outlined,
                                 height: 38.h,
-                                onPressed: () => RejectPartnerDialog.show(
+                                onPressed: () => RejectPartnerSheet.show(
                                   context,
                                   isNetwork: true,
                                   id: network.networkId,

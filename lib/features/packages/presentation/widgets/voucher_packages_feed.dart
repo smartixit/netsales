@@ -18,10 +18,7 @@ import 'package:netsales/widgets/feedback/custom_loading_state.dart';
 class VoucherPackagesFeed extends StatelessWidget {
   final PackagesController controller;
 
-  const VoucherPackagesFeed({
-    super.key,
-    required this.controller,
-  });
+  const VoucherPackagesFeed({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +66,7 @@ class VoucherPackagesFeed extends StatelessWidget {
         color: colors.primary,
         onRefresh: () => controller.loadPackages(isRefresh: true),
         child: ListView.builder(
+          shrinkWrap: true,
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
@@ -101,7 +99,10 @@ class VoucherPackagesFeed extends StatelessWidget {
     });
   }
 
-  void _confirmDelete(BuildContext context, VoucherPackageEntity package) async {
+  void _confirmDelete(
+    BuildContext context,
+    VoucherPackageEntity package,
+  ) async {
     final confirmed = await CustomDialog.showDanger(
       title: 'حذف باقة الكروت',
       message:

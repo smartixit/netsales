@@ -103,6 +103,29 @@ class PartnersRepositoryImpl implements PartnersRepository {
   }
 
   @override
+  Future<NetworkPosEntity?> createNetworkPos({
+    required int networkId,
+    required String posUuid,
+    bool status = true,
+  }) async {
+    final response = await _remoteDataSource.createNetworkPos(
+      networkId: networkId,
+      posUuid: posUuid,
+      status: status,
+    );
+
+    if (!response.success) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر إنشاء عقد الارتباط والتوزيع',
+      );
+    }
+
+    return response.data;
+  }
+
+  @override
   Future<bool> toggleNetworkPosStatus(int networkPosId) async {
     final response = await _remoteDataSource.toggleNetworkPosStatus(networkPosId);
 

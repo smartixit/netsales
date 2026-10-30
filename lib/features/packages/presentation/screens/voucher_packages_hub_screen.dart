@@ -76,22 +76,28 @@ class VoucherPackagesHubScreen extends GetView<PackagesController> {
       ),
       floatingActionButton:
           PermissionService.to.can(AppPermissions.voucherPackagesCreate)
-              ? Obx(
-                  () => CustomButton.floating(
-                    icon: Icons.add_rounded,
-                    tooltip: controller.activeSegmentIndex.value == 0
-                        ? 'إنشاء باقة كروت جديدة'
-                        : 'تخصيص خصم استثنائي لوكيل',
-                    onPressed: () {
-                      if (controller.activeSegmentIndex.value == 0) {
-                        CreateEditPackageSheet.show(context, controller: controller);
-                      } else {
-                        CreateEditDiscountSheet.show(context, controller: controller);
-                      }
-                    },
-                  ),
-                )
-              : null,
+          ? Obx(
+              () => CustomButton.floating(
+                icon: Icons.add_rounded,
+                tooltip: controller.activeSegmentIndex.value == 0
+                    ? 'إنشاء باقة كروت جديدة'
+                    : 'تخصيص خصم استثنائي لوكيل',
+                onPressed: () {
+                  if (controller.activeSegmentIndex.value == 0) {
+                    CreateEditPackageSheet.show(
+                      context,
+                      controller: controller,
+                    );
+                  } else {
+                    CreateEditDiscountSheet.show(
+                      context,
+                      controller: controller,
+                    );
+                  }
+                },
+              ),
+            )
+          : null,
     );
   }
 }

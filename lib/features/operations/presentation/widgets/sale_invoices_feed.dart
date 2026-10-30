@@ -32,6 +32,7 @@ class SaleInvoicesFeed extends StatelessWidget {
           itemCount: 4,
           cardHeight: 110,
           padding: EdgeInsets.zero,
+          shrinkWrap: true,
         );
       }
 

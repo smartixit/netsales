@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
 import 'package:netsales/features/partners/presentation/widgets/network_item_card.dart';
+import 'package:netsales/features/partners/presentation/widgets/partners_stats_header.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 
@@ -23,7 +24,7 @@ class NetworksFeed extends StatelessWidget {
     return Obx(() {
       // 1. حالة التحميل الأولي
       if (controller.isLoading.value && controller.networks.isEmpty) {
-        return const CustomSkeletonFeed(itemCount: 4, cardHeight: 130);
+        return const CustomSkeletonFeed(itemCount: 4, cardHeight: 130, shrinkWrap: true,);
       }
 
       final items = controller.filteredNetworks;
@@ -32,13 +33,32 @@ class NetworksFeed extends StatelessWidget {
       if (items.isEmpty) {
         final isFiltering = controller.searchQuery.value.isNotEmpty ||
             controller.selectedStatusFilter.value != 'ALL';
-        return CustomEmptyState(
-          title: isFiltering
-              ? 'لا توجد نتائج مطابقة'
-              : 'لا يوجد مزودو شبكات مسجلون',
-          subtitle: isFiltering
-              ? 'جرّب تعديل عبارة البحث أو تغيير فلتر الحالة المعروضة'
-              : 'لم يتم تسجيل أي مزودي شبكات إنترنت في النظام حتى الآن',
+        return RefreshIndicator(
+          color: colors.primary,
+          onRefresh: () => controller.loadAllData(isRefresh: true),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenPadding,
+              vertical: AppSpacing.xs,
+            ),
+            child: Column(
+              children: [
+                PartnersStatsHeader(controller: controller),
+                AppSpacing.vLg,
+                CustomEmptyState(
+                  title: isFiltering
+                      ? 'لا توجد نتائج مطابقة'
+                      : 'لا يوجد مزودو شبكات مسجلون',
+                  subtitle: isFiltering
+                      ? 'جرّب تعديل عبارة البحث أو تغيير فلتر الحالة المعروضة'
+                      : 'لم يتم تسجيل أي مزودي شبكات إنترنت في النظام حتى الآن',
+                ),
+              ],
+            ),
+          ),
         );
       }
 
@@ -54,11 +74,17 @@ class NetworksFeed extends StatelessWidget {
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          itemCount: items.length,
+          itemCount: items.length + 1,
           separatorBuilder: (_, __) => AppSpacing.vXs,
           itemBuilder: (context, index) {
+            if (index == 0) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                child: PartnersStatsHeader(controller: controller),
+              );
+            }
             return NetworkItemCard(
-              network: items[index],
+              network: items[index - 1],
               controller: controller,
             );
           },

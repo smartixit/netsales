@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
 import 'package:netsales/features/partners/presentation/widgets/network_pos_item_card.dart';
+import 'package:netsales/features/partners/presentation/widgets/partners_stats_header.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 
@@ -23,7 +24,7 @@ class NetworkPosFeed extends StatelessWidget {
     return Obx(() {
       // 1. حالة التحميل الأولي
       if (controller.isLoading.value && controller.networkPosList.isEmpty) {
-        return const CustomSkeletonFeed(itemCount: 4, cardHeight: 120);
+        return const CustomSkeletonFeed(itemCount: 4, cardHeight: 120, shrinkWrap: true,);
       }
 
       final items = controller.filteredNetworkPosList;
@@ -32,13 +33,32 @@ class NetworkPosFeed extends StatelessWidget {
       if (items.isEmpty) {
         final isFiltering = controller.searchQuery.value.isNotEmpty ||
             controller.selectedStatusFilter.value != 'ALL';
-        return CustomEmptyState(
-          title: isFiltering
-              ? 'لا توجد عقود مطابقة'
-              : 'لا توجد عقود توزيع مسجلة',
-          subtitle: isFiltering
-              ? 'جرّب تعديل عبارة البحث أو تغيير فلتر الحالة المعروضة'
-              : 'لم يتم ربط أي نقاط بيع بشبكات الإنترنت حتى الآن',
+        return RefreshIndicator(
+          color: colors.primary,
+          onRefresh: () => controller.loadAllData(isRefresh: true),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenPadding,
+              vertical: AppSpacing.xs,
+            ),
+            child: Column(
+              children: [
+                PartnersStatsHeader(controller: controller),
+                AppSpacing.vLg,
+                CustomEmptyState(
+                  title: isFiltering
+                      ? 'لا توجد عقود مطابقة'
+                      : 'لا توجد عقود توزيع مسجلة',
+                  subtitle: isFiltering
+                      ? 'جرّب تعديل عبارة البحث أو تغيير فلتر الحالة المعروضة'
+                      : 'لم يتم تسجيل أي عقود ربط بين الشبكات ونقاط البيع في النظام حتى الآن',
+                ),
+              ],
+            ),
+          ),
         );
       }
 
@@ -54,11 +74,17 @@ class NetworkPosFeed extends StatelessWidget {
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          itemCount: items.length,
+          itemCount: items.length + 1,
           separatorBuilder: (_, __) => AppSpacing.vXs,
           itemBuilder: (context, index) {
+            if (index == 0) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                child: PartnersStatsHeader(controller: controller),
+              );
+            }
             return NetworkPosItemCard(
-              link: items[index],
+              link: items[index - 1],
               controller: controller,
             );
           },

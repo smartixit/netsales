@@ -17,10 +17,7 @@ import 'package:netsales/widgets/feedback/custom_loading_state.dart';
 class PackageDiscountsFeed extends StatelessWidget {
   final PackagesController controller;
 
-  const PackageDiscountsFeed({
-    super.key,
-    required this.controller,
-  });
+  const PackageDiscountsFeed({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +65,7 @@ class PackageDiscountsFeed extends StatelessWidget {
         color: colors.primary,
         onRefresh: () => controller.loadDiscounts(isRefresh: true),
         child: ListView.builder(
+          shrinkWrap: true,
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),

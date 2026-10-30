@@ -12,10 +12,7 @@ import 'package:netsales/widgets/cards/custom_kpi_card.dart';
 class PackagesKpiSummaryStrip extends StatelessWidget {
   final PackagesController controller;
 
-  const PackagesKpiSummaryStrip({
-    super.key,
-    required this.controller,
-  });
+  const PackagesKpiSummaryStrip({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +24,7 @@ class PackagesKpiSummaryStrip extends StatelessWidget {
       return SizedBox(
         height: AppSpacing.kpiStripHeight,
         child: ListView(
+          shrinkWrap: true,
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),

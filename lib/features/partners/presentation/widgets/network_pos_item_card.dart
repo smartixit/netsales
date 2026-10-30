@@ -43,7 +43,13 @@ class NetworkPosItemCard extends StatelessWidget {
         link.isActive ? Icons.verified_rounded : Icons.pause_circle_outline;
 
     return CustomInteractiveBounce(
-      onTap: () {},
+      onTap: () => PosWalletManagementSheet.show(
+        context,
+        networkId: link.networkId,
+        posId: link.posId,
+        posName: link.posName ?? 'نقطة البيع #${link.posId}',
+        networkName: link.networkName,
+      ),
       child: Container(
         margin: EdgeInsets.only(bottom: 12.h),
         decoration: BoxDecoration(

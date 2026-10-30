@@ -100,17 +100,16 @@ class CustomKpiCard extends StatelessWidget {
     required IconData icon,
     Color? iconColor,
     VoidCallback? onTap,
-  }) =>
-      CustomKpiCard(
-        key: key,
-        title: title,
-        value: value,
-        unit: unit,
-        icon: icon,
-        iconColor: iconColor,
-        variant: KpiCardVariant.compact,
-        onTap: onTap,
-      );
+  }) => CustomKpiCard(
+    key: key,
+    title: title,
+    value: value,
+    unit: unit,
+    icon: icon,
+    iconColor: iconColor,
+    variant: KpiCardVariant.compact,
+    onTap: onTap,
+  );
 
   // ── 2. Factory: Standard ──────────────────────────────────────────────────
   /// بطاقة متوسطة لشبكات Bento، تدعم badge النمو اختيارياً.
@@ -124,19 +123,18 @@ class CustomKpiCard extends StatelessWidget {
     String? badgeText,
     bool isPositiveBadge = true,
     VoidCallback? onTap,
-  }) =>
-      CustomKpiCard(
-        key: key,
-        title: title,
-        value: value,
-        unit: unit,
-        icon: icon,
-        iconColor: iconColor,
-        variant: KpiCardVariant.standard,
-        badgeText: badgeText,
-        isPositiveBadge: isPositiveBadge,
-        onTap: onTap,
-      );
+  }) => CustomKpiCard(
+    key: key,
+    title: title,
+    value: value,
+    unit: unit,
+    icon: icon,
+    iconColor: iconColor,
+    variant: KpiCardVariant.standard,
+    badgeText: badgeText,
+    isPositiveBadge: isPositiveBadge,
+    onTap: onTap,
+  );
 
   // ── 3. Factory: Highlighted ───────────────────────────────────────────────
   /// بطاقة standard مع إطار warning — لفت الانتباه للطلبات المعلقة والتحذيرات.
@@ -150,26 +148,28 @@ class CustomKpiCard extends StatelessWidget {
     String? badgeText,
     bool isPositiveBadge = false,
     VoidCallback? onTap,
-  }) =>
-      CustomKpiCard(
-        key: key,
-        title: title,
-        value: value,
-        unit: unit,
-        icon: icon,
-        iconColor: iconColor,
-        variant: KpiCardVariant.highlighted,
-        badgeText: badgeText,
-        isPositiveBadge: isPositiveBadge,
-        onTap: onTap,
-      );
+  }) => CustomKpiCard(
+    key: key,
+    title: title,
+    value: value,
+    unit: unit,
+    icon: icon,
+    iconColor: iconColor,
+    variant: KpiCardVariant.highlighted,
+    badgeText: badgeText,
+    isPositiveBadge: isPositiveBadge,
+    onTap: onTap,
+  );
 
   @override
   Widget build(BuildContext context) {
     final child = switch (variant) {
       KpiCardVariant.compact => _CompactLayout(card: this),
       KpiCardVariant.standard => _StandardLayout(card: this),
-      KpiCardVariant.highlighted => _StandardLayout(card: this, isHighlighted: true),
+      KpiCardVariant.highlighted => _StandardLayout(
+        card: this,
+        isHighlighted: true,
+      ),
     };
 
     if (onTap != null) {
@@ -193,6 +193,7 @@ class _CompactLayout extends StatelessWidget {
     final iconColor = card.iconColor ?? colors.primary;
 
     return Container(
+      width: 120.w,
       padding: EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: colors.surface,
@@ -203,6 +204,7 @@ class _CompactLayout extends StatelessWidget {
         boxShadow: AppElevation.level1(context),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // أيقونة + عنوان في صف واحد
@@ -263,10 +265,7 @@ class _StandardLayout extends StatelessWidget {
   final CustomKpiCard card;
   final bool isHighlighted;
 
-  const _StandardLayout({
-    required this.card,
-    this.isHighlighted = false,
-  });
+  const _StandardLayout({required this.card, this.isHighlighted = false});
 
   @override
   Widget build(BuildContext context) {
@@ -316,7 +315,9 @@ class _StandardLayout extends StatelessWidget {
                     child: Text(
                       card.badgeText!,
                       style: AppTypography.labelSmall.copyWith(
-                        color: card.isPositiveBadge ? colors.success : colors.error,
+                        color: card.isPositiveBadge
+                            ? colors.success
+                            : colors.error,
                         fontWeight: FontWeight.bold,
                         fontSize: 10.sp,
                       ),

@@ -4,6 +4,7 @@ import 'package:netsales/features/partners/data/datasources/partners_remote_data
 import 'package:netsales/features/partners/data/repositories/partners_repository_impl.dart';
 import 'package:netsales/features/partners/domain/repositories/partners_repository.dart';
 import 'package:netsales/features/partners/domain/usecases/approve_partner_use_case.dart';
+import 'package:netsales/features/partners/domain/usecases/create_network_pos_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_networks_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_pos_list_use_case.dart';
@@ -52,6 +53,10 @@ class PartnersBinding extends Bindings {
       () => ToggleNetworkPosStatusUseCase(Get.find<PartnersRepository>()),
       fenix: true,
     );
+    Get.lazyPut<CreateNetworkPosUseCase>(
+      () => CreateNetworkPosUseCase(Get.find<PartnersRepository>()),
+      fenix: true,
+    );
     Get.lazyPut<ApprovePartnerUseCase>(
       () => ApprovePartnerUseCase(Get.find<PartnersRepository>()),
       fenix: true,
@@ -80,6 +85,7 @@ class PartnersBinding extends Bindings {
         getPosListUseCase: Get.find<GetPosListUseCase>(),
         getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
         toggleNetworkPosStatusUseCase: Get.find<ToggleNetworkPosStatusUseCase>(),
+        createNetworkPosUseCase: Get.find<CreateNetworkPosUseCase>(),
         approvePartnerUseCase: Get.find<ApprovePartnerUseCase>(),
         rejectPartnerUseCase: Get.find<RejectPartnerUseCase>(),
       ),

@@ -7,6 +7,7 @@ import 'package:netsales/features/partners/domain/entities/network_entity.dart';
 import 'package:netsales/features/partners/domain/entities/network_pos_entity.dart';
 import 'package:netsales/features/partners/domain/entities/pos_entity.dart';
 import 'package:netsales/features/partners/domain/usecases/approve_partner_use_case.dart';
+import 'package:netsales/features/partners/domain/usecases/create_network_pos_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_networks_use_case.dart';
 import 'package:netsales/features/partners/domain/usecases/get_pos_list_use_case.dart';
@@ -26,6 +27,7 @@ class PartnersController extends GetxController {
   final GetPosListUseCase getPosListUseCase;
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
   final ToggleNetworkPosStatusUseCase toggleNetworkPosStatusUseCase;
+  final CreateNetworkPosUseCase createNetworkPosUseCase;
   final ApprovePartnerUseCase approvePartnerUseCase;
   final RejectPartnerUseCase rejectPartnerUseCase;
 
@@ -34,6 +36,7 @@ class PartnersController extends GetxController {
     required this.getPosListUseCase,
     required this.getNetworkPosListUseCase,
     required this.toggleNetworkPosStatusUseCase,
+    required this.createNetworkPosUseCase,
     required this.approvePartnerUseCase,
     required this.rejectPartnerUseCase,
   });
@@ -73,6 +76,7 @@ class PartnersController extends GetxController {
 
   /// حقل إدخال سبب الرفض المدار في دورة حياة المتحكم
   final TextEditingController rejectReasonController = TextEditingController();
+  final GlobalKey<FormState> rejectFormKey = GlobalKey<FormState>();
 
   @override
   void onInit() {
@@ -311,6 +315,46 @@ class PartnersController extends GetxController {
         message: AppException.sanitizeMessage(e),
         type: SnackType.error,
       );
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  /// إنشاء عقد ارتباط وتوزيع وتوثيقه في النظام
+  Future<bool> createContract({
+    required int networkId,
+    required String posUuid,
+    bool status = true,
+  }) async {
+    isSubmittingAction.value = true;
+    try {
+      await CustomAnimationOverlay.showLoading(
+        message: 'جارٍ توثيق عقد الارتباط والتوزيع...',
+      );
+      final newLink = await createNetworkPosUseCase(
+        networkId: networkId,
+        posUuid: posUuid,
+        status: status,
+      );
+      if (newLink != null) {
+        await loadNetworkPosList(isRefresh: true);
+        await CustomAnimationOverlay.showSuccess(
+          message: 'تم توثيق عقد الارتباط بنجاح وتجهيز الحساب المشترك.',
+        );
+        return true;
+      }
+      return false;
+    } catch (e) {
+      await CustomAnimationOverlay.hide();
+      CustomSnackbar.show(
+        title: 'تعذر توثيق العقد',
+        message: AppException.sanitizeMessage(e),
+        type: SnackType.error,
+      );
+      return false;
     } finally {
       isSubmittingAction.value = false;
       if (CustomAnimationOverlay.isShowing) {

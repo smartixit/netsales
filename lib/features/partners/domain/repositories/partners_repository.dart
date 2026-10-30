@@ -38,6 +38,13 @@ abstract class PartnersRepository {
     String? search,
   });
 
+  /// إنشاء وتوثيق عقد ارتباط وتوزيع جديد بين شبكة ونقطة بيع
+  Future<NetworkPosEntity?> createNetworkPos({
+    required int networkId,
+    required String posUuid,
+    bool status = true,
+  });
+
   /// تبديل حالة عقد الربط بين نشط ومعطل
   Future<bool> toggleNetworkPosStatus(int networkPosId);
 

@@ -39,6 +39,13 @@ abstract class PartnersRemoteDataSource {
     String? search,
   });
 
+  /// إنشاء وتوثيق عقد ارتباط وتوزيع جديد بين شبكة ونقطة بيع
+  Future<ApiResponse<NetworkPosModel>> createNetworkPos({
+    required int networkId,
+    required String posUuid,
+    bool status = true,
+  });
+
   /// تبديل حالة عقد الارتباط بين نشط ومعطل
   Future<ApiResponse<NetworkPosModel>> toggleNetworkPosStatus(int networkPosId);
 

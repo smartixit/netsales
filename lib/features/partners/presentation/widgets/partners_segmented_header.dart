@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
+import 'package:netsales/features/partners/presentation/widgets/sheets/link_partner_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 
@@ -63,23 +64,40 @@ class PartnersSegmentedHeader extends StatelessWidget {
 
           AppSpacing.hSm,
 
-          // 2. زر الإجراء السريع السياقي
-          CustomButton.primary(
-            text: actionText,
-            icon: actionIcon,
-            height: 42.h,
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            onPressed: () {
-              if (activeIndex == 0) {
-                Get.toNamed(AppRoutes.registerNetwork);
-              } else if (activeIndex == 1) {
-                Get.toNamed(AppRoutes.registerPos);
-              } else {
-                // تصفية العقود أو توجيه لسجل التوزيع
-                controller.filterByStatus('ALL');
-              }
-            },
-          ),
+          // 2. زر الإجراء السريع السياقي المتكيف مع قياس الشاشة
+          if (MediaQuery.sizeOf(context).width < 360)
+            CustomButton.icon(
+              icon: actionIcon,
+              tooltip: actionText,
+              dimension: 40.r,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              onPressed: () {
+                if (activeIndex == 0) {
+                  Get.toNamed(AppRoutes.registerNetwork);
+                } else if (activeIndex == 1) {
+                  Get.toNamed(AppRoutes.registerPos);
+                } else {
+                  LinkPartnerSheet.show(context, controller: controller);
+                }
+              },
+            )
+          else
+            CustomButton.primary(
+              text: actionText,
+              icon: actionIcon,
+              height: 42.h,
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              onPressed: () {
+                if (activeIndex == 0) {
+                  Get.toNamed(AppRoutes.registerNetwork);
+                } else if (activeIndex == 1) {
+                  Get.toNamed(AppRoutes.registerPos);
+                } else {
+                  LinkPartnerSheet.show(context, controller: controller);
+                }
+              },
+            ),
         ],
       );
     });

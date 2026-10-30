@@ -27,7 +27,11 @@ class OperationalExpensesHistoryView extends StatelessWidget {
       if (isLoading && expenses.isEmpty) {
         return Padding(
           padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-          child: const CustomSkeletonFeed(itemCount: 4, cardHeight: 90),
+          child: const CustomSkeletonFeed(
+            itemCount: 4,
+            cardHeight: 90,
+            shrinkWrap: true,
+          ),
         );
       }
 

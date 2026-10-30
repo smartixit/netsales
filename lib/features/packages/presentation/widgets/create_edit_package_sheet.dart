@@ -608,11 +608,15 @@ class _MarginPreviewBox extends StatelessWidget {
                 color: colors.primary,
               ),
               AppSpacing.hXxs,
-              Text(
-                'احتساب فوري لهامش ربح نقطة البيع (تكلفة الشراء الصافية):',
-                style: AppTypography.labelSmall.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'احتساب فوري لهامش ربح نقطة البيع (تكلفة الشراء الصافية):',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

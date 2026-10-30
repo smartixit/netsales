@@ -49,7 +49,11 @@ class AuthorizedSessionsSheet extends StatelessWidget {
       if (isLoading && sessions.isEmpty) {
         return Padding(
           padding: EdgeInsets.symmetric(vertical: 24.h),
-          child: const CustomSkeletonFeed(itemCount: 3, cardHeight: 110),
+          child: const CustomSkeletonFeed(
+            itemCount: 3,
+            cardHeight: 110,
+            shrinkWrap: true,
+          ),
         );
       }
 
@@ -58,13 +62,17 @@ class AuthorizedSessionsSheet extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 16.w),
           child: Column(
             children: [
-              Icon(Icons.error_outline_rounded,
-                  size: 48.r, color: colors.error),
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48.r,
+                color: colors.error,
+              ),
               AppSpacing.vMd,
               Text(
                 errorMessage,
-                style: AppTypography.bodyMedium
-                    .copyWith(color: colors.onSurfaceVariant),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
                 textAlign: TextAlign.center,
               ),
               AppSpacing.vLg,
@@ -84,8 +92,9 @@ class AuthorizedSessionsSheet extends StatelessWidget {
           child: Center(
             child: Text(
               'لا توجد جلسات أخرى مسجلة حالياً.',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: colors.onSurfaceVariant),
+              style: AppTypography.bodyMedium.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
             ),
           ),
         );
@@ -115,10 +124,7 @@ class _SessionCard extends StatelessWidget {
   final UserSessionEntity session;
   final VoidCallback onTerminate;
 
-  const _SessionCard({
-    required this.session,
-    required this.onTerminate,
-  });
+  const _SessionCard({required this.session, required this.onTerminate});
 
   @override
   Widget build(BuildContext context) {
@@ -187,8 +193,9 @@ class _SessionCard extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: colors.success.withValues(alpha: 0.15),
-                              borderRadius:
-                                  BorderRadius.circular(AppRadius.full),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.full,
+                              ),
                             ),
                             child: Text(
                               'هذا الجهاز',

@@ -12,7 +12,8 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/create_sale_invoice_sheet.dart';
 import 'package:netsales/features/partners/domain/entities/pos_entity.dart';
 import 'package:netsales/features/partners/presentation/controllers/partners_controller.dart';
-import 'package:netsales/features/partners/presentation/widgets/reject_partner_dialog.dart';
+import 'package:netsales/features/partners/presentation/widgets/sheets/reject_partner_sheet.dart';
+import 'package:netsales/features/partners/presentation/widgets/sheets/partner_details_sheet.dart';
 import 'package:netsales/features/partners/presentation/widgets/sheets/pos_wallet_management_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -61,7 +62,11 @@ class PosItemCard extends StatelessWidget {
                 : Icons.pause_circle_outline));
 
     return CustomInteractiveBounce(
-      onTap: () {},
+      onTap: () => PartnerDetailsSheet.show(
+        context,
+        pos: pos,
+        controller: controller,
+      ),
       child: Container(
         margin: EdgeInsets.only(bottom: 12.h),
         decoration: BoxDecoration(
@@ -271,15 +276,17 @@ class PosItemCard extends StatelessWidget {
 
                     AppSpacing.vSm,
 
-                    // 3. شريط عداد الشبكات المرتبطة ومعرف النقطة
-                    Row(
+                    // 3. شريط عداد الشبكات المرتبطة ومعرف النقطة المتكيف
+                    Wrap(
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         _PosCountBadge(
                           icon: Icons.hub_outlined,
                           label: '${pos.networksCount ?? 0} شبكات مرتبطة',
                           color: colors.primary,
                         ),
-                        const Spacer(),
                         _PosCountBadge(
                           icon: Icons.tag_rounded,
                           label: '#${pos.posUuid}',
@@ -308,7 +315,7 @@ class PosItemCard extends StatelessWidget {
                               text: 'رفض الطلب',
                               icon: Icons.cancel_outlined,
                               height: 38.h,
-                              onPressed: () => RejectPartnerDialog.show(
+                              onPressed: () => RejectPartnerSheet.show(
                                 context,
                                 isNetwork: false,
                                 id: pos.posId,
