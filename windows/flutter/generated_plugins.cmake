@@ -12,6 +12,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   local_auth_windows
   permission_handler_windows
   printing
+  share_plus
   sodium_libs
   url_launcher_windows
 )
