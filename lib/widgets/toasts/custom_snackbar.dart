@@ -79,6 +79,8 @@ class CustomSnackbar {
         child: Text(
           cleanMessage,
           style: AppTypography.bodyMedium.copyWith(color: subtitleColor),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
       backgroundGradient: backgroundGradient,
