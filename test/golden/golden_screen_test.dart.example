@@ -1,0 +1,13 @@
+// Example only. Rename to a *_test.dart file after replacing the placeholder
+// widget with a real, deterministic screen from your application.
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  testWidgets('screen matches its approved golden image', (tester) async {
+    // TODO: set a deterministic viewport, text scale, locale, theme and fonts.
+    // TODO: pump the real screen with deterministic data and fake services.
+    // TODO: compare only after the screen is fully settled.
+    // expect(find.byType(YourScreen), findsOneWidget);
+    // await expectLater(find.byType(YourScreen), matchesGoldenFile('goldens/your_screen.png'));
+  });
+}
