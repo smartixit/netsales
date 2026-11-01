@@ -39,5 +39,8 @@ abstract final class StorageKeys {
 
   /// إعدادات النظام العامة المخزنة محلياً (Public Settings Cache)
   static const String publicSettings = 'public_settings_cache';
+
+  /// مساحة العمل النشطة المحفوظة (network | pos)
+  static const String activeWorkspaceKey = 'active_workspace_key';
 }
 

@@ -2,6 +2,12 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
+import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/routing/middlewares/workspace_guard.dart';
+import 'package:netsales/features/auth/presentation/screens/unsupported_platform_screen.dart';
+import 'package:netsales/features/home/presentation/bindings/workspace_bindings.dart';
+import 'package:netsales/features/home/presentation/screens/network_workspace_shell.dart';
+import 'package:netsales/features/home/presentation/screens/pos_workspace_shell.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/register_network_binding.dart';
@@ -117,6 +123,29 @@ abstract final class AppPages {
     // ========================================================================
     // 3. المسارات الرئيسية المحمية (Dashboard & Home Layout)
     // ========================================================================
+    GetPage(
+      name: AppRoutes.networkWorkspace,
+      page: () => const NetworkWorkspaceShell(),
+      binding: NetworkWorkspaceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.posWorkspace,
+      page: () => const PosWorkspaceShell(),
+      binding: PosWorkspaceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.unsupportedPlatform,
+      page: () => const UnsupportedPlatformClientScreen(),
+      middlewares: [AuthGuard()],
+    ),
     GetPage(
       name: AppRoutes.dashboard,
       page: () => const HomeLayoutScreen(),

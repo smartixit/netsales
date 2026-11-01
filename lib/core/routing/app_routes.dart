@@ -24,6 +24,36 @@ abstract final class AppRoutes {
   static const String dashboard = '/dashboard';
   static const String homeLayout = '/home';
 
+  // مساحات العمل التشغيلية (Operational Workspaces)
+  static const String workspace = '/workspace';
+  static const String networkWorkspace = '/workspace/network';
+  static const String posWorkspace = '/workspace/pos';
+  static const String unsupportedPlatform = '/unsupported-platform';
+
+  // شاشات مساحة مزودي الشبكات (NETWORK Workspace Routes)
+  static const String wholesaleInvoices = '/network/invoices';
+  static const String supplyRequestsReview = '/network/supply-requests';
+  static const String posDirectory = '/network/pos-directory';
+  static const String voucherPackagesCatalog = '/voucher-packages';
+  static const String customDiscounts = '/network/discounts';
+  static const String networkWalletStatement = '/network-wallets';
+  static const String operatingExpenses = '/expenses';
+  static const String networkTeamManagement = '/network/team';
+  static const String networkSubscription = '/network/subscription';
+
+  // شاشات مساحة نقاط البيع (POS Workspace Routes)
+  static const String procurementOrders = '/pos/procurement-orders';
+  static const String newProcurementOrder = '/pos/procurement-orders/new';
+  static const String purchaseInvoices = '/pos/invoices';
+  static const String purchaseInvoiceDetails = '/sale-invoices/details';
+  static const String linkedNetworksCatalog = '/pos/linked-networks';
+  static const String posWalletStatement = '/pos-wallets';
+  static const String posStaffManagement = '/pos/staff';
+
+  // شاشات الأمان الموحدة
+  static const String activeSessions = '/security/sessions';
+  static const String securitySettings = '/security/settings';
+
   // قطاعات العمل المعتمدة (Business Domain Routes)
   static const String networks = '/networks';
   static const String networkDetails = '/networks/details';
