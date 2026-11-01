@@ -256,7 +256,7 @@ class MoreWalletCard extends StatelessWidget {
                   icon: Icons.history_rounded,
                   height: 38.h,
                   onPressed: () {
-                    // فتح سجل العمليات
+                    Get.toNamed(AppRoutes.networkWalletStatement);
                   },
                 ),
               ),

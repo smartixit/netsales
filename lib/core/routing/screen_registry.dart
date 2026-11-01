@@ -136,7 +136,7 @@ abstract final class ScreenRegistry {
       titleEn: 'Network Wallet Statement',
       workspace: AppWorkspace.network,
       requiredPermission: AppPermissions.networkWalletsView,
-      implementationState: ScreenImplementationState.placeholder,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'NET-05',
@@ -240,7 +240,7 @@ abstract final class ScreenRegistry {
       titleEn: 'POS Wallet Statement',
       workspace: AppWorkspace.pos,
       requiredPermission: AppPermissions.posWalletsView,
-      implementationState: ScreenImplementationState.placeholder,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'POS-05',

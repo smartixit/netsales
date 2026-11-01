@@ -79,6 +79,14 @@ class NetworkWorkspaceController extends GetxController {
         targetRoute: AppRoutes.posWallets,
       ),
       HomeQuickActionEntity(
+        id: 'view_network_statement',
+        title: 'كشف حركات محفظة الشبكة',
+        description: 'متابعة السيولة النقدية ودفتر الأستاذ والتحصيلات',
+        icon: Icons.account_balance_wallet_rounded,
+        requiredPermission: AppPermissions.networkWalletsView,
+        targetRoute: AppRoutes.networkWalletStatement,
+      ),
+      HomeQuickActionEntity(
         id: 'manage_team',
         title: 'إدارة فريق عمل الشبكة',
         description: 'إضافة وتعيين صلاحيات موظفي ومحاسبي الشبكة',

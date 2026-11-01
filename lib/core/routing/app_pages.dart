@@ -35,6 +35,10 @@ import 'package:netsales/features/operations/presentation/screens/sale_invoice_d
 import 'package:netsales/features/operations/presentation/screens/voucher_request_details_screen.dart';
 import 'package:netsales/features/packages/presentation/bindings/packages_binding.dart';
 import 'package:netsales/features/packages/presentation/screens/voucher_packages_hub_screen.dart';
+import 'package:netsales/features/wallets/presentation/bindings/network_wallet_binding.dart';
+import 'package:netsales/features/wallets/presentation/bindings/pos_wallet_binding.dart';
+import 'package:netsales/features/wallets/presentation/screens/network_wallet_statement_screen.dart';
+import 'package:netsales/features/wallets/presentation/screens/pos_wallet_statement_screen.dart';
 import 'package:netsales/widgets/feedback/custom_not_found.dart';
 import 'package:netsales/widgets/feedback/custom_unauthorized.dart';
 
@@ -171,15 +175,15 @@ abstract final class AppPages {
     //     PermissionGuardMiddleware(requiredPermission: AppPermissions.networksView),
     //   ],
     // ),
-    // GetPage(
-    //   name: AppRoutes.networkWallets,
-    //   page: () => const NetworkWalletsScreen(),
-    //   binding: NetworkWalletsBinding(),
-    //   middlewares: [
-    //     AuthGuard(),
-    //     PermissionGuardMiddleware(requiredPermission: AppPermissions.networkWalletsView),
-    //   ],
-    // ),
+    GetPage(
+      name: AppRoutes.networkWalletStatement,
+      page: () => const NetworkWalletStatementScreen(),
+      binding: NetworkWalletBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networkWalletsView),
+      ],
+    ),
 
     // ========================================================================
     // 5. قطاع نقاط البيع ومحافظها (POS & Wallets)
@@ -193,15 +197,15 @@ abstract final class AppPages {
     //     PermissionGuardMiddleware(requiredPermission: AppPermissions.posView),
     //   ],
     // ),
-    // GetPage(
-    //   name: AppRoutes.posWallets,
-    //   page: () => const PosWalletsScreen(),
-    //   binding: PosWalletsBinding(),
-    //   middlewares: [
-    //     AuthGuard(),
-    //     PermissionGuardMiddleware(requiredPermission: AppPermissions.posWalletsView),
-    //   ],
-    // ),
+    GetPage(
+      name: AppRoutes.posWalletStatement,
+      page: () => const PosWalletStatementScreen(),
+      binding: PosWalletBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posWalletsView),
+      ],
+    ),
 
     // ========================================================================
     // 6. باقات كروت الشبكة والخصومات (Voucher Packages & Discounts Hub)
