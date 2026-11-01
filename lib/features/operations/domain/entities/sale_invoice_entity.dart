@@ -22,6 +22,8 @@ class SaleInvoiceEntity {
   final String? networkName;
   final String? posName;
   final String? posCode;
+  final int? requestId;
+  final String? requestUuid;
   final List<SaleInvoiceItemEntity> items;
 
   const SaleInvoiceEntity({
@@ -44,6 +46,8 @@ class SaleInvoiceEntity {
     this.networkName,
     this.posName,
     this.posCode,
+    this.requestId,
+    this.requestUuid,
     this.items = const [],
   });
 

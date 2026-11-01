@@ -1,3 +1,4 @@
+import 'package:netsales/features/operations/domain/entities/request_pricing_preview_entity.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 import 'package:netsales/features/operations/domain/entities/sales_trend_point_entity.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';

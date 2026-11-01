@@ -64,6 +64,8 @@ class SaleInvoiceModel extends SaleInvoiceEntity {
       networkName: networkData?['network_name'] as String?,
       posName: posData?['pos_name'] as String?,
       posCode: posData?['pos_code'] as String?,
+      requestId: json['request_id'] != null ? _toInt(json['request_id']) : null,
+      requestUuid: json['request_uuid'] as String?,
       items: parsedItems,
     );
   }

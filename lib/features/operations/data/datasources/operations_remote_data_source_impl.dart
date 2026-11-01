@@ -2,6 +2,7 @@ import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/operations/data/datasources/operations_remote_data_source.dart';
+import 'package:netsales/features/operations/data/models/request_pricing_preview_model.dart';
 import 'package:netsales/features/operations/data/models/sale_invoice_model.dart';
 import 'package:netsales/features/operations/data/models/sales_trend_point_model.dart';
 import 'package:netsales/features/operations/data/models/voucher_request_model.dart';
@@ -105,16 +106,47 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
   }
 
   @override
-  Future<ApiResponse<VoucherRequestModel>> approveVoucherRequest(
+  Future<ApiResponse<RequestPricingPreviewModel>> previewRequestModification(
+    int id, {
+    required List<Map<String, dynamic>> items,
+    String? saleType,
+    String? requestNote,
+  }) {
+    return ApiService.instance.post<RequestPricingPreviewModel>(
+      ApiConstants.voucherRequestPreviewModification(id),
+      data: {
+        'items': items,
+        if (saleType != null) 'sale_type': saleType,
+        if (requestNote != null && requestNote.trim().isNotEmpty)
+          'request_note': requestNote.trim(),
+      },
+      fromJson: (json) => RequestPricingPreviewModel.fromJson(
+        json as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> approveVoucherRequest(
     int id, {
     String? notes,
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? idempotencyKey,
   }) {
-    return ApiService.instance.post<VoucherRequestModel>(
+    return ApiService.instance.post<Map<String, dynamic>>(
       ApiConstants.voucherRequestApprove(id),
       data: {
-        if (notes != null && notes.trim().isNotEmpty) 'request_note': notes.trim(),
+        if (notes != null && notes.trim().isNotEmpty)
+          'request_note': notes.trim(),
+        if (saleType != null) 'sale_type': saleType,
+        if (items != null && items.isNotEmpty) 'items': items,
       },
-      fromJson: (json) => VoucherRequestModel.fromJson(json as Map<String, dynamic>),
+      headers: {
+        if (idempotencyKey != null && idempotencyKey.isNotEmpty)
+          'Idempotency-Key': idempotencyKey,
+      },
+      fromJson: (json) => json as Map<String, dynamic>,
     );
   }
 

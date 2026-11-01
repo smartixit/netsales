@@ -9,6 +9,7 @@ import 'package:netsales/features/operations/presentation/widgets/invoice_detail
 import 'package:netsales/features/operations/presentation/widgets/invoice_financial_summary_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/invoice_hero_bond_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/invoice_items_card.dart';
+import 'package:netsales/features/operations/presentation/widgets/invoice_linked_request_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/invoice_parties_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/operations_details_skeleton_view.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -111,6 +112,16 @@ class SaleInvoiceDetailsScreen extends GetView<OperationsController> {
 
                     // 4. بطاقة الملخص المالي ومطابقة الحساب
                     InvoiceFinancialSummaryCard(invoice: invoice),
+
+                    // 5. بطاقة طلب التوريد الأصلي المرتبط بالفاتورة
+                    if (invoice.requestId != null ||
+                        invoice.requestUuid != null) ...[
+                      AppSpacing.vMd,
+                      InvoiceLinkedRequestCard(
+                        invoice: invoice,
+                        controller: controller,
+                      ),
+                    ],
 
                     AppSpacing.vLg,
                   ],

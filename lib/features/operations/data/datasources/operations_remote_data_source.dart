@@ -1,4 +1,5 @@
 import 'package:netsales/core/models/api_response.dart';
+import 'package:netsales/features/operations/data/models/request_pricing_preview_model.dart';
 import 'package:netsales/features/operations/data/models/sale_invoice_model.dart';
 import 'package:netsales/features/operations/data/models/sales_trend_point_model.dart';
 import 'package:netsales/features/operations/data/models/voucher_request_model.dart';
@@ -37,9 +38,19 @@ abstract class OperationsRemoteDataSource {
 
   Future<ApiResponse<VoucherRequestModel>> getVoucherRequestDetails(int id);
 
-  Future<ApiResponse<VoucherRequestModel>> approveVoucherRequest(
+  Future<ApiResponse<RequestPricingPreviewModel>> previewRequestModification(
+    int id, {
+    required List<Map<String, dynamic>> items,
+    String? saleType,
+    String? requestNote,
+  });
+
+  Future<ApiResponse<Map<String, dynamic>>> approveVoucherRequest(
     int id, {
     String? notes,
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? idempotencyKey,
   });
 
   Future<ApiResponse<VoucherRequestModel>> rejectVoucherRequest(

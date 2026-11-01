@@ -22,6 +22,8 @@ class VoucherRequestEntity {
   final String? networkName;
   final String? posName;
   final String? posCode;
+  final int? invoiceId;
+  final String? invoiceUuid;
   final List<VoucherRequestItemEntity> items;
 
   const VoucherRequestEntity({
@@ -44,6 +46,8 @@ class VoucherRequestEntity {
     this.networkName,
     this.posName,
     this.posCode,
+    this.invoiceId,
+    this.invoiceUuid,
     this.items = const [],
   });
 

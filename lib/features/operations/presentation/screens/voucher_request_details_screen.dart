@@ -10,6 +10,7 @@ import 'package:netsales/features/operations/presentation/widgets/request_detail
 import 'package:netsales/features/operations/presentation/widgets/request_details_app_bar_actions.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_hero_bond_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_items_card.dart';
+import 'package:netsales/features/operations/presentation/widgets/request_linked_invoice_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_notes_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_parties_card.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -107,6 +108,16 @@ class VoucherRequestDetailsScreen extends GetView<OperationsController> {
                     if (!request.isPending) ...[
                       AppSpacing.vMd,
                       RequestAuditStatusCard(request: request),
+                    ],
+
+                    // 6. بطاقة الفاتورة المولدة المرتبطة بالطلب المعتمد
+                    if (request.invoiceId != null ||
+                        request.invoiceUuid != null) ...[
+                      AppSpacing.vMd,
+                      RequestLinkedInvoiceCard(
+                        request: request,
+                        controller: controller,
+                      ),
                     ],
 
                     AppSpacing.vLg,

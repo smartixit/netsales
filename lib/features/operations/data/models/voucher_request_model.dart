@@ -63,6 +63,8 @@ class VoucherRequestModel extends VoucherRequestEntity {
       networkName: networkData?['network_name'] as String?,
       posName: posData?['pos_name'] as String?,
       posCode: posData?['pos_code'] as String?,
+      invoiceId: json['invoice_id'] != null ? _toInt(json['invoice_id']) : null,
+      invoiceUuid: json['invoice_uuid'] as String?,
       items: parsedItems,
     );
   }
