@@ -6,6 +6,7 @@ import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 import 'package:netsales/features/operations/domain/entities/sales_trend_point_entity.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
+import 'package:netsales/features/operations/domain/entities/request_pricing_preview_entity.dart';
 import 'package:netsales/features/operations/domain/repositories/operations_repository.dart';
 import 'package:netsales/features/operations/domain/usecases/approve_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/cancel_voucher_request_use_case.dart';
@@ -66,7 +67,22 @@ class FakeOperationsRepository implements OperationsRepository {
       throw UnimplementedError();
 
   @override
-  Future<VoucherRequestEntity> approveVoucherRequest(int id, {String? notes}) =>
+  Future<VoucherRequestEntity> approveVoucherRequest(
+    int id, {
+    String? notes,
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? idempotencyKey,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  Future<RequestPricingPreviewEntity> previewRequestModification(
+    int id, {
+    required List<Map<String, dynamic>> items,
+    String? saleType,
+    String? requestNote,
+  }) =>
       throw UnimplementedError();
 
   @override
@@ -111,7 +127,13 @@ class FakeOperationsRepository implements OperationsRepository {
   Future<void> deleteVoucherRequest(int id) async {}
 
   @override
-  Future<List<SalesTrendPointEntity>> getSalesTrend({String period = 'daily', int? networkId, int? posId, String? fromDate, String? toDate}) {
+  Future<List<SalesTrendPointEntity>> getSalesTrend({
+    String period = 'daily',
+    int? networkId,
+    int? posId,
+    String? fromDate,
+    String? toDate,
+  }) {
     return Future.value([]);
   }
 }
@@ -134,7 +156,7 @@ void main() {
     isFullyPaid: false,
     createdBy: 1,
     posName: 'مركز الأمل للاتصالات ونقاط البيع السريعة',
-    posCode: 'POS-042',
+    posUuid: 'POS-042',
     networkName: 'شبكة النورس',
     createdAt: '2026-10-27 14:30:00',
     items: [
@@ -162,7 +184,7 @@ void main() {
     statusLabel: 'قيد المراجعة',
     createdBy: 1,
     posName: 'نقطة بيع الصقر الذهبي لخدمات الإنترنت المحدودة',
-    posCode: 'POS-089',
+    posUuid: 'POS-089',
     networkName: 'شبكة النورس',
     createdAt: '2026-10-27 12:15:00',
     items: [
@@ -673,7 +695,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // 1. يظهر عدد الباقات المجمعة مع زر عرض البنود
-        expect(find.text('2 باقات مختلفة (153 كرت) • بيع نقدي'), findsOneWidget);
+        expect(
+          find.text('2 باقات مختلفة (153 كرت) • بيع نقدي'),
+          findsOneWidget,
+        );
         expect(find.text('عرض البنود'), findsOneWidget);
 
         // 2. النقر على عرض البنود للتوسيع
@@ -827,9 +852,15 @@ void main() {
         final controller = OperationsController(
           getSaleInvoicesUseCase: GetSaleInvoicesUseCase(repository),
           getVoucherRequestsUseCase: GetVoucherRequestsUseCase(repository),
-          getSaleInvoiceDetailsUseCase: GetSaleInvoiceDetailsUseCase(repository),
-          getVoucherRequestDetailsUseCase: GetVoucherRequestDetailsUseCase(repository),
-          approveVoucherRequestUseCase: ApproveVoucherRequestUseCase(repository),
+          getSaleInvoiceDetailsUseCase: GetSaleInvoiceDetailsUseCase(
+            repository,
+          ),
+          getVoucherRequestDetailsUseCase: GetVoucherRequestDetailsUseCase(
+            repository,
+          ),
+          approveVoucherRequestUseCase: ApproveVoucherRequestUseCase(
+            repository,
+          ),
           rejectVoucherRequestUseCase: RejectVoucherRequestUseCase(repository),
           cancelVoucherRequestUseCase: CancelVoucherRequestUseCase(repository),
           createVoucherRequestUseCase: CreateVoucherRequestUseCase(repository),

@@ -21,9 +21,10 @@ class VoucherRequestEntity {
   final String? updatedAt;
   final String? networkName;
   final String? posName;
-  final String? posCode;
+  final String? posUuid;
   final int? invoiceId;
   final String? invoiceUuid;
+  final Map<String, dynamic>? modificationsSummary;
   final List<VoucherRequestItemEntity> items;
 
   const VoucherRequestEntity({
@@ -45,9 +46,10 @@ class VoucherRequestEntity {
     this.updatedAt,
     this.networkName,
     this.posName,
-    this.posCode,
+    this.posUuid,
     this.invoiceId,
     this.invoiceUuid,
+    this.modificationsSummary,
     this.items = const [],
   });
 
@@ -57,7 +59,15 @@ class VoucherRequestEntity {
   bool get isCancelled => status == 'CANCELLED';
   bool get isCash => saleType == 'CASH';
   bool get isCredit => saleType == 'CREDIT';
-  int get totalCardsCount => items.fold(0, (sum, item) => sum + item.voucherCount);
+  bool get hasModifications =>
+      modificationsSummary?['has_modifications'] == true;
+  double? get approvedTotal => modificationsSummary?['approved_total'] != null
+      ? (modificationsSummary!['approved_total'] as num).toDouble()
+      : null;
+  int? get approvedItemsCount =>
+      modificationsSummary?['approved_items_count'] as int?;
+  int get totalCardsCount =>
+      items.fold(0, (sum, item) => sum + item.voucherCount);
 }
 
 /// بند من بنود طلب توريد باقات الكروت

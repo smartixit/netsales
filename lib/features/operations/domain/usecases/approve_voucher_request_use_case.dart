@@ -9,7 +9,19 @@ class ApproveVoucherRequestUseCase {
 
   const ApproveVoucherRequestUseCase(this._repository);
 
-  Future<VoucherRequestEntity> call(int id, {String? notes}) {
-    return _repository.approveVoucherRequest(id, notes: notes);
+  Future<VoucherRequestEntity> call(
+    int id, {
+    String? notes,
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? idempotencyKey,
+  }) {
+    return _repository.approveVoucherRequest(
+      id,
+      notes: notes,
+      saleType: saleType,
+      items: items,
+      idempotencyKey: idempotencyKey,
+    );
   }
 }

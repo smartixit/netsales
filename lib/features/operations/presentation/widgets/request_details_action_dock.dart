@@ -10,6 +10,7 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
 import 'package:netsales/features/operations/presentation/widgets/sheets/reject_voucher_request_sheet.dart';
+import 'package:netsales/features/operations/presentation/widgets/sheets/review_and_approve_request_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/sheets/invoice_print_format_sheet.dart';
@@ -84,10 +85,10 @@ class RequestDetailsActionDock extends StatelessWidget {
                           .can(AppPermissions.requestsApprove))
                         Expanded(
                           flex: 3,
-                          child: CustomButton.outline(
-                            text: 'اعتماد الطلب (مقفل أمنياً)',
-                            icon: Icons.lock_outline_rounded,
-                            onPressed: () => _showLockedNotice(context),
+                          child: CustomButton.primary(
+                            text: 'مراجعة واعتماد الطلب',
+                            icon: Icons.fact_check_outlined,
+                            onPressed: () => _openReviewAndApproveSheet(context),
                           ),
                         ),
                     ],
@@ -99,6 +100,14 @@ class RequestDetailsActionDock extends StatelessWidget {
                     InvoicePrintFormatSheet.show(context, request: request),
               ),
       ),
+    );
+  }
+
+  void _openReviewAndApproveSheet(BuildContext context) {
+    ReviewAndApproveRequestSheet.show(
+      context,
+      request: request,
+      controller: controller,
     );
   }
 

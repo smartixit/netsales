@@ -18,6 +18,10 @@ import 'package:netsales/features/operations/domain/usecases/get_voucher_request
 import 'package:netsales/features/operations/domain/usecases/reject_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/update_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/delete_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/entities/request_pricing_preview_entity.dart';
+import 'package:netsales/features/operations/domain/usecases/preview_request_modification_use_case.dart';
+import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
+import 'package:netsales/features/packages/domain/usecases/get_voucher_packages_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -38,6 +42,8 @@ class OperationsController extends GetxController {
   final CreateSaleInvoiceUseCase createSaleInvoiceUseCase;
   final UpdateVoucherRequestUseCase updateVoucherRequestUseCase;
   final DeleteVoucherRequestUseCase deleteVoucherRequestUseCase;
+  final PreviewRequestModificationUseCase? previewRequestModificationUseCase;
+  final GetVoucherPackagesUseCase? getVoucherPackagesUseCase;
 
   OperationsController({
     required this.getSaleInvoicesUseCase,
@@ -51,6 +57,8 @@ class OperationsController extends GetxController {
     required this.createSaleInvoiceUseCase,
     required this.updateVoucherRequestUseCase,
     required this.deleteVoucherRequestUseCase,
+    this.previewRequestModificationUseCase,
+    this.getVoucherPackagesUseCase,
   });
 
   /// القطاع النشط: 0 لفواتير المبيعات، 1 لطلبات الكروت
@@ -690,5 +698,195 @@ class OperationsController extends GetxController {
     }
 
     return result;
+  }
+
+  // ===========================================================================
+  // مسار المراجعة والتعديل والاعتماد السيادي لطلبات التوريد (Milestone 4B)
+  // ===========================================================================
+  final Rxn<RequestPricingPreviewEntity> pricingPreview =
+      Rxn<RequestPricingPreviewEntity>();
+  final RxBool isLoadingPreview = false.obs;
+  final RxString previewError = ''.obs;
+  final RxString reviewSaleType = 'CASH'.obs;
+  final RxList<Map<String, dynamic>> reviewDraftItems =
+      <Map<String, dynamic>>[].obs;
+  final RxList<VoucherPackageEntity> networkAvailablePackages =
+      <VoucherPackageEntity>[].obs;
+  final RxBool isLoadingNetworkPackages = false.obs;
+  final TextEditingController reviewNotesController = TextEditingController();
+
+  /// تهيئة مسار مراجعة طلب التوريد وتعبئة المسودة واستدعاء التسعير السيادي
+  Future<void> initReviewFlow(VoucherRequestEntity request) async {
+    reviewSaleType.value = request.saleType;
+    previewError.value = '';
+    pricingPreview.value = null;
+    reviewNotesController.text = request.requestNote ?? '';
+
+    reviewDraftItems.assignAll(
+      request.items.map((item) => {
+        'package_id': item.packageId,
+        'voucher_count': item.voucherCount,
+      }).toList(),
+    );
+
+    loadNetworkPackages(request.networkId);
+    await refreshReviewPreview(request.requestId);
+  }
+
+  /// جلب الباقات المفعلة للشبكة لاختيار باقات إضافية
+  Future<void> loadNetworkPackages(int networkId) async {
+    if (getVoucherPackagesUseCase == null) return;
+    isLoadingNetworkPackages.value = true;
+    try {
+      final pkgs = await getVoucherPackagesUseCase!(networkId: networkId);
+      networkAvailablePackages.assignAll(pkgs.where((p) => p.isActive));
+    } catch (_) {
+      // إبقاء القائمة هادئة عند تعذر الاتصال
+    } finally {
+      isLoadingNetworkPackages.value = false;
+    }
+  }
+
+  /// طلب إعادة معاينة التسعير من السيرفر
+  Future<void> refreshReviewPreview(int requestId) async {
+    if (previewRequestModificationUseCase == null) return;
+    if (reviewDraftItems.isEmpty) {
+      pricingPreview.value = null;
+      return;
+    }
+
+    isLoadingPreview.value = true;
+    previewError.value = '';
+    try {
+      final preview = await previewRequestModificationUseCase!(
+        requestId,
+        items: reviewDraftItems.toList(),
+        saleType: reviewSaleType.value,
+        requestNote: reviewNotesController.text.trim().isNotEmpty
+            ? reviewNotesController.text.trim()
+            : null,
+      );
+      pricingPreview.value = preview;
+
+      // مزامنة التوكنات المشفرة مع المسودة المحلية للحفاظ على تجميد أسعار الإضافات
+      for (final pItem in preview.items) {
+        if (pItem.pricingToken != null) {
+          final idx = reviewDraftItems
+              .indexWhere((d) => d['package_id'] == pItem.packageId);
+          if (idx != -1) {
+            reviewDraftItems[idx]['pricing_token'] = pItem.pricingToken;
+          }
+        }
+      }
+    } catch (e) {
+      previewError.value = AppException.sanitizeMessage(e);
+    } finally {
+      isLoadingPreview.value = false;
+    }
+  }
+
+  /// تعديل كمية باقة معينة أثناء المراجعة
+  void updateReviewItemQuantity(int requestId, int packageId, int newQuantity) {
+    final idx =
+        reviewDraftItems.indexWhere((d) => d['package_id'] == packageId);
+    if (idx != -1) {
+      if (newQuantity <= 0) {
+        reviewDraftItems.removeAt(idx);
+      } else {
+        reviewDraftItems[idx]['voucher_count'] = newQuantity;
+      }
+      refreshReviewPreview(requestId);
+    }
+  }
+
+  /// حذف باقة من طلب التوريد أثناء المراجعة
+  void removeReviewItem(int requestId, int packageId) {
+    reviewDraftItems.removeWhere((d) => d['package_id'] == packageId);
+    refreshReviewPreview(requestId);
+  }
+
+  /// إضافة باقة جديدة أثناء المراجعة
+  void addReviewPackage(
+    int requestId,
+    VoucherPackageEntity package, {
+    int quantity = 1,
+  }) {
+    final idx =
+        reviewDraftItems.indexWhere((d) => d['package_id'] == package.packageId);
+    if (idx != -1) {
+      final current = reviewDraftItems[idx]['voucher_count'] as int? ?? 0;
+      reviewDraftItems[idx]['voucher_count'] = current + quantity;
+    } else {
+      reviewDraftItems.add({
+        'package_id': package.packageId,
+        'voucher_count': quantity,
+      });
+    }
+    refreshReviewPreview(requestId);
+  }
+
+  /// تغيير طريقة البيع أثناء المراجعة (نقدي / آجل)
+  void setReviewSaleType(int requestId, String saleType) {
+    if (reviewSaleType.value != saleType) {
+      reviewSaleType.value = saleType;
+      refreshReviewPreview(requestId);
+    }
+  }
+
+  /// اعتماد الطلب النهائي وتوليد الفاتورة
+  Future<bool> submitApprovalWithModifications(int requestId) async {
+    if (reviewDraftItems.isEmpty) {
+      CustomSnackbar.show(
+        title: 'تنبيه',
+        message: 'يجب أن يحتوي الطلب على باقة واحدة على الأقل للاعتماد.',
+        type: SnackType.warning,
+      );
+      return false;
+    }
+
+    isSubmittingAction.value = true;
+    try {
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري اعتماد التعديلات وتوليد فاتورة المبيعات...',
+      );
+
+      final updated = await approveVoucherRequestUseCase(
+        requestId,
+        notes: reviewNotesController.text.trim().isNotEmpty
+            ? reviewNotesController.text.trim()
+            : null,
+        saleType: reviewSaleType.value,
+        items: reviewDraftItems.toList(),
+      );
+
+      final index = requests.indexWhere((r) => r.requestId == requestId);
+      if (index != -1) {
+        requests[index] = updated;
+      }
+      if (selectedRequest.value?.requestId == requestId) {
+        selectedRequest.value = updated;
+      }
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم اعتماد الطلب وتوليد الفاتورة بنجاح.',
+      );
+
+      loadInvoices(isRefresh: true);
+      return true;
+    } catch (e) {
+      await CustomAnimationOverlay.hide();
+      final cleanMessage = AppException.sanitizeMessage(e);
+      CustomSnackbar.show(
+        title: 'تعذر اعتماد الطلب',
+        message: cleanMessage,
+        type: SnackType.error,
+      );
+      return false;
+    } finally {
+      isSubmittingAction.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
   }
 }

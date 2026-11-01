@@ -84,3 +84,4 @@ class RequestPricingPreviewEntity {
     required this.removedItems,
   });
 }
+

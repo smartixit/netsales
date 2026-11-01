@@ -140,3 +140,4 @@ double _toDouble(dynamic value) {
   if (value is String) return double.tryParse(value) ?? 0.0;
   return 0.0;
 }
+

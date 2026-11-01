@@ -23,8 +23,8 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
     int page = 1,
   }) {
     final queryParameters = <String, dynamic>{
-      if (networkId != null) 'network_id': networkId,
-      if (posId != null) 'pos_id': posId,
+      'network_id': ?networkId,
+      'pos_id': ?posId,
       if (saleType != null && saleType.isNotEmpty && saleType != 'ALL')
         'sale_type': saleType,
       if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
@@ -57,8 +57,8 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
   }) {
     final queryParameters = <String, dynamic>{
       'period': period,
-      if (networkId != null) 'network_id': networkId,
-      if (posId != null) 'pos_id': posId,
+      'network_id': ?networkId,
+      'pos_id': ?posId,
       if (fromDate != null && fromDate.isNotEmpty) 'from_date': fromDate,
       if (toDate != null && toDate.isNotEmpty) 'to_date': toDate,
     };
@@ -81,8 +81,8 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
     int page = 1,
   }) {
     final queryParameters = <String, dynamic>{
-      if (networkId != null) 'network_id': networkId,
-      if (posId != null) 'pos_id': posId,
+      'network_id': ?networkId,
+      'pos_id': ?posId,
       if (status != null && status.isNotEmpty && status != 'ALL')
         'status': status,
       if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
@@ -116,7 +116,7 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
       ApiConstants.voucherRequestPreviewModification(id),
       data: {
         'items': items,
-        if (saleType != null) 'sale_type': saleType,
+        'sale_type': ?saleType,
         if (requestNote != null && requestNote.trim().isNotEmpty)
           'request_note': requestNote.trim(),
       },
@@ -139,7 +139,7 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
       data: {
         if (notes != null && notes.trim().isNotEmpty)
           'request_note': notes.trim(),
-        if (saleType != null) 'sale_type': saleType,
+        'sale_type': ?saleType,
         if (items != null && items.isNotEmpty) 'items': items,
       },
       headers: {
@@ -212,7 +212,7 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
         'pos_id': posId,
         'sale_type': saleType,
         'items': items,
-        if (paidAmount != null) 'paid_amount': paidAmount,
+        'paid_amount': ?paidAmount,
       },
       fromJson: (json) => SaleInvoiceModel.fromJson(json as Map<String, dynamic>),
     );
@@ -228,8 +228,8 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
     return ApiService.instance.put<VoucherRequestModel>(
       ApiConstants.voucherRequest(id),
       data: {
-        if (saleType != null) 'sale_type': saleType,
-        if (items != null) 'items': items,
+        'sale_type': ?saleType,
+        'items': ?items,
         if (requestNote != null) 'request_note': requestNote.trim(),
       },
       fromJson: (json) => VoucherRequestModel.fromJson(json as Map<String, dynamic>),

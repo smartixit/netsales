@@ -24,7 +24,9 @@ class SaleInvoiceModel extends SaleInvoiceEntity {
     super.updatedAt,
     super.networkName,
     super.posName,
-    super.posCode,
+    super.posUuid,
+    super.requestId,
+    super.requestUuid,
     super.items,
   });
 
@@ -63,7 +65,7 @@ class SaleInvoiceModel extends SaleInvoiceEntity {
       updatedAt: json['updated_at'] as String?,
       networkName: networkData?['network_name'] as String?,
       posName: posData?['pos_name'] as String?,
-      posCode: posData?['pos_code'] as String?,
+      posUuid: posData?['pos_code'] as String?,
       requestId: json['request_id'] != null ? _toInt(json['request_id']) : null,
       requestUuid: json['request_uuid'] as String?,
       items: parsedItems,

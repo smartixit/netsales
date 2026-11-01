@@ -51,8 +51,6 @@ class DashboardNetworkSummaryEntity {
     required this.activePosCount,
     required this.pendingRequestsCount,
   });
-
-  String get networkCode => networkUuid;
 }
 
 /// سياق الكيان الحالي (شبكة أو نقطة بيع)

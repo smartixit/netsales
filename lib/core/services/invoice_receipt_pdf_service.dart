@@ -291,8 +291,8 @@ class InvoiceReceiptPdfService {
           if (invoice.invoiceDate != null)
             _buildThermalKeyValue('تاريخ الإصدار:', invoice.invoiceDate!),
           _buildThermalKeyValue('نقطة البيع:', invoice.posName ?? 'غير محدد'),
-          if (invoice.posCode != null)
-            _buildThermalKeyValue('رمز النقطة:', invoice.posCode!),
+          if (invoice.posUuid != null)
+            _buildThermalKeyValue('رمز النقطة:', invoice.posUuid!),
           _buildThermalKeyValue('نوع البيع:', invoice.saleTypeLabel),
           _buildThermalKeyValue('حالة السداد:', invoice.paymentStatusLabel),
 
@@ -600,7 +600,7 @@ class InvoiceReceiptPdfService {
                         ),
                         pw.SizedBox(height: 2),
                         pw.Text(
-                          'رمز النقطة: ${invoice.posCode ?? '#${invoice.posId}'}',
+                          'رمز النقطة: ${invoice.posUuid ?? '#${invoice.posId}'}',
                           style: const pw.TextStyle(
                             fontSize: 9,
                             color: PdfColors.grey700,

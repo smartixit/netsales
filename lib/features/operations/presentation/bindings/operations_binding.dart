@@ -15,6 +15,7 @@ import 'package:netsales/features/operations/domain/usecases/create_sale_invoice
 import 'package:netsales/features/operations/domain/usecases/create_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/update_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/domain/usecases/delete_voucher_request_use_case.dart';
+import 'package:netsales/features/operations/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/operations/presentation/controllers/create_sale_invoice_controller.dart';
 import 'package:netsales/features/operations/presentation/controllers/create_voucher_request_controller.dart';
 import 'package:netsales/features/operations/presentation/controllers/edit_voucher_request_controller.dart';
@@ -90,6 +91,10 @@ class OperationsBinding extends Bindings {
       () => DeleteVoucherRequestUseCase(Get.find<OperationsRepository>()),
       fenix: true,
     );
+    Get.lazyPut<PreviewRequestModificationUseCase>(
+      () => PreviewRequestModificationUseCase(Get.find<OperationsRepository>()),
+      fenix: true,
+    );
 
     // تسجيل التبعيات المساعدة للفوترة وتوريد الكروت إن لم تكن مسجلة مسبقاً
     if (!Get.isRegistered<PackagesRemoteDataSource>()) {
@@ -150,6 +155,8 @@ class OperationsBinding extends Bindings {
         createSaleInvoiceUseCase: Get.find<CreateSaleInvoiceUseCase>(),
         updateVoucherRequestUseCase: Get.find<UpdateVoucherRequestUseCase>(),
         deleteVoucherRequestUseCase: Get.find<DeleteVoucherRequestUseCase>(),
+        previewRequestModificationUseCase: Get.find<PreviewRequestModificationUseCase>(),
+        getVoucherPackagesUseCase: Get.find<GetVoucherPackagesUseCase>(),
       ),
       fenix: true,
     );

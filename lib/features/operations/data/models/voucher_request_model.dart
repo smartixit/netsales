@@ -24,7 +24,10 @@ class VoucherRequestModel extends VoucherRequestEntity {
     super.updatedAt,
     super.networkName,
     super.posName,
-    super.posCode,
+    super.posUuid,
+    super.invoiceId,
+    super.invoiceUuid,
+    super.modificationsSummary,
     super.items,
   });
 
@@ -55,16 +58,22 @@ class VoucherRequestModel extends VoucherRequestEntity {
       status: json['status'] as String? ?? 'PENDING',
       statusLabel: json['status_label'] as String? ?? 'قيد الانتظار',
       createdBy: _toInt(json['created_by']),
-      reviewedBy: json['reviewed_by'] != null ? _toInt(json['reviewed_by']) : null,
+      reviewedBy: json['reviewed_by'] != null
+          ? _toInt(json['reviewed_by'])
+          : null,
       reviewDate: json['review_date'] as String?,
       requestNote: json['request_note'] as String?,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
       networkName: networkData?['network_name'] as String?,
       posName: posData?['pos_name'] as String?,
-      posCode: posData?['pos_code'] as String?,
+      posUuid: posData?['pos_code'] as String?,
       invoiceId: json['invoice_id'] != null ? _toInt(json['invoice_id']) : null,
       invoiceUuid: json['invoice_uuid'] as String?,
+      modificationsSummary:
+          json['modifications_summary'] is Map<String, dynamic>
+          ? json['modifications_summary'] as Map<String, dynamic>
+          : null,
       items: parsedItems,
     );
   }

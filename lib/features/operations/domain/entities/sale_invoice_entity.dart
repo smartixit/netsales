@@ -21,7 +21,7 @@ class SaleInvoiceEntity {
   final String? updatedAt;
   final String? networkName;
   final String? posName;
-  final String? posCode;
+  final String? posUuid;
   final int? requestId;
   final String? requestUuid;
   final List<SaleInvoiceItemEntity> items;
@@ -45,7 +45,7 @@ class SaleInvoiceEntity {
     this.updatedAt,
     this.networkName,
     this.posName,
-    this.posCode,
+    this.posUuid,
     this.requestId,
     this.requestUuid,
     this.items = const [],
@@ -54,7 +54,8 @@ class SaleInvoiceEntity {
   bool get isCash => saleType == 'CASH';
   bool get isCredit => saleType == 'CREDIT';
   bool get hasRemaining => remainingAmount > 0.001;
-  int get totalCardsCount => items.fold(0, (sum, item) => sum + item.voucherCount);
+  int get totalCardsCount =>
+      items.fold(0, (sum, item) => sum + item.voucherCount);
 }
 
 /// بند من بنود فاتورة المبيعات (باقة كروت محددة مع السعر والكمية والخصم)

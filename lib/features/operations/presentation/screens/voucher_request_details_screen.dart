@@ -11,6 +11,7 @@ import 'package:netsales/features/operations/presentation/widgets/request_detail
 import 'package:netsales/features/operations/presentation/widgets/request_hero_bond_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_items_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_linked_invoice_card.dart';
+import 'package:netsales/features/operations/presentation/widgets/request_modifications_comparison_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_notes_card.dart';
 import 'package:netsales/features/operations/presentation/widgets/request_parties_card.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -115,6 +116,17 @@ class VoucherRequestDetailsScreen extends GetView<OperationsController> {
                         request.invoiceUuid != null) ...[
                       AppSpacing.vMd,
                       RequestLinkedInvoiceCard(
+                        request: request,
+                        controller: controller,
+                      ),
+                    ],
+
+                    // 7. بطاقة تقرير مطابقة وتعديل طلب التوريد مع الفاتورة المعتمدة
+                    if (request.isApproved &&
+                        (request.hasModifications ||
+                            request.invoiceId != null)) ...[
+                      AppSpacing.vMd,
+                      RequestModificationsComparisonCard(
                         request: request,
                         controller: controller,
                       ),

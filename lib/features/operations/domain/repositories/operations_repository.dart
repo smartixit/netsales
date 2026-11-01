@@ -42,10 +42,21 @@ abstract class OperationsRepository {
   /// جلب تفاصيل طلب توريد محدد
   Future<VoucherRequestEntity> getVoucherRequestDetails(int id);
 
-  /// اعتماد طلب توريد كروت من قبل مزود الشبكة
+  /// معاينة التعديلات والتسعير السيادي لطلب التوريد قبل الاعتماد
+  Future<RequestPricingPreviewEntity> previewRequestModification(
+    int id, {
+    required List<Map<String, dynamic>> items,
+    String? saleType,
+    String? requestNote,
+  });
+
+  /// اعتماد طلب توريد كروت من قبل مزود الشبكة وتوليد الفاتورة
   Future<VoucherRequestEntity> approveVoucherRequest(
     int id, {
     String? notes,
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? idempotencyKey,
   });
 
   /// رفض طلب توريد كروت مع ذكر السبب
@@ -88,4 +99,3 @@ abstract class OperationsRepository {
   /// حذف طلب توريد كروت قيد الانتظار أو الملغي
   Future<void> deleteVoucherRequest(int id);
 }
-

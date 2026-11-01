@@ -1,5 +1,7 @@
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/operations/data/datasources/operations_remote_data_source.dart';
+import 'package:netsales/features/operations/data/models/voucher_request_model.dart';
+import 'package:netsales/features/operations/domain/entities/request_pricing_preview_entity.dart';
 import 'package:netsales/features/operations/domain/entities/sale_invoice_entity.dart';
 import 'package:netsales/features/operations/domain/entities/sales_trend_point_entity.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
@@ -54,7 +56,7 @@ class OperationsRepositoryImpl implements OperationsRepository {
     throw AppException(
       response.message.isNotEmpty
           ? response.message
-          : 'تعذر استرجاع تفاصيل الفاتورة',
+          : 'تعذر استرجاع تفاصيل فاتورة المبيعات',
     );
   }
 
@@ -103,17 +105,52 @@ class OperationsRepositoryImpl implements OperationsRepository {
   }
 
   @override
-  Future<VoucherRequestEntity> approveVoucherRequest(
+  Future<RequestPricingPreviewEntity> previewRequestModification(
     int id, {
-    String? notes,
+    required List<Map<String, dynamic>> items,
+    String? saleType,
+    String? requestNote,
   }) async {
-    final response = await _remoteDataSource.approveVoucherRequest(
+    final response = await _remoteDataSource.previewRequestModification(
       id,
-      notes: notes,
+      items: items,
+      saleType: saleType,
+      requestNote: requestNote,
     );
 
     if (response.data != null) {
       return response.data!;
+    }
+
+    throw AppException(
+      response.message.isNotEmpty
+          ? response.message
+          : 'تعذر احتساب معاينة تعديلات الطلب',
+    );
+  }
+
+  @override
+  Future<VoucherRequestEntity> approveVoucherRequest(
+    int id, {
+    String? notes,
+    String? saleType,
+    List<Map<String, dynamic>>? items,
+    String? idempotencyKey,
+  }) async {
+    final response = await _remoteDataSource.approveVoucherRequest(
+      id,
+      notes: notes,
+      saleType: saleType,
+      items: items,
+      idempotencyKey: idempotencyKey,
+    );
+
+    if (response.data != null) {
+      final data = response.data!;
+      if (data.containsKey('request') && data['request'] is Map<String, dynamic>) {
+        return VoucherRequestModel.fromJson(data['request'] as Map<String, dynamic>);
+      }
+      return VoucherRequestModel.fromJson(data);
     }
 
     throw AppException(
@@ -286,4 +323,3 @@ class OperationsRepositoryImpl implements OperationsRepository {
     throw AppException('failed');
   }
 }
-

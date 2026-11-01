@@ -16,10 +16,7 @@ import 'package:netsales/features/operations/domain/entities/sale_invoice_entity
 class InvoicePartiesCard extends StatelessWidget {
   final SaleInvoiceEntity invoice;
 
-  const InvoicePartiesCard({
-    super.key,
-    required this.invoice,
-  });
+  const InvoicePartiesCard({super.key, required this.invoice});
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +78,8 @@ class InvoicePartiesCard extends StatelessWidget {
                   icon: Icons.wifi_tethering_rounded,
                   accentColor: colors.primary,
                   roleLabel: 'شبكة الإنترنت المصدّرة',
-                  partyName: invoice.networkName ?? 'الشبكة #${invoice.networkId}',
+                  partyName:
+                      invoice.networkName ?? 'الشبكة #${invoice.networkId}',
                   idBadge: 'المزوّد',
                 ),
               ),
@@ -95,7 +93,9 @@ class InvoicePartiesCard extends StatelessWidget {
                   accentColor: themeColor,
                   roleLabel: 'نقطة البيع المستلمة',
                   partyName: invoice.posName ?? 'نقطة بيع #${invoice.posId}',
-                  idBadge: invoice.posCode != null ? '#${invoice.posCode}' : 'الوكيل',
+                  idBadge: invoice.posUuid != null
+                      ? '#${invoice.posUuid}'
+                      : 'الوكيل',
                 ),
               ),
             ],
@@ -149,17 +149,10 @@ class _PartyLedgerPod extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 alignment: Alignment.center,
-                child: Icon(
-                  icon,
-                  color: accentColor,
-                  size: 16.r,
-                ),
+                child: Icon(icon, color: accentColor, size: 16.r),
               ),
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 6.w,
-                  vertical: 2.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
                   color: accentColor.withValues(alpha: 0.1),
                   borderRadius: AppRadius.fullRadius,
