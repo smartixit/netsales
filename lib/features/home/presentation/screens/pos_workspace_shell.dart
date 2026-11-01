@@ -42,13 +42,13 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
                         // Tab 0: لوحة قيادة ومشتريات الوكيل (POS-01)
                         DashboardView(),
 
-                        // Tab 1: طلبات التوريد وفواتير الشراء المستلمة (POS-02 / POS-04)
+                        // Tab 1: طلبات التوريد وفواتير الشراء المستلمة (POS-03 / POS-05)
                         OperationsScreen(),
 
                         // Tab 2: دليل الشبكات المزودة المعتمدة والأسعار (POS-06)
                         PartnersScreen(),
 
-                        // Tab 3: الحساب الجاري والمديونية وموظفو النقطة (POS-07 / POS-08)
+                        // Tab 3: الحساب الجاري والمديونية وموظفو النقطة (POS-04 / POS-07)
                         MoreScreen(),
                       ],
                     ),

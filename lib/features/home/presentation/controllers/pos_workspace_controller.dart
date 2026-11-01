@@ -35,7 +35,7 @@ class PosWorkspaceController extends GetxController {
       icon: Icons.shopping_cart_outlined,
       activeIcon: Icons.shopping_cart_rounded,
       label: 'التوريد',
-      tooltip: 'طلبات التوريد وفواتير الشراء المستلمة (POS-02 / POS-04)',
+      tooltip: 'طلبات التوريد وفواتير الشراء المستلمة (POS-03 / POS-05)',
     ),
     CustomFloatingNavItem(
       icon: Icons.hub_outlined,
@@ -47,7 +47,7 @@ class PosWorkspaceController extends GetxController {
       icon: Icons.account_balance_wallet_outlined,
       activeIcon: Icons.account_balance_wallet_rounded,
       label: 'الحساب',
-      tooltip: 'الحساب الجاري والمديونية وموظفو النقطة (POS-07 / POS-08)',
+      tooltip: 'الحساب الجاري والمديونية وموظفو النقطة (POS-04 / POS-07)',
     ),
   ];
 

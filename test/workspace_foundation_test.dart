@@ -123,14 +123,18 @@ void main() {
       expect(net01!.route, equals(AppRoutes.networkWorkspace));
       expect(net01.workspace, equals(AppWorkspace.network));
 
+      final net02 = ScreenRegistry.findById('NET-02');
+      expect(net02, isNotNull);
+      expect(net02!.titleEn, equals('Supply Requests'));
+
       final pos01 = ScreenRegistry.findById('POS-01');
       expect(pos01, isNotNull);
       expect(pos01!.route, equals(AppRoutes.posWorkspace));
       expect(pos01.workspace, equals(AppWorkspace.pos));
 
-      final pos03 = ScreenRegistry.findById('POS-03');
-      expect(pos03, isNotNull);
-      expect(pos03!.isBalanceMutation, isTrue);
+      final pos02 = ScreenRegistry.findById('POS-02');
+      expect(pos02, isNotNull);
+      expect(pos02!.isBalanceMutation, isTrue);
     });
 
     test('resolves screen descriptor by canonical route', () {

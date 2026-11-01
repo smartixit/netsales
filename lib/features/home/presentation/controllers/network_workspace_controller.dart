@@ -35,19 +35,19 @@ class NetworkWorkspaceController extends GetxController {
       icon: Icons.receipt_long_outlined,
       activeIcon: Icons.receipt_long_rounded,
       label: 'المبيعات',
-      tooltip: 'فواتير مبيعات الجملة وطلبات التوريد (NET-02 / NET-04)',
+      tooltip: 'فواتير مبيعات الجملة وطلبات التوريد (NET-02 / NET-03)',
     ),
     CustomFloatingNavItem(
       icon: Icons.storefront_outlined,
       activeIcon: Icons.storefront_rounded,
       label: 'الوكلاء',
-      tooltip: 'دليل نقاط البيع وباقات الكروت (NET-06 / NET-08)',
+      tooltip: 'دليل نقاط البيع وباقات الكروت (NET-05 / NET-06)',
     ),
     CustomFloatingNavItem(
       icon: Icons.account_balance_wallet_outlined,
       activeIcon: Icons.account_balance_wallet_rounded,
       label: 'المالية',
-      tooltip: 'المحافظ والمصروفات وفريق العمل (NET-10 / NET-11 / NET-12)',
+      tooltip: 'المحافظ والمصروفات وفريق العمل (NET-04 / NET-07 / NET-08)',
     ),
   ];
 

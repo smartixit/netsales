@@ -3,6 +3,16 @@ import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 
 /// ============================================================================
+/// حالة تنفيذ الشاشة في النظام (Screen Implementation State)
+/// ============================================================================
+enum ScreenImplementationState {
+  implemented,
+  placeholder,
+  planned,
+  notSupported,
+}
+
+/// ============================================================================
 /// كائن تعريف الشاشة المؤسسية المعتمدة (Screen Metadata Descriptor)
 /// ============================================================================
 class ScreenDescriptor {
@@ -14,6 +24,7 @@ class ScreenDescriptor {
   final String? requiredPermission;
   final bool isReadOnlyVerified;
   final bool isBalanceMutation;
+  final ScreenImplementationState implementationState;
 
   const ScreenDescriptor({
     required this.screenId,
@@ -24,13 +35,14 @@ class ScreenDescriptor {
     this.requiredPermission,
     this.isReadOnlyVerified = true,
     this.isBalanceMutation = false,
+    this.implementationState = ScreenImplementationState.implemented,
   });
 }
 
 /// ============================================================================
 /// سجل الشاشات والمسارات البرمجية المعتمدة لنظام NetSales (Screen Registry)
 /// ============================================================================
-/// يربط كل شاشة بكودها الفريد المتفق عليه في وثيقة المعمارية (Phase 3/3.1/4)
+/// يربط كل شاشة بكودها الفريد المتفق عليه في وثائق المعمارية (Phase 3.1 & Phase 4)
 abstract final class ScreenRegistry {
   ScreenRegistry._();
 
@@ -44,6 +56,7 @@ abstract final class ScreenRegistry {
       titleAr: 'تسجيل الدخول',
       titleEn: 'Sign In',
       workspace: AppWorkspace.unsupported,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'AUTH-02',
@@ -51,6 +64,7 @@ abstract final class ScreenRegistry {
       titleAr: 'التحقق بخطوتين',
       titleEn: 'Two-Factor Authentication',
       workspace: AppWorkspace.unsupported,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'AUTH-03',
@@ -58,6 +72,7 @@ abstract final class ScreenRegistry {
       titleAr: 'استعادة وتعيين كلمة المرور',
       titleEn: 'Password Reset',
       workspace: AppWorkspace.unsupported,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'AUTH-04',
@@ -65,6 +80,7 @@ abstract final class ScreenRegistry {
       titleAr: 'تسجيل مزود شبكة جديد',
       titleEn: 'Network Provider Registration',
       workspace: AppWorkspace.unsupported,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'AUTH-05',
@@ -72,6 +88,7 @@ abstract final class ScreenRegistry {
       titleAr: 'تسجيل نقطة بيع جديدة',
       titleEn: 'Point of Sale Registration',
       workspace: AppWorkspace.unsupported,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'AUTH-06',
@@ -79,175 +96,196 @@ abstract final class ScreenRegistry {
       titleAr: 'بوابة توجيه إدارة المنصة العامة',
       titleEn: 'Platform Admin Windows Desktop Gateway',
       workspace: AppWorkspace.unsupported,
+      implementationState: ScreenImplementationState.implemented,
     ),
 
     // -------------------------------------------------------------------------
-    // شاشات مساحة عمل مزود الشبكة (NETWORK Workspace Screens)
+    // شاشات مساحة عمل مزود الشبكة (NETWORK Workspace Screens - Phase 3.1 / 4)
     // -------------------------------------------------------------------------
     ScreenDescriptor(
       screenId: 'NET-01',
       route: AppRoutes.networkWorkspace,
       titleAr: 'لوحة قيادة وتوزيع مزود الشبكة',
-      titleEn: 'Network Operations Dashboard',
+      titleEn: 'Network Dashboard',
       workspace: AppWorkspace.network,
       requiredPermission: AppPermissions.networksView,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'NET-02',
-      route: AppRoutes.wholesaleInvoices,
-      titleAr: 'فواتير مبيعات الجملة والتوزيع',
-      titleEn: 'Wholesale Sales Invoices',
+      route: AppRoutes.supplyRequestsReview,
+      titleAr: 'مراجعة واعتماد طلبات التوريد',
+      titleEn: 'Supply Requests',
       workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.salesView,
+      requiredPermission: AppPermissions.requestsView,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'NET-03',
-      route: AppRoutes.saleInvoiceDetails,
-      titleAr: 'تفاصيل فاتورة مبيعات الجملة',
-      titleEn: 'Wholesale Invoice Details',
+      route: AppRoutes.wholesaleInvoices,
+      titleAr: 'فواتير مبيعات الجملة والتوزيع',
+      titleEn: 'Wholesale Invoices',
       workspace: AppWorkspace.network,
       requiredPermission: AppPermissions.salesView,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'NET-04',
-      route: AppRoutes.supplyRequestsReview,
-      titleAr: 'مراجعة واعتماد طلبات التوريد',
-      titleEn: 'Supply Requests Review Hub',
+      route: AppRoutes.networkWalletStatement,
+      titleAr: 'كشف حركات محفظة الشبكة والحسابات',
+      titleEn: 'Network Wallet Statement',
       workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.requestsView,
+      requiredPermission: AppPermissions.networkWalletsView,
+      implementationState: ScreenImplementationState.placeholder,
     ),
     ScreenDescriptor(
       screenId: 'NET-05',
+      route: AppRoutes.posDirectory,
+      titleAr: 'دليل وكلاء نقاط البيع المرتبطين',
+      titleEn: 'Affiliated POS Directory',
+      workspace: AppWorkspace.network,
+      requiredPermission: AppPermissions.posView,
+      implementationState: ScreenImplementationState.implemented,
+    ),
+    ScreenDescriptor(
+      screenId: 'NET-06',
+      route: AppRoutes.voucherPackagesCatalog,
+      titleAr: 'كتالوج باقات الكروت وأسعار الجملة',
+      titleEn: 'Voucher Package Catalog',
+      workspace: AppWorkspace.network,
+      requiredPermission: AppPermissions.voucherPackagesView,
+      implementationState: ScreenImplementationState.implemented,
+    ),
+    ScreenDescriptor(
+      screenId: 'NET-07',
+      route: AppRoutes.operatingExpenses,
+      titleAr: 'سندات المصروفات التشغيلية',
+      titleEn: 'Operational Expenses',
+      workspace: AppWorkspace.network,
+      requiredPermission: AppPermissions.expensesView,
+      implementationState: ScreenImplementationState.placeholder,
+    ),
+    ScreenDescriptor(
+      screenId: 'NET-08',
+      route: AppRoutes.networkTeamManagement,
+      titleAr: 'إدارة فريق عمل وموظفي الشبكة',
+      titleEn: 'Network Staff',
+      workspace: AppWorkspace.network,
+      requiredPermission: AppPermissions.usersView,
+      implementationState: ScreenImplementationState.planned,
+    ),
+    ScreenDescriptor(
+      screenId: 'NET-09',
+      route: AppRoutes.networkSubscription,
+      titleAr: 'اشتراك الشبكة وحصص الاستهلاك',
+      titleEn: 'Provider Subscription',
+      workspace: AppWorkspace.network,
+      requiredPermission: AppPermissions.networksView,
+      implementationState: ScreenImplementationState.placeholder,
+    ),
+    ScreenDescriptor(
+      screenId: 'NET-10',
       route: AppRoutes.voucherRequestDetails,
       titleAr: 'تفاصيل وبنود طلب التوريد',
       titleEn: 'Supply Request Details',
       workspace: AppWorkspace.network,
       requiredPermission: AppPermissions.requestsView,
-    ),
-    ScreenDescriptor(
-      screenId: 'NET-06',
-      route: AppRoutes.posDirectory,
-      titleAr: 'دليل وكلاء نقاط البيع المرتبطين',
-      titleEn: 'Point of Sale Directory',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.posView,
-    ),
-    ScreenDescriptor(
-      screenId: 'NET-08',
-      route: AppRoutes.voucherPackagesCatalog,
-      titleAr: 'كتالوج باقات الكروت وأسعار الجملة',
-      titleEn: 'Voucher Packages Catalog',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.voucherPackagesView,
-    ),
-    ScreenDescriptor(
-      screenId: 'NET-09',
-      route: AppRoutes.customDiscounts,
-      titleAr: 'عمولات وخصومات الوكلاء المخصصة',
-      titleEn: 'Custom POS Discounts',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.voucherPackagesView,
-    ),
-    ScreenDescriptor(
-      screenId: 'NET-10',
-      route: AppRoutes.networkWalletStatement,
-      titleAr: 'كشف حركات محفظة الشبكة والحسابات',
-      titleEn: 'Network Wallet & Ledger Statement',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.networkWalletsView,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'NET-11',
-      route: AppRoutes.operatingExpenses,
-      titleAr: 'سندات المصروفات التشغيلية',
-      titleEn: 'Operating Expenses Disbursals',
+      route: AppRoutes.saleInvoiceDetails,
+      titleAr: 'تفاصيل فاتورة مبيعات الجملة',
+      titleEn: 'Wholesale Invoice Details',
       workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.expensesView,
-    ),
-    ScreenDescriptor(
-      screenId: 'NET-12',
-      route: AppRoutes.networkTeamManagement,
-      titleAr: 'إدارة فريق عمل وموظفي الشبكة',
-      titleEn: 'Network Staff & Memberships',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.usersView,
-    ),
-    ScreenDescriptor(
-      screenId: 'NET-13',
-      route: AppRoutes.networkSubscription,
-      titleAr: 'اشتراك الشبكة وحصص الاستهلاك',
-      titleEn: 'Network Cloud Subscription & Quotas',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.networksView,
+      requiredPermission: AppPermissions.salesView,
+      implementationState: ScreenImplementationState.implemented,
     ),
 
     // -------------------------------------------------------------------------
-    // شاشات مساحة عمل نقطة البيع والوكيل (POS Workspace Screens)
+    // شاشات مساحة عمل نقطة البيع والوكيل (POS Workspace Screens - Phase 3.1 / 4)
     // -------------------------------------------------------------------------
     ScreenDescriptor(
       screenId: 'POS-01',
       route: AppRoutes.posWorkspace,
       titleAr: 'لوحة قيادة ومشتريات نقطة البيع',
-      titleEn: 'POS Organization Dashboard',
+      titleEn: 'POS Dashboard',
       workspace: AppWorkspace.pos,
       requiredPermission: AppPermissions.posView,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'POS-02',
-      route: AppRoutes.procurementOrders,
-      titleAr: 'سجل طلبات توريد وشراء الكروت',
-      titleEn: 'Procurement Supply Orders',
-      workspace: AppWorkspace.pos,
-      requiredPermission: AppPermissions.requestsView,
-    ),
-    ScreenDescriptor(
-      screenId: 'POS-03',
       route: AppRoutes.newProcurementOrder,
       titleAr: 'إنشاء طلب توريد كروت جديد',
       titleEn: 'New Procurement Order',
       workspace: AppWorkspace.pos,
       requiredPermission: AppPermissions.requestsCreate,
       isBalanceMutation: true,
+      implementationState: ScreenImplementationState.placeholder,
+    ),
+    ScreenDescriptor(
+      screenId: 'POS-03',
+      route: AppRoutes.purchaseInvoices,
+      titleAr: 'فواتير مشتريات نقطة البيع',
+      titleEn: 'Purchase Invoices',
+      workspace: AppWorkspace.pos,
+      requiredPermission: AppPermissions.salesView,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'POS-04',
-      route: AppRoutes.purchaseInvoices,
-      titleAr: 'فواتير المشتريات وسندات الاستلام',
-      titleEn: 'Purchase Invoices & Receipts',
+      route: AppRoutes.posWalletStatement,
+      titleAr: 'كشف الحساب الجاري والمديونية',
+      titleEn: 'POS Wallet Statement',
       workspace: AppWorkspace.pos,
-      requiredPermission: AppPermissions.salesView,
+      requiredPermission: AppPermissions.posWalletsView,
+      implementationState: ScreenImplementationState.placeholder,
     ),
     ScreenDescriptor(
       screenId: 'POS-05',
-      route: AppRoutes.purchaseInvoiceDetails,
-      titleAr: 'تفاصيل فاتورة الشراء والسند',
-      titleEn: 'Purchase Invoice Details',
+      route: AppRoutes.procurementOrders,
+      titleAr: 'سجل ومتابعة طلبات التوريد',
+      titleEn: 'Procurement Tracking',
       workspace: AppWorkspace.pos,
-      requiredPermission: AppPermissions.salesView,
+      requiredPermission: AppPermissions.requestsView,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'POS-06',
       route: AppRoutes.linkedNetworksCatalog,
-      titleAr: 'دليل الشبكات المزودة وباقاتها',
-      titleEn: 'Linked Networks & Packages Catalog',
+      titleAr: 'دليل الشبكات المزودة وباقاتها المعتمدة',
+      titleEn: 'Linked Networks and Catalog',
       workspace: AppWorkspace.pos,
       requiredPermission: AppPermissions.networksView,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'POS-07',
-      route: AppRoutes.posWalletStatement,
-      titleAr: 'كشف الحساب الجاري والمديونية',
-      titleEn: 'Current Account & Debt Statement',
+      route: AppRoutes.posStaffManagement,
+      titleAr: 'إدارة موظفي ومحاسبي نقطة البيع',
+      titleEn: 'POS Staff',
       workspace: AppWorkspace.pos,
-      requiredPermission: AppPermissions.posWalletsView,
+      requiredPermission: AppPermissions.usersView,
+      implementationState: ScreenImplementationState.planned,
     ),
     ScreenDescriptor(
       screenId: 'POS-08',
-      route: AppRoutes.posStaffManagement,
-      titleAr: 'إدارة موظفي ومحاسبي نقطة البيع',
-      titleEn: 'POS Staff & Memberships',
+      route: AppRoutes.voucherRequestDetails,
+      titleAr: 'تفاصيل وتتبع طلب التوريد',
+      titleEn: 'Procurement Order Details',
       workspace: AppWorkspace.pos,
-      requiredPermission: AppPermissions.usersView,
+      requiredPermission: AppPermissions.requestsView,
+      implementationState: ScreenImplementationState.implemented,
+    ),
+    ScreenDescriptor(
+      screenId: 'POS-09',
+      route: AppRoutes.purchaseInvoiceDetails,
+      titleAr: 'تفاصيل فاتورة الشراء والسند المالي',
+      titleEn: 'Purchase Invoice Details',
+      workspace: AppWorkspace.pos,
+      requiredPermission: AppPermissions.salesView,
+      implementationState: ScreenImplementationState.implemented,
     ),
 
     // -------------------------------------------------------------------------
@@ -260,6 +298,7 @@ abstract final class ScreenRegistry {
       titleEn: 'Active Devices & Sessions',
       workspace: AppWorkspace.unsupported,
       requiredPermission: AppPermissions.authView,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'SEC-02',
@@ -268,6 +307,7 @@ abstract final class ScreenRegistry {
       titleEn: 'Security & 2FA Settings',
       workspace: AppWorkspace.unsupported,
       requiredPermission: AppPermissions.authManage,
+      implementationState: ScreenImplementationState.placeholder,
     ),
   ];
 
@@ -287,4 +327,3 @@ abstract final class ScreenRegistry {
     }
   }
 }
-

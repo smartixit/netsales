@@ -43,13 +43,13 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
                         // Tab 0: لوحة قيادة ومؤشرات مزود الشبكة (NET-01)
                         DashboardView(),
 
-                        // Tab 1: فواتير مبيعات الجملة وطلبات التوريد (NET-02 / NET-04)
+                        // Tab 1: فواتير مبيعات الجملة وطلبات التوريد (NET-02 / NET-03)
                         OperationsScreen(),
 
-                        // Tab 2: دليل نقاط البيع وباقات الكروت (NET-06 / NET-08)
+                        // Tab 2: دليل نقاط البيع وباقات الكروت (NET-05 / NET-06)
                         PartnersScreen(),
 
-                        // Tab 3: المحفظة والمصروفات وإدارة الفريق (NET-10 / NET-11 / NET-12)
+                        // Tab 3: المحفظة والمصروفات وإدارة الفريق (NET-04 / NET-07 / NET-08)
                         MoreScreen(),
                       ],
                     ),
