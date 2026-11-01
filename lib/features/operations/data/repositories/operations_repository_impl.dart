@@ -166,6 +166,7 @@ class OperationsRepositoryImpl implements OperationsRepository {
     required String saleType,
     required List<Map<String, dynamic>> items,
     String? requestNote,
+    String? idempotencyKey,
   }) async {
     final response = await _remoteDataSource.createVoucherRequest(
       networkId: networkId,
@@ -173,6 +174,7 @@ class OperationsRepositoryImpl implements OperationsRepository {
       saleType: saleType,
       items: items,
       requestNote: requestNote,
+      idempotencyKey: idempotencyKey,
     );
 
     if (response.data != null) {
@@ -219,12 +221,14 @@ class OperationsRepositoryImpl implements OperationsRepository {
     String? saleType,
     List<Map<String, dynamic>>? items,
     String? requestNote,
+    String? idempotencyKey,
   }) async {
     final response = await _remoteDataSource.updateVoucherRequest(
       id,
       saleType: saleType,
       items: items,
       requestNote: requestNote,
+      idempotencyKey: idempotencyKey,
     );
 
     if (response.data != null) {

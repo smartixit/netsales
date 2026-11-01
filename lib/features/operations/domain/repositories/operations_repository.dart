@@ -63,6 +63,7 @@ abstract class OperationsRepository {
     required String saleType,
     required List<Map<String, dynamic>> items,
     String? requestNote,
+    String? idempotencyKey,
   });
 
   /// إنشاء وتوليد فاتورة مبيعات مباشرة
@@ -80,6 +81,7 @@ abstract class OperationsRepository {
     String? saleType,
     List<Map<String, dynamic>>? items,
     String? requestNote,
+    String? idempotencyKey,
   });
 
   /// حذف طلب توريد كروت قيد الانتظار أو الملغي

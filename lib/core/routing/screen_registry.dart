@@ -221,8 +221,8 @@ abstract final class ScreenRegistry {
       titleEn: 'New Procurement Order',
       workspace: AppWorkspace.pos,
       requiredPermission: AppPermissions.requestsCreate,
-      isBalanceMutation: true,
-      implementationState: ScreenImplementationState.placeholder,
+      isBalanceMutation: false,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'POS-03',

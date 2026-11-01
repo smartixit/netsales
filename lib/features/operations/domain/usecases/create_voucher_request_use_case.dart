@@ -15,6 +15,7 @@ class CreateVoucherRequestUseCase {
     required String saleType,
     required List<Map<String, dynamic>> items,
     String? requestNote,
+    String? idempotencyKey,
   }) {
     return _repository.createVoucherRequest(
       networkId: networkId,
@@ -22,6 +23,7 @@ class CreateVoucherRequestUseCase {
       saleType: saleType,
       items: items,
       requestNote: requestNote,
+      idempotencyKey: idempotencyKey,
     );
   }
 }

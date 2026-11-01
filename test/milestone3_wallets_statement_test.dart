@@ -140,8 +140,8 @@ void main() {
       expect(model.isOverdrawn, isTrue);
       expect(model.debitAmount, equals(85000.0));
       expect(model.isDebtor, isTrue);
-      // Absolute magnitude of negative balance is the authoritative debt
-      expect(model.walletBalance.abs(), equals(85000.0));
+      // Server-provided debitAmount is the authoritative debt magnitude without local abs() or invoice math
+      expect(model.debitAmount, equals(85000.0));
     });
 
     test('PosWalletLogModel parses ledger movement correctly', () {

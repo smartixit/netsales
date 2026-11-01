@@ -55,6 +55,7 @@ abstract class OperationsRemoteDataSource {
     required String saleType,
     required List<Map<String, dynamic>> items,
     String? requestNote,
+    String? idempotencyKey,
   });
 
   Future<ApiResponse<SaleInvoiceModel>> createSaleInvoice({

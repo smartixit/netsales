@@ -1,13 +1,10 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
-import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/routing/middlewares/permission_guard_middleware.dart';
 import 'package:netsales/core/routing/middlewares/workspace_guard.dart';
-import 'package:netsales/features/auth/presentation/screens/unsupported_platform_screen.dart';
-import 'package:netsales/features/home/presentation/bindings/workspace_bindings.dart';
-import 'package:netsales/features/home/presentation/screens/network_workspace_shell.dart';
-import 'package:netsales/features/home/presentation/screens/pos_workspace_shell.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/register_network_binding.dart';
@@ -21,20 +18,25 @@ import 'package:netsales/features/auth/presentation/screens/register_network_scr
 import 'package:netsales/features/auth/presentation/screens/register_pos_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/two_factor_auth_screen.dart';
+import 'package:netsales/features/auth/presentation/screens/unsupported_platform_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:netsales/features/home/presentation/bindings/home_layout_binding.dart';
+import 'package:netsales/features/home/presentation/bindings/workspace_bindings.dart';
 import 'package:netsales/features/home/presentation/screens/home_layout_screen.dart';
+import 'package:netsales/features/home/presentation/screens/network_workspace_shell.dart';
+import 'package:netsales/features/home/presentation/screens/pos_workspace_shell.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
 import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:netsales/features/onboarding/presentation/screens/welcome_screen.dart';
-import 'package:netsales/features/splash/presentation/bindings/splash_binding.dart';
-import 'package:netsales/features/splash/presentation/screens/splash_screen.dart';
 import 'package:netsales/features/operations/presentation/bindings/operations_binding.dart';
+import 'package:netsales/features/operations/presentation/screens/new_procurement_order_screen.dart';
 import 'package:netsales/features/operations/presentation/screens/sale_invoice_details_screen.dart';
 import 'package:netsales/features/operations/presentation/screens/voucher_request_details_screen.dart';
 import 'package:netsales/features/packages/presentation/bindings/packages_binding.dart';
 import 'package:netsales/features/packages/presentation/screens/voucher_packages_hub_screen.dart';
+import 'package:netsales/features/splash/presentation/bindings/splash_binding.dart';
+import 'package:netsales/features/splash/presentation/screens/splash_screen.dart';
 import 'package:netsales/features/wallets/presentation/bindings/network_wallet_binding.dart';
 import 'package:netsales/features/wallets/presentation/bindings/pos_wallet_binding.dart';
 import 'package:netsales/features/wallets/presentation/screens/network_wallet_statement_screen.dart';
@@ -166,44 +168,30 @@ abstract final class AppPages {
     // ========================================================================
     // 4. قطاع الشبكات ومحافظها (Networks & Wallets)
     // ========================================================================
-    // GetPage(
-    //   name: AppRoutes.networks,
-    //   page: () => const NetworksScreen(),
-    //   binding: NetworksBinding(),
-    //   middlewares: [
-    //     AuthGuard(),
-    //     PermissionGuardMiddleware(requiredPermission: AppPermissions.networksView),
-    //   ],
-    // ),
     GetPage(
       name: AppRoutes.networkWalletStatement,
       page: () => const NetworkWalletStatementScreen(),
       binding: NetworkWalletBinding(),
       middlewares: [
         AuthGuard(),
-        PermissionGuardMiddleware(requiredPermission: AppPermissions.networkWalletsView),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.networkWalletsView,
+        ),
       ],
     ),
 
     // ========================================================================
     // 5. قطاع نقاط البيع ومحافظها (POS & Wallets)
     // ========================================================================
-    // GetPage(
-    //   name: AppRoutes.pos,
-    //   page: () => const PosScreen(),
-    //   binding: PosBinding(),
-    //   middlewares: [
-    //     AuthGuard(),
-    //     PermissionGuardMiddleware(requiredPermission: AppPermissions.posView),
-    //   ],
-    // ),
     GetPage(
       name: AppRoutes.posWalletStatement,
       page: () => const PosWalletStatementScreen(),
       binding: PosWalletBinding(),
       middlewares: [
         AuthGuard(),
-        PermissionGuardMiddleware(requiredPermission: AppPermissions.posWalletsView),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.posWalletsView,
+        ),
       ],
     ),
 
@@ -216,7 +204,9 @@ abstract final class AppPages {
       binding: PackagesBinding(),
       middlewares: [
         AuthGuard(),
-        PermissionGuardMiddleware(requiredPermission: AppPermissions.voucherPackagesView),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.voucherPackagesView,
+        ),
       ],
     ),
 
@@ -238,33 +228,22 @@ abstract final class AppPages {
       binding: OperationsBinding(),
       middlewares: [
         AuthGuard(),
-        PermissionGuardMiddleware(requiredPermission: AppPermissions.requestsView),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.requestsView,
+        ),
       ],
     ),
-
-    // ========================================================================
-    // 8. المصروفات والاشتراكات والدعم (Expenses, Subscriptions & Support)
-    // ========================================================================
-    // GetPage(
-    //   name: AppRoutes.expenses,
-    //   page: () => const ExpensesScreen(),
-    //   binding: ExpensesBinding(),
-    //   middlewares: [
-    //     AuthGuard(),
-    //     PermissionGuardMiddleware(requiredPermission: AppPermissions.expensesView),
-    //   ],
-    // ),
-    // GetPage(
-    //   name: AppRoutes.subscriptions,
-    //   page: () => const SubscriptionsScreen(),
-    //   binding: SubscriptionsBinding(),
-    //   middlewares: [AuthGuard()],
-    // ),
-    // GetPage(
-    //   name: AppRoutes.support,
-    //   page: () => const SupportScreen(),
-    //   binding: SupportBinding(),
-    //   middlewares: [AuthGuard()],
-    // ),
+    GetPage(
+      name: AppRoutes.newProcurementOrder,
+      page: () => const NewProcurementOrderScreen(),
+      binding: OperationsBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.requestsCreate,
+        ),
+      ],
+    ),
   ];
 }

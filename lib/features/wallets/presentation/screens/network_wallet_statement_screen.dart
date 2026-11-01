@@ -123,8 +123,8 @@ class NetworkWalletStatementScreen extends GetView<NetworkWalletController> {
             children: [
               // 1. بطاقة الرصيد المركزي المعتمد
               WalletBalanceHeroCard(
-                title: wallet?.networkName ?? 'محفظة الشبكة المركزية',
-                subtitle: 'الحساب الرئيسي للسيولة وإيرادات الجملة',
+                title: wallet?.networkName ?? 'محفظة الشبكة',
+                subtitle: 'رصيد محفظة الشبكة المعتمد',
                 balance: wallet?.walletBalance ?? 0.0,
                 isBalanceHidden: isPrivacyHidden,
                 onTogglePrivacy: controller.togglePrivacy,

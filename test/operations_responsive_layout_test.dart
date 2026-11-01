@@ -86,6 +86,7 @@ class FakeOperationsRepository implements OperationsRepository {
     required String saleType,
     required List<Map<String, dynamic>> items,
     String? requestNote,
+    String? idempotencyKey,
   }) => throw UnimplementedError();
 
   @override
@@ -103,6 +104,7 @@ class FakeOperationsRepository implements OperationsRepository {
     String? saleType,
     List<Map<String, dynamic>>? items,
     String? requestNote,
+    String? idempotencyKey,
   }) => throw UnimplementedError();
 
   @override

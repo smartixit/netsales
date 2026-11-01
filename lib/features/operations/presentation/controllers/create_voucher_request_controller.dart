@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/domain/usecases/create_voucher_request_use_case.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
@@ -40,6 +41,7 @@ class CreateVoucherRequestController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxString loadError = ''.obs;
   final RxBool isSubmitting = false.obs;
+  final RxString currentDraftIdempotencyKey = ''.obs;
 
   final TextEditingController notesController = TextEditingController();
 
@@ -63,6 +65,8 @@ class CreateVoucherRequestController extends GetxController {
     saleType.value = 'CASH';
     packageQuantities.clear();
     notesController.clear();
+    currentDraftIdempotencyKey.value =
+        IdempotencyHelper.forVoucherRequest(networkId);
 
     await loadInitialData();
   }
@@ -229,6 +233,11 @@ class CreateVoucherRequestController extends GetxController {
       }
     }
 
+    if (currentDraftIdempotencyKey.value.isEmpty) {
+      currentDraftIdempotencyKey.value =
+          IdempotencyHelper.forVoucherRequest(selectedNetworkId.value);
+    }
+
     isSubmitting.value = true;
     try {
       await CustomAnimationOverlay.showLoading(
@@ -243,7 +252,10 @@ class CreateVoucherRequestController extends GetxController {
         requestNote: notesController.text.trim().isNotEmpty
             ? notesController.text.trim()
             : null,
+        idempotencyKey: currentDraftIdempotencyKey.value,
       );
+
+      currentDraftIdempotencyKey.value = '';
 
       // تحديث قائمة طلبات التوريد في OperationsController إن وجد
       if (Get.isRegistered<OperationsController>()) {

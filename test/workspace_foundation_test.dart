@@ -134,7 +134,9 @@ void main() {
 
       final pos02 = ScreenRegistry.findById('POS-02');
       expect(pos02, isNotNull);
-      expect(pos02!.isBalanceMutation, isTrue);
+      expect(pos02!.isBalanceMutation, isFalse);
+      expect(pos02.implementationState,
+          equals(ScreenImplementationState.implemented));
     });
 
     test('resolves screen descriptor by canonical route', () {

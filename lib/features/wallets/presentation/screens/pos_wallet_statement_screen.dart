@@ -173,23 +173,21 @@ class PosWalletStatementScreen extends GetView<PosWalletController> {
               else if (wallet != null)
                 WalletBalanceHeroCard(
                   title: selectedNet?.networkName ?? 'الشبكة المزودة',
-                  subtitle: isOverdrawn
+                  subtitle: wallet.isOverdrawn
                       ? 'مديونية مستحقة للشبكة المحددة فقط'
-                      : 'رصيد مسبق الدفع متاح للشراء',
-                  balance: wallet.walletBalance,
+                      : 'رصيد دائن متاح للتعامل',
+                  balance: wallet.isOverdrawn ? wallet.debitAmount : wallet.creditAmount,
                   isBalanceHidden: isPrivacyHidden,
                   onTogglePrivacy: controller.togglePrivacy,
-                  isPosDebt: isOverdrawn,
-                  statusLabel: isOverdrawn
-                      ? 'مديونية قائمة: ${wallet.accountingStatusLabel}'
-                      : 'رصيد دائن: ${wallet.accountingStatusLabel}',
+                  isPosDebt: wallet.isOverdrawn,
+                  statusLabel: wallet.accountingStatusLabel,
                   accountUuid: wallet.walletUuid,
                   onRefresh: () => controller.loadWalletAndLogsForSelectedNetwork(),
                 ),
 
               AppSpacing.vMd,
 
-              // 4. أزرار العمليات المقفلة برمجياً
+              // 4. أزرار العمليات
               Row(
                 children: [
                   Expanded(
@@ -203,10 +201,10 @@ class PosWalletStatementScreen extends GetView<PosWalletController> {
                   AppSpacing.hSm,
                   Expanded(
                     child: CustomButton.outline(
-                      text: 'طلب كروت جديدة',
+                      text: 'طلب كروت جديدة (POS-02)',
                       icon: Icons.add_shopping_cart_rounded,
                       height: 40.h,
-                      onPressed: () => controller.showDisabledMutationNotice(context, 'طلب كروت جديدة'),
+                      onPressed: () => Get.toNamed(AppRoutes.newProcurementOrder),
                     ),
                   ),
                 ],

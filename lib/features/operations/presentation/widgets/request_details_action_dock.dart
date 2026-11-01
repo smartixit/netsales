@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
@@ -15,8 +17,8 @@ import 'package:netsales/widgets/sheets/invoice_print_format_sheet.dart';
 /// ============================================================================
 /// رصيف الإجراءات والقرارات العائم لطلب التوريد (RequestDetailsActionDock)
 /// ============================================================================
-/// يوفر وصولاً دائماً وفورياً لقرارات الاعتماد والرفض المباشر للطلبات المعلقة،
-/// أو خيارات الطباعة والمشاركة للطلبات المعالجة.
+/// يوفر وصولاً دائماً وفورياً لقرارات الرفض والإلغاء المباشر للطلبات المعلقة،
+/// مع إغلاق قيد الفواتير المالية أمنياً في Milestone 4A.
 class RequestDetailsActionDock extends StatelessWidget {
   final VoucherRequestEntity request;
   final OperationsController controller;
@@ -31,6 +33,8 @@ class RequestDetailsActionDock extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isPending = request.isPending;
+    final isPosWorkspace =
+        WorkspaceService.to.activeWorkspace == AppWorkspace.pos;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -50,30 +54,44 @@ class RequestDetailsActionDock extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: isPending
-            ? Row(
-                children: [
-                  if (PermissionService.to.can(AppPermissions.requestsReject)) ...[
-                    Expanded(
-                      flex: 2,
-                      child: CustomButton.danger(
-                        text: 'رفض الطلب',
-                        icon: Icons.close_rounded,
-                        onPressed: () => _showRejectSheet(context),
+            ? (isPosWorkspace
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: CustomButton.danger(
+                          text: 'إلغاء الطلب',
+                          icon: Icons.cancel_outlined,
+                          onPressed: () => _showCancelConfirmation(context),
+                        ),
                       ),
-                    ),
-                    AppSpacing.hSm,
-                  ],
-                  if (PermissionService.to.can(AppPermissions.requestsApprove))
-                    Expanded(
-                      flex: 3,
-                      child: CustomButton.primary(
-                        text: 'اعتماد وتوليد الفاتورة',
-                        icon: Icons.check_circle_outline_rounded,
-                        onPressed: () => _showApproveConfirmation(context),
-                      ),
-                    ),
-                ],
-              )
+                    ],
+                  )
+                : Row(
+                    children: [
+                      if (PermissionService.to
+                          .can(AppPermissions.requestsReject)) ...[
+                        Expanded(
+                          flex: 2,
+                          child: CustomButton.danger(
+                            text: 'رفض الطلب',
+                            icon: Icons.close_rounded,
+                            onPressed: () => _showRejectSheet(context),
+                          ),
+                        ),
+                        AppSpacing.hSm,
+                      ],
+                      if (PermissionService.to
+                          .can(AppPermissions.requestsApprove))
+                        Expanded(
+                          flex: 3,
+                          child: CustomButton.outline(
+                            text: 'اعتماد الطلب (مقفل أمنياً)',
+                            icon: Icons.lock_outline_rounded,
+                            onPressed: () => _showLockedNotice(context),
+                          ),
+                        ),
+                    ],
+                  ))
             : CustomButton.outline(
                 text: 'طباعة ومشاركة سند الطلب',
                 icon: Icons.print_rounded,
@@ -84,15 +102,27 @@ class RequestDetailsActionDock extends StatelessWidget {
     );
   }
 
-  void _showApproveConfirmation(BuildContext context) {
+  void _showCancelConfirmation(BuildContext context) {
     CustomBottomSheet.showConfirmation(
-      title: 'تأكيد اعتماد طلب التوريد',
+      title: 'تأكيد إلغاء طلب التوريد',
       message:
-          'هل أنت متأكد من رغبتك في اعتماد طلب التوريد وتوليد فاتورة مبيعات جديدة؟ سيتم قيد العملية في حساب نقطة البيع فوراً.',
-      confirmLabel: 'تأكيد واعتماد',
+          'هل أنت متأكد من رغبتك في إلغاء طلب التوريد رقم #${request.requestUuid}؟ لا يمكن التراجع عن هذا الإجراء بعد تنفيذه.',
+      confirmLabel: 'تأكيد الإلغاء',
       cancelLabel: 'تراجع',
-      leadingIcon: Icons.verified_rounded,
-      onConfirm: () => controller.approveRequest(request.requestId),
+      leadingIcon: Icons.cancel_rounded,
+      onConfirm: () => controller.cancelRequest(request.requestId),
+    );
+  }
+
+  void _showLockedNotice(BuildContext context) {
+    CustomBottomSheet.showConfirmation(
+      title: 'بوابة الفوترة والاعتماد المالي مقفلة',
+      message:
+          'اعتماد طلبات التوريد وتوليد فواتير المبيعات وتسوية أرصدة المحافظ مقفل أمنياً ومحمي في المرحلة الحالية (Milestone 4A). سيتم تمكين العمليات المالية في Milestone 4B.',
+      confirmLabel: 'حسناً، فهمت',
+      cancelLabel: 'إغلاق',
+      leadingIcon: Icons.lock_clock_rounded,
+      onConfirm: () {},
     );
   }
 

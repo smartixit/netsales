@@ -43,7 +43,7 @@ class WalletBalanceHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final displayBalance = isPosDebt ? balance.abs() : balance;
+    final displayBalance = balance;
 
     return Container(
       width: double.infinity,
@@ -157,7 +157,7 @@ class WalletBalanceHeroCard extends StatelessWidget {
 
           // 2. قيمة الرصيد الرسمي مع العملة وحالة الخصوصية
           Text(
-            isPosDebt ? 'المديونية الحالية المستحقة' : 'الرصيد الفعلي المتاح',
+            isPosDebt ? 'المديونية الحالية (حساب مدين للشبكة)' : 'رصيد محفظة الحساب',
             style: AppTypography.labelSmall.copyWith(
               color: isPosDebt ? colors.warning : colors.onSurfaceVariant,
               fontWeight: FontWeight.w600,

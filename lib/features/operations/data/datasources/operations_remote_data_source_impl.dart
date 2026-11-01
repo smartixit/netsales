@@ -126,6 +126,7 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
     return ApiService.instance.post<VoucherRequestModel>(
       ApiConstants.voucherRequestReject(id),
       data: {
+        'rejection_reason': reason.trim(),
         'request_note': reason.trim(),
       },
       fromJson: (json) => VoucherRequestModel.fromJson(json as Map<String, dynamic>),
@@ -147,6 +148,7 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
     required String saleType,
     required List<Map<String, dynamic>> items,
     String? requestNote,
+    String? idempotencyKey,
   }) {
     return ApiService.instance.post<VoucherRequestModel>(
       ApiConstants.voucherRequests,
@@ -158,6 +160,7 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
         if (requestNote != null && requestNote.trim().isNotEmpty)
           'request_note': requestNote.trim(),
       },
+      idempotencyKey: idempotencyKey,
       fromJson: (json) => VoucherRequestModel.fromJson(json as Map<String, dynamic>),
     );
   }
