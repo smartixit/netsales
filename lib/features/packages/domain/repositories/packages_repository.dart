@@ -67,6 +67,8 @@ abstract interface class PackagesRepository {
     required double discountCash,
     required double discountCredit,
     bool? status,
+    String? discountStartDate,
+    String? discountEndDate,
   });
 
   /// تحديث خصم مخصص لنقطة بيع
@@ -75,6 +77,9 @@ abstract interface class PackagesRepository {
     double? discountCash,
     double? discountCredit,
     bool? status,
+    String? discountStartDate,
+    String? discountEndDate,
+    bool clearEndDate = false,
   });
 
   /// تبديل حالة تفعيل خصم مخصص

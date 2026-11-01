@@ -483,6 +483,9 @@ class PackagesController extends GetxController {
     required double discountCash,
     required double discountCredit,
     bool? status,
+    String? discountStartDate,
+    String? discountEndDate,
+    bool clearEndDate = false,
   }) async {
     isSubmittingAction.value = true;
     try {
@@ -498,6 +501,9 @@ class PackagesController extends GetxController {
           discountCash: discountCash,
           discountCredit: discountCredit,
           status: status,
+          discountStartDate: discountStartDate,
+          discountEndDate: discountEndDate,
+          clearEndDate: clearEndDate,
         );
         final index =
             discounts.indexWhere((d) => d.discountId == discountId);
@@ -515,6 +521,8 @@ class PackagesController extends GetxController {
           discountCash: discountCash,
           discountCredit: discountCredit,
           status: status,
+          discountStartDate: discountStartDate,
+          discountEndDate: discountEndDate,
         );
         discounts.insert(0, created);
         await CustomAnimationOverlay.showSuccess(

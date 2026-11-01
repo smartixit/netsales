@@ -20,6 +20,9 @@ class VoucherPackageDiscountModel extends VoucherPackageDiscountEntity {
     super.networkName,
     super.posName,
     super.packageName,
+    super.discountStartDate,
+    super.discountEndDate,
+    super.isEffectiveNow,
     super.originalPackagePrice,
     super.effectiveCashPrice,
     super.effectiveCreditPrice,
@@ -60,6 +63,9 @@ class VoucherPackageDiscountModel extends VoucherPackageDiscountEntity {
       networkName: netName,
       posName: pName,
       packageName: pkgName,
+      discountStartDate: json['discount_start_date'] as String?,
+      discountEndDate: json['discount_end_date'] as String?,
+      isEffectiveNow: json['is_effective_now'] as bool? ?? false,
       // Server-authoritative derived monetary values (Display-Only, AGENTS.md §34)
       originalPackagePrice:
           (json['original_package_price'] as num?)?.toDouble(),

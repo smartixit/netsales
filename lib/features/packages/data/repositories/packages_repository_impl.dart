@@ -166,6 +166,8 @@ class PackagesRepositoryImpl implements PackagesRepository {
     required double discountCash,
     required double discountCredit,
     bool? status,
+    String? discountStartDate,
+    String? discountEndDate,
   }) async {
     final payload = <String, dynamic>{
       'network_id': networkId,
@@ -174,6 +176,8 @@ class PackagesRepositoryImpl implements PackagesRepository {
       'discount_cash': discountCash,
       'discount_credit': discountCredit,
       if (status != null) 'status': status,
+      if (discountStartDate != null) 'discount_start_date': discountStartDate,
+      if (discountEndDate != null) 'discount_end_date': discountEndDate,
     };
 
     final response =
@@ -192,11 +196,19 @@ class PackagesRepositoryImpl implements PackagesRepository {
     double? discountCash,
     double? discountCredit,
     bool? status,
+    String? discountStartDate,
+    String? discountEndDate,
+    bool clearEndDate = false,
   }) async {
     final payload = <String, dynamic>{
       if (discountCash != null) 'discount_cash': discountCash,
       if (discountCredit != null) 'discount_credit': discountCredit,
       if (status != null) 'status': status,
+      if (discountStartDate != null) 'discount_start_date': discountStartDate,
+      if (clearEndDate)
+        'discount_end_date': null
+      else if (discountEndDate != null)
+        'discount_end_date': discountEndDate,
     };
 
     final response = await remoteDataSource.updateVoucherPackageDiscount(

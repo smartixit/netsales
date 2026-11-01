@@ -8,6 +8,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/packages/domain/entities/voucher_package_discount_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -121,53 +122,37 @@ class PackageDiscountCard extends StatelessWidget {
                 ),
                 if (canEdit) AppSpacing.hSm,
                 if (canEdit)
-                  // زر تبديل الحالة
+                  // زر تبديل الحالة ومؤشر السريان
                   CustomInteractiveBounce(
-                  onTap: onToggleStatus,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: discount.isActive
-                          ? colors.successContainer.withValues(alpha: 0.4)
-                          : colors.errorContainer.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                      border: Border.all(
-                        color: discount.isActive
-                            ? colors.success.withValues(alpha: 0.3)
-                            : colors.error.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          discount.isActive
-                              ? Icons.check_circle_rounded
-                              : Icons.pause_circle_rounded,
-                          size: 14.r,
-                          color: discount.isActive
-                              ? colors.success
-                              : colors.error,
-                        ),
-                        AppSpacing.hXxs,
-                        Text(
-                          discount.isActive ? 'مطبق' : 'معطل',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: discount.isActive
-                                ? colors.success
-                                : colors.error,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                    onTap: onToggleStatus,
+                    child: _buildStatusBadge(context),
                   ),
-                ),
               ],
             ),
+
+            if (discount.discountStartDate != null || discount.discountEndDate != null) ...[
+              AppSpacing.vXs,
+              Row(
+                children: [
+                  Icon(
+                    Icons.schedule_outlined,
+                    size: 13.r,
+                    color: colors.onSurfaceVariant,
+                  ),
+                  AppSpacing.hXxs,
+                  Expanded(
+                    child: Text(
+                      _formatValidityDates(discount),
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
 
             AppSpacing.vMd,
 
@@ -280,5 +265,100 @@ class PackageDiscountCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildStatusBadge(BuildContext context) {
+    final colors = context.colors;
+    final String label;
+    final Color badgeColor;
+    final Color containerColor;
+    final IconData icon;
+
+    if (!discount.isActive) {
+      label = 'معطل';
+      badgeColor = colors.error;
+      containerColor = colors.errorContainer.withValues(alpha: 0.4);
+      icon = Icons.pause_circle_rounded;
+    } else if (discount.isEffectiveNow == true) {
+      label = 'سارٍ حالياً';
+      badgeColor = colors.success;
+      containerColor = colors.successContainer.withValues(alpha: 0.4);
+      icon = Icons.check_circle_rounded;
+    } else {
+      final start = discount.discountStartDate != null
+          ? DateTime.tryParse(discount.discountStartDate!)
+          : null;
+      final end = discount.discountEndDate != null
+          ? DateTime.tryParse(discount.discountEndDate!)
+          : null;
+      final now = DateTime.now();
+
+      if (start != null && start.isAfter(now)) {
+        label = 'مجدول';
+        badgeColor = colors.primary;
+        containerColor = colors.primaryContainer.withValues(alpha: 0.4);
+        icon = Icons.schedule_rounded;
+      } else if (end != null && end.isBefore(now)) {
+        label = 'منتهي';
+        badgeColor = colors.error;
+        containerColor = colors.errorContainer.withValues(alpha: 0.4);
+        icon = Icons.timer_off_outlined;
+      } else {
+        label = 'مطبق';
+        badgeColor = colors.success;
+        containerColor = colors.successContainer.withValues(alpha: 0.4);
+        icon = Icons.check_circle_rounded;
+      }
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 10.w,
+        vertical: 4.h,
+      ),
+      decoration: BoxDecoration(
+        color: containerColor,
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        border: Border.all(
+          color: badgeColor.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14.r,
+            color: badgeColor,
+          ),
+          AppSpacing.hXxs,
+          Text(
+            label,
+            style: AppTypography.labelSmall.copyWith(
+              color: badgeColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatValidityDates(VoucherPackageDiscountEntity d) {
+    final start = d.discountStartDate != null
+        ? DateTime.tryParse(d.discountStartDate!)
+        : null;
+    final end = d.discountEndDate != null
+        ? DateTime.tryParse(d.discountEndDate!)
+        : null;
+
+    if (start != null && end != null) {
+      return 'الصلاحية: من ${DateFormatter.date(start)} إلى ${DateFormatter.date(end)}';
+    } else if (start != null) {
+      return 'سارٍ اعتباراً من: ${DateFormatter.date(start)}';
+    } else if (end != null) {
+      return 'سارٍ حتى: ${DateFormatter.date(end)}';
+    }
+    return 'صلاحية مفتوحة';
   }
 }

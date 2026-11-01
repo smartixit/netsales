@@ -14,12 +14,18 @@ class UpdateVoucherPackageDiscountUseCase {
     double? discountCash,
     double? discountCredit,
     bool? status,
+    String? discountStartDate,
+    String? discountEndDate,
+    bool clearEndDate = false,
   }) {
     return repository.updateVoucherPackageDiscount(
       discountId: discountId,
       discountCash: discountCash,
       discountCredit: discountCredit,
       status: status,
+      discountStartDate: discountStartDate,
+      discountEndDate: discountEndDate,
+      clearEndDate: clearEndDate,
     );
   }
 }

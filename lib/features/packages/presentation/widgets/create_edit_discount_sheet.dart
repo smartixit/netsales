@@ -13,6 +13,7 @@ import 'package:netsales/features/partners/domain/entities/pos_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/pickers/custom_date_picker_field.dart';
 import 'package:netsales/widgets/pickers/custom_pos_selector_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -74,6 +75,8 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
   int? _selectedPackageId;
   PosEntity? _selectedPos;
   String? _posError;
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   @override
   void initState() {
@@ -81,6 +84,12 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
     final d = widget.discount;
 
     if (d != null) {
+      if (d.discountStartDate != null) {
+        _startDate = DateTime.tryParse(d.discountStartDate!);
+      }
+      if (d.discountEndDate != null) {
+        _endDate = DateTime.tryParse(d.discountEndDate!);
+      }
       _selectedPos =
           widget.controller.posList.firstWhereOrNull(
             (p) => p.posId == d.posId,
@@ -154,6 +163,15 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
       return;
     }
 
+    if (_startDate != null && _endDate != null && !_endDate!.isAfter(_startDate!)) {
+      CustomSnackbar.show(
+        title: 'تاريخ غير صالح',
+        message: 'تاريخ انتهاء الخصم يجب أن يكون لاحقاً لتاريخ البدء.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
     // استنتاج معرف الشبكة من الباقة المختارة أو الخصم قيد التعديل
     final selectedPkg = widget.controller.packages.firstWhereOrNull(
       (p) => p.packageId == _selectedPackageId,
@@ -170,6 +188,17 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
       return;
     }
 
+    final String? startDateStr = _startDate != null
+        ? '${_startDate!.year.toString().padLeft(4, '0')}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')} 00:00:00'
+        : null;
+
+    final String? endDateStr = _endDate != null
+        ? '${_endDate!.year.toString().padLeft(4, '0')}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')} 23:59:59'
+        : null;
+
+    final bool isEdit = widget.discount != null;
+    final bool clearEndDate = isEdit && widget.discount?.discountEndDate != null && _endDate == null;
+
     final success = await widget.controller.saveDiscount(
       discountId: widget.discount?.discountId,
       networkId: networkId,
@@ -178,10 +207,13 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
       discountCash: cashDisc,
       discountCredit: creditDisc,
       status: widget.discount?.status ?? true,
+      discountStartDate: startDateStr,
+      discountEndDate: endDateStr,
+      clearEndDate: clearEndDate,
     );
 
     if (success) {
-      Get.back();
+      Get.back<void>();
     }
   }
 
@@ -301,6 +333,38 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
                   validator: FormValidators.percentageValidator(
                     fieldName: 'نسبة خصم الآجل',
                   ),
+                ),
+              ),
+            ],
+          ),
+
+          AppSpacing.vMd,
+
+          // ── 3.1 فترة صلاحية الخصم (اختياري) ──
+          Row(
+            children: [
+              Expanded(
+                child: CustomDatePickerField.single(
+                  label: 'تاريخ بدء السريان',
+                  hint: 'تفعيل فوري',
+                  value: _startDate,
+                  onChanged: (date) => setState(() => _startDate = date),
+                ),
+              ),
+              AppSpacing.hSm,
+              Expanded(
+                child: CustomDatePickerField.single(
+                  label: 'تاريخ انتهاء السريان',
+                  hint: 'بدون انتهاء (دائم)',
+                  value: _endDate,
+                  onChanged: (date) => setState(() => _endDate = date),
+                  suffixIcon: _endDate != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear_rounded, size: 18),
+                          tooltip: 'إلغاء تاريخ الانتهاء',
+                          onPressed: () => setState(() => _endDate = null),
+                        )
+                      : null,
                 ),
               ),
             ],

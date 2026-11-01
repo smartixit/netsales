@@ -16,6 +16,8 @@ class CreateVoucherPackageDiscountUseCase {
     required double discountCash,
     required double discountCredit,
     bool? status,
+    String? discountStartDate,
+    String? discountEndDate,
   }) {
     return repository.createVoucherPackageDiscount(
       networkId: networkId,
@@ -24,6 +26,8 @@ class CreateVoucherPackageDiscountUseCase {
       discountCash: discountCash,
       discountCredit: discountCredit,
       status: status,
+      discountStartDate: discountStartDate,
+      discountEndDate: discountEndDate,
     );
   }
 }
