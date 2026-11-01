@@ -21,6 +21,8 @@ class VoucherPackageDiscountEntity {
   final String? packageName;
   final String? discountStartDate;
   final String? discountEndDate;
+  final String? displayEndDate;
+  final String? validityState;
   final bool isEffectiveNow;
 
   // Server-authoritative derived monetary values (Display-Only, AGENTS.md §34)
@@ -46,6 +48,8 @@ class VoucherPackageDiscountEntity {
     this.packageName,
     this.discountStartDate,
     this.discountEndDate,
+    this.displayEndDate,
+    this.validityState,
     this.isEffectiveNow = false,
     this.originalPackagePrice,
     this.effectiveCashPrice,
@@ -74,6 +78,8 @@ class VoucherPackageDiscountEntity {
     String? packageName,
     String? discountStartDate,
     String? discountEndDate,
+    String? displayEndDate,
+    String? validityState,
     bool? isEffectiveNow,
     double? originalPackagePrice,
     double? effectiveCashPrice,
@@ -97,6 +103,8 @@ class VoucherPackageDiscountEntity {
       packageName: packageName ?? this.packageName,
       discountStartDate: discountStartDate ?? this.discountStartDate,
       discountEndDate: discountEndDate ?? this.discountEndDate,
+      displayEndDate: displayEndDate ?? this.displayEndDate,
+      validityState: validityState ?? this.validityState,
       isEffectiveNow: isEffectiveNow ?? this.isEffectiveNow,
       originalPackagePrice: originalPackagePrice ?? this.originalPackagePrice,
       effectiveCashPrice: effectiveCashPrice ?? this.effectiveCashPrice,

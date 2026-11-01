@@ -274,7 +274,46 @@ class PackageDiscountCard extends StatelessWidget {
     final Color containerColor;
     final IconData icon;
 
-    if (!discount.isActive) {
+    final validityState = discount.validityState?.toUpperCase();
+    if (validityState != null) {
+      switch (validityState) {
+        case 'EFFECTIVE':
+          label = 'سارٍ حالياً';
+          badgeColor = colors.success;
+          containerColor = colors.successContainer.withValues(alpha: 0.4);
+          icon = Icons.check_circle_rounded;
+          break;
+        case 'SCHEDULED':
+          label = 'مجدول';
+          badgeColor = colors.primary;
+          containerColor = colors.primaryContainer.withValues(alpha: 0.4);
+          icon = Icons.schedule_rounded;
+          break;
+        case 'EXPIRED':
+          label = 'منتهي';
+          badgeColor = colors.error;
+          containerColor = colors.errorContainer.withValues(alpha: 0.4);
+          icon = Icons.timer_off_outlined;
+          break;
+        case 'DISABLED':
+          label = 'معطل';
+          badgeColor = colors.error;
+          containerColor = colors.errorContainer.withValues(alpha: 0.4);
+          icon = Icons.pause_circle_rounded;
+          break;
+        case 'DELETED':
+          label = 'محذوف';
+          badgeColor = colors.error;
+          containerColor = colors.errorContainer.withValues(alpha: 0.4);
+          icon = Icons.delete_outline_rounded;
+          break;
+        default:
+          label = 'سارٍ حالياً';
+          badgeColor = colors.success;
+          containerColor = colors.successContainer.withValues(alpha: 0.4);
+          icon = Icons.check_circle_rounded;
+      }
+    } else if (!discount.isActive) {
       label = 'معطل';
       badgeColor = colors.error;
       containerColor = colors.errorContainer.withValues(alpha: 0.4);
@@ -348,9 +387,8 @@ class PackageDiscountCard extends StatelessWidget {
     final start = d.discountStartDate != null
         ? DateTime.tryParse(d.discountStartDate!)
         : null;
-    final end = d.discountEndDate != null
-        ? DateTime.tryParse(d.discountEndDate!)
-        : null;
+    final endStr = d.displayEndDate ?? d.discountEndDate;
+    final end = endStr != null ? DateTime.tryParse(endStr) : null;
 
     if (start != null && end != null) {
       return 'الصلاحية: من ${DateFormatter.date(start)} إلى ${DateFormatter.date(end)}';
