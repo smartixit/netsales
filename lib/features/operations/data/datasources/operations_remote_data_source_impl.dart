@@ -116,7 +116,6 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
       ApiConstants.voucherRequestPreviewModification(id),
       data: {
         'items': items,
-        'sale_type': ?saleType,
         if (requestNote != null && requestNote.trim().isNotEmpty)
           'request_note': requestNote.trim(),
       },
@@ -139,13 +138,9 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
       data: {
         if (notes != null && notes.trim().isNotEmpty)
           'request_note': notes.trim(),
-        'sale_type': ?saleType,
         if (items != null && items.isNotEmpty) 'items': items,
       },
-      headers: {
-        if (idempotencyKey != null && idempotencyKey.isNotEmpty)
-          'Idempotency-Key': idempotencyKey,
-      },
+      idempotencyKey: idempotencyKey,
       fromJson: (json) => json as Map<String, dynamic>,
     );
   }
@@ -212,7 +207,7 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
         'pos_id': posId,
         'sale_type': saleType,
         'items': items,
-        'paid_amount': ?paidAmount,
+        if (paidAmount != null) 'paid_amount': paidAmount,
       },
       fromJson: (json) => SaleInvoiceModel.fromJson(json as Map<String, dynamic>),
     );
@@ -224,14 +219,16 @@ class OperationsRemoteDataSourceImpl implements OperationsRemoteDataSource {
     String? saleType,
     List<Map<String, dynamic>>? items,
     String? requestNote,
+    String? idempotencyKey,
   }) {
     return ApiService.instance.put<VoucherRequestModel>(
       ApiConstants.voucherRequest(id),
       data: {
-        'sale_type': ?saleType,
-        'items': ?items,
+        if (saleType != null) 'sale_type': saleType,
+        if (items != null) 'items': items,
         if (requestNote != null) 'request_note': requestNote.trim(),
       },
+      idempotencyKey: idempotencyKey,
       fromJson: (json) => VoucherRequestModel.fromJson(json as Map<String, dynamic>),
     );
   }

@@ -484,6 +484,7 @@ class PackagesController extends GetxController {
     required double discountCredit,
     bool? status,
     String? discountStartDate,
+    bool clearStartDate = false,
     String? discountEndDate,
     bool clearEndDate = false,
   }) async {
@@ -502,6 +503,7 @@ class PackagesController extends GetxController {
           discountCredit: discountCredit,
           status: status,
           discountStartDate: discountStartDate,
+          clearStartDate: clearStartDate,
           discountEndDate: discountEndDate,
           clearEndDate: clearEndDate,
         );

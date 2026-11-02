@@ -197,6 +197,7 @@ class PackagesRepositoryImpl implements PackagesRepository {
     double? discountCredit,
     bool? status,
     String? discountStartDate,
+    bool clearStartDate = false,
     String? discountEndDate,
     bool clearEndDate = false,
   }) async {
@@ -204,7 +205,10 @@ class PackagesRepositoryImpl implements PackagesRepository {
       if (discountCash != null) 'discount_cash': discountCash,
       if (discountCredit != null) 'discount_credit': discountCredit,
       if (status != null) 'status': status,
-      if (discountStartDate != null) 'discount_start_date': discountStartDate,
+      if (clearStartDate)
+        'discount_start_date': null
+      else if (discountStartDate != null)
+        'discount_start_date': discountStartDate,
       if (clearEndDate)
         'discount_end_date': null
       else if (discountEndDate != null)

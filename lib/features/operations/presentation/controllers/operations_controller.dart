@@ -761,7 +761,7 @@ class OperationsController extends GetxController {
       final preview = await previewRequestModificationUseCase!(
         requestId,
         items: reviewDraftItems.toList(),
-        saleType: reviewSaleType.value,
+        saleType: null,
         requestNote: reviewNotesController.text.trim().isNotEmpty
             ? reviewNotesController.text.trim()
             : null,
@@ -855,7 +855,7 @@ class OperationsController extends GetxController {
         notes: reviewNotesController.text.trim().isNotEmpty
             ? reviewNotesController.text.trim()
             : null,
-        saleType: reviewSaleType.value,
+        saleType: null,
         items: reviewDraftItems.toList(),
       );
 

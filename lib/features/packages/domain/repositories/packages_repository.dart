@@ -78,6 +78,7 @@ abstract interface class PackagesRepository {
     double? discountCredit,
     bool? status,
     String? discountStartDate,
+    bool clearStartDate = false,
     String? discountEndDate,
     bool clearEndDate = false,
   });

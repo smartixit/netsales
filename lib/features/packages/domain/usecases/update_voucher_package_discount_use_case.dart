@@ -15,6 +15,7 @@ class UpdateVoucherPackageDiscountUseCase {
     double? discountCredit,
     bool? status,
     String? discountStartDate,
+    bool clearStartDate = false,
     String? discountEndDate,
     bool clearEndDate = false,
   }) {
@@ -24,6 +25,7 @@ class UpdateVoucherPackageDiscountUseCase {
       discountCredit: discountCredit,
       status: status,
       discountStartDate: discountStartDate,
+      clearStartDate: clearStartDate,
       discountEndDate: discountEndDate,
       clearEndDate: clearEndDate,
     );

@@ -91,6 +91,8 @@ class VoucherPackageDiscountModel extends VoucherPackageDiscountEntity {
       'discount_cash': discountCash,
       'discount_credit': discountCredit,
       'status': status,
+      'discount_start_date': discountStartDate,
+      'discount_end_date': discountEndDate,
     };
   }
 }

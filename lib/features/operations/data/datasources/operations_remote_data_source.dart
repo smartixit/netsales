@@ -82,6 +82,7 @@ abstract class OperationsRemoteDataSource {
     String? saleType,
     List<Map<String, dynamic>>? items,
     String? requestNote,
+    String? idempotencyKey,
   });
 
   Future<ApiResponse<void>> deleteVoucherRequest(int id);

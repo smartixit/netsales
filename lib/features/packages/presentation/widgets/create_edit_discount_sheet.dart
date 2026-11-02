@@ -87,8 +87,9 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
       if (d.discountStartDate != null) {
         _startDate = DateTime.tryParse(d.discountStartDate!);
       }
-      if (d.discountEndDate != null) {
-        _endDate = DateTime.tryParse(d.discountEndDate!);
+      final endStr = d.displayEndDate ?? d.discountEndDate;
+      if (endStr != null) {
+        _endDate = DateTime.tryParse(endStr);
       }
       _selectedPos =
           widget.controller.posList.firstWhereOrNull(
@@ -189,15 +190,16 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
     }
 
     final String? startDateStr = _startDate != null
-        ? '${_startDate!.year.toString().padLeft(4, '0')}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')} 00:00:00'
+        ? '${_startDate!.year.toString().padLeft(4, '0')}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}'
         : null;
 
     final String? endDateStr = _endDate != null
-        ? '${_endDate!.year.toString().padLeft(4, '0')}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')} 23:59:59'
+        ? '${_endDate!.year.toString().padLeft(4, '0')}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}'
         : null;
 
     final bool isEdit = widget.discount != null;
-    final bool clearEndDate = isEdit && widget.discount?.discountEndDate != null && _endDate == null;
+    final bool clearStartDate = isEdit && widget.discount?.discountStartDate != null && _startDate == null;
+    final bool clearEndDate = isEdit && (widget.discount?.discountEndDate != null || widget.discount?.displayEndDate != null) && _endDate == null;
 
     final success = await widget.controller.saveDiscount(
       discountId: widget.discount?.discountId,
@@ -208,6 +210,7 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
       discountCredit: creditDisc,
       status: widget.discount?.status ?? true,
       discountStartDate: startDateStr,
+      clearStartDate: clearStartDate,
       discountEndDate: endDateStr,
       clearEndDate: clearEndDate,
     );
@@ -349,6 +352,13 @@ class _CreateEditDiscountSheetState extends State<CreateEditDiscountSheet> {
                   hint: 'تفعيل فوري',
                   value: _startDate,
                   onChanged: (date) => setState(() => _startDate = date),
+                  suffixIcon: _startDate != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear_rounded, size: 18),
+                          tooltip: 'إلغاء تاريخ البدء (تفعيل فوري)',
+                          onPressed: () => setState(() => _startDate = null),
+                        )
+                      : null,
                 ),
               ),
               AppSpacing.hSm,

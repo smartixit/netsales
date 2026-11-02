@@ -10,8 +10,6 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/operations/domain/entities/request_pricing_preview_entity.dart';
 import 'package:netsales/features/operations/domain/entities/voucher_request_entity.dart';
 import 'package:netsales/features/operations/presentation/controllers/operations_controller.dart';
-import 'package:netsales/features/operations/presentation/widgets/sheets/components/operations_sale_type_bar.dart';
-import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -41,7 +39,6 @@ class ReviewAndApproveRequestSheet extends StatelessWidget {
     controller.initReviewFlow(request);
 
     return CustomBottomSheet.show(
-      context: context,
       title: 'مراجعة واعتماد طلب التوريد',
       subtitle: 'مراجعة وتعديل باقات وكميات الطلب قبل توليد فاتورة البيع',
       leadingIcon: Icons.fact_check_outlined,
@@ -61,9 +58,7 @@ class ReviewAndApproveRequestSheet extends StatelessWidget {
       final preview = controller.pricingPreview.value;
       final isLoading = controller.isLoadingPreview.value;
       final error = controller.previewError.value;
-      final saleType = controller.reviewSaleType.value;
       final draftItems = controller.reviewDraftItems;
-      final availablePackages = controller.networkAvailablePackages;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -73,12 +68,8 @@ class ReviewAndApproveRequestSheet extends StatelessWidget {
 
           AppSpacing.vMd,
 
-          // 2. محدد طريقة البيع والفوترة (نقدي / آجل)
-          OperationsSaleTypeBar(
-            selectedSaleType: saleType,
-            onChanged: (newType) =>
-                controller.setReviewSaleType(request.requestId, newType),
-          ),
+          // 2. نوع البيع المعتمد بالطلب الأصلي (سيادي غير قابل للتغيير من الشبكة)
+          _buildSaleTypeReadonlyBadge(context, request.saleType),
 
           AppSpacing.vMd,
 
@@ -144,7 +135,7 @@ class ReviewAndApproveRequestSheet extends StatelessWidget {
             controller: controller.reviewNotesController,
             label: 'ملاحظات الاعتماد والفوترة (اختياري)',
             hint: 'أدخل أي ملاحظات للتسجيل في فاتورة المبيعات...',
-            prefixIcon: Icons.notes_rounded,
+            prefixIcon: const Icon(Icons.notes_rounded),
             maxLines: 2,
           ),
 
@@ -166,7 +157,7 @@ class ReviewAndApproveRequestSheet extends StatelessWidget {
                 child: CustomButton.primary(
                   text: 'اعتماد وتوليد الفاتورة',
                   icon: Icons.check_circle_outline_rounded,
-                  isLoading: controller.isSubmittingAction.value,
+                  loading: controller.isSubmittingAction.value,
                   onPressed: draftItems.isEmpty || preview == null
                       ? null
                       : () => _confirmApproval(context, preview),
@@ -244,6 +235,70 @@ class ReviewAndApproveRequestSheet extends StatelessWidget {
   }
 
   /// بطاقة مقارنة مالية حية سيادية
+  /// شريط نوع البيع المعتمد أصلاً بالطلب (غير قابل للتعديل)
+  Widget _buildSaleTypeReadonlyBadge(BuildContext context, String saleType) {
+    final colors = context.colors;
+    final isCash = saleType.toUpperCase() == 'CASH';
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: (isCash ? colors.successContainer : colors.secondaryContainer).withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        border: Border.all(
+          color: (isCash ? colors.success : colors.secondary).withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isCash ? Icons.payments_outlined : Icons.credit_score_outlined,
+            size: 18.r,
+            color: isCash ? colors.success : colors.secondary,
+          ),
+          AppSpacing.hSm,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'نوع البيع المتفق عليه في الطلب الأصلي',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  isCash ? 'دفع نقدي (كاش)' : 'دفع آجل (حساب الوكيل)',
+                  style: AppTypography.labelLarge.copyWith(
+                    color: isCash ? colors.success : colors.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+            decoration: BoxDecoration(
+              color: colors.surfaceContainer,
+              borderRadius: BorderRadius.circular(AppRadius.xs),
+            ),
+            child: Text(
+              'غير قابل للتعديل',
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFinancialComparisonCard(
     BuildContext context,
     RequestPricingPreviewEntity preview,

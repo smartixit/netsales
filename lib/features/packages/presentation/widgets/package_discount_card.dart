@@ -324,30 +324,11 @@ class PackageDiscountCard extends StatelessWidget {
       containerColor = colors.successContainer.withValues(alpha: 0.4);
       icon = Icons.check_circle_rounded;
     } else {
-      final start = discount.discountStartDate != null
-          ? DateTime.tryParse(discount.discountStartDate!)
-          : null;
-      final end = discount.discountEndDate != null
-          ? DateTime.tryParse(discount.discountEndDate!)
-          : null;
-      final now = DateTime.now();
-
-      if (start != null && start.isAfter(now)) {
-        label = 'مجدول';
-        badgeColor = colors.primary;
-        containerColor = colors.primaryContainer.withValues(alpha: 0.4);
-        icon = Icons.schedule_rounded;
-      } else if (end != null && end.isBefore(now)) {
-        label = 'منتهي';
-        badgeColor = colors.error;
-        containerColor = colors.errorContainer.withValues(alpha: 0.4);
-        icon = Icons.timer_off_outlined;
-      } else {
-        label = 'مطبق';
-        badgeColor = colors.success;
-        containerColor = colors.successContainer.withValues(alpha: 0.4);
-        icon = Icons.check_circle_rounded;
-      }
+      // حالة محايدة عند عدم توفر حالة السريان من الخادم (بدون احتساب محلي من ساعة الجهاز)
+      label = 'غير محدد';
+      badgeColor = colors.onSurfaceVariant;
+      containerColor = colors.surfaceContainer.withValues(alpha: 0.4);
+      icon = Icons.help_outline_rounded;
     }
 
     return Container(
