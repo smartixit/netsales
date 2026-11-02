@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/themes/app_motion.dart';
-import 'package:netsales/core/models/app_picked_file.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/app_cache_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item_model.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_gallery_filmstrip.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_gallery_header_overlay.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_viewer_item.dart';
@@ -27,7 +27,7 @@ enum _ViewerActionState { none, downloading, sharing, printing }
 /// - شريط مصغرات سفلي تفاعلي (WhatsApp Filmstrip Carousel).
 /// - حفظ المستندات والوسائط محلياً، والمشاركة، والطباعة المباشرة.
 class MediaGalleryViewer extends StatefulWidget {
-  final List<MediaGalleryItem> items;
+  final List<MediaGalleryItemModel> items;
   final int initialIndex;
   final String? defaultTitle;
 
@@ -41,7 +41,7 @@ class MediaGalleryViewer extends StatefulWidget {
   /// استدعاء سريع ومريح لفتح المعرض كنافذة عائمة متجاوبة
   static Future<void> show(
     BuildContext context, {
-    required List<MediaGalleryItem> items,
+    required List<MediaGalleryItemModel> items,
     int initialIndex = 0,
     String? defaultTitle,
   }) {
@@ -67,18 +67,18 @@ class MediaGalleryViewer extends StatefulWidget {
   /// استدعاء سريع لعرض عنصر فردي مباشر (مثل صورة شخصية أو فاتورة)
   static Future<void> showSingle(
     BuildContext context,
-    MediaGalleryItem item,
+    MediaGalleryItemModel item,
   ) {
     return show(context, items: [item], initialIndex: 0);
   }
 
-  /// استدعاء سريع لتحويل وعرض ملفات [AppPickedFile] المرفقة
+  /// استدعاء سريع لتحويل وعرض ملفات [AppPickedFileModel] المرفقة
   static Future<void> showPickedFiles(
     BuildContext context, {
-    required List<AppPickedFile> files,
+    required List<AppPickedFileModel> files,
     int initialIndex = 0,
   }) {
-    final items = files.map(MediaGalleryItem.fromPickedFile).toList();
+    final items = files.map(MediaGalleryItemModel.fromPickedFile).toList();
     return show(context, items: items, initialIndex: initialIndex);
   }
 
@@ -126,7 +126,7 @@ class _MediaGalleryViewerState extends State<MediaGalleryViewer> {
     }
   }
 
-  Future<Uint8List?> _resolveItemBytes(MediaGalleryItem item) async {
+  Future<Uint8List?> _resolveItemBytes(MediaGalleryItemModel item) async {
     if (_bytesCache.containsKey(item.url)) {
       return _bytesCache[item.url];
     }
@@ -236,19 +236,14 @@ class _MediaGalleryViewerState extends State<MediaGalleryViewer> {
             pageFormat: PdfPageFormat.a4,
             margin: const pw.EdgeInsets.all(16),
             build: (pw.Context context) {
-              return pw.Center(
-                child: pw.Image(image, fit: pw.BoxFit.contain),
-              );
+              return pw.Center(child: pw.Image(image, fit: pw.BoxFit.contain));
             },
           ),
         );
         printBytes = await pdf.save();
       }
 
-      await Printing.layoutPdf(
-        onLayout: (_) => printBytes,
-        name: item.title,
-      );
+      await Printing.layoutPdf(onLayout: (_) => printBytes, name: item.title);
     } catch (_) {
       CustomSnackbar.show(
         title: 'خطأ',

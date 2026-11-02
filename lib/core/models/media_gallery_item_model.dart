@@ -1,17 +1,12 @@
 import 'dart:typed_data';
 
-import 'package:netsales/core/models/app_picked_file.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 
 /// أنواع الوسائط والمستندات المدعومة داخل معرض NetSales
-enum MediaGalleryType {
-  image,
-  pdf,
-  spreadsheet,
-  document,
-}
+enum MediaGalleryType { image, pdf, spreadsheet, document }
 
 /// كائن الدومين النقي للوسائط والمستندات المعروضة في المعرض التفاعلي (MediaGalleryItem)
-class MediaGalleryItem {
+class MediaGalleryItemModel {
   final String url;
   final String title;
   final String? subtitle;
@@ -20,7 +15,7 @@ class MediaGalleryItem {
   final Uint8List? bytes;
   final Map<String, dynamic>? metadata;
 
-  const MediaGalleryItem({
+  const MediaGalleryItemModel({
     required this.url,
     required this.title,
     this.subtitle,
@@ -30,8 +25,8 @@ class MediaGalleryItem {
     this.metadata,
   });
 
-  /// إنشاء عنصر معرض مباشرة من كائن المرفقات المعتمد [AppPickedFile]
-  factory MediaGalleryItem.fromPickedFile(AppPickedFile file) {
+  /// إنشاء عنصر معرض مباشرة من كائن المرفقات المعتمد [AppPickedFileModel]
+  factory MediaGalleryItemModel.fromPickedFile(AppPickedFileModel file) {
     MediaGalleryType resolved;
     if (file.isPdf) {
       resolved = MediaGalleryType.pdf;
@@ -43,7 +38,7 @@ class MediaGalleryItem {
       resolved = MediaGalleryType.document;
     }
 
-    return MediaGalleryItem(
+    return MediaGalleryItemModel(
       url: file.path,
       title: file.name,
       subtitle: file.sizeFormatted,
@@ -123,11 +118,17 @@ class MediaGalleryItem {
     // 4. فحص التوقيع الثنائي للملف (File Signatures / Magic Numbers)
     if (bytes != null && bytes!.length >= 4) {
       // PDF: %PDF (0x25, 0x50, 0x44, 0x46)
-      if (bytes![0] == 0x25 && bytes![1] == 0x50 && bytes![2] == 0x44 && bytes![3] == 0x46) {
+      if (bytes![0] == 0x25 &&
+          bytes![1] == 0x50 &&
+          bytes![2] == 0x44 &&
+          bytes![3] == 0x46) {
         return 'pdf';
       }
       // PNG: 0x89, 0x50, 0x4E, 0x47
-      if (bytes![0] == 0x89 && bytes![1] == 0x50 && bytes![2] == 0x4E && bytes![3] == 0x47) {
+      if (bytes![0] == 0x89 &&
+          bytes![1] == 0x50 &&
+          bytes![2] == 0x4E &&
+          bytes![3] == 0x47) {
         return 'png';
       }
       // JPEG: 0xFF, 0xD8, 0xFF
@@ -135,13 +136,22 @@ class MediaGalleryItem {
         return 'jpg';
       }
       // GIF: GIF8 (0x47, 0x49, 0x46, 0x38)
-      if (bytes![0] == 0x47 && bytes![1] == 0x49 && bytes![2] == 0x46 && bytes![3] == 0x38) {
+      if (bytes![0] == 0x47 &&
+          bytes![1] == 0x49 &&
+          bytes![2] == 0x46 &&
+          bytes![3] == 0x38) {
         return 'gif';
       }
       // WebP: RIFF...WEBP
       if (bytes!.length >= 12 &&
-          bytes![0] == 0x52 && bytes![1] == 0x49 && bytes![2] == 0x46 && bytes![3] == 0x46 &&
-          bytes![8] == 0x57 && bytes![9] == 0x45 && bytes![10] == 0x42 && bytes![11] == 0x50) {
+          bytes![0] == 0x52 &&
+          bytes![1] == 0x49 &&
+          bytes![2] == 0x46 &&
+          bytes![3] == 0x46 &&
+          bytes![8] == 0x57 &&
+          bytes![9] == 0x45 &&
+          bytes![10] == 0x42 &&
+          bytes![11] == 0x50) {
         return 'webp';
       }
       // Office XML / ZIP (xlsx, docx): PK (0x50, 0x4B)

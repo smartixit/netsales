@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:netsales/core/models/app_picked_file.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
 
 void main() {
   group('AppPickedFile Domain Entity Tests', () {
     test('sizeFormatted formats bytes accurately into B, KB, MB, and GB', () {
-      const zeroFile = AppPickedFile(
+      const zeroFile = AppPickedFileModel(
         id: '1',
         path: '/tmp/test.txt',
         name: 'test.txt',
@@ -14,7 +14,7 @@ void main() {
       );
       expect(zeroFile.sizeFormatted, '0 B');
 
-      const byteFile = AppPickedFile(
+      const byteFile = AppPickedFileModel(
         id: '2',
         path: '/tmp/test.txt',
         name: 'test.txt',
@@ -23,7 +23,7 @@ void main() {
       );
       expect(byteFile.sizeFormatted, '512 B');
 
-      const kbFile = AppPickedFile(
+      const kbFile = AppPickedFileModel(
         id: '3',
         path: '/tmp/test.txt',
         name: 'test.txt',
@@ -32,7 +32,7 @@ void main() {
       );
       expect(kbFile.sizeFormatted, '450 KB');
 
-      const mbFile = AppPickedFile(
+      const mbFile = AppPickedFileModel(
         id: '4',
         path: '/tmp/document.pdf',
         name: 'document.pdf',
@@ -43,7 +43,7 @@ void main() {
     });
 
     test('file extension helpers identify types cleanly', () {
-      const pdf = AppPickedFile(
+      const pdf = AppPickedFileModel(
         id: '1',
         path: '/tmp/invoice.pdf',
         name: 'invoice.pdf',
@@ -53,7 +53,7 @@ void main() {
       expect(pdf.isPdf, isTrue);
       expect(pdf.isImage, isFalse);
 
-      const excel = AppPickedFile(
+      const excel = AppPickedFileModel(
         id: '2',
         path: '/tmp/cards.xlsx',
         name: 'cards.xlsx',
@@ -63,7 +63,7 @@ void main() {
       expect(excel.isSpreadsheet, isTrue);
       expect(excel.isPdf, isFalse);
 
-      const img = AppPickedFile(
+      const img = AppPickedFileModel(
         id: '3',
         path: '/tmp/logo.png',
         name: 'logo.png',

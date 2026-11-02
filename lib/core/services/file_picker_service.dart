@@ -3,14 +3,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:netsales/core/models/app_picked_file.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// مصدر التقاط الصور (كاميرا أو معرض)
-enum ImagePickerSource {
-  camera,
-  gallery,
-}
+enum ImagePickerSource { camera, gallery }
 
 /// تصنيفات مسبقة لأنواع الملفات المقبولة في الخدمة
 enum FileTypePreset {
@@ -36,7 +33,7 @@ enum FileTypePreset {
 /// عقد خدمة اختيار الملفات والوسائط المجرد (IFilePickerService)
 abstract class IFilePickerService {
   /// اختيار صورة مفردة
-  Future<AppPickedFile?> pickImage({
+  Future<AppPickedFileModel?> pickImage({
     required ImagePickerSource source,
     int? maxSizeBytes,
     double? maxWidth,
@@ -45,7 +42,7 @@ abstract class IFilePickerService {
   });
 
   /// اختيار صور متعددة من المعرض
-  Future<List<AppPickedFile>> pickMultiImages({
+  Future<List<AppPickedFileModel>> pickMultiImages({
     int? maxFiles,
     int? maxSizeBytes,
     int? maxTotalSizeBytes,
@@ -55,7 +52,7 @@ abstract class IFilePickerService {
   });
 
   /// اختيار ملف مستند مفرد
-  Future<AppPickedFile?> pickFile({
+  Future<AppPickedFileModel?> pickFile({
     List<String>? allowedExtensions,
     FileTypePreset preset = FileTypePreset.anySafe,
     int? maxSizeBytes,
@@ -63,7 +60,7 @@ abstract class IFilePickerService {
   });
 
   /// اختيار ملفات مستندات متعددة مع ضوابط السقف والعدد
-  Future<List<AppPickedFile>> pickMultiFiles({
+  Future<List<AppPickedFileModel>> pickMultiFiles({
     List<String>? allowedExtensions,
     FileTypePreset preset = FileTypePreset.anySafe,
     int? maxFiles,
@@ -84,8 +81,9 @@ class FilePickerService implements IFilePickerService {
   FilePickerService._();
   static final FilePickerService instance = FilePickerService._();
 
-  static FilePickerService get to =>
-      Get.isRegistered<FilePickerService>() ? Get.find<FilePickerService>() : instance;
+  static FilePickerService get to => Get.isRegistered<FilePickerService>()
+      ? Get.find<FilePickerService>()
+      : instance;
 
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -132,7 +130,7 @@ class FilePickerService implements IFilePickerService {
   static const List<String> _pdfExtensions = ['pdf'];
 
   @override
-  Future<AppPickedFile?> pickImage({
+  Future<AppPickedFileModel?> pickImage({
     required ImagePickerSource source,
     int? maxSizeBytes,
     double? maxWidth,
@@ -154,7 +152,7 @@ class FilePickerService implements IFilePickerService {
       if (xFile == null) return null;
 
       final file = File(xFile.path);
-      final pickedFile = AppPickedFile.fromFile(file);
+      final pickedFile = AppPickedFileModel.fromFile(file);
 
       // فحص الحجم
       final limit = maxSizeBytes ?? defaultMaxFileSize;
@@ -175,7 +173,7 @@ class FilePickerService implements IFilePickerService {
   }
 
   @override
-  Future<List<AppPickedFile>> pickMultiImages({
+  Future<List<AppPickedFileModel>> pickMultiImages({
     int? maxFiles,
     int? maxSizeBytes,
     int? maxTotalSizeBytes,
@@ -193,7 +191,7 @@ class FilePickerService implements IFilePickerService {
       if (xFiles.isEmpty) return [];
 
       final limit = maxSizeBytes ?? defaultMaxFileSize;
-      final results = <AppPickedFile>[];
+      final results = <AppPickedFileModel>[];
       int totalSize = 0;
 
       for (final xFile in xFiles) {
@@ -208,7 +206,7 @@ class FilePickerService implements IFilePickerService {
         }
 
         final file = File(xFile.path);
-        final pickedFile = AppPickedFile.fromFile(file);
+        final pickedFile = AppPickedFileModel.fromFile(file);
 
         if (!_validateFileSize(pickedFile, limit)) {
           continue;
@@ -241,7 +239,7 @@ class FilePickerService implements IFilePickerService {
   }
 
   @override
-  Future<AppPickedFile?> pickFile({
+  Future<AppPickedFileModel?> pickFile({
     List<String>? allowedExtensions,
     FileTypePreset preset = FileTypePreset.anySafe,
     int? maxSizeBytes,
@@ -259,7 +257,7 @@ class FilePickerService implements IFilePickerService {
   }
 
   @override
-  Future<List<AppPickedFile>> pickMultiFiles({
+  Future<List<AppPickedFileModel>> pickMultiFiles({
     List<String>? allowedExtensions,
     FileTypePreset preset = FileTypePreset.anySafe,
     int? maxFiles,
@@ -281,7 +279,7 @@ class FilePickerService implements IFilePickerService {
       if (result == null || result.files.isEmpty) return [];
 
       final limit = maxSizeBytes ?? defaultMaxFileSize;
-      final results = <AppPickedFile>[];
+      final results = <AppPickedFileModel>[];
       int totalSize = 0;
 
       for (final platformFile in result.files) {
@@ -298,7 +296,7 @@ class FilePickerService implements IFilePickerService {
         }
 
         final file = File(platformFile.path!);
-        final pickedFile = AppPickedFile.fromFile(file);
+        final pickedFile = AppPickedFileModel.fromFile(file);
 
         // 1. الفحص الأمني ضد الامتدادات المحظورة
         if (_blacklistedExtensions.contains(pickedFile.extension)) {
@@ -356,9 +354,9 @@ class FilePickerService implements IFilePickerService {
   }
 
   /// التحقق من حجم الملف وإشعار المستخدم بدقة عند تجاوزه
-  bool _validateFileSize(AppPickedFile file, int maxSizeBytes) {
+  bool _validateFileSize(AppPickedFileModel file, int maxSizeBytes) {
     if (file.sizeBytes > maxSizeBytes) {
-      final allowedFormatted = AppPickedFile(
+      final allowedFormatted = AppPickedFileModel(
         id: '',
         path: '',
         name: '',

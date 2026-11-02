@@ -6,11 +6,11 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/core/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item_model.dart';
 
 /// ترويسة وشريط إجراءات معرض الوسائط التفاعلي (MediaGalleryHeaderOverlay)
 class MediaGalleryHeaderOverlay extends StatelessWidget {
-  final MediaGalleryItem currentItem;
+  final MediaGalleryItemModel currentItem;
   final int currentIndex;
   final int totalCount;
   final String? defaultTitle;
@@ -63,7 +63,9 @@ class MediaGalleryHeaderOverlay extends StatelessWidget {
             dimension: 38.r,
             iconSize: 20.r,
             foregroundColor: colors.onSurface,
-            backgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+            backgroundColor: colors.surfaceContainerHighest.withValues(
+              alpha: 0.4,
+            ),
             onPressed: onClose,
           ),
 
@@ -116,7 +118,9 @@ class MediaGalleryHeaderOverlay extends StatelessWidget {
             iconSize: 18.r,
             loading: isDownloading,
             foregroundColor: colors.onSurface,
-            backgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+            backgroundColor: colors.surfaceContainerHighest.withValues(
+              alpha: 0.4,
+            ),
             onPressed: isDownloading ? null : onDownload,
           ),
 
@@ -129,7 +133,9 @@ class MediaGalleryHeaderOverlay extends StatelessWidget {
             iconSize: 18.r,
             loading: isSharing,
             foregroundColor: colors.onSurface,
-            backgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+            backgroundColor: colors.surfaceContainerHighest.withValues(
+              alpha: 0.4,
+            ),
             onPressed: isSharing ? null : onShare,
           ),
 
@@ -142,7 +148,9 @@ class MediaGalleryHeaderOverlay extends StatelessWidget {
             iconSize: 18.r,
             loading: isPrinting,
             foregroundColor: colors.onSurface,
-            backgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+            backgroundColor: colors.surfaceContainerHighest.withValues(
+              alpha: 0.4,
+            ),
             onPressed: isPrinting ? null : onPrint,
           ),
         ],

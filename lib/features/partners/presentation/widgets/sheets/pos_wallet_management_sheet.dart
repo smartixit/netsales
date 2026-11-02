@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/partners/domain/entities/pos_wallet_entity.dart';
 import 'package:netsales/features/partners/presentation/controllers/pos_wallet_sheet_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -204,7 +204,7 @@ class PosWalletManagementSheet extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: logs.length,
-                separatorBuilder: (_, __) => AppSpacing.vSm,
+                separatorBuilder: (context, index) => AppSpacing.vSm,
                 itemBuilder: (context, idx) {
                   final log = logs[idx];
                   return _WalletLogTile(log: log);
@@ -509,11 +509,8 @@ class _WalletLogTile extends StatelessWidget {
         : Icons.arrow_upward_rounded;
     final prefix = isCredit ? '+' : '-';
 
-    final dateStr = log.logDate != null
-        ? DateFormat('yyyy/MM/dd • HH:mm', 'ar').format(log.logDate!)
-        : (log.createdAt != null
-              ? DateFormat('yyyy/MM/dd • HH:mm', 'ar').format(log.createdAt!)
-              : '—');
+    final dateStr = DateFormatter.apiDateTime(log.logDate ?? log.createdAt ?? DateTime.parse('-'));
+        
 
     return Container(
       padding: EdgeInsets.all(12.r),

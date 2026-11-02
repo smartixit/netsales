@@ -9,11 +9,11 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
-import 'package:netsales/core/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item_model.dart';
 
 /// شريط المصغرات السفلي التفاعلي لمعرض الوسائط (MediaGalleryFilmstrip)
 class MediaGalleryFilmstrip extends StatelessWidget {
-  final List<MediaGalleryItem> items;
+  final List<MediaGalleryItemModel> items;
   final int currentIndex;
   final ValueChanged<int> onItemTap;
 
@@ -88,7 +88,7 @@ class MediaGalleryFilmstrip extends StatelessWidget {
 
 /// ودجت مصغرة العنصر الفردي داخل شريط المصغرات
 class _FilmstripThumbnail extends StatelessWidget {
-  final MediaGalleryItem item;
+  final MediaGalleryItemModel item;
 
   const _FilmstripThumbnail({required this.item});
 

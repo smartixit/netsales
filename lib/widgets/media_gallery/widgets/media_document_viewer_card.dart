@@ -7,17 +7,14 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/core/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item_model.dart';
 import 'package:open_filex/open_filex.dart';
 
 /// بطاقة عرض المستندات وجداول البيانات (Excel / Word / Documents) داخل المعرض
 class MediaDocumentViewerCard extends StatelessWidget {
-  final MediaGalleryItem item;
+  final MediaGalleryItemModel item;
 
-  const MediaDocumentViewerCard({
-    super.key,
-    required this.item,
-  });
+  const MediaDocumentViewerCard({super.key, required this.item});
 
   Future<void> _openDocument() async {
     try {
@@ -62,11 +59,7 @@ class MediaDocumentViewerCard extends StatelessWidget {
                 color: iconColor.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                iconData,
-                size: 52.r,
-                color: iconColor,
-              ),
+              child: Icon(iconData, size: 52.r, color: iconColor),
             ),
             AppSpacing.vLg,
             Text(

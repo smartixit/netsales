@@ -7,7 +7,7 @@ import 'package:netsales/core/utils/file_size_formatter.dart';
 ///
 /// كائن قيمة غير قابل للتعديل (Immutable Value Object) يمثل أي ملف أو صورة تم اختيارها
 /// محلياً، مجرداً من أي حزم خارجية أو تبعيات واجهة المستخدم.
-class AppPickedFile {
+class AppPickedFileModel {
   final String id;
   final String path;
   final String name;
@@ -16,7 +16,7 @@ class AppPickedFile {
   final Uint8List? bytes;
   final String? mimeType;
 
-  const AppPickedFile({
+  const AppPickedFileModel({
     required this.id,
     required this.path,
     required this.name,
@@ -27,7 +27,7 @@ class AppPickedFile {
   });
 
   /// إنشاء كائن من ملف محلي قياسي (dart:io File)
-  factory AppPickedFile.fromFile(File file) {
+  factory AppPickedFileModel.fromFile(File file) {
     final path = file.path;
     final name = path.split(Platform.pathSeparator).last;
     final dotIndex = name.lastIndexOf('.');
@@ -37,7 +37,7 @@ class AppPickedFile {
     final length = file.existsSync() ? file.lengthSync() : 0;
     final id = '${DateTime.now().microsecondsSinceEpoch}_$name';
 
-    return AppPickedFile(
+    return AppPickedFileModel(
       id: id,
       path: path,
       name: name,
@@ -94,7 +94,7 @@ class AppPickedFile {
     return textExtensions.contains(extension.toLowerCase());
   }
 
-  AppPickedFile copyWith({
+  AppPickedFileModel copyWith({
     String? id,
     String? path,
     String? name,
@@ -103,7 +103,7 @@ class AppPickedFile {
     Uint8List? bytes,
     String? mimeType,
   }) {
-    return AppPickedFile(
+    return AppPickedFileModel(
       id: id ?? this.id,
       path: path ?? this.path,
       name: name ?? this.name,
@@ -117,7 +117,7 @@ class AppPickedFile {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is AppPickedFile &&
+    return other is AppPickedFileModel &&
         other.id == id &&
         other.path == path &&
         other.sizeBytes == sizeBytes;

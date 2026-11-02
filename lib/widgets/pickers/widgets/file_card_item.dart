@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/models/app_picked_file.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -16,7 +16,7 @@ import 'package:netsales/widgets/media_gallery/media_gallery_viewer.dart';
 /// تعرض أيقونة نوع الملف الملونة، اسمه، حجمه المنسق، وزر حذفه، مع دعم
 /// المعاينة المصغرة للصور بحماية كاملة من انهيار الذاكرة.
 class FileCardItem extends StatelessWidget {
-  final AppPickedFile file;
+  final AppPickedFileModel file;
   final VoidCallback? onRemove;
   final VoidCallback? onTap;
   final bool readOnly;
@@ -116,21 +116,19 @@ class FileCardItem extends StatelessWidget {
       ),
     );
 
-    final effectiveOnTap = onTap ??
+    final effectiveOnTap =
+        onTap ??
         () {
           MediaGalleryViewer.showPickedFiles(context, files: [file]);
         };
 
-    return CustomInteractiveBounce(
-      onTap: effectiveOnTap,
-      child: cardContent,
-    );
+    return CustomInteractiveBounce(onTap: effectiveOnTap, child: cardContent);
   }
 }
 
 /// وسم وأيقونة الملف المخصصة بحسب النوع مع حماية الذاكرة للصور
 class _FileIconBadge extends StatelessWidget {
-  final AppPickedFile file;
+  final AppPickedFileModel file;
 
   const _FileIconBadge({required this.file});
 
@@ -174,16 +172,10 @@ class _FileIconBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(
-          color: badgeColor.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: badgeColor.withValues(alpha: 0.25)),
       ),
       child: Center(
-        child: Icon(
-          iconData,
-          color: badgeColor,
-          size: 22.r,
-        ),
+        child: Icon(iconData, color: badgeColor, size: 22.r),
       ),
     );
   }

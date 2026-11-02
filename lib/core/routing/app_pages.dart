@@ -3,7 +3,6 @@ import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
-import 'package:netsales/core/routing/middlewares/permission_guard_middleware.dart';
 import 'package:netsales/core/routing/middlewares/workspace_guard.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
@@ -20,6 +19,8 @@ import 'package:netsales/features/auth/presentation/screens/reset_password_scree
 import 'package:netsales/features/auth/presentation/screens/two_factor_auth_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/unsupported_platform_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/verify_otp_screen.dart';
+import 'package:netsales/features/debts/presentation/bindings/network_debts_binding.dart';
+import 'package:netsales/features/debts/presentation/screens/network_debts_screen.dart';
 import 'package:netsales/features/home/presentation/bindings/home_layout_binding.dart';
 import 'package:netsales/features/home/presentation/bindings/workspace_bindings.dart';
 import 'package:netsales/features/home/presentation/screens/home_layout_screen.dart';
@@ -54,7 +55,7 @@ abstract final class AppPages {
 
   static const String initial = AppRoutes.initial;
 
-  static final List<GetPage> routes = [
+  static final List<GetPage<dynamic>> routes = [
     // 1. مسار البداية والفحص الأولي (Splash)
     GetPage(
       name: AppRoutes.initial,
@@ -172,6 +173,17 @@ abstract final class AppPages {
       name: AppRoutes.networkWalletStatement,
       page: () => const NetworkWalletStatementScreen(),
       binding: NetworkWalletBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.networkWalletsView,
+        ),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.networkDebts,
+      page: () => const NetworkDebtsScreen(),
+      binding: NetworkDebtsBinding(),
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(

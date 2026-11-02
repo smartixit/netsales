@@ -3,21 +3,26 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/cache/netsales_cache_manager.dart';
 import 'package:netsales/core/constants/api_constants.dart';
-import 'package:netsales/core/models/app_picked_file.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/app_cache_service.dart';
-import 'package:netsales/core/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item_model.dart';
 
 void main() {
   group('NetSalesDioFileService URL Normalization & MIME Tests', () {
     test('normalizeMediaUrl handles relative paths correctly', () {
       const relativePath = 'networks/logos/logo_123.png';
       final normalized = NetSalesDioFileService.normalizeMediaUrl(relativePath);
-      expect(normalized, '${ApiConstants.baseUrl}/files/networks/logos/logo_123.png');
+      expect(
+        normalized,
+        '${ApiConstants.baseUrl}/files/networks/logos/logo_123.png',
+      );
     });
 
     test('normalizeMediaUrl handles /files/ prefixed paths correctly', () {
       const pathWithFiles = '/files/pos/logos/pos_99.png';
-      final normalized = NetSalesDioFileService.normalizeMediaUrl(pathWithFiles);
+      final normalized = NetSalesDioFileService.normalizeMediaUrl(
+        pathWithFiles,
+      );
       expect(normalized, '${ApiConstants.baseUrl}/files/pos/logos/pos_99.png');
     });
 
@@ -29,8 +34,17 @@ void main() {
 
     test('extractExtension resolves from path or MIME type accurately', () {
       expect(NetSalesDioFileService.extractExtension('doc.pdf', null), '.pdf');
-      expect(NetSalesDioFileService.extractExtension('sheet.xlsx', null), '.xlsx');
-      expect(NetSalesDioFileService.extractExtension('file_without_ext', 'application/pdf'), '.pdf');
+      expect(
+        NetSalesDioFileService.extractExtension('sheet.xlsx', null),
+        '.xlsx',
+      );
+      expect(
+        NetSalesDioFileService.extractExtension(
+          'file_without_ext',
+          'application/pdf',
+        ),
+        '.pdf',
+      );
       expect(
         NetSalesDioFileService.extractExtension(
           'data',
@@ -38,8 +52,14 @@ void main() {
         ),
         '.xlsx',
       );
-      expect(NetSalesDioFileService.extractExtension('data', 'text/csv'), '.csv');
-      expect(NetSalesDioFileService.extractExtension('photo', 'image/jpeg'), '.jpg');
+      expect(
+        NetSalesDioFileService.extractExtension('data', 'text/csv'),
+        '.csv',
+      );
+      expect(
+        NetSalesDioFileService.extractExtension('photo', 'image/jpeg'),
+        '.jpg',
+      );
     });
   });
 
@@ -90,7 +110,7 @@ void main() {
 
   group('MediaGalleryItem Clean Architecture & Type Resolution Tests', () {
     test('resolves image URLs accurately', () {
-      const item = MediaGalleryItem(
+      const item = MediaGalleryItemModel(
         url: 'http://server.com/api/v1/files/networks/logos/test.png',
         title: 'شعار الشبكة',
       );
@@ -102,8 +122,9 @@ void main() {
     });
 
     test('resolves PDF documents accurately', () {
-      const item = MediaGalleryItem(
-        url: 'http://server.com/api/v1/files/signed/expenses/receipt.pdf?signature=123',
+      const item = MediaGalleryItemModel(
+        url:
+            'http://server.com/api/v1/files/signed/expenses/receipt.pdf?signature=123',
         title: 'فاتورة الصيانة',
       );
 
@@ -114,7 +135,7 @@ void main() {
     });
 
     test('resolves Excel spreadsheets accurately', () {
-      const item = MediaGalleryItem(
+      const item = MediaGalleryItemModel(
         url: 'http://server.com/api/v1/files/signed/reports/sales.xlsx',
         title: 'تقرير المبيعات',
       );
@@ -125,7 +146,7 @@ void main() {
     });
 
     test('detects local file path correctly', () {
-      const localItem = MediaGalleryItem(
+      const localItem = MediaGalleryItemModel(
         url: '/data/user/0/com.smartix.netsales/cache/invoice.pdf',
         title: 'فاتورة محلية',
       );
@@ -134,7 +155,7 @@ void main() {
     });
 
     test('converts AppPickedFile into MediaGalleryItem seamlessly', () {
-      final pickedPdf = AppPickedFile(
+      final pickedPdf = AppPickedFileModel(
         id: 'file_001',
         path: '/storage/emulated/0/Download/report.pdf',
         name: 'report.pdf',
@@ -143,7 +164,7 @@ void main() {
         bytes: Uint8List(10),
       );
 
-      final galleryItem = MediaGalleryItem.fromPickedFile(pickedPdf);
+      final galleryItem = MediaGalleryItemModel.fromPickedFile(pickedPdf);
       expect(galleryItem.title, 'report.pdf');
       expect(galleryItem.isPdf, isTrue);
       expect(galleryItem.isLocalFile, isTrue);

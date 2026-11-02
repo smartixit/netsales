@@ -236,6 +236,16 @@ abstract final class ApiConstants {
       '/sale-invoices/batch-force-delete';
 
   // ==========================================================================
+  // 14.1. إدارة وتتبع الديون والذمم وسداد الفواتير (POS Debts & Repayments) — Milestone 4-C
+  // ==========================================================================
+  static const String posDebtsSummary = '/pos-debts/summary';
+  static const String posDebtsInvoices = '/pos-debts/invoices';
+  static const String posDebtsRepayments = '/pos-debts/repayments';
+  static String posDebtRepayment(int id) => '/pos-debts/repayments/$id';
+  static String posDebtRepaymentReverse(int id) => '/pos-debts/repayments/$id/reverse';
+  static String posWalletCreditLimit(int id) => '/pos-wallets/$id/credit-limit';
+
+  // ==========================================================================
   // 15. المصروفات التشغيلية والبنود والمرفقات (Expenses & Operational Disbursals)
   // ==========================================================================
   static const String expenses = '/expenses';

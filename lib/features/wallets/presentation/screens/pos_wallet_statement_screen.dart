@@ -121,7 +121,6 @@ class PosWalletStatementScreen extends GetView<PosWalletController> {
           );
         }
 
-        final isOverdrawn = wallet != null && wallet.walletBalance < 0;
 
         return RefreshIndicator(
           onRefresh: () => controller.loadWalletAndLogsForSelectedNetwork(),
@@ -183,6 +182,8 @@ class PosWalletStatementScreen extends GetView<PosWalletController> {
                   isPosDebt: wallet.isOverdrawn,
                   statusLabel: wallet.accountingStatusLabel,
                   accountUuid: wallet.walletUuid,
+                  creditLimit: wallet.creditLimit,
+                  availableCapacity: wallet.availableOverdraftCapacity,
                   onRefresh: () => controller.loadWalletAndLogsForSelectedNetwork(),
                 ),
 
@@ -205,7 +206,7 @@ class PosWalletStatementScreen extends GetView<PosWalletController> {
                       text: 'طلب كروت جديدة (POS-02)',
                       icon: Icons.add_shopping_cart_rounded,
                       height: 40.h,
-                      onPressed: () => Get.toNamed(AppRoutes.newProcurementOrder),
+                      onPressed: () => Get.toNamed<dynamic>(AppRoutes.newProcurementOrder),
                     ),
                   ),
                 ],

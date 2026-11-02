@@ -18,6 +18,8 @@ class PosWalletModel extends PosWalletEntity {
     required super.isOverdrawn,
     required super.debitAmount,
     required super.creditAmount,
+    super.creditLimit,
+    super.availableOverdraftCapacity,
     super.networkName,
     super.posName,
     super.createdAt,
@@ -54,6 +56,16 @@ class PosWalletModel extends PosWalletEntity {
     final String accountingStatus = json['accounting_status']?.toString() ?? 'ZERO';
     final String accountingStatusLabel = json['accounting_status_label']?.toString() ?? '';
 
+    final rawLimit = json['credit_limit'];
+    final double? creditLimit = (rawLimit != null)
+        ? ((rawLimit is num) ? rawLimit.toDouble() : double.tryParse(rawLimit.toString()))
+        : null;
+
+    final rawCapacity = json['available_overdraft_capacity'];
+    final double? availableCapacity = (rawCapacity != null)
+        ? ((rawCapacity is num) ? rawCapacity.toDouble() : double.tryParse(rawCapacity.toString()))
+        : null;
+
     final network = json['network'] is Map ? json['network'] as Map<String, dynamic> : null;
     final pos = json['pos'] is Map ? json['pos'] as Map<String, dynamic> : null;
 
@@ -69,6 +81,8 @@ class PosWalletModel extends PosWalletEntity {
       isOverdrawn: isOverdrawn,
       debitAmount: debit,
       creditAmount: credit,
+      creditLimit: creditLimit,
+      availableOverdraftCapacity: availableCapacity,
       networkName: network?['network_name']?.toString() ?? json['network_name']?.toString(),
       posName: pos?['pos_name']?.toString() ?? json['pos_name']?.toString(),
       createdAt: parseDate(json['created_at']),

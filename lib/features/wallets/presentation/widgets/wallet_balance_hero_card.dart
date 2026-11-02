@@ -24,6 +24,8 @@ class WalletBalanceHeroCard extends StatelessWidget {
   final bool isPosDebt;
   final String? statusLabel;
   final String? accountUuid;
+  final double? creditLimit;
+  final double? availableCapacity;
   final VoidCallback? onRefresh;
 
   const WalletBalanceHeroCard({
@@ -37,6 +39,8 @@ class WalletBalanceHeroCard extends StatelessWidget {
     this.isPosDebt = false,
     this.statusLabel,
     this.accountUuid,
+    this.creditLimit,
+    this.availableCapacity,
     this.onRefresh,
   });
 
@@ -231,6 +235,36 @@ class WalletBalanceHeroCard extends StatelessWidget {
                 ),
             ],
           ),
+
+          if (creditLimit != null) ...[
+            AppSpacing.vSm,
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(AppRadius.xs),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'السقف الائتماني: ${isBalanceHidden ? "••••" : AmountFormatter.formatValue(creditLimit!)} $currency',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    'المتاح: ${isBalanceHidden ? "••••" : AmountFormatter.formatValue(availableCapacity ?? (creditLimit! + balance))} $currency',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: (availableCapacity ?? (creditLimit! + balance)) < 0 ? colors.error : colors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           AppSpacing.vSm,
           const Divider(height: 1),

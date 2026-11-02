@@ -48,6 +48,14 @@ abstract final class IdempotencyHelper {
   static String forExpense([int? categoryId]) =>
       generate(categoryId != null ? 'exp-cat$categoryId' : 'exp');
 
+  /// مفتاح لسندات سداد مديونيات نقاط البيع (Milestone 4-C)
+  static String forRepayment([int? posId]) =>
+      generate(posId != null ? 'repay-pos$posId' : 'repay');
+
+  /// مفتاح لعكس سندات سداد مديونيات نقاط البيع (Milestone 4-C)
+  static String forRepaymentReversal([int? repaymentId]) =>
+      generate(repaymentId != null ? 'repay-rev$repaymentId' : 'repay-rev');
+
   /// مفتاح للعمليات المجمعة الحساسة (Batch Operations)
   static String forBatchOperation(String operation) =>
       generate('batch-$operation');

@@ -10,7 +10,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/core/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item_model.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:printing/printing.dart';
 
@@ -20,14 +20,10 @@ import 'package:printing/printing.dart';
 /// بواسطة [PdfPreview] دون الحاجة لمغادرة التطبيق أو فتح روابط ويب، مع إمكانية
 /// الفتح في تطبيق خارجي.
 class MediaPdfViewerCard extends StatefulWidget {
-  final MediaGalleryItem item;
+  final MediaGalleryItemModel item;
   final ValueChanged<Uint8List>? onBytesLoaded;
 
-  const MediaPdfViewerCard({
-    super.key,
-    required this.item,
-    this.onBytesLoaded,
-  });
+  const MediaPdfViewerCard({super.key, required this.item, this.onBytesLoaded});
 
   @override
   State<MediaPdfViewerCard> createState() => _MediaPdfViewerCardState();
@@ -171,9 +167,7 @@ class _MediaPdfViewerCardState extends State<MediaPdfViewerCard> {
               Text(
                 _errorMessage ?? 'تعذر قراءة المستند',
                 textAlign: TextAlign.center,
-                style: AppTypography.bodySmall.copyWith(
-                  color: colors.error,
-                ),
+                style: AppTypography.bodySmall.copyWith(color: colors.error),
               ),
               AppSpacing.vLg,
               CustomButton.outline(
@@ -214,8 +208,11 @@ class _MediaPdfViewerCardState extends State<MediaPdfViewerCard> {
             canChangePageFormat: false,
             canChangeOrientation: false,
             canDebug: false,
-            useActions: false, // الإجراءات تُدار بالكامل عبر أزرار نظامنا الموحدة
-            scrollViewDecoration: const BoxDecoration(color: Colors.transparent),
+            useActions:
+                false, // الإجراءات تُدار بالكامل عبر أزرار نظامنا الموحدة
+            scrollViewDecoration: const BoxDecoration(
+              color: Colors.transparent,
+            ),
             loadingWidget: Center(
               child: SizedBox.square(
                 dimension: 32.r,

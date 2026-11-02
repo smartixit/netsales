@@ -37,6 +37,7 @@ abstract final class AppRoutes {
   static const String voucherPackagesCatalog = '/voucher-packages';
   static const String customDiscounts = '/network/discounts';
   static const String networkWalletStatement = '/network-wallets';
+  static const String networkDebts = '/network/debts';
   static const String operatingExpenses = '/expenses';
   static const String networkTeamManagement = '/network/team';
   static const String networkSubscription = '/network/subscription';

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/models/app_picked_file.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -16,7 +16,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 /// الملفات عند النقر، وتنبيهات بصرية متناسقة مع ألوان النظام.
 class FilePickerDropzone extends StatefulWidget {
   final VoidCallback onBrowse;
-  final ValueChanged<List<AppPickedFile>>? onDroppedFiles;
+  final ValueChanged<List<AppPickedFileModel>>? onDroppedFiles;
   final String title;
   final String? subtitle;
   final bool enabled;
@@ -57,11 +57,11 @@ class _FilePickerDropzoneState extends State<FilePickerDropzone> {
         setState(() => _isDragging = false);
         if (detail.files.isEmpty) return;
 
-        final converted = <AppPickedFile>[];
+        final converted = <AppPickedFileModel>[];
         for (final xFile in detail.files) {
           final file = File(xFile.path);
           if (file.existsSync()) {
-            converted.add(AppPickedFile.fromFile(file));
+            converted.add(AppPickedFileModel.fromFile(file));
           }
         }
         if (converted.isNotEmpty) {

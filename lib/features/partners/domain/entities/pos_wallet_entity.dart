@@ -14,6 +14,8 @@ class PosWalletEntity {
   final bool isOverdrawn;
   final double debitAmount;
   final double creditAmount;
+  final double? creditLimit;
+  final double? availableOverdraftCapacity;
   final String? networkName;
   final String? posName;
   final DateTime? createdAt;
@@ -31,6 +33,8 @@ class PosWalletEntity {
     required this.isOverdrawn,
     required this.debitAmount,
     required this.creditAmount,
+    this.creditLimit,
+    this.availableOverdraftCapacity,
     this.networkName,
     this.posName,
     this.createdAt,
@@ -41,6 +45,8 @@ class PosWalletEntity {
   bool get isDebtor => accountingStatus.toUpperCase() == 'DEBIT';
   bool get isCreditor => accountingStatus.toUpperCase() == 'CREDIT';
   bool get isBalanced => accountingStatus.toUpperCase() == 'ZERO';
+  bool get hasCreditFacility => creditLimit != null;
+  double get remainingCreditLimit => availableOverdraftCapacity ?? (creditLimit != null ? (creditLimit! + walletBalance) : 0.0);
 
 
   @override

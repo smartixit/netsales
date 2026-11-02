@@ -8,7 +8,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
-import 'package:netsales/core/models/media_gallery_item.dart';
+import 'package:netsales/core/models/media_gallery_item_model.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_document_viewer_card.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_pdf_viewer_card.dart';
 
@@ -19,7 +19,7 @@ import 'package:netsales/widgets/media_gallery/widgets/media_pdf_viewer_card.dar
 /// - استعراض جداول البيانات والمستندات عبر [MediaDocumentViewerCard].
 /// - استعراض الصور مع دعم السحب والتكبير والتصغير التفاعلي واللمس المزدوج.
 class MediaViewerItem extends StatefulWidget {
-  final MediaGalleryItem item;
+  final MediaGalleryItemModel item;
   final VoidCallback? onTap;
   final ValueChanged<Uint8List>? onBytesLoaded;
 
@@ -45,21 +45,23 @@ class _MediaViewerItemState extends State<MediaViewerItem>
   void initState() {
     super.initState();
     _transformationController = TransformationController();
-    _zoomAnimationController = AnimationController(
-      vsync: this,
-      duration: AppMotion.fast,
-    )..addListener(() {
-        if (_zoomAnimation != null) {
-          _transformationController.value = _zoomAnimation!.value;
-        }
-      });
+    _zoomAnimationController =
+        AnimationController(vsync: this, duration: AppMotion.fast)
+          ..addListener(() {
+            if (_zoomAnimation != null) {
+              _transformationController.value = _zoomAnimation!.value;
+            }
+          });
 
     if (widget.item.isLocalFile) {
-      File(widget.item.url).readAsBytes().then((bytes) {
-        if (mounted && bytes.isNotEmpty) {
-          widget.onBytesLoaded?.call(bytes);
-        }
-      }).catchError((_) {});
+      File(widget.item.url)
+          .readAsBytes()
+          .then((bytes) {
+            if (mounted && bytes.isNotEmpty) {
+              widget.onBytesLoaded?.call(bytes);
+            }
+          })
+          .catchError((_) {});
     }
   }
 
@@ -86,15 +88,16 @@ class _MediaViewerItemState extends State<MediaViewerItem>
       endMatrix.setEntry(1, 3, y);
     }
 
-    _zoomAnimation = Matrix4Tween(
-      begin: _transformationController.value,
-      end: endMatrix,
-    ).animate(
-      CurvedAnimation(
-        parent: _zoomAnimationController,
-        curve: AppMotion.emphasized,
-      ),
-    );
+    _zoomAnimation =
+        Matrix4Tween(
+          begin: _transformationController.value,
+          end: endMatrix,
+        ).animate(
+          CurvedAnimation(
+            parent: _zoomAnimationController,
+            curve: AppMotion.emphasized,
+          ),
+        );
 
     _zoomAnimationController.forward(from: 0);
   }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/models/app_picked_file.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -28,8 +28,8 @@ enum FilePickerDisplayMode {
 /// يدعم تحديد سقف عدد الملفات، سقف الأحجام، تصفية الامتدادات، الحماية الأمنية،
 /// والسحب والإفلات على الحاسوب والويب، مع هيكل وميضي احترافي (Skeleton Shimmer) أثناء المعالجة والتحميل.
 class CustomFilePicker extends StatefulWidget {
-  final List<AppPickedFile>? initialFiles;
-  final ValueChanged<List<AppPickedFile>>? onFilesChanged;
+  final List<AppPickedFileModel>? initialFiles;
+  final ValueChanged<List<AppPickedFileModel>>? onFilesChanged;
   final int maxFiles;
   final int maxFileSizeBytes;
   final int? maxTotalSizeBytes;
@@ -40,7 +40,7 @@ class CustomFilePicker extends StatefulWidget {
   final String? hint;
   final bool isRequired;
   final bool readOnly;
-  final String? Function(List<AppPickedFile>?)? validator;
+  final String? Function(List<AppPickedFileModel>?)? validator;
 
   const CustomFilePicker({
     super.key,
@@ -62,8 +62,8 @@ class CustomFilePicker extends StatefulWidget {
   /// منشئ مخصص لملف مفرد (Single File / Document)
   factory CustomFilePicker.single({
     Key? key,
-    AppPickedFile? initialFile,
-    ValueChanged<AppPickedFile?>? onFileChanged,
+    AppPickedFileModel? initialFile,
+    ValueChanged<AppPickedFileModel?>? onFileChanged,
     int maxFileSizeBytes = 2 * 1024 * 1024,
     List<String>? allowedExtensions,
     FileTypePreset preset = FileTypePreset.anySafe,
@@ -94,8 +94,8 @@ class CustomFilePicker extends StatefulWidget {
   /// منشئ مخصص لجداول البيانات (Excel / CSV)
   factory CustomFilePicker.spreadsheet({
     Key? key,
-    List<AppPickedFile>? initialFiles,
-    ValueChanged<List<AppPickedFile>>? onFilesChanged,
+    List<AppPickedFileModel>? initialFiles,
+    ValueChanged<List<AppPickedFileModel>>? onFilesChanged,
     int maxFiles = 1,
     int maxFileSizeBytes = 10 * 1024 * 1024, // 10MB
     String label = 'ملف كروت الشبكة (Excel / CSV)',
@@ -123,13 +123,13 @@ class CustomFilePicker extends StatefulWidget {
 }
 
 class _CustomFilePickerState extends State<CustomFilePicker> {
-  late final List<AppPickedFile> _files;
+  late final List<AppPickedFileModel> _files;
   bool _isPicking = false;
 
   @override
   void initState() {
     super.initState();
-    _files = List<AppPickedFile>.from(widget.initialFiles ?? []);
+    _files = List<AppPickedFileModel>.from(widget.initialFiles ?? []);
   }
 
   @override
@@ -172,7 +172,7 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
     }
   }
 
-  void _handleDroppedFiles(List<AppPickedFile> dropped) {
+  void _handleDroppedFiles(List<AppPickedFileModel> dropped) {
     if (widget.readOnly || !_canAddMore || _isPicking) return;
 
     final remainingSlots = widget.maxFiles - _files.length;
@@ -198,7 +198,7 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return FormField<List<AppPickedFile>>(
+    return FormField<List<AppPickedFileModel>>(
       initialValue: _files,
       validator: widget.validator,
       builder: (fieldState) {
@@ -225,7 +225,8 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
                   onBrowse: _pickFiles,
                   onDroppedFiles: _handleDroppedFiles,
                   enabled: !_isPicking,
-                  subtitle: widget.hint ??
+                  subtitle:
+                      widget.hint ??
                       'الحد الأقصى: ${widget.maxFiles} ملفات (${widget.maxFileSizeBytes ~/ (1024 * 1024)}MB لكل ملف)',
                 )
               else
@@ -245,9 +246,7 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
               AppSpacing.vXs,
               Text(
                 fieldState.errorText!,
-                style: AppTypography.labelSmall.copyWith(
-                  color: colors.error,
-                ),
+                style: AppTypography.labelSmall.copyWith(color: colors.error),
               ),
             ],
 
