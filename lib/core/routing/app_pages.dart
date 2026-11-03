@@ -20,6 +20,9 @@ import 'package:netsales/features/auth/presentation/screens/register_pos_screen.
 import 'package:netsales/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/two_factor_auth_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/verify_otp_screen.dart';
+import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
+import 'package:netsales/features/commercial/presentation/screens/pos_linked_networks_screen.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
 import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -165,6 +168,28 @@ abstract final class AppPages {
       page: () => const ActiveSessionsScreen(),
       binding: ActiveSessionsBinding(),
       middlewares: [AuthGuard()],
+    ),
+
+    // ========================================================================
+    // 6. مسارات الكيانات والعلاقات التجارية (Commercial Entities & Relationships)
+    // ========================================================================
+    GetPage(
+      name: AppRoutes.posDirectory,
+      page: () => const NetworkPosDirectoryScreen(),
+      binding: CommercialBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.linkedNetworksCatalog,
+      page: () => const PosLinkedNetworksScreen(),
+      binding: CommercialBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
     ),
   ];
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/adaptive_workspace_scaffold.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
@@ -61,11 +62,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         label: 'نقاط البيع',
         icon: Icons.storefront_outlined,
         activeIcon: Icons.storefront_rounded,
-        content: CustomEmptyState(
-          title: 'دليل نقاط البيع المعتمدة',
-          subtitle:
-              'إدارة روابط الشراكة، نسب الخصومات التعاقدية، وسقوف الائتمان',
-        ),
+        content: NetworkPosDirectoryScreen(),
       ),
       const WorkspaceNavItem(
         label: 'المالية والديون',
