@@ -148,7 +148,7 @@ class AppCryptoService {
     if (!force && hasServerBoxKey) return true;
 
     try {
-      final response = await dio.get(
+      final response = await dio.get<AppCryptoService>(
         ApiConstants.securityPublicKeys,
         options: Options(headers: {'X-Bypass-Encryption': 'true'}),
       );

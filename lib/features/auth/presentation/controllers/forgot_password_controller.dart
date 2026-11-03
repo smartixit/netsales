@@ -42,7 +42,7 @@ class ForgotPasswordController extends GetxController {
       if (isClosed) return;
 
       // الانتقال لشاشة التحقق من الرمز مع تمرير رقم الهاتف
-      Get.toNamed(AppRoutes.verifyOtp, arguments: {'phone': phone});
+      await Get.toNamed<void>(AppRoutes.verifyOtp, arguments: {'phone': phone});
     } catch (error) {
       await CustomAnimationOverlay.hide();
       if (isClosed) return;
@@ -61,7 +61,7 @@ class ForgotPasswordController extends GetxController {
   }
 
   void goToLogin() {
-    Get.offNamed(AppRoutes.login);
+    Get.offNamed<void>(AppRoutes.login);
   }
 
   @override

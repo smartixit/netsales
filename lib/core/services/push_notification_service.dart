@@ -251,7 +251,7 @@ class PushNotificationService extends GetxService {
         'device_type': device.deviceType,
       };
 
-      final response = await ApiService.instance.post(
+      final response = await ApiService.instance.post<DeviceService>(
         ApiConstants.notificationFcmToken,
         data: payload,
       );
@@ -399,7 +399,7 @@ class PushNotificationService extends GetxService {
 
     // 1. التوجيه المباشر بالمسار الصريح إن وُجد
     if (route != null && route.isNotEmpty) {
-      Get.toNamed(route, arguments: {'entity_id': entityId});
+      Get.toNamed<void>(route, arguments: {'entity_id': entityId});
       return;
     }
 
@@ -408,10 +408,10 @@ class PushNotificationService extends GetxService {
     final targetRoute = notificationType.defaultRoute;
 
     if (entityId != null && entityId.isNotEmpty) {
-      Get.toNamed(targetRoute, arguments: {'entity_id': entityId});
+      Get.toNamed<void>(targetRoute, arguments: {'entity_id': entityId});
     } else {
       if (Get.currentRoute != targetRoute) {
-        Get.toNamed(targetRoute);
+        Get.toNamed<void>(targetRoute);
       }
     }
   }

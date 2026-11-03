@@ -505,7 +505,7 @@ class CustomAnimationOverlay {
 
       reverseTransitionDuration: AppMotion.slow,
 
-      transitionsBuilder: (_, animation, __, child) {
+      transitionsBuilder: (context, animation, animation2, child) {
         final curve = CurvedAnimation(
           parent: animation,
           curve: AppMotion.springy,
@@ -521,7 +521,7 @@ class CustomAnimationOverlay {
         );
       },
 
-      pageBuilder: (context, _, __) {
+      pageBuilder: (context, animation, animation2) {
         final isAction = actionLabel != null && onAction != null;
 
         final allowBackToClose =

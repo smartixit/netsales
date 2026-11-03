@@ -9,7 +9,6 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/onboarding/presentation/controllers/welcome_controller.dart';
 
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/cards/custom_action_card.dart';
 import 'package:netsales/widgets/dividers/custom_labeled_divider.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 

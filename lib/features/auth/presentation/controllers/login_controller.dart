@@ -225,12 +225,12 @@ class LoginController extends GetxController {
 
   /// التوجيه لصفحة استعادة كلمة المرور
   void goToForgotPassword() {
-    Get.toNamed(AppRoutes.forgotPassword);
+    Get.toNamed<void>(AppRoutes.forgotPassword);
   }
 
   /// التوجيه لصفحة اختيار نوع الحساب الجديد
   void goToRegister() {
-    Get.offNamed(AppRoutes.welcome);
+    Get.offNamed<void>(AppRoutes.welcome);
   }
 
   @override

@@ -60,7 +60,7 @@ class CustomUnauthorized extends StatelessWidget {
                   text: 'العودة للرئيسية',
                   icon: Icons.home_rounded,
                   onPressed: () {
-                    Get.offAllNamed(AppRoutes.dashboard);
+                    Get.offAllNamed<void>(AppRoutes.dashboard);
                   },
                 ),
               ],

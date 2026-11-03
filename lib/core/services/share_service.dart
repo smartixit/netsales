@@ -11,7 +11,7 @@ class ShareService {
   static final ShareService instance = ShareService._();
 
   /// Share plain text.
-  Future shareText({
+  Future<ShareResult> shareText({
     required String text,
     String? subject,
     Rect? sharePositionOrigin,
@@ -26,7 +26,7 @@ class ShareService {
   }
 
   /// Share a URL.
-  Future shareLink({
+  Future<ShareResult> shareLink({
     required String url,
     String? subject,
     String? text,
@@ -42,7 +42,7 @@ class ShareService {
   }
 
   /// Share a file from device storage.
-  Future shareFile({
+  Future<ShareResult> shareFile({
     required String filePath,
     String? text,
     String? subject,

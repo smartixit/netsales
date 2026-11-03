@@ -208,7 +208,7 @@ class RegisterPosController extends GetxController {
   }
 
   void goToLogin() {
-    Get.offNamed(AppRoutes.login);
+    Get.offNamed<void>(AppRoutes.login);
   }
 
   @override
