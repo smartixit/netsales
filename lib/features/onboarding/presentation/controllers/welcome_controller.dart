@@ -4,14 +4,14 @@ import 'package:netsales/core/routing/app_routes.dart';
 /// متحكم واجهة الترحيب وتحديد الهوية (WelcomeController)
 class WelcomeController extends GetxController {
   void goToLogin() {
-    Get.toNamed(AppRoutes.login);
+    Get.toNamed<void>(AppRoutes.login);
   }
 
   void goToRegisterNetwork() {
-    Get.toNamed(AppRoutes.registerNetwork);
+    Get.toNamed<void>(AppRoutes.registerNetwork);
   }
 
   void goToRegisterPos() {
-    Get.toNamed(AppRoutes.registerPos);
+    Get.toNamed<void>(AppRoutes.registerPos);
   }
 }

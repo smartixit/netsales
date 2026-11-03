@@ -28,10 +28,10 @@ class AppThemes {
   /// ── Build Theme ──
   static ThemeData _buildTheme({
     required Brightness brightness,
-    required dynamic colors,
+    required AppColors colors,
   }) {
     // final isDark = brightness == Brightness.dark;
-    final c = colors;
+    AppColors c = colors;
 
     return ThemeData(
       useMaterial3: true,
@@ -175,7 +175,7 @@ class AppThemes {
   }
 
   /// ── App Bar Theme ──
-  static AppBarTheme _buildAppBarTheme({required dynamic colors}) {
+  static AppBarTheme _buildAppBarTheme({required AppColors colors}) {
     return AppBarTheme(
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -201,7 +201,7 @@ class AppThemes {
 
   /// ── Bottom Nav Theme ──
   static BottomNavigationBarThemeData _buildBottomNavTheme({
-    required dynamic colors,
+    required AppColors colors,
   }) {
     return BottomNavigationBarThemeData(
       backgroundColor: colors.surface,
@@ -218,7 +218,7 @@ class AppThemes {
 
   /// ── Elevated Button Theme ──
   static ElevatedButtonThemeData _buildElevatedButtonTheme({
-    required dynamic colors,
+    required AppColors colors,
   }) {
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -240,7 +240,7 @@ class AppThemes {
 
   /// ── Outlined Button Theme ──
   static OutlinedButtonThemeData _buildOutlinedButtonTheme({
-    required dynamic colors,
+    required AppColors colors,
   }) {
     return OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
@@ -260,7 +260,9 @@ class AppThemes {
   }
 
   /// ── Text Button Theme ──
-  static TextButtonThemeData _buildTextButtonTheme({required dynamic colors}) {
+  static TextButtonThemeData _buildTextButtonTheme({
+    required AppColors colors,
+  }) {
     return TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: colors.primary,
@@ -278,7 +280,7 @@ class AppThemes {
 
   /// ── Filled Button Theme ──
   static FilledButtonThemeData _buildFilledButtonTheme({
-    required dynamic colors,
+    required AppColors colors,
   }) {
     return FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -297,7 +299,7 @@ class AppThemes {
 
   /// ── Input Decoration Theme ──
   static InputDecorationTheme _buildInputDecorationTheme({
-    required dynamic colors,
+    required AppColors colors,
   }) {
     return InputDecorationTheme(
       filled: true,
@@ -347,7 +349,7 @@ class AppThemes {
   }
 
   /// ── Card Theme ──
-  static CardThemeData _buildCardTheme({required dynamic colors}) {
+  static CardThemeData _buildCardTheme({required AppColors colors}) {
     return CardThemeData(
       elevation: 0,
       color: colors.surfaceContainerLow,
@@ -357,7 +359,7 @@ class AppThemes {
   }
 
   /// ── Dialog Theme ──
-  static DialogThemeData _buildDialogTheme({required dynamic colors}) {
+  static DialogThemeData _buildDialogTheme({required AppColors colors}) {
     return DialogThemeData(
       backgroundColor: colors.surfaceContainerHigh,
       elevation: 0,
@@ -373,7 +375,7 @@ class AppThemes {
 
   /// ── Bottom Sheet Theme ──
   static BottomSheetThemeData _buildBottomSheetTheme({
-    required dynamic colors,
+    required AppColors colors,
   }) {
     return BottomSheetThemeData(
       backgroundColor: colors.surfaceContainerLow,
@@ -385,7 +387,7 @@ class AppThemes {
   }
 
   /// ── Snackbar Theme ──
-  static SnackBarThemeData _buildSnackbarTheme({required dynamic colors}) {
+  static SnackBarThemeData _buildSnackbarTheme({required AppColors colors}) {
     return SnackBarThemeData(
       backgroundColor: colors.inverseSurface,
       contentTextStyle: AppTypography.bodyMedium.copyWith(
@@ -399,7 +401,7 @@ class AppThemes {
   }
 
   /// ── Chip Theme ──
-  static ChipThemeData _buildChipTheme({required dynamic colors}) {
+  static ChipThemeData _buildChipTheme({required AppColors colors}) {
     return ChipThemeData(
       backgroundColor: colors.surfaceContainerHighest,
       disabledColor: colors.disabled,
@@ -416,7 +418,7 @@ class AppThemes {
   }
 
   /// ── Divider Theme ──
-  static DividerThemeData _buildDividerTheme({required dynamic colors}) {
+  static DividerThemeData _buildDividerTheme({required AppColors colors}) {
     return DividerThemeData(
       color: colors.divider,
       thickness: 1.w,
@@ -425,7 +427,7 @@ class AppThemes {
   }
 
   /// ── List Tile Theme ──
-  static ListTileThemeData _buildListTileTheme({required dynamic colors}) {
+  static ListTileThemeData _buildListTileTheme({required AppColors colors}) {
     return ListTileThemeData(
       contentPadding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       minLeadingWidth: 24.w,
@@ -440,7 +442,7 @@ class AppThemes {
   }
 
   /// ── Switch Theme ──
-  static SwitchThemeData _buildSwitchTheme({required dynamic colors}) {
+  static SwitchThemeData _buildSwitchTheme({required AppColors colors}) {
     return SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -459,7 +461,7 @@ class AppThemes {
   }
 
   /// ── Checkbox Theme ──
-  static CheckboxThemeData _buildCheckboxTheme({required dynamic colors}) {
+  static CheckboxThemeData _buildCheckboxTheme({required AppColors colors}) {
     return CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -474,7 +476,7 @@ class AppThemes {
   }
 
   /// ── Radio Theme ──
-  static RadioThemeData _buildRadioTheme({required dynamic colors}) {
+  static RadioThemeData _buildRadioTheme({required AppColors colors}) {
     return RadioThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -486,7 +488,7 @@ class AppThemes {
   }
 
   /// ── Slider Theme ──
-  static SliderThemeData _buildSliderTheme({required dynamic colors}) {
+  static SliderThemeData _buildSliderTheme({required AppColors colors}) {
     return SliderThemeData(
       activeTrackColor: colors.primary,
       inactiveTrackColor: colors.surfaceContainerHighest,
@@ -500,7 +502,7 @@ class AppThemes {
 
   /// ── Progress Indicator Theme ──
   static ProgressIndicatorThemeData _buildProgressIndicatorTheme({
-    required dynamic colors,
+    required AppColors colors,
   }) {
     return ProgressIndicatorThemeData(
       color: colors.primary,
@@ -511,7 +513,7 @@ class AppThemes {
   }
 
   /// ── Tooltip Theme ──
-  static TooltipThemeData _buildTooltipTheme({required dynamic colors}) {
+  static TooltipThemeData _buildTooltipTheme({required AppColors colors}) {
     return TooltipThemeData(
       decoration: BoxDecoration(
         color: colors.inverseSurface,
@@ -533,7 +535,7 @@ class AppThemes {
 
   /// ── FAB Theme ──
   static FloatingActionButtonThemeData _buildFabTheme({
-    required dynamic colors,
+    required AppColors colors,
   }) {
     return FloatingActionButtonThemeData(
       backgroundColor: colors.primaryContainer,
@@ -545,7 +547,7 @@ class AppThemes {
   }
 
   /// ── Tab Bar Theme ──
-  static TabBarThemeData _buildTabBarTheme({required dynamic colors}) {
+  static TabBarThemeData _buildTabBarTheme({required AppColors colors}) {
     return TabBarThemeData(
       labelColor: colors.primary,
       unselectedLabelColor: colors.onSurfaceVariant,

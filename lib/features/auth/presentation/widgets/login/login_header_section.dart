@@ -4,7 +4,6 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/widgets/brand/custom_brand_logo.dart';
 
 /// رأس شاشة تسجيل الدخول: الشعار المركزي، العنوان، والوصف الترحيبي الهادئ
 class LoginHeaderSection extends StatelessWidget {

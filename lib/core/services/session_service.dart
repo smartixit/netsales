@@ -73,7 +73,7 @@ class SessionService extends GetxService {
       }
 
       if (Get.isRegistered<PushNotificationService>()) {
-        PushNotificationService.to.syncTokenWithBackend();
+        await PushNotificationService.to.syncTokenWithBackend();
       }
 
       log(
@@ -121,7 +121,7 @@ class SessionService extends GetxService {
     }
 
     if (Get.isRegistered<PushNotificationService>()) {
-      PushNotificationService.to.syncTokenWithBackend();
+      await PushNotificationService.to.syncTokenWithBackend();
     }
 
     log(

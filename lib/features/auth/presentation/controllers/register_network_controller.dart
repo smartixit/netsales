@@ -167,7 +167,7 @@ class RegisterNetworkController extends GetxController {
 
       await CustomAnimationOverlay.hide();
 
-      SoundService.instance.playSound(soundPath: 'sounds/netsales_success.wav');
+      await SoundService.instance.playSound(soundPath: 'sounds/netsales_success.wav');
       // إظهار حوار التأكيد والاعتماد بحالة PENDING مع خيار الدعم الهادئ والانتقال بعده لصفحة تسجيل الدخول
       await CustomDialog.showPending(
         title: 'تم استلام طلبكم بنجاح',
@@ -181,14 +181,14 @@ class RegisterNetworkController extends GetxController {
           message:
               'مرحباً فريق الدعم، لقد قمت بتقديم طلب تسجيل مزود شبكة جديد في نظام NetSales وأود الاستفسار عن حالة الطلب.',
         ),
-        onConfirm: () => Get.offAllNamed(AppRoutes.login),
+        onConfirm: () => Get.offAllNamed<void>(AppRoutes.login),
       );
 
       // قد تُغلق الشاشة أثناء عرض الحوار، فلا يجوز التنقّل بعد ذلك.
       if (isClosed) return;
 
       if (Get.currentRoute != AppRoutes.login) {
-        Get.offAllNamed(AppRoutes.login);
+        await Get.offAllNamed<void>(AppRoutes.login);
       }
     } catch (e) {
       await CustomAnimationOverlay.hide();
@@ -209,7 +209,7 @@ class RegisterNetworkController extends GetxController {
   }
 
   void goToLogin() {
-    Get.offNamed(AppRoutes.login);
+    Get.offNamed<void>(AppRoutes.login);
   }
 
   @override

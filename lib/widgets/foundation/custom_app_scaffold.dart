@@ -156,7 +156,7 @@ class CustomAppScaffold extends StatelessWidget {
           dimension: 40.r,
           foregroundColor: colors.onSurface,
           backgroundColor: Colors.transparent,
-          onPressed: onBackPressed ?? () => Get.back(),
+          onPressed: onBackPressed ?? () => Get.back<void>(),
         ),
       );
     }
@@ -291,9 +291,7 @@ class CustomAppScaffold extends StatelessWidget {
 class _GlassAppBarBackground extends StatefulWidget {
   final Color backgroundColor;
 
-  const _GlassAppBarBackground({
-    required this.backgroundColor,
-  });
+  const _GlassAppBarBackground({required this.backgroundColor});
 
   @override
   State<_GlassAppBarBackground> createState() => _GlassAppBarBackgroundState();

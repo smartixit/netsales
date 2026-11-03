@@ -6,7 +6,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/splash/presentation/controllers/splash_controller.dart';
-import 'package:netsales/widgets/brand/custom_brand_logo.dart';
+
 import 'package:netsales/widgets/feedback/custom_loading_indicator_bar.dart';
 
 /// المحتوى البصري المركزي لشاشة الإقلاع

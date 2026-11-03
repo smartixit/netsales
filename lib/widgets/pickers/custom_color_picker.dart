@@ -215,7 +215,7 @@ class CustomColorPicker extends StatelessWidget {
                   Expanded(
                     child: CustomButton.outline(
                       text: 'إلغاء',
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.back<void>(),
                     ),
                   ),
                   AppSpacing.hSm,

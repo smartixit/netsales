@@ -99,7 +99,7 @@ class CustomBottomSheet extends StatelessWidget {
                 padding: EdgeInsets.only(bottom: AppSpacing.sm),
                 child: CustomInteractiveBounce(
                   onTap: () {
-                    Get.back();
+                    Get.back<void>();
                     item.onTap();
                   },
                   child: Container(
@@ -212,7 +212,7 @@ class CustomBottomSheet extends StatelessWidget {
           child: CustomButton.outline(
             text: cancelLabel,
             onPressed: () {
-              Get.back();
+              Get.back<void>();
               onCancel?.call();
             },
           ),
@@ -223,14 +223,14 @@ class CustomBottomSheet extends StatelessWidget {
               ? CustomButton.danger(
                   text: confirmLabel,
                   onPressed: () {
-                    Get.back();
+                    Get.back<void>();
                     onConfirm?.call();
                   },
                 )
               : CustomButton.primary(
                   text: confirmLabel,
                   onPressed: () {
-                    Get.back();
+                    Get.back<void>();
                     onConfirm?.call();
                   },
                 ),
@@ -448,7 +448,7 @@ class CustomBottomSheet extends StatelessWidget {
                         backgroundColor: Colors.transparent,
                         foregroundColor: colors.onSurfaceVariant,
                         shape: AppButtonShape.circle,
-                        onPressed: () => Get.back(),
+                        onPressed: () => Get.back<void>(),
                       ),
                   ],
                 ),

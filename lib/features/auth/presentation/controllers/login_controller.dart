@@ -133,7 +133,7 @@ class LoginController extends GetxController {
       // 3. فحص حالة التحقق الثنائي (2FA)
       if (result.require2fa) {
         await CustomAnimationOverlay.hide();
-        Get.toNamed(
+        await Get.toNamed<void>(
           AppRoutes.twoFactorAuth,
           arguments: {
             'phone': phoneController.text,
@@ -157,7 +157,7 @@ class LoginController extends GetxController {
               'تم الدخول بكلمة مرور مؤقتة، يرجى تعيين كلمة مرور جديدة لحسابك للمتابعة.',
           type: SnackType.warning,
         );
-        Get.offAllNamed(
+        await Get.offAllNamed<void>(
           AppRoutes.resetPassword,
           arguments: {
             'is_forced': true,
@@ -180,7 +180,7 @@ class LoginController extends GetxController {
 
       // 6. التوجيه الفوري للوحة التحكم
       if (isClosed) return;
-      Get.offAllNamed(AppRoutes.dashboard);
+      await Get.offAllNamed<void>(AppRoutes.dashboard);
     } catch (error) {
       // 6. إغلاق الـ Overlay فوراً وعرض رسالة الخطأ عبر CustomSnackbar أو حوار المراجعة المخصص
       await CustomAnimationOverlay.hide();

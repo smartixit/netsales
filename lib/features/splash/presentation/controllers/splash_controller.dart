@@ -44,7 +44,7 @@ class SplashController extends GetxController {
       // 2. ضمان بقاء شاشة الإقلاع للمدة البصرية المطلوبة دون وميض حاد
       final elapsed = stopwatch.elapsed;
       if (elapsed < minSplashDuration) {
-        await Future.delayed(minSplashDuration - elapsed);
+        await Future<dynamic>.delayed(minSplashDuration - elapsed);
       }
       if (_isDisposed) return;
 
@@ -53,7 +53,7 @@ class SplashController extends GetxController {
       if (_isDisposed) return;
 
       log('🚀 [SplashController] Bootstrapping complete. Navigating to: $destination');
-      Get.offNamed(destination);
+      await Get.offNamed<void>(destination);
     } catch (e, stack) {
       final cleanMessage = AppException.sanitizeMessage(e);
       CustomSnackbar.show(
@@ -63,7 +63,7 @@ class SplashController extends GetxController {
       );
       log('❌ [SplashController] Bootstrapping error: $e', stackTrace: stack);
       if (!_isDisposed) {
-        Get.offNamed(AppRoutes.welcome);
+        await Get.offNamed<void>(AppRoutes.welcome);
       }
     }
   }

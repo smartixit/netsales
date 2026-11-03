@@ -101,7 +101,7 @@ class ApiService {
     CancelToken? cancelToken,
   }) async {
     try {
-      final response = await _dio.get(
+      final response = await _dio.get<T>(
         endpoint,
         queryParameters: queryParameters,
         options: options,
@@ -129,10 +129,10 @@ class ApiService {
       final params = <String, dynamic>{
         ...?queryParameters,
         if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
-        if (perPage != null) 'per_page': perPage,
+        'per_page': ?perPage,
       };
 
-      final response = await _dio.get(
+      final response = await _dio.get<T>(
         endpoint,
         queryParameters: params.isEmpty ? null : params,
         options: options,
@@ -180,13 +180,10 @@ class ApiService {
   }) async {
     try {
       final effectiveOptions = (options ?? Options()).copyWith(
-        extra: {
-          ...?options?.extra,
-          if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
-        },
+        extra: {...?options?.extra, 'idempotency_key': ?idempotencyKey},
       );
 
-      final response = await _dio.post(
+      final response = await _dio.post<T>(
         endpoint,
         data: data,
         queryParameters: queryParameters,
@@ -214,13 +211,10 @@ class ApiService {
   }) async {
     try {
       final effectiveOptions = (options ?? Options()).copyWith(
-        extra: {
-          ...?options?.extra,
-          if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
-        },
+        extra: {...?options?.extra, 'idempotency_key': ?idempotencyKey},
       );
 
-      final response = await _dio.put(
+      final response = await _dio.put<T>(
         endpoint,
         data: data,
         queryParameters: queryParameters,
@@ -247,13 +241,10 @@ class ApiService {
   }) async {
     try {
       final effectiveOptions = (options ?? Options()).copyWith(
-        extra: {
-          ...?options?.extra,
-          if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
-        },
+        extra: {...?options?.extra, 'idempotency_key': ?idempotencyKey},
       );
 
-      final response = await _dio.patch(
+      final response = await _dio.patch<T>(
         endpoint,
         data: data,
         queryParameters: queryParameters,
@@ -280,13 +271,10 @@ class ApiService {
   }) async {
     try {
       final effectiveOptions = (options ?? Options()).copyWith(
-        extra: {
-          ...?options?.extra,
-          if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
-        },
+        extra: {...?options?.extra, 'idempotency_key': ?idempotencyKey},
       );
 
-      final response = await _dio.delete(
+      final response = await _dio.delete<T>(
         endpoint,
         data: data,
         queryParameters: queryParameters,
@@ -333,12 +321,10 @@ class ApiService {
       });
 
       final effectiveOptions = Options(
-        extra: {
-          if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
-        },
+        extra: {'idempotency_key': ?idempotencyKey},
       );
 
-      final response = await _dio.post(
+      final response = await _dio.post<T>(
         endpoint,
         data: formData,
         options: effectiveOptions,
@@ -434,7 +420,8 @@ class ApiService {
     final body = response.data;
     final isIdempotentHit =
         response.headers.value('X-Idempotency-Hit')?.toLowerCase() == 'true';
-    final idempotencyKey = response.headers.value('X-Idempotency-Key') ??
+    final idempotencyKey =
+        response.headers.value('X-Idempotency-Key') ??
         response.requestOptions.headers['X-Idempotency-Key']?.toString();
 
     if (body is Map<String, dynamic>) {
@@ -474,7 +461,9 @@ class ApiService {
     return ApiResponse<T>(
       success: isSuccess,
       message: isSuccess ? 'تمت العملية بنجاح' : 'حدث خطأ في الاستجابة',
-      data: isSuccess && fromJson != null && body != null ? fromJson(body) : null,
+      data: isSuccess && fromJson != null && body != null
+          ? fromJson(body)
+          : null,
       isIdempotentHit: isIdempotentHit,
       idempotencyKey: idempotencyKey,
     );
@@ -482,7 +471,9 @@ class ApiService {
 
   ApiResponse<T> _handleDioError<T>(DioException e, String endpoint) {
     if (AppEnvironment.enableLogging) {
-      log('❌ Dio Error [$endpoint]: ${e.message} | Status: ${e.response?.statusCode}');
+      log(
+        '❌ Dio Error [$endpoint]: ${e.message} | Status: ${e.response?.statusCode}',
+      );
       if (e.response?.data != null) {
         log('Response data: ${e.response?.data}');
       }
@@ -492,7 +483,8 @@ class ApiService {
     if (ConnectionFailureDetector.isConnectionFailure(e)) {
       return ApiResponse<T>(
         success: false,
-        message: 'لا يتوفر اتصال بالإنترنت، يرجى التحقق من اتصالك والمحاولة مجدداً',
+        message:
+            'لا يتوفر اتصال بالإنترنت، يرجى التحقق من اتصالك والمحاولة مجدداً',
       );
     }
 
@@ -653,7 +645,8 @@ class _SessionAuthInterceptor extends Interceptor {
     // التعامل مع انتهاء صلاحية الجلسة
     if (statusCode == 401) {
       final path = err.requestOptions.path;
-      final isPublicAuth = path.contains('/auth/login') ||
+      final isPublicAuth =
+          path.contains('/auth/login') ||
           path.contains('/auth/register') ||
           path.contains('/auth/password');
 
@@ -691,7 +684,8 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
         _cookieExpiry.remove(host);
       }
     }
-    options.headers['User-Agent'] = InfinityFreeChallengeSolver.browserUserAgent;
+    options.headers['User-Agent'] =
+        InfinityFreeChallengeSolver.browserUserAgent;
     return handler.next(options);
   }
 
@@ -731,7 +725,8 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
 
     final options = response.requestOptions;
     options.headers['Cookie'] = '__test=$cookie';
-    options.headers['User-Agent'] = InfinityFreeChallengeSolver.browserUserAgent;
+    options.headers['User-Agent'] =
+        InfinityFreeChallengeSolver.browserUserAgent;
     options.extra[_retryFlagKey] = true;
 
     try {
@@ -808,7 +803,7 @@ class _RetryInterceptor extends Interceptor {
           '🔄 [RetryInterceptor] Retrying ${requestOptions.path} in ${delayMs}ms (attempt $nextRetry of $_maxRetries)...',
         );
       }
-      await Future.delayed(Duration(milliseconds: delayMs));
+      await Future<dynamic>.delayed(Duration(milliseconds: delayMs));
 
       requestOptions.extra['retry_count'] = nextRetry;
       try {
@@ -846,7 +841,8 @@ class _CryptoInterceptor extends Interceptor {
     final crypto = AppCryptoService.instance;
 
     // استثناء المسارات العامة أو الطلبات المستثناة صراحة
-    final isBypassed = options.headers['X-Bypass-Encryption'] == 'true' ||
+    final isBypassed =
+        options.headers['X-Bypass-Encryption'] == 'true' ||
         options.extra['bypass_encryption'] == true ||
         _isBypassEndpoint(options.path);
 
@@ -879,13 +875,16 @@ class _CryptoInterceptor extends Interceptor {
       } else {
         // 2. طلبات القراءة أو الحذف التي تتطلب استجابة مشفرة من الخادم
         final ephemeral = crypto.generateEphemeralKeyPair();
-        final clientPublicKeyHex =
-            AppCryptoService.bytesToHex(ephemeral.publicKey);
+        final clientPublicKeyHex = AppCryptoService.bytesToHex(
+          ephemeral.publicKey,
+        );
         options.headers['X-Client-Public-Key'] = clientPublicKeyHex;
         options.extra['_crypto_keypair'] = ephemeral;
       }
     } catch (e, stack) {
-      log('⚠️ [CryptoInterceptor] Encryption failed for ${options.uri}: $e\n$stack');
+      log(
+        '⚠️ [CryptoInterceptor] Encryption failed for ${options.uri}: $e\n$stack',
+      );
     }
 
     return handler.next(options);
@@ -914,7 +913,9 @@ class _CryptoInterceptor extends Interceptor {
           }
         }
       } catch (e, stack) {
-        log('❌ [CryptoInterceptor] Decryption failed for ${response.requestOptions.uri}: $e\n$stack');
+        log(
+          '❌ [CryptoInterceptor] Decryption failed for ${response.requestOptions.uri}: $e\n$stack',
+        );
         handler.reject(
           DioException(
             requestOptions: response.requestOptions,
@@ -935,8 +936,7 @@ class _CryptoInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    final keyPair =
-        err.requestOptions.extra['_crypto_keypair'] as KeyPair?;
+    final keyPair = err.requestOptions.extra['_crypto_keypair'] as KeyPair?;
     try {
       keyPair?.dispose();
     } catch (_) {}

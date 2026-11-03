@@ -97,14 +97,11 @@ class ResetPasswordController extends GetxController {
     passwordScore.value = points / 5.0;
   }
 
-  void toggleCurrentPasswordVisibility() =>
-      isCurrentPasswordVisible.toggle();
+  void toggleCurrentPasswordVisibility() => isCurrentPasswordVisible.toggle();
 
-  void toggleNewPasswordVisibility() =>
-      isNewPasswordVisible.toggle();
+  void toggleNewPasswordVisibility() => isNewPasswordVisible.toggle();
 
-  void toggleConfirmPasswordVisibility() =>
-      isConfirmPasswordVisible.toggle();
+  void toggleConfirmPasswordVisibility() => isConfirmPasswordVisible.toggle();
 
   /// إرسال طلب تعيين كلمة المرور الجديدة
   Future<void> submit() async {
@@ -166,10 +163,7 @@ class ResetPasswordController extends GetxController {
 
         // التوجيه لشاشة تسجيل الدخول مع تمرير رقم الهاتف الجاهز
         if (isClosed) return;
-        Get.offAllNamed(
-          AppRoutes.login,
-          arguments: {'phone': userPhone},
-        );
+        await Get.offAllNamed<void>(AppRoutes.login, arguments: {'phone': userPhone});
       } else {
         await updatePasswordUseCase.execute(
           UpdatePasswordParams(
@@ -188,7 +182,7 @@ class ResetPasswordController extends GetxController {
 
         // التوجيه الفوري للوحة التحكم بعد ترقية الجلسة وفك الحظر الإلزامي
         if (isClosed) return;
-        Get.offAllNamed(AppRoutes.dashboard);
+        await Get.offAllNamed<void>(AppRoutes.dashboard);
       }
     } catch (error) {
       await CustomAnimationOverlay.hide();
@@ -210,15 +204,15 @@ class ResetPasswordController extends GetxController {
   /// إلغاء العملية أو تسجيل الخروج عند الرغبة بعدم المتابعة
   Future<void> abortOrLogout() async {
     if (isDirectReset) {
-      Get.back();
+      Get.back<void>();
     } else if (isForced) {
       // إذا كان التغيير إجبارياً، الخروج يلغي الجلسة المؤقتة ويعيد المستخدم لشاشة الدخول
       await SessionService.to.terminateSession();
       // قد تُزال الشاشة أثناء إنهاء الجلسة، فلا يجوز التنقّل بعد ذلك.
       if (isClosed) return;
-      Get.offAllNamed(AppRoutes.login);
+      await Get.offAllNamed<void>(AppRoutes.login);
     } else {
-      Get.back();
+      Get.back<void>();
     }
   }
 

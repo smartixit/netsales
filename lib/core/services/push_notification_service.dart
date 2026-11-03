@@ -312,7 +312,7 @@ class PushNotificationService extends GetxService {
           '🚀 [PushNotificationService] App launched from terminated state via notification.',
         );
         // ننتظر قليلاً حتى تكتمل جاهزية شجرة التوجيه والواجهات
-        Future.delayed(const Duration(milliseconds: 600), () {
+        Future<dynamic>.delayed(const Duration(milliseconds: 600), () {
           _handleMessageNavigation(initialMessage);
         });
       }

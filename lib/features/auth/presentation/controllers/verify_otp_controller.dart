@@ -128,7 +128,7 @@ class VerifyOtpController extends GetxController {
 
       // التوجيه لشاشة تسجيل الدخول مع تمرير رقم الهاتف للدخول بكلمة المرور المؤقتة
       if (isClosed) return;
-      Get.offAllNamed(AppRoutes.login, arguments: {'phone': phone});
+      await Get.offAllNamed<void>(AppRoutes.login, arguments: {'phone': phone});
     } catch (error) {
       await CustomAnimationOverlay.hide();
       // الحارس يمنع الكتابة في متحكم OTP محرَّر بعد إغلاق الشاشة أثناء الطلب.
@@ -149,7 +149,7 @@ class VerifyOtpController extends GetxController {
   }
 
   void goToChangePhone() {
-    Get.back();
+    Get.back<void>();
   }
 
   @override

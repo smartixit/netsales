@@ -271,7 +271,9 @@ class CustomAnimationOverlay {
     _route = route;
 
     if (type == AnimationOverlayType.success) {
-      SoundService.instance.playSound(soundPath: 'sounds/netsales_success.wav');
+      await SoundService.instance.playSound(
+        soundPath: 'sounds/netsales_success.wav',
+      );
     }
 
     final navigator = Navigator.of(context, rootNavigator: true);
@@ -289,7 +291,7 @@ class CustomAnimationOverlay {
     unawaited(navigator.push<void>(route));
 
     // ننتظر حتى تكتمل عملية دخول Route
-    // بدلاً من الاعتماد على Future.delayed(Duration.zero)
+    // بدلاً من الاعتماد على Future<dynamic>.delayed(Duration.zero)
     // لمعرفة أن Transition انتهى.
     await _waitForRouteEntrance(route);
 

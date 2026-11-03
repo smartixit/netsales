@@ -166,7 +166,7 @@ class TwoFactorAuthController extends GetxController {
               'تم الدخول بكلمة مرور مؤقتة، يرجى تعيين كلمة مرور جديدة لحسابك للمتابعة.',
           type: SnackType.warning,
         );
-        Get.offAllNamed(AppRoutes.resetPassword);
+        await Get.offAllNamed<void>(AppRoutes.resetPassword);
         return;
       }
 
@@ -175,7 +175,7 @@ class TwoFactorAuthController extends GetxController {
       );
 
       if (isClosed) return;
-      Get.offAllNamed(AppRoutes.dashboard);
+      await Get.offAllNamed<void>(AppRoutes.dashboard);
     } catch (error) {
       await CustomAnimationOverlay.hide();
       // الحارس يمنع الكتابة في متحكم OTP محرَّر بعد إغلاق الشاشة أثناء الطلب.
@@ -196,7 +196,7 @@ class TwoFactorAuthController extends GetxController {
   }
 
   void cancelAndGoBack() {
-    Get.back();
+    Get.back<void>();
   }
 
   @override
