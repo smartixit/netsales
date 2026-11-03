@@ -137,7 +137,7 @@ void main() {
     );
 
     test(
-      'Component Decomposition Rule: Feature widgets directory exists and screens remain focused page composition',
+      'Component Decomposition Rule: Feature widgets directory exists and screens do not contain secondary embedded Widget classes',
       () {
         final widgetsDir = Directory(
           'lib/features/commercial/presentation/widgets',
@@ -162,27 +162,34 @@ void main() {
               'Feature presentation components (cards, headers, sheets) must be decomposed into presentation/widgets/',
         );
 
-        // Screens should not be monolithic (each screen file <= 160 lines)
+        // Screens should represent single top-level page composition and not define secondary embedded Widget classes
         final screensDir = Directory(
           'lib/features/commercial/presentation/screens',
         );
-        final oversizedScreens = <String>[];
+        final secondaryWidgetViolations = <String>[];
 
         for (final file in screensDir.listSync().whereType<File>().where(
           (f) => f.path.endsWith('.dart'),
         )) {
-          final lines = file.readAsLinesSync().length;
-          if (lines > 160) {
-            oversizedScreens.add('${file.path} ($lines lines)');
+          final content = file.readAsStringSync();
+          final widgetClasses = RegExp(
+            r'class\s+([A-Za-z0-9_]+)\s+extends\s+(?:StatelessWidget|StatefulWidget|GetView|GetWidget)',
+          ).allMatches(content).map((m) => m.group(1)).toList();
+
+          if (widgetClasses.length > 1) {
+            secondaryWidgetViolations.add(
+              '${file.path} defines multiple widget classes: $widgetClasses. '
+              'Secondary widgets must be decomposed into presentation/widgets/.',
+            );
           }
         }
 
         expect(
-          oversizedScreens,
+          secondaryWidgetViolations,
           isEmpty,
           reason:
-              'Screen files must be focused on page composition and not contain monolithic embedded widget definitions. '
-              'Oversized screens: $oversizedScreens',
+              'Screen files must be focused on top-level page composition and not contain secondary embedded widget classes. '
+              'Violations: $secondaryWidgetViolations',
         );
       },
     );
