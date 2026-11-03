@@ -45,7 +45,8 @@ class CommercialDirectoryController extends GetxController {
 
   // حقول الفلترة والبحث
   final RxString searchQuery = ''.obs;
-  final Rxn<bool> selectedStatusFilter = Rxn<bool>(); // null: الكل, true: نشط, false: معطل
+  final Rxn<bool> selectedStatusFilter =
+      Rxn<bool>(); // null: الكل, true: نشط, false: معطل
 
   // معرفات الكيان الحالي (الشبكة أو نقطة البيع)
   final RxInt activeNetworkId = 0.obs;
@@ -87,7 +88,10 @@ class CommercialDirectoryController extends GetxController {
   }
 
   /// جلب روابط نقاط البيع لشبكة المزود
-  Future<void> fetchNetworkPosLinks({int? networkId, bool showLoading = true}) async {
+  Future<void> fetchNetworkPosLinks({
+    int? networkId,
+    bool showLoading = true,
+  }) async {
     try {
       if (showLoading) {
         isLoading.value = true;
@@ -193,7 +197,9 @@ class CommercialDirectoryController extends GetxController {
   }) async {
     try {
       isActionLoading.value = true;
-      await CustomAnimationOverlay.showLoading(message: 'جاري ربط نقطة البيع...');
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري ربط نقطة البيع...',
+      );
 
       final newLink = await createNetworkPosLinkUseCase(
         networkId: networkId,
@@ -241,7 +247,9 @@ class CommercialDirectoryController extends GetxController {
   Future<void> toggleLinkStatus(int linkId) async {
     try {
       isActionLoading.value = true;
-      await CustomAnimationOverlay.showLoading(message: 'جاري تعديل حالة الارتباط...');
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري تعديل حالة الارتباط...',
+      );
 
       final updated = await toggleNetworkPosLinkStatusUseCase(linkId);
 

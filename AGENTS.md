@@ -21,7 +21,7 @@
 - Flutter client-side role checks, route guards, and workspace selection are purely for UX and navigation convenience. They do NOT provide security enforcement.
 - Active tenant context (selected Network ID or POS ID) must be authoritatively transmitted via API headers/payloads as required by Laravel.
 
-## 4. Flutter Architectural Standards & State Management
+## 4. Flutter Architectural Standards, Component Placement & State Management
 - **State Management Ecosystem:** **GetX** is the project's exclusive state management and dependency injection ecosystem (`GetxController`, `GetBuilder`/`Obx`, `Bindings`).
   - **PROHIBITIONS:**
     - **NO Provider, Riverpod, Bloc, or MobX.**
@@ -31,6 +31,21 @@
   - `data/` (`datasources/`, `models/`, `repositories/`)
   - `domain/` (`entities/`, `repositories/`, `usecases/`) — Must remain pure Dart (zero imports from data, presentation, GetX, or Flutter material).
   - `presentation/` (`screens/`, `widgets/`, `controllers/`, `bindings/`)
+- **Presentation Component Placement & Screen Decomposition Standards:**
+  1. **Screens (`presentation/screens/`):**
+     - Screen files represent page-level composition ONLY.
+     - Responsibilities: Compose page layout, arrange feature-specific and shared widgets, connect screen to GetX controller, define page-level presentation structure.
+     - **Strict Prohibition:** Screen files must NOT be containers for the entire UI implementation. They must NOT contain large custom widget classes, complex list-item implementations, reusable form components, dialog/sheet content, or inline multi-section trees.
+  2. **Feature-Specific Widgets (`presentation/widgets/`):**
+     - Default location for widgets that belong to a specific feature or business domain.
+     - Belongs here when its presentation meaning is tied to the feature (e.g., `network_pos_card.dart`, `network_pos_search_filter_header.dart`, `link_pos_bottom_sheet.dart`).
+     - Do NOT move feature-specific widgets into `lib/widgets/` merely because they are reusable within the feature.
+  3. **Shared Generic Widgets (`lib/widgets/`):**
+     - Exclusively for genuinely shared, feature-independent presentation components with zero business domain concepts (no Network, POS, voucher, wallet, or debt entities).
+     - Must be reusable across unrelated features without domain coupling.
+  4. **Shared Infrastructure (`lib/core/`):**
+     - Exclusively for services, configuration, utilities, and infrastructure. NEVER for presentation widgets.
+  5. **Decomposition Quality:** Avoid both monolithic screen files (> 160 lines with embedded widgets) and artificial one-line widget fragmentation.
 - **Infrastructure Reuse:** Mandatory reuse of existing foundation (never create redundant duplicates):
   - **Error & Toast Feedback:** All errors, exceptions, and API failure messages must use `CustomSnackbar.show(..., type: SnackType.error)`.
   - **Action Loading & Success Overlays:** Mutating actions must use `CustomAnimationOverlay.showLoading()` / `CustomAnimationOverlay.showSuccess()`, always safely hidden in `finally { if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide(); }`.

@@ -36,4 +36,3 @@ class PosEntity {
 
   bool get isActive => status == 'ACTIVE';
 }
-

@@ -13,4 +13,3 @@ class GetNetworkDetailsUseCase {
 
   Future<NetworkEntity> call(int networkId) => execute(networkId);
 }
-

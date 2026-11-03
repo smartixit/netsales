@@ -19,9 +19,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
       return response.data!;
     }
 
-    throw AppException(
-      response.message,
-    );
+    throw AppException(response.message);
   }
 
   @override
@@ -32,9 +30,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
       return response.data!;
     }
 
-    throw AppException(
-      response.message,
-    );
+    throw AppException(response.message);
   }
 
   @override
@@ -51,9 +47,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
       return response.data!;
     }
 
-    throw AppException(
-      response.message,
-    );
+    throw AppException(response.message);
   }
 
   @override
@@ -70,9 +64,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
       return response.data!;
     }
 
-    throw AppException(
-      response.message,
-    );
+    throw AppException(response.message);
   }
 
   @override
@@ -93,9 +85,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
       return response.data!;
     }
 
-    throw AppException(
-      response.message,
-    );
+    throw AppException(response.message);
   }
 
   @override
@@ -106,9 +96,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
       return response.data!;
     }
 
-    throw AppException(
-      response.message,
-    );
+    throw AppException(response.message);
   }
 
   @override
@@ -116,9 +104,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
     final response = await _remoteDataSource.deleteNetworkPosLink(linkId);
 
     if (!response.success) {
-      throw AppException(
-        response.message,
-      );
+      throw AppException(response.message);
     }
   }
 
@@ -130,9 +116,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
       return response.data!;
     }
 
-    throw AppException(
-      response.message,
-    );
+    throw AppException(response.message);
   }
 
   @override
@@ -143,9 +127,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
       return response.data!;
     }
 
-    throw AppException(
-      response.message,
-    );
+    throw AppException(response.message);
   }
 
   @override
@@ -153,15 +135,16 @@ class CommercialRepositoryImpl implements CommercialRepository {
     int networkId,
     Map<String, dynamic> data,
   ) async {
-    final response = await _remoteDataSource.updateNetworkDetails(networkId, data);
+    final response = await _remoteDataSource.updateNetworkDetails(
+      networkId,
+      data,
+    );
 
     if (response.success && response.data != null) {
       return response.data!;
     }
 
-    throw AppException(
-      response.message,
-    );
+    throw AppException(response.message);
   }
 
   @override
@@ -175,8 +158,6 @@ class CommercialRepositoryImpl implements CommercialRepository {
       return response.data!;
     }
 
-    throw AppException(
-      response.message,
-    );
+    throw AppException(response.message);
   }
 }

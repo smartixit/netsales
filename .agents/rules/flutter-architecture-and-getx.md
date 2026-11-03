@@ -65,7 +65,24 @@ Never re-implement components or utilities that already exist in `lib/widgets/` 
   - Elevation, Gradients & Motion: `AppElevation`, `AppGradients`, `AppMotion`, `AppThemes`.
   - Breakpoints: `AppBreakpoints` (`mobileSmallMax: 360`, `mobileMax: 600`, `tabletMax: 900`, `desktopMax: 1240`).
 
-## 4. UI State Coverage
+## 4. Component Placement & Screen Decomposition Standards
+Every widget must be placed strictly according to its responsibility and reuse scope:
+1. **Screens (`presentation/screens/`):**
+   - Page-level composition ONLY.
+   - Responsibilities: Assemble page layout, arrange feature-specific and shared widgets, connect screen to GetxController.
+   - **Prohibition:** Screens must NOT contain large custom widget classes, complex list-item cards, reusable form components, or dialog content inline.
+2. **Feature-Specific Widgets (`presentation/widgets/`):**
+   - Default location for widgets specific to that business feature (e.g., `network_pos_card.dart`, `network_pos_search_filter_header.dart`, `link_pos_bottom_sheet.dart`).
+   - Do NOT place feature-specific components in `lib/widgets/`.
+3. **Shared Generic Widgets (`lib/widgets/`):**
+   - Exclusively for feature-independent, generic UI components (buttons, text fields, generic dialogs, empty states). Zero NetSales business domain entities or concepts.
+4. **Shared Infrastructure (`lib/core/`):**
+   - Core services, utilities, exceptions, themes, and configuration. Never presentation widgets.
+5. **Decomposition Balance:**
+   - Avoid monolithic screens (> 160 lines with embedded complex widgets).
+   - Avoid excessive artificial fragmentation (do not extract trivial 2-line containers).
+
+## 5. UI State Coverage
 Every view handling asynchronous data must explicitly implement:
 - **Loading State:** Shimmers or controlled loaders.
 - **Empty State:** Informative empty illustrations and messages.

@@ -33,12 +33,8 @@ class CommercialBinding extends Bindings {
     // 3. Use Cases
     Get.lazyPut(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
     Get.lazyPut(() => GetMyPosUseCase(Get.find<CommercialRepository>()));
-    Get.lazyPut(
-      () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
-    );
-    Get.lazyPut(
-      () => GetMyPosUseCase(Get.find<CommercialRepository>()),
-    );
+    Get.lazyPut(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
+    Get.lazyPut(() => GetMyPosUseCase(Get.find<CommercialRepository>()));
     Get.lazyPut(
       () => GetNetworkPosListUseCase(Get.find<CommercialRepository>()),
     );

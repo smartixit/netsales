@@ -13,4 +13,3 @@ class ToggleNetworkPosLinkStatusUseCase {
 
   Future<NetworkPosLinkEntity> call(int linkId) => execute(linkId);
 }
-

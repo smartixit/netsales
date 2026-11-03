@@ -108,5 +108,83 @@ void main() {
         );
       },
     );
+
+    test(
+      'Component Placement Rule: Screens directory contains only page-level screens (*_screen.dart)',
+      () {
+        final screensDir = Directory(
+          'lib/features/commercial/presentation/screens',
+        );
+        expect(screensDir.existsSync(), isTrue);
+
+        final nonScreenFiles = screensDir
+            .listSync()
+            .whereType<File>()
+            .where((f) => f.path.endsWith('.dart'))
+            .where((f) => !f.path.endsWith('_screen.dart'))
+            .map((f) => f.path)
+            .toList();
+
+        expect(
+          nonScreenFiles,
+          isEmpty,
+          reason:
+              'presentation/screens/ must contain only page-level screen files ending in _screen.dart. '
+              'Dialogs, bottom sheets, cards, and sections must be in presentation/widgets/. '
+              'Violations found: $nonScreenFiles',
+        );
+      },
+    );
+
+    test(
+      'Component Decomposition Rule: Feature widgets directory exists and screens remain focused page composition',
+      () {
+        final widgetsDir = Directory(
+          'lib/features/commercial/presentation/widgets',
+        );
+        expect(
+          widgetsDir.existsSync(),
+          isTrue,
+          reason:
+              'presentation/widgets/ directory must exist for decomposed components',
+        );
+
+        final widgetFiles = widgetsDir
+            .listSync()
+            .whereType<File>()
+            .where((f) => f.path.endsWith('.dart'))
+            .toList();
+
+        expect(
+          widgetFiles.length,
+          greaterThanOrEqualTo(3),
+          reason:
+              'Feature presentation components (cards, headers, sheets) must be decomposed into presentation/widgets/',
+        );
+
+        // Screens should not be monolithic (each screen file <= 160 lines)
+        final screensDir = Directory(
+          'lib/features/commercial/presentation/screens',
+        );
+        final oversizedScreens = <String>[];
+
+        for (final file in screensDir.listSync().whereType<File>().where(
+          (f) => f.path.endsWith('.dart'),
+        )) {
+          final lines = file.readAsLinesSync().length;
+          if (lines > 160) {
+            oversizedScreens.add('${file.path} ($lines lines)');
+          }
+        }
+
+        expect(
+          oversizedScreens,
+          isEmpty,
+          reason:
+              'Screen files must be focused on page composition and not contain monolithic embedded widget definitions. '
+              'Oversized screens: $oversizedScreens',
+        );
+      },
+    );
   });
 }

@@ -14,4 +14,3 @@ class UpdatePosDetailsUseCase {
   Future<PosEntity> call(int posId, Map<String, dynamic> data) =>
       execute(posId, data);
 }
-

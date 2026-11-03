@@ -1,38 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
-import 'package:netsales/features/commercial/presentation/screens/link_pos_dialog.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/dialogs/custom_dialog.dart';
+import 'package:netsales/features/commercial/presentation/widgets/link_pos_bottom_sheet.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_pos_card.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_pos_search_filter_header.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
-import 'package:netsales/widgets/images/custom_cached_image.dart';
-import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
-import 'package:netsales/widgets/toasts/custom_toast.dart';
 
 /// شاشة دليل نقاط البيع وإدارة روابط الشراكة بمساحة عمل الشبكة
-/// مبنية بالكامل كـ StatelessWidget وفق معايير Clean Architecture و GetX
+/// مسؤوليتها: تركيب الصفحة وتنسيق المكونات وتوصيلها بالمتحكم (Page Composition)
 class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
   const NetworkPosDirectoryScreen({super.key, this.networkId});
 
   final int? networkId;
 
   void _ensureDataLoaded() {
-    if (networkId != null && networkId! > 0 && controller.activeNetworkId.value != networkId) {
+    if (networkId != null &&
+        networkId! > 0 &&
+        controller.activeNetworkId.value != networkId) {
       controller.activeNetworkId.value = networkId!;
       controller.fetchNetworkPosLinks(networkId: networkId);
-    } else if (controller.links.isEmpty && !controller.isLoading.value && controller.errorMessage.value == null) {
+    } else if (controller.links.isEmpty &&
+        !controller.isLoading.value &&
+        controller.errorMessage.value == null) {
       controller.fetchNetworkPosLinks(networkId: networkId);
     }
   }
@@ -46,90 +40,13 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
       backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          // 1. شريط البحث والفلترة العلوية الموحدة
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              boxShadow: AppElevation.level1(context),
-            ),
-            child: Column(
-              children: [
-                // حقل البحث الموحد
-                CustomTextField(
-                  controller: controller.searchController,
-                  label: 'البحث عن نقطة بيع',
-                  hint: 'ابحث بالاسم، المعرف UUID، أو رقم الهاتف...',
-                  prefixIcon: const Icon(Icons.search_rounded),
-                  suffixIcon: Obx(() {
-                    return controller.searchQuery.value.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear_rounded),
-                            onPressed: controller.clearSearch,
-                          )
-                        : const SizedBox.shrink();
-                  }),
-                  isRequired: false,
-                  onChanged: controller.setSearchQuery,
-                ),
+          // 1. شريط البحث والفلترة المفصول (Feature Widget)
+          const NetworkPosSearchFilterHeader(),
 
-                AppSpacing.vSm,
-
-                // شريط التبويب القطاعي لفلترة الحالة
-                Obx(() {
-                  final activeFilter = controller.selectedStatusFilter.value;
-                  final selectedIndex = activeFilter == null
-                      ? 0
-                      : activeFilter
-                          ? 1
-                          : 2;
-
-                  final allCount = controller.links.length;
-                  final activeCount =
-                      controller.links.where((l) => l.status).length;
-                  final inactiveCount = allCount - activeCount;
-
-                  return CustomSegmentedBar(
-                    selectedIndex: selectedIndex,
-                    onSegmentChanged: (index) {
-                      if (index == 0) {
-                        controller.setStatusFilter(null);
-                      } else if (index == 1) {
-                        controller.setStatusFilter(true);
-                      } else {
-                        controller.setStatusFilter(false);
-                      }
-                    },
-                    items: [
-                      CustomSegmentItem(
-                        label: 'الكل',
-                        count: allCount,
-                        icon: Icons.list_alt_rounded,
-                      ),
-                      CustomSegmentItem(
-                        label: 'نشطة',
-                        count: activeCount,
-                        icon: Icons.check_circle_rounded,
-                      ),
-                      CustomSegmentItem(
-                        label: 'معطلة',
-                        count: inactiveCount,
-                        icon: Icons.cancel_rounded,
-                      ),
-                    ],
-                  );
-                }),
-              ],
-            ),
-          ),
-
-          // 2. المحتوى الرئيسي مع معالجة حالات التحميل والخطأ والفراغ
+          // 2. قائمة نقاط البيع وحالات التحميل والخطأ والفراغ
           Expanded(
             child: Obx(() {
-              // أ. حالة التحميل الأولي مع الوميض الشيمر (Shimmer Skeleton)
+              // أ. حالة التحميل الأولي مع الوميض الشيمر
               if (controller.isLoading.value) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
@@ -146,9 +63,8 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
                 return CustomErrorState(
                   title: 'تعذر جلب نقاط البيع',
                   subtitle: controller.errorMessage.value,
-                  onRetry: () => controller.fetchNetworkPosLinks(
-                    networkId: networkId,
-                  ),
+                  onRetry: () =>
+                      controller.fetchNetworkPosLinks(networkId: networkId),
                 );
               }
 
@@ -165,13 +81,13 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
                       : 'جرب استخدام كلمات بحث مختلفة أو إلغاء فلتر التفعيل',
                   icon: Icons.storefront_outlined,
                   actionLabel: 'ربط نقطة بيع جديدة',
-                  onAction: () => LinkPosDialog.show(
+                  onAction: () => LinkPosBottomSheet.show(
                     networkId: controller.activeNetworkId.value,
                   ),
                 );
               }
 
-              // د. عرض قائمة نقاط البيع
+              // د. عرض قائمة البطاقات المفصولة
               return RefreshIndicator.adaptive(
                 onRefresh: () => controller.fetchNetworkPosLinks(
                   networkId: networkId,
@@ -186,7 +102,7 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
                   separatorBuilder: (context, index) => AppSpacing.vMd,
                   itemBuilder: (ctx, index) {
                     final link = displayLinks[index];
-                    return _buildPosCard(context, link);
+                    return NetworkPosCard(link: link);
                   },
                 ),
               );
@@ -206,237 +122,8 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
             color: colors.onPrimary,
           ),
         ),
-        onPressed: () => LinkPosDialog.show(
+        onPressed: () => LinkPosBottomSheet.show(
           networkId: controller.activeNetworkId.value,
-        ),
-      ),
-    );
-  }
-
-  /// بطاقة نقطة البيع التفاعلية الموحدة
-  Widget _buildPosCard(BuildContext context, NetworkPosLinkEntity link) {
-    final colors = context.colors;
-    final pos = link.pos;
-
-    final isActive = link.status;
-    final statusColor = isActive ? colors.success : colors.error;
-
-    return CustomInteractiveBounce(
-      onTap: () {},
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.4),
-            width: 1.2,
-          ),
-          boxShadow: AppElevation.level1(context),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ترويسة البطاقة: الشعار، الاسم، وشارة الحالة
-            Row(
-              children: [
-                // صورة أو أيقونة نقطة البيع
-                if (pos?.posProfileLogoUrl != null &&
-                    pos!.posProfileLogoUrl!.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    child: CustomCachedImage(
-                      url: pos.posProfileLogoUrl!,
-                      width: 48.r,
-                      height: 48.r,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                else
-                  Container(
-                    width: 48.r,
-                    height: 48.r,
-                    decoration: BoxDecoration(
-                      color: colors.primaryContainer.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                    ),
-                    child: Icon(
-                      Icons.storefront_rounded,
-                      color: colors.primary,
-                      size: 26.r,
-                    ),
-                  ),
-
-                AppSpacing.hMd,
-
-                // اسم نقطة البيع ورقم الهاتف
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        pos?.posName ?? 'نقطة بيع #${link.posId}',
-                        style: AppTypography.titleMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colors.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      AppSpacing.vXxs,
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.phone_outlined,
-                            size: 14.r,
-                            color: colors.onSurfaceVariant,
-                          ),
-                          AppSpacing.hXxs,
-                          Text(
-                            pos?.posPhoneNumber.isNotEmpty == true
-                                ? pos!.posPhoneNumber
-                                : 'لا يوجد هاتف',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: colors.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // شارة الحالة (Badge)
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xxs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(AppRadius.full),
-                    border: Border.all(
-                      color: statusColor.withValues(alpha: 0.25),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 7.r,
-                        height: 7.r,
-                        decoration: BoxDecoration(
-                          color: statusColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      AppSpacing.hXxs,
-                      Text(
-                        isActive ? 'نشط' : 'معطل',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: statusColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            AppSpacing.vSm,
-
-            // المعرف الفريد UUID مع زر النسخ
-            if (pos?.posUuid.isNotEmpty == true)
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.fingerprint_rounded,
-                      size: 16.r,
-                      color: colors.onSurfaceVariant,
-                    ),
-                    AppSpacing.hXs,
-                    Expanded(
-                      child: Text(
-                        pos!.posUuid,
-                        style: AppTypography.labelSmall.copyWith(
-                          fontFamily: 'monospace',
-                          color: colors.onSurfaceVariant,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        Clipboard.setData(ClipboardData(text: pos.posUuid));
-                        CustomToast.show(
-                          message: 'تم نسخ معرف نقطة البيع',
-                          icon: Icons.copy_rounded,
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(AppRadius.xs),
-                      child: Padding(
-                        padding: EdgeInsets.all(AppSpacing.xxs),
-                        child: Icon(
-                          Icons.copy_rounded,
-                          size: 16.r,
-                          color: colors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-            AppSpacing.vMd,
-
-            // أزرار التحكم والإجراءات الموحدة
-            Row(
-              children: [
-                // زر تبديل الحالة الموحد
-                Expanded(
-                  child: CustomButton.outline(
-                    text: isActive ? 'تعطيل الارتباط' : 'تفعيل الارتباط',
-                    icon: isActive
-                        ? Icons.pause_circle_outline_rounded
-                        : Icons.play_circle_outline_rounded,
-                    onPressed: () =>
-                        controller.toggleLinkStatus(link.networkPosId),
-                  ),
-                ),
-
-                AppSpacing.hSm,
-
-                // زر فك الارتباط الموحد مع حوار التأكيد التحذيري
-                CustomButton.danger(
-                  text: 'فك الارتباط',
-                  icon: Icons.link_off_rounded,
-                  onPressed: () {
-                    CustomDialog.danger(
-                      title: 'فك ارتباط نقطة البيع',
-                      message:
-                          'هل أنت متأكد من رغبتك في فك ارتباط "${pos?.posName ?? 'نقطة البيع'}" بالشبكة؟ سيؤدي ذلك لتعليق طلبات التوريد بالجملة.',
-                      confirmLabel: 'تأكيد فك الارتباط',
-                      cancelLabel: 'إلغاء',
-                      onConfirm: () =>
-                          controller.unlinkPos(link.networkPosId),
-                    ).showDialog(context);
-                  },
-                ),
-              ],
-            ),
-          ],
         ),
       ),
     );

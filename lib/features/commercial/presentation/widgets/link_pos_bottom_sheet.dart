@@ -10,10 +10,9 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
-/// نافذة ربط نقطة بيع جديدة بشبكة المزود
-/// معيار Clean Architecture و GetX - خالية تماماً من StatefulWidget أو setState
-class LinkPosDialog {
-  LinkPosDialog._();
+/// نافذة سفلية (Modal Bottom Sheet) لربط نقطة بيع جديدة بشبكة المزود
+class LinkPosBottomSheet {
+  LinkPosBottomSheet._();
 
   static Future<bool?> show({required int networkId}) {
     final formKey = GlobalKey<FormState>();
@@ -33,7 +32,7 @@ class LinkPosDialog {
           children: [
             AppSpacing.vMd,
 
-            // حقل إدخال المعرف أو الرقم الموحد
+            // 1. حقل إدخال المعرف أو الرقم الموحد
             CustomTextField(
               controller: controller.posIdentifierController,
               label: 'معرف أو رقم نقطة البيع',
@@ -50,7 +49,7 @@ class LinkPosDialog {
 
             AppSpacing.vMd,
 
-            // مفتاح التفعيل الأولي
+            // 2. مفتاح التفعيل الأولي
             Builder(
               builder: (context) {
                 final colors = context.colors;
@@ -108,7 +107,7 @@ class LinkPosDialog {
 
             AppSpacing.vLg,
 
-            // زر تأكيد الربط الموحد
+            // 3. زر تأكيد الربط الموحد
             GetX<CommercialDirectoryController>(
               builder: (ctrl) {
                 return CustomButton.primary(
@@ -120,9 +119,12 @@ class LinkPosDialog {
                       : () async {
                           if (!formKey.currentState!.validate()) return;
 
-                          final input = ctrl.posIdentifierController.text.trim();
+                          final input = ctrl.posIdentifierController.text
+                              .trim();
                           final isNumeric = int.tryParse(input) != null;
-                          final int? posId = isNumeric ? int.parse(input) : null;
+                          final int? posId = isNumeric
+                              ? int.parse(input)
+                              : null;
                           final String? posUuid = isNumeric ? null : input;
 
                           final success = await ctrl.linkPos(

@@ -46,7 +46,9 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
       queryParameters: query,
       fromJson: (data) {
         if (data is List) {
-          return data.map((item) => NetworkPosLinkModel.fromJson(item)).toList();
+          return data
+              .map((item) => NetworkPosLinkModel.fromJson(item))
+              .toList();
         }
         return [];
       },
@@ -63,7 +65,9 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
       queryParameters: query,
       fromJson: (data) {
         if (data is List) {
-          return data.map((item) => NetworkPosLinkModel.fromJson(item)).toList();
+          return data
+              .map((item) => NetworkPosLinkModel.fromJson(item))
+              .toList();
         }
         return [];
       },
@@ -92,7 +96,9 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
-  Future<ApiResponse<NetworkPosLinkModel>> toggleNetworkPosLinkStatus(int linkId) {
+  Future<ApiResponse<NetworkPosLinkModel>> toggleNetworkPosLinkStatus(
+    int linkId,
+  ) {
     return ApiService.instance.post<NetworkPosLinkModel>(
       ApiConstants.networkPosToggleStatus(linkId),
       fromJson: NetworkPosLinkModel.fromJson,

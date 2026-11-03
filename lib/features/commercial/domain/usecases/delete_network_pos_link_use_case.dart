@@ -12,4 +12,3 @@ class DeleteNetworkPosLinkUseCase {
 
   Future<void> call(int linkId) => execute(linkId);
 }
-

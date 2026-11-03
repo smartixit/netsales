@@ -13,4 +13,3 @@ class GetMyPosUseCase {
 
   Future<List<PosEntity>> call() => execute();
 }
-
