@@ -1,4 +1,5 @@
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/user_status.dart';
 import 'package:netsales/core/models/role_model.dart';
 
 /// نموذج بيانات المستخدم الأساسي (Clean User Model)
@@ -34,6 +35,8 @@ class UserModel {
   bool get isSuperAdmin => role?.roleKey == AppRoles.superAdmin;
   bool get isNetworkOwner => role?.roleKey == AppRoles.networkOwner;
   bool get isPosAgent => role?.roleKey == AppRoles.posAgent;
+  UserStatus get typedStatus => UserStatus.fromWire(status);
+  bool get isActive => typedStatus == UserStatus.active;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(

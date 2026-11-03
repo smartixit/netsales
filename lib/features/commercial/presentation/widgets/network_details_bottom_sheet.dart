@@ -3,10 +3,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -47,8 +49,6 @@ class NetworkDetailsBottomSheet {
             Builder(
               builder: (context) {
                 final colors = context.colors;
-                final isActive = network.status == 'ACTIVE';
-                final statusColor = isActive ? colors.success : colors.error;
 
                 return Container(
                   padding: EdgeInsets.symmetric(
@@ -81,25 +81,13 @@ class NetworkDetailsBottomSheet {
                           ),
                         ],
                       ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xxs,
+                      CustomStatusBadge.fromPresentation(
+                        EnumPresentationRegistry.resolveNetworkStatus(
+                          network.typedStatus,
+                          serverLabel: network.statusLabel,
                         ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(AppRadius.full),
-                          border: Border.all(
-                            color: statusColor.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          network.statusLabel ?? (isActive ? 'نشط' : 'معطل'),
-                          style: AppTypography.labelSmall.copyWith(
-                            color: statusColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        showDot: true,
+                        isCompact: true,
                       ),
                     ],
                   ),

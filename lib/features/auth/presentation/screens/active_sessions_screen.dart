@@ -6,8 +6,11 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/features/auth/domain/entities/user_device_entity.dart';
 import 'package:netsales/features/auth/presentation/controllers/active_sessions_controller.dart';
+import 'package:netsales/widgets/badges/custom_chip.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
@@ -138,7 +141,10 @@ class ActiveSessionsScreen extends GetView<ActiveSessionsController> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  _resolveDeviceIcon(device.deviceType),
+                  EnumPresentationRegistry.resolveDeviceType(
+                        device.typedDeviceType,
+                      ).icon ??
+                      Icons.devices_rounded,
                   color: colors.primary,
                   size: 24.sp,
                 ),
@@ -180,12 +186,13 @@ class ActiveSessionsScreen extends GetView<ActiveSessionsController> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      'النوع: ${device.deviceTypeLabel ?? device.deviceType ?? "غير محدد"}',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: colors.onSurfaceVariant,
+                    SizedBox(height: 6.h),
+                    CustomChip.fromPresentation(
+                      EnumPresentationRegistry.resolveDeviceType(
+                        device.typedDeviceType,
+                        serverLabel: device.deviceTypeLabel,
                       ),
+                      isCompact: true,
                     ),
                   ],
                 ),
@@ -208,12 +215,13 @@ class ActiveSessionsScreen extends GetView<ActiveSessionsController> {
                   fontFamily: 'monospace',
                 ),
               ),
-              Text(
-                'نشط الآن',
-                style: AppTypography.badgeText.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w700,
+              CustomStatusBadge.fromPresentation(
+                EnumPresentationRegistry.resolveUserDeviceStatus(
+                  device.typedStatus,
+                  serverLabel: device.statusLabel,
                 ),
+                showDot: true,
+                isCompact: true,
               ),
             ],
           ),
@@ -304,7 +312,10 @@ class ActiveSessionsScreen extends GetView<ActiveSessionsController> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              _resolveDeviceIcon(device.deviceType),
+              EnumPresentationRegistry.resolveDeviceType(
+                    device.typedDeviceType,
+                  ).icon ??
+                  Icons.devices_rounded,
               color: colors.onSurfaceVariant,
               size: 20.sp,
             ),
@@ -351,18 +362,6 @@ class ActiveSessionsScreen extends GetView<ActiveSessionsController> {
         ],
       ),
     );
-  }
-
-  IconData _resolveDeviceIcon(String? deviceType) {
-    final type = (deviceType ?? '').toUpperCase();
-    return switch (type) {
-      'ANDROID' => Icons.phone_android_rounded,
-      'IOS' => Icons.phone_iphone_rounded,
-      'LINUX' => Icons.laptop_chromebook_rounded,
-      'WINDOWS' => Icons.desktop_windows_rounded,
-      'MAC' => Icons.laptop_mac_rounded,
-      _ => Icons.devices_rounded,
-    };
   }
 
   String _formatDeviceUuid(String uuid) {

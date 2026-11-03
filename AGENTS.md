@@ -62,6 +62,7 @@
     - Pickers: `CustomDatePickerField`, `CustomDatePickerModal`, `CustomFilePicker`, `CustomImagePicker`, `CustomContactPickerIconButton`, `CustomColorPicker`, `CustomPosSelectorField`.
     - Navigation & Foundation: `CustomAppScaffold`, `CustomFloatingBottomNavBar`, `DoubleBackExitScope`.
     - Media & QR: `MediaGalleryViewer`, `CustomCachedImage`, `CustomQrCode`.
+    - Badges & Chips (`lib/widgets/badges/`): `CustomStatusBadge`, `CustomChip`.
     - Menus, Dividers & Interactions: `CustomPopupMenu`, `CustomLabeledDivider`, `CustomInteractiveBounce`, `CustomeThemeSwitcher`, `CustomPageIndicator`, `CustomSegmentedBar`.
   - **Utils (`lib/core/utils/`):** `DateFormatter`, `AmountFormatter`, `TextFormatter`, `FileSizeFormatter`, `FormValidators`, `IdempotencyHelper`, `SystemUiStyleResolver`.
   - **Core Services (`lib/core/services/`):** `ApiService`, `WorkspaceService`, `SessionService`, `ThemeService`, `StorageService`, `CredentialService`, `AppCryptoService`, `AppCacheService`, `InternetConnectionService`, `PermissionService`, `DeviceService`, `PushNotificationService`, `SmsRetrieverService`, `SoundService`, `ShareService`, `UrlLauncherService`, `FilePickerService`, `FileExportService`, `DatePickerService`, `ContactPickerService`, `QrCodeService`, `PublicSettingsService`, `AppExitService`.
@@ -72,3 +73,19 @@
 - Never implement features or start a new milestone without explicit user approval.
 - All persistent project memory, state, and decisions are canonically documented in `netsales_api/docs/project/` and referenced locally in `docs/project/`.
 - Maintain clean handoffs and update `docs/project/WORK_LOG.md` upon completing authorized tasks.
+
+## 6. Centralized Enum Contract & Semantic Badge Presentation System
+- **Strict Wire Parsing:** All backend Enums must have typed client Dart Enums with `fromWire(String? raw)`.
+  - Wire string casing must match backend exactly (UPPERCASE, lowercase, or snake_case).
+  - Never alter casing blindly (e.g. do not apply `.toUpperCase()` universally).
+  - Must include an `unknown` fallback case to ensure forward compatibility with unknown backend values.
+- **Pure Domain Integration:** Domain entities expose typed enum accessors (e.g., `NetworkStatus get typedStatus => NetworkStatus.fromWire(status);`), keeping raw strings for serialization without breaking domain purity.
+- **Centralized Presentation Registry:**
+  - Status presentation (label, icon, semantic tone) is governed exclusively by `EnumPresentationRegistry` located at `lib/core/presentation/enums/enum_presentation_registry.dart`.
+  - Server-provided localized labels (`*_label`) have priority; the registry provides localized fallbacks when server labels are absent.
+  - Semantic tones are strictly typed via `SemanticTone` (`success`, `warning`, `danger`, `info`, `neutral`, `primary`).
+- **Shared Presentation Components:**
+  - Status badges must use `CustomStatusBadge` (`lib/widgets/badges/custom_status_badge.dart`).
+  - Interactive or compact chips must use `CustomChip` (`lib/widgets/badges/custom_chip.dart`).
+  - **Prohibition:** Never write ad-hoc `switch` statements or conditional color mappings for statuses directly inside screen or widget files.
+

@@ -1,3 +1,6 @@
+import 'package:netsales/core/enums/device_type.dart';
+import 'package:netsales/core/enums/user_device_status.dart';
+
 /// كيان جهاز المستخدم (User Device Entity)
 class UserDeviceEntity {
   final int deviceId;
@@ -30,5 +33,7 @@ class UserDeviceEntity {
     this.updatedAt,
   });
 
-  bool get isActive => status == 'ACTIVE';
+  UserDeviceStatus get typedStatus => UserDeviceStatus.fromWire(status);
+  DeviceType get typedDeviceType => DeviceType.fromWire(deviceType);
+  bool get isActive => typedStatus == UserDeviceStatus.active;
 }

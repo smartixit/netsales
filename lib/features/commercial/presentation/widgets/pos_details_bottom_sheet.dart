@@ -3,11 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -37,6 +39,58 @@ class PosDetailsBottomSheet {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppSpacing.vMd,
+
+            // شارة الحالة ورقم نقطة البيع
+            Builder(
+              builder: (context) {
+                final colors = context.colors;
+
+                return Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest.withValues(
+                      alpha: 0.35,
+                    ),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.storefront_rounded,
+                            size: 20.r,
+                            color: colors.primary,
+                          ),
+                          AppSpacing.hSm,
+                          Text(
+                            'معرف نقطة البيع #${pos.posId}',
+                            style: AppTypography.bodyMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colors.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                      CustomStatusBadge.fromPresentation(
+                        EnumPresentationRegistry.resolvePosStatus(
+                          pos.typedStatus,
+                          serverLabel: pos.statusLabel,
+                        ),
+                        showDot: true,
+                        isCompact: true,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+
+            AppSpacing.vSm,
 
             // المعرف الفريد UUID
             Builder(

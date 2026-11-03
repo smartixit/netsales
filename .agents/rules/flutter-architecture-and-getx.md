@@ -46,6 +46,7 @@ Never re-implement components or utilities that already exist in `lib/widgets/` 
 - **Dialogs & Confirmations:** Confirmation dialogs must use `CustomDialog` (`CustomDialog.danger`, `CustomDialog.confirmation`).
 - **Sheets:** Modal sheets must use `CustomBottomSheet.show(...)`.
 - **Shared Widgets (`lib/widgets/`):**
+  - **Badges & Chips (`lib/widgets/badges/`):** `CustomStatusBadge`, `CustomChip`.
   - **Buttons (`lib/widgets/buttons/`):** `CustomButton`, `CustomThemeToggleButton`.
   - **Dialogs (`lib/widgets/dialogs/`):** `CustomDialog`, `CustomAnimationOverlay`, `DialogActionBar`, `DialogBodyContent`, `DialogIconHeader`.
   - **Sheets (`lib/widgets/sheets/`):** `CustomBottomSheet`, `InvoicePrintFormatSheet`.
@@ -88,3 +89,19 @@ Every view handling asynchronous data must explicitly implement:
 - **Empty State:** Informative empty illustrations and messages.
 - **Error State:** Actionable error display with retry capability.
 - **Success State:** Loaded content rendered responsively.
+
+## 6. Centralized Enum Architecture & Semantic Badge System
+- **Typed Wire Parsing:** All backend-provided Enums must have typed client Dart representations under `lib/core/enums/` or feature `domain/entities/` with strict `fromWire(String? raw)`.
+  - Wire string casing must match backend specifications exactly (UPPERCASE, lowercase, or snake_case).
+  - Never alter casing blindly (e.g. no universal `.toUpperCase()`).
+  - Always implement an `unknown` fallback case for forward compatibility.
+- **Domain Entity Integration:** Domain entities expose typed enum accessors (e.g., `NetworkStatus get typedStatus => NetworkStatus.fromWire(status);`), preserving serialization contracts while maintaining pure Dart safety.
+- **Centralized Presentation Registry:**
+  - Status display logic (label, icon, semantic tone) must be retrieved exclusively through `EnumPresentationRegistry` (`lib/core/presentation/enums/enum_presentation_registry.dart`).
+  - Server-provided localized labels (`*_label`) have first-class precedence; the registry provides localized fallbacks when server labels are absent.
+  - Semantic tones are strictly typed via `SemanticTone` (`success`, `warning`, `danger`, `info`, `neutral`, `primary`).
+- **Shared Presentation Components:**
+  - Status badges must use `CustomStatusBadge` (`lib/widgets/badges/custom_status_badge.dart`).
+  - Interactive or compact status tags must use `CustomChip` (`lib/widgets/badges/custom_chip.dart`).
+  - **Prohibition:** Never write ad-hoc `switch` statements or conditional color mappings for statuses directly inside screen or widget files.
+

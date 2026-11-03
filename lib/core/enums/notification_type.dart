@@ -23,19 +23,26 @@ enum NotificationType {
   securityDeviceBlocked('SECURITY_DEVICE_BLOCKED'),
   securityPasswordChanged('SECURITY_PASSWORD_CHANGED'),
   systemAnnouncement('SYSTEM_ANNOUNCEMENT'),
-  generalInfo('GENERAL_INFO');
+  generalInfo('GENERAL_INFO'),
+  unknown('UNKNOWN');
 
   final String value;
   const NotificationType(this.value);
 
-  static NotificationType fromString(String? raw) {
-    if (raw == null) return NotificationType.generalInfo;
-    final upper = raw.toUpperCase().trim();
+  /// تحليل آمن ومطابق للقيمة السلكية الصادرة من الخادم
+  static NotificationType fromWire(String? raw) {
+    if (raw == null) return NotificationType.unknown;
+    final trimmed = raw.trim();
     for (final type in NotificationType.values) {
-      if (type.value == upper) return type;
+      if (type.value == trimmed) return type;
     }
-    return NotificationType.generalInfo;
+    return NotificationType.unknown;
   }
+
+  /// متوافق مع الاستخدامات السابقة مع ضمان عدم إخفاء الحالات المجهولة
+  static NotificationType fromString(String? raw) => fromWire(raw);
+
+  bool get isKnown => this != NotificationType.unknown;
 
   String get defaultRoute {
     switch (this) {

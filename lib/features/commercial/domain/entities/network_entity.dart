@@ -1,3 +1,5 @@
+import 'package:netsales/features/commercial/domain/entities/network_status.dart';
+
 /// كيان مزود الشبكة التجاري (Network Commercial Entity)
 class NetworkEntity {
   final int networkId;
@@ -32,5 +34,6 @@ class NetworkEntity {
     this.updatedAt,
   });
 
-  bool get isActive => status == 'ACTIVE';
+  NetworkStatus get typedStatus => NetworkStatus.fromWire(status);
+  bool get isActive => typedStatus == NetworkStatus.active;
 }

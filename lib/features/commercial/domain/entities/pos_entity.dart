@@ -1,3 +1,5 @@
+import 'package:netsales/features/commercial/domain/entities/pos_status.dart';
+
 /// كيان نقطة البيع التجارية (POS Commercial Entity)
 class PosEntity {
   final int posId;
@@ -34,5 +36,6 @@ class PosEntity {
     this.updatedAt,
   });
 
-  bool get isActive => status == 'ACTIVE';
+  PosStatus get typedStatus => PosStatus.fromWire(status);
+  bool get isActive => typedStatus == PosStatus.active;
 }

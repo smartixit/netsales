@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_details_bottom_sheet.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
@@ -20,9 +22,6 @@ class PosLinkedNetworkCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final network = link.network;
-
-    final isActive = link.status;
-    final statusColor = isActive ? colors.success : colors.error;
 
     return CustomInteractiveBounce(
       onTap: () {
@@ -136,41 +135,11 @@ class PosLinkedNetworkCard extends StatelessWidget {
 
             AppSpacing.hSm,
 
-            // 3. شارة حالة الشراكة
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppRadius.full),
-                border: Border.all(
-                  color: statusColor.withValues(alpha: 0.25),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 7.r,
-                    height: 7.r,
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  AppSpacing.hXxs,
-                  Text(
-                    isActive ? 'نشط' : 'معطل',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+            // 3. شارة حالة الشراكة الدلالية الموحدة
+            CustomStatusBadge.fromPresentation(
+              EnumPresentationRegistry.resolveLinkStatus(link.status),
+              showDot: true,
+              isCompact: true,
             ),
           ],
         ),

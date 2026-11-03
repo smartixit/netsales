@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
@@ -10,6 +11,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/pos_details_bottom_sheet.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
@@ -28,7 +30,6 @@ class NetworkPosCard extends GetView<CommercialDirectoryController> {
     final pos = link.pos;
 
     final isActive = link.status;
-    final statusColor = isActive ? colors.success : colors.error;
 
     return CustomInteractiveBounce(
       onTap: () {
@@ -120,41 +121,11 @@ class NetworkPosCard extends GetView<CommercialDirectoryController> {
                   ),
                 ),
 
-                // شارة الحالة (Badge)
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xxs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(AppRadius.full),
-                    border: Border.all(
-                      color: statusColor.withValues(alpha: 0.25),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 7.r,
-                        height: 7.r,
-                        decoration: BoxDecoration(
-                          color: statusColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      AppSpacing.hXxs,
-                      Text(
-                        isActive ? 'نشط' : 'معطل',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: statusColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+                // شارة الحالة الدلالية الموحدة (Semantic Status Badge)
+                CustomStatusBadge.fromPresentation(
+                  EnumPresentationRegistry.resolveLinkStatus(link.status),
+                  showDot: true,
+                  isCompact: true,
                 ),
               ],
             ),
