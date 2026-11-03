@@ -17,39 +17,25 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// شاشة استعراض الشبكات المزودة لنقطة البيع (POS Linked Networks Screen)
-class PosLinkedNetworksScreen extends StatefulWidget {
+/// مبنية بالكامل كـ StatelessWidget وفق معايير Clean Architecture و GetX
+class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
   const PosLinkedNetworksScreen({super.key, this.posId});
 
   final int? posId;
 
-  @override
-  State<PosLinkedNetworksScreen> createState() =>
-      _PosLinkedNetworksScreenState();
-}
-
-class _PosLinkedNetworksScreenState extends State<PosLinkedNetworksScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  late final CommercialDirectoryController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = Get.find<CommercialDirectoryController>();
-    if (widget.posId != null && widget.posId! > 0) {
-      _controller.activePosId.value = widget.posId!;
+  void _ensureDataLoaded() {
+    if (posId != null && posId! > 0 && controller.activePosId.value != posId) {
+      controller.activePosId.value = posId!;
+      controller.fetchPosNetworks(posId: posId);
+    } else if (controller.links.isEmpty && !controller.isLoading.value && controller.errorMessage.value == null) {
+      controller.fetchPosNetworks(posId: posId);
     }
-    _controller.fetchPosNetworks(posId: widget.posId);
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    _ensureDataLoaded();
 
     return Scaffold(
       appBar: AppBar(
@@ -71,50 +57,47 @@ class _PosLinkedNetworksScreenState extends State<PosLinkedNetworksScreen> {
             child: Column(
               children: [
                 CustomTextField(
-                  controller: _searchController,
+                  controller: controller.searchController,
                   label: 'البحث عن شبكة مزودة',
                   hint: 'ابحث باسم الشبكة أو هاتفها...',
                   prefixIcon: const Icon(Icons.search_rounded),
                   suffixIcon: Obx(() {
-                    return _controller.searchQuery.value.isNotEmpty
+                    return controller.searchQuery.value.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear_rounded),
-                            onPressed: () {
-                              _searchController.clear();
-                              _controller.setSearchQuery('');
-                            },
+                            onPressed: controller.clearSearch,
                           )
                         : const SizedBox.shrink();
                   }),
                   isRequired: false,
-                  onChanged: _controller.setSearchQuery,
+                  onChanged: controller.setSearchQuery,
                 ),
 
                 AppSpacing.vSm,
 
                 // شريط التبويب القطاعي لفلترة الحالة
                 Obx(() {
-                  final activeFilter = _controller.selectedStatusFilter.value;
+                  final activeFilter = controller.selectedStatusFilter.value;
                   final selectedIndex = activeFilter == null
                       ? 0
                       : activeFilter
                           ? 1
                           : 2;
 
-                  final allCount = _controller.links.length;
+                  final allCount = controller.links.length;
                   final activeCount =
-                      _controller.links.where((l) => l.status).length;
+                      controller.links.where((l) => l.status).length;
                   final inactiveCount = allCount - activeCount;
 
                   return CustomSegmentedBar(
                     selectedIndex: selectedIndex,
                     onSegmentChanged: (index) {
                       if (index == 0) {
-                        _controller.setStatusFilter(null);
+                        controller.setStatusFilter(null);
                       } else if (index == 1) {
-                        _controller.setStatusFilter(true);
+                        controller.setStatusFilter(true);
                       } else {
-                        _controller.setStatusFilter(false);
+                        controller.setStatusFilter(false);
                       }
                     },
                     items: [
@@ -143,7 +126,7 @@ class _PosLinkedNetworksScreenState extends State<PosLinkedNetworksScreen> {
           // 2. المحتوى الرئيسي
           Expanded(
             child: Obx(() {
-              if (_controller.isLoading.value) {
+              if (controller.isLoading.value) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
                   child: const CustomSkeletonFeed(
@@ -153,25 +136,25 @@ class _PosLinkedNetworksScreenState extends State<PosLinkedNetworksScreen> {
                 );
               }
 
-              if (_controller.errorMessage.value != null &&
-                  _controller.links.isEmpty) {
+              if (controller.errorMessage.value != null &&
+                  controller.links.isEmpty) {
                 return CustomErrorState(
                   title: 'تعذر جلب الشبكات المزودة',
-                  subtitle: _controller.errorMessage.value,
-                  onRetry: () => _controller.fetchPosNetworks(
-                    posId: widget.posId,
+                  subtitle: controller.errorMessage.value,
+                  onRetry: () => controller.fetchPosNetworks(
+                    posId: posId,
                   ),
                 );
               }
 
-              final displayLinks = _controller.filteredLinks;
+              final displayLinks = controller.filteredLinks;
 
               if (displayLinks.isEmpty) {
                 return CustomEmptyState(
-                  title: _controller.links.isEmpty
+                  title: controller.links.isEmpty
                       ? 'لا توجد شبكات مزودة مرتبطة'
                       : 'لا توجد نتائج مطابقة للبحث',
-                  subtitle: _controller.links.isEmpty
+                  subtitle: controller.links.isEmpty
                       ? 'يجب أن يقوم مزود الشبكة بربط نقطة البيع الخاصة بك أولاً لتتمكن من طلب باقات الكروت بالجملة'
                       : 'جرب استخدام كلمات بحث مختلفة',
                   icon: Icons.hub_outlined,
@@ -179,8 +162,8 @@ class _PosLinkedNetworksScreenState extends State<PosLinkedNetworksScreen> {
               }
 
               return RefreshIndicator.adaptive(
-                onRefresh: () => _controller.fetchPosNetworks(
-                  posId: widget.posId,
+                onRefresh: () => controller.fetchPosNetworks(
+                  posId: posId,
                   showLoading: false,
                 ),
                 child: ListView.separated(

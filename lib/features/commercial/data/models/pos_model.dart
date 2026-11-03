@@ -22,7 +22,9 @@ class PosModel extends PosEntity {
 
   factory PosModel.fromJson(dynamic json) {
     if (json is! Map<String, dynamic>) {
-      throw FormatException('Invalid JSON type for PosModel: ${json.runtimeType}');
+      throw FormatException(
+        'Invalid JSON type for PosModel: ${json.runtimeType}',
+      );
     }
 
     String? ownerName;
@@ -40,8 +42,12 @@ class PosModel extends PosEntity {
       posPhoneNumber: json['pos_phone_number']?.toString() ?? '',
       posEmail: json['pos_email']?.toString(),
       posAddress: json['pos_address']?.toString(),
-      governorateId: json['governorate_id'] != null ? _toInt(json['governorate_id']) : null,
-      directorateId: json['directorate_id'] != null ? _toInt(json['directorate_id']) : null,
+      governorateId: json['governorate_id'] != null
+          ? _toInt(json['governorate_id'])
+          : null,
+      directorateId: json['directorate_id'] != null
+          ? _toInt(json['directorate_id'])
+          : null,
       status: json['status']?.toString(),
       statusLabel: json['status_label']?.toString(),
       ownerName: ownerName,

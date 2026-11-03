@@ -17,7 +17,9 @@ class NetworkPosLinkModel extends NetworkPosLinkEntity {
 
   factory NetworkPosLinkModel.fromJson(dynamic json) {
     if (json is! Map<String, dynamic>) {
-      throw FormatException('Invalid JSON type for NetworkPosLinkModel: ${json.runtimeType}');
+      throw FormatException(
+        'Invalid JSON type for NetworkPosLinkModel: ${json.runtimeType}',
+      );
     }
 
     NetworkModel? network;

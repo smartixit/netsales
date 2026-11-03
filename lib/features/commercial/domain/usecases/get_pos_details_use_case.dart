@@ -13,3 +13,4 @@ class GetPosDetailsUseCase {
 
   Future<PosEntity> call(int posId) => execute(posId);
 }
+

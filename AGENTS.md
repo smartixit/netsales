@@ -23,12 +23,20 @@
 
 ## 4. Flutter Architectural Standards & State Management
 - **State Management Ecosystem:** **GetX** is the project's exclusive state management and dependency injection ecosystem (`GetxController`, `GetBuilder`/`Obx`, `Bindings`).
-  - **PROHIBITED:** Provider, Riverpod, Bloc, or custom `StatefulWidget` state machines (unless justified for low-level animation/lifecycle controllers).
+  - **PROHIBITIONS:**
+    - **NO Provider, Riverpod, Bloc, or MobX.**
+    - **NO `StatefulWidget` or `setState()` in application feature code.** All screens, dialogs, bottom sheets, and presentation widgets must be `StatelessWidget` (or `GetView<T>`), driven exclusively by GetX reactive state (`Rx`, `Obx`).
+    - **NO direct HTTP calls in controllers or UI:** `GetxController` classes must delegate to Domain Use Cases and are strictly forbidden from importing `ApiService`, `package:http`, or `package:dio` directly.
 - **Architecture:** Feature-first 3-layer Clean Architecture:
   - `data/` (`datasources/`, `models/`, `repositories/`)
-  - `domain/` (`entities/`, `repositories/`, `usecases/`)
+  - `domain/` (`entities/`, `repositories/`, `usecases/`) — Must remain pure Dart (zero imports from data, presentation, GetX, or Flutter material).
   - `presentation/` (`screens/`, `widgets/`, `controllers/`, `bindings/`)
 - **Infrastructure Reuse:** Mandatory reuse of existing foundation (never create redundant duplicates):
+  - **Error & Toast Feedback:** All errors, exceptions, and API failure messages must use `CustomSnackbar.show(..., type: SnackType.error)`.
+  - **Action Loading & Success Overlays:** Mutating actions must use `CustomAnimationOverlay.showLoading()` / `CustomAnimationOverlay.showSuccess()`, always safely hidden in `finally { if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide(); }`.
+  - **Feed & Card Loading:** All asynchronous list/feed loading states must use `CustomSkeletonFeed` or `CustomSkeletonShimmer`.
+  - **Dialogs & Confirmations:** Confirmation and alert dialogs must use `CustomDialog` (`CustomDialog.danger`, `CustomDialog.confirmation`).
+  - **Sheets:** Modal sheets must use `CustomBottomSheet.show(...)`.
   - **Widgets (`lib/widgets/`):**
     - Dialogs: `CustomDialog`, `CustomAnimationOverlay`, `DialogActionBar`, `DialogBodyContent`, `DialogIconHeader`.
     - Sheets: `CustomBottomSheet`, `InvoicePrintFormatSheet`.

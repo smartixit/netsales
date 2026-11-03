@@ -5,6 +5,12 @@ import 'package:netsales/features/commercial/data/models/pos_model.dart';
 
 /// عقد مصدر البيانات البعيد للكيانات والروابط التجارية
 abstract interface class CommercialRemoteDataSource {
+  /// جلب قائمة الشبكات التابعة للمستخدم الحالي
+  Future<ApiResponse<List<NetworkModel>>> getMyNetworks();
+
+  /// جلب قائمة نقاط البيع التابعة للمستخدم الحالي
+  Future<ApiResponse<List<PosModel>>> getMyPos();
+
   /// جلب قائمة نقاط البيع المرتبطة بشبكة
   Future<ApiResponse<List<NetworkPosLinkModel>>> getNetworkPosList(
     int networkId, {
@@ -26,7 +32,9 @@ abstract interface class CommercialRemoteDataSource {
   });
 
   /// تبديل حالة الارتباط
-  Future<ApiResponse<NetworkPosLinkModel>> toggleNetworkPosLinkStatus(int linkId);
+  Future<ApiResponse<NetworkPosLinkModel>> toggleNetworkPosLinkStatus(
+    int linkId,
+  );
 
   /// فك الارتباط
   Future<ApiResponse<void>> deleteNetworkPosLink(int linkId);

@@ -1,10 +1,11 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
-import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
@@ -19,6 +20,8 @@ class CommercialDirectoryController extends GetxController {
     required this.createNetworkPosLinkUseCase,
     required this.toggleNetworkPosLinkStatusUseCase,
     required this.deleteNetworkPosLinkUseCase,
+    required this.getMyNetworksUseCase,
+    required this.getMyPosUseCase,
   });
 
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
@@ -26,12 +29,19 @@ class CommercialDirectoryController extends GetxController {
   final CreateNetworkPosLinkUseCase createNetworkPosLinkUseCase;
   final ToggleNetworkPosLinkStatusUseCase toggleNetworkPosLinkStatusUseCase;
   final DeleteNetworkPosLinkUseCase deleteNetworkPosLinkUseCase;
+  final GetMyNetworksUseCase getMyNetworksUseCase;
+  final GetMyPosUseCase getMyPosUseCase;
 
   // الحالات التفاعلية
   final RxBool isLoading = false.obs;
   final RxBool isActionLoading = false.obs;
   final RxnString errorMessage = RxnString();
   final RxList<NetworkPosLinkEntity> links = <NetworkPosLinkEntity>[].obs;
+
+  // متحكمات النصوص ومفاتيح النماذج
+  final TextEditingController searchController = TextEditingController();
+  final TextEditingController posIdentifierController = TextEditingController();
+  final RxBool linkStatusInitial = true.obs;
 
   // حقول الفلترة والبحث
   final RxString searchQuery = ''.obs;
@@ -40,6 +50,13 @@ class CommercialDirectoryController extends GetxController {
   // معرفات الكيان الحالي (الشبكة أو نقطة البيع)
   final RxInt activeNetworkId = 0.obs;
   final RxInt activePosId = 0.obs;
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    posIdentifierController.dispose();
+    super.onClose();
+  }
 
   /// القائمة المفلترة حسب البحث وحالة التفعيل
   List<NetworkPosLinkEntity> get filteredLinks {
@@ -79,17 +96,12 @@ class CommercialDirectoryController extends GetxController {
 
       var targetNetworkId = networkId ?? activeNetworkId.value;
 
-      // إذا لم يكن معرف الشبكة محدداً، يتم استرجاعه من قائمة شبكات المستخدم
+      // إذا لم يكن معرف الشبكة محدداً، يتم استرجاعه عبر Use Case
       if (targetNetworkId <= 0) {
-        final networksResponse = await ApiService.instance.get<dynamic>(
-          ApiConstants.networks,
-        );
-        if (networksResponse.success && networksResponse.data is List) {
-          final list = networksResponse.data as List;
-          if (list.isNotEmpty && list.first is Map) {
-            targetNetworkId = (list.first['network_id'] as num?)?.toInt() ?? 0;
-            activeNetworkId.value = targetNetworkId;
-          }
+        final networks = await getMyNetworksUseCase();
+        if (networks.isNotEmpty) {
+          targetNetworkId = networks.first.networkId;
+          activeNetworkId.value = targetNetworkId;
         }
       }
 
@@ -133,17 +145,12 @@ class CommercialDirectoryController extends GetxController {
 
       var targetPosId = posId ?? activePosId.value;
 
-      // إذا لم يكن معرف نقطة البيع محدداً، يتم استرجاعه من قائمة نقاط بيع المستخدم
+      // إذا لم يكن معرف نقطة البيع محدداً، يتم استرجاعه عبر Use Case
       if (targetPosId <= 0) {
-        final posResponse = await ApiService.instance.get<dynamic>(
-          ApiConstants.pos,
-        );
-        if (posResponse.success && posResponse.data is List) {
-          final list = posResponse.data as List;
-          if (list.isNotEmpty && list.first is Map) {
-            targetPosId = (list.first['pos_id'] as num?)?.toInt() ?? 0;
-            activePosId.value = targetPosId;
-          }
+        final posList = await getMyPosUseCase();
+        if (posList.isNotEmpty) {
+          targetPosId = posList.first.posId;
+          activePosId.value = targetPosId;
         }
       }
 
@@ -200,6 +207,7 @@ class CommercialDirectoryController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم ربط نقطة البيع بالشبكة بنجاح',
       );
+      posIdentifierController.clear();
       return true;
     } on AppException catch (e) {
       if (CustomAnimationOverlay.isShowing) {
@@ -315,6 +323,12 @@ class CommercialDirectoryController extends GetxController {
   /// تحديث نص البحث
   void setSearchQuery(String query) {
     searchQuery.value = query;
+  }
+
+  /// تفريغ نص البحث
+  void clearSearch() {
+    searchController.clear();
+    searchQuery.value = '';
   }
 
   /// تغيير فلتر الحالة

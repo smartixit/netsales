@@ -4,6 +4,12 @@ import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 
 /// عقد مستودع الكيانات والروابط التجارية
 abstract interface class CommercialRepository {
+  /// جلب قائمة الشبكات التابعة للمستخدم الحالي
+  Future<List<NetworkEntity>> getMyNetworks();
+
+  /// جلب قائمة نقاط البيع التابعة للمستخدم الحالي
+  Future<List<PosEntity>> getMyPos();
+
   /// جلب قائمة نقاط البيع المرتبطة بشبكة محددة
   Future<List<NetworkPosLinkEntity>> getNetworkPosList(
     int networkId, {
@@ -43,8 +49,5 @@ abstract interface class CommercialRepository {
   );
 
   /// تحديث بيانات نقطة بيع
-  Future<PosEntity> updatePosDetails(
-    int posId,
-    Map<String, dynamic> data,
-  );
+  Future<PosEntity> updatePosDetails(int posId, Map<String, dynamic> data);
 }

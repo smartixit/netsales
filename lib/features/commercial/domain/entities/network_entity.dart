@@ -34,3 +34,4 @@ class NetworkEntity {
 
   bool get isActive => status == 'ACTIVE';
 }
+

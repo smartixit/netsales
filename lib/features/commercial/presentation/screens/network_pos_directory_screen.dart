@@ -22,39 +22,25 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/toasts/custom_toast.dart';
 
 /// شاشة دليل نقاط البيع وإدارة روابط الشراكة بمساحة عمل الشبكة
-class NetworkPosDirectoryScreen extends StatefulWidget {
+/// مبنية بالكامل كـ StatelessWidget وفق معايير Clean Architecture و GetX
+class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
   const NetworkPosDirectoryScreen({super.key, this.networkId});
 
   final int? networkId;
 
-  @override
-  State<NetworkPosDirectoryScreen> createState() =>
-      _NetworkPosDirectoryScreenState();
-}
-
-class _NetworkPosDirectoryScreenState extends State<NetworkPosDirectoryScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  late final CommercialDirectoryController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = Get.find<CommercialDirectoryController>();
-    if (widget.networkId != null && widget.networkId! > 0) {
-      _controller.activeNetworkId.value = widget.networkId!;
+  void _ensureDataLoaded() {
+    if (networkId != null && networkId! > 0 && controller.activeNetworkId.value != networkId) {
+      controller.activeNetworkId.value = networkId!;
+      controller.fetchNetworkPosLinks(networkId: networkId);
+    } else if (controller.links.isEmpty && !controller.isLoading.value && controller.errorMessage.value == null) {
+      controller.fetchNetworkPosLinks(networkId: networkId);
     }
-    _controller.fetchNetworkPosLinks(networkId: widget.networkId);
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    _ensureDataLoaded();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -74,50 +60,47 @@ class _NetworkPosDirectoryScreenState extends State<NetworkPosDirectoryScreen> {
               children: [
                 // حقل البحث الموحد
                 CustomTextField(
-                  controller: _searchController,
+                  controller: controller.searchController,
                   label: 'البحث عن نقطة بيع',
                   hint: 'ابحث بالاسم، المعرف UUID، أو رقم الهاتف...',
                   prefixIcon: const Icon(Icons.search_rounded),
                   suffixIcon: Obx(() {
-                    return _controller.searchQuery.value.isNotEmpty
+                    return controller.searchQuery.value.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear_rounded),
-                            onPressed: () {
-                              _searchController.clear();
-                              _controller.setSearchQuery('');
-                            },
+                            onPressed: controller.clearSearch,
                           )
                         : const SizedBox.shrink();
                   }),
                   isRequired: false,
-                  onChanged: _controller.setSearchQuery,
+                  onChanged: controller.setSearchQuery,
                 ),
 
                 AppSpacing.vSm,
 
                 // شريط التبويب القطاعي لفلترة الحالة
                 Obx(() {
-                  final activeFilter = _controller.selectedStatusFilter.value;
+                  final activeFilter = controller.selectedStatusFilter.value;
                   final selectedIndex = activeFilter == null
                       ? 0
                       : activeFilter
                           ? 1
                           : 2;
 
-                  final allCount = _controller.links.length;
+                  final allCount = controller.links.length;
                   final activeCount =
-                      _controller.links.where((l) => l.status).length;
+                      controller.links.where((l) => l.status).length;
                   final inactiveCount = allCount - activeCount;
 
                   return CustomSegmentedBar(
                     selectedIndex: selectedIndex,
                     onSegmentChanged: (index) {
                       if (index == 0) {
-                        _controller.setStatusFilter(null);
+                        controller.setStatusFilter(null);
                       } else if (index == 1) {
-                        _controller.setStatusFilter(true);
+                        controller.setStatusFilter(true);
                       } else {
-                        _controller.setStatusFilter(false);
+                        controller.setStatusFilter(false);
                       }
                     },
                     items: [
@@ -147,7 +130,7 @@ class _NetworkPosDirectoryScreenState extends State<NetworkPosDirectoryScreen> {
           Expanded(
             child: Obx(() {
               // أ. حالة التحميل الأولي مع الوميض الشيمر (Shimmer Skeleton)
-              if (_controller.isLoading.value) {
+              if (controller.isLoading.value) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
                   child: const CustomSkeletonFeed(
@@ -158,40 +141,40 @@ class _NetworkPosDirectoryScreenState extends State<NetworkPosDirectoryScreen> {
               }
 
               // ب. حالة الخطأ مع خيار إعادة المحاولة
-              if (_controller.errorMessage.value != null &&
-                  _controller.links.isEmpty) {
+              if (controller.errorMessage.value != null &&
+                  controller.links.isEmpty) {
                 return CustomErrorState(
                   title: 'تعذر جلب نقاط البيع',
-                  subtitle: _controller.errorMessage.value,
-                  onRetry: () => _controller.fetchNetworkPosLinks(
-                    networkId: widget.networkId,
+                  subtitle: controller.errorMessage.value,
+                  onRetry: () => controller.fetchNetworkPosLinks(
+                    networkId: networkId,
                   ),
                 );
               }
 
-              final displayLinks = _controller.filteredLinks;
+              final displayLinks = controller.filteredLinks;
 
               // ج. حالة القائمة الفارغة
               if (displayLinks.isEmpty) {
                 return CustomEmptyState(
-                  title: _controller.links.isEmpty
+                  title: controller.links.isEmpty
                       ? 'لا توجد نقاط بيع مرتبطة'
                       : 'لا توجد نتائج مطابقة لبحثك',
-                  subtitle: _controller.links.isEmpty
+                  subtitle: controller.links.isEmpty
                       ? 'قم بربط نقاط البيع المرخصة بشبكتك لتفعيل التوزيع بالجملة'
                       : 'جرب استخدام كلمات بحث مختلفة أو إلغاء فلتر التفعيل',
                   icon: Icons.storefront_outlined,
                   actionLabel: 'ربط نقطة بيع جديدة',
                   onAction: () => LinkPosDialog.show(
-                    networkId: _controller.activeNetworkId.value,
+                    networkId: controller.activeNetworkId.value,
                   ),
                 );
               }
 
               // د. عرض قائمة نقاط البيع
               return RefreshIndicator.adaptive(
-                onRefresh: () => _controller.fetchNetworkPosLinks(
-                  networkId: widget.networkId,
+                onRefresh: () => controller.fetchNetworkPosLinks(
+                  networkId: networkId,
                   showLoading: false,
                 ),
                 child: ListView.separated(
@@ -224,7 +207,7 @@ class _NetworkPosDirectoryScreenState extends State<NetworkPosDirectoryScreen> {
           ),
         ),
         onPressed: () => LinkPosDialog.show(
-          networkId: _controller.activeNetworkId.value,
+          networkId: controller.activeNetworkId.value,
         ),
       ),
     );
@@ -429,7 +412,7 @@ class _NetworkPosDirectoryScreenState extends State<NetworkPosDirectoryScreen> {
                         ? Icons.pause_circle_outline_rounded
                         : Icons.play_circle_outline_rounded,
                     onPressed: () =>
-                        _controller.toggleLinkStatus(link.networkPosId),
+                        controller.toggleLinkStatus(link.networkPosId),
                   ),
                 ),
 
@@ -447,7 +430,7 @@ class _NetworkPosDirectoryScreenState extends State<NetworkPosDirectoryScreen> {
                       confirmLabel: 'تأكيد فك الارتباط',
                       cancelLabel: 'إلغاء',
                       onConfirm: () =>
-                          _controller.unlinkPos(link.networkPosId),
+                          controller.unlinkPos(link.networkPosId),
                     ).showDialog(context);
                   },
                 ),

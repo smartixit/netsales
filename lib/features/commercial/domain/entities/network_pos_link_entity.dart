@@ -25,3 +25,4 @@ class NetworkPosLinkEntity {
 
   bool get isActive => status;
 }
+

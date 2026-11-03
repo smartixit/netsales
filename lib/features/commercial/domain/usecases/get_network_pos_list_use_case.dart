@@ -17,6 +17,5 @@ class GetNetworkPosListUseCase {
   Future<List<NetworkPosLinkEntity>> call(
     int networkId, {
     Map<String, dynamic>? query,
-  }) =>
-      execute(networkId, query: query);
+  }) => execute(networkId, query: query);
 }

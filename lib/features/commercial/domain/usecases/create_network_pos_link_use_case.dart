@@ -26,11 +26,10 @@ class CreateNetworkPosLinkUseCase {
     int? posId,
     String? posUuid,
     bool? status,
-  }) =>
-      execute(
-        networkId: networkId,
-        posId: posId,
-        posUuid: posUuid,
-        status: status,
-      );
+  }) => execute(
+    networkId: networkId,
+    posId: posId,
+    posUuid: posUuid,
+    status: status,
+  );
 }

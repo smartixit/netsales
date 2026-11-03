@@ -14,3 +14,4 @@ class UpdateNetworkDetailsUseCase {
   Future<NetworkEntity> call(int networkId, Map<String, dynamic> data) =>
       execute(networkId, data);
 }
+

@@ -12,6 +12,32 @@ class CommercialRepositoryImpl implements CommercialRepository {
   final CommercialRemoteDataSource _remoteDataSource;
 
   @override
+  Future<List<NetworkEntity>> getMyNetworks() async {
+    final response = await _remoteDataSource.getMyNetworks();
+
+    if (response.success && response.data != null) {
+      return response.data!;
+    }
+
+    throw AppException(
+      response.message,
+    );
+  }
+
+  @override
+  Future<List<PosEntity>> getMyPos() async {
+    final response = await _remoteDataSource.getMyPos();
+
+    if (response.success && response.data != null) {
+      return response.data!;
+    }
+
+    throw AppException(
+      response.message,
+    );
+  }
+
+  @override
   Future<List<NetworkPosLinkEntity>> getNetworkPosList(
     int networkId, {
     Map<String, dynamic>? query,

@@ -11,6 +11,32 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   const CommercialRemoteDataSourceImpl();
 
   @override
+  Future<ApiResponse<List<NetworkModel>>> getMyNetworks() {
+    return ApiService.instance.get<List<NetworkModel>>(
+      ApiConstants.networks,
+      fromJson: (data) {
+        if (data is List) {
+          return data.map((item) => NetworkModel.fromJson(item)).toList();
+        }
+        return [];
+      },
+    );
+  }
+
+  @override
+  Future<ApiResponse<List<PosModel>>> getMyPos() {
+    return ApiService.instance.get<List<PosModel>>(
+      ApiConstants.pos,
+      fromJson: (data) {
+        if (data is List) {
+          return data.map((item) => PosModel.fromJson(item)).toList();
+        }
+        return [];
+      },
+    );
+  }
+
+  @override
   Future<ApiResponse<List<NetworkPosLinkModel>>> getNetworkPosList(
     int networkId, {
     Map<String, dynamic>? query,

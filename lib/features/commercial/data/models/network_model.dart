@@ -21,7 +21,9 @@ class NetworkModel extends NetworkEntity {
 
   factory NetworkModel.fromJson(dynamic json) {
     if (json is! Map<String, dynamic>) {
-      throw FormatException('Invalid JSON type for NetworkModel: ${json.runtimeType}');
+      throw FormatException(
+        'Invalid JSON type for NetworkModel: ${json.runtimeType}',
+      );
     }
 
     String? ownerName;
@@ -38,8 +40,12 @@ class NetworkModel extends NetworkEntity {
       networkPhoneNumber: json['network_phone_number']?.toString() ?? '',
       networkEmail: json['network_email']?.toString(),
       networkAddress: json['network_address']?.toString(),
-      governorateId: json['governorate_id'] != null ? _toInt(json['governorate_id']) : null,
-      directorateId: json['directorate_id'] != null ? _toInt(json['directorate_id']) : null,
+      governorateId: json['governorate_id'] != null
+          ? _toInt(json['governorate_id'])
+          : null,
+      directorateId: json['directorate_id'] != null
+          ? _toInt(json['directorate_id'])
+          : null,
       status: json['status']?.toString(),
       statusLabel: json['status_label']?.toString(),
       ownerName: ownerName,

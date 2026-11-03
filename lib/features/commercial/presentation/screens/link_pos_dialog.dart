@@ -11,13 +11,15 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// نافذة ربط نقطة بيع جديدة بشبكة المزود
+/// معيار Clean Architecture و GetX - خالية تماماً من StatefulWidget أو setState
 class LinkPosDialog {
   LinkPosDialog._();
 
   static Future<bool?> show({required int networkId}) {
     final formKey = GlobalKey<FormState>();
-    final posIdentifierController = TextEditingController();
-    final isActive = true.obs;
+    final controller = Get.find<CommercialDirectoryController>();
+    controller.posIdentifierController.clear();
+    controller.linkStatusInitial.value = true;
 
     return CustomBottomSheet.show<bool>(
       title: 'ربط نقطة بيع جديدة',
@@ -33,7 +35,7 @@ class LinkPosDialog {
 
             // حقل إدخال المعرف أو الرقم الموحد
             CustomTextField(
-              controller: posIdentifierController,
+              controller: controller.posIdentifierController,
               label: 'معرف أو رقم نقطة البيع',
               hint: 'مثال: POS-2611-00001-A1B2 أو 12',
               prefixIcon: const Icon(Icons.qr_code_rounded),
@@ -72,10 +74,10 @@ class LinkPosDialog {
                         Row(
                           children: [
                             Icon(
-                              isActive.value
+                              controller.linkStatusInitial.value
                                   ? Icons.check_circle_outline_rounded
                                   : Icons.block_flipped,
-                              color: isActive.value
+                              color: controller.linkStatusInitial.value
                                   ? colors.primary
                                   : colors.error,
                               size: 20.r,
@@ -91,10 +93,10 @@ class LinkPosDialog {
                           ],
                         ),
                         Switch.adaptive(
-                          value: isActive.value,
+                          value: controller.linkStatusInitial.value,
                           activeTrackColor: colors.primary,
                           onChanged: (val) {
-                            isActive.value = val;
+                            controller.linkStatusInitial.value = val;
                           },
                         ),
                       ],
@@ -118,7 +120,7 @@ class LinkPosDialog {
                       : () async {
                           if (!formKey.currentState!.validate()) return;
 
-                          final input = posIdentifierController.text.trim();
+                          final input = ctrl.posIdentifierController.text.trim();
                           final isNumeric = int.tryParse(input) != null;
                           final int? posId = isNumeric ? int.parse(input) : null;
                           final String? posUuid = isNumeric ? null : input;
@@ -127,7 +129,7 @@ class LinkPosDialog {
                             networkId: networkId,
                             posId: posId,
                             posUuid: posUuid,
-                            status: isActive.value,
+                            status: ctrl.linkStatusInitial.value,
                           );
 
                           if (success) {
