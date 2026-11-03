@@ -48,7 +48,7 @@ class CustomSkeletonFeed extends StatelessWidget {
                   parent: BouncingScrollPhysics(),
                 )),
       itemCount: itemCount,
-      separatorBuilder: (_, __) => AppSpacing.vSm,
+      separatorBuilder: (context, i) => AppSpacing.vSm,
       itemBuilder: (context, index) => CustomSkeletonCard(height: cardHeight),
     );
   }

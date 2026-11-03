@@ -257,7 +257,7 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _files.length + (_isPicking ? 1 : 0),
-                separatorBuilder: (_, __) => AppSpacing.vSm,
+                separatorBuilder: (context, i) => AppSpacing.vSm,
                 itemBuilder: (context, index) {
                   if (index < _files.length) {
                     final file = _files[index];

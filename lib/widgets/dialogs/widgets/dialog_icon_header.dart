@@ -43,11 +43,9 @@ class DialogIconHeader extends StatelessWidget {
 
     final topColor = switch (type) {
       DialogType.danger ||
-      DialogType.error =>
-        colors.error.withValues(alpha: 0.12),
+      DialogType.error => colors.error.withValues(alpha: 0.12),
       DialogType.pending ||
-      DialogType.warning =>
-        colors.warning.withValues(alpha: 0.12),
+      DialogType.warning => colors.warning.withValues(alpha: 0.12),
       DialogType.success => colors.success.withValues(alpha: 0.12),
       _ => colors.primary.withValues(alpha: 0.12),
     };
@@ -61,10 +59,7 @@ class DialogIconHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            topColor,
-            colors.surface,
-          ],
+          colors: [topColor, colors.surface],
         ),
       ),
       child: Center(
@@ -75,7 +70,8 @@ class DialogIconHeader extends StatelessWidget {
             animationPath,
             repeat: isPending,
             animate: true,
-            errorBuilder: (_, __, ___) => _buildFallbackIcon(colors, isDanger, isPending, isSuccess),
+            errorBuilder: (context, obj, e) =>
+                _buildFallbackIcon(colors, isDanger, isPending, isSuccess),
           ),
         ),
       ),
@@ -91,10 +87,10 @@ class DialogIconHeader extends StatelessWidget {
     final iconColor = isDanger
         ? colors.error
         : isPending
-            ? colors.warning
-            : isSuccess
-                ? colors.success
-                : colors.primary;
+        ? colors.warning
+        : isSuccess
+        ? colors.success
+        : colors.primary;
 
     final iconData = switch (type) {
       DialogType.success => Icons.check_circle_rounded,
@@ -112,11 +108,7 @@ class DialogIconHeader extends StatelessWidget {
         color: iconColor.withValues(alpha: 0.12),
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        iconData,
-        color: iconColor,
-        size: 38.r,
-      ),
+      child: Icon(iconData, color: iconColor, size: 38.r),
     );
   }
 

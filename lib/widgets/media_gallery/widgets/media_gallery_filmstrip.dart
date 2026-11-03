@@ -48,7 +48,7 @@ class MediaGalleryFilmstrip extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           itemCount: items.length,
-          separatorBuilder: (_, __) => AppSpacing.hSm,
+          separatorBuilder: (context, i) => AppSpacing.hSm,
           itemBuilder: (context, index) {
             final item = items[index];
             final isSelected = index == currentIndex;
@@ -139,7 +139,7 @@ class _FilmstripThumbnail extends StatelessWidget {
       return Image.file(
         File(item.url),
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildFallback(colors),
+        errorBuilder: (context, obj, e) => _buildFallback(colors),
       );
     }
 
@@ -150,7 +150,7 @@ class _FilmstripThumbnail extends StatelessWidget {
     );
   }
 
-  Widget _buildFallback(dynamic colors) {
+  Widget _buildFallback(AppColors colors) {
     return Container(
       color: colors.surfaceContainerHighest,
       child: Center(

@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
@@ -17,39 +17,24 @@ import 'package:netsales/features/auth/presentation/screens/register_network_scr
 import 'package:netsales/features/auth/presentation/screens/register_pos_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/two_factor_auth_screen.dart';
-import 'package:netsales/features/auth/presentation/screens/unsupported_platform_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/verify_otp_screen.dart';
-import 'package:netsales/features/debts/presentation/bindings/network_debts_binding.dart';
-import 'package:netsales/features/debts/presentation/screens/network_debts_screen.dart';
-import 'package:netsales/features/home/presentation/bindings/home_layout_binding.dart';
-import 'package:netsales/features/home/presentation/bindings/workspace_bindings.dart';
-import 'package:netsales/features/home/presentation/screens/home_layout_screen.dart';
-import 'package:netsales/features/home/presentation/screens/network_workspace_shell.dart';
-import 'package:netsales/features/home/presentation/screens/pos_workspace_shell.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
 import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:netsales/features/onboarding/presentation/screens/welcome_screen.dart';
-import 'package:netsales/features/operations/presentation/bindings/operations_binding.dart';
-import 'package:netsales/features/operations/presentation/screens/new_procurement_order_screen.dart';
-import 'package:netsales/features/operations/presentation/screens/sale_invoice_details_screen.dart';
-import 'package:netsales/features/operations/presentation/screens/voucher_request_details_screen.dart';
-import 'package:netsales/features/packages/presentation/bindings/packages_binding.dart';
-import 'package:netsales/features/packages/presentation/screens/voucher_packages_hub_screen.dart';
 import 'package:netsales/features/splash/presentation/bindings/splash_binding.dart';
 import 'package:netsales/features/splash/presentation/screens/splash_screen.dart';
-import 'package:netsales/features/wallets/presentation/bindings/network_wallet_binding.dart';
-import 'package:netsales/features/wallets/presentation/bindings/pos_wallet_binding.dart';
-import 'package:netsales/features/wallets/presentation/screens/network_wallet_statement_screen.dart';
-import 'package:netsales/features/wallets/presentation/screens/pos_wallet_statement_screen.dart';
+import 'package:netsales/features/workspace/presentation/bindings/network_workspace_binding.dart';
+import 'package:netsales/features/workspace/presentation/bindings/pos_workspace_binding.dart';
+import 'package:netsales/features/workspace/presentation/screens/network_workspace_shell.dart';
+import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell.dart';
+import 'package:netsales/features/workspace/presentation/screens/unsupported_platform_screen.dart';
 import 'package:netsales/widgets/feedback/custom_not_found.dart';
 import 'package:netsales/widgets/feedback/custom_unauthorized.dart';
 
 /// ============================================================================
 /// سجل صفحات ومسارات التطبيق (Application Pages Register)
 /// ============================================================================
-/// يحتوي على قائمة مسارات GetPage وروابطها مع الـ Bindings والـ Middlewares.
-/// تم وضع الصفحات المستقبلية في حالة تعليق مؤقتاً لحين بناء واجهات كل ميزة.
 abstract final class AppPages {
   AppPages._();
 
@@ -87,6 +72,10 @@ abstract final class AppPages {
       binding: WelcomeBinding(),
       middlewares: [GuestGuard()],
     ),
+
+    // ========================================================================
+    // 3. مسارات المصادقة العامة (Auth Routes)
+    // ========================================================================
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginScreen(),
@@ -125,6 +114,45 @@ abstract final class AppPages {
       page: () => const RegisterPosScreen(),
       binding: RegisterPosBinding(),
       middlewares: [GuestGuard()],
+    ),
+
+    // ========================================================================
+    // 4. مسارات مساحات العمل التشغيلية المحمية (Workspace Shell Routes)
+    // ========================================================================
+    // مسار التوجيه الافتراضي للوحة التحكم (يتم اعتراضه وتوجيهه حسب مساحة المستخدم)
+    GetPage(
+      name: AppRoutes.dashboard,
+      page: () => const SizedBox.shrink(),
+      middlewares: [AuthGuard(), WorkspaceGuard()],
+    ),
+
+    // مساحة عمل مزود شبكة الإنترنت (Network Workspace)
+    GetPage(
+      name: AppRoutes.networkWorkspace,
+      page: () => const NetworkWorkspaceShell(),
+      binding: NetworkWorkspaceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+
+    // مساحة عمل نقطة البيع والوكيل (POS Workspace)
+    GetPage(
+      name: AppRoutes.posWorkspace,
+      page: () => const PosWorkspaceShell(),
+      binding: PosWorkspaceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+
+    // شاشة حظر وتوجيه حسابات إدارة المنصة العامة (Platform Scope Exclusion)
+    GetPage(
+      name: AppRoutes.unsupportedPlatform,
+      page: () => const UnsupportedPlatformScreen(),
+      middlewares: [AuthGuard()],
     ),
   ];
 }

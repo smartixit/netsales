@@ -65,8 +65,8 @@ class ShareService {
   }
 
   /// Share multiple files from device storage.
-  Future shareFiles({
-    required List filePaths,
+  Future<ShareResult> shareFiles({
+    required List<String> filePaths,
     String? text,
     String? subject,
     Rect? sharePositionOrigin,
@@ -98,7 +98,7 @@ class ShareService {
   }
 
   /// Share binary data directly without saving it first.
-  Future shareBytes({
+  Future<ShareResult> shareBytes({
     required Uint8List bytes,
     required String fileName,
     String? mimeType,
@@ -122,7 +122,7 @@ class ShareService {
   }
 
   /// Internal sharing handler.
-  Future _share(ShareParams params) async {
+  Future<ShareResult> _share(ShareParams params) async {
     return SharePlus.instance.share(params);
   }
 }

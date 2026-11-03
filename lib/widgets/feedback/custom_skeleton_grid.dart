@@ -26,7 +26,7 @@ class CustomSkeletonGrid extends StatelessWidget {
         childAspectRatio: 1.2,
       ),
       itemCount: count,
-      itemBuilder: (_, __) => CustomSkeletonCard(height: itemHeight),
+      itemBuilder: (context, i) => CustomSkeletonCard(height: itemHeight),
     );
   }
 }

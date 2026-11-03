@@ -151,7 +151,8 @@ class _OnboardingVisual extends StatelessWidget {
           Lottie.asset(
             item.animationAsset!,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => _OnboardingFallbackIcon(icon: item.icon),
+            errorBuilder: (context, obj, e) =>
+                _OnboardingFallbackIcon(icon: item.icon),
           ),
         ],
       );
@@ -160,7 +161,8 @@ class _OnboardingVisual extends StatelessWidget {
       return Image.asset(
         item.imageAsset!,
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => _OnboardingFallbackIcon(icon: item.icon),
+        errorBuilder: (context, obj, e) =>
+            _OnboardingFallbackIcon(icon: item.icon),
       );
     }
     return _OnboardingFallbackIcon(icon: item.icon);

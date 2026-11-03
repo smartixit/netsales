@@ -154,7 +154,7 @@ class _FileIconBadge extends StatelessWidget {
             fit: BoxFit.cover,
             cacheWidth: (44 * 2.5).toInt(),
             cacheHeight: (44 * 2.5).toInt(),
-            errorBuilder: (_, __, ___) => _buildFallbackBadge(colors),
+            errorBuilder: (context, obj, e) => _buildFallbackBadge(colors),
           ),
         ),
       );

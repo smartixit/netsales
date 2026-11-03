@@ -46,10 +46,10 @@ class ApiResponse<T> {
         json['prev_cursor']?.toString() ?? metaMap?['prev_cursor']?.toString();
 
     return ApiResponse<T>(
-      success: json['success'] ?? false,
-      message: json['message'] ?? '',
+      success: json['success'] == true,
+      message: json['message']?.toString() ?? '',
       data: json['data'] != null ? fromJsonT(json['data']) : null,
-      errors: json['errors'],
+      errors: _parseErrors(json['errors']),
       nextCursor: nextCur,
       prevCursor: prevCur,
       meta: metaMap,
@@ -76,8 +76,8 @@ class ApiResponse<T> {
         json['prev_cursor']?.toString() ?? metaMap?['prev_cursor']?.toString();
 
     return ApiResponse<T>(
-      success: json['success'] ?? false,
-      message: json['message'] ?? '',
+      success: json['success'] == true,
+      message: json['message']?.toString() ?? '',
       data: null,
       errors: _parseErrors(json['errors']),
       nextCursor: nextCur,

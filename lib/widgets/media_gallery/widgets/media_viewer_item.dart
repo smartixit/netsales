@@ -121,7 +121,7 @@ class _MediaViewerItemState extends State<MediaViewerItem>
       imageWidget = Image.file(
         File(widget.item.url),
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => _buildErrorPlaceholder(context),
+        errorBuilder: (context, obj, e) => _buildErrorPlaceholder(context),
       );
     } else {
       imageWidget = CustomCachedImage(

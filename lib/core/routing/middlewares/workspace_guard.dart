@@ -45,10 +45,8 @@ class WorkspaceGuard extends GetMiddleware {
       return RouteSettings(name: fallbackRoute);
     }
 
-    // عند الدخول إلى المسارات العامة للوحة التحكم، التوجيه التلقائي لمساحة عمل المستخدم
-    if (route == AppRoutes.dashboard ||
-        route == AppRoutes.homeLayout ||
-        route == AppRoutes.workspace) {
+    // عند الدخول إلى المسار العام للوحة التحكم، التوجيه التلقائي لمساحة عمل المستخدم
+    if (route == AppRoutes.dashboard) {
       final destination = resolved == AppWorkspace.network
           ? AppRoutes.networkWorkspace
           : AppRoutes.posWorkspace;

@@ -373,8 +373,11 @@ class PushNotificationService extends GetxService {
   /// معالجة السلسلة النصية للحمولة القادمة من نقر الإشعار المحلي
   void _handleNotificationPayloadString(String payloadString) {
     try {
-      final Map<String, dynamic> data = jsonDecode(payloadString);
-      _dispatchPayloadNavigation(data);
+      final decoded = jsonDecode(payloadString);
+      if (decoded is Map) {
+        final data = Map<String, dynamic>.from(decoded);
+        _dispatchPayloadNavigation(data);
+      }
     } catch (e) {
       log(
         '⚠️ [PushNotificationService] Error decoding notification payload: $e',
