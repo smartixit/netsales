@@ -460,7 +460,7 @@ class _CustomImagePickerState extends State<CustomImagePicker> {
 
   /// عرض النافذة السفلية لاختيار المصدر (Source BottomSheet)
   void _showSourceBottomSheet(BuildContext context, bool hasImage) {
-    CustomBottomSheet.showActions(
+    CustomBottomSheet.showActions<void>(
       title: widget.label,
       items: [
         CustomBottomSheetActionItem(
@@ -513,3 +513,4 @@ class _CustomImagePickerState extends State<CustomImagePicker> {
     widget.onChanged?.call(file);
   }
 }
+

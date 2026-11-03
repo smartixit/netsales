@@ -204,6 +204,7 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
   Future<void> _handleTap() async {
     if (!widget.enabled) return;
     await HapticFeedback.lightImpact();
+    if (!mounted) return;
 
     final result = await DatePickerService.instance.showPicker(
       context: context,
@@ -414,3 +415,4 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
     );
   }
 }
+

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/images/custom_brand_logo.dart';
 import 'package:netsales/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:netsales/features/onboarding/presentation/widgets/onboarding_page_card.dart';
 
@@ -100,3 +101,4 @@ class OnboardingScreen extends GetView<OnboardingController> {
     );
   }
 }
+

@@ -276,6 +276,7 @@ class CustomAnimationOverlay {
       );
     }
 
+    if (!context.mounted) return;
     final navigator = Navigator.of(context, rootNavigator: true);
 
     if (!navigator.mounted) {
@@ -388,6 +389,7 @@ class CustomAnimationOverlay {
       return;
     }
 
+    if (!context.mounted) return;
     final navigator = Navigator.of(context, rootNavigator: true);
 
     if (!navigator.mounted) {
@@ -666,3 +668,4 @@ class CustomAnimationOverlay {
     }
   }
 }
+

@@ -730,7 +730,7 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     options.extra[_retryFlagKey] = true;
 
     try {
-      final retried = await _dio.fetch(options);
+      final retried = await _dio.fetch<dynamic>(options);
       return handler.resolve(retried);
     } catch (e) {
       if (AppEnvironment.enableLogging) {
@@ -807,7 +807,7 @@ class _RetryInterceptor extends Interceptor {
 
       requestOptions.extra['retry_count'] = nextRetry;
       try {
-        final response = await _dio.fetch(requestOptions);
+        final response = await _dio.fetch<dynamic>(requestOptions);
         return handler.resolve(response);
       } on DioException catch (retryErr) {
         return handler.next(retryErr);
@@ -952,3 +952,4 @@ class _CryptoInterceptor extends Interceptor {
         path.contains(ApiConstants.file(path));
   }
 }
+
