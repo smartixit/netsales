@@ -3,9 +3,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:share_plus/share_plus.dart' show ShareResultStatus;
 
 import 'package:netsales/core/services/file_export_service.dart';
+import 'package:netsales/core/services/share_service.dart';
 
 /// ============================================================================
 /// نتيجة عملية توليد QR
@@ -268,20 +269,13 @@ class QrCodeService {
         );
       }
 
-      final imageFile = XFile.fromData(
-        generationResult.bytes!,
+      final result = await ShareService.instance.shareBytes(
+        bytes: generationResult.bytes!,
+        fileName: '${fileName ?? _config.defaultFileName}.png',
         mimeType: 'image/png',
-        name: '${fileName ?? _config.defaultFileName}.png',
-      );
-
-      final result = await SharePlus.instance.share(
-        ShareParams(
-          title: shareTitle,
-          text: shareText,
-          files: [imageFile],
-          fileNameOverrides: ['${fileName ?? _config.defaultFileName}.png'],
-          sharePositionOrigin: sharePositionOrigin,
-        ),
+        text: shareText,
+        subject: shareTitle,
+        sharePositionOrigin: sharePositionOrigin,
       );
 
       return QrCodeShareResult.success(result.status);
