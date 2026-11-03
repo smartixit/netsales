@@ -25,3 +25,4 @@ enum RoleKey {
 
   bool get isKnown => this != RoleKey.unknown;
 }
+

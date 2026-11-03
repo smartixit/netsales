@@ -21,3 +21,4 @@ enum UserStatus {
   bool get isKnown => this != UserStatus.unknown;
   bool get isActive => this == UserStatus.active;
 }
+

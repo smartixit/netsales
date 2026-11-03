@@ -19,3 +19,4 @@ enum RoleScope {
 
   bool get isKnown => this != RoleScope.unknown;
 }
+

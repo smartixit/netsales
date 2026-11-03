@@ -21,3 +21,4 @@ enum ProviderSubscriptionStatus {
 
   bool get isKnown => this != ProviderSubscriptionStatus.unknown;
 }
+

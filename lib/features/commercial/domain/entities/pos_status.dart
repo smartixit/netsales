@@ -23,3 +23,4 @@ enum PosStatus {
   bool get isKnown => this != PosStatus.unknown;
   bool get isActive => this == PosStatus.active;
 }
+
