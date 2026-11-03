@@ -61,7 +61,9 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
           Flexible(
             child: Text(
               title,
-              style: AppTypography.titleMedium.copyWith(color: colors.onSurface),
+              style: AppTypography.titleMedium.copyWith(
+                color: colors.onSurface,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),

@@ -33,8 +33,9 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isMobile = AppBreakpoints.isMobile(context);
-    final activeIndex =
-        (currentIndex >= 0 && currentIndex < items.length) ? currentIndex : 0;
+    final activeIndex = (currentIndex >= 0 && currentIndex < items.length)
+        ? currentIndex
+        : 0;
 
     if (isMobile) {
       final floatingItems = items.map((item) {

@@ -44,4 +44,3 @@ class WorkspaceCoordinatorBinding extends Bindings {
     );
   }
 }
-

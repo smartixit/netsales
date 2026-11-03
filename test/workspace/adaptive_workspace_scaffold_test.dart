@@ -9,19 +9,11 @@ import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_i
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 
 void main() {
-  Widget buildTestableWidget({
-    required Size screenSize,
-    required Widget child,
-  }) {
-    return MediaQuery(
-      data: MediaQueryData(size: screenSize),
-      child: ScreenUtilInit(
-        designSize: const Size(375, 812),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (context, _) =>
-            MaterialApp(theme: AppThemes.light, home: child),
-      ),
+  Widget buildTestableWidget({required Widget child}) {
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      builder: (context, _) => MaterialApp(theme: AppThemes.light, home: child),
     );
   }
 
@@ -43,11 +35,14 @@ void main() {
   testWidgets(
     'AdaptiveWorkspaceScaffold renders CustomFloatingBottomNavBar on mobile screens (< 600px)',
     (tester) async {
+      tester.view.physicalSize = const Size(375 * 2, 812 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
       int selectedIndex = 0;
 
       await tester.pumpWidget(
         buildTestableWidget(
-          screenSize: const Size(400, 800), // Mobile width < 600
           child: AdaptiveWorkspaceScaffold(
             appBar: const WorkspaceAppBar(
               title: 'مساحة العمل',
@@ -74,11 +69,14 @@ void main() {
   testWidgets(
     'AdaptiveWorkspaceScaffold renders NavigationRail on tablet screens (>= 600px)',
     (tester) async {
+      tester.view.physicalSize = const Size(800 * 2, 1024 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
       int selectedIndex = 0;
 
       await tester.pumpWidget(
         buildTestableWidget(
-          screenSize: const Size(800, 1024), // Tablet width >= 600
           child: AdaptiveWorkspaceScaffold(
             appBar: const WorkspaceAppBar(
               title: 'مساحة العمل',

@@ -19,4 +19,3 @@ class WorkspaceRepositoryImpl implements WorkspaceRepository {
     return _localDataSource.saveActiveWorkspace(workspace);
   }
 }
-

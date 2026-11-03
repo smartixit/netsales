@@ -11,4 +11,3 @@ class SetActiveWorkspaceUseCase {
     return _repository.setActiveWorkspace(workspace);
   }
 }
-

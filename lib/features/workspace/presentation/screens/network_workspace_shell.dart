@@ -53,7 +53,8 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         activeIcon: Icons.receipt_long_rounded,
         content: CustomEmptyState(
           title: 'طلبات التوريد بالجملة',
-          subtitle: 'سيتم تفعيل استعراض واعتماد وتعديل طلبات التوريد في المرحلة المخصصة لها',
+          subtitle:
+              'سيتم تفعيل استعراض واعتماد وتعديل طلبات التوريد في المرحلة المخصصة لها',
         ),
       ),
       const WorkspaceNavItem(
@@ -62,7 +63,8 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         activeIcon: Icons.storefront_rounded,
         content: CustomEmptyState(
           title: 'دليل نقاط البيع المعتمدة',
-          subtitle: 'إدارة روابط الشراكة، نسب الخصومات التعاقدية، وسقوف الائتمان',
+          subtitle:
+              'إدارة روابط الشراكة، نسب الخصومات التعاقدية، وسقوف الائتمان',
         ),
       ),
       const WorkspaceNavItem(

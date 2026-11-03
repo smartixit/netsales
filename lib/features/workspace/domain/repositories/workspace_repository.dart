@@ -9,4 +9,3 @@ abstract class WorkspaceRepository {
   /// تعيين مساحة العمل النشطة
   Future<void> setActiveWorkspace(AppWorkspace workspace);
 }
-

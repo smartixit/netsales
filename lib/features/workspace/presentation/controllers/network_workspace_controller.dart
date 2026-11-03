@@ -19,4 +19,3 @@ class NetworkWorkspaceController extends GetxController {
     selectedNavIndex.value = index;
   }
 }
-

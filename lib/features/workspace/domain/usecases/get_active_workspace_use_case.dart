@@ -11,4 +11,3 @@ class GetActiveWorkspaceUseCase {
     return _repository.getActiveWorkspaceContext();
   }
 }
-

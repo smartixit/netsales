@@ -62,7 +62,8 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         activeIcon: Icons.receipt_rounded,
         content: CustomEmptyState(
           title: 'سجل فواتير المشتريات',
-          subtitle: 'استعراض فواتير التوريد الصادرة ومستندات السداد النقدي والآجل',
+          subtitle:
+              'استعراض فواتير التوريد الصادرة ومستندات السداد النقدي والآجل',
         ),
       ),
       const WorkspaceNavItem(
@@ -71,7 +72,8 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         activeIcon: Icons.account_balance_wallet_rounded,
         content: CustomEmptyState(
           title: 'رصيد المحفظة والمديونيات',
-          subtitle: 'متابعة سقف الائتمان وسداد الالتزامات المالية وفق نظام FIFO المعتمد',
+          subtitle:
+              'متابعة سقف الائتمان وسداد الالتزامات المالية وفق نظام FIFO المعتمد',
         ),
       ),
     ];
