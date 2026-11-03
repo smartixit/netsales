@@ -20,9 +20,13 @@ class SplashRepositoryImpl implements SplashRepository {
       return AppRoutes.onboarding;
     }
 
-    // 2. إذا كانت هناك جلسة مصادقة نشطة وصالحة -> توجيه للوحة التحكم (Dashboard)
+    // 2. إذا كانت هناك جلسة مصادقة محلية، نتحقق من صحتها وسريانها مع الخادم مباشرة
     if (_dataSource.isAuthenticated) {
-      return AppRoutes.dashboard;
+      final isValidOnServer = await _dataSource.validateSessionWithServer();
+      if (isValidOnServer) {
+        return AppRoutes.dashboard;
+      }
+      return AppRoutes.welcome;
     }
 
     // 3. مستخدم غير مسجل أكمل جولة التعريف سابقاً -> توجيه لواجهة الترحيب (Welcome)

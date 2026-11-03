@@ -86,18 +86,11 @@ class ActiveSessionsScreen extends GetView<ActiveSessionsController> {
 
               // 4. حالة الخلو أو قائمة الأجهزة المقترنة
               if (otherDevices.isEmpty)
-                Container(
-                  padding: EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: colors.surfaceContainerLowest,
-                    borderRadius: BorderRadius.circular(AppRadius.card),
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: const CustomEmptyState.compact(
-                    title: 'لا توجد أجهزة أخرى مقترنة بهذا الحساب حالياً.',
-                  ),
+                const CustomEmptyState.boxed(
+                  title: 'لا توجد أجهزة أخرى مقترنة بهذا الحساب حالياً.',
+                  subtitle:
+                      'كافة عمليات الدخول محصورة ومؤمنة في هذا الجهاز الحالي المصادق عليه.',
+                  icon: Icons.devices_other_rounded,
                 )
               else
                 ...otherDevices.map(
@@ -351,8 +344,11 @@ class ActiveSessionsScreen extends GetView<ActiveSessionsController> {
               ],
             ),
           ),
-          IconButton(
-            icon: Icon(Icons.remove_circle_outline_rounded, color: colors.error),
+          CustomButton.icon(
+            icon: Icons.remove_circle_outline_rounded,
+            foregroundColor: colors.error,
+            backgroundColor: colors.error.withValues(alpha: 0.08),
+            size: AppButtonSize.small,
             tooltip: 'فصل وإلغاء اقتران هذا الجهاز',
             onPressed: () => controller.disconnectDevice(device),
           ),

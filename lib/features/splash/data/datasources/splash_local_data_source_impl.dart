@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:developer';
 
+import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
+import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
@@ -45,6 +48,41 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
   @override
   bool get isAuthenticated {
     return SessionService.to.isAuthenticated;
+  }
+
+  @override
+  Future<bool> validateSessionWithServer() async {
+    // إذا كان الجهاز غير متصل بالإنترنت، لا نعتبر البيانات المخزنة محلياً إثباتاً لجلسة نشطة وموثقة على الخادم
+    if (!InternetConnectionService.instance.isConnected) {
+      log('⚠️ [Splash] Offline startup: server session cannot be verified authoritatively.');
+      return false;
+    }
+
+    try {
+      final response = await ApiService.instance.get<Map<String, dynamic>>(
+        ApiConstants.me,
+        fromJson: (json) =>
+            json is Map ? Map<String, dynamic>.from(json) : <String, dynamic>{},
+      );
+
+      if (response.success && response.data != null) {
+        final profileData = response.data!;
+        final rawUser = profileData['user'];
+        if (rawUser is Map) {
+          final updatedUser = UserModel.fromJson(
+            Map<String, dynamic>.from(rawUser),
+          );
+          await SessionService.to.updateCurrentUser(updatedUser);
+        }
+        return true;
+      }
+
+      await SessionService.to.terminateSession();
+      return false;
+    } catch (_) {
+      // عند الرفض بـ 401، يقوم معترض ApiService.onUnauthorized بإنهاء الجلسة تلقائياً
+      return false;
+    }
   }
 }
 

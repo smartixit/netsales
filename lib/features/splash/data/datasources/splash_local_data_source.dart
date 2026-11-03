@@ -6,7 +6,10 @@ abstract interface class SplashLocalDataSource {
   /// التحقق مما إذا كان التطبيق يُفتح للمرة الأولى
   bool get isFirstLaunch;
 
-  /// التحقق من توفر جلسة مصادقة نشطة
+  /// التحقق من توفر جلسة مصادقة نشطة محلياً
   bool get isAuthenticated;
+
+  /// التحقق السيادي المباشر من سريان الجلسة مع الخادم عبر مسار /auth/me
+  Future<bool> validateSessionWithServer();
 }
 
