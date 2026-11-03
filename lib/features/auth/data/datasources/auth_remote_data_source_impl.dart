@@ -56,9 +56,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<ApiResponse<void>> requestPasswordReset(String phoneNumber) {
     return ApiService.instance.post<void>(
       ApiConstants.passwordRequestReset,
-      data: {
-        'user_phone_number': phoneNumber,
-      },
+      data: {'user_phone_number': phoneNumber},
     );
   }
 
@@ -69,10 +67,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) {
     return ApiService.instance.post<void>(
       ApiConstants.passwordVerifyOtp,
-      data: {
-        'user_phone_number': phoneNumber,
-        'otp': otp,
-      },
+      data: {'user_phone_number': phoneNumber, 'otp': otp},
     );
   }
 
@@ -116,19 +111,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return ApiService.instance.getList<GovernorateModel>(
       ApiConstants.governorates,
       queryParameters: {'all': true},
-      fromJson: (json) => GovernorateModel.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      fromJson: (json) =>
+          GovernorateModel.fromJson(Map<String, dynamic>.from(json as Map)),
     );
   }
 
   @override
-  Future<ApiResponse<List<DirectorateModel>>> getDirectorates(int governorateId) {
+  Future<ApiResponse<List<DirectorateModel>>> getDirectorates(
+    int governorateId,
+  ) {
     return ApiService.instance.getList<DirectorateModel>(
       ApiConstants.directoratesByGovernorate(governorateId),
-      fromJson: (json) => DirectorateModel.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      fromJson: (json) =>
+          DirectorateModel.fromJson(Map<String, dynamic>.from(json as Map)),
     );
   }
 
@@ -176,18 +171,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<ApiResponse<void>> logoutOtherDevices() {
-    return ApiService.instance.post<void>(
-      ApiConstants.logoutOtherDevices,
-    );
+    return ApiService.instance.post<void>(ApiConstants.logoutOtherDevices);
   }
 
   @override
   Future<ApiResponse<List<UserDeviceModel>>> getDevices() {
     return ApiService.instance.getList<UserDeviceModel>(
       ApiConstants.authDevices,
-      fromJson: (json) => UserDeviceModel.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      fromJson: (json) =>
+          UserDeviceModel.fromJson(Map<String, dynamic>.from(json as Map)),
     );
   }
 

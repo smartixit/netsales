@@ -22,51 +22,51 @@ class CustomUnauthorized extends StatelessWidget {
     return CustomAppScaffold(
       useSurfaceMesh: true,
       body: Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(AppSpacing.xxl),
-                  decoration: BoxDecoration(
-                    color: colors.warning.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.security_rounded,
-                    size: 64.r,
-                    color: colors.warning,
-                  ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(AppSpacing.xxl),
+                decoration: BoxDecoration(
+                  color: colors.warning.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
                 ),
-                AppSpacing.vLg,
-                Text(
-                  'غير مصرح بالوصول',
-                  style: AppTypography.titleLarge.copyWith(
-                    color: colors.onSurface,
-                  ),
-                  textAlign: TextAlign.center,
+                child: Icon(
+                  Icons.security_rounded,
+                  size: 64.r,
+                  color: colors.warning,
                 ),
-                AppSpacing.vSm,
-                Text(
-                  'ليس لديك الصلاحية الكافية للوصول إلى هذا المسار أو تنفيذ هذا الإجراء.',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
+              ),
+              AppSpacing.vLg,
+              Text(
+                'غير مصرح بالوصول',
+                style: AppTypography.titleLarge.copyWith(
+                  color: colors.onSurface,
                 ),
-                AppSpacing.vXl,
-                CustomButton.primary(
-                  text: 'العودة للرئيسية',
-                  icon: Icons.home_rounded,
-                  onPressed: () {
-                    Get.offAllNamed<void>(AppRoutes.dashboard);
-                  },
+                textAlign: TextAlign.center,
+              ),
+              AppSpacing.vSm,
+              Text(
+                'ليس لديك الصلاحية الكافية للوصول إلى هذا المسار أو تنفيذ هذا الإجراء.',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: colors.onSurfaceVariant,
                 ),
-              ],
-            ),
+                textAlign: TextAlign.center,
+              ),
+              AppSpacing.vXl,
+              CustomButton.primary(
+                text: 'العودة للرئيسية',
+                icon: Icons.home_rounded,
+                onPressed: () {
+                  Get.offAllNamed<void>(AppRoutes.dashboard);
+                },
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 }

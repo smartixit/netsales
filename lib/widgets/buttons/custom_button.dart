@@ -785,13 +785,13 @@ class CustomButton extends StatelessWidget {
                           variant == AppButtonVariant.floating
                       ? EdgeInsets.zero
                       : (variant == AppButtonVariant.text
-                          ? EdgeInsets.symmetric(
-                              horizontal: AppSpacing.sm,
-                              vertical: AppSpacing.xs,
-                            )
-                          : EdgeInsets.symmetric(
-                              horizontal: AppSpacing.buttonPaddingH / 1.5,
-                            ))),
+                            ? EdgeInsets.symmetric(
+                                horizontal: AppSpacing.sm,
+                                vertical: AppSpacing.xs,
+                              )
+                            : EdgeInsets.symmetric(
+                                horizontal: AppSpacing.buttonPaddingH / 1.5,
+                              ))),
               child: content,
             ),
           ),

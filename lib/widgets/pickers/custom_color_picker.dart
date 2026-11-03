@@ -352,11 +352,7 @@ class _ColorSwatch extends StatelessWidget {
         ),
         child: isSelected
             ? const Center(
-                child: Icon(
-                  Icons.check_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
+                child: Icon(Icons.check_rounded, color: Colors.white, size: 18),
               )
             : null,
       ),
@@ -418,4 +414,3 @@ class _CustomWheelButton extends StatelessWidget {
     );
   }
 }
-

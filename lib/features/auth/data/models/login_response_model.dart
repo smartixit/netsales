@@ -52,8 +52,11 @@ class LoginResponseModel extends AuthResultEntity {
         ? UserModel.fromJson(Map<String, dynamic>.from(rawUser))
         : null;
 
-    final userPhone = (map['user_phone_number'] ?? userModel?.userPhoneNumber ?? '').toString();
-    final mustChangePassword = map['require_password_change'] == true ||
+    final userPhone =
+        (map['user_phone_number'] ?? userModel?.userPhoneNumber ?? '')
+            .toString();
+    final mustChangePassword =
+        map['require_password_change'] == true ||
         userModel?.mustChangePassword == true;
 
     return LoginResponseModel(

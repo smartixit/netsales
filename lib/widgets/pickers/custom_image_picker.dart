@@ -513,4 +513,3 @@ class _CustomImagePickerState extends State<CustomImagePicker> {
     widget.onChanged?.call(file);
   }
 }
-

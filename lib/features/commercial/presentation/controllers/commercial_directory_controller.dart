@@ -1,14 +1,20 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_network_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_pos_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/update_network_details_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/update_pos_details_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -22,6 +28,10 @@ class CommercialDirectoryController extends GetxController {
     required this.deleteNetworkPosLinkUseCase,
     required this.getMyNetworksUseCase,
     required this.getMyPosUseCase,
+    this.getNetworkDetailsUseCase,
+    this.getPosDetailsUseCase,
+    this.updateNetworkDetailsUseCase,
+    this.updatePosDetailsUseCase,
   });
 
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
@@ -31,12 +41,21 @@ class CommercialDirectoryController extends GetxController {
   final DeleteNetworkPosLinkUseCase deleteNetworkPosLinkUseCase;
   final GetMyNetworksUseCase getMyNetworksUseCase;
   final GetMyPosUseCase getMyPosUseCase;
+  final GetNetworkDetailsUseCase? getNetworkDetailsUseCase;
+  final GetPosDetailsUseCase? getPosDetailsUseCase;
+  final UpdateNetworkDetailsUseCase? updateNetworkDetailsUseCase;
+  final UpdatePosDetailsUseCase? updatePosDetailsUseCase;
 
-  // الحالات التفاعلية
+  // الحالات التفاعلية للقوائم
   final RxBool isLoading = false.obs;
   final RxBool isActionLoading = false.obs;
+  final RxBool isDetailsLoading = false.obs;
   final RxnString errorMessage = RxnString();
   final RxList<NetworkPosLinkEntity> links = <NetworkPosLinkEntity>[].obs;
+
+  // الكيانات التفصيلية المحددة للعرض والتحديث
+  final Rxn<NetworkEntity> selectedNetworkDetails = Rxn<NetworkEntity>();
+  final Rxn<PosEntity> selectedPosDetails = Rxn<PosEntity>();
 
   // متحكمات النصوص ومفاتيح النماذج
   final TextEditingController searchController = TextEditingController();
@@ -135,6 +154,165 @@ class CommercialDirectoryController extends GetxController {
     } finally {
       if (showLoading) {
         isLoading.value = false;
+      }
+    }
+  }
+
+  /// جلب تفاصيل شبكة محددة
+  Future<NetworkEntity?> fetchNetworkDetails(int networkId) async {
+    if (getNetworkDetailsUseCase == null) return null;
+    try {
+      isDetailsLoading.value = true;
+      final details = await getNetworkDetailsUseCase!(networkId);
+      selectedNetworkDetails.value = details;
+      return details;
+    } on AppException catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ في جلب بيانات الشبكة',
+        message: e.message,
+        type: SnackType.error,
+      );
+      return null;
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ غير متوقع',
+        message: 'تعذر جلب تفاصيل الشبكة: $e',
+        type: SnackType.error,
+      );
+      return null;
+    } finally {
+      isDetailsLoading.value = false;
+    }
+  }
+
+  /// تحديث بيانات شبكة قائمة
+  Future<bool> updateNetworkDetails(
+    int networkId,
+    Map<String, dynamic> data,
+  ) async {
+    if (updateNetworkDetailsUseCase == null) return false;
+    try {
+      isActionLoading.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري تحديث بيانات الشبكة...',
+      );
+
+      final updated = await updateNetworkDetailsUseCase!(networkId, data);
+      selectedNetworkDetails.value = updated;
+
+      // تحديث بيانات الشبكة في القوائم المعروضة إن وجدت
+      for (var i = 0; i < links.length; i++) {
+        if (links[i].networkId == networkId) {
+          links[i] = links[i].copyWith(network: updated);
+        }
+      }
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم تحديث بيانات الشبكة بنجاح',
+      );
+      return true;
+    } on AppException catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'فشل تحديث الشبكة',
+        message: e.message,
+        type: SnackType.error,
+      );
+      return false;
+    } catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'خطأ في التحديث',
+        message: 'تعذر تعديل بيانات الشبكة: $e',
+        type: SnackType.error,
+      );
+      return false;
+    } finally {
+      isActionLoading.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  /// جلب تفاصيل نقطة بيع محددة
+  Future<PosEntity?> fetchPosDetails(int posId) async {
+    if (getPosDetailsUseCase == null) return null;
+    try {
+      isDetailsLoading.value = true;
+      final details = await getPosDetailsUseCase!(posId);
+      selectedPosDetails.value = details;
+      return details;
+    } on AppException catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ في جلب بيانات نقطة البيع',
+        message: e.message,
+        type: SnackType.error,
+      );
+      return null;
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ غير متوقع',
+        message: 'تعذر جلب تفاصيل نقطة البيع: $e',
+        type: SnackType.error,
+      );
+      return null;
+    } finally {
+      isDetailsLoading.value = false;
+    }
+  }
+
+  /// تحديث بيانات نقطة بيع قائمة
+  Future<bool> updatePosDetails(int posId, Map<String, dynamic> data) async {
+    if (updatePosDetailsUseCase == null) return false;
+    try {
+      isActionLoading.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري تحديث بيانات نقطة البيع...',
+      );
+
+      final updated = await updatePosDetailsUseCase!(posId, data);
+      selectedPosDetails.value = updated;
+
+      // تحديث بيانات نقطة البيع في القوائم المعروضة إن وجدت
+      for (var i = 0; i < links.length; i++) {
+        if (links[i].posId == posId) {
+          links[i] = links[i].copyWith(pos: updated);
+        }
+      }
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم تحديث بيانات نقطة البيع بنجاح',
+      );
+      return true;
+    } on AppException catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'فشل تحديث نقطة البيع',
+        message: e.message,
+        type: SnackType.error,
+      );
+      return false;
+    } catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'خطأ في التحديث',
+        message: 'تعذر تعديل بيانات نقطة البيع: $e',
+        type: SnackType.error,
+      );
+      return false;
+    } finally {
+      isActionLoading.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
       }
     }
   }

@@ -11,9 +11,7 @@ class ForgotPasswordBinding extends Bindings {
   @override
   void dependencies() {
     if (!Get.isRegistered<AuthRemoteDataSource>()) {
-      Get.lazyPut<AuthRemoteDataSource>(
-        () => const AuthRemoteDataSourceImpl(),
-      );
+      Get.lazyPut<AuthRemoteDataSource>(() => const AuthRemoteDataSourceImpl());
     }
 
     if (!Get.isRegistered<AuthRepository>()) {
@@ -27,7 +25,9 @@ class ForgotPasswordBinding extends Bindings {
     );
 
     Get.lazyPut<ForgotPasswordController>(
-      () => ForgotPasswordController(requestPasswordResetUseCase: Get.find<RequestPasswordResetUseCase>()),
+      () => ForgotPasswordController(
+        requestPasswordResetUseCase: Get.find<RequestPasswordResetUseCase>(),
+      ),
     );
   }
 }

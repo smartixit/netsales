@@ -22,8 +22,10 @@ class VerifyTwoFactorRequestModel {
       'otp': otp,
       'device_uuid': deviceUuid,
       'fcm_token': fcmToken,
-      if (deviceName != null && deviceName!.isNotEmpty) 'device_name': deviceName,
-      if (deviceType != null && deviceType!.isNotEmpty) 'device_type': deviceType,
+      if (deviceName != null && deviceName!.isNotEmpty)
+        'device_name': deviceName,
+      if (deviceType != null && deviceType!.isNotEmpty)
+        'device_type': deviceType,
     };
   }
 }

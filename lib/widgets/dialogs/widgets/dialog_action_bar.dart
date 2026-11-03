@@ -33,7 +33,8 @@ class DialogActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasConfirm = confirmLabel != null;
-    final hasCancel = cancelLabel != null ||
+    final hasCancel =
+        cancelLabel != null ||
         (!hasConfirm &&
             (type == DialogType.success ||
                 type == DialogType.info ||
@@ -74,7 +75,8 @@ class DialogActionBar extends StatelessWidget {
           // 2. زر الإلغاء أو التأكيد الثانوي الخفيف
           if (hasCancel)
             CustomButton.text(
-              text: cancelLabel ??
+              text:
+                  cancelLabel ??
                   (type == DialogType.success ||
                           type == DialogType.info ||
                           type == DialogType.pending

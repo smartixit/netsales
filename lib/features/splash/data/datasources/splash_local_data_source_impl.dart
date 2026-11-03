@@ -54,7 +54,9 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
   Future<bool> validateSessionWithServer() async {
     // إذا كان الجهاز غير متصل بالإنترنت، لا نعتبر البيانات المخزنة محلياً إثباتاً لجلسة نشطة وموثقة على الخادم
     if (!InternetConnectionService.instance.isConnected) {
-      log('⚠️ [Splash] Offline startup: server session cannot be verified authoritatively.');
+      log(
+        '⚠️ [Splash] Offline startup: server session cannot be verified authoritatively.',
+      );
       return false;
     }
 
@@ -85,4 +87,3 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
     }
   }
 }
-

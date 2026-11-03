@@ -23,36 +23,39 @@ void main() {
   }
 
   group('CustomEmptyState Widget Tests', () {
-    testWidgets('renders full empty state with badge, title, subtitle, and action', (tester) async {
-      configureViewport(tester);
-      addTearDown(() => tester.view.resetPhysicalSize());
+    testWidgets(
+      'renders full empty state with badge, title, subtitle, and action',
+      (tester) async {
+        configureViewport(tester);
+        addTearDown(() => tester.view.resetPhysicalSize());
 
-      bool actionTapped = false;
+        bool actionTapped = false;
 
-      await tester.pumpWidget(
-        buildTestableWidget(
-          child: CustomEmptyState(
-            title: 'لا توجد طلبات توريد',
-            subtitle: 'لم يتم تقديم أي طلب توريد حتى الآن',
-            badgeText: 'الطلبات',
-            badgeIcon: Icons.receipt_rounded,
-            icon: Icons.receipt_long_rounded,
-            animationPath: null, // Test icon fallback
-            actionLabel: 'طلب جديد',
-            onAction: () => actionTapped = true,
+        await tester.pumpWidget(
+          buildTestableWidget(
+            child: CustomEmptyState(
+              title: 'لا توجد طلبات توريد',
+              subtitle: 'لم يتم تقديم أي طلب توريد حتى الآن',
+              badgeText: 'الطلبات',
+              badgeIcon: Icons.receipt_rounded,
+              icon: Icons.receipt_long_rounded,
+              animationPath: null, // Test icon fallback
+              actionLabel: 'طلب جديد',
+              onAction: () => actionTapped = true,
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('لا توجد طلبات توريد'), findsOneWidget);
-      expect(find.text('لم يتم تقديم أي طلب توريد حتى الآن'), findsOneWidget);
-      expect(find.text('الطلبات'), findsOneWidget);
-      expect(find.text('طلب جديد'), findsOneWidget);
+        expect(find.text('لا توجد طلبات توريد'), findsOneWidget);
+        expect(find.text('لم يتم تقديم أي طلب توريد حتى الآن'), findsOneWidget);
+        expect(find.text('الطلبات'), findsOneWidget);
+        expect(find.text('طلب جديد'), findsOneWidget);
 
-      await tester.tap(find.text('طلب جديد'));
-      await tester.pumpAndSettle();
-      expect(actionTapped, isTrue);
-    });
+        await tester.tap(find.text('طلب جديد'));
+        await tester.pumpAndSettle();
+        expect(actionTapped, isTrue);
+      },
+    );
 
     testWidgets('renders compact empty state', (tester) async {
       configureViewport(tester);
@@ -96,37 +99,45 @@ void main() {
   });
 
   group('CustomErrorState Widget Tests', () {
-    testWidgets('renders full error state with title, subtitle, and retry action', (tester) async {
-      configureViewport(tester);
-      addTearDown(() => tester.view.resetPhysicalSize());
+    testWidgets(
+      'renders full error state with title, subtitle, and retry action',
+      (tester) async {
+        configureViewport(tester);
+        addTearDown(() => tester.view.resetPhysicalSize());
 
-      bool retried = false;
+        bool retried = false;
 
-      await tester.pumpWidget(
-        buildTestableWidget(
-          child: CustomErrorState(
-            title: 'تعذر الاتصال بالخادم',
-            subtitle: 'يرجى التحقق من الشبكة ثم إعادة المحاولة',
-            retryLabel: 'إعادة المحاولة الآن',
-            onRetry: () => retried = true,
-            icon: Icons.error_outline_rounded,
-            animationPath: null,
-            errorCode: 'ERR_500',
+        await tester.pumpWidget(
+          buildTestableWidget(
+            child: CustomErrorState(
+              title: 'تعذر الاتصال بالخادم',
+              subtitle: 'يرجى التحقق من الشبكة ثم إعادة المحاولة',
+              retryLabel: 'إعادة المحاولة الآن',
+              onRetry: () => retried = true,
+              icon: Icons.error_outline_rounded,
+              animationPath: null,
+              errorCode: 'ERR_500',
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('تعذر الاتصال بالخادم'), findsOneWidget);
-      expect(find.text('يرجى التحقق من الشبكة ثم إعادة المحاولة'), findsOneWidget);
-      expect(find.text('ERR_500'), findsOneWidget);
-      expect(find.text('إعادة المحاولة الآن'), findsOneWidget);
+        expect(find.text('تعذر الاتصال بالخادم'), findsOneWidget);
+        expect(
+          find.text('يرجى التحقق من الشبكة ثم إعادة المحاولة'),
+          findsOneWidget,
+        );
+        expect(find.text('ERR_500'), findsOneWidget);
+        expect(find.text('إعادة المحاولة الآن'), findsOneWidget);
 
-      await tester.tap(find.text('إعادة المحاولة الآن'));
-      await tester.pumpAndSettle();
-      expect(retried, isTrue);
-    });
+        await tester.tap(find.text('إعادة المحاولة الآن'));
+        await tester.pumpAndSettle();
+        expect(retried, isTrue);
+      },
+    );
 
-    testWidgets('renders technical details accordion when expanded', (tester) async {
+    testWidgets('renders technical details accordion when expanded', (
+      tester,
+    ) async {
       configureViewport(tester);
       addTearDown(() => tester.view.resetPhysicalSize());
 
@@ -135,7 +146,8 @@ void main() {
           child: const CustomErrorState(
             title: 'خطأ برمجي',
             subtitle: 'حدث خطأ استثنائي',
-            technicalDetails: 'DioException [badResponse]: 500 Internal Server Error',
+            technicalDetails:
+                'DioException [badResponse]: 500 Internal Server Error',
             icon: Icons.error_outline_rounded,
             animationPath: null,
           ),
@@ -143,13 +155,19 @@ void main() {
       );
 
       expect(find.text('التفاصيل الفنية والدعم التقني'), findsOneWidget);
-      expect(find.text('DioException [badResponse]: 500 Internal Server Error'), findsNothing);
+      expect(
+        find.text('DioException [badResponse]: 500 Internal Server Error'),
+        findsNothing,
+      );
 
       // Tap to expand accordion
       await tester.tap(find.text('التفاصيل الفنية والدعم التقني'));
       await tester.pumpAndSettle();
 
-      expect(find.text('DioException [badResponse]: 500 Internal Server Error'), findsOneWidget);
+      expect(
+        find.text('DioException [badResponse]: 500 Internal Server Error'),
+        findsOneWidget,
+      );
       expect(find.text('نسخ تفاصيل الخطأ'), findsOneWidget);
     });
 
@@ -160,9 +178,7 @@ void main() {
       bool retried = false;
       await tester.pumpWidget(
         buildTestableWidget(
-          child: CustomErrorState.connection(
-            onRetry: () => retried = true,
-          ),
+          child: CustomErrorState.connection(onRetry: () => retried = true),
         ),
       );
 

@@ -952,4 +952,3 @@ class _CryptoInterceptor extends Interceptor {
         path.contains(ApiConstants.file(path));
   }
 }
-

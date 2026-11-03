@@ -79,18 +79,15 @@ class FileExportResult {
     required String filePath,
     required String fileName,
     required int bytesWritten,
-  }) =>
-      FileExportResult(
-        isSuccess: true,
-        filePath: filePath,
-        fileName: fileName,
-        bytesWritten: bytesWritten,
-      );
+  }) => FileExportResult(
+    isSuccess: true,
+    filePath: filePath,
+    fileName: fileName,
+    bytesWritten: bytesWritten,
+  );
 
-  factory FileExportResult.failure(String message) => FileExportResult(
-        isSuccess: false,
-        errorMessage: message,
-      );
+  factory FileExportResult.failure(String message) =>
+      FileExportResult(isSuccess: false, errorMessage: message);
 }
 
 /// عقد خدمة تصدير وحفظ ومشاركة الملفات في النظام (IFileExportService)
@@ -165,7 +162,10 @@ class FileExportService implements IFileExportService {
 
     try {
       final exportDir = await getAppExportDirectory(folderName: folderName);
-      final safeExt = resolveExtension(fileName: fileName, explicitExtension: extension);
+      final safeExt = resolveExtension(
+        fileName: fileName,
+        explicitExtension: extension,
+      );
 
       // توليد اسم الملف المؤسسي الموحد وفق استراتيجية التسمية
       final baseGeneratedName = buildFileNameWithoutExtension(
@@ -188,7 +188,8 @@ class FileExportService implements IFileExportService {
       if (showFeedback) {
         CustomSnackbar.show(
           title: 'تم الحفظ بنجاح',
-          message: 'تم حفظ الملف في مجلد التنزيلات ($folderName):\n$uniqueFileName',
+          message:
+              'تم حفظ الملف في مجلد التنزيلات ($folderName):\n$uniqueFileName',
           type: SnackType.success,
         );
       }
@@ -210,7 +211,10 @@ class FileExportService implements IFileExportService {
       );
     } catch (e, stack) {
       if (AppEnvironment.enableLogging) {
-        log('❌ FileExportService.saveFile خطأ أثناء التصدير: $e', stackTrace: stack);
+        log(
+          '❌ FileExportService.saveFile خطأ أثناء التصدير: $e',
+          stackTrace: stack,
+        );
       }
       final message = 'تعذر إتمام عملية الحفظ: $e';
       if (showFeedback) {
@@ -232,10 +236,15 @@ class FileExportService implements IFileExportService {
     FileNamingStrategy namingStrategy = FileNamingStrategy.enterprise,
     DateTime? timestamp,
   }) async {
-    if (bytes.isEmpty) return false;
+    if (bytes.isEmpty) {
+      return false;
+    }
 
     try {
-      final safeExt = resolveExtension(fileName: fileName, explicitExtension: extension);
+      final safeExt = resolveExtension(
+        fileName: fileName,
+        explicitExtension: extension,
+      );
       final baseGeneratedName = buildFileNameWithoutExtension(
         rawTitle: fileName,
         extension: safeExt,
@@ -244,10 +253,7 @@ class FileExportService implements IFileExportService {
       );
       final finalName = '$baseGeneratedName.$safeExt';
 
-      await Printing.sharePdf(
-        bytes: bytes,
-        filename: finalName,
-      );
+      await Printing.sharePdf(bytes: bytes, filename: finalName);
       return true;
     } catch (e) {
       if (AppEnvironment.enableLogging) {
@@ -256,14 +262,19 @@ class FileExportService implements IFileExportService {
       // محاولة بديلة: حفظ مؤقت ثم الفتح الخارجي
       try {
         final tempDir = await getTemporaryDirectory();
-        final safeExt = resolveExtension(fileName: fileName, explicitExtension: extension);
+        final safeExt = resolveExtension(
+          fileName: fileName,
+          explicitExtension: extension,
+        );
         final baseGeneratedName = buildFileNameWithoutExtension(
           rawTitle: fileName,
           extension: safeExt,
           strategy: namingStrategy,
           timestamp: timestamp,
         );
-        final tempFile = File('${tempDir.path}/${baseGeneratedName}_tmp.$safeExt');
+        final tempFile = File(
+          '${tempDir.path}/${baseGeneratedName}_tmp.$safeExt',
+        );
         await tempFile.writeAsBytes(bytes);
         final openResult = await OpenFilex.open(tempFile.path);
         return openResult.type == ResultType.done;
@@ -274,10 +285,14 @@ class FileExportService implements IFileExportService {
   }
 
   @override
-  Future<Directory> getAppExportDirectory({String folderName = 'NetSales'}) async {
+  Future<Directory> getAppExportDirectory({
+    String folderName = 'NetSales',
+  }) async {
     // 1. بيئة الاختبارات الآلية (Unit Tests)
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
-      final testDir = Directory('${Directory.systemTemp.path}/netsales_export_test/$folderName');
+      final testDir = Directory(
+        '${Directory.systemTemp.path}/netsales_export_test/$folderName',
+      );
       if (!testDir.existsSync()) {
         testDir.createSync(recursive: true);
       }
@@ -299,7 +314,9 @@ class FileExportService implements IFileExportService {
       // ب. التنزيلات عبر مسار التخزين الخارجي للتطبيق (Scoped Storage Safe)
       if (targetDir == null) {
         try {
-          final extDirs = await getExternalStorageDirectories(type: StorageDirectory.downloads);
+          final extDirs = await getExternalStorageDirectories(
+            type: StorageDirectory.downloads,
+          );
           if (extDirs != null && extDirs.isNotEmpty) {
             targetDir = Directory('${extDirs.first.path}/$folderName');
           }
@@ -308,7 +325,8 @@ class FileExportService implements IFileExportService {
     }
 
     // 3. بيئات سطح المكتب (Windows / macOS / Linux)
-    if (targetDir == null && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
+    if (targetDir == null &&
+        (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
       try {
         final downloads = await getDownloadsDirectory();
         if (downloads != null) {
@@ -353,14 +371,18 @@ class FileExportService implements IFileExportService {
 
     // إزالة الامتداد من نهاية الاسم إذا كان متطابقاً لمنع التكرار (مثل file.pdf.pdf)
     if (extensionToRemove != null && extensionToRemove.isNotEmpty) {
-      final extWithDot = extensionToRemove.startsWith('.') ? extensionToRemove : '.$extensionToRemove';
+      final extWithDot = extensionToRemove.startsWith('.')
+          ? extensionToRemove
+          : '.$extensionToRemove';
       if (clean.toLowerCase().endsWith(extWithDot.toLowerCase())) {
         clean = clean.substring(0, clean.length - extWithDot.length);
       }
     }
 
     // استبدال الأحرف المحظورة والشرطات في أنظمة التشغيل (Windows, Android, Linux, macOS)
-    clean = clean.replaceAll(RegExp(r'[\\/:*?"<>|\r\n\t#%!@$^&+=`~_]'), spaceReplacement).trim();
+    clean = clean
+        .replaceAll(RegExp(r'[\\/:*?"<>|\r\n\t#%!@$^&+=`~_]'), spaceReplacement)
+        .trim();
 
     // استبدال المسافات بالفاصل المحدد
     clean = clean.replaceAll(RegExp(r'\s+'), spaceReplacement);
@@ -390,8 +412,12 @@ class FileExportService implements IFileExportService {
   }) {
     if (explicitExtension != null && explicitExtension.trim().isNotEmpty) {
       var ext = explicitExtension.trim().toLowerCase();
-      if (ext.startsWith('.')) ext = ext.substring(1);
-      if (ext.isNotEmpty && ext.length <= 6) return ext;
+      if (ext.startsWith('.')) {
+        ext = ext.substring(1);
+      }
+      if (ext.isNotEmpty && ext.length <= 6) {
+        return ext;
+      }
     }
 
     final cleanName = fileName.split('?').first.trim();
@@ -409,8 +435,15 @@ class FileExportService implements IFileExportService {
   /// استنتاج تصنيف الملف (IMG, DOC, SHEET, FILE)
   static String resolveCategory(String extension) {
     final ext = extension.toLowerCase().replaceAll('.', '').trim();
-    if (ext == 'pdf' || ext == 'doc' || ext == 'docx' || ext == 'txt') return 'DOC';
-    if (ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'webp' || ext == 'gif' || ext == 'svg') {
+    if (ext == 'pdf' || ext == 'doc' || ext == 'docx' || ext == 'txt') {
+      return 'DOC';
+    }
+    if (ext == 'jpg' ||
+        ext == 'jpeg' ||
+        ext == 'png' ||
+        ext == 'webp' ||
+        ext == 'gif' ||
+        ext == 'svg') {
       return 'IMG';
     }
     if (ext == 'xlsx' || ext == 'xls' || ext == 'csv') {
@@ -437,7 +470,9 @@ class FileExportService implements IFileExportService {
     FileNamingStrategy strategy = FileNamingStrategy.enterprise,
     DateTime? timestamp,
   }) {
-    final safeExt = extension.startsWith('.') ? extension.substring(1) : extension;
+    final safeExt = extension.startsWith('.')
+        ? extension.substring(1)
+        : extension;
     final cleanTitle = sanitizeFileName(
       rawTitle,
       extensionToRemove: safeExt,
@@ -481,7 +516,9 @@ class FileExportService implements IFileExportService {
     required String baseFullName,
     required String extension,
   }) {
-    final cleanExt = extension.startsWith('.') ? extension.substring(1) : extension;
+    final cleanExt = extension.startsWith('.')
+        ? extension.substring(1)
+        : extension;
 
     var candidate = '$baseFullName.$cleanExt';
     var counter = 1;

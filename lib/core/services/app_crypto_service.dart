@@ -387,4 +387,3 @@ class AppCryptoService {
     return base64.decode(normalized);
   }
 }
-

@@ -7,6 +7,7 @@ import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_coordinator_controller.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/buttons/custom_theme_toggle_button.dart';
 
 /// شريط التطبيق الموحد لمساحات العمل (WorkspaceAppBar)
@@ -72,15 +73,23 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         if (actions != null) ...actions!,
-        IconButton(
-          icon: Icon(Icons.devices_rounded, color: colors.onSurfaceVariant),
+        CustomButton.icon(
+          icon: Icons.devices_rounded,
+          foregroundColor: colors.onSurfaceVariant,
           tooltip: 'الأجهزة والجلسات النشطة',
+          backgroundColor: Colors.transparent,
+          dimension: 40.r,
+          iconSize: 22.r,
           onPressed: () => Get.toNamed<dynamic>(AppRoutes.activeSessions),
         ),
         const CustomThemeToggleButton(),
-        IconButton(
-          icon: Icon(Icons.logout_rounded, color: colors.error),
+        CustomButton.icon(
+          icon: Icons.logout_rounded,
+          foregroundColor: colors.error,
           tooltip: 'تسجيل الخروج',
+          backgroundColor: Colors.transparent,
+          dimension: 40.r,
+          iconSize: 22.r,
           onPressed: () {
             if (Get.isRegistered<WorkspaceCoordinatorController>()) {
               WorkspaceCoordinatorController.to.logout();

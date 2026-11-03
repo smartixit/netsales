@@ -7,7 +7,8 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class InternetConnectionService {
   InternetConnectionService._();
 
-  static final InternetConnectionService instance = InternetConnectionService._();
+  static final InternetConnectionService instance =
+      InternetConnectionService._();
 
   final InternetConnection _internet = InternetConnection();
 
@@ -64,24 +65,23 @@ class InternetConnectionService {
   }
 
   void showInternetConnectionState() {
-    _stateSubscription ??= InternetConnectionService.instance.statusStream.listen((
-      connected,
-    ) {
-      if (Get.context == null) return;
-      if (!connected) {
-        CustomSnackbar.show(
-          title: "لا يوجد اتصال بالإنترنت",
-          message: "الرجاء التأكد من الاتصال بالإنترنت",
-          type: SnackType.info,
-        );
-      } else {
-        CustomSnackbar.show(
-          title: "تم استعادة الاتصال بالإنترنت",
-          message: "تم استعادة الاتصال بالإنترنت",
-          type: SnackType.success,
-        );
-      }
-    });
+    _stateSubscription ??= InternetConnectionService.instance.statusStream
+        .listen((connected) {
+          if (Get.context == null) return;
+          if (!connected) {
+            CustomSnackbar.show(
+              title: "لا يوجد اتصال بالإنترنت",
+              message: "الرجاء التأكد من الاتصال بالإنترنت",
+              type: SnackType.info,
+            );
+          } else {
+            CustomSnackbar.show(
+              title: "تم استعادة الاتصال بالإنترنت",
+              message: "تم استعادة الاتصال بالإنترنت",
+              type: SnackType.success,
+            );
+          }
+        });
   }
 
   /// Dispose resources

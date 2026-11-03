@@ -22,89 +22,91 @@ class VerifyOtpFormCard extends GetView<VerifyOtpController> {
     final colors = context.colors;
 
     return Form(
-      key: controller.formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 1. حقل إدخال الرمز الموحد (CustomPinField) بنمط 3-3 مع التعبئة التلقائية للرسائل
-          Center(
-            child: CustomPinField(
-              length: 6,
-              controller: controller.otpController,
-              autofocus: true,
-              useNativeKeyboard: true,
-              validator: FormValidators.otpValidator(
-                fieldName: 'رمز التحقق',
-                length: 6,
+          key: controller.formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. حقل إدخال الرمز الموحد (CustomPinField) بنمط 3-3 مع التعبئة التلقائية للرسائل
+              Center(
+                child: CustomPinField(
+                  length: 6,
+                  controller: controller.otpController,
+                  autofocus: true,
+                  useNativeKeyboard: true,
+                  validator: FormValidators.otpValidator(
+                    fieldName: 'رمز التحقق',
+                    length: 6,
+                  ),
+                  onCompleted: (pin) => controller.submitOtp(pin),
+                ),
               ),
-              onCompleted: (pin) => controller.submitOtp(pin),
-            ),
-          ),
 
-          AppSpacing.vLg,
+              AppSpacing.vLg,
 
-          // 2. سطر التهدئة وإعادة الإرسال الهادئ (Resend Timer)
-          Center(
-            child: Obx(() {
-              if (controller.canResend.value) {
-                return CustomButton.text(
-                  text: 'إعادة إرسال رمز التحقق',
-                  icon: Icons.refresh_rounded,
-                  loading: controller.isResending.value,
-                  // foregroundColor: colors.primary,
-                  // textStyle: AppTypography.labelLarge.copyWith(
-                  //   fontWeight: FontWeight.w700,
-                  // ),
-                  onPressed: controller.resendOtp,
-                );
-              }
-              return Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.timer_outlined,
-                      size: 15.r,
-                      color: colors.onSurfaceVariant,
+              // 2. سطر التهدئة وإعادة الإرسال الهادئ (Resend Timer)
+              Center(
+                child: Obx(() {
+                  if (controller.canResend.value) {
+                    return CustomButton.text(
+                      text: 'إعادة إرسال رمز التحقق',
+                      icon: Icons.refresh_rounded,
+                      loading: controller.isResending.value,
+                      // foregroundColor: colors.primary,
+                      // textStyle: AppTypography.labelLarge.copyWith(
+                      //   fontWeight: FontWeight.w700,
+                      // ),
+                      onPressed: controller.resendOtp,
+                    );
+                  }
+                  return Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xs,
                     ),
-                    AppSpacing.hXxs,
-                    Text(
-                      'إعادة إرسال الرمز بعد ${controller.cooldownSeconds.value} ثانية',
-                      style: AppTypography.labelMedium.copyWith(
-                        color: colors.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerHighest.withValues(
+                        alpha: 0.4,
                       ),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
-                  ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.timer_outlined,
+                          size: 15.r,
+                          color: colors.onSurfaceVariant,
+                        ),
+                        AppSpacing.hXxs,
+                        Text(
+                          'إعادة إرسال الرمز بعد ${controller.cooldownSeconds.value} ثانية',
+                          style: AppTypography.labelMedium.copyWith(
+                            color: colors.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+
+              AppSpacing.vXxl,
+
+              // 3. الإجراء الأساسي الموحد (التحقق الفعلي مع الخادم)
+              Obx(
+                () => CustomButton.primary(
+                  text: 'التحقق وتأكيد الاستعادة',
+                  icon: Icons.check_circle_outline_rounded,
+                  size: AppButtonSize.large,
+                  height: 52.h,
+                  loading: controller.isLoading.value,
+                  onPressed: () => controller.submitOtp(),
                 ),
-              );
-            }),
+              ),
+            ],
           ),
-
-          AppSpacing.vXxl,
-
-          // 3. الإجراء الأساسي الموحد (التحقق الفعلي مع الخادم)
-          Obx(
-            () => CustomButton.primary(
-              text: 'التحقق وتأكيد الاستعادة',
-              icon: Icons.check_circle_outline_rounded,
-              size: AppButtonSize.large,
-              height: 52.h,
-              loading: controller.isLoading.value,
-              onPressed: () => controller.submitOtp(),
-            ),
-          ),
-        ],
-      ),
-    )
+        )
         .animate()
         .fadeIn(duration: AppMotion.normal)
         .slideY(

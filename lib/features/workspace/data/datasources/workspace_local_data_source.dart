@@ -26,7 +26,9 @@ class WorkspaceLocalDataSourceImpl implements WorkspaceLocalDataSource {
   Future<WorkspaceContextModel> getActiveWorkspaceContext() async {
     final user = SessionService.to.currentUser;
     final resolved = _workspaceService.resolveWorkspaceForUser(user);
-    final permissions = _storageService.getStringList(StorageKeys.permissionsStorage);
+    final permissions = _storageService.getStringList(
+      StorageKeys.permissionsStorage,
+    );
 
     return WorkspaceContextModel(
       workspace: resolved,

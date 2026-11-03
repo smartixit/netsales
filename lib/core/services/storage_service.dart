@@ -119,7 +119,6 @@ class StorageService {
   String? get sessionId => getString(StorageKeys.session);
   Future<bool> clearSession() => remove(StorageKeys.session);
 
-
   /// حالة تسجيل الدخول
   Future<bool> setLoggedIn(bool value) =>
       setBool(StorageKeys.isLoggedIn, value);
@@ -147,4 +146,3 @@ class StorageService {
     await setLoggedIn(false);
   }
 }
-

@@ -132,7 +132,10 @@ void main() async {
   Get.put<SessionService>(SessionService.instance, permanent: true);
   await WorkspaceService.instance.init();
   Get.put<WorkspaceService>(WorkspaceService.instance, permanent: true);
-  Get.put<IntegrationGateService>(IntegrationGateService.instance, permanent: true);
+  Get.put<IntegrationGateService>(
+    IntegrationGateService.instance,
+    permanent: true,
+  );
 
   // 3. تسجيل الخدمات العامة الدائمة في حاوية GetX لضمان استقرار التبعيات
   Get.put<DeviceService>(DeviceService.instance, permanent: true);
@@ -159,7 +162,6 @@ void main() async {
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
   ]);
-  
 
   // Edge-to-Edge (Android 15+ standard) — Guaranteed modern system bars
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

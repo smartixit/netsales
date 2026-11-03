@@ -101,4 +101,3 @@ class OnboardingScreen extends GetView<OnboardingController> {
     );
   }
 }
-

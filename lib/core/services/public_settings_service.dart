@@ -20,7 +20,9 @@ class PublicSettingsService extends GetxService {
   static final PublicSettingsService instance = PublicSettingsService._();
 
   static PublicSettingsService get to =>
-      Get.isRegistered<PublicSettingsService>() ? Get.find<PublicSettingsService>() : instance;
+      Get.isRegistered<PublicSettingsService>()
+      ? Get.find<PublicSettingsService>()
+      : instance;
 
   final Rx<PublicSettingsModel> _settings = const PublicSettingsModel(
     appName: AppConstants.appName,
@@ -32,8 +34,9 @@ class PublicSettingsService extends GetxService {
   ).obs;
 
   /// اسم التطبيق العام
-  String get appName =>
-      _settings.value.appName.isNotEmpty ? _settings.value.appName : AppConstants.appName;
+  String get appName => _settings.value.appName.isNotEmpty
+      ? _settings.value.appName
+      : AppConstants.appName;
 
   /// رقم هاتف الدعم الفني
   String get supportPhone => _settings.value.appSupportPhone.isNotEmpty
@@ -66,7 +69,9 @@ class PublicSettingsService extends GetxService {
   /// تحميل الإعدادات من التخزين المحلي إن وجدت
   void _loadFromLocalCache() {
     try {
-      final cached = StorageService.instance.getJson(StorageKeys.publicSettings);
+      final cached = StorageService.instance.getJson(
+        StorageKeys.publicSettings,
+      );
       if (cached != null) {
         _settings.value = PublicSettingsModel.fromJson(cached);
       }
@@ -80,7 +85,8 @@ class PublicSettingsService extends GetxService {
     try {
       final response = await ApiService.instance.get<PublicSettingsModel>(
         ApiConstants.systemSettingsPublic,
-        fromJson: (json) => PublicSettingsModel.fromJson(json as Map<String, dynamic>),
+        fromJson: (json) =>
+            PublicSettingsModel.fromJson(json as Map<String, dynamic>),
       );
 
       if (response.success && response.data != null) {
@@ -91,7 +97,9 @@ class PublicSettingsService extends GetxService {
         );
       }
     } catch (e) {
-      log('⚠️ [PublicSettingsService] Failed to fetch remote settings, using cache/defaults: $e');
+      log(
+        '⚠️ [PublicSettingsService] Failed to fetch remote settings, using cache/defaults: $e',
+      );
     }
   }
 }

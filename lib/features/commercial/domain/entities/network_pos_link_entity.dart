@@ -24,4 +24,26 @@ class NetworkPosLinkEntity {
   });
 
   bool get isActive => status;
+
+  NetworkPosLinkEntity copyWith({
+    int? networkPosId,
+    int? networkId,
+    int? posId,
+    bool? status,
+    String? createdAt,
+    String? updatedAt,
+    NetworkEntity? network,
+    PosEntity? pos,
+  }) {
+    return NetworkPosLinkEntity(
+      networkPosId: networkPosId ?? this.networkPosId,
+      networkId: networkId ?? this.networkId,
+      posId: posId ?? this.posId,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      network: network ?? this.network,
+      pos: pos ?? this.pos,
+    );
+  }
 }

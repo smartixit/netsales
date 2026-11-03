@@ -54,4 +54,3 @@ class UserDeviceModel extends UserDeviceEntity {
     };
   }
 }
-

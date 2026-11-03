@@ -52,7 +52,8 @@ abstract final class AppRoutes {
   static const String operatingExpenses = '/network/operating-expenses';
   static const String networkTeamManagement = '/network/team-management';
   static const String networkSubscription = '/network/subscription';
-  static const String voucherRequestDetails = '/network/voucher-request-details';
+  static const String voucherRequestDetails =
+      '/network/voucher-request-details';
   static const String saleInvoiceDetails = '/network/sale-invoice-details';
 
   // ----------------------------------------------------------------------------

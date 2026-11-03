@@ -6,11 +6,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
 
 class CustomSkeletonText extends StatelessWidget {
-  const CustomSkeletonText({
-    super.key,
-    this.lines = 3,
-    this.lineHeight = 12,
-  });
+  const CustomSkeletonText({super.key, this.lines = 3, this.lineHeight = 12});
 
   final int lines;
   final double lineHeight;

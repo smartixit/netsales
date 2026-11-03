@@ -24,11 +24,7 @@ enum AppDeviceSize {
 
 /// فئات عرض النوافذ الأساسية وفق مواصفات Material 3.
 /// تُستخدم للتوافق الخلفي والتصنيفات العريضة (Compact / Medium / Expanded).
-enum AppWindowClass {
-  compact,
-  medium,
-  expanded,
-}
+enum AppWindowClass { compact, medium, expanded }
 
 /// المنظومة المركزية لنقاط الانقطاع والتصميم التكيفي (Enterprise Adaptive Breakpoints).
 ///
@@ -202,8 +198,7 @@ class AppBreakpoints {
       AppDeviceSize.tablet => 16.0,
       AppDeviceSize.desktop ||
       AppDeviceSize.desktopLarge ||
-      AppDeviceSize.ultraWide =>
-        24.0,
+      AppDeviceSize.ultraWide => 24.0,
     };
   }
 
@@ -322,15 +317,14 @@ extension ResponsiveContext on BuildContext {
     T? desktop,
     T? desktopLarge,
     T? ultraWide,
-  }) =>
-      AppBreakpoints.value<T>(
-        this,
-        compact: mobile,
-        tablet: tablet,
-        desktop: desktop,
-        desktopLarge: desktopLarge,
-        ultraWide: ultraWide,
-      );
+  }) => AppBreakpoints.value<T>(
+    this,
+    compact: mobile,
+    tablet: tablet,
+    desktop: desktop,
+    desktopLarge: desktopLarge,
+    ultraWide: ultraWide,
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -379,19 +373,14 @@ class ResponsiveContentWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectivePadding = padding ??
-        EdgeInsets.symmetric(
-          horizontal: context.screenMargin,
-        );
+    final effectivePadding =
+        padding ?? EdgeInsets.symmetric(horizontal: context.screenMargin);
 
     return Align(
       alignment: alignment,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
-        child: Padding(
-          padding: effectivePadding,
-          child: child,
-        ),
+        child: Padding(padding: effectivePadding, child: child),
       ),
     );
   }
@@ -438,4 +427,3 @@ class AdaptiveSplitView extends StatelessWidget {
     );
   }
 }
-

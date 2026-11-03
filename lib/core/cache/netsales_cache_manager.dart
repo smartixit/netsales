@@ -27,14 +27,14 @@ class NetSalesCacheManager extends CacheManager {
   static NetSalesCacheManager get instance => _instance;
 
   NetSalesCacheManager._()
-      : super(
-          Config(
-            key,
-            stalePeriod: const Duration(days: 14),
-            maxNrOfCacheObjects: 500,
-            fileService: NetSalesDioFileService(),
-          ),
-        );
+    : super(
+        Config(
+          key,
+          stalePeriod: const Duration(days: 14),
+          maxNrOfCacheObjects: 500,
+          fileService: NetSalesDioFileService(),
+        ),
+      );
 }
 
 /// خدمة جلب الملفات عبر شبكة مؤمنة تعتمد على كائن [Dio] الخاص بـ [ApiService].
@@ -42,7 +42,7 @@ class NetSalesDioFileService extends FileService {
   final ApiService _apiService;
 
   NetSalesDioFileService({ApiService? apiService})
-      : _apiService = apiService ?? ApiService.instance;
+    : _apiService = apiService ?? ApiService.instance;
 
   @override
   Future<FileServiceResponse> get(
@@ -52,9 +52,7 @@ class NetSalesDioFileService extends FileService {
     final normalizedUrl = normalizeMediaUrl(url);
     final uri = Uri.parse(normalizedUrl);
 
-    final mergedHeaders = <String, dynamic>{
-      'Accept': '*/*',
-    };
+    final mergedHeaders = <String, dynamic>{'Accept': '*/*'};
 
     if (headers != null) {
       mergedHeaders.addAll(headers);
@@ -102,7 +100,9 @@ class NetSalesDioFileService extends FileService {
       if (InfinityFreeChallengeSolver.isChallengeBody(bytes) ||
           InfinityFreeChallengeSolver.computeFromBytes(bytes) != null) {
         if (AppEnvironment.enableLogging) {
-          log('⚠️ NetSalesDioFileService: تم اكتشاف صفحة تحدي أمني HTML، تم منع حفظها في الكاش [$url]');
+          log(
+            '⚠️ NetSalesDioFileService: تم اكتشاف صفحة تحدي أمني HTML، تم منع حفظها في الكاش [$url]',
+          );
         }
         throw HttpExceptionWithStatus(
           403,
@@ -192,7 +192,9 @@ class NetSalesDioFileService extends FileService {
       if (contentType.contains('image/gif')) return '.gif';
       if (contentType.contains('image/svg')) return '.svg';
       if (contentType.contains('application/pdf')) return '.pdf';
-      if (contentType.contains('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+      if (contentType.contains(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      )) {
         return '.xlsx';
       }
       if (contentType.contains('application/vnd.ms-excel')) return '.xls';
@@ -215,10 +217,10 @@ class NetSalesDioFileResponse implements FileServiceResponse {
     required Response<dynamic> response,
     required Uint8List bytes,
     required String fileExtension,
-  })  : _response = response,
-        _bytes = bytes,
-        _fileExtension = fileExtension,
-        _receivedTime = DateTime.now();
+  }) : _response = response,
+       _bytes = bytes,
+       _fileExtension = fileExtension,
+       _receivedTime = DateTime.now();
 
   @override
   Stream<List<int>> get content => Stream.value(_bytes);

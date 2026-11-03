@@ -67,11 +67,7 @@ class CustomPhoneField extends StatelessWidget {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(9),
       ],
-      prefixIcon:
-          suffixIcon ??
-          Icon(
-            Icons.phone_iphone_rounded,
-          ),
+      prefixIcon: suffixIcon ?? Icon(Icons.phone_iphone_rounded),
       suffixIcon: Padding(
         padding: EdgeInsetsDirectional.only(
           start: AppSpacing.sm,

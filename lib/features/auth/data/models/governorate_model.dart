@@ -10,7 +10,8 @@ class GovernorateModel extends GovernorateEntity {
   factory GovernorateModel.fromJson(Map<String, dynamic> json) {
     return GovernorateModel(
       governorateId: (json['governorate_id'] ?? json['id']) as int? ?? 0,
-      governorateName: (json['governorate_name'] ?? json['name'])?.toString() ?? '',
+      governorateName:
+          (json['governorate_name'] ?? json['name'])?.toString() ?? '',
     );
   }
 

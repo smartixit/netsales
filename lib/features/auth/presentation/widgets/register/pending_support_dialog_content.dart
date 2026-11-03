@@ -57,11 +57,7 @@ class PendingSupportDialogContent extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.schedule_rounded,
-                color: colors.warning,
-                size: 20.r,
-              ),
+              Icon(Icons.schedule_rounded, color: colors.warning, size: 20.r),
               AppSpacing.hSm,
               Expanded(
                 child: Text(

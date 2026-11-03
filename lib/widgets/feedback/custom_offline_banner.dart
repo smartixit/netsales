@@ -13,10 +13,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 class CustomOfflineBanner extends StatelessWidget {
   final bool isOffline;
 
-  const CustomOfflineBanner({
-    super.key,
-    required this.isOffline,
-  });
+  const CustomOfflineBanner({super.key, required this.isOffline});
 
   @override
   Widget build(BuildContext context) {

@@ -13,4 +13,3 @@ class GetDevicesUseCase {
 
   Future<List<UserDeviceEntity>> call() => execute();
 }
-

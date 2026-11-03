@@ -18,11 +18,12 @@ class ActiveSessionsController extends GetxController {
     required GetDevicesUseCase getDevicesUseCase,
     required DisconnectDeviceUseCase disconnectDeviceUseCase,
     required LogoutOtherDevicesUseCase logoutOtherDevicesUseCase,
-  })  : _getDevicesUseCase = getDevicesUseCase,
-        _disconnectDeviceUseCase = disconnectDeviceUseCase,
-        _logoutOtherDevicesUseCase = logoutOtherDevicesUseCase;
+  }) : _getDevicesUseCase = getDevicesUseCase,
+       _disconnectDeviceUseCase = disconnectDeviceUseCase,
+       _logoutOtherDevicesUseCase = logoutOtherDevicesUseCase;
 
-  static ActiveSessionsController get to => Get.find<ActiveSessionsController>();
+  static ActiveSessionsController get to =>
+      Get.find<ActiveSessionsController>();
 
   final RxList<UserDeviceEntity> devices = <UserDeviceEntity>[].obs;
   final RxBool isLoading = false.obs;

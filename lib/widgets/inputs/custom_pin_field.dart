@@ -191,14 +191,16 @@ class CustomPinFieldState extends State<CustomPinField>
       decoration: defaultPinTheme.decoration!.copyWith(
         color: colors.surface,
         borderRadius: cellRadius,
-        border: Border.all(
-          color: colors.primary,
-          width: 1.8.w,
-        ),
+        border: Border.all(color: colors.primary, width: 1.8.w),
         boxShadow: widget.useShadows
             ? [
                 ...AppElevation.level1(context),
-                ...AppElevation.glow(context, colors.primary, blur: 8.r, alpha: 0.15),
+                ...AppElevation.glow(
+                  context,
+                  colors.primary,
+                  blur: 8.r,
+                  alpha: 0.15,
+                ),
               ]
             : null,
       ),
@@ -222,10 +224,7 @@ class CustomPinFieldState extends State<CustomPinField>
       decoration: defaultPinTheme.decoration!.copyWith(
         color: colors.surface,
         borderRadius: cellRadius,
-        border: Border.all(
-          color: colors.error,
-          width: 1.8.w,
-        ),
+        border: Border.all(color: colors.error, width: 1.8.w),
         boxShadow: widget.useShadows
             ? AppElevation.glow(context, colors.error, blur: 8.r, alpha: 0.2)
             : null,
@@ -245,7 +244,8 @@ class CustomPinFieldState extends State<CustomPinField>
     );
 
     // مؤشر الكتابة النابض كالتطبيقات العالمية
-    final effectiveCursor = widget.cursor ??
+    final effectiveCursor =
+        widget.cursor ??
         Center(
           child: Container(
             width: 2.w,
@@ -258,7 +258,8 @@ class CustomPinFieldState extends State<CustomPinField>
         );
 
     // استخراج أو تهيئة مستمع الرسائل التلقائي على أندرويد
-    final effectiveSmsRetriever = widget.smsRetriever ??
+    final effectiveSmsRetriever =
+        widget.smsRetriever ??
         (widget.enableSmsRetriever &&
                 !kIsWeb &&
                 defaultTargetPlatform == TargetPlatform.android
@@ -288,10 +289,7 @@ class CustomPinFieldState extends State<CustomPinField>
     return AnimatedBuilder(
       animation: _shakeAnimation,
       builder: (context, child) {
-        return Transform.translate(
-          offset: _shakeAnimation.value,
-          child: child,
-        );
+        return Transform.translate(offset: _shakeAnimation.value, child: child);
       },
       child: Directionality(
         textDirection: TextDirection.ltr,
@@ -312,7 +310,8 @@ class CustomPinFieldState extends State<CustomPinField>
           disabledPinTheme: disabledPinTheme,
           hapticFeedbackType: widget.hapticFeedbackType,
           keyboardType: widget.keyboardType,
-          inputFormatters: widget.inputFormatters ??
+          inputFormatters:
+              widget.inputFormatters ??
               [FilteringTextInputFormatter.digitsOnly],
           validator: _wrappedValidator,
           onCompleted: widget.onCompleted,

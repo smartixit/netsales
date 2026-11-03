@@ -24,9 +24,9 @@ class ResetPasswordRequestModel {
 
   /// تحويل النموذج لحمولة JSON مطابقة لحقول الطلب في الباك إند
   Map<String, dynamic> toJson() => {
-        'user_phone_number': userPhoneNumber,
-        'otp': otp,
-        'password': password,
-        'password_confirmation': passwordConfirmation,
-      };
+    'user_phone_number': userPhoneNumber,
+    'otp': otp,
+    'password': password,
+    'password_confirmation': passwordConfirmation,
+  };
 }

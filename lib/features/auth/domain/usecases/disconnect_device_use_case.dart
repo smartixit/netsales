@@ -12,4 +12,3 @@ class DisconnectDeviceUseCase {
 
   Future<void> call(int deviceId) => execute(deviceId);
 }
-

@@ -103,7 +103,9 @@ class AuthRepositoryImpl implements AuthRepository {
         final profileData = profileResp.data!;
         final rawUser = profileData['user'];
         if (rawUser is Map) {
-          final updatedUser = UserModel.fromJson(Map<String, dynamic>.from(rawUser));
+          final updatedUser = UserModel.fromJson(
+            Map<String, dynamic>.from(rawUser),
+          );
           await SessionService.to.updateCurrentUser(updatedUser);
         }
         final rawPerms = profileData['permissions'];

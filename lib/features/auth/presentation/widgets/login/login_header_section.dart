@@ -33,13 +33,13 @@ class LoginHeaderSection extends StatelessWidget {
 
         // 2. العنوان الرئيسي
         Text(
-          'تسجيل الدخول',
-          style: AppTypography.headlineMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.w800,
-          ),
-          textAlign: TextAlign.center,
-        )
+              'تسجيل الدخول',
+              style: AppTypography.headlineMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
+              ),
+              textAlign: TextAlign.center,
+            )
             .animate()
             .fadeIn(duration: AppMotion.normal)
             .slideY(
@@ -53,12 +53,12 @@ class LoginHeaderSection extends StatelessWidget {
 
         // 3. النص الترحيبي الهادئ المريح
         Text(
-          'أهلاً بك مجدداً، سجّل دخولك للمتابعة',
-          style: AppTypography.bodyMedium.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        )
+              'أهلاً بك مجدداً، سجّل دخولك للمتابعة',
+              style: AppTypography.bodyMedium.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            )
             .animate()
             .fadeIn(duration: AppMotion.normal)
             .slideY(
@@ -71,4 +71,3 @@ class LoginHeaderSection extends StatelessWidget {
     );
   }
 }
-

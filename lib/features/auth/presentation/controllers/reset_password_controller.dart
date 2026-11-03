@@ -163,7 +163,10 @@ class ResetPasswordController extends GetxController {
 
         // التوجيه لشاشة تسجيل الدخول مع تمرير رقم الهاتف الجاهز
         if (isClosed) return;
-        await Get.offAllNamed<void>(AppRoutes.login, arguments: {'phone': userPhone});
+        await Get.offAllNamed<void>(
+          AppRoutes.login,
+          arguments: {'phone': userPhone},
+        );
       } else {
         await updatePasswordUseCase.execute(
           UpdatePasswordParams(

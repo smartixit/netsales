@@ -20,10 +20,10 @@ abstract final class IdempotencyHelper {
       (_) => _secureRandom.nextInt(16).toRadixString(16),
     ).join();
 
-    final cleanPrefix = prefix
-        .trim()
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9_-]'), '');
+    final cleanPrefix = prefix.trim().toLowerCase().replaceAll(
+      RegExp(r'[^a-z0-9_-]'),
+      '',
+    );
 
     return '${cleanPrefix.isEmpty ? "req" : cleanPrefix}-$timestamp-$randomHex';
   }

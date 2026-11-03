@@ -24,9 +24,9 @@ class SplashBinding extends Bindings {
     Get.lazyPut<SplashController>(
       () => SplashController(
         initializeAppUseCase: Get.find<InitializeAppUseCase>(),
-        determineBootDestinationUseCase: Get.find<DetermineBootDestinationUseCase>(),
+        determineBootDestinationUseCase:
+            Get.find<DetermineBootDestinationUseCase>(),
       ),
     );
   }
 }
-

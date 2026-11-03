@@ -12,4 +12,3 @@ abstract interface class SplashLocalDataSource {
   /// التحقق السيادي المباشر من سريان الجلسة مع الخادم عبر مسار /auth/me
   Future<bool> validateSessionWithServer();
 }
-

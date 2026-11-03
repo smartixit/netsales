@@ -668,4 +668,3 @@ class CustomAnimationOverlay {
     }
   }
 }
-

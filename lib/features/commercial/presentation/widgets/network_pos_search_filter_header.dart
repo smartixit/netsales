@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -35,8 +37,12 @@ class NetworkPosSearchFilterHeader
             prefixIcon: const Icon(Icons.search_rounded),
             suffixIcon: Obx(() {
               return controller.searchQuery.value.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear_rounded),
+                  ? CustomButton.icon(
+                      icon: Icons.clear_rounded,
+                      tooltip: 'مسح البحث',
+                      dimension: 36.r,
+                      iconSize: 18.r,
+                      backgroundColor: Colors.transparent,
                       onPressed: controller.clearSearch,
                     )
                   : const SizedBox.shrink();

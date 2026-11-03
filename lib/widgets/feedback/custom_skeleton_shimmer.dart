@@ -48,19 +48,17 @@ class CustomSkeletonShimmer extends StatelessWidget {
 
     // ألوان شيمر ناصعة ومصممة وفق معايير Fintech العالمية (Light & Dark)
     // في الوضع الفاتح: لون أساسي ناعم ونظيف مع وميض أبيض مشرق لمنع المظهر الداكن/المعتم
-    final resolvedBaseColor = baseColor ??
-        (isDark
-            ? const Color(0xFF132B20)
-            : const Color(0xFFE9EEF0));
+    final resolvedBaseColor =
+        baseColor ??
+        (isDark ? const Color(0xFF132B20) : const Color(0xFFE9EEF0));
 
-    final resolvedHighlightColor = highlightColor ??
-        (isDark
-            ? const Color(0xFF1E4634)
-            : const Color(0xFFFFFFFF));
+    final resolvedHighlightColor =
+        highlightColor ??
+        (isDark ? const Color(0xFF1E4634) : const Color(0xFFFFFFFF));
 
     final resolvedPeriod = period ?? const Duration(milliseconds: 1300);
-    final resolvedDirection = direction ??
-        (isRtl ? ShimmerDirection.rtl : ShimmerDirection.ltr);
+    final resolvedDirection =
+        direction ?? (isRtl ? ShimmerDirection.rtl : ShimmerDirection.ltr);
 
     return _ShimmerScope(
       child: Shimmer.fromColors(

@@ -154,5 +154,3 @@ class WelcomeScreen extends GetView<WelcomeController> {
     );
   }
 }
-
-

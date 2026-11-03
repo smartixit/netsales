@@ -54,7 +54,9 @@ abstract interface class AuthRemoteDataSource {
   Future<ApiResponse<List<GovernorateModel>>> getGovernorates();
 
   /// جلب قائمة المديريات التابعة لمحافظة معينة
-  Future<ApiResponse<List<DirectorateModel>>> getDirectorates(int governorateId);
+  Future<ApiResponse<List<DirectorateModel>>> getDirectorates(
+    int governorateId,
+  );
 
   /// تقديم طلب تسجيل مزود شبكة جديد
   Future<ApiResponse<RegisterNetworkResponseModel>> registerNetwork(

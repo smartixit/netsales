@@ -4,4 +4,3 @@ export 'package:netsales/features/commercial/presentation/widgets/link_pos_botto
 
 /// الاسم المرجعي المتوافق مع الاستدعاءات
 typedef LinkPosDialog = LinkPosBottomSheet;
-

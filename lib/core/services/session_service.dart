@@ -23,8 +23,9 @@ class SessionService extends GetxService {
 
   static SessionService instance = SessionService._();
 
-  static SessionService get to =>
-      Get.isRegistered<SessionService>() ? Get.find<SessionService>() : instance;
+  static SessionService get to => Get.isRegistered<SessionService>()
+      ? Get.find<SessionService>()
+      : instance;
 
   final Rxn<UserModel> _user = Rxn<UserModel>();
   final Rxn<UserSessionModel> _session = Rxn<UserSessionModel>();
@@ -195,4 +196,3 @@ class SessionService extends GetxService {
     log('🚪 [SessionService] Session terminated.');
   }
 }
-

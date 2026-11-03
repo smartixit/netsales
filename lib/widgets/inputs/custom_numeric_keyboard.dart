@@ -305,11 +305,7 @@ class _ActionKey extends StatelessWidget {
             ),
           ),
           alignment: Alignment.center,
-          child: Icon(
-            icon,
-            size: 22.r,
-            color: colors.onSurfaceVariant,
-          ),
+          child: Icon(icon, size: 22.r, color: colors.onSurfaceVariant),
         ),
       ),
     );

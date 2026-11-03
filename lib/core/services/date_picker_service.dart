@@ -38,8 +38,9 @@ class DatePickerService extends GetxService {
 
   static final DatePickerService instance = DatePickerService._();
 
-  static DatePickerService get to =>
-      Get.isRegistered<DatePickerService>() ? Get.find<DatePickerService>() : instance;
+  static DatePickerService get to => Get.isRegistered<DatePickerService>()
+      ? Get.find<DatePickerService>()
+      : instance;
 
   /// تهيئة الخدمة وضمان توفر بيانات التقويم
   Future<DatePickerService> init() async {
@@ -115,7 +116,10 @@ class DatePickerService extends GetxService {
       useDialog: useDialog,
     );
 
-    if (dates != null && dates.length >= 2 && dates[0] != null && dates[1] != null) {
+    if (dates != null &&
+        dates.length >= 2 &&
+        dates[0] != null &&
+        dates[1] != null) {
       return DateTimeRange(start: dates[0]!, end: dates[1]!);
     }
     return null;
@@ -283,7 +287,7 @@ class DatePickerService extends GetxService {
     'أرب',
     'خمي',
     'جمع',
-    'سبت'
+    'سبت',
   ];
 
   /// اسم بديل متوافق لتسميات أيام الأسبوع المختصرة

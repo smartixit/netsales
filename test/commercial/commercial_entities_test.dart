@@ -11,9 +11,13 @@ import 'package:netsales/features/commercial/domain/usecases/create_network_pos_
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_network_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_pos_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/update_network_details_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/update_pos_details_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
 
 class MockCommercialRepository implements CommercialRepository {
@@ -339,6 +343,36 @@ void main() {
       final list = await getNetworkPosListUseCase(1);
       expect(list, isEmpty);
     });
+
+    test(
+      'GetNetworkDetailsUseCase and UpdateNetworkDetailsUseCase manage network details',
+      () async {
+        final getDetails = GetNetworkDetailsUseCase(repository);
+        final updateDetails = UpdateNetworkDetailsUseCase(repository);
+
+        final network = await getDetails(1);
+        expect(network.networkName, equals('Al-Amal Network'));
+
+        final updated = await updateDetails(1, {
+          'network_name': 'New Hope Network',
+        });
+        expect(updated.networkName, equals('New Hope Network'));
+      },
+    );
+
+    test(
+      'GetPosDetailsUseCase and UpdatePosDetailsUseCase manage POS details',
+      () async {
+        final getPos = GetPosDetailsUseCase(repository);
+        final updatePos = UpdatePosDetailsUseCase(repository);
+
+        final pos = await getPos(1);
+        expect(pos.posName, equals('Al-Nour POS'));
+
+        final updated = await updatePos(1, {'pos_name': 'Al-Nour Super POS'});
+        expect(updated.posName, equals('Al-Nour Super POS'));
+      },
+    );
   });
 
   group('CommercialDirectoryController Filtering and Logic', () {
@@ -384,6 +418,10 @@ void main() {
         deleteNetworkPosLinkUseCase: DeleteNetworkPosLinkUseCase(repo),
         getMyNetworksUseCase: GetMyNetworksUseCase(repo),
         getMyPosUseCase: GetMyPosUseCase(repo),
+        getNetworkDetailsUseCase: GetNetworkDetailsUseCase(repo),
+        getPosDetailsUseCase: GetPosDetailsUseCase(repo),
+        updateNetworkDetailsUseCase: UpdateNetworkDetailsUseCase(repo),
+        updatePosDetailsUseCase: UpdatePosDetailsUseCase(repo),
       );
 
       controller.links.assignAll([link1, link2]);

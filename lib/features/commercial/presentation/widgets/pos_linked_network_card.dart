@@ -6,6 +6,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_details_bottom_sheet.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
@@ -24,7 +25,11 @@ class PosLinkedNetworkCard extends StatelessWidget {
     final statusColor = isActive ? colors.success : colors.error;
 
     return CustomInteractiveBounce(
-      onTap: () {},
+      onTap: () {
+        if (network != null) {
+          NetworkDetailsBottomSheet.show(network: network);
+        }
+      },
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.all(AppSpacing.md),

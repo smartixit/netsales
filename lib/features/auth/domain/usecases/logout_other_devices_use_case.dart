@@ -12,4 +12,3 @@ class LogoutOtherDevicesUseCase {
 
   Future<void> call() => execute();
 }
-

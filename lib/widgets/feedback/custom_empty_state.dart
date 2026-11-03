@@ -71,8 +71,8 @@ class CustomEmptyState extends StatelessWidget {
     this.customAction,
     this.graphicSize,
     this.padding,
-  })  : variant = EmptyStateVariant.boxed,
-        compact = false;
+  }) : variant = EmptyStateVariant.boxed,
+       compact = false;
 
   /// منشئ مخصص للحالات المضغوطة جداً (قوائم منسدلة، أشرطة، أو بطاقات مصغرة)
   const CustomEmptyState.compact({
@@ -84,17 +84,17 @@ class CustomEmptyState extends StatelessWidget {
     this.actionLabel,
     this.onAction,
     this.padding,
-  })  : badgeText = null,
-        badgeIcon = null,
-        animationPath = null,
-        actionIcon = null,
-        secondaryActionLabel = null,
-        onSecondaryAction = null,
-        secondaryActionIcon = null,
-        customAction = null,
-        graphicSize = null,
-        variant = EmptyStateVariant.compact,
-        compact = true;
+  }) : badgeText = null,
+       badgeIcon = null,
+       animationPath = null,
+       actionIcon = null,
+       secondaryActionLabel = null,
+       onSecondaryAction = null,
+       secondaryActionIcon = null,
+       customAction = null,
+       graphicSize = null,
+       variant = EmptyStateVariant.compact,
+       compact = true;
 
   /// منشئ مخصص لنتائج البحث والتصفية الفارغة (Search & Filter Zero Results)
   factory CustomEmptyState.search({
@@ -110,7 +110,8 @@ class CustomEmptyState extends StatelessWidget {
       icon: Icons.search_off_rounded,
       animationPath: null,
       title: 'لم يتم العثور على أي نتائج',
-      subtitle: subtitle ??
+      subtitle:
+          subtitle ??
           (query.isNotEmpty
               ? 'لم تتطابق نتائج البحث مع "$query". يرجى التحقق من صحة الكلمات أو إعادة التصفية.'
               : 'لم نتمكن من العثور على أي سجلات متطابقة مع معايير البحث الحالية.'),
@@ -189,10 +190,12 @@ class CustomEmptyState extends StatelessWidget {
     return Center(
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: padding ?? EdgeInsets.symmetric(
-          horizontal: AppSpacing.xl,
-          vertical: AppSpacing.xxl,
-        ),
+        padding:
+            padding ??
+            EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.xxl,
+            ),
         child: content,
       ),
     );
@@ -244,10 +247,7 @@ class CustomEmptyState extends StatelessWidget {
           ],
 
           // 5. حزمة أزرار الإجراءات
-          if (_hasActions) ...[
-            AppSpacing.vLg,
-            _buildActionButtons(context),
-          ],
+          if (_hasActions) ...[AppSpacing.vLg, _buildActionButtons(context)],
         ],
       ),
     );
@@ -278,10 +278,7 @@ class CustomEmptyState extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [
-                    haloColor,
-                    haloColor.withValues(alpha: 0.0),
-                  ],
+                  colors: [haloColor, haloColor.withValues(alpha: 0.0)],
                   stops: const [0.4, 1.0],
                 ),
               ),
@@ -294,13 +291,12 @@ class CustomEmptyState extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: colors.surfaceContainerLowest.withValues(alpha: 0.6),
-                border: Border.all(
-                  color: innerRingColor,
-                  width: 1.5,
-                ),
+                border: Border.all(color: innerRingColor, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: (iconColor ?? colors.primary).withValues(alpha: 0.06),
+                    color: (iconColor ?? colors.primary).withValues(
+                      alpha: 0.06,
+                    ),
                     blurRadius: 24,
                     spreadRadius: 2,
                   ),
@@ -346,11 +342,7 @@ class CustomEmptyState extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: Icon(
-          activeIcon,
-          size: size * 0.28,
-          color: effectiveColor,
-        ),
+        child: Icon(activeIcon, size: size * 0.28, color: effectiveColor),
       ),
     );
   }
@@ -365,19 +357,13 @@ class CustomEmptyState extends StatelessWidget {
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(
-          color: badgeColor.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: badgeColor.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (badgeIcon != null) ...[
-            Icon(
-              badgeIcon,
-              size: 14.sp,
-              color: badgeColor,
-            ),
+            Icon(badgeIcon, size: 14.sp, color: badgeColor),
             SizedBox(width: 5.w),
           ] else ...[
             Container(
@@ -440,10 +426,12 @@ class CustomEmptyState extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: padding ?? EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xl,
-      ),
+      padding:
+          padding ??
+          EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.xl,
+          ),
       decoration: BoxDecoration(
         color: colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.card),
@@ -483,11 +471,7 @@ class CustomEmptyState extends StatelessWidget {
                   color: effectiveColor.withValues(alpha: 0.2),
                 ),
               ),
-              child: Icon(
-                activeIcon,
-                size: 20.sp,
-                color: effectiveColor,
-              ),
+              child: Icon(activeIcon, size: 20.sp, color: effectiveColor),
             ),
             SizedBox(height: 8.h),
             Text(

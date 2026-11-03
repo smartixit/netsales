@@ -50,10 +50,7 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
       duration: widget.duration,
       reverseDuration: widget.duration,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: widget.lowerBound,
-    ).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.lowerBound).animate(
       CurvedAnimation(
         parent: _controller,
         curve: AppMotion.emphasized,
@@ -130,10 +127,7 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
       onTapUp: _handleTapUp,
       onTapCancel: _handleTapCancel,
       onTap: _handleTap,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: widget.child,
-      ),
+      child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
     );
   }
 }

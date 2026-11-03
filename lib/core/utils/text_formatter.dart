@@ -205,13 +205,12 @@ extension TextFormatterExtensions on String? {
     int maxChars = 2,
     bool spaceBetween = true,
     String fallback = 'نت',
-  }) =>
-      TextFormatter.avatarInitials(
-        this,
-        maxChars: maxChars,
-        spaceBetween: spaceBetween,
-        fallback: fallback,
-      );
+  }) => TextFormatter.avatarInitials(
+    this,
+    maxChars: maxChars,
+    spaceBetween: spaceBetween,
+    fallback: fallback,
+  );
 
   /// اختزال بعدد الكلمات
   String takeWords(int count, {String fallback = '', String ellipsis = ''}) =>
@@ -227,26 +226,24 @@ extension TextFormatterExtensions on String? {
     int maxLength, {
     String ellipsis = '…',
     String fallback = '',
-  }) =>
-      TextFormatter.truncate(
-        this,
-        maxLength,
-        ellipsis: ellipsis,
-        fallback: fallback,
-      );
+  }) => TextFormatter.truncate(
+    this,
+    maxLength,
+    ellipsis: ellipsis,
+    fallback: fallback,
+  );
 
   /// حجب البيانات الحساسة
   String maskSecure({
     int startVisible = 3,
     int endVisible = 2,
     String maskChar = '*',
-  }) =>
-      TextFormatter.mask(
-        this,
-        startVisible: startVisible,
-        endVisible: endVisible,
-        maskChar: maskChar,
-      );
+  }) => TextFormatter.mask(
+    this,
+    startVisible: startVisible,
+    endVisible: endVisible,
+    maskChar: maskChar,
+  );
 }
 
 /// ملحق التفاعل مع GetX RxString

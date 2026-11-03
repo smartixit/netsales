@@ -177,7 +177,9 @@ class CustomDatePickerBottomSheetContent extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl.r)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppRadius.xl.r),
+            ),
             boxShadow: AppElevation.level4(context),
           ),
           child: SafeArea(
@@ -313,7 +315,8 @@ class _DatePickerContainerView extends StatefulWidget {
   final VoidCallback onCancel;
 
   @override
-  State<_DatePickerContainerView> createState() => _DatePickerContainerViewState();
+  State<_DatePickerContainerView> createState() =>
+      _DatePickerContainerViewState();
 }
 
 class _DatePickerContainerViewState extends State<_DatePickerContainerView> {
@@ -410,9 +413,7 @@ class _DatePickerContainerViewState extends State<_DatePickerContainerView> {
         color: colors.onPrimary,
         fontWeight: FontWeight.bold,
       ),
-      dayTextStyle: AppTypography.bodyMedium.copyWith(
-        color: colors.onSurface,
-      ),
+      dayTextStyle: AppTypography.bodyMedium.copyWith(color: colors.onSurface),
       todayTextStyle: AppTypography.bodyMedium.copyWith(
         color: colors.primary,
         fontWeight: FontWeight.bold,
@@ -420,7 +421,9 @@ class _DatePickerContainerViewState extends State<_DatePickerContainerView> {
       disabledDayTextStyle: AppTypography.bodyMedium.copyWith(
         color: colors.onSurface.withValues(alpha: 0.28),
       ),
-      selectedRangeHighlightColor: colors.primaryContainer.withValues(alpha: 0.40),
+      selectedRangeHighlightColor: colors.primaryContainer.withValues(
+        alpha: 0.40,
+      ),
       selectedRangeDayTextStyle: AppTypography.bodyMedium.copyWith(
         color: colors.onPrimaryContainer,
         fontWeight: FontWeight.bold,
@@ -519,7 +522,11 @@ class _DatePickerHeader extends StatelessWidget {
     if (mode == DatePickerSelectionMode.range) {
       final start = selectedDates.isNotEmpty ? selectedDates[0] : null;
       final end = selectedDates.length > 1 ? selectedDates[1] : null;
-      return DatePickerService.instance.formatArabicRange(start, end, includeTime: enableTime);
+      return DatePickerService.instance.formatArabicRange(
+        start,
+        end,
+        includeTime: enableTime,
+      );
     }
 
     return DatePickerService.instance.formatArabicDate(
@@ -540,7 +547,9 @@ class _DatePickerHeader extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg.r)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.lg.r),
+        ),
       ),
       child: Row(
         children: [
@@ -757,7 +766,9 @@ class _TimePickerSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isPm = selectedTime.hour >= 12;
-    final displayHour = selectedTime.hour % 12 == 0 ? 12 : selectedTime.hour % 12;
+    final displayHour = selectedTime.hour % 12 == 0
+        ? 12
+        : selectedTime.hour % 12;
     final displayMinute = selectedTime.minute.toString().padLeft(2, '0');
 
     return Container(
@@ -779,11 +790,7 @@ class _TimePickerSection extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.access_time_rounded,
-            color: colors.primary,
-            size: 20.r,
-          ),
+          Icon(Icons.access_time_rounded, color: colors.primary, size: 20.r),
           AppSpacing.hSm,
           Text(
             'الوقت:',

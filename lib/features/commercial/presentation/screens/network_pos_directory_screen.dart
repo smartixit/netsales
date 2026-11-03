@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/link_pos_bottom_sheet.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_details_bottom_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_card.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_search_filter_header.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
@@ -33,11 +34,31 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     _ensureDataLoaded();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: const Text('دليل نقاط البيع المرتبطة'),
+        centerTitle: true,
+        actions: [
+          CustomButton.icon(
+            icon: Icons.business_outlined,
+            tooltip: 'بيانات الشبكة',
+            onPressed: () async {
+              final network = await controller.fetchNetworkDetails(
+                controller.activeNetworkId.value,
+              );
+              if (network != null) {
+                await NetworkDetailsBottomSheet.show(
+                  network: network,
+                  canEdit: true,
+                );
+              }
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           // 1. شريط البحث والفلترة المفصول (Feature Widget)
@@ -110,18 +131,12 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: colors.primary,
-        foregroundColor: colors.onPrimary,
-        elevation: 3,
-        icon: const Icon(Icons.add_link_rounded),
-        label: Text(
-          'ربط نقطة بيع',
-          style: AppTypography.labelLarge.copyWith(
-            fontWeight: FontWeight.bold,
-            color: colors.onPrimary,
-          ),
-        ),
+      floatingActionButton: CustomButton.primary(
+        text: 'ربط نقطة بيع',
+        icon: Icons.add_link_rounded,
+        shape: AppButtonShape.pill,
+        size: AppButtonSize.medium,
+        shadow: AppElevation.level4(context),
         onPressed: () => LinkPosBottomSheet.show(
           networkId: controller.activeNetworkId.value,
         ),

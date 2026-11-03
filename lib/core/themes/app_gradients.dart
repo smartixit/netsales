@@ -134,92 +134,79 @@ class AppGradients {
       stops: const [0.0, 0.45, 1.0],
     );
   }
-    /// تدرج Hero ب3 محطات (accent خفيف → surface → surfaceContainerLowest) — للبطاقات Hero في operations
-    static LinearGradient accentHero3(BuildContext context, Color accent) {
-      final scheme = _scheme(context);
-      return LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [
-          accent.withValues(alpha: 0.06),
-          scheme.surface.withValues(alpha: 0.40),
-          scheme.surfaceContainerLowest,
-        ],
-        stops: const [0.0, 0.40, 1.0],
-      );
-    }
 
-    /// تدرج Badge ب2 محطات (accent 0.18 → accent 0.06) — للشارات داخل Hero
-    static LinearGradient accentBadge(BuildContext context, Color accent) {
-      return LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          accent.withValues(alpha: 0.18),
-          accent.withValues(alpha: 0.06),
-        ],
-      );
-    }
+  /// تدرج Hero ب3 محطات (accent خفيف → surface → surfaceContainerLowest) — للبطاقات Hero في operations
+  static LinearGradient accentHero3(BuildContext context, Color accent) {
+    final scheme = _scheme(context);
+    return LinearGradient(
+      begin: Alignment.topRight,
+      end: Alignment.bottomLeft,
+      colors: [
+        accent.withValues(alpha: 0.06),
+        scheme.surface.withValues(alpha: 0.40),
+        scheme.surfaceContainerLowest,
+      ],
+      stops: const [0.0, 0.40, 1.0],
+    );
+  }
 
-    /// تدرج Soft ب2 محطات (accent 0.18 → accent 0.05) — لبطاقات parties
-    static LinearGradient accentSoft(BuildContext context, Color accent) {
-      return LinearGradient(
-        colors: [
-          accent.withValues(alpha: 0.18),
-          accent.withValues(alpha: 0.05),
-        ],
-      );
-    }
+  /// تدرج Badge ب2 محطات (accent 0.18 → accent 0.06) — للشارات داخل Hero
+  static LinearGradient accentBadge(BuildContext context, Color accent) {
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [accent.withValues(alpha: 0.18), accent.withValues(alpha: 0.06)],
+    );
+  }
 
-    /// تدرج Ledger Hero ب3 محطات (accent 0.05 → surface 0.35 → surfaceContainerLowest)
-    static LinearGradient ledgerHero3(BuildContext context, Color accent) {
-      final scheme = _scheme(context);
-      return LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [
-          accent.withValues(alpha: 0.05),
-          scheme.surface.withValues(alpha: 0.35),
-          scheme.surfaceContainerLowest,
-        ],
-        stops: const [0.0, 0.40, 1.0],
-      );
-    }
+  /// تدرج Soft ب2 محطات (accent 0.18 → accent 0.05) — لبطاقات parties
+  static LinearGradient accentSoft(BuildContext context, Color accent) {
+    return LinearGradient(
+      colors: [accent.withValues(alpha: 0.18), accent.withValues(alpha: 0.05)],
+    );
+  }
 
-    /// تدرج Ledger Badge ب2 محطات (accent 0.16 → accent 0.05)
-    static LinearGradient ledgerBadge(BuildContext context, Color accent) {
-      return LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          accent.withValues(alpha: 0.16),
-          accent.withValues(alpha: 0.05),
-        ],
-      );
-    }
+  /// تدرج Ledger Hero ب3 محطات (accent 0.05 → surface 0.35 → surfaceContainerLowest)
+  static LinearGradient ledgerHero3(BuildContext context, Color accent) {
+    final scheme = _scheme(context);
+    return LinearGradient(
+      begin: Alignment.topRight,
+      end: Alignment.bottomLeft,
+      colors: [
+        accent.withValues(alpha: 0.05),
+        scheme.surface.withValues(alpha: 0.35),
+        scheme.surfaceContainerLowest,
+      ],
+      stops: const [0.0, 0.40, 1.0],
+    );
+  }
 
-    /// تدرج Outline Soft ب2 محطات (accent 0.35 → accent 0.05)
-    static LinearGradient outlineSoft(BuildContext context, Color accent) {
-      return LinearGradient(
-        colors: [
-          accent.withValues(alpha: 0.35),
-          accent.withValues(alpha: 0.05),
-        ],
-      );
-    }
-    /// تدرج من قائمة ألوان مخصصة (للحالات الديناميكية) — يمنع كتابة LinearGradient في الميزات
-    static LinearGradient fromColors(
-      BuildContext context,
-      List<Color> colors, {
-      AlignmentGeometry begin = AlignmentDirectional.topStart,
-      AlignmentGeometry end = AlignmentDirectional.bottomEnd,
-    }) {
-      return LinearGradient(
-        begin: begin,
-        end: end,
-        colors: colors,
-      );
-    }
+  /// تدرج Ledger Badge ب2 محطات (accent 0.16 → accent 0.05)
+  static LinearGradient ledgerBadge(BuildContext context, Color accent) {
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [accent.withValues(alpha: 0.16), accent.withValues(alpha: 0.05)],
+    );
+  }
+
+  /// تدرج Outline Soft ب2 محطات (accent 0.35 → accent 0.05)
+  static LinearGradient outlineSoft(BuildContext context, Color accent) {
+    return LinearGradient(
+      colors: [accent.withValues(alpha: 0.35), accent.withValues(alpha: 0.05)],
+    );
+  }
+
+  /// تدرج من قائمة ألوان مخصصة (للحالات الديناميكية) — يمنع كتابة LinearGradient في الميزات
+  static LinearGradient fromColors(
+    BuildContext context,
+    List<Color> colors, {
+    AlignmentGeometry begin = AlignmentDirectional.topStart,
+    AlignmentGeometry end = AlignmentDirectional.bottomEnd,
+  }) {
+    return LinearGradient(begin: begin, end: end, colors: colors);
+  }
+
   /// Primary Gradient
   static LinearGradient primaryGradient(BuildContext context) {
     // final scheme = _scheme(context);

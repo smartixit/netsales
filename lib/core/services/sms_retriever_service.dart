@@ -8,10 +8,8 @@ import 'package:smart_auth/smart_auth.dart';
 /// يطبق واجهة [SmsRetriever] من حزمة Pinput للاستماع المباشر لرسائل OTP
 /// عبر Google Play Services SMS Retriever API (تلقائي بالكامل Zero-Click).
 class AppSmsRetriever implements SmsRetriever {
-  AppSmsRetriever({
-    SmartAuth? smartAuth,
-    this.matcher = r'\d{4,8}',
-  }) : _smartAuth = smartAuth ?? SmartAuth.instance;
+  AppSmsRetriever({SmartAuth? smartAuth, this.matcher = r'\d{4,8}'})
+    : _smartAuth = smartAuth ?? SmartAuth.instance;
 
   final SmartAuth _smartAuth;
 

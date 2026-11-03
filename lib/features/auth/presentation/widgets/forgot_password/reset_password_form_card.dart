@@ -22,148 +22,144 @@ class ResetPasswordFormCard extends GetView<ResetPasswordController> {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
-        boxShadow: AppElevation.level1(context),
-      ),
-      child: Form(
-        key: controller.formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 1. كلمة المرور الحالية أو المؤقتة (تُعرض فقط عند التغيير المسجل/الإلزامي وليس عند الاستعادة بالرمز)
-            if (!controller.isDirectReset) ...[
-              CustomPasswordField(
-                controller: controller.currentPasswordController,
-                label: controller.isForced
-                    ? 'كلمة المرور المؤقتة (الحالية)'
-                    : 'كلمة المرور الحالية',
-                textInputAction: TextInputAction.next,
-                prefixIcon: Icon(
-                  Icons.lock_clock_rounded,
-                ),
-                validator: FormValidators.required(
-                  fieldName: controller.isForced
-                      ? 'كلمة المرور المؤقتة'
-                      : 'كلمة المرور الحالية',
-                ),
-              ),
-              AppSpacing.vLg,
-            ],
-
-            // 2. كلمة المرور الجديدة
-            CustomPasswordField.newPassword(
-              controller: controller.newPasswordController,
-              validator: FormValidators.passwordValidator(
-                fieldName: 'كلمة المرور الجديدة',
-                minLength: 8,
-              ),
+          padding: EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            border: Border.all(
+              color: colors.outlineVariant.withValues(alpha: 0.3),
             ),
-
-            AppSpacing.vSm,
-
-            // 3. شريط مقياس قوة كلمة المرور مع المعايير الذكية
-            Obx(() {
-              final score = controller.passwordScore.value;
-              final Color meterColor = score <= 0.4
-                  ? colors.error
-                  : (score <= 0.7 ? colors.warning : colors.success);
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.xs),
-                    child: LinearProgressIndicator(
-                      value: score,
-                      minHeight: 4.h,
-                      backgroundColor: colors.surfaceContainerHighest,
-                      valueColor: AlwaysStoppedAnimation<Color>(meterColor),
+            boxShadow: AppElevation.level1(context),
+          ),
+          child: Form(
+            key: controller.formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // 1. كلمة المرور الحالية أو المؤقتة (تُعرض فقط عند التغيير المسجل/الإلزامي وليس عند الاستعادة بالرمز)
+                if (!controller.isDirectReset) ...[
+                  CustomPasswordField(
+                    controller: controller.currentPasswordController,
+                    label: controller.isForced
+                        ? 'كلمة المرور المؤقتة (الحالية)'
+                        : 'كلمة المرور الحالية',
+                    textInputAction: TextInputAction.next,
+                    prefixIcon: Icon(Icons.lock_clock_rounded),
+                    validator: FormValidators.required(
+                      fieldName: controller.isForced
+                          ? 'كلمة المرور المؤقتة'
+                          : 'كلمة المرور الحالية',
                     ),
                   ),
-                  AppSpacing.vSm,
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.xs,
+                  AppSpacing.vLg,
+                ],
+
+                // 2. كلمة المرور الجديدة
+                CustomPasswordField.newPassword(
+                  controller: controller.newPasswordController,
+                  validator: FormValidators.passwordValidator(
+                    fieldName: 'كلمة المرور الجديدة',
+                    minLength: 8,
+                  ),
+                ),
+
+                AppSpacing.vSm,
+
+                // 3. شريط مقياس قوة كلمة المرور مع المعايير الذكية
+                Obx(() {
+                  final score = controller.passwordScore.value;
+                  final Color meterColor = score <= 0.4
+                      ? colors.error
+                      : (score <= 0.7 ? colors.warning : colors.success);
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomPasswordRequirementItem(
-                        label: '8 أحرف على الأقل',
-                        isValid: controller.hasMinLength.value,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(AppRadius.xs),
+                        child: LinearProgressIndicator(
+                          value: score,
+                          minHeight: 4.h,
+                          backgroundColor: colors.surfaceContainerHighest,
+                          valueColor: AlwaysStoppedAnimation<Color>(meterColor),
+                        ),
                       ),
-                      CustomPasswordRequirementItem(
-                        label: 'حرف كبير (A-Z)',
-                        isValid: controller.hasUppercase.value,
-                      ),
-                      CustomPasswordRequirementItem(
-                        label: 'حرف صغير (a-z)',
-                        isValid: controller.hasLowercase.value,
-                      ),
-                      CustomPasswordRequirementItem(
-                        label: 'رقم (0-9)',
-                        isValid: controller.hasDigit.value,
-                      ),
-                      CustomPasswordRequirementItem(
-                        label: 'رمز خاص (!@#\$%)',
-                        isValid: controller.hasSpecialChar.value,
+                      AppSpacing.vSm,
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.xs,
+                        children: [
+                          CustomPasswordRequirementItem(
+                            label: '8 أحرف على الأقل',
+                            isValid: controller.hasMinLength.value,
+                          ),
+                          CustomPasswordRequirementItem(
+                            label: 'حرف كبير (A-Z)',
+                            isValid: controller.hasUppercase.value,
+                          ),
+                          CustomPasswordRequirementItem(
+                            label: 'حرف صغير (a-z)',
+                            isValid: controller.hasLowercase.value,
+                          ),
+                          CustomPasswordRequirementItem(
+                            label: 'رقم (0-9)',
+                            isValid: controller.hasDigit.value,
+                          ),
+                          CustomPasswordRequirementItem(
+                            label: 'رمز خاص (!@#\$%)',
+                            isValid: controller.hasSpecialChar.value,
+                          ),
+                        ],
                       ),
                     ],
+                  );
+                }),
+
+                AppSpacing.vLg,
+
+                // 4. تأكيد كلمة المرور الجديدة
+                CustomPasswordField.confirm(
+                  controller: controller.confirmPasswordController,
+                  prefixIcon: Icon(Icons.lock_reset_rounded),
+                  validator: FormValidators.confirmPasswordValidator(
+                    fieldName: 'تأكيد كلمة المرور',
+                    passwordController: controller.newPasswordController,
                   ),
-                ],
-              );
-            }),
+                  onFieldSubmitted: (_) => controller.submit(),
+                ),
 
-            AppSpacing.vLg,
+                AppSpacing.vXl,
 
-            // 4. تأكيد كلمة المرور الجديدة
-            CustomPasswordField.confirm(
-              controller: controller.confirmPasswordController,
-              prefixIcon: Icon(
-                Icons.lock_reset_rounded,
-              ),
-              validator: FormValidators.confirmPasswordValidator(
-                fieldName: 'تأكيد كلمة المرور',
-                passwordController: controller.newPasswordController,
-              ),
-              onFieldSubmitted: (_) => controller.submit(),
+                // 5. زر الحفظ وتأكيد الهوية
+                Obx(
+                  () => CustomButton.primary(
+                    text: controller.isDirectReset
+                        ? 'حفظ كلمة المرور والدخول'
+                        : 'حفظ وتأمين الحساب',
+                    icon: Icons.check_circle_outline_rounded,
+                    size: AppButtonSize.large,
+                    height: 52.h,
+                    loading: controller.isLoading.value,
+                    onPressed: controller.submit,
+                  ),
+                ),
+
+                AppSpacing.vSm,
+
+                // 6. زر الإلغاء
+                CustomButton.text(
+                  text: controller.isDirectReset
+                      ? 'رجوع'
+                      : (controller.isForced
+                            ? 'تسجيل الخروج والعودة لاحقاً'
+                            : 'إلغاء'),
+                  onPressed: controller.abortOrLogout,
+                  // foregroundColor: colors.onSurfaceVariant,
+                ),
+              ],
             ),
-
-            AppSpacing.vXl,
-
-            // 5. زر الحفظ وتأكيد الهوية
-            Obx(
-              () => CustomButton.primary(
-                text: controller.isDirectReset
-                    ? 'حفظ كلمة المرور والدخول'
-                    : 'حفظ وتأمين الحساب',
-                icon: Icons.check_circle_outline_rounded,
-                size: AppButtonSize.large,
-                height: 52.h,
-                loading: controller.isLoading.value,
-                onPressed: controller.submit,
-              ),
-            ),
-
-            AppSpacing.vSm,
-
-            // 6. زر الإلغاء
-            CustomButton.text(
-              text: controller.isDirectReset
-                  ? 'رجوع'
-                  : (controller.isForced
-                      ? 'تسجيل الخروج والعودة لاحقاً'
-                      : 'إلغاء'),
-              onPressed: controller.abortOrLogout,
-              // foregroundColor: colors.onSurfaceVariant,
-            ),
-          ],
-        ),
-      ),
-    )
+          ),
+        )
         .animate()
         .fadeIn(duration: AppMotion.normal)
         .slideY(

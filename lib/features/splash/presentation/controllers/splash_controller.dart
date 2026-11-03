@@ -52,7 +52,9 @@ class SplashController extends GetxController {
       final destination = await determineBootDestinationUseCase();
       if (_isDisposed) return;
 
-      log('🚀 [SplashController] Bootstrapping complete. Navigating to: $destination');
+      log(
+        '🚀 [SplashController] Bootstrapping complete. Navigating to: $destination',
+      );
       await Get.offNamed<void>(destination);
     } catch (e, stack) {
       final cleanMessage = AppException.sanitizeMessage(e);
@@ -74,4 +76,3 @@ class SplashController extends GetxController {
     super.onClose();
   }
 }
-

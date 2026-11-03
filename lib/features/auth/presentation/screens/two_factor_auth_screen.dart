@@ -40,9 +40,7 @@ class TwoFactorAuthScreen extends GetView<TwoFactorAuthController> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // 1. قسم الترويسة والأيقونة الأمنية
-            TwoFactorHeaderSection(
-              maskedPhone: controller.maskedPhone,
-            ),
+            TwoFactorHeaderSection(maskedPhone: controller.maskedPhone),
 
             AppSpacing.vLg,
 

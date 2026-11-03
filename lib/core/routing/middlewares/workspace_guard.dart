@@ -56,4 +56,3 @@ class WorkspaceGuard extends GetMiddleware {
     return null;
   }
 }
-

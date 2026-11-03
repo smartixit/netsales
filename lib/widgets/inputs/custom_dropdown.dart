@@ -10,6 +10,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// يكيّف `RxBool` من GetX مع `ValueListenable<bool>` ليستطيع
 /// `ValueListenableBuilder` داخل القائمة المفتوحة التفاعل مع تغيّره.
@@ -301,8 +302,11 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
         if (value.text.isEmpty) {
           return const SizedBox.shrink();
         }
-        return IconButton(
-          icon: Icon(Icons.clear_rounded, size: 20.r),
+        return CustomButton.icon(
+          icon: Icons.clear_rounded,
+          iconSize: 20.r,
+          dimension: 36.r,
+          backgroundColor: Colors.transparent,
           tooltip: 'مسح البحث',
           onPressed: () {
             _searchController.clear();
@@ -471,9 +475,11 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
                       if (widget.showScanner &&
                           widget.onScannerTap != null) ...[
                         SizedBox(width: AppSpacing.sm),
-                        IconButton.filledTonal(
+                        CustomButton.icon(
                           tooltip: 'مسح رمز QR',
-                          icon: Icon(Icons.qr_code_scanner_rounded, size: 20.r),
+                          icon: Icons.qr_code_scanner_rounded,
+                          iconSize: 20.r,
+                          dimension: 36.r,
                           onPressed: widget.onScannerTap,
                         ),
                       ],

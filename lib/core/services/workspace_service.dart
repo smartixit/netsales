@@ -18,10 +18,9 @@ class WorkspaceService extends GetxService {
 
   static WorkspaceService instance = WorkspaceService._();
 
-  static WorkspaceService get to =>
-      Get.isRegistered<WorkspaceService>()
-          ? Get.find<WorkspaceService>()
-          : instance;
+  static WorkspaceService get to => Get.isRegistered<WorkspaceService>()
+      ? Get.find<WorkspaceService>()
+      : instance;
 
   final Rx<AppWorkspace> currentWorkspace = AppWorkspace.unsupported.obs;
 
@@ -40,13 +39,16 @@ class WorkspaceService extends GetxService {
 
     if (savedWorkspace == 'pos' && resolved == AppWorkspace.pos) {
       currentWorkspace.value = AppWorkspace.pos;
-    } else if (savedWorkspace == 'network' && resolved == AppWorkspace.network) {
+    } else if (savedWorkspace == 'network' &&
+        resolved == AppWorkspace.network) {
       currentWorkspace.value = AppWorkspace.network;
     } else {
       currentWorkspace.value = resolved;
     }
 
-    log('🏢 [WorkspaceService] Initialized with workspace: ${currentWorkspace.value.name}');
+    log(
+      '🏢 [WorkspaceService] Initialized with workspace: ${currentWorkspace.value.name}',
+    );
     return this;
   }
 
@@ -82,10 +84,12 @@ class WorkspaceService extends GetxService {
     }
 
     // fallback: إذا احتوى اسم الدور أو وصفه على NETWORK أو POS
-    if (roleKey.contains('NET') || (user.role?.roleName.contains('شبك') ?? false)) {
+    if (roleKey.contains('NET') ||
+        (user.role?.roleName.contains('شبك') ?? false)) {
       return AppWorkspace.network;
     }
-    if (roleKey.contains('POS') || (user.role?.roleName.contains('نقط') ?? false)) {
+    if (roleKey.contains('POS') ||
+        (user.role?.roleName.contains('نقط') ?? false)) {
       return AppWorkspace.pos;
     }
 
@@ -114,4 +118,3 @@ class WorkspaceService extends GetxService {
     }
   }
 }
-

@@ -21,21 +21,21 @@ class RegisterPosHeaderSection extends StatelessWidget {
       children: [
         // 1. أيقونة نقطة البيع الهندسية المعتمدة
         Container(
-          width: 56.r,
-          height: 56.r,
-          decoration: BoxDecoration(
-            color: colors.primaryContainer.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(
-              color: colors.primary.withValues(alpha: 0.15),
-            ),
-          ),
-          child: Icon(
-            Icons.storefront_rounded,
-            color: colors.primary,
-            size: 28.r,
-          ),
-        )
+              width: 56.r,
+              height: 56.r,
+              decoration: BoxDecoration(
+                color: colors.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: 0.15),
+                ),
+              ),
+              child: Icon(
+                Icons.storefront_rounded,
+                color: colors.primary,
+                size: 28.r,
+              ),
+            )
             .animate()
             .scale(
               begin: const Offset(0.9, 0.9),
@@ -49,13 +49,13 @@ class RegisterPosHeaderSection extends StatelessWidget {
 
         // 2. العنوان الرئيسي
         Text(
-          'تسجيل نقطة بيع جديدة',
-          style: AppTypography.headlineMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.w800,
-          ),
-          textAlign: TextAlign.center,
-        )
+              'تسجيل نقطة بيع جديدة',
+              style: AppTypography.headlineMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
+              ),
+              textAlign: TextAlign.center,
+            )
             .animate()
             .fadeIn(duration: AppMotion.normal)
             .slideY(
@@ -69,13 +69,13 @@ class RegisterPosHeaderSection extends StatelessWidget {
 
         // 3. النص الإرشادي
         Text(
-          'انضم كوكيل ونقطة بيع معتمدة وأصدر كروت الإنترنت بكل سهولة وموثوقية',
-          style: AppTypography.bodyMedium.copyWith(
-            color: colors.onSurfaceVariant,
-            height: 1.4,
-          ),
-          textAlign: TextAlign.center,
-        )
+              'انضم كوكيل ونقطة بيع معتمدة وأصدر كروت الإنترنت بكل سهولة وموثوقية',
+              style: AppTypography.bodyMedium.copyWith(
+                color: colors.onSurfaceVariant,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            )
             .animate()
             .fadeIn(duration: AppMotion.normal)
             .slideY(

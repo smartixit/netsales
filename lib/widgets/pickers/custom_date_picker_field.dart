@@ -63,7 +63,8 @@ class CustomDatePickerField extends StatefulWidget {
     return CustomDatePickerField(
       key: key,
       value: value != null ? [value] : null,
-      onChanged: (dates) => onChanged?.call(dates.isNotEmpty ? dates.first : null),
+      onChanged: (dates) =>
+          onChanged?.call(dates.isNotEmpty ? dates.first : null),
       label: label,
       hint: hint ?? 'اختر التاريخ...',
       pickerType: DatePickerSelectionMode.single,
@@ -75,7 +76,9 @@ class CustomDatePickerField extends StatefulWidget {
       isRequired: isRequired,
       enabled: enabled,
       validator: validator != null
-          ? (dates) => validator(dates != null && dates.isNotEmpty ? dates.first : null)
+          ? (dates) => validator(
+              dates != null && dates.isNotEmpty ? dates.first : null,
+            )
           : null,
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
@@ -109,7 +112,10 @@ class CustomDatePickerField extends StatefulWidget {
     bool useDialog = false,
   }) {
     DateTimeRange? toRange(List<DateTime?>? dates) {
-      if (dates != null && dates.length >= 2 && dates[0] != null && dates[1] != null) {
+      if (dates != null &&
+          dates.length >= 2 &&
+          dates[0] != null &&
+          dates[1] != null) {
         return DateTimeRange(start: dates[0]!, end: dates[1]!);
       }
       return null;
@@ -129,7 +135,9 @@ class CustomDatePickerField extends StatefulWidget {
       selectableDayPredicate: selectableDayPredicate,
       isRequired: isRequired,
       enabled: enabled,
-      validator: validator != null ? (dates) => validator(toRange(dates)) : null,
+      validator: validator != null
+          ? (dates) => validator(toRange(dates))
+          : null,
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
       displayFormatter: displayFormatter != null
@@ -254,7 +262,11 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
     if (widget.pickerType == DatePickerSelectionMode.range) {
       final start = list.isNotEmpty ? list[0] : null;
       final end = list.length > 1 ? list[1] : null;
-      return DatePickerService.instance.formatArabicRange(start, end, includeTime: widget.enableTime);
+      return DatePickerService.instance.formatArabicRange(
+        start,
+        end,
+        includeTime: widget.enableTime,
+      );
     }
 
     if (widget.pickerType == DatePickerSelectionMode.single) {
@@ -271,7 +283,8 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final hasValue = widget.value != null &&
+    final hasValue =
+        widget.value != null &&
         widget.value!.isNotEmpty &&
         widget.value!.any((d) => d != null);
     final displayText = _formatDisplayText();
@@ -337,9 +350,7 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
                           ? Icons.access_time_rounded
                           : Icons.calendar_today_rounded,
                       size: 18.r,
-                      color: hasError
-                          ? colors.error
-                          : colors.onSurfaceVariant,
+                      color: hasError ? colors.error : colors.onSurfaceVariant,
                     ),
                 AppSpacing.hSm,
 
@@ -355,7 +366,9 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
                             fontWeight: FontWeight.w500,
                           )
                         : AppTypography.inputHint.copyWith(
-                            color: colors.onSurfaceVariant.withValues(alpha: 0.6),
+                            color: colors.onSurfaceVariant.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -415,4 +428,3 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
     );
   }
 }
-

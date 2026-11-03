@@ -516,7 +516,9 @@ class CustomErrorState extends StatelessWidget {
                     child: CustomButton.text(
                       foregroundColor: colors.primary,
                       onPressed: () async {
-                        await UrlLauncherService.copyToClipboard(technicalDetails!);
+                        await UrlLauncherService.copyToClipboard(
+                          technicalDetails!,
+                        );
                         CustomToast.show(
                           message: 'تم نسخ تفاصيل الخطأ للحافظة',
                           icon: Icons.copy_rounded,

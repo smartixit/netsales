@@ -5,10 +5,7 @@ class VerifyResetOtpParams {
   final String phoneNumber;
   final String otp;
 
-  const VerifyResetOtpParams({
-    required this.phoneNumber,
-    required this.otp,
-  });
+  const VerifyResetOtpParams({required this.phoneNumber, required this.otp});
 }
 
 /// حالة استخدام التحقق من كود الاستعادة وتوليد كلمة المرور المؤقتة (Verify Reset OTP Use Case)

@@ -20,8 +20,8 @@ class IntegrationGateService extends GetxService {
 
   static IntegrationGateService get to =>
       Get.isRegistered<IntegrationGateService>()
-          ? Get.find<IntegrationGateService>()
-          : instance;
+      ? Get.find<IntegrationGateService>()
+      : instance;
 
   final Map<ControlledMutation, bool> _mutationGates = {
     ControlledMutation.walletDeposit: false,
@@ -54,4 +54,3 @@ class IntegrationGateService extends GetxService {
     }
   }
 }
-

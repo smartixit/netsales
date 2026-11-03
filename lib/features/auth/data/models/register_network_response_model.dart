@@ -12,13 +12,21 @@ class RegisterNetworkResponseModel extends RegisterNetworkResultEntity {
     super.status,
   });
 
-  factory RegisterNetworkResponseModel.fromJson(Map<String, dynamic> json, {String? defaultMessage}) {
-    final network = json['network'] is Map ? json['network'] as Map<String, dynamic> : null;
-    final user = json['user'] is Map ? json['user'] as Map<String, dynamic> : null;
+  factory RegisterNetworkResponseModel.fromJson(
+    Map<String, dynamic> json, {
+    String? defaultMessage,
+  }) {
+    final network = json['network'] is Map
+        ? json['network'] as Map<String, dynamic>
+        : null;
+    final user = json['user'] is Map
+        ? json['user'] as Map<String, dynamic>
+        : null;
 
     return RegisterNetworkResponseModel(
       success: true,
-      message: json['message']?.toString() ??
+      message:
+          json['message']?.toString() ??
           defaultMessage ??
           'تم استلام طلبكم، سيتم مراجعة الطلب واشعاركم في حال قبول الطلب.',
       networkId: network?['network_id'] as int?,

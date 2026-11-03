@@ -210,12 +210,7 @@ class AppCacheService {
   // ===========================================================================
 
   /// تخزين قيمة في كاش الذاكرة مع مدة صلاحية اختيارية ووسوم تجميعية
-  void set<T>(
-    String key,
-    T data, {
-    Duration? ttl,
-    List<String>? tags,
-  }) {
+  void set<T>(String key, T data, {Duration? ttl, List<String>? tags}) {
     final now = DateTime.now();
     final expiresAt = ttl != null ? now.add(ttl) : null;
     _memoryCache[key] = _MemoryCacheEntry<T>(

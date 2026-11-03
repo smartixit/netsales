@@ -12,7 +12,8 @@ class DirectorateModel extends DirectorateEntity {
     return DirectorateModel(
       directorateId: (json['directorate_id'] ?? json['id']) as int? ?? 0,
       governorateId: (json['governorate_id']) as int? ?? 0,
-      directorateName: (json['directorate_name'] ?? json['name'])?.toString() ?? '',
+      directorateName:
+          (json['directorate_name'] ?? json['name'])?.toString() ?? '',
     );
   }
 

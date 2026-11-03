@@ -73,8 +73,9 @@ class CredentialService extends GetxService {
 
   static final CredentialService instance = CredentialService._();
 
-  static CredentialService get to =>
-      Get.isRegistered<CredentialService>() ? Get.find<CredentialService>() : instance;
+  static CredentialService get to => Get.isRegistered<CredentialService>()
+      ? Get.find<CredentialService>()
+      : instance;
 
   static const String _keyPhone = 'nts_secure_cred_phone';
   static const String _keyPassword = 'nts_secure_cred_password';
@@ -83,12 +84,8 @@ class CredentialService extends GetxService {
   final LocalAuthentication _localAuth = LocalAuthentication();
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      resetOnError: true,
-    ),
-    iOptions: IOSOptions(
-      accessibility: KeychainAccessibility.first_unlock,
-    ),
+    aOptions: AndroidOptions(resetOnError: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 
   /// تهيئة الخدمة

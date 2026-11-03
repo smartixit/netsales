@@ -32,4 +32,3 @@ class UserDeviceEntity {
 
   bool get isActive => status == 'ACTIVE';
 }
-

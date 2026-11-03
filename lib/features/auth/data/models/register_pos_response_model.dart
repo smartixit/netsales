@@ -19,11 +19,14 @@ class RegisterPosResponseModel extends RegisterPosResultEntity {
     String? defaultMessage,
   }) {
     final pos = json['pos'] is Map ? json['pos'] as Map<String, dynamic> : null;
-    final user = json['user'] is Map ? json['user'] as Map<String, dynamic> : null;
+    final user = json['user'] is Map
+        ? json['user'] as Map<String, dynamic>
+        : null;
 
     return RegisterPosResponseModel(
       success: true,
-      message: json['message']?.toString() ??
+      message:
+          json['message']?.toString() ??
           defaultMessage ??
           'تم استلام طلب تسجيل نقطة البيع بنجاح وهو قيد المراجعة والاعتماد.',
       posId: pos?['pos_id'] as int?,

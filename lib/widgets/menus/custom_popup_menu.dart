@@ -386,6 +386,7 @@ class _BouncyTriggerState extends State<_BouncyTrigger>
     );
   }
 }
+
 class _PopupHeaderEntry<T> extends PopupMenuEntry<T> {
   final String title;
   final AppColors colors;

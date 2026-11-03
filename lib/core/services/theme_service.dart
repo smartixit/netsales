@@ -97,7 +97,7 @@ class ThemeService extends GetxService with WidgetsBindingObserver {
 
     final isDark = mode == ThemeMode.system
         ? (WidgetsBinding.instance.platformDispatcher.platformBrightness ==
-            Brightness.dark)
+              Brightness.dark)
         : mode == ThemeMode.dark;
 
     syncSystemOverlay(isDark);
@@ -123,8 +123,9 @@ class ThemeService extends GetxService with WidgetsBindingObserver {
           statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
           statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
           systemNavigationBarColor: Colors.transparent,
-          systemNavigationBarIconBrightness:
-              isDark ? Brightness.light : Brightness.dark,
+          systemNavigationBarIconBrightness: isDark
+              ? Brightness.light
+              : Brightness.dark,
         ),
       );
     }

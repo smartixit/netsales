@@ -97,6 +97,3 @@ class UnauthenticatedException extends AppException {
     dynamic details,
   ]) : super(code: 'UNAUTHENTICATED', details: details);
 }
-
-
-

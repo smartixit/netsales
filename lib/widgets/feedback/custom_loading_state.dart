@@ -32,10 +32,7 @@ class CustomLoadingState extends StatelessWidget {
           SizedBox(
             width: 120.w,
             height: 120.w,
-            child: Lottie.asset(
-              'assets/animations/loading.json',
-              repeat: true,
-            ),
+            child: Lottie.asset('assets/animations/loading.json', repeat: true),
           ),
           if (message != null) ...[
             AppSpacing.vMd,

@@ -43,4 +43,3 @@ abstract final class StorageKeys {
   /// مساحة العمل النشطة المحفوظة (network | pos)
   static const String activeWorkspaceKey = 'active_workspace_key';
 }
-

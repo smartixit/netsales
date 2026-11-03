@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/widgets/pos_details_bottom_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
@@ -30,7 +31,11 @@ class NetworkPosCard extends GetView<CommercialDirectoryController> {
     final statusColor = isActive ? colors.success : colors.error;
 
     return CustomInteractiveBounce(
-      onTap: () {},
+      onTap: () {
+        if (pos != null) {
+          PosDetailsBottomSheet.show(pos: pos);
+        }
+      },
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.all(AppSpacing.md),
@@ -185,23 +190,18 @@ class NetworkPosCard extends GetView<CommercialDirectoryController> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    InkWell(
-                      onTap: () {
-                        Clipboard.setData(ClipboardData(text: pos.posUuid));
+                    CustomButton.icon(
+                      icon: Icons.copy_rounded,
+                      iconSize: 16.r,
+                      dimension: 28.r,
+                      tooltip: 'نسخ المعرف',
+                      onPressed: () async {
+                        await UrlLauncherService.copyToClipboard(pos.posUuid);
                         CustomToast.show(
                           message: 'تم نسخ معرف نقطة البيع',
                           icon: Icons.copy_rounded,
                         );
                       },
-                      borderRadius: BorderRadius.circular(AppRadius.xs),
-                      child: Padding(
-                        padding: EdgeInsets.all(AppSpacing.xxs),
-                        child: Icon(
-                          Icons.copy_rounded,
-                          size: 16.r,
-                          color: colors.primary,
-                        ),
-                      ),
                     ),
                   ],
                 ),

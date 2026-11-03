@@ -43,11 +43,7 @@ class CustomTabPlaceholder extends StatelessWidget {
                 ),
               ),
               child: Center(
-                child: Icon(
-                  icon,
-                  size: 36.r,
-                  color: colors.primary,
-                ),
+                child: Icon(icon, size: 36.r, color: colors.primary),
               ),
             ),
             AppSpacing.vMd,

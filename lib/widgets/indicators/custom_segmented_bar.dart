@@ -73,7 +73,10 @@ class CustomSegmentedBar extends StatelessWidget {
     required this.onSegmentChanged,
     required this.items,
     this.padding,
-  }) : assert(items.length >= 2, 'CustomSegmentedBar requires at least 2 items');
+  }) : assert(
+         items.length >= 2,
+         'CustomSegmentedBar requires at least 2 items',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -84,9 +87,7 @@ class CustomSegmentedBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
         borderRadius: AppRadius.lgRadius,
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -156,8 +157,7 @@ class _SegmentTab extends StatelessWidget {
                 item.label,
                 style: AppTypography.titleSmall.copyWith(
                   color: isSelected ? colors.primary : colors.onSurfaceVariant,
-                  fontWeight:
-                      isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -177,8 +177,8 @@ class _SegmentTab extends StatelessWidget {
                   color: item.highlightBadge
                       ? colors.warning.withValues(alpha: 0.15)
                       : (isSelected
-                          ? colors.primary.withValues(alpha: 0.12)
-                          : colors.onSurfaceVariant.withValues(alpha: 0.10)),
+                            ? colors.primary.withValues(alpha: 0.12)
+                            : colors.onSurfaceVariant.withValues(alpha: 0.10)),
                   borderRadius: AppRadius.fullRadius,
                 ),
                 child: Text(
@@ -187,8 +187,8 @@ class _SegmentTab extends StatelessWidget {
                     color: item.highlightBadge
                         ? colors.warning
                         : (isSelected
-                            ? colors.primary
-                            : colors.onSurfaceVariant),
+                              ? colors.primary
+                              : colors.onSurfaceVariant),
                     fontWeight: FontWeight.bold,
                     fontSize: 10.sp,
                   ),

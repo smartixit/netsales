@@ -26,82 +26,78 @@ class ResetPasswordSecurityBanner extends StatelessWidget {
     final title = isDirectReset
         ? 'تعيين كلمة مرور جديدة'
         : (isForced
-            ? 'مطلوب تعيين كلمة مرور جديدة'
-            : 'تحديث كلمة المرور لحسابك');
+              ? 'مطلوب تعيين كلمة مرور جديدة'
+              : 'تحديث كلمة المرور لحسابك');
 
     final subtitle = isDirectReset
         ? 'أدخل كلمة مرور قوية وجديدة لحسابك للمتابعة.'
         : (isForced
-            ? 'تم الدخول بكلمة مؤقتة، يُلزم النظام تعيين كلمة مرور شخصية للمتابعة.'
-            : 'احرص على اختيار كلمة مرور قوية لحماية حسابك.');
+              ? 'تم الدخول بكلمة مؤقتة، يُلزم النظام تعيين كلمة مرور شخصية للمتابعة.'
+              : 'احرص على اختيار كلمة مرور قوية لحماية حسابك.');
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: isWarning
-            ? colors.warningContainer.withValues(alpha: 0.35)
-            : colors.primaryContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: isWarning
-              ? colors.warning.withValues(alpha: 0.25)
-              : colors.primary.withValues(alpha: 0.15),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38.r,
-            height: 38.r,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: isWarning
+                ? colors.warningContainer.withValues(alpha: 0.35)
+                : colors.primaryContainer.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(
               color: isWarning
-                  ? colors.warning.withValues(alpha: 0.15)
-                  : colors.primary.withValues(alpha: 0.12),
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              isWarning ? Icons.shield_outlined : Icons.lock_reset_rounded,
-              color: isWarning ? colors.warning : colors.primary,
-              size: 20.r,
+                  ? colors.warning.withValues(alpha: 0.25)
+                  : colors.primary.withValues(alpha: 0.15),
             ),
           ),
-          AppSpacing.hSm,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w700,
-                  ),
+          child: Row(
+            children: [
+              Container(
+                width: 38.r,
+                height: 38.r,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isWarning
+                      ? colors.warning.withValues(alpha: 0.15)
+                      : colors.primary.withValues(alpha: 0.12),
                 ),
-                AppSpacing.vXxs,
-                Text(
-                  subtitle,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    height: 1.35,
-                  ),
+                alignment: Alignment.center,
+                child: Icon(
+                  isWarning ? Icons.shield_outlined : Icons.lock_reset_rounded,
+                  color: isWarning ? colors.warning : colors.primary,
+                  size: 20.r,
                 ),
-              ],
-            ),
+              ),
+              AppSpacing.hSm,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTypography.titleSmall.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    AppSpacing.vXxs,
+                    Text(
+                      subtitle,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    )
+        )
         .animate()
         .fadeIn(duration: AppMotion.normal)
-        .slideY(
-          begin: -0.08,
-          end: 0,
-          curve: AppMotion.emphasized,
-        );
+        .slideY(begin: -0.08, end: 0, curve: AppMotion.emphasized);
   }
 }

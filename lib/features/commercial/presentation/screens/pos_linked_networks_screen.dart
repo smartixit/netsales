@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/widgets/pos_details_bottom_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/pos_linked_network_card.dart';
 import 'package:netsales/features/commercial/presentation/widgets/pos_linked_networks_search_filter_header.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
@@ -34,6 +36,20 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
       appBar: AppBar(
         title: const Text('الشبكات المزودة المرتبطة'),
         centerTitle: true,
+        actions: [
+          CustomButton.icon(
+            icon: Icons.storefront_outlined,
+            tooltip: 'بيانات نقطة البيع',
+            onPressed: () async {
+              final pos = await controller.fetchPosDetails(
+                controller.activePosId.value,
+              );
+              if (pos != null) {
+                await PosDetailsBottomSheet.show(pos: pos, canEdit: true);
+              }
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

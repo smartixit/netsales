@@ -231,9 +231,7 @@ class ActiveSessionsScreen extends GetView<ActiveSessionsController> {
       decoration: BoxDecoration(
         color: colors.error.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(
-          color: colors.error.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: colors.error.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -294,9 +292,7 @@ class ActiveSessionsScreen extends GetView<ActiveSessionsController> {
       decoration: BoxDecoration(
         color: colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

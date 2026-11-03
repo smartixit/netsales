@@ -3,6 +3,7 @@ import 'package:netsales/core/themes/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 
 class CustomTextField extends StatefulWidget {
   const CustomTextField({
@@ -281,16 +282,17 @@ class _CustomTextFieldState extends State<CustomTextField>
           prefixIcon: widget.prefixIcon,
 
           suffixIcon: widget.enablePasswordToggle
-              ? IconButton(
-                  icon: Icon(
-                    _obscureText
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                    color: context.colors.onSurfaceVariant.withValues(
-                      alpha: 0.5,
-                    ),
+              ? CustomButton.icon(
+                  icon: _obscureText
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  foregroundColor: context.colors.onSurfaceVariant.withValues(
+                    alpha: 0.5,
                   ),
-
+                  backgroundColor: Colors.transparent,
+                  tooltip: _obscureText
+                      ? 'إظهار كلمة المرور'
+                      : 'إخفاء كلمة المرور',
                   onPressed: () {
                     setState(() {
                       _obscureText = !_obscureText;

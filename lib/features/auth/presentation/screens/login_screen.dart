@@ -29,7 +29,7 @@ class LoginScreen extends GetView<LoginController> {
           ),
           vertical: AppSpacing.lg,
         ),
-        child:  Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppSpacing.vMd,

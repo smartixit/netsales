@@ -34,7 +34,8 @@ class AuthGuard extends GetMiddleware {
     }
 
     // الحزام الأمني: منع الوصول لأي صفحة إذا كان تغيير كلمة المرور إلزامياً
-    if (SessionService.to.mustChangePassword && route != AppRoutes.resetPassword) {
+    if (SessionService.to.mustChangePassword &&
+        route != AppRoutes.resetPassword) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         CustomSnackbar.show(
           title: 'تغيير كلمة المرور إلزامي',
@@ -56,7 +57,8 @@ class GuestGuard extends GetMiddleware {
 
   @override
   RouteSettings? redirect(String? route) {
-    if (Get.isRegistered<SessionService>() && SessionService.to.isAuthenticated) {
+    if (Get.isRegistered<SessionService>() &&
+        SessionService.to.isAuthenticated) {
       if (SessionService.to.mustChangePassword) {
         return const RouteSettings(name: AppRoutes.resetPassword);
       }
@@ -94,9 +96,7 @@ class PermissionGuardMiddleware extends GetMiddleware {
         CustomSnackbar.show(
           title: 'تسجيل الدخول مطلوب',
           message: AppException.sanitizeMessage(
-            const UnauthenticatedException(
-              'يرجى تسجيل الدخول للمتابعة',
-            ),
+            const UnauthenticatedException('يرجى تسجيل الدخول للمتابعة'),
           ),
           type: SnackType.warning,
         );
@@ -104,7 +104,8 @@ class PermissionGuardMiddleware extends GetMiddleware {
       return const RouteSettings(name: AppRoutes.login);
     }
 
-    if (SessionService.to.mustChangePassword && route != AppRoutes.resetPassword) {
+    if (SessionService.to.mustChangePassword &&
+        route != AppRoutes.resetPassword) {
       return const RouteSettings(name: AppRoutes.resetPassword);
     }
 

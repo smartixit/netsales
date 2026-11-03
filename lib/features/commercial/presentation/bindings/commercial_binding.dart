@@ -72,6 +72,10 @@ class CommercialBinding extends Bindings {
         deleteNetworkPosLinkUseCase: Get.find<DeleteNetworkPosLinkUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
         getMyPosUseCase: Get.find<GetMyPosUseCase>(),
+        getNetworkDetailsUseCase: Get.find<GetNetworkDetailsUseCase>(),
+        getPosDetailsUseCase: Get.find<GetPosDetailsUseCase>(),
+        updateNetworkDetailsUseCase: Get.find<UpdateNetworkDetailsUseCase>(),
+        updatePosDetailsUseCase: Get.find<UpdatePosDetailsUseCase>(),
       ),
     );
   }

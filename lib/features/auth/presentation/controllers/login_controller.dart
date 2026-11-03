@@ -34,8 +34,8 @@ class LoginController extends GetxController {
   /// فحص دعم المقاييس الحيوية واستعادة الاعتمادات المحفوظة بأمان
   Future<void> _initBiometricsAndSavedCredentials() async {
     try {
-      final canAuthenticate =
-          await CredentialService.instance.canAuthenticateWithBiometrics();
+      final canAuthenticate = await CredentialService.instance
+          .canAuthenticateWithBiometrics();
       if (isClosed) return;
       canCheckBiometrics.value = canAuthenticate;
 
@@ -62,8 +62,7 @@ class LoginController extends GetxController {
     if (isClosed) return;
 
     if (result.isSuccess) {
-      final savedCreds =
-          await CredentialService.instance.getSavedCredentials();
+      final savedCreds = await CredentialService.instance.getSavedCredentials();
       // نفس الحارس بعد كل عملية غير متزامنة قبل أي كتابة في متحكمات النص.
       if (isClosed) return;
 
@@ -85,7 +84,8 @@ class LoginController extends GetxController {
     } else if (result.status != BiometricAuthStatus.canceled) {
       CustomSnackbar.show(
         title: 'تعذر التحقق الحيوي',
-        message: result.errorMessage ?? 'يرجى استخدام كلمة المرور لتسجيل الدخول.',
+        message:
+            result.errorMessage ?? 'يرجى استخدام كلمة المرور لتسجيل الدخول.',
         type: SnackType.warning,
       );
     }

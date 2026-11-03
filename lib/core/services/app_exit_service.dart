@@ -13,8 +13,9 @@ class AppExitService extends GetxService {
   AppExitService._();
   static final AppExitService instance = AppExitService._();
 
-  static AppExitService get to =>
-      Get.isRegistered<AppExitService>() ? Get.find<AppExitService>() : instance;
+  static AppExitService get to => Get.isRegistered<AppExitService>()
+      ? Get.find<AppExitService>()
+      : instance;
 
   DateTime? _lastBackPressTime;
 
@@ -51,10 +52,7 @@ class AppExitService extends GetxService {
     }
 
     if (showToast) {
-      CustomToast.show(
-        message: message,
-        icon: icon,
-      );
+      CustomToast.show(message: message, icon: icon);
     }
 
     onFirstTap?.call();
