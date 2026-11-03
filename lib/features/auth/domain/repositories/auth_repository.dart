@@ -3,6 +3,7 @@ import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/register_network_result_entity.dart';
 import 'package:netsales/features/auth/domain/entities/register_pos_result_entity.dart';
+import 'package:netsales/features/auth/domain/entities/user_device_entity.dart';
 
 /// عقد مستودع المصادقة الدوميني المجرد
 abstract interface class AuthRepository {
@@ -100,4 +101,16 @@ abstract interface class AuthRepository {
     String? deviceName,
     String? deviceType,
   });
+
+  /// تسجيل الخروج وإنهاء الجلسة الرسمية على الخادم محلياً وعن بعد
+  Future<void> logout();
+
+  /// تسجيل الخروج وإنهاء الجلسات على كافة الأجهزة الأخرى
+  Future<void> logoutOtherDevices();
+
+  /// جلب قائمة أجهزة المستخدم المقترنة
+  Future<List<UserDeviceEntity>> getDevices();
+
+  /// إلغاء إقران وفصل جهاز محدد
+  Future<void> disconnectDevice(int deviceId);
 }

@@ -1,6 +1,11 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:netsales/features/auth/data/datasources/auth_remote_data_source_impl.dart';
+import 'package:netsales/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
+import 'package:netsales/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:netsales/features/workspace/data/datasources/workspace_local_data_source.dart';
 import 'package:netsales/features/workspace/data/repositories/workspace_repository_impl.dart';
 import 'package:netsales/features/workspace/domain/repositories/workspace_repository.dart';
@@ -34,6 +39,27 @@ class WorkspaceCoordinatorBinding extends Bindings {
       () => SetActiveWorkspaceUseCase(Get.find<WorkspaceRepository>()),
       fenix: true,
     );
+
+    if (!Get.isRegistered<AuthRemoteDataSource>()) {
+      Get.lazyPut<AuthRemoteDataSource>(
+        () => const AuthRemoteDataSourceImpl(),
+        fenix: true,
+      );
+    }
+
+    if (!Get.isRegistered<AuthRepository>()) {
+      Get.lazyPut<AuthRepository>(
+        () => AuthRepositoryImpl(Get.find<AuthRemoteDataSource>()),
+        fenix: true,
+      );
+    }
+
+    if (!Get.isRegistered<LogoutUseCase>()) {
+      Get.lazyPut<LogoutUseCase>(
+        () => LogoutUseCase(Get.find<AuthRepository>()),
+        fenix: true,
+      );
+    }
 
     Get.lazyPut<WorkspaceCoordinatorController>(
       () => WorkspaceCoordinatorController(

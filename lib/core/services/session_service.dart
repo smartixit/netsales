@@ -2,13 +2,16 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
+import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/models/user_session_model.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 
 /// ============================================================================
 /// خدمة إدارة الجلسة والهوية (Enterprise Identity & Session Lifecycle Service)
@@ -90,6 +93,9 @@ class SessionService extends GetxService {
         '⚠️ [SessionService] Unauthorized event received (401). Terminating session...',
       );
       terminateSession();
+      if (Get.currentRoute != AppRoutes.login) {
+        Get.offAllNamed<void>(AppRoutes.login);
+      }
     };
 
     return this;
@@ -180,6 +186,10 @@ class SessionService extends GetxService {
 
     if (Get.isRegistered<PushNotificationService>()) {
       await PushNotificationService.to.clearFcmToken();
+    }
+
+    if (Get.isRegistered<WorkspaceService>()) {
+      await WorkspaceService.to.setActiveWorkspace(AppWorkspace.unsupported);
     }
 
     log('🚪 [SessionService] Session terminated.');

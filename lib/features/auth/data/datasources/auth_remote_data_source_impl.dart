@@ -11,6 +11,7 @@ import 'package:netsales/features/auth/data/models/register_network_response_mod
 import 'package:netsales/features/auth/data/models/register_pos_request_model.dart';
 import 'package:netsales/features/auth/data/models/register_pos_response_model.dart';
 import 'package:netsales/features/auth/data/models/reset_password_request_model.dart';
+import 'package:netsales/features/auth/data/models/user_device_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 
 /// تطبيق مصدر البيانات البعيد للمصادقة عبر ApiService
@@ -162,6 +163,38 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       fromJson: (json) => RegisterPosResponseModel.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),
+    );
+  }
+
+  @override
+  Future<ApiResponse<void>> logout({required String deviceUuid}) {
+    return ApiService.instance.post<void>(
+      ApiConstants.logout,
+      data: {'device_uuid': deviceUuid},
+    );
+  }
+
+  @override
+  Future<ApiResponse<void>> logoutOtherDevices() {
+    return ApiService.instance.post<void>(
+      ApiConstants.logoutOtherDevices,
+    );
+  }
+
+  @override
+  Future<ApiResponse<List<UserDeviceModel>>> getDevices() {
+    return ApiService.instance.getList<UserDeviceModel>(
+      ApiConstants.authDevices,
+      fromJson: (json) => UserDeviceModel.fromJson(
+        Map<String, dynamic>.from(json as Map),
+      ),
+    );
+  }
+
+  @override
+  Future<ApiResponse<void>> disconnectDevice(int deviceId) {
+    return ApiService.instance.delete<void>(
+      ApiConstants.disconnectDevice(deviceId),
     );
   }
 }

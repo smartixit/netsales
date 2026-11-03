@@ -8,6 +8,7 @@ import 'package:netsales/features/auth/data/models/register_network_response_mod
 import 'package:netsales/features/auth/data/models/register_pos_request_model.dart';
 import 'package:netsales/features/auth/data/models/register_pos_response_model.dart';
 import 'package:netsales/features/auth/data/models/reset_password_request_model.dart';
+import 'package:netsales/features/auth/data/models/user_device_model.dart';
 import 'package:netsales/features/auth/data/models/verify_two_factor_request_model.dart';
 
 /// عقد مصدر البيانات البعيد للمصادقة والحسابات
@@ -64,4 +65,16 @@ abstract interface class AuthRemoteDataSource {
   Future<ApiResponse<RegisterPosResponseModel>> registerPos(
     RegisterPosRequestModel request,
   );
+
+  /// تسجيل الخروج وإنهاء الجلسة الحالية
+  Future<ApiResponse<void>> logout({required String deviceUuid});
+
+  /// إنهاء كافة الجلسات الأخرى على الأجهزة المختلفة
+  Future<ApiResponse<void>> logoutOtherDevices();
+
+  /// جلب قائمة أجهزة المستخدم المقترنة
+  Future<ApiResponse<List<UserDeviceModel>>> getDevices();
+
+  /// فصل وإلغاء اقتران جهاز محدد
+  Future<ApiResponse<void>> disconnectDevice(int deviceId);
 }

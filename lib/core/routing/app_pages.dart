@@ -4,6 +4,7 @@ import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 import 'package:netsales/core/routing/middlewares/workspace_guard.dart';
+import 'package:netsales/features/auth/presentation/bindings/active_sessions_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/register_network_binding.dart';
@@ -11,6 +12,7 @@ import 'package:netsales/features/auth/presentation/bindings/register_pos_bindin
 import 'package:netsales/features/auth/presentation/bindings/reset_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/two_factor_auth_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/verify_otp_binding.dart';
+import 'package:netsales/features/auth/presentation/screens/active_sessions_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/login_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/register_network_screen.dart';
@@ -152,6 +154,16 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.unsupportedPlatform,
       page: () => const UnsupportedPlatformScreen(),
+      middlewares: [AuthGuard()],
+    ),
+
+    // ========================================================================
+    // 5. مسارات الأمان والجلسات المعتمدة (Security & Active Sessions)
+    // ========================================================================
+    GetPage(
+      name: AppRoutes.activeSessions,
+      page: () => const ActiveSessionsScreen(),
+      binding: ActiveSessionsBinding(),
       middlewares: [AuthGuard()],
     ),
   ];

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -71,6 +72,11 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         if (actions != null) ...actions!,
+        IconButton(
+          icon: Icon(Icons.devices_rounded, color: colors.onSurfaceVariant),
+          tooltip: 'الأجهزة والجلسات النشطة',
+          onPressed: () => Get.toNamed<dynamic>(AppRoutes.activeSessions),
+        ),
         const CustomThemeToggleButton(),
         IconButton(
           icon: Icon(Icons.logout_rounded, color: colors.error),

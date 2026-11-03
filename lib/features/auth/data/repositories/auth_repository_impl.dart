@@ -1,9 +1,12 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/models/user_session_model.dart';
+import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:netsales/features/auth/data/models/login_request_model.dart';
 import 'package:netsales/features/auth/data/models/register_network_request_model.dart';
@@ -15,6 +18,7 @@ import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/register_network_result_entity.dart';
 import 'package:netsales/features/auth/domain/entities/register_pos_result_entity.dart';
+import 'package:netsales/features/auth/domain/entities/user_device_entity.dart';
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
 
 /// تطبيق مستودع المصادقة وتنسيق البيانات بين مصدر البيانات وإدارة الجلسات
@@ -348,5 +352,45 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     return data;
+  }
+
+  @override
+  Future<void> logout() async {
+    try {
+      final deviceUuid = DeviceService.instance.deviceUuid;
+      await _remoteDataSource.logout(deviceUuid: deviceUuid);
+    } catch (_) {
+      // نتسامح مع أخطاء انقطاع الشبكة أثناء تسجيل الخروج لضمان تنظيف الجلسة المحلية دوماً
+    } finally {
+      await SessionService.to.terminateSession();
+      if (Get.isRegistered<WorkspaceService>()) {
+        await WorkspaceService.to.setActiveWorkspace(AppWorkspace.unsupported);
+      }
+    }
+  }
+
+  @override
+  Future<void> logoutOtherDevices() async {
+    final response = await _remoteDataSource.logoutOtherDevices();
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+  }
+
+  @override
+  Future<List<UserDeviceEntity>> getDevices() async {
+    final response = await _remoteDataSource.getDevices();
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+    return response.data ?? [];
+  }
+
+  @override
+  Future<void> disconnectDevice(int deviceId) async {
+    final response = await _remoteDataSource.disconnectDevice(deviceId);
+    if (!response.success) {
+      throw AppException(response.message);
+    }
   }
 }
