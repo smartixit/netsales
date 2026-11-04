@@ -23,4 +23,3 @@ enum NetworkStatus {
   bool get isKnown => this != NetworkStatus.unknown;
   bool get isActive => this == NetworkStatus.active;
 }
-

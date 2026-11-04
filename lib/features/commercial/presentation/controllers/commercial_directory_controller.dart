@@ -2,8 +2,12 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
+import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
@@ -12,6 +16,8 @@ import 'package:netsales/features/commercial/domain/usecases/get_network_details
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/update_network_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/update_pos_details_use_case.dart';
@@ -32,6 +38,10 @@ class CommercialDirectoryController extends GetxController {
     this.getPosDetailsUseCase,
     this.updateNetworkDetailsUseCase,
     this.updatePosDetailsUseCase,
+    this.createNetworkPosLinkChallengeUseCase,
+    this.previewNetworkPosLinkChallengeUseCase,
+    this.confirmNetworkPosLinkChallengeUseCase,
+    this.revokeNetworkPosLinkChallengeUseCase,
   });
 
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
@@ -45,6 +55,14 @@ class CommercialDirectoryController extends GetxController {
   final GetPosDetailsUseCase? getPosDetailsUseCase;
   final UpdateNetworkDetailsUseCase? updateNetworkDetailsUseCase;
   final UpdatePosDetailsUseCase? updatePosDetailsUseCase;
+  final CreateNetworkPosLinkChallengeUseCase?
+  createNetworkPosLinkChallengeUseCase;
+  final PreviewNetworkPosLinkChallengeUseCase?
+  previewNetworkPosLinkChallengeUseCase;
+  final ConfirmNetworkPosLinkChallengeUseCase?
+  confirmNetworkPosLinkChallengeUseCase;
+  final RevokeNetworkPosLinkChallengeUseCase?
+  revokeNetworkPosLinkChallengeUseCase;
 
   // الحالات التفاعلية للقوائم
   final RxBool isLoading = false.obs;
@@ -66,6 +84,13 @@ class CommercialDirectoryController extends GetxController {
   final RxString searchQuery = ''.obs;
   final Rxn<bool> selectedStatusFilter =
       Rxn<bool>(); // null: الكل, true: نشط, false: معطل
+
+  // حالات دعوات وتحديات الربط عبر رمز QR
+  final Rxn<NetworkPosLinkChallengeEntity> activeChallenge =
+      Rxn<NetworkPosLinkChallengeEntity>();
+  final Rxn<NetworkPosLinkPreviewEntity> activePreview =
+      Rxn<NetworkPosLinkPreviewEntity>();
+  final RxBool isChallengeLoading = false.obs;
 
   // معرفات الكيان الحالي (الشبكة أو نقطة البيع)
   final RxInt activeNetworkId = 0.obs;
@@ -520,5 +545,210 @@ class CommercialDirectoryController extends GetxController {
   /// تغيير فلتر الحالة
   void setStatusFilter(bool? status) {
     selectedStatusFilter.value = status;
+  }
+
+  // ==========================================================================
+  // عمليات دعوات وتحديات الربط عبر رمز QR (QR-Based POS–Network Linking)
+  // ==========================================================================
+
+  /// إنشاء تحدي ربط مشفر جديد لشبكة معينة
+  Future<NetworkPosLinkChallengeEntity?> createQrChallenge({
+    required int networkId,
+    int? posId,
+    int? durationMinutes,
+  }) async {
+    if (createNetworkPosLinkChallengeUseCase == null) return null;
+
+    try {
+      isChallengeLoading.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري إنشاء رمز الربط المشفر...',
+      );
+
+      final challenge = await createNetworkPosLinkChallengeUseCase!(
+        networkId: networkId,
+        posId: posId,
+        durationMinutes: durationMinutes,
+      );
+
+      activeChallenge.value = challenge;
+      await CustomAnimationOverlay.hide();
+      return challenge;
+    } on AppException catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'تعذر إنشاء رمز الربط',
+        message: e.message,
+        type: SnackType.error,
+      );
+      return null;
+    } catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'خطأ',
+        message: 'فشل إنشاء رمز الربط: $e',
+        type: SnackType.error,
+      );
+      return null;
+    } finally {
+      isChallengeLoading.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  /// إلغاء وإبطال دعوة الربط المشفرة النشطة
+  Future<void> revokeActiveChallenge() async {
+    final challenge = activeChallenge.value;
+    if (challenge == null || revokeNetworkPosLinkChallengeUseCase == null) {
+      return;
+    }
+
+    try {
+      await CustomAnimationOverlay.showLoading(message: 'جاري إلغاء الدعوة...');
+      await revokeNetworkPosLinkChallengeUseCase!(challenge.challengeUuid);
+      activeChallenge.value = null;
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم إلغاء دعوة الربط بنجاح',
+      );
+    } on AppException catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'تعذر إلغاء الدعوة',
+        message: e.message,
+        type: SnackType.error,
+      );
+    } catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'خطأ',
+        message: 'فشل إلغاء الدعوة: $e',
+        type: SnackType.error,
+      );
+    } finally {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  /// معاينة وفحص التحدي المشفر من جانب نقطة البيع
+  Future<NetworkPosLinkPreviewEntity?> previewQrChallenge(
+    String payload, {
+    int? posId,
+    String? posUuid,
+  }) async {
+    if (previewNetworkPosLinkChallengeUseCase == null) return null;
+
+    try {
+      isChallengeLoading.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري فحص وتأكيد رمز الدعوة...',
+      );
+
+      final preview = await previewNetworkPosLinkChallengeUseCase!(
+        payload: payload,
+        posId: posId,
+        posUuid: posUuid,
+      );
+
+      activePreview.value = preview;
+      await CustomAnimationOverlay.hide();
+      return preview;
+    } on AppException catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'رمز غير صالح أو منتهي الصلاحية',
+        message: e.message,
+        type: SnackType.error,
+      );
+      return null;
+    } catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'خطأ في فحص الرمز',
+        message: 'تعذر التحقق من التحدي: $e',
+        type: SnackType.error,
+      );
+      return null;
+    } finally {
+      isChallengeLoading.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  /// تأكيد واعتماد ربط نقطة البيع بالشبكة عبر التحدي المشفر
+  Future<bool> confirmQrChallenge({
+    required String challengeUuid,
+    int? posId,
+    String? posUuid,
+  }) async {
+    if (confirmNetworkPosLinkChallengeUseCase == null) return false;
+
+    try {
+      isChallengeLoading.value = true;
+      await CustomAnimationOverlay.showLoading(message: 'جاري اعتماد الربط...');
+
+      final link = await confirmNetworkPosLinkChallengeUseCase!(
+        challengeUuid: challengeUuid,
+        posId: posId,
+        posUuid: posUuid,
+      );
+
+      // إضافة الرابط الجديد إذا كان معروضاً في القائمة الحالية
+      if (activeNetworkId.value == link.networkId ||
+          activePosId.value == link.posId) {
+        if (!links.any((l) => l.networkPosId == link.networkPosId)) {
+          links.insert(0, link);
+        }
+      }
+
+      activePreview.value = null;
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم تأكيد وربط نقطة البيع بالشبكة بنجاح',
+      );
+      return true;
+    } on AppException catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'فشل اعتماد الربط',
+        message: e.message,
+        type: SnackType.error,
+      );
+      return false;
+    } catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'خطأ',
+        message: 'تعذر اعتماد الربط: $e',
+        type: SnackType.error,
+      );
+      return false;
+    } finally {
+      isChallengeLoading.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
   }
 }

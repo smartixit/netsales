@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/enums/backup_status.dart';
 import 'package:netsales/core/enums/device_type.dart';
 import 'package:netsales/core/enums/invoice_payment_status.dart';
+import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/enums/notification_type.dart';
 import 'package:netsales/core/enums/provider_subscription_status.dart';
 import 'package:netsales/core/enums/request_status.dart';
@@ -349,5 +350,87 @@ void main() {
         expect(inactiveLink.label, 'معطل');
       },
     );
+
+    test(
+      'LinkingChallengeStatus parses exact wire values and presentation',
+      () {
+        expect(
+          LinkingChallengeStatus.fromWire('PENDING'),
+          LinkingChallengeStatus.pending,
+        );
+        expect(
+          LinkingChallengeStatus.fromWire('CONSUMED'),
+          LinkingChallengeStatus.consumed,
+        );
+        expect(
+          LinkingChallengeStatus.fromWire('EXPIRED'),
+          LinkingChallengeStatus.expired,
+        );
+        expect(
+          LinkingChallengeStatus.fromWire('REVOKED'),
+          LinkingChallengeStatus.revoked,
+        );
+        expect(
+          LinkingChallengeStatus.fromWire('pending'),
+          LinkingChallengeStatus.unknown,
+        );
+        expect(
+          LinkingChallengeStatus.fromWire(null),
+          LinkingChallengeStatus.unknown,
+        );
+
+        expect(LinkingChallengeStatus.pending.isPending, isTrue);
+        expect(LinkingChallengeStatus.consumed.isConsumed, isTrue);
+        expect(LinkingChallengeStatus.expired.isExpired, isTrue);
+        expect(LinkingChallengeStatus.revoked.isRevoked, isTrue);
+
+        final presPending =
+            EnumPresentationRegistry.resolveLinkingChallengeStatus(
+              LinkingChallengeStatus.pending,
+            );
+        expect(presPending.tone, SemanticTone.warning);
+        expect(presPending.label, 'قيد الانتظار');
+
+        final presConsumed =
+            EnumPresentationRegistry.resolveLinkingChallengeStatus(
+              LinkingChallengeStatus.consumed,
+            );
+        expect(presConsumed.tone, SemanticTone.success);
+        expect(presConsumed.label, 'مكتمل');
+
+        final presRevoked =
+            EnumPresentationRegistry.resolveLinkingChallengeStatus(
+              LinkingChallengeStatus.revoked,
+            );
+        expect(presRevoked.tone, SemanticTone.danger);
+        expect(presRevoked.label, 'ملغي');
+      },
+    );
+
+    test('LinkingChallengeStatus parses exact wire values and presentation', () {
+      expect(LinkingChallengeStatus.fromWire('PENDING'), LinkingChallengeStatus.pending);
+      expect(LinkingChallengeStatus.fromWire('CONSUMED'), LinkingChallengeStatus.consumed);
+      expect(LinkingChallengeStatus.fromWire('EXPIRED'), LinkingChallengeStatus.expired);
+      expect(LinkingChallengeStatus.fromWire('REVOKED'), LinkingChallengeStatus.revoked);
+      expect(LinkingChallengeStatus.fromWire('pending'), LinkingChallengeStatus.unknown);
+      expect(LinkingChallengeStatus.fromWire(null), LinkingChallengeStatus.unknown);
+
+      expect(LinkingChallengeStatus.pending.isPending, isTrue);
+      expect(LinkingChallengeStatus.consumed.isConsumed, isTrue);
+      expect(LinkingChallengeStatus.expired.isExpired, isTrue);
+      expect(LinkingChallengeStatus.revoked.isRevoked, isTrue);
+
+      final presPending = EnumPresentationRegistry.resolveLinkingChallengeStatus(LinkingChallengeStatus.pending);
+      expect(presPending.tone, SemanticTone.warning);
+      expect(presPending.label, 'قيد الانتظار');
+
+      final presConsumed = EnumPresentationRegistry.resolveLinkingChallengeStatus(LinkingChallengeStatus.consumed);
+      expect(presConsumed.tone, SemanticTone.success);
+      expect(presConsumed.label, 'مكتمل');
+
+      final presRevoked = EnumPresentationRegistry.resolveLinkingChallengeStatus(LinkingChallengeStatus.revoked);
+      expect(presRevoked.tone, SemanticTone.danger);
+      expect(presRevoked.label, 'ملغي');
+    });
   });
 }

@@ -3,7 +3,9 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 
 /// تطبيق مصدر البيانات البعيد للكيانات والروابط التجارية
@@ -149,6 +151,74 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
       ApiConstants.posItem(posId),
       data: data,
       fromJson: PosModel.fromJson,
+    );
+  }
+
+  @override
+  Future<ApiResponse<NetworkPosLinkChallengeModel>> createLinkChallenge({
+    required int networkId,
+    int? posId,
+    String? posUuid,
+    int? durationMinutes,
+  }) {
+    final body = <String, dynamic>{
+      'network_id': networkId,
+      'pos_id': ?posId,
+      'pos_uuid': ?posUuid,
+      'duration_minutes': ?durationMinutes,
+    };
+
+    return ApiService.instance.post<NetworkPosLinkChallengeModel>(
+      ApiConstants.networkPosChallenges,
+      data: body,
+      fromJson: (data) =>
+          NetworkPosLinkChallengeModel.fromJson(data as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Future<ApiResponse<NetworkPosLinkPreviewModel>> previewLinkChallenge({
+    required String payload,
+    int? posId,
+    String? posUuid,
+  }) {
+    final body = <String, dynamic>{
+      'payload': payload,
+      'pos_id': ?posId,
+      'pos_uuid': ?posUuid,
+    };
+
+    return ApiService.instance.post<NetworkPosLinkPreviewModel>(
+      ApiConstants.networkPosChallengesPreview,
+      data: body,
+      fromJson: (data) =>
+          NetworkPosLinkPreviewModel.fromJson(data as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Future<ApiResponse<NetworkPosLinkModel>> confirmLinkChallenge({
+    required String challengeUuid,
+    int? posId,
+    String? posUuid,
+  }) {
+    final body = <String, dynamic>{
+      'challenge_uuid': challengeUuid,
+      'pos_id': ?posId,
+      'pos_uuid': ?posUuid,
+    };
+
+    return ApiService.instance.post<NetworkPosLinkModel>(
+      ApiConstants.networkPosChallengesConfirm,
+      data: body,
+      fromJson: NetworkPosLinkModel.fromJson,
+    );
+  }
+
+  @override
+  Future<ApiResponse<void>> revokeLinkChallenge(String uuid) {
+    return ApiService.instance.delete<void>(
+      ApiConstants.networkPosChallengeRevoke(uuid),
     );
   }
 }

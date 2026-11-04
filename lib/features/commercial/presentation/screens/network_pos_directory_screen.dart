@@ -6,6 +6,7 @@ import 'package:netsales/features/commercial/presentation/controllers/commercial
 import 'package:netsales/features/commercial/presentation/widgets/link_pos_bottom_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_details_bottom_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_card.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_challenge_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_search_filter_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -42,6 +43,21 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
         title: const Text('دليل نقاط البيع المرتبطة'),
         centerTitle: true,
         actions: [
+          CustomButton.icon(
+            icon: Icons.qr_code_2_rounded,
+            tooltip: 'دعوة ربط عبر QR',
+            onPressed: () async {
+              final netId = controller.activeNetworkId.value;
+              final net = await controller.fetchNetworkDetails(netId);
+              if (net != null) {
+                await NetworkPosQrChallengeSheet.show(
+                  networkId: netId,
+                  networkName: net.networkName,
+                  networkPhone: net.networkPhoneNumber,
+                );
+              }
+            },
+          ),
           CustomButton.icon(
             icon: Icons.business_outlined,
             tooltip: 'بيانات الشبكة',

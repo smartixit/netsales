@@ -1,6 +1,8 @@
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 
 /// عقد مصدر البيانات البعيد للكيانات والروابط التجارية
@@ -56,4 +58,29 @@ abstract interface class CommercialRemoteDataSource {
     int posId,
     Map<String, dynamic> data,
   );
+
+  /// إنشاء تحدي ربط مشفر عبر رمز QR
+  Future<ApiResponse<NetworkPosLinkChallengeModel>> createLinkChallenge({
+    required int networkId,
+    int? posId,
+    String? posUuid,
+    int? durationMinutes,
+  });
+
+  /// معاينة وفحص تحدي ربط مشفر من جانب نقطة البيع
+  Future<ApiResponse<NetworkPosLinkPreviewModel>> previewLinkChallenge({
+    required String payload,
+    int? posId,
+    String? posUuid,
+  });
+
+  /// تأكيد واعتماد ربط نقطة البيع بالشبكة عبر التحدي
+  Future<ApiResponse<NetworkPosLinkModel>> confirmLinkChallenge({
+    required String challengeUuid,
+    int? posId,
+    String? posUuid,
+  });
+
+  /// إلغاء وإبطال تحدي الربط
+  Future<ApiResponse<void>> revokeLinkChallenge(String uuid);
 }

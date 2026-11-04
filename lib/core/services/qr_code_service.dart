@@ -100,7 +100,7 @@ class QrCodeServiceConfig {
 /// تعتمد على:
 /// - pretty_qr_code
 /// - FileExportService
-/// - share_plus
+/// - ShareService
 /// ============================================================================
 class QrCodeService {
   QrCodeService._();

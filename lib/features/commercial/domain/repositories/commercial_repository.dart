@@ -1,5 +1,7 @@
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 
 /// عقد مستودع الكيانات والروابط التجارية
@@ -50,4 +52,29 @@ abstract interface class CommercialRepository {
 
   /// تحديث بيانات نقطة بيع
   Future<PosEntity> updatePosDetails(int posId, Map<String, dynamic> data);
+
+  /// إنشاء تحدي ربط مشفر عبر رمز QR
+  Future<NetworkPosLinkChallengeEntity> createLinkChallenge({
+    required int networkId,
+    int? posId,
+    String? posUuid,
+    int? durationMinutes,
+  });
+
+  /// معاينة وفحص تحدي الربط المشفر من جانب نقطة البيع
+  Future<NetworkPosLinkPreviewEntity> previewLinkChallenge({
+    required String payload,
+    int? posId,
+    String? posUuid,
+  });
+
+  /// تأكيد واعتماد ربط نقطة البيع بالشبكة عبر التحدي
+  Future<NetworkPosLinkEntity> confirmLinkChallenge({
+    required String challengeUuid,
+    int? posId,
+    String? posUuid,
+  });
+
+  /// إلغاء وإبطال تحدي الربط
+  Future<void> revokeLinkChallenge(String uuid);
 }

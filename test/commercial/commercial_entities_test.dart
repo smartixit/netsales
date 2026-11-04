@@ -3,8 +3,11 @@ import 'package:get/get.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
+import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_use_case.dart';
@@ -167,6 +170,59 @@ class MockCommercialRepository implements CommercialRepository {
       status: 'ACTIVE',
     );
   }
+
+  @override
+  Future<NetworkPosLinkChallengeEntity> createLinkChallenge({
+    required int networkId,
+    int? posId,
+    String? posUuid,
+    int? durationMinutes,
+  }) async {
+    return NetworkPosLinkChallengeEntity(
+      challengeUuid: 'test-challenge-uuid',
+      networkId: networkId,
+      payloadToken: 'NTS_LINK_V1_MOCK',
+      status: LinkingChallengeStatus.pending,
+      expiresAt: DateTime.now().add(const Duration(minutes: 30)),
+      createdAt: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<NetworkPosLinkPreviewEntity> previewLinkChallenge({
+    required String payload,
+    int? posId,
+    String? posUuid,
+  }) async {
+    return NetworkPosLinkPreviewEntity(
+      challengeUuid: 'test-challenge-uuid',
+      networkId: 1,
+      networkName: 'Al-Amal Network',
+      expiresAt: DateTime.now().add(const Duration(minutes: 30)),
+      alreadyLinked: false,
+    );
+  }
+
+  @override
+  Future<NetworkPosLinkEntity> confirmLinkChallenge({
+    required String challengeUuid,
+    int? posId,
+    String? posUuid,
+  }) async {
+    final link = NetworkPosLinkEntity(
+      networkPosId: _links.length + 1,
+      networkId: 1,
+      posId: posId ?? 1,
+      status: true,
+      createdAt: DateTime.now().toIso8601String(),
+      updatedAt: DateTime.now().toIso8601String(),
+    );
+    _links.add(link);
+    return link;
+  }
+
+  @override
+  Future<void> revokeLinkChallenge(String uuid) async {}
 }
 
 void main() {

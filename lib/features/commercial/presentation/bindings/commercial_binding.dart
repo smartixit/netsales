@@ -3,6 +3,8 @@ import 'package:netsales/features/commercial/data/datasources/commercial_remote_
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source_impl.dart';
 import 'package:netsales/features/commercial/data/repositories/commercial_repository_impl.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
+import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
@@ -11,6 +13,8 @@ import 'package:netsales/features/commercial/domain/usecases/get_network_details
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/update_network_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/update_pos_details_use_case.dart';
@@ -60,6 +64,26 @@ class CommercialBinding extends Bindings {
     Get.lazyPut(
       () => UpdatePosDetailsUseCase(Get.find<CommercialRepository>()),
     );
+    Get.lazyPut(
+      () => CreateNetworkPosLinkChallengeUseCase(
+        Get.find<CommercialRepository>(),
+      ),
+    );
+    Get.lazyPut(
+      () => PreviewNetworkPosLinkChallengeUseCase(
+        Get.find<CommercialRepository>(),
+      ),
+    );
+    Get.lazyPut(
+      () => ConfirmNetworkPosLinkChallengeUseCase(
+        Get.find<CommercialRepository>(),
+      ),
+    );
+    Get.lazyPut(
+      () => RevokeNetworkPosLinkChallengeUseCase(
+        Get.find<CommercialRepository>(),
+      ),
+    );
 
     // 4. Controller
     Get.lazyPut<CommercialDirectoryController>(
@@ -76,6 +100,14 @@ class CommercialBinding extends Bindings {
         getPosDetailsUseCase: Get.find<GetPosDetailsUseCase>(),
         updateNetworkDetailsUseCase: Get.find<UpdateNetworkDetailsUseCase>(),
         updatePosDetailsUseCase: Get.find<UpdatePosDetailsUseCase>(),
+        createNetworkPosLinkChallengeUseCase:
+            Get.find<CreateNetworkPosLinkChallengeUseCase>(),
+        previewNetworkPosLinkChallengeUseCase:
+            Get.find<PreviewNetworkPosLinkChallengeUseCase>(),
+        confirmNetworkPosLinkChallengeUseCase:
+            Get.find<ConfirmNetworkPosLinkChallengeUseCase>(),
+        revokeNetworkPosLinkChallengeUseCase:
+            Get.find<RevokeNetworkPosLinkChallengeUseCase>(),
       ),
     );
   }

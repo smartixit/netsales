@@ -1,7 +1,9 @@
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 
@@ -156,6 +158,76 @@ class CommercialRepositoryImpl implements CommercialRepository {
 
     if (response.success && response.data != null) {
       return response.data!;
+    }
+
+    throw AppException(response.message);
+  }
+
+  @override
+  Future<NetworkPosLinkChallengeEntity> createLinkChallenge({
+    required int networkId,
+    int? posId,
+    String? posUuid,
+    int? durationMinutes,
+  }) async {
+    final response = await _remoteDataSource.createLinkChallenge(
+      networkId: networkId,
+      posId: posId,
+      posUuid: posUuid,
+      durationMinutes: durationMinutes,
+    );
+
+    if (response.success && response.data != null) {
+      return response.data!;
+    }
+
+    throw AppException(response.message);
+  }
+
+  @override
+  Future<NetworkPosLinkPreviewEntity> previewLinkChallenge({
+    required String payload,
+    int? posId,
+    String? posUuid,
+  }) async {
+    final response = await _remoteDataSource.previewLinkChallenge(
+      payload: payload,
+      posId: posId,
+      posUuid: posUuid,
+    );
+
+    if (response.success && response.data != null) {
+      return response.data!;
+    }
+
+    throw AppException(response.message);
+  }
+
+  @override
+  Future<NetworkPosLinkEntity> confirmLinkChallenge({
+    required String challengeUuid,
+    int? posId,
+    String? posUuid,
+  }) async {
+    final response = await _remoteDataSource.confirmLinkChallenge(
+      challengeUuid: challengeUuid,
+      posId: posId,
+      posUuid: posUuid,
+    );
+
+    if (response.success && response.data != null) {
+      return response.data!;
+    }
+
+    throw AppException(response.message);
+  }
+
+  @override
+  Future<void> revokeLinkChallenge(String uuid) async {
+    final response = await _remoteDataSource.revokeLinkChallenge(uuid);
+
+    if (response.success) {
+      return;
     }
 
     throw AppException(response.message);

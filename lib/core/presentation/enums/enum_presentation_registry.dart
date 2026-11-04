@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:netsales/core/enums/backup_status.dart';
 import 'package:netsales/core/enums/device_type.dart';
 import 'package:netsales/core/enums/invoice_payment_status.dart';
+import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/enums/provider_subscription_status.dart';
 import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/core/enums/role_key.dart';
@@ -531,6 +532,51 @@ class EnumPresentationRegistry {
       tone: isActive ? SemanticTone.success : SemanticTone.neutral,
       icon: isActive ? Icons.link_rounded : Icons.link_off_rounded,
     );
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 15. حالة دعوة ربط نقطة البيع (LinkingChallengeStatus)
+  // ──────────────────────────────────────────────────────────────────────────
+  static EnumPresentation resolveLinkingChallengeStatus(
+    LinkingChallengeStatus status, {
+    String? serverLabel,
+  }) {
+    final label = _effectiveLabel(serverLabel, switch (status) {
+      LinkingChallengeStatus.pending => 'قيد الانتظار',
+      LinkingChallengeStatus.consumed => 'مكتمل',
+      LinkingChallengeStatus.expired => 'منتهي الصلاحية',
+      LinkingChallengeStatus.revoked => 'ملغي',
+      LinkingChallengeStatus.unknown => 'حالة غير معروفة',
+    });
+
+    return switch (status) {
+      LinkingChallengeStatus.pending => EnumPresentation(
+        label: label,
+        tone: SemanticTone.warning,
+        icon: Icons.hourglass_top_rounded,
+      ),
+      LinkingChallengeStatus.consumed => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.check_circle_rounded,
+      ),
+      LinkingChallengeStatus.expired => EnumPresentation(
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.timer_off_outlined,
+      ),
+      LinkingChallengeStatus.revoked => EnumPresentation(
+        label: label,
+        tone: SemanticTone.danger,
+        icon: Icons.cancel_outlined,
+      ),
+      LinkingChallengeStatus.unknown => EnumPresentation(
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.help_outline_rounded,
+        isKnown: false,
+      ),
+    };
   }
 
   // ──────────────────────────────────────────────────────────────────────────

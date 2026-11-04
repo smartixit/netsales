@@ -117,6 +117,13 @@ abstract final class ApiConstants {
       '/network-pos/$id/toggle-status';
   static const String networkPosBatchDelete = '/network-pos/batch-delete';
   static const String networkPosBatchStatus = '/network-pos/batch-status';
+  static const String networkPosChallenges = '/network-pos/challenges';
+  static const String networkPosChallengesPreview =
+      '/network-pos/challenges/preview';
+  static const String networkPosChallengesConfirm =
+      '/network-pos/challenges/confirm';
+  static String networkPosChallengeRevoke(String uuid) =>
+      '/network-pos/challenges/$uuid';
 
   // ==========================================================================
   // 9. باقات كروت الإنترنت (Voucher Packages)
