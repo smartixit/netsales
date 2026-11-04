@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// نافذة تأكيد ربط نقطة البيع بالشبكة بعد مسح رمز QR (Link Confirmation Sheet)
 class NetworkPosLinkConfirmSheet extends StatelessWidget {
@@ -23,10 +25,32 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
     required this.onCancel,
   });
 
+  /// عرض النافذة السفلية الموحدة للمعاينة والتأكيد
+  static Future<bool?> show({
+    required NetworkPosLinkPreviewEntity preview,
+    required Future<bool> Function() onConfirm,
+  }) {
+    return CustomBottomSheet.show<bool>(
+      title: 'تأكيد الربط مع مزود شبكة',
+      subtitle: 'تم التحقق من صحة التحدي المشفر بنجاح',
+      leadingIcon: Icons.link_rounded,
+      child: NetworkPosLinkConfirmSheet(
+        preview: preview,
+        onConfirm: () async {
+          final success = await onConfirm();
+          if (success) {
+            Get.back<bool>(result: true);
+          }
+        },
+        onCancel: () => Get.back<bool>(result: false),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final dateFormat = DateFormat('yyyy/MM/dd hh:mm a');
+    final formattedExpiry = DateFormatter.dateTime(preview.expiresAt);
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.lg),
@@ -41,19 +65,6 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // مقبض السحب
-            Center(
-              child: Container(
-                width: 40.w,
-                height: 4.h,
-                margin: EdgeInsets.only(bottom: AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: colors.outlineVariant,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-              ),
-            ),
-
             // ترويسة النافذة
             Row(
               children: [
@@ -69,7 +80,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                     size: 24.r,
                   ),
                 ),
-                SizedBox(width: AppSpacing.sm),
+                AppSpacing.hSm,
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +103,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
               ],
             ),
 
-            SizedBox(height: AppSpacing.lg),
+            AppSpacing.vLg,
 
             // بطاقة بيانات الشبكة المعاينة
             Container(
@@ -113,7 +124,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                   ),
                   if (preview.networkPhone != null &&
                       preview.networkPhone!.isNotEmpty) ...[
-                    SizedBox(height: AppSpacing.sm),
+                    AppSpacing.vSm,
                     _buildInfoRow(
                       context,
                       icon: Icons.phone_outlined,
@@ -122,7 +133,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                     ),
                   ],
                   if (preview.governorateName != null) ...[
-                    SizedBox(height: AppSpacing.sm),
+                    AppSpacing.vSm,
                     _buildInfoRow(
                       context,
                       icon: Icons.location_on_outlined,
@@ -131,12 +142,12 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                           '${preview.governorateName} - ${preview.directorateName ?? ""}',
                     ),
                   ],
-                  SizedBox(height: AppSpacing.sm),
+                  AppSpacing.vSm,
                   _buildInfoRow(
                     context,
                     icon: Icons.timer_outlined,
                     label: 'صلاحية الدعوة:',
-                    value: dateFormat.format(preview.expiresAt),
+                    value: formattedExpiry,
                   ),
                 ],
               ),
@@ -144,7 +155,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
 
             // تنبيه في حال الارتباط المسبق
             if (preview.alreadyLinked) ...[
-              SizedBox(height: AppSpacing.md),
+              AppSpacing.vMd,
               Container(
                 padding: EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
@@ -161,7 +172,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                       color: colors.warning,
                       size: 20.r,
                     ),
-                    SizedBox(width: AppSpacing.sm),
+                    AppSpacing.hSm,
                     Expanded(
                       child: Text(
                         'نقطة البيع مرتبطة بالفعل بهذه الشبكة سابقاً.',
@@ -176,25 +187,23 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
               ),
             ],
 
-            SizedBox(height: AppSpacing.xl),
+            AppSpacing.vXl,
 
             // أزرار التأكيد والإلغاء
             Row(
               children: [
                 Expanded(
-                  child: CustomButton(
+                  child: CustomButton.outline(
                     text: 'إلغاء',
-                    variant: AppButtonVariant.outline,
                     onPressed: isLoading ? null : onCancel,
                   ),
                 ),
-                SizedBox(width: AppSpacing.md),
+                AppSpacing.hMd,
                 Expanded(
                   flex: 2,
-                  child: CustomButton(
+                  child: CustomButton.primary(
                     text: 'تأكيد وإتمام الربط',
                     icon: Icons.check_circle_outline_rounded,
-                    variant: AppButtonVariant.primary,
                     loading: isLoading,
                     onPressed: preview.alreadyLinked ? null : onConfirm,
                   ),
@@ -218,14 +227,14 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 18.r, color: colors.primary),
-        SizedBox(width: AppSpacing.sm),
+        AppSpacing.hSm,
         Text(
           label,
           style: AppTypography.bodySmall.copyWith(
             color: colors.onSurfaceVariant,
           ),
         ),
-        SizedBox(width: AppSpacing.xs),
+        AppSpacing.hXs,
         Expanded(
           child: Text(
             value,

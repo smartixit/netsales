@@ -1,0 +1,13 @@
+import 'package:netsales/features/packages/domain/entities/voucher_package_entity.dart';
+import 'package:netsales/features/packages/domain/repositories/packages_repository.dart';
+
+class UpdatePackageUseCase {
+  final PackagesRepository _repository;
+
+  const UpdatePackageUseCase(this._repository);
+
+  Future<VoucherPackageEntity> call(int packageId, Map<String, dynamic> data) {
+    return _repository.updatePackage(packageId, data);
+  }
+}
+

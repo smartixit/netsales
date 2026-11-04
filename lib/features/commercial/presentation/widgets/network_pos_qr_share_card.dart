@@ -2,18 +2,18 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/share_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/qr/custom_qr_code.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// بطاقة دعوة ربط نقطة البيع بالشبكة عبر QR القابلة للمشاركة والتصدير
 ///
@@ -43,7 +43,11 @@ class NetworkPosQrShareCard extends StatelessWidget {
           _cardKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
 
       if (boundary == null) {
-        Get.snackbar('تنبيه', 'تعذر التقاط صورة البطاقة');
+        CustomSnackbar.show(
+          title: 'تنبيه',
+          message: 'تعذر التقاط صورة البطاقة',
+          type: SnackType.warning,
+        );
         return;
       }
 
@@ -51,7 +55,11 @@ class NetworkPosQrShareCard extends StatelessWidget {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
       if (byteData == null) {
-        Get.snackbar('خطأ', 'فشل تحويل البطاقة إلى صورة');
+        CustomSnackbar.show(
+          title: 'خطأ',
+          message: 'فشل تحويل البطاقة إلى صورة',
+          type: SnackType.error,
+        );
         return;
       }
 
@@ -66,14 +74,18 @@ class NetworkPosQrShareCard extends StatelessWidget {
         text: 'دعوة ربط نقطة بيع مع شبكة $networkName عبر منصة NetSales',
       );
     } catch (e) {
-      Get.snackbar('خطأ', 'تعذرت مشاركة بطاقة الدعوة: ${e.toString()}');
+      CustomSnackbar.show(
+        title: 'خطأ',
+        message: 'تعذرت مشاركة بطاقة الدعوة: ${e.toString()}',
+        type: SnackType.error,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final dateFormat = DateFormat('yyyy/MM/dd hh:mm a');
+    final dateFormat = DateFormatter.dateTime(challenge.expiresAt);
     final presentation = EnumPresentationRegistry.resolveLinkingChallengeStatus(
       challenge.status,
     );
@@ -152,9 +164,9 @@ class NetworkPosQrShareCard extends StatelessWidget {
                   ],
                 ),
 
-                SizedBox(height: AppSpacing.md),
+                AppSpacing.vMd,
                 Divider(color: colors.outlineVariant),
-                SizedBox(height: AppSpacing.md),
+                AppSpacing.vMd,
 
                 // تخصيص لنقطة محددة إن وُجدت
                 if (posName != null && posName!.isNotEmpty) ...[
@@ -175,7 +187,7 @@ class NetworkPosQrShareCard extends StatelessWidget {
                           size: 16.r,
                           color: colors.secondary,
                         ),
-                        SizedBox(width: AppSpacing.xs),
+                        AppSpacing.hXs,
                         Text(
                           'دعوة مخصصة لنقطة: $posName',
                           style: AppTypography.bodySmall.copyWith(
@@ -186,7 +198,7 @@ class NetworkPosQrShareCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(height: AppSpacing.md),
+                  AppSpacing.vMd,
                 ],
 
                 // رمز الـ QR الفعلي
@@ -209,7 +221,7 @@ class NetworkPosQrShareCard extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(height: AppSpacing.md),
+                AppSpacing.vMd,
 
                 // إرشادات المسح والانتهاء
                 Text(
@@ -219,9 +231,9 @@ class NetworkPosQrShareCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: AppSpacing.xs),
+                AppSpacing.vXs,
                 Text(
-                  'تنتهي الصلاحية: ${dateFormat.format(challenge.expiresAt)}',
+                  'تنتهي الصلاحية: $dateFormat',
                   textAlign: TextAlign.center,
                   style: AppTypography.bodySmall.copyWith(
                     color: colors.onSurfaceVariant,
@@ -238,15 +250,14 @@ class NetworkPosQrShareCard extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: CustomButton(
+                child: CustomButton.primary(
                   text: 'مشاركة كبطاقة دعوة',
                   icon: Icons.share_rounded,
-                  variant: AppButtonVariant.primary,
                   onPressed: () => _shareCardImage(context),
                 ),
               ),
               if (onRevoke != null && challenge.isPending) ...[
-                SizedBox(width: AppSpacing.sm),
+                AppSpacing.hSm,
                 CustomButton.icon(
                   icon: Icons.delete_outline_rounded,
                   backgroundColor: colors.error.withValues(alpha: 0.1),

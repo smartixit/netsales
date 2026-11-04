@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_share_card.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
@@ -44,12 +45,13 @@ class NetworkPosQrChallengeSheet {
 
           final challenge = snapshot.data;
           if (challenge == null) {
-            return const SizedBox(
-              height: 200,
-              child: Center(
-                child: Text(
-                  'تعذر إنشاء دعوة الربط المشفرة. يرجى المحاولة لاحقاً.',
-                ),
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CustomErrorState(
+                variant: ErrorStateVariant.compact,
+                title: 'تعذر إنشاء دعوة الربط المشفرة',
+                subtitle:
+                    'يرجى التحقق من اتصالك بالإنترنت وإعادة المحاولة لاحقاً.',
               ),
             );
           }

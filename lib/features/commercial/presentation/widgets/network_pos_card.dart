@@ -202,14 +202,14 @@ class NetworkPosCard extends GetView<CommercialDirectoryController> {
                   text: 'فك الارتباط',
                   icon: Icons.link_off_rounded,
                   onPressed: () {
-                    CustomDialog.danger(
+                    CustomDialog.showDanger(
                       title: 'فك ارتباط نقطة البيع',
                       message:
                           'هل أنت متأكد من رغبتك في فك ارتباط "${pos?.posName ?? 'نقطة البيع'}" بالشبكة؟ سيؤدي ذلك لتعليق طلبات التوريد بالجملة.',
                       confirmLabel: 'تأكيد فك الارتباط',
                       cancelLabel: 'إلغاء',
                       onConfirm: () => controller.unlinkPos(link.networkPosId),
-                    ).showDialog(context);
+                    );
                   },
                 ),
               ],

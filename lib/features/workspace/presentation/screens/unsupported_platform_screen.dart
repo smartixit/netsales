@@ -73,7 +73,7 @@ class UnsupportedPlatformScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 32.h),
-              CustomButton(
+              CustomButton.danger(
                 text: 'تسجيل الخروج الآمن',
                 icon: Icons.logout_rounded,
                 onPressed: () async {

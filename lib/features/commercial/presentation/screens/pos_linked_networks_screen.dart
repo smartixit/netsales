@@ -45,21 +45,12 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
           );
 
           if (preview != null) {
-            await Get.bottomSheet<void>(
-              NetworkPosLinkConfirmSheet(
-                preview: preview,
-                onCancel: () => Get.back<void>(),
-                onConfirm: () async {
-                  final success = await controller.confirmQrChallenge(
-                    challengeUuid: preview.challengeUuid,
-                    posId: controller.activePosId.value,
-                  );
-                  if (success) {
-                    Get.back<void>();
-                  }
-                },
+            await NetworkPosLinkConfirmSheet.show(
+              preview: preview,
+              onConfirm: () => controller.confirmQrChallenge(
+                challengeUuid: preview.challengeUuid,
+                posId: controller.activePosId.value,
               ),
-              isScrollControlled: true,
             );
           }
         },

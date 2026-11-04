@@ -252,13 +252,9 @@ class CustomQrScanner extends StatelessWidget {
                         // زر استيراد من المعرض
                         if (enableGalleryImport) ...[
                           SizedBox(height: AppSpacing.md),
-                          CustomButton(
+                          CustomButton.outline(
                             text: 'اختيار من معرض الصور',
                             icon: Icons.photo_library_outlined,
-                            variant: AppButtonVariant.outline,
-                            foregroundColor: Colors.white,
-                            borderColor: Colors.white54,
-                            backgroundColor: Colors.black45,
                             onPressed: controller.pickAndScanFromGallery,
                           ),
                         ],
