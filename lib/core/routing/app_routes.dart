@@ -49,6 +49,8 @@ abstract final class AppRoutes {
   static const String networkWalletStatement = '/network/wallet-statement';
   static const String posDirectory = '/network/pos-directory';
   static const String voucherPackagesCatalog = '/network/packages-catalog';
+  static const String packageDetails = '/network/packages/details';
+  static const String packageForm = '/network/packages/form';
   static const String operatingExpenses = '/network/operating-expenses';
   static const String networkTeamManagement = '/network/team-management';
   static const String networkSubscription = '/network/subscription';

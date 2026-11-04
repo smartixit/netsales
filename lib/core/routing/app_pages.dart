@@ -20,6 +20,10 @@ import 'package:netsales/features/auth/presentation/screens/register_pos_screen.
 import 'package:netsales/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/two_factor_auth_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/verify_otp_screen.dart';
+import 'package:netsales/features/catalog/presentation/bindings/package_catalog_binding.dart';
+import 'package:netsales/features/catalog/presentation/screens/package_catalog_screen.dart';
+import 'package:netsales/features/catalog/presentation/screens/package_details_screen.dart';
+import 'package:netsales/features/catalog/presentation/screens/package_form_screen.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/pos_linked_networks_screen.dart';
@@ -189,6 +193,37 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+
+    // ========================================================================
+    // 7. مسارات كتالوج باقات الكروت والأسعار (Voucher Packages Catalog M5.1)
+    // ========================================================================
+    GetPage(
+      name: AppRoutes.voucherPackagesCatalog,
+      page: () => const PackageCatalogScreen(),
+      binding: PackageCatalogBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.packageDetails,
+      page: () => const PackageDetailsScreen(),
+      binding: PackageCatalogBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.packageForm,
+      page: () => const PackageFormScreen(),
+      binding: PackageCatalogBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
   ];
