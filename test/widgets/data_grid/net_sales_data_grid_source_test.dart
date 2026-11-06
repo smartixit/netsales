@@ -228,7 +228,14 @@ void main() {
       );
       expect(editSource.items[0].name, 'Alpha updated');
       expect(editSource.items[1].name, 'Beta');
-      expect(editSource.itemForRow(firstSourceRow)?.id, 1);
+      final updatedRow = editSource.rows.firstWhere(
+        (row) => row.getCells().any(
+          (cell) =>
+              cell.columnName == 'name' && cell.value == 'Alpha updated',
+        ),
+      );
+      expect(editSource.itemForRow(firstSourceRow), isNull);
+      expect(editSource.itemForRow(updatedRow)?.id, 1);
     },
   );
 
