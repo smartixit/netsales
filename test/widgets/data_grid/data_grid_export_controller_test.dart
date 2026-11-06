@@ -98,9 +98,9 @@ void main() {
           body: SfDataGrid(
             key: controller.gridKey,
             source: gridSource,
-            columns: const [
-              GridColumn(columnName: 'id', label: Text('ID')),
-              GridColumn(columnName: 'name', label: Text('Name')),
+            columns: [
+              GridColumn(columnName: 'id', label: const Text('ID')),
+              GridColumn(columnName: 'name', label: const Text('Name')),
             ],
           ),
         ),
