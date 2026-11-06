@@ -41,6 +41,8 @@ import 'package:netsales/features/workspace/presentation/screens/pos_workspace_s
 import 'package:netsales/features/workspace/presentation/screens/unsupported_platform_screen.dart';
 import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_binding.dart';
 import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_screen.dart';
+import 'package:netsales/widgets/data_grid/showcase/data_grid_showcase_binding.dart';
+import 'package:netsales/widgets/data_grid/showcase/data_grid_showcase_screen.dart';
 import 'package:netsales/widgets/feedback/custom_not_found.dart';
 import 'package:netsales/widgets/feedback/custom_unauthorized.dart';
 
@@ -237,5 +239,13 @@ abstract final class AppPages {
         page: () => const DashboardMetricsShowcaseScreen(),
         binding: DashboardMetricsShowcaseBinding(),
       ),
+    // Developer-only DataGrid showcase; omitted from release builds.
+    if (kDebugMode)
+      GetPage<dynamic>(
+        name: AppRoutes.dataGridShowcase,
+        page: () => const DataGridShowcaseScreen(),
+        binding: DataGridShowcaseBinding(),
+      ),
+
   ];
 }
