@@ -11,7 +11,6 @@ import '../enums/dashboard_metric_variant.dart';
 import '../models/dashboard_metric_data.dart';
 import '../models/dashboard_metric_source.dart';
 import '../models/dashboard_metric_trend.dart';
-import '../models/dashboard_metric_threshold.dart';
 import '../theme/dashboard_metrics_theme.dart';
 
 /// A semantic KPI surface: value, interpretation, boundaries and provenance.
@@ -38,7 +37,6 @@ class DashboardMetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = DashboardMetricsTheme.of(context);
-    final scheme = Theme.of(context).colorScheme;
     final accent = tokens.colorFor(metric.tone);
     final radius = BorderRadius.circular(tokens.cardRadius);
 
@@ -377,7 +375,11 @@ class _TargetProgress extends StatelessWidget {
 }
 
 class _StatusCaption extends StatelessWidget {
-  const _StatusCaption({required this.tone, required this.tokens});
+  const _StatusCaption({
+    required this.tone,
+    required this.tokens,
+    required this.label,
+  });
 
   final DashboardMetricTone tone;
   final DashboardMetricsTheme tokens;
