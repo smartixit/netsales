@@ -113,7 +113,7 @@ class AppDataGrid<T> extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title != null || searchController != null || headerActions.isNotEmpty)
+        if (title != null || subtitle != null || searchController != null || headerActions.isNotEmpty || source.items.isNotEmpty || (!AppBreakpoints.isMobile(context) && exportController != null && viewState == AppDataGridViewState.success))
           _GridToolbar(
             title: title,
             subtitle: subtitle,
@@ -423,7 +423,7 @@ class _GridToolbar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (title != null || actions.isNotEmpty) ...[
+          if (title != null || actions.isNotEmpty || exportController != null) ...[
             Wrap(
               alignment: WrapAlignment.spaceBetween,
               crossAxisAlignment: WrapCrossAlignment.center,
