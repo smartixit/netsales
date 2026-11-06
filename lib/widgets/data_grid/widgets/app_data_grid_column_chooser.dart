@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_column.dart';
 import 'package:netsales/widgets/menus/custom_popup_menu.dart';
@@ -24,14 +23,18 @@ class AppDataGridColumnChooser<T> extends StatelessWidget {
     return CustomPopupMenu<String>(
       tooltip: tooltip,
       triggerIcon: triggerIcon,
-      items: columns.map((column) => CustomPopupItem<String>(
-        value: column.name,
-        label: column.label,
-        enabled: !column.visible || visibleCount > 1,
-        icon: column.visible
-            ? Icons.check_box_rounded
-            : Icons.check_box_outline_blank_rounded,
-      )).toList(growable: false),
+      items: columns
+          .map(
+            (column) => CustomPopupItem<String>(
+              value: column.name,
+              label: column.label,
+              enabled: !column.visible || visibleCount > 1,
+              icon: column.visible
+                  ? Icons.check_box_rounded
+                  : Icons.check_box_outline_blank_rounded,
+            ),
+          )
+          .toList(growable: false),
       onSelected: onVisibilityChanged,
     );
   }

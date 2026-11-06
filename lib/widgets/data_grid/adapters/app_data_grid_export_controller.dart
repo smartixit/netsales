@@ -8,7 +8,7 @@ import 'package:syncfusion_flutter_datagrid_export/export.dart';
 /// Exports rows currently loaded into the widget. Full server result exports belong in Laravel.
 class AppDataGridExportController {
   AppDataGridExportController({IFileExportService? fileExportService})
-      : _fileExportService = fileExportService ?? FileExportService.instance;
+    : _fileExportService = fileExportService ?? FileExportService.instance;
 
   final IFileExportService _fileExportService;
   final GlobalKey<SfDataGridState> gridKey = GlobalKey<SfDataGridState>();

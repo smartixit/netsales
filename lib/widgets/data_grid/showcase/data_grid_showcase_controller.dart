@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -51,7 +50,13 @@ class DataGridShowcaseController extends GetxController {
     const statuses = ['مكتمل', 'قيد المراجعة', 'معلّق', 'مرفوض'];
     const regions = ['صنعاء', 'تعز', 'عدن', 'إب', 'الحديدة'];
     const channels = ['تحويل بنكي', 'محفظة', 'نقدي'];
-    const customers = ['مؤسسة الرواد التجارية', 'شبكة المستقبل', 'مبيعات الاتصالات', 'مؤسسة النخبة', 'شبكة الأفق'];
+    const customers = [
+      'مؤسسة الرواد التجارية',
+      'شبكة المستقبل',
+      'مبيعات الاتصالات',
+      'مؤسسة النخبة',
+      'شبكة الأفق',
+    ];
     return DataGridShowcaseRecord(
       id: index + 1,
       reference: 'NS-${(index + 1).toString().padLeft(5, '0')}',
@@ -75,7 +80,8 @@ class DataGridShowcaseController extends GetxController {
         await Future<void>.delayed(const Duration(milliseconds: 180));
         source.replaceRows(_records);
       },
-      onEditFailure: (error) => Get.snackbar('تعذر حفظ التعديل', error.toString()),
+      onEditFailure: (error) =>
+          Get.snackbar('تعذر حفظ التعديل', error.toString()),
     );
     visibleColumns.addAll(source.columns.map((column) => column.name));
   }
@@ -94,15 +100,21 @@ class DataGridShowcaseController extends GetxController {
       minimumWidth: 180,
       valueGetter: (row) => row.customer,
       allowEditing: true,
-      editorBuilder: ({required row, required initialValue, required onChanged, required onSubmit}) =>
-          TextFormField(
+      editorBuilder:
+          ({
+            required row,
+            required initialValue,
+            required onChanged,
+            required onSubmit,
+          }) => TextFormField(
             initialValue: initialValue?.toString(),
             autofocus: true,
             onChanged: onChanged,
             onFieldSubmitted: (_) => onSubmit(),
           ),
       parseEditedValue: (value) => value?.toString().trim(),
-      validateEditedValue: (_, value) => value is String && value.trim().length >= 3,
+      validateEditedValue: (_, value) =>
+          value is String && value.trim().length >= 3,
     ),
     AppDataGridColumn<DataGridShowcaseRecord>(
       name: 'region',
@@ -128,7 +140,13 @@ class DataGridShowcaseController extends GetxController {
             color: tone.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(30),
           ),
-          child: Text(row.status, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: tone, fontWeight: FontWeight.w700)),
+          child: Text(
+            row.status,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: tone,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         );
       },
     ),
@@ -141,7 +159,9 @@ class DataGridShowcaseController extends GetxController {
       valueGetter: (row) => row.amount,
       cellBuilder: (context, row, value) => Text(
         AmountFormatter.formatValue(row.amount, decimalPlaces: 2),
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
       ),
     ),
     AppDataGridColumn<DataGridShowcaseRecord>(
@@ -149,7 +169,8 @@ class DataGridShowcaseController extends GetxController {
       label: 'تاريخ الإنشاء',
       width: 155,
       valueGetter: (row) => row.createdAt,
-      cellBuilder: (context, row, value) => Text(DateFormatter.date(row.createdAt)),
+      cellBuilder: (context, row, value) =>
+          Text(DateFormatter.date(row.createdAt)),
     ),
     AppDataGridColumn<DataGridShowcaseRecord>(
       name: 'channel',
@@ -191,14 +212,19 @@ class DataGridShowcaseController extends GetxController {
     currentPage.value = 1;
     selectedRows.clear();
     final query = value.trim().toLowerCase();
-    final filtered = _records.where((row) =>
-      row.reference.toLowerCase().contains(query) ||
-      row.customer.toLowerCase().contains(query) ||
-      row.region.toLowerCase().contains(query) ||
-      row.status.toLowerCase().contains(query)
-    ).toList(growable: false);
+    final filtered = _records
+        .where(
+          (row) =>
+              row.reference.toLowerCase().contains(query) ||
+              row.customer.toLowerCase().contains(query) ||
+              row.region.toLowerCase().contains(query) ||
+              row.status.toLowerCase().contains(query),
+        )
+        .toList(growable: false);
     source.replaceRows(filtered);
-    viewState.value = filtered.isEmpty ? AppDataGridViewState.noResults : AppDataGridViewState.success;
+    viewState.value = filtered.isEmpty
+        ? AppDataGridViewState.noResults
+        : AppDataGridViewState.success;
   }
 
   void clearSearch() {
@@ -211,9 +237,13 @@ class DataGridShowcaseController extends GetxController {
 
   void toggleColumn(String name) {
     if (visibleColumns.length == 1 && visibleColumns.contains(name)) return;
-    final updated = source.columns.map((column) =>
-      column.name == name ? column.copyWith(visible: !column.visible) : column
-    ).toList(growable: false);
+    final updated = source.columns
+        .map(
+          (column) => column.name == name
+              ? column.copyWith(visible: !column.visible)
+              : column,
+        )
+        .toList(growable: false);
     source.updateColumns(updated);
     if (visibleColumns.contains(name)) {
       visibleColumns.remove(name);
@@ -232,7 +262,10 @@ class DataGridShowcaseController extends GetxController {
     }
   }
 
-  void onSelectionChanged(List<DataGridShowcaseRecord> selected, List<DataGridShowcaseRecord> deselected) {
+  void onSelectionChanged(
+    List<DataGridShowcaseRecord> selected,
+    List<DataGridShowcaseRecord> deselected,
+  ) {
     final next = selectedRows.toList();
     next.removeWhere((row) => deselected.any((value) => value.id == row.id));
     for (final row in selected) {
@@ -263,26 +296,28 @@ class DataGridShowcaseController extends GetxController {
     frozenColumnsCount: 1,
     allowPullToRefresh: true,
     stackedHeaderRows: [
-      StackedHeaderRow(cells: [
-        StackedHeaderCell(
-          text: 'بيانات العملية',
-          columnNames: ['reference', 'customer', 'region'],
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: const Text('بيانات العملية'),
+      StackedHeaderRow(
+        cells: [
+          StackedHeaderCell(
+            text: 'بيانات العملية',
+            columnNames: ['reference', 'customer', 'region'],
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: const Text('بيانات العملية'),
+            ),
           ),
-        ),
-        StackedHeaderCell(
-          text: 'تفاصيل المعالجة',
-          columnNames: ['status', 'amount', 'createdAt', 'channel'],
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: const Text('تفاصيل المعالجة'),
+          StackedHeaderCell(
+            text: 'تفاصيل المعالجة',
+            columnNames: ['status', 'amount', 'createdAt', 'channel'],
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: const Text('تفاصيل المعالجة'),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     ],
     tableSummaryRows: [
       GridTableSummaryRow(

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -58,7 +57,8 @@ class DataGridShowcaseScreen extends GetView<DataGridShowcaseController> {
                       features: controller.features,
                       viewState: controller.viewState.value,
                       title: 'سجل العمليات التجارية',
-                      subtitle: 'معاينة الفرز والتصفية والتحديد وتخصيص الأعمدة والتصدير',
+                      subtitle:
+                          'معاينة الفرز والتصفية والتحديد وتخصيص الأعمدة والتصدير',
                       searchController: controller.searchController,
                       onSearchChanged: controller.setSearch,
                       onClearSearch: controller.clearSearch,
@@ -66,12 +66,22 @@ class DataGridShowcaseScreen extends GetView<DataGridShowcaseController> {
                       exportController: controller.exportController,
                       exportFileName: 'NetSales_DataGrid_Showcase',
                       selectedCount: controller.selectedRows.length,
-                      selectedItems: controller.selectedRows.toList(growable: false),
+                      selectedItems: controller.selectedRows.toList(
+                        growable: false,
+                      ),
                       onSelectionChanged: controller.onSelectionChanged,
                       onColumnsReordered: controller.onColumnsReordered,
                       headerActions: [
                         AppDataGridColumnChooser<DataGridShowcaseRecord>(
-                          columns: controller.source.columns.map((column) => column.copyWith(visible: visibleColumnNames.contains(column.name))).toList(growable: false),
+                          columns: controller.source.columns
+                              .map(
+                                (column) => column.copyWith(
+                                  visible: visibleColumnNames.contains(
+                                    column.name,
+                                  ),
+                                ),
+                              )
+                              .toList(growable: false),
                           onVisibilityChanged: controller.toggleColumn,
                         ),
                       ],
@@ -114,14 +124,34 @@ class _ShowcaseSettings extends StatelessWidget {
     runSpacing: AppSpacing.xs,
     crossAxisAlignment: WrapCrossAlignment.center,
     children: [
-      CustomButton.outline(text: dark ? 'Dark' : 'Light', onPressed: () => onDarkChanged(!dark)),
-      CustomButton.outline(text: rtl ? 'RTL' : 'LTR', onPressed: () => onRtlChanged(!rtl)),
-      CustomButton.outline(text: grouping ? 'إلغاء التجميع' : 'تجميع حسب الحالة', onPressed: onGroupingChanged),
-      CustomButton.text(text: 'تحميل', onPressed: () => onStateChanged(AppDataGridViewState.loading)),
-      CustomButton.text(text: 'فارغ', onPressed: () => onStateChanged(AppDataGridViewState.empty)),
-      CustomButton.text(text: 'خطأ', onPressed: () => onStateChanged(AppDataGridViewState.error)),
-      CustomButton.text(text: 'البيانات', onPressed: () => onStateChanged(AppDataGridViewState.success)),
+      CustomButton.outline(
+        text: dark ? 'Dark' : 'Light',
+        onPressed: () => onDarkChanged(!dark),
+      ),
+      CustomButton.outline(
+        text: rtl ? 'RTL' : 'LTR',
+        onPressed: () => onRtlChanged(!rtl),
+      ),
+      CustomButton.outline(
+        text: grouping ? 'إلغاء التجميع' : 'تجميع حسب الحالة',
+        onPressed: onGroupingChanged,
+      ),
+      CustomButton.text(
+        text: 'تحميل',
+        onPressed: () => onStateChanged(AppDataGridViewState.loading),
+      ),
+      CustomButton.text(
+        text: 'فارغ',
+        onPressed: () => onStateChanged(AppDataGridViewState.empty),
+      ),
+      CustomButton.text(
+        text: 'خطأ',
+        onPressed: () => onStateChanged(AppDataGridViewState.error),
+      ),
+      CustomButton.text(
+        text: 'البيانات',
+        onPressed: () => onStateChanged(AppDataGridViewState.success),
+      ),
     ],
   );
 }
-

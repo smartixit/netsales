@@ -43,8 +43,9 @@ class _MemoryExportService implements IFileExportService {
   }) async => true;
 
   @override
-  Future<Directory> getAppExportDirectory({String folderName = 'NetSales'}) async =>
-      Directory.systemTemp;
+  Future<Directory> getAppExportDirectory({
+    String folderName = 'NetSales',
+  }) async => Directory.systemTemp;
 
   @override
   String sanitizeFileName(
@@ -58,14 +59,18 @@ class _MemoryExportService implements IFileExportService {
 class _TestGridSource extends DataGridSource {
   _TestGridSource() {
     _rows = [
-      DataGridRow(cells: [
-        const DataGridCell<int>(columnName: 'id', value: 1),
-        const DataGridCell<String>(columnName: 'name', value: 'Alpha'),
-      ]),
-      DataGridRow(cells: [
-        const DataGridCell<int>(columnName: 'id', value: 2),
-        const DataGridCell<String>(columnName: 'name', value: 'Beta'),
-      ]),
+      DataGridRow(
+        cells: [
+          const DataGridCell<int>(columnName: 'id', value: 1),
+          const DataGridCell<String>(columnName: 'name', value: 'Alpha'),
+        ],
+      ),
+      DataGridRow(
+        cells: [
+          const DataGridCell<int>(columnName: 'id', value: 2),
+          const DataGridCell<String>(columnName: 'name', value: 'Beta'),
+        ],
+      ),
     ];
   }
 
@@ -76,8 +81,8 @@ class _TestGridSource extends DataGridSource {
 
   @override
   DataGridRowAdapter buildRow(DataGridRow row) => DataGridRowAdapter(
-        cells: row.getCells().map((cell) => Text(cell.value.toString())).toList(),
-      );
+    cells: row.getCells().map((cell) => Text(cell.value.toString())).toList(),
+  );
 }
 
 void main() {
@@ -94,14 +99,8 @@ void main() {
             key: controller.gridKey,
             source: gridSource,
             columns: const [
-              GridColumn(
-                columnName: 'id',
-                label: Text('ID'),
-              ),
-              GridColumn(
-                columnName: 'name',
-                label: Text('Name'),
-              ),
+              GridColumn(columnName: 'id', label: Text('ID')),
+              GridColumn(columnName: 'name', label: Text('Name')),
             ],
           ),
         ),
@@ -121,7 +120,9 @@ void main() {
     expect(result.errorMessage, contains('not mounted'));
   });
 
-  testWidgets('exports a valid XLSX workbook through FileExportService', (tester) async {
+  testWidgets('exports a valid XLSX workbook through FileExportService', (
+    tester,
+  ) async {
     await mountGrid(tester);
 
     final result = await controller.exportExcel(fileName: 'grid-test');
@@ -133,7 +134,9 @@ void main() {
     expect(fileService.savedBytes!.take(2).toList(), [0x50, 0x4b]);
   });
 
-  testWidgets('exports a valid PDF document through FileExportService', (tester) async {
+  testWidgets('exports a valid PDF document through FileExportService', (
+    tester,
+  ) async {
     await mountGrid(tester);
 
     final result = await controller.exportPdf(fileName: 'grid-test');
@@ -145,7 +148,9 @@ void main() {
     expect(String.fromCharCodes(fileService.savedBytes!.take(5)), '%PDF-');
   });
 
-  testWidgets('exports only the selected rows when rows are supplied', (tester) async {
+  testWidgets('exports only the selected rows when rows are supplied', (
+    tester,
+  ) async {
     await mountGrid(tester);
     final selectedRows = gridSource.rows.take(1).toList();
 
@@ -159,7 +164,9 @@ void main() {
     expect(fileService.savedBytes!.take(2).toList(), [0x50, 0x4b]);
   });
 
-  testWidgets('converts storage failures into a failed export result', (tester) async {
+  testWidgets('converts storage failures into a failed export result', (
+    tester,
+  ) async {
     await mountGrid(tester);
     fileService.shouldFail = true;
 

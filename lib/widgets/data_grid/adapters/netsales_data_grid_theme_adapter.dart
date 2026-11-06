@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:syncfusion_flutter_core/theme.dart';

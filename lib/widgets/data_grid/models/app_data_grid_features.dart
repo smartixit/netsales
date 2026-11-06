@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -158,12 +157,14 @@ class AppDataGridFeatures {
   final double footerHeight;
   final QueryRowHeightCallback? onQueryRowHeight;
 
-  GridNavigationMode get effectiveNavigationMode => allowEditing ? GridNavigationMode.cell : navigationMode;
+  GridNavigationMode get effectiveNavigationMode =>
+      allowEditing ? GridNavigationMode.cell : navigationMode;
 
   SelectionMode get effectiveSelectionMode {
     if (!allowSelection) return SelectionMode.none;
     return allowMultiSelection ? SelectionMode.multiple : SelectionMode.single;
   }
 
-  bool get canFilterLocally => dataMode == AppDataGridDataMode.local && allowFiltering;
+  bool get canFilterLocally =>
+      dataMode == AppDataGridDataMode.local && allowFiltering;
 }
