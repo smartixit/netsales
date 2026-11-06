@@ -5,7 +5,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
-# Both of the version and the builder number may be overridden in flutter
+# Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
 # In Android, build-name is used as versionName while build-number used as versionCode.
 # Read more about Android versioning at https://developer.android.com/studio/publish/versioning
@@ -13,11 +13,11 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
-# of the product and build number used as the build suffix.
+# of the product and file versions while build-number is used as the build suffix.
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.13.0
+  sdk: ^3.13.7
   flutter: ">=3.47.9"
 
 # Dependencies specify other packages that your package needs in order to work.
@@ -35,12 +35,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   get: ^4.7.3
   dio: ^5.10.0
-  shared_preferences: ^2.5.5
+  shared_preferences: ^2.5.6
   flutter_animate: ^4.5.2
   intl: ^0.20.2
   hijri: ^3.0.1
   flutter_mdi_icons: ^0.1.5
-  form_builder_validators: ^11.2.0
+  form_builder_validators: ^11.3.0
   pretty_qr_code: ^3.6.0
   flutter_local_notifications: ^22.3.3
   timezone: ^0.11.2
@@ -49,13 +49,13 @@ dependencies:
   workmanager: ^0.9.0+3
   internet_connection_checker_plus: ^3.1.1
   flutter_screenutil: ^5.9.3
-  lottie: ^3.3.3
+  lottie: ^3.8.2
   disable_battery_optimization: ^1.1.2
   permission_handler: ^12.0.3
   flutter_localizations:
     sdk: flutter
   dropdown_button2: ^3.1.0
-  image_picker: ^1.1.2
+  image_picker: ^1.2.4
   device_info_plus: ^12.4.0
   flutter_udid: ^4.1.4
   local_auth: ^2.3.0
@@ -64,11 +64,11 @@ dependencies:
   pinput: ^6.0.2
   calendar_date_picker2: 2.0.1
   audioplayers: ^6.7.1
-  url_launcher: ^6.3.2
-  printing: ^5.14.0
+  url_launcher: ^6.3.3
+  printing: ^5.15.1
   pdf: ^3.12.0
-  path_provider: ^2.1.0
-  crypto: ^3.0.6
+  path_provider: ^2.1.6
+  crypto: ^3.0.8
   syncfusion_flutter_charts: ^34.2.6
   syncfusion_flutter_core: ^34.2.6
   syncfusion_flutter_datagrid: ^34.2.6
@@ -77,7 +77,7 @@ dependencies:
   background_downloader: ^9.5.7
   open_filex: ^4.7.0
   path: ^1.9.0
-  mobile_scanner: ^7.4.0
+  mobile_scanner: ^7.5.0
   pointycastle: ^4.0.0
   cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1
@@ -99,29 +99,43 @@ dev_dependencies:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided in the
-  # analysis_options.yaml file located at the root of your package.
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
   flutter_lints: ^6.0.0
   integration_test:
     sdk: flutter
 
-# For information on the general Dart part of this file, see
-# https://dart.dev/tools/pub/pubspec
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
 
-# The following section is specific to the Flutter packages.
+# The following section is specific to Flutter packages.
 flutter:
 
   # The following line ensures that the Material Icons font is
-  # included with the application, so that it is included in the app.
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section here.
+  # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
     - assets/fonts/
     - assets/animations/
     - assets/sounds/
 
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
   fonts:
     - family: IBM
       fonts:
@@ -133,3 +147,6 @@ flutter:
           weight: 600
         - asset: assets/fonts/IBM-Bold.ttf
           weight: 700
+
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
