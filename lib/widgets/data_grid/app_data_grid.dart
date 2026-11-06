@@ -116,6 +116,10 @@ class AppDataGrid<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedGridRows = source.rows.where((row) {
+      final item = source.itemForRow(row);
+      return item != null && selectedItems.contains(item);
+    }).toList(growable: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -132,6 +136,7 @@ class AppDataGrid<T> extends StatelessWidget {
             exportFileName: exportFileName,
             itemCount: source.items.length,
             selectedCount: selectedCount,
+            selectedRows: selectedGridRows,
             isRemote: features.dataMode == AppDataGridDataMode.remote,
           ),
         Expanded(child: _buildBody(context)),
@@ -420,6 +425,7 @@ class _GridToolbar extends StatelessWidget {
     required this.exportFileName,
     required this.itemCount,
     required this.selectedCount,
+    this.selectedRows = const <DataGridRow>[],
     required this.isRemote,
   });
 
@@ -434,6 +440,7 @@ class _GridToolbar extends StatelessWidget {
   final String exportFileName;
   final int itemCount;
   final int selectedCount;
+  final List<DataGridRow> selectedRows;
   final bool isRemote;
 
   @override
@@ -478,6 +485,26 @@ class _GridToolbar extends StatelessWidget {
                         size: AppButtonSize.small,
                         onPressed: () => exportController!.exportPdf(fileName: exportFileName),
                       ),
+                      if (selectedCount > 0 && selectedRows.isNotEmpty) ...[
+                        CustomButton.icon(
+                          icon: Icons.file_download_outlined,
+                          tooltip: 'تصدير المحدد Excel',
+                          size: AppButtonSize.small,
+                          onPressed: () => exportController!.exportExcel(
+                            fileName: '${exportFileName}_Selected',
+                            rows: selectedRows,
+                          ),
+                        ),
+                        CustomButton.icon(
+                          icon: Icons.picture_as_pdf_rounded,
+                          tooltip: 'تصدير المحدد PDF',
+                          size: AppButtonSize.small,
+                          onPressed: () => exportController!.exportPdf(
+                            fileName: '${exportFileName}_Selected',
+                            rows: selectedRows,
+                          ),
+                        ),
+                      ],
                     ],
                   ],
                 ),
