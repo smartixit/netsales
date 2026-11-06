@@ -7,8 +7,8 @@ import 'package:netsales/widgets/data_grid/showcase/data_grid_showcase_screen.da
 
 void main() {
   setUp(() => Get.testMode = true);
-  tearDown(() async {
-    await Get.reset();
+  tearDown(() {
+    Get.reset();
     Get.testMode = false;
   });
 

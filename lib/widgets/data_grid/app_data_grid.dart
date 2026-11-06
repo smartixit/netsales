@@ -47,7 +47,7 @@ class AppDataGrid<T> extends StatelessWidget {
     this.exportController,
     this.exportFileName = 'NetSales_Report',
     this.selectedCount = 0,
-    this.selectedItems = const <T>[],
+    this.selectedItems = const [],
     this.onSelectionChanged,
     this.onColumnsReordered,
     this.onSelectionChanging,
@@ -322,8 +322,6 @@ class AppDataGrid<T> extends StatelessWidget {
               columnSizer: features.columnSizer,
               columnResizeMode: features.columnResizeMode,
               columnDragFeedbackBuilder: features.columnDragFeedbackBuilder,
-              onColumnResizeStart: features.onColumnResizeStart,
-              onColumnResizeEnd: features.onColumnResizeEnd,
               controller: features.controller,
               selectionManager: features.selectionManager,
               sortingGestureType: features.sortingGestureType,
@@ -669,7 +667,7 @@ class _MobileGridList<T> extends StatelessWidget {
     this.allowPullToRefresh = false,
     this.allowSelection = false,
     this.allowMultiSelection = true,
-    this.selectedItems = const <T>[],
+    this.selectedItems = const [],
     this.onSelectionChanged,
     this.itemBuilder,
     this.isRemote = false,
@@ -735,13 +733,13 @@ class _MobileGridList<T> extends StatelessWidget {
                   onSelectionChanged!(
                     [item],
                     allowMultiSelection
-                        ? const <T>[]
+                        ? <T>[]
                         : selectedItems
                               .where((value) => value != item)
                               .toList(growable: false),
                   );
                 } else {
-                  onSelectionChanged!(const <T>[], [item]);
+                  onSelectionChanged!(<T>[], [item]);
                 }
               },
             ),

@@ -282,7 +282,7 @@ class DataGridShowcaseController extends GetxController {
     onPageNavigationEnd: (pageIndex) => currentPage.value = pageIndex + 1,
   );
 
-  AppDataGridFeatures get features => const AppDataGridFeatures(
+  AppDataGridFeatures get features => AppDataGridFeatures(
     allowSorting: true,
     allowMultiColumnSorting: true,
     allowFiltering: true,

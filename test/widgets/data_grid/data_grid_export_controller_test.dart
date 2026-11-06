@@ -61,14 +61,14 @@ class _TestGridSource extends DataGridSource {
     _rows = [
       DataGridRow(
         cells: [
-          const DataGridCell<int>(columnName: 'id', value: 1),
-          const DataGridCell<String>(columnName: 'name', value: 'Alpha'),
+          DataGridCell<int>(columnName: 'id', value: 1),
+          DataGridCell<String>(columnName: 'name', value: 'Alpha'),
         ],
       ),
       DataGridRow(
         cells: [
-          const DataGridCell<int>(columnName: 'id', value: 2),
-          const DataGridCell<String>(columnName: 'name', value: 'Beta'),
+          DataGridCell<int>(columnName: 'id', value: 2),
+          DataGridCell<String>(columnName: 'name', value: 'Beta'),
         ],
       ),
     ];
