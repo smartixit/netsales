@@ -185,6 +185,7 @@ class DataGridShowcaseController extends GetxController {
 
   void setSearch(String value) {
     currentPage.value = 1;
+    selectedRows.clear();
     final query = value.trim().toLowerCase();
     final filtered = _records.where((row) =>
       row.reference.toLowerCase().contains(query) ||
@@ -198,6 +199,7 @@ class DataGridShowcaseController extends GetxController {
 
   void clearSearch() {
     currentPage.value = 1;
+    selectedRows.clear();
     searchController.clear();
     source.replaceRows(_records);
     viewState.value = AppDataGridViewState.success;
@@ -220,7 +222,7 @@ class DataGridShowcaseController extends GetxController {
     groupingEnabled.toggle();
     source.clearColumnGroups();
     if (groupingEnabled.value) {
-      source.addColumnGroup(const ColumnGroup(name: 'status', sortGroupRows: true));
+      source.addColumnGroup(ColumnGroup(name: 'status', sortGroupRows: true));
     }
   }
 

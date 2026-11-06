@@ -230,6 +230,25 @@ class AppDataGrid<T> extends StatelessWidget {
               onColumnResizeUpdate: features.allowColumnResizing
                   ? (details) {
                       source.updateColumnWidth(details.column.columnName, details.width);
+                      final columnIndex = gridColumns.indexWhere(
+                        (column) => column.columnName == details.column.columnName,
+                      );
+                      if (columnIndex >= 0) {
+                        final current = details.column;
+                        gridColumns[columnIndex] = GridColumn(
+                          columnName: current.columnName,
+                          label: current.label,
+                          width: details.width,
+                          minimumWidth: current.minimumWidth,
+                          maximumWidth: current.maximumWidth,
+                          columnWidthMode: current.columnWidthMode,
+                          visible: current.visible,
+                          allowSorting: current.allowSorting,
+                          allowFiltering: current.allowFiltering,
+                          allowEditing: current.allowEditing,
+                          filterPopupMenuOptions: current.filterPopupMenuOptions,
+                        );
+                      }
                       return true;
                     }
                   : null,
