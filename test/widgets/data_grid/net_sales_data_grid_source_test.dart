@@ -58,5 +58,7 @@ void main() {
 
     expect(source.columns.last.width, 260);
     expect(source.columns.last.label, 'Name');
+    source.reorderColumns(0, 1);
+    expect(source.columns.map((column) => column.name).toList(), ['name', 'id']);
   });
 }

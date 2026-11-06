@@ -9,7 +9,7 @@ class AppDataGridPagination {
   const AppDataGridPagination.none()
       : mode = AppDataGridPaginationMode.none, currentPage = 0, totalPages = 0,
         pageLabel = null, hasPrevious = false, hasNext = false,
-        onPageChanged = null, onPrevious = null, onNext = null, isLoading = false, delegate = null;
+        onPageChanged = null, onPrevious = null, onNext = null, isLoading = false, delegate = null, onPageNavigationStart = null, onPageNavigationEnd = null;
 
   const AppDataGridPagination.pageBased({
     required this.currentPage,
@@ -17,6 +17,8 @@ class AppDataGridPagination {
     required this.onPageChanged,
     this.isLoading = false,
     this.delegate,
+    this.onPageNavigationStart,
+    this.onPageNavigationEnd,
   }) : assert(currentPage >= 1),
        assert(totalPages >= 1),
        assert(currentPage <= totalPages),
@@ -32,7 +34,7 @@ class AppDataGridPagination {
     this.pageLabel,
     this.isLoading = false,
   }) : mode = AppDataGridPaginationMode.cursorBased,
-       currentPage = 0, totalPages = 0, onPageChanged = null, delegate = null;
+       currentPage = 0, totalPages = 0, onPageChanged = null, delegate = null, onPageNavigationStart = null, onPageNavigationEnd = null;
 
   final AppDataGridPaginationMode mode;
   final int currentPage;
@@ -45,6 +47,8 @@ class AppDataGridPagination {
   final Future<void> Function()? onNext;
   final bool isLoading;
   final DataPagerDelegate? delegate;
+  final PageNavigationStart? onPageNavigationStart;
+  final PageNavigationEnd? onPageNavigationEnd;
 
   bool get isEnabled => mode != AppDataGridPaginationMode.none;
 }

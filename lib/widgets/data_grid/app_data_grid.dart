@@ -96,18 +96,41 @@ class AppDataGrid<T> extends StatelessWidget {
             onSearchChanged: onSearchChanged,
             onClearSearch: onClearSearch,
             actions: headerActions,
-            exportController: exportController,
+            exportController: !AppBreakpoints.isMobile(context) && viewState == AppDataGridViewState.success && source.items.isNotEmpty ? exportController : null,
             exportFileName: exportFileName,
             itemCount: source.items.length,
             selectedCount: selectedCount,
           ),
         Expanded(child: _buildBody(context)),
         if (viewState == AppDataGridViewState.success && pagination.isEnabled)
-          if (pagination.mode == AppDataGridPaginationMode.pageBased && pagination.delegate != null)
+          if (pagination.mode == AppDataGridPaginationMode.pageBased &&
+              pagination.delegate != null &&
+              !AppBreakpoints.isMobile(context))
             SfDataPager(
+              key: ValueKey('data-grid-pager-${pagination.currentPage}'),
               delegate: pagination.delegate!,
               pageCount: pagination.totalPages.toDouble(),
+              initialPageIndex: pagination.currentPage - 1,
               direction: Axis.horizontal,
+              pageItemBuilder: (itemName) {
+                final label = switch (itemName) {
+                  'First' => 'الأولى',
+                  'Previous' => 'السابق',
+                  'Next' => 'التالي',
+                  'Last' => 'الأخيرة',
+                  _ => itemName,
+                };
+                return Center(
+                  child: Text(
+                    label,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: context.colors.onSurface,
+                    ),
+                  ),
+                );
+              },
+              onPageNavigationStart: pagination.onPageNavigationStart,
+              onPageNavigationEnd: pagination.onPageNavigationEnd,
             )
           else
             _GridPaginationBar(pagination: pagination),
@@ -155,10 +178,23 @@ class AppDataGrid<T> extends StatelessWidget {
           onClearSearch: noResultsAction ?? onClearSearch,
         );
       case AppDataGridViewState.success:
+        if (source.items.isEmpty) {
+          return CustomEmptyState.boxed(
+            key: const ValueKey('data-grid-empty-success'),
+            title: emptyTitle,
+            subtitle: emptyMessage,
+            icon: Icons.table_rows_outlined,
+            actionLabel: emptyActionLabel,
+            onAction: onEmptyAction,
+          );
+        }
         if (AppBreakpoints.isMobile(context)) {
           return _MobileGridList<T>(
             key: const ValueKey('data-grid-mobile'),
             source: source,
+            pagination: pagination,
+            rowsPerPage: features.rowsPerPage,
+            allowPullToRefresh: features.allowPullToRefresh,
             itemBuilder: mobileItemBuilder,
           );
         }
@@ -358,22 +394,34 @@ class _GridToolbar extends StatelessWidget {
 }
 
 class _MobileGridList<T> extends StatelessWidget {
-  const _MobileGridList({super.key, required this.source, this.itemBuilder});
+  const _MobileGridList({super.key, required this.source, required this.pagination, this.rowsPerPage, this.allowPullToRefresh = false, this.itemBuilder});
   final NetSalesDataGridSource<T> source;
+  final AppDataGridPagination pagination;
+  final int? rowsPerPage;
+  final bool allowPullToRefresh;
   final AppDataGridMobileItemBuilder<T>? itemBuilder;
 
   @override
   Widget build(BuildContext context) {
-    final rows = source.items;
+    final allRows = source.items;
+    final rows = pagination.mode == AppDataGridPaginationMode.pageBased && rowsPerPage != null
+        ? allRows.skip((pagination.currentPage - 1) * rowsPerPage!).take(rowsPerPage!).toList(growable: false)
+        : allRows;
     if (rows.isEmpty) {
       return const CustomEmptyState.compact(title: 'لا توجد سجلات', subtitle: 'لا توجد بيانات لعرضها في هذه الصفحة.', icon: Icons.table_rows_outlined);
     }
-    return ListView.separated(
+    final list = ListView.separated(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsetsDirectional.fromSTEB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.md),
       itemCount: rows.length,
       separatorBuilder: (_, __) => AppSpacing.vSm,
       itemBuilder: (context, index) => itemBuilder?.call(context, rows[index]) ??
           _DefaultMobileRecordCard<T>(item: rows[index], columns: source.columns.where((column) => column.visible).toList(growable: false)),
+    );
+    if (!allowPullToRefresh) return list;
+    return RefreshIndicator(
+      onRefresh: source.handleRefresh,
+      child: list,
     );
   }
 }
@@ -446,7 +494,7 @@ class _GridPaginationBar extends StatelessWidget {
           Row(
             children: [
               CustomButton.icon(
-                icon: Icons.chevron_left_rounded,
+                icon: Directionality.of(context) == TextDirection.rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
                 tooltip: 'السابق',
                 size: AppButtonSize.small,
                 enabled: !pagination.isLoading && (pagination.mode == AppDataGridPaginationMode.pageBased ? pagination.currentPage > 1 : pagination.hasPrevious),
@@ -460,7 +508,7 @@ class _GridPaginationBar extends StatelessWidget {
               ),
               AppSpacing.hXs,
               CustomButton.icon(
-                icon: Icons.chevron_right_rounded,
+                icon: Directionality.of(context) == TextDirection.rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
                 tooltip: 'التالي',
                 size: AppButtonSize.small,
                 enabled: !pagination.isLoading && (pagination.mode == AppDataGridPaginationMode.pageBased ? pagination.currentPage < pagination.totalPages : pagination.hasNext),

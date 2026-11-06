@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/widgets/data_grid/adapters/app_data_grid_export_controller.dart';
@@ -163,7 +164,7 @@ class DataGridShowcaseController extends GetxController {
     await Future<void>.delayed(const Duration(milliseconds: 100));
     if (value is! String || value.trim().isEmpty) return null;
     if (column.name != 'customer') return row;
-    return DataGridShowcaseRecord(
+    final updated = DataGridShowcaseRecord(
       id: row.id,
       reference: row.reference,
       customer: value.trim(),
@@ -173,6 +174,9 @@ class DataGridShowcaseController extends GetxController {
       createdAt: row.createdAt,
       channel: row.channel,
     );
+    final index = _records.indexWhere((record) => record.id == row.id);
+    if (index >= 0) _records[index] = updated;
+    return updated;
   }
 
   void setDarkMode(bool value) => isDarkMode.value = value;
@@ -180,6 +184,7 @@ class DataGridShowcaseController extends GetxController {
   void setViewState(AppDataGridViewState value) => viewState.value = value;
 
   void setSearch(String value) {
+    currentPage.value = 1;
     final query = value.trim().toLowerCase();
     final filtered = _records.where((row) =>
       row.reference.toLowerCase().contains(query) ||
@@ -192,12 +197,14 @@ class DataGridShowcaseController extends GetxController {
   }
 
   void clearSearch() {
+    currentPage.value = 1;
     searchController.clear();
     source.replaceRows(_records);
     viewState.value = AppDataGridViewState.success;
   }
 
   void toggleColumn(String name) {
+    if (visibleColumns.length == 1 && visibleColumns.contains(name)) return;
     final updated = source.columns.map((column) =>
       column.name == name ? column.copyWith(visible: !column.visible) : column
     ).toList(growable: false);
@@ -228,8 +235,10 @@ class DataGridShowcaseController extends GetxController {
 
   AppDataGridPagination get pagination => AppDataGridPagination.pageBased(
     currentPage: currentPage.value,
-    totalPages: 5,
+    totalPages: source.items.isEmpty ? 1 : (source.items.length / 10).ceil(),
     onPageChanged: (page) => currentPage.value = page,
+    delegate: source,
+    onPageNavigationEnd: (pageIndex) => currentPage.value = pageIndex + 1,
   );
 
   AppDataGridFeatures get features => const AppDataGridFeatures(
@@ -247,6 +256,7 @@ class DataGridShowcaseController extends GetxController {
     rowHeight: 62,
     headerRowHeight: 56,
     defaultColumnWidth: 150,
+    rowsPerPage: 10,
   );
 
   @override

@@ -19,6 +19,7 @@ class NetSalesDataGridSource<T> extends DataGridSource {
     List<String> groupByColumns = const <String>[],
   }) : _columns = List<AppDataGridColumn<T>>.of(columns),
        _items = List<T>.of(items) {
+    _validateColumns(_columns);
     _buildRows(notify: false);
     for (final name in groupByColumns) {
       if (_columns.any((column) => column.name == name)) {
@@ -50,7 +51,7 @@ class NetSalesDataGridSource<T> extends DataGridSource {
   }
 
   void updateColumns(List<AppDataGridColumn<T>> columns) {
-    assert(columns.map((column) => column.name).toSet().length == columns.length);
+    _validateColumns(columns);
     _columns = List<AppDataGridColumn<T>>.of(columns);
     _buildRows(notify: true);
   }
@@ -65,7 +66,17 @@ class NetSalesDataGridSource<T> extends DataGridSource {
   void updateColumnWidth(String name, double width) {
     _columns = _columns.map((column) =>
       column.name == name ? column.copyWith(width: width) : column
-    ).toList(growable: false);
+    ).toList(growable: true);
+  }
+
+  void _validateColumns(List<AppDataGridColumn<T>> columns) {
+    if (columns.isEmpty || !columns.any((column) => column.visible)) {
+      throw ArgumentError('DataGrid requires at least one visible column.');
+    }
+    final names = columns.map((column) => column.name).toSet();
+    if (names.length != columns.length) {
+      throw ArgumentError('DataGrid column names must be unique.');
+    }
   }
 
   void _buildRows({required bool notify}) {
