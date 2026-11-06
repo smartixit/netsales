@@ -14,10 +14,9 @@ class WorkspaceCoordinatorController extends GetxController {
   final SetActiveWorkspaceUseCase _setActiveWorkspaceUseCase;
 
   WorkspaceCoordinatorController({
-    required GetActiveWorkspaceUseCase getActiveWorkspaceUseCase,
-    required SetActiveWorkspaceUseCase setActiveWorkspaceUseCase,
-  }) : _getActiveWorkspaceUseCase = getActiveWorkspaceUseCase,
-       _setActiveWorkspaceUseCase = setActiveWorkspaceUseCase;
+    required this._getActiveWorkspaceUseCase,
+    required this._setActiveWorkspaceUseCase,
+  });
 
   static WorkspaceCoordinatorController get to =>
       Get.find<WorkspaceCoordinatorController>();
