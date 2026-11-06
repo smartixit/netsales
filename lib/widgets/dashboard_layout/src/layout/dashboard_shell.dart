@@ -182,7 +182,13 @@ class _BreadcrumbRow extends StatelessWidget {
       children: [
         for (var index = 0; index < breadcrumbs.length; index++) ...[
           if (index > 0)
-            Icon(Icons.chevron_right_rounded, size: 16, color: scheme.onSurfaceVariant),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
+              size: 16,
+              color: scheme.onSurfaceVariant,
+            ),
           InkWell(
             onTap: breadcrumbs[index].enabled && breadcrumbs[index].id != null && onTap != null
                 ? () => onTap!(breadcrumbs[index].id!)
