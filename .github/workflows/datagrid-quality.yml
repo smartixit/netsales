@@ -45,6 +45,7 @@ jobs:
           dart --version
 
       - name: Resolve dependencies and synchronize lockfile
+        if: github.event_name == 'push'
         run: |
           flutter pub get
           if ! git diff --quiet -- pubspec.lock; then
