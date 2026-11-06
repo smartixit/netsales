@@ -36,7 +36,7 @@ void main() {
     expect(find.text('فاتح'), findsOneWidget);
     expect(find.text('داكن'), findsOneWidget);
     expect(find.textContaining('RTL'), findsOneWidget);
-    expect(find.textContaining('LTR'), findsOneWidget);
+    expect(find.text('LTR'), findsOneWidget);
   });
 
   testWidgets('switches the preview theme and text direction locally', (
@@ -108,14 +108,33 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final scrollable = find.byType(Scrollable).first;
     await tester.scrollUntilVisible(
       find.text('إجمالي الشبكات'),
       320,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: scrollable,
     );
     expect(find.text('إجمالي الشبكات'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('متوسط زمن الاستجابة'),
+      320,
+      scrollable: scrollable,
+    );
     expect(find.text('متوسط زمن الاستجابة'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('استقرار الخدمة'),
+      320,
+      scrollable: scrollable,
+    );
     expect(find.text('استقرار الخدمة'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('المبيعات اليومية'),
+      320,
+      scrollable: scrollable,
+    );
     expect(find.text('المبيعات اليومية'), findsOneWidget);
 
     await tester.scrollUntilVisible(
