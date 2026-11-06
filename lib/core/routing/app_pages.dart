@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
@@ -38,6 +39,8 @@ import 'package:netsales/features/workspace/presentation/bindings/pos_workspace_
 import 'package:netsales/features/workspace/presentation/screens/network_workspace_shell.dart';
 import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell.dart';
 import 'package:netsales/features/workspace/presentation/screens/unsupported_platform_screen.dart';
+import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_binding.dart';
+import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_screen.dart';
 import 'package:netsales/widgets/feedback/custom_not_found.dart';
 import 'package:netsales/widgets/feedback/custom_unauthorized.dart';
 
@@ -226,5 +229,13 @@ abstract final class AppPages {
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
+
+    // Developer-only visual verification; omitted from release builds.
+    if (kDebugMode)
+      GetPage<dynamic>(
+        name: AppRoutes.dashboardMetricsShowcase,
+        page: () => const DashboardMetricsShowcaseScreen(),
+        binding: DashboardMetricsShowcaseBinding(),
+      ),
   ];
 }

@@ -32,6 +32,9 @@ abstract final class AppRoutes {
   /// مسار التوجيه المركزي العام بعد تسجيل الدخول (يتولى حارس WorkspaceGuard توجيهه)
   static const String dashboard = '/dashboard';
 
+  /// Developer-only KPI visual showcase (registered in debug builds only).
+  static const String dashboardMetricsShowcase = '/dev/dashboard-metrics';
+
   /// مساحة عمل مزود شبكة الإنترنت المعتمد (Network Workspace)
   static const String networkWorkspace = '/network-workspace';
 
