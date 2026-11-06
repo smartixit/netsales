@@ -47,7 +47,7 @@ class DataGridShowcaseController extends GetxController {
 
   late final NetSalesDataGridSource<DataGridShowcaseRecord> source;
 
-  static final List<DataGridShowcaseRecord> _records = List.generate(48, (index) {
+  final List<DataGridShowcaseRecord> _records = List.generate(48, (index) {
     const statuses = ['مكتمل', 'قيد المراجعة', 'معلّق', 'مرفوض'];
     const regions = ['صنعاء', 'تعز', 'عدن', 'إب', 'الحديدة'];
     const channels = ['تحويل بنكي', 'محفظة', 'نقدي'];
@@ -222,6 +222,8 @@ class DataGridShowcaseController extends GetxController {
     }
   }
 
+  void onColumnsReordered() => visibleColumns.refresh();
+
   void toggleGrouping() {
     groupingEnabled.toggle();
     source.clearColumnGroups();
@@ -289,7 +291,7 @@ class DataGridShowcaseController extends GetxController {
         columns: [
           GridSummaryColumn(
             name: 'Count',
-            columnName: 'id',
+            columnName: 'reference',
             summaryType: GridSummaryType.count,
           ),
         ],
@@ -312,6 +314,7 @@ class DataGridShowcaseController extends GetxController {
   @override
   void onClose() {
     searchController.dispose();
+    source.dispose();
     super.onClose();
   }
 }

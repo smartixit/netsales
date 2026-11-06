@@ -17,6 +17,7 @@ class DataGridShowcaseScreen extends GetView<DataGridShowcaseController> {
     return Obx(() {
       final dark = controller.isDarkMode.value;
       final rtl = controller.isRtl.value;
+      final visibleColumnNames = controller.visibleColumns.toSet();
       return Theme(
         data: dark ? AppThemes.dark : AppThemes.light,
         child: Directionality(
@@ -67,9 +68,10 @@ class DataGridShowcaseScreen extends GetView<DataGridShowcaseController> {
                       selectedCount: controller.selectedRows.length,
                       selectedItems: controller.selectedRows.toList(growable: false),
                       onSelectionChanged: controller.onSelectionChanged,
+                      onColumnsReordered: controller.onColumnsReordered,
                       headerActions: [
                         AppDataGridColumnChooser<DataGridShowcaseRecord>(
-                          columns: controller.source.columns,
+                          columns: controller.source.columns.map((column) => column.copyWith(visible: visibleColumnNames.contains(column.name))).toList(growable: false),
                           onVisibilityChanged: controller.toggleColumn,
                         ),
                       ],

@@ -18,6 +18,7 @@ class AppDataGridFeatures {
     this.allowColumnResizing = true,
     this.allowColumnDragging = true,
     this.allowEditing = false,
+    this.editingGestureType = EditingGestureType.doubleTap,
     this.allowGrouping = false,
     this.allowExpandCollapseGroup = true,
     this.autoExpandGroups = true,
@@ -43,9 +44,14 @@ class AppDataGridFeatures {
     this.columnResizeMode = ColumnResizeMode.onResize,
     this.columnDragFeedbackBuilder,
     this.onColumnResizeStart,
+    this.onColumnResizeUpdate,
     this.onColumnResizeEnd,
     this.sortingGestureType = SortingGestureType.tap,
     this.checkboxColumnSettings = const DataGridCheckboxColumnSettings(),
+    this.checkboxShape,
+    this.placeholder,
+    this.horizontalScrollController,
+    this.verticalScrollController,
     this.horizontalScrollPhysics = const AlwaysScrollableScrollPhysics(),
     this.verticalScrollPhysics = const AlwaysScrollableScrollPhysics(),
     this.shrinkWrapColumns = false,
@@ -88,6 +94,7 @@ class AppDataGridFeatures {
   final bool allowColumnResizing;
   final bool allowColumnDragging;
   final bool allowEditing;
+  final EditingGestureType editingGestureType;
   final bool allowGrouping;
   final bool allowExpandCollapseGroup;
   final bool autoExpandGroups;
@@ -113,9 +120,14 @@ class AppDataGridFeatures {
   final ColumnResizeMode columnResizeMode;
   final ColumnDragFeedbackBuilderCallback? columnDragFeedbackBuilder;
   final ColumnResizeStartCallback? onColumnResizeStart;
+  final ColumnResizeUpdateCallback? onColumnResizeUpdate;
   final ColumnResizeEndCallback? onColumnResizeEnd;
   final SortingGestureType sortingGestureType;
   final DataGridCheckboxColumnSettings checkboxColumnSettings;
+  final OutlinedBorder? checkboxShape;
+  final Widget? placeholder;
+  final ScrollController? horizontalScrollController;
+  final ScrollController? verticalScrollController;
   final ScrollPhysics horizontalScrollPhysics;
   final ScrollPhysics verticalScrollPhysics;
   final bool shrinkWrapColumns;

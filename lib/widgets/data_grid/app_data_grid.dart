@@ -13,6 +13,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/data_grid/adapters/app_data_grid_export_controller.dart';
 import 'package:netsales/widgets/data_grid/adapters/net_sales_data_grid_source.dart';
 import 'package:netsales/widgets/data_grid/adapters/netsales_data_grid_theme_adapter.dart';
+import 'package:netsales/widgets/data_grid/models/app_data_grid_column.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_features.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_pagination.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_state.dart';
@@ -46,6 +47,7 @@ class AppDataGrid<T> extends StatelessWidget {
     this.selectedCount = 0,
     this.selectedItems = const <T>[],
     this.onSelectionChanged,
+    this.onColumnsReordered,
     this.onSelectionChanging,
     this.onCheckboxValueChanged,
     this.onCurrentCellActivating,
@@ -58,6 +60,7 @@ class AppDataGrid<T> extends StatelessWidget {
     this.onSortChanged,
     this.onFilterChanging,
     this.onFilterChanged,
+    this.onFilterRequested,
     this.onRetry,
     this.errorTitle = 'تعذر تحميل البيانات',
     this.errorMessage = 'حدث خطأ أثناء تحميل السجلات. يرجى المحاولة مجدداً.',
@@ -86,6 +89,7 @@ class AppDataGrid<T> extends StatelessWidget {
   final int selectedCount;
   final List<T> selectedItems;
   final AppDataGridSelectionChanged<T>? onSelectionChanged;
+  final VoidCallback? onColumnsReordered;
   final SelectionChangingCallback? onSelectionChanging;
   final DataGridCheckboxValueChangedCallback? onCheckboxValueChanged;
   final CurrentCellActivatingCallback? onCurrentCellActivating;
@@ -98,6 +102,7 @@ class AppDataGrid<T> extends StatelessWidget {
   final DataGridColumnSortChangedCallback? onSortChanged;
   final DataGridFilterChangingCallback? onFilterChanging;
   final DataGridFilterChangedCallback? onFilterChanged;
+  final ValueChanged<DataGridFilterChangeDetails>? onFilterRequested;
   final VoidCallback? onRetry;
   final String errorTitle;
   final String errorMessage;
@@ -176,7 +181,15 @@ class AppDataGrid<T> extends StatelessWidget {
               ),
             )
           else
-            _GridPaginationBar(pagination: pagination),
+            _GridPaginationBar(
+              pagination: pagination,
+              onPageChanged: features.dataMode == AppDataGridDataMode.remote
+                  ? (page) {
+                      unawaited(source.handlePageChange(pagination.currentPage - 1, page - 1));
+                      pagination.onPageChanged?.call(page);
+                    }
+                  : pagination.onPageChanged,
+            ),
         if (viewState == AppDataGridViewState.success && features.dataMode == AppDataGridDataMode.remote)
           Padding(
             padding: EdgeInsetsDirectional.only(start: AppSpacing.md, end: AppSpacing.md, bottom: AppSpacing.xs),
@@ -243,6 +256,7 @@ class AppDataGrid<T> extends StatelessWidget {
             selectedItems: selectedItems,
             onSelectionChanged: onSelectionChanged,
             itemBuilder: mobileItemBuilder,
+            isRemote: features.dataMode == AppDataGridDataMode.remote,
           );
         }
         final gridColumns = source.columns.where((column) => column.visible).map((column) => column.toGridColumn(context)).toList();
@@ -271,6 +285,8 @@ class AppDataGrid<T> extends StatelessWidget {
               checkboxColumnSettings: features.checkboxColumnSettings,
               horizontalScrollPhysics: features.horizontalScrollPhysics,
               verticalScrollPhysics: features.verticalScrollPhysics,
+              horizontalScrollController: features.horizontalScrollController,
+              verticalScrollController: features.verticalScrollController,
               shrinkWrapColumns: features.shrinkWrapColumns,
               shrinkWrapRows: features.shrinkWrapRows,
               rowsCacheExtent: features.rowsCacheExtent,
@@ -288,39 +304,21 @@ class AppDataGrid<T> extends StatelessWidget {
               allowTriStateSorting: features.allowSorting && features.allowTriStateSorting,
               showSortNumbers: features.showSortNumbers,
               showColumnHeaderIconOnHover: features.showColumnHeaderIconOnHover,
-              allowFiltering: features.canFilterLocally,
+              allowFiltering: features.allowFiltering,
               allowEditing: features.allowEditing,
-              editingGestureType: EditingGestureType.doubleTap,
+              editingGestureType: features.editingGestureType,
+              placeholder: features.placeholder,
+              checkboxShape: features.checkboxShape,
               allowColumnsResizing: features.allowColumnResizing,
+              onColumnResizeStart: features.allowColumnResizing ? features.onColumnResizeStart : null,
               onColumnResizeUpdate: features.allowColumnResizing
                   ? (details) {
-                      source.updateColumnWidth(details.column.columnName, details.width);
-                      final columnIndex = gridColumns.indexWhere(
-                        (column) => column.columnName == details.column.columnName,
-                      );
-                      if (columnIndex >= 0) {
-                        final current = details.column;
-                        gridColumns[columnIndex] = GridColumn(
-                          columnName: current.columnName,
-                          label: current.label,
-                          width: details.width,
-                          minimumWidth: current.minimumWidth,
-                          maximumWidth: current.maximumWidth,
-                          columnWidthMode: current.columnWidthMode,
-                          visible: current.visible,
-                          allowSorting: current.allowSorting,
-                          allowFiltering: current.allowFiltering,
-                          allowEditing: current.allowEditing,
-                          sortIconPosition: current.sortIconPosition,
-                          filterIconPosition: current.filterIconPosition,
-                          autoFitPadding: current.autoFitPadding,
-                          filterIconPadding: current.filterIconPadding,
-                          filterPopupMenuOptions: current.filterPopupMenuOptions,
-                        );
-                      }
-                      return true;
+                      final accepted = features.onColumnResizeUpdate?.call(details) ?? true;
+                      if (accepted) source.updateColumnWidth(details.column.columnName, details.width);
+                      return accepted;
                     }
                   : null,
+              onColumnResizeEnd: features.allowColumnResizing ? features.onColumnResizeEnd : null,
               allowColumnsDragging: features.allowColumnDragging,
               onColumnDragging: features.allowColumnDragging
                   ? (details) {
@@ -334,9 +332,10 @@ class AppDataGrid<T> extends StatelessWidget {
                             to >= gridColumns.length) {
                           return false;
                         }
-                        source.reorderColumns(from, to);
+                        source.reorderVisibleColumns(from, to);
                         final moved = gridColumns.removeAt(from);
                         gridColumns.insert(to, moved);
+                        onColumnsReordered?.call();
                       }
                       return true;
                     }
@@ -381,7 +380,12 @@ class AppDataGrid<T> extends StatelessWidget {
                 onSelectionChanged!(source.itemsForRows(added), source.itemsForRows(removed));
               },
               onColumnSortChanged: onSortChanged,
-              onFilterChanging: features.dataMode == AppDataGridDataMode.local ? onFilterChanging : null,
+              onFilterChanging: features.dataMode == AppDataGridDataMode.local
+                  ? onFilterChanging
+                  : (details) {
+                      onFilterRequested?.call(details);
+                      return false;
+                    },
               onFilterChanged: features.dataMode == AppDataGridDataMode.local ? onFilterChanged : null,
               onColumnSortChanging: features.dataMode == AppDataGridDataMode.remote
                   ? (next, previous) {
@@ -517,7 +521,7 @@ class _GridToolbar extends StatelessWidget {
 }
 
 class _MobileGridList<T> extends StatelessWidget {
-  const _MobileGridList({super.key, required this.source, required this.pagination, this.rowsPerPage, this.allowPullToRefresh = false, this.allowSelection = false, this.allowMultiSelection = true, this.selectedItems = const <T>[], this.onSelectionChanged, this.itemBuilder});
+  const _MobileGridList({super.key, required this.source, required this.pagination, this.rowsPerPage, this.allowPullToRefresh = false, this.allowSelection = false, this.allowMultiSelection = true, this.selectedItems = const <T>[], this.onSelectionChanged, this.itemBuilder, this.isRemote = false});
   final NetSalesDataGridSource<T> source;
   final AppDataGridPagination pagination;
   final int? rowsPerPage;
@@ -527,11 +531,12 @@ class _MobileGridList<T> extends StatelessWidget {
   final List<T> selectedItems;
   final AppDataGridSelectionChanged<T>? onSelectionChanged;
   final AppDataGridMobileItemBuilder<T>? itemBuilder;
+  final bool isRemote;
 
   @override
   Widget build(BuildContext context) {
     final allRows = source.items;
-    final rows = pagination.mode == AppDataGridPaginationMode.pageBased && rowsPerPage != null
+    final rows = !isRemote && pagination.mode == AppDataGridPaginationMode.pageBased && rowsPerPage != null
         ? allRows.skip((pagination.currentPage - 1) * rowsPerPage!).take(rowsPerPage!).toList(growable: false)
         : allRows;
     if (rows.isEmpty) {
@@ -596,7 +601,7 @@ class _MobileGridList<T> extends StatelessWidget {
 class _DefaultMobileRecordCard<T> extends StatelessWidget {
   const _DefaultMobileRecordCard({required this.item, required this.columns});
   final T item;
-  final List<dynamic> columns;
+  final List<AppDataGridColumn<T>> columns;
 
   @override
   Widget build(BuildContext context) {
@@ -628,7 +633,7 @@ class _DefaultMobileRecordCard<T> extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(column.label as String, style: AppTypography.caption.copyWith(color: colors.onSurfaceVariant)),
+                      Text(column.label, style: AppTypography.caption.copyWith(color: colors.onSurfaceVariant)),
                       Text(value?.toString() ?? '—', style: AppTypography.bodyMedium.copyWith(color: colors.onSurface, fontWeight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis),
                     ],
                   ),
@@ -643,8 +648,9 @@ class _DefaultMobileRecordCard<T> extends StatelessWidget {
 }
 
 class _GridPaginationBar extends StatelessWidget {
-  const _GridPaginationBar({required this.pagination});
+  const _GridPaginationBar({required this.pagination, this.onPageChanged});
   final AppDataGridPagination pagination;
+  final ValueChanged<int>? onPageChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -667,7 +673,7 @@ class _GridPaginationBar extends StatelessWidget {
                 enabled: !pagination.isLoading && (pagination.mode == AppDataGridPaginationMode.pageBased ? pagination.currentPage > 1 : pagination.hasPrevious),
                 onPressed: pagination.isLoading ? null : () {
                   if (pagination.mode == AppDataGridPaginationMode.pageBased) {
-                    pagination.onPageChanged?.call(pagination.currentPage - 1);
+                    onPageChanged?.call(pagination.currentPage - 1);
                   } else {
                     pagination.onPrevious?.call();
                   }
@@ -681,7 +687,7 @@ class _GridPaginationBar extends StatelessWidget {
                 enabled: !pagination.isLoading && (pagination.mode == AppDataGridPaginationMode.pageBased ? pagination.currentPage < pagination.totalPages : pagination.hasNext),
                 onPressed: pagination.isLoading ? null : () {
                   if (pagination.mode == AppDataGridPaginationMode.pageBased) {
-                    pagination.onPageChanged?.call(pagination.currentPage + 1);
+                    onPageChanged?.call(pagination.currentPage + 1);
                   } else {
                     pagination.onNext?.call();
                   }

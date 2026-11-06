@@ -16,12 +16,12 @@ import 'package:netsales/widgets/data_grid/data_grid.dart';
 - `AppDataGrid<T>`: Stateless UI wrapper for design tokens, toolbar, states, responsive rendering, selection and navigation. Local filter/sort lifecycle callbacks are exposed for active-filter chips and query synchronization.
 - `AppDataGridColumnChooser<T>`: reusable visibility menu that prevents hiding the final visible column.
 - `AppDataGridFeatures`: feature policy for one grid.
-- `AppDataGridPagination`: page-based or cursor-based navigation; cursor mode has no fabricated total-page count. Page-based desktop/tablet mode can host Syncfusion `SfDataPager` with automatic local paging or a host-provided remote delegate; mobile uses the same page state with previous/next controls.
+- `AppDataGridPagination`: page-based or cursor-based navigation; cursor mode has no fabricated total-page count. Page-based desktop/tablet mode uses Syncfusion `SfDataPager`; local data is paged automatically and remote page changes are delegated through `NetSalesDataGridSource.onPageChange`. Mobile uses the same page state with previous/next controls and does not slice an already server-paginated page.
 - `AppDataGridExportController`: Excel/PDF export through the shared FileExportService.
 
 ## Remote-data safety
 
-Set `dataMode: AppDataGridDataMode.remote` for API-backed partial datasets. Local filtering is disabled in remote mode. Sorting changes are intercepted and delegated to the feature controller. Search, advanced filters, page/cursor navigation and server-side export must flow through feature Use Cases, repositories and Laravel API. Never sort/filter only the loaded cursor page and imply the result covers all records.
+Set `dataMode: AppDataGridDataMode.remote` for API-backed partial datasets. Local filtering is disabled in remote mode. Sorting and filter-menu changes are intercepted and delegated to the feature controller (`onSortRequested` / `onFilterRequested`). Search, advanced filters, page/cursor navigation and server-side export must flow through feature Use Cases, repositories and Laravel API. Never sort/filter only the loaded cursor page and imply the result covers all records.
 
 Exports from the grid controller contain currently loaded rows. A full filtered result export must use an authorized backend export endpoint/job and return the complete artifact.
 

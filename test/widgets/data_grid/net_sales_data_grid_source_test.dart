@@ -1,6 +1,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/widgets/data_grid/adapters/net_sales_data_grid_source.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_column.dart';
@@ -54,8 +55,8 @@ void main() {
     source.reorderColumns(0, 1);
 
     expect(source.columns.map((column) => column.name).toList(), ['name', 'id']);
-    expect(source.rows.first.getCells().map((cell) => cell.columnName).toList(), ['name', 'id']);
-    expect(source.rows.first.getCells().map((cell) => cell.value).toList(), ['Alpha', 1]);
+    expect(source.rows.first.getCells().map((cell) => cell.columnName).toList(), ['id', 'name']);
+    expect(source.rows.first.getCells().map((cell) => cell.value).toList(), [1, 'Alpha']);
   });
 
   test('rejects hiding every column', () {
@@ -91,6 +92,23 @@ void main() {
     expect(features.effectiveNavigationMode, GridNavigationMode.cell);
   });
 
+  test('remote page changes are delegated with zero-based indexes', () async {
+    var oldIndex = -1;
+    var newIndex = -1;
+    final remoteSource = NetSalesDataGridSource<_GridRecord>(
+      items: const [_GridRecord(1, 'Alpha')],
+      columns: columns,
+      onPageChange: (oldPage, newPage) async {
+        oldIndex = oldPage;
+        newIndex = newPage;
+        return true;
+      },
+    );
+    expect(await remoteSource.handlePageChange(0, 2), isTrue);
+    expect(oldIndex, 0);
+    expect(newIndex, 2);
+  });
+
   test('load-more requests are guarded against concurrent calls and exhaustion', () async {
     final completer = Completer<void>();
     var calls = 0;
@@ -112,6 +130,46 @@ void main() {
     loadMoreSource.setHasMore(false);
     await loadMoreSource.requestLoadMore();
     expect(calls, 1);
+  });
+
+  test('reorders visible columns while preserving row identity', () {
+    final firstRow = source.rows.first;
+    source.reorderVisibleColumns(0, 1);
+    expect(source.columns.map((column) => column.name).toList(), ['name', 'id']);
+    expect(identical(source.rows.first, firstRow), isTrue);
+    expect(source.itemForRow(firstRow)?.id, 1);
+  });
+
+  test('column visibility updates preserve row identity', () {
+    final firstRow = source.rows.first;
+    final updatedColumns = source.columns
+        .map((column) => column.copyWith(visible: column.name != 'id'))
+        .toList(growable: false);
+    source.updateColumns(updatedColumns);
+    expect(identical(source.rows.first, firstRow), isTrue);
+    expect(source.itemForRow(firstRow)?.id, 1);
+  });
+
+  test('editing a visually reordered row updates the matching source model', () async {
+    final editSource = NetSalesDataGridSource<_GridRecord>(
+      items: const [_GridRecord(1, 'Alpha'), _GridRecord(2, 'Beta')],
+      columns: columns,
+      onEdit: (row, column, value) async => _GridRecord(row.id, value as String),
+    );
+    final firstSourceRow = editSource.rows.first;
+    editSource.rows.insert(0, editSource.rows.removeAt(1));
+    final editColumn = GridColumn(columnName: 'name', label: const Text('Name'));
+    final editor = editSource.buildEditWidget(
+      firstSourceRow,
+      RowColumnIndex(1, 1),
+      editColumn,
+      () {},
+    ) as TextFormField;
+    editor.onChanged?.call('Alpha updated');
+    await editSource.onCellSubmit(firstSourceRow, RowColumnIndex(1, 1), editColumn);
+    expect(editSource.items[0].name, 'Alpha updated');
+    expect(editSource.items[1].name, 'Beta');
+    expect(editSource.itemForRow(firstSourceRow)?.id, 1);
   });
 
   test('updates a column width without changing its semantic definition', () {

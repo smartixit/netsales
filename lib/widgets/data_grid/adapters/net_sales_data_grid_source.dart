@@ -6,6 +6,7 @@ import '../models/app_data_grid_column.dart';
 
 typedef AppDataGridEditHandler<T> = Future<T?> Function(T row, AppDataGridColumn<T> column, Object? value);
 typedef AppDataGridEditFailureHandler = void Function(Object error);
+typedef AppDataGridPageChangeHandler = Future<bool> Function(int oldPageIndex, int newPageIndex);
 
 /// Long-lived data adapter. It must be owned by the feature/controller, not created in build().
 class NetSalesDataGridSource<T> extends DataGridSource {
@@ -16,6 +17,7 @@ class NetSalesDataGridSource<T> extends DataGridSource {
     this.onEditFailure,
     this.onRefresh,
     this.onLoadMore,
+    this.onPageChange,
     List<String> groupByColumns = const <String>[],
   }) : _columns = List<AppDataGridColumn<T>>.of(columns),
        _items = List<T>.of(items) {
@@ -36,6 +38,7 @@ class NetSalesDataGridSource<T> extends DataGridSource {
   final AppDataGridEditFailureHandler? onEditFailure;
   final Future<void> Function()? onRefresh;
   final Future<void> Function()? onLoadMore;
+  final AppDataGridPageChangeHandler? onPageChange;
   Object? _pendingEditValue;
   bool _isLoadingMore = false;
   bool _hasMore = true;
@@ -56,15 +59,40 @@ class NetSalesDataGridSource<T> extends DataGridSource {
 
   void updateColumns(List<AppDataGridColumn<T>> columns) {
     _validateColumns(columns);
+    final previousNames = _columns.map((column) => column.name).toSet();
+    final nextNames = columns.map((column) => column.name).toSet();
     _columns = List<AppDataGridColumn<T>>.of(columns);
-    _buildRows(notify: true);
+    // Preserve row identity for visibility/order/width changes. Rebuild only
+    // when the actual data-column schema changes.
+    if (!setEquals(previousNames, nextNames)) {
+      _buildRows(notify: true);
+    } else {
+      notifyDataSourceListeners();
+    }
   }
 
   void reorderColumns(int from, int to) {
     if (from < 0 || from >= _columns.length || to < 0 || to >= _columns.length || from == to) return;
     final moved = _columns.removeAt(from);
     _columns.insert(to, moved);
-    _buildRows(notify: true);
+    notifyDataSourceListeners();
+  }
+
+  /// Reorders visible columns by the indexes reported by SfDataGrid.
+  /// Hidden columns keep their relative positions.
+  void reorderVisibleColumns(int from, int to) {
+    final visible = _columns.where((column) => column.visible).toList(growable: false);
+    if (from < 0 || from >= visible.length || to < 0 || to >= visible.length || from == to) return;
+
+    final fromName = visible[from].name;
+    final toName = visible[to].name;
+    final fromIndex = _columns.indexWhere((column) => column.name == fromName);
+    final toIndex = _columns.indexWhere((column) => column.name == toName);
+    if (fromIndex < 0 || toIndex < 0) return;
+
+    final moved = _columns.removeAt(fromIndex);
+    _columns.insert(toIndex, moved);
+    notifyDataSourceListeners();
   }
 
   void updateColumnWidth(String name, double width) {
@@ -180,6 +208,13 @@ class NetSalesDataGridSource<T> extends DataGridSource {
   @override
   Future<void> handleRefresh() async => onRefresh?.call();
 
+  @override
+  Future<bool> handlePageChange(int oldPageIndex, int newPageIndex) async {
+    final handler = onPageChange;
+    if (handler == null) return super.handlePageChange(oldPageIndex, newPageIndex);
+    return handler(oldPageIndex, newPageIndex);
+  }
+
   Future<void> requestLoadMore() async {
     if (_isLoadingMore || !_hasMore || onLoadMore == null) return;
     _isLoadingMore = true;
@@ -201,16 +236,23 @@ class NetSalesDataGridSource<T> extends DataGridSource {
   }
 
   void _replaceRow(DataGridRow oldRow, T updatedItem) {
-    final index = _rows.indexOf(oldRow);
-    if (index < 0) return;
-    _items[index] = updatedItem;
+    final oldItem = _modelsByRow[oldRow];
+    final rowIndex = _rows.indexOf(oldRow);
+    if (oldItem == null || rowIndex < 0) return;
+
+    // Sorting/filtering may change visual order; update the backing model by
+    // identity instead of assuming the visual row index equals source index.
+    final itemIndex = _items.indexWhere((item) => identical(item, oldItem));
+    if (itemIndex < 0) return;
+
+    _items[itemIndex] = updatedItem;
     final updatedRow = DataGridRow(
       cells: _columns.map((column) => DataGridCell<dynamic>(
         columnName: column.name,
         value: column.valueGetter(updatedItem),
       )).toList(growable: false),
     );
-    _rows[index] = updatedRow;
+    _rows[rowIndex] = updatedRow;
     _modelsByRow.remove(oldRow);
     _modelsByRow[updatedRow] = updatedItem;
     notifyDataSourceListeners();
