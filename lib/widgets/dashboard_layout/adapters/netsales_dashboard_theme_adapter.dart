@@ -23,7 +23,7 @@ class NetSalesDashboardThemeAdapter {
     // navigation geometry by the mobile 375dp design width.
     final screenUtil = ScreenUtil();
     final widthScale = screenUtil.scaleWidth == 0 ? 1.0 : screenUtil.scaleWidth;
-    final radiusScale = screenUtil.scaleRadius == 0 ? 1.0 : screenUtil.scaleRadius;
+    final radiusScale = screenUtil.radius(1) == 0 ? 1.0 : screenUtil.radius(1);
 
     return DashboardLayoutTheme(
       sidebarBackground: colors.surfaceContainerLowest,
