@@ -127,7 +127,7 @@ class DashboardShell extends StatelessWidget {
                       ),
                       Expanded(
                         child: SingleChildScrollView(
-                          padding: EdgeInsets.all(config.contentPadding),
+                          padding: EdgeInsets.all(config.contentPadding ?? theme.contentPadding),
                           child: Align(
                             alignment: AlignmentDirectional.topCenter,
                             child: ConstrainedBox(
