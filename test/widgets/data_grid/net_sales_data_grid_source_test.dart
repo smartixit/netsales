@@ -230,8 +230,7 @@ void main() {
       expect(editSource.items[1].name, 'Beta');
       final updatedRow = editSource.rows.firstWhere(
         (row) => row.getCells().any(
-          (cell) =>
-              cell.columnName == 'name' && cell.value == 'Alpha updated',
+          (cell) => cell.columnName == 'name' && cell.value == 'Alpha updated',
         ),
       );
       expect(editSource.itemForRow(firstSourceRow), isNull);
