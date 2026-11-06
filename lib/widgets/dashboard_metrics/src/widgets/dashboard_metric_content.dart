@@ -1,6 +1,6 @@
-import 'dart:ui' show FontFeature;
 
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/dashboard_metrics/src/models/dashboard_metric_threshold.dart';
 
 import '../enums/dashboard_metric_direction.dart';
 import '../enums/dashboard_metric_tone.dart';
@@ -12,7 +12,7 @@ import '../theme/dashboard_metrics_theme.dart';
 import 'dashboard_metric_sparkline.dart';
 
 class DashboardMetricContent extends StatelessWidget {
-  const DashboardMetricContent({
+  const DashboardMetricContent({super.key, 
     required this.metric,
     required this.accent,
     required this.tokens,

@@ -1,21 +1,40 @@
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 
-/// حالة استخدام جلب الشبكات المرتبطة بنقطة بيع
+/// حالة استخدام جلب الشبكات المرتبطة بنقطة بيع مع دعم الترقيم بالمؤشر والبحث الخادمي
 class GetPosNetworksListUseCase {
   const GetPosNetworksListUseCase(this._repository);
 
   final CommercialRepository _repository;
 
-  Future<List<NetworkPosLinkEntity>> execute(
+  Future<PaginatedList<NetworkPosLinkEntity>> execute(
     int posId, {
-    Map<String, dynamic>? query,
+    String? cursor,
+    String? search,
+    bool? status,
+    int? perPage,
   }) {
-    return _repository.getPosNetworksList(posId, query: query);
+    return _repository.getPosNetworksList(
+      posId,
+      cursor: cursor,
+      search: search,
+      status: status,
+      perPage: perPage,
+    );
   }
 
-  Future<List<NetworkPosLinkEntity>> call(
+  Future<PaginatedList<NetworkPosLinkEntity>> call(
     int posId, {
-    Map<String, dynamic>? query,
-  }) => execute(posId, query: query);
+    String? cursor,
+    String? search,
+    bool? status,
+    int? perPage,
+  }) => execute(
+    posId,
+    cursor: cursor,
+    search: search,
+    status: status,
+    perPage: perPage,
+  );
 }

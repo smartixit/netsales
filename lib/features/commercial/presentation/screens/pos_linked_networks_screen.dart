@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_pos_card_skeleton.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_link_confirm_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/pos_details_bottom_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/pos_linked_network_card.dart';
@@ -116,22 +117,22 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
                 );
               }
 
-              final displayLinks = controller.filteredLinks;
+              final displayLinks = controller.links;
 
               // ج. حالة القائمة الفارغة
               if (displayLinks.isEmpty) {
                 return CustomEmptyState(
-                  title: controller.links.isEmpty
-                      ? 'لا توجد شبكات مزودة مرتبطة'
-                      : 'لا توجد نتائج مطابقة للبحث',
-                  subtitle: controller.links.isEmpty
-                      ? 'يجب أن يقوم مزود الشبكة بربط نقطة البيع الخاصة بك أولاً لتتمكن من طلب باقات الكروت بالجملة'
-                      : 'جرب استخدام كلمات بحث مختلفة',
+                  title: 'لا توجد شبكات مزودة مرتبطة',
+                  subtitle:
+                      'يجب أن يقوم مزود الشبكة بربط نقطة البيع الخاصة بك أولاً لتتمكن من طلب باقات الكروت بالجملة',
                   icon: Icons.hub_outlined,
                 );
               }
 
-              // د. عرض قائمة بطاقات الشبكات المفصولة
+              // د. عرض قائمة بطاقات الشبكات مع دعم تحميل المزيد
+              final hasMore = controller.hasMorePosNetworks;
+              final isLoadingMore = controller.isLoadingMore.value;
+
               return RefreshIndicator.adaptive(
                 onRefresh: () => controller.fetchPosNetworks(
                   posId: posId,
@@ -142,9 +143,27 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.md,
                   ),
-                  itemCount: displayLinks.length,
+                  itemCount:
+                      displayLinks.length + (hasMore || isLoadingMore ? 1 : 0),
                   separatorBuilder: (context, index) => AppSpacing.vMd,
                   itemBuilder: (ctx, index) {
+                    // عنصر نهاية القائمة: skeleton تحميل المزيد أو trigger
+                    if (index == displayLinks.length) {
+                      if (isLoadingMore) {
+                        return const Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: NetworkPosCardSkeleton(),
+                        );
+                      }
+                      // trigger تحميل الصفحة التالية
+                      if (hasMore) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          controller.loadMorePosNetworks();
+                        });
+                        return const SizedBox.shrink();
+                      }
+                    }
+
                     final link = displayLinks[index];
                     return PosLinkedNetworkCard(link: link);
                   },

@@ -1,3 +1,4 @@
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
@@ -12,15 +13,23 @@ abstract interface class CommercialRepository {
   /// جلب قائمة نقاط البيع التابعة للمستخدم الحالي
   Future<List<PosEntity>> getMyPos();
 
-  /// جلب قائمة نقاط البيع المرتبطة بشبكة محددة
-  Future<List<NetworkPosLinkEntity>> getNetworkPosList(
+  /// جلب قائمة نقاط البيع المرتبطة بشبكة محددة مع دعم الترقيم بالمؤشر والفلترة
+  Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList(
     int networkId, {
+    String? cursor,
+    String? search,
+    bool? status,
+    int? perPage,
     Map<String, dynamic>? query,
   });
 
-  /// جلب قائمة الشبكات المرتبطة بنقطة بيع محددة
-  Future<List<NetworkPosLinkEntity>> getPosNetworksList(
+  /// جلب قائمة الشبكات المرتبطة بنقطة بيع محددة مع دعم الترقيم بالمؤشر والفلترة
+  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList(
     int posId, {
+    String? cursor,
+    String? search,
+    bool? status,
+    int? perPage,
     Map<String, dynamic>? query,
   });
 

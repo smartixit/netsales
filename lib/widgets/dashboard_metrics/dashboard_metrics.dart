@@ -1,4 +1,4 @@
-library dashboard_metrics;
+library;
 
 export 'src/enums/dashboard_metric_direction.dart';
 export 'src/enums/dashboard_metric_state.dart';

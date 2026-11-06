@@ -4,7 +4,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
-import 'package:netsales/core/themes/app_radius.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/widgets/dashboard_metrics/adapters/netsales_dashboard_metrics_theme_adapter.dart';
 import 'package:netsales/widgets/dashboard_metrics/dashboard_metrics.dart';
@@ -58,7 +58,7 @@ class _DashboardMetricsShowcaseContent extends StatelessWidget {
   final bool isDarkMode;
   final bool isRtl;
 
-  static const List<DashboardMetricData> _metricExamples = [
+  static final List<DashboardMetricData> _metricExamples = [
     DashboardMetricData(
       id: 'active-networks',
       title: 'إجمالي الشبكات',
@@ -237,7 +237,7 @@ class _DashboardMetricsShowcaseContent extends StatelessWidget {
     ),
   ];
 
-  static const DashboardMetricData _stateMetric = DashboardMetricData(
+  static final DashboardMetricData _stateMetric = DashboardMetricData(
     id: 'state-preview',
     title: 'طلبات التوريد',
     value: '248',
@@ -363,7 +363,7 @@ class _DashboardMetricsShowcaseContent extends StatelessWidget {
                             icon: Icons.layers_outlined,
                           ),
                           SizedBox(height: AppSpacing.lg),
-                          const _StatePreviewGrid(metric: _stateMetric),
+                          _StatePreviewGrid(metric: _stateMetric),
                           SizedBox(height: AppSpacing.xxl),
                           _PreviewNotes(
                             themeLabel: themeLabel,

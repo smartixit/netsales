@@ -1,4 +1,4 @@
-library dashboard_layout;
+library;
 
 export 'src/config/dashboard_layout_config.dart';
 export 'src/models/dashboard_navigation_item.dart';

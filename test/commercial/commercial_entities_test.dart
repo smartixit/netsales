@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get/get.dart';
+import 'package:netsales/core/enums/linking_challenge_status.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
-import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
@@ -58,19 +58,29 @@ class MockCommercialRepository implements CommercialRepository {
   }
 
   @override
-  Future<List<NetworkPosLinkEntity>> getNetworkPosList(
+  Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList(
     int networkId, {
+    String? cursor,
+    String? search,
+    bool? status,
+    int? perPage,
     Map<String, dynamic>? query,
   }) async {
-    return _links.where((l) => l.networkId == networkId).toList();
+    final filtered = _links.where((l) => l.networkId == networkId).toList();
+    return PaginatedList<NetworkPosLinkEntity>(items: filtered);
   }
 
   @override
-  Future<List<NetworkPosLinkEntity>> getPosNetworksList(
+  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList(
     int posId, {
+    String? cursor,
+    String? search,
+    bool? status,
+    int? perPage,
     Map<String, dynamic>? query,
   }) async {
-    return _links.where((l) => l.posId == posId).toList();
+    final filtered = _links.where((l) => l.posId == posId).toList();
+    return PaginatedList<NetworkPosLinkEntity>(items: filtered);
   }
 
   @override
@@ -353,22 +363,22 @@ void main() {
     });
 
     test(
-      'GetNetworkPosListUseCase returns linked POS list for network',
+      'GetNetworkPosListUseCase returns PaginatedList for network',
       () async {
-        final list = await getNetworkPosListUseCase(1);
-        expect(list.length, equals(1));
-        expect(list.first.pos?.posName, equals('Super POS'));
+        final page = await getNetworkPosListUseCase(1);
+        expect(page.items.length, equals(1));
+        expect(page.items.first.pos?.posName, equals('Super POS'));
+        expect(page.hasMore, isFalse);
+        expect(page.nextCursor, isNull);
       },
     );
 
-    test(
-      'GetPosNetworksListUseCase returns linked networks list for POS',
-      () async {
-        final list = await getPosNetworksListUseCase(10);
-        expect(list.length, equals(1));
-        expect(list.first.network?.networkName, equals('Main Network'));
-      },
-    );
+    test('GetPosNetworksListUseCase returns PaginatedList for POS', () async {
+      final page = await getPosNetworksListUseCase(10);
+      expect(page.items.length, equals(1));
+      expect(page.items.first.network?.networkName, equals('Main Network'));
+      expect(page.hasMore, isFalse);
+    });
 
     test('CreateNetworkPosLinkUseCase links new POS to network', () async {
       final created = await createNetworkPosLinkUseCase(
@@ -382,8 +392,8 @@ void main() {
       expect(created.posId, equals(30));
       expect(created.isActive, isTrue);
 
-      final list = await getNetworkPosListUseCase(1);
-      expect(list.length, equals(2));
+      final page = await getNetworkPosListUseCase(1);
+      expect(page.items.length, equals(2));
     });
 
     test('ToggleNetworkPosLinkStatusUseCase updates link status', () async {
@@ -396,8 +406,8 @@ void main() {
 
     test('DeleteNetworkPosLinkUseCase unlinks POS from network', () async {
       await deleteNetworkPosLinkUseCase(1);
-      final list = await getNetworkPosListUseCase(1);
-      expect(list, isEmpty);
+      final page = await getNetworkPosListUseCase(1);
+      expect(page.items, isEmpty);
     });
 
     test(
@@ -431,39 +441,9 @@ void main() {
     );
   });
 
-  group('CommercialDirectoryController Filtering and Logic', () {
-    test('Search query and status filtering matches correct records', () {
-      final link1 = NetworkPosLinkEntity(
-        networkPosId: 1,
-        networkId: 1,
-        posId: 10,
-        status: true,
-        pos: const PosEntity(
-          posId: 10,
-          ownerId: 2,
-          posUuid: 'POS-ALPHA-01',
-          posName: 'Sanaa Retail Hub',
-          posPhoneNumber: '771111111',
-          status: 'ACTIVE',
-        ),
-      );
-
-      final link2 = NetworkPosLinkEntity(
-        networkPosId: 2,
-        networkId: 1,
-        posId: 20,
-        status: false,
-        pos: const PosEntity(
-          posId: 20,
-          ownerId: 3,
-          posUuid: 'POS-BETA-02',
-          posName: 'Aden Branch Outlet',
-          posPhoneNumber: '772222222',
-          status: 'INACTIVE',
-        ),
-      );
-
-      final repo = MockCommercialRepository([link1, link2]);
+  group('CommercialDirectoryController Cursor Pagination State', () {
+    test('Controller initializes with empty links and no cursor', () {
+      final repo = MockCommercialRepository([]);
       final controller = CommercialDirectoryController(
         getNetworkPosListUseCase: GetNetworkPosListUseCase(repo),
         getPosNetworksListUseCase: GetPosNetworksListUseCase(repo),
@@ -480,41 +460,62 @@ void main() {
         updatePosDetailsUseCase: UpdatePosDetailsUseCase(repo),
       );
 
-      controller.links.assignAll([link1, link2]);
+      expect(controller.links, isEmpty);
+      expect(controller.hasMoreNetworkPosLinks, isFalse);
+      expect(controller.hasMorePosNetworks, isFalse);
+      expect(controller.isLoading.value, isFalse);
+      expect(controller.isLoadingMore.value, isFalse);
+      expect(controller.nextCursorNetwork.value, isNull);
+      expect(controller.nextCursorPos.value, isNull);
+    });
 
-      // 1. بدون فلترة
-      expect(controller.filteredLinks.length, equals(2));
+    test(
+      'PaginatedList isEmpty and hasMore reflect cursor state correctly',
+      () {
+        // No next cursor: hasMore = false
+        final pageNoMore = PaginatedList<NetworkPosLinkEntity>(
+          items: const [],
+          nextCursor: null,
+        );
+        expect(pageNoMore.hasMore, isFalse);
+        expect(pageNoMore.isEmpty, isTrue);
 
-      // 2. فلترة الحالة: نشط
-      controller.setStatusFilter(true);
-      expect(controller.filteredLinks.length, equals(1));
-      expect(
-        controller.filteredLinks.first.pos?.posName,
-        equals('Sanaa Retail Hub'),
+        // With next cursor: hasMore = true
+        final pageWithMore = PaginatedList<NetworkPosLinkEntity>(
+          items: [
+            NetworkPosLinkEntity(
+              networkPosId: 1,
+              networkId: 1,
+              posId: 10,
+              status: true,
+            ),
+          ],
+          nextCursor: 'eyJpZCI6NX0',
+        );
+        expect(pageWithMore.hasMore, isTrue);
+        expect(pageWithMore.isNotEmpty, isTrue);
+        expect(pageWithMore.length, equals(1));
+      },
+    );
+
+    test('setStatusFilter and setSearchQuery do not throw', () {
+      final repo = MockCommercialRepository([]);
+      final controller = CommercialDirectoryController(
+        getNetworkPosListUseCase: GetNetworkPosListUseCase(repo),
+        getPosNetworksListUseCase: GetPosNetworksListUseCase(repo),
+        createNetworkPosLinkUseCase: CreateNetworkPosLinkUseCase(repo),
+        toggleNetworkPosLinkStatusUseCase: ToggleNetworkPosLinkStatusUseCase(
+          repo,
+        ),
+        deleteNetworkPosLinkUseCase: DeleteNetworkPosLinkUseCase(repo),
+        getMyNetworksUseCase: GetMyNetworksUseCase(repo),
+        getMyPosUseCase: GetMyPosUseCase(repo),
       );
 
-      // 3. فلترة الحالة: معطل
-      controller.setStatusFilter(false);
-      expect(controller.filteredLinks.length, equals(1));
-      expect(
-        controller.filteredLinks.first.pos?.posName,
-        equals('Aden Branch Outlet'),
-      );
-
-      // 4. إعادة الفلتر وبحث نصي
-      controller.setStatusFilter(null);
-      controller.setSearchQuery('Sanaa');
-      expect(controller.filteredLinks.length, equals(1));
-      expect(controller.filteredLinks.first.posId, equals(10));
-
-      // 5. بحث بالمعرف الفريد UUID
-      controller.setSearchQuery('BETA');
-      expect(controller.filteredLinks.length, equals(1));
-      expect(controller.filteredLinks.first.posId, equals(20));
-
-      // 6. بحث غير مطابق
-      controller.setSearchQuery('XYZNOTFOUND');
-      expect(controller.filteredLinks, isEmpty);
+      expect(() => controller.setSearchQuery('test'), returnsNormally);
+      expect(() => controller.clearSearch(), returnsNormally);
+      expect(() => controller.setStatusFilter(true), returnsNormally);
+      expect(() => controller.setStatusFilter(null), returnsNormally);
     });
   });
 }

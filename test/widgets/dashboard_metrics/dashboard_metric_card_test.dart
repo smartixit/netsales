@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/widgets/dashboard_metrics/dashboard_metrics.dart';
 
 void main() {
-  const metric = DashboardMetricData(
+  final metric = DashboardMetricData(
     id: 'active-networks',
     title: 'Active networks',
     value: '1,284',
@@ -39,7 +39,7 @@ void main() {
 
   testWidgets('renders value, interpreted trend and source freshness', (tester) async {
     await tester.pumpWidget(
-      harness(const DashboardMetricCard(metric: metric)),
+      harness( DashboardMetricCard(metric: metric)),
     );
 
     expect(find.text('1,284'), findsOneWidget);
@@ -49,7 +49,7 @@ void main() {
   });
 
   testWidgets('renders target boundaries and progress metadata', (tester) async {
-    const targetMetric = DashboardMetricData(
+  final targetMetric = DashboardMetricData(
       id: 'quota',
       title: 'Monthly target',
       value: '72%',
@@ -74,7 +74,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      harness(const DashboardMetricCard(metric: targetMetric)),
+      harness( DashboardMetricCard(metric: targetMetric)),
     );
 
     expect(find.text('72% / 100%'), findsOneWidget);
@@ -83,7 +83,7 @@ void main() {
 
   testWidgets('renders loading and error states', (tester) async {
     await tester.pumpWidget(
-      harness(const DashboardMetricCard(
+      harness( DashboardMetricCard(
         metric: metric,
         state: DashboardMetricState.loading,
       )),
@@ -91,7 +91,7 @@ void main() {
     expect(find.text('1,284'), findsNothing);
 
     await tester.pumpWidget(
-      harness(const DashboardMetricCard(
+      harness( DashboardMetricCard(
         metric: metric,
         state: DashboardMetricState.error,
         errorMessage: 'Could not refresh',
@@ -103,7 +103,7 @@ void main() {
   testWidgets('supports RTL without changing metric semantics', (tester) async {
     await tester.pumpWidget(
       harness(
-        const DashboardMetricCard(metric: metric),
+         DashboardMetricCard(metric: metric),
         direction: TextDirection.rtl,
       ),
     );

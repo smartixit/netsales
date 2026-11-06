@@ -25,6 +25,7 @@ import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم إدارة الروابط التجارية ودليل نقاط البيع والشبكات
+/// يدعم ترقيم المؤشر (Cursor Pagination) والبحث الخادمي المؤجل (Debounced Server Search)
 class CommercialDirectoryController extends GetxController {
   CommercialDirectoryController({
     required this.getNetworkPosListUseCase,
@@ -64,37 +65,76 @@ class CommercialDirectoryController extends GetxController {
   final RevokeNetworkPosLinkChallengeUseCase?
   revokeNetworkPosLinkChallengeUseCase;
 
-  // الحالات التفاعلية للقوائم
-  final RxBool isLoading = false.obs;
-  final RxBool isActionLoading = false.obs;
-  final RxBool isDetailsLoading = false.obs;
-  final RxnString errorMessage = RxnString();
+  // ============================================================
+  // حالات القائمة التفاعلية مع دعم الترقيم بالمؤشر
+  // ============================================================
+
+  /// قائمة الروابط المحملة تتراكم عبر صفحات التحميل الإضافية
   final RxList<NetworkPosLinkEntity> links = <NetworkPosLinkEntity>[].obs;
 
-  // الكيانات التفصيلية المحددة للعرض والتحديث
+  /// حالة التحميل الأولي (يظهر shimmer skeleton كامل)
+  final RxBool isLoading = false.obs;
+
+  /// حالة تحميل المزيد في نهاية القائمة
+  final RxBool isLoadingMore = false.obs;
+
+  /// حالة تحميل الإجراءات (ربط / تبديل / حذف)
+  final RxBool isActionLoading = false.obs;
+
+  /// حالة تحميل التفاصيل
+  final RxBool isDetailsLoading = false.obs;
+
+  /// رسالة الخطأ الحالية
+  final RxnString errorMessage = RxnString();
+
+  /// مؤشر الصفحة التالية — null يعني لا توجد صفحات إضافية
+  final RxnString nextCursorNetwork = RxnString();
+  final RxnString nextCursorPos = RxnString();
+
+  /// الكيانات التفصيلية المحددة
   final Rxn<NetworkEntity> selectedNetworkDetails = Rxn<NetworkEntity>();
   final Rxn<PosEntity> selectedPosDetails = Rxn<PosEntity>();
 
-  // متحكمات النصوص ومفاتيح النماذج
+  // ============================================================
+  // البحث الخادمي المؤجل (Server-Side Search with Debounce)
+  // ============================================================
+
+  /// نص البحث الحالي (يُرسل إلى الخادم بعد تأخير 300ms)
+  final RxString searchQuery = ''.obs;
+
+  /// فلتر الحالة: null=الكل, true=نشط, false=معطل
+  final Rxn<bool> selectedStatusFilter = Rxn<bool>();
+
+  /// متحكم نص البحث — مرتبط بحقل الإدخال في الواجهة
   final TextEditingController searchController = TextEditingController();
+
+  /// متحكم نص هوية نقطة البيع لنافذة ربط جديدة
   final TextEditingController posIdentifierController = TextEditingController();
+
+  /// حالة تفعيل الارتباط الافتراضية عند إنشاء رابط جديد
   final RxBool linkStatusInitial = true.obs;
 
-  // حقول الفلترة والبحث
-  final RxString searchQuery = ''.obs;
-  final Rxn<bool> selectedStatusFilter =
-      Rxn<bool>(); // null: الكل, true: نشط, false: معطل
-
-  // حالات دعوات وتحديات الربط عبر رمز QR
+  // حالات تحديات الربط عبر رمز QR
   final Rxn<NetworkPosLinkChallengeEntity> activeChallenge =
       Rxn<NetworkPosLinkChallengeEntity>();
   final Rxn<NetworkPosLinkPreviewEntity> activePreview =
       Rxn<NetworkPosLinkPreviewEntity>();
   final RxBool isChallengeLoading = false.obs;
 
-  // معرفات الكيان الحالي (الشبكة أو نقطة البيع)
+  // معرفات الكيان الحالي
   final RxInt activeNetworkId = 0.obs;
   final RxInt activePosId = 0.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Worker مؤجل 300ms: إعادة البحث الخادمي عند تغيير نص البحث
+    debounce<String>(
+      searchQuery,
+      _onSearchQueryChanged,
+      time: const Duration(milliseconds: 300),
+    );
+  }
 
   @override
   void onClose() {
@@ -103,35 +143,46 @@ class CommercialDirectoryController extends GetxController {
     super.onClose();
   }
 
-  /// القائمة المفلترة حسب البحث وحالة التفعيل
-  List<NetworkPosLinkEntity> get filteredLinks {
-    return links.where((link) {
-      // 1. فلترة الحالة
-      if (selectedStatusFilter.value != null) {
-        if (link.status != selectedStatusFilter.value) {
-          return false;
-        }
-      }
+  // ============================================================
+  // إدارة البحث والفلترة
+  // ============================================================
 
-      // 2. فلترة البحث النصي
-      final query = searchQuery.value.trim().toLowerCase();
-      if (query.isEmpty) {
-        return true;
-      }
-
-      final posName = link.pos?.posName.toLowerCase() ?? '';
-      final posUuid = link.pos?.posUuid.toLowerCase() ?? '';
-      final posPhone = link.pos?.posPhoneNumber.toLowerCase() ?? '';
-      final networkName = link.network?.networkName.toLowerCase() ?? '';
-
-      return posName.contains(query) ||
-          posUuid.contains(query) ||
-          posPhone.contains(query) ||
-          networkName.contains(query);
-    }).toList();
+  /// استدعاء داخلي من Worker عند تغيير نص البحث بعد التأخير
+  void _onSearchQueryChanged(String _) {
+    if (activeNetworkId.value > 0) {
+      fetchNetworkPosLinks(networkId: activeNetworkId.value);
+    } else if (activePosId.value > 0) {
+      fetchPosNetworks(posId: activePosId.value);
+    }
   }
 
-  /// جلب روابط نقاط البيع لشبكة المزود
+  /// تحديث نص البحث (يُطلق Worker المؤجل)
+  void setSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  /// تفريغ نص البحث وإعادة تحميل القائمة
+  void clearSearch() {
+    searchController.clear();
+    searchQuery.value = '';
+  }
+
+  /// تغيير فلتر الحالة وإعادة التحميل فوراً
+  void setStatusFilter(bool? status) {
+    selectedStatusFilter.value = status;
+    if (activeNetworkId.value > 0) {
+      fetchNetworkPosLinks(networkId: activeNetworkId.value);
+    } else if (activePosId.value > 0) {
+      fetchPosNetworks(posId: activePosId.value);
+    }
+  }
+
+  // ============================================================
+  // جلب روابط نقاط البيع لشبكة (مع إعادة ضبط المؤشر)
+  // ============================================================
+
+  /// جلب الصفحة الأولى من روابط نقاط البيع لشبكة
+  /// — يُعيد ضبط المؤشر والقائمة ويبدأ تحميل جديد
   Future<void> fetchNetworkPosLinks({
     int? networkId,
     bool showLoading = true,
@@ -144,7 +195,6 @@ class CommercialDirectoryController extends GetxController {
 
       var targetNetworkId = networkId ?? activeNetworkId.value;
 
-      // إذا لم يكن معرف الشبكة محدداً، يتم استرجاعه عبر Use Case
       if (targetNetworkId <= 0) {
         final networks = await getMyNetworksUseCase();
         if (networks.isNotEmpty) {
@@ -156,11 +206,20 @@ class CommercialDirectoryController extends GetxController {
       if (targetNetworkId <= 0) {
         errorMessage.value = 'لم يتم العثور على شبكة نشطة تابعة لحسابك.';
         links.clear();
+        nextCursorNetwork.value = null;
         return;
       }
 
-      final result = await getNetworkPosListUseCase(targetNetworkId);
-      links.assignAll(result);
+      final page = await getNetworkPosListUseCase(
+        targetNetworkId,
+        search: searchQuery.value.trim().isNotEmpty
+            ? searchQuery.value.trim()
+            : null,
+        status: selectedStatusFilter.value,
+      );
+
+      links.assignAll(page.items);
+      nextCursorNetwork.value = page.nextCursor;
     } on AppException catch (e) {
       errorMessage.value = e.message;
       CustomSnackbar.show(
@@ -182,6 +241,153 @@ class CommercialDirectoryController extends GetxController {
       }
     }
   }
+
+  /// تحميل الصفحة التالية من روابط نقاط البيع (تُضاف إلى النهاية)
+  Future<void> loadMoreNetworkPosLinks() async {
+    final cursor = nextCursorNetwork.value;
+    if (cursor == null || isLoadingMore.value || isLoading.value) return;
+
+    try {
+      isLoadingMore.value = true;
+
+      final page = await getNetworkPosListUseCase(
+        activeNetworkId.value,
+        cursor: cursor,
+        search: searchQuery.value.trim().isNotEmpty
+            ? searchQuery.value.trim()
+            : null,
+        status: selectedStatusFilter.value,
+      );
+
+      links.addAll(page.items);
+      nextCursorNetwork.value = page.nextCursor;
+    } on AppException catch (e) {
+      CustomSnackbar.show(
+        title: 'تعذر تحميل المزيد',
+        message: e.message,
+        type: SnackType.error,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ',
+        message: 'تعذر تحميل المزيد من نقاط البيع: $e',
+        type: SnackType.error,
+      );
+    } finally {
+      isLoadingMore.value = false;
+    }
+  }
+
+  // ============================================================
+  // جلب الشبكات المرتبطة بنقطة بيع (مع إعادة ضبط المؤشر)
+  // ============================================================
+
+  /// جلب الصفحة الأولى من الشبكات المرتبطة بنقطة بيع
+  Future<void> fetchPosNetworks({int? posId, bool showLoading = true}) async {
+    try {
+      if (showLoading) {
+        isLoading.value = true;
+      }
+      errorMessage.value = null;
+
+      var targetPosId = posId ?? activePosId.value;
+
+      if (targetPosId <= 0) {
+        final posList = await getMyPosUseCase();
+        if (posList.isNotEmpty) {
+          targetPosId = posList.first.posId;
+          activePosId.value = targetPosId;
+        }
+      }
+
+      if (targetPosId <= 0) {
+        errorMessage.value = 'لم يتم العثور على نقطة بيع نشطة تابعة لحسابك.';
+        links.clear();
+        nextCursorPos.value = null;
+        return;
+      }
+
+      final page = await getPosNetworksListUseCase(
+        targetPosId,
+        search: searchQuery.value.trim().isNotEmpty
+            ? searchQuery.value.trim()
+            : null,
+        status: selectedStatusFilter.value,
+      );
+
+      links.assignAll(page.items);
+      nextCursorPos.value = page.nextCursor;
+    } on AppException catch (e) {
+      errorMessage.value = e.message;
+      CustomSnackbar.show(
+        title: 'خطأ في جلب الشبكات',
+        message: e.message,
+        type: SnackType.error,
+      );
+    } catch (e) {
+      final msg = 'تعذر استرجاع الشبكات المرتبطة: $e';
+      errorMessage.value = msg;
+      CustomSnackbar.show(
+        title: 'خطأ في النظام',
+        message: msg,
+        type: SnackType.error,
+      );
+    } finally {
+      if (showLoading) {
+        isLoading.value = false;
+      }
+    }
+  }
+
+  /// تحميل الصفحة التالية من الشبكات المرتبطة (تُضاف إلى النهاية)
+  Future<void> loadMorePosNetworks() async {
+    final cursor = nextCursorPos.value;
+    if (cursor == null || isLoadingMore.value || isLoading.value) return;
+
+    try {
+      isLoadingMore.value = true;
+
+      final page = await getPosNetworksListUseCase(
+        activePosId.value,
+        cursor: cursor,
+        search: searchQuery.value.trim().isNotEmpty
+            ? searchQuery.value.trim()
+            : null,
+        status: selectedStatusFilter.value,
+      );
+
+      links.addAll(page.items);
+      nextCursorPos.value = page.nextCursor;
+    } on AppException catch (e) {
+      CustomSnackbar.show(
+        title: 'تعذر تحميل المزيد',
+        message: e.message,
+        type: SnackType.error,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ',
+        message: 'تعذر تحميل المزيد من الشبكات: $e',
+        type: SnackType.error,
+      );
+    } finally {
+      isLoadingMore.value = false;
+    }
+  }
+
+  // ============================================================
+  // هل توجد المزيد من العناصر لكل نوع من القوائم
+  // ============================================================
+
+  /// هل تتوفر صفحات إضافية لروابط نقاط البيع
+  bool get hasMoreNetworkPosLinks => nextCursorNetwork.value != null;
+
+  /// هل تتوفر صفحات إضافية للشبكات المرتبطة بنقطة بيع
+  bool get hasMorePosNetworks => nextCursorPos.value != null;
+
+  // ============================================================
+  // عمليات إدارة الروابط
+  // ============================================================
 
   /// جلب تفاصيل شبكة محددة
   Future<NetworkEntity?> fetchNetworkDetails(int networkId) async {
@@ -225,7 +431,6 @@ class CommercialDirectoryController extends GetxController {
       final updated = await updateNetworkDetailsUseCase!(networkId, data);
       selectedNetworkDetails.value = updated;
 
-      // تحديث بيانات الشبكة في القوائم المعروضة إن وجدت
       for (var i = 0; i < links.length; i++) {
         if (links[i].networkId == networkId) {
           links[i] = links[i].copyWith(network: updated);
@@ -303,7 +508,6 @@ class CommercialDirectoryController extends GetxController {
       final updated = await updatePosDetailsUseCase!(posId, data);
       selectedPosDetails.value = updated;
 
-      // تحديث بيانات نقطة البيع في القوائم المعروضة إن وجدت
       for (var i = 0; i < links.length; i++) {
         if (links[i].posId == posId) {
           links[i] = links[i].copyWith(pos: updated);
@@ -342,56 +546,7 @@ class CommercialDirectoryController extends GetxController {
     }
   }
 
-  /// جلب الشبكات المزودة لنقطة البيع
-  Future<void> fetchPosNetworks({int? posId, bool showLoading = true}) async {
-    try {
-      if (showLoading) {
-        isLoading.value = true;
-      }
-      errorMessage.value = null;
-
-      var targetPosId = posId ?? activePosId.value;
-
-      // إذا لم يكن معرف نقطة البيع محدداً، يتم استرجاعه عبر Use Case
-      if (targetPosId <= 0) {
-        final posList = await getMyPosUseCase();
-        if (posList.isNotEmpty) {
-          targetPosId = posList.first.posId;
-          activePosId.value = targetPosId;
-        }
-      }
-
-      if (targetPosId <= 0) {
-        errorMessage.value = 'لم يتم العثور على نقطة بيع نشطة تابعة لحسابك.';
-        links.clear();
-        return;
-      }
-
-      final result = await getPosNetworksListUseCase(targetPosId);
-      links.assignAll(result);
-    } on AppException catch (e) {
-      errorMessage.value = e.message;
-      CustomSnackbar.show(
-        title: 'خطأ في جلب الشبكات',
-        message: e.message,
-        type: SnackType.error,
-      );
-    } catch (e) {
-      final msg = 'تعذر استرجاع الشبكات المرتبطة: $e';
-      errorMessage.value = msg;
-      CustomSnackbar.show(
-        title: 'خطأ في النظام',
-        message: msg,
-        type: SnackType.error,
-      );
-    } finally {
-      if (showLoading) {
-        isLoading.value = false;
-      }
-    }
-  }
-
-  /// ربط نقطة بيع جديدة بالشبكة مع نافذة التحميل والتنبيهات
+  /// ربط نقطة بيع جديدة بالشبكة
   Future<bool> linkPos({
     required int networkId,
     int? posId,
@@ -446,7 +601,7 @@ class CommercialDirectoryController extends GetxController {
     }
   }
 
-  /// تبديل حالة تفعيل الارتباط بين الشبكة ونقطة البيع
+  /// تبديل حالة تفعيل الارتباط
   Future<void> toggleLinkStatus(int linkId) async {
     try {
       isActionLoading.value = true;
@@ -529,22 +684,6 @@ class CommercialDirectoryController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
     }
-  }
-
-  /// تحديث نص البحث
-  void setSearchQuery(String query) {
-    searchQuery.value = query;
-  }
-
-  /// تفريغ نص البحث
-  void clearSearch() {
-    searchController.clear();
-    searchQuery.value = '';
-  }
-
-  /// تغيير فلتر الحالة
-  void setStatusFilter(bool? status) {
-    selectedStatusFilter.value = status;
   }
 
   // ==========================================================================
@@ -711,7 +850,6 @@ class CommercialDirectoryController extends GetxController {
         posUuid: posUuid,
       );
 
-      // إضافة الرابط الجديد إذا كان معروضاً في القائمة الحالية
       if (activeNetworkId.value == link.networkId ||
           activePosId.value == link.posId) {
         if (!links.any((l) => l.networkPosId == link.networkPosId)) {

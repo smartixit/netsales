@@ -4,10 +4,12 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/inputs/custom_switch.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// عنصر تبديل متكامل وعالي الجودة قابل لإعادة الاستخدام (Enterprise CustomSwitchListTile)
 /// ودجت عام في lib/widgets يمكن استخدامه في أي شاشة أو مشروع لإدارة الحالات التبديلية (On/Off)
+/// مبني بالكامل على معايير NetSales التصميمية ويعتمد على [CustomSwitch] كعنصر تحكم أصيل.
 class CustomSwitchListTile extends StatelessWidget {
   /// العنوان الرئيسي
   final String title;
@@ -126,10 +128,13 @@ class CustomSwitchListTile extends StatelessWidget {
             ),
           ),
           AppSpacing.hSm,
-          Switch.adaptive(
+          CustomSwitch(
             value: value,
+            enabled: enabled,
             onChanged: enabled ? onChanged : null,
             activeTrackColor: effectiveActiveColor,
+            activeIcon: activeIcon,
+            inactiveIcon: inactiveIcon,
           ),
         ],
       ),

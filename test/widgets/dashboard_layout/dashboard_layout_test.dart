@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/widgets/dashboard_layout/dashboard_layout.dart';
 
 void main() {
-  const navigation = DashboardNavigationSection(
+  final navigation = DashboardNavigationSection(
     items: [
       DashboardNavigationItem(
         id: 'home',
@@ -15,7 +15,7 @@ void main() {
 
   testWidgets('renders content and selected navigation item', (tester) async {
     await tester.view.setLogicalSize(const Size(1440, 900));
-    await tester.view.devicePixelRatio = 1;
+    tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetLogicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
@@ -38,7 +38,7 @@ void main() {
 
   testWidgets('uses drawer navigation at compact width', (tester) async {
     await tester.view.setLogicalSize(const Size(700, 900));
-    await tester.view.devicePixelRatio = 1;
+    tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetLogicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 

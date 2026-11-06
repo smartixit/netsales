@@ -6,6 +6,7 @@ import 'package:netsales/features/commercial/presentation/controllers/commercial
 import 'package:netsales/features/commercial/presentation/widgets/link_pos_bottom_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_details_bottom_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_card.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_pos_card_skeleton.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_challenge_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_search_filter_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -105,17 +106,14 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
                 );
               }
 
-              final displayLinks = controller.filteredLinks;
+              final displayLinks = controller.links;
 
               // ج. حالة القائمة الفارغة
               if (displayLinks.isEmpty) {
                 return CustomEmptyState(
-                  title: controller.links.isEmpty
-                      ? 'لا توجد نقاط بيع مرتبطة'
-                      : 'لا توجد نتائج مطابقة لبحثك',
-                  subtitle: controller.links.isEmpty
-                      ? 'قم بربط نقاط البيع المرخصة بشبكتك لتفعيل التوزيع بالجملة'
-                      : 'جرب استخدام كلمات بحث مختلفة أو إلغاء فلتر التفعيل',
+                  title: 'لا توجد نقاط بيع مرتبطة',
+                  subtitle:
+                      'قم بربط نقاط البيع المرخصة بشبكتك لتفعيل التوزيع بالجملة',
                   icon: Icons.storefront_outlined,
                   actionLabel: 'ربط نقطة بيع جديدة',
                   onAction: () => LinkPosBottomSheet.show(
@@ -124,7 +122,10 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
                 );
               }
 
-              // د. عرض قائمة البطاقات المفصولة
+              // د. عرض قائمة البطاقات مع دعم تحميل المزيد
+              final hasMore = controller.hasMoreNetworkPosLinks;
+              final isLoadingMore = controller.isLoadingMore.value;
+
               return RefreshIndicator.adaptive(
                 onRefresh: () => controller.fetchNetworkPosLinks(
                   networkId: networkId,
@@ -135,9 +136,28 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.md,
                   ),
-                  itemCount: displayLinks.length,
+                  // إضافة عنصر إضافي في النهاية لعرض skeleton تحميل المزيد
+                  itemCount:
+                      displayLinks.length + (hasMore || isLoadingMore ? 1 : 0),
                   separatorBuilder: (context, index) => AppSpacing.vMd,
                   itemBuilder: (ctx, index) {
+                    // عنصر نهاية القائمة: skeleton تحميل المزيد أو trigger
+                    if (index == displayLinks.length) {
+                      if (isLoadingMore) {
+                        return const Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: NetworkPosCardSkeleton(),
+                        );
+                      }
+                      // trigger تحميل الصفحة التالية
+                      if (hasMore) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          controller.loadMoreNetworkPosLinks();
+                        });
+                        return const SizedBox.shrink();
+                      }
+                    }
+
                     final link = displayLinks[index];
                     return NetworkPosCard(link: link);
                   },

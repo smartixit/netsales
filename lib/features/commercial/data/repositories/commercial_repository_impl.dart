@@ -1,4 +1,5 @@
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
@@ -36,34 +37,66 @@ class CommercialRepositoryImpl implements CommercialRepository {
   }
 
   @override
-  Future<List<NetworkPosLinkEntity>> getNetworkPosList(
+  Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList(
     int networkId, {
+    String? cursor,
+    String? search,
+    bool? status,
+    int? perPage,
     Map<String, dynamic>? query,
   }) async {
+    final mergedQuery = <String, dynamic>{
+      'cursor': ?cursor,
+      if (search != null && search.isNotEmpty) 'search': search,
+      if (status != null) 'status': status ? '1' : '0',
+      'per_page': ?perPage,
+      ...?query,
+    };
+
     final response = await _remoteDataSource.getNetworkPosList(
       networkId,
-      query: query,
+      query: mergedQuery.isEmpty ? null : mergedQuery,
     );
 
     if (response.success && response.data != null) {
-      return response.data!;
+      return PaginatedList<NetworkPosLinkEntity>(
+        items: response.data!,
+        nextCursor: response.nextCursor,
+        prevCursor: response.prevCursor,
+      );
     }
 
     throw AppException(response.message);
   }
 
   @override
-  Future<List<NetworkPosLinkEntity>> getPosNetworksList(
+  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList(
     int posId, {
+    String? cursor,
+    String? search,
+    bool? status,
+    int? perPage,
     Map<String, dynamic>? query,
   }) async {
+    final mergedQuery = <String, dynamic>{
+      'cursor': ?cursor,
+      if (search != null && search.isNotEmpty) 'search': search,
+      if (status != null) 'status': status ? '1' : '0',
+      'per_page': ?perPage,
+      ...?query,
+    };
+
     final response = await _remoteDataSource.getPosNetworksList(
       posId,
-      query: query,
+      query: mergedQuery.isEmpty ? null : mergedQuery,
     );
 
     if (response.success && response.data != null) {
-      return response.data!;
+      return PaginatedList<NetworkPosLinkEntity>(
+        items: response.data!,
+        nextCursor: response.nextCursor,
+        prevCursor: response.prevCursor,
+      );
     }
 
     throw AppException(response.message);
