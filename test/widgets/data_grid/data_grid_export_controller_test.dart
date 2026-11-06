@@ -83,14 +83,16 @@ class _TestGridSource extends DataGridSource {
 void main() {
   late _MemoryExportService fileService;
   late AppDataGridExportController controller;
+  late _TestGridSource gridSource;
 
   Future<void> mountGrid(WidgetTester tester) async {
+    gridSource = _TestGridSource();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: SfDataGrid(
             key: controller.gridKey,
-            source: _TestGridSource(),
+            source: gridSource,
             columns: const [
               GridColumn(
                 columnName: 'id',
@@ -145,7 +147,7 @@ void main() {
 
   testWidgets('exports only the selected rows when rows are supplied', (tester) async {
     await mountGrid(tester);
-    final selectedRows = controller.gridKey.currentState!.effectiveRows.take(1).toList();
+    final selectedRows = gridSource.rows.take(1).toList();
 
     final result = await controller.exportExcel(
       fileName: 'selected-grid',
