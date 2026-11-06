@@ -6,7 +6,7 @@ class DashboardLayoutConfig {
     this.expandedSidebarWidth = 264,
     this.collapsedSidebarWidth = 76,
     this.topbarHeight = 72,
-    this.contentPadding = 28,
+    this.contentPadding,
     this.mobileBreakpoint = 900,
     this.maxContentWidth,
     this.initiallyCollapsed = false,
@@ -18,7 +18,7 @@ class DashboardLayoutConfig {
   final double expandedSidebarWidth;
   final double collapsedSidebarWidth;
   final double topbarHeight;
-  final double contentPadding;
+  final double? contentPadding;
   final double mobileBreakpoint;
   final double? maxContentWidth;
   final bool initiallyCollapsed;
