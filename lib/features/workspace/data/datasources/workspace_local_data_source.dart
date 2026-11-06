@@ -17,10 +17,9 @@ class WorkspaceLocalDataSourceImpl implements WorkspaceLocalDataSource {
   final WorkspaceService _workspaceService;
 
   const WorkspaceLocalDataSourceImpl({
-    required StorageService storageService,
-    required WorkspaceService workspaceService,
-  }) : _storageService = storageService,
-       _workspaceService = workspaceService;
+    required this._storageService,
+    required this._workspaceService,
+  });
 
   @override
   Future<WorkspaceContextModel> getActiveWorkspaceContext() async {

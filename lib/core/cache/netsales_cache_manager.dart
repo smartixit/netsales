@@ -214,13 +214,10 @@ class NetSalesDioFileResponse implements FileServiceResponse {
   final DateTime _receivedTime;
 
   NetSalesDioFileResponse({
-    required Response<dynamic> response,
-    required Uint8List bytes,
-    required String fileExtension,
-  }) : _response = response,
-       _bytes = bytes,
-       _fileExtension = fileExtension,
-       _receivedTime = DateTime.now();
+    required this._response,
+    required this._bytes,
+    required this._fileExtension,
+  }) : _receivedTime = DateTime.now();
 
   @override
   Stream<List<int>> get content => Stream.value(_bytes);

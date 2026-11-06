@@ -14,10 +14,9 @@ class OnboardingController extends GetxController {
   final CompleteOnboardingUseCase _completeOnboardingUseCase;
 
   OnboardingController({
-    required GetOnboardingItemsUseCase getOnboardingItemsUseCase,
-    required CompleteOnboardingUseCase completeOnboardingUseCase,
-  }) : _getOnboardingItemsUseCase = getOnboardingItemsUseCase,
-       _completeOnboardingUseCase = completeOnboardingUseCase;
+    required this._getOnboardingItemsUseCase,
+    required this._completeOnboardingUseCase,
+  });
 
   final PageController pageController = PageController();
   final RxInt currentPage = 0.obs;

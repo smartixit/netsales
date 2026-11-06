@@ -35,12 +35,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   get: ^4.7.3
   dio: ^5.10.0
-  shared_preferences: ^2.5.5
+  shared_preferences: ^2.5.6
   flutter_animate: ^4.5.2
   intl: ^0.20.2
   hijri: ^3.0.1
   flutter_mdi_icons: ^0.1.5
-  form_builder_validators: ^11.2.0
+  form_builder_validators: ^11.3.0
   pretty_qr_code: ^3.6.0
   flutter_local_notifications: ^22.3.3
   timezone: ^0.11.2
@@ -49,13 +49,13 @@ dependencies:
   workmanager: ^0.9.0+3
   internet_connection_checker_plus: ^3.1.1
   flutter_screenutil: ^5.9.3
-  lottie: ^3.3.3
+  lottie: ^3.8.2
   disable_battery_optimization: ^1.1.2
   permission_handler: ^12.0.3
   flutter_localizations:
     sdk: flutter
   dropdown_button2: ^3.1.0
-  image_picker: ^1.1.2
+  image_picker: ^1.2.4
   device_info_plus: ^12.4.0
   flutter_udid: ^4.1.4
   local_auth: ^2.3.0
@@ -64,11 +64,11 @@ dependencies:
   pinput: ^6.0.2
   calendar_date_picker2: 2.0.1
   audioplayers: ^6.7.1
-  url_launcher: ^6.3.2
-  printing: ^5.14.0
+  url_launcher: ^6.3.3
+  printing: ^5.15.1
   pdf: ^3.12.0
-  path_provider: ^2.1.0
-  crypto: ^3.0.6
+  path_provider: ^2.1.6
+  crypto: ^3.0.8
   syncfusion_flutter_charts: ^34.2.6
   syncfusion_flutter_core: ^34.2.6
   syncfusion_flutter_datagrid: ^34.2.6
@@ -77,7 +77,7 @@ dependencies:
   background_downloader: ^9.5.7
   open_filex: ^4.7.0
   path: ^1.9.0
-  mobile_scanner: ^7.4.0
+  mobile_scanner: ^7.5.0
   pointycastle: ^4.0.0
   cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1

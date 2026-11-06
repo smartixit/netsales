@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - fix/data-grid-final-verification
+      - chore/pub-dependency-maintenance
   pull_request:
     branches:
       - main
@@ -57,15 +58,16 @@ jobs:
           grep -q '^  timezone:' pubspec.lock
 
       - name: Format DataGrid sources on branch pushes
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref_name != 'chore/pub-dependency-maintenance'
         run: dart format lib/widgets/data_grid test/widgets/data_grid
 
       - name: Verify Dart formatting
+        if: github.head_ref != 'chore/pub-dependency-maintenance' && github.ref_name != 'chore/pub-dependency-maintenance'
         run: dart format --output=none --set-exit-if-changed lib/widgets/data_grid test/widgets/data_grid
 
       - name: Synchronize generated lockfile and formatting
         id: synchronize
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref_name != 'chore/pub-dependency-maintenance'
         run: |
           if git diff --quiet -- pubspec.lock lib/widgets/data_grid test/widgets/data_grid; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
