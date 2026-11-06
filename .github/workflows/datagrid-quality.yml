@@ -1,0 +1,74 @@
+name: Flutter DataGrid Quality Gate
+
+on:
+  push:
+    branches:
+      - main
+      - fix/data-grid-final-verification
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: datagrid-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter-quality:
+    name: Dependencies, format, analyze, tests and Android build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Report toolchain
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Resolve dependencies and verify lockfile
+        run: |
+          flutter pub get
+          git diff --exit-code -- pubspec.lock
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed lib/widgets/data_grid test/widgets/data_grid
+
+      - name: Analyze project
+        run: flutter analyze
+
+      - name: Run DataGrid tests
+        run: flutter test test/widgets/data_grid
+
+      - name: Run complete Flutter test suite
+        run: flutter test
+
+      - name: Build Android debug APK
+        run: flutter build apk --debug
+
+      - name: Upload APK verification artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netsales-datagrid-android-debug
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
