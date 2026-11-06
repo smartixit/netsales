@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - fix/data-grid-final-verification
+      - chore/pub-dependency-maintenance
   pull_request:
     branches:
       - main
