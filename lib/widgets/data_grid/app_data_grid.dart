@@ -20,6 +20,7 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_grid.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 typedef AppDataGridMobileItemBuilder<T> = Widget Function(BuildContext context, T item);
@@ -133,31 +134,46 @@ class AppDataGrid<T> extends StatelessWidget {
           if (pagination.mode == AppDataGridPaginationMode.pageBased &&
               pagination.delegate != null &&
               !AppBreakpoints.isMobile(context))
-            SfDataPager(
-              key: ValueKey('data-grid-pager-${pagination.currentPage}'),
-              delegate: pagination.delegate!,
-              pageCount: pagination.totalPages.toDouble(),
-              initialPageIndex: pagination.currentPage - 1,
-              direction: Axis.horizontal,
-              pageItemBuilder: (itemName) {
-                final label = switch (itemName) {
-                  'First' => 'الأولى',
-                  'Previous' => 'السابق',
-                  'Next' => 'التالي',
-                  'Last' => 'الأخيرة',
-                  _ => itemName,
-                };
-                return Center(
-                  child: Text(
-                    label,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: context.colors.onSurface,
+            SfDataPagerTheme(
+              data: SfDataPagerThemeData(
+                backgroundColor: context.colors.surfaceContainerHigh,
+                itemColor: context.colors.surfaceContainerLowest,
+                itemTextStyle: AppTypography.labelMedium.copyWith(color: context.colors.onSurface),
+                selectedItemColor: context.colors.primary,
+                selectedItemTextStyle: AppTypography.labelMedium.copyWith(
+                  color: context.colors.onPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+                disabledItemColor: context.colors.surfaceContainerLow,
+                disabledItemTextStyle: AppTypography.labelMedium.copyWith(color: context.colors.onSurfaceVariant),
+                itemBorderColor: context.colors.outlineVariant,
+                itemBorderWidth: 0.6,
+                itemBorderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: SfDataPager(
+                key: ValueKey('data-grid-pager-${pagination.currentPage}'),
+                delegate: pagination.delegate!,
+                pageCount: pagination.totalPages.toDouble(),
+                initialPageIndex: pagination.currentPage - 1,
+                direction: Axis.horizontal,
+                pageItemBuilder: (itemName) {
+                  final label = switch (itemName) {
+                    'First' => 'الأولى',
+                    'Previous' => 'السابق',
+                    'Next' => 'التالي',
+                    'Last' => 'الأخيرة',
+                    _ => itemName,
+                  };
+                  return Center(
+                    child: Text(
+                      label,
+                      style: AppTypography.labelMedium.copyWith(color: context.colors.onSurface),
                     ),
-                  ),
-                );
-              },
-              onPageNavigationStart: pagination.onPageNavigationStart,
-              onPageNavigationEnd: pagination.onPageNavigationEnd,
+                  );
+                },
+                onPageNavigationStart: pagination.onPageNavigationStart,
+                onPageNavigationEnd: pagination.onPageNavigationEnd,
+              ),
             )
           else
             _GridPaginationBar(pagination: pagination),
