@@ -105,8 +105,4 @@ jobs:
       - name: Compile Android Debug sources without packaging an APK
         run: |
           cd android
-          gradle --no-daemon \\
-            :app:checkDebugAarMetadata \\
-            :app:compileDebugKotlin \\
-            :app:compileDebugJavaWithJavac \\
-            :app:compileFlutterBuildDebug
+          gradle --no-daemon :app:checkDebugAarMetadata :app:compileDebugKotlin :app:compileDebugJavaWithJavac :app:compileFlutterBuildDebug
