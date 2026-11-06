@@ -90,8 +90,7 @@ class DashboardMetricCard extends StatelessWidget {
       if (source.updatedAtLabel != null) parts.add(source.updatedAtLabel!);
       if (source.freshnessLabel != null) parts.add(source.freshnessLabel!);
     }
-    if (metric.statusLabel != null) parts.add(metric.statusLabel);
-    }
+    if (metric.statusLabel != null) parts.add(metric.statusLabel!);
     return parts.join(', ');
   }
 }
