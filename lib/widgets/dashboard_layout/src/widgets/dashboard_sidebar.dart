@@ -189,6 +189,8 @@ class _NavigationTile extends StatelessWidget {
           color: selected ? theme.sidebarSelectedBackground : Colors.transparent,
           borderRadius: BorderRadius.circular(theme.itemRadius),
           child: InkWell(
+            hoverColor: theme.sidebarHoverBackground,
+            focusColor: theme.sidebarHoverBackground,
             borderRadius: BorderRadius.circular(theme.itemRadius),
             onTap: item.enabled && !item.hasChildren
                 ? () => onSelected(item.id)
