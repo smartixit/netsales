@@ -28,12 +28,14 @@ class DashboardMetricData {
     this.target,
     this.source,
     this.tooltip,
+    this.statusLabel,
   }) : assert(id != ''),
        assert(title != ''),
        assert(value != ''),
        assert(sparkline.length == 0 || sparkline.length >= 2),
        assert(sparkline.every((point) => point >= 0 && point <= 1)),
-       assert(variant != DashboardMetricVariant.target || target != null);
+       assert(variant != DashboardMetricVariant.target || target != null),
+       assert(variant != DashboardMetricVariant.status || statusLabel != null);
 
   final String id;
   final String title;
@@ -52,4 +54,7 @@ class DashboardMetricData {
   final DashboardMetricTarget? target;
   final DashboardMetricSource? source;
   final String? tooltip;
+
+  /// Localized status caption supplied by the host for status cards.
+  final String? statusLabel;
 }
