@@ -14,6 +14,7 @@ class DashboardMetricSource {
     this.detail,
     this.updatedAt,
     this.updatedAtLabel,
+    this.freshnessLabel,
     this.freshness = DashboardMetricFreshness.unknown,
   }) : assert(label != '');
 
@@ -24,5 +25,6 @@ class DashboardMetricSource {
 
   /// Localized display text supplied by the host.
   final String? updatedAtLabel;
+  final String? freshnessLabel;
   final DashboardMetricFreshness freshness;
 }
