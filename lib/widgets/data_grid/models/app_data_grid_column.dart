@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-typedef AppDataGridCellBuilder<T> =
-    Widget Function(BuildContext context, T row, Object? value);
-typedef AppDataGridEditorBuilder<T> =
-    Widget Function({
-      required T row,
-      required Object? initialValue,
-      required ValueChanged<Object?> onChanged,
-      required VoidCallback onSubmit,
-    });
+typedef AppDataGridCellBuilder<T> = Widget Function(
+  BuildContext context,
+  T row,
+  Object? value,
+);
+typedef AppDataGridEditorBuilder<T> = Widget Function({
+  required T row,
+  required Object? initialValue,
+  required ValueChanged<Object?> onChanged,
+  required VoidCallback onSubmit,
+});
 typedef AppDataGridValueParser = Object? Function(Object? value);
 typedef AppDataGridValueValidator<T> = bool Function(T row, Object? value);
 

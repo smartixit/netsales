@@ -142,10 +142,8 @@ class DataGridShowcaseController extends GetxController {
           ),
           child: Text(
             row.status,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: tone,
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(context).textTheme.labelSmall
+                ?.copyWith(color: tone, fontWeight: FontWeight.w700),
           ),
         );
       },
@@ -159,9 +157,8 @@ class DataGridShowcaseController extends GetxController {
       valueGetter: (row) => row.amount,
       cellBuilder: (context, row, value) => Text(
         AmountFormatter.formatValue(row.amount, decimalPlaces: 2),
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+        style: Theme.of(context).textTheme.bodyMedium
+            ?.copyWith(fontWeight: FontWeight.w700),
       ),
     ),
     AppDataGridColumn<DataGridShowcaseRecord>(
