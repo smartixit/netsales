@@ -1,0 +1,109 @@
+name: Flutter DataGrid Quality Gate
+
+on:
+  push:
+    branches:
+      - main
+      - fix/data-grid-final-verification
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: datagrid-quality-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  flutter-quality:
+    name: Dependencies, format, analyze, tests and Android build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.9'
+          cache: true
+
+      - name: Report toolchain
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Resolve dependencies and verify lockfile
+        run: |
+          flutter pub get
+          flutter pub get --enforce-lockfile
+          grep -q '^  syncfusion_flutter_datagrid:' pubspec.lock
+          grep -q '^  syncfusion_flutter_datagrid_export:' pubspec.lock
+          grep -q '^  flutter_local_notifications:' pubspec.lock
+          grep -q '^  timezone:' pubspec.lock
+
+      - name: Format DataGrid sources on branch pushes
+        if: github.event_name == 'push'
+        run: dart format lib/widgets/data_grid test/widgets/data_grid
+
+      - name: Verify Dart formatting
+        run: dart format --output=none --set-exit-if-changed lib/widgets/data_grid test/widgets/data_grid
+
+      - name: Synchronize generated lockfile and formatting
+        id: synchronize
+        if: github.event_name == 'push'
+        run: |
+          if git diff --quiet -- pubspec.lock lib/widgets/data_grid test/widgets/data_grid; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pubspec.lock lib/widgets/data_grid test/widgets/data_grid
+          git commit -m "chore(data-grid): format sources and synchronize dependencies"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch verification for the synchronized branch commit
+        if: github.event_name == 'push' && steps.synchronize.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method POST \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/datagrid-quality.yml/dispatches" \
+            -f ref="${GITHUB_REF_NAME}"
+
+      - name: Analyze project
+        run: flutter analyze
+
+      - name: Run DataGrid tests
+        run: flutter test test/widgets/data_grid
+
+      - name: Run complete Flutter test suite
+        run: flutter test
+
+      - name: Build Android debug APK
+        run: flutter build apk --debug
+
+      - name: Upload APK verification artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netsales-datagrid-android-debug
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7

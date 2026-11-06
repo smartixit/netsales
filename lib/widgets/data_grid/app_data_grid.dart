@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -24,9 +23,12 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-typedef AppDataGridMobileItemBuilder<T> = Widget Function(BuildContext context, T item);
-typedef AppDataGridSelectionChanged<T> = void Function(List<T> selected, List<T> deselected);
-typedef AppDataGridSortRequested = void Function(SortColumnDetails? next, SortColumnDetails? previous);
+typedef AppDataGridMobileItemBuilder<T> =
+    Widget Function(BuildContext context, T item);
+typedef AppDataGridSelectionChanged<T> =
+    void Function(List<T> selected, List<T> deselected);
+typedef AppDataGridSortRequested =
+    void Function(SortColumnDetails? next, SortColumnDetails? previous);
 
 class AppDataGrid<T> extends StatelessWidget {
   const AppDataGrid({
@@ -45,7 +47,7 @@ class AppDataGrid<T> extends StatelessWidget {
     this.exportController,
     this.exportFileName = 'NetSales_Report',
     this.selectedCount = 0,
-    this.selectedItems = const <T>[],
+    this.selectedItems = const [],
     this.onSelectionChanged,
     this.onColumnsReordered,
     this.onSelectionChanging,
@@ -116,14 +118,23 @@ class AppDataGrid<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedGridRows = source.rows.where((row) {
-      final item = source.itemForRow(row);
-      return item != null && selectedItems.contains(item);
-    }).toList(growable: false);
+    final selectedGridRows = source.rows
+        .where((row) {
+          final item = source.itemForRow(row);
+          return item != null && selectedItems.contains(item);
+        })
+        .toList(growable: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title != null || subtitle != null || searchController != null || headerActions.isNotEmpty || source.items.isNotEmpty || (!AppBreakpoints.isMobile(context) && exportController != null && viewState == AppDataGridViewState.success))
+        if (title != null ||
+            subtitle != null ||
+            searchController != null ||
+            headerActions.isNotEmpty ||
+            source.items.isNotEmpty ||
+            (!AppBreakpoints.isMobile(context) &&
+                exportController != null &&
+                viewState == AppDataGridViewState.success))
           _GridToolbar(
             title: title,
             subtitle: subtitle,
@@ -132,7 +143,12 @@ class AppDataGrid<T> extends StatelessWidget {
             onSearchChanged: onSearchChanged,
             onClearSearch: onClearSearch,
             actions: headerActions,
-            exportController: !AppBreakpoints.isMobile(context) && viewState == AppDataGridViewState.success && source.items.isNotEmpty ? exportController : null,
+            exportController:
+                !AppBreakpoints.isMobile(context) &&
+                    viewState == AppDataGridViewState.success &&
+                    source.items.isNotEmpty
+                ? exportController
+                : null,
             exportFileName: exportFileName,
             itemCount: source.items.length,
             selectedCount: selectedCount,
@@ -148,14 +164,18 @@ class AppDataGrid<T> extends StatelessWidget {
               data: SfDataPagerThemeData(
                 backgroundColor: context.colors.surfaceContainerHigh,
                 itemColor: context.colors.surfaceContainerLowest,
-                itemTextStyle: AppTypography.labelMedium.copyWith(color: context.colors.onSurface),
+                itemTextStyle: AppTypography.labelMedium.copyWith(
+                  color: context.colors.onSurface,
+                ),
                 selectedItemColor: context.colors.primary,
                 selectedItemTextStyle: AppTypography.labelMedium.copyWith(
                   color: context.colors.onPrimary,
                   fontWeight: FontWeight.w700,
                 ),
                 disabledItemColor: context.colors.surfaceContainerLow,
-                disabledItemTextStyle: AppTypography.labelMedium.copyWith(color: context.colors.onSurfaceVariant),
+                disabledItemTextStyle: AppTypography.labelMedium.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                ),
                 itemBorderColor: context.colors.outlineVariant,
                 itemBorderWidth: 0.6,
                 itemBorderRadius: BorderRadius.circular(AppRadius.md),
@@ -177,7 +197,9 @@ class AppDataGrid<T> extends StatelessWidget {
                   return Center(
                     child: Text(
                       label,
-                      style: AppTypography.labelMedium.copyWith(color: context.colors.onSurface),
+                      style: AppTypography.labelMedium.copyWith(
+                        color: context.colors.onSurface,
+                      ),
                     ),
                   );
                 },
@@ -190,18 +212,32 @@ class AppDataGrid<T> extends StatelessWidget {
               pagination: pagination,
               onPageChanged: features.dataMode == AppDataGridDataMode.remote
                   ? (page) {
-                      unawaited(source.handlePageChange(pagination.currentPage - 1, page - 1).then<void>((changed) {
-                        if (changed) pagination.onPageChanged?.call(page);
-                      }));
+                      unawaited(
+                        source
+                            .handlePageChange(
+                              pagination.currentPage - 1,
+                              page - 1,
+                            )
+                            .then<void>((changed) {
+                              if (changed) pagination.onPageChanged?.call(page);
+                            }),
+                      );
                     }
                   : pagination.onPageChanged,
             ),
-        if (viewState == AppDataGridViewState.success && features.dataMode == AppDataGridDataMode.remote)
+        if (viewState == AppDataGridViewState.success &&
+            features.dataMode == AppDataGridDataMode.remote)
           Padding(
-            padding: EdgeInsetsDirectional.only(start: AppSpacing.md, end: AppSpacing.md, bottom: AppSpacing.xs),
+            padding: EdgeInsetsDirectional.only(
+              start: AppSpacing.md,
+              end: AppSpacing.md,
+              bottom: AppSpacing.xs,
+            ),
             child: Text(
               'يتم تطبيق الفرز والتصفية على الخادم لضمان صحة نتائج الصفحات.',
-              style: AppTypography.caption.copyWith(color: context.colors.onSurfaceVariant),
+              style: AppTypography.caption.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
             ),
           ),
       ],
@@ -265,7 +301,10 @@ class AppDataGrid<T> extends StatelessWidget {
             isRemote: features.dataMode == AppDataGridDataMode.remote,
           );
         }
-        final gridColumns = source.columns.where((column) => column.visible).map((column) => column.toGridColumn(context)).toList();
+        final gridColumns = source.columns
+            .where((column) => column.visible)
+            .map((column) => column.toGridColumn(context))
+            .toList();
         return ClipRRect(
           key: const ValueKey('data-grid-desktop'),
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -283,8 +322,6 @@ class AppDataGrid<T> extends StatelessWidget {
               columnSizer: features.columnSizer,
               columnResizeMode: features.columnResizeMode,
               columnDragFeedbackBuilder: features.columnDragFeedbackBuilder,
-              onColumnResizeStart: features.onColumnResizeStart,
-              onColumnResizeEnd: features.onColumnResizeEnd,
               controller: features.controller,
               selectionManager: features.selectionManager,
               sortingGestureType: features.sortingGestureType,
@@ -301,13 +338,27 @@ class AppDataGrid<T> extends StatelessWidget {
               headerGridLinesVisibility: features.headerGridLinesVisibility,
               selectionMode: features.effectiveSelectionMode,
               navigationMode: features.effectiveNavigationMode,
-              frozenColumnsCount: _safeFrozenCount(features.frozenColumnsCount, source.columns.where((column) => column.visible).length),
-              frozenRowsCount: _safeFrozenRowCount(features.frozenRowsCount, source.rows.length),
-              footerFrozenColumnsCount: _safeFrozenCount(features.footerFrozenColumnsCount, source.columns.where((column) => column.visible).length),
-              footerFrozenRowsCount: _safeFrozenRowCount(features.footerFrozenRowsCount, source.rows.length),
+              frozenColumnsCount: _safeFrozenCount(
+                features.frozenColumnsCount,
+                source.columns.where((column) => column.visible).length,
+              ),
+              frozenRowsCount: _safeFrozenRowCount(
+                features.frozenRowsCount,
+                source.rows.length,
+              ),
+              footerFrozenColumnsCount: _safeFrozenCount(
+                features.footerFrozenColumnsCount,
+                source.columns.where((column) => column.visible).length,
+              ),
+              footerFrozenRowsCount: _safeFrozenRowCount(
+                features.footerFrozenRowsCount,
+                source.rows.length,
+              ),
               allowSorting: features.allowSorting,
-              allowMultiColumnSorting: features.allowSorting && features.allowMultiColumnSorting,
-              allowTriStateSorting: features.allowSorting && features.allowTriStateSorting,
+              allowMultiColumnSorting:
+                  features.allowSorting && features.allowMultiColumnSorting,
+              allowTriStateSorting:
+                  features.allowSorting && features.allowTriStateSorting,
               showSortNumbers: features.showSortNumbers,
               showColumnHeaderIconOnHover: features.showColumnHeaderIconOnHover,
               allowFiltering: features.allowFiltering,
@@ -316,15 +367,25 @@ class AppDataGrid<T> extends StatelessWidget {
               placeholder: features.placeholder,
               checkboxShape: features.checkboxShape,
               allowColumnsResizing: features.allowColumnResizing,
-              onColumnResizeStart: features.allowColumnResizing ? features.onColumnResizeStart : null,
+              onColumnResizeStart: features.allowColumnResizing
+                  ? features.onColumnResizeStart
+                  : null,
               onColumnResizeUpdate: features.allowColumnResizing
                   ? (details) {
-                      final accepted = features.onColumnResizeUpdate?.call(details) ?? true;
-                      if (accepted) source.updateColumnWidth(details.column.columnName, details.width);
+                      final accepted =
+                          features.onColumnResizeUpdate?.call(details) ?? true;
+                      if (accepted) {
+                        source.updateColumnWidth(
+                          details.column.columnName,
+                          details.width,
+                        );
+                      }
                       return accepted;
                     }
                   : null,
-              onColumnResizeEnd: features.allowColumnResizing ? features.onColumnResizeEnd : null,
+              onColumnResizeEnd: features.allowColumnResizing
+                  ? features.onColumnResizeEnd
+                  : null,
               allowColumnsDragging: features.allowColumnDragging,
               onColumnDragging: features.allowColumnDragging
                   ? (details) {
@@ -346,7 +407,8 @@ class AppDataGrid<T> extends StatelessWidget {
                       return true;
                     }
                   : null,
-              allowExpandCollapseGroup: features.allowGrouping && features.allowExpandCollapseGroup,
+              allowExpandCollapseGroup:
+                  features.allowGrouping && features.allowExpandCollapseGroup,
               autoExpandGroups: features.autoExpandGroups,
               groupCaptionTitleFormat: features.groupCaptionTitleFormat,
               groupExpanding: features.groupExpanding,
@@ -354,7 +416,8 @@ class AppDataGrid<T> extends StatelessWidget {
               groupCollapsing: features.groupCollapsing,
               groupCollapsed: features.groupCollapsed,
               allowPullToRefresh: features.allowPullToRefresh,
-              refreshIndicatorDisplacement: features.refreshIndicatorDisplacement,
+              refreshIndicatorDisplacement:
+                  features.refreshIndicatorDisplacement,
               refreshIndicatorStrokeWidth: features.refreshIndicatorStrokeWidth,
               loadMoreViewBuilder: features.loadMoreViewBuilder,
               allowSwiping: features.allowSwiping,
@@ -382,9 +445,14 @@ class AppDataGrid<T> extends StatelessWidget {
               onCellDoubleTap: onCellDoubleTap,
               onCellSecondaryTap: onCellSecondaryTap,
               onCellLongPress: onCellLongPress,
-              onSelectionChanged: onSelectionChanged == null ? null : (added, removed) {
-                onSelectionChanged!(source.itemsForRows(added), source.itemsForRows(removed));
-              },
+              onSelectionChanged: onSelectionChanged == null
+                  ? null
+                  : (added, removed) {
+                      onSelectionChanged!(
+                        source.itemsForRows(added),
+                        source.itemsForRows(removed),
+                      );
+                    },
               onColumnSortChanged: onSortChanged,
               onFilterChanging: features.dataMode == AppDataGridDataMode.local
                   ? onFilterChanging
@@ -392,8 +460,11 @@ class AppDataGrid<T> extends StatelessWidget {
                       onFilterRequested?.call(details);
                       return false;
                     },
-              onFilterChanged: features.dataMode == AppDataGridDataMode.local ? onFilterChanged : null,
-              onColumnSortChanging: features.dataMode == AppDataGridDataMode.remote
+              onFilterChanged: features.dataMode == AppDataGridDataMode.local
+                  ? onFilterChanged
+                  : null,
+              onColumnSortChanging:
+                  features.dataMode == AppDataGridDataMode.remote
                   ? (next, previous) {
                       onSortRequested?.call(next, previous);
                       return false;
@@ -447,11 +518,18 @@ class _GridToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.md),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.md,
+        AppSpacing.md,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (title != null || actions.isNotEmpty || exportController != null) ...[
+          if (title != null ||
+              actions.isNotEmpty ||
+              exportController != null) ...[
             Wrap(
               alignment: WrapAlignment.spaceBetween,
               crossAxisAlignment: WrapCrossAlignment.center,
@@ -462,9 +540,19 @@ class _GridToolbar extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title!, style: AppTypography.titleMedium.copyWith(color: colors.onSurface)),
+                      Text(
+                        title!,
+                        style: AppTypography.titleMedium.copyWith(
+                          color: colors.onSurface,
+                        ),
+                      ),
                       if (subtitle != null)
-                        Text(subtitle!, style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+                        Text(
+                          subtitle!,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
                     ],
                   ),
                 Wrap(
@@ -477,13 +565,17 @@ class _GridToolbar extends StatelessWidget {
                         icon: Icons.table_view_rounded,
                         tooltip: 'تصدير Excel',
                         size: AppButtonSize.small,
-                        onPressed: () => exportController!.exportExcel(fileName: exportFileName),
+                        onPressed: () => exportController!.exportExcel(
+                          fileName: exportFileName,
+                        ),
                       ),
                       CustomButton.icon(
                         icon: Icons.picture_as_pdf_outlined,
                         tooltip: 'تصدير PDF',
                         size: AppButtonSize.small,
-                        onPressed: () => exportController!.exportPdf(fileName: exportFileName),
+                        onPressed: () => exportController!.exportPdf(
+                          fileName: exportFileName,
+                        ),
                       ),
                       if (selectedCount > 0 && selectedRows.isNotEmpty) ...[
                         CustomButton.icon(
@@ -520,25 +612,44 @@ class _GridToolbar extends StatelessWidget {
                     controller: searchController!,
                     label: 'بحث',
                     hint: searchHint,
-                    prefixIcon: Icon(Icons.search_rounded, color: colors.onSurfaceVariant),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: colors.onSurfaceVariant,
+                    ),
                     onChanged: onSearchChanged,
                     isRequired: false,
-                    contentPadding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
                   ),
                 ),
                 if (onClearSearch != null) ...[
                   AppSpacing.hXs,
-                  CustomButton.icon(icon: Icons.close_rounded, tooltip: 'مسح البحث', size: AppButtonSize.small, onPressed: onClearSearch),
+                  CustomButton.icon(
+                    icon: Icons.close_rounded,
+                    tooltip: 'مسح البحث',
+                    size: AppButtonSize.small,
+                    onPressed: onClearSearch,
+                  ),
                 ],
               ],
             ),
           AppSpacing.vXs,
           Row(
             children: [
-              CustomChip(label: isRemote ? '${itemCount} سجل محمّل' : '${itemCount} سجل', icon: Icons.table_rows_outlined, isCompact: true),
+              CustomChip(
+                label: isRemote ? '$itemCount سجل محمّل' : '$itemCount سجل',
+                icon: Icons.table_rows_outlined,
+                isCompact: true,
+              ),
               if (selectedCount > 0) ...[
                 AppSpacing.hXs,
-                CustomChip(label: selectedCount.toString() + ' محدد', icon: Icons.check_circle_outline_rounded, isCompact: true),
+                CustomChip(
+                  label: '$selectedCount محدد',
+                  icon: Icons.check_circle_outline_rounded,
+                  isCompact: true,
+                ),
               ],
             ],
           ),
@@ -549,7 +660,19 @@ class _GridToolbar extends StatelessWidget {
 }
 
 class _MobileGridList<T> extends StatelessWidget {
-  const _MobileGridList({super.key, required this.source, required this.pagination, this.rowsPerPage, this.allowPullToRefresh = false, this.allowSelection = false, this.allowMultiSelection = true, this.selectedItems = const <T>[], this.onSelectionChanged, this.itemBuilder, this.isRemote = false});
+  const _MobileGridList({
+    super.key,
+    required this.source,
+    required this.pagination,
+    this.rowsPerPage,
+    this.allowPullToRefresh = false,
+    this.allowSelection = false,
+    this.allowMultiSelection = true,
+    this.selectedItems = const [],
+    this.onSelectionChanged,
+    this.itemBuilder,
+    this.isRemote = false,
+  });
   final NetSalesDataGridSource<T> source;
   final AppDataGridPagination pagination;
   final int? rowsPerPage;
@@ -564,24 +687,42 @@ class _MobileGridList<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final allRows = source.items;
-    final rows = !isRemote && pagination.mode == AppDataGridPaginationMode.pageBased && rowsPerPage != null
-        ? allRows.skip((pagination.currentPage - 1) * rowsPerPage!).take(rowsPerPage!).toList(growable: false)
+    final rows =
+        !isRemote &&
+            pagination.mode == AppDataGridPaginationMode.pageBased &&
+            rowsPerPage != null
+        ? allRows
+              .skip((pagination.currentPage - 1) * rowsPerPage!)
+              .take(rowsPerPage!)
+              .toList(growable: false)
         : allRows;
     if (rows.isEmpty) {
-      return const CustomEmptyState.compact(title: 'لا توجد سجلات', subtitle: 'لا توجد بيانات لعرضها في هذه الصفحة.', icon: Icons.table_rows_outlined);
+      return const CustomEmptyState.compact(
+        title: 'لا توجد سجلات',
+        subtitle: 'لا توجد بيانات لعرضها في هذه الصفحة.',
+        icon: Icons.table_rows_outlined,
+      );
     }
     final list = ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsetsDirectional.fromSTEB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.md),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.md,
+        AppSpacing.xs,
+        AppSpacing.md,
+        AppSpacing.md,
+      ),
       itemCount: rows.length,
-      separatorBuilder: (_, __) => AppSpacing.vSm,
+      separatorBuilder: (_, _) => AppSpacing.vSm,
       itemBuilder: (context, index) {
         final item = rows[index];
         final isSelected = selectedItems.contains(item);
-        final recordCard = itemBuilder?.call(context, item) ??
+        final recordCard =
+            itemBuilder?.call(context, item) ??
             _DefaultMobileRecordCard<T>(
               item: item,
-              columns: source.columns.where((column) => column.visible).toList(growable: false),
+              columns: source.columns
+                  .where((column) => column.visible)
+                  .toList(growable: false),
             );
         if (!allowSelection || onSelectionChanged == null) return recordCard;
         return Row(
@@ -593,11 +734,13 @@ class _MobileGridList<T> extends StatelessWidget {
                   onSelectionChanged!(
                     [item],
                     allowMultiSelection
-                        ? const <T>[]
-                        : selectedItems.where((value) => value != item).toList(growable: false),
+                        ? <T>[]
+                        : selectedItems
+                              .where((value) => value != item)
+                              .toList(growable: false),
                   );
                 } else {
-                  onSelectionChanged!(const <T>[], [item]);
+                  onSelectionChanged!(<T>[], [item]);
                 }
               },
             ),
@@ -619,10 +762,7 @@ class _MobileGridList<T> extends StatelessWidget {
       );
     }
     if (!allowPullToRefresh) return content;
-    return RefreshIndicator(
-      onRefresh: source.handleRefresh,
-      child: content,
-    );
+    return RefreshIndicator(onRefresh: source.handleRefresh, child: content);
   }
 }
 
@@ -641,32 +781,55 @@ class _DefaultMobileRecordCard<T> extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.55)),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: 0.55),
+        ),
         boxShadow: AppElevation.level1(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(primary.valueGetter(item)?.toString() ?? '—', style: AppTypography.titleSmall.copyWith(color: colors.onSurface), maxLines: 2, overflow: TextOverflow.ellipsis),
+          Text(
+            primary.valueGetter(item)?.toString() ?? '—',
+            style: AppTypography.titleSmall.copyWith(color: colors.onSurface),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
           if (columns.length > 1) ...[
             AppSpacing.vSm,
             Wrap(
               spacing: AppSpacing.md,
               runSpacing: AppSpacing.sm,
-              children: columns.skip(1).map((column) {
-                final value = column.valueGetter(item);
-                return ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 220),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(column.label, style: AppTypography.caption.copyWith(color: colors.onSurfaceVariant)),
-                      Text(value?.toString() ?? '—', style: AppTypography.bodyMedium.copyWith(color: colors.onSurface, fontWeight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                );
-              }).toList(growable: false),
+              children: columns
+                  .skip(1)
+                  .map((column) {
+                    final value = column.valueGetter(item);
+                    return ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 220),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            column.label,
+                            style: AppTypography.caption.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
+                          Text(
+                            value?.toString() ?? '—',
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: colors.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    );
+                  })
+                  .toList(growable: false),
             ),
           ],
         ],
@@ -683,43 +846,73 @@ class _GridPaginationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = pagination.mode == AppDataGridPaginationMode.pageBased
-        ? 'صفحة ' + pagination.currentPage.toString() + ' من ' + pagination.totalPages.toString()
+        ? 'صفحة ${pagination.currentPage} من ${pagination.totalPages}'
         : pagination.pageLabel ?? 'تصفح النتائج';
     return Container(
-      padding: EdgeInsetsDirectional.fromSTEB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.sm),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: context.colors.outlineVariant))),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.md,
+        AppSpacing.xs,
+        AppSpacing.md,
+        AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: context.colors.outlineVariant)),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: AppTypography.caption.copyWith(color: context.colors.onSurfaceVariant)),
+          Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
           Row(
             children: [
               CustomButton.icon(
-                icon: Directionality.of(context) == TextDirection.rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
+                icon: Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_right_rounded
+                    : Icons.chevron_left_rounded,
                 tooltip: 'السابق',
                 size: AppButtonSize.small,
-                enabled: !pagination.isLoading && (pagination.mode == AppDataGridPaginationMode.pageBased ? pagination.currentPage > 1 : pagination.hasPrevious),
-                onPressed: pagination.isLoading ? null : () {
-                  if (pagination.mode == AppDataGridPaginationMode.pageBased) {
-                    onPageChanged?.call(pagination.currentPage - 1);
-                  } else {
-                    pagination.onPrevious?.call();
-                  }
-                },
+                enabled:
+                    !pagination.isLoading &&
+                    (pagination.mode == AppDataGridPaginationMode.pageBased
+                        ? pagination.currentPage > 1
+                        : pagination.hasPrevious),
+                onPressed: pagination.isLoading
+                    ? null
+                    : () {
+                        if (pagination.mode ==
+                            AppDataGridPaginationMode.pageBased) {
+                          onPageChanged?.call(pagination.currentPage - 1);
+                        } else {
+                          pagination.onPrevious?.call();
+                        }
+                      },
               ),
               AppSpacing.hXs,
               CustomButton.icon(
-                icon: Directionality.of(context) == TextDirection.rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+                icon: Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
                 tooltip: 'التالي',
                 size: AppButtonSize.small,
-                enabled: !pagination.isLoading && (pagination.mode == AppDataGridPaginationMode.pageBased ? pagination.currentPage < pagination.totalPages : pagination.hasNext),
-                onPressed: pagination.isLoading ? null : () {
-                  if (pagination.mode == AppDataGridPaginationMode.pageBased) {
-                    onPageChanged?.call(pagination.currentPage + 1);
-                  } else {
-                    pagination.onNext?.call();
-                  }
-                },
+                enabled:
+                    !pagination.isLoading &&
+                    (pagination.mode == AppDataGridPaginationMode.pageBased
+                        ? pagination.currentPage < pagination.totalPages
+                        : pagination.hasNext),
+                onPressed: pagination.isLoading
+                    ? null
+                    : () {
+                        if (pagination.mode ==
+                            AppDataGridPaginationMode.pageBased) {
+                          onPageChanged?.call(pagination.currentPage + 1);
+                        } else {
+                          pagination.onNext?.call();
+                        }
+                      },
               ),
             ],
           ),

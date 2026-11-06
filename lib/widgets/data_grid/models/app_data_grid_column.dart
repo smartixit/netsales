@@ -1,9 +1,15 @@
-
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-typedef AppDataGridCellBuilder<T> = Widget Function(BuildContext context, T row, Object? value);
-typedef AppDataGridEditorBuilder<T> = Widget Function({required T row, required Object? initialValue, required ValueChanged<Object?> onChanged, required VoidCallback onSubmit});
+typedef AppDataGridCellBuilder<T> =
+    Widget Function(BuildContext context, T row, Object? value);
+typedef AppDataGridEditorBuilder<T> =
+    Widget Function({
+      required T row,
+      required Object? initialValue,
+      required ValueChanged<Object?> onChanged,
+      required VoidCallback onSubmit,
+    });
 typedef AppDataGridValueParser = Object? Function(Object? value);
 typedef AppDataGridValueValidator<T> = bool Function(T row, Object? value);
 
@@ -57,31 +63,37 @@ class AppDataGridColumn<T> {
   final AlignmentGeometry headerAlignment;
   final AlignmentGeometry cellAlignment;
 
-  AppDataGridColumn<T> copyWith({String? label, bool? visible, bool? allowSorting, bool? allowFiltering, bool? allowEditing, double? width}) =>
-      AppDataGridColumn<T>(
-        name: name,
-        label: label ?? this.label,
-        valueGetter: valueGetter,
-        cellBuilder: cellBuilder,
-        editorBuilder: editorBuilder,
-        parseEditedValue: parseEditedValue,
-        validateEditedValue: validateEditedValue,
-        width: width ?? this.width,
-        minimumWidth: minimumWidth,
-        maximumWidth: maximumWidth,
-        columnWidthMode: columnWidthMode,
-        sortIconPosition: sortIconPosition,
-        filterIconPosition: filterIconPosition,
-        autoFitPadding: autoFitPadding,
-        filterIconPadding: filterIconPadding,
-        filterPopupMenuOptions: filterPopupMenuOptions,
-        visible: visible ?? this.visible,
-        allowSorting: allowSorting ?? this.allowSorting,
-        allowFiltering: allowFiltering ?? this.allowFiltering,
-        allowEditing: allowEditing ?? this.allowEditing,
-        headerAlignment: headerAlignment,
-        cellAlignment: cellAlignment,
-      );
+  AppDataGridColumn<T> copyWith({
+    String? label,
+    bool? visible,
+    bool? allowSorting,
+    bool? allowFiltering,
+    bool? allowEditing,
+    double? width,
+  }) => AppDataGridColumn<T>(
+    name: name,
+    label: label ?? this.label,
+    valueGetter: valueGetter,
+    cellBuilder: cellBuilder,
+    editorBuilder: editorBuilder,
+    parseEditedValue: parseEditedValue,
+    validateEditedValue: validateEditedValue,
+    width: width ?? this.width,
+    minimumWidth: minimumWidth,
+    maximumWidth: maximumWidth,
+    columnWidthMode: columnWidthMode,
+    sortIconPosition: sortIconPosition,
+    filterIconPosition: filterIconPosition,
+    autoFitPadding: autoFitPadding,
+    filterIconPadding: filterIconPadding,
+    filterPopupMenuOptions: filterPopupMenuOptions,
+    visible: visible ?? this.visible,
+    allowSorting: allowSorting ?? this.allowSorting,
+    allowFiltering: allowFiltering ?? this.allowFiltering,
+    allowEditing: allowEditing ?? this.allowEditing,
+    headerAlignment: headerAlignment,
+    cellAlignment: cellAlignment,
+  );
 
   GridColumn toGridColumn(BuildContext context) {
     final theme = Theme.of(context);
@@ -90,8 +102,15 @@ class AppDataGridColumn<T> {
       label: Container(
         alignment: headerAlignment,
         padding: const EdgeInsetsDirectional.symmetric(horizontal: 14),
-        child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w700)),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
       width: width ?? double.nan,
       minimumWidth: minimumWidth ?? double.nan,

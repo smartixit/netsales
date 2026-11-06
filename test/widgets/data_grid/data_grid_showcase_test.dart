@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,12 +7,14 @@ import 'package:netsales/widgets/data_grid/showcase/data_grid_showcase_screen.da
 
 void main() {
   setUp(() => Get.testMode = true);
-  tearDown(() async {
-    await Get.reset();
+  tearDown(() {
+    Get.reset();
     Get.testMode = false;
   });
 
-  testWidgets('renders the DataGrid showcase and feature controls', (tester) async {
+  testWidgets('renders the DataGrid showcase and feature controls', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1440, 1000);
     tester.view.devicePixelRatio = 1;
     await tester.pumpWidget(
@@ -40,7 +41,9 @@ void main() {
     tester.view.resetDevicePixelRatio();
   });
 
-  testWidgets('toggles theme and text direction in the showcase', (tester) async {
+  testWidgets('toggles theme and text direction in the showcase', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1440, 1000);
     tester.view.devicePixelRatio = 1;
     await tester.pumpWidget(
@@ -57,14 +60,29 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('الوضع الفاتح/الداكن'));
     await tester.pumpAndSettle();
-    expect(find.byWidgetPredicate((widget) => widget is Theme && widget.data.brightness == Brightness.dark), findsWidgets);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Theme && widget.data.brightness == Brightness.dark,
+      ),
+      findsWidgets,
+    );
     await tester.tap(find.byTooltip('RTL / LTR'));
     await tester.pumpAndSettle();
-    expect(find.byWidgetPredicate((widget) => widget is Directionality && widget.textDirection == TextDirection.ltr), findsWidgets);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Directionality &&
+            widget.textDirection == TextDirection.ltr,
+      ),
+      findsWidgets,
+    );
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
   });
-  testWidgets('uses compact selectable record cards on mobile widths', (tester) async {
+  testWidgets('uses compact selectable record cards on mobile widths', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     await tester.pumpWidget(
@@ -86,5 +104,4 @@ void main() {
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
   });
-
 }

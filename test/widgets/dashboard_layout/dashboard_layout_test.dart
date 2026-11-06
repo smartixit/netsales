@@ -14,9 +14,9 @@ void main() {
   );
 
   testWidgets('renders content and selected navigation item', (tester) async {
-    await tester.view.setLogicalSize(const Size(1440, 900));
+    tester.view.physicalSize = const Size(1440, 900);
     tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetLogicalSize);
+    addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
@@ -37,9 +37,9 @@ void main() {
   });
 
   testWidgets('uses drawer navigation at compact width', (tester) async {
-    await tester.view.setLogicalSize(const Size(700, 900));
+    tester.view.physicalSize = const Size(700, 900);
     tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetLogicalSize);
+    addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(

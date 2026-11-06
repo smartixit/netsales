@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -41,7 +40,10 @@ void main() {
   test('maps each data row back to its original typed model', () {
     expect(source.rows, hasLength(2));
     expect(source.itemForRow(source.rows.first)?.id, 1);
-    expect(source.rows.first.getCells().map((cell) => cell.value).toList(), [1, 'Alpha']);
+    expect(source.rows.first.getCells().map((cell) => cell.value).toList(), [
+      1,
+      'Alpha',
+    ]);
   });
 
   test('replaces source records and rebuilds grid rows', () {
@@ -54,20 +56,34 @@ void main() {
   test('reorders columns while preserving each row cell mapping', () {
     source.reorderColumns(0, 1);
 
-    expect(source.columns.map((column) => column.name).toList(), ['name', 'id']);
-    expect(source.rows.first.getCells().map((cell) => cell.columnName).toList(), ['id', 'name']);
-    expect(source.rows.first.getCells().map((cell) => cell.value).toList(), [1, 'Alpha']);
+    expect(source.columns.map((column) => column.name).toList(), [
+      'name',
+      'id',
+    ]);
+    expect(
+      source.rows.first.getCells().map((cell) => cell.columnName).toList(),
+      ['id', 'name'],
+    );
+    expect(source.rows.first.getCells().map((cell) => cell.value).toList(), [
+      1,
+      'Alpha',
+    ]);
   });
 
   test('rejects hiding every column', () {
     expect(
-      () => source.updateColumns(columns.map((column) => column.copyWith(visible: false)).toList()),
+      () => source.updateColumns(
+        columns.map((column) => column.copyWith(visible: false)).toList(),
+      ),
       throwsArgumentError,
     );
   });
 
   test('rejects duplicate column names', () {
-    expect(() => source.updateColumns([columns.first, columns.first]), throwsArgumentError);
+    expect(
+      () => source.updateColumns([columns.first, columns.first]),
+      throwsArgumentError,
+    );
   });
 
   test('cursor pagination never fabricates a page total', () {
@@ -127,33 +143,39 @@ void main() {
     expect(capturedError, isA<StateError>());
   });
 
-  test('load-more requests are guarded against concurrent calls and exhaustion', () async {
-    final completer = Completer<void>();
-    var calls = 0;
-    final loadMoreSource = NetSalesDataGridSource<_GridRecord>(
-      items: const [_GridRecord(1, 'Alpha')],
-      columns: columns,
-      onLoadMore: () {
-        calls++;
-        return completer.future;
-      },
-    );
+  test(
+    'load-more requests are guarded against concurrent calls and exhaustion',
+    () async {
+      final completer = Completer<void>();
+      var calls = 0;
+      final loadMoreSource = NetSalesDataGridSource<_GridRecord>(
+        items: const [_GridRecord(1, 'Alpha')],
+        columns: columns,
+        onLoadMore: () {
+          calls++;
+          return completer.future;
+        },
+      );
 
-    final first = loadMoreSource.requestLoadMore();
-    final second = loadMoreSource.requestLoadMore();
-    expect(calls, 1);
-    completer.complete();
-    await Future.wait([first, second]);
+      final first = loadMoreSource.requestLoadMore();
+      final second = loadMoreSource.requestLoadMore();
+      expect(calls, 1);
+      completer.complete();
+      await Future.wait([first, second]);
 
-    loadMoreSource.setHasMore(false);
-    await loadMoreSource.requestLoadMore();
-    expect(calls, 1);
-  });
+      loadMoreSource.setHasMore(false);
+      await loadMoreSource.requestLoadMore();
+      expect(calls, 1);
+    },
+  );
 
   test('reorders visible columns while preserving row identity', () {
     final firstRow = source.rows.first;
     source.reorderVisibleColumns(0, 1);
-    expect(source.columns.map((column) => column.name).toList(), ['name', 'id']);
+    expect(source.columns.map((column) => column.name).toList(), [
+      'name',
+      'id',
+    ]);
     expect(identical(source.rows.first, firstRow), isTrue);
     expect(source.itemForRow(firstRow)?.id, 1);
   });
@@ -168,27 +190,53 @@ void main() {
     expect(source.itemForRow(firstRow)?.id, 1);
   });
 
-  test('editing a visually reordered row updates the matching source model', () async {
-    final editSource = NetSalesDataGridSource<_GridRecord>(
-      items: const [_GridRecord(1, 'Alpha'), _GridRecord(2, 'Beta')],
-      columns: columns,
-      onEdit: (row, column, value) async => _GridRecord(row.id, value as String),
-    );
-    final firstSourceRow = editSource.rows.first;
-    editSource.rows.insert(0, editSource.rows.removeAt(1));
-    final editColumn = GridColumn(columnName: 'name', label: const Text('Name'));
-    final editor = editSource.buildEditWidget(
-      firstSourceRow,
-      RowColumnIndex(1, 1),
-      editColumn,
-      () {},
-    ) as TextFormField;
-    editor.onChanged?.call('Alpha updated');
-    await editSource.onCellSubmit(firstSourceRow, RowColumnIndex(1, 1), editColumn);
-    expect(editSource.items[0].name, 'Alpha updated');
-    expect(editSource.items[1].name, 'Beta');
-    expect(editSource.itemForRow(firstSourceRow)?.id, 1);
-  });
+  test(
+    'editing a visually reordered row updates the matching source model',
+    () async {
+      final editableColumns = columns
+          .map(
+            (column) => column.name == 'name'
+                ? column.copyWith(allowEditing: true)
+                : column,
+          )
+          .toList(growable: false);
+      final editSource = NetSalesDataGridSource<_GridRecord>(
+        items: const [_GridRecord(1, 'Alpha'), _GridRecord(2, 'Beta')],
+        columns: editableColumns,
+        onEdit: (row, column, value) async =>
+            _GridRecord(row.id, value as String),
+      );
+      final firstSourceRow = editSource.rows.first;
+      editSource.rows.insert(0, editSource.rows.removeAt(1));
+      final editColumn = GridColumn(
+        columnName: 'name',
+        label: const Text('Name'),
+      );
+      final editor =
+          editSource.buildEditWidget(
+                firstSourceRow,
+                RowColumnIndex(1, 1),
+                editColumn,
+                () {},
+              )
+              as TextFormField;
+      editor.onChanged?.call('Alpha updated');
+      await editSource.onCellSubmit(
+        firstSourceRow,
+        RowColumnIndex(1, 1),
+        editColumn,
+      );
+      expect(editSource.items[0].name, 'Alpha updated');
+      expect(editSource.items[1].name, 'Beta');
+      final updatedRow = editSource.rows.firstWhere(
+        (row) => row.getCells().any(
+          (cell) => cell.columnName == 'name' && cell.value == 'Alpha updated',
+        ),
+      );
+      expect(editSource.itemForRow(firstSourceRow), isNull);
+      expect(editSource.itemForRow(updatedRow)?.id, 1);
+    },
+  );
 
   test('updates a column width without changing its semantic definition', () {
     source.updateColumnWidth('name', 260);
@@ -196,6 +244,9 @@ void main() {
     expect(source.columns.last.width, 260);
     expect(source.columns.last.label, 'Name');
     source.reorderColumns(0, 1);
-    expect(source.columns.map((column) => column.name).toList(), ['name', 'id']);
+    expect(source.columns.map((column) => column.name).toList(), [
+      'name',
+      'id',
+    ]);
   });
 }

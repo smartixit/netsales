@@ -72,7 +72,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        if (actions != null) ...actions!,
+        ...?actions,
         CustomButton.icon(
           icon: Icons.devices_rounded,
           foregroundColor: colors.onSurfaceVariant,
