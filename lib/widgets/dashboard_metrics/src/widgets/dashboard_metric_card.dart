@@ -1,5 +1,3 @@
-import 'dart:ui' show FontFeature;
-
 import 'package:flutter/material.dart';
 
 import '../enums/dashboard_metric_state.dart';
@@ -90,6 +88,9 @@ class DashboardMetricCard extends StatelessWidget {
     if (source != null) {
       parts.add(source.label);
       if (source.updatedAtLabel != null) parts.add(source.updatedAtLabel!);
+      if (source.freshnessLabel != null) parts.add(source.freshnessLabel!);
+    }
+    if (metric.statusLabel != null) parts.add(metric.statusLabel);
     }
     return parts.join(', ');
   }
