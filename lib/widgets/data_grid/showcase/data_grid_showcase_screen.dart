@@ -6,7 +6,6 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/data_grid/app_data_grid.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_state.dart';
 import 'package:netsales/widgets/data_grid/widgets/app_data_grid_column_chooser.dart';
-
 import 'data_grid_showcase_controller.dart';
 
 class DataGridShowcaseScreen extends GetView<DataGridShowcaseController> {
@@ -58,7 +57,8 @@ class DataGridShowcaseScreen extends GetView<DataGridShowcaseController> {
                       features: controller.features,
                       viewState: controller.viewState.value,
                       title: 'سجل العمليات التجارية',
-                      subtitle: 'معاينة الفرز والتصفية والتحديد وتخصيص الأعمدة والتصدير',
+                      subtitle:
+                          'معاينة الفرز والتصفية والتحديد وتخصيص الأعمدة والتصدير',
                       searchController: controller.searchController,
                       onSearchChanged: controller.setSearch,
                       onClearSearch: controller.clearSearch,

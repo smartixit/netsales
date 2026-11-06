@@ -23,18 +23,12 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-typedef AppDataGridMobileItemBuilder<T> = Widget Function(
-  BuildContext context,
-  T item,
-);
-typedef AppDataGridSelectionChanged<T> = void Function(
-  List<T> selected,
-  List<T> deselected,
-);
-typedef AppDataGridSortRequested = void Function(
-  SortColumnDetails? next,
-  SortColumnDetails? previous,
-);
+typedef AppDataGridMobileItemBuilder<T> =
+    Widget Function(BuildContext context, T item);
+typedef AppDataGridSelectionChanged<T> =
+    void Function(List<T> selected, List<T> deselected);
+typedef AppDataGridSortRequested =
+    void Function(SortColumnDetails? next, SortColumnDetails? previous);
 
 class AppDataGrid<T> extends StatelessWidget {
   const AppDataGrid({

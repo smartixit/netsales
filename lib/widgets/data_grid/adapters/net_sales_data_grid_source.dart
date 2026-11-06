@@ -1,21 +1,14 @@
 import 'dart:collection';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-
 import '../models/app_data_grid_column.dart';
 
-typedef AppDataGridEditHandler<T> = Future<T?> Function(
-  T row,
-  AppDataGridColumn<T> column,
-  Object? value,
-);
+typedef AppDataGridEditHandler<T> =
+    Future<T?> Function(T row, AppDataGridColumn<T> column, Object? value);
 typedef AppDataGridEditFailureHandler = void Function(Object error);
-typedef AppDataGridPageChangeHandler = Future<bool> Function(
-  int oldPageIndex,
-  int newPageIndex,
-);
+typedef AppDataGridPageChangeHandler =
+    Future<bool> Function(int oldPageIndex, int newPageIndex);
 typedef AppDataGridFailureHandler = void Function(Object error);
 
 /// Long-lived data adapter. It must be owned by the feature/controller, not created in build().
