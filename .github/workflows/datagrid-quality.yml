@@ -140,4 +140,6 @@ jobs:
           flutter pub get --enforce-lockfile
 
       - name: Compile Windows Debug application
+        env:
+          CMAKE_POLICY_VERSION_MINIMUM: '3.5'
         run: flutter build windows --debug
