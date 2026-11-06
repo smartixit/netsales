@@ -193,9 +193,16 @@ void main() {
   test(
     'editing a visually reordered row updates the matching source model',
     () async {
+      final editableColumns = columns
+          .map(
+            (column) => column.name == 'name'
+                ? column.copyWith(allowEditing: true)
+                : column,
+          )
+          .toList(growable: false);
       final editSource = NetSalesDataGridSource<_GridRecord>(
         items: const [_GridRecord(1, 'Alpha'), _GridRecord(2, 'Beta')],
-        columns: columns,
+        columns: editableColumns,
         onEdit: (row, column, value) async =>
             _GridRecord(row.id, value as String),
       );
