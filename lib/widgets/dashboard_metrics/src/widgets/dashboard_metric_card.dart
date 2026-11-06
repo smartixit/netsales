@@ -2,8 +2,6 @@ import 'dart:ui' show FontFeature;
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/themes/app_elevation.dart';
-import '../../../../core/themes/app_motion.dart';
 import '../enums/dashboard_metric_direction.dart';
 import '../enums/dashboard_metric_state.dart';
 import '../enums/dashboard_metric_tone.dart';
@@ -54,13 +52,13 @@ class DashboardMetricCard extends StatelessWidget {
           onTap: state == DashboardMetricState.data ? onTap : null,
           borderRadius: radius,
           child: AnimatedContainer(
-            duration: AppMotion.duration(context, AppMotion.fast),
-            curve: AppMotion.standard,
+            duration: tokens.motionDuration,
+            curve: tokens.motionCurve,
             padding: EdgeInsets.all(tokens.cardPadding),
             decoration: BoxDecoration(
               borderRadius: radius,
               border: Border.all(color: tokens.cardBorder),
-              boxShadow: AppElevation.level1(context),
+              boxShadow: tokens.cardShadows,
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 132),
