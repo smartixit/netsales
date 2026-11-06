@@ -20,6 +20,10 @@ class DashboardMetricsTheme extends ThemeExtension<DashboardMetricsTheme> {
     this.cardRadius = 16,
     this.cardPadding = 20,
     this.iconRadius = 12,
+    this.gridSpacing = 16,
+    this.cardShadows = const [],
+    this.motionDuration = const Duration(milliseconds: 150),
+    this.motionCurve = Curves.easeInOutCubic,
   });
 
   final Color primary;
@@ -34,6 +38,10 @@ class DashboardMetricsTheme extends ThemeExtension<DashboardMetricsTheme> {
   final double cardRadius;
   final double cardPadding;
   final double iconRadius;
+  final double gridSpacing;
+  final List<BoxShadow> cardShadows;
+  final Duration motionDuration;
+  final Curve motionCurve;
 
   Color colorFor(DashboardMetricTone tone) => switch (tone) {
     DashboardMetricTone.primary => primary,
@@ -50,14 +58,21 @@ class DashboardMetricsTheme extends ThemeExtension<DashboardMetricsTheme> {
     final scheme = Theme.of(context).colorScheme;
     return DashboardMetricsTheme(
       primary: scheme.primary,
-      success: const Color(0xFF2E7D32),
-      warning: const Color(0xFFF57C00),
+      success: scheme.tertiary,
+      warning: scheme.secondary,
       danger: scheme.error,
-      info: scheme.tertiary,
+      info: scheme.primary,
       neutral: scheme.onSurfaceVariant,
       cardBackground: scheme.surfaceContainerLowest,
       cardBorder: scheme.outlineVariant,
       mutedForeground: scheme.onSurfaceVariant,
+      cardShadows: [
+        BoxShadow(
+          color: scheme.shadow.withValues(alpha: 0.05),
+          blurRadius: 10,
+          offset: const Offset(0, 3),
+        ),
+      ],
     );
   }
 
@@ -75,6 +90,10 @@ class DashboardMetricsTheme extends ThemeExtension<DashboardMetricsTheme> {
     double? cardRadius,
     double? cardPadding,
     double? iconRadius,
+    double? gridSpacing,
+    List<BoxShadow>? cardShadows,
+    Duration? motionDuration,
+    Curve? motionCurve,
   }) => DashboardMetricsTheme(
     primary: primary ?? this.primary,
     success: success ?? this.success,
@@ -88,6 +107,10 @@ class DashboardMetricsTheme extends ThemeExtension<DashboardMetricsTheme> {
     cardRadius: cardRadius ?? this.cardRadius,
     cardPadding: cardPadding ?? this.cardPadding,
     iconRadius: iconRadius ?? this.iconRadius,
+    gridSpacing: gridSpacing ?? this.gridSpacing,
+    cardShadows: cardShadows ?? this.cardShadows,
+    motionDuration: motionDuration ?? this.motionDuration,
+    motionCurve: motionCurve ?? this.motionCurve,
   );
 
   @override
@@ -109,6 +132,10 @@ class DashboardMetricsTheme extends ThemeExtension<DashboardMetricsTheme> {
       cardRadius: lerpDouble(cardRadius, other.cardRadius, t)!,
       cardPadding: lerpDouble(cardPadding, other.cardPadding, t)!,
       iconRadius: lerpDouble(iconRadius, other.iconRadius, t)!,
+      gridSpacing: lerpDouble(gridSpacing, other.gridSpacing, t)!,
+      cardShadows: t < 0.5 ? cardShadows : other.cardShadows,
+      motionDuration: t < 0.5 ? motionDuration : other.motionDuration,
+      motionCurve: t < 0.5 ? motionCurve : other.motionCurve,
     );
   }
 }
