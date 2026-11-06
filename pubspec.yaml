@@ -69,6 +69,9 @@ dependencies:
   path_provider: ^2.1.0
   crypto: ^3.0.6
   syncfusion_flutter_charts: ^34.2.6
+  syncfusion_flutter_core: ^34.2.6
+  syncfusion_flutter_datagrid: ^34.2.6
+  syncfusion_flutter_datagrid_export: ^34.2.6
   package_info_plus: ^9.0.1
   background_downloader: ^9.5.7
   open_filex: ^4.7.0
