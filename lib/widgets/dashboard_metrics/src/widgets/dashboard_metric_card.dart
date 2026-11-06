@@ -1,3 +1,5 @@
+import 'dart:ui' show FontFeature;
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/themes/app_elevation.dart';
@@ -8,6 +10,7 @@ import '../enums/dashboard_metric_tone.dart';
 import '../enums/dashboard_metric_variant.dart';
 import '../models/dashboard_metric_data.dart';
 import '../models/dashboard_metric_source.dart';
+import '../models/dashboard_metric_trend.dart';
 import '../models/dashboard_metric_threshold.dart';
 import '../theme/dashboard_metrics_theme.dart';
 
@@ -238,7 +241,11 @@ class _MetricContent extends StatelessWidget {
         ],
         if (metric.variant == DashboardMetricVariant.status) ...[
           const SizedBox(height: 10),
-          _StatusCaption(tone: metric.tone, tokens: tokens),
+          _StatusCaption(
+            tone: metric.tone,
+            tokens: tokens,
+            label: metric.statusLabel,
+          ),
         ],
         if (metric.source != null) ...[
           const SizedBox(height: 12),
@@ -252,13 +259,13 @@ class _MetricContent extends StatelessWidget {
 class _TrendLine extends StatelessWidget {
   const _TrendLine({required this.trend, required this.tokens});
 
-  final dynamic trend;
+  final DashboardMetricTrend trend;
   final DashboardMetricsTheme tokens;
 
   @override
   Widget build(BuildContext context) {
-    final tone = trend.tone as DashboardMetricTone;
-    final direction = trend.direction as DashboardMetricDirection;
+    final tone = trend.tone;
+    final direction = trend.direction;
     final color = tokens.colorFor(tone);
     final icon = switch (direction) {
       DashboardMetricDirection.increase => Icons.trending_up_rounded,
@@ -273,21 +280,21 @@ class _TrendLine extends StatelessWidget {
       children: [
         Icon(icon, size: 17, color: color),
         Text(
-          trend.valueLabel as String,
+          trend.valueLabel,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
             color: color,
             fontWeight: FontWeight.w700,
           ),
         ),
         Text(
-          trend.comparisonLabel as String,
+          trend.comparisonLabel,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: tokens.mutedForeground,
           ),
         ),
         if (trend.description != null)
           Text(
-            trend.description as String,
+            trend.description!,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: tokens.mutedForeground,
             ),
@@ -307,25 +314,18 @@ class _TargetProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final markerWidgets = target.thresholds.map((threshold) {
-      return PositionedDirectional(
-        start: 0,
-        end: 0,
-        child: FractionalTranslation(
-          translation: Offset(
-            Directionality.of(context) == TextDirection.rtl
-                ? threshold.position
-                : -threshold.position,
+      return Positioned.fill(
+        child: Align(
+          alignment: AlignmentDirectional(
+            -1 + (2 * threshold.position),
             0,
           ),
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Tooltip(
-              message: threshold.label,
-              child: Container(
-                width: 2,
-                height: 12,
-                color: tokens.colorFor(threshold.tone),
-              ),
+          child: Tooltip(
+            message: threshold.label,
+            child: Container(
+              width: 2,
+              height: 12,
+              color: tokens.colorFor(threshold.tone),
             ),
           ),
         ),
@@ -381,18 +381,11 @@ class _StatusCaption extends StatelessWidget {
 
   final DashboardMetricTone tone;
   final DashboardMetricsTheme tokens;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
     final color = tokens.colorFor(tone);
-    final label = switch (tone) {
-      DashboardMetricTone.success => 'Healthy',
-      DashboardMetricTone.warning => 'Attention required',
-      DashboardMetricTone.danger => 'Critical',
-      DashboardMetricTone.info => 'Informational',
-      DashboardMetricTone.primary => 'Current status',
-      DashboardMetricTone.neutral => 'Neutral',
-    };
     return Row(
       children: [
         Container(
@@ -402,7 +395,7 @@ class _StatusCaption extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Text(
-          label,
+          label ?? '',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
             color: color,
             fontWeight: FontWeight.w600,
@@ -439,8 +432,8 @@ class _SourceLine extends StatelessWidget {
         Expanded(
           child: Text(
             source.updatedAtLabel == null
-                ? source.label
-                : '${source.label} · ${source.updatedAtLabel}',
+                ? '${source.label} · ${source.freshnessLabel ?? ''}'
+                : '${source.label} · ${source.updatedAtLabel} · ${source.freshnessLabel ?? ''}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
