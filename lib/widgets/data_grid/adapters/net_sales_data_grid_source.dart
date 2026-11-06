@@ -93,8 +93,9 @@ class NetSalesDataGridSource<T> extends DataGridSource {
         from >= _columns.length ||
         to < 0 ||
         to >= _columns.length ||
-        from == to)
+        from == to) {
       return;
+    }
     final moved = _columns.removeAt(from);
     _columns.insert(to, moved);
     notifyDataSourceListeners();
@@ -110,8 +111,9 @@ class NetSalesDataGridSource<T> extends DataGridSource {
         from >= visible.length ||
         to < 0 ||
         to >= visible.length ||
-        from == to)
+        from == to) {
       return;
+    }
 
     final fromName = visible[from].name;
     final toName = visible[to].name;
@@ -199,8 +201,8 @@ class NetSalesDataGridSource<T> extends DataGridSource {
 
   @override
   bool onCellBeginEdit(
-    DataGridRow row,
-    RowColumnIndex index,
+    DataGridRow dataGridRow,
+    RowColumnIndex rowColumnIndex,
     GridColumn column,
   ) {
     final definition = _columnFor(column.columnName);
@@ -209,16 +211,17 @@ class NetSalesDataGridSource<T> extends DataGridSource {
 
   @override
   Widget? buildEditWidget(
-    DataGridRow row,
-    RowColumnIndex index,
+    DataGridRow dataGridRow,
+    RowColumnIndex rowColumnIndex,
     GridColumn column,
     CellSubmit submitCell,
   ) {
-    final item = itemForRow(row);
+    final item = itemForRow(dataGridRow);
     final definition = _columnFor(column.columnName);
-    if (item == null || definition == null || !definition.allowEditing)
+    if (item == null || definition == null || !definition.allowEditing) {
       return null;
-    final initialValue = row
+    }
+    final initialValue = dataGridRow
         .getCells()
         .firstWhere((cell) => cell.columnName == column.columnName)
         .value;
@@ -251,11 +254,11 @@ class NetSalesDataGridSource<T> extends DataGridSource {
 
   @override
   Future<bool> canSubmitCell(
-    DataGridRow row,
-    RowColumnIndex index,
+    DataGridRow dataGridRow,
+    RowColumnIndex rowColumnIndex,
     GridColumn column,
   ) async {
-    final item = itemForRow(row);
+    final item = itemForRow(dataGridRow);
     final definition = _columnFor(column.columnName);
     if (item == null || definition == null) return false;
     final value =
@@ -266,11 +269,11 @@ class NetSalesDataGridSource<T> extends DataGridSource {
 
   @override
   Future<void> onCellSubmit(
-    DataGridRow row,
-    RowColumnIndex index,
+    DataGridRow dataGridRow,
+    RowColumnIndex rowColumnIndex,
     GridColumn column,
   ) async {
-    final item = itemForRow(row);
+    final item = itemForRow(dataGridRow);
     final definition = _columnFor(column.columnName);
     if (item == null || definition == null || onEdit == null) return;
     final value =
@@ -278,7 +281,7 @@ class NetSalesDataGridSource<T> extends DataGridSource {
         _pendingEditValue;
     try {
       final updatedItem = await onEdit!(item, definition, value);
-      if (updatedItem != null) _replaceRow(row, updatedItem);
+      if (updatedItem != null) _replaceRow(dataGridRow, updatedItem);
     } catch (error) {
       onEditFailure?.call(error);
     } finally {
@@ -288,8 +291,8 @@ class NetSalesDataGridSource<T> extends DataGridSource {
 
   @override
   void onCellCancelEdit(
-    DataGridRow row,
-    RowColumnIndex index,
+    DataGridRow dataGridRow,
+    RowColumnIndex rowColumnIndex,
     GridColumn column,
   ) {
     _pendingEditValue = null;
@@ -301,8 +304,9 @@ class NetSalesDataGridSource<T> extends DataGridSource {
   @override
   Future<bool> handlePageChange(int oldPageIndex, int newPageIndex) async {
     final handler = onPageChange;
-    if (handler == null)
+    if (handler == null) {
       return super.handlePageChange(oldPageIndex, newPageIndex);
+    }
     try {
       return await handler(oldPageIndex, newPageIndex);
     } catch (error) {
