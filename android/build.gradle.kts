@@ -1,4 +1,4 @@
-import com.android.build.gradle.LibraryExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
 
 allprojects {
     repositories {
@@ -17,13 +17,12 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 
-    // Flutter plugins may assign their own compileSdk later in their build scripts.
-    // Apply the app's compile SDK after each Android library project is evaluated
-    // so AndroidX AAR metadata checks use a sufficiently recent API level.
+    // Flutter plugins may declare an outdated compileSdk in their own Android DSL.
+    // finalizeDsl runs after that DSL is parsed and before AGP locks it for variants.
     plugins.withId("com.android.library") {
-        afterEvaluate {
-            extensions.configure<LibraryExtension> {
-                compileSdk = 36
+        extensions.configure<LibraryAndroidComponentsExtension> {
+            finalizeDsl { libraryExtension ->
+                libraryExtension.compileSdk = 36
             }
         }
     }
