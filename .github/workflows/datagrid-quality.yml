@@ -6,6 +6,7 @@ on:
       - main
       - fix/data-grid-final-verification
       - chore/pub-dependency-maintenance
+      - audit/pub-outdated-report
   pull_request:
     branches:
       - main
@@ -56,6 +57,51 @@ jobs:
           grep -q '^  syncfusion_flutter_datagrid_export:' pubspec.lock
           grep -q '^  flutter_local_notifications:' pubspec.lock
           grep -q '^  timezone:' pubspec.lock
+
+
+      - name: Inventory outdated Pub packages
+        if: github.ref_name == 'audit/pub-outdated-report'
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/pub-outdated.json"
+          flutter pub outdated --json > "$report"
+          python3 - "$report" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          data = json.loads(Path(sys.argv[1]).read_text())
+          packages = data.get("packages", [])
+          if isinstance(packages, dict):
+              packages = [dict(value, package=value.get("package", name)) for name, value in packages.items()]
+
+          def value(item, key):
+              val = item.get(key, "-")
+              if isinstance(val, dict):
+                  return val.get("version", val.get("versionString", json.dumps(val, sort_keys=True)))
+              return str(val)
+
+          rows = []
+          for item in packages:
+              name = item.get("package", item.get("name", "unknown"))
+              kind = item.get("dependencies", item.get("dependency", "unknown"))
+              current = value(item, "current")
+              upgradable = value(item, "upgradable")
+              resolvable = value(item, "resolvable")
+              latest = value(item, "latest")
+              direct = "direct" in str(kind).lower()
+              changed = len({current, upgradable, resolvable, latest}) > 1
+              if direct or changed:
+                  rows.append((str(name), str(kind), current, upgradable, resolvable, latest, str(item.get("source", "-"))))
+
+          print("PUB_OUTDATED_REPORT_BEGIN")
+          print("package | dependency | current | upgradable | resolvable | latest | source")
+          for row in sorted(rows, key=lambda r: ("direct" not in r[1].lower(), r[0])):
+              print(" | ".join(row))
+          print(f"Reported {len(rows)} direct or version-divergent packages from {len(packages)} total packages.")
+          print("PUB_OUTDATED_REPORT_END")
+          PY
 
       - name: Format DataGrid sources on branch pushes
         if: github.event_name == 'push' && github.ref_name != 'chore/pub-dependency-maintenance'
