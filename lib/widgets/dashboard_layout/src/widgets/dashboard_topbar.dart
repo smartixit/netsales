@@ -38,7 +38,7 @@ class DashboardTopbar extends StatelessWidget {
         children: [
           if (leading != null) ...[leading!, const SizedBox(width: 12)],
           if (search != null) Expanded(child: search!) else const Spacer(),
-          if (notifications case final notification?) notification,
+          ...[notifications].whereType<Widget>(),
           ...?actions,
           if (profile != null) ...[
             const SizedBox(width: 12),
