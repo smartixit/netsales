@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -17,6 +18,13 @@ class NetSalesDashboardThemeAdapter {
     final colors = AppColors.of(context);
     final isDesktop = AppBreakpoints.isDesktop(context);
 
+    // Convert ScreenUtil-backed design tokens back to their logical baseline.
+    // This preserves the established token source without scaling desktop
+    // navigation geometry by the mobile 375dp design width.
+    final screenUtil = ScreenUtil();
+    final widthScale = screenUtil.scaleWidth == 0 ? 1.0 : screenUtil.scaleWidth;
+    final radiusScale = screenUtil.scaleRadius == 0 ? 1.0 : screenUtil.scaleRadius;
+
     return DashboardLayoutTheme(
       sidebarBackground: colors.surfaceContainerLowest,
       sidebarForeground: colors.onSurface,
@@ -29,18 +37,18 @@ class NetSalesDashboardThemeAdapter {
       border: colors.outlineVariant,
       badgeBackground: colors.primary,
       badgeForeground: colors.onPrimary,
-      itemRadius: AppRadius.md,
-      sidebarPadding: isDesktop ? 18 : AppSpacing.md,
-      itemSpacing: AppSpacing.xs,
-      sectionSpacing: isDesktop ? 18 : AppSpacing.lg,
-      contentPadding: isDesktop ? 28 : AppSpacing.lg,
+      itemRadius: AppRadius.md / radiusScale,
+      sidebarPadding: isDesktop ? AppSpacing.lg / widthScale : AppSpacing.md / widthScale,
+      itemSpacing: AppSpacing.xs / widthScale,
+      sectionSpacing: isDesktop ? AppSpacing.xl / widthScale : AppSpacing.lg / widthScale,
+      contentPadding: isDesktop ? AppSpacing.xxl / widthScale : AppSpacing.lg / widthScale,
       motionDuration: AppMotion.duration(context, AppMotion.normal),
       motionCurve: AppMotion.standard,
     );
   }
 
-  /// Wrap the shell once at the host boundary; the generic widgets stay
-  /// independent from NetSales and consume only a ThemeExtension.
+  /// Wrap the shell once at the host boundary; generic widgets consume only
+  /// the ThemeExtension and never import NetSales core services.
   static Widget wrap({
     required BuildContext context,
     required Widget child,
