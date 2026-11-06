@@ -59,7 +59,7 @@ class DashboardTopbar extends StatelessWidget {
                           ? null
                           : Text(
                               profile!.initials ??
-                                  profile!.name.characters.take(1).toString(),
+                                  profile!.name.substring(0, 1),
                               style: TextStyle(color: scheme.onPrimaryContainer),
                             ),
                     ),
