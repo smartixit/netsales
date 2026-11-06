@@ -19,6 +19,7 @@ void main() {
     source: DashboardMetricSource(
       label: 'Platform reporting',
       updatedAtLabel: 'Updated 2 minutes ago',
+      freshnessLabel: 'Fresh',
       freshness: DashboardMetricFreshness.fresh,
     ),
   );
