@@ -14,6 +14,8 @@ Compose `DashboardShell` with a `DashboardNavigationSection`, selected navigatio
 
 ## Styling
 
+For NetSales, wrap the shell at the host boundary with `NetSalesDashboardThemeAdapter.wrap(context: context, child: shell)`. The adapter is located at `lib/widgets/dashboard_layout/adapters/netsales_dashboard_theme_adapter.dart`; it maps AppColors, AppRadius, AppSpacing, AppBreakpoints, AppElevation and AppMotion into the framework's semantic theme. It normalizes ScreenUtil-backed geometry tokens to logical desktop dimensions. The application ThemeData continues to supply AppTypography through its existing TextTheme.
+
 The generic shell reads `DashboardLayoutTheme` from Flutter's ThemeExtensions and falls back to the active Material `ColorScheme`. NetSales can map its existing AppColors, AppRadius, AppSpacing, AppBreakpoints and AppMotion through `NetSalesDashboardThemeAdapter.of(context)`. Add that extension to the host ThemeData; generic widgets never import GetX or NetSales core services.
 
 ## Responsive behavior
