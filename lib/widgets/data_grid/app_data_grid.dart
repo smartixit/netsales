@@ -185,8 +185,9 @@ class AppDataGrid<T> extends StatelessWidget {
               pagination: pagination,
               onPageChanged: features.dataMode == AppDataGridDataMode.remote
                   ? (page) {
-                      unawaited(source.handlePageChange(pagination.currentPage - 1, page - 1).then<void>((_) {}));
-                      pagination.onPageChanged?.call(page);
+                      unawaited(source.handlePageChange(pagination.currentPage - 1, page - 1).then<void>((changed) {
+                        if (changed) pagination.onPageChanged?.call(page);
+                      }));
                     }
                   : pagination.onPageChanged,
             ),
