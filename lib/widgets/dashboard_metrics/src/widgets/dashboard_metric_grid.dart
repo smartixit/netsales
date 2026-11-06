@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/themes/app_breakpoints.dart';
 import 'dashboard_metric_card.dart';
 import '../models/dashboard_metric_data.dart';
 import '../enums/dashboard_metric_state.dart';
+import '../theme/dashboard_metrics_theme.dart';
 
 /// Constraint-driven KPI grid. Column count is selected from available width,
 /// not the physical device type, so desktop split panes remain predictable.
@@ -35,7 +35,7 @@ class DashboardMetricGrid extends StatelessWidget {
         final availableWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : AppBreakpoints.widthOf(context);
-        final gap = spacing ?? AppBreakpoints.gridGutter(context);
+        final gap = spacing ?? DashboardMetricsTheme.of(context).gridSpacing;
         final columns = ((availableWidth + gap) / (minimumCardWidth + gap))
             .floor()
             .clamp(1, maximumColumns);
