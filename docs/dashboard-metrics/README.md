@@ -51,3 +51,14 @@ DashboardMetricCard(
 ```
 
 No GetX, API, role, permission, repository, or NetSales business model is imported by the generic framework.
+
+
+## Visual showcase
+
+A developer-only showcase screen demonstrates all four card variants, the six semantic tones, and loading/empty/error states. It uses local sample data only and allows switching between Light/Dark and LTR/RTL without changing the persisted application theme.
+
+In a debug build, open the route:
+
+`/dev/dashboard-metrics`
+
+The route is conditionally registered with `kDebugMode`, so it is not included in release builds. The screen is under `lib/widgets/dashboard_metrics/showcase/` and uses the existing NetSales theme adapter.
