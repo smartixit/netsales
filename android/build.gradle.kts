@@ -1,3 +1,5 @@
+import com.android.build.gradle.LibraryExtension
+
 allprojects {
     repositories {
         google()
@@ -14,7 +16,17 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
+
+    // Keep Android library plugins aligned with the app compile SDK.
+    // Some Flutter plugins declare an older compileSdk that cannot consume
+    // the AndroidX AAR metadata required by their resolved dependencies.
+    plugins.withId("com.android.library") {
+        extensions.configure<LibraryExtension> {
+            compileSdk = 36
+        }
+    }
 }
+
 subprojects {
     project.evaluationDependsOn(":app")
 }
