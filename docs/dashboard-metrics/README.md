@@ -25,7 +25,7 @@ The generic UI never calculates deltas, percentages, financial values, threshold
 
 ## NetSales theme integration
 
-Wrap the metrics section with `NetSalesDashboardMetricsThemeAdapter.wrap(context: context, child: ...)`. The adapter maps the existing `AppColors`, `AppRadius`, and `AppSpacing` design tokens into `DashboardMetricsTheme`. Generic metric widgets consume only the theme extension and Flutter Material theme.
+Wrap the metrics section with `NetSalesDashboardMetricsThemeAdapter.wrap(context: context, child: ...)`. The adapter maps the existing `AppColors`, `AppRadius`, `AppSpacing`, `AppBreakpoints`, `AppElevation`, and `AppMotion` design tokens into `DashboardMetricsTheme`, normalizing ScreenUtil-backed card geometry to logical dimensions. The generic card and grid import only Flutter and the generic KPI contracts; they do not import NetSales core classes. Generic metric widgets consume only the theme extension and Flutter Material theme.
 
 ## Responsive grid
 
