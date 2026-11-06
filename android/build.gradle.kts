@@ -17,12 +17,14 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 
-    // Keep Android library plugins aligned with the app compile SDK.
-    // Some Flutter plugins declare an older compileSdk that cannot consume
-    // the AndroidX AAR metadata required by their resolved dependencies.
+    // Flutter plugins may assign their own compileSdk later in their build scripts.
+    // Apply the app's compile SDK after each Android library project is evaluated
+    // so AndroidX AAR metadata checks use a sufficiently recent API level.
     plugins.withId("com.android.library") {
-        extensions.configure<LibraryExtension> {
-            compileSdk = 36
+        afterEvaluate {
+            extensions.configure<LibraryExtension> {
+                compileSdk = 36
+            }
         }
     }
 }
