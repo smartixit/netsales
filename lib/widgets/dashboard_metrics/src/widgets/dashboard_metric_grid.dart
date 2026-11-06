@@ -34,7 +34,7 @@ class DashboardMetricGrid extends StatelessWidget {
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
-            : AppBreakpoints.widthOf(context);
+            : MediaQuery.sizeOf(context).width;
         final gap = spacing ?? DashboardMetricsTheme.of(context).gridSpacing;
         final columns = ((availableWidth + gap) / (minimumCardWidth + gap))
             .floor()
