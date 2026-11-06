@@ -1,3 +1,16 @@
+import 'dart:ui' show FontFeature;
+
+import 'package:flutter/material.dart';
+
+import '../enums/dashboard_metric_direction.dart';
+import '../enums/dashboard_metric_tone.dart';
+import '../enums/dashboard_metric_variant.dart';
+import '../models/dashboard_metric_data.dart';
+import '../models/dashboard_metric_source.dart';
+import '../models/dashboard_metric_trend.dart';
+import '../theme/dashboard_metrics_theme.dart';
+import 'dashboard_metric_sparkline.dart';
+
 class DashboardMetricContent extends StatelessWidget {
   const DashboardMetricContent({
     required this.metric,
