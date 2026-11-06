@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -41,8 +43,20 @@ class AppDataGrid<T> extends StatelessWidget {
     this.exportController,
     this.exportFileName = 'NetSales_Report',
     this.selectedCount = 0,
+    this.selectedItems = const <T>[],
     this.onSelectionChanged,
+    this.onSelectionChanging,
+    this.onCheckboxValueChanged,
+    this.onCurrentCellActivating,
+    this.onCurrentCellActivated,
+    this.onCellTap,
+    this.onCellDoubleTap,
+    this.onCellSecondaryTap,
+    this.onCellLongPress,
     this.onSortRequested,
+    this.onSortChanged,
+    this.onFilterChanging,
+    this.onFilterChanged,
     this.onRetry,
     this.errorTitle = 'تعذر تحميل البيانات',
     this.errorMessage = 'حدث خطأ أثناء تحميل السجلات. يرجى المحاولة مجدداً.',
@@ -69,8 +83,20 @@ class AppDataGrid<T> extends StatelessWidget {
   final AppDataGridExportController? exportController;
   final String exportFileName;
   final int selectedCount;
+  final List<T> selectedItems;
   final AppDataGridSelectionChanged<T>? onSelectionChanged;
+  final SelectionChangingCallback? onSelectionChanging;
+  final DataGridCheckboxValueChangedCallback? onCheckboxValueChanged;
+  final CurrentCellActivatingCallback? onCurrentCellActivating;
+  final CurrentCellActivatedCallback? onCurrentCellActivated;
+  final DataGridCellTapCallback? onCellTap;
+  final DataGridCellDoubleTapCallback? onCellDoubleTap;
+  final DataGridCellTapCallback? onCellSecondaryTap;
+  final DataGridCellLongPressCallback? onCellLongPress;
   final AppDataGridSortRequested? onSortRequested;
+  final DataGridColumnSortChangedCallback? onSortChanged;
+  final DataGridFilterChangingCallback? onFilterChanging;
+  final DataGridFilterChangedCallback? onFilterChanged;
   final VoidCallback? onRetry;
   final String errorTitle;
   final String errorMessage;
@@ -100,6 +126,7 @@ class AppDataGrid<T> extends StatelessWidget {
             exportFileName: exportFileName,
             itemCount: source.items.length,
             selectedCount: selectedCount,
+            isRemote: features.dataMode == AppDataGridDataMode.remote,
           ),
         Expanded(child: _buildBody(context)),
         if (viewState == AppDataGridViewState.success && pagination.isEnabled)
@@ -195,6 +222,10 @@ class AppDataGrid<T> extends StatelessWidget {
             pagination: pagination,
             rowsPerPage: features.rowsPerPage,
             allowPullToRefresh: features.allowPullToRefresh,
+            allowSelection: features.allowSelection,
+            allowMultiSelection: features.allowMultiSelection,
+            selectedItems: selectedItems,
+            onSelectionChanged: onSelectionChanged,
             itemBuilder: mobileItemBuilder,
           );
         }
@@ -213,11 +244,31 @@ class AppDataGrid<T> extends StatelessWidget {
               defaultColumnWidth: features.defaultColumnWidth,
               rowsPerPage: features.rowsPerPage,
               columnWidthMode: features.columnWidthMode,
+              columnSizer: features.columnSizer,
+              columnResizeMode: features.columnResizeMode,
+              columnDragFeedbackBuilder: features.columnDragFeedbackBuilder,
+              onColumnResizeStart: features.onColumnResizeStart,
+              onColumnResizeEnd: features.onColumnResizeEnd,
+              controller: features.controller,
+              selectionManager: features.selectionManager,
+              sortingGestureType: features.sortingGestureType,
+              checkboxColumnSettings: features.checkboxColumnSettings,
+              horizontalScrollPhysics: features.horizontalScrollPhysics,
+              verticalScrollPhysics: features.verticalScrollPhysics,
+              shrinkWrapColumns: features.shrinkWrapColumns,
+              shrinkWrapRows: features.shrinkWrapRows,
+              rowsCacheExtent: features.rowsCacheExtent,
               columnWidthCalculationRange: features.columnWidthCalculationRange,
+              gridLinesVisibility: features.gridLinesVisibility,
+              headerGridLinesVisibility: features.headerGridLinesVisibility,
+              gridLinesVisibility: features.gridLinesVisibility,
+              headerGridLinesVisibility: features.headerGridLinesVisibility,
               selectionMode: features.effectiveSelectionMode,
               navigationMode: features.effectiveNavigationMode,
               frozenColumnsCount: _safeFrozenCount(features.frozenColumnsCount, source.columns.where((column) => column.visible).length),
-              frozenRowsCount: features.frozenRowsCount,
+              frozenRowsCount: _safeFrozenRowCount(features.frozenRowsCount, source.rows.length),
+              footerFrozenColumnsCount: _safeFrozenCount(features.footerFrozenColumnsCount, source.columns.where((column) => column.visible).length),
+              footerFrozenRowsCount: _safeFrozenRowCount(features.footerFrozenRowsCount, source.rows.length),
               allowSorting: features.allowSorting,
               allowMultiColumnSorting: features.allowSorting && features.allowMultiColumnSorting,
               allowTriStateSorting: features.allowSorting && features.allowTriStateSorting,
@@ -246,6 +297,10 @@ class AppDataGrid<T> extends StatelessWidget {
                           allowSorting: current.allowSorting,
                           allowFiltering: current.allowFiltering,
                           allowEditing: current.allowEditing,
+                          sortIconPosition: current.sortIconPosition,
+                          filterIconPosition: current.filterIconPosition,
+                          autoFitPadding: current.autoFitPadding,
+                          filterIconPadding: current.filterIconPadding,
                           filterPopupMenuOptions: current.filterPopupMenuOptions,
                         );
                       }
@@ -255,18 +310,36 @@ class AppDataGrid<T> extends StatelessWidget {
               allowColumnsDragging: features.allowColumnDragging,
               onColumnDragging: features.allowColumnDragging
                   ? (details) {
-                      if (details.action == DataGridColumnDragAction.dropped && details.to != null) {
-                        source.reorderColumns(details.from, details.to!);
-                        final moved = gridColumns.removeAt(details.from);
-                        gridColumns.insert(details.to!, moved);
+                      if (details.action == DataGridColumnDragAction.dropped) {
+                        final from = details.from;
+                        final to = details.to;
+                        if (to == null ||
+                            from < 0 ||
+                            from >= gridColumns.length ||
+                            to < 0 ||
+                            to >= gridColumns.length) {
+                          return false;
+                        }
+                        source.reorderColumns(from, to);
+                        final moved = gridColumns.removeAt(from);
+                        gridColumns.insert(to, moved);
                       }
                       return true;
                     }
                   : null,
-              allowExpandCollapseGroup: features.allowGrouping,
+              allowExpandCollapseGroup: features.allowGrouping && features.allowExpandCollapseGroup,
+              autoExpandGroups: features.autoExpandGroups,
+              groupCaptionTitleFormat: features.groupCaptionTitleFormat,
+              groupExpanding: features.groupExpanding,
+              groupExpanded: features.groupExpanded,
+              groupCollapsing: features.groupCollapsing,
+              groupCollapsed: features.groupCollapsed,
               allowPullToRefresh: features.allowPullToRefresh,
+              refreshIndicatorDisplacement: features.refreshIndicatorDisplacement,
+              refreshIndicatorStrokeWidth: features.refreshIndicatorStrokeWidth,
               loadMoreViewBuilder: features.loadMoreViewBuilder,
               allowSwiping: features.allowSwiping,
+              swipeMaxOffset: features.swipeMaxOffset,
               startSwipeActionsBuilder: features.startSwipeActionsBuilder,
               endSwipeActionsBuilder: features.endSwipeActionsBuilder,
               onSwipeStart: features.onSwipeStart,
@@ -281,9 +354,21 @@ class AppDataGrid<T> extends StatelessWidget {
               tableSummaryRows: features.tableSummaryRows,
               footer: features.footer,
               footerHeight: features.footerHeight,
+              onQueryRowHeight: features.onQueryRowHeight,
+              onSelectionChanging: onSelectionChanging,
+              onCheckboxValueChanged: onCheckboxValueChanged,
+              onCurrentCellActivating: onCurrentCellActivating,
+              onCurrentCellActivated: onCurrentCellActivated,
+              onCellTap: onCellTap,
+              onCellDoubleTap: onCellDoubleTap,
+              onCellSecondaryTap: onCellSecondaryTap,
+              onCellLongPress: onCellLongPress,
               onSelectionChanged: onSelectionChanged == null ? null : (added, removed) {
                 onSelectionChanged!(source.itemsForRows(added), source.itemsForRows(removed));
               },
+              onColumnSortChanged: onSortChanged,
+              onFilterChanging: features.dataMode == AppDataGridDataMode.local ? onFilterChanging : null,
+              onFilterChanged: features.dataMode == AppDataGridDataMode.local ? onFilterChanged : null,
               onColumnSortChanging: features.dataMode == AppDataGridDataMode.remote
                   ? (next, previous) {
                       onSortRequested?.call(next, previous);
@@ -297,7 +382,13 @@ class AppDataGrid<T> extends StatelessWidget {
   }
 
   static int _safeFrozenCount(int count, int visibleColumns) =>
-      visibleColumns <= 1 ? 0 : count.clamp(0, visibleColumns - 1);
+      visibleColumns <= 1 ? 0 : count.clamp(0, visibleColumns - 1).toInt();
+
+  static int _safeFrozenRowCount(int count, int rowCount) =>
+      rowCount <= 1 ? 0 : count.clamp(0, rowCount - 1).toInt();
+
+  static int _safeFrozenRowCount(int count, int rowCount) =>
+      rowCount <= 1 ? 0 : count.clamp(0, rowCount - 1).toInt();
 }
 
 class _GridToolbar extends StatelessWidget {
@@ -313,6 +404,7 @@ class _GridToolbar extends StatelessWidget {
     required this.exportFileName,
     required this.itemCount,
     required this.selectedCount,
+    required this.isRemote,
   });
 
   final String? title;
@@ -326,6 +418,7 @@ class _GridToolbar extends StatelessWidget {
   final String exportFileName;
   final int itemCount;
   final int selectedCount;
+  final bool isRemote;
 
   @override
   Widget build(BuildContext context) {
@@ -399,7 +492,7 @@ class _GridToolbar extends StatelessWidget {
           AppSpacing.vXs,
           Row(
             children: [
-              CustomChip(label: itemCount.toString() + ' سجل', icon: Icons.table_rows_outlined, isCompact: true),
+              CustomChip(label: isRemote ? '${itemCount} سجل محمّل' : '${itemCount} سجل', icon: Icons.table_rows_outlined, isCompact: true),
               if (selectedCount > 0) ...[
                 AppSpacing.hXs,
                 CustomChip(label: selectedCount.toString() + ' محدد', icon: Icons.check_circle_outline_rounded, isCompact: true),
@@ -413,11 +506,15 @@ class _GridToolbar extends StatelessWidget {
 }
 
 class _MobileGridList<T> extends StatelessWidget {
-  const _MobileGridList({super.key, required this.source, required this.pagination, this.rowsPerPage, this.allowPullToRefresh = false, this.itemBuilder});
+  const _MobileGridList({super.key, required this.source, required this.pagination, this.rowsPerPage, this.allowPullToRefresh = false, this.allowSelection = false, this.allowMultiSelection = true, this.selectedItems = const <T>[], this.onSelectionChanged, this.itemBuilder});
   final NetSalesDataGridSource<T> source;
   final AppDataGridPagination pagination;
   final int? rowsPerPage;
   final bool allowPullToRefresh;
+  final bool allowSelection;
+  final bool allowMultiSelection;
+  final List<T> selectedItems;
+  final AppDataGridSelectionChanged<T>? onSelectionChanged;
   final AppDataGridMobileItemBuilder<T>? itemBuilder;
 
   @override
@@ -434,13 +531,53 @@ class _MobileGridList<T> extends StatelessWidget {
       padding: EdgeInsetsDirectional.fromSTEB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.md),
       itemCount: rows.length,
       separatorBuilder: (_, __) => AppSpacing.vSm,
-      itemBuilder: (context, index) => itemBuilder?.call(context, rows[index]) ??
-          _DefaultMobileRecordCard<T>(item: rows[index], columns: source.columns.where((column) => column.visible).toList(growable: false)),
+      itemBuilder: (context, index) {
+        final item = rows[index];
+        final isSelected = selectedItems.contains(item);
+        final recordCard = itemBuilder?.call(context, item) ??
+            _DefaultMobileRecordCard<T>(
+              item: item,
+              columns: source.columns.where((column) => column.visible).toList(growable: false),
+            );
+        if (!allowSelection || onSelectionChanged == null) return recordCard;
+        return Row(
+          children: [
+            Checkbox(
+              value: isSelected,
+              onChanged: (selected) {
+                if (selected == true) {
+                  onSelectionChanged!(
+                    [item],
+                    allowMultiSelection
+                        ? const <T>[]
+                        : selectedItems.where((value) => value != item).toList(growable: false),
+                  );
+                } else {
+                  onSelectionChanged!(const <T>[], [item]);
+                }
+              },
+            ),
+            Expanded(child: recordCard),
+          ],
+        );
+      },
     );
-    if (!allowPullToRefresh) return list;
+    Widget content = list;
+    if (source.onLoadMore != null) {
+      content = NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification.metrics.extentAfter < 180 && source.hasMore) {
+            unawaited(source.requestLoadMore());
+          }
+          return false;
+        },
+        child: content,
+      );
+    }
+    if (!allowPullToRefresh) return content;
     return RefreshIndicator(
       onRefresh: source.handleRefresh,
-      child: list,
+      child: content,
     );
   }
 }

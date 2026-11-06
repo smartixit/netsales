@@ -21,6 +21,11 @@ class AppDataGridColumn<T> {
     this.minimumWidth,
     this.maximumWidth,
     this.columnWidthMode = ColumnWidthMode.none,
+    this.sortIconPosition = ColumnHeaderIconPosition.end,
+    this.filterIconPosition = ColumnHeaderIconPosition.end,
+    this.autoFitPadding = const EdgeInsets.all(16),
+    this.filterIconPadding = const EdgeInsets.symmetric(horizontal: 8),
+    this.filterPopupMenuOptions = const FilterPopupMenuOptions(),
     this.visible = true,
     this.allowSorting = true,
     this.allowFiltering = true,
@@ -40,6 +45,11 @@ class AppDataGridColumn<T> {
   final double? minimumWidth;
   final double? maximumWidth;
   final ColumnWidthMode columnWidthMode;
+  final ColumnHeaderIconPosition sortIconPosition;
+  final ColumnHeaderIconPosition filterIconPosition;
+  final EdgeInsets autoFitPadding;
+  final EdgeInsetsGeometry filterIconPadding;
+  final FilterPopupMenuOptions filterPopupMenuOptions;
   final bool visible;
   final bool allowSorting;
   final bool allowFiltering;
@@ -60,6 +70,11 @@ class AppDataGridColumn<T> {
         minimumWidth: minimumWidth,
         maximumWidth: maximumWidth,
         columnWidthMode: columnWidthMode,
+        sortIconPosition: sortIconPosition,
+        filterIconPosition: filterIconPosition,
+        autoFitPadding: autoFitPadding,
+        filterIconPadding: filterIconPadding,
+        filterPopupMenuOptions: filterPopupMenuOptions,
         visible: visible ?? this.visible,
         allowSorting: allowSorting ?? this.allowSorting,
         allowFiltering: allowFiltering ?? this.allowFiltering,
@@ -82,11 +97,15 @@ class AppDataGridColumn<T> {
       minimumWidth: minimumWidth ?? double.nan,
       maximumWidth: maximumWidth ?? double.nan,
       columnWidthMode: columnWidthMode,
+      sortIconPosition: sortIconPosition,
+      filterIconPosition: filterIconPosition,
+      autoFitPadding: autoFitPadding,
+      filterIconPadding: filterIconPadding,
       visible: visible,
       allowSorting: allowSorting,
       allowFiltering: allowFiltering,
       allowEditing: allowEditing,
-      filterPopupMenuOptions: const FilterPopupMenuOptions(),
+      filterPopupMenuOptions: filterPopupMenuOptions,
     );
   }
 }

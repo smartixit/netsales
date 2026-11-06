@@ -12,8 +12,9 @@ import 'package:netsales/widgets/data_grid/data_grid.dart';
 ## Architecture
 
 - `AppDataGridColumn<T>`: typed column definition, value getter, optional renderer/editor/parser/validator. An edit handler returns the updated typed record; null rejects the edit.
-- `NetSalesDataGridSource<T>`: adapts host records to Syncfusion. Keep it long-lived in the feature controller/binding; never create it in build().
-- `AppDataGrid<T>`: Stateless UI wrapper for design tokens, toolbar, states, responsive rendering, selection and navigation.
+- `NetSalesDataGridSource<T>`: adapts host records to Syncfusion. Keep it long-lived in the feature controller/binding; never create it in build(). It supports guarded load-more callbacks; call `setHasMore(false)` when the source is exhausted.
+- `AppDataGrid<T>`: Stateless UI wrapper for design tokens, toolbar, states, responsive rendering, selection and navigation. Local filter/sort lifecycle callbacks are exposed for active-filter chips and query synchronization.
+- `AppDataGridColumnChooser<T>`: reusable visibility menu that prevents hiding the final visible column.
 - `AppDataGridFeatures`: feature policy for one grid.
 - `AppDataGridPagination`: page-based or cursor-based navigation; cursor mode has no fabricated total-page count. Page-based desktop/tablet mode can host Syncfusion `SfDataPager` with automatic local paging or a host-provided remote delegate; mobile uses the same page state with previous/next controls.
 - `AppDataGridExportController`: Excel/PDF export through the shared FileExportService.
@@ -28,7 +29,7 @@ The generic layer has no HTTP, permissions, workspace, financial or business log
 
 ## Responsive and visual behavior
 
-Desktop/tablet use SfDataGrid with horizontal scrolling. Phones use key/value record cards; provide `mobileItemBuilder` for a feature-specific mobile presentation. Pull-to-refresh remains available when enabled. Grid-state Excel/PDF export buttons are hidden on mobile because no SfDataGrid is mounted there; mobile features may provide a feature-owned export action. Light/Dark uses the active NetSales AppColors palette. RTL follows Directionality.
+Desktop/tablet use SfDataGrid with horizontal scrolling. Phones use key/value record cards; provide `mobileItemBuilder` for a feature-specific mobile presentation. Mobile selection uses checkboxes, page-based lists use previous/next controls, and guarded load-more/pull-to-refresh callbacks are supported when enabled. Grid-state Excel/PDF export buttons are hidden on mobile because no SfDataGrid is mounted there; mobile features may provide a feature-owned export action. Light/Dark uses the active NetSales AppColors palette. RTL follows Directionality.
 
 ## Syncfusion capabilities surfaced
 

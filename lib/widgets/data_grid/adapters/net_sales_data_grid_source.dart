@@ -37,9 +37,13 @@ class NetSalesDataGridSource<T> extends DataGridSource {
   final Future<void> Function()? onRefresh;
   final Future<void> Function()? onLoadMore;
   Object? _pendingEditValue;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
 
   List<AppDataGridColumn<T>> get columns => List.unmodifiable(_columns);
   List<T> get items => List.unmodifiable(_items);
+  bool get hasMore => _hasMore;
+  void setHasMore(bool value) => _hasMore = value;
   @override
   List<DataGridRow> get rows => _rows;
   T? itemForRow(DataGridRow row) => _modelsByRow[row];
@@ -176,8 +180,18 @@ class NetSalesDataGridSource<T> extends DataGridSource {
   @override
   Future<void> handleRefresh() async => onRefresh?.call();
 
+  Future<void> requestLoadMore() async {
+    if (_isLoadingMore || !_hasMore || onLoadMore == null) return;
+    _isLoadingMore = true;
+    try {
+      await onLoadMore!.call();
+    } finally {
+      _isLoadingMore = false;
+    }
+  }
+
   @override
-  Future<void> handleLoadMoreRows() async => onLoadMore?.call();
+  Future<void> handleLoadMoreRows() => requestLoadMore();
 
   AppDataGridColumn<T>? _columnFor(String name) {
     for (final column in _columns) {

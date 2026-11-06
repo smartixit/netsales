@@ -32,6 +32,8 @@ void main() {
     expect(find.text('سجل العمليات التجارية'), findsOneWidget);
     expect(find.text('العميل'), findsWidgets);
     expect(find.text('المنطقة'), findsWidgets);
+    expect(find.text('بيانات العملية'), findsOneWidget);
+    expect(find.text('تفاصيل المعالجة'), findsOneWidget);
     expect(find.byTooltip('الوضع الفاتح/الداكن'), findsOneWidget);
     expect(find.byTooltip('RTL / LTR'), findsOneWidget);
     tester.view.resetPhysicalSize();
@@ -62,4 +64,27 @@ void main() {
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
   });
+  testWidgets('uses compact selectable record cards on mobile widths', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    await tester.pumpWidget(
+      ScreenUtilInit(
+        designSize: const Size(390, 844),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) => GetMaterialApp(
+          home: const DataGridShowcaseScreen(),
+          initialBinding: DataGridShowcaseBinding(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('data-grid-mobile')), findsOneWidget);
+    expect(find.byKey(const ValueKey('data-grid-desktop')), findsNothing);
+    expect(find.byType(Checkbox), findsWidgets);
+    expect(find.byTooltip('تصدير Excel'), findsNothing);
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
+
 }

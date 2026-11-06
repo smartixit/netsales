@@ -71,6 +71,10 @@ class DataGridShowcaseController extends GetxController {
       items: _records,
       columns: _buildColumns(),
       onEdit: _editRecord,
+      onRefresh: () async {
+        await Future<void>.delayed(const Duration(milliseconds: 180));
+        source.replaceRows(_records);
+      },
       onEditFailure: (error) => Get.snackbar('تعذر حفظ التعديل', error.toString()),
     );
     visibleColumns.addAll(source.columns.map((column) => column.name));
@@ -255,6 +259,50 @@ class DataGridShowcaseController extends GetxController {
     allowEditing: true,
     allowGrouping: true,
     frozenColumnsCount: 1,
+    allowPullToRefresh: true,
+    stackedHeaderRows: [
+      StackedHeaderRow(cells: [
+        StackedHeaderCell(
+          text: 'بيانات العملية',
+          columnNames: ['reference', 'customer', 'region'],
+          child: Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: const Text('بيانات العملية'),
+          ),
+        ),
+        StackedHeaderCell(
+          text: 'تفاصيل المعالجة',
+          columnNames: ['status', 'amount', 'createdAt', 'channel'],
+          child: Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: const Text('تفاصيل المعالجة'),
+          ),
+        ),
+      ]),
+    ],
+    tableSummaryRows: [
+      GridTableSummaryRow(
+        showSummaryInRow: true,
+        title: 'عدد الصفوف المحملة: {Count}',
+        columns: [
+          GridSummaryColumn(
+            name: 'Count',
+            columnName: 'id',
+            summaryType: GridSummaryType.count,
+          ),
+        ],
+        position: GridTableSummaryRowPosition.bottom,
+      ),
+    ],
+    footer: Container(
+      height: 42,
+      alignment: AlignmentDirectional.centerStart,
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: 12),
+      child: const Text('بيانات تجريبية للمعاينة — لا تمثل سجلات فعلية.'),
+    ),
+    footerHeight: 42,
     rowHeight: 62,
     headerRowHeight: 56,
     defaultColumnWidth: 150,

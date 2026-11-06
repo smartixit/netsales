@@ -1,7 +1,12 @@
 
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/widgets/data_grid/adapters/net_sales_data_grid_source.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_column.dart';
+import 'package:netsales/widgets/data_grid/models/app_data_grid_features.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'package:netsales/widgets/data_grid/models/app_data_grid_pagination.dart';
 
 class _GridRecord {
   const _GridRecord(this.id, this.name);
@@ -51,6 +56,62 @@ void main() {
     expect(source.columns.map((column) => column.name).toList(), ['name', 'id']);
     expect(source.rows.first.getCells().map((cell) => cell.columnName).toList(), ['name', 'id']);
     expect(source.rows.first.getCells().map((cell) => cell.value).toList(), ['Alpha', 1]);
+  });
+
+  test('rejects hiding every column', () {
+    expect(
+      () => source.updateColumns(columns.map((column) => column.copyWith(visible: false)).toList()),
+      throwsArgumentError,
+    );
+  });
+
+  test('rejects duplicate column names', () {
+    expect(() => source.updateColumns([columns.first, columns.first]), throwsArgumentError);
+  });
+
+  test('cursor pagination never fabricates a page total', () {
+    final pagination = AppDataGridPagination.cursorBased(
+      hasPrevious: true,
+      hasNext: true,
+      onPrevious: () async {},
+      onNext: () async {},
+      pageLabel: 'دفعة 2',
+    );
+    expect(pagination.totalPages, 0);
+    expect(pagination.mode, AppDataGridPaginationMode.cursorBased);
+  });
+
+  test('remote data mode disables local filtering', () {
+    const features = AppDataGridFeatures(dataMode: AppDataGridDataMode.remote);
+    expect(features.canFilterLocally, isFalse);
+  });
+
+  test('editing automatically enables cell navigation', () {
+    const features = AppDataGridFeatures(allowEditing: true);
+    expect(features.effectiveNavigationMode, GridNavigationMode.cell);
+  });
+
+  test('load-more requests are guarded against concurrent calls and exhaustion', () async {
+    final completer = Completer<void>();
+    var calls = 0;
+    final loadMoreSource = NetSalesDataGridSource<_GridRecord>(
+      items: const [_GridRecord(1, 'Alpha')],
+      columns: columns,
+      onLoadMore: () {
+        calls++;
+        return completer.future;
+      },
+    );
+
+    final first = loadMoreSource.requestLoadMore();
+    final second = loadMoreSource.requestLoadMore();
+    expect(calls, 1);
+    completer.complete();
+    await Future.wait([first, second]);
+
+    loadMoreSource.setHasMore(false);
+    await loadMoreSource.requestLoadMore();
+    expect(calls, 1);
   });
 
   test('updates a column width without changing its semantic definition', () {

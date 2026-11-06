@@ -6,7 +6,7 @@ import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/data_grid/app_data_grid.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_state.dart';
-import 'package:netsales/widgets/menus/custom_popup_menu.dart';
+import 'package:netsales/widgets/data_grid/widgets/app_data_grid_column_chooser.dart';
 import 'data_grid_showcase_controller.dart';
 
 class DataGridShowcaseScreen extends GetView<DataGridShowcaseController> {
@@ -65,11 +65,12 @@ class DataGridShowcaseScreen extends GetView<DataGridShowcaseController> {
                       exportController: controller.exportController,
                       exportFileName: 'NetSales_DataGrid_Showcase',
                       selectedCount: controller.selectedRows.length,
+                      selectedItems: controller.selectedRows.toList(growable: false),
                       onSelectionChanged: controller.onSelectionChanged,
                       headerActions: [
-                        _ColumnChooser(
+                        AppDataGridColumnChooser<DataGridShowcaseRecord>(
                           columns: controller.source.columns,
-                          onToggle: controller.toggleColumn,
+                          onVisibilityChanged: controller.toggleColumn,
                         ),
                       ],
                       noResultsQuery: controller.searchController.text,
@@ -122,20 +123,3 @@ class _ShowcaseSettings extends StatelessWidget {
   );
 }
 
-class _ColumnChooser extends StatelessWidget {
-  const _ColumnChooser({required this.columns, required this.onToggle});
-  final List<dynamic> columns;
-  final ValueChanged<String> onToggle;
-
-  @override
-  Widget build(BuildContext context) => CustomPopupMenu<String>(
-    tooltip: 'إدارة الأعمدة',
-    triggerIcon: Icons.view_column_outlined,
-    items: columns.map((column) => CustomPopupItem<String>(
-      value: column.name as String,
-      label: column.label as String,
-      icon: column.visible as bool ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
-    )).toList(growable: false),
-    onSelected: onToggle,
-  );
-}
