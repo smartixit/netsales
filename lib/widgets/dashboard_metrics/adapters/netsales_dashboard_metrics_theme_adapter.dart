@@ -48,10 +48,10 @@ class NetSalesDashboardMetricsThemeAdapter {
     return Theme(
       data: theme.copyWith(
         extensions: <ThemeExtension<dynamic>>[
-          ...theme.extensions.values.where(
-            (extension) => extension is! DashboardMetricsTheme,
-          ),
-          of(context),
+          for (final extension in theme.extensions.values)
+            if (extension is! DashboardMetricsTheme)
+              extension as ThemeExtension<ThemeExtension<dynamic>>,
+          of(context) as ThemeExtension<ThemeExtension<dynamic>>,
         ],
       ),
       child: child,

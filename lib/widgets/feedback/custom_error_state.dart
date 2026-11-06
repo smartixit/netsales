@@ -450,13 +450,15 @@ class CustomErrorState extends StatelessWidget {
   Widget _buildTechnicalDetailsSection(BuildContext context, Color themeColor) {
     final colors = context.colors;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
+    return Material(
+      color: colors.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.4)),
+        side: BorderSide(
+          color: colors.outlineVariant.withValues(alpha: 0.4),
+        ),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Theme(
         data: Theme.of(context).copyWith(
           dividerColor: Colors.transparent,
