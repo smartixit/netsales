@@ -6,6 +6,7 @@ on:
       - main
       - fix/data-grid-final-verification
       - chore/pub-dependency-maintenance
+      - chore/pub-compatible-updates
   pull_request:
     branches:
       - main
