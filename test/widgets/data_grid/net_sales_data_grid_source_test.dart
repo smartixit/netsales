@@ -212,14 +212,12 @@ void main() {
         columnName: 'name',
         label: const Text('Name'),
       );
-      final editor =
-          editSource.buildEditWidget(
-                firstSourceRow,
-                RowColumnIndex(1, 1),
-                editColumn,
-                () {},
-              )
-              as TextFormField;
+      final editor = editSource.buildEditWidget(
+        firstSourceRow,
+        RowColumnIndex(1, 1),
+        editColumn,
+        () {},
+      ) as TextFormField;
       editor.onChanged?.call('Alpha updated');
       await editSource.onCellSubmit(
         firstSourceRow,
