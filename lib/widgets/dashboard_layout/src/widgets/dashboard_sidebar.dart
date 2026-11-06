@@ -42,20 +42,26 @@ class DashboardSidebar extends StatelessWidget {
             ),
           Expanded(
             child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: theme.sidebarPadding, vertical: 8),
+              padding: EdgeInsets.symmetric(
+                horizontal: theme.sidebarPadding,
+                vertical: 8,
+              ),
               children: [
                 for (final item in navigation.items)
                   _NavigationTile(
                     item: item,
                     collapsed: collapsed,
-                    selected: item.id == selectedNavigationId,
+                    selectedNavigationId: selectedNavigationId,
                     onSelected: onNavigationSelected,
                   ),
                 for (final group in navigation.groups) ...[
                   SizedBox(height: theme.sectionSpacing),
                   if (!collapsed)
                     Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 12, bottom: 8),
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 12,
+                        bottom: 8,
+                      ),
                       child: Text(
                         group.label.toUpperCase(),
                         style: textTheme.labelSmall?.copyWith(
@@ -69,10 +75,12 @@ class DashboardSidebar extends StatelessWidget {
                     _NavigationTile(
                       item: item,
                       collapsed: collapsed,
-                      selected: _containsSelected(item, selectedNavigationId),
+                      selectedNavigationId: selectedNavigationId,
                       onSelected: onNavigationSelected,
-                      expanded: group.id != null && expandedGroupIds.contains(group.id),
-                      onExpandedChanged: group.id == null || onGroupExpansionChanged == null
+                      expanded: group.id != null &&
+                          expandedGroupIds.contains(group.id),
+                      onExpandedChanged: group.id == null ||
+                              onGroupExpansionChanged == null
                           ? null
                           : (_) => onGroupExpansionChanged!(group.id!),
                     ),
@@ -89,18 +97,13 @@ class DashboardSidebar extends StatelessWidget {
       ),
     );
   }
-
-  bool _containsSelected(DashboardNavigationItem item, String? selectedId) {
-    if (item.id == selectedId) return true;
-    return item.children.any((child) => _containsSelected(child, selectedId));
-  }
 }
 
 class _NavigationTile extends StatelessWidget {
   const _NavigationTile({
     required this.item,
     required this.collapsed,
-    required this.selected,
+    required this.selectedNavigationId,
     required this.onSelected,
     this.expanded = false,
     this.onExpandedChanged,
@@ -109,16 +112,21 @@ class _NavigationTile extends StatelessWidget {
 
   final DashboardNavigationItem item;
   final bool collapsed;
-  final bool selected;
+  final String? selectedNavigationId;
   final ValueChanged<String> onSelected;
   final bool expanded;
   final ValueChanged<bool>? onExpandedChanged;
   final int depth;
 
+  bool _containsSelected(DashboardNavigationItem item) {
+    if (item.id == selectedNavigationId) return true;
+    return item.children.any(_containsSelected);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = DashboardLayoutTheme.of(context);
-    final scheme = Theme.of(context).colorScheme;
+    final selected = _containsSelected(item);
     final color = selected
         ? theme.sidebarSelectedForeground
         : item.enabled
@@ -138,23 +146,36 @@ class _NavigationTile extends StatelessWidget {
         ),
         child: ExpansionTile(
           key: PageStorageKey<String>('dashboard-nav-${item.id}'),
-          initiallyExpanded: expanded,
-          tilePadding: EdgeInsetsDirectional.only(start: 12 + depth * 12, end: 8),
-          childrenPadding: EdgeInsetsDirectional.only(start: 12 + depth * 12),
+          initiallyExpanded: expanded || selected,
+          tilePadding: EdgeInsetsDirectional.only(
+            start: 12 + depth * 12,
+            end: 8,
+          ),
+          childrenPadding: EdgeInsetsDirectional.only(
+            start: 12 + depth * 12,
+          ),
           leading: leading,
-          title: Text(item.label, maxLines: 1, overflow: TextOverflow.ellipsis),
-          trailing: item.badge == null
-              ? null
-              : _Badge(label: item.badge!),
+          title: Text(
+            item.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: color,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            ),
+          ),
+          trailing: item.badge == null ? null : _Badge(label: item.badge!),
           onExpansionChanged: onExpandedChanged,
           children: item.children
-              .map((child) => _NavigationTile(
-                    item: child,
-                    collapsed: false,
-                    selected: child.id == selectedId(context),
-                    onSelected: onSelected,
-                    depth: depth + 1,
-                  ))
+              .map(
+                (child) => _NavigationTile(
+                  item: child,
+                  collapsed: false,
+                  selectedNavigationId: selectedNavigationId,
+                  onSelected: onSelected,
+                  depth: depth + 1,
+                ),
+              )
               .toList(),
         ),
       );
@@ -169,10 +190,8 @@ class _NavigationTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(theme.itemRadius),
           child: InkWell(
             borderRadius: BorderRadius.circular(theme.itemRadius),
-            onTap: item.enabled
-                ? () => item.hasChildren
-                    ? onExpandedChanged?.call(!expanded)
-                    : onSelected(item.id)
+            onTap: item.enabled && !item.hasChildren
+                ? () => onSelected(item.id)
                 : null,
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -180,7 +199,9 @@ class _NavigationTile extends StatelessWidget {
                 vertical: 12,
               ),
               child: Row(
-                mainAxisAlignment: collapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
+                mainAxisAlignment: collapsed
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.start,
                 children: [
                   leading,
                   if (!collapsed) ...[
@@ -192,17 +213,13 @@ class _NavigationTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: color,
-                              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                              fontWeight: selected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
                             ),
                       ),
                     ),
                     if (item.badge != null) _Badge(label: item.badge!),
-                    if (item.hasChildren)
-                      Icon(
-                        expanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                        size: 18,
-                        color: theme.sidebarMuted,
-                      ),
                   ],
                 ],
               ),
@@ -212,12 +229,11 @@ class _NavigationTile extends StatelessWidget {
       ),
     );
   }
-
-  String? selectedId(BuildContext context) => null;
 }
 
 class _Badge extends StatelessWidget {
   const _Badge({required this.label});
+
   final String label;
 
   @override
