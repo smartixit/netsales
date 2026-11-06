@@ -261,8 +261,6 @@ class AppDataGrid<T> extends StatelessWidget {
               columnWidthCalculationRange: features.columnWidthCalculationRange,
               gridLinesVisibility: features.gridLinesVisibility,
               headerGridLinesVisibility: features.headerGridLinesVisibility,
-              gridLinesVisibility: features.gridLinesVisibility,
-              headerGridLinesVisibility: features.headerGridLinesVisibility,
               selectionMode: features.effectiveSelectionMode,
               navigationMode: features.effectiveNavigationMode,
               frozenColumnsCount: _safeFrozenCount(features.frozenColumnsCount, source.columns.where((column) => column.visible).length),
@@ -383,9 +381,6 @@ class AppDataGrid<T> extends StatelessWidget {
 
   static int _safeFrozenCount(int count, int visibleColumns) =>
       visibleColumns <= 1 ? 0 : count.clamp(0, visibleColumns - 1).toInt();
-
-  static int _safeFrozenRowCount(int count, int rowCount) =>
-      rowCount <= 1 ? 0 : count.clamp(0, rowCount - 1).toInt();
 
   static int _safeFrozenRowCount(int count, int rowCount) =>
       rowCount <= 1 ? 0 : count.clamp(0, rowCount - 1).toInt();
