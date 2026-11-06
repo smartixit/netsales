@@ -12,7 +12,7 @@ import 'package:netsales/widgets/data_grid/data_grid.dart';
 ## Architecture
 
 - `AppDataGridColumn<T>`: typed column definition, value getter, optional renderer/editor/parser/validator. An edit handler returns the updated typed record; null rejects the edit.
-- `NetSalesDataGridSource<T>`: adapts host records to Syncfusion. Keep it long-lived in the feature controller/binding; never create it in build(). It supports guarded load-more callbacks; call `setHasMore(false)` when the source is exhausted.
+- `NetSalesDataGridSource<T>`: adapts host records to Syncfusion. Keep it long-lived in the feature controller/binding; never create it in build(). It supports guarded load-more callbacks and `appendRows()` for fetched batches; call `setHasMore(false)` when the source is exhausted. Remote page/load-more failures can be surfaced through the source failure callbacks.
 - `AppDataGrid<T>`: Stateless UI wrapper for design tokens, toolbar, states, responsive rendering, selection and navigation. Local filter/sort lifecycle callbacks are exposed for active-filter chips and query synchronization.
 - `AppDataGridColumnChooser<T>`: reusable visibility menu that prevents hiding the final visible column.
 - `AppDataGridFeatures`: feature policy for one grid.

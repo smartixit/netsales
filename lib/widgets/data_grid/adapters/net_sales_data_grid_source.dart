@@ -7,6 +7,7 @@ import '../models/app_data_grid_column.dart';
 typedef AppDataGridEditHandler<T> = Future<T?> Function(T row, AppDataGridColumn<T> column, Object? value);
 typedef AppDataGridEditFailureHandler = void Function(Object error);
 typedef AppDataGridPageChangeHandler = Future<bool> Function(int oldPageIndex, int newPageIndex);
+typedef AppDataGridFailureHandler = void Function(Object error);
 
 /// Long-lived data adapter. It must be owned by the feature/controller, not created in build().
 class NetSalesDataGridSource<T> extends DataGridSource {
@@ -18,6 +19,8 @@ class NetSalesDataGridSource<T> extends DataGridSource {
     this.onRefresh,
     this.onLoadMore,
     this.onPageChange,
+    this.onPageChangeFailure,
+    this.onLoadMoreFailure,
     List<String> groupByColumns = const <String>[],
   }) : _columns = List<AppDataGridColumn<T>>.of(columns),
        _items = List<T>.of(items) {
@@ -39,6 +42,8 @@ class NetSalesDataGridSource<T> extends DataGridSource {
   final Future<void> Function()? onRefresh;
   final Future<void> Function()? onLoadMore;
   final AppDataGridPageChangeHandler? onPageChange;
+  final AppDataGridFailureHandler? onPageChangeFailure;
+  final AppDataGridFailureHandler? onLoadMoreFailure;
   Object? _pendingEditValue;
   bool _isLoadingMore = false;
   bool _hasMore = true;
@@ -54,6 +59,13 @@ class NetSalesDataGridSource<T> extends DataGridSource {
 
   void replaceRows(List<T> items) {
     _items..clear()..addAll(items);
+    _buildRows(notify: true);
+  }
+
+  /// Appends a fetched page while preserving the existing loaded records.
+  void appendRows(List<T> items) {
+    if (items.isEmpty) return;
+    _items.addAll(items);
     _buildRows(notify: true);
   }
 
@@ -212,7 +224,12 @@ class NetSalesDataGridSource<T> extends DataGridSource {
   Future<bool> handlePageChange(int oldPageIndex, int newPageIndex) async {
     final handler = onPageChange;
     if (handler == null) return super.handlePageChange(oldPageIndex, newPageIndex);
-    return handler(oldPageIndex, newPageIndex);
+    try {
+      return await handler(oldPageIndex, newPageIndex);
+    } catch (error) {
+      onPageChangeFailure?.call(error);
+      return false;
+    }
   }
 
   Future<void> requestLoadMore() async {
@@ -220,6 +237,8 @@ class NetSalesDataGridSource<T> extends DataGridSource {
     _isLoadingMore = true;
     try {
       await onLoadMore!.call();
+    } catch (error) {
+      onLoadMoreFailure?.call(error);
     } finally {
       _isLoadingMore = false;
     }

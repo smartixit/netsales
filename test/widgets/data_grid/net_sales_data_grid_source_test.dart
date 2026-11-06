@@ -92,6 +92,12 @@ void main() {
     expect(features.effectiveNavigationMode, GridNavigationMode.cell);
   });
 
+  test('appends fetched rows without dropping loaded records', () {
+    source.appendRows(const [_GridRecord(3, 'Gamma')]);
+    expect(source.items.map((item) => item.id).toList(), [1, 2, 3]);
+    expect(source.rows, hasLength(3));
+  });
+
   test('remote page changes are delegated with zero-based indexes', () async {
     var oldIndex = -1;
     var newIndex = -1;
@@ -107,6 +113,18 @@ void main() {
     expect(await remoteSource.handlePageChange(0, 2), isTrue);
     expect(oldIndex, 0);
     expect(newIndex, 2);
+  });
+
+  test('remote page failures are reported and reject navigation', () async {
+    Object? capturedError;
+    final remoteSource = NetSalesDataGridSource<_GridRecord>(
+      items: const [_GridRecord(1, 'Alpha')],
+      columns: columns,
+      onPageChange: (oldPage, newPage) async => throw StateError('network'),
+      onPageChangeFailure: (error) => capturedError = error,
+    );
+    expect(await remoteSource.handlePageChange(0, 1), isFalse);
+    expect(capturedError, isA<StateError>());
   });
 
   test('load-more requests are guarded against concurrent calls and exhaustion', () async {
