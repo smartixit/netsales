@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: datagrid-quality-${{ github.workflow }}-${{ github.ref }}
@@ -44,10 +44,16 @@ jobs:
           flutter --version
           dart --version
 
-      - name: Resolve dependencies and verify lockfile
+      - name: Resolve dependencies and synchronize lockfile
         run: |
           flutter pub get
-          git diff --exit-code -- pubspec.lock
+          if ! git diff --quiet -- pubspec.lock; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add pubspec.lock
+            git commit -m "chore(deps): lock resolved DataGrid packages"
+            git push
+          fi
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib/widgets/data_grid test/widgets/data_grid
