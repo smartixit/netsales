@@ -45,6 +45,7 @@ jobs:
         run: |
           flutter --version
           dart --version
+          java -version
 
       - name: Resolve dependencies and verify lockfile
         run: |
@@ -99,11 +100,43 @@ jobs:
       - name: Build Android debug APK
         run: flutter build apk --debug
 
+      - name: Prepare ephemeral signing key for release verification
+        run: |
+          keytool -genkeypair -v \
+            -keystore "$RUNNER_TEMP/netsales-ci-release.p12" \
+            -storetype PKCS12 \
+            -storepass "netsales-ci-only-password" \
+            -keypass "netsales-ci-only-password" \
+            -alias netsales-ci \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 2 \
+            -dname "CN=NetSales CI Verification"
+
+          cat > android/key.properties <<EOF
+          storePassword=netsales-ci-only-password
+          keyPassword=netsales-ci-only-password
+          keyAlias=netsales-ci
+          storeFile=$RUNNER_TEMP/netsales-ci-release.p12
+          EOF
+
+      - name: Build Android release APK
+        run: flutter build apk --release
+
       - name: Upload APK verification artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: netsales-datagrid-android-debug
           path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Android release verification artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netsales-android-release-verification
+          path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 7
