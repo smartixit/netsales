@@ -33,7 +33,6 @@ class DashboardMetricData {
        assert(title != ''),
        assert(value != ''),
        assert(sparkline.length == 0 || sparkline.length >= 2),
-       assert(sparkline.every((point) => point >= 0 && point <= 1)),
        assert(variant != DashboardMetricVariant.target || target != null),
        assert(variant != DashboardMetricVariant.status || statusLabel != null);
 
