@@ -98,7 +98,7 @@ jobs:
           dart --version
 
           echo "=== Analyzer environment ==="
-          env | sort | grep -E '^(DART|FLUTTER|PUB|CI)_' || true
+          env | sort | grep -E "^(DART|FLUTTER|PUB|CI)_" || true
 
           echo "=== Analysis options file ==="
           git status --short -- analysis_options.yaml
@@ -107,29 +107,13 @@ jobs:
           cat analysis_options.yaml
 
           echo "=== Analysis options files in checkout ==="
-          find . -name analysis_options.yaml -not -path './.git/*' -not -path './.dart_tool/*' -not -path './build/*' -print
+          find . -name analysis_options.yaml -not -path "./.git/*" -not -path "./.dart_tool/*" -not -path "./build/*" -print
 
           echo "=== Runtime mutation message source, if present in checkout ==="
           grep -RIn --exclude-dir=.git --exclude-dir=.dart_tool --exclude-dir=build -F "Upgrading analysis_options.yaml" . || true
 
           echo "=== Resolved analyzer/lint packages ==="
-          grep -A8 -E '^  (analyzer|flutter_lints|lints):
-      - name: Run DataGrid tests
-        run: flutter test test/widgets/data_grid
-
-      - name: Run complete Flutter test suite
-        run: flutter test
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.14.3'
-
-      - name: Compile Android Debug sources without packaging an APK
-        run: |
-          cd android
-          gradle --no-daemon :app:checkDebugAarMetadata :app:compileDebugKotlin :app:compileDebugJavaWithJavac :app:compileFlutterBuildDebug
- pubspec.lock || true
+          grep -A8 -E "analyzer|flutter_lints|lints" pubspec.lock || true
 
           echo "=== Files reported by analyzer ==="
           git status --short -- lib/core/cache/netsales_cache_manager.dart lib/features/auth/presentation/controllers/active_sessions_controller.dart lib/features/onboarding/presentation/controllers/onboarding_controller.dart lib/features/workspace/data/datasources/workspace_local_data_source.dart lib/features/workspace/presentation/controllers/workspace_coordinator_controller.dart
