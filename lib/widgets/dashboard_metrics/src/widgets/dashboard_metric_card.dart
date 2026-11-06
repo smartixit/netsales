@@ -20,6 +20,7 @@ class DashboardMetricCard extends StatelessWidget {
     this.state = DashboardMetricState.data,
     this.emptyMessage,
     this.errorMessage,
+    this.retryLabel = 'Retry',
     this.onRetry,
     this.onTap,
     this.semanticsLabel,
@@ -30,6 +31,7 @@ class DashboardMetricCard extends StatelessWidget {
   final DashboardMetricState state;
   final String? emptyMessage;
   final String? errorMessage;
+  final String retryLabel;
   final VoidCallback? onRetry;
   final VoidCallback? onTap;
   final String? semanticsLabel;
@@ -71,6 +73,7 @@ class DashboardMetricCard extends StatelessWidget {
                 DashboardMetricState.error => _ErrorMessage(
                     message: errorMessage ?? 'Unable to load this metric',
                     onRetry: onRetry,
+                    retryLabel: retryLabel,
                   ),
                 DashboardMetricState.data => _MetricContent(
                     metric: metric,
@@ -477,9 +480,14 @@ class _StateMessage extends StatelessWidget {
 }
 
 class _ErrorMessage extends StatelessWidget {
-  const _ErrorMessage({required this.message, this.onRetry});
+  const _ErrorMessage({
+    required this.message,
+    required this.retryLabel,
+    this.onRetry,
+  });
 
   final String message;
+  final String retryLabel;
   final VoidCallback? onRetry;
 
   @override
@@ -495,7 +503,7 @@ class _ErrorMessage extends StatelessWidget {
           TextButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Retry'),
+            label: Text(retryLabel),
           ),
         ],
       ],
