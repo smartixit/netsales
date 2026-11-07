@@ -67,16 +67,17 @@ void main() {
       find.byType(sf.SfCartesianChart),
     );
     final line = chart.series.single as sf.LineSeries<ChartDataPoint, dynamic>;
-    expect(line.trendlines, hasLength(2));
-    expect(line.trendlines.first.type, sf.TrendlineType.movingAverage);
-    expect(line.trendlines.first.period, 3);
-    expect(line.trendlines.first.forwardForecast, 2);
-    expect(line.trendlines.first.backwardForecast, 1);
-    expect(line.trendlines.last.type, sf.TrendlineType.linear);
+    final trendlines = line.trendlines ?? const <sf.Trendline>[];
+    expect(trendlines, hasLength(2));
+    expect(trendlines.first.type, sf.TrendlineType.movingAverage);
+    expect(trendlines.first.period, 3);
+    expect(trendlines.first.forwardForecast, 2);
+    expect(trendlines.first.backwardForecast, 1);
+    expect(trendlines.last.type, sf.TrendlineType.linear);
 
     final yAxis = chart.primaryYAxis as sf.NumericAxis;
     expect(yAxis.plotBands, hasLength(1));
-    expect(yAxis.plotBands!.single.start, 25);
+    expect(yAxis.plotBands.single.start, 25);
     expect(yAxis.plotBands!.single.end, 25);
     expect(yAxis.plotBands!.single.text, 'الحد المستهدف');
     expect(tester.takeException(), isNull);
