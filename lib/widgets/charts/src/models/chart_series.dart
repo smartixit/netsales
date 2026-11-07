@@ -13,7 +13,8 @@ class ChartSeries {
     this.data = const <ChartDataPoint>[],
     this.liveDataSource,
     this.color,
-    this.width = 2.5,
+    this.seriesWidth = 0.7,
+    this.strokeWidth = 2.5,
     this.opacity = 0.88,
     this.isVisible = true,
     this.isVisibleInLegend = true,
@@ -31,7 +32,11 @@ class ChartSeries {
   final List<ChartDataPoint> data;
   final ChartLiveDataSource<ChartDataPoint>? liveDataSource;
   final Color? color;
-  final double width;
+  /// Relative category/financial/box width expected by Syncfusion (0..1).
+  final double seriesWidth;
+
+  /// Stroke thickness in logical pixels for line, area and outline series.
+  final double strokeWidth;
   final double opacity;
   final bool isVisible;
   final bool isVisibleInLegend;
