@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../enums/chart_family.dart';
 import '../enums/chart_state.dart';
+import '../controllers/chart_controller.dart';
+import '../enums/chart_zoom_mode.dart';
 import '../models/chart_definition.dart';
 import '../models/chart_interaction.dart';
 import '../models/chart_series.dart';
@@ -21,11 +24,13 @@ class ChartRenderer extends StatefulWidget {
     required this.definition,
     this.onPointTap,
     this.onRetry,
+    this.controller,
   });
 
   final ChartDefinition definition;
   final ValueChanged<ChartPointInteraction>? onPointTap;
   final VoidCallback? onRetry;
+  final ChartController? controller;
 
   @override
   State<ChartRenderer> createState() => _ChartRendererState();
@@ -35,6 +40,54 @@ class _ChartRendererState extends State<ChartRenderer> {
   static int _nextBindingScope = 0;
 
   late final String _bindingScope = 'chart-${_nextBindingScope++}';
+  final Object _controllerOwner = Object();
+  ZoomPanBehavior? _zoomPanBehavior;
+
+  bool _isCartesian(ChartFamily family) => switch (family) {
+        ChartFamily.cartesian || ChartFamily.comparison ||
+        ChartFamily.statistical || ChartFamily.financial => true,
+        _ => false,
+      };
+
+  ZoomPanBehavior? _createZoomBehavior(ChartDefinition definition) {
+    final options = definition.options;
+    if (!_isCartesian(definition.family) || !options.enableZoom) return null;
+    return ZoomPanBehavior(
+      enablePinching: options.enablePinching,
+      enablePanning: options.enablePanning,
+      enableSelectionZooming: options.enableSelectionZooming,
+      enableMouseWheelZooming: options.enableMouseWheelZooming,
+      enableDoubleTapZooming: options.enableDoubleTapZooming,
+      enableDirectionalZooming: options.enableDirectionalZooming,
+      zoomMode: switch (options.zoomMode) {
+        ChartZoomMode.horizontal => ZoomMode.x,
+        ChartZoomMode.vertical => ZoomMode.y,
+        ChartZoomMode.both => ZoomMode.xy,
+      },
+    );
+  }
+
+  void _syncController() {
+    final behavior = _zoomPanBehavior;
+    if (behavior == null) {
+      widget.controller?.detach(_controllerOwner);
+      return;
+    }
+    widget.controller?.attach(
+      owner: _controllerOwner,
+      reset: behavior.reset,
+      zoomIn: behavior.zoomIn,
+      zoomOut: behavior.zoomOut,
+      pan: behavior.panToDirection,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _zoomPanBehavior = _createZoomBehavior(widget.definition);
+    _syncController();
+  }
 
   String _bindingId(String seriesId) => '$_bindingScope:$seriesId';
 
@@ -47,6 +100,14 @@ class _ChartRendererState extends State<ChartRenderer> {
   @override
   void didUpdateWidget(covariant ChartRenderer oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.controller, widget.controller)) {
+      oldWidget.controller?.detach(_controllerOwner);
+    }
+    if (oldWidget.definition.options != widget.definition.options ||
+        oldWidget.definition.family != widget.definition.family) {
+      _zoomPanBehavior = _createZoomBehavior(widget.definition);
+    }
+    _syncController();
 
     final oldDefinition = oldWidget.definition;
     final newDefinition = widget.definition;
@@ -77,6 +138,7 @@ class _ChartRendererState extends State<ChartRenderer> {
   @override
   void dispose() {
     _unbindSeries(widget.definition.series);
+    widget.controller?.detach(_controllerOwner);
     super.dispose();
   }
 
@@ -112,6 +174,7 @@ class _ChartRendererState extends State<ChartRenderer> {
           ),
           definition: definition,
           bindingScope: _bindingScope,
+          zoomPanBehavior: _zoomPanBehavior,
           onPointTap: widget.onPointTap,
         ),
       ChartFamily.circular => CircularChartRenderer(
