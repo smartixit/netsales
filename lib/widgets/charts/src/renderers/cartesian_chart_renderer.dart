@@ -14,10 +14,12 @@ class CartesianChartRenderer extends StatelessWidget {
   const CartesianChartRenderer({
     super.key,
     required this.definition,
+    required this.bindingScope,
     this.onPointTap,
   });
 
   final ChartDefinition definition;
+  final String bindingScope;
   final ValueChanged<ChartPointInteraction>? onPointTap;
 
   @override
@@ -164,11 +166,14 @@ class CartesianChartRenderer extends StatelessWidget {
     final type = series.resolveType(definition.type);
     final data = series.dataSource;
     final color = series.color ?? theme.palette.first;
-    final callback = series.liveDataSource?.bindSyncfusion;
-    final onRendererCreated = callback == null
+    final source = series.liveDataSource;
+    final onRendererCreated = source == null
         ? null
         : (ChartSeriesController controller) {
-            callback(controller.updateDataSource);
+            source.bindSyncfusion(
+              controller.updateDataSource,
+              bindingId: '$bindingScope:${series.id}',
+            );
           };
     final pointTap = onPointTap == null
         ? null
@@ -193,25 +198,6 @@ class CartesianChartRenderer extends StatelessWidget {
       borderColor: theme.cardSurface,
       borderWidth: 1.5,
     );
-    final common = <String, Object?>{
-      'dataSource': data,
-      'xValueMapper': (ChartDataPoint point, int index) => point.x ?? index,
-      'yValueMapper': (ChartDataPoint point, int _) => point.y ?? 0,
-      'name': series.name,
-      'color': color,
-      'opacity': series.opacity,
-      'width': series.width,
-      'enableTooltip': definition.options.showTooltip,
-      'enableTrackball': definition.options.enableTrackball,
-      'dataLabelSettings': labels,
-      'initialIsVisible': series.isVisible,
-      'isVisibleInLegend': series.isVisibleInLegend,
-      'xAxisName': series.xAxisName,
-      'yAxisName': series.yAxisName,
-      'onRendererCreated': onRendererCreated,
-      'onPointTap': pointTap,
-    };
-
     switch (type) {
       case ChartType.line:
         return LineSeries<ChartDataPoint, dynamic>(

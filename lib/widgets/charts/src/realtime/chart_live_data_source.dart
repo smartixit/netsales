@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-/// Incremental change passed to a Syncfusion series controller.
 @immutable
 class ChartDataSourceUpdate {
   const ChartDataSourceUpdate({
@@ -32,8 +31,6 @@ class ChartDataSourceUpdate {
 
 typedef ChartSeriesUpdateHandler = void Function(ChartDataSourceUpdate update);
 
-/// Mirrors Syncfusion's updateDataSource named arguments. Its integer indexes
-/// are non-null because Syncfusion uses -1 to represent an omitted single index.
 typedef ChartSyncfusionUpdateCallback = void Function({
   List<int>? addedDataIndexes,
   List<int>? removedDataIndexes,
@@ -43,13 +40,10 @@ typedef ChartSyncfusionUpdateCallback = void Function({
   int updatedDataIndex,
 });
 
-/// Mutable, bounded and stream-capable source for real-time charts.
+/// Mutable, bounded source for multiple live Syncfusion charts.
 ///
-/// Cartesian, circular, funnel and pyramid renderers bind this source to the
-/// matching Syncfusion series controller and forward the documented
-/// updateDataSource indexes. Spark charts listen to this source and rebuild
-/// their compact numeric renderer because the spark widgets expose a numeric
-/// list API rather than a per-series updateDataSource controller.
+/// Each renderer must bind with its own unique bindingId and detach only that
+/// binding. The source remains owned by the host feature/controller.
 class ChartLiveDataSource<T> extends ChangeNotifier {
   ChartLiveDataSource({
     Iterable<T> initialData = const <Never>[],
@@ -67,34 +61,49 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
 
   final List<T> _data;
   final int? maxDataPoints;
-  ChartSeriesUpdateHandler? _updateHandler;
+  final Map<String, ChartSeriesUpdateHandler> _syncfusionBindings =
+      <String, ChartSeriesUpdateHandler>{};
+  ChartSeriesUpdateHandler? _defaultUpdateHandler;
   StreamSubscription<T>? _subscription;
   bool _disposed = false;
 
-  /// The mutable list bound to Syncfusion. Mutate it only through this class.
+  /// Exact mutable list instance bound to Syncfusion; mutate through this class.
   List<T> get data => _data;
+
+  /// Immutable snapshot for consumers that do not own a chart binding.
+  List<T> get snapshot => List<T>.unmodifiable(_data);
 
   int get length => _data.length;
   bool get isEmpty => _data.isEmpty;
   bool get isNotEmpty => _data.isNotEmpty;
+  bool get hasActiveStream => _subscription != null;
 
+  /// Compatibility binding for one non-Syncfusion consumer.
   void bind(ChartSeriesUpdateHandler handler) {
     _ensureActive();
-    _updateHandler = handler;
+    _defaultUpdateHandler = handler;
   }
 
-  void unbind() {
-    _updateHandler = null;
+  /// Detaches one renderer. Without an id, all bindings are cleared.
+  void unbind({String? bindingId}) {
+    if (bindingId == null) {
+      _syncfusionBindings.clear();
+      _defaultUpdateHandler = null;
+    } else {
+      _syncfusionBindings.remove(bindingId);
+    }
   }
 
-  /// Binds a Syncfusion Cartesian, circular, funnel or pyramid series
-  /// controller directly to this source.
-  void bindSyncfusion(ChartSyncfusionUpdateCallback updateDataSource) {
-    bind((change) {
+  /// Binds a Syncfusion series controller without replacing other charts.
+  void bindSyncfusion(
+    ChartSyncfusionUpdateCallback updateDataSource, {
+    String bindingId = 'default',
+  }) {
+    _ensureActive();
+    _syncfusionBindings[bindingId] = (change) {
       if (change.isEmpty) {
         return;
       }
-
       updateDataSource(
         addedDataIndexes: change.addedDataIndexes,
         removedDataIndexes: change.removedDataIndexes,
@@ -103,18 +112,16 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
         removedDataIndex: change.removedDataIndex ?? -1,
         updatedDataIndex: change.updatedDataIndex ?? -1,
       );
-    });
+    };
   }
 
   void append(T value) {
     _ensureActive();
     var removedCount = 0;
-
     if (maxDataPoints != null && _data.length >= maxDataPoints!) {
       removedCount = _data.length - maxDataPoints! + 1;
       _data.removeRange(0, removedCount);
     }
-
     _data.add(value);
     _notifyChange(
       ChartDataSourceUpdate(
@@ -142,7 +149,6 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
           _data.removeRange(0, removedCount);
         }
       }
-
       if (incoming.length > maxDataPoints!) {
         incoming.removeRange(0, incoming.length - maxDataPoints!);
       }
@@ -150,7 +156,6 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
 
     final firstAddedIndex = _data.length;
     _data.addAll(incoming);
-
     _notifyChange(
       ChartDataSourceUpdate(
         addedDataIndexes: List<int>.generate(
@@ -179,18 +184,16 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
     return removed;
   }
 
-  /// Replaces the complete list and reports both index ranges to Syncfusion.
-  /// The renderer can use the same source instance without recreating its chart.
+  /// Replaces all points and reports the affected indexes.
   void replaceAll(Iterable<T> values) {
     _ensureActive();
     final previousLength = _data.length;
-
     _data
       ..clear()
       ..addAll(values);
     _trimInitialData();
-
     final nextLength = _data.length;
+
     _notifyChange(
       ChartDataSourceUpdate(
         removedDataIndexes: previousLength == 0
@@ -203,9 +206,8 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
     );
   }
 
-  /// Connects a transport stream (WebSocket, SSE, or a polling stream).
-  /// The host/controller owns the transport and should call [stopStream] or
-  /// dispose the source when its subscription lifecycle ends.
+  /// Connects a WebSocket, SSE, polling, or other transport stream.
+  /// Rebinding cancels the previous subscription before listening to the new one.
   Future<void> bindStream(
     Stream<T> stream, {
     void Function(Object error, StackTrace stackTrace)? onError,
@@ -213,10 +215,14 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
   }) async {
     _ensureActive();
     await stopStream();
+    _ensureActive();
     _subscription = stream.listen(
       append,
       onError: onError,
-      onDone: onDone,
+      onDone: () {
+        _subscription = null;
+        onDone?.call();
+      },
       cancelOnError: false,
     );
   }
@@ -231,7 +237,13 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
     if (_disposed) {
       return;
     }
-    _updateHandler?.call(update);
+    final handlers = List<ChartSeriesUpdateHandler>.of(
+      _syncfusionBindings.values,
+    );
+    for (final handler in handlers) {
+      handler(update);
+    }
+    _defaultUpdateHandler?.call(update);
     notifyListeners();
   }
 
@@ -250,7 +262,8 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    _updateHandler = null;
+    _syncfusionBindings.clear();
+    _defaultUpdateHandler = null;
     unawaited(_subscription?.cancel());
     _subscription = null;
     super.dispose();
