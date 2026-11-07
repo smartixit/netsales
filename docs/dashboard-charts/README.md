@@ -58,6 +58,22 @@ Wrap the feature surface with `NetSalesChartsThemeAdapter.wrap` to adapt
 the application Design System tokens. The reusable renderers themselves do
 not depend on GetX, API clients, repositories, or NetSales domain models.
 
+## Advanced analysis and axis context
+
+Cartesian series support configurable trendline overlays: linear, exponential,
+logarithmic, polynomial, power, and moving average. Configure moving-average
+period, polynomial order, styling, tooltip/legend visibility, and forward or
+backward visual projection.
+
+Each configured primary or additional axis can display shaded plot bands or
+labeled reference levels. Use `ChartPlotBandConfig.referenceLine` for a single
+threshold or the regular constructor for a range.
+
+Trendline projections are visual statistical overlays, not authoritative
+NetSales financial forecasts. Horizontal Bar, StackedBar and StackedBar100
+series do not accept Syncfusion trendlines; the renderer rejects that
+unsupported combination explicitly.
+
 ## Live data
 
 The host feature owns the source and its lifecycle. The renderer registers a
@@ -87,7 +103,7 @@ The Cartesian, circular, funnel, and pyramid renderers use Syncfusion's
 `updateDataSource` method. Changes are sent as added, removed, or updated
 indexes rather than replacing the complete chart widget. Sources support
 multiple independent chart bindings and an optional bounded data window.
-Spark charts listen to the same source and rebuild their compact data list.
+Spark charts listen to every visible live source and rebuild their compact data lists. A live source may initially be empty; it transitions from the empty state to the chart when its first point arrives.
 
 Do not mutate `liveSales.data` directly. Use the source mutation methods so
 the corresponding Syncfusion controllers receive the correct change indexes.
@@ -129,7 +145,7 @@ The host supplies export/share callbacks so the widget layer remains decoupled
 from storage, permission, and platform-specific behavior.
 
 `ChartDataTable` adapts its columns to the point shape, including range,
-financial, bubble, and distribution fields.
+financial, bubble, distribution, and waterfall subtotal/total semantics. CSV also exports the subtotal and final-total flags.
 
 ## Export and sharing
 

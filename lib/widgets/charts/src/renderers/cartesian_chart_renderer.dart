@@ -940,7 +940,6 @@ class CartesianChartRenderer extends StatelessWidget {
           isVisibleInLegend: series.isVisibleInLegend,
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
-          trendlines: trendlines,
 
           onRendererCreated: onRendererCreated,
         );
