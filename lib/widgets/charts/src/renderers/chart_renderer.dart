@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/charts.dart' hide ChartSeries;
 
 import '../enums/chart_family.dart';
 import '../enums/chart_state.dart';
