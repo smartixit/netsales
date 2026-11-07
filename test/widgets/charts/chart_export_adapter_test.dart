@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:netsales/widgets/charts/adapters/netsales_charts_export_adapter.dart';
 import 'package:netsales/widgets/charts/charting.dart';
 
 void main() {
