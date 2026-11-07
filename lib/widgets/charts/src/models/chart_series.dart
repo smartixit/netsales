@@ -22,7 +22,9 @@ class ChartSeries {
     this.xAxisName,
     this.yAxisName,
     this.binInterval,
-  });
+  }) : assert(seriesWidth >= 0 && seriesWidth <= 1),
+       assert(strokeWidth >= 0),
+       assert(opacity >= 0 && opacity <= 1);
 
   final String id;
   final String name;
