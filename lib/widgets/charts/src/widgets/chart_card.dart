@@ -74,8 +74,12 @@ class ChartCard extends StatelessWidget {
     final theme = ChartsTheme.of(context);
     final scheme = Theme.of(context).colorScheme;
     final resetZoom = onResetZoom ?? chartController?.resetZoom;
-    final hasExportActions = onExportPng != null || onExportPdf != null ||
-        onExportCsv != null || onSharePng != null || onSharePdf != null ||
+    final hasExportActions =
+        onExportPng != null ||
+        onExportPdf != null ||
+        onExportCsv != null ||
+        onSharePng != null ||
+        onSharePdf != null ||
         onShareCsv != null;
     final toolbar = <Widget>[
       ...actions,
@@ -116,16 +120,22 @@ class ChartCard extends StatelessWidget {
             switch (action) {
               case _ChartCardAction.exportPng:
                 onExportPng?.call();
+                break;
               case _ChartCardAction.exportPdf:
                 onExportPdf?.call();
+                break;
               case _ChartCardAction.exportCsv:
                 onExportCsv?.call();
+                break;
               case _ChartCardAction.sharePng:
                 onSharePng?.call();
+                break;
               case _ChartCardAction.sharePdf:
                 onSharePdf?.call();
+                break;
               case _ChartCardAction.shareCsv:
                 onShareCsv?.call();
+                break;
             }
           },
           itemBuilder: (context) => [
@@ -144,7 +154,9 @@ class ChartCard extends StatelessWidget {
                 value: _ChartCardAction.exportCsv,
                 child: Text('تصدير البيانات CSV'),
               ),
-            if (onExportPng != null || onExportPdf != null || onExportCsv != null)
+            if (onExportPng != null ||
+                onExportPdf != null ||
+                onExportCsv != null)
               const PopupMenuDivider(),
             if (onSharePng != null)
               const PopupMenuItem(
@@ -347,7 +359,6 @@ class ChartToolbarAction extends StatelessWidget {
     );
   }
 }
-
 
 enum _ChartCardAction {
   exportPng,
