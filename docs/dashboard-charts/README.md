@@ -131,6 +131,10 @@ provides directional pan methods. Configure `ChartOptions.zoomMode` to limit
 zooming to the horizontal, vertical, or both axes. Double-tap, directional,
 pinch, selection, wheel, and pan gestures are separately configurable.
 
+## Legend interaction
+
+Set `ChartOptions.toggleSeriesVisibility` to allow users to select a legend item to show or hide its series. The default is enabled and is applied consistently to Cartesian, circular, funnel, and pyramid charts.
+
 ## Chart card, states, and data view
 
 `ChartCard` supports:

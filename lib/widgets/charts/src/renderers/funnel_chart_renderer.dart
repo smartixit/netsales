@@ -43,6 +43,7 @@ class FunnelChartRenderer extends StatelessWidget {
               ? LegendPosition.bottom
               : LegendPosition.right,
           overflowMode: LegendItemOverflowMode.wrap,
+          toggleSeriesVisibility: definition.options.toggleSeriesVisibility,
           textStyle: TextStyle(color: theme.mutedText),
         ),
         tooltipBehavior: TooltipBehavior(
@@ -62,6 +63,7 @@ class FunnelChartRenderer extends StatelessWidget {
               ? LegendPosition.bottom
               : LegendPosition.right,
           overflowMode: LegendItemOverflowMode.wrap,
+          toggleSeriesVisibility: definition.options.toggleSeriesVisibility,
           textStyle: TextStyle(color: theme.mutedText),
         ),
         tooltipBehavior: TooltipBehavior(

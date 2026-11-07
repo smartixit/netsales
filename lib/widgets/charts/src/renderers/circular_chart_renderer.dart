@@ -35,6 +35,7 @@ class CircularChartRenderer extends StatelessWidget {
             ? LegendPosition.bottom
             : LegendPosition.right,
         overflowMode: LegendItemOverflowMode.wrap,
+        toggleSeriesVisibility: options.toggleSeriesVisibility,
         textStyle: TextStyle(color: theme.mutedText),
       ),
       tooltipBehavior: TooltipBehavior(enable: options.showTooltip),

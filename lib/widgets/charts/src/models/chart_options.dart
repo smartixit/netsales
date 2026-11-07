@@ -30,6 +30,7 @@ class ChartOptions {
     this.animate = true,
     this.animationDuration = 650,
     this.legendAtBottom = true,
+    this.toggleSeriesVisibility = true,
     this.showMeanInBoxPlot = false,
     this.solidCandles = false,
     this.autoScrollingDelta,
@@ -59,6 +60,9 @@ class ChartOptions {
   final bool animate;
   final int animationDuration;
   final bool legendAtBottom;
+
+  /// Allow users to show or hide a series by selecting its legend item.
+  final bool toggleSeriesVisibility;
   final bool showMeanInBoxPlot;
   final bool solidCandles;
 
