@@ -74,7 +74,7 @@ abstract final class NetSalesChartsExportAdapter {
       }
     }
     final csv = rows.map((row) => row.map(_escape).join(',')).join('\r\n');
-    return Uint8List.fromList([0xEF, 0xBB, 0xBF, ...utf8.encode(csv + '\r\n')]);
+    return Uint8List.fromList([0xEF, 0xBB, 0xBF, ...utf8.encode('$csv\r\n')]);
   }
 
   static String _value(Object? value) {
@@ -85,7 +85,7 @@ abstract final class NetSalesChartsExportAdapter {
 
   static String _escape(String value) {
     if (!value.contains(RegExp(r'[",\r\n]'))) return value;
-    return '"' + value.replaceAll('"', '""') + '"';
+    return '"${value.replaceAll('"', '""')}"';
   }
 
   static Future<FileExportResult> saveCsv({required List<ChartSeries> series, required String title}) {
@@ -98,11 +98,11 @@ abstract final class NetSalesChartsExportAdapter {
   static Future<bool> sharePng({required GlobalKey boundaryKey, required String title}) async {
     final bytes = await capturePng(boundaryKey);
     if (bytes == null || bytes.isEmpty) return false;
-    return _share(bytes, title + '.png', 'image/png');
+    return _share(bytes, '$title.png', 'image/png');
   }
 
   static Future<bool> shareCsv({required List<ChartSeries> series, required String title}) =>
-      _share(buildCsvBytes(series), title + '.csv', 'text/csv');
+      _share(buildCsvBytes(series), '$title.csv', 'text/csv');
 
   static Future<bool> sharePdf({required GlobalKey boundaryKey, required String title}) async {
     final bytes = await capturePng(boundaryKey);
@@ -115,7 +115,7 @@ abstract final class NetSalesChartsExportAdapter {
     try {
       final result = await SharePlus.instance.share(ShareParams(
         files: [XFile.fromData(await document.save(), mimeType: 'application/pdf')],
-        fileNameOverrides: [title + '.pdf'],
+        fileNameOverrides: ['$title.pdf'],
         downloadFallbackEnabled: true,
       ));
       return result.status == ShareResultStatus.success;
