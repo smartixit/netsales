@@ -17,11 +17,13 @@ class CartesianChartRenderer extends StatelessWidget {
     super.key,
     required this.definition,
     required this.bindingScope,
+    required this.zoomPanBehavior,
     this.onPointTap,
   });
 
   final ChartDefinition definition;
   final String bindingScope;
+  final ZoomPanBehavior? zoomPanBehavior;
   final ValueChanged<ChartPointInteraction>? onPointTap;
 
   @override
@@ -68,14 +70,7 @@ class CartesianChartRenderer extends StatelessWidget {
               activationMode: ActivationMode.singleTap,
             )
           : null,
-      zoomPanBehavior: options.enableZoom
-          ? ZoomPanBehavior(
-              enablePinching: options.enablePinching,
-              enablePanning: options.enablePanning,
-              enableSelectionZooming: options.enableSelectionZooming,
-              enableMouseWheelZooming: options.enableMouseWheelZooming,
-            )
-          : null,
+      zoomPanBehavior: zoomPanBehavior,
       series: definition.series
           .map((series) => _buildSeries(series, theme))
           .toList(growable: false),
@@ -106,6 +101,7 @@ class CartesianChartRenderer extends StatelessWidget {
       ChartAxisKind.category => CategoryAxis(
           name: config.name,
           title: title,
+          labelFormat: config.labelFormat,
           labelStyle: labelStyle,
           labelRotation: config.labelRotation,
           isVisible: config.isVisible,
@@ -118,6 +114,7 @@ class CartesianChartRenderer extends StatelessWidget {
       ChartAxisKind.numeric => NumericAxis(
           name: config.name,
           title: title,
+          labelFormat: config.labelFormat,
           labelStyle: labelStyle,
           minimum: config.minimum?.toDouble(),
           maximum: config.maximum?.toDouble(),
@@ -133,6 +130,7 @@ class CartesianChartRenderer extends StatelessWidget {
       ChartAxisKind.dateTime => DateTimeAxis(
           name: config.name,
           title: title,
+          labelFormat: config.labelFormat,
           labelStyle: labelStyle,
           labelRotation: config.labelRotation,
           isVisible: config.isVisible,
@@ -145,6 +143,7 @@ class CartesianChartRenderer extends StatelessWidget {
       ChartAxisKind.dateTimeCategory => DateTimeCategoryAxis(
           name: config.name,
           title: title,
+          labelFormat: config.labelFormat,
           labelStyle: labelStyle,
           labelRotation: config.labelRotation,
           isVisible: config.isVisible,
@@ -157,6 +156,7 @@ class CartesianChartRenderer extends StatelessWidget {
       ChartAxisKind.logarithmic => LogarithmicAxis(
           name: config.name,
           title: title,
+          labelFormat: config.labelFormat,
           labelStyle: labelStyle,
           minimum: config.minimum?.toDouble(),
           maximum: config.maximum?.toDouble(),
