@@ -15,7 +15,11 @@ void main() {
       ChartType.rangeArea,
       ChartType.splineRangeArea,
     ])
-      (family: ChartFamily.cartesian, type: type, point: const ChartDataPoint(x: 1, y: 12, low: 8, high: 16)),
+      (
+        family: ChartFamily.cartesian,
+        type: type,
+        point: const ChartDataPoint(x: 1, y: 12, low: 8, high: 16),
+      ),
     for (final type in [
       ChartType.column,
       ChartType.bar,
@@ -29,9 +33,21 @@ void main() {
       ChartType.stackedLine100,
       ChartType.waterfall,
     ])
-      (family: ChartFamily.comparison, type: type, point: const ChartDataPoint(x: 'Jan', y: 12)),
-    for (final type in [ChartType.scatter, ChartType.bubble, ChartType.histogram])
-      (family: ChartFamily.statistical, type: type, point: const ChartDataPoint(x: 2, y: 12, size: 5)),
+      (
+        family: ChartFamily.comparison,
+        type: type,
+        point: const ChartDataPoint(x: 'Jan', y: 12),
+      ),
+    for (final type in [
+      ChartType.scatter,
+      ChartType.bubble,
+      ChartType.histogram,
+    ])
+      (
+        family: ChartFamily.statistical,
+        type: type,
+        point: const ChartDataPoint(x: 2, y: 12, size: 5),
+      ),
     (
       family: ChartFamily.statistical,
       type: ChartType.boxAndWhisker,
@@ -51,14 +67,42 @@ void main() {
       (
         family: ChartFamily.financial,
         type: type,
-        point: const ChartDataPoint(x: 'Jan', low: 7, high: 14, open: 9, close: 12, volume: 100),
+        point: const ChartDataPoint(
+          x: 'Jan',
+          low: 7,
+          high: 14,
+          open: 9,
+          close: 12,
+          volume: 100,
+        ),
       ),
-    for (final type in [ChartType.pie, ChartType.doughnut, ChartType.radialBar])
-      (family: ChartFamily.circular, type: type, point: const ChartDataPoint(x: 'Jan', y: 12)),
+    for (final type in [
+      ChartType.pie,
+      ChartType.doughnut,
+      ChartType.radialBar,
+    ])
+      (
+        family: ChartFamily.circular,
+        type: type,
+        point: const ChartDataPoint(x: 'Jan', y: 12),
+      ),
     for (final type in [ChartType.funnel, ChartType.pyramid])
-      (family: ChartFamily.funnel, type: type, point: const ChartDataPoint(x: 'Visits', y: 12)),
-    for (final type in [ChartType.sparkLine, ChartType.sparkArea, ChartType.sparkBar, ChartType.sparkWinLoss])
-      (family: ChartFamily.spark, type: type, point: const ChartDataPoint(x: 1, y: 12)),
+      (
+        family: ChartFamily.funnel,
+        type: type,
+        point: const ChartDataPoint(x: 'Visits', y: 12),
+      ),
+    for (final type in [
+      ChartType.sparkLine,
+      ChartType.sparkArea,
+      ChartType.sparkBar,
+      ChartType.sparkWinLoss,
+    ])
+      (
+        family: ChartFamily.spark,
+        type: type,
+        point: const ChartDataPoint(x: 1, y: 12),
+      ),
   ];
 
   for (final chartCase in cases) {
