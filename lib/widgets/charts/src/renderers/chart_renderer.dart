@@ -68,7 +68,12 @@ class _ChartRendererState extends State<ChartRenderer> {
   }
 
   void _syncController() {
-    final behavior = _zoomPanBehavior;
+    final definition = widget.definition;
+    final isRenderableCartesianChart =
+        definition.state == ChartState.data &&
+        definition.hasData &&
+        _isCartesian(definition.family);
+    final behavior = isRenderableCartesianChart ? _zoomPanBehavior : null;
     if (behavior == null) {
       widget.controller?.detach(_controllerOwner);
       return;
