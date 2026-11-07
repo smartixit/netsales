@@ -78,8 +78,8 @@ void main() {
     final yAxis = chart.primaryYAxis as sf.NumericAxis;
     expect(yAxis.plotBands, hasLength(1));
     expect(yAxis.plotBands.single.start, 25);
-    expect(yAxis.plotBands!.single.end, 25);
-    expect(yAxis.plotBands!.single.text, 'الحد المستهدف');
+    expect(yAxis.plotBands.single.end, 25);
+    expect(yAxis.plotBands.single.text, 'الحد المستهدف');
     expect(tester.takeException(), isNull);
   });
 
