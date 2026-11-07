@@ -13,12 +13,10 @@ class FunnelChartRenderer extends StatelessWidget {
   const FunnelChartRenderer({
     super.key,
     required this.definition,
-    required this.bindingScope,
     this.onPointTap,
   });
 
   final ChartDefinition definition;
-  final String bindingScope;
   final ValueChanged<ChartPointInteraction>? onPointTap;
 
   @override
@@ -104,10 +102,7 @@ class FunnelChartRenderer extends StatelessWidget {
         textStyle: TextStyle(color: theme.text, fontSize: 11),
       ),
       onRendererCreated: (FunnelSeriesController controller) {
-        source?.bindSyncfusion(
-          controller.updateDataSource,
-          bindingId: '$bindingScope:${series.id}',
-        );
+        source?.bindSyncfusion(controller.updateDataSource);
       },
       onPointTap: pointTap,
     );
@@ -143,10 +138,7 @@ class FunnelChartRenderer extends StatelessWidget {
         textStyle: TextStyle(color: theme.text, fontSize: 11),
       ),
       onRendererCreated: (PyramidSeriesController controller) {
-        source?.bindSyncfusion(
-          controller.updateDataSource,
-          bindingId: '$bindingScope:${series.id}',
-        );
+        source?.bindSyncfusion(controller.updateDataSource);
       },
       onPointTap: pointTap,
     );

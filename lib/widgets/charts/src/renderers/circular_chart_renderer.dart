@@ -13,12 +13,10 @@ class CircularChartRenderer extends StatelessWidget {
   const CircularChartRenderer({
     super.key,
     required this.definition,
-    required this.bindingScope,
     this.onPointTap,
   });
 
   final ChartDefinition definition;
-  final String bindingScope;
   final ValueChanged<ChartPointInteraction>? onPointTap;
 
   @override
@@ -50,6 +48,7 @@ class CircularChartRenderer extends StatelessWidget {
   ) {
     final type = series.resolveType(definition.type);
     final data = series.dataSource;
+    final color = series.color ?? theme.palette.first;
     final source = series.liveDataSource;
     final labelSettings = DataLabelSettings(
       isVisible: definition.options.showDataLabels,
@@ -69,10 +68,7 @@ class CircularChartRenderer extends StatelessWidget {
           };
 
     void onRendererCreated(CircularSeriesController controller) {
-      source?.bindSyncfusion(
-        controller.updateDataSource,
-        bindingId: '$bindingScope:${series.id}',
-      );
+      source?.bindSyncfusion(controller.updateDataSource);
     }
 
     switch (type) {

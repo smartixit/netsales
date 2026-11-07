@@ -6,6 +6,7 @@ import '../enums/chart_state.dart';
 import '../models/chart_definition.dart';
 import '../models/chart_interaction.dart';
 import '../models/chart_series.dart';
+import '../realtime/chart_live_data_source.dart';
 import '../widgets/chart_state_view.dart';
 import 'cartesian_chart_renderer.dart';
 import 'circular_chart_renderer.dart';
@@ -14,8 +15,9 @@ import 'spark_chart_renderer.dart';
 
 /// Shared Syncfusion rendering entry point for all seven chart families.
 ///
-/// It owns only series-controller registrations. Data sources remain owned by
-/// the feature/controller that created them.
+/// This low-level shared wrapper is stateful only to bind/unbind the
+/// imperative Syncfusion series-controller callbacks safely. It does not own
+/// feature or business state; NetSales feature state remains in GetX.
 class ChartRenderer extends StatefulWidget {
   const ChartRenderer({
     super.key,
@@ -33,51 +35,28 @@ class ChartRenderer extends StatefulWidget {
 }
 
 class _ChartRendererState extends State<ChartRenderer> {
-  static int _nextBindingScope = 0;
-
-  late final String _bindingScope = 'chart-\${_nextBindingScope++}';
-
-  String _bindingId(String seriesId) => '$_bindingScope:$seriesId';
-
-  void _unbindSeries(Iterable<ChartSeries> series) {
-    for (final item in series) {
-      item.liveDataSource?.unbind(bindingId: _bindingId(item.id));
-    }
+  Set<ChartLiveDataSource<dynamic>> _sources(ChartDefinition definition) {
+    return definition.series
+        .map((series) => series.liveDataSource)
+        .whereType<ChartLiveDataSource<dynamic>>()
+        .toSet();
   }
 
   @override
   void didUpdateWidget(covariant ChartRenderer oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    final oldDefinition = oldWidget.definition;
-    final newDefinition = widget.definition;
-    final rendererWasReplaced =
-        oldDefinition.state != ChartState.data ||
-        newDefinition.state != ChartState.data ||
-        oldDefinition.family != newDefinition.family;
-
-    if (rendererWasReplaced) {
-      _unbindSeries(oldDefinition.series);
-      return;
-    }
-
-    for (final oldSeries in oldDefinition.series) {
-      final stillBound = newDefinition.series.any(
-        (newSeries) =>
-            newSeries.id == oldSeries.id &&
-            identical(newSeries.liveDataSource, oldSeries.liveDataSource),
-      );
-      if (!stillBound) {
-        oldSeries.liveDataSource?.unbind(
-          bindingId: _bindingId(oldSeries.id),
-        );
-      }
+    final previous = _sources(oldWidget.definition);
+    final current = _sources(widget.definition);
+    for (final source in previous.difference(current)) {
+      source.unbind();
     }
   }
 
   @override
   void dispose() {
-    _unbindSeries(widget.definition.series);
+    for (final source in _sources(widget.definition)) {
+      source.unbind();
+    }
     super.dispose();
   }
 
@@ -98,10 +77,8 @@ class _ChartRendererState extends State<ChartRenderer> {
     }
 
     return switch (definition.family) {
-      ChartFamily.cartesian ||
-      ChartFamily.comparison ||
-      ChartFamily.statistical ||
-      ChartFamily.financial =>
+      ChartFamily.cartesian || ChartFamily.comparison ||
+      ChartFamily.statistical || ChartFamily.financial =>
         CartesianChartRenderer(
           key: ValueKey<Object>(
             Object.hash(
@@ -112,17 +89,14 @@ class _ChartRendererState extends State<ChartRenderer> {
             ),
           ),
           definition: definition,
-          bindingScope: _bindingScope,
           onPointTap: widget.onPointTap,
         ),
       ChartFamily.circular => CircularChartRenderer(
           definition: definition,
-          bindingScope: _bindingScope,
           onPointTap: widget.onPointTap,
         ),
       ChartFamily.funnel => FunnelChartRenderer(
           definition: definition,
-          bindingScope: _bindingScope,
           onPointTap: widget.onPointTap,
         ),
       ChartFamily.spark => SparkChartRenderer(definition: definition),
@@ -130,7 +104,7 @@ class _ChartRendererState extends State<ChartRenderer> {
   }
 }
 
-/// Converts Syncfusion point callback indexes to a framework-neutral event.
+/// Converts Syncfusion's point callback indexes into the neutral public event.
 ChartPointInteraction? resolveChartPointInteraction({
   required List<ChartSeries> series,
   required int? seriesIndex,
