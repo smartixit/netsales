@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
-import '../../../core/themes/app_breakpoints.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_elevation.dart';
 import '../../../core/themes/app_motion.dart';
@@ -50,15 +49,13 @@ class NetSalesChartsThemeAdapter {
     required Widget child,
   }) {
     final baseTheme = Theme.of(context);
+    final extensions = baseTheme.extensions.values
+        .where((extension) => extension is! ChartsTheme)
+        .toList(growable: true);
+    extensions.add(of(context));
+
     return Theme(
-      data: baseTheme.copyWith(
-        extensions: <ThemeExtension<dynamic>>[
-          ...baseTheme.extensions.values.where(
-            (extension) => extension is! ChartsTheme,
-          ),
-          of(context),
-        ],
-      ),
+      data: baseTheme.copyWith(extensions: extensions),
       child: child,
     );
   }
