@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../enums/chart_type.dart';
 import '../realtime/chart_live_data_source.dart';
 import 'chart_data_point.dart';
+import 'chart_trendline_config.dart';
 
 @immutable
 class ChartSeries {
@@ -22,22 +23,18 @@ class ChartSeries {
     this.xAxisName,
     this.yAxisName,
     this.binInterval,
+    this.trendlines = const <ChartTrendlineConfig>[],
   }) : assert(seriesWidth >= 0 && seriesWidth <= 1),
        assert(strokeWidth >= 0),
        assert(opacity >= 0 && opacity <= 1);
 
   final String id;
   final String name;
-
-  /// Overrides the definition's default type for mixed-series charts.
   final ChartType? type;
   final List<ChartDataPoint> data;
   final ChartLiveDataSource<ChartDataPoint>? liveDataSource;
   final Color? color;
-  /// Relative category/financial/box width expected by Syncfusion (0..1).
   final double seriesWidth;
-
-  /// Stroke thickness in logical pixels for line, area and outline series.
   final double strokeWidth;
   final double opacity;
   final bool isVisible;
@@ -46,9 +43,8 @@ class ChartSeries {
   final String? xAxisName;
   final String? yAxisName;
   final double? binInterval;
+  final List<ChartTrendlineConfig> trendlines;
 
-  /// The exact mutable list instance bound to the corresponding Syncfusion
-  /// series. For live charts this is owned by [liveDataSource].
   List<ChartDataPoint> get dataSource => liveDataSource?.data ?? data;
 
   ChartType resolveType(ChartType fallback) => type ?? fallback;

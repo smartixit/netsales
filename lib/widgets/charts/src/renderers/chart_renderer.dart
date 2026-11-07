@@ -14,10 +14,6 @@ import 'circular_chart_renderer.dart';
 import 'funnel_chart_renderer.dart';
 import 'spark_chart_renderer.dart';
 
-/// Shared Syncfusion rendering entry point for all seven chart families.
-///
-/// It owns only renderer callback registrations. Data sources remain owned by
-/// the feature/controller that created them.
 class ChartRenderer extends StatefulWidget {
   const ChartRenderer({
     super.key,
@@ -44,10 +40,12 @@ class _ChartRendererState extends State<ChartRenderer> {
   ZoomPanBehavior? _zoomPanBehavior;
 
   bool _isCartesian(ChartFamily family) => switch (family) {
-        ChartFamily.cartesian || ChartFamily.comparison ||
-        ChartFamily.statistical || ChartFamily.financial => true,
-        _ => false,
-      };
+    ChartFamily.cartesian ||
+    ChartFamily.comparison ||
+    ChartFamily.statistical ||
+    ChartFamily.financial => true,
+    _ => false,
+  };
 
   ZoomPanBehavior? _createZoomBehavior(ChartDefinition definition) {
     final options = definition.options;
@@ -71,7 +69,7 @@ class _ChartRendererState extends State<ChartRenderer> {
     final definition = widget.definition;
     final isRenderableCartesianChart =
         definition.state == ChartState.data &&
-        definition.hasData &&
+        definition.canRender &&
         _isCartesian(definition.family);
     final behavior = isRenderableCartesianChart ? _zoomPanBehavior : null;
     if (behavior == null) {
@@ -159,7 +157,7 @@ class _ChartRendererState extends State<ChartRenderer> {
       );
     }
 
-    if (!definition.hasData) {
+    if (!definition.canRender) {
       return const ChartStateView(state: ChartState.empty);
     }
 
@@ -167,37 +165,35 @@ class _ChartRendererState extends State<ChartRenderer> {
       ChartFamily.cartesian ||
       ChartFamily.comparison ||
       ChartFamily.statistical ||
-      ChartFamily.financial =>
-        CartesianChartRenderer(
-          key: ValueKey<Object>(
-            Object.hash(
-              definition.series.map((series) => series.id).join('|'),
-              definition.series
-                  .map((series) => identityHashCode(series.liveDataSource))
-                  .join('|'),
-            ),
+      ChartFamily.financial => CartesianChartRenderer(
+        key: ValueKey<Object>(
+          Object.hash(
+            definition.series.map((series) => series.id).join('|'),
+            definition.series
+                .map((series) => identityHashCode(series.liveDataSource))
+                .join('|'),
           ),
-          definition: definition,
-          bindingScope: _bindingScope,
-          zoomPanBehavior: _zoomPanBehavior,
-          onPointTap: widget.onPointTap,
         ),
+        definition: definition,
+        bindingScope: _bindingScope,
+        zoomPanBehavior: _zoomPanBehavior,
+        onPointTap: widget.onPointTap,
+      ),
       ChartFamily.circular => CircularChartRenderer(
-          definition: definition,
-          bindingScope: _bindingScope,
-          onPointTap: widget.onPointTap,
-        ),
+        definition: definition,
+        bindingScope: _bindingScope,
+        onPointTap: widget.onPointTap,
+      ),
       ChartFamily.funnel => FunnelChartRenderer(
-          definition: definition,
-          bindingScope: _bindingScope,
-          onPointTap: widget.onPointTap,
-        ),
+        definition: definition,
+        bindingScope: _bindingScope,
+        onPointTap: widget.onPointTap,
+      ),
       ChartFamily.spark => SparkChartRenderer(definition: definition),
     };
   }
 }
 
-/// Converts Syncfusion point indexes to a framework-neutral callback model.
 ChartPointInteraction? resolveChartPointInteraction({
   required List<ChartSeries> series,
   required int? seriesIndex,

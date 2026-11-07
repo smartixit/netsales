@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../enums/chart_axis_kind.dart';
+import 'chart_plot_band_config.dart';
 
 @immutable
 class ChartAxisConfig {
@@ -16,6 +17,7 @@ class ChartAxisConfig {
     this.isInversed = false,
     this.opposedPosition = false,
     this.labelFormat,
+    this.plotBands = const <ChartPlotBandConfig>[],
   });
 
   final ChartAxisKind kind;
@@ -29,4 +31,5 @@ class ChartAxisConfig {
   final bool isInversed;
   final bool opposedPosition;
   final String? labelFormat;
+  final List<ChartPlotBandConfig> plotBands;
 }

@@ -60,7 +60,7 @@ abstract final class NetSalesChartsExportAdapter {
 
   static Uint8List buildCsvBytes(List<ChartSeries> series) {
     final rows = <List<String>>[
-      ['series_id','series_name','index','x','label','y','low','high','open','close','volume','size','samples'],
+      ['series_id','series_name','index','x','label','y','low','high','open','close','volume','size','samples', 'is_intermediate_sum', 'is_total_sum'],
     ];
     for (final item in series) {
       for (var index = 0; index < item.dataSource.length; index++) {
@@ -70,6 +70,8 @@ abstract final class NetSalesChartsExportAdapter {
           _value(point.y), _value(point.low), _value(point.high), _value(point.open),
           _value(point.close), _value(point.volume), _value(point.size),
           point.samples?.join(';') ?? '',
+          point.isIntermediateSum.toString(),
+          point.isTotalSum.toString(),
         ]);
       }
     }

@@ -4,6 +4,8 @@ import 'package:syncfusion_flutter_charts/charts.dart' hide ChartSeries;
 import '../enums/chart_axis_kind.dart';
 import '../enums/chart_type.dart';
 import '../models/chart_axis_config.dart';
+import '../models/chart_plot_band_config.dart';
+import '../models/chart_trendline_config.dart';
 import '../models/chart_data_point.dart';
 import '../models/chart_error_bar_config.dart';
 import '../models/chart_definition.dart';
@@ -77,6 +79,82 @@ class CartesianChartRenderer extends StatelessWidget {
     );
   }
 
+
+  List<PlotBand> _buildPlotBands(
+    List<ChartPlotBandConfig> configs,
+    ChartsTheme theme,
+  ) => configs
+      .map(
+        (band) => PlotBand(
+          isVisible: band.isVisible,
+          start: band.start,
+          end: band.end,
+          associatedAxisStart: band.associatedAxisStart,
+          associatedAxisEnd: band.associatedAxisEnd,
+          color: band.color,
+          opacity: band.opacity,
+          borderColor: band.borderColor,
+          borderWidth: band.borderWidth,
+          dashArray: band.dashArray,
+          text: band.text,
+          textStyle: band.text == null
+              ? null
+              : TextStyle(
+                  color: band.textColor ?? theme.text,
+                  fontSize: band.textFontSize,
+                ),
+          shouldRenderAboveSeries: band.shouldRenderAboveSeries,
+        ),
+      )
+      .toList(growable: false);
+
+  List<Trendline>? _buildTrendlines(
+    ChartSeries series,
+    ChartType type,
+    ChartsTheme theme,
+  ) {
+    if (series.trendlines.isEmpty) return null;
+    if (type == ChartType.bar ||
+        type == ChartType.stackedBar ||
+        type == ChartType.stackedBar100) {
+      throw ArgumentError.value(
+        type,
+        'series.type',
+        'Syncfusion trendlines are not supported by horizontal bar series.',
+      );
+    }
+
+    return series.trendlines
+        .map(
+          (config) => Trendline(
+            type: switch (config.type) {
+              ChartTrendlineType.linear => TrendlineType.linear,
+              ChartTrendlineType.exponential => TrendlineType.exponential,
+              ChartTrendlineType.logarithmic => TrendlineType.logarithmic,
+              ChartTrendlineType.polynomial => TrendlineType.polynomial,
+              ChartTrendlineType.power => TrendlineType.power,
+              ChartTrendlineType.movingAverage => TrendlineType.movingAverage,
+            },
+            name: config.name,
+            color: config.color ?? theme.palette.first,
+            width: config.width,
+            opacity: config.opacity,
+            forwardForecast: config.forwardForecast,
+            backwardForecast: config.backwardForecast,
+            period: config.period,
+            polynomialOrder: config.polynomialOrder,
+            animationDuration: config.animationDuration,
+            animationDelay: config.animationDelay,
+            valueField: config.valueField,
+            dashArray: config.dashArray,
+            isVisible: config.isVisible,
+            isVisibleInLegend: config.isVisibleInLegend,
+            enableTooltip: config.enableTooltip,
+          ),
+        )
+        .toList(growable: false);
+  }
+
   ChartAxis _buildAxis(
     ChartAxisConfig config,
     ChartsTheme theme,
@@ -114,6 +192,8 @@ class CartesianChartRenderer extends StatelessWidget {
           opposedPosition: config.opposedPosition,
           axisLine: axisLine,
           majorGridLines: majorGridLines,
+
+          plotBands: _buildPlotBands(config.plotBands, theme),
           autoScrollingDelta: autoScrollingDelta,
         ),
       ChartAxisKind.numeric => NumericAxis(
@@ -130,6 +210,8 @@ class CartesianChartRenderer extends StatelessWidget {
           opposedPosition: config.opposedPosition,
           axisLine: axisLine,
           majorGridLines: majorGridLines,
+
+          plotBands: _buildPlotBands(config.plotBands, theme),
           autoScrollingDelta: autoScrollingDelta,
         ),
       ChartAxisKind.dateTime => DateTimeAxis(
@@ -143,6 +225,8 @@ class CartesianChartRenderer extends StatelessWidget {
           opposedPosition: config.opposedPosition,
           axisLine: axisLine,
           majorGridLines: majorGridLines,
+
+          plotBands: _buildPlotBands(config.plotBands, theme),
           autoScrollingDelta: autoScrollingDelta,
         ),
       ChartAxisKind.dateTimeCategory => DateTimeCategoryAxis(
@@ -161,6 +245,8 @@ class CartesianChartRenderer extends StatelessWidget {
           opposedPosition: config.opposedPosition,
           axisLine: axisLine,
           majorGridLines: majorGridLines,
+
+          plotBands: _buildPlotBands(config.plotBands, theme),
           autoScrollingDelta: autoScrollingDelta,
         ),
       ChartAxisKind.logarithmic => LogarithmicAxis(
@@ -177,6 +263,8 @@ class CartesianChartRenderer extends StatelessWidget {
           opposedPosition: config.opposedPosition,
           axisLine: axisLine,
           majorGridLines: majorGridLines,
+
+          plotBands: _buildPlotBands(config.plotBands, theme),
           autoScrollingDelta: autoScrollingDelta,
         ),
     };
@@ -214,6 +302,7 @@ class CartesianChartRenderer extends StatelessWidget {
       isVisible: definition.options.showDataLabels,
       textStyle: TextStyle(color: theme.text, fontSize: 10),
     );
+    final trendlines = _buildTrendlines(series, type, theme);
     final marker = MarkerSettings(
       isVisible: definition.options.showMarkers,
       height: 7,
@@ -242,6 +331,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -265,6 +356,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -287,6 +380,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -310,6 +405,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -333,6 +430,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -356,6 +455,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -379,6 +480,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -402,6 +505,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -425,6 +530,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -448,6 +555,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -471,6 +580,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -494,6 +605,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -517,6 +630,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -540,6 +655,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -563,6 +680,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -585,6 +704,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -607,6 +728,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -628,6 +751,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -651,6 +776,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -675,6 +802,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -696,6 +825,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -717,6 +848,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -737,6 +870,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -760,6 +895,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -803,6 +940,8 @@ class CartesianChartRenderer extends StatelessWidget {
           isVisibleInLegend: series.isVisibleInLegend,
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
         );
       case ChartType.rangeColumn:
@@ -825,6 +964,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -850,6 +991,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -869,6 +1012,8 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );
@@ -894,6 +1039,8 @@ class CartesianChartRenderer extends StatelessWidget {
           yAxisName: series.yAxisName,
           enableTooltip: definition.options.showTooltip,
           enableTrackball: definition.options.enableTrackball,
+          trendlines: trendlines,
+
           onRendererCreated: onRendererCreated,
           onPointTap: pointTap,
         );

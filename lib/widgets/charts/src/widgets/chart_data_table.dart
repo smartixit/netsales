@@ -4,7 +4,6 @@ import '../models/chart_data_point.dart';
 import '../models/chart_series.dart';
 import '../theme/charts_theme.dart';
 
-/// Accessible tabular alternative to every supported chart data shape.
 class ChartDataTable extends StatelessWidget {
   const ChartDataTable({super.key, required this.series});
 
@@ -15,7 +14,8 @@ class ChartDataTable extends StatelessWidget {
     final theme = ChartsTheme.of(context);
     final points = <({ChartSeries series, ChartDataPoint point})>[
       for (final item in series)
-        for (final point in item.dataSource) (series: item, point: point),
+        for (final point in item.dataSource)
+          (series: item, point: point),
     ];
     if (points.isEmpty) return const SizedBox.shrink();
 
@@ -38,6 +38,17 @@ class ChartDataTable extends StatelessWidget {
         (title: 'الحجم النسبي', value: (point) => _string(point.size)),
       if (points.any((row) => row.point.samples?.isNotEmpty ?? false))
         (title: 'العينات', value: (point) => point.samples?.join('، ') ?? '—'),
+      if (points.any(
+        (row) => row.point.isIntermediateSum || row.point.isTotalSum,
+      ))
+        (
+          title: 'نوع الإجمالي',
+          value: (point) => point.isTotalSum
+              ? 'الإجمالي النهائي'
+              : point.isIntermediateSum
+                  ? 'مجموع مرحلي'
+                  : '—',
+        ),
     ];
 
     return DecoratedBox(

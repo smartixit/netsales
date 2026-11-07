@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
 import '../enums/chart_type.dart';
+import '../enums/chart_state.dart';
 import '../models/chart_definition.dart';
 import '../models/chart_series.dart';
 import '../theme/charts_theme.dart';
+import '../widgets/chart_state_view.dart';
 
-/// Syncfusion Spark renderer.
-///
-/// Spark widgets consume a numeric list. A single series fills the available
-/// plot area; multiple visible series are composed as independently labelled
-/// compact charts. Each live series listens only to its own source.
 class SparkChartRenderer extends StatelessWidget {
   const SparkChartRenderer({super.key, required this.definition});
 
@@ -22,42 +19,55 @@ class SparkChartRenderer extends StatelessWidget {
     final visibleSeries = definition.series
         .where((series) => series.isVisible)
         .toList(growable: false);
+    final liveSources = visibleSeries
+        .map((series) => series.liveDataSource)
+        .whereType<Listenable>()
+        .toList(growable: false);
 
-    if (visibleSeries.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    return AnimatedBuilder(
+      animation: Listenable.merge(liveSources),
+      builder: (context, _) {
+        final populatedSeries = visibleSeries
+            .where((series) => series.dataSource.isNotEmpty)
+            .toList(growable: false);
 
-    if (visibleSeries.length == 1) {
-      return _buildSparkChart(context, visibleSeries.single, theme);
-    }
+        if (populatedSeries.isEmpty) {
+          return const ChartStateView(state: ChartState.empty);
+        }
 
-    return Column(
-      children: [
-        for (final series in visibleSeries)
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 104,
-                    child: Text(
-                      series.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        if (populatedSeries.length == 1) {
+          return _buildSparkChart(context, populatedSeries.single, theme);
+        }
+
+        return Column(
+          children: [
+            for (final series in populatedSeries)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 104,
+                        child: Text(
+                          series.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: theme.mutedText,
                             fontWeight: FontWeight.w600,
                           ),
-                    ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(child: _buildSparkChart(context, series, theme)),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(child: _buildSparkChart(context, series, theme)),
-                ],
+                ),
               ),
-            ),
-          ),
-      ],
+          ],
+        );
+      },
     );
   }
 
@@ -68,68 +78,62 @@ class SparkChartRenderer extends StatelessWidget {
   ) {
     final type = series.resolveType(definition.type);
     _ensureSparkType(type);
-
-    return AnimatedBuilder(
-      animation: series.liveDataSource ?? _NoopListenable.instance,
-      builder: (context, _) {
-        final values = series.dataSource
-            .map((point) => point.y?.toDouble() ?? 0.0)
-            .toList(growable: false);
-        final color = series.color ?? theme.primary;
-        final trackball = SparkChartTrackball(
-          activationMode: SparkChartActivationMode.tap,
-        );
-        final marker = SparkChartMarker(
-          displayMode: definition.options.showMarkers
-              ? SparkChartMarkerDisplayMode.all
-              : SparkChartMarkerDisplayMode.none,
-        );
-        final labelDisplayMode = definition.options.showDataLabels
-            ? SparkChartLabelDisplayMode.last
-            : SparkChartLabelDisplayMode.none;
-
-        return switch (type) {
-          ChartType.sparkLine => SfSparkLineChart(
-              data: values,
-              color: color,
-              axisLineWidth: 0,
-              marker: marker,
-              trackball: trackball,
-              labelDisplayMode: labelDisplayMode,
-            ),
-          ChartType.sparkArea => SfSparkAreaChart(
-              data: values,
-              color: color,
-              axisLineWidth: 0,
-              marker: marker,
-              trackball: trackball,
-              labelDisplayMode: labelDisplayMode,
-            ),
-          ChartType.sparkBar => SfSparkBarChart(
-              data: values,
-              color: color,
-              axisLineWidth: 0,
-              trackball: trackball,
-              labelDisplayMode: labelDisplayMode,
-            ),
-          ChartType.sparkWinLoss => SfSparkWinLossChart(
-              data: values,
-              color: color,
-              axisLineWidth: 0,
-              highPointColor: theme.success,
-              lowPointColor: theme.danger,
-              negativePointColor: theme.danger,
-              trackball: trackball,
-            ),
-          _ => throw ArgumentError.value(
-              type,
-              'series.type',
-              'Spark family supports only SparkLine, SparkArea, SparkBar, '
-                  'and SparkWinLoss chart types.',
-            ),
-        };
-      },
+    final values = series.dataSource
+        .map((point) => point.y?.toDouble() ?? 0.0)
+        .toList(growable: false);
+    final color = series.color ?? theme.primary;
+    final trackball = SparkChartTrackball(
+      activationMode: SparkChartActivationMode.tap,
     );
+    final marker = SparkChartMarker(
+      displayMode: definition.options.showMarkers
+          ? SparkChartMarkerDisplayMode.all
+          : SparkChartMarkerDisplayMode.none,
+    );
+    final labelDisplayMode = definition.options.showDataLabels
+        ? SparkChartLabelDisplayMode.last
+        : SparkChartLabelDisplayMode.none;
+
+    return switch (type) {
+      ChartType.sparkLine => SfSparkLineChart(
+        data: values,
+        color: color,
+        axisLineWidth: 0,
+        marker: marker,
+        trackball: trackball,
+        labelDisplayMode: labelDisplayMode,
+      ),
+      ChartType.sparkArea => SfSparkAreaChart(
+        data: values,
+        color: color,
+        axisLineWidth: 0,
+        marker: marker,
+        trackball: trackball,
+        labelDisplayMode: labelDisplayMode,
+      ),
+      ChartType.sparkBar => SfSparkBarChart(
+        data: values,
+        color: color,
+        axisLineWidth: 0,
+        trackball: trackball,
+        labelDisplayMode: labelDisplayMode,
+      ),
+      ChartType.sparkWinLoss => SfSparkWinLossChart(
+        data: values,
+        color: color,
+        axisLineWidth: 0,
+        highPointColor: theme.success,
+        lowPointColor: theme.danger,
+        negativePointColor: theme.danger,
+        trackball: trackball,
+      ),
+      _ => throw ArgumentError.value(
+        type,
+        'series.type',
+        'Spark family supports only SparkLine, SparkArea, SparkBar, '
+            'and SparkWinLoss chart types.',
+      ),
+    };
   }
 
   void _ensureSparkType(ChartType type) {
@@ -148,10 +152,4 @@ class SparkChartRenderer extends StatelessWidget {
       );
     }
   }
-}
-
-class _NoopListenable extends ChangeNotifier {
-  _NoopListenable._();
-
-  static final instance = _NoopListenable._();
 }
