@@ -167,6 +167,5 @@ class CircularChartRenderer extends StatelessWidget {
            ChartType.sparkWinLoss:
         throw ArgumentError.value(type, 'series.type', 'This chart type is not circular.');
     }
-    throw ArgumentError.value(type, 'series.type', 'Unsupported circular chart type.');
   }
 }
