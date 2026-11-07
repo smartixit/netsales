@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:netsales/widgets/buttons/custom_button.dart';
+
 import '../enums/chart_state.dart';
 import '../theme/charts_theme.dart';
 
@@ -87,10 +89,11 @@ class ChartStateView extends StatelessWidget {
             ],
             if (onRetry != null) ...[
               const SizedBox(height: 12),
-              TextButton.icon(
+              CustomButton.secondary(
+                text: 'إعادة المحاولة',
+                icon: Icons.refresh_rounded,
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('إعادة المحاولة'),
+                size: AppButtonSize.small,
               ),
             ],
           ],
@@ -117,7 +120,15 @@ class _ChartSkeleton extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: List<Widget>.generate(7, (index) {
-                final factor = <double>[0.35, 0.58, 0.46, 0.82, 0.62, 0.94, 0.7][index];
+                final factor = <double>[
+                  0.35,
+                  0.58,
+                  0.46,
+                  0.82,
+                  0.62,
+                  0.94,
+                  0.7,
+                ][index];
                 return Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -136,10 +147,14 @@ class _ChartSkeleton extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Container(height: 8, width: 140, decoration: BoxDecoration(
-            color: base,
-            borderRadius: BorderRadius.circular(99),
-          )),
+          Container(
+            height: 8,
+            width: 140,
+            decoration: BoxDecoration(
+              color: base,
+              borderRadius: BorderRadius.circular(99),
+            ),
+          ),
         ],
       ),
     );

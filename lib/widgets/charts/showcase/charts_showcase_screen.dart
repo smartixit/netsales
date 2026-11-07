@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_themes.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/charts/charting.dart';
+
 import 'charts_showcase_controller.dart';
 
 /// Seven-family visual laboratory. Uses local data only and is debug-only.
@@ -67,14 +71,19 @@ class _ChartsShowcaseContent extends StatelessWidget {
     ChartType type,
     List<ChartDataPoint> points, {
     ChartOptions options = const ChartOptions(),
-  }) => ChartDefinition(
-    family: family,
-    type: type,
-    options: options,
-    series: [
-      ChartSeries(id: '${family.name}-${type.name}', name: 'الإجمالي', data: points),
-    ],
-  );
+  }) =>
+      ChartDefinition(
+        family: family,
+        type: type,
+        options: options,
+        series: [
+          ChartSeries(
+            id: '${family.name}-${type.name}',
+            name: 'الإجمالي',
+            data: points,
+          ),
+        ],
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +116,11 @@ class _ChartsShowcaseContent extends StatelessWidget {
             ChartFamily.cartesian,
             ChartType.spline,
             _trend,
-            options: const ChartOptions(showMarkers: true, enableTrackball: true, enableCrosshair: true),
+            options: const ChartOptions(
+              showMarkers: true,
+              enableTrackball: true,
+              enableCrosshair: true,
+            ),
           ),
         ),
       ),
@@ -171,7 +184,10 @@ class _ChartsShowcaseContent extends StatelessWidget {
               ChartDataPoint(x: 6, y: 45),
             ],
             options: const ChartOptions(
-              xAxis: ChartAxisConfig(kind: ChartAxisKind.numeric, title: 'العينة'),
+              xAxis: ChartAxisConfig(
+                kind: ChartAxisKind.numeric,
+                title: 'العينة',
+              ),
               enableTrackball: true,
             ),
           ),
@@ -182,7 +198,11 @@ class _ChartsShowcaseContent extends StatelessWidget {
         description: 'Candlestick / OHLC / HiLo',
         height: 280,
         chart: ChartRenderer(
-          definition: _definition(ChartFamily.financial, ChartType.candle, _financial),
+          definition: _definition(
+            ChartFamily.financial,
+            ChartType.candle,
+            _financial,
+          ),
         ),
       ),
       ChartCard(
@@ -218,26 +238,58 @@ class _ChartsShowcaseContent extends StatelessWidget {
         title: const Text('مختبر المخططات البيانية'),
         actions: [
           Obx(
-            () => IconButton(
+            () => CustomButton.icon(
               tooltip: 'الوضع الداكن',
-              onPressed: () => controller.setDarkMode(!controller.isDarkMode.value),
-              icon: Icon(controller.isDarkMode.value ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+              icon: Icon(
+                controller.isDarkMode.value
+                    ? Icons.light_mode_outlined
+                    : Icons.dark_mode_outlined,
+              ),
+              onPressed: () =>
+                  controller.setDarkMode(!controller.isDarkMode.value),
+              size: AppButtonSize.small,
+              dimension: 40,
             ),
           ),
           Obx(
-            () => IconButton(
+            () => CustomButton.icon(
               tooltip: 'اتجاه العرض',
+              icon: Icon(
+                controller.isRtl.value
+                    ? Icons.format_textdirection_l_to_r
+                    : Icons.format_textdirection_r_to_l,
+              ),
               onPressed: () => controller.setRtl(!controller.isRtl.value),
-              icon: Icon(controller.isRtl.value ? Icons.format_textdirection_l_to_r : Icons.format_textdirection_r_to_l),
+              size: AppButtonSize.small,
+              dimension: 40,
             ),
           ),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(20),
-        itemCount: cards.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 18),
-        itemBuilder: (_, index) => cards[index],
+      body: SingleChildScrollView(
+        child: ResponsiveContentWrapper(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppBreakpoints.screenMargin(context),
+            vertical: AppSpacing.lg,
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = AppBreakpoints.columnsFor(context).clamp(1, 3);
+              final gutter = AppBreakpoints.gridGutter(context);
+              final itemWidth =
+                  (constraints.maxWidth - (gutter * (columns - 1))) / columns;
+
+              return Wrap(
+                spacing: gutter,
+                runSpacing: gutter,
+                children: [
+                  for (final card in cards)
+                    SizedBox(width: itemWidth, child: card),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -248,20 +300,20 @@ class _LiveBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.primaryContainer,
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      child: Text(
-        'LIVE',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
-          fontWeight: FontWeight.w800,
-          fontSize: 10,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(20),
         ),
-      ),
-    ),
-  );
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          child: Text(
+            'LIVE',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.w800,
+              fontSize: 10,
+            ),
+          ),
+        ),
+      );
 }
