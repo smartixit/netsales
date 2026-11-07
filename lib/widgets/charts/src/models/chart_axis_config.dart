@@ -24,7 +24,7 @@ class ChartAxisConfig {
   final num? minimum;
   final num? maximum;
   final num? interval;
-  final double labelRotation;
+  final int labelRotation;
   final bool isVisible;
   final bool isInversed;
   final bool opposedPosition;

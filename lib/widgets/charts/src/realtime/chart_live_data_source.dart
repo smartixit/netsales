@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-/// Incremental change passed to a Syncfusion series controller.
+/// Incremental change passed to one or more Syncfusion series controllers.
 @immutable
 class ChartDataSourceUpdate {
   const ChartDataSourceUpdate({
@@ -32,8 +32,6 @@ class ChartDataSourceUpdate {
 
 typedef ChartSeriesUpdateHandler = void Function(ChartDataSourceUpdate update);
 
-/// Mirrors Syncfusion's updateDataSource named arguments. Its integer indexes
-/// are non-null because Syncfusion uses -1 to represent an omitted single index.
 typedef ChartSyncfusionUpdateCallback = void Function({
   List<int>? addedDataIndexes,
   List<int>? removedDataIndexes,
@@ -45,11 +43,9 @@ typedef ChartSyncfusionUpdateCallback = void Function({
 
 /// Mutable, bounded and stream-capable source for real-time charts.
 ///
-/// Cartesian, circular, funnel and pyramid renderers bind this source to the
-/// matching Syncfusion series controller and forward the documented
-/// updateDataSource indexes. Spark charts listen to this source and rebuild
-/// their compact numeric renderer because the spark widgets expose a numeric
-/// list API rather than a per-series updateDataSource controller.
+/// One source can feed several chart instances and several series. Every
+/// renderer must bind with a unique [bindingId] and detach only its own
+/// registration. The source itself remains owned by the host feature/controller.
 class ChartLiveDataSource<T> extends ChangeNotifier {
   ChartLiveDataSource({
     Iterable<T> initialData = const <Never>[],
@@ -67,34 +63,61 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
 
   final List<T> _data;
   final int? maxDataPoints;
-  ChartSeriesUpdateHandler? _updateHandler;
+  final Map<String, ChartSeriesUpdateHandler> _syncfusionBindings =
+      <String, ChartSeriesUpdateHandler>{};
+
+  ChartSeriesUpdateHandler? _defaultUpdateHandler;
   StreamSubscription<T>? _subscription;
+  int _streamGeneration = 0;
   bool _disposed = false;
 
-  /// The mutable list bound to Syncfusion. Mutate it only through this class.
+  /// The exact mutable list instance bound to Syncfusion.
+  ///
+  /// Do not modify this list directly. Use the mutation methods on this class
+  /// so the registered series controllers receive their incremental indexes.
   List<T> get data => _data;
+
+  /// Immutable data snapshot for readers that do not own a chart binding.
+  List<T> get snapshot => List<T>.unmodifiable(_data);
 
   int get length => _data.length;
   bool get isEmpty => _data.isEmpty;
   bool get isNotEmpty => _data.isNotEmpty;
+  bool get hasActiveStream => _subscription != null;
 
+  /// Compatibility callback for a non-Syncfusion consumer.
+  ///
+  /// Syncfusion chart renderers must use [bindSyncfusion] with an explicit,
+  /// per-renderer binding id instead.
   void bind(ChartSeriesUpdateHandler handler) {
     _ensureActive();
-    _updateHandler = handler;
+    _defaultUpdateHandler = handler;
   }
 
-  void unbind() {
-    _updateHandler = null;
+  /// Removes a specific renderer binding. Calling without [bindingId] clears
+  /// every binding and the compatibility callback.
+  void unbind({String? bindingId}) {
+    if (bindingId == null) {
+      _syncfusionBindings.clear();
+      _defaultUpdateHandler = null;
+      return;
+    }
+    _syncfusionBindings.remove(bindingId);
   }
 
-  /// Binds a Syncfusion Cartesian, circular, funnel or pyramid series
-  /// controller directly to this source.
-  void bindSyncfusion(ChartSyncfusionUpdateCallback updateDataSource) {
-    bind((change) {
+  /// Binds one Syncfusion Cartesian, circular, funnel, or pyramid controller.
+  ///
+  /// Rebinding the same id replaces only that registration. Other charts
+  /// sharing this source remain subscribed.
+  void bindSyncfusion(
+    ChartSyncfusionUpdateCallback updateDataSource, {
+    String bindingId = 'default',
+  }) {
+    _ensureActive();
+    _syncfusionBindings[bindingId] = (change) {
       if (change.isEmpty) {
         return;
       }
-
       updateDataSource(
         addedDataIndexes: change.addedDataIndexes,
         removedDataIndexes: change.removedDataIndexes,
@@ -103,7 +126,7 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
         removedDataIndex: change.removedDataIndex ?? -1,
         updatedDataIndex: change.updatedDataIndex ?? -1,
       );
-    });
+    };
   }
 
   void append(T value) {
@@ -142,7 +165,6 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
           _data.removeRange(0, removedCount);
         }
       }
-
       if (incoming.length > maxDataPoints!) {
         incoming.removeRange(0, incoming.length - maxDataPoints!);
       }
@@ -150,7 +172,6 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
 
     final firstAddedIndex = _data.length;
     _data.addAll(incoming);
-
     _notifyChange(
       ChartDataSourceUpdate(
         addedDataIndexes: List<int>.generate(
@@ -179,18 +200,16 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
     return removed;
   }
 
-  /// Replaces the complete list and reports both index ranges to Syncfusion.
-  /// The renderer can use the same source instance without recreating its chart.
+  /// Replaces all points and reports the previous and new index ranges.
   void replaceAll(Iterable<T> values) {
     _ensureActive();
     final previousLength = _data.length;
-
     _data
       ..clear()
       ..addAll(values);
     _trimInitialData();
-
     final nextLength = _data.length;
+
     _notifyChange(
       ChartDataSourceUpdate(
         removedDataIndexes: previousLength == 0
@@ -203,25 +222,49 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
     );
   }
 
-  /// Connects a transport stream (WebSocket, SSE, or a polling stream).
-  /// The host/controller owns the transport and should call [stopStream] or
-  /// dispose the source when its subscription lifecycle ends.
+  /// Connects a WebSocket, SSE, polling, or any other typed transport stream.
+  ///
+  /// A new stream supersedes and cancels the previous subscription. Generation
+  /// checks also prevent late events from an old stream affecting a new one.
   Future<void> bindStream(
     Stream<T> stream, {
     void Function(Object error, StackTrace stackTrace)? onError,
     void Function()? onDone,
   }) async {
     _ensureActive();
-    await stopStream();
+    final generation = ++_streamGeneration;
+    final previousSubscription = _subscription;
+    _subscription = null;
+    await previousSubscription?.cancel();
+
+    _ensureActive();
+    if (generation != _streamGeneration) {
+      return;
+    }
+
     _subscription = stream.listen(
-      append,
-      onError: onError,
-      onDone: onDone,
+      (value) {
+        if (generation == _streamGeneration && !_disposed) {
+          append(value);
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        if (generation == _streamGeneration && !_disposed) {
+          onError?.call(error, stackTrace);
+        }
+      },
+      onDone: () {
+        if (generation == _streamGeneration) {
+          _subscription = null;
+          onDone?.call();
+        }
+      },
       cancelOnError: false,
     );
   }
 
   Future<void> stopStream() async {
+    ++_streamGeneration;
     final subscription = _subscription;
     _subscription = null;
     await subscription?.cancel();
@@ -231,7 +274,15 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
     if (_disposed) {
       return;
     }
-    _updateHandler?.call(update);
+
+    // A callback is allowed to detach or replace a registration.
+    final handlers = List<ChartSeriesUpdateHandler>.of(
+      _syncfusionBindings.values,
+    );
+    for (final handler in handlers) {
+      handler(update);
+    }
+    _defaultUpdateHandler?.call(update);
     notifyListeners();
   }
 
@@ -250,7 +301,9 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    _updateHandler = null;
+    ++_streamGeneration;
+    _syncfusionBindings.clear();
+    _defaultUpdateHandler = null;
     unawaited(_subscription?.cancel());
     _subscription = null;
     super.dispose();

@@ -13,10 +13,12 @@ class CircularChartRenderer extends StatelessWidget {
   const CircularChartRenderer({
     super.key,
     required this.definition,
+    required this.bindingScope,
     this.onPointTap,
   });
 
   final ChartDefinition definition;
+  final String bindingScope;
   final ValueChanged<ChartPointInteraction>? onPointTap;
 
   @override
@@ -48,7 +50,6 @@ class CircularChartRenderer extends StatelessWidget {
   ) {
     final type = series.resolveType(definition.type);
     final data = series.dataSource;
-    final color = series.color ?? theme.palette.first;
     final source = series.liveDataSource;
     final labelSettings = DataLabelSettings(
       isVisible: definition.options.showDataLabels,
@@ -68,13 +69,19 @@ class CircularChartRenderer extends StatelessWidget {
           };
 
     void onRendererCreated(CircularSeriesController controller) {
-      source?.bindSyncfusion(controller.updateDataSource);
+      source?.bindSyncfusion(
+        controller.updateDataSource,
+        bindingId: '$bindingScope:${series.id}',
+      );
     }
 
     switch (type) {
       case ChartType.pie:
         return PieSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           pointColorMapper: (_, index) => theme.palette[index % theme.palette.length],
@@ -90,6 +97,9 @@ class CircularChartRenderer extends StatelessWidget {
       case ChartType.doughnut:
         return DoughnutSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           pointColorMapper: (_, index) => theme.palette[index % theme.palette.length],
@@ -105,6 +115,9 @@ class CircularChartRenderer extends StatelessWidget {
       case ChartType.radialBar:
         return RadialBarSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           pointColorMapper: (_, index) => theme.palette[index % theme.palette.length],

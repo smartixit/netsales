@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../enums/chart_axis_kind.dart';
 import 'chart_axis_config.dart';
+import 'chart_error_bar_config.dart';
 
 @immutable
 class ChartOptions {
@@ -28,7 +29,9 @@ class ChartOptions {
     this.showMeanInBoxPlot = false,
     this.solidCandles = false,
     this.autoScrollingDelta,
-  });
+    this.errorBar = const ChartErrorBarConfig(),
+  }) : assert(animationDuration >= 0),
+       assert(autoScrollingDelta == null || autoScrollingDelta > 0);
 
   final ChartAxisConfig xAxis;
   final ChartAxisConfig yAxis;
@@ -52,7 +55,9 @@ class ChartOptions {
   final bool showMeanInBoxPlot;
   final bool solidCandles;
 
-  /// When set, the primary axis scrolls to the latest [autoScrollingDelta]
-  /// visible data units. This is useful for live monitoring charts.
-  final double? autoScrollingDelta;
+  /// Number of recent data points kept visible on the primary X axis.
+  /// This is an item count, matching Syncfusion ChartAxis.autoScrollingDelta.
+  final int? autoScrollingDelta;
+
+  final ChartErrorBarConfig errorBar;
 }

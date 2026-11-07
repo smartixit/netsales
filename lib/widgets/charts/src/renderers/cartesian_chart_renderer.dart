@@ -14,10 +14,12 @@ class CartesianChartRenderer extends StatelessWidget {
   const CartesianChartRenderer({
     super.key,
     required this.definition,
+    required this.bindingScope,
     this.onPointTap,
   });
 
   final ChartDefinition definition;
+  final String bindingScope;
   final ValueChanged<ChartPointInteraction>? onPointTap;
 
   @override
@@ -32,7 +34,12 @@ class CartesianChartRenderer extends StatelessWidget {
       plotAreaBorderWidth: 0,
       isTransposed: options.isTransposed,
       palette: theme.palette,
-      primaryXAxis: _buildAxis(options.xAxis, theme, options.showMajorGridLines),
+      primaryXAxis: _buildAxis(
+        options.xAxis,
+        theme,
+        options.showMajorGridLines,
+        autoScrollingDelta: options.autoScrollingDelta,
+      ),
       primaryYAxis: _buildAxis(options.yAxis, theme, options.showMajorGridLines),
       axes: options.additionalAxes
           .map((axis) => _buildAxis(axis, theme, options.showMajorGridLines))
@@ -76,8 +83,9 @@ class CartesianChartRenderer extends StatelessWidget {
   ChartAxis _buildAxis(
     ChartAxisConfig config,
     ChartsTheme theme,
-    bool showGrid,
-  ) {
+    bool showGrid, {
+    int? autoScrollingDelta,
+  }) {
     final title = AxisTitle(
       text: config.title ?? '',
       textStyle: TextStyle(color: theme.mutedText, fontSize: 11),
@@ -103,6 +111,7 @@ class CartesianChartRenderer extends StatelessWidget {
           opposedPosition: config.opposedPosition,
           axisLine: axisLine,
           majorGridLines: majorGridLines,
+          autoScrollingDelta: autoScrollingDelta,
         ),
       ChartAxisKind.numeric => NumericAxis(
           name: config.name,
@@ -117,6 +126,7 @@ class CartesianChartRenderer extends StatelessWidget {
           opposedPosition: config.opposedPosition,
           axisLine: axisLine,
           majorGridLines: majorGridLines,
+          autoScrollingDelta: autoScrollingDelta,
         ),
       ChartAxisKind.dateTime => DateTimeAxis(
           name: config.name,
@@ -128,6 +138,7 @@ class CartesianChartRenderer extends StatelessWidget {
           opposedPosition: config.opposedPosition,
           axisLine: axisLine,
           majorGridLines: majorGridLines,
+          autoScrollingDelta: autoScrollingDelta,
         ),
       ChartAxisKind.dateTimeCategory => DateTimeCategoryAxis(
           name: config.name,
@@ -139,6 +150,7 @@ class CartesianChartRenderer extends StatelessWidget {
           opposedPosition: config.opposedPosition,
           axisLine: axisLine,
           majorGridLines: majorGridLines,
+          autoScrollingDelta: autoScrollingDelta,
         ),
       ChartAxisKind.logarithmic => LogarithmicAxis(
           name: config.name,
@@ -153,6 +165,7 @@ class CartesianChartRenderer extends StatelessWidget {
           opposedPosition: config.opposedPosition,
           axisLine: axisLine,
           majorGridLines: majorGridLines,
+          autoScrollingDelta: autoScrollingDelta,
         ),
     };
   }
@@ -164,11 +177,14 @@ class CartesianChartRenderer extends StatelessWidget {
     final type = series.resolveType(definition.type);
     final data = series.dataSource;
     final color = series.color ?? theme.palette.first;
-    final callback = series.liveDataSource?.bindSyncfusion;
-    final onRendererCreated = callback == null
+    final source = series.liveDataSource;
+    final onRendererCreated = source == null
         ? null
         : (ChartSeriesController controller) {
-            callback(controller.updateDataSource);
+            source.bindSyncfusion(
+              controller.updateDataSource,
+              bindingId: '$bindingScope:${series.id}',
+            );
           };
     final pointTap = onPointTap == null
         ? null
@@ -193,29 +209,13 @@ class CartesianChartRenderer extends StatelessWidget {
       borderColor: theme.cardSurface,
       borderWidth: 1.5,
     );
-    final common = <String, Object?>{
-      'dataSource': data,
-      'xValueMapper': (ChartDataPoint point, int index) => point.x ?? index,
-      'yValueMapper': (ChartDataPoint point, int _) => point.y ?? 0,
-      'name': series.name,
-      'color': color,
-      'opacity': series.opacity,
-      'width': series.width,
-      'enableTooltip': definition.options.showTooltip,
-      'enableTrackball': definition.options.enableTrackball,
-      'dataLabelSettings': labels,
-      'initialIsVisible': series.isVisible,
-      'isVisibleInLegend': series.isVisibleInLegend,
-      'xAxisName': series.xAxisName,
-      'yAxisName': series.yAxisName,
-      'onRendererCreated': onRendererCreated,
-      'onPointTap': pointTap,
-    };
-
     switch (type) {
       case ChartType.line:
         return LineSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -236,6 +236,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.spline:
         return SplineSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -256,6 +259,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.fastLine:
         return FastLineSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -275,6 +281,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.area:
         return AreaSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -295,6 +304,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.splineArea:
         return SplineAreaSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -315,6 +327,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.stepLine:
         return StepLineSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -335,6 +350,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.stepArea:
         return StepAreaSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -355,6 +373,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.rangeArea:
         return RangeAreaSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           lowValueMapper: (point, _) => point.low ?? 0,
           highValueMapper: (point, _) => point.high ?? 0,
@@ -375,6 +396,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.splineRangeArea:
         return SplineRangeAreaSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           lowValueMapper: (point, _) => point.low ?? 0,
           highValueMapper: (point, _) => point.high ?? 0,
@@ -395,6 +419,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.column:
         return ColumnSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -415,6 +442,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.bar:
         return BarSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -435,6 +465,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.stackedColumn:
         return StackedColumnSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -454,6 +487,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.stackedBar:
         return StackedBarSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -473,6 +509,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.stackedArea:
         return StackedAreaSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -493,6 +532,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.stackedLine:
         return StackedLineSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -513,6 +555,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.stackedColumn100:
         return StackedColumn100Series<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -531,6 +576,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.stackedBar100:
         return StackedBar100Series<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -549,6 +597,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.stackedArea100:
         return StackedArea100Series<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -567,6 +618,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.stackedLine100:
         return StackedLine100Series<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -587,6 +641,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.waterfall:
         return WaterfallSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -608,6 +665,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.scatter:
         return ScatterSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
@@ -626,6 +686,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.bubble:
         return BubbleSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
           sizeValueMapper: (point, _) => point.size ?? 1,
@@ -644,6 +707,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.histogram:
         return HistogramSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           yValueMapper: (point, _) => point.y ?? 0,
           name: series.name,
           color: color,
@@ -661,6 +727,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.boxAndWhisker:
         return BoxAndWhiskerSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.samples ?? const <num>[],
           name: series.name,
@@ -680,10 +749,37 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.errorBar:
         return ErrorBarSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
-          verticalPositiveErrorValue: 0,
-          verticalNegativeErrorValue: 0,
+          type: switch (definition.options.errorBar.type) {
+            ChartErrorBarType.fixed => ErrorBarType.fixed,
+            ChartErrorBarType.percentage => ErrorBarType.percentage,
+            ChartErrorBarType.standardDeviation =>
+              ErrorBarType.standardDeviation,
+            ChartErrorBarType.standardError => ErrorBarType.standardError,
+            ChartErrorBarType.custom => ErrorBarType.custom,
+          },
+          mode: switch (definition.options.errorBar.mode) {
+            ChartErrorBarMode.vertical => RenderingMode.vertical,
+            ChartErrorBarMode.horizontal => RenderingMode.horizontal,
+            ChartErrorBarMode.both => RenderingMode.both,
+          },
+          verticalErrorValue:
+              definition.options.errorBar.verticalErrorValue,
+          horizontalErrorValue:
+              definition.options.errorBar.horizontalErrorValue,
+          verticalPositiveErrorValue:
+              definition.options.errorBar.verticalPositiveErrorValue,
+          verticalNegativeErrorValue:
+              definition.options.errorBar.verticalNegativeErrorValue,
+          horizontalPositiveErrorValue:
+              definition.options.errorBar.horizontalPositiveErrorValue,
+          horizontalNegativeErrorValue:
+              definition.options.errorBar.horizontalNegativeErrorValue,
+          capLength: definition.options.errorBar.capLength,
           name: series.name,
           color: color,
           width: series.width,
@@ -696,6 +792,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.rangeColumn:
         return RangeColumnSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           lowValueMapper: (point, _) => point.low ?? 0,
           highValueMapper: (point, _) => point.high ?? 0,
@@ -716,6 +815,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.candle:
         return CandleSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           lowValueMapper: (point, _) => point.low ?? 0,
           highValueMapper: (point, _) => point.high ?? 0,
@@ -738,6 +840,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.hilo:
         return HiloSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           lowValueMapper: (point, _) => point.low ?? 0,
           highValueMapper: (point, _) => point.high ?? 0,
@@ -755,6 +860,9 @@ class CartesianChartRenderer extends StatelessWidget {
       case ChartType.ohlc:
         return HiloOpenCloseSeries<ChartDataPoint, dynamic>(
           dataSource: data,
+          animationDuration: definition.options.animate
+              ? definition.options.animationDuration.toDouble()
+              : 0,
           xValueMapper: (point, index) => point.x ?? index,
           lowValueMapper: (point, _) => point.low ?? 0,
           highValueMapper: (point, _) => point.high ?? 0,
