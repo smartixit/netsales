@@ -39,6 +39,8 @@ import 'package:netsales/features/workspace/presentation/bindings/pos_workspace_
 import 'package:netsales/features/workspace/presentation/screens/network_workspace_shell.dart';
 import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell.dart';
 import 'package:netsales/features/workspace/presentation/screens/unsupported_platform_screen.dart';
+import 'package:netsales/widgets/charts/showcase/charts_showcase_binding.dart';
+import 'package:netsales/widgets/charts/showcase/charts_showcase_screen.dart';
 import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_binding.dart';
 import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_screen.dart';
 import 'package:netsales/widgets/data_grid/showcase/data_grid_showcase_binding.dart';
@@ -238,6 +240,13 @@ abstract final class AppPages {
         name: AppRoutes.dashboardMetricsShowcase,
         page: () => const DashboardMetricsShowcaseScreen(),
         binding: DashboardMetricsShowcaseBinding(),
+      ),
+    // Developer-only Syncfusion Charts showcase; omitted from release builds.
+    if (kDebugMode)
+      GetPage<dynamic>(
+        name: AppRoutes.chartsShowcase,
+        page: () => const ChartsShowcaseScreen(),
+        binding: ChartsShowcaseBinding(),
       ),
     // Developer-only DataGrid showcase; omitted from release builds.
     if (kDebugMode)
