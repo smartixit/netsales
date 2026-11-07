@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:get/get.dart';
+
 import '../src/models/chart_data_point.dart';
 import '../src/realtime/chart_live_data_source.dart';
 
@@ -9,15 +12,24 @@ class ChartsShowcaseController extends GetxController {
   final isDarkMode = false.obs;
   final isRtl = false.obs;
   final liveTick = 0.obs;
+
   late final ChartLiveDataSource<ChartDataPoint> liveSales =
       ChartLiveDataSource<ChartDataPoint>(
         initialData: List<ChartDataPoint>.generate(
           12,
-          (index) => ChartDataPoint(x: 'نقطة \${index + 1}', y: 30 + index * 2),
+          (index) => ChartDataPoint(
+            x: pointLabel(index + 1),
+            y: 30 + index * 2,
+          ),
         ),
         maxDataPoints: 24,
       );
+
   Timer? _timer;
+
+  /// Creates a localized sequence label for deterministic showcase data.
+  @visibleForTesting
+  static String pointLabel(int index) => 'نقطة $index';
 
   @override
   void onInit() {
@@ -27,7 +39,10 @@ class ChartsShowcaseController extends GetxController {
       liveTick.value = tick;
       final random = math.Random(tick);
       liveSales.append(
-        ChartDataPoint(x: 'نقطة \${tick + 12}', y: 30 + random.nextInt(55)),
+        ChartDataPoint(
+          x: pointLabel(tick + 12),
+          y: 30 + random.nextInt(55),
+        ),
       );
     });
   }
