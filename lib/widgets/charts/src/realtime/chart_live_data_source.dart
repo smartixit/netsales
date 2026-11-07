@@ -36,9 +36,9 @@ typedef ChartSyncfusionUpdateCallback = void Function({
   List<int>? addedDataIndexes,
   List<int>? removedDataIndexes,
   List<int>? updatedDataIndexes,
-  int addedDataIndex,
-  int removedDataIndex,
-  int updatedDataIndex,
+  int? addedDataIndex,
+  int? removedDataIndex,
+  int? updatedDataIndex,
 });
 
 /// Mutable, bounded and stream-capable source for real-time charts.
@@ -122,9 +122,9 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
         addedDataIndexes: change.addedDataIndexes,
         removedDataIndexes: change.removedDataIndexes,
         updatedDataIndexes: change.updatedDataIndexes,
-        addedDataIndex: change.addedDataIndex ?? -1,
-        removedDataIndex: change.removedDataIndex ?? -1,
-        updatedDataIndex: change.updatedDataIndex ?? -1,
+        addedDataIndex: change.addedDataIndex,
+        removedDataIndex: change.removedDataIndex,
+        updatedDataIndex: change.updatedDataIndex,
       );
     };
   }
