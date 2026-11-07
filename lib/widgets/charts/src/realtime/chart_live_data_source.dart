@@ -31,29 +31,36 @@ class ChartDataSourceUpdate {
 }
 
 typedef ChartSeriesUpdateHandler = void Function(ChartDataSourceUpdate update);
+
+/// Mirrors Syncfusion's updateDataSource named arguments. Its integer indexes
+/// are non-null because Syncfusion uses -1 to represent an omitted single index.
 typedef ChartSyncfusionUpdateCallback = void Function({
   List<int>? addedDataIndexes,
   List<int>? removedDataIndexes,
   List<int>? updatedDataIndexes,
-  int? addedDataIndex,
-  int? removedDataIndex,
-  int? updatedDataIndex,
+  int addedDataIndex,
+  int removedDataIndex,
+  int updatedDataIndex,
 });
 
-/// Mutable, bounded and stream-capable data source for real-time charts.
+/// Mutable, bounded and stream-capable source for real-time charts.
 ///
 /// Cartesian, circular, funnel and pyramid renderers bind this source to the
-/// matching Syncfusion series controller and call its documented
-/// updateDataSource API. Spark charts listen to this source and rebuild their
-/// compact renderer because the Spark chart controls do not expose the same
-/// per-series controller contract.
+/// matching Syncfusion series controller and forward the documented
+/// updateDataSource indexes. Spark charts listen to this source and rebuild
+/// their compact numeric renderer because the spark widgets expose a numeric
+/// list API rather than a per-series updateDataSource controller.
 class ChartLiveDataSource<T> extends ChangeNotifier {
   ChartLiveDataSource({
     Iterable<T> initialData = const <Never>[],
     this.maxDataPoints,
   }) : _data = List<T>.of(initialData) {
     if (maxDataPoints != null && maxDataPoints! < 1) {
-      throw ArgumentError.value(maxDataPoints, 'maxDataPoints', 'Must be >= 1.');
+      throw ArgumentError.value(
+        maxDataPoints,
+        'maxDataPoints',
+        'Must be >= 1.',
+      );
     }
     _trimInitialData();
   }
@@ -80,37 +87,41 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
     _updateHandler = null;
   }
 
-  /// Convenience bridge for controller.updateDataSource(...).
+  /// Binds a Syncfusion Cartesian, circular, funnel or pyramid series
+  /// controller directly to this source.
   void bindSyncfusion(ChartSyncfusionUpdateCallback updateDataSource) {
     bind((change) {
       if (change.isEmpty) {
         return;
       }
+
       updateDataSource(
         addedDataIndexes: change.addedDataIndexes,
         removedDataIndexes: change.removedDataIndexes,
         updatedDataIndexes: change.updatedDataIndexes,
-        addedDataIndex: change.addedDataIndex,
-        removedDataIndex: change.removedDataIndex,
-        updatedDataIndex: change.updatedDataIndex,
+        addedDataIndex: change.addedDataIndex ?? -1,
+        removedDataIndex: change.removedDataIndex ?? -1,
+        updatedDataIndex: change.updatedDataIndex ?? -1,
       );
     });
   }
 
   void append(T value) {
     _ensureActive();
-    var removed = 0;
+    var removedCount = 0;
+
     if (maxDataPoints != null && _data.length >= maxDataPoints!) {
-      removed = _data.length - maxDataPoints! + 1;
-      _data.removeRange(0, removed);
+      removedCount = _data.length - maxDataPoints! + 1;
+      _data.removeRange(0, removedCount);
     }
+
     _data.add(value);
     _notifyChange(
       ChartDataSourceUpdate(
         addedDataIndex: _data.length - 1,
-        removedDataIndexes: removed == 0
+        removedDataIndexes: removedCount == 0
             ? null
-            : List<int>.generate(removed, (index) => index),
+            : List<int>.generate(removedCount, (index) => index),
       ),
     );
   }
@@ -122,31 +133,33 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
       return;
     }
 
-    var removed = 0;
+    var removedCount = 0;
     if (maxDataPoints != null) {
       final overflow = _data.length + incoming.length - maxDataPoints!;
       if (overflow > 0) {
-        removed = overflow.clamp(0, _data.length);
-        if (removed > 0) {
-          _data.removeRange(0, removed);
+        removedCount = overflow.clamp(0, _data.length).toInt();
+        if (removedCount > 0) {
+          _data.removeRange(0, removedCount);
         }
       }
+
       if (incoming.length > maxDataPoints!) {
         incoming.removeRange(0, incoming.length - maxDataPoints!);
       }
     }
 
-    final startIndex = _data.length;
+    final firstAddedIndex = _data.length;
     _data.addAll(incoming);
+
     _notifyChange(
       ChartDataSourceUpdate(
         addedDataIndexes: List<int>.generate(
           incoming.length,
-          (index) => startIndex + index,
+          (index) => firstAddedIndex + index,
         ),
-        removedDataIndexes: removed == 0
+        removedDataIndexes: removedCount == 0
             ? null
-            : List<int>.generate(removed, (index) => index),
+            : List<int>.generate(removedCount, (index) => index),
       ),
     );
   }
@@ -166,15 +179,17 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
     return removed;
   }
 
-  /// Replace all points. This notifies listeners and reports complete index
-  /// ranges to Syncfusion so the renderer can refresh its internal data.
+  /// Replaces the complete list and reports both index ranges to Syncfusion.
+  /// The renderer can use the same source instance without recreating its chart.
   void replaceAll(Iterable<T> values) {
     _ensureActive();
     final previousLength = _data.length;
+
     _data
       ..clear()
       ..addAll(values);
     _trimInitialData();
+
     final nextLength = _data.length;
     _notifyChange(
       ChartDataSourceUpdate(
@@ -188,9 +203,9 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
     );
   }
 
-  /// Connect a transport stream (WebSocket, SSE, polling stream, etc.).
-  /// The host controller owns the transport and should cancel it by calling
-  /// [stopStream] or disposing this source.
+  /// Connects a transport stream (WebSocket, SSE, or a polling stream).
+  /// The host/controller owns the transport and should call [stopStream] or
+  /// dispose the source when its subscription lifecycle ends.
   Future<void> bindStream(
     Stream<T> stream, {
     void Function(Object error, StackTrace stackTrace)? onError,

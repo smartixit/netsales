@@ -21,6 +21,9 @@ class ChartsTheme extends ThemeExtension<ChartsTheme> {
     this.cardElevation = const <BoxShadow>[],
     this.axisLabelSize = 11,
     this.titleSize = 15,
+    this.success = const Color(0xFF2E9D70),
+    this.warning = const Color(0xFFE6A23C),
+    this.danger = const Color(0xFFD9534F),
     this.motionDuration = const Duration(milliseconds: 180),
     this.motionCurve = Curves.easeOutCubic,
   });
@@ -35,6 +38,9 @@ class ChartsTheme extends ThemeExtension<ChartsTheme> {
   final Color tooltipSurface;
   final Color tooltipText;
   final List<Color> palette;
+  final Color success;
+  final Color warning;
+  final Color danger;
   final double cardRadius;
   final double cardPadding;
   final List<BoxShadow> cardElevation;
@@ -90,6 +96,9 @@ class ChartsTheme extends ThemeExtension<ChartsTheme> {
     double? titleSize,
     Duration? motionDuration,
     Curve? motionCurve,
+    Color? success,
+    Color? warning,
+    Color? danger,
   }) => ChartsTheme(
     primary: primary ?? this.primary,
     text: text ?? this.text,
@@ -101,6 +110,9 @@ class ChartsTheme extends ThemeExtension<ChartsTheme> {
     tooltipSurface: tooltipSurface ?? this.tooltipSurface,
     tooltipText: tooltipText ?? this.tooltipText,
     palette: palette ?? this.palette,
+    success: success ?? this.success,
+    warning: warning ?? this.warning,
+    danger: danger ?? this.danger,
     cardRadius: cardRadius ?? this.cardRadius,
     cardPadding: cardPadding ?? this.cardPadding,
     cardElevation: cardElevation ?? this.cardElevation,
@@ -126,6 +138,9 @@ class ChartsTheme extends ThemeExtension<ChartsTheme> {
       tooltipSurface: Color.lerp(tooltipSurface, other.tooltipSurface, t)!,
       tooltipText: Color.lerp(tooltipText, other.tooltipText, t)!,
       palette: t < 0.5 ? palette : other.palette,
+      success: Color.lerp(success, other.success, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      danger: Color.lerp(danger, other.danger, t)!,
       cardRadius: lerpDouble(cardRadius, other.cardRadius, t)!,
       cardPadding: lerpDouble(cardPadding, other.cardPadding, t)!,
       cardElevation: t < 0.5 ? cardElevation : other.cardElevation,

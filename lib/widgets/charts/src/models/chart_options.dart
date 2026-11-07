@@ -20,12 +20,14 @@ class ChartOptions {
     this.enablePinching = true,
     this.enablePanning = true,
     this.enableSelectionZooming = false,
+    this.enableMouseWheelZooming = false,
     this.isTransposed = false,
     this.animate = true,
     this.animationDuration = 650,
     this.legendAtBottom = true,
     this.showMeanInBoxPlot = false,
     this.solidCandles = false,
+    this.autoScrollingDelta,
   });
 
   final ChartAxisConfig xAxis;
@@ -42,10 +44,15 @@ class ChartOptions {
   final bool enablePinching;
   final bool enablePanning;
   final bool enableSelectionZooming;
+  final bool enableMouseWheelZooming;
   final bool isTransposed;
   final bool animate;
   final int animationDuration;
   final bool legendAtBottom;
   final bool showMeanInBoxPlot;
   final bool solidCandles;
+
+  /// When set, the primary axis scrolls to the latest [autoScrollingDelta]
+  /// visible data units. This is useful for live monitoring charts.
+  final double? autoScrollingDelta;
 }

@@ -10,7 +10,7 @@ class ChartSeries {
   const ChartSeries({
     required this.id,
     required this.name,
-    this.type = ChartType.line,
+    this.type,
     this.data = const <ChartDataPoint>[],
     this.liveDataSource,
     this.color,
@@ -29,7 +29,9 @@ class ChartSeries {
 
   final String id;
   final String name;
-  final ChartType type;
+
+  /// Overrides the definition's default type for mixed-series charts.
+  final ChartType? type;
   final List<ChartDataPoint> data;
   final ChartLiveDataSource<ChartDataPoint>? liveDataSource;
   final Color? color;
@@ -42,6 +44,9 @@ class ChartSeries {
   final String? yAxisName;
   final double? binInterval;
 
-  /// The exact mutable list instance required by Syncfusion's series binding.
+  /// The exact mutable list instance bound to the corresponding Syncfusion
+  /// series. For live charts this is owned by [liveDataSource].
   List<ChartDataPoint> get dataSource => liveDataSource?.data ?? data;
+
+  ChartType resolveType(ChartType fallback) => type ?? fallback;
 }
