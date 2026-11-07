@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../enums/chart_axis_kind.dart';
+import '../enums/chart_zoom_mode.dart';
 import 'chart_axis_config.dart';
 import 'chart_error_bar_config.dart';
 
@@ -22,6 +23,9 @@ class ChartOptions {
     this.enablePanning = true,
     this.enableSelectionZooming = false,
     this.enableMouseWheelZooming = false,
+    this.enableDoubleTapZooming = false,
+    this.enableDirectionalZooming = false,
+    this.zoomMode = ChartZoomMode.both,
     this.isTransposed = false,
     this.animate = true,
     this.animationDuration = 650,
@@ -48,6 +52,9 @@ class ChartOptions {
   final bool enablePanning;
   final bool enableSelectionZooming;
   final bool enableMouseWheelZooming;
+  final bool enableDoubleTapZooming;
+  final bool enableDirectionalZooming;
+  final ChartZoomMode zoomMode;
   final bool isTransposed;
   final bool animate;
   final int animationDuration;
