@@ -14,18 +14,18 @@ void main() {
         List<int>? addedDataIndexes,
         List<int>? removedDataIndexes,
         List<int>? updatedDataIndexes,
-        int? addedDataIndex,
-        int? removedDataIndex,
-        int? updatedDataIndex,
+        int addedDataIndex = -1,
+        int removedDataIndex = -1,
+        int updatedDataIndex = -1,
       }) {
         firstUpdates.add(
           ChartDataSourceUpdate(
             addedDataIndexes: addedDataIndexes,
             removedDataIndexes: removedDataIndexes,
             updatedDataIndexes: updatedDataIndexes,
-            addedDataIndex: addedDataIndex,
-            removedDataIndex: removedDataIndex,
-            updatedDataIndex: updatedDataIndex,
+            addedDataIndex: addedDataIndex < 0 ? null : addedDataIndex,
+            removedDataIndex: removedDataIndex < 0 ? null : removedDataIndex,
+            updatedDataIndex: updatedDataIndex < 0 ? null : updatedDataIndex,
           ),
         );
       }
@@ -34,18 +34,18 @@ void main() {
         List<int>? addedDataIndexes,
         List<int>? removedDataIndexes,
         List<int>? updatedDataIndexes,
-        int? addedDataIndex,
-        int? removedDataIndex,
-        int? updatedDataIndex,
+        int addedDataIndex = -1,
+        int removedDataIndex = -1,
+        int updatedDataIndex = -1,
       }) {
         secondUpdates.add(
           ChartDataSourceUpdate(
             addedDataIndexes: addedDataIndexes,
             removedDataIndexes: removedDataIndexes,
             updatedDataIndexes: updatedDataIndexes,
-            addedDataIndex: addedDataIndex,
-            removedDataIndex: removedDataIndex,
-            updatedDataIndex: updatedDataIndex,
+            addedDataIndex: addedDataIndex < 0 ? null : addedDataIndex,
+            removedDataIndex: removedDataIndex < 0 ? null : removedDataIndex,
+            updatedDataIndex: updatedDataIndex < 0 ? null : updatedDataIndex,
           ),
         );
       }
