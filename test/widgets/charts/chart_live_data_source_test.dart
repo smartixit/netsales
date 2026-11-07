@@ -121,6 +121,13 @@ void main() {
       source.dispose();
     });
 
+    test('replaceAll safely accepts its own live data list', () {
+      final source = ChartLiveDataSource<int>(initialData: const [1, 2, 3]);
+      source.replaceAll(source.data);
+      expect(source.snapshot, [1, 2, 3]);
+      source.dispose();
+    });
+
     test('replacing a stream cancels the previous subscription', () async {
       final source = ChartLiveDataSource<int>();
       final firstStream = StreamController<int>();
