@@ -12,4 +12,3 @@ class RevokeNetworkPosLinkChallengeUseCase {
 
   Future<void> call(String uuid) => execute(uuid);
 }
-

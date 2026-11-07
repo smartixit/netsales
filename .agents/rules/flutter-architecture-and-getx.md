@@ -50,7 +50,7 @@ Never re-implement components or utilities that already exist in `lib/widgets/` 
   - **Buttons (`lib/widgets/buttons/`):** `CustomButton`, `CustomThemeToggleButton`.
   - **Dialogs (`lib/widgets/dialogs/`):** `CustomDialog`, `CustomAnimationOverlay`, `DialogActionBar`, `DialogBodyContent`, `DialogIconHeader`.
   - **Sheets (`lib/widgets/sheets/`):** `CustomBottomSheet`, `InvoicePrintFormatSheet`.
-  - **Inputs (`lib/widgets/inputs/`):** `CustomTextField`, `CustomPasswordField`, `CustomPasswordRequirementItem`, `CustomPhoneField`, `CustomPinField`, `CustomDropdown`, `CustomNumericKeyboard`.
+  - **Inputs (`lib/widgets/inputs/`):** `CustomTextField`, `CustomPasswordField`, `CustomPasswordRequirementItem`, `CustomPhoneField`, `CustomPinField`, `CustomDropdown`, `CustomNumericKeyboard`, `CustomSwitch`, `CustomSwitchListTile`.
   - **Feedback & States (`lib/widgets/feedback/`):** `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Skeleton Shimmers (`CustomSkeletonCard`, `CustomSkeletonFeed`, `CustomSkeletonGrid`, `CustomSkeletonListTile`, `CustomSkeletonShimmer`, `CustomSkeletonText`).
   - **Toasts (`lib/widgets/toasts/`):** `CustomSnackbar`, `CustomToast`.
   - **Pickers (`lib/widgets/pickers/`):** `CustomDatePickerField`, `CustomDatePickerModal`, `CustomFilePicker`, `CustomImagePicker`, `CustomContactPickerIconButton`, `CustomColorPicker`, `CustomPosSelectorField`, `FileCardItem`, `FilePickerDropzone`.
@@ -76,19 +76,24 @@ Every widget must be placed strictly according to its responsibility and reuse s
    - Default location for widgets specific to that business feature (e.g., `network_pos_card.dart`, `network_pos_search_filter_header.dart`, `link_pos_bottom_sheet.dart`).
    - Do NOT place feature-specific components in `lib/widgets/`.
 3. **Shared Generic Widgets (`lib/widgets/`):**
-   - Exclusively for feature-independent, generic UI components (buttons, text fields, generic dialogs, empty states). Zero NetSales business domain entities or concepts.
+   - Exclusively for feature-independent, generic UI components (buttons, text fields, generic dialogs, empty states, custom switches). Zero NetSales business domain entities or concepts.
 4. **Shared Infrastructure (`lib/core/`):**
    - Core services, utilities, exceptions, themes, and configuration. Never presentation widgets.
 5. **Decomposition Balance:**
    - Avoid monolithic screens (> 160 lines with embedded complex widgets).
    - Avoid excessive artificial fragmentation (do not extract trivial 2-line containers).
 
-## 5. UI State Coverage
+## 5. UI State Coverage & Cursor Pagination Standards
 Every view handling asynchronous data must explicitly implement:
-- **Loading State:** Shimmers or controlled loaders.
+- **Loading State:** Content-matching skeletons (`CustomSkeletonFeed`, `CustomSkeletonShimmer`) for initial load.
 - **Empty State:** Informative empty illustrations and messages.
 - **Error State:** Actionable error display with retry capability.
 - **Success State:** Loaded content rendered responsively.
+- **Cursor Pagination & Load-More:**
+  - For growing lists, domain repositories return `PaginatedList<T>`.
+  - In-list load-more uses content-matching skeleton (e.g. `NetworkPosCardSkeleton`) appended at the end of the list without resetting existing items.
+  - Server-side search and filtering must be debounced (e.g. 300ms) and reset cursor pagination cleanly upon query or filter changes.
+  - Client-side in-memory filtering of server datasets is strictly prohibited.
 
 ## 6. Centralized Enum Architecture & Semantic Badge System
 - **Typed Wire Parsing:** All backend-provided Enums must have typed client Dart representations under `lib/core/enums/` or feature `domain/entities/` with strict `fromWire(String? raw)`.
@@ -104,4 +109,3 @@ Every view handling asynchronous data must explicitly implement:
   - Status badges must use `CustomStatusBadge` (`lib/widgets/badges/custom_status_badge.dart`).
   - Interactive or compact status tags must use `CustomChip` (`lib/widgets/badges/custom_chip.dart`).
   - **Prohibition:** Never write ad-hoc `switch` statements or conditional color mappings for statuses directly inside screen or widget files.
-

@@ -112,8 +112,7 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
               if (displayLinks.isEmpty) {
                 return CustomEmptyState(
                   title: 'لا توجد نقاط بيع مرتبطة',
-                  subtitle:
-                      'قم بربط نقاط البيع المرخصة بشبكتك لتفعيل التوزيع بالجملة',
+                  subtitle: 'قم بربط نقاط البيع المرخصة بشبكتك لتفعيل التوزيع بالجملة',
                   icon: Icons.storefront_outlined,
                   actionLabel: 'ربط نقطة بيع جديدة',
                   onAction: () => LinkPosBottomSheet.show(

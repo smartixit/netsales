@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -122,8 +123,7 @@ class VerifyOtpController extends GetxController {
       if (isClosed) return;
 
       await CustomAnimationOverlay.showSuccess(
-        message:
-            'تم التحقق بنجاح! تم إرسال كلمة المرور المؤقتة الجديدة إلى هاتفك عبر رسالة SMS.',
+        message: 'تم التحقق بنجاح! تم إرسال كلمة المرور المؤقتة الجديدة إلى هاتفك عبر رسالة SMS.',
       );
 
       // التوجيه لشاشة تسجيل الدخول مع تمرير رقم الهاتف للدخول بكلمة المرور المؤقتة

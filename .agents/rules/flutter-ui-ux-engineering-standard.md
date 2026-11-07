@@ -36,6 +36,7 @@ Before writing any UI widgets:
 - **Typography:** Mandatory use of `AppTypography` styles (`badgeText`, `bodyLarge`, `titleMedium`, etc.).
 - **Radii & Spacing:** Strict adherence to `AppRadius` and `AppSpacing`. Never hardcode raw numeric margins or paddings.
 - **Motion & Interactions:** Reuse `AppMotion`, `AppElevation`, and `CustomInteractiveBounce`. Keep animations purposeful and responsive.
+- **Switch Controls:** All switch interactions must use `CustomSwitch` from `lib/widgets/inputs/custom_switch.dart` or `CustomSwitchListTile` from `lib/widgets/inputs/custom_switch_list_tile.dart`. Raw Flutter `Switch` or `Switch.adaptive` is strictly forbidden.
 
 ## 6. Arabic, RTL & Complete Interface State Quality
 - **First-Class RTL:** Verify correct reading order, logical alignment, appropriate icon orientation, and zero label clipping or awkward wraps.
@@ -44,6 +45,7 @@ Before writing any UI widgets:
   - **Empty:** Feature-specific contextual message explaining what is missing and offering a clear next action.
   - **Error:** Actionable error state with user retry.
   - **Success:** Polished, responsive data presentation.
+  - **Incremental Load-More Skeleton:** When fetching subsequent pages via cursor pagination, append a content-matching skeleton (e.g. `NetworkPosCardSkeleton`) at the bottom of the existing list. Never replace loaded items with a generic full-screen loader or spinning indicator.
 
 ## 7. Mandatory Design Quality & Visual QA Gate
 A UI feature is **incomplete** and rejected if it exhibits:

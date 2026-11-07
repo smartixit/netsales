@@ -37,4 +37,3 @@ class NetworkPosLinkPreviewModel extends NetworkPosLinkPreviewEntity {
     );
   }
 }
-

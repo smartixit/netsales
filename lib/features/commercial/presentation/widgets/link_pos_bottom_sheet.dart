@@ -7,6 +7,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_switch.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
@@ -91,7 +92,7 @@ class LinkPosBottomSheet {
                             ),
                           ],
                         ),
-                        Switch.adaptive(
+                        CustomSwitch(
                           value: controller.linkStatusInitial.value,
                           activeTrackColor: colors.primary,
                           onChanged: (val) {

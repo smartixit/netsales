@@ -9,7 +9,7 @@ description: >-
 # Skill: NetSales Flutter Feature Engineering
 
 ## Purpose
-Guides the implementation of Flutter features in NetSales according to established project conventions, Clean Architecture layers, and GetX state management.
+Guides the implementation of Flutter features in NetSales according to established project conventions, Clean Architecture layers, GetX state management, and cursor pagination standards.
 
 ---
 
@@ -49,20 +49,21 @@ lib/features/<feature_name>/
      - Do NOT move feature-specific components into global `lib/widgets/`.
    - **Controllers (`presentation/controllers/`):**
      - Subclasses of `GetxController`. Sole owner of mutable presentation state (`Rx`, `.obs`, text controllers). Delegates business operations to Domain Use Cases. Prohibited from calling `ApiService` directly.
+     - Manages cursor pagination, debounced server-side search, and load-more state.
    - **Bindings (`presentation/bindings/`):**
      - Extends `Bindings` to inject controllers, use cases, and repositories lazily via `Get.lazyPut(...)` and binds them to `AppPages` routes.
 2. **Domain Layer (`domain/`):**
    - **Entities:** Pure Dart classes representing core business data structures. Free of JSON serialization dependencies.
-   - **Repositories (Interfaces):** Abstract contracts defining data operations required by use cases.
-   - **Use Cases:** Granular, single-responsibility business operations (e.g. `GetProcurementRequestsUseCase`).
+   - **Repositories (Interfaces):** Abstract contracts defining data operations required by use cases, returning `PaginatedList<T>` for unbounded list operations.
+   - **Use Cases:** Granular, single-responsibility business operations (e.g. `GetNetworkPosListUseCase`).
 3. **Data Layer (`data/`):**
    - **Models:** Extends or maps to domain entities, containing `fromJson` and `toJson` serialization matching Laravel API resources.
-   - **Data Sources:** Handle raw network calls (`ApiClient`), headers, and query parameters.
-   - **Repositories (Implementations):** Implements domain repository interfaces, coordinating data sources and converting models to domain entities.
+   - **Data Sources:** Handle raw network calls (`ApiService`), headers, query parameters, and cursor propagation.
+   - **Repositories (Implementations):** Implements domain repository interfaces, coordinating data sources and converting models to domain entities and `PaginatedList<T>`.
 4. **Global Generic Widgets (`lib/widgets/`):**
-   - Genuinely shared, domain-independent UI primitives (`CustomButton`, `CustomTextField`, `CustomDialog`, `CustomEmptyState`).
+   - Genuinely shared, domain-independent UI primitives (`CustomButton`, `CustomTextField`, `CustomDialog`, `CustomEmptyState`, `CustomSwitch`, `CustomSwitchListTile`).
 5. **Shared Infrastructure (`lib/core/`):**
-   - Application services, utilities, themes, exceptions, and configuration. Never presentation widgets.
+   - Application services, utilities, themes, exceptions, models (`PaginatedList`), and configuration. Never presentation widgets.
 
 ---
 
@@ -70,10 +71,15 @@ lib/features/<feature_name>/
 
 - **State Management Ecosystem:** **GetX** is the exclusive ecosystem.
   - Bind UI with `Obx(() => ...)` or `GetBuilder<FeatureController>`.
-  - **Prohibited:** Provider, Riverpod, Bloc, and custom state machines via `StatefulWidget`. `StatefulWidget` is permitted only for low-level animation/ticker controllers.
+  - **Prohibited:** Provider, Riverpod, Bloc, and custom state machines via `StatefulWidget`. `StatefulWidget` and `setState` are strictly prohibited in application feature presentation code.
+- **Cursor Pagination & Load-More (Mandatory):**
+  - Growing collections must use `PaginatedList<T>` from `lib/core/models/paginated_list.dart`.
+  - Incremental load-more appends items to existing `RxList` without full-screen reload.
+  - In-list load-more uses content-matching skeleton (e.g. `NetworkPosCardSkeleton`).
+  - Search and filter queries must trigger debounced (300ms) server-side calls and reset pagination cursor.
 - **Infrastructure & Core Reuse (Mandatory):**
   - **Dialogs & Sheets:** Reuse `CustomDialog`, `CustomAnimationOverlay`, `DialogActionBar`, `CustomBottomSheet`, `InvoicePrintFormatSheet`.
-  - **Inputs & Keyboards:** Reuse `CustomTextField`, `CustomPasswordField`, `CustomPhoneField`, `CustomPinField`, `CustomDropdown`, `CustomNumericKeyboard`.
+  - **Inputs & Switches:** Reuse `CustomTextField`, `CustomPasswordField`, `CustomPhoneField`, `CustomPinField`, `CustomDropdown`, `CustomNumericKeyboard`, `CustomSwitch`, `CustomSwitchListTile`.
   - **Buttons:** Reuse `CustomButton`, `CustomThemeToggleButton`.
   - **Feedback & Skeletons:** Reuse `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, and skeleton shimmers (`CustomSkeletonCard`, `CustomSkeletonFeed`, `CustomSkeletonGrid`, `CustomSkeletonListTile`, `CustomSkeletonShimmer`, `CustomSkeletonText`).
   - **Toasts:** Reuse `CustomSnackbar`, `CustomToast`.
@@ -81,17 +87,6 @@ lib/features/<feature_name>/
   - **Foundation, Nav & Media:** Reuse `CustomAppScaffold`, `CustomFloatingBottomNavBar`, `DoubleBackExitScope`, `MediaGalleryViewer`, `CustomCachedImage`, `CustomQrCode`.
   - **Dividers, Menus & Indicators:** Reuse `CustomLabeledDivider`, `CustomPopupMenu`, `CustomPageIndicator`, `CustomSegmentedBar`, `CustomInteractiveBounce`.
   - **Utils:** Reuse `DateFormatter`, `AmountFormatter`, `TextFormatter`, `FileSizeFormatter`, `FormValidators`, `IdempotencyHelper`, `SystemUiStyleResolver`.
-  - **Core Services:** Leverage established services (`ApiService`, `WorkspaceService`, `SessionService`, `ThemeService`, `StorageService`, `CredentialService`, `AppCryptoService`, `AppCacheService`, `InternetConnectionService`, `PermissionService`, `DeviceService`, `PushNotificationService`, `FilePickerService`, `FileExportService`, `DatePickerService`, `ContactPickerService`, `QrCodeService`).
-- **Design System Tokens:**
-  - Colors: Reuse `AppColors.primary` (`0xFF0D7A5F`), `AppColors.secondary` (`0xFF1ABC9C`), `AppColors.tertiary` (`0xFF2ECC71`), and Material 3 surface tokens.
-  - Typography: Reuse `AppTypography` styles (`badgeText`, `bodyLarge`, `titleMedium`, etc.).
-  - Radii & Spacing: Reuse `AppRadius.full`, `AppRadius.chip`, `AppRadius.card`, `AppSpacing`.
-  - Elevation & Motion: Reuse `AppElevation`, `AppGradients`, `AppMotion`, `AppThemes`.
-  - Breakpoints: Strictly adapt using `AppBreakpoints` (`mobileSmallMax: 360`, `mobileMax: 600`, `tabletMax: 900`, `desktopMax: 1240`).
-- **Permanent Premium UI/UX Standard (Mandatory):**
-  - Follow the dedicated `flutter-premium-ui-ux` skill for information architecture, visual hierarchy, and distinct screen composition.
-  - Strict prohibition against generic screen templates (e.g., repeating identical card stacks across different business features).
-  - Explicit multi-form factor design for mobile (< 600dp) and tablet (≥ 600dp) using `AppBreakpoints`.
 - **Zero Financial Calculations:**
   - Never compute invoice line sums, discount subtotals, or repayment allocations on the client.
   - Display financial amounts originating directly from authoritative Laravel API responses.

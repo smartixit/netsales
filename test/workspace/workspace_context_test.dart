@@ -16,27 +16,24 @@ void main() {
       expect(workspace, equals(AppWorkspace.unsupported));
     });
 
-    test(
-      'SUPER_ADMIN role is strictly resolved to AppWorkspace.unsupported (AUTH-06)',
-      () {
-        final superAdminUser = UserModel(
-          userId: 1,
-          userFullName: 'Super Admin User',
-          userPhoneNumber: '+967770000001',
-          userEmail: 'admin@platform.com',
-          role: const RoleModel(
-            roleId: 1,
-            roleKey: 'SUPER_ADMIN',
-            roleName: 'مدير المنصة',
-          ),
-        );
+    test('SUPER_ADMIN role is strictly resolved to AppWorkspace.unsupported (AUTH-06)', () {
+      final superAdminUser = UserModel(
+        userId: 1,
+        userFullName: 'Super Admin User',
+        userPhoneNumber: '+967770000001',
+        userEmail: 'admin@platform.com',
+        role: const RoleModel(
+          roleId: 1,
+          roleKey: 'SUPER_ADMIN',
+          roleName: 'مدير المنصة',
+        ),
+      );
 
-        final workspace = workspaceService.resolveWorkspaceForUser(
-          superAdminUser,
-        );
-        expect(workspace, equals(AppWorkspace.unsupported));
-      },
-    );
+      final workspace = workspaceService.resolveWorkspaceForUser(
+        superAdminUser,
+      );
+      expect(workspace, equals(AppWorkspace.unsupported));
+    });
 
     test(
       'SUPPORT_AGENT role is strictly resolved to AppWorkspace.unsupported',

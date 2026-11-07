@@ -29,4 +29,3 @@ class NetworkPosLinkChallengeEntity {
   bool get isExpired => DateTime.now().isAfter(expiresAt);
   bool get isPending => status == LinkingChallengeStatus.pending && !isExpired;
 }
-

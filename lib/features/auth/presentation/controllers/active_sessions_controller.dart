@@ -101,8 +101,7 @@ class ActiveSessionsController extends GetxController {
     final confirmed = await CustomDialog.show(
       type: DialogType.danger,
       title: 'تسجيل الخروج من كافة الأجهزة الأخرى',
-      message:
-          'سيتم إنهاء كافة جلسات العمل الفعالة على جميع الأجهزة الأخرى فورياً، وستبقى جلستك الحالية فقط قيد التشغيل. هل تريد المتابعة؟',
+      message: 'سيتم إنهاء كافة جلسات العمل الفعالة على جميع الأجهزة الأخرى فورياً، وستبقى جلستك الحالية فقط قيد التشغيل. هل تريد المتابعة؟',
       confirmLabel: 'تأكيد إنهاء الجلسات',
       cancelLabel: 'إلغاء',
     );

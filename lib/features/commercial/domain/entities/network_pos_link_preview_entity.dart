@@ -26,4 +26,3 @@ class NetworkPosLinkPreviewEntity {
 
   bool get isExpired => DateTime.now().isAfter(expiresAt);
 }
-

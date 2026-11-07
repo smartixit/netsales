@@ -157,8 +157,7 @@ class ResetPasswordController extends GetxController {
         if (isClosed) return;
 
         await CustomAnimationOverlay.showSuccess(
-          message:
-              'تم إعادة تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.',
+          message: 'تم إعادة تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.',
         );
 
         // التوجيه لشاشة تسجيل الدخول مع تمرير رقم الهاتف الجاهز

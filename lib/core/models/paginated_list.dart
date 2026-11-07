@@ -36,4 +36,3 @@ class PaginatedList<T> {
   /// قائمة فارغة افتراضية
   static PaginatedList<T> empty<T>() => PaginatedList<T>(items: const []);
 }
-

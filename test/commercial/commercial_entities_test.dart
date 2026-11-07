@@ -410,21 +410,18 @@ void main() {
       expect(page.items, isEmpty);
     });
 
-    test(
-      'GetNetworkDetailsUseCase and UpdateNetworkDetailsUseCase manage network details',
-      () async {
-        final getDetails = GetNetworkDetailsUseCase(repository);
-        final updateDetails = UpdateNetworkDetailsUseCase(repository);
+    test('GetNetworkDetailsUseCase and UpdateNetworkDetailsUseCase manage network details', () async {
+      final getDetails = GetNetworkDetailsUseCase(repository);
+      final updateDetails = UpdateNetworkDetailsUseCase(repository);
 
-        final network = await getDetails(1);
-        expect(network.networkName, equals('Al-Amal Network'));
+      final network = await getDetails(1);
+      expect(network.networkName, equals('Al-Amal Network'));
 
-        final updated = await updateDetails(1, {
-          'network_name': 'New Hope Network',
-        });
-        expect(updated.networkName, equals('New Hope Network'));
-      },
-    );
+      final updated = await updateDetails(1, {
+        'network_name': 'New Hope Network',
+      });
+      expect(updated.networkName, equals('New Hope Network'));
+    });
 
     test(
       'GetPosDetailsUseCase and UpdatePosDetailsUseCase manage POS details',

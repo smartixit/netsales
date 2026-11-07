@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -36,30 +37,165 @@ void main() {
       );
     });
 
-    test(
-      'Zero ApiService or HTTP primitives in lib/features/commercial/presentation/',
-      () {
-        final presentationDir = Directory(
-          'lib/features/commercial/presentation',
-        );
-        expect(
-          presentationDir.existsSync(),
-          isTrue,
-          reason: 'Presentation directory must exist',
-        );
+    test('Zero ApiService or HTTP primitives in lib/features/commercial/presentation/', () {
+      final presentationDir = Directory('lib/features/commercial/presentation');
+      expect(
+        presentationDir.existsSync(),
+        isTrue,
+        reason: 'Presentation directory must exist',
+      );
 
-        final dartFiles = presentationDir
+      final dartFiles = presentationDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'));
+
+      final violations = <String>[];
+
+      for (final file in dartFiles) {
+        final content = file.readAsStringSync();
+        if (content.contains('ApiService') ||
+            content.contains('package:http/') ||
+            content.contains('package:dio/')) {
+          violations.add(file.path);
+        }
+      }
+
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'Controllers and presentation components must delegate to Use Cases and never import ApiService directly. '
+            'Violations found in: $violations',
+      );
+    });
+
+    test('Dependency Rule: Presentation depends on Domain, Domain depends on nothing external', () {
+      final domainDir = Directory('lib/features/commercial/domain');
+      expect(domainDir.existsSync(), isTrue);
+
+      final dartFiles = domainDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'));
+
+      final violations = <String>[];
+
+      for (final file in dartFiles) {
+        final content = file.readAsStringSync();
+        if (content.contains('package:netsales/features/commercial/data/') ||
+            content.contains(
+              'package:netsales/features/commercial/presentation/',
+            ) ||
+            content.contains('package:get/get.dart') ||
+            content.contains('package:flutter/material.dart')) {
+          violations.add(file.path);
+        }
+      }
+
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'Domain layer must be completely pure and independent of Data, Presentation, Flutter UI, and GetX. '
+            'Violations found in: $violations',
+      );
+    });
+
+    test('Component Placement Rule: Screens directory contains only page-level screens (*_screen.dart)', () {
+      final screensDir = Directory(
+        'lib/features/commercial/presentation/screens',
+      );
+      expect(screensDir.existsSync(), isTrue);
+
+      final nonScreenFiles = screensDir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'))
+          .where((f) => !f.path.endsWith('_screen.dart'))
+          .map((f) => f.path)
+          .toList();
+
+      expect(
+        nonScreenFiles,
+        isEmpty,
+        reason:
+            'presentation/screens/ must contain only page-level screen files ending in _screen.dart. '
+            'Dialogs, bottom sheets, cards, and sections must be in presentation/widgets/. '
+            'Violations found: $nonScreenFiles',
+      );
+    });
+
+    test('Component Decomposition Rule: Feature widgets directory exists and screens do not contain secondary embedded Widget classes', () {
+      final widgetsDir = Directory(
+        'lib/features/commercial/presentation/widgets',
+      );
+      expect(
+        widgetsDir.existsSync(),
+        isTrue,
+        reason: 'presentation/widgets/ directory must exist for decomposed components',
+      );
+
+      final widgetFiles = widgetsDir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'))
+          .toList();
+
+      expect(
+        widgetFiles.length,
+        greaterThanOrEqualTo(3),
+        reason: 'Feature presentation components (cards, headers, sheets) must be decomposed into presentation/widgets/',
+      );
+
+      // Screens should represent single top-level page composition and not define secondary embedded Widget classes
+      final screensDir = Directory(
+        'lib/features/commercial/presentation/screens',
+      );
+      final secondaryWidgetViolations = <String>[];
+
+      for (final file in screensDir.listSync().whereType<File>().where(
+        (f) => f.path.endsWith('.dart'),
+      )) {
+        final content = file.readAsStringSync();
+        final widgetClasses = RegExp(
+          r'class\s+([A-Za-z0-9_]+)\s+extends\s+(?:StatelessWidget|StatefulWidget|GetView|GetWidget)',
+        ).allMatches(content).map((m) => m.group(1)).toList();
+
+        if (widgetClasses.length > 1) {
+          secondaryWidgetViolations.add(
+            '${file.path} defines multiple widget classes: $widgetClasses. '
+            'Secondary widgets must be decomposed into presentation/widgets/.',
+          );
+        }
+      }
+
+      expect(
+        secondaryWidgetViolations,
+        isEmpty,
+        reason:
+            'Screen files must be focused on top-level page composition and not contain secondary embedded widget classes. '
+            'Violations: $secondaryWidgetViolations',
+      );
+    });
+
+    test(
+      'Zero raw Switch or Switch.adaptive in lib/ (must use CustomSwitch)',
+      () {
+        final libDir = Directory('lib');
+        final dartFiles = libDir
             .listSync(recursive: true)
             .whereType<File>()
-            .where((f) => f.path.endsWith('.dart'));
+            .where((f) => f.path.endsWith('.dart'))
+            // CustomSwitch itself is allowed to use low-level primitives or CustomInteractiveBounce
+            .where((f) => !f.path.endsWith('custom_switch.dart'));
 
         final violations = <String>[];
 
         for (final file in dartFiles) {
           final content = file.readAsStringSync();
-          if (content.contains('ApiService') ||
-              content.contains('package:http/') ||
-              content.contains('package:dio/')) {
+          if (content.contains('Switch.adaptive(') ||
+              RegExp(r'\bSwitch\(').hasMatch(content)) {
             violations.add(file.path);
           }
         }
@@ -68,128 +204,25 @@ void main() {
           violations,
           isEmpty,
           reason:
-              'Controllers and presentation components must delegate to Use Cases and never import ApiService directly. '
+              'All switch controls must use CustomSwitch from lib/widgets/inputs/custom_switch.dart. '
               'Violations found in: $violations',
         );
       },
     );
 
     test(
-      'Dependency Rule: Presentation depends on Domain, Domain depends on nothing external',
+      'Zero client-side filteredLinks getter in CommercialDirectoryController',
       () {
-        final domainDir = Directory('lib/features/commercial/domain');
-        expect(domainDir.existsSync(), isTrue);
+        final controllerFile = File(
+          'lib/features/commercial/presentation/controllers/commercial_directory_controller.dart',
+        );
+        expect(controllerFile.existsSync(), isTrue);
 
-        final dartFiles = domainDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where((f) => f.path.endsWith('.dart'));
-
-        final violations = <String>[];
-
-        for (final file in dartFiles) {
-          final content = file.readAsStringSync();
-          if (content.contains('package:netsales/features/commercial/data/') ||
-              content.contains(
-                'package:netsales/features/commercial/presentation/',
-              ) ||
-              content.contains('package:get/get.dart') ||
-              content.contains('package:flutter/material.dart')) {
-            violations.add(file.path);
-          }
-        }
-
+        final content = controllerFile.readAsStringSync();
         expect(
-          violations,
-          isEmpty,
-          reason:
-              'Domain layer must be completely pure and independent of Data, Presentation, Flutter UI, and GetX. '
-              'Violations found in: $violations',
-        );
-      },
-    );
-
-    test(
-      'Component Placement Rule: Screens directory contains only page-level screens (*_screen.dart)',
-      () {
-        final screensDir = Directory(
-          'lib/features/commercial/presentation/screens',
-        );
-        expect(screensDir.existsSync(), isTrue);
-
-        final nonScreenFiles = screensDir
-            .listSync()
-            .whereType<File>()
-            .where((f) => f.path.endsWith('.dart'))
-            .where((f) => !f.path.endsWith('_screen.dart'))
-            .map((f) => f.path)
-            .toList();
-
-        expect(
-          nonScreenFiles,
-          isEmpty,
-          reason:
-              'presentation/screens/ must contain only page-level screen files ending in _screen.dart. '
-              'Dialogs, bottom sheets, cards, and sections must be in presentation/widgets/. '
-              'Violations found: $nonScreenFiles',
-        );
-      },
-    );
-
-    test(
-      'Component Decomposition Rule: Feature widgets directory exists and screens do not contain secondary embedded Widget classes',
-      () {
-        final widgetsDir = Directory(
-          'lib/features/commercial/presentation/widgets',
-        );
-        expect(
-          widgetsDir.existsSync(),
-          isTrue,
-          reason:
-              'presentation/widgets/ directory must exist for decomposed components',
-        );
-
-        final widgetFiles = widgetsDir
-            .listSync()
-            .whereType<File>()
-            .where((f) => f.path.endsWith('.dart'))
-            .toList();
-
-        expect(
-          widgetFiles.length,
-          greaterThanOrEqualTo(3),
-          reason:
-              'Feature presentation components (cards, headers, sheets) must be decomposed into presentation/widgets/',
-        );
-
-        // Screens should represent single top-level page composition and not define secondary embedded Widget classes
-        final screensDir = Directory(
-          'lib/features/commercial/presentation/screens',
-        );
-        final secondaryWidgetViolations = <String>[];
-
-        for (final file in screensDir.listSync().whereType<File>().where(
-          (f) => f.path.endsWith('.dart'),
-        )) {
-          final content = file.readAsStringSync();
-          final widgetClasses = RegExp(
-            r'class\s+([A-Za-z0-9_]+)\s+extends\s+(?:StatelessWidget|StatefulWidget|GetView|GetWidget)',
-          ).allMatches(content).map((m) => m.group(1)).toList();
-
-          if (widgetClasses.length > 1) {
-            secondaryWidgetViolations.add(
-              '${file.path} defines multiple widget classes: $widgetClasses. '
-              'Secondary widgets must be decomposed into presentation/widgets/.',
-            );
-          }
-        }
-
-        expect(
-          secondaryWidgetViolations,
-          isEmpty,
-          reason:
-              'Screen files must be focused on top-level page composition and not contain secondary embedded widget classes. '
-              'Violations: $secondaryWidgetViolations',
+          content.contains('get filteredLinks'),
+          isFalse,
+          reason: 'CommercialDirectoryController must use server-side search and cursor pagination, not in-memory filteredLinks getter.',
         );
       },
     );

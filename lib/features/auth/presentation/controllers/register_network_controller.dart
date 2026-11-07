@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -180,8 +181,7 @@ class RegisterNetworkController extends GetxController {
         secondaryActionIcon: Icons.support_agent_rounded,
         onSecondaryAction: () => UrlLauncherService.openWhatsApp(
           phoneNumber: PublicSettingsService.instance.supportWhatsApp,
-          message:
-              'مرحباً فريق الدعم، لقد قمت بتقديم طلب تسجيل مزود شبكة جديد في نظام NetSales وأود الاستفسار عن حالة الطلب.',
+          message: 'مرحباً فريق الدعم، لقد قمت بتقديم طلب تسجيل مزود شبكة جديد في نظام NetSales وأود الاستفسار عن حالة الطلب.',
         ),
         onConfirm: () => Get.offAllNamed<void>(AppRoutes.login),
       );

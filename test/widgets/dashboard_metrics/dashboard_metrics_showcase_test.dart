@@ -11,7 +11,7 @@ void main() {
   });
 
   tearDown(() async {
-     Get.reset();
+    Get.reset();
     Get.testMode = false;
   });
 

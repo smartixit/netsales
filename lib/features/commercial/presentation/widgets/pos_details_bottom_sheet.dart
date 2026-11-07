@@ -238,12 +238,14 @@ class PosDetailsBottomSheet {
                         loading: controller.isActionLoading.value,
                         onPressed: () async {
                           if (!formKey.currentState!.validate()) return;
-                          final success = await controller
-                              .updatePosDetails(pos.posId, {
-                                'pos_name': nameController.text.trim(),
-                                'pos_phone_number': phoneController.text.trim(),
-                                'pos_address': addressController.text.trim(),
-                              });
+                          final success = await controller.updatePosDetails(
+                            pos.posId,
+                            {
+                              'pos_name': nameController.text.trim(),
+                              'pos_phone_number': phoneController.text.trim(),
+                              'pos_address': addressController.text.trim(),
+                            },
+                          );
                           if (success) {
                             Get.back<void>();
                           }

@@ -85,19 +85,17 @@ class CustomSwitch extends StatelessWidget {
         inactiveTrackColor ?? colors.surfaceContainerHighest;
 
     final effectiveActiveThumb = activeThumbColor ?? colors.onPrimary;
-    final effectiveInactiveThumb =
-        inactiveThumbColor ?? colors.surface;
+    final effectiveInactiveThumb = inactiveThumbColor ?? colors.surface;
 
-    final effectiveActiveIconColor =
-        activeIconColor ?? colors.primary;
+    final effectiveActiveIconColor = activeIconColor ?? colors.primary;
     final effectiveInactiveIconColor =
         inactiveIconColor ?? colors.onSurfaceVariant;
 
     final trackColor = enabled
         ? (value ? effectiveActiveTrack : effectiveInactiveTrack)
         : (value
-            ? effectiveActiveTrack.withValues(alpha: 0.5)
-            : effectiveInactiveTrack.withValues(alpha: 0.5));
+              ? effectiveActiveTrack.withValues(alpha: 0.5)
+              : effectiveInactiveTrack.withValues(alpha: 0.5));
 
     final thumbColor = enabled
         ? (value ? effectiveActiveThumb : effectiveInactiveThumb)
@@ -180,4 +178,3 @@ class CustomSwitch extends StatelessWidget {
     );
   }
 }
-

@@ -102,103 +102,88 @@ void main() {
       expect(RoleScope.fromWire('OTHER'), RoleScope.unknown);
     });
 
-    test(
-      'SaleType, RequestStatus, and InvoicePaymentStatus parse exact wire values',
-      () {
-        expect(SaleType.fromWire('CASH'), SaleType.cash);
-        expect(SaleType.fromWire('CREDIT'), SaleType.credit);
-        expect(SaleType.fromWire('cash'), SaleType.unknown);
+    test('SaleType, RequestStatus, and InvoicePaymentStatus parse exact wire values', () {
+      expect(SaleType.fromWire('CASH'), SaleType.cash);
+      expect(SaleType.fromWire('CREDIT'), SaleType.credit);
+      expect(SaleType.fromWire('cash'), SaleType.unknown);
 
-        expect(RequestStatus.fromWire('PENDING'), RequestStatus.pending);
-        expect(RequestStatus.fromWire('APPROVED'), RequestStatus.approved);
-        expect(RequestStatus.fromWire('REJECTED'), RequestStatus.rejected);
-        expect(RequestStatus.fromWire('CANCELLED'), RequestStatus.cancelled);
-        expect(RequestStatus.fromWire(null), RequestStatus.unknown);
+      expect(RequestStatus.fromWire('PENDING'), RequestStatus.pending);
+      expect(RequestStatus.fromWire('APPROVED'), RequestStatus.approved);
+      expect(RequestStatus.fromWire('REJECTED'), RequestStatus.rejected);
+      expect(RequestStatus.fromWire('CANCELLED'), RequestStatus.cancelled);
+      expect(RequestStatus.fromWire(null), RequestStatus.unknown);
 
-        expect(
-          InvoicePaymentStatus.fromWire('PAID'),
-          InvoicePaymentStatus.paid,
-        );
-        expect(
-          InvoicePaymentStatus.fromWire('PARTIALLY_PAID'),
-          InvoicePaymentStatus.partiallyPaid,
-        );
-        expect(
-          InvoicePaymentStatus.fromWire('UNPAID'),
-          InvoicePaymentStatus.unpaid,
-        );
-        expect(
-          InvoicePaymentStatus.fromWire(null),
-          InvoicePaymentStatus.unknown,
-        );
-      },
-    );
+      expect(InvoicePaymentStatus.fromWire('PAID'), InvoicePaymentStatus.paid);
+      expect(
+        InvoicePaymentStatus.fromWire('PARTIALLY_PAID'),
+        InvoicePaymentStatus.partiallyPaid,
+      );
+      expect(
+        InvoicePaymentStatus.fromWire('UNPAID'),
+        InvoicePaymentStatus.unpaid,
+      );
+      expect(InvoicePaymentStatus.fromWire(null), InvoicePaymentStatus.unknown);
+    });
 
-    test(
-      'WalletOperationType, ProviderSubscriptionStatus, and BackupStatus parse exact wire values',
-      () {
-        expect(
-          WalletOperationType.fromWire('DEPOSIT'),
-          WalletOperationType.deposit,
-        );
-        expect(
-          WalletOperationType.fromWire('WITHDRAW'),
-          WalletOperationType.withdraw,
-        );
-        expect(
-          WalletOperationType.fromWire('deposit'),
-          WalletOperationType.unknown,
-        );
+    test('WalletOperationType, ProviderSubscriptionStatus, and BackupStatus parse exact wire values', () {
+      expect(
+        WalletOperationType.fromWire('DEPOSIT'),
+        WalletOperationType.deposit,
+      );
+      expect(
+        WalletOperationType.fromWire('WITHDRAW'),
+        WalletOperationType.withdraw,
+      );
+      expect(
+        WalletOperationType.fromWire('deposit'),
+        WalletOperationType.unknown,
+      );
 
-        expect(
-          ProviderSubscriptionStatus.fromWire('ACTIVE'),
-          ProviderSubscriptionStatus.active,
-        );
-        expect(
-          ProviderSubscriptionStatus.fromWire('QUEUED'),
-          ProviderSubscriptionStatus.queued,
-        );
-        expect(
-          ProviderSubscriptionStatus.fromWire('EXPIRED'),
-          ProviderSubscriptionStatus.expired,
-        );
-        expect(
-          ProviderSubscriptionStatus.fromWire('CANCELLED'),
-          ProviderSubscriptionStatus.cancelled,
-        );
-        expect(
-          ProviderSubscriptionStatus.fromWire('SUSPENDED'),
-          ProviderSubscriptionStatus.suspended,
-        );
+      expect(
+        ProviderSubscriptionStatus.fromWire('ACTIVE'),
+        ProviderSubscriptionStatus.active,
+      );
+      expect(
+        ProviderSubscriptionStatus.fromWire('QUEUED'),
+        ProviderSubscriptionStatus.queued,
+      );
+      expect(
+        ProviderSubscriptionStatus.fromWire('EXPIRED'),
+        ProviderSubscriptionStatus.expired,
+      );
+      expect(
+        ProviderSubscriptionStatus.fromWire('CANCELLED'),
+        ProviderSubscriptionStatus.cancelled,
+      );
+      expect(
+        ProviderSubscriptionStatus.fromWire('SUSPENDED'),
+        ProviderSubscriptionStatus.suspended,
+      );
 
-        expect(BackupStatus.fromWire('QUEUED'), BackupStatus.queued);
-        expect(BackupStatus.fromWire('RUNNING'), BackupStatus.running);
-        expect(BackupStatus.fromWire('SUCCESS'), BackupStatus.success);
-        expect(BackupStatus.fromWire('FAILED'), BackupStatus.failed);
-        expect(BackupStatus.fromWire('failed'), BackupStatus.unknown);
-      },
-    );
+      expect(BackupStatus.fromWire('QUEUED'), BackupStatus.queued);
+      expect(BackupStatus.fromWire('RUNNING'), BackupStatus.running);
+      expect(BackupStatus.fromWire('SUCCESS'), BackupStatus.success);
+      expect(BackupStatus.fromWire('FAILED'), BackupStatus.failed);
+      expect(BackupStatus.fromWire('failed'), BackupStatus.unknown);
+    });
 
-    test(
-      'NotificationType safe wire parsing preserves unknown state without generalInfo hiding',
-      () {
-        expect(
-          NotificationType.fromWire('SALE_INVOICE_CREATED'),
-          NotificationType.saleInvoiceCreated,
-        );
-        expect(
-          NotificationType.fromWire('GENERAL_INFO'),
-          NotificationType.generalInfo,
-        );
+    test('NotificationType safe wire parsing preserves unknown state without generalInfo hiding', () {
+      expect(
+        NotificationType.fromWire('SALE_INVOICE_CREATED'),
+        NotificationType.saleInvoiceCreated,
+      );
+      expect(
+        NotificationType.fromWire('GENERAL_INFO'),
+        NotificationType.generalInfo,
+      );
 
-        // Crucial invariant: unknown string does NOT return generalInfo
-        final unknown = NotificationType.fromWire(
-          'NEW_BACKEND_EVENT_NOT_IN_CLIENT',
-        );
-        expect(unknown, NotificationType.unknown);
-        expect(unknown.isKnown, isFalse);
-      },
-    );
+      // Crucial invariant: unknown string does NOT return generalInfo
+      final unknown = NotificationType.fromWire(
+        'NEW_BACKEND_EVENT_NOT_IN_CLIENT',
+      );
+      expect(unknown, NotificationType.unknown);
+      expect(unknown.isKnown, isFalse);
+    });
   });
 
   group('EnumPresentationRegistry Semantic Mapping & Precedence Tests', () {
@@ -221,9 +206,8 @@ void main() {
     test('Status values map to accurate semantic tones', () {
       // Success
       expect(
-        EnumPresentationRegistry.resolveNetworkStatus(
-          NetworkStatus.active,
-        ).tone,
+        EnumPresentationRegistry.resolveNetworkStatus(NetworkStatus.active)
+            .tone,
         SemanticTone.success,
       );
       expect(
@@ -231,9 +215,8 @@ void main() {
         SemanticTone.success,
       );
       expect(
-        EnumPresentationRegistry.resolveRequestStatus(
-          RequestStatus.approved,
-        ).tone,
+        EnumPresentationRegistry.resolveRequestStatus(RequestStatus.approved)
+            .tone,
         SemanticTone.success,
       );
       expect(
@@ -249,15 +232,13 @@ void main() {
 
       // Warning
       expect(
-        EnumPresentationRegistry.resolveNetworkStatus(
-          NetworkStatus.pending,
-        ).tone,
+        EnumPresentationRegistry.resolveNetworkStatus(NetworkStatus.pending)
+            .tone,
         SemanticTone.warning,
       );
       expect(
-        EnumPresentationRegistry.resolveRequestStatus(
-          RequestStatus.pending,
-        ).tone,
+        EnumPresentationRegistry.resolveRequestStatus(RequestStatus.pending)
+            .tone,
         SemanticTone.warning,
       );
       expect(
@@ -273,21 +254,18 @@ void main() {
 
       // Danger
       expect(
-        EnumPresentationRegistry.resolveNetworkStatus(
-          NetworkStatus.rejected,
-        ).tone,
+        EnumPresentationRegistry.resolveNetworkStatus(NetworkStatus.rejected)
+            .tone,
         SemanticTone.danger,
       );
       expect(
-        EnumPresentationRegistry.resolveNetworkStatus(
-          NetworkStatus.banned,
-        ).tone,
+        EnumPresentationRegistry.resolveNetworkStatus(NetworkStatus.banned)
+            .tone,
         SemanticTone.danger,
       );
       expect(
-        EnumPresentationRegistry.resolveRequestStatus(
-          RequestStatus.rejected,
-        ).tone,
+        EnumPresentationRegistry.resolveRequestStatus(RequestStatus.rejected)
+            .tone,
         SemanticTone.danger,
       );
       expect(
@@ -303,15 +281,13 @@ void main() {
 
       // Neutral
       expect(
-        EnumPresentationRegistry.resolveNetworkStatus(
-          NetworkStatus.inactive,
-        ).tone,
+        EnumPresentationRegistry.resolveNetworkStatus(NetworkStatus.inactive)
+            .tone,
         SemanticTone.neutral,
       );
       expect(
-        EnumPresentationRegistry.resolveRequestStatus(
-          RequestStatus.cancelled,
-        ).tone,
+        EnumPresentationRegistry.resolveRequestStatus(RequestStatus.cancelled)
+            .tone,
         SemanticTone.neutral,
       );
       expect(
@@ -325,15 +301,13 @@ void main() {
 
       // Unknown fallback
       expect(
-        EnumPresentationRegistry.resolveNetworkStatus(
-          NetworkStatus.unknown,
-        ).tone,
+        EnumPresentationRegistry.resolveNetworkStatus(NetworkStatus.unknown)
+            .tone,
         SemanticTone.neutral,
       );
       expect(
-        EnumPresentationRegistry.resolveNetworkStatus(
-          NetworkStatus.unknown,
-        ).isKnown,
+        EnumPresentationRegistry.resolveNetworkStatus(NetworkStatus.unknown)
+            .isKnown,
         isFalse,
       );
     });
@@ -407,30 +381,60 @@ void main() {
       },
     );
 
-    test('LinkingChallengeStatus parses exact wire values and presentation', () {
-      expect(LinkingChallengeStatus.fromWire('PENDING'), LinkingChallengeStatus.pending);
-      expect(LinkingChallengeStatus.fromWire('CONSUMED'), LinkingChallengeStatus.consumed);
-      expect(LinkingChallengeStatus.fromWire('EXPIRED'), LinkingChallengeStatus.expired);
-      expect(LinkingChallengeStatus.fromWire('REVOKED'), LinkingChallengeStatus.revoked);
-      expect(LinkingChallengeStatus.fromWire('pending'), LinkingChallengeStatus.unknown);
-      expect(LinkingChallengeStatus.fromWire(null), LinkingChallengeStatus.unknown);
+    test(
+      'LinkingChallengeStatus parses exact wire values and presentation',
+      () {
+        expect(
+          LinkingChallengeStatus.fromWire('PENDING'),
+          LinkingChallengeStatus.pending,
+        );
+        expect(
+          LinkingChallengeStatus.fromWire('CONSUMED'),
+          LinkingChallengeStatus.consumed,
+        );
+        expect(
+          LinkingChallengeStatus.fromWire('EXPIRED'),
+          LinkingChallengeStatus.expired,
+        );
+        expect(
+          LinkingChallengeStatus.fromWire('REVOKED'),
+          LinkingChallengeStatus.revoked,
+        );
+        expect(
+          LinkingChallengeStatus.fromWire('pending'),
+          LinkingChallengeStatus.unknown,
+        );
+        expect(
+          LinkingChallengeStatus.fromWire(null),
+          LinkingChallengeStatus.unknown,
+        );
 
-      expect(LinkingChallengeStatus.pending.isPending, isTrue);
-      expect(LinkingChallengeStatus.consumed.isConsumed, isTrue);
-      expect(LinkingChallengeStatus.expired.isExpired, isTrue);
-      expect(LinkingChallengeStatus.revoked.isRevoked, isTrue);
+        expect(LinkingChallengeStatus.pending.isPending, isTrue);
+        expect(LinkingChallengeStatus.consumed.isConsumed, isTrue);
+        expect(LinkingChallengeStatus.expired.isExpired, isTrue);
+        expect(LinkingChallengeStatus.revoked.isRevoked, isTrue);
 
-      final presPending = EnumPresentationRegistry.resolveLinkingChallengeStatus(LinkingChallengeStatus.pending);
-      expect(presPending.tone, SemanticTone.warning);
-      expect(presPending.label, 'قيد الانتظار');
+        final presPending =
+            EnumPresentationRegistry.resolveLinkingChallengeStatus(
+              LinkingChallengeStatus.pending,
+            );
+        expect(presPending.tone, SemanticTone.warning);
+        expect(presPending.label, 'قيد الانتظار');
 
-      final presConsumed = EnumPresentationRegistry.resolveLinkingChallengeStatus(LinkingChallengeStatus.consumed);
-      expect(presConsumed.tone, SemanticTone.success);
-      expect(presConsumed.label, 'مكتمل');
+        final presConsumed =
+            EnumPresentationRegistry.resolveLinkingChallengeStatus(
+              LinkingChallengeStatus.consumed,
+            );
+        expect(presConsumed.tone, SemanticTone.success);
+        expect(presConsumed.label, 'مكتمل');
 
-      final presRevoked = EnumPresentationRegistry.resolveLinkingChallengeStatus(LinkingChallengeStatus.revoked);
-      expect(presRevoked.tone, SemanticTone.danger);
-      expect(presRevoked.label, 'ملغي');
-    });
+        final presRevoked =
+            EnumPresentationRegistry.resolveLinkingChallengeStatus(
+              LinkingChallengeStatus.revoked,
+            );
+        expect(presRevoked.tone, SemanticTone.danger);
+        expect(presRevoked.label, 'ملغي');
+      },
+    );
   });
 }

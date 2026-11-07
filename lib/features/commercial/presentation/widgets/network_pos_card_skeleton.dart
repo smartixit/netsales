@@ -111,4 +111,3 @@ class NetworkPosCardSkeleton extends StatelessWidget {
     );
   }
 }
-

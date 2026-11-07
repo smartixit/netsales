@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -162,8 +163,7 @@ class TwoFactorAuthController extends GetxController {
         if (isClosed) return;
         CustomSnackbar.show(
           title: 'تغيير كلمة المرور إلزامي',
-          message:
-              'تم الدخول بكلمة مرور مؤقتة، يرجى تعيين كلمة مرور جديدة لحسابك للمتابعة.',
+          message: 'تم الدخول بكلمة مرور مؤقتة، يرجى تعيين كلمة مرور جديدة لحسابك للمتابعة.',
           type: SnackType.warning,
         );
         await Get.offAllNamed<void>(AppRoutes.resetPassword);

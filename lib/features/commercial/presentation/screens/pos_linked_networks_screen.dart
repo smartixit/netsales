@@ -123,8 +123,7 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
               if (displayLinks.isEmpty) {
                 return CustomEmptyState(
                   title: 'لا توجد شبكات مزودة مرتبطة',
-                  subtitle:
-                      'يجب أن يقوم مزود الشبكة بربط نقطة البيع الخاصة بك أولاً لتتمكن من طلب باقات الكروت بالجملة',
+                  subtitle: 'يجب أن يقوم مزود الشبكة بربط نقطة البيع الخاصة بك أولاً لتتمكن من طلب باقات الكروت بالجملة',
                   icon: Icons.hub_outlined,
                 );
               }

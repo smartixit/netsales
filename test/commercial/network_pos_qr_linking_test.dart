@@ -20,7 +20,9 @@ void main() {
         'payload_token': 'NTS_LINK_V1_TEST_TOKEN',
         'status': 'PENDING',
         'status_label': 'قيد الانتظار',
-        'expires_at': DateTime.now().add(const Duration(minutes: 30)).toIso8601String(),
+        'expires_at': DateTime.now()
+            .add(const Duration(minutes: 30))
+            .toIso8601String(),
         'consumed_at': null,
         'network': {'network_id': 15, 'network_name': 'شبكة الأمل للاختبار'},
         'pos': {'pos_id': 25, 'pos_name': 'نقطة السعادة'},

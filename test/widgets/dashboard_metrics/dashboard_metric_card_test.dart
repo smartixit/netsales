@@ -29,18 +29,16 @@ void main() {
       home: Directionality(
         textDirection: direction,
         child: Scaffold(
-          body: Center(
-            child: SizedBox(width: 340, child: child),
-          ),
+          body: Center(child: SizedBox(width: 340, child: child)),
         ),
       ),
     );
   }
 
-  testWidgets('renders value, interpreted trend and source freshness', (tester) async {
-    await tester.pumpWidget(
-      harness( DashboardMetricCard(metric: metric)),
-    );
+  testWidgets('renders value, interpreted trend and source freshness', (
+    tester,
+  ) async {
+    await tester.pumpWidget(harness(DashboardMetricCard(metric: metric)));
 
     expect(find.text('1,284'), findsOneWidget);
     expect(find.text('+12.5%'), findsOneWidget);
@@ -48,8 +46,10 @@ void main() {
     expect(find.textContaining('Platform reporting'), findsOneWidget);
   });
 
-  testWidgets('renders target boundaries and progress metadata', (tester) async {
-  final targetMetric = DashboardMetricData(
+  testWidgets('renders target boundaries and progress metadata', (
+    tester,
+  ) async {
+    final targetMetric = DashboardMetricData(
       id: 'quota',
       title: 'Monthly target',
       value: '72%',
@@ -73,9 +73,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(
-      harness( DashboardMetricCard(metric: targetMetric)),
-    );
+    await tester.pumpWidget(harness(DashboardMetricCard(metric: targetMetric)));
 
     expect(find.text('72% / 100%'), findsOneWidget);
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
@@ -83,19 +81,23 @@ void main() {
 
   testWidgets('renders loading and error states', (tester) async {
     await tester.pumpWidget(
-      harness( DashboardMetricCard(
-        metric: metric,
-        state: DashboardMetricState.loading,
-      )),
+      harness(
+        DashboardMetricCard(
+          metric: metric,
+          state: DashboardMetricState.loading,
+        ),
+      ),
     );
     expect(find.text('1,284'), findsNothing);
 
     await tester.pumpWidget(
-      harness( DashboardMetricCard(
-        metric: metric,
-        state: DashboardMetricState.error,
-        errorMessage: 'Could not refresh',
-      )),
+      harness(
+        DashboardMetricCard(
+          metric: metric,
+          state: DashboardMetricState.error,
+          errorMessage: 'Could not refresh',
+        ),
+      ),
     );
     expect(find.text('Could not refresh'), findsOneWidget);
   });
@@ -103,7 +105,7 @@ void main() {
   testWidgets('supports RTL without changing metric semantics', (tester) async {
     await tester.pumpWidget(
       harness(
-         DashboardMetricCard(metric: metric),
+        DashboardMetricCard(metric: metric),
         direction: TextDirection.rtl,
       ),
     );

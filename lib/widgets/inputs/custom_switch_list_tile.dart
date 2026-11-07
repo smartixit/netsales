@@ -60,16 +60,15 @@ class CustomSwitchListTile extends StatelessWidget {
     final colors = context.colors;
     final effectiveActiveColor = activeColor ?? colors.primary;
 
-    final resolvedIcon = value
-        ? (activeIcon ?? icon)
-        : (inactiveIcon ?? icon);
+    final resolvedIcon = value ? (activeIcon ?? icon) : (inactiveIcon ?? icon);
 
     final resolvedIconColor = value
         ? effectiveActiveColor
         : colors.onSurfaceVariant;
 
     final tileContent = Container(
-      padding: contentPadding ??
+      padding:
+          contentPadding ??
           EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
@@ -93,11 +92,7 @@ class CustomSwitchListTile extends StatelessWidget {
                 color: resolvedIconColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
-              child: Icon(
-                resolvedIcon,
-                color: resolvedIconColor,
-                size: 20.r,
-              ),
+              child: Icon(resolvedIcon, color: resolvedIconColor, size: 20.r),
             ),
             AppSpacing.hSm,
           ],
@@ -118,9 +113,7 @@ class CustomSwitchListTile extends StatelessWidget {
                   Text(
                     subtitle!,
                     style: AppTypography.bodySmall.copyWith(
-                      color: enabled
-                          ? colors.onSurfaceVariant
-                          : colors.outline,
+                      color: enabled ? colors.onSurfaceVariant : colors.outline,
                     ),
                   ),
                 ],

@@ -76,8 +76,7 @@ class LoginController extends GetxController {
       } else {
         CustomSnackbar.show(
           title: 'المقاييس الحيوية مؤكدة',
-          message:
-              'يرجى إدخال كلمة المرور لتسجيل الدخول أول مرة وحفظ الاعتمادات بأمان.',
+          message: 'يرجى إدخال كلمة المرور لتسجيل الدخول أول مرة وحفظ الاعتمادات بأمان.',
           type: SnackType.info,
         );
       }
@@ -153,8 +152,7 @@ class LoginController extends GetxController {
         await CustomAnimationOverlay.hide();
         CustomSnackbar.show(
           title: 'تغيير كلمة المرور إلزامي',
-          message:
-              'تم الدخول بكلمة مرور مؤقتة، يرجى تعيين كلمة مرور جديدة لحسابك للمتابعة.',
+          message: 'تم الدخول بكلمة مرور مؤقتة، يرجى تعيين كلمة مرور جديدة لحسابك للمتابعة.',
           type: SnackType.warning,
         );
         await Get.offAllNamed<void>(
