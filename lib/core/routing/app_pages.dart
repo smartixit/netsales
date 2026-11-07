@@ -33,6 +33,10 @@ import 'package:netsales/features/requests/presentation/screens/procurement_requ
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/pos_linked_networks_screen.dart';
+import 'package:netsales/features/invoices/presentation/bindings/invoice_binding.dart';
+import 'package:netsales/features/invoices/presentation/screens/invoice_details_screen.dart';
+import 'package:netsales/features/invoices/presentation/screens/network_wholesale_invoices_screen.dart';
+import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
 import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -275,6 +279,46 @@ abstract final class AppPages {
       binding: ProcurementRequestBinding(),
       middlewares: [
         AuthGuard(),
+      ],
+    ),
+
+    // ==========================================
+    // 9. فواتير المبيعات والمشتريات والمحاسبة (Invoicing & Accounting)
+    // ==========================================
+    GetPage(
+      name: AppRoutes.wholesaleInvoices,
+      page: () => const NetworkWholesaleInvoicesScreen(),
+      binding: InvoiceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.saleInvoiceDetails,
+      page: () => const InvoiceDetailsScreen(isNetworkPerspective: true),
+      binding: InvoiceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.purchaseInvoices,
+      page: () => const PosPurchaseInvoicesScreen(),
+      binding: InvoiceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.purchaseInvoiceDetails,
+      page: () => const InvoiceDetailsScreen(isNetworkPerspective: false),
+      binding: InvoiceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
 
