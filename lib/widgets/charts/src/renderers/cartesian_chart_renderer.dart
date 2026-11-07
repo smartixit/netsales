@@ -182,7 +182,7 @@ class CartesianChartRenderer extends StatelessWidget {
     final source = series.liveDataSource;
     final onRendererCreated = source == null
         ? null
-        : (ChartSeriesController controller) {
+        : (ChartSeriesController<ChartDataPoint, dynamic> controller) {
             source.bindSyncfusion(
               controller.updateDataSource,
               bindingId: '$bindingScope:${series.id}',
