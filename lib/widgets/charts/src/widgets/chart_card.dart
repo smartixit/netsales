@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/chart_controller.dart';
 import '../enums/chart_state.dart';
 import '../models/chart_period_option.dart';
 import '../models/chart_series.dart';
@@ -24,7 +25,14 @@ class ChartCard extends StatelessWidget {
     this.onToggleDataTable,
     this.chartBoundaryKey,
     this.onResetZoom,
+    this.chartController,
     this.onExpand,
+    this.onExportPng,
+    this.onExportPdf,
+    this.onExportCsv,
+    this.onSharePng,
+    this.onSharePdf,
+    this.onShareCsv,
     this.periods = const <ChartPeriodOption>[],
     this.selectedPeriodId,
     this.onPeriodChanged,
@@ -46,7 +54,14 @@ class ChartCard extends StatelessWidget {
   final VoidCallback? onToggleDataTable;
   final GlobalKey? chartBoundaryKey;
   final VoidCallback? onResetZoom;
+  final ChartController? chartController;
   final VoidCallback? onExpand;
+  final VoidCallback? onExportPng;
+  final VoidCallback? onExportPdf;
+  final VoidCallback? onExportCsv;
+  final VoidCallback? onSharePng;
+  final VoidCallback? onSharePdf;
+  final VoidCallback? onShareCsv;
   final List<ChartPeriodOption> periods;
   final String? selectedPeriodId;
   final ValueChanged<String>? onPeriodChanged;
@@ -58,14 +73,30 @@ class ChartCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = ChartsTheme.of(context);
     final scheme = Theme.of(context).colorScheme;
+    final resetZoom = onResetZoom ?? chartController?.resetZoom;
+    final hasExportActions = onExportPng != null || onExportPdf != null ||
+        onExportCsv != null || onSharePng != null || onSharePdf != null ||
+        onShareCsv != null;
     final toolbar = <Widget>[
       ...actions,
-      if (onResetZoom != null)
+      if (resetZoom != null)
         ChartToolbarAction(
           icon: Icons.center_focus_strong_rounded,
           tooltip: 'إعادة ضبط التكبير',
-          onPressed: onResetZoom,
+          onPressed: resetZoom,
         ),
+      if (chartController != null) ...[
+        ChartToolbarAction(
+          icon: Icons.zoom_in_rounded,
+          tooltip: 'تكبير المخطط',
+          onPressed: chartController!.zoomIn,
+        ),
+        ChartToolbarAction(
+          icon: Icons.zoom_out_rounded,
+          tooltip: 'تصغير المخطط',
+          onPressed: chartController!.zoomOut,
+        ),
+      ],
       if (onToggleDataTable != null)
         ChartToolbarAction(
           icon: showDataTable ? Icons.show_chart_rounded : Icons.table_chart_outlined,
@@ -77,6 +108,60 @@ class ChartCard extends StatelessWidget {
           icon: Icons.open_in_full_rounded,
           tooltip: 'توسيع المخطط',
           onPressed: onExpand,
+        ),
+      if (hasExportActions)
+        PopupMenuButton<_ChartCardAction>(
+          tooltip: 'تصدير ومشاركة',
+          onSelected: (action) {
+            switch (action) {
+              case _ChartCardAction.exportPng:
+                onExportPng?.call();
+              case _ChartCardAction.exportPdf:
+                onExportPdf?.call();
+              case _ChartCardAction.exportCsv:
+                onExportCsv?.call();
+              case _ChartCardAction.sharePng:
+                onSharePng?.call();
+              case _ChartCardAction.sharePdf:
+                onSharePdf?.call();
+              case _ChartCardAction.shareCsv:
+                onShareCsv?.call();
+            }
+          },
+          itemBuilder: (context) => [
+            if (onExportPng != null)
+              const PopupMenuItem(
+                value: _ChartCardAction.exportPng,
+                child: Text('حفظ كصورة PNG'),
+              ),
+            if (onExportPdf != null)
+              const PopupMenuItem(
+                value: _ChartCardAction.exportPdf,
+                child: Text('حفظ كملف PDF'),
+              ),
+            if (onExportCsv != null)
+              const PopupMenuItem(
+                value: _ChartCardAction.exportCsv,
+                child: Text('تصدير البيانات CSV'),
+              ),
+            if (onExportPng != null || onExportPdf != null || onExportCsv != null)
+              const PopupMenuDivider(),
+            if (onSharePng != null)
+              const PopupMenuItem(
+                value: _ChartCardAction.sharePng,
+                child: Text('مشاركة الصورة'),
+              ),
+            if (onSharePdf != null)
+              const PopupMenuItem(
+                value: _ChartCardAction.sharePdf,
+                child: Text('مشاركة PDF'),
+              ),
+            if (onShareCsv != null)
+              const PopupMenuItem(
+                value: _ChartCardAction.shareCsv,
+                child: Text('مشاركة CSV'),
+              ),
+          ],
         ),
     ];
 
@@ -261,4 +346,14 @@ class ChartToolbarAction extends StatelessWidget {
       ),
     );
   }
+}
+
+
+enum _ChartCardAction {
+  exportPng,
+  exportPdf,
+  exportCsv,
+  sharePng,
+  sharePdf,
+  shareCsv,
 }
