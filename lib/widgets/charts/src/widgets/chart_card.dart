@@ -189,7 +189,7 @@ class _ChartCardHeader extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                   ),
-                  if (badge != null) badge!,
+                  ?badge,
                 ],
               ),
               if (description != null) ...[
