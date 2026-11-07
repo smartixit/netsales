@@ -13,7 +13,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   permission_handler_windows
   printing
   share_plus
-  sodium_libs
   url_launcher_windows
 )
 
