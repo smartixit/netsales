@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_themes.dart';
-import 'package:netsales/widgets/charts/adapters/netsales_charts_theme_adapter.dart';
 import 'package:netsales/widgets/charts/charting.dart';
 import 'charts_showcase_controller.dart';
 
@@ -73,7 +72,7 @@ class _ChartsShowcaseContent extends StatelessWidget {
     type: type,
     options: options,
     series: [
-      ChartSeries(id: '\${family.name}-\${type.name}', name: 'الإجمالي', data: points),
+      ChartSeries(id: '${family.name}-${type.name}', name: 'الإجمالي', data: points),
     ],
   );
 
@@ -207,8 +206,8 @@ class _ChartsShowcaseContent extends StatelessWidget {
         chart: ChartRenderer(definition: liveDefinition),
         footer: Obx(
           () => Text(
-            'عدد التحديثات: \${controller.liveTick.value} • '
-            'النقاط الحالية: \${controller.liveSales.length}',
+            'عدد التحديثات: ${controller.liveTick.value} • '
+            'النقاط الحالية: ${controller.liveSales.length}',
           ),
         ),
       ),
@@ -237,7 +236,7 @@ class _ChartsShowcaseContent extends StatelessWidget {
       body: ListView.separated(
         padding: const EdgeInsets.all(20),
         itemCount: cards.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 18),
+        separatorBuilder: (_, _) => const SizedBox(height: 18),
         itemBuilder: (_, index) => cards[index],
       ),
     );
