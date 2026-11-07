@@ -6,6 +6,7 @@ export 'src/enums/chart_type.dart';
 export 'src/models/chart_axis_config.dart';
 export 'src/models/chart_data_point.dart';
 export 'src/models/chart_definition.dart';
+export 'src/models/chart_error_bar_config.dart';
 export 'src/models/chart_interaction.dart';
 export 'src/models/chart_options.dart';
 export 'src/models/chart_period_option.dart';
