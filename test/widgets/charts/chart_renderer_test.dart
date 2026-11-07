@@ -33,7 +33,7 @@ void main() {
   ];
 
   for (final chartCase in cases) {
-    testWidgets('renders \${chartCase.family.name} chart family', (tester) async {
+    testWidgets('renders ${chartCase.family.name} chart family', (tester) async {
       final definition = ChartDefinition(
         family: chartCase.family,
         type: chartCase.type,
