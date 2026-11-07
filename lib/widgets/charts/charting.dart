@@ -4,6 +4,8 @@ export 'src/enums/chart_axis_kind.dart';
 export 'src/enums/chart_family.dart';
 export 'src/enums/chart_state.dart';
 export 'src/enums/chart_type.dart';
+export 'src/enums/chart_zoom_mode.dart';
+export 'src/controllers/chart_controller.dart';
 export 'src/models/chart_axis_config.dart';
 export 'src/models/chart_data_point.dart';
 export 'src/models/chart_definition.dart';
