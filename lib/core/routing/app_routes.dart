@@ -79,4 +79,7 @@ abstract final class AppRoutes {
   static const String securitySettings = '/security/settings';
   /// Developer-only reusable DataGrid showcase.
   static const String dataGridShowcase = '/dev/data-grid';
+
+  /// Developer-only reusable Syncfusion Charts showcase.
+  static const String chartsShowcase = '/dev/dashboard-charts';
 }
