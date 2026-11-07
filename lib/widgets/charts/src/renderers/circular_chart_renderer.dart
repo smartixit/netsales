@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/charts.dart' hide ChartSeries;
 
 import '../enums/chart_type.dart';
 import '../models/chart_data_point.dart';
@@ -68,7 +68,7 @@ class CircularChartRenderer extends StatelessWidget {
             }
           };
 
-    void onRendererCreated(CircularSeriesController controller) {
+    void onRendererCreated(CircularSeriesController<ChartDataPoint, dynamic> controller) {
       source?.bindSyncfusion(
         controller.updateDataSource,
         bindingId: '$bindingScope:${series.id}',
@@ -167,5 +167,6 @@ class CircularChartRenderer extends StatelessWidget {
            ChartType.sparkWinLoss:
         throw ArgumentError.value(type, 'series.type', 'This chart type is not circular.');
     }
+    throw ArgumentError.value(type, 'series.type', 'Unsupported circular chart type.');
   }
 }

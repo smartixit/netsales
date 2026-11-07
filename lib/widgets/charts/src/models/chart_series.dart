@@ -22,10 +22,7 @@ class ChartSeries {
     this.xAxisName,
     this.yAxisName,
     this.binInterval,
-  }) : assert(
-         liveDataSource == null || data.isEmpty,
-         'Provide either static data or a live data source, not both.',
-       );
+  });
 
   final String id;
   final String name;

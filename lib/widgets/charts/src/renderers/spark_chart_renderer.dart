@@ -3,7 +3,6 @@ import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
 import '../enums/chart_type.dart';
 import '../models/chart_definition.dart';
-import '../models/chart_series.dart';
 import '../theme/charts_theme.dart';
 
 /// Syncfusion Spark renderer.

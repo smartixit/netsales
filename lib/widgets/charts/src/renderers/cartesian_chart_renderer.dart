@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/charts.dart' hide ChartSeries;
 
 import '../enums/chart_axis_kind.dart';
 import '../enums/chart_type.dart';
 import '../models/chart_axis_config.dart';
+import '../models/chart_data_point.dart';
+import '../models/chart_error_bar_config.dart';
 import '../models/chart_definition.dart';
 import '../models/chart_interaction.dart';
 import '../models/chart_series.dart';
@@ -28,7 +30,7 @@ class CartesianChartRenderer extends StatelessWidget {
     final options = definition.options;
 
     return SfCartesianChart(
-      margin: const EdgeInsetsDirectional.fromSTEB(4, 10, 8, 4),
+      margin: const EdgeInsets.fromLTRB(4, 10, 8, 4),
       backgroundColor: Colors.transparent,
       plotAreaBackgroundColor: Colors.transparent,
       plotAreaBorderWidth: 0,
@@ -787,7 +789,6 @@ class CartesianChartRenderer extends StatelessWidget {
           xAxisName: series.xAxisName,
           yAxisName: series.yAxisName,
           onRendererCreated: onRendererCreated,
-          onPointTap: pointTap,
         );
       case ChartType.rangeColumn:
         return RangeColumnSeries<ChartDataPoint, dynamic>(
@@ -848,7 +849,6 @@ class CartesianChartRenderer extends StatelessWidget {
           highValueMapper: (point, _) => point.high ?? 0,
           name: series.name,
           color: color,
-          width: series.width,
           opacity: series.opacity,
           isVisibleInLegend: series.isVisibleInLegend,
           xAxisName: series.xAxisName,

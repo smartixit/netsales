@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/charts.dart' hide ChartSeries;
 
 import '../enums/chart_type.dart';
 import '../models/chart_data_point.dart';
@@ -24,6 +24,14 @@ class FunnelChartRenderer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = ChartsTheme.of(context);
+    if (definition.series.length != 1) {
+      throw ArgumentError.value(
+        definition.series.length,
+        'definition.series.length',
+        'Syncfusion Funnel and Pyramid charts accept exactly one series.',
+      );
+    }
+    final series = definition.series.single;
     final type = definition.type;
     if (type == ChartType.funnel) {
       return SfFunnelChart(
@@ -40,9 +48,7 @@ class FunnelChartRenderer extends StatelessWidget {
         tooltipBehavior: TooltipBehavior(
           enable: definition.options.showTooltip,
         ),
-        series: definition.series
-            .map((series) => _buildFunnelSeries(series, theme))
-            .toList(growable: false),
+        series: _buildFunnelSeries(series, theme),
       );
     }
 
@@ -61,9 +67,7 @@ class FunnelChartRenderer extends StatelessWidget {
         tooltipBehavior: TooltipBehavior(
           enable: definition.options.showTooltip,
         ),
-        series: definition.series
-            .map((series) => _buildPyramidSeries(series, theme))
-            .toList(growable: false),
+        series: _buildPyramidSeries(series, theme),
       );
     }
 
@@ -106,7 +110,7 @@ class FunnelChartRenderer extends StatelessWidget {
         isVisible: definition.options.showDataLabels,
         textStyle: TextStyle(color: theme.text, fontSize: 11),
       ),
-      onRendererCreated: (FunnelSeriesController controller) {
+      onRendererCreated: (FunnelSeriesController<ChartDataPoint, dynamic> controller) {
         source?.bindSyncfusion(
           controller.updateDataSource,
           bindingId: '$bindingScope:${series.id}',
@@ -148,7 +152,7 @@ class FunnelChartRenderer extends StatelessWidget {
         isVisible: definition.options.showDataLabels,
         textStyle: TextStyle(color: theme.text, fontSize: 11),
       ),
-      onRendererCreated: (PyramidSeriesController controller) {
+      onRendererCreated: (PyramidSeriesController<ChartDataPoint, dynamic> controller) {
         source?.bindSyncfusion(
           controller.updateDataSource,
           bindingId: '$bindingScope:${series.id}',
