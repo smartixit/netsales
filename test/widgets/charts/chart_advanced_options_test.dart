@@ -68,11 +68,11 @@ void main() {
     );
     final line = chart.series.single as sf.LineSeries<ChartDataPoint, dynamic>;
     expect(line.trendlines, hasLength(2));
-    expect(line.trendlines!.first.type, sf.TrendlineType.movingAverage);
-    expect(line.trendlines!.first.period, 3);
-    expect(line.trendlines!.first.forwardForecast, 2);
-    expect(line.trendlines!.first.backwardForecast, 1);
-    expect(line.trendlines!.last.type, sf.TrendlineType.linear);
+    expect(line.trendlines.first.type, sf.TrendlineType.movingAverage);
+    expect(line.trendlines.first.period, 3);
+    expect(line.trendlines.first.forwardForecast, 2);
+    expect(line.trendlines.first.backwardForecast, 1);
+    expect(line.trendlines.last.type, sf.TrendlineType.linear);
 
     final yAxis = chart.primaryYAxis as sf.NumericAxis;
     expect(yAxis.plotBands, hasLength(1));
