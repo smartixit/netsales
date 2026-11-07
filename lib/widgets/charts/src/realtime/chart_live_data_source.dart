@@ -204,10 +204,15 @@ class ChartLiveDataSource<T> extends ChangeNotifier {
   void replaceAll(Iterable<T> values) {
     _ensureActive();
     final previousLength = _data.length;
+    // Snapshot first so replaceAll(data) is safe when the caller passes this
+    // source's own mutable list as the iterable.
+    final incoming = List<T>.of(values);
+    if (maxDataPoints != null && incoming.length > maxDataPoints!) {
+      incoming.removeRange(0, incoming.length - maxDataPoints!);
+    }
     _data
       ..clear()
-      ..addAll(values);
-    _trimInitialData();
+      ..addAll(incoming);
     final nextLength = _data.length;
 
     _notifyChange(
