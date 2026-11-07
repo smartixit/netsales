@@ -1,5 +1,5 @@
 # Project-level configuration.
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.15)
 project(netsales LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
@@ -8,7 +8,13 @@ set(BINARY_NAME "NetSales")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
-cmake_policy(VERSION 3.14...3.25)
+cmake_policy(VERSION 3.15...3.25)
+
+# MSVC 14.51 (Visual Studio 2026) now treats legacy <experimental/coroutine>
+# usage in currently resolved Windows Flutter plugins as a hard error.
+# Microsoft documents this compatibility define until those plugins migrate
+# to the standard C++20 coroutine header.
+add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
 
 # Define build configuration option.
 get_property(IS_MULTICONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)

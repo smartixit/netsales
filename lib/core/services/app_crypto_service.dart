@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:ffi';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -86,13 +84,13 @@ class AppCryptoService {
   bool get isEncryptionActive => isReady;
 
   /// ==========================================================================
-  /// 1. تهيئة مكتبة التشفير libsodium (Cross-Platform Dynamic Library Loader)
+  /// 1. تهيئة مكتبة التشفير libsodium (Native Assets / Build Hooks)
   /// ==========================================================================
   Future<void> init() async {
     if (_isInitialized) return;
 
     try {
-      _sodium = await SodiumInit.init(_loadPlatformDynamicLibrary);
+      _sodium = await SodiumInit.init();
       _isInitialized = true;
       log(
         '🔒 [Crypto] libsodium initialized successfully (version: ${_sodium?.version})',
@@ -106,37 +104,7 @@ class AppCryptoService {
     }
   }
 
-  /// تحميل المكتبة الديناميكية حسب نظام التشغيل
-  static DynamicLibrary _loadPlatformDynamicLibrary() {
-    if (Platform.isAndroid || Platform.isLinux) {
-      return DynamicLibrary.open('libsodium.so');
-    }
-
-    if (Platform.isIOS || Platform.isMacOS) {
-      return DynamicLibrary.process();
-    }
-
-    if (Platform.isWindows) {
-      final candidates = [
-        'libsodium.dll',
-        'sodium.dll',
-        r'C:\php\libsodium.dll',
-        'libsodium-23.dll',
-      ];
-
-      for (final candidate in candidates) {
-        try {
-          return DynamicLibrary.open(candidate);
-        } catch (_) {}
-      }
-
-      return DynamicLibrary.open('libsodium.dll');
-    }
-
-    throw UnsupportedError(
-      'نظام التشغيل الحالي غير مدعوم لمكتبة التشفير libsodium.',
-    );
-  }
+  /// يتم بناء وتحميل مكتبة libsodium تلقائياً عبر Native Assets.
 
   /// ==========================================================================
   /// 2. مزامنة المفاتيح العامة السيادية للخادم (Public Keys Synchronization)

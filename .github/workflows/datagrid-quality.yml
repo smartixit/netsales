@@ -7,6 +7,7 @@ on:
       - fix/data-grid-final-verification
       - chore/pub-dependency-maintenance
       - chore/pub-compatible-cache-picker
+      - chore/pub-audioplayers-6.8.1
       - chore/pub-compatible-updates
   pull_request:
     branches:
@@ -110,3 +111,35 @@ jobs:
         run: |
           cd android
           gradle --no-daemon :app:checkDebugAarMetadata :app:compileDebugKotlin :app:compileDebugJavaWithJavac :app:compileFlutterBuildDebug
+
+  windows-debug-compile:
+    name: Windows Debug compilation
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.9'
+          cache: true
+
+      - name: Report Windows toolchain
+        run: |
+          flutter --version
+          dart --version
+          cmake --version
+
+      - name: Resolve dependencies and verify lockfile
+        run: |
+          flutter pub get
+          flutter pub get --enforce-lockfile
+
+      - name: Compile Windows Debug application
+        env:
+          CMAKE_POLICY_VERSION_MINIMUM: '3.5'
+        run: flutter build windows --debug --verbose
