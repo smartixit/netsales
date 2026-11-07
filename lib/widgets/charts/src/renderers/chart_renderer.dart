@@ -34,7 +34,7 @@ class ChartRenderer extends StatefulWidget {
 class _ChartRendererState extends State<ChartRenderer> {
   static int _nextBindingScope = 0;
 
-  late final String _bindingScope = 'chart-\${_nextBindingScope++}';
+  late final String _bindingScope = 'chart-${_nextBindingScope++}';
 
   String _bindingId(String seriesId) => '$_bindingScope:$seriesId';
 
