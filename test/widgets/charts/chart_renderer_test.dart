@@ -32,6 +32,49 @@ void main() {
     (family: ChartFamily.spark, type: ChartType.sparkLine, point: point),
   ];
 
+  testWidgets('detaches zoom controls while the chart is not renderable',
+      (tester) async {
+    final controller = ChartController();
+    final series = [
+      ChartSeries(id: 'sales', name: 'Sales', data: const [point]),
+    ];
+
+    ChartDefinition definition(ChartState state) => ChartDefinition(
+          family: ChartFamily.cartesian,
+          type: ChartType.line,
+          options: const ChartOptions(enableZoom: true, animate: false),
+          state: state,
+          series: series,
+        );
+
+    Widget host(ChartState state) => MaterialApp(
+          home: SizedBox(
+            width: 520,
+            height: 300,
+            child: ChartRenderer(
+              key: const ValueKey('sales-chart'),
+              definition: definition(state),
+              controller: controller,
+            ),
+          ),
+        );
+
+    await tester.pumpWidget(host(ChartState.data));
+    await tester.pump();
+    expect(controller.isAttached, isTrue);
+
+    await tester.pumpWidget(host(ChartState.loading));
+    expect(controller.isAttached, isFalse);
+
+    await tester.pumpWidget(host(ChartState.data));
+    await tester.pump();
+    expect(controller.isAttached, isTrue);
+
+    await tester.pumpWidget(host(ChartState.empty));
+    expect(controller.isAttached, isFalse);
+  });
+
+
   for (final chartCase in cases) {
     testWidgets('renders ${chartCase.family.name} chart family', (tester) async {
       final definition = ChartDefinition(
