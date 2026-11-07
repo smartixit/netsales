@@ -101,6 +101,12 @@ class CartesianChartRenderer extends StatelessWidget {
       ChartAxisKind.category => CategoryAxis(
           name: config.name,
           title: title,
+          axisLabelFormatter: config.labelFormat == null
+              ? null
+              : (details) => ChartAxisLabel(
+                    config.labelFormat!.replaceAll('{value}', details.text),
+                    details.textStyle,
+                  ),
           labelStyle: labelStyle,
           labelRotation: config.labelRotation,
           isVisible: config.isVisible,
@@ -142,6 +148,12 @@ class CartesianChartRenderer extends StatelessWidget {
       ChartAxisKind.dateTimeCategory => DateTimeCategoryAxis(
           name: config.name,
           title: title,
+          axisLabelFormatter: config.labelFormat == null
+              ? null
+              : (details) => ChartAxisLabel(
+                    config.labelFormat!.replaceAll('{value}', details.text),
+                    details.textStyle,
+                  ),
           labelStyle: labelStyle,
           labelRotation: config.labelRotation,
           isVisible: config.isVisible,
