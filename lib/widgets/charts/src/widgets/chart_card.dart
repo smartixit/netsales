@@ -21,6 +21,10 @@ class ChartCard extends StatelessWidget {
     this.height = 300,
     this.series = const <ChartSeries>[],
     this.showDataTable = false,
+    this.onToggleDataTable,
+    this.chartBoundaryKey,
+    this.onResetZoom,
+    this.onExpand,
     this.periods = const <ChartPeriodOption>[],
     this.selectedPeriodId,
     this.onPeriodChanged,
@@ -39,6 +43,10 @@ class ChartCard extends StatelessWidget {
   final double height;
   final List<ChartSeries> series;
   final bool showDataTable;
+  final VoidCallback? onToggleDataTable;
+  final GlobalKey? chartBoundaryKey;
+  final VoidCallback? onResetZoom;
+  final VoidCallback? onExpand;
   final List<ChartPeriodOption> periods;
   final String? selectedPeriodId;
   final ValueChanged<String>? onPeriodChanged;
@@ -50,6 +58,27 @@ class ChartCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = ChartsTheme.of(context);
     final scheme = Theme.of(context).colorScheme;
+    final toolbar = <Widget>[
+      ...actions,
+      if (onResetZoom != null)
+        ChartToolbarAction(
+          icon: Icons.center_focus_strong_rounded,
+          tooltip: 'إعادة ضبط التكبير',
+          onPressed: onResetZoom,
+        ),
+      if (onToggleDataTable != null)
+        ChartToolbarAction(
+          icon: showDataTable ? Icons.show_chart_rounded : Icons.table_chart_outlined,
+          tooltip: showDataTable ? 'عرض المخطط' : 'عرض البيانات',
+          onPressed: onToggleDataTable,
+        ),
+      if (onExpand != null)
+        ChartToolbarAction(
+          icon: Icons.open_in_full_rounded,
+          tooltip: 'توسيع المخطط',
+          onPressed: onExpand,
+        ),
+    ];
 
     return Container(
       decoration: BoxDecoration(
@@ -66,7 +95,7 @@ class ChartCard extends StatelessWidget {
             title: title,
             description: description,
             badge: badge,
-            actions: actions,
+            actions: toolbar,
           ),
           if (periods.isNotEmpty) ...[
             const SizedBox(height: 14),
@@ -108,7 +137,7 @@ class ChartCard extends StatelessWidget {
             child: state == ChartState.data
                 ? (showDataTable
                     ? ChartDataTable(series: series)
-                    : chart)
+                    : RepaintBoundary(key: chartBoundaryKey, child: chart))
                 : ChartStateView(
                     state: state,
                     message: stateMessage,
