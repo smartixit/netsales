@@ -1,4 +1,5 @@
 export 'adapters/netsales_charts_theme_adapter.dart';
+export 'adapters/netsales_charts_export_adapter.dart';
 export 'src/enums/chart_axis_kind.dart';
 export 'src/enums/chart_family.dart';
 export 'src/enums/chart_state.dart';
