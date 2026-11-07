@@ -25,6 +25,11 @@ import 'package:netsales/features/catalog/presentation/bindings/package_catalog_
 import 'package:netsales/features/catalog/presentation/screens/package_catalog_screen.dart';
 import 'package:netsales/features/catalog/presentation/screens/package_details_screen.dart';
 import 'package:netsales/features/catalog/presentation/screens/package_form_screen.dart';
+import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
+import 'package:netsales/features/requests/presentation/screens/network_supply_requests_review_screen.dart';
+import 'package:netsales/features/requests/presentation/screens/pos_new_procurement_order_screen.dart';
+import 'package:netsales/features/requests/presentation/screens/pos_procurement_orders_screen.dart';
+import 'package:netsales/features/requests/presentation/screens/procurement_request_details_screen.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/pos_linked_networks_screen.dart';
@@ -231,6 +236,45 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+
+    // ========================================================================
+    // 8. مسارات دورة حياة طلبات التوريد والمشتريات (Procurement Requests M6)
+    // ========================================================================
+    GetPage(
+      name: AppRoutes.procurementOrders,
+      page: () => const PosProcurementOrdersScreen(),
+      binding: ProcurementRequestBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.newProcurementOrder,
+      page: () => const PosNewProcurementOrderScreen(),
+      binding: ProcurementRequestBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.supplyRequestsReview,
+      page: () => const NetworkSupplyRequestsReviewScreen(),
+      binding: ProcurementRequestBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.voucherRequestDetails,
+      page: () => const ProcurementRequestDetailsScreen(),
+      binding: ProcurementRequestBinding(),
+      middlewares: [
+        AuthGuard(),
       ],
     ),
 

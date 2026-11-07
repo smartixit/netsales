@@ -1,4 +1,5 @@
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
@@ -10,50 +11,68 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
   const PackageCatalogRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<List<PackageEntity>> getPackages({
+  Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
     bool? status,
     String? search,
+    String? cursor,
     int? perPage,
   }) async {
     final query = <String, dynamic>{};
     if (networkId != null) query['network_id'] = networkId;
-    if (status != null) query['status'] = status;
+    if (status != null) query['status'] = status ? '1' : '0';
     if (search != null && search.trim().isNotEmpty) {
       query['search'] = search.trim();
     }
+    if (cursor != null && cursor.isNotEmpty) {
+      query['cursor'] = cursor;
+    }
     if (perPage != null) query['per_page'] = perPage;
 
-    final response = await _remoteDataSource.getPackages(query: query);
+    final response = await _remoteDataSource.getPackages(
+      query: query.isEmpty ? null : query,
+    );
 
     if (response.success && response.data != null) {
-      return response.data!;
+      return PaginatedList<PackageEntity>(
+        items: response.data!,
+        nextCursor: response.nextCursor,
+        prevCursor: response.prevCursor,
+      );
     }
 
     throw AppException(response.message);
   }
 
   @override
-  Future<List<PackageEntity>> getNetworkPackages(
+  Future<PaginatedList<PackageEntity>> getNetworkPackages(
     int networkId, {
     bool? status,
     String? search,
+    String? cursor,
     int? perPage,
   }) async {
     final query = <String, dynamic>{};
-    if (status != null) query['status'] = status;
+    if (status != null) query['status'] = status ? '1' : '0';
     if (search != null && search.trim().isNotEmpty) {
       query['search'] = search.trim();
+    }
+    if (cursor != null && cursor.isNotEmpty) {
+      query['cursor'] = cursor;
     }
     if (perPage != null) query['per_page'] = perPage;
 
     final response = await _remoteDataSource.getNetworkPackages(
       networkId,
-      query: query,
+      query: query.isEmpty ? null : query,
     );
 
     if (response.success && response.data != null) {
-      return response.data!;
+      return PaginatedList<PackageEntity>(
+        items: response.data!,
+        nextCursor: response.nextCursor,
+        prevCursor: response.prevCursor,
+      );
     }
 
     throw AppException(response.message);
@@ -117,4 +136,3 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
     throw AppException(response.message);
   }
 }
-

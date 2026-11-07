@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/utils/package_spec_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/create_package_use_case.dart';
@@ -10,17 +11,10 @@ import 'package:netsales/features/catalog/domain/usecases/get_package_details_us
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/toggle_package_status_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/update_package_use_case.dart';
+import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
-
-/// خيارات ترتيب الباقات
-enum PackageSortOption {
-  nameAsc,
-  nameDesc,
-  priceAsc,
-  priceDesc,
-  newest,
-}
 
 /// متحكم إدارة كتالوج باقات الكروت والأسعار التعاقدية
 class PackageCatalogController extends GetxController {
@@ -31,6 +25,7 @@ class PackageCatalogController extends GetxController {
   final UpdatePackageUseCase updatePackageUseCase;
   final TogglePackageStatusUseCase togglePackageStatusUseCase;
   final DeletePackageUseCase deletePackageUseCase;
+  final GetMyNetworksUseCase? getMyNetworksUseCase;
 
   PackageCatalogController({
     required this.getPackagesUseCase,
@@ -40,6 +35,7 @@ class PackageCatalogController extends GetxController {
     required this.updatePackageUseCase,
     required this.togglePackageStatusUseCase,
     required this.deletePackageUseCase,
+    this.getMyNetworksUseCase,
   });
 
   // State Variables
@@ -48,17 +44,25 @@ class PackageCatalogController extends GetxController {
   final selectedPackage = Rxn<PackageEntity>();
 
   final isLoading = false.obs;
+  final isLoadingMore = false.obs;
   final isSaving = false.obs;
   final isDeleting = false.obs;
   final isTogglingStatus = false.obs;
   final errorMessage = RxnString();
+  final nextCursor = RxnString();
 
-  // Filters & Search
+  bool get hasMore => nextCursor.value != null;
+
+  // Filters & Server Search
   final searchController = TextEditingController();
   final searchQuery = ''.obs;
   final statusFilter = RxnBool(); // null = all, true = active, false = inactive
   final selectedNetworkId = RxnInt();
-  final sortOption = PackageSortOption.newest.obs;
+
+  // Network Selection State
+  final authorizedNetworks = <NetworkEntity>[].obs;
+  final isLoadingNetworks = false.obs;
+  final formNetworkId = RxnInt();
 
   // Form Management
   final formKey = GlobalKey<FormState>();
@@ -80,26 +84,23 @@ class PackageCatalogController extends GetxController {
   final packageActiveStatus = true.obs;
   final isEditing = false.obs;
   final editingPackageId = RxnInt();
-  final formNetworkId = RxnInt();
-
-  // Live Informational Preview (Financial Display-Only Guidance AGENTS.md §3)
-  final previewEffectiveCashPrice = 0.0.obs;
-  final previewEffectiveCreditPrice = 0.0.obs;
-  final previewCashDiscountAmount = 0.0.obs;
-  final previewCreditDiscountAmount = 0.0.obs;
 
   @override
   void onInit() {
     super.onInit();
+
+    // Debounced search via GetX debounce worker
     searchController.addListener(() {
       searchQuery.value = searchController.text;
-      applyFilters();
     });
 
-    priceController.addListener(updateLiveCalculations);
-    cashDiscountController.addListener(updateLiveCalculations);
-    creditDiscountController.addListener(updateLiveCalculations);
+    debounce(
+      searchQuery,
+      (_) => loadPackages(isRefresh: true),
+      time: const Duration(milliseconds: 500),
+    );
 
+    loadAuthorizedNetworks();
     loadPackages();
   }
 
@@ -120,30 +121,60 @@ class PackageCatalogController extends GetxController {
     super.onClose();
   }
 
-  /// تحميل الباقات من الخادم
-  Future<void> loadPackages({int? networkId}) async {
+  /// جلب الشبكات المعتمدة التابعة للمستخدم لتحديد شبكة إنشاء الباقة
+  Future<void> loadAuthorizedNetworks() async {
+    if (getMyNetworksUseCase == null) return;
+    isLoadingNetworks.value = true;
+    try {
+      final networks = await getMyNetworksUseCase!();
+      authorizedNetworks.assignAll(networks);
+      if (formNetworkId.value == null && networks.length == 1) {
+        formNetworkId.value = networks.first.networkId;
+      }
+    } catch (_) {
+      // Non-blocking, handled during submission validation
+    } finally {
+      isLoadingNetworks.value = false;
+    }
+  }
+
+  /// تحميل الباقات من الخادم مع ترقيم الصفحات القائم على المؤشر (Cursor Pagination)
+  Future<void> loadPackages({int? networkId, bool isRefresh = false}) async {
+    if (networkId != null) {
+      selectedNetworkId.value = networkId;
+    }
+
     isLoading.value = true;
     errorMessage.value = null;
 
+    if (isRefresh) {
+      nextCursor.value = null;
+    }
+
     try {
-      final List<PackageEntity> result;
-      if (networkId != null) {
-        selectedNetworkId.value = networkId;
+      final query = searchQuery.value.trim();
+      final effectiveSearch = query.isEmpty ? null : query;
+
+      final PaginatedList<PackageEntity> result;
+      if (selectedNetworkId.value != null) {
         result = await getNetworkPackagesUseCase(
-          networkId,
+          selectedNetworkId.value!,
           status: statusFilter.value,
-          search: searchQuery.value.isEmpty ? null : searchQuery.value,
+          search: effectiveSearch,
+          cursor: null,
         );
       } else {
         result = await getPackagesUseCase(
           networkId: selectedNetworkId.value,
           status: statusFilter.value,
-          search: searchQuery.value.isEmpty ? null : searchQuery.value,
+          search: effectiveSearch,
+          cursor: null,
         );
       }
 
-      packages.assignAll(result);
-      applyFilters();
+      packages.assignAll(result.items);
+      filteredPackages.assignAll(result.items);
+      nextCursor.value = result.nextCursor;
     } catch (e) {
       errorMessage.value = e is AppException
           ? e.message
@@ -153,63 +184,60 @@ class PackageCatalogController extends GetxController {
     }
   }
 
-  /// تحديث قائمة الكتالوج
+  /// تحميل المزيد من الباقات عند التمرير لنهاية القائمة
+  Future<void> loadMorePackages() async {
+    if (isLoadingMore.value || isLoading.value || nextCursor.value == null) {
+      return;
+    }
+
+    isLoadingMore.value = true;
+
+    try {
+      final query = searchQuery.value.trim();
+      final effectiveSearch = query.isEmpty ? null : query;
+
+      final PaginatedList<PackageEntity> result;
+      if (selectedNetworkId.value != null) {
+        result = await getNetworkPackagesUseCase(
+          selectedNetworkId.value!,
+          status: statusFilter.value,
+          search: effectiveSearch,
+          cursor: nextCursor.value,
+        );
+      } else {
+        result = await getPackagesUseCase(
+          networkId: selectedNetworkId.value,
+          status: statusFilter.value,
+          search: effectiveSearch,
+          cursor: nextCursor.value,
+        );
+      }
+
+      // منع التكرار بناء على packageId
+      final existingIds = packages.map((p) => p.packageId).toSet();
+      final newItems =
+          result.items.where((p) => !existingIds.contains(p.packageId)).toList();
+
+      packages.addAll(newItems);
+      filteredPackages.assignAll(packages);
+      nextCursor.value = result.nextCursor;
+    } catch (e) {
+      // Non-fatal for load-more; cursor remains so user can retry by scrolling
+    } finally {
+      isLoadingMore.value = false;
+    }
+  }
+
+  /// تحديث قائمة الكتالوج بالكامل
   Future<void> refreshCatalog() async {
-    await loadPackages(networkId: selectedNetworkId.value);
+    await loadPackages(isRefresh: true);
   }
 
-  /// تطبيق الفلاتر والبحث والترتيب محلياً
-  void applyFilters() {
-    var result = List<PackageEntity>.from(packages);
-
-    // 1. فلترة الحالة
-    if (statusFilter.value != null) {
-      result = result.where((pkg) => pkg.status == statusFilter.value).toList();
-    }
-
-    // 2. فلترة البحث
-    final q = searchQuery.value.trim().toLowerCase();
-    if (q.isNotEmpty) {
-      result = result.where((pkg) {
-        final nameMatch = pkg.packageName.toLowerCase().contains(q);
-        final priceMatch = pkg.packageVoucherPrice.toString().contains(q);
-        final balanceMatch = pkg.packageBalance.toString().contains(q);
-        return nameMatch || priceMatch || balanceMatch;
-      }).toList();
-    }
-
-    // 3. الترتيب
-    switch (sortOption.value) {
-      case PackageSortOption.nameAsc:
-        result.sort((a, b) => a.packageName.compareTo(b.packageName));
-        break;
-      case PackageSortOption.nameDesc:
-        result.sort((a, b) => b.packageName.compareTo(a.packageName));
-        break;
-      case PackageSortOption.priceAsc:
-        result.sort((a, b) => a.packageVoucherPrice.compareTo(b.packageVoucherPrice));
-        break;
-      case PackageSortOption.priceDesc:
-        result.sort((a, b) => b.packageVoucherPrice.compareTo(a.packageVoucherPrice));
-        break;
-      case PackageSortOption.newest:
-        result.sort((a, b) => (b.packageId).compareTo(a.packageId));
-        break;
-    }
-
-    filteredPackages.assignAll(result);
-  }
-
-  /// تحديد فلتر الحالة (الكل / النشطة / المعطلة)
+  /// تحديد فلتر الحالة على الخادم (الكل / النشطة / المعطلة)
   void setStatusFilter(bool? status) {
+    if (statusFilter.value == status) return;
     statusFilter.value = status;
-    applyFilters();
-  }
-
-  /// تغيير طريقة الترتيب
-  void setSortOption(PackageSortOption option) {
-    sortOption.value = option;
-    applyFilters();
+    loadPackages(isRefresh: true);
   }
 
   /// اختيار باقة معينة وعرض تفاصيلها
@@ -223,11 +251,10 @@ class PackageCatalogController extends GetxController {
       final details = await getPackageDetailsUseCase(packageId);
       selectedPackage.value = details;
 
-      // تحديث العنصر في القائمة إن وجد
       final index = packages.indexWhere((p) => p.packageId == packageId);
       if (index != -1) {
         packages[index] = details;
-        applyFilters();
+        filteredPackages.assignAll(packages);
       }
     } on AppException catch (e) {
       CustomSnackbar.show(
@@ -299,9 +326,12 @@ class PackageCatalogController extends GetxController {
   void initCreateForm({int? networkId}) {
     isEditing.value = false;
     editingPackageId.value = null;
+
     formNetworkId.value = networkId ??
         selectedNetworkId.value ??
-        (packages.isNotEmpty ? packages.first.networkId : 1);
+        (authorizedNetworks.length == 1
+            ? authorizedNetworks.first.networkId
+            : null);
 
     nameController.clear();
     balanceController.clear();
@@ -318,7 +348,6 @@ class PackageCatalogController extends GetxController {
 
     selectedColorHex.value = '0xFF0D7A5F';
     packageActiveStatus.value = true;
-    updateLiveCalculations();
   }
 
   /// تهيئة نموذج التعديل لباقة قائمة مع اختيار الوحدات الأنسب
@@ -373,32 +402,35 @@ class PackageCatalogController extends GetxController {
 
     selectedColorHex.value = pkg.packageColor ?? '0xFF0D7A5F';
     packageActiveStatus.value = pkg.status;
-    updateLiveCalculations();
   }
 
-  /// تحديث الحسابات الاسترشادية الحية أثناء إدخال البيانات في النموذج
-  void updateLiveCalculations() {
-    final price = double.tryParse(priceController.text.trim()) ?? 0.0;
-    final cashPercent =
-        double.tryParse(cashDiscountController.text.trim()) ?? 0.0;
-    final creditPercent =
-        double.tryParse(creditDiscountController.text.trim()) ?? 0.0;
-
-    final cashAmt = (price * cashPercent) / 100;
-    final creditAmt = (price * creditPercent) / 100;
-
-    previewCashDiscountAmount.value = cashAmt;
-    previewCreditDiscountAmount.value = creditAmt;
-    previewEffectiveCashPrice.value =
-        (price - cashAmt).clamp(0.0, double.infinity);
-    previewEffectiveCreditPrice.value =
-        (price - creditAmt).clamp(0.0, double.infinity);
-  }
-
-  /// إرسال وحفظ بيانات الباقة (إنشاء أو تعديل) مع Overlay و Snackbar
+  /// إرسال وحفظ بيانات الباقة (إنشاء أو تعديل) مع التحقق الحتمي للشبكة والـ Overlay
   Future<bool> submitPackageForm() async {
     if (!formKey.currentState!.validate()) {
       return false;
+    }
+
+    // التحقق الحتمي من معرف الشبكة عند الإنشاء
+    if (!isEditing.value) {
+      if (formNetworkId.value == null) {
+        if (authorizedNetworks.length == 1) {
+          formNetworkId.value = authorizedNetworks.first.networkId;
+        } else if (authorizedNetworks.isEmpty) {
+          CustomSnackbar.show(
+            title: 'تعذر إنشاء الباقة',
+            message: 'لا توجد شبكة معتمدة تابعة لك لإنشاء الباقة فيها.',
+            type: SnackType.error,
+          );
+          return false;
+        } else {
+          CustomSnackbar.show(
+            title: 'تحديد الشبكة مطلوب',
+            message: 'يرجى اختيار الشبكة التابعة للباقة أولاً.',
+            type: SnackType.warning,
+          );
+          return false;
+        }
+      }
     }
 
     final price = double.tryParse(priceController.text.trim()) ?? 0.0;
@@ -458,9 +490,10 @@ class PackageCatalogController extends GetxController {
       };
 
       if (!isEditing.value) {
-        payload['network_id'] = formNetworkId.value ?? 1;
+        payload['network_id'] = formNetworkId.value!;
         final created = await createPackageUseCase(payload);
         packages.insert(0, created);
+        filteredPackages.assignAll(packages);
         selectedPackage.value = created;
 
         await CustomAnimationOverlay.showSuccess(
@@ -478,6 +511,7 @@ class PackageCatalogController extends GetxController {
         if (index != -1) {
           packages[index] = updated;
         }
+        filteredPackages.assignAll(packages);
         selectedPackage.value = updated;
 
         await CustomAnimationOverlay.showSuccess(
@@ -490,7 +524,6 @@ class PackageCatalogController extends GetxController {
         );
       }
 
-      applyFilters();
       return true;
     } on AppException catch (e) {
       if (CustomAnimationOverlay.isShowing) {
@@ -539,7 +572,7 @@ class PackageCatalogController extends GetxController {
         selectedPackage.value = updated;
       }
 
-      applyFilters();
+      filteredPackages.assignAll(packages);
 
       final stateLabel = updated.status ? 'تفعيل' : 'تعطيل';
       await CustomAnimationOverlay.showSuccess(
@@ -587,7 +620,7 @@ class PackageCatalogController extends GetxController {
       final success = await deletePackageUseCase(packageId);
       if (success) {
         packages.removeWhere((p) => p.packageId == packageId);
-        applyFilters();
+        filteredPackages.assignAll(packages);
         if (selectedPackage.value?.packageId == packageId) {
           selectedPackage.value = null;
         }

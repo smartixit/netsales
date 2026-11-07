@@ -11,6 +11,11 @@ import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.
 import 'package:netsales/features/catalog/domain/usecases/toggle_package_status_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/update_package_use_case.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
+import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
+import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source_impl.dart';
+import 'package:netsales/features/commercial/data/repositories/commercial_repository_impl.dart';
+import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 
 /// ربط التبعيات لميزة كتالوج باقات الكروت والأسعار التعاقدية
 class PackageCatalogBinding extends Bindings {
@@ -28,7 +33,26 @@ class PackageCatalogBinding extends Bindings {
       ),
     );
 
-    // 3. Use Cases
+    // 3. Commercial Dependencies for Network Selection
+    if (!Get.isRegistered<CommercialRemoteDataSource>()) {
+      Get.lazyPut<CommercialRemoteDataSource>(
+        () => const CommercialRemoteDataSourceImpl(),
+      );
+    }
+    if (!Get.isRegistered<CommercialRepository>()) {
+      Get.lazyPut<CommercialRepository>(
+        () => CommercialRepositoryImpl(
+          Get.find<CommercialRemoteDataSource>(),
+        ),
+      );
+    }
+    if (!Get.isRegistered<GetMyNetworksUseCase>()) {
+      Get.lazyPut(
+        () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
+      );
+    }
+
+    // 4. Use Cases
     Get.lazyPut(
       () => GetPackagesUseCase(Get.find<PackageCatalogRepository>()),
     );
@@ -51,7 +75,7 @@ class PackageCatalogBinding extends Bindings {
       () => DeletePackageUseCase(Get.find<PackageCatalogRepository>()),
     );
 
-    // 4. Controller
+    // 5. Controller
     Get.lazyPut<PackageCatalogController>(
       () => PackageCatalogController(
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
@@ -61,8 +85,8 @@ class PackageCatalogBinding extends Bindings {
         updatePackageUseCase: Get.find<UpdatePackageUseCase>(),
         togglePackageStatusUseCase: Get.find<TogglePackageStatusUseCase>(),
         deletePackageUseCase: Get.find<DeletePackageUseCase>(),
+        getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
       ),
     );
   }
 }
-

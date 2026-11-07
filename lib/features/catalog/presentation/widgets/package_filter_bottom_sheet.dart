@@ -8,7 +8,7 @@ import 'package:netsales/widgets/badges/custom_filter_chip.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
-/// ورقة سفلية لفلترة وترتيب باقات الكتالوج
+/// ورقة سفلية لفلترة باقات الكتالوج بحسب الحالة المعتمدة على الخادم
 class PackageFilterBottomSheet extends StatelessWidget {
   final PackageCatalogController controller;
 
@@ -19,7 +19,7 @@ class PackageFilterBottomSheet extends StatelessWidget {
 
   static Future<void> show(PackageCatalogController controller) {
     return CustomBottomSheet.show<void>(
-      title: 'فلترة وترتيب الباقات',
+      title: 'فلترة باقات الكتالوج',
       child: PackageFilterBottomSheet(controller: controller),
     );
   }
@@ -30,7 +30,6 @@ class PackageFilterBottomSheet extends StatelessWidget {
 
     return Obx(() {
       final currentStatus = controller.statusFilter.value;
-      final currentSort = controller.sortOption.value;
 
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -39,7 +38,7 @@ class PackageFilterBottomSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'حالة الباقة',
+              'حالة الباقة على الخادم',
               style: AppTypography.titleSmall.copyWith(
                 color: colors.onSurface,
                 fontWeight: FontWeight.bold,
@@ -66,52 +65,9 @@ class PackageFilterBottomSheet extends StatelessWidget {
                 ),
               ],
             ),
-
-            AppSpacing.vLg,
-
-            Text(
-              'ترتيب حسب',
-              style: AppTypography.titleSmall.copyWith(
-                color: colors.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            AppSpacing.vSm,
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              children: [
-                CustomFilterChip(
-                  label: 'الأحدث أولاً',
-                  isSelected: currentSort == PackageSortOption.newest,
-                  onSelected: () =>
-                      controller.setSortOption(PackageSortOption.newest),
-                ),
-                CustomFilterChip(
-                  label: 'الاسم (أ - ي)',
-                  isSelected: currentSort == PackageSortOption.nameAsc,
-                  onSelected: () =>
-                      controller.setSortOption(PackageSortOption.nameAsc),
-                ),
-                CustomFilterChip(
-                  label: 'السعر: الأقل أولاً',
-                  isSelected: currentSort == PackageSortOption.priceAsc,
-                  onSelected: () =>
-                      controller.setSortOption(PackageSortOption.priceAsc),
-                ),
-                CustomFilterChip(
-                  label: 'السعر: الأعلى أولاً',
-                  isSelected: currentSort == PackageSortOption.priceDesc,
-                  onSelected: () =>
-                      controller.setSortOption(PackageSortOption.priceDesc),
-                ),
-              ],
-            ),
-
             AppSpacing.vXl,
-
             CustomButton(
-              text: 'تطبيق الفلاتر',
+              text: 'إغلاق',
               onPressed: () => Get.back<void>(),
             ),
             AppSpacing.vMd,

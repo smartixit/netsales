@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/data/models/package_model.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
@@ -18,13 +19,14 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
   }
 
   @override
-  Future<List<PackageEntity>> getPackages({
+  Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
     bool? status,
     String? search,
+    String? cursor,
     int? perPage,
   }) async {
-    return _packages.where((p) {
+    final filtered = _packages.where((p) {
       if (networkId != null && p.networkId != networkId) return false;
       if (status != null && p.status != status) return false;
       if (search != null && search.isNotEmpty) {
@@ -34,20 +36,38 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
       }
       return true;
     }).toList();
+
+    return PaginatedList<PackageEntity>(
+      items: filtered,
+      nextCursor: filtered.length > 5 ? 'cursor_token_next' : null,
+      prevCursor: cursor != null ? 'cursor_token_prev' : null,
+    );
   }
 
   @override
-  Future<List<PackageEntity>> getNetworkPackages(
+  Future<PaginatedList<PackageEntity>> getNetworkPackages(
     int networkId, {
     bool? status,
     String? search,
+    String? cursor,
     int? perPage,
   }) async {
-    return _packages.where((p) {
+    final filtered = _packages.where((p) {
       if (p.networkId != networkId) return false;
       if (status != null && p.status != status) return false;
+      if (search != null && search.isNotEmpty) {
+        if (!p.packageName.toLowerCase().contains(search.toLowerCase())) {
+          return false;
+        }
+      }
       return true;
     }).toList();
+
+    return PaginatedList<PackageEntity>(
+      items: filtered,
+      nextCursor: filtered.length > 5 ? 'cursor_token_next' : null,
+      prevCursor: cursor != null ? 'cursor_token_prev' : null,
+    );
   }
 
   @override
@@ -73,9 +93,12 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
       packageName: data['package_name'] as String? ?? 'New Package',
       packageBalance: (data['package_balance'] as num?)?.toDouble() ?? 5.0,
       packageVoucherCount: data['package_voucher_count'] as int? ?? 100,
-      packageVoucherPrice: (data['package_voucher_price'] as num?)?.toDouble() ?? 1000.0,
-      packageDefaultCashDiscount: (data['package_default_cash_discount'] as num?)?.toDouble() ?? 5.0,
-      packageDefaultCreditDiscount: (data['package_default_credit_discount'] as num?)?.toDouble() ?? 2.5,
+      packageVoucherPrice:
+          (data['package_voucher_price'] as num?)?.toDouble() ?? 1000.0,
+      packageDefaultCashDiscount:
+          (data['package_default_cash_discount'] as num?)?.toDouble() ?? 5.0,
+      packageDefaultCreditDiscount:
+          (data['package_default_credit_discount'] as num?)?.toDouble() ?? 2.5,
       cashDiscountAmount: 50.0,
       creditDiscountAmount: 25.0,
       effectiveCashPrice: 950.0,
@@ -87,11 +110,13 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
   }
 
   @override
-  Future<PackageEntity> updatePackage(int packageId, Map<String, dynamic> data) async {
+  Future<PackageEntity> updatePackage(
+      int packageId, Map<String, dynamic> data) async {
     final index = _packages.indexWhere((p) => p.packageId == packageId);
     if (index >= 0) {
       final existing = _packages[index];
-      final price = (data['package_voucher_price'] as num?)?.toDouble() ?? existing.packageVoucherPrice;
+      final price = (data['package_voucher_price'] as num?)?.toDouble() ??
+          existing.packageVoucherPrice;
       final updated = PackageEntity(
         packageId: existing.packageId,
         networkId: existing.networkId,
@@ -155,7 +180,8 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
 
 void main() {
   group('Voucher Package Models and Serialization Tests', () {
-    test('PackageModel fromJson deserializes full backend resource correctly', () {
+    test('PackageModel fromJson deserializes full backend resource correctly',
+        () {
       final json = {
         'package_id': 101,
         'network_id': 5,
@@ -198,7 +224,9 @@ void main() {
       expect(model.status, true);
     });
 
-    test('PackageModel toJson serializes request payload accurately without currency', () {
+    test(
+        'PackageModel toJson serializes request payload accurately without currency',
+        () {
       final model = PackageModel(
         packageId: 101,
         networkId: 5,
@@ -264,10 +292,10 @@ void main() {
       togglePackageStatusUseCase = TogglePackageStatusUseCase(mockRepo);
     });
 
-    test('GetPackagesUseCase returns filtered package list', () async {
+    test('GetPackagesUseCase returns paginated package list', () async {
       final result = await getPackagesUseCase(networkId: 10);
-      expect(result.length, 1);
-      expect(result.first.packageName, 'باقة الفجر 5 جيجا');
+      expect(result.items.length, 1);
+      expect(result.items.first.packageName, 'باقة الفجر 5 جيجا');
     });
 
     test('GetPackageDetailsUseCase returns single package details', () async {
@@ -276,7 +304,8 @@ void main() {
       expect(result.packageVoucherPrice, 1000.0);
     });
 
-    test('CreatePackageUseCase appends and returns newly created package', () async {
+    test('CreatePackageUseCase appends and returns newly created package',
+        () async {
       final data = {
         'network_id': 10,
         'package_name': 'باقة المساء 20 جيجا',
@@ -292,7 +321,7 @@ void main() {
       expect(result.packageId, 2);
 
       final list = await getPackagesUseCase(networkId: 10);
-      expect(list.length, 2);
+      expect(list.items.length, 2);
     });
 
     test('UpdatePackageUseCase updates package entity in repository', () async {
@@ -319,7 +348,7 @@ void main() {
       expect(deleted, true);
 
       final list = await getPackagesUseCase(networkId: 10);
-      expect(list.isEmpty, true);
+      expect(list.items.isEmpty, true);
     });
   });
 }
