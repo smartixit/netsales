@@ -5,7 +5,7 @@ export 'package:dropdown_button2/dropdown_button2.dart' show DropdownItem;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart' show RxBool;
+import 'package:get/get.dart' show Rx, RxBool;
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -53,12 +53,66 @@ class RxBoolListenable implements ValueListenable<bool> {
   }
 }
 
+/// قناة كتابة متوافقة مع ValueListenable وتسمح للمكوّن بتحديث مصدر الحالة.
+abstract interface class WritableValueListenable<T>
+    implements ValueListenable<T> {
+  set value(T value);
+}
+
+/// محوّل GetX Rx إلى ValueListenable لعزل تفاصيل DropdownButton2 عن Controllers.
+/// يُنشئ اشتراك Rx فقط عند وجود مستمعين، ويحرره عند زوالهم أو التخلص من المحوّل.
+class RxValueListenable<T> implements WritableValueListenable<T> {
+  RxValueListenable(this._rx);
+
+  final Rx<T> _rx;
+  StreamSubscription<T>? _subscription;
+  final Set<VoidCallback> _listeners = {};
+
+  @override
+  T get value => _rx.value;
+
+  @override
+  set value(T value) => _rx.value = value;
+
+  void _syncSubscription() {
+    if (_listeners.isNotEmpty && _subscription == null) {
+      _subscription = _rx.stream.listen((_) {
+        for (final listener in List<VoidCallback>.of(_listeners)) {
+          listener();
+        }
+      });
+    } else if (_listeners.isEmpty && _subscription != null) {
+      _subscription!.cancel();
+      _subscription = null;
+    }
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
+    _syncSubscription();
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+    _syncSubscription();
+  }
+
+  void dispose() {
+    _subscription?.cancel();
+    _subscription = null;
+    _listeners.clear();
+  }
+}
+
 /// حقل قائمة منسدلة موحد وقابل لإعادة الاستخدام (CustomDropdown)
 class CustomDropdown<T> extends StatefulWidget {
   const CustomDropdown({
     super.key,
     required this.items,
-    required this.valueListenable,
+    this.valueListenable,
+    this.rxValue,
     required this.onChanged,
     this.hint,
     this.label,
@@ -79,8 +133,10 @@ class CustomDropdown<T> extends StatefulWidget {
 
   final List<DropdownItem<T>> items;
 
-  /// قناة القيمة التفاعلية — تُدار من الـ Controller (GetX).
-  final ValueListenable<T?> valueListenable;
+  /// يمكن تمرير ValueListenable تقليدي، أو Rx من GetX.
+  /// ينشئ المكوّن محوّل ValueListenable داخلياً عند استخدام rxValue.
+  final ValueListenable<T?>? valueListenable;
+  final Rx<T?>? rxValue;
 
   final ValueChanged<T?>? onChanged;
 
@@ -143,6 +199,9 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
   /// يشير إلى أن آخر نتيجة بحث سيرفري كانت فارغة، فيُعرض «لا توجد نتائج».
   bool _remoteEmpty = false;
 
+  late ValueListenable<T?> _resolvedValueListenable;
+  RxValueListenable<T?>? _rxValueAdapter;
+
   /// يحمي «الاستحثاث» الاصطناعي لمحرف البحث من إطلاق ديبونس خدمي إضافي.
   bool _poking = false;
 
@@ -150,6 +209,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
   void initState() {
     super.initState();
     _currentItems = List<DropdownItem<T>>.of(widget.items);
+    _initializeValueListenable();
 
     _shakeController = AnimationController(
       vsync: this,
@@ -204,9 +264,28 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     }
   }
 
+  void _initializeValueListenable() {
+    assert(
+      (widget.valueListenable == null) != (widget.rxValue == null),
+      'Provide exactly one of valueListenable or rxValue.',
+    );
+    if (widget.rxValue != null) {
+      _rxValueAdapter = RxValueListenable<T?>(widget.rxValue!);
+      _resolvedValueListenable = _rxValueAdapter!;
+    } else {
+      _resolvedValueListenable = widget.valueListenable!;
+    }
+  }
+
   @override
   void didUpdateWidget(CustomDropdown<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.rxValue != widget.rxValue ||
+        oldWidget.valueListenable != widget.valueListenable) {
+      _rxValueAdapter?.dispose();
+      _rxValueAdapter = null;
+      _initializeValueListenable();
+    }
     if (oldWidget.onRemoteSearch != widget.onRemoteSearch) {
       if (oldWidget.onRemoteSearch != null) {
         _searchController.removeListener(_onSearchInputChanged);
@@ -243,7 +322,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
   /// يطابق محتويات القائمة الثابتة مع آخر نتيجة سيرفرية ويستحث القائمة
   /// المفتوحة على إعادة الرسم (الآلية الوحيدة المتاحة في الحزمة).
   void _applyRemoteResult() {
-    final effective = _resolveItems(widget.valueListenable.value);
+    final effective = _resolveItems(_resolvedValueListenable.value);
     if (effective.isEmpty) {
       // إبقاء المحتوى السابق (غير فارغ) لتفادي انهيار items[0] داخل الحزمة.
       _remoteEmpty = true;
@@ -325,6 +404,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
   void dispose() {
     _debounceTimer?.cancel();
     _searchController.removeListener(_onSearchInputChanged);
+    _rxValueAdapter?.dispose();
     _shakeController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -333,7 +413,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
   /// يضمن التزام الزر بالقيمة حتى لو نسي المستدعي تحديث القناة: يكتب القيمة
   /// مباشرة في ValueNotifier إن وُجد، ثم يمرر الحدث للمسمى دائماً.
   void _handleChange(T? value) {
-    final listenable = widget.valueListenable;
+    final listenable = _resolvedValueListenable;
     if (listenable is ValueNotifier<T?>) {
       listenable.value = value;
     }
