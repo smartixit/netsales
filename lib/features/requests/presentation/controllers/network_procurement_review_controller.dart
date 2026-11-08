@@ -377,7 +377,8 @@ class NetworkProcurementReviewController extends GetxController {
 
   /// تغيير الشبكة المحددة
   void onNetworkFilterChanged(int? networkId) {
-    if (selectedNetworkId.value == networkId) return;
+    // CustomDropdown updates its ValueNotifier before invoking onChanged.
+    // Always refresh here; comparing the current value would skip the request.
     selectedNetworkId.value = networkId;
     loadRequests(isRefresh: true);
   }
