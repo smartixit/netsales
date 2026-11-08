@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
@@ -10,6 +11,7 @@ import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/presentation/models/procurement_cart_line.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
@@ -59,12 +61,85 @@ class PosProcurementController extends GetxController {
 
   final availablePackages = <PackageEntity>[].obs;
   final selectedPackage = Rxn<PackageEntity>();
+  final selectedPackageId = RxnInt();
   final isLoadingPackages = false.obs;
+  final procurementCart = <ProcurementCartLine>[].obs;
 
-  final quantityController = TextEditingController(text: '10');
+  bool get hasCartItems => procurementCart.isNotEmpty;
+
+  void _setSelectedNetworkId(int? value) {
+    selectedNetworkId.value = value;
+  }
+
+  void _setSelectedPackage(PackageEntity? value) {
+    selectedPackage.value = value;
+    selectedPackageId.value = value?.packageId;
+  }
+
+  bool get isSelectedPackageInCart {
+    final packageId = selectedPackage.value?.packageId;
+    return packageId != null &&
+        procurementCart.any((line) => line.package.packageId == packageId);
+  }
+
+  /// حقل الإدخال بوحدة الأوراق؛ يحول إلى عدد الكروت عند إرسال الطلب.
+  final quantityController = TextEditingController(text: '1');
+  final quantityInput = '1'.obs;
   final notesController = TextEditingController();
   final selectedSaleType = SaleType.cash.obs;
   final isSubmitting = false.obs;
+
+  int _networkLoadRevision = 0;
+  int _packageLoadRevision = 0;
+  int _requestListRevision = 0;
+
+  /// يحول الأوراق إلى voucher_count الذي يقبله عقد Laravel الحالي.
+  /// هذا تحويل وحدة وليس حساباً مالياً.
+  int get requestedVoucherCount {
+    final sheets = double.tryParse(quantityInput.value.trim());
+    final sheetSize = selectedPackage.value?.packageVoucherCount ?? 0;
+
+    if (sheets == null || !sheets.isFinite || sheetSize <= 0) {
+      return 0;
+    }
+
+    return VoucherSheetCalculator.cardsForSheets(sheets, sheetSize);
+  }
+
+  String? validateSheetQuantity(String? value) {
+    final sheets = double.tryParse((value ?? '').trim());
+
+    if (sheets == null || !sheets.isFinite || sheets <= 0) {
+      return 'أدخل عدد أوراق صحيحاً أكبر من صفر.';
+    }
+
+    final package = selectedPackage.value;
+    if (package == null) {
+      return 'اختر الباقة أولاً حتى يمكن تحويل الأوراق إلى كروت.';
+    }
+
+    if (package.packageVoucherCount <= 0) {
+      return 'سعة الورقة لهذه الباقة غير صالحة. راجع بيانات الباقة لدى الشبكة.';
+    }
+
+    if (VoucherSheetCalculator.cardsForSheets(
+          sheets,
+          package.packageVoucherCount,
+        ) <
+        1) {
+      return 'الكمية المدخلة لا تنتج أي كروت.';
+    }
+
+    return null;
+  }
+
+  void setSheetCount(String value) {
+    quantityController.text = value;
+    quantityController.selection = TextSelection.collapsed(
+      offset: quantityController.text.length,
+    );
+    quantityInput.value = value;
+  }
 
   @override
   void onInit() {
@@ -72,6 +147,9 @@ class PosProcurementController extends GetxController {
 
     searchController.addListener(() {
       searchQuery.value = searchController.text;
+    });
+    quantityController.addListener(() {
+      quantityInput.value = quantityController.text;
     });
 
     debounce(
@@ -88,6 +166,9 @@ class PosProcurementController extends GetxController {
     searchController.dispose();
     quantityController.dispose();
     notesController.dispose();
+    _networkLoadRevision++;
+    _packageLoadRevision++;
+    _requestListRevision++;
     super.onClose();
   }
 
@@ -115,123 +196,268 @@ class PosProcurementController extends GetxController {
   /// جلب قائمة الشبكات الموردة المرتبطة بنقطة البيع المحددة
   Future<void> loadLinkedNetworks(int posId) async {
     if (getPosNetworksListUseCase == null) return;
+
+    final revision = ++_networkLoadRevision;
+    _packageLoadRevision++;
+    _setSelectedNetworkId(null);
+    _setSelectedPackage(null);
+    linkedNetworks.clear();
+    availablePackages.clear();
     isLoadingNetworks.value = true;
+    isLoadingPackages.value = false;
+
     try {
       final paginated = await getPosNetworksListUseCase!(
         posId,
-        status: true, // الشبكات المرتبطة النشطة فقط
+        status: true,
       );
+      if (revision != _networkLoadRevision || selectedPosId.value != posId) {
+        return;
+      }
+
       linkedNetworks.assignAll(paginated.items);
       if (linkedNetworks.length == 1) {
-        selectedNetworkId.value = linkedNetworks.first.networkId;
-        await loadNetworkPackages(linkedNetworks.first.networkId);
-      } else {
-        selectedNetworkId.value = null;
-        availablePackages.clear();
-        selectedPackage.value = null;
+        final networkId = linkedNetworks.first.networkId;
+        _setSelectedNetworkId(networkId);
+        await loadNetworkPackages(networkId);
       }
     } catch (_) {
+      if (revision != _networkLoadRevision || selectedPosId.value != posId) {
+        return;
+      }
       linkedNetworks.clear();
+      availablePackages.clear();
+      _setSelectedNetworkId(null);
+      _setSelectedPackage(null);
     } finally {
-      isLoadingNetworks.value = false;
+      if (revision == _networkLoadRevision) {
+        isLoadingNetworks.value = false;
+      }
     }
   }
 
-  /// جلب كتالوج باقات الكروت المتاحة لدى الشبكة المحددة
+  /// جلب كتالوج الباقات مع تجاهل أي استجابة تخص شبكة سابقة.
   Future<void> loadNetworkPackages(int networkId) async {
     if (getPackagesUseCase == null) return;
+
+    final revision = ++_packageLoadRevision;
     isLoadingPackages.value = true;
     try {
       final paginated = await getPackagesUseCase!(
         networkId: networkId,
-        status: true, // الباقات النشطة فقط
+        status: true,
       );
-      availablePackages.assignAll(paginated.items);
-      if (availablePackages.isNotEmpty) {
-        selectedPackage.value = availablePackages.first;
-      } else {
-        selectedPackage.value = null;
+      if (revision != _packageLoadRevision ||
+          selectedNetworkId.value != networkId) {
+        return;
       }
+
+      availablePackages.assignAll(paginated.items);
+      _setSelectedPackage(
+        availablePackages.isNotEmpty ? availablePackages.first : null,
+      );
     } catch (_) {
+      if (revision != _packageLoadRevision ||
+          selectedNetworkId.value != networkId) {
+        return;
+      }
       availablePackages.clear();
-      selectedPackage.value = null;
+      _setSelectedPackage(null);
     } finally {
-      isLoadingPackages.value = false;
+      if (revision == _packageLoadRevision) {
+        isLoadingPackages.value = false;
+      }
     }
   }
 
   /// اختيار الشبكة الموردة وتحديث الباقات
   void onNetworkSelected(int networkId) {
-    if (selectedNetworkId.value == networkId) return;
-    selectedNetworkId.value = networkId;
+    _networkLoadRevision++;
+    _setSelectedNetworkId(networkId);
+    clearProcurementCart();
+    _setSelectedPackage(null);
+    availablePackages.clear();
+    setSheetCount('1');
     loadNetworkPackages(networkId);
+  }
+
+  void addOrUpdateCartLine() {
+    final package = selectedPackage.value;
+    final sheets = double.tryParse(quantityInput.value.trim());
+
+    if (package == null) {
+      CustomSnackbar.show(
+        title: 'اختر الباقة أولاً',
+        message: 'حدد الباقة التي تريد إضافتها إلى طلب التوريد.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+    if (sheets == null || !sheets.isFinite || sheets <= 0) {
+      CustomSnackbar.show(
+        title: 'كمية الأوراق غير صالحة',
+        message: 'أدخل كمية أكبر من صفر قبل إضافة الباقة.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+    if (package.networkId != selectedNetworkId.value) {
+      CustomSnackbar.show(
+        title: 'الباقة لا تتبع الشبكة المحددة',
+        message: 'اختر باقة من كتالوج الشبكة الموردة الحالية.',
+        type: SnackType.error,
+      );
+      return;
+    }
+
+    if (package.packageVoucherCount <= 0) {
+      CustomSnackbar.show(
+        title: 'سعة الباقة غير صالحة',
+        message: 'لا يمكن تحويل الأوراق إلى كروت لأن سعة الباقة غير صحيحة.',
+        type: SnackType.error,
+      );
+      return;
+    }
+
+    final voucherCount = VoucherSheetCalculator.cardsForSheets(
+      sheets,
+      package.packageVoucherCount,
+    );
+    if (voucherCount <= 0) {
+      CustomSnackbar.show(
+        title: 'كمية غير صالحة',
+        message: 'الكمية المدخلة لا تنتج أي كروت.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
+    final line = ProcurementCartLine(
+      package: package,
+      sheets: sheets,
+      voucherCount: voucherCount,
+    );
+    final index = procurementCart.indexWhere(
+      (item) => item.package.packageId == package.packageId,
+    );
+
+    if (index == -1) {
+      procurementCart.add(line);
+      CustomSnackbar.show(
+        title: 'أضيفت الباقة إلى الطلب',
+        message: 'تمت إضافة ${package.packageName} إلى سلة التوريد.',
+        type: SnackType.success,
+      );
+    } else {
+      procurementCart[index] = line;
+      CustomSnackbar.show(
+        title: 'تم تحديث كمية الباقة',
+        message: 'تم تحديث كمية ${package.packageName} في سلة التوريد.',
+        type: SnackType.success,
+      );
+    }
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  void editCartLine(ProcurementCartLine line) {
+    _setSelectedPackage(line.package);
+    setSheetCount(_formatSheetQuantity(line.sheets));
+  }
+
+  void removeCartLine(int packageId) {
+    procurementCart.removeWhere(
+      (line) => line.package.packageId == packageId,
+    );
+  }
+
+  void clearProcurementCart() {
+    procurementCart.clear();
+  }
+
+  String _formatSheetQuantity(double sheets) {
+    return sheets == sheets.roundToDouble()
+        ? sheets.toInt().toString()
+        : sheets.toString();
   }
 
   /// اختيار الباقة المطلوبة
   void onPackageSelected(PackageEntity package) {
-    selectedPackage.value = package;
+    _setSelectedPackage(package);
   }
 
   /// تحميل طلبات التوريد من الخادم مع ترقيم المؤشر
   Future<void> loadRequests({bool isRefresh = false}) async {
+    final revision = ++_requestListRevision;
     isLoading.value = true;
     errorMessage.value = null;
 
-    if (isRefresh) {
-      nextCursor.value = null;
-    }
+    nextCursor.value = null;
+    isLoadingMore.value = false;
+
+    final posId = selectedPosId.value;
+    final status = statusFilter.value;
+    final query = searchQuery.value.trim();
+    final effectiveSearch = query.isEmpty ? null : query;
 
     try {
-      final query = searchQuery.value.trim();
-      final effectiveSearch = query.isEmpty ? null : query;
-
       final PaginatedList<RequestEntity> result = await getRequestsUseCase(
-        posId: selectedPosId.value,
-        status: statusFilter.value,
+        posId: posId,
+        status: status,
         search: effectiveSearch,
         cursor: null,
       );
+      if (revision != _requestListRevision) return;
 
       requests.assignAll(result.items);
       nextCursor.value = result.nextCursor;
-    } catch (e) {
-      errorMessage.value = e is AppException
-          ? e.message
-          : 'تعذر تحميل قائمة طلبات التوريد: $e';
+    } catch (error) {
+      if (revision != _requestListRevision) return;
+      errorMessage.value = error is AppException
+          ? error.message
+          : 'تعذر تحميل قائمة طلبات التوريد: $error';
     } finally {
-      isLoading.value = false;
+      if (revision == _requestListRevision) {
+        isLoading.value = false;
+      }
     }
   }
 
-  /// تحميل المزيد من الطلبات عند التمرير
+  /// تحميل المزيد دون السماح لاستجابة صفحة قديمة بتلويث نتائج التصفية الحالية.
   Future<void> loadMoreRequests() async {
-    if (isLoadingMore.value || isLoading.value || nextCursor.value == null) {
+    final cursor = nextCursor.value;
+    if (isLoadingMore.value || isLoading.value || cursor == null) {
       return;
     }
 
+    final revision = _requestListRevision;
+    final posId = selectedPosId.value;
+    final status = statusFilter.value;
+    final query = searchQuery.value.trim();
+    final effectiveSearch = query.isEmpty ? null : query;
     isLoadingMore.value = true;
 
     try {
-      final query = searchQuery.value.trim();
-      final effectiveSearch = query.isEmpty ? null : query;
-
       final PaginatedList<RequestEntity> result = await getRequestsUseCase(
-        posId: selectedPosId.value,
-        status: statusFilter.value,
+        posId: posId,
+        status: status,
         search: effectiveSearch,
-        cursor: nextCursor.value,
+        cursor: cursor,
       );
+      if (revision != _requestListRevision) return;
 
-      final existingIds = requests.map((r) => r.requestId).toSet();
-      final newItems =
-          result.items.where((r) => !existingIds.contains(r.requestId)).toList();
+      final existingIds = requests.map((request) => request.requestId).toSet();
+      final newItems = result.items
+          .where((request) => !existingIds.contains(request.requestId))
+          .toList(growable: false);
 
       requests.addAll(newItems);
       nextCursor.value = result.nextCursor;
     } catch (_) {
-      // Non-fatal for load-more
+      // Keep the already loaded page and allow an explicit retry.
     } finally {
-      isLoadingMore.value = false;
+      if (revision == _requestListRevision) {
+        isLoadingMore.value = false;
+      }
     }
   }
 
@@ -244,12 +470,14 @@ class PosProcurementController extends GetxController {
 
   /// تهيئة نموذج طلب جديد
   void initNewOrderForm() {
-    quantityController.text = '10';
+    clearProcurementCart();
+    _setSelectedPackage(null);
+    setSheetCount('1');
     notesController.clear();
     selectedSaleType.value = SaleType.cash;
 
     if (linkedNetworks.length == 1) {
-      selectedNetworkId.value = linkedNetworks.first.networkId;
+      _setSelectedNetworkId(linkedNetworks.first.networkId);
       loadNetworkPackages(linkedNetworks.first.networkId);
     }
   }
@@ -278,21 +506,22 @@ class PosProcurementController extends GetxController {
       return false;
     }
 
-    if (selectedPackage.value == null) {
+    if (procurementCart.isEmpty) {
       CustomSnackbar.show(
-        title: 'تحديد الباقة مطلوب',
-        message: 'يرجى اختيار باقة الكروت المراد طلبها.',
+        title: 'سلة التوريد فارغة',
+        message: 'أضف باقة واحدة على الأقل إلى الطلب قبل إرساله.',
         type: SnackType.warning,
       );
       return false;
     }
 
-    final quantity = int.tryParse(quantityController.text.trim()) ?? 0;
-    if (quantity <= 0) {
+    if (procurementCart.any(
+      (line) => line.package.networkId != selectedNetworkId.value,
+    )) {
       CustomSnackbar.show(
-        title: 'كمية غير صالحة',
-        message: 'يرجى إدخال كمية كروت صحيحة (1 كارت على الأقل).',
-        type: SnackType.warning,
+        title: 'تعارض في الشبكة الموردة',
+        message: 'تحتوي السلة على باقات لا تنتمي إلى الشبكة المحددة.',
+        type: SnackType.error,
       );
       return false;
     }
@@ -309,16 +538,20 @@ class PosProcurementController extends GetxController {
         'sale_type': selectedSaleType.value.wireValue,
         if (notesController.text.trim().isNotEmpty)
           'request_note': notesController.text.trim(),
-        'items': [
-          {
-            'package_id': selectedPackage.value!.packageId,
-            'voucher_count': quantity,
-          }
-        ],
+        'items': procurementCart
+            .map(
+              (line) => {
+                'package_id': line.package.packageId,
+                'voucher_count': line.voucherCount,
+              },
+            )
+            .toList(growable: false),
       };
 
       final created = await createRequestUseCase(payload);
       requests.insert(0, created);
+      clearProcurementCart();
+      setSheetCount('1');
 
       await CustomAnimationOverlay.showSuccess(
         message: 'تم تقديم طلب الكروت بنجاح وهو قيد الانتظار',

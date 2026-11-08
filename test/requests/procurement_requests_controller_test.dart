@@ -12,11 +12,15 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
@@ -24,6 +28,7 @@ import 'package:netsales/features/requests/presentation/controllers/pos_procurem
 class MockRequestRepository implements RequestRepository {
   List<RequestEntity> items;
   bool shouldThrow = false;
+  int? lastRequestedNetworkId;
 
   MockRequestRepository(this.items);
 
@@ -36,6 +41,7 @@ class MockRequestRepository implements RequestRepository {
     String? cursor,
     int? perPage,
   }) async {
+    lastRequestedNetworkId = networkId;
     if (shouldThrow) {
       throw const AppException('فشل الاتصال بالخادم', code: '500');
     }
@@ -93,12 +99,23 @@ class MockRequestRepository implements RequestRepository {
   }
 
   @override
+  Future<RequestModificationPreviewEntity> previewRequestModification(
+    int requestId,
+    List<RequestModificationLineEntity> items,
+  ) async {
+    throw UnimplementedError(
+      'This test mock does not configure request modification previews.',
+    );
+  }
+
+  @override
   Future<RequestEntity> approveRequest(
     int requestId, {
     String? requestNote,
+    List<RequestModificationLineEntity>? items,
   }) async {
-    final index = items.indexWhere((r) => r.requestId == requestId);
-    final existing = items[index];
+    final index = this.items.indexWhere((r) => r.requestId == requestId);
+    final existing = this.items[index];
     final updated = RequestEntity(
       requestId: existing.requestId,
       networkId: existing.networkId,
@@ -109,7 +126,7 @@ class MockRequestRepository implements RequestRepository {
       statusLabel: 'تمت الموافقة',
       invoiceId: 777,
     );
-    items[index] = updated;
+    this.items[index] = updated;
     return updated;
   }
 
@@ -327,6 +344,12 @@ void main() {
         getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
         approveRequestUseCase: ApproveRequestUseCase(mockRequestRepo),
         rejectRequestUseCase: RejectRequestUseCase(mockRequestRepo),
+        previewRequestModificationUseCase:
+            PreviewRequestModificationUseCase(mockRequestRepo),
+        getPackagesUseCase: GetPackagesUseCase(
+          MockPackageCatalogRepository([samplePackage]),
+        ),
+        getRequestDetailsUseCase: GetRequestDetailsUseCase(mockRequestRepo),
         getMyNetworksUseCase: GetMyNetworksUseCase(mockCommercialRepo),
       );
       controller.onInit();
@@ -338,6 +361,17 @@ void main() {
       expect(controller.selectedNetworkId.value, 10);
       expect(controller.nextCursor.value, 'cursor_page_2');
     });
+
+    test(
+      'network filter reloads after CustomDropdown pre-updates its listenable',
+      () async {
+        controller.selectedNetworkId.value = 30;
+        await controller.onNetworkFilterChanged(30);
+
+        expect(mockRequestRepo.lastRequestedNetworkId, 30);
+        expect(controller.requests, isEmpty);
+      },
+    );
 
     test('approveRequest approves pending request and updates list', () async {
       final success = await controller.approveRequest(1, requestNote: 'تم الفحص');

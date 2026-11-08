@@ -65,15 +65,19 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
           title: Text('فاتورة #${invoice.invoiceId}'),
           actions: [
             // زر الطباعة
-            IconButton(
-              icon: const Icon(Icons.print_outlined),
+            CustomButton.icon(
+              icon: Icons.print_outlined,
               tooltip: 'طباعة الفاتورة',
+              backgroundColor: Colors.transparent,
+              foregroundColor: colors.onSurfaceVariant,
               onPressed: controller.printInvoice,
             ),
             // زر المشاركة
-            IconButton(
-              icon: const Icon(Icons.share_outlined),
+            CustomButton.icon(
+              icon: Icons.share_outlined,
               tooltip: 'مشاركة الفاتورة',
+              backgroundColor: Colors.transparent,
+              foregroundColor: colors.onSurfaceVariant,
               onPressed: controller.shareInvoice,
             ),
           ],

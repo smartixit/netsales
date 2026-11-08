@@ -24,8 +24,10 @@ class RepaymentCollectionController extends GetxController {
   final networks = <NetworkEntity>[].obs;
   final posList = <PosEntity>[].obs;
 
+  /// GetX remains the single source of truth for both selections.
   final selectedNetworkId = RxnInt();
   final selectedPosId = RxnInt();
+  int _posLoadRevision = 0;
 
   final amountController = TextEditingController();
   final refController = TextEditingController();
@@ -33,6 +35,7 @@ class RepaymentCollectionController extends GetxController {
   final selectedMethod = 'CASH'.obs;
 
   final isLoadingInitial = false.obs;
+  final isLoadingPos = false.obs;
   final isSubmitting = false.obs;
   final lastResult = Rxn<PosRepaymentEntity>();
 
@@ -47,6 +50,7 @@ class RepaymentCollectionController extends GetxController {
     amountController.dispose();
     refController.dispose();
     notesController.dispose();
+    _posLoadRevision++;
     super.onClose();
   }
 
@@ -54,11 +58,12 @@ class RepaymentCollectionController extends GetxController {
     isLoadingInitial.value = true;
     try {
       final netList = await getMyNetworksUseCase();
+      // Financial collections require an explicit beneficiary selection.
+      // Never default to the first tenant or POS returned by the API.
       networks.assignAll(netList);
-      if (networks.isNotEmpty) {
-        selectedNetworkId.value = networks.first.networkId;
-        await loadPosForNetwork(networks.first.networkId);
-      }
+      selectedNetworkId.value = null;
+      selectedPosId.value = null;
+      posList.clear();
     } catch (_) {
       // initial load
     } finally {
@@ -67,26 +72,42 @@ class RepaymentCollectionController extends GetxController {
   }
 
   Future<void> loadPosForNetwork(int networkId) async {
+    final revision = ++_posLoadRevision;
+    selectedPosId.value = null;
+    posList.clear();
+    isLoadingPos.value = true;
     try {
       final res = await getNetworkPosListUseCase(networkId);
+      if (revision != _posLoadRevision ||
+          selectedNetworkId.value != networkId) {
+        return;
+      }
       posList.assignAll(
         res.items.map((link) => link.pos).whereType<PosEntity>(),
       );
-      if (posList.isNotEmpty) {
-        selectedPosId.value = posList.first.posId;
-      } else {
-        selectedPosId.value = null;
-      }
+      selectedPosId.value = null;
     } catch (_) {
+      if (revision != _posLoadRevision ||
+          selectedNetworkId.value != networkId) {
+        return;
+      }
       posList.clear();
       selectedPosId.value = null;
+    } finally {
+      if (revision == _posLoadRevision) {
+        isLoadingPos.value = false;
+      }
     }
   }
 
-  void onNetworkChanged(int? netId) {
-    if (netId == null || selectedNetworkId.value == netId) return;
+  Future<void> onNetworkChanged(int? netId) async {
+    if (netId == null) return;
+    // CustomDropdown writes to selectedNetworkId before calling onChanged.
+    // Do not compare against the notifier here or the linked POS refresh is skipped.
     selectedNetworkId.value = netId;
-    loadPosForNetwork(netId);
+    posList.clear();
+    selectedPosId.value = null;
+    await loadPosForNetwork(netId);
   }
 
   Future<bool> submitRepayment() async {

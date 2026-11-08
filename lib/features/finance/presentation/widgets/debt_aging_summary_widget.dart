@@ -64,12 +64,25 @@ class DebtAgingSummaryWidget extends StatelessWidget {
                   color: colors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppRadius.chip),
                 ),
-                child: Text(
-                  '${summary.totalOutstandingInvoices} فاتورة آجلة',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.error,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${summary.totalOutstandingInvoices} فاتورة آجلة',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: colors.error,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${summary.unpaidInvoicesCount} غير مسددة · '
+                      '${summary.partiallyPaidInvoicesCount} مسددة جزئياً',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

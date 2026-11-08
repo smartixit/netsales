@@ -114,7 +114,10 @@ jobs:
 
   windows-debug-compile:
     name: Windows Debug compilation
-    runs-on: windows-latest
+    # Keep the native toolchain on the Visual Studio 2022 runner image.
+    # windows-latest moved to the newer VS 2026/MSVC toolchain, which currently
+    # breaks several pinned Flutter Windows plugin sources during C++ compilation.
+    runs-on: windows-2022
     timeout-minutes: 45
 
     steps:
@@ -129,10 +132,20 @@ jobs:
           cache: true
 
       - name: Report Windows toolchain
+        shell: pwsh
         run: |
           flutter --version
           dart --version
           cmake --version
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsInstall = & $vswhere -latest -products '*' -property installationPath
+          Write-Host "Visual Studio installation: $vsInstall"
+          $clPath = Get-ChildItem -Path "$vsInstall\VC\Tools\MSVC\*\bin\HostX64\x64\cl.exe" |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1 -ExpandProperty FullName
+          Write-Host "MSVC compiler: $clPath"
+          $msvcVersion = [regex]::Match($clPath, 'MSVC\\([^\\]+)').Groups[1].Value
+          Write-Host "MSVC toolset version: $msvcVersion"
 
       - name: Resolve dependencies and verify lockfile
         run: |

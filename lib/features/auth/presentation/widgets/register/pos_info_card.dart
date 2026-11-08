@@ -138,7 +138,7 @@ class PosInfoCard extends GetView<RegisterPosController> {
                       : 'اختر المحافظة',
                   prefixIcon: Icons.map_outlined,
                   items: items,
-                  valueListenable: controller.selectedGovernorate,
+                  rxValue: controller.selectedGovernorate,
                   itemSearchText: (gov) => gov.governorateName,
                   onChanged: controller.onGovernorateChanged,
                   validator: (gov) =>
@@ -170,7 +170,7 @@ class PosInfoCard extends GetView<RegisterPosController> {
                   prefixIcon: Icons.location_city_outlined,
                   enabled: hasGov && !controller.isLoadingDirectorates.value,
                   items: items,
-                  valueListenable: controller.selectedDirectorate,
+                  rxValue: controller.selectedDirectorate,
                   itemSearchText: (dir) => dir.directorateName,
                   onChanged: controller.onDirectorateChanged,
                   validator: (dir) =>

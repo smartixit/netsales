@@ -8,6 +8,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_card.dart';
+import 'package:netsales/features/requests/presentation/widgets/network_request_modification_sheet.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_search_filter_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -73,8 +74,7 @@ class NetworkSupplyRequestsReviewScreen
               child: CustomDropdown<int>(
                 label: 'تصفية بحسب الشبكة',
                 searchEnabled: false,
-                valueListenable:
-                    ValueNotifier<int?>(controller.selectedNetworkId.value),
+                rxValue: controller.selectedNetworkId,
                 items: networks.map((net) {
                   return DropdownItem<int>(
                     value: net.networkId,
@@ -162,6 +162,9 @@ class NetworkSupplyRequestsReviewScreen
                             arguments: request,
                           );
                         },
+                        onModify: request.isPending
+                            ? () => NetworkRequestModificationSheet.open(request)
+                            : null,
                         onApprove: request.isPending
                             ? () => ProcurementActionDialogs.showApprovalDialog(
                                   requestId: request.requestId,

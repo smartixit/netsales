@@ -18,6 +18,11 @@ abstract interface class RequestRemoteDataSource {
     Map<String, dynamic>? data,
   });
 
+  Future<ApiResponse<Map<String, dynamic>>> previewRequestModification(
+    int requestId,
+    Map<String, dynamic> data,
+  );
+
   Future<ApiResponse<RequestModel>> rejectRequest(
     int requestId,
     Map<String, dynamic> data,

@@ -68,7 +68,8 @@ void main() {
     test('DebtSummaryEntity parses aging summary buckets correctly', () {
       const summary = DebtSummaryEntity(
         totalReceivables: 1250000.00,
-        totalOutstandingInvoices: 15,
+        unpaidInvoicesCount: 10,
+        partiallyPaidInvoicesCount: 5,
         agingBuckets: {
           '0_30': 500000.00,
           '31_60': 350000.00,
@@ -79,6 +80,8 @@ void main() {
 
       expect(summary.totalReceivables, 1250000.00);
       expect(summary.totalOutstandingInvoices, 15);
+      expect(summary.unpaidInvoicesCount, 10);
+      expect(summary.partiallyPaidInvoicesCount, 5);
       expect(summary.agingBuckets['0_30'], 500000.00);
       expect(summary.agingBuckets['31_60'], 350000.00);
       expect(summary.agingBuckets['61_90'], 250000.00);

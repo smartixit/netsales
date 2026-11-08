@@ -49,6 +49,7 @@ abstract final class AppRoutes {
   // ----------------------------------------------------------------------------
   static const String supplyRequestsReview = '/network/supply-requests';
   static const String wholesaleInvoices = '/network/wholesale-invoices';
+  static const String networkCreateSaleInvoice = '/network/create-sale-invoice';
   static const String networkWalletStatement = '/network/wallet-statement';
   static const String posDirectory = '/network/pos-directory';
   static const String voucherPackagesCatalog = '/network/packages-catalog';

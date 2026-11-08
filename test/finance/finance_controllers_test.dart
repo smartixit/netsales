@@ -26,6 +26,7 @@ import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 class MockCommercialRepository implements CommercialRepository {
   List<NetworkEntity> networks = [];
   PaginatedList<NetworkPosLinkEntity> posLinks = const PaginatedList(items: []);
+  final List<int> requestedNetworkIds = [];
 
   @override
   Future<List<NetworkEntity>> getMyNetworks() async => networks;
@@ -41,7 +42,10 @@ class MockCommercialRepository implements CommercialRepository {
     bool? status,
     int? perPage,
     Map<String, dynamic>? query,
-  }) async => posLinks;
+  }) async {
+    requestedNetworkIds.add(networkId);
+    return posLinks;
+  }
 
   @override
   Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList(
@@ -102,7 +106,6 @@ class TestFinanceRepository implements FinanceRepository {
       debtSummary ??
       const DebtSummaryEntity(
         totalReceivables: 0,
-        totalOutstandingInvoices: 0,
         agingBuckets: {},
       );
 
@@ -256,7 +259,8 @@ void main() {
       () async {
         repository.debtSummary = const DebtSummaryEntity(
           totalReceivables: 850000,
-          totalOutstandingInvoices: 4,
+          unpaidInvoicesCount: 2,
+          partiallyPaidInvoicesCount: 2,
           agingBuckets: {
             '0_30': 400000,
             '31_60': 250000,
@@ -291,6 +295,9 @@ void main() {
         expect(controller.isLoading.value, isFalse);
         expect(controller.summary.value, isNotNull);
         expect(controller.summary.value!.totalReceivables, 850000);
+        expect(controller.summary.value!.unpaidInvoicesCount, 2);
+        expect(controller.summary.value!.partiallyPaidInvoicesCount, 2);
+        expect(controller.summary.value!.totalOutstandingInvoices, 4);
         expect(controller.outstandingInvoices.length, 1);
         expect(controller.outstandingInvoices[0].remainingAmount, 800);
       },
@@ -339,9 +346,82 @@ void main() {
         await controller.loadInitialData();
 
         expect(controller.networks.length, 1);
-        expect(controller.selectedNetworkId.value, 1);
+        expect(controller.selectedNetworkId.value, isNull);
+        expect(controller.posList, isEmpty);
+        expect(controller.selectedPosId.value, isNull);
+
+        // CustomDropdown writes the selected ID before invoking onChanged.
+        controller.selectedNetworkId.value = 1;
+        await controller.onNetworkChanged(1);
+
         expect(controller.posList.length, 1);
+        expect(controller.posList.single.posId, 10);
+        expect(controller.selectedPosId.value, isNull);
+
+        // The POS must be chosen deliberately for a financial transaction.
+        controller.selectedPosId.value = 10;
         expect(controller.selectedPosId.value, 10);
+      },
+    );
+
+    test(
+      'RepaymentCollectionController reloads POS after dropdown network change',
+      () async {
+        commercialRepository.networks = [
+          const NetworkEntity(
+            networkId: 1,
+            ownerId: 1,
+            networkName: 'الشبكة الأولى',
+            networkPhoneNumber: '777000111',
+            status: 'ACTIVE',
+          ),
+          const NetworkEntity(
+            networkId: 2,
+            ownerId: 1,
+            networkName: 'الشبكة الثانية',
+            networkPhoneNumber: '777000222',
+            status: 'ACTIVE',
+          ),
+        ];
+        commercialRepository.posLinks = const PaginatedList(
+          items: [
+            NetworkPosLinkEntity(
+              networkPosId: 2,
+              networkId: 2,
+              posId: 20,
+              status: true,
+              pos: PosEntity(
+                posId: 20,
+                ownerId: 1,
+                posUuid: 'pos-uuid-20',
+                posName: 'نقطة الشبكة الثانية',
+                posPhoneNumber: '777999000',
+                status: 'ACTIVE',
+              ),
+            ),
+          ],
+        );
+
+        final controller = RepaymentCollectionController(
+          collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+          getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+          getNetworkPosListUseCase: GetNetworkPosListUseCase(
+            commercialRepository,
+          ),
+        );
+
+        await controller.loadInitialData();
+        controller.selectedNetworkId.value = 2;
+        await controller.onNetworkChanged(2);
+
+        expect(commercialRepository.requestedNetworkIds.last, 2);
+        expect(controller.posList.single.posId, 20);
+
+        // The available POS is loaded, but financial collection must not
+        // select it automatically. The user must choose the beneficiary.
+        expect(controller.selectedPosId.value, isNull);
+        controller.selectedPosId.value = 20;
+        expect(controller.selectedPosId.value, 20);
       },
     );
 

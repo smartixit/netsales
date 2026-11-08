@@ -21,6 +21,7 @@ import 'package:netsales/features/requests/domain/usecases/create_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/controllers/procurement_request_details_controller.dart';
@@ -93,6 +94,7 @@ class ProcurementRequestBinding extends Bindings {
     Get.lazyPut(() => CancelRequestUseCase(Get.find<RequestRepository>()));
     Get.lazyPut(() => ApproveRequestUseCase(Get.find<RequestRepository>()));
     Get.lazyPut(() => RejectRequestUseCase(Get.find<RequestRepository>()));
+    Get.lazyPut(() => PreviewRequestModificationUseCase(Get.find<RequestRepository>()));
 
     // 4. Controllers
     Get.lazyPut<PosProcurementController>(
@@ -103,6 +105,7 @@ class ProcurementRequestBinding extends Bindings {
         getMyPosUseCase: Get.find<GetMyPosUseCase>(),
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
+        
       ),
     );
 
@@ -111,6 +114,9 @@ class ProcurementRequestBinding extends Bindings {
         getRequestsUseCase: Get.find<GetRequestsUseCase>(),
         approveRequestUseCase: Get.find<ApproveRequestUseCase>(),
         rejectRequestUseCase: Get.find<RejectRequestUseCase>(),
+        previewRequestModificationUseCase: Get.find<PreviewRequestModificationUseCase>(),
+        getPackagesUseCase: Get.find<GetPackagesUseCase>(),
+        getRequestDetailsUseCase: Get.find<GetRequestDetailsUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
       ),
     );

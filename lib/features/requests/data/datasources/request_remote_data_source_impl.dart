@@ -72,6 +72,25 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
   }
 
   @override
+  Future<ApiResponse<Map<String, dynamic>>> previewRequestModification(
+    int requestId,
+    Map<String, dynamic> data,
+  ) {
+    return ApiService.instance.post<Map<String, dynamic>>(
+      ApiConstants.voucherRequestPreviewModification(requestId),
+      data: data,
+      fromJson: (responseData) {
+        if (responseData is Map<String, dynamic>) {
+          return responseData;
+        }
+        throw const FormatException(
+          'Invalid request modification preview response.',
+        );
+      },
+    );
+  }
+
+  @override
   Future<ApiResponse<RequestModel>> rejectRequest(
     int requestId,
     Map<String, dynamic> data,

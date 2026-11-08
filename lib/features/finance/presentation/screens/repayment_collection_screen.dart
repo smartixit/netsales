@@ -8,6 +8,7 @@ import 'package:netsales/features/finance/presentation/controllers/repayment_col
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
   const RepaymentCollectionScreen({super.key});
@@ -65,56 +66,47 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                     ),
                   ),
                   AppSpacing.vXs,
-                  DropdownButtonFormField<int>(
-                    value: controller.selectedNetworkId.value,
-                    items: controller.networks.map((n) {
-                      return DropdownMenuItem<int>(
-                        value: n.networkId,
-                        child: Text(n.networkName),
+                  CustomDropdown<int>(
+                    hint: 'اختر الشبكة المستفيدة',
+                    searchEnabled: controller.networks.length > 5,
+                    isRequired: true,
+                    rxValue: controller.selectedNetworkId,
+                    items: controller.networks.map((network) {
+                      return DropdownItem<int>(
+                        value: network.networkId,
+                        child: Text(network.networkName),
                       );
-                    }).toList(),
+                    }).toList(growable: false),
+                    itemSearchText: (networkId) => controller.networks
+                        .firstWhereOrNull((network) => network.networkId == networkId)
+                        ?.networkName ?? networkId.toString(),
                     onChanged: controller.onNetworkChanged,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: colors.surfaceContainerHighest.withValues(
-                        alpha: 0.3,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppRadius.input,
-                        ),
-                      ),
-                    ),
                   ),
                   AppSpacing.vMd,
-                  Text(
-                    'نقطة البيع المسددة',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  AppSpacing.vXs,
-                  DropdownButtonFormField<int>(
-                    value: controller.selectedPosId.value,
-                    items: controller.posList.map((p) {
-                      return DropdownMenuItem<int>(
-                        value: p.posId,
-                        child: Text(p.posName),
+                  controller.isLoadingPos.value
+                      ? const LinearProgressIndicator()
+                      : CustomDropdown<int>(
+                          hint: controller.selectedNetworkId.value == null
+                              ? 'اختر الشبكة أولاً'
+                              : controller.posList.isEmpty
+                                  ? 'لا توجد نقاط بيع مرتبطة بهذه الشبكة'
+                                  : 'اختر نقطة البيع المستفيدة',
+                    searchEnabled: controller.posList.length > 5,
+                    isRequired: true,
+                    enabled: controller.posList.isNotEmpty,
+                    rxValue: controller.selectedPosId,
+                    items: controller.posList.map((pos) {
+                      return DropdownItem<int>(
+                        value: pos.posId,
+                        child: Text(pos.posName),
                       );
-                    }).toList(),
-                    onChanged: (val) => controller.selectedPosId.value = val,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: colors.surfaceContainerHighest.withValues(
-                        alpha: 0.3,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppRadius.input,
-                        ),
-                      ),
-                    ),
+                    }).toList(growable: false),
+                    itemSearchText: (posId) => controller.posList
+                        .firstWhereOrNull((pos) => pos.posId == posId)
+                        ?.posName ?? posId.toString(),
+                    onChanged: (posId) {
+                      controller.selectedPosId.value = posId;
+                    },
                   ),
                 ],
               );

@@ -5,8 +5,14 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -17,11 +23,20 @@ class NetworkProcurementReviewController extends GetxController {
   final ApproveRequestUseCase approveRequestUseCase;
   final RejectRequestUseCase rejectRequestUseCase;
   final GetMyNetworksUseCase? getMyNetworksUseCase;
+  final PreviewRequestModificationUseCase previewRequestModificationUseCase;
+  final GetPackagesUseCase getPackagesUseCase;
+  final GetRequestDetailsUseCase getRequestDetailsUseCase;
+  int _modificationRevision = 0;
+  int _editorLoadRevision = 0;
+  int _packageLoadRevision = 0;
 
   NetworkProcurementReviewController({
     required this.getRequestsUseCase,
     required this.approveRequestUseCase,
     required this.rejectRequestUseCase,
+    required this.previewRequestModificationUseCase,
+    required this.getPackagesUseCase,
+    required this.getRequestDetailsUseCase,
     this.getMyNetworksUseCase,
   });
 
@@ -44,6 +59,208 @@ class NetworkProcurementReviewController extends GetxController {
   // شبكات المشغل التابعة
   final authorizedNetworks = <NetworkEntity>[].obs;
 
+  final availablePackages = <PackageEntity>[].obs;
+  final isLoadingPackages = false.obs;
+  final isPreviewingModification = false.obs;
+  final currentPreview = Rxn<RequestModificationPreviewEntity>();
+  final modificationLines = <RequestModificationLineEntity>[].obs;
+  final editingRequestId = RxnInt();
+  final modificationNoteController = TextEditingController();
+  int _requestListRevision = 0;
+
+  Future<void> beginModification(RequestEntity request) async {
+    if (!request.isPending) return;
+
+    final requestId = request.requestId;
+    final loadRevision = ++_editorLoadRevision;
+    _packageLoadRevision++;
+    _modificationRevision++;
+    editingRequestId.value = requestId;
+    currentPreview.value = null;
+    modificationLines.clear();
+    availablePackages.clear();
+
+    try {
+      final detailedRequest = await getRequestDetailsUseCase(requestId);
+      if (loadRevision != _editorLoadRevision ||
+          editingRequestId.value != requestId) {
+        return;
+      }
+      if (!detailedRequest.isPending) {
+        clearModificationEditor();
+        return;
+      }
+
+      modificationLines.assignAll(
+        detailedRequest.items.map((item) => RequestModificationLineEntity(
+          packageId: item.packageId,
+          voucherCount: item.voucherCount,
+        )),
+      );
+      modificationNoteController.text = detailedRequest.requestNote ?? '';
+      await loadModificationPackages(
+        detailedRequest.networkId,
+        requestId: requestId,
+        editorRevision: loadRevision,
+      );
+    } catch (error) {
+      if (loadRevision != _editorLoadRevision ||
+          editingRequestId.value != requestId) {
+        return;
+      }
+      editingRequestId.value = null;
+      modificationLines.clear();
+      currentPreview.value = null;
+      CustomSnackbar.show(
+        title: 'تعذر تحميل تفاصيل الطلب',
+        message: error is AppException ? error.message : error.toString(),
+        type: SnackType.error,
+      );
+    }
+  }
+
+  Future<void> loadModificationPackages(
+    int networkId, {
+    required int requestId,
+    required int editorRevision,
+  }) async {
+    final packageRevision = ++_packageLoadRevision;
+    isLoadingPackages.value = true;
+    try {
+      final result = await getPackagesUseCase(
+        networkId: networkId,
+        status: true,
+        perPage: 100,
+      );
+      if (packageRevision != _packageLoadRevision ||
+          editorRevision != _editorLoadRevision ||
+          editingRequestId.value != requestId) {
+        return;
+      }
+      availablePackages.assignAll(result.items);
+    } catch (error) {
+      if (packageRevision != _packageLoadRevision ||
+          editorRevision != _editorLoadRevision ||
+          editingRequestId.value != requestId) {
+        return;
+      }
+      CustomSnackbar.show(
+        title: 'تعذر تحميل الباقات',
+        message: error is AppException ? error.message : error.toString(),
+        type: SnackType.error,
+      );
+    } finally {
+      if (packageRevision == _packageLoadRevision) {
+        isLoadingPackages.value = false;
+      }
+    }
+  }
+
+  void setModificationQuantity(int packageId, int quantity) {
+    if (quantity < 1) return;
+    _modificationRevision++;
+    final index = modificationLines.indexWhere((line) => line.packageId == packageId);
+    if (index < 0) return;
+    final current = modificationLines[index];
+    modificationLines[index] = RequestModificationLineEntity(
+      packageId: packageId,
+      voucherCount: quantity,
+      pricingToken: current.pricingToken,
+    );
+    currentPreview.value = null;
+  }
+
+  void addModificationPackage(int packageId, {int initialQuantity = 1}) {
+    if (modificationLines.any((line) => line.packageId == packageId)) return;
+    _modificationRevision++;
+    modificationLines.add(RequestModificationLineEntity(
+      packageId: packageId,
+      voucherCount: initialQuantity,
+    ));
+    currentPreview.value = null;
+  }
+
+  void removeModificationPackage(int packageId) {
+    _modificationRevision++;
+    modificationLines.removeWhere((line) => line.packageId == packageId);
+    currentPreview.value = null;
+  }
+
+  Future<bool> previewModification() async {
+    final requestId = editingRequestId.value;
+    if (requestId == null ||
+        modificationLines.isEmpty ||
+        isPreviewingModification.value ||
+        isProcessingDecision.value) {
+      return false;
+    }
+    currentPreview.value = null;
+    isPreviewingModification.value = true;
+    final revision = _modificationRevision;
+    final submittedLines = modificationLines.toList(growable: false);
+    try {
+      final preview = await previewRequestModificationUseCase(
+        requestId,
+        submittedLines,
+      );
+      if (revision != _modificationRevision || editingRequestId.value != requestId) {
+        return false;
+      }
+      currentPreview.value = preview;
+      return true;
+    } catch (error) {
+      currentPreview.value = null;
+      CustomSnackbar.show(
+        title: 'تعذرت معاينة التعديل',
+        message: error is AppException ? error.message : error.toString(),
+        type: SnackType.error,
+      );
+      return false;
+    } finally {
+      isPreviewingModification.value = false;
+    }
+  }
+
+  Future<bool> approvePreview({String? requestNote}) async {
+    final preview = currentPreview.value;
+    final requestId = editingRequestId.value;
+    if (preview == null || requestId == null || !preview.hasModifications) {
+      return false;
+    }
+    final draft = modificationLines
+        .map((line) => '${line.packageId}:${line.voucherCount}')
+        .toSet();
+    final reviewed = preview.items
+        .map((line) => '${line.packageId}:${line.voucherCount}')
+        .toSet();
+    if (draft.length != reviewed.length || !draft.containsAll(reviewed)) {
+      currentPreview.value = null;
+      CustomSnackbar.show(
+        title: 'المعاينة لم تعد مطابقة',
+        message: 'تغيرت البنود بعد المعاينة. أعد المعاينة قبل الاعتماد.',
+        type: SnackType.warning,
+      );
+      return false;
+    }
+    return approveRequest(
+      requestId,
+      requestNote: requestNote,
+      items: preview.approvalItems,
+    );
+  }
+
+  void clearModificationEditor() {
+    _modificationRevision++;
+    _editorLoadRevision++;
+    _packageLoadRevision++;
+    isLoadingPackages.value = false;
+    editingRequestId.value = null;
+    currentPreview.value = null;
+    modificationLines.clear();
+    availablePackages.clear();
+    modificationNoteController.clear();
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -64,6 +281,8 @@ class NetworkProcurementReviewController extends GetxController {
   @override
   void onClose() {
     searchController.dispose();
+    modificationNoteController.dispose();
+    _requestListRevision++;
     super.onClose();
   }
 
@@ -89,64 +308,76 @@ class NetworkProcurementReviewController extends GetxController {
 
   /// تحميل طلبات التوريد الواردة من نقاط البيع
   Future<void> loadRequests({bool isRefresh = false}) async {
+    final revision = ++_requestListRevision;
     isLoading.value = true;
     errorMessage.value = null;
+    nextCursor.value = null;
+    isLoadingMore.value = false;
 
-    if (isRefresh) {
-      nextCursor.value = null;
-    }
+    final networkId = selectedNetworkId.value;
+    final status = statusFilter.value;
+    final query = searchQuery.value.trim();
+    final effectiveSearch = query.isEmpty ? null : query;
 
     try {
-      final query = searchQuery.value.trim();
-      final effectiveSearch = query.isEmpty ? null : query;
-
       final PaginatedList<RequestEntity> result = await getRequestsUseCase(
-        networkId: selectedNetworkId.value,
-        status: statusFilter.value,
+        networkId: networkId,
+        status: status,
         search: effectiveSearch,
         cursor: null,
       );
+      if (revision != _requestListRevision) return;
 
       requests.assignAll(result.items);
       nextCursor.value = result.nextCursor;
-    } catch (e) {
-      errorMessage.value = e is AppException
-          ? e.message
-          : 'تعذر تحميل قائمة طلبات التوريد الواردة: $e';
+    } catch (error) {
+      if (revision != _requestListRevision) return;
+      errorMessage.value = error is AppException
+          ? error.message
+          : 'تعذر تحميل قائمة طلبات التوريد الواردة: $error';
     } finally {
-      isLoading.value = false;
+      if (revision == _requestListRevision) {
+        isLoading.value = false;
+      }
     }
   }
 
-  /// تحميل المزيد من الطلبات عند التمرير
+  /// تحميل المزيد مع منع الصفحات المتأخرة من تلويث نتائج فلتر أحدث.
   Future<void> loadMoreRequests() async {
-    if (isLoadingMore.value || isLoading.value || nextCursor.value == null) {
+    final cursor = nextCursor.value;
+    if (isLoadingMore.value || isLoading.value || cursor == null) {
       return;
     }
 
+    final revision = _requestListRevision;
+    final networkId = selectedNetworkId.value;
+    final status = statusFilter.value;
+    final query = searchQuery.value.trim();
+    final effectiveSearch = query.isEmpty ? null : query;
     isLoadingMore.value = true;
 
     try {
-      final query = searchQuery.value.trim();
-      final effectiveSearch = query.isEmpty ? null : query;
-
       final PaginatedList<RequestEntity> result = await getRequestsUseCase(
-        networkId: selectedNetworkId.value,
-        status: statusFilter.value,
+        networkId: networkId,
+        status: status,
         search: effectiveSearch,
-        cursor: nextCursor.value,
+        cursor: cursor,
       );
+      if (revision != _requestListRevision) return;
 
-      final existingIds = requests.map((r) => r.requestId).toSet();
-      final newItems =
-          result.items.where((r) => !existingIds.contains(r.requestId)).toList();
+      final existingIds = requests.map((request) => request.requestId).toSet();
+      final newItems = result.items
+          .where((request) => !existingIds.contains(request.requestId))
+          .toList(growable: false);
 
       requests.addAll(newItems);
       nextCursor.value = result.nextCursor;
     } catch (_) {
-      // Non-fatal
+      // Keep loaded requests and allow a later retry.
     } finally {
-      isLoadingMore.value = false;
+      if (revision == _requestListRevision) {
+        isLoadingMore.value = false;
+      }
     }
   }
 
@@ -158,16 +389,18 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   /// تغيير الشبكة المحددة
-  void onNetworkFilterChanged(int? networkId) {
-    if (selectedNetworkId.value == networkId) return;
+  Future<void> onNetworkFilterChanged(int? networkId) async {
+    // CustomDropdown updates its ValueNotifier before invoking onChanged.
+    // Always refresh here; comparing the current value would skip the request.
     selectedNetworkId.value = networkId;
-    loadRequests(isRefresh: true);
+    await loadRequests(isRefresh: true);
   }
 
   /// مراجعة واعتماد طلب الكروت وتوليد الفاتورة آلياً
   Future<bool> approveRequest(
     int requestId, {
     String? requestNote,
+    List<RequestModificationLineEntity>? items,
   }) async {
     isProcessingDecision.value = true;
     await CustomAnimationOverlay.showLoading(
@@ -178,6 +411,7 @@ class NetworkProcurementReviewController extends GetxController {
       final approved = await approveRequestUseCase(
         requestId,
         requestNote: requestNote,
+        items: items,
       );
 
       final index = requests.indexWhere((r) => r.requestId == requestId);
@@ -185,6 +419,7 @@ class NetworkProcurementReviewController extends GetxController {
         requests[index] = approved;
       }
 
+      clearModificationEditor();
       await CustomAnimationOverlay.showSuccess(
         message: 'تم اعتماد الطلب وتوليد الفاتورة والتسوية بنجاح',
       );

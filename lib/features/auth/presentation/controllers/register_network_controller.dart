@@ -51,10 +51,8 @@ class RegisterNetworkController extends GetxController {
   final ValueNotifier<File?> ownerAvatar = ValueNotifier<File?>(null);
 
   // قنوات القيمة التفاعلية للقوائم المنسدلة (CustomDropdown)
-  final ValueNotifier<GovernorateEntity?> selectedGovernorate =
-      ValueNotifier<GovernorateEntity?>(null);
-  final ValueNotifier<DirectorateEntity?> selectedDirectorate =
-      ValueNotifier<DirectorateEntity?>(null);
+  final selectedGovernorate = Rxn<GovernorateEntity>();
+  final selectedDirectorate = Rxn<DirectorateEntity>();
 
   // الحالات التفاعلية
   final RxList<GovernorateEntity> governorates = <GovernorateEntity>[].obs;
@@ -226,8 +224,6 @@ class RegisterNetworkController extends GetxController {
     ownerEmailController.dispose();
     networkLogo.dispose();
     ownerAvatar.dispose();
-    selectedGovernorate.dispose();
-    selectedDirectorate.dispose();
     super.onClose();
   }
 }
