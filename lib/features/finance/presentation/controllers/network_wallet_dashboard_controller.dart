@@ -21,7 +21,8 @@ class NetworkWalletDashboardController extends GetxController {
   final isLoadingLogs = false.obs;
   final isLoadingMoreLogs = false.obs;
   final nextCursor = RxnString();
-  final errorMessage = RxnString();
+  final walletsErrorMessage = RxnString();
+  final logsErrorMessage = RxnString();
 
   bool get hasMoreLogs => nextCursor.value != null;
 
@@ -32,40 +33,60 @@ class NetworkWalletDashboardController extends GetxController {
   }
 
   Future<void> loadWallets() async {
+    if (isLoading.value) return;
     isLoading.value = true;
-    errorMessage.value = null;
+    walletsErrorMessage.value = null;
 
     try {
       final res = await getNetworkWalletsUseCase();
       wallets.assignAll(res.items);
-      if (wallets.isNotEmpty) {
-        selectedWallet.value = wallets.first;
-        await loadWalletLogs(wallets.first.walletId, isRefresh: true);
+
+      final selectedId = selectedWallet.value?.walletId;
+      final selected = res.items.cast<NetworkWalletEntity?>().firstWhere(
+        (wallet) => wallet?.walletId == selectedId,
+        orElse: () => res.items.isEmpty ? null : res.items.first,
+      );
+      selectedWallet.value = selected;
+
+      if (selected != null) {
+        await loadWalletLogs(selected.walletId, isRefresh: true);
+      } else {
+        logs.clear();
+        nextCursor.value = null;
+        logsErrorMessage.value = null;
       }
     } on AppException catch (e) {
-      errorMessage.value = e.message;
+      walletsErrorMessage.value = e.message;
       CustomSnackbar.show(
         title: 'خطأ',
         message: e.message,
         type: SnackType.error,
       );
     } catch (e) {
-      errorMessage.value = 'تعذر تحميل محافظ الشبكة: $e';
+      walletsErrorMessage.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل محافظ الشبكة. يرجى المحاولة مجدداً.',
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
-  void selectWallet(NetworkWalletEntity wallet) {
+  Future<void> selectWallet(NetworkWalletEntity wallet) async {
     if (selectedWallet.value?.walletId == wallet.walletId) return;
     selectedWallet.value = wallet;
-    loadWalletLogs(wallet.walletId, isRefresh: true);
+    logs.clear();
+    await loadWalletLogs(wallet.walletId, isRefresh: true);
   }
 
   Future<void> loadWalletLogs(int walletId, {bool isRefresh = false}) async {
     if (isRefresh) {
+      if (isLoadingLogs.value) return;
       isLoadingLogs.value = true;
       nextCursor.value = null;
+      logsErrorMessage.value = null;
+    } else if (isLoadingMoreLogs.value || !hasMoreLogs) {
+      return;
     }
 
     try {
@@ -75,25 +96,43 @@ class NetworkWalletDashboardController extends GetxController {
         perPage: 15,
       );
 
+      if (selectedWallet.value?.walletId != walletId) return;
       if (isRefresh) {
         logs.assignAll(res.items);
       } else {
-        logs.addAll(res.items);
+        logs.addAll(
+          res.items.where(
+            (item) => !logs.any((existing) => existing.logId == item.logId),
+          ),
+        );
       }
       nextCursor.value = res.nextCursor;
+      logsErrorMessage.value = null;
+    } on AppException catch (e) {
+      logsErrorMessage.value = e.message;
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'تعذر تحميل الحركات',
+          message: e.message,
+          type: SnackType.error,
+        );
+      }
     } catch (e) {
-      // logs failure
+      logsErrorMessage.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل حركات المحفظة. يرجى المحاولة مجدداً.',
+      );
     } finally {
-      isLoadingLogs.value = false;
+      if (isRefresh) isLoadingLogs.value = false;
       isLoadingMoreLogs.value = false;
     }
   }
 
   Future<void> loadMoreLogs() async {
-    final wId = selectedWallet.value?.walletId;
-    if (wId == null || isLoadingMoreLogs.value || !hasMoreLogs) return;
+    final walletId = selectedWallet.value?.walletId;
+    if (walletId == null || isLoadingMoreLogs.value || !hasMoreLogs) return;
 
     isLoadingMoreLogs.value = true;
-    await loadWalletLogs(wId, isRefresh: false);
+    await loadWalletLogs(walletId, isRefresh: false);
   }
 }
