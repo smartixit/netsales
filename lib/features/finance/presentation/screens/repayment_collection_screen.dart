@@ -67,7 +67,6 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                   ),
                   AppSpacing.vXs,
                   CustomDropdown<int>(
-                    label: 'الشبكة المستفيدة',
                     hint: 'اختر الشبكة المستفيدة',
                     searchEnabled: controller.networks.length > 5,
                     isRequired: true,
@@ -85,7 +84,6 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                   ),
                   AppSpacing.vMd,
                   CustomDropdown<int>(
-                    label: 'نقطة البيع المسددة',
                     hint: controller.posList.isEmpty
                         ? 'لا توجد نقاط بيع مرتبطة بهذه الشبكة'
                         : 'اختر نقطة البيع',
