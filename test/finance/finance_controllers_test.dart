@@ -549,6 +549,36 @@ void main() {
       expect(controller.isLoadingPos.value, isFalse);
     });
 
+    test('Repayment remote search failure preserves the selected beneficiary', () async {
+      const selected = PosEntity(
+        posId: 22,
+        ownerId: 1,
+        posUuid: 'pos-uuid-selected',
+        posName: 'نقطة البيع المحددة',
+        posPhoneNumber: '777222222',
+        status: 'ACTIVE',
+      );
+      final controller = RepaymentCollectionController(
+        collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+        getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
+      );
+      controller.selectedNetworkId.value = 7;
+      controller.selectedPosId.value = selected.posId;
+      controller.selectedPos.value = selected;
+      controller.posList.assignAll([selected]);
+      controller.hasLoadedPosList.value = true;
+      commercialRepository.failPosList = true;
+
+      await controller.searchPosForNetwork('نتيجة غير متاحة');
+
+      expect(controller.selectedPosId.value, selected.posId);
+      expect(controller.selectedPos.value, selected);
+      expect(controller.posList, [selected]);
+      expect(controller.posErrorMessage.value, isNotNull);
+      expect(controller.hasLoadedPosList.value, isTrue);
+    });
+
     test('Repayment collection exposes network list failure for retry', () async {
       commercialRepository.failNetworkList = true;
       final controller = RepaymentCollectionController(

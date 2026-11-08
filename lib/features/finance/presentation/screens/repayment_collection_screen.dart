@@ -101,7 +101,8 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                     onChanged: controller.onNetworkChanged,
                   ),
                   AppSpacing.vMd,
-                  if (controller.posErrorMessage.value != null)
+                  if (controller.posErrorMessage.value != null &&
+                      !controller.hasLoadedPosList.value)
                     CustomErrorState.compact(
                       title: 'تعذر تحميل نقاط البيع',
                       subtitle: controller.posErrorMessage.value,
@@ -115,11 +116,20 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                       !controller.hasLoadedPosList.value)
                     const RepaymentBeneficiaryFieldSkeleton()
                   else
-                    CustomDropdown<int>(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (controller.posErrorMessage.value != null)
+                          CustomErrorState.compact(
+                            title: 'تعذر تحديث نتائج البحث',
+                            subtitle: controller.posErrorMessage.value,
+                            onRetry: () => controller.searchPosForNetwork(''),
+                          ),
+                        CustomDropdown<int>(
                           hint: controller.selectedNetworkId.value == null
                               ? 'اختر الشبكة أولاً'
                               : 'ابحث عن نقطة البيع المستفيدة',
-                    searchEnabled: controller.posList.length > 5,
+                    searchEnabled: true,
                     isRequired: true,
                     enabled: controller.selectedNetworkId.value != null &&
                         !controller.isSubmitting.value,
@@ -145,7 +155,9 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                             ? controller.selectedPos.value!.posName
                             : posId.toString()),
                     onChanged: controller.onPosChanged,
-                  ),
+                        ),
+                      ],
+                    ),
                 ],
               );
             }),
