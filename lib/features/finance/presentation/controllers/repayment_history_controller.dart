@@ -249,8 +249,6 @@ class RepaymentHistoryController extends GetxController {
         reversalReason: reason,
         idempotencyKey: _pendingReversalKey,
       );
-      _pendingReversalKey = null;
-      _pendingReversalFingerprint = null;
 
       if (selectedNetworkId.value == networkId) {
         await loadRepayments(isRefresh: true);
@@ -259,6 +257,8 @@ class RepaymentHistoryController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم عكس سند السداد بنجاح',
       );
+      _pendingReversalKey = null;
+      _pendingReversalFingerprint = null;
       return true;
     } on AppException catch (e) {
       if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide();

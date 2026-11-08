@@ -241,11 +241,11 @@ class RepaymentCollectionController extends GetxController {
       );
 
       lastResult.value = repayment;
-      _pendingCollectionKey = null;
-      _pendingCollectionFingerprint = null;
       await CustomAnimationOverlay.showSuccess(
         message: 'تم تحصيل السداد وتسويته بنجاح',
       );
+      _pendingCollectionKey = null;
+      _pendingCollectionFingerprint = null;
       return true;
     } on AppException catch (e) {
       if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide();
