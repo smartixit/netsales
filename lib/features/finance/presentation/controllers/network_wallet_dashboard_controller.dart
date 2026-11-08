@@ -54,12 +54,19 @@ class NetworkWalletDashboardController extends GetxController {
       final res = await getNetworkWalletsUseCase(perPage: 15);
       if (requestVersion != _walletsRequestVersion) return;
       final availableWallets = List<NetworkWalletEntity>.of(res.items);
-      final previousId = selectedWallet.value?.walletId;
-      final selected = previousId == null
+      final previousSelected = selectedWallet.value;
+      final previousId = previousSelected?.walletId;
+      var selected = previousId == null
           ? (availableWallets.isEmpty ? null : availableWallets.first)
           : availableWallets.firstWhereOrNull(
               (wallet) => wallet.walletId == previousId,
             );
+
+      // The first cursor page cannot prove that an off-page wallet was revoked.
+      if (selected == null && previousSelected != null) {
+        selected = previousSelected;
+        availableWallets.insert(0, previousSelected);
+      }
       wallets.assignAll(availableWallets);
       walletsNextCursor.value = res.nextCursor;
       selectedWallet.value = selected;
@@ -189,7 +196,22 @@ class NetworkWalletDashboardController extends GetxController {
         return;
       }
       logsErrorMessage.value = e.message;
-      if (isRefresh) {
+      final normalizedMessage = e.message.toLowerCase();
+      final accessUnavailable = normalizedMessage.contains('غير مصرح') ||
+          normalizedMessage.contains('ليس لديك الصلاحية') ||
+          normalizedMessage.contains('غير موجود') ||
+          normalizedMessage.contains('forbidden') ||
+          normalizedMessage.contains('not found');
+      if (accessUnavailable &&
+          selectedWallet.value?.walletId == walletId) {
+        wallets.removeWhere((wallet) => wallet.walletId == walletId);
+        selectedWallet.value = null;
+        logs.clear();
+        nextCursor.value = null;
+        logsErrorMessage.value = null;
+        walletsErrorMessage.value = e.message;
+      }
+      if (isRefresh && selectedWallet.value?.walletId == walletId) {
         CustomSnackbar.show(
           title: 'تعذر تحميل الحركات',
           message: e.message,
