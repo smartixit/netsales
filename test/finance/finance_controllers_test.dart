@@ -112,6 +112,7 @@ class TestFinanceRepository implements FinanceRepository {
   PaginatedList<InvoiceEntity> invoices = const PaginatedList(items: []);
   PaginatedList<PosRepaymentEntity> repayments = const PaginatedList(items: []);
   final List<Map<String, int?>> requestedRepaymentScopes = [];
+  final List<String?> requestedRepaymentStatuses = [];
   final List<Map<String, int?>> requestedDebtScopes = [];
   final List<Map<String, int?>> requestedInvoiceScopes = [];
   PaginatedList<NetworkWalletEntity> networkWallets = const PaginatedList(
@@ -202,6 +203,7 @@ class TestFinanceRepository implements FinanceRepository {
     int? perPage,
   }) async {
     requestedRepaymentScopes.add({'networkId': networkId, 'posId': posId});
+    requestedRepaymentStatuses.add(status);
     final pending = pendingRepaymentPages[status];
     if (pending != null) return pending.future;
     return repayments;
@@ -817,6 +819,11 @@ void main() {
       await oldFuture;
 
       expect(controller.selectedStatus.value, 'COMPLETED');
+      expect(repository.requestedRepaymentScopes, [
+        {'networkId': 1, 'posId': null},
+        {'networkId': 1, 'posId': null},
+      ]);
+      expect(repository.requestedRepaymentStatuses, ['PENDING', 'COMPLETED']);
       expect(controller.repayments.map((item) => item.repaymentId), [202]);
       expect(controller.isLoading.value, isFalse);
     });

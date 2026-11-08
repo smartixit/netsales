@@ -115,6 +115,7 @@ class RepaymentHistoryController extends GetxController {
     await loadRepayments(isRefresh: true);
   }
 
+  @override
   Future<void> refresh() async {
     if (!hasSelectedNetwork) {
       if (networks.isEmpty) await initializeNetworks();

@@ -21,8 +21,6 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return CustomAppScaffold(
       appBar: AppBar(title: const Text('سجل سندات سداد الديون')),
       body: RefreshIndicator(
