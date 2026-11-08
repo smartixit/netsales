@@ -129,18 +129,30 @@ class NetworkOperatingExpensesController extends GetxController {
         cursor: refresh ? null : _cursor,
       );
       if (version != _listVersion || selectedNetworkId.value != networkId) return;
-      if (refresh) { expenses.assignAll(page.items); }
-      else {
+      if (refresh) {
+        expenses.assignAll(page.items);
+      } else {
         final ids = expenses.map((e) => e.expenseId).toSet();
         expenses.addAll(page.items.where((e) => ids.add(e.expenseId)));
       }
-      _cursor = page.nextCursor; _loaded = true;
+      _cursor = page.nextCursor;
+      _loaded = true;
     } catch (e) {
       if (version != _listVersion) return;
-      final message = AppException.sanitizeMessage(e, fallback: 'تعذر تحميل المصروفات.');
-      if (refresh) error.value = message; else loadMoreError.value = message;
+      final message = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل المصروفات.',
+      );
+      if (refresh) {
+        error.value = message;
+      } else {
+        loadMoreError.value = message;
+      }
     } finally {
-      if (version == _listVersion) { isLoading.value = false; isLoadingMore.value = false; }
+      if (version == _listVersion) {
+        isLoading.value = false;
+        isLoadingMore.value = false;
+      }
     }
   }
 
@@ -155,14 +167,25 @@ class NetworkOperatingExpensesController extends GetxController {
     isLoadingDetails.value = true; selectedExpense.value = null;
     try {
       final result = await getExpenseDetailsUseCase(id);
-      if (version == _detailVersion) selectedExpense.value = result;
+      if (version == _detailVersion) {
+        selectedExpense.value = result;
+      }
     } catch (e) {
-      if (version == _detailVersion) CustomSnackbar.show(
-        title: 'تعذر تحميل المصروف',
-        message: AppException.sanitizeMessage(e, fallback: 'حاول مجدداً.'),
-        type: SnackType.error,
-      );
-    } finally { if (version == _detailVersion) isLoadingDetails.value = false; }
+      if (version == _detailVersion) {
+        CustomSnackbar.show(
+          title: 'تعذر تحميل المصروف',
+          message: AppException.sanitizeMessage(
+            e,
+            fallback: 'حاول مجدداً.',
+          ),
+          type: SnackType.error,
+        );
+      }
+    } finally {
+      if (version == _detailVersion) {
+        isLoadingDetails.value = false;
+      }
+    }
   }
 
   Future<bool> saveExpense({int? expenseId, required DateTime date, required List<Map<String, dynamic>> items}) async {

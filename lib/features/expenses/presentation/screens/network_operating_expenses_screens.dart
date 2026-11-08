@@ -386,11 +386,13 @@ class _NetworkExpenseDetailsScreenState extends State<NetworkExpenseDetailsScree
       body: Obx(() {
         if (controller.isLoadingDetails.value) return const CustomSkeletonFeed(itemCount: 4);
         final expense = controller.selectedExpense.value;
-        if (expense == null) return CustomErrorState.compact(
-          title: 'تعذر عرض المصروف',
-          subtitle: 'لم يتم تحميل تفاصيل هذا السجل.',
-          onRetry: () => controller.loadDetails(expenseId),
-        );
+        if (expense == null) {
+          return CustomErrorState.compact(
+            title: 'تعذر عرض المصروف',
+            subtitle: 'لم يتم تحميل تفاصيل هذا السجل.',
+            onRetry: () => controller.loadDetails(expenseId),
+          );
+        }
         final colors = context.colors;
         return ListView(
           padding: EdgeInsets.all(AppSpacing.cardPadding),
