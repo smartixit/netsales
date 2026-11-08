@@ -44,7 +44,7 @@ abstract final class StorageKeys {
   static const String activeWorkspaceKey = 'active_workspace_key';
 
   /// نقطة البيع النشطة لكل مستخدم.
-  static const String activePosTenantId = 'active_pos_tenant_id';
+  static const String activePosTenantPrefix = 'active_pos_tenant';
 
   /// بادئة تخزين الشبكة المختارة لكل مستخدم ونقطة بيع.
   static const String activePosNetworkPrefix = 'active_pos_network';
