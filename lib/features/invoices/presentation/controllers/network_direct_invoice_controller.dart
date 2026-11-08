@@ -110,9 +110,13 @@ class NetworkDirectInvoiceController extends GetxController {
         return;
       }
 
-      // Preselect only the first authorized network; the user may change it
-      // before adding invoice lines.
-      await onNetworkSelected(networks.first.networkId);
+      // Financial beneficiary selection must be deliberate even when the
+      // account has exactly one network. Never infer the target from API order.
+      selectedNetworkId.value = null;
+      selectedPosId.value = null;
+      selectedPackageId.value = null;
+      linkedPos.clear();
+      availablePackages.clear();
     } catch (error) {
       errorMessage.value = error is AppException
           ? error.message
@@ -174,7 +178,8 @@ class NetworkDirectInvoiceController extends GetxController {
       linkedPos.assignAll(
         result.items.where((link) => link.isActive && link.pos != null),
       );
-      selectedPosId.value = linkedPos.length == 1 ? linkedPos.first.posId : null;
+      // POS beneficiary must also be selected explicitly by the user.
+      selectedPosId.value = null;
     } catch (error) {
       if (revision != _posRevision ||
           networkRevision != _networkRevision ||
@@ -215,9 +220,8 @@ class NetworkDirectInvoiceController extends GetxController {
       availablePackages.assignAll(
         result.items.where((package) => package.isActive),
       );
-      selectedPackageId.value = availablePackages.isNotEmpty
-          ? availablePackages.first.packageId
-          : null;
+      // Require an explicit package choice; do not use catalog ordering.
+      selectedPackageId.value = null;
     } catch (error) {
       if (revision != _packageRevision ||
           networkRevision != _networkRevision ||
