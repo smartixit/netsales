@@ -76,7 +76,7 @@ class NetworkWalletTransferSheet
                 CustomErrorState.compact(
                   title: 'تعذر تحميل نقاط البيع',
                   subtitle: controller.posErrorMessage.value,
-                  onRetry: controller.loadPosForNetwork,
+                  onRetry: () => controller.loadPosForNetwork(),
                 )
               else if (controller.posList.isEmpty &&
                   controller.hasLoadedPosList.value &&
