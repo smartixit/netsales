@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
@@ -72,11 +73,28 @@ class PosNetworkCarouselCard extends StatelessWidget {
                         .withValues(alpha: 0.13),
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
-                  child: Icon(
-                    Icons.hub_rounded,
-                    color: isSelected ? colors.onPrimary : colors.primary,
-                    size: 24.r,
-                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: network?.networkProfileLogoUrl != null &&
+                          network!.networkProfileLogoUrl!.trim().isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: network.networkProfileLogoUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Icon(
+                            Icons.hub_rounded,
+                            color: isSelected ? colors.onPrimary : colors.primary,
+                            size: 24.r,
+                          ),
+                          errorWidget: (context, url, error) => Icon(
+                            Icons.hub_rounded,
+                            color: isSelected ? colors.onPrimary : colors.primary,
+                            size: 24.r,
+                          ),
+                        )
+                      : Icon(
+                          Icons.hub_rounded,
+                          color: isSelected ? colors.onPrimary : colors.primary,
+                          size: 24.r,
+                        ),
                 ),
                 Container(
                   padding: EdgeInsets.symmetric(
