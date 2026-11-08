@@ -21,7 +21,9 @@ class RepaymentHistoryController extends GetxController {
   final selectedStatus = RxnString();
   final errorMessage = RxnString();
 
-  bool get hasMore => nextCursor.value != null;
+  int _requestVersion = 0;
+
+  bool get hasMore => nextCursor.value?.trim().isNotEmpty ?? false;
 
   @override
   void onInit() {
@@ -32,48 +34,82 @@ class RepaymentHistoryController extends GetxController {
   Future<void> loadRepayments({bool isRefresh = false}) async {
     if (isRefresh) {
       isLoading.value = true;
+      isLoadingMore.value = false;
       errorMessage.value = null;
       nextCursor.value = null;
+    } else {
+      if (isLoading.value || isLoadingMore.value || !hasMore) return;
+      isLoadingMore.value = true;
+      errorMessage.value = null;
     }
+
+    final requestVersion = ++_requestVersion;
+    final requestedStatus = selectedStatus.value;
+    final requestedCursor = isRefresh ? null : nextCursor.value;
 
     try {
       final res = await getRepaymentsUseCase(
-        status: selectedStatus.value,
-        cursor: isRefresh ? null : nextCursor.value,
+        status: requestedStatus,
+        cursor: requestedCursor,
         perPage: 15,
       );
+
+      if (requestVersion != _requestVersion ||
+          selectedStatus.value != requestedStatus) {
+        return;
+      }
 
       if (isRefresh) {
         repayments.assignAll(res.items);
       } else {
-        repayments.addAll(res.items);
+        final existingIds = repayments
+            .map((repayment) => repayment.repaymentId)
+            .toSet();
+        repayments.addAll(
+          res.items.where((repayment) => existingIds.add(repayment.repaymentId)),
+        );
       }
       nextCursor.value = res.nextCursor;
+      errorMessage.value = null;
     } on AppException catch (e) {
+      if (requestVersion != _requestVersion ||
+          selectedStatus.value != requestedStatus) {
+        return;
+      }
       errorMessage.value = e.message;
-      CustomSnackbar.show(
-        title: 'خطأ',
-        message: e.message,
-        type: SnackType.error,
-      );
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'تعذر تحميل سندات السداد',
+          message: e.message,
+          type: SnackType.error,
+        );
+      }
     } catch (e) {
-      errorMessage.value = 'تعذر استرجاع سجلات السداد: $e';
+      if (requestVersion != _requestVersion ||
+          selectedStatus.value != requestedStatus) {
+        return;
+      }
+      errorMessage.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر استرجاع سجلات السداد. يرجى المحاولة مجدداً.',
+      );
     } finally {
-      isLoading.value = false;
-      isLoadingMore.value = false;
+      if (requestVersion == _requestVersion) {
+        isLoading.value = false;
+        isLoadingMore.value = false;
+      }
     }
   }
 
   Future<void> loadMoreRepayments() async {
-    if (isLoadingMore.value || !hasMore) return;
-    errorMessage.value = null;
-    isLoadingMore.value = true;
     await loadRepayments(isRefresh: false);
   }
 
   void onStatusChanged(String? status) {
     if (selectedStatus.value == status) return;
     selectedStatus.value = status;
+    repayments.clear();
+    nextCursor.value = null;
     loadRepayments(isRefresh: true);
   }
 
@@ -108,7 +144,10 @@ class RepaymentHistoryController extends GetxController {
       if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide();
       CustomSnackbar.show(
         title: 'خطأ',
-        message: 'تعذر عكس السند: $e',
+        message: AppException.sanitizeMessage(
+          e,
+          fallback: 'تعذر عكس السند. يرجى المحاولة مجدداً.',
+        ),
         type: SnackType.error,
       );
       return false;
