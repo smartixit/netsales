@@ -40,6 +40,7 @@ void main() {
           home: Scaffold(
             body: PremiumCarouselSlider<String>(
               items: const [],
+              itemBuilder: (context, item, index) => Text(item),
               emptyBuilder: (_) => const Text('No networks'),
             ),
           ),
