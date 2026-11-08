@@ -241,6 +241,7 @@ class _ExpenseFormBodyState extends State<_ExpenseFormBody> {
   @override
   void initState() {
     super.initState();
+    Get.find<NetworkOperatingExpensesController>().formAttachments.clear();
     _selectedDate = DateTime.tryParse(widget.expense?.expenseDate ?? '') ?? DateTime.now();
     _date = TextEditingController(text: _selectedDate.toIso8601String().substring(0, 10));
     _items = widget.expense == null
