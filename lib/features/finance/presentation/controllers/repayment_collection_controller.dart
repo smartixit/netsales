@@ -95,14 +95,14 @@ class RepaymentCollectionController extends GetxController {
     }
   }
 
-  void onNetworkChanged(int? netId) {
+  Future<void> onNetworkChanged(int? netId) async {
     if (netId == null) return;
     // CustomDropdown writes to selectedNetworkId before calling onChanged.
     // Do not compare against the notifier here or the linked POS refresh is skipped.
     selectedNetworkId.value = netId;
     posList.clear();
     selectedPosId.value = null;
-    loadPosForNetwork(netId);
+    await loadPosForNetwork(netId);
   }
 
   Future<bool> submitRepayment() async {
