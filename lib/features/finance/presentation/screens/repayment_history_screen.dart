@@ -74,7 +74,9 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                             return CustomErrorState.compact(
                               title: 'تعذر تحميل المزيد من السندات',
                               subtitle: controller.errorMessage.value,
-                              onRetry: controller.loadMoreRepayments,
+                              onRetry: controller.hasMore
+                                  ? controller.loadMoreRepayments
+                                  : () => controller.loadRepayments(isRefresh: true),
                             );
                           }
                           return const RepaymentCardSkeleton();
