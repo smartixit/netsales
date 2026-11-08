@@ -27,6 +27,8 @@ class NetworkProcurementReviewController extends GetxController {
   final GetPackagesUseCase getPackagesUseCase;
   final GetRequestDetailsUseCase getRequestDetailsUseCase;
   int _modificationRevision = 0;
+  int _editorLoadRevision = 0;
+  int _packageLoadRevision = 0;
 
   NetworkProcurementReviewController({
     required this.getRequestsUseCase,
@@ -67,37 +69,61 @@ class NetworkProcurementReviewController extends GetxController {
 
   Future<void> beginModification(RequestEntity request) async {
     if (!request.isPending) return;
-    editingRequestId.value = request.requestId;
+
+    final requestId = request.requestId;
+    final loadRevision = ++_editorLoadRevision;
+    _packageLoadRevision++;
     _modificationRevision++;
+    editingRequestId.value = requestId;
     currentPreview.value = null;
+    modificationLines.clear();
+    availablePackages.clear();
+
     try {
-      final detailedRequest = await getRequestDetailsUseCase(request.requestId);
-      if (editingRequestId.value != request.requestId || !detailedRequest.isPending) {
+      final detailedRequest = await getRequestDetailsUseCase(requestId);
+      if (loadRevision != _editorLoadRevision ||
+          editingRequestId.value != requestId) {
+        return;
+      }
+      if (!detailedRequest.isPending) {
         clearModificationEditor();
         return;
       }
-      request = detailedRequest;
+
+      modificationLines.assignAll(
+        detailedRequest.items.map((item) => RequestModificationLineEntity(
+          packageId: item.packageId,
+          voucherCount: item.voucherCount,
+        )),
+      );
+      modificationNoteController.text = detailedRequest.requestNote ?? '';
+      await loadModificationPackages(
+        detailedRequest.networkId,
+        requestId: requestId,
+        editorRevision: loadRevision,
+      );
     } catch (error) {
+      if (loadRevision != _editorLoadRevision ||
+          editingRequestId.value != requestId) {
+        return;
+      }
       editingRequestId.value = null;
+      modificationLines.clear();
+      currentPreview.value = null;
       CustomSnackbar.show(
         title: 'تعذر تحميل تفاصيل الطلب',
         message: error is AppException ? error.message : error.toString(),
         type: SnackType.error,
       );
-      return;
     }
-    currentPreview.value = null;
-    modificationLines.assignAll(
-      request.items.map((item) => RequestModificationLineEntity(
-        packageId: item.packageId,
-        voucherCount: item.voucherCount,
-      )),
-    );
-    modificationNoteController.text = request.requestNote ?? '';
-    loadModificationPackages(request.networkId);
   }
 
-  Future<void> loadModificationPackages(int networkId) async {
+  Future<void> loadModificationPackages(
+    int networkId, {
+    required int requestId,
+    required int editorRevision,
+  }) async {
+    final packageRevision = ++_packageLoadRevision;
     isLoadingPackages.value = true;
     try {
       final result = await getPackagesUseCase(
@@ -105,15 +131,27 @@ class NetworkProcurementReviewController extends GetxController {
         status: true,
         perPage: 100,
       );
+      if (packageRevision != _packageLoadRevision ||
+          editorRevision != _editorLoadRevision ||
+          editingRequestId.value != requestId) {
+        return;
+      }
       availablePackages.assignAll(result.items);
     } catch (error) {
+      if (packageRevision != _packageLoadRevision ||
+          editorRevision != _editorLoadRevision ||
+          editingRequestId.value != requestId) {
+        return;
+      }
       CustomSnackbar.show(
         title: 'تعذر تحميل الباقات',
-        message: error.toString(),
+        message: error is AppException ? error.message : error.toString(),
         type: SnackType.error,
       );
     } finally {
-      isLoadingPackages.value = false;
+      if (packageRevision == _packageLoadRevision) {
+        isLoadingPackages.value = false;
+      }
     }
   }
 
@@ -149,7 +187,12 @@ class NetworkProcurementReviewController extends GetxController {
 
   Future<bool> previewModification() async {
     final requestId = editingRequestId.value;
-    if (requestId == null || modificationLines.isEmpty) return false;
+    if (requestId == null ||
+        modificationLines.isEmpty ||
+        isPreviewingModification.value ||
+        isProcessingDecision.value) {
+      return false;
+    }
     currentPreview.value = null;
     isPreviewingModification.value = true;
     final revision = _modificationRevision;
@@ -207,6 +250,9 @@ class NetworkProcurementReviewController extends GetxController {
 
   void clearModificationEditor() {
     _modificationRevision++;
+    _editorLoadRevision++;
+    _packageLoadRevision++;
+    isLoadingPackages.value = false;
     editingRequestId.value = null;
     currentPreview.value = null;
     modificationLines.clear();
