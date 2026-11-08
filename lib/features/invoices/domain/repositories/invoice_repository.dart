@@ -23,6 +23,7 @@ abstract interface class InvoiceRepository {
     required int posId,
     required SaleType saleType,
     required List<DirectInvoiceItemInput> items,
+    required String idempotencyKey,
   });
 
   /// استرجاع تفاصيل فاتورة محددة بكافة بنودها وأطرافها
