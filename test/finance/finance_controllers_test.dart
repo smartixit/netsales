@@ -415,8 +415,13 @@ void main() {
         await controller.onNetworkChanged(2);
 
         expect(commercialRepository.requestedNetworkIds.last, 2);
-        expect(controller.selectedPosId.value, 20);
         expect(controller.posList.single.posId, 20);
+
+        // The available POS is loaded, but financial collection must not
+        // select it automatically. The user must choose the beneficiary.
+        expect(controller.selectedPosId.value, isNull);
+        controller.selectedPosId.value = 20;
+        expect(controller.selectedPosId.value, 20);
       },
     );
 
