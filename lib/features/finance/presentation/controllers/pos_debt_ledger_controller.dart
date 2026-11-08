@@ -118,6 +118,7 @@ class PosDebtLedgerController extends GetxController {
 
   Future<void> loadMoreInvoices() async {
     if (isLoadingMore.value || !hasMore) return;
+    invoicesErrorMessage.value = null;
     isLoadingMore.value = true;
     await loadInvoices(isRefresh: false);
   }
