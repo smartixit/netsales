@@ -70,7 +70,7 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                     hint: 'اختر الشبكة المستفيدة',
                     searchEnabled: controller.networks.length > 5,
                     isRequired: true,
-                    valueListenable: controller.selectedNetworkId,
+                    rxValue: controller.selectedNetworkId,
                     items: controller.networks.map((network) {
                       return DropdownItem<int>(
                         value: network.networkId,
@@ -90,7 +90,7 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                     searchEnabled: controller.posList.length > 5,
                     isRequired: true,
                     enabled: controller.posList.isNotEmpty,
-                    valueListenable: controller.selectedPosId,
+                    rxValue: controller.selectedPosId,
                     items: controller.posList.map((pos) {
                       return DropdownItem<int>(
                         value: pos.posId,
