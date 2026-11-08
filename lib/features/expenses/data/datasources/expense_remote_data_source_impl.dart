@@ -62,5 +62,5 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
 
   @override
   Future<ApiResponse<void>> deleteAttachment({required int expenseId, required int attachmentId}) =>
-      ApiService.instance.delete<void>(ApiConstants.expenseAttachment(expenseId, attachmentId));
+      ApiService.instance.delete<void>(ApiConstants.expenseDeleteAttachment(expenseId, attachmentId));
 }
