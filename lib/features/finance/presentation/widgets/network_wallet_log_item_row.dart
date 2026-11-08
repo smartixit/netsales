@@ -23,6 +23,7 @@ class NetworkWalletLogItemRow extends StatelessWidget {
 
     return WalletLogEntryRow(
       operation: presentation,
+      operationType: log.typedLogOperation,
       amount: log.logAmount,
       statement: log.logStatement,
       date: log.logDate,
