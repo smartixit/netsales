@@ -4,6 +4,7 @@ import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
+import 'package:netsales/features/finance/presentation/widgets/network_finance_workspace_hub.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/adaptive_workspace_scaffold.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
@@ -68,10 +69,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         label: 'المالية والديون',
         icon: Icons.account_balance_wallet_outlined,
         activeIcon: Icons.account_balance_wallet_rounded,
-        content: CustomEmptyState(
-          title: 'المحفظة والتسويات المالية',
-          subtitle: 'كشوف حسابات المحفظة والرقابة على مديونيات نقاط البيع',
-        ),
+        content: NetworkFinanceWorkspaceHub(),
       ),
     ];
 
