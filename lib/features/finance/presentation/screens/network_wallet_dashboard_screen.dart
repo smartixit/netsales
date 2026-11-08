@@ -76,6 +76,8 @@ class NetworkWalletDashboardScreen
                       Get.bottomSheet<void>(
                         const NetworkWalletTransferSheet(),
                         isScrollControlled: true,
+                        isDismissible: false,
+                        enableDrag: false,
                         backgroundColor: Colors.transparent,
                       );
                     },

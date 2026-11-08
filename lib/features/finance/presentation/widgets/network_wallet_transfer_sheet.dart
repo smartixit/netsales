@@ -185,6 +185,7 @@ class NetworkWalletTransferSheet
               CustomButton.text(
                 text: 'إلغاء',
                 width: double.infinity,
+                enabled: !controller.isSubmitting.value,
                 onPressed: () => Get.back<void>(),
               ),
             ],

@@ -45,6 +45,12 @@ class NetworkWalletTransferController extends GetxController {
   String get searchQuery => _searchQuery;
 
   Future<void> initialize(NetworkWalletEntity wallet) async {
+    if (isSubmitting.value) return;
+    final previousWalletId = selectedWallet.value?.walletId;
+    if (previousWalletId != wallet.walletId) {
+      _pendingKey = null;
+      _pendingFingerprint = null;
+    }
     ++_requestVersion;
     selectedWallet.value = wallet;
     posList.clear();
@@ -58,7 +64,6 @@ class NetworkWalletTransferController extends GetxController {
     hasLoadedPosList.value = false;
     isLoadingPos.value = false;
     isLoadingMorePos.value = false;
-    isSubmitting.value = false;
     _searchQuery = '';
     _pendingKey = null;
     _pendingFingerprint = null;
