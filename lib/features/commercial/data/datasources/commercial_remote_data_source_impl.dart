@@ -29,6 +29,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   Future<ApiResponse<List<PosModel>>> getMyPos() {
     return ApiService.instance.get<List<PosModel>>(
       ApiConstants.pos,
+      queryParameters: const {'all': true},
       fromJson: (data) {
         if (data is List) {
           return data.map((item) => PosModel.fromJson(item)).toList();

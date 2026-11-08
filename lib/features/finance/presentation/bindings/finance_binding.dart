@@ -4,6 +4,8 @@ import 'package:netsales/features/commercial/data/datasources/commercial_remote_
 import 'package:netsales/features/commercial/data/repositories/commercial_repository_impl.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source_impl.dart';
@@ -44,6 +46,18 @@ class FinanceBinding extends Bindings {
     if (!Get.isRegistered<GetMyNetworksUseCase>()) {
       Get.lazyPut<GetMyNetworksUseCase>(
         () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<GetMyPosUseCase>()) {
+      Get.lazyPut<GetMyPosUseCase>(
+        () => GetMyPosUseCase(Get.find<CommercialRepository>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<GetPosNetworksListUseCase>()) {
+      Get.lazyPut<GetPosNetworksListUseCase>(
+        () => GetPosNetworksListUseCase(Get.find<CommercialRepository>()),
         fenix: true,
       );
     }
@@ -121,6 +135,8 @@ class FinanceBinding extends Bindings {
         getDebtSummaryUseCase: Get.find<GetDebtSummaryUseCase>(),
         getOutstandingInvoicesUseCase:
             Get.find<GetOutstandingInvoicesUseCase>(),
+        getMyPosUseCase: Get.find<GetMyPosUseCase>(),
+        getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
       ),
       fenix: true,
     );

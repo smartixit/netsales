@@ -9,6 +9,8 @@ import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/finance/domain/entities/debt_summary_entity.dart';
 import 'package:netsales/features/finance/domain/entities/network_wallet_entity.dart';
 import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
@@ -27,7 +29,14 @@ import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 
 class MockCommercialRepository implements CommercialRepository {
   List<NetworkEntity> networks = [];
+  List<PosEntity> myPos = [];
   PaginatedList<NetworkPosLinkEntity> posLinks = const PaginatedList(items: []);
+  PaginatedList<NetworkPosLinkEntity> posNetworkLinks = const PaginatedList(items: []);
+  final List<int> requestedPosNetworkIds = [];
+  final List<String?> requestedPosNetworkSearchQueries = [];
+  final Map<String, PaginatedList<NetworkPosLinkEntity>> posNetworkSearchResults = {};
+  final Map<String, Completer<PaginatedList<NetworkPosLinkEntity>>> pendingPosNetworkSearches = {};
+  bool failPosNetworksList = false;
   final List<int> requestedNetworkIds = [];
   final List<int?> requestedPosPageSizes = [];
   final List<String?> requestedPosSearchQueries = [];
@@ -43,7 +52,7 @@ class MockCommercialRepository implements CommercialRepository {
   }
 
   @override
-  Future<List<PosEntity>> getMyPos() async => [];
+  Future<List<PosEntity>> getMyPos() async => myPos;
 
   @override
   Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList(
@@ -71,7 +80,17 @@ class MockCommercialRepository implements CommercialRepository {
     bool? status,
     int? perPage,
     Map<String, dynamic>? query,
-  }) async => const PaginatedList(items: []);
+  }) async {
+    requestedPosNetworkIds.add(posId);
+    requestedPosNetworkSearchQueries.add(search);
+    if (failPosNetworksList) {
+      throw Exception('POS network list request failed');
+    }
+    final searchKey = search ?? '';
+    final pending = pendingPosNetworkSearches[searchKey];
+    if (pending != null) return pending.future;
+    return posNetworkSearchResults[searchKey] ?? posNetworkLinks;
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -83,6 +102,8 @@ class TestFinanceRepository implements FinanceRepository {
   DebtSummaryEntity? debtSummary;
   PaginatedList<InvoiceEntity> invoices = const PaginatedList(items: []);
   PaginatedList<PosRepaymentEntity> repayments = const PaginatedList(items: []);
+  final List<Map<String, int?>> requestedDebtScopes = [];
+  final List<Map<String, int?>> requestedInvoiceScopes = [];
   PaginatedList<NetworkWalletEntity> networkWallets = const PaginatedList(
     items: [],
   );
@@ -134,12 +155,14 @@ class TestFinanceRepository implements FinanceRepository {
   Future<DebtSummaryEntity> getDebtSummary({
     int? networkId,
     int? posId,
-  }) async =>
-      debtSummary ??
-      const DebtSummaryEntity(
-        totalReceivables: 0,
-        agingBuckets: {},
-      );
+  }) async {
+    requestedDebtScopes.add({'networkId': networkId, 'posId': posId});
+    return debtSummary ??
+        const DebtSummaryEntity(
+          totalReceivables: 0,
+          agingBuckets: {},
+        );
+  }
 
   @override
   Future<PaginatedList<InvoiceEntity>> getOutstandingInvoices({
@@ -150,6 +173,7 @@ class TestFinanceRepository implements FinanceRepository {
     String? cursor,
     int? perPage,
   }) async {
+    requestedInvoiceScopes.add({'networkId': networkId, 'posId': posId});
     if (failOutstandingInvoices) {
       throw Exception('Outstanding invoice request failed');
     }
@@ -331,14 +355,41 @@ void main() {
           ],
         );
 
-        final controller = PosDebtLedgerController(
-          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
-          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(
-            repository,
+        commercialRepository.myPos = [
+          const PosEntity(
+            posId: 2,
+            ownerId: 1,
+            posUuid: 'pos-2',
+            posName: 'نقطة البيع الرئيسية',
+            posPhoneNumber: '777000111',
           ),
+        ];
+        commercialRepository.posNetworkLinks = const PaginatedList(
+          items: [
+            NetworkPosLinkEntity(
+              networkPosId: 20,
+              networkId: 1,
+              posId: 2,
+              status: true,
+              network: NetworkEntity(
+                networkId: 1,
+                ownerId: 1,
+                networkName: 'شبكة السرعة',
+                networkPhoneNumber: '777111222',
+              ),
+            ),
+          ],
         );
 
-        await controller.loadDebtData();
+        final controller = PosDebtLedgerController(
+          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+          getPosNetworksListUseCase:
+              GetPosNetworksListUseCase(commercialRepository),
+        );
+
+        await controller.initializeScope();
 
         expect(controller.isLoading.value, isFalse);
         expect(controller.summary.value, isNotNull);
@@ -738,6 +789,9 @@ void main() {
       final controller = PosDebtLedgerController(
         getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
         getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+        getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+        getPosNetworksListUseCase:
+            GetPosNetworksListUseCase(commercialRepository),
       );
 
       await controller.loadDebtData();
@@ -747,6 +801,204 @@ void main() {
       expect(controller.invoicesErrorMessage.value, isNotNull);
       expect(controller.isLoadingInvoices.value, isFalse);
     });
+
+
+    test(
+      'POS debt summary and invoices remain blocked until the network scope is explicit',
+      () async {
+        const pos = PosEntity(
+          posId: 5,
+          ownerId: 1,
+          posUuid: 'pos-5',
+          posName: 'نقطة بيع متعددة الشبكات',
+          posPhoneNumber: '777000555',
+        );
+        const firstLink = NetworkPosLinkEntity(
+          networkPosId: 51,
+          networkId: 11,
+          posId: 5,
+          status: true,
+          network: NetworkEntity(
+            networkId: 11,
+            ownerId: 1,
+            networkName: 'الشبكة الأولى',
+            networkPhoneNumber: '777111111',
+          ),
+        );
+        const secondLink = NetworkPosLinkEntity(
+          networkPosId: 52,
+          networkId: 22,
+          posId: 5,
+          status: false,
+          network: NetworkEntity(
+            networkId: 22,
+            ownerId: 2,
+            networkName: 'الشبكة الثانية',
+            networkPhoneNumber: '777222222',
+          ),
+        );
+        commercialRepository.myPos = [pos];
+        commercialRepository.posNetworkLinks = const PaginatedList(
+          items: [firstLink, secondLink],
+        );
+
+        final controller = PosDebtLedgerController(
+          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+          getPosNetworksListUseCase:
+              GetPosNetworksListUseCase(commercialRepository),
+        );
+
+        await controller.initializeScope();
+
+        expect(controller.selectedPosId.value, 5);
+        expect(controller.selectedNetworkId.value, isNull);
+        expect(repository.requestedDebtScopes, isEmpty);
+        expect(repository.requestedInvoiceScopes, isEmpty);
+        expect(commercialRepository.requestedPosNetworkIds, [5]);
+
+        await controller.selectNetwork(22);
+
+        expect(repository.requestedDebtScopes, [
+          {'networkId': 22, 'posId': 5},
+        ]);
+        expect(repository.requestedInvoiceScopes, [
+          {'networkId': 22, 'posId': 5},
+        ]);
+      },
+    );
+
+    test(
+      'multiple POS memberships require explicit POS selection before loading debt',
+      () async {
+        commercialRepository.myPos = [
+          const PosEntity(
+            posId: 1,
+            ownerId: 1,
+            posUuid: 'pos-1',
+            posName: 'نقطة البيع الأولى',
+            posPhoneNumber: '777000001',
+          ),
+          const PosEntity(
+            posId: 2,
+            ownerId: 1,
+            posUuid: 'pos-2',
+            posName: 'نقطة البيع الثانية',
+            posPhoneNumber: '777000002',
+          ),
+        ];
+        commercialRepository.posNetworkLinks = const PaginatedList(
+          items: [
+            NetworkPosLinkEntity(
+              networkPosId: 201,
+              networkId: 20,
+              posId: 2,
+              status: true,
+              network: NetworkEntity(
+                networkId: 20,
+                ownerId: 1,
+                networkName: 'شبكة النقطة الثانية',
+                networkPhoneNumber: '777222000',
+              ),
+            ),
+          ],
+        );
+
+        final controller = PosDebtLedgerController(
+          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+          getPosNetworksListUseCase:
+              GetPosNetworksListUseCase(commercialRepository),
+        );
+
+        await controller.initializeScope();
+
+        expect(controller.selectedPosId.value, isNull);
+        expect(commercialRepository.requestedPosNetworkIds, isEmpty);
+        expect(repository.requestedDebtScopes, isEmpty);
+
+        await controller.selectPos(2);
+
+        expect(controller.selectedPosId.value, 2);
+        expect(controller.selectedNetworkId.value, 20);
+        expect(repository.requestedDebtScopes.single, {
+          'networkId': 20,
+          'posId': 2,
+        });
+        expect(repository.requestedInvoiceScopes.single, {
+          'networkId': 20,
+          'posId': 2,
+        });
+      },
+    );
+
+    test(
+      'remote network search preserves selected supplier and records the server query',
+      () async {
+        const pos = PosEntity(
+          posId: 8,
+          ownerId: 1,
+          posUuid: 'pos-8',
+          posName: 'نقطة البحث',
+          posPhoneNumber: '777000008',
+        );
+        const firstLink = NetworkPosLinkEntity(
+          networkPosId: 81,
+          networkId: 81,
+          posId: 8,
+          status: true,
+          network: NetworkEntity(
+            networkId: 81,
+            ownerId: 1,
+            networkName: 'شبكة ألف',
+            networkPhoneNumber: '777888111',
+          ),
+        );
+        const secondLink = NetworkPosLinkEntity(
+          networkPosId: 82,
+          networkId: 82,
+          posId: 8,
+          status: true,
+          network: NetworkEntity(
+            networkId: 82,
+            ownerId: 2,
+            networkName: 'شبكة باء',
+            networkPhoneNumber: '777888222',
+          ),
+        );
+        commercialRepository.myPos = [pos];
+        commercialRepository.posNetworkLinks = const PaginatedList(
+          items: [firstLink, secondLink],
+        );
+        commercialRepository.posNetworkSearchResults['شبكة باء'] =
+            const PaginatedList(items: [secondLink]);
+
+        final controller = PosDebtLedgerController(
+          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+          getPosNetworksListUseCase:
+              GetPosNetworksListUseCase(commercialRepository),
+        );
+
+        await controller.initializeScope();
+        await controller.selectNetwork(81);
+        await controller.searchNetworks('شبكة باء');
+
+        expect(commercialRepository.requestedPosNetworkSearchQueries, [
+          null,
+          'شبكة باء',
+        ]);
+        expect(controller.networkLinks.map((link) => link.networkId), [82]);
+        expect(controller.selectedNetworkId.value, 81);
+        expect(controller.selectedNetwork?.networkId, 81);
+        expect(repository.requestedDebtScopes, [
+          {'networkId': 81, 'posId': 8},
+        ]);
+      },
+    );
 
     test('Network wallet stale response cannot replace newly selected wallet ledger', () async {
       const walletA = NetworkWalletEntity(
@@ -868,8 +1120,13 @@ void main() {
       final controller = PosDebtLedgerController(
         getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
         getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+        getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+        getPosNetworksListUseCase:
+            GetPosNetworksListUseCase(commercialRepository),
       );
       controller.selectedBucket.value = '0_30';
+      controller.selectedPosId.value = 1;
+      controller.selectedNetworkId.value = 1;
       final oldFuture = controller.loadInvoices(isRefresh: true);
       await controller.onBucketSelected('31_60');
       oldRequest.complete(const PaginatedList(items: [oldInvoice]));
