@@ -57,14 +57,26 @@ class PosProcurementController extends GetxController {
 
   final linkedNetworks = <NetworkPosLinkEntity>[].obs;
   final selectedNetworkId = RxnInt();
+  final selectedNetworkDropdownValue = ValueNotifier<int?>(null);
   final isLoadingNetworks = false.obs;
 
   final availablePackages = <PackageEntity>[].obs;
   final selectedPackage = Rxn<PackageEntity>();
+  final selectedPackageDropdownValue = ValueNotifier<int?>(null);
   final isLoadingPackages = false.obs;
   final procurementCart = <ProcurementCartLine>[].obs;
 
   bool get hasCartItems => procurementCart.isNotEmpty;
+
+  void _setSelectedNetworkId(int? value) {
+    selectedNetworkId.value = value;
+    selectedNetworkDropdownValue.value = value;
+  }
+
+  void _setSelectedPackage(PackageEntity? value) {
+    selectedPackage.value = value;
+    selectedPackageDropdownValue.value = value?.packageId;
+  }
 
   bool get isSelectedPackageInCart {
     final packageId = selectedPackage.value?.packageId;
@@ -152,6 +164,8 @@ class PosProcurementController extends GetxController {
     searchController.dispose();
     quantityController.dispose();
     notesController.dispose();
+    selectedNetworkDropdownValue.dispose();
+    selectedPackageDropdownValue.dispose();
     super.onClose();
   }
 
@@ -187,12 +201,12 @@ class PosProcurementController extends GetxController {
       );
       linkedNetworks.assignAll(paginated.items);
       if (linkedNetworks.length == 1) {
-        selectedNetworkId.value = linkedNetworks.first.networkId;
+        _setSelectedNetworkId(linkedNetworks.first.networkId);
         await loadNetworkPackages(linkedNetworks.first.networkId);
       } else {
-        selectedNetworkId.value = null;
+        _setSelectedNetworkId(null);
         availablePackages.clear();
-        selectedPackage.value = null;
+        _setSelectedPackage(null);
       }
     } catch (_) {
       linkedNetworks.clear();
@@ -212,13 +226,13 @@ class PosProcurementController extends GetxController {
       );
       availablePackages.assignAll(paginated.items);
       if (availablePackages.isNotEmpty) {
-        selectedPackage.value = availablePackages.first;
+        _setSelectedPackage(availablePackages.first);
       } else {
-        selectedPackage.value = null;
+        _setSelectedPackage(null);
       }
     } catch (_) {
       availablePackages.clear();
-      selectedPackage.value = null;
+      _setSelectedPackage(null);
     } finally {
       isLoadingPackages.value = false;
     }
@@ -227,9 +241,9 @@ class PosProcurementController extends GetxController {
   /// اختيار الشبكة الموردة وتحديث الباقات
   void onNetworkSelected(int networkId) {
     if (selectedNetworkId.value == networkId) return;
-    selectedNetworkId.value = networkId;
+    _setSelectedNetworkId(networkId);
     clearProcurementCart();
-    selectedPackage.value = null;
+    _setSelectedPackage(null);
     availablePackages.clear();
     setSheetCount('1');
     loadNetworkPackages(networkId);
@@ -314,7 +328,7 @@ class PosProcurementController extends GetxController {
   }
 
   void editCartLine(ProcurementCartLine line) {
-    selectedPackage.value = line.package;
+    _setSelectedPackage(line.package);
     setSheetCount(_formatSheetQuantity(line.sheets));
   }
 
@@ -336,7 +350,7 @@ class PosProcurementController extends GetxController {
 
   /// اختيار الباقة المطلوبة
   void onPackageSelected(PackageEntity package) {
-    selectedPackage.value = package;
+    _setSelectedPackage(package);
   }
 
   /// تحميل طلبات التوريد من الخادم مع ترقيم المؤشر
@@ -412,13 +426,13 @@ class PosProcurementController extends GetxController {
   /// تهيئة نموذج طلب جديد
   void initNewOrderForm() {
     clearProcurementCart();
-    selectedPackage.value = null;
+    _setSelectedPackage(null);
     setSheetCount('1');
     notesController.clear();
     selectedSaleType.value = SaleType.cash;
 
     if (linkedNetworks.length == 1) {
-      selectedNetworkId.value = linkedNetworks.first.networkId;
+      _setSelectedNetworkId(linkedNetworks.first.networkId);
       loadNetworkPackages(linkedNetworks.first.networkId);
     }
   }
