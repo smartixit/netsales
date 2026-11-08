@@ -94,7 +94,6 @@ class NetworkDirectInvoiceScreen
                   hint: 'اختر الشبكة',
                   rxValue: controller.selectedNetworkId,
                   enabled: controller.canChangeTarget &&
-                      controller.authorizedNetworks.length > 1 &&
                       !controller.isLoadingNetworks.value,
                   searchEnabled: controller.authorizedNetworks.length > 5,
                   items: controller.authorizedNetworks.map((network) {
@@ -123,7 +122,9 @@ class NetworkDirectInvoiceScreen
                   if (controller.linkedPos.isEmpty) {
                     return _buildInlineNotice(
                       context,
-                      'لا توجد نقاط بيع نشطة مرتبطة بهذه الشبكة.',
+                      controller.selectedNetworkId.value == null
+                          ? 'اختر الشبكة أولاً لعرض نقاط البيع المرتبطة بها.'
+                          : 'لا توجد نقاط بيع نشطة مرتبطة بهذه الشبكة.',
                       Icons.store_mall_directory_outlined,
                     );
                   }
@@ -172,7 +173,9 @@ class NetworkDirectInvoiceScreen
                   if (controller.availablePackages.isEmpty) {
                     return _buildInlineNotice(
                       context,
-                      'لا توجد باقات نشطة متاحة لهذه الشبكة.',
+                      controller.selectedNetworkId.value == null
+                          ? 'اختر الشبكة أولاً لعرض باقاتها.'
+                          : 'لا توجد باقات نشطة متاحة لهذه الشبكة.',
                       Icons.inventory_2_outlined,
                     );
                   }
