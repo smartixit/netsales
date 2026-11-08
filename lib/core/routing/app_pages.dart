@@ -348,6 +348,19 @@ abstract final class AppPages {
     // ==========================================
     // كشف رصيد وحركات محفظة نقطة البيع (M8.1)
     GetPage(
+      name: AppRoutes.operatingExpenses,
+      page: () => const NetworkOperatingExpensesScreen(),
+      binding: NetworkOperatingExpensesBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.expensesView,
+        ),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+
+    GetPage(
       name: AppRoutes.posWalletStatement,
       page: () => const PosWalletDashboardScreen(),
       binding: FinanceBinding(),
