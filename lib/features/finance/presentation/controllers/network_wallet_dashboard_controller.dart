@@ -35,6 +35,40 @@ class NetworkWalletDashboardController extends GetxController {
 
   bool get hasMoreLogs => nextCursor.value?.trim().isNotEmpty ?? false;
 
+  bool _isAccessUnavailable(AppException error) {
+    final message = error.message.toLowerCase();
+    return message.contains('غير مصرح') ||
+        message.contains('ليس لديك الصلاحية') ||
+        message.contains('غير موجود') ||
+        message.contains('forbidden') ||
+        message.contains('not found');
+  }
+
+  void _clearUnavailableWallet(int walletId, String message) {
+    wallets.removeWhere((wallet) => wallet.walletId == walletId);
+    if (selectedWallet.value?.walletId != walletId) return;
+    selectedWallet.value = null;
+    logs.clear();
+    nextCursor.value = null;
+    logsErrorMessage.value = null;
+    walletsErrorMessage.value = message;
+    isLoadingLogs.value = false;
+    isLoadingMoreLogs.value = false;
+  }
+
+  void _clearAllWalletAccess() {
+    wallets.clear();
+    selectedWallet.value = null;
+    logs.clear();
+    walletsNextCursor.value = null;
+    walletsLoadMoreErrorMessage.value = null;
+    nextCursor.value = null;
+    logsErrorMessage.value = null;
+    isLoadingLogs.value = false;
+    isLoadingMoreLogs.value = false;
+    isLoadingMoreWallets.value = false;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -83,6 +117,7 @@ class NetworkWalletDashboardController extends GetxController {
       }
     } on AppException catch (e) {
       if (requestVersion != _walletsRequestVersion) return;
+      if (_isAccessUnavailable(e)) _clearAllWalletAccess();
       walletsErrorMessage.value = e.message;
       CustomSnackbar.show(
         title: 'خطأ',
@@ -195,21 +230,10 @@ class NetworkWalletDashboardController extends GetxController {
           selectedWallet.value?.walletId != walletId) {
         return;
       }
-      logsErrorMessage.value = e.message;
-      final normalizedMessage = e.message.toLowerCase();
-      final accessUnavailable = normalizedMessage.contains('غير مصرح') ||
-          normalizedMessage.contains('ليس لديك الصلاحية') ||
-          normalizedMessage.contains('غير موجود') ||
-          normalizedMessage.contains('forbidden') ||
-          normalizedMessage.contains('not found');
-      if (accessUnavailable &&
-          selectedWallet.value?.walletId == walletId) {
-        wallets.removeWhere((wallet) => wallet.walletId == walletId);
-        selectedWallet.value = null;
-        logs.clear();
-        nextCursor.value = null;
-        logsErrorMessage.value = null;
-        walletsErrorMessage.value = e.message;
+      if (_isAccessUnavailable(e)) {
+        _clearUnavailableWallet(walletId, e.message);
+      } else {
+        logsErrorMessage.value = e.message;
       }
       if (isRefresh && selectedWallet.value?.walletId == walletId) {
         CustomSnackbar.show(
