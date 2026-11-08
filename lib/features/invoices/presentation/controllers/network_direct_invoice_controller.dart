@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
@@ -79,7 +81,7 @@ class NetworkDirectInvoiceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadInitialData();
+    unawaited(loadInitialData());
   }
 
   @override
