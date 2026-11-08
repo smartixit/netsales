@@ -142,7 +142,12 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                             return CustomErrorState.compact(
                               title: 'تعذر تحميل المزيد من الحركات',
                               subtitle: controller.logsErrorMessage.value,
-                              onRetry: controller.loadMoreLogs,
+                              onRetry: controller.hasMoreLogs
+                                  ? controller.loadMoreLogs
+                                  : () => controller.loadWalletLogs(
+                                        controller.selectedWallet.value!.walletId,
+                                        isRefresh: true,
+                                      ),
                             );
                           }
                           return const WalletLogEntrySkeleton();
