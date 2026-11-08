@@ -12,6 +12,7 @@ class _RecordingInvoiceRepository implements InvoiceRepository {
   int? posId;
   SaleType? saleType;
   List<DirectInvoiceItemInput>? items;
+  String? idempotencyKey;
 
   @override
   Future<InvoiceEntity> createDirectInvoice({
@@ -19,12 +20,14 @@ class _RecordingInvoiceRepository implements InvoiceRepository {
     required int posId,
     required SaleType saleType,
     required List<DirectInvoiceItemInput> items,
+    required String idempotencyKey,
   }) async {
     createCalls++;
     this.networkId = networkId;
     this.posId = posId;
     this.saleType = saleType;
     this.items = List<DirectInvoiceItemInput>.unmodifiable(items);
+    this.idempotencyKey = idempotencyKey;
 
     return InvoiceEntity(
       invoiceId: 901,
@@ -70,6 +73,7 @@ void main() {
         networkId: 10,
         posId: 20,
         saleType: SaleType.credit,
+        idempotencyKey: 'sale-pos20-unique-test-key',
         items: const [
           DirectInvoiceItemInput(packageId: 31, voucherCount: 100),
           DirectInvoiceItemInput(packageId: 32, voucherCount: 250),
@@ -81,6 +85,7 @@ void main() {
       expect(repository.networkId, 10);
       expect(repository.posId, 20);
       expect(repository.saleType, SaleType.credit);
+      expect(repository.idempotencyKey, 'sale-pos20-unique-test-key');
       expect(
         repository.items,
         const [
@@ -96,6 +101,7 @@ void main() {
           networkId: 10,
           posId: 20,
           saleType: SaleType.cash,
+          idempotencyKey: 'sale-test-empty',
           items: const [],
         ),
         throwsArgumentError,
@@ -110,8 +116,26 @@ void main() {
           networkId: 10,
           posId: 20,
           saleType: SaleType.cash,
+          idempotencyKey: 'sale-test-invalid-count',
           items: const [
             DirectInvoiceItemInput(packageId: 31, voucherCount: 0),
+          ],
+        ),
+        throwsArgumentError,
+      );
+      expect(repository.createCalls, 0);
+    });
+
+    test('rejects an empty idempotency key before contacting repository',
+        () async {
+      expect(
+        () => useCase(
+          networkId: 10,
+          posId: 20,
+          saleType: SaleType.cash,
+          idempotencyKey: ' ',
+          items: const [
+            DirectInvoiceItemInput(packageId: 31, voucherCount: 1),
           ],
         ),
         throwsArgumentError,
@@ -125,6 +149,7 @@ void main() {
           networkId: 10,
           posId: 20,
           saleType: SaleType.unknown,
+          idempotencyKey: 'sale-test-unknown-type',
           items: const [
             DirectInvoiceItemInput(packageId: 31, voucherCount: 1),
           ],
