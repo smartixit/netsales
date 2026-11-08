@@ -106,7 +106,6 @@ class TestFinanceRepository implements FinanceRepository {
       debtSummary ??
       const DebtSummaryEntity(
         totalReceivables: 0,
-        totalOutstandingInvoices: 0,
         agingBuckets: {},
       );
 
@@ -260,7 +259,8 @@ void main() {
       () async {
         repository.debtSummary = const DebtSummaryEntity(
           totalReceivables: 850000,
-          totalOutstandingInvoices: 4,
+          unpaidInvoicesCount: 2,
+          partiallyPaidInvoicesCount: 2,
           agingBuckets: {
             '0_30': 400000,
             '31_60': 250000,
@@ -295,6 +295,9 @@ void main() {
         expect(controller.isLoading.value, isFalse);
         expect(controller.summary.value, isNotNull);
         expect(controller.summary.value!.totalReceivables, 850000);
+        expect(controller.summary.value!.unpaidInvoicesCount, 2);
+        expect(controller.summary.value!.partiallyPaidInvoicesCount, 2);
+        expect(controller.summary.value!.totalOutstandingInvoices, 4);
         expect(controller.outstandingInvoices.length, 1);
         expect(controller.outstandingInvoices[0].remainingAmount, 800);
       },
