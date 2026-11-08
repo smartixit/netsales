@@ -26,6 +26,7 @@ import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 class MockCommercialRepository implements CommercialRepository {
   List<NetworkEntity> networks = [];
   PaginatedList<NetworkPosLinkEntity> posLinks = const PaginatedList(items: []);
+  final List<int> requestedNetworkIds = [];
 
   @override
   Future<List<NetworkEntity>> getMyNetworks() async => networks;
@@ -41,7 +42,10 @@ class MockCommercialRepository implements CommercialRepository {
     bool? status,
     int? perPage,
     Map<String, dynamic>? query,
-  }) async => posLinks;
+  }) async {
+    requestedNetworkIds.add(networkId);
+    return posLinks;
+  }
 
   @override
   Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList(
@@ -342,6 +346,62 @@ void main() {
         expect(controller.selectedNetworkId.value, 1);
         expect(controller.posList.length, 1);
         expect(controller.selectedPosId.value, 10);
+      },
+    );
+
+    test(
+      'RepaymentCollectionController reloads POS after dropdown network change',
+      () async {
+        commercialRepository.networks = [
+          const NetworkEntity(
+            networkId: 1,
+            ownerId: 1,
+            networkName: 'الشبكة الأولى',
+            networkPhoneNumber: '777000111',
+            status: 'ACTIVE',
+          ),
+          const NetworkEntity(
+            networkId: 2,
+            ownerId: 1,
+            networkName: 'الشبكة الثانية',
+            networkPhoneNumber: '777000222',
+            status: 'ACTIVE',
+          ),
+        ];
+        commercialRepository.posLinks = const PaginatedList(
+          items: [
+            NetworkPosLinkEntity(
+              networkPosId: 2,
+              networkId: 2,
+              posId: 20,
+              status: true,
+              pos: PosEntity(
+                posId: 20,
+                ownerId: 1,
+                posUuid: 'pos-uuid-20',
+                posName: 'نقطة الشبكة الثانية',
+                posPhoneNumber: '777999000',
+                status: 'ACTIVE',
+              ),
+            ),
+          ],
+        );
+
+        final controller = RepaymentCollectionController(
+          collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+          getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+          getNetworkPosListUseCase: GetNetworkPosListUseCase(
+            commercialRepository,
+          ),
+        );
+
+        await controller.loadInitialData();
+        controller.selectedNetworkId.value = 2;
+        await controller.onNetworkChanged(2);
+
+        expect(commercialRepository.requestedNetworkIds.last, 2);
+        expect(controller.selectedPosId.value, 20);
+        expect(controller.posList.single.posId, 20);
       },
     );
 
