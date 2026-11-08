@@ -11,6 +11,7 @@ import 'package:netsales/widgets/badges/custom_status_badge.dart';
 /// صف دفتر الأستاذ: اتجاه الحركة مصدره Enum الخادم، لا إشارة قيمة المبلغ.
 class WalletLogEntryRow extends StatelessWidget {
   final EnumPresentation operation;
+  final WalletOperationType operationType;
   final double amount;
   final String? statement;
   final String? date;
@@ -19,6 +20,7 @@ class WalletLogEntryRow extends StatelessWidget {
   const WalletLogEntryRow({
     super.key,
     required this.operation,
+    required this.operationType,
     required this.amount,
     required this.statement,
     required this.date,
@@ -26,20 +28,21 @@ class WalletLogEntryRow extends StatelessWidget {
   });
 
   String get _amountSign {
-    if (!operation.isKnown) return '';
-    return operation.label == 'إيداع' ? '+' : '−';
+    return switch (operationType) {
+      WalletOperationType.deposit => '+',
+      WalletOperationType.withdraw => '−',
+      WalletOperationType.unknown => '',
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isDeposit = operation.isKnown &&
-        operation.label == 'إيداع';
-    final amountColor = !operation.isKnown
-        ? colors.onSurface
-        : isDeposit
-            ? colors.success
-            : colors.error;
+    final amountColor = switch (operationType) {
+      WalletOperationType.deposit => colors.success,
+      WalletOperationType.withdraw => colors.error,
+      WalletOperationType.unknown => colors.onSurface,
+    };
 
     return Container(
       padding: EdgeInsets.symmetric(
