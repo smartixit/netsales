@@ -20,11 +20,11 @@ class NetworkWalletTransferSheet
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final wallet = controller.selectedWallet.value;
-
     return SafeArea(
       top: false,
-      child: Container(
+      child: Obx(() {
+        final wallet = controller.selectedWallet.value;
+        return Container(
         constraints: BoxConstraints(maxHeight: 0.9.sh),
         decoration: BoxDecoration(
           color: colors.surface,
@@ -180,7 +180,8 @@ class NetworkWalletTransferSheet
             ],
           ),
         ),
-      ),
+        );
+      }),
     );
   }
 }
