@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/utils/idempotency_key_generator.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
@@ -32,6 +33,8 @@ class RepaymentHistoryController extends GetxController {
 
   int _networksRequestVersion = 0;
   int _requestVersion = 0;
+  String? _pendingReversalKey;
+  String? _pendingReversalFingerprint;
 
   bool get hasMore => nextCursor.value?.trim().isNotEmpty ?? false;
   bool get hasSelectedNetwork => selectedNetworkId.value != null;
@@ -232,12 +235,22 @@ class RepaymentHistoryController extends GetxController {
     );
     if (repayment == null) return false;
 
+    final fingerprint = '$repaymentId|${reason.trim()}';
+    if (_pendingReversalFingerprint != fingerprint ||
+        _pendingReversalKey == null) {
+      _pendingReversalFingerprint = fingerprint;
+      _pendingReversalKey = IdempotencyKeyGenerator.generate();
+    }
+
     await CustomAnimationOverlay.showLoading(message: 'جاري عكس سند السداد...');
     try {
       await reverseRepaymentUseCase!(
         repaymentId: repaymentId,
         reversalReason: reason,
+        idempotencyKey: _pendingReversalKey,
       );
+      _pendingReversalKey = null;
+      _pendingReversalFingerprint = null;
 
       if (selectedNetworkId.value == networkId) {
         await loadRepayments(isRefresh: true);

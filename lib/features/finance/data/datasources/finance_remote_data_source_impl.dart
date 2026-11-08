@@ -132,11 +132,13 @@ class FinanceRemoteDataSourceImpl implements FinanceRemoteDataSource {
 
   @override
   Future<ApiResponse<PosRepaymentModel>> collectRepayment(
-    Map<String, dynamic> data,
-  ) {
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  }) {
     return ApiService.instance.post<PosRepaymentModel>(
       ApiConstants.posDebtsRepayments,
       data: data,
+      idempotencyKey: idempotencyKey,
       fromJson: (resData) =>
           PosRepaymentModel.fromJson(resData as Map<String, dynamic>),
     );
@@ -145,11 +147,13 @@ class FinanceRemoteDataSourceImpl implements FinanceRemoteDataSource {
   @override
   Future<ApiResponse<PosRepaymentModel>> reverseRepayment(
     int repaymentId,
-    Map<String, dynamic> data,
-  ) {
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  }) {
     return ApiService.instance.post<PosRepaymentModel>(
       ApiConstants.posDebtRepaymentReverse(repaymentId),
       data: data,
+      idempotencyKey: idempotencyKey,
       fromJson: (resData) =>
           PosRepaymentModel.fromJson(resData as Map<String, dynamic>),
     );
@@ -157,11 +161,13 @@ class FinanceRemoteDataSourceImpl implements FinanceRemoteDataSource {
 
   @override
   Future<ApiResponse<dynamic>> transferFromNetworkToPos(
-    Map<String, dynamic> data,
-  ) {
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  }) {
     return ApiService.instance.post<dynamic>(
       ApiConstants.posWalletTransferFromNetwork,
       data: data,
+      idempotencyKey: idempotencyKey,
     );
   }
 }

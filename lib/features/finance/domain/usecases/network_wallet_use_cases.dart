@@ -64,12 +64,14 @@ class TransferFromNetworkToPosUseCase {
     required int posId,
     required double amount,
     String? statement,
+    String? idempotencyKey,
   }) {
     return repository.transferFromNetworkToPos(
       networkId: networkId,
       posId: posId,
       amount: amount,
       statement: statement,
+      idempotencyKey: idempotencyKey,
     );
   }
 }

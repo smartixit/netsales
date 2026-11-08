@@ -1,5 +1,6 @@
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
+import 'package:netsales/core/utils/idempotency_key_generator.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:netsales/features/finance/domain/entities/debt_summary_entity.dart';
@@ -348,6 +349,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
     String? paymentMethod,
     String? referenceNumber,
     String? notes,
+    String? idempotencyKey,
   }) async {
     final payload = <String, dynamic>{
       'network_id': networkId,
@@ -357,7 +359,10 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'reference_number': ?referenceNumber,
       'notes': ?notes,
     };
-    final res = await remoteDataSource.collectRepayment(payload);
+    final res = await remoteDataSource.collectRepayment(
+      payload,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
     if (!res.success || res.data == null) {
       throw _requestFailure(
         res,
@@ -372,9 +377,14 @@ class FinanceRepositoryImpl implements FinanceRepository {
   Future<PosRepaymentEntity> reverseRepayment({
     required int repaymentId,
     required String reversalReason,
+    String? idempotencyKey,
   }) async {
     final payload = <String, dynamic>{'reversal_reason': reversalReason};
-    final res = await remoteDataSource.reverseRepayment(repaymentId, payload);
+    final res = await remoteDataSource.reverseRepayment(
+      repaymentId,
+      payload,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
     if (!res.success || res.data == null) {
       throw _requestFailure(
         res,
@@ -391,6 +401,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
     required int posId,
     required double amount,
     String? statement,
+    String? idempotencyKey,
   }) async {
     final payload = <String, dynamic>{
       'network_id': networkId,
@@ -398,7 +409,10 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'amount': amount,
       'statement': ?statement,
     };
-    final res = await remoteDataSource.transferFromNetworkToPos(payload);
+    final res = await remoteDataSource.transferFromNetworkToPos(
+      payload,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
     if (!res.success) {
       throw _requestFailure(
         res,

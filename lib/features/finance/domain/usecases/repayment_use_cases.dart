@@ -48,6 +48,7 @@ class CollectRepaymentUseCase {
     String? paymentMethod,
     String? referenceNumber,
     String? notes,
+    String? idempotencyKey,
   }) {
     return repository.collectRepayment(
       networkId: networkId,
@@ -56,6 +57,7 @@ class CollectRepaymentUseCase {
       paymentMethod: paymentMethod,
       referenceNumber: referenceNumber,
       notes: notes,
+      idempotencyKey: idempotencyKey,
     );
   }
 }
@@ -68,10 +70,12 @@ class ReverseRepaymentUseCase {
   Future<PosRepaymentEntity> call({
     required int repaymentId,
     required String reversalReason,
+    String? idempotencyKey,
   }) {
     return repository.reverseRepayment(
       repaymentId: repaymentId,
       reversalReason: reversalReason,
+      idempotencyKey: idempotencyKey,
     );
   }
 }

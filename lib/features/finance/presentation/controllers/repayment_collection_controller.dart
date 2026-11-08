@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/utils/idempotency_key_generator.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
@@ -42,6 +45,8 @@ class RepaymentCollectionController extends GetxController {
   final posErrorMessage = RxnString();
   final isSubmitting = false.obs;
   final lastResult = Rxn<PosRepaymentEntity>();
+  String? _pendingCollectionKey;
+  String? _pendingCollectionFingerprint;
 
   @override
   void onInit() {
@@ -200,6 +205,20 @@ class RepaymentCollectionController extends GetxController {
     }
 
     if (isSubmitting.value) return false;
+    final fingerprint = jsonEncode({
+      'network_id': netId,
+      'pos_id': pId,
+      'amount': amount,
+      'payment_method': selectedMethod.value,
+      'reference_number': refController.text.trim(),
+      'notes': notesController.text.trim(),
+    });
+    if (_pendingCollectionFingerprint != fingerprint ||
+        _pendingCollectionKey == null) {
+      _pendingCollectionFingerprint = fingerprint;
+      _pendingCollectionKey = IdempotencyKeyGenerator.generate();
+    }
+
     isSubmitting.value = true;
 
     await CustomAnimationOverlay.showLoading(
@@ -218,9 +237,12 @@ class RepaymentCollectionController extends GetxController {
         notes: notesController.text.trim().isEmpty
             ? null
             : notesController.text.trim(),
+        idempotencyKey: _pendingCollectionKey,
       );
 
       lastResult.value = repayment;
+      _pendingCollectionKey = null;
+      _pendingCollectionFingerprint = null;
       await CustomAnimationOverlay.showSuccess(
         message: 'تم تحصيل السداد وتسويته بنجاح',
       );
