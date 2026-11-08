@@ -215,11 +215,7 @@ class PosHomeDashboard extends StatelessWidget {
                       ),
                       onOpenAccount: () => Get.toNamed<void>(
                         AppRoutes.posWalletStatement,
-                        arguments: {
-                          'pos_id': activePos.posId,
-                          'network_id':
-                              controller.selectedNetworkLink.value!.networkId,
-                        },
+
                       ),
                     ),
                     AppSpacing.vXl,
@@ -236,7 +232,7 @@ class PosHomeDashboard extends StatelessWidget {
                           icon: Icons.add_shopping_cart_rounded,
                           title: 'طلب توريد',
                           subtitle: 'اطلب باقات بالجملة',
-                          onTap: () => Get.toNamed<void>(AppRoutes.posNewRequest),
+                          onTap: () => Get.toNamed<void>(AppRoutes.newProcurementOrder),
                         ),
                       ),
                       AppSpacing.hMd,
@@ -245,7 +241,7 @@ class PosHomeDashboard extends StatelessWidget {
                           icon: Icons.receipt_long_rounded,
                           title: 'فواتيري',
                           subtitle: 'راجع مشترياتك',
-                          onTap: () => Get.toNamed<void>(AppRoutes.posInvoices),
+                          onTap: () => Get.toNamed<void>(AppRoutes.purchaseInvoices),
                         ),
                       ),
                     ],
