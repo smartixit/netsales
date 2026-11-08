@@ -265,7 +265,7 @@ abstract final class ApiConstants {
   static String expenseAddItem(int id) => '/expenses/$id/items';
   static String expenseDeleteItem(int id, int itemId) =>
       '/expenses/$id/items/$itemId';
-  static String expenseAttachment(int id, int attachmentId) =>
+  static String expenseDeleteAttachment(int id, int attachmentId) =>
       '/expenses/$id/attachments/$attachmentId';
   static const String expensesBatchDelete = '/expenses/batch-delete';
   static const String expensesBatchRestore = '/expenses/batch-restore';
