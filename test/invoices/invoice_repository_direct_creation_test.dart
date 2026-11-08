@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/models/api_response.dart';
-import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/invoices/data/datasources/invoice_remote_data_source.dart';
 import 'package:netsales/features/invoices/data/models/invoice_model.dart';
 import 'package:netsales/features/invoices/data/repositories/invoice_repository_impl.dart';
