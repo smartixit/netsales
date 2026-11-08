@@ -41,7 +41,7 @@ class NetworkOperatingExpensesScreen extends GetView<NetworkOperatingExpensesCon
           _NetworkScope(controller: controller),
           AppSpacing.vMd,
           CustomTextField(
-            controller: _searchController,
+            controller: controller.searchTextController,
             label: 'بحث في المصروفات',
             hint: 'ابحث بوصف البند أو رقم المصروف',
             prefixIcon: const Icon(Icons.search_rounded),
@@ -139,8 +139,6 @@ class NetworkOperatingExpensesScreen extends GetView<NetworkOperatingExpensesCon
     ),
   );
 }
-
-final TextEditingController _searchController = TextEditingController();
 
 class _NetworkScope extends StatelessWidget {
   const _NetworkScope({required this.controller});
@@ -285,12 +283,12 @@ class _ExpenseFormBodyState extends State<_ExpenseFormBody> {
               readOnly: true,
               prefixIcon: const Icon(Icons.calendar_month_outlined),
               onChanged: (_) {},
-              suffixIcon: IconButton(
+              suffixIcon: CustomButton.icon(
+                icon: Icons.edit_calendar_outlined,
                 onPressed: () async {
                   final date = await showDatePicker(context: context, initialDate: _selectedDate, firstDate: DateTime(2020), lastDate: DateTime.now().add(const Duration(days: 365)));
                   if (date != null) setState(() { _selectedDate = date; _date.text = date.toIso8601String().substring(0,10); });
                 },
-                icon: const Icon(Icons.edit_calendar_outlined),
               ),
             ),
             AppSpacing.vLg,
