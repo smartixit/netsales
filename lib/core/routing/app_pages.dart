@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
@@ -297,6 +299,9 @@ abstract final class AppPages {
       binding: InvoiceBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.salesCreate,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
