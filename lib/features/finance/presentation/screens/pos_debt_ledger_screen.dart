@@ -99,9 +99,9 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                     child: ListView.builder(
                       itemCount:
                           controller.outstandingInvoices.length +
-                          (controller.hasMore ? 1 : 0) +
-                          (controller.invoicesErrorMessage.value != null &&
-                                  controller.outstandingInvoices.isNotEmpty
+                          (controller.hasMore ||
+                                  (controller.invoicesErrorMessage.value != null &&
+                                      controller.outstandingInvoices.isNotEmpty)
                               ? 1
                               : 0),
                       itemBuilder: (context, index) {
