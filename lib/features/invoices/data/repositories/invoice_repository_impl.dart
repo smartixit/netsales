@@ -1,5 +1,8 @@
+import 'package:netsales/core/enums/sale_type.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/invoices/data/datasources/invoice_remote_data_source.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 
@@ -39,6 +42,39 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
       nextCursor: response.nextCursor,
       prevCursor: response.prevCursor,
     );
+  }
+
+  @override
+  Future<InvoiceEntity> createDirectInvoice({
+    required int networkId,
+    required int posId,
+    required SaleType saleType,
+    required List<DirectInvoiceItemInput> items,
+  }) async {
+    final payload = <String, dynamic>{
+      'network_id': networkId,
+      'pos_id': posId,
+      'sale_type': saleType.wireValue,
+      'items': items
+          .map((item) => <String, dynamic>{
+                'package_id': item.packageId,
+                'voucher_count': item.voucherCount,
+              })
+          .toList(growable: false),
+    };
+
+    final response = await remoteDataSource.createDirectInvoice(payload);
+    final invoice = response.data;
+    if (!response.success || invoice == null) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر إنشاء فاتورة المبيعات المباشرة.',
+        code: 'DIRECT_INVOICE_CREATE_FAILED',
+        details: response.errors,
+      );
+    }
+    return invoice;
   }
 
   @override
