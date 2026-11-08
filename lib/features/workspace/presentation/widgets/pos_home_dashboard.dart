@@ -215,7 +215,11 @@ class PosHomeDashboard extends StatelessWidget {
                       ),
                       onOpenAccount: () => Get.toNamed<void>(
                         AppRoutes.posWalletStatement,
-
+                        arguments: {
+                          'pos_id': activePos.posId,
+                          'network_id':
+                              controller.selectedNetworkLink.value!.networkId,
+                        },
                       ),
                     ),
                     AppSpacing.vXl,
@@ -256,7 +260,7 @@ class PosHomeDashboard extends StatelessWidget {
   }
 
   void _showPosPicker(BuildContext context) {
-    CustomBottomSheet.show(
+    CustomBottomSheet.show<void>(
       title: 'تبديل نقطة البيع',
       subtitle: 'اختر نقطة البيع التي تريد إدارتها',
       leadingIcon: Icons.storefront_rounded,
