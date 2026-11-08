@@ -453,7 +453,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final currentValue = widget.valueListenable.value;
+    final currentValue = _resolvedValueListenable.value;
     final effectiveItems = _resolveItems(currentValue);
 
     return AnimatedBuilder(
