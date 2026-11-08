@@ -83,10 +83,14 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                     onChanged: controller.onNetworkChanged,
                   ),
                   AppSpacing.vMd,
-                  CustomDropdown<int>(
-                    hint: controller.posList.isEmpty
-                        ? 'لا توجد نقاط بيع مرتبطة بهذه الشبكة'
-                        : 'اختر نقطة البيع',
+                  controller.isLoadingPos.value
+                      ? const LinearProgressIndicator()
+                      : CustomDropdown<int>(
+                          hint: controller.selectedNetworkId.value == null
+                              ? 'اختر الشبكة أولاً'
+                              : controller.posList.isEmpty
+                                  ? 'لا توجد نقاط بيع مرتبطة بهذه الشبكة'
+                                  : 'اختر نقطة البيع المستفيدة',
                     searchEnabled: controller.posList.length > 5,
                     isRequired: true,
                     enabled: controller.posList.isNotEmpty,
