@@ -24,10 +24,10 @@ class ExpenseModel extends ExpenseEntity {
       expenseUuid: json['expense_uuid'] as String? ?? '',
       totalAmount: (json['expense_total_amount'] as num?)?.toDouble() ?? 0,
       expenseDate: json['expense_date'] as String?,
-      networkName: network is Map ? network['network_name'] as String? : null,
-      createdByName: creator is Map ? creator['name'] as String? : null,
+      networkName: network is Map<dynamic, dynamic> ? network['network_name'] as String? : null,
+      createdByName: creator is Map<dynamic, dynamic> ? creator['name'] as String? : null,
       items: rawItems is List
-          ? rawItems.whereType<Map>().map((item) => ExpenseItemEntity(
+          ? rawItems.whereType<Map<dynamic, dynamic>>().map((item) => ExpenseItemEntity(
                 itemId: (item['item_id'] as num?)?.toInt() ?? 0,
                 statement: item['item_statement'] as String? ?? '',
                 amount: (item['item_amount'] as num?)?.toDouble() ?? 0,
