@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
+import 'package:netsales/features/finance/presentation/controllers/network_wallet_transfer_controller.dart';
 import 'package:netsales/features/finance/presentation/widgets/network_wallet_log_item_row.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_selector_skeleton.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_log_entry_skeleton.dart';
+import 'package:netsales/features/finance/presentation/widgets/network_wallet_transfer_sheet.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
@@ -44,6 +49,37 @@ class NetworkWalletDashboardScreen
               ),
               AppSpacing.vSm,
               _buildWalletSelector(context),
+              Obx(() {
+                final wallet = controller.selectedWallet.value;
+                final permissions = PermissionService.to;
+                final canTransfer = wallet != null &&
+                    wallet.status &&
+                    (permissions.hasAnyRole([
+                          AppRoles.networkOwner,
+                          AppRoles.superAdmin,
+                        ]) ||
+                        permissions.can(AppPermissions.posWalletsCreate));
+                if (!canTransfer) return const SizedBox.shrink();
+
+                return Padding(
+                  padding: EdgeInsets.only(top: AppSpacing.sm),
+                  child: CustomButton.primary(
+                    text: 'تحويل رصيد إلى نقطة بيع',
+                    prefix: Icons.swap_horiz_rounded,
+                    width: double.infinity,
+                    onPressed: () {
+                      final transferController =
+                          Get.find<NetworkWalletTransferController>();
+                      transferController.initialize(wallet);
+                      Get.bottomSheet<void>(
+                        const NetworkWalletTransferSheet(),
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                      );
+                    },
+                  ),
+                );
+              }),
               AppSpacing.vLg,
               Text(
                 'دفتر الأستاذ وحركات المحفظة المحددة',
