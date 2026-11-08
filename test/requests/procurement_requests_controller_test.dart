@@ -12,6 +12,8 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
@@ -95,9 +97,20 @@ class MockRequestRepository implements RequestRepository {
   }
 
   @override
+  Future<RequestModificationPreviewEntity> previewRequestModification(
+    int requestId,
+    List<RequestModificationLineEntity> items,
+  ) async {
+    throw UnimplementedError(
+      'This test mock does not configure request modification previews.',
+    );
+  }
+
+  @override
   Future<RequestEntity> approveRequest(
     int requestId, {
     String? requestNote,
+    List<RequestModificationLineEntity>? items,
   }) async {
     final index = items.indexWhere((r) => r.requestId == requestId);
     final existing = items[index];
