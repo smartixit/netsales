@@ -75,7 +75,7 @@ class NetworkSupplyRequestsReviewScreen
                 label: 'تصفية بحسب الشبكة',
                 searchEnabled: false,
                 valueListenable:
-                    ValueNotifier<int?>(controller.selectedNetworkId.value),
+                    controller.selectedNetworkId,
                 items: networks.map((net) {
                   return DropdownItem<int>(
                     value: net.networkId,
