@@ -10,8 +10,9 @@ abstract interface class InvoiceRemoteDataSource {
 
   /// إنشاء فاتورة مبيعات مباشرة ببيانات كمية فقط.
   Future<ApiResponse<InvoiceModel>> createDirectInvoice(
-    Map<String, dynamic> payload,
-  );
+    Map<String, dynamic> payload, {
+    required String idempotencyKey,
+  });
 
   /// استرجاع تفاصيل فاتورة محددة
   Future<ApiResponse<InvoiceModel>> getInvoiceDetails(int invoiceId);
