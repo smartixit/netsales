@@ -96,7 +96,9 @@ class RepaymentCollectionController extends GetxController {
   }
 
   void onNetworkChanged(int? netId) {
-    if (netId == null || selectedNetworkId.value == netId) return;
+    if (netId == null) return;
+    // CustomDropdown writes to selectedNetworkId before calling onChanged.
+    // Do not compare against the notifier here or the linked POS refresh is skipped.
     selectedNetworkId.value = netId;
     posList.clear();
     selectedPosId.value = null;
