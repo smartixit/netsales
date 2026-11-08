@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -108,7 +107,7 @@ class NetworkOperatingExpensesScreen extends GetView<NetworkOperatingExpensesCon
                 child: ListView.separated(
                   itemCount: controller.expenses.length +
                       ((controller.hasMore || controller.loadMoreError.value != null) ? 1 : 0),
-                  separatorBuilder: (_, __) => AppSpacing.vSm,
+                  separatorBuilder: (_, _) => AppSpacing.vSm,
                   itemBuilder: (context, index) {
                     if (index == controller.expenses.length) {
                       if (controller.loadMoreError.value != null) {
