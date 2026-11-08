@@ -18,6 +18,10 @@ class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
   ApiResponse<List<NetworkWalletModel>>? networkWalletsResponse;
   ApiResponse<List<NetworkWalletLogModel>>? networkWalletLogsResponse;
   ApiResponse<NetworkWalletModel>? networkWalletByIdResponse;
+  ApiResponse<PosRepaymentModel>? collectRepaymentResponse;
+  ApiResponse<PosRepaymentModel>? reverseRepaymentResponse;
+  String? lastCollectIdempotencyKey;
+  String? lastReverseIdempotencyKey;
   ApiResponse<List<InvoiceModel>>? outstandingInvoicesResponse;
   ApiResponse<List<PosRepaymentModel>>? repaymentsResponse;
 
@@ -118,6 +122,46 @@ class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
       );
 
   @override
+  Future<ApiResponse<PosRepaymentModel>> collectRepayment(
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  }) async {
+    lastCollectIdempotencyKey = idempotencyKey;
+    return collectRepaymentResponse ??
+        const ApiResponse<PosRepaymentModel>(
+          success: true,
+          message: 'ok',
+          data: PosRepaymentModel(
+            repaymentId: 1,
+            networkId: 1,
+            posId: 1,
+            amount: 1,
+          ),
+        );
+  }
+
+  @override
+  Future<ApiResponse<PosRepaymentModel>> reverseRepayment(
+    int repaymentId,
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  }) async {
+    lastReverseIdempotencyKey = idempotencyKey;
+    return reverseRepaymentResponse ??
+        ApiResponse<PosRepaymentModel>(
+          success: true,
+          message: 'ok',
+          data: PosRepaymentModel(
+            repaymentId: repaymentId,
+            networkId: 1,
+            posId: 1,
+            amount: 1,
+            status: 'REVERSED',
+          ),
+        );
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -204,6 +248,34 @@ void main() {
     });
   });
 
+
+  group('FinanceRepositoryImpl financial idempotency contracts', () {
+    test('forwards stable collection and reversal keys to the remote API', () async {
+      final remote = _DebtSummaryRemoteDataSource(
+        ApiResponse<Map<String, dynamic>>(
+          success: true,
+          message: 'ok',
+          data: const {},
+        ),
+      );
+      final repository = FinanceRepositoryImpl(remoteDataSource: remote);
+
+      await repository.collectRepayment(
+        networkId: 10,
+        posId: 20,
+        amount: 500,
+        idempotencyKey: 'collection-attempt-001',
+      );
+      expect(remote.lastCollectIdempotencyKey, 'collection-attempt-001');
+
+      await repository.reverseRepayment(
+        repaymentId: 9,
+        reversalReason: 'تصحيح سند مكرر',
+        idempotencyKey: 'reversal-attempt-001',
+      );
+      expect(remote.lastReverseIdempotencyKey, 'reversal-attempt-001');
+    });
+  });
 
   group('FinanceRepositoryImpl single request failure contracts', () {
     test('surfaces failed wallet detail responses instead of force-unwrapping data', () async {
