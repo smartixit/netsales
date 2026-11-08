@@ -75,8 +75,7 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                 return CustomDropdown<int>(
                   label: 'اختر الشبكة الموردة',
                   searchEnabled: false,
-                  valueListenable:
-                      controller.selectedNetworkDropdownValue,
+                  rxValue: controller.selectedNetworkId,
                   items: networks.map((link) {
                     return DropdownItem<int>(
                       value: link.networkId,
@@ -127,7 +126,7 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                 return CustomDropdown<int>(
                   label: 'اختر باقة الكروت',
                   searchEnabled: true,
-                  valueListenable: controller.selectedPackageDropdownValue,
+                  rxValue: controller.selectedPackageId,
                   items: packages.map((pkg) {
                     return DropdownItem<int>(
                       value: pkg.packageId,
