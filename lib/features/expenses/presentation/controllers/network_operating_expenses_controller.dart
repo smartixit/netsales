@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -51,6 +52,7 @@ class NetworkOperatingExpensesController extends GetxController {
   int _networkVersion = 0;
   int _detailVersion = 0;
   bool _loaded = false;
+  Timer? _searchDebounce;
   bool get hasMore => _cursor?.trim().isNotEmpty ?? false;
   bool get hasSelectedNetwork => selectedNetworkId.value != null;
   bool get canCreate => PermissionService.to.can(AppPermissions.expensesCreate);
@@ -61,7 +63,15 @@ class NetworkOperatingExpensesController extends GetxController {
   void onInit() { super.onInit(); initializeNetworks(); }
 
   @override
-  void onClose() { searchTextController.dispose(); super.onClose(); }
+  void onClose() { _searchDebounce?.cancel(); searchTextController.dispose(); super.onClose(); }
+
+  void onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 400), () {
+      searchQuery.value = value.trim();
+      loadExpenses(refresh: true);
+    });
+  }
 
   Future<void> initializeNetworks() async {
     final version = ++_networkVersion;
