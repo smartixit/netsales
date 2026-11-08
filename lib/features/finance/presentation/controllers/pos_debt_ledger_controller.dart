@@ -36,6 +36,8 @@ class PosDebtLedgerController extends GetxController {
   final networkSearchQuery = ''.obs;
   final networkSearchHasNoResults = false.obs;
   final networkNextCursor = RxnString();
+  final isLoadingMoreNetworks = false.obs;
+  final networkOptionsLoadMoreErrorMessage = RxnString();
   final requiresNetworkSelection = false.obs;
 
   final summary = Rxn<DebtSummaryEntity>();
@@ -126,6 +128,8 @@ class PosDebtLedgerController extends GetxController {
     posOptions.clear();
     networkLinks.clear();
     networkNextCursor.value = null;
+    isLoadingMoreNetworks.value = false;
+    networkOptionsLoadMoreErrorMessage.value = null;
     selectedPosId.value = null;
     selectedNetworkId.value = null;
     _selectedNetworkFallback = null;
@@ -210,6 +214,8 @@ class PosDebtLedgerController extends GetxController {
     if (posId == null) return;
 
     networkSearchQuery.value = query.trim();
+    networkNextCursor.value = null;
+    networkOptionsLoadMoreErrorMessage.value = null;
     await _fetchNetworkLinks(
       posId: posId,
       search: query.trim().isEmpty ? null : query.trim(),
@@ -217,13 +223,38 @@ class PosDebtLedgerController extends GetxController {
     );
   }
 
+  Future<void> loadMoreNetworkOptions() async {
+    final posId = selectedPosId.value;
+    if (posId == null ||
+        !hasMoreNetworkOptions ||
+        isLoadingNetworks.value ||
+        isSearchingNetworks.value ||
+        isLoadingMoreNetworks.value) {
+      return;
+    }
+
+    final search = networkSearchQuery.value.trim();
+    await _fetchNetworkLinks(
+      posId: posId,
+      search: search.isEmpty ? null : search,
+      isSearch: search.isNotEmpty,
+      cursor: networkNextCursor.value,
+      append: true,
+    );
+  }
+
   Future<void> _fetchNetworkLinks({
     required int posId,
     required String? search,
     required bool isSearch,
+    String? cursor,
+    bool append = false,
   }) async {
     final requestVersion = ++_networkOptionsRequestVersion;
-    if (isSearch) {
+    if (append) {
+      isLoadingMoreNetworks.value = true;
+      networkOptionsLoadMoreErrorMessage.value = null;
+    } else if (isSearch) {
       isSearchingNetworks.value = true;
       networkSearchErrorMessage.value = null;
       networkSearchHasNoResults.value = false;
@@ -231,12 +262,14 @@ class PosDebtLedgerController extends GetxController {
       isLoadingNetworks.value = true;
       networksErrorMessage.value = null;
       networkSearchErrorMessage.value = null;
+      networkOptionsLoadMoreErrorMessage.value = null;
     }
 
     var autoSelectNetworkId = 0;
     try {
       final result = await getPosNetworksListUseCase(
         posId,
+        cursor: cursor,
         search: search,
         perPage: 50,
       );
@@ -254,16 +287,23 @@ class PosDebtLedgerController extends GetxController {
         }
       }
 
-      if (isSearch && search != null && uniqueLinks.isEmpty) {
-        // Preserve the last usable options and selected scope when the query
-        // has no matches; the UI shows a contextual no-results hint instead.
+      if (isSearch && search != null && uniqueLinks.isEmpty && !append) {
+        // Keep the active scope and the previous usable options intact.
         networkSearchHasNoResults.value = true;
+        networkNextCursor.value = result.nextCursor;
       } else {
-        networkLinks.assignAll(uniqueLinks);
+        if (append) {
+          final existingIds = networkLinks.map((link) => link.networkId).toSet();
+          networkLinks.addAll(
+            uniqueLinks.where((link) => existingIds.add(link.networkId)),
+          );
+        } else {
+          networkLinks.assignAll(uniqueLinks);
+        }
         networkNextCursor.value = result.nextCursor;
       }
 
-      if (!isSearch) {
+      if (!isSearch && !append) {
         final hasMultipleNetworks =
             uniqueLinks.length > 1 || result.nextCursor != null;
         requiresNetworkSelection.value = hasMultipleNetworks;
@@ -275,14 +315,7 @@ class PosDebtLedgerController extends GetxController {
         }
       }
 
-      if (isSearch &&
-          selectedNetworkId.value != null &&
-          !uniqueLinks.any(
-            (link) => link.networkId == selectedNetworkId.value,
-          )) {
-        // Keep the selected supplier snapshot so remote search cannot
-        // silently erase the active financial scope.
-      } else if (selectedNetworkId.value != null) {
+      if (selectedNetworkId.value != null) {
         final selectedLink = uniqueLinks.where(
           (link) => link.networkId == selectedNetworkId.value,
         );
@@ -293,9 +326,11 @@ class PosDebtLedgerController extends GetxController {
     } on AppException catch (e) {
       if (requestVersion == _networkOptionsRequestVersion &&
           selectedPosId.value == posId) {
-        if (isSearch) {
+        if (append) {
+          networkOptionsLoadMoreErrorMessage.value = e.message;
+        } else if (isSearch) {
           networkSearchErrorMessage.value = e.message;
-        networkSearchHasNoResults.value = false;
+          networkSearchHasNoResults.value = false;
         } else {
           networksErrorMessage.value = e.message;
         }
@@ -307,7 +342,9 @@ class PosDebtLedgerController extends GetxController {
           e,
           fallback: 'تعذر تحميل مزودي الشبكة المرتبطين بنقطة البيع.',
         );
-        if (isSearch) {
+        if (append) {
+          networkOptionsLoadMoreErrorMessage.value = message;
+        } else if (isSearch) {
           networkSearchErrorMessage.value = message;
           networkSearchHasNoResults.value = false;
         } else {
@@ -318,6 +355,7 @@ class PosDebtLedgerController extends GetxController {
       if (requestVersion == _networkOptionsRequestVersion) {
         isLoadingNetworks.value = false;
         isSearchingNetworks.value = false;
+        isLoadingMoreNetworks.value = false;
       }
     }
 

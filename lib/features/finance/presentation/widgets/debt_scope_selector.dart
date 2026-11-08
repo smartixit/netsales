@@ -8,6 +8,7 @@ import 'package:netsales/features/finance/presentation/controllers/pos_debt_ledg
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class DebtScopeSelector extends StatelessWidget {
@@ -236,6 +237,25 @@ class DebtScopeSelector extends StatelessWidget {
               style: AppTypography.bodySmall.copyWith(
                 color: colors.onSurfaceVariant,
               ),
+            ),
+          ],
+          if (controller.networkOptionsLoadMoreErrorMessage.value != null) ...[
+            AppSpacing.vXs,
+            CustomErrorState.compact(
+              title: 'تعذر تحميل بقية مزودي الشبكة',
+              subtitle: controller.networkOptionsLoadMoreErrorMessage.value,
+              onRetry: controller.loadMoreNetworkOptions,
+            ),
+          ],
+          if (controller.hasMoreNetworkOptions) ...[
+            AppSpacing.vXs,
+            CustomButton.secondary(
+              text: 'تحميل مزيد من مزودي الشبكة',
+              prefix: Icons.expand_more_rounded,
+              loading: controller.isLoadingMoreNetworks.value,
+              enabled: !controller.isLoadingMoreNetworks.value,
+              width: double.infinity,
+              onPressed: controller.loadMoreNetworkOptions,
             ),
           ],
         ],

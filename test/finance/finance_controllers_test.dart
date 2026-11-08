@@ -34,6 +34,8 @@ class MockCommercialRepository implements CommercialRepository {
   PaginatedList<NetworkPosLinkEntity> posNetworkLinks = const PaginatedList(items: []);
   final List<int> requestedPosNetworkIds = [];
   final List<String?> requestedPosNetworkSearchQueries = [];
+  final List<String?> requestedPosNetworkCursors = [];
+  final Map<String, PaginatedList<NetworkPosLinkEntity>> posNetworkPages = {};
   final Map<String, PaginatedList<NetworkPosLinkEntity>> posNetworkSearchResults = {};
   final Map<String, Completer<PaginatedList<NetworkPosLinkEntity>>> pendingPosNetworkSearches = {};
   bool failPosNetworksList = false;
@@ -88,6 +90,7 @@ class MockCommercialRepository implements CommercialRepository {
   }) async {
     requestedPosNetworkIds.add(posId);
     requestedPosNetworkSearchQueries.add(search);
+    requestedPosNetworkCursors.add(cursor);
     if (failPosNetworksList) {
       throw Exception('POS network list request failed');
     }
@@ -95,10 +98,14 @@ class MockCommercialRepository implements CommercialRepository {
     final pending = pendingPosNetworkSearches[searchKey];
     if (pending != null) return pending.future;
     if (search != null && search.isNotEmpty) {
-      return posNetworkSearchResults[searchKey] ??
-          const PaginatedList(items: []);
+      return cursor == null
+          ? posNetworkSearchResults[searchKey] ??
+              const PaginatedList(items: [])
+          : posNetworkPages[cursor] ?? const PaginatedList(items: []);
     }
-    return posNetworkLinks;
+    return cursor == null
+        ? posNetworkLinks
+        : posNetworkPages[cursor] ?? const PaginatedList(items: []);
   }
 
   @override
@@ -896,6 +903,61 @@ void main() {
       expect(controller.logsErrorMessage.value, isNotNull);
       expect(controller.isLoadingLogs.value, isFalse);
     });
+
+    test(
+      'POS debt scope selector can load every cursor page of network links',
+      () async {
+        const firstNetwork = NetworkPosLinkEntity(
+          networkId: 101,
+          posId: 5,
+          status: true,
+          network: NetworkEntity(networkId: 101, networkName: 'الشبكة الأولى'),
+        );
+        const secondNetwork = NetworkPosLinkEntity(
+          networkId: 202,
+          posId: 5,
+          status: true,
+          network: NetworkEntity(networkId: 202, networkName: 'الشبكة الثانية'),
+        );
+        commercialRepository.myPos = [
+          const PosEntity(posId: 5, posName: 'نقطة البيع'),
+        ];
+        commercialRepository.posNetworkLinks = const PaginatedList(
+          items: [firstNetwork],
+          nextCursor: 'network-links-page-2',
+        );
+        commercialRepository.posNetworkPages['network-links-page-2'] =
+            const PaginatedList(items: [secondNetwork]);
+
+        final controller = PosDebtLedgerController(
+          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+          getPosNetworksListUseCase: GetPosNetworksListUseCase(commercialRepository),
+        );
+
+        await controller.initializeScope();
+        expect(controller.networkLinks.map((link) => link.networkId), [101]);
+        expect(controller.hasMoreNetworkOptions, isTrue);
+        expect(controller.selectedNetworkId.value, isNull);
+
+        await controller.loadMoreNetworkOptions();
+
+        expect(controller.networkLinks.map((link) => link.networkId), [101, 202]);
+        expect(controller.hasMoreNetworkOptions, isFalse);
+        expect(commercialRepository.requestedPosNetworkCursors, [
+          null,
+          'network-links-page-2',
+        ]);
+
+        await controller.selectNetwork(202);
+        expect(controller.selectedNetworkId.value, 202);
+        expect(repository.requestedDebtScopes, [
+          {'networkId': 101, 'posId': 5},
+          {'networkId': 202, 'posId': 5},
+        ]);
+      },
+    );
 
     test('Outstanding invoice failure is not represented as no debt', () async {
       repository.debtSummary = const DebtSummaryEntity(
