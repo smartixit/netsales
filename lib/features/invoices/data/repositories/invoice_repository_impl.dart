@@ -50,7 +50,12 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     required int posId,
     required SaleType saleType,
     required List<DirectInvoiceItemInput> items,
+    required String idempotencyKey,
   }) async {
+    if (idempotencyKey.trim().isEmpty) {
+      throw ArgumentError.value(idempotencyKey, 'idempotencyKey');
+    }
+
     final payload = <String, dynamic>{
       'network_id': networkId,
       'pos_id': posId,
@@ -63,7 +68,10 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
           .toList(growable: false),
     };
 
-    final response = await remoteDataSource.createDirectInvoice(payload);
+    final response = await remoteDataSource.createDirectInvoice(
+      payload,
+      idempotencyKey: idempotencyKey,
+    );
     final invoice = response.data;
     if (!response.success || invoice == null) {
       throw AppException(
