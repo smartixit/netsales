@@ -8,13 +8,16 @@ import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_i
 
 class _RecordingInvoiceRemoteDataSource implements InvoiceRemoteDataSource {
   Map<String, dynamic>? submittedPayload;
+  String? submittedIdempotencyKey;
   bool failCreation = false;
 
   @override
   Future<ApiResponse<InvoiceModel>> createDirectInvoice(
-    Map<String, dynamic> payload,
-  ) async {
+    Map<String, dynamic> payload, {
+    required String idempotencyKey,
+  }) async {
     submittedPayload = Map<String, dynamic>.from(payload);
+    submittedIdempotencyKey = idempotencyKey;
     if (failCreation) {
       return ApiResponse<InvoiceModel>(
         success: false,
@@ -74,6 +77,7 @@ void main() {
         networkId: 10,
         posId: 20,
         saleType: SaleType.credit,
+        idempotencyKey: 'sale-pos20-idempotent-key',
         items: const [
           DirectInvoiceItemInput(packageId: 31, voucherCount: 100),
           DirectInvoiceItemInput(packageId: 32, voucherCount: 250),
@@ -81,6 +85,7 @@ void main() {
       );
 
       expect(invoice.invoiceId, 501);
+      expect(remote.submittedIdempotencyKey, 'sale-pos20-idempotent-key');
       expect(remote.submittedPayload, {
         'network_id': 10,
         'pos_id': 20,
@@ -110,6 +115,7 @@ void main() {
           networkId: 10,
           posId: 20,
           saleType: SaleType.cash,
+          idempotencyKey: 'sale-pos20-error-key',
           items: const [
             DirectInvoiceItemInput(packageId: 31, voucherCount: 1),
           ],
