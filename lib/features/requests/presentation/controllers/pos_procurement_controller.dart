@@ -89,6 +89,10 @@ class PosProcurementController extends GetxController {
   final selectedSaleType = SaleType.cash.obs;
   final isSubmitting = false.obs;
 
+  int _networkLoadRevision = 0;
+  int _packageLoadRevision = 0;
+  int _requestListRevision = 0;
+
   /// يحول الأوراق إلى voucher_count الذي يقبله عقد Laravel الحالي.
   /// هذا تحويل وحدة وليس حساباً مالياً.
   int get requestedVoucherCount {
@@ -162,6 +166,9 @@ class PosProcurementController extends GetxController {
     searchController.dispose();
     quantityController.dispose();
     notesController.dispose();
+    _networkLoadRevision++;
+    _packageLoadRevision++;
+    _requestListRevision++;
     super.onClose();
   }
 
@@ -189,53 +196,83 @@ class PosProcurementController extends GetxController {
   /// جلب قائمة الشبكات الموردة المرتبطة بنقطة البيع المحددة
   Future<void> loadLinkedNetworks(int posId) async {
     if (getPosNetworksListUseCase == null) return;
+
+    final revision = ++_networkLoadRevision;
+    _packageLoadRevision++;
+    _setSelectedNetworkId(null);
+    _setSelectedPackage(null);
+    linkedNetworks.clear();
+    availablePackages.clear();
     isLoadingNetworks.value = true;
+    isLoadingPackages.value = false;
+
     try {
       final paginated = await getPosNetworksListUseCase!(
         posId,
-        status: true, // الشبكات المرتبطة النشطة فقط
+        status: true,
       );
+      if (revision != _networkLoadRevision || selectedPosId.value != posId) {
+        return;
+      }
+
       linkedNetworks.assignAll(paginated.items);
       if (linkedNetworks.length == 1) {
-        _setSelectedNetworkId(linkedNetworks.first.networkId);
-        await loadNetworkPackages(linkedNetworks.first.networkId);
-      } else {
-        _setSelectedNetworkId(null);
-        availablePackages.clear();
-        _setSelectedPackage(null);
+        final networkId = linkedNetworks.first.networkId;
+        _setSelectedNetworkId(networkId);
+        await loadNetworkPackages(networkId);
       }
     } catch (_) {
+      if (revision != _networkLoadRevision || selectedPosId.value != posId) {
+        return;
+      }
       linkedNetworks.clear();
+      availablePackages.clear();
+      _setSelectedNetworkId(null);
+      _setSelectedPackage(null);
     } finally {
-      isLoadingNetworks.value = false;
+      if (revision == _networkLoadRevision) {
+        isLoadingNetworks.value = false;
+      }
     }
   }
 
-  /// جلب كتالوج باقات الكروت المتاحة لدى الشبكة المحددة
+  /// جلب كتالوج الباقات مع تجاهل أي استجابة تخص شبكة سابقة.
   Future<void> loadNetworkPackages(int networkId) async {
     if (getPackagesUseCase == null) return;
+
+    final revision = ++_packageLoadRevision;
     isLoadingPackages.value = true;
     try {
       final paginated = await getPackagesUseCase!(
         networkId: networkId,
-        status: true, // الباقات النشطة فقط
+        status: true,
       );
-      availablePackages.assignAll(paginated.items);
-      if (availablePackages.isNotEmpty) {
-        _setSelectedPackage(availablePackages.first);
-      } else {
-        _setSelectedPackage(null);
+      if (revision != _packageLoadRevision ||
+          selectedNetworkId.value != networkId) {
+        return;
       }
+
+      availablePackages.assignAll(paginated.items);
+      _setSelectedPackage(
+        availablePackages.isNotEmpty ? availablePackages.first : null,
+      );
     } catch (_) {
+      if (revision != _packageLoadRevision ||
+          selectedNetworkId.value != networkId) {
+        return;
+      }
       availablePackages.clear();
       _setSelectedPackage(null);
     } finally {
-      isLoadingPackages.value = false;
+      if (revision == _packageLoadRevision) {
+        isLoadingPackages.value = false;
+      }
     }
   }
 
   /// اختيار الشبكة الموردة وتحديث الباقات
   void onNetworkSelected(int networkId) {
+    _networkLoadRevision++;
     _setSelectedNetworkId(networkId);
     clearProcurementCart();
     _setSelectedPackage(null);
@@ -350,64 +387,79 @@ class PosProcurementController extends GetxController {
 
   /// تحميل طلبات التوريد من الخادم مع ترقيم المؤشر
   Future<void> loadRequests({bool isRefresh = false}) async {
+    final revision = ++_requestListRevision;
     isLoading.value = true;
     errorMessage.value = null;
 
     if (isRefresh) {
       nextCursor.value = null;
+      isLoadingMore.value = false;
     }
 
-    try {
-      final query = searchQuery.value.trim();
-      final effectiveSearch = query.isEmpty ? null : query;
+    final posId = selectedPosId.value;
+    final status = statusFilter.value;
+    final query = searchQuery.value.trim();
+    final effectiveSearch = query.isEmpty ? null : query;
 
+    try {
       final PaginatedList<RequestEntity> result = await getRequestsUseCase(
-        posId: selectedPosId.value,
-        status: statusFilter.value,
+        posId: posId,
+        status: status,
         search: effectiveSearch,
         cursor: null,
       );
+      if (revision != _requestListRevision) return;
 
       requests.assignAll(result.items);
       nextCursor.value = result.nextCursor;
-    } catch (e) {
-      errorMessage.value = e is AppException
-          ? e.message
-          : 'تعذر تحميل قائمة طلبات التوريد: $e';
+    } catch (error) {
+      if (revision != _requestListRevision) return;
+      errorMessage.value = error is AppException
+          ? error.message
+          : 'تعذر تحميل قائمة طلبات التوريد: $error';
     } finally {
-      isLoading.value = false;
+      if (revision == _requestListRevision) {
+        isLoading.value = false;
+      }
     }
   }
 
-  /// تحميل المزيد من الطلبات عند التمرير
+  /// تحميل المزيد دون السماح لاستجابة صفحة قديمة بتلويث نتائج التصفية الحالية.
   Future<void> loadMoreRequests() async {
-    if (isLoadingMore.value || isLoading.value || nextCursor.value == null) {
+    final cursor = nextCursor.value;
+    if (isLoadingMore.value || isLoading.value || cursor == null) {
       return;
     }
 
+    final revision = _requestListRevision;
+    final posId = selectedPosId.value;
+    final status = statusFilter.value;
+    final query = searchQuery.value.trim();
+    final effectiveSearch = query.isEmpty ? null : query;
     isLoadingMore.value = true;
 
     try {
-      final query = searchQuery.value.trim();
-      final effectiveSearch = query.isEmpty ? null : query;
-
       final PaginatedList<RequestEntity> result = await getRequestsUseCase(
-        posId: selectedPosId.value,
-        status: statusFilter.value,
+        posId: posId,
+        status: status,
         search: effectiveSearch,
-        cursor: nextCursor.value,
+        cursor: cursor,
       );
+      if (revision != _requestListRevision) return;
 
-      final existingIds = requests.map((r) => r.requestId).toSet();
-      final newItems =
-          result.items.where((r) => !existingIds.contains(r.requestId)).toList();
+      final existingIds = requests.map((request) => request.requestId).toSet();
+      final newItems = result.items
+          .where((request) => !existingIds.contains(request.requestId))
+          .toList(growable: false);
 
       requests.addAll(newItems);
       nextCursor.value = result.nextCursor;
     } catch (_) {
-      // Non-fatal for load-more
+      // Keep the already loaded page and allow an explicit retry.
     } finally {
-      isLoadingMore.value = false;
+      if (revision == _requestListRevision) {
+        isLoadingMore.value = false;
+      }
     }
   }
 
