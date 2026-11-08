@@ -113,7 +113,8 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
       payload: payload,
       attachments: attachments,
     );
-    return ApiService.instance.put<ExpenseModel>(
+    formData.fields.add(const MapEntry('_method', 'PUT'));
+    return ApiService.instance.post<ExpenseModel>(
       ApiConstants.expense(expenseId),
       data: formData,
       fromJson: _parseExpense,
