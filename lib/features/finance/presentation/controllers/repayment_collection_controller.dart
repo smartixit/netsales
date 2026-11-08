@@ -109,6 +109,7 @@ class RepaymentCollectionController extends GetxController {
         search: normalizedSearch == null || normalizedSearch.isEmpty
             ? null
             : normalizedSearch,
+        status: true,
         perPage: 50,
       );
       if (revision != _posLoadRevision ||

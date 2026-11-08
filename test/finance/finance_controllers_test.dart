@@ -39,6 +39,7 @@ class MockCommercialRepository implements CommercialRepository {
   bool failPosNetworksList = false;
   final List<int> requestedNetworkIds = [];
   final List<int?> requestedPosPageSizes = [];
+  final List<bool?> requestedPosStatuses = [];
   final List<String?> requestedPosSearchQueries = [];
   final Map<String, Completer<PaginatedList<NetworkPosLinkEntity>>>
       pendingPosSearches = {};
@@ -65,11 +66,15 @@ class MockCommercialRepository implements CommercialRepository {
   }) async {
     requestedNetworkIds.add(networkId);
     requestedPosPageSizes.add(perPage);
+    requestedPosStatuses.add(status);
     requestedPosSearchQueries.add(search);
     if (failPosList) throw Exception('POS list request failed');
     final pending = pendingPosSearches[search ?? ''];
     if (pending != null) return pending.future;
-    return posLinks;
+    final items = status == null
+        ? posLinks.items
+        : posLinks.items.where((link) => link.status == status).toList();
+    return PaginatedList(items: items, nextCursor: posLinks.nextCursor);
   }
 
   @override
@@ -435,6 +440,21 @@ void main() {
                 status: 'ACTIVE',
               ),
             ),
+            NetworkPosLinkEntity(
+              networkPosId: 2,
+              networkId: 1,
+              posId: 11,
+              status: false,
+              createdAt: '2026-11-01',
+              pos: PosEntity(
+                posId: 11,
+                ownerId: 1,
+                posUuid: 'pos-uuid-11',
+                posName: 'نقطة متوقفة',
+                posPhoneNumber: '777999887',
+                status: 'ACTIVE',
+              ),
+            ),
           ],
         );
 
@@ -459,6 +479,7 @@ void main() {
 
         expect(controller.posList.length, 1);
         expect(controller.posList.single.posId, 10);
+        expect(commercialRepository.requestedPosStatuses, [true]);
         expect(controller.selectedPosId.value, isNull);
 
         // The POS must be chosen deliberately for a financial transaction.
