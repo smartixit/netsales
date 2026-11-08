@@ -43,7 +43,7 @@ class NetworkWalletTransferController extends GetxController {
 
   bool get hasMorePos => posNextCursor.value?.trim().isNotEmpty ?? false;
 
-  void initialize(NetworkWalletEntity wallet) {
+  Future<void> initialize(NetworkWalletEntity wallet) async {
     ++_requestVersion;
     selectedWallet.value = wallet;
     posList.clear();
@@ -61,7 +61,7 @@ class NetworkWalletTransferController extends GetxController {
     _searchQuery = '';
     _pendingKey = null;
     _pendingFingerprint = null;
-    loadPosForNetwork();
+    await loadPosForNetwork();
   }
 
   @override

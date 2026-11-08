@@ -22,6 +22,7 @@ import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cas
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/repayment_use_cases.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
+import 'package:netsales/features/finance/presentation/controllers/network_wallet_transfer_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_debt_ledger_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_collection_controller.dart';
@@ -921,6 +922,72 @@ void main() {
       expect(controller.logsErrorMessage.value, isNotNull);
       expect(controller.isLoadingLogs.value, isFalse);
     });
+
+    test(
+      'network wallet transfer can page through all linked POS beneficiaries',
+      () async {
+        const firstPos = PosEntity(
+          posId: 81,
+          ownerId: 1,
+          posUuid: 'pos-81',
+          posName: 'نقطة البيع الأولى',
+          posPhoneNumber: '777000081',
+        );
+        const secondPos = PosEntity(
+          posId: 82,
+          ownerId: 1,
+          posUuid: 'pos-82',
+          posName: 'نقطة البيع الثانية',
+          posPhoneNumber: '777000082',
+        );
+        commercialRepository.posLinks = const PaginatedList(
+          items: [
+            NetworkPosLinkEntity(
+              networkPosId: 8001,
+              networkId: 8,
+              posId: 81,
+              status: true,
+              pos: firstPos,
+            ),
+          ],
+          nextCursor: 'transfer-pos-page-2',
+        );
+        commercialRepository.networkPosPages['transfer-pos-page-2'] =
+            const PaginatedList(
+              items: [
+                NetworkPosLinkEntity(
+                  networkPosId: 8002,
+                  networkId: 8,
+                  posId: 82,
+                  status: true,
+                  pos: secondPos,
+                ),
+              ],
+            );
+
+        final controller = NetworkWalletTransferController(
+          transferFromNetworkToPosUseCase:
+              TransferFromNetworkToPosUseCase(repository),
+          getNetworkPosListUseCase:
+              GetNetworkPosListUseCase(commercialRepository),
+        );
+
+        await controller.initialize(
+          const NetworkWalletEntity(
+            walletId: 8,
+            networkId: 8,
+            walletBalance: 50000,
+          ),
+        );
+        expect(controller.posList.map((pos) => pos.posId), [81]);
+        expect(controller.hasMorePos, isTrue);
+
+        await controller.loadMorePos();
+
+        expect(controller.posList.map((pos) => pos.posId), [81, 82]);
+        expect(controller.hasMorePos, isFalse);
+      },
+    );
 
     test(
       'repayment collection can page through all POS beneficiaries',

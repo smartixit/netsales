@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -70,7 +72,7 @@ class NetworkWalletDashboardScreen
                     onPressed: () {
                       final transferController =
                           Get.find<NetworkWalletTransferController>();
-                      transferController.initialize(wallet);
+                      unawaited(transferController.initialize(wallet));
                       Get.bottomSheet<void>(
                         const NetworkWalletTransferSheet(),
                         isScrollControlled: true,
