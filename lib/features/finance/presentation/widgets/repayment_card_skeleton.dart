@@ -11,7 +11,7 @@ class RepaymentCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    Widget block(double width, double height, {double radius = AppRadius.xs}) {
+    Widget block(double width, double height, {double? radius}) {
       return Container(
         width: width,
         height: height,
