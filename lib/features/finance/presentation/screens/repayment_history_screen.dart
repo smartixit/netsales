@@ -5,7 +5,9 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_history_controller.dart';
 import 'package:netsales/features/finance/presentation/screens/repayment_details_screen.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_card.dart';
+import 'package:netsales/features/finance/presentation/widgets/repayment_card_skeleton.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
@@ -33,6 +35,15 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                     return const CustomSkeletonFeed(itemCount: 4);
                   }
 
+                  if (controller.repayments.isEmpty &&
+                      controller.errorMessage.value != null) {
+                    return CustomErrorState.compact(
+                      title: 'تعذر تحميل سندات السداد',
+                      subtitle: controller.errorMessage.value,
+                      onRetry: () => controller.loadRepayments(isRefresh: true),
+                    );
+                  }
+
                   if (controller.repayments.isEmpty) {
                     return CustomEmptyState(
                       icon: Icons.payments_outlined,
@@ -54,18 +65,24 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                     child: ListView.builder(
                       itemCount:
                           controller.repayments.length +
-                          (controller.hasMore ? 1 : 0),
+                          (controller.hasMore ? 1 : 0) +
+                          (controller.errorMessage.value != null &&
+                                  controller.repayments.isNotEmpty
+                              ? 1
+                              : 0),
                       itemBuilder: (context, index) {
                         if (index == controller.repayments.length) {
-                          return Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(AppSpacing.cardPadding),
-                              child: CircularProgressIndicator(
-                                color: colors.primary,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          );
+                          if (controller.errorMessage.value != null) {
+                            return CustomErrorState.compact(
+                              title: 'تعذر تحميل المزيد من السندات',
+                              subtitle: controller.errorMessage.value,
+                              onRetry: controller.loadMoreRepayments,
+                            );
+                          }
+                          return const RepaymentCardSkeleton();
+                        }
+                        if (index > controller.repayments.length) {
+                          return const SizedBox.shrink();
                         }
 
                         final repayment = controller.repayments[index];
