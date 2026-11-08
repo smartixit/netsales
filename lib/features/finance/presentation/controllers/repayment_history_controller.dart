@@ -66,6 +66,7 @@ class RepaymentHistoryController extends GetxController {
 
   Future<void> loadMoreRepayments() async {
     if (isLoadingMore.value || !hasMore) return;
+    errorMessage.value = null;
     isLoadingMore.value = true;
     await loadRepayments(isRefresh: false);
   }
