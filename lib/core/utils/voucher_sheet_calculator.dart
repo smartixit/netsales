@@ -181,7 +181,8 @@ class VoucherSheetCalculator {
         sheets: sheets,
       );
     }).toList(growable: false);
-  }}
+  }
+}
 
 /// ============================================================================
 /// كائن تفكيك كمية الأوراق (SheetBreakdown)
