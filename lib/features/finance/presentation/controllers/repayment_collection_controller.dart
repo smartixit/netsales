@@ -57,11 +57,12 @@ class RepaymentCollectionController extends GetxController {
     isLoadingInitial.value = true;
     try {
       final netList = await getMyNetworksUseCase();
+      // Financial collections require an explicit beneficiary selection.
+      // Never default to the first tenant or POS returned by the API.
       networks.assignAll(netList);
-      if (networks.isNotEmpty) {
-        selectedNetworkId.value = networks.first.networkId;
-        await loadPosForNetwork(networks.first.networkId);
-      }
+      selectedNetworkId.value = null;
+      selectedPosId.value = null;
+      posList.clear();
     } catch (_) {
       // initial load
     } finally {
@@ -71,6 +72,8 @@ class RepaymentCollectionController extends GetxController {
 
   Future<void> loadPosForNetwork(int networkId) async {
     final revision = ++_posLoadRevision;
+    selectedPosId.value = null;
+    posList.clear();
     try {
       final res = await getNetworkPosListUseCase(networkId);
       if (revision != _posLoadRevision ||
@@ -80,8 +83,7 @@ class RepaymentCollectionController extends GetxController {
       posList.assignAll(
         res.items.map((link) => link.pos).whereType<PosEntity>(),
       );
-      selectedPosId.value =
-          posList.isNotEmpty ? posList.first.posId : null;
+      selectedPosId.value = null;
     } catch (_) {
       if (revision != _posLoadRevision ||
           selectedNetworkId.value != networkId) {
