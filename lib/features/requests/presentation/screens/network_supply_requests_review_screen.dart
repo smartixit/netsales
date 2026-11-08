@@ -74,8 +74,7 @@ class NetworkSupplyRequestsReviewScreen
               child: CustomDropdown<int>(
                 label: 'تصفية بحسب الشبكة',
                 searchEnabled: false,
-                valueListenable:
-                    controller.selectedNetworkId,
+                rxValue: controller.selectedNetworkId,
                 items: networks.map((net) {
                   return DropdownItem<int>(
                     value: net.networkId,
