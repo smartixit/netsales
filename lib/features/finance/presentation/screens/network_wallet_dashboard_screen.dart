@@ -7,8 +7,11 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
+import 'package:netsales/features/finance/presentation/widgets/network_wallet_log_item_row.dart';
+import 'package:netsales/features/finance/presentation/widgets/wallet_log_entry_skeleton.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -41,6 +44,15 @@ class NetworkWalletDashboardScreen
               Obx(() {
                 if (controller.isLoading.value && controller.wallets.isEmpty) {
                   return const CustomSkeletonFeed(itemCount: 2);
+                }
+
+                if (controller.wallets.isEmpty &&
+                    controller.walletsErrorMessage.value != null) {
+                  return CustomErrorState.compact(
+                    title: 'تعذر تحميل المحافظ',
+                    subtitle: controller.walletsErrorMessage.value,
+                    onRetry: controller.loadWallets,
+                  );
                 }
 
                 if (controller.wallets.isEmpty) {
@@ -147,6 +159,21 @@ class NetworkWalletDashboardScreen
                     return const CustomSkeletonFeed(itemCount: 3);
                   }
 
+                  if (controller.logs.isEmpty &&
+                      controller.logsErrorMessage.value != null) {
+                    final walletId = controller.selectedWallet.value?.walletId;
+                    return CustomErrorState.compact(
+                      title: 'تعذر تحميل دفتر الأستاذ',
+                      subtitle: controller.logsErrorMessage.value,
+                      onRetry: walletId == null
+                          ? null
+                          : () => controller.loadWalletLogs(
+                                walletId,
+                                isRefresh: true,
+                              ),
+                    );
+                  }
+
                   if (controller.logs.isEmpty) {
                     return CustomEmptyState(
                       icon: Icons.receipt_long_outlined,
@@ -168,104 +195,31 @@ class NetworkWalletDashboardScreen
                     child: ListView.separated(
                       itemCount:
                           controller.logs.length +
-                          (controller.hasMoreLogs ? 1 : 0),
+                          (controller.hasMoreLogs ? 1 : 0) +
+                          (controller.logsErrorMessage.value != null &&
+                                  controller.logs.isNotEmpty
+                              ? 1
+                              : 0),
                       separatorBuilder: (context, index) => AppSpacing.vXs,
                       itemBuilder: (context, index) {
                         if (index == controller.logs.length) {
-                          return Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(AppSpacing.cardPadding),
-                              child: CircularProgressIndicator(
-                                color: colors.primary,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          );
+                          if (controller.logsErrorMessage.value != null) {
+                            return CustomErrorState.compact(
+                              title: 'تعذر تحميل المزيد من الحركات',
+                              subtitle: controller.logsErrorMessage.value,
+                              onRetry: controller.loadMoreLogs,
+                            );
+                          }
+                          return const WalletLogEntrySkeleton();
+                        }
+                        if (index > controller.logs.length) {
+                          return const SizedBox.shrink();
                         }
 
                         final log = controller.logs[index];
-                        final isDeposit = log.logAmount >= 0;
+                        return NetworkWalletLogItemRow(log: log, index: index);
 
-                        return Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.sm,
-                          ),
-                          decoration: BoxDecoration(
-                            color: index.isEven
-                                ? colors.surfaceContainerLowest
-                                : colors.surfaceContainerHighest.withValues(
-                                    alpha: 0.3,
-                                  ),
-                            borderRadius: BorderRadius.circular(AppRadius.xs),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isDeposit
-                                    ? Icons.arrow_downward
-                                    : Icons.arrow_upward,
-                                color: isDeposit
-                                    ? colors.primary
-                                    : colors.error,
-                                size: 18,
-                              ),
-                              AppSpacing.hSm,
-                              Expanded(
-                                flex: 3,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      log.logOperationLabel ??
-                                          log.logOperation ??
-                                          'حركة مالية',
-                                      style: AppTypography.bodyMedium.copyWith(
-                                        color: colors.onSurface,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    if (log.logStatement != null)
-                                      Text(
-                                        log.logStatement!,
-                                        style: AppTypography.bodySmall.copyWith(
-                                          color: colors.onSurfaceVariant,
-                                          fontSize: 11,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              if (log.logDate != null)
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    log.logDate!.substring(0, 10),
-                                    textAlign: TextAlign.center,
-                                    style: AppTypography.bodySmall.copyWith(
-                                      color: colors.onSurfaceVariant,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  AmountFormatter.format(
-                                    log.logAmount.abs().toString(),
-                                  ),
-                                  textAlign: TextAlign.end,
-                                  style: AppTypography.titleSmall.copyWith(
-                                    color: isDeposit
-                                        ? colors.primary
-                                        : colors.error,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
+                        */
                       },
                     ),
                   );
