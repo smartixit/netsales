@@ -128,10 +128,10 @@ class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
   }) async {
     lastCollectIdempotencyKey = idempotencyKey;
     return collectRepaymentResponse ??
-        const ApiResponse<PosRepaymentModel>(
+        ApiResponse<PosRepaymentModel>(
           success: true,
           message: 'ok',
-          data: PosRepaymentModel(
+          data: const PosRepaymentModel(
             repaymentId: 1,
             networkId: 1,
             posId: 1,
