@@ -5,6 +5,11 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
@@ -17,11 +22,15 @@ class NetworkProcurementReviewController extends GetxController {
   final ApproveRequestUseCase approveRequestUseCase;
   final RejectRequestUseCase rejectRequestUseCase;
   final GetMyNetworksUseCase? getMyNetworksUseCase;
+  final PreviewRequestModificationUseCase previewRequestModificationUseCase;
+  final GetPackagesUseCase getPackagesUseCase;
 
   NetworkProcurementReviewController({
     required this.getRequestsUseCase,
     required this.approveRequestUseCase,
     required this.rejectRequestUseCase,
+    required this.previewRequestModificationUseCase,
+    required this.getPackagesUseCase,
     this.getMyNetworksUseCase,
   });
 
@@ -44,6 +53,120 @@ class NetworkProcurementReviewController extends GetxController {
   // شبكات المشغل التابعة
   final authorizedNetworks = <NetworkEntity>[].obs;
 
+  final availablePackages = <PackageEntity>[].obs;
+  final isLoadingPackages = false.obs;
+  final isPreviewingModification = false.obs;
+  final currentPreview = Rxn<RequestModificationPreviewEntity>();
+  final modificationLines = <RequestModificationLineEntity>[].obs;
+  final editingRequestId = RxnInt();
+  final modificationNoteController = TextEditingController();
+
+  void beginModification(RequestEntity request) {
+    if (!request.isPending) return;
+    editingRequestId.value = request.requestId;
+    currentPreview.value = null;
+    modificationLines.assignAll(
+      request.items.map((item) => RequestModificationLineEntity(
+        packageId: item.packageId,
+        voucherCount: item.voucherCount,
+      )),
+    );
+    modificationNoteController.text = request.requestNote ?? '';
+    loadModificationPackages(request.networkId);
+  }
+
+  Future<void> loadModificationPackages(int networkId) async {
+    isLoadingPackages.value = true;
+    try {
+      final result = await getPackagesUseCase(
+        networkId: networkId,
+        status: true,
+        perPage: 100,
+      );
+      availablePackages.assignAll(result.items);
+    } catch (error) {
+      CustomSnackbar.show(
+        title: 'تعذر تحميل الباقات',
+        message: error.toString(),
+        type: SnackType.error,
+      );
+    } finally {
+      isLoadingPackages.value = false;
+    }
+  }
+
+  void setModificationQuantity(int packageId, int quantity) {
+    if (quantity < 1) return;
+    final index = modificationLines.indexWhere((line) => line.packageId == packageId);
+    if (index < 0) return;
+    final current = modificationLines[index];
+    modificationLines[index] = RequestModificationLineEntity(
+      packageId: packageId,
+      voucherCount: quantity,
+      pricingToken: current.pricingToken,
+    );
+    currentPreview.value = null;
+  }
+
+  void addModificationPackage(int packageId, {int initialQuantity = 1}) {
+    if (modificationLines.any((line) => line.packageId == packageId)) return;
+    modificationLines.add(RequestModificationLineEntity(
+      packageId: packageId,
+      voucherCount: initialQuantity,
+    ));
+    currentPreview.value = null;
+  }
+
+  void removeModificationPackage(int packageId) {
+    modificationLines.removeWhere((line) => line.packageId == packageId);
+    currentPreview.value = null;
+  }
+
+  Future<bool> previewModification() async {
+    final requestId = editingRequestId.value;
+    if (requestId == null || modificationLines.isEmpty) return false;
+    isPreviewingModification.value = true;
+    try {
+      final preview = await previewRequestModificationUseCase(
+        requestId,
+        modificationLines.toList(growable: false),
+      );
+      currentPreview.value = preview;
+      return true;
+    } catch (error) {
+      currentPreview.value = null;
+      CustomSnackbar.show(
+        title: 'تعذرت معاينة التعديل',
+        message: error is AppException ? error.message : error.toString(),
+        type: SnackType.error,
+      );
+      return false;
+    } finally {
+      isPreviewingModification.value = false;
+    }
+  }
+
+  Future<bool> approvePreview({String? requestNote}) async {
+    final preview = currentPreview.value;
+    final requestId = editingRequestId.value;
+    if (preview == null || requestId == null || !preview.hasModifications) {
+      return false;
+    }
+    return approveRequest(
+      requestId,
+      requestNote: requestNote,
+      items: preview.approvalItems,
+    );
+  }
+
+  void clearModificationEditor() {
+    editingRequestId.value = null;
+    currentPreview.value = null;
+    modificationLines.clear();
+    availablePackages.clear();
+    modificationNoteController.clear();
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -64,6 +187,7 @@ class NetworkProcurementReviewController extends GetxController {
   @override
   void onClose() {
     searchController.dispose();
+    modificationNoteController.dispose();
     super.onClose();
   }
 
@@ -168,6 +292,7 @@ class NetworkProcurementReviewController extends GetxController {
   Future<bool> approveRequest(
     int requestId, {
     String? requestNote,
+    List<RequestModificationLineEntity>? items,
   }) async {
     isProcessingDecision.value = true;
     await CustomAnimationOverlay.showLoading(
@@ -178,6 +303,7 @@ class NetworkProcurementReviewController extends GetxController {
       final approved = await approveRequestUseCase(
         requestId,
         requestNote: requestNote,
+        items: items,
       );
 
       final index = requests.indexWhere((r) => r.requestId == requestId);
@@ -185,6 +311,7 @@ class NetworkProcurementReviewController extends GetxController {
         requests[index] = approved;
       }
 
+      clearModificationEditor();
       await CustomAnimationOverlay.showSuccess(
         message: 'تم اعتماد الطلب وتوليد الفاتورة والتسوية بنجاح',
       );

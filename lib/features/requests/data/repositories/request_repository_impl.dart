@@ -1,6 +1,9 @@
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/requests/data/datasources/request_remote_data_source.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/features/requests/data/models/request_modification_preview_model.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 
 /// تطبيق مستودع دورة حياة طلبات الكروت والتوريد
@@ -59,13 +62,36 @@ class RequestRepositoryImpl implements RequestRepository {
   }
 
   @override
+  Future<RequestModificationPreviewEntity> previewRequestModification(
+    int requestId,
+    List<RequestModificationLineEntity> items,
+  ) async {
+    final payload = <String, dynamic>{
+      'items': _mapModificationItems(items),
+    };
+    final response = await _remoteDataSource.previewRequestModification(
+      requestId,
+      payload,
+    );
+    final data = response.data;
+    if (data == null) {
+      throw const FormatException(
+        'The server returned an empty request modification preview.',
+      );
+    }
+    return RequestModificationPreviewModel.fromJson(data);
+  }
+
+  @override
   Future<RequestEntity> approveRequest(
     int requestId, {
     String? requestNote,
+    List<RequestModificationLineEntity>? items,
   }) async {
     final data = <String, dynamic>{
       if (requestNote != null && requestNote.isNotEmpty)
         'request_note': requestNote,
+      if (items != null) 'items': _mapModificationItems(items),
     };
 
     final response = await _remoteDataSource.approveRequest(
@@ -79,6 +105,21 @@ class RequestRepositoryImpl implements RequestRepository {
 
     // إذا أعاد الخادم تفاصيل الطلب داخل كائن مركب
     return await getRequestDetails(requestId);
+  }
+
+  List<Map<String, dynamic>> _mapModificationItems(
+    List<RequestModificationLineEntity> items,
+  ) {
+    return items
+        .map(
+          (item) => <String, dynamic>{
+            'package_id': item.packageId,
+            'voucher_count': item.voucherCount,
+            if (item.pricingToken != null)
+              'pricing_token': item.pricingToken,
+          },
+        )
+        .toList(growable: false);
   }
 
   @override

@@ -1,5 +1,7 @@
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 
 /// واجهة مستودع دورة حياة طلبات الكروت والتوريد
 abstract interface class RequestRepository {
@@ -22,10 +24,17 @@ abstract interface class RequestRepository {
   /// إلغاء طلب الكروت قيد الانتظار من قبل نقطة البيع
   Future<RequestEntity> cancelRequest(int requestId);
 
-  /// اعتماد طلب الكروت وتوليد الفاتورة المالية من قبل مزود الشبكة
+  /// معاينة بنود التعديل وحساب أسعارها وخصوماتها سيادياً دون تغيير الطلب.
+  Future<RequestModificationPreviewEntity> previewRequestModification(
+    int requestId,
+    List<RequestModificationLineEntity> items,
+  );
+
+  /// اعتماد الطلب مع البنود نفسها ورموز المعاينة الصادرة من الخادم.
   Future<RequestEntity> approveRequest(
     int requestId, {
     String? requestNote,
+    List<RequestModificationLineEntity>? items,
   });
 
   /// رفض طلب الكروت مع توثيق السبب المعتمد من قبل مزود الشبكة

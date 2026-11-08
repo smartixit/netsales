@@ -19,6 +19,7 @@ class ProcurementRequestCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onCancel;
   final VoidCallback? onApprove;
+  final VoidCallback? onModify;
   final VoidCallback? onReject;
 
   const ProcurementRequestCard({
@@ -28,6 +29,7 @@ class ProcurementRequestCard extends StatelessWidget {
     required this.onTap,
     this.onCancel,
     this.onApprove,
+    this.onModify,
     this.onReject,
   });
 
@@ -176,26 +178,41 @@ class ProcurementRequestCard extends StatelessWidget {
             if (request.isPending) ...[
               AppSpacing.vMd,
               if (isNetworkView)
-                Row(
+                Column(
                   children: [
-                    Expanded(
-                      child: CustomButton(
-                        text: 'اعتماد الطلب',
-                        icon: Icons.check_circle_outline_rounded,
-                        backgroundColor: colors.success,
-                        foregroundColor: colors.onSuccess,
-                        onPressed: onApprove,
+                    if (onModify != null) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: CustomButton.outline(
+                          text: 'تعديل البنود ومعاينة التسعير',
+                          icon: Icons.edit_note_rounded,
+                          onPressed: onModify,
+                        ),
                       ),
-                    ),
-                    AppSpacing.hSm,
-                    Expanded(
-                      child: CustomButton(
-                        text: 'رفض',
-                        icon: Icons.cancel_outlined,
-                        backgroundColor: colors.error.withValues(alpha: 0.1),
-                        foregroundColor: colors.error,
-                        onPressed: onReject,
-                      ),
+                      AppSpacing.vSm,
+                    ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomButton(
+                            text: 'اعتماد كما هو',
+                            icon: Icons.check_circle_outline_rounded,
+                            backgroundColor: colors.success,
+                            foregroundColor: colors.onSuccess,
+                            onPressed: onApprove,
+                          ),
+                        ),
+                        AppSpacing.hSm,
+                        Expanded(
+                          child: CustomButton(
+                            text: 'رفض',
+                            icon: Icons.cancel_outlined,
+                            backgroundColor: colors.error.withValues(alpha: 0.1),
+                            foregroundColor: colors.error,
+                            onPressed: onReject,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 )
