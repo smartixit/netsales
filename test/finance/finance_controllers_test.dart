@@ -911,13 +911,23 @@ void main() {
           networkId: 101,
           posId: 5,
           status: true,
-          network: NetworkEntity(networkId: 101, networkName: 'الشبكة الأولى'),
+          network: NetworkEntity(
+            networkId: 101,
+            ownerId: 1,
+            networkName: 'الشبكة الأولى',
+            networkPhoneNumber: '777111101',
+          ),
         );
         const secondNetwork = NetworkPosLinkEntity(
           networkId: 202,
           posId: 5,
           status: true,
-          network: NetworkEntity(networkId: 202, networkName: 'الشبكة الثانية'),
+          network: NetworkEntity(
+            networkId: 202,
+            ownerId: 1,
+            networkName: 'الشبكة الثانية',
+            networkPhoneNumber: '777111202',
+          ),
         );
         commercialRepository.myPos = [
           const PosEntity(posId: 5, posName: 'نقطة البيع'),
@@ -953,7 +963,6 @@ void main() {
         await controller.selectNetwork(202);
         expect(controller.selectedNetworkId.value, 202);
         expect(repository.requestedDebtScopes, [
-          {'networkId': 101, 'posId': 5},
           {'networkId': 202, 'posId': 5},
         ]);
       },
