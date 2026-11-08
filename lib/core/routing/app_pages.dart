@@ -5,7 +5,6 @@ import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 import 'package:netsales/core/routing/middlewares/workspace_guard.dart';
 import 'package:netsales/features/auth/presentation/bindings/active_sessions_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
