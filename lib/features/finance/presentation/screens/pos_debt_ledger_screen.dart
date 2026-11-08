@@ -6,8 +6,10 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_debt_ledger_controller.dart';
 import 'package:netsales/features/finance/presentation/widgets/debt_aging_summary_widget.dart';
+import 'package:netsales/features/finance/presentation/widgets/outstanding_invoice_skeleton.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_card.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
@@ -32,6 +34,14 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                 if (sum == null && controller.isLoading.value) {
                   return const CustomSkeletonFeed(itemCount: 1);
                 }
+                if (sum == null &&
+                    controller.summaryErrorMessage.value != null) {
+                  return CustomErrorState.compact(
+                    title: 'تعذر تحميل ملخص الذمم',
+                    subtitle: controller.summaryErrorMessage.value,
+                    onRetry: controller.loadDebtData,
+                  );
+                }
                 if (sum == null) return const SizedBox.shrink();
 
                 return DebtAgingSummaryWidget(
@@ -51,9 +61,18 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
               AppSpacing.vSm,
               Expanded(
                 child: Obx(() {
-                  if (controller.isLoading.value &&
+                  if (controller.isLoadingInvoices.value &&
                       controller.outstandingInvoices.isEmpty) {
                     return const CustomSkeletonFeed(itemCount: 3);
+                  }
+
+                  if (controller.outstandingInvoices.isEmpty &&
+                      controller.invoicesErrorMessage.value != null) {
+                    return CustomErrorState.compact(
+                      title: 'تعذر تحميل الفواتير المستحقة',
+                      subtitle: controller.invoicesErrorMessage.value,
+                      onRetry: () => controller.loadInvoices(isRefresh: true),
+                    );
                   }
 
                   if (controller.outstandingInvoices.isEmpty) {
@@ -79,18 +98,24 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                     child: ListView.builder(
                       itemCount:
                           controller.outstandingInvoices.length +
-                          (controller.hasMore ? 1 : 0),
+                          (controller.hasMore ? 1 : 0) +
+                          (controller.invoicesErrorMessage.value != null &&
+                                  controller.outstandingInvoices.isNotEmpty
+                              ? 1
+                              : 0),
                       itemBuilder: (context, index) {
                         if (index == controller.outstandingInvoices.length) {
-                          return Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(AppSpacing.cardPadding),
-                              child: CircularProgressIndicator(
-                                color: colors.primary,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          );
+                          if (controller.invoicesErrorMessage.value != null) {
+                            return CustomErrorState.compact(
+                              title: 'تعذر تحميل المزيد من الفواتير',
+                              subtitle: controller.invoicesErrorMessage.value,
+                              onRetry: controller.loadMoreInvoices,
+                            );
+                          }
+                          return const OutstandingInvoiceSkeleton();
+                        }
+                        if (index > controller.outstandingInvoices.length) {
+                          return const SizedBox.shrink();
                         }
 
                         final invoice = controller.outstandingInvoices[index];
