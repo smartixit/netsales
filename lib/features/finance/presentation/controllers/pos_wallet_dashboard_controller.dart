@@ -60,7 +60,7 @@ class PosWalletDashboardController extends GetxController {
       );
       wallets.assignAll(availableWallets);
       walletsNextCursor.value = res.nextCursor;
-
+      selectedWallet.value = selected;
 
       if (selected != null) {
         await loadWalletLogs(selected.walletId, isRefresh: true);
