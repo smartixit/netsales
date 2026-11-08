@@ -24,8 +24,11 @@ class RepaymentCollectionController extends GetxController {
   final networks = <NetworkEntity>[].obs;
   final posList = <PosEntity>[].obs;
 
-  final selectedNetworkId = RxnInt();
-  final selectedPosId = RxnInt();
+  /// Selection state is exposed as ValueListenable for the shared CustomDropdown.
+  /// The controller remains the single owner of both selected values.
+  final selectedNetworkId = ValueNotifier<int?>(null);
+  final selectedPosId = ValueNotifier<int?>(null);
+  int _posLoadRevision = 0;
 
   final amountController = TextEditingController();
   final refController = TextEditingController();
@@ -47,6 +50,9 @@ class RepaymentCollectionController extends GetxController {
     amountController.dispose();
     refController.dispose();
     notesController.dispose();
+    selectedNetworkId.dispose();
+    selectedPosId.dispose();
+    _posLoadRevision++;
     super.onClose();
   }
 
@@ -67,17 +73,23 @@ class RepaymentCollectionController extends GetxController {
   }
 
   Future<void> loadPosForNetwork(int networkId) async {
+    final revision = ++_posLoadRevision;
     try {
       final res = await getNetworkPosListUseCase(networkId);
+      if (revision != _posLoadRevision ||
+          selectedNetworkId.value != networkId) {
+        return;
+      }
       posList.assignAll(
         res.items.map((link) => link.pos).whereType<PosEntity>(),
       );
-      if (posList.isNotEmpty) {
-        selectedPosId.value = posList.first.posId;
-      } else {
-        selectedPosId.value = null;
-      }
+      selectedPosId.value =
+          posList.isNotEmpty ? posList.first.posId : null;
     } catch (_) {
+      if (revision != _posLoadRevision ||
+          selectedNetworkId.value != networkId) {
+        return;
+      }
       posList.clear();
       selectedPosId.value = null;
     }
