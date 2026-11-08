@@ -63,9 +63,9 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                     child: ListView.builder(
                       itemCount:
                           controller.repayments.length +
-                          (controller.hasMore ? 1 : 0) +
-                          (controller.errorMessage.value != null &&
-                                  controller.repayments.isNotEmpty
+                          (controller.hasMore ||
+                                  (controller.errorMessage.value != null &&
+                                      controller.repayments.isNotEmpty)
                               ? 1
                               : 0),
                       itemBuilder: (context, index) {
