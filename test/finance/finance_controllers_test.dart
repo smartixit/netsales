@@ -978,6 +978,73 @@ void main() {
     );
 
     test(
+      'POS wallet refresh preserves a selected wallet outside the first page',
+      () async {
+        const firstWallet = PosWalletEntity(
+          walletId: 51,
+          networkId: 501,
+          posId: 5,
+          walletBalance: 1000,
+        );
+        const selectedWallet = PosWalletEntity(
+          walletId: 52,
+          networkId: 502,
+          posId: 6,
+          walletBalance: 2000,
+        );
+        repository.posWallets = const PaginatedList(
+          items: [firstWallet],
+          nextCursor: 'pos-wallet-refresh-page-2',
+        );
+        repository.posWalletPages['pos-wallet-refresh-page-2'] =
+            const PaginatedList(items: [selectedWallet]);
+
+        final controller = PosWalletDashboardController(
+          getPosWalUseCase: GetPosWalUseCase(repository),
+          getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+        );
+
+        await controller.loadWallets();
+        await controller.loadMoreWallets();
+        await controller.selectWallet(selectedWallet);
+
+        repository.posWallets = const PaginatedList(
+          items: [firstWallet],
+          nextCursor: 'pos-wallet-refresh-page-2',
+        );
+        await controller.loadWallets();
+
+        expect(controller.selectedWallet.value?.walletId, 52);
+        expect(controller.wallets.map((wallet) => wallet.walletId), [52, 51]);
+      },
+    );
+
+    test(
+      'POS wallet selection is cleared when the ledger confirms access was revoked',
+      () async {
+        const wallet = PosWalletEntity(
+          walletId: 61,
+          networkId: 601,
+          posId: 6,
+          walletBalance: 1000,
+        );
+        repository.posWallets = const PaginatedList(items: [wallet]);
+        repository.denyPosLogs = true;
+
+        final controller = PosWalletDashboardController(
+          getPosWalUseCase: GetPosWalUseCase(repository),
+          getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+        );
+
+        await controller.loadWallets();
+
+        expect(controller.selectedWallet.value, isNull);
+        expect(controller.wallets, isEmpty);
+        expect(controller.walletsErrorMessage.value, isNotNull);
+      },
+    );
+
+    test(
       'POS debt scope selector can load every cursor page of network links',
       () async {
         const firstNetwork = NetworkPosLinkEntity(
