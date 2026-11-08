@@ -346,8 +346,20 @@ void main() {
         await controller.loadInitialData();
 
         expect(controller.networks.length, 1);
-        expect(controller.selectedNetworkId.value, 1);
+        expect(controller.selectedNetworkId.value, isNull);
+        expect(controller.posList, isEmpty);
+        expect(controller.selectedPosId.value, isNull);
+
+        // CustomDropdown writes the selected ID before invoking onChanged.
+        controller.selectedNetworkId.value = 1;
+        await controller.onNetworkChanged(1);
+
         expect(controller.posList.length, 1);
+        expect(controller.posList.single.posId, 10);
+        expect(controller.selectedPosId.value, isNull);
+
+        // The POS must be chosen deliberately for a financial transaction.
+        controller.selectedPosId.value = 10;
         expect(controller.selectedPosId.value, 10);
       },
     );
