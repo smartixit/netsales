@@ -84,6 +84,8 @@ class TestFinanceRepository implements FinanceRepository {
       pendingPosLogs = {};
   final Map<String, Completer<PaginatedList<InvoiceEntity>>>
       pendingInvoicePages = {};
+  final Map<String?, Completer<PaginatedList<PosRepaymentEntity>>>
+      pendingRepaymentPages = {};
 
   @override
   Future<PaginatedList<PosWalletEntity>> getPosWallets({
@@ -150,7 +152,11 @@ class TestFinanceRepository implements FinanceRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) async => repayments;
+  }) async {
+    final pending = pendingRepaymentPages[status];
+    if (pending != null) return pending.future;
+    return repayments;
+  }
 
   @override
   Future<PosRepaymentEntity> getRepaymentById(int repaymentId) async =>
@@ -478,6 +484,44 @@ void main() {
       expect(controller.isLoading.value, isFalse);
       expect(controller.repayments.length, 1);
       expect(controller.repayments[0].amount, 250000);
+    });
+
+    test('Repayment status stale response cannot replace latest filter results', () async {
+      const oldRepayment = PosRepaymentEntity(
+        repaymentId: 101,
+        repaymentUuid: 'rep-old',
+        posId: 1,
+        networkId: 1,
+        amount: 100,
+        repaymentDate: '2026-11-01',
+      );
+      const newRepayment = PosRepaymentEntity(
+        repaymentId: 202,
+        repaymentUuid: 'rep-new',
+        posId: 1,
+        networkId: 1,
+        amount: 200,
+        repaymentDate: '2026-11-02',
+      );
+      final oldRequest = Completer<PaginatedList<PosRepaymentEntity>>();
+      repository.pendingRepaymentPages['PENDING'] = oldRequest;
+      repository.pendingRepaymentPages['COMPLETED'] =
+          Completer<PaginatedList<PosRepaymentEntity>>()
+            ..complete(const PaginatedList(items: [newRepayment]));
+
+      final controller = RepaymentHistoryController(
+        getRepaymentsUseCase: GetRepaymentsUseCase(repository),
+      );
+      controller.selectedStatus.value = 'PENDING';
+      final oldFuture = controller.loadRepayments(isRefresh: true);
+      controller.onStatusChanged('COMPLETED');
+      await Future<void>.delayed(Duration.zero);
+      oldRequest.complete(const PaginatedList(items: [oldRepayment]));
+      await oldFuture;
+
+      expect(controller.selectedStatus.value, 'COMPLETED');
+      expect(controller.repayments.map((item) => item.repaymentId), [202]);
+      expect(controller.isLoading.value, isFalse);
     });
 
     test('POS wallet log failure is exposed separately from an empty ledger', () async {
