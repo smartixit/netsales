@@ -80,7 +80,7 @@ class PosWorkspaceController extends GetxController {
     posError.value = null;
     try {
       final result = await getMyPosUseCase();
-      final posList = result.data;
+      final posList = result;
       availablePos.assignAll(posList);
       if (posList.isEmpty) {
         activePos.value = null;
@@ -154,10 +154,10 @@ class PosWorkspaceController extends GetxController {
           activePos.value?.posId != posId) return;
       final knownIds = networkLinks.map((item) => item.networkId).toSet();
       networkLinks.addAll(
-        result.data.where((item) => !knownIds.contains(item.networkId)),
+        result.items.where((item) => !knownIds.contains(item.networkId)),
       );
       networkCursor.value = result.nextCursor;
-      hasMoreNetworks.value = result.hasMorePages;
+      hasMoreNetworks.value = result.hasMore;
       if (selectedNetworkLink.value == null && networkLinks.isNotEmpty) {
         final savedId = StorageService.instance.getInt(_networkStorageKey(posId));
         final saved = networkLinks.where((item) => item.networkId == savedId);
