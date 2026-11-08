@@ -130,9 +130,9 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                     child: ListView.separated(
                       itemCount:
                           controller.logs.length +
-                          (controller.hasMoreLogs ? 1 : 0) +
-                          (controller.logsErrorMessage.value != null &&
-                                  controller.logs.isNotEmpty
+                          (controller.hasMoreLogs ||
+                                  (controller.logsErrorMessage.value != null &&
+                                      controller.logs.isNotEmpty)
                               ? 1
                               : 0),
                       separatorBuilder: (context, index) => AppSpacing.vXs,
