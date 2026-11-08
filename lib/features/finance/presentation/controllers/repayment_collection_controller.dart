@@ -24,10 +24,9 @@ class RepaymentCollectionController extends GetxController {
   final networks = <NetworkEntity>[].obs;
   final posList = <PosEntity>[].obs;
 
-  /// Selection state is exposed as ValueListenable for the shared CustomDropdown.
-  /// The controller remains the single owner of both selected values.
-  final selectedNetworkId = ValueNotifier<int?>(null);
-  final selectedPosId = ValueNotifier<int?>(null);
+  /// GetX remains the single source of truth for both selections.
+  final selectedNetworkId = RxnInt();
+  final selectedPosId = RxnInt();
   int _posLoadRevision = 0;
 
   final amountController = TextEditingController();
@@ -50,8 +49,6 @@ class RepaymentCollectionController extends GetxController {
     amountController.dispose();
     refController.dispose();
     notesController.dispose();
-    selectedNetworkId.dispose();
-    selectedPosId.dispose();
     _posLoadRevision++;
     super.onClose();
   }
