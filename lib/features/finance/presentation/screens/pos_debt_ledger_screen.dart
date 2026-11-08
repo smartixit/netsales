@@ -110,7 +110,9 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                             return CustomErrorState.compact(
                               title: 'تعذر تحميل المزيد من الفواتير',
                               subtitle: controller.invoicesErrorMessage.value,
-                              onRetry: controller.loadMoreInvoices,
+                              onRetry: controller.hasMore
+                                  ? controller.loadMoreInvoices
+                                  : () => controller.loadInvoices(isRefresh: true),
                             );
                           }
                           return const OutstandingInvoiceSkeleton();
