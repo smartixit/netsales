@@ -28,6 +28,7 @@ import 'package:netsales/features/requests/presentation/controllers/pos_procurem
 class MockRequestRepository implements RequestRepository {
   List<RequestEntity> items;
   bool shouldThrow = false;
+  int? lastRequestedNetworkId;
 
   MockRequestRepository(this.items);
 
@@ -40,6 +41,7 @@ class MockRequestRepository implements RequestRepository {
     String? cursor,
     int? perPage,
   }) async {
+    lastRequestedNetworkId = networkId;
     if (shouldThrow) {
       throw const AppException('فشل الاتصال بالخادم', code: '500');
     }
@@ -359,6 +361,17 @@ void main() {
       expect(controller.selectedNetworkId.value, 10);
       expect(controller.nextCursor.value, 'cursor_page_2');
     });
+
+    test(
+      'network filter reloads after CustomDropdown pre-updates its listenable',
+      () async {
+        controller.selectedNetworkId.value = 30;
+        await controller.onNetworkFilterChanged(30);
+
+        expect(mockRequestRepo.lastRequestedNetworkId, 30);
+        expect(controller.requests, isEmpty);
+      },
+    );
 
     test('approveRequest approves pending request and updates list', () async {
       final success = await controller.approveRequest(1, requestNote: 'تم الفحص');
