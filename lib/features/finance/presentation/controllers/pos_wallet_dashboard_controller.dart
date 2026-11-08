@@ -85,7 +85,6 @@ class PosWalletDashboardController extends GetxController {
 
   Future<void> loadWalletLogs(int walletId, {bool isRefresh = false}) async {
     if (isRefresh) {
-      if (isLoadingLogs.value) return;
       isLoadingLogs.value = true;
       nextCursor.value = null;
       logsErrorMessage.value = null;
