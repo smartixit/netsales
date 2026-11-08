@@ -718,8 +718,8 @@ void main() {
         getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
         getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
       );
+      controller.selectedBucket.value = '0_30';
       final oldFuture = controller.loadInvoices(isRefresh: true);
-      await controller.onBucketSelected('0_30');
       await controller.onBucketSelected('31_60');
       oldRequest.complete(const PaginatedList(items: [oldInvoice]));
       await oldFuture;
