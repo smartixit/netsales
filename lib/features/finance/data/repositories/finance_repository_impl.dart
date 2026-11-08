@@ -1,4 +1,6 @@
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/api_response.dart';
+import 'package:netsales/core/utils/idempotency_key_generator.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:netsales/features/finance/domain/entities/debt_summary_entity.dart';
@@ -12,6 +14,28 @@ class FinanceRepositoryImpl implements FinanceRepository {
   final FinanceRemoteDataSource remoteDataSource;
 
   const FinanceRepositoryImpl({required this.remoteDataSource});
+
+  AppException _requestFailure<T>(
+    ApiResponse<T> response, {
+    required String fallback,
+    required String code,
+  }) {
+    return AppException(
+      response.message.isNotEmpty ? response.message : fallback,
+      code: code,
+      details: response.errors,
+    );
+  }
+
+  AppException _listRequestFailure<T>(
+    ApiResponse<List<T>> response, {
+    required String fallback,
+    required String code,
+  }) => _requestFailure(
+    response,
+    fallback: fallback,
+    code: code,
+  );
 
   @override
   Future<PaginatedList<PosWalletEntity>> getPosWallets({
@@ -29,8 +53,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'per_page': ?perPage,
     };
     final res = await remoteDataSource.getPosWallets(query: query);
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع محافظ نقطة البيع من الخادم.',
+        code: 'POS_WALLET_LIST_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<PosWalletEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -45,6 +76,13 @@ class FinanceRepositoryImpl implements FinanceRepository {
       networkId,
       posId,
     );
+    if (!res.success || res.data == null) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر استرجاع محفظة نقطة البيع المطلوبة.',
+        code: 'POS_WALLET_DETAILS_REQUEST_FAILED',
+      );
+    }
     return res.data!;
   }
 
@@ -64,8 +102,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'per_page': ?perPage,
     };
     final res = await remoteDataSource.getPosWalletLogs(walletId, query: query);
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع حركات محفظة نقطة البيع.',
+        code: 'POS_WALLET_LOGS_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<PosWalletLogEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -85,8 +130,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'per_page': ?perPage,
     };
     final res = await remoteDataSource.getNetworkWallets(query: query);
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع محافظ الشبكة من الخادم.',
+        code: 'NETWORK_WALLET_LIST_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<NetworkWalletEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -95,6 +147,13 @@ class FinanceRepositoryImpl implements FinanceRepository {
   @override
   Future<NetworkWalletEntity> getNetworkWalletById(int walletId) async {
     final res = await remoteDataSource.getNetworkWalletById(walletId);
+    if (!res.success || res.data == null) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر استرجاع بيانات محفظة الشبكة المطلوبة.',
+        code: 'NETWORK_WALLET_DETAILS_REQUEST_FAILED',
+      );
+    }
     return res.data!;
   }
 
@@ -116,8 +175,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       walletId,
       query: query,
     );
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع حركات محفظة الشبكة.',
+        code: 'NETWORK_WALLET_LOGS_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<NetworkWalletLogEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -215,8 +281,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'limit': ?perPage,
     };
     final res = await remoteDataSource.getOutstandingInvoices(query: query);
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع فواتير الذمم المستحقة.',
+        code: 'OUTSTANDING_INVOICE_LIST_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<InvoiceEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -241,8 +314,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'limit': ?perPage,
     };
     final res = await remoteDataSource.getRepayments(query: query);
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع سجل سندات السداد.',
+        code: 'REPAYMENT_HISTORY_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<PosRepaymentEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -251,6 +331,13 @@ class FinanceRepositoryImpl implements FinanceRepository {
   @override
   Future<PosRepaymentEntity> getRepaymentById(int repaymentId) async {
     final res = await remoteDataSource.getRepaymentById(repaymentId);
+    if (!res.success || res.data == null) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر استرجاع تفاصيل سند السداد.',
+        code: 'REPAYMENT_DETAILS_REQUEST_FAILED',
+      );
+    }
     return res.data!;
   }
 
@@ -262,6 +349,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
     String? paymentMethod,
     String? referenceNumber,
     String? notes,
+    String? idempotencyKey,
   }) async {
     final payload = <String, dynamic>{
       'network_id': networkId,
@@ -271,7 +359,17 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'reference_number': ?referenceNumber,
       'notes': ?notes,
     };
-    final res = await remoteDataSource.collectRepayment(payload);
+    final res = await remoteDataSource.collectRepayment(
+      payload,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
+    if (!res.success || res.data == null) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر تسجيل سند السداد.',
+        code: 'REPAYMENT_COLLECTION_REQUEST_FAILED',
+      );
+    }
     return res.data!;
   }
 
@@ -279,9 +377,21 @@ class FinanceRepositoryImpl implements FinanceRepository {
   Future<PosRepaymentEntity> reverseRepayment({
     required int repaymentId,
     required String reversalReason,
+    String? idempotencyKey,
   }) async {
     final payload = <String, dynamic>{'reversal_reason': reversalReason};
-    final res = await remoteDataSource.reverseRepayment(repaymentId, payload);
+    final res = await remoteDataSource.reverseRepayment(
+      repaymentId,
+      payload,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
+    if (!res.success || res.data == null) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر عكس سند السداد.',
+        code: 'REPAYMENT_REVERSAL_REQUEST_FAILED',
+      );
+    }
     return res.data!;
   }
 
@@ -291,6 +401,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
     required int posId,
     required double amount,
     String? statement,
+    String? idempotencyKey,
   }) async {
     final payload = <String, dynamic>{
       'network_id': networkId,
@@ -298,6 +409,16 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'amount': amount,
       'statement': ?statement,
     };
-    await remoteDataSource.transferFromNetworkToPos(payload);
+    final res = await remoteDataSource.transferFromNetworkToPos(
+      payload,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
+    if (!res.success) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر تنفيذ التحويل من محفظة الشبكة إلى نقطة البيع.',
+        code: 'NETWORK_TO_POS_TRANSFER_REQUEST_FAILED',
+      );
+    }
   }
 }

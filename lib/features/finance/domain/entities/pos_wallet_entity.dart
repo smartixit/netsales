@@ -1,3 +1,5 @@
+import 'package:netsales/core/enums/wallet_operation_type.dart';
+
 /// كيان محفظة نقطة البيع والائتمان التجاري (POS Wallet Entity)
 class PosWalletEntity {
   final int walletId;
@@ -67,5 +69,8 @@ class PosWalletLogEntity {
     this.createdByName,
     this.createdAt,
   });
-}
 
+  /// النوع السلكي مصنف وفق Enum الباكيند دون استنتاج الاتجاه من قيمة المبلغ.
+  WalletOperationType get typedLogOperationType =>
+      WalletOperationType.fromWire(logOperationType);
+}

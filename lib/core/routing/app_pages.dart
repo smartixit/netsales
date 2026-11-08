@@ -379,14 +379,20 @@ abstract final class AppPages {
       name: AppRoutes.repaymentHistory,
       page: () => const RepaymentHistoryScreen(),
       binding: FinanceBinding(),
-      middlewares: [AuthGuard()],
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
     ),
     // تفاصيل سند التسديد وتوزيعات الفواتير (M8.3)
     GetPage(
       name: AppRoutes.repaymentDetails,
       page: () => const RepaymentDetailsScreen(),
       binding: FinanceBinding(),
-      middlewares: [AuthGuard()],
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
     ),
     // لوحة تحكم وكشف حساب محفظة مزود الشبكة (M8.4 Network)
     GetPage(

@@ -8,10 +8,14 @@ import 'package:netsales/features/commercial/data/models/pos_model.dart';
 /// عقد مصدر البيانات البعيد للكيانات والروابط التجارية
 abstract interface class CommercialRemoteDataSource {
   /// جلب قائمة الشبكات التابعة للمستخدم الحالي
-  Future<ApiResponse<List<NetworkModel>>> getMyNetworks();
+  Future<ApiResponse<List<NetworkModel>>> getMyNetworks({
+    Map<String, dynamic>? query,
+  });
 
   /// جلب قائمة نقاط البيع التابعة للمستخدم الحالي
-  Future<ApiResponse<List<PosModel>>> getMyPos();
+  Future<ApiResponse<List<PosModel>>> getMyPos({
+    Map<String, dynamic>? query,
+  });
 
   /// جلب قائمة نقاط البيع المرتبطة بشبكة
   Future<ApiResponse<List<NetworkPosLinkModel>>> getNetworkPosList(

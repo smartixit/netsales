@@ -75,11 +75,13 @@ abstract interface class FinanceRepository {
     String? paymentMethod,
     String? referenceNumber,
     String? notes,
+    String? idempotencyKey,
   });
 
   Future<PosRepaymentEntity> reverseRepayment({
     required int repaymentId,
     required String reversalReason,
+    String? idempotencyKey,
   });
 
   // 5. التحويل والتغذية المباشرة
@@ -88,5 +90,6 @@ abstract interface class FinanceRepository {
     required int posId,
     required double amount,
     String? statement,
+    String? idempotencyKey,
   });
 }

@@ -21,9 +21,53 @@ class NetworkWalletDashboardController extends GetxController {
   final isLoadingLogs = false.obs;
   final isLoadingMoreLogs = false.obs;
   final nextCursor = RxnString();
-  final errorMessage = RxnString();
+  final walletsErrorMessage = RxnString();
+  final walletsLoadMoreErrorMessage = RxnString();
+  final walletsNextCursor = RxnString();
+  final isLoadingMoreWallets = false.obs;
+  final logsErrorMessage = RxnString();
 
-  bool get hasMoreLogs => nextCursor.value != null;
+  int _logsRequestVersion = 0;
+  int _walletsRequestVersion = 0;
+
+  bool get hasMoreWallets =>
+      walletsNextCursor.value?.trim().isNotEmpty ?? false;
+
+  bool get hasMoreLogs => nextCursor.value?.trim().isNotEmpty ?? false;
+
+  bool _isAccessUnavailable(AppException error) {
+    final message = error.message.toLowerCase();
+    return message.contains('غير مصرح') ||
+        message.contains('ليس لديك الصلاحية') ||
+        message.contains('غير موجود') ||
+        message.contains('forbidden') ||
+        message.contains('not found');
+  }
+
+  void _clearUnavailableWallet(int walletId, String message) {
+    wallets.removeWhere((wallet) => wallet.walletId == walletId);
+    if (selectedWallet.value?.walletId != walletId) return;
+    selectedWallet.value = null;
+    logs.clear();
+    nextCursor.value = null;
+    logsErrorMessage.value = null;
+    walletsErrorMessage.value = message;
+    isLoadingLogs.value = false;
+    isLoadingMoreLogs.value = false;
+  }
+
+  void _clearAllWalletAccess() {
+    wallets.clear();
+    selectedWallet.value = null;
+    logs.clear();
+    walletsNextCursor.value = null;
+    walletsLoadMoreErrorMessage.value = null;
+    nextCursor.value = null;
+    logsErrorMessage.value = null;
+    isLoadingLogs.value = false;
+    isLoadingMoreLogs.value = false;
+    isLoadingMoreWallets.value = false;
+  }
 
   @override
   void onInit() {
@@ -32,68 +76,192 @@ class NetworkWalletDashboardController extends GetxController {
   }
 
   Future<void> loadWallets() async {
+    if (isLoading.value) return;
+    final requestVersion = ++_walletsRequestVersion;
     isLoading.value = true;
-    errorMessage.value = null;
+    isLoadingMoreWallets.value = false;
+    walletsErrorMessage.value = null;
+    walletsLoadMoreErrorMessage.value = null;
+    walletsNextCursor.value = null;
 
     try {
-      final res = await getNetworkWalletsUseCase();
-      wallets.assignAll(res.items);
-      if (wallets.isNotEmpty) {
-        selectedWallet.value = wallets.first;
-        await loadWalletLogs(wallets.first.walletId, isRefresh: true);
+      final res = await getNetworkWalletsUseCase(perPage: 15);
+      if (requestVersion != _walletsRequestVersion) return;
+      final availableWallets = List<NetworkWalletEntity>.of(res.items);
+      final previousSelected = selectedWallet.value;
+      final previousId = previousSelected?.walletId;
+      var selected = previousId == null
+          ? (availableWallets.isEmpty ? null : availableWallets.first)
+          : availableWallets.firstWhereOrNull(
+              (wallet) => wallet.walletId == previousId,
+            );
+
+      // The first cursor page cannot prove that an off-page wallet was revoked.
+      if (selected == null && previousSelected != null) {
+        selected = previousSelected;
+        availableWallets.insert(0, previousSelected);
+      }
+      wallets.assignAll(availableWallets);
+      walletsNextCursor.value = res.nextCursor;
+      selectedWallet.value = selected;
+
+      if (selected != null) {
+        await loadWalletLogs(selected.walletId, isRefresh: true);
+      } else {
+        ++_logsRequestVersion;
+        logs.clear();
+        nextCursor.value = null;
+        logsErrorMessage.value = null;
+        isLoadingLogs.value = false;
+        isLoadingMoreLogs.value = false;
       }
     } on AppException catch (e) {
-      errorMessage.value = e.message;
+      if (requestVersion != _walletsRequestVersion) return;
+      if (_isAccessUnavailable(e)) _clearAllWalletAccess();
+      walletsErrorMessage.value = e.message;
       CustomSnackbar.show(
         title: 'خطأ',
         message: e.message,
         type: SnackType.error,
       );
     } catch (e) {
-      errorMessage.value = 'تعذر تحميل محافظ الشبكة: $e';
+      if (requestVersion != _walletsRequestVersion) return;
+      walletsErrorMessage.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل محافظ الشبكة. يرجى المحاولة مجدداً.',
+      );
     } finally {
-      isLoading.value = false;
+      if (requestVersion == _walletsRequestVersion) {
+        isLoading.value = false;
+      }
     }
   }
 
-  void selectWallet(NetworkWalletEntity wallet) {
+  Future<void> loadMoreWallets() async {
+    if (isLoading.value || isLoadingMoreWallets.value || !hasMoreWallets) {
+      return;
+    }
+
+    final requestVersion = ++_walletsRequestVersion;
+    final requestedCursor = walletsNextCursor.value;
+    isLoadingMoreWallets.value = true;
+    walletsLoadMoreErrorMessage.value = null;
+
+    try {
+      final result = await getNetworkWalletsUseCase(
+        cursor: requestedCursor,
+        perPage: 15,
+      );
+      if (requestVersion != _walletsRequestVersion) return;
+
+      final existingIds = wallets.map((wallet) => wallet.walletId).toSet();
+      wallets.addAll(
+        result.items.where((wallet) => existingIds.add(wallet.walletId)),
+      );
+      walletsNextCursor.value = result.nextCursor;
+    } on AppException catch (e) {
+      if (requestVersion == _walletsRequestVersion) {
+        walletsLoadMoreErrorMessage.value = e.message;
+      }
+    } catch (e) {
+      if (requestVersion == _walletsRequestVersion) {
+        walletsLoadMoreErrorMessage.value = AppException.sanitizeMessage(
+          e,
+          fallback: 'تعذر تحميل بقية المحافظ. يرجى المحاولة مجدداً.',
+        );
+      }
+    } finally {
+      if (requestVersion == _walletsRequestVersion) {
+        isLoadingMoreWallets.value = false;
+      }
+    }
+  }
+
+  Future<void> selectWallet(NetworkWalletEntity wallet) async {
     if (selectedWallet.value?.walletId == wallet.walletId) return;
     selectedWallet.value = wallet;
-    loadWalletLogs(wallet.walletId, isRefresh: true);
+    logs.clear();
+    await loadWalletLogs(wallet.walletId, isRefresh: true);
   }
 
   Future<void> loadWalletLogs(int walletId, {bool isRefresh = false}) async {
+    if (selectedWallet.value?.walletId != walletId) return;
+
     if (isRefresh) {
       isLoadingLogs.value = true;
+      isLoadingMoreLogs.value = false;
       nextCursor.value = null;
+      logsErrorMessage.value = null;
+    } else {
+      if (isLoadingLogs.value || isLoadingMoreLogs.value || !hasMoreLogs) {
+        return;
+      }
+      isLoadingMoreLogs.value = true;
+      logsErrorMessage.value = null;
     }
+
+    final requestVersion = ++_logsRequestVersion;
+    final requestedCursor = isRefresh ? null : nextCursor.value;
 
     try {
       final res = await getNetworkWalletLogsUseCase(
         walletId,
-        cursor: isRefresh ? null : nextCursor.value,
+        cursor: requestedCursor,
         perPage: 15,
       );
+
+      if (requestVersion != _logsRequestVersion ||
+          selectedWallet.value?.walletId != walletId) {
+        return;
+      }
 
       if (isRefresh) {
         logs.assignAll(res.items);
       } else {
-        logs.addAll(res.items);
+        final existingIds = logs.map((item) => item.logId).toSet();
+        logs.addAll(
+          res.items.where((item) => existingIds.add(item.logId)),
+        );
       }
       nextCursor.value = res.nextCursor;
+      logsErrorMessage.value = null;
+    } on AppException catch (e) {
+      if (requestVersion != _logsRequestVersion ||
+          selectedWallet.value?.walletId != walletId) {
+        return;
+      }
+      if (_isAccessUnavailable(e)) {
+        _clearUnavailableWallet(walletId, e.message);
+      } else {
+        logsErrorMessage.value = e.message;
+      }
+      if (isRefresh && selectedWallet.value?.walletId == walletId) {
+        CustomSnackbar.show(
+          title: 'تعذر تحميل الحركات',
+          message: e.message,
+          type: SnackType.error,
+        );
+      }
     } catch (e) {
-      // logs failure
+      if (requestVersion != _logsRequestVersion ||
+          selectedWallet.value?.walletId != walletId) {
+        return;
+      }
+      logsErrorMessage.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل حركات المحفظة. يرجى المحاولة مجدداً.',
+      );
     } finally {
-      isLoadingLogs.value = false;
-      isLoadingMoreLogs.value = false;
+      if (requestVersion == _logsRequestVersion) {
+        isLoadingLogs.value = false;
+        isLoadingMoreLogs.value = false;
+      }
     }
   }
 
   Future<void> loadMoreLogs() async {
-    final wId = selectedWallet.value?.walletId;
-    if (wId == null || isLoadingMoreLogs.value || !hasMoreLogs) return;
-
-    isLoadingMoreLogs.value = true;
-    await loadWalletLogs(wId, isRefresh: false);
+    final walletId = selectedWallet.value?.walletId;
+    if (walletId == null) return;
+    await loadWalletLogs(walletId, isRefresh: false);
   }
 }

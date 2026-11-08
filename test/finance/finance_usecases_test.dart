@@ -118,6 +118,7 @@ class MockFinanceRepository implements FinanceRepository {
     String? paymentMethod,
     String? referenceNumber,
     String? notes,
+    String? idempotencyKey,
   }) async =>
       mockCollectedRepayment ??
       PosRepaymentEntity(
@@ -135,6 +136,7 @@ class MockFinanceRepository implements FinanceRepository {
   Future<PosRepaymentEntity> reverseRepayment({
     required int repaymentId,
     required String reversalReason,
+    String? idempotencyKey,
   }) async => PosRepaymentEntity(
     repaymentId: repaymentId,
     networkId: 1,
@@ -176,6 +178,7 @@ class MockFinanceRepository implements FinanceRepository {
     required int posId,
     required double amount,
     String? statement,
+    String? idempotencyKey,
   }) async {}
 }
 

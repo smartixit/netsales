@@ -4,6 +4,8 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:netsales/features/finance/data/repositories/finance_repository_impl.dart';
 import 'package:netsales/features/finance/data/models/pos_repayment_models.dart';
+import 'package:netsales/features/finance/data/models/network_wallet_models.dart';
+import 'package:netsales/features/finance/data/models/pos_wallet_models.dart';
 import 'package:netsales/features/invoices/data/models/invoice_model.dart';
 
 class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
@@ -11,6 +13,17 @@ class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
   Map<String, dynamic>? lastQuery;
   Map<String, dynamic>? lastOutstandingInvoicesQuery;
   Map<String, dynamic>? lastRepaymentsQuery;
+  ApiResponse<List<PosWalletModel>>? posWalletsResponse;
+  ApiResponse<List<PosWalletLogModel>>? posWalletLogsResponse;
+  ApiResponse<List<NetworkWalletModel>>? networkWalletsResponse;
+  ApiResponse<List<NetworkWalletLogModel>>? networkWalletLogsResponse;
+  ApiResponse<NetworkWalletModel>? networkWalletByIdResponse;
+  ApiResponse<PosRepaymentModel>? collectRepaymentResponse;
+  ApiResponse<PosRepaymentModel>? reverseRepaymentResponse;
+  String? lastCollectIdempotencyKey;
+  String? lastReverseIdempotencyKey;
+  ApiResponse<List<InvoiceModel>>? outstandingInvoicesResponse;
+  ApiResponse<List<PosRepaymentModel>>? repaymentsResponse;
 
   _DebtSummaryRemoteDataSource(this.response);
 
@@ -19,11 +32,12 @@ class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
     Map<String, dynamic>? query,
   }) async {
     lastOutstandingInvoicesQuery = query;
-    return ApiResponse<List<InvoiceModel>>(
-      success: true,
-      message: 'ok',
-      data: const [],
-    );
+    return outstandingInvoicesResponse ??
+        ApiResponse<List<InvoiceModel>>(
+          success: true,
+          message: 'ok',
+          data: const [],
+        );
   }
 
   @override
@@ -31,11 +45,12 @@ class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
     Map<String, dynamic>? query,
   }) async {
     lastRepaymentsQuery = query;
-    return ApiResponse<List<PosRepaymentModel>>(
-      success: true,
-      message: 'ok',
-      data: const [],
-    );
+    return repaymentsResponse ??
+        ApiResponse<List<PosRepaymentModel>>(
+          success: true,
+          message: 'ok',
+          data: const [],
+        );
   }
 
   @override
@@ -44,6 +59,106 @@ class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
   }) async {
     lastQuery = query;
     return response;
+  }
+
+
+  @override
+  Future<ApiResponse<List<PosWalletModel>>> getPosWallets({
+    Map<String, dynamic>? query,
+  }) async =>
+      posWalletsResponse ??
+      ApiResponse<List<PosWalletModel>>(
+        success: true,
+        message: 'ok',
+        data: const [],
+      );
+
+  @override
+  Future<ApiResponse<List<PosWalletLogModel>>> getPosWalletLogs(
+    int walletId, {
+    Map<String, dynamic>? query,
+  }) async =>
+      posWalletLogsResponse ??
+      ApiResponse<List<PosWalletLogModel>>(
+        success: true,
+        message: 'ok',
+        data: const [],
+      );
+
+  @override
+  Future<ApiResponse<List<NetworkWalletModel>>> getNetworkWallets({
+    Map<String, dynamic>? query,
+  }) async =>
+      networkWalletsResponse ??
+      ApiResponse<List<NetworkWalletModel>>(
+        success: true,
+        message: 'ok',
+        data: const [],
+      );
+
+  @override
+  Future<ApiResponse<List<NetworkWalletLogModel>>> getNetworkWalletLogs(
+    int walletId, {
+    Map<String, dynamic>? query,
+  }) async =>
+      networkWalletLogsResponse ??
+      ApiResponse<List<NetworkWalletLogModel>>(
+        success: true,
+        message: 'ok',
+        data: const [],
+      );
+
+  @override
+  Future<ApiResponse<NetworkWalletModel>> getNetworkWalletById(int walletId) async =>
+      networkWalletByIdResponse ??
+      ApiResponse<NetworkWalletModel>(
+        success: true,
+        message: 'ok',
+        data: const NetworkWalletModel(
+          walletId: 1,
+          networkId: 1,
+          walletBalance: 0,
+        ),
+      );
+
+  @override
+  Future<ApiResponse<PosRepaymentModel>> collectRepayment(
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  }) async {
+    lastCollectIdempotencyKey = idempotencyKey;
+    return collectRepaymentResponse ??
+        ApiResponse<PosRepaymentModel>(
+          success: true,
+          message: 'ok',
+          data: const PosRepaymentModel(
+            repaymentId: 1,
+            networkId: 1,
+            posId: 1,
+            amount: 1,
+          ),
+        );
+  }
+
+  @override
+  Future<ApiResponse<PosRepaymentModel>> reverseRepayment(
+    int repaymentId,
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  }) async {
+    lastReverseIdempotencyKey = idempotencyKey;
+    return reverseRepaymentResponse ??
+        ApiResponse<PosRepaymentModel>(
+          success: true,
+          message: 'ok',
+          data: PosRepaymentModel(
+            repaymentId: repaymentId,
+            networkId: 1,
+            posId: 1,
+            amount: 1,
+            status: 'REVERSED',
+          ),
+        );
   }
 
   @override
@@ -130,6 +245,178 @@ void main() {
         'paginate': true,
         'limit': 30,
       });
+    });
+  });
+
+
+  group('FinanceRepositoryImpl financial idempotency contracts', () {
+    test('forwards stable collection and reversal keys to the remote API', () async {
+      final remote = _DebtSummaryRemoteDataSource(
+        ApiResponse<Map<String, dynamic>>(
+          success: true,
+          message: 'ok',
+          data: const {},
+        ),
+      );
+      final repository = FinanceRepositoryImpl(remoteDataSource: remote);
+
+      await repository.collectRepayment(
+        networkId: 10,
+        posId: 20,
+        amount: 500,
+        idempotencyKey: 'collection-attempt-001',
+      );
+      expect(remote.lastCollectIdempotencyKey, 'collection-attempt-001');
+
+      await repository.reverseRepayment(
+        repaymentId: 9,
+        reversalReason: 'تصحيح سند مكرر',
+        idempotencyKey: 'reversal-attempt-001',
+      );
+      expect(remote.lastReverseIdempotencyKey, 'reversal-attempt-001');
+    });
+  });
+
+  group('FinanceRepositoryImpl single request failure contracts', () {
+    test('surfaces failed wallet detail responses instead of force-unwrapping data', () async {
+      final remote = _DebtSummaryRemoteDataSource(
+        ApiResponse<Map<String, dynamic>>(
+          success: true,
+          message: 'ok',
+          data: const {},
+        ),
+      );
+      remote.networkWalletByIdResponse = ApiResponse<NetworkWalletModel>(
+        success: false,
+        message: 'Wallet details unavailable',
+      );
+      final repository = FinanceRepositoryImpl(remoteDataSource: remote);
+
+      await expectLater(
+        repository.getNetworkWalletById(1),
+        throwsA(
+          isA<AppException>().having(
+            (error) => error.code,
+            'code',
+            'NETWORK_WALLET_DETAILS_REQUEST_FAILED',
+          ),
+        ),
+      );
+    });
+  });
+
+  group('FinanceRepositoryImpl list failure contracts', () {
+    test('surfaces unsuccessful wallet and ledger responses as failures', () async {
+      final remote = _DebtSummaryRemoteDataSource(
+        ApiResponse<Map<String, dynamic>>(
+          success: true,
+          message: 'ok',
+          data: const {},
+        ),
+      );
+      final repository = FinanceRepositoryImpl(remoteDataSource: remote);
+
+      remote.posWalletsResponse = ApiResponse<List<PosWalletModel>>(
+        success: false,
+        message: 'POS wallet list unavailable',
+      );
+      await expectLater(
+        repository.getPosWallets(),
+        throwsA(
+          isA<AppException>().having(
+            (error) => error.code,
+            'code',
+            'POS_WALLET_LIST_REQUEST_FAILED',
+          ),
+        ),
+      );
+
+      remote.networkWalletsResponse = ApiResponse<List<NetworkWalletModel>>(
+        success: false,
+        message: 'Network wallet list unavailable',
+      );
+      await expectLater(
+        repository.getNetworkWallets(),
+        throwsA(
+          isA<AppException>().having(
+            (error) => error.code,
+            'code',
+            'NETWORK_WALLET_LIST_REQUEST_FAILED',
+          ),
+        ),
+      );
+
+      remote.posWalletLogsResponse = ApiResponse<List<PosWalletLogModel>>(
+        success: false,
+        message: 'POS wallet logs unavailable',
+      );
+      await expectLater(
+        repository.getPosWalletLogs(1),
+        throwsA(
+          isA<AppException>().having(
+            (error) => error.code,
+            'code',
+            'POS_WALLET_LOGS_REQUEST_FAILED',
+          ),
+        ),
+      );
+
+      remote.networkWalletLogsResponse =
+          ApiResponse<List<NetworkWalletLogModel>>(
+            success: false,
+            message: 'Network wallet logs unavailable',
+          );
+      await expectLater(
+        repository.getNetworkWalletLogs(1),
+        throwsA(
+          isA<AppException>().having(
+            (error) => error.code,
+            'code',
+            'NETWORK_WALLET_LOGS_REQUEST_FAILED',
+          ),
+        ),
+      );
+    });
+
+    test('surfaces unsuccessful debt invoice and repayment pages', () async {
+      final remote = _DebtSummaryRemoteDataSource(
+        ApiResponse<Map<String, dynamic>>(
+          success: true,
+          message: 'ok',
+          data: const {},
+        ),
+      );
+      final repository = FinanceRepositoryImpl(remoteDataSource: remote);
+
+      remote.outstandingInvoicesResponse = ApiResponse<List<InvoiceModel>>(
+        success: false,
+        message: 'Outstanding invoices unavailable',
+      );
+      await expectLater(
+        repository.getOutstandingInvoices(networkId: 1, posId: 2),
+        throwsA(
+          isA<AppException>().having(
+            (error) => error.code,
+            'code',
+            'OUTSTANDING_INVOICE_LIST_REQUEST_FAILED',
+          ),
+        ),
+      );
+
+      remote.repaymentsResponse = ApiResponse<List<PosRepaymentModel>>(
+        success: false,
+        message: 'Repayment history unavailable',
+      );
+      await expectLater(
+        repository.getRepayments(networkId: 1, posId: 2),
+        throwsA(
+          isA<AppException>().having(
+            (error) => error.code,
+            'code',
+            'REPAYMENT_HISTORY_REQUEST_FAILED',
+          ),
+        ),
+      );
     });
   });
 

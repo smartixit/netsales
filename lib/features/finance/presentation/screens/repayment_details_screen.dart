@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/features/finance/presentation/controllers/repayment_history_controller.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -11,11 +14,20 @@ import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.d
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/dialogs/custom_dialog.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class RepaymentDetailsScreen extends StatelessWidget {
   final PosRepaymentEntity? repayment;
+  final bool isNetworkView;
 
-  const RepaymentDetailsScreen({super.key, this.repayment});
+  const RepaymentDetailsScreen({
+    super.key,
+    this.repayment,
+    this.isNetworkView = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +44,15 @@ class RepaymentDetailsScreen extends StatelessWidget {
         ),
       );
     }
+
+    final permissions = PermissionService.to;
+    final canReverse = isNetworkView &&
+        item.isCompleted &&
+        (permissions.hasAnyRole([
+              AppRoles.networkOwner,
+              AppRoles.superAdmin,
+            ]) ||
+            permissions.can(AppPermissions.posWalletsManage));
 
     return CustomAppScaffold(
       appBar: AppBar(title: Text('سند سداد #${item.repaymentId}')),
@@ -135,6 +156,10 @@ class RepaymentDetailsScreen extends StatelessWidget {
                 ],
               ),
             ),
+            if (canReverse) ...[
+              AppSpacing.vMd,
+              _ReverseRepaymentAction(repayment: item),
+            ],
             AppSpacing.vLg,
             Text(
               'تسويات وتوزيعات الفواتير المعتمدة (FIFO Settled Invoices)',
@@ -256,6 +281,71 @@ class RepaymentDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+
+class _ReverseRepaymentAction extends StatelessWidget {
+  const _ReverseRepaymentAction({required this.repayment});
+
+  final PosRepaymentEntity repayment;
+
+  Future<void> _requestReversal() async {
+    final reasonController = TextEditingController();
+    try {
+      final confirmed = await CustomDialog.show(
+        type: DialogType.warning,
+        title: 'تأكيد عكس سند السداد',
+        message:
+            'سيُرسل طلب العكس إلى الخادم ليعيد تقييم التسويات والقيود المرتبطة بالسند. لا يمكن تنفيذ هذا الإجراء دون سبب موثق.',
+        content: Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: CustomTextField(
+            controller: reasonController,
+            label: 'سبب عكس السند',
+            hint: 'اكتب سبباً واضحاً للعكس',
+            minLines: 2,
+            maxLines: 4,
+            maxLength: 500,
+            textInputAction: TextInputAction.newline,
+            isRequired: true,
+          ),
+        ),
+        confirmLabel: 'تأكيد العكس',
+        cancelLabel: 'الاحتفاظ بالسند',
+      );
+
+      if (confirmed != true) return;
+
+      final reason = reasonController.text.trim();
+      if (reason.length < 3 || reason.length > 500) {
+        CustomSnackbar.show(
+          title: 'سبب العكس مطلوب',
+          message: 'اكتب سبباً من 3 إلى 500 حرف قبل تأكيد العملية.',
+          type: SnackType.warning,
+        );
+        return;
+      }
+
+      final controller = Get.find<RepaymentHistoryController>();
+      final reversed = await controller.reverseRepayment(
+        repayment.repaymentId,
+        reason,
+      );
+      if (reversed) Get.back<void>();
+    } finally {
+      reasonController.dispose();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomButton.danger(
+      text: 'عكس سند السداد',
+      prefix: Icons.undo_rounded,
+      width: double.infinity,
+      onPressed: _requestReversal,
     );
   }
 }

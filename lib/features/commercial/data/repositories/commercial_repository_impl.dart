@@ -16,24 +16,86 @@ class CommercialRepositoryImpl implements CommercialRepository {
 
   @override
   Future<List<NetworkEntity>> getMyNetworks() async {
-    final response = await _remoteDataSource.getMyNetworks();
+    const pageSize = 100;
+    final networks = <NetworkEntity>[];
+    final seenNetworkIds = <int>{};
+    final seenCursors = <String>{};
+    String? cursor;
 
-    if (response.success && response.data != null) {
-      return response.data!;
+    while (true) {
+      final query = <String, dynamic>{
+        'per_page': pageSize,
+        'cursor': ?cursor,
+      };
+      final response = await _remoteDataSource.getMyNetworks(query: query);
+
+      if (!response.success || response.data == null) {
+        throw AppException(
+          response.message.isNotEmpty
+              ? response.message
+              : 'تعذر تحميل قائمة الشبكات المصرح بها.',
+        );
+      }
+
+      for (final network in response.data!) {
+        if (network.networkId > 0 && seenNetworkIds.add(network.networkId)) {
+          networks.add(network);
+        }
+      }
+
+      final nextCursor = response.nextCursor?.trim();
+      if (nextCursor == null || nextCursor.isEmpty) {
+        return networks;
+      }
+      if (!seenCursors.add(nextCursor)) {
+        throw AppException(
+          'توقف تحميل الشبكات بسبب تكرار مؤشر الصفحة من الخادم.',
+        );
+      }
+      cursor = nextCursor;
     }
-
-    throw AppException(response.message);
   }
 
   @override
   Future<List<PosEntity>> getMyPos() async {
-    final response = await _remoteDataSource.getMyPos();
+    const pageSize = 100;
+    final positions = <PosEntity>[];
+    final seenPosIds = <int>{};
+    final seenCursors = <String>{};
+    String? cursor;
 
-    if (response.success && response.data != null) {
-      return response.data!;
+    while (true) {
+      final query = <String, dynamic>{
+        'per_page': pageSize,
+        'cursor': ?cursor,
+      };
+      final response = await _remoteDataSource.getMyPos(query: query);
+
+      if (!response.success || response.data == null) {
+        throw AppException(
+          response.message.isNotEmpty
+              ? response.message
+              : 'تعذر تحميل قائمة نقاط البيع المصرح بها.',
+        );
+      }
+
+      for (final pos in response.data!) {
+        if (pos.posId > 0 && seenPosIds.add(pos.posId)) {
+          positions.add(pos);
+        }
+      }
+
+      final nextCursor = response.nextCursor?.trim();
+      if (nextCursor == null || nextCursor.isEmpty) {
+        return positions;
+      }
+      if (!seenCursors.add(nextCursor)) {
+        throw AppException(
+          'توقف تحميل نقاط البيع بسبب تكرار مؤشر الصفحة من الخادم.',
+        );
+      }
+      cursor = nextCursor;
     }
-
-    throw AppException(response.message);
   }
 
   @override

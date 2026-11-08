@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_dual_wallet_card.dart';
+import 'package:netsales/features/finance/presentation/widgets/wallet_selector_skeleton.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_wallet_log_item_row.dart';
+import 'package:netsales/features/finance/presentation/widgets/wallet_log_entry_skeleton.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
@@ -34,38 +38,7 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                 ),
               ),
               AppSpacing.vSm,
-              Obx(() {
-                if (controller.isLoading.value && controller.wallets.isEmpty) {
-                  return const CustomSkeletonFeed(itemCount: 2);
-                }
-
-                if (controller.wallets.isEmpty) {
-                  return CustomEmptyState(
-                    icon: Icons.account_balance_wallet_outlined,
-                    title: 'لا توجد محافظ',
-                    subtitle: 'لم يتم العثور على أي محفظة مرتبطة بنقطة البيع.',
-                    actionLabel: 'إعادة المحاولة',
-                    onAction: controller.loadWallets,
-                  );
-                }
-
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.wallets.length,
-                  separatorBuilder: (context, index) => AppSpacing.vSm,
-                  itemBuilder: (context, index) {
-                    final wallet = controller.wallets[index];
-                    return PosDualWalletCard(
-                      wallet: wallet,
-                      isSelected:
-                          controller.selectedWallet.value?.walletId ==
-                          wallet.walletId,
-                      onTap: () => controller.selectWallet(wallet),
-                    );
-                  },
-                );
-              }),
+              _buildWalletSelector(context),
               AppSpacing.vLg,
               Text(
                 'دفتر الأستاذ وحركات المحفظة المحددة',
@@ -82,6 +55,21 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                     return const CustomSkeletonFeed(itemCount: 3);
                   }
 
+                  if (controller.logs.isEmpty &&
+                      controller.logsErrorMessage.value != null) {
+                    final walletId = controller.selectedWallet.value?.walletId;
+                    return CustomErrorState.compact(
+                      title: 'تعذر تحميل دفتر الأستاذ',
+                      subtitle: controller.logsErrorMessage.value,
+                      onRetry: walletId == null
+                          ? null
+                          : () => controller.loadWalletLogs(
+                                walletId,
+                                isRefresh: true,
+                              ),
+                    );
+                  }
+
                   if (controller.logs.isEmpty) {
                     return CustomEmptyState(
                       icon: Icons.receipt_long_outlined,
@@ -95,6 +83,7 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                       if (scrollInfo.metrics.pixels >=
                               scrollInfo.metrics.maxScrollExtent - 200 &&
                           controller.hasMoreLogs &&
+                          controller.logsErrorMessage.value == null &&
                           !controller.isLoadingMoreLogs.value) {
                         controller.loadMoreLogs();
                       }
@@ -103,19 +92,30 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                     child: ListView.separated(
                       itemCount:
                           controller.logs.length +
-                          (controller.hasMoreLogs ? 1 : 0),
+                          (controller.hasMoreLogs ||
+                                  (controller.logsErrorMessage.value != null &&
+                                      controller.logs.isNotEmpty)
+                              ? 1
+                              : 0),
                       separatorBuilder: (context, index) => AppSpacing.vXs,
                       itemBuilder: (context, index) {
                         if (index == controller.logs.length) {
-                          return Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(AppSpacing.cardPadding),
-                              child: CircularProgressIndicator(
-                                color: colors.primary,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          );
+                          if (controller.logsErrorMessage.value != null) {
+                            return CustomErrorState.compact(
+                              title: 'تعذر تحميل المزيد من الحركات',
+                              subtitle: controller.logsErrorMessage.value,
+                              onRetry: controller.hasMoreLogs
+                                  ? controller.loadMoreLogs
+                                  : () => controller.loadWalletLogs(
+                                        controller.selectedWallet.value!.walletId,
+                                        isRefresh: true,
+                                      ),
+                            );
+                          }
+                          return const WalletLogEntrySkeleton();
+                        }
+                        if (index > controller.logs.length) {
+                          return const SizedBox.shrink();
                         }
                         return PosWalletLogItemRow(
                           log: controller.logs[index],
@@ -132,4 +132,118 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
       ),
     );
   }
+
+  Widget _buildWalletSelector(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading.value && controller.wallets.isEmpty) {
+        return SizedBox(
+          height: 194.h,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                WalletSelectorSkeleton(width: 310.w, height: 180.h),
+                AppSpacing.hSm,
+                WalletSelectorSkeleton(width: 310.w, height: 180.h),
+              ],
+            ),
+          ),
+        );
+      }
+
+      if (controller.wallets.isEmpty &&
+          controller.walletsErrorMessage.value != null) {
+        return SizedBox(
+          height: 160.h,
+          child: CustomErrorState.compact(
+            title: 'تعذر تحميل المحافظ',
+            subtitle: controller.walletsErrorMessage.value,
+            onRetry: controller.loadWallets,
+          ),
+        );
+      }
+
+      if (controller.wallets.isEmpty) {
+        return SizedBox(
+          height: 160.h,
+          child: CustomEmptyState(
+            icon: Icons.account_balance_wallet_outlined,
+            title: 'لا توجد محافظ',
+            subtitle: 'لم يتم العثور على أي محفظة مرتبطة بنقطة البيع.',
+            actionLabel: 'إعادة المحاولة',
+            onAction: controller.loadWallets,
+          ),
+        );
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (controller.walletsErrorMessage.value != null) ...[
+            CustomErrorState.compact(
+              title: 'تعذر تحديث قائمة المحافظ',
+              subtitle: controller.walletsErrorMessage.value,
+              onRetry: controller.loadWallets,
+            ),
+            AppSpacing.vXs,
+          ],
+          if (controller.walletsLoadMoreErrorMessage.value != null) ...[
+            CustomErrorState.compact(
+              title: 'تعذر تحميل بقية المحافظ',
+              subtitle: controller.walletsLoadMoreErrorMessage.value,
+              onRetry: controller.loadMoreWallets,
+            ),
+            AppSpacing.vXs,
+          ],
+          SizedBox(
+            height: 194.h,
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification.metrics.axis == Axis.horizontal &&
+                    notification.metrics.pixels >=
+                        notification.metrics.maxScrollExtent - 140.w &&
+                    controller.hasMoreWallets &&
+                    controller.walletsLoadMoreErrorMessage.value == null &&
+                    !controller.isLoadingMoreWallets.value) {
+                  controller.loadMoreWallets();
+                }
+                return false;
+              },
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                itemCount: controller.wallets.length +
+                    (controller.hasMoreWallets &&
+                            controller.walletsLoadMoreErrorMessage.value == null
+                        ? 1
+                        : 0),
+                separatorBuilder: (context, index) => AppSpacing.hSm,
+                itemBuilder: (context, index) {
+                  if (index == controller.wallets.length) {
+                    return WalletSelectorSkeleton(
+                      width: 310.w,
+                      height: 180.h,
+                    );
+                  }
+
+                  final wallet = controller.wallets[index];
+                  return SizedBox(
+                    width: 310.w,
+                    child: PosDualWalletCard(
+                      wallet: wallet,
+                      isSelected:
+                          controller.selectedWallet.value?.walletId ==
+                          wallet.walletId,
+                      onTap: () => controller.selectWallet(wallet),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
 }

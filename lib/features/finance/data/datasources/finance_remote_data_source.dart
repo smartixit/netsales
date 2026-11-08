@@ -38,14 +38,17 @@ abstract interface class FinanceRemoteDataSource {
   });
   Future<ApiResponse<PosRepaymentModel>> getRepaymentById(int repaymentId);
   Future<ApiResponse<PosRepaymentModel>> collectRepayment(
-    Map<String, dynamic> data,
-  );
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  });
   Future<ApiResponse<PosRepaymentModel>> reverseRepayment(
     int repaymentId,
-    Map<String, dynamic> data,
-  );
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  });
 
   Future<ApiResponse<dynamic>> transferFromNetworkToPos(
-    Map<String, dynamic> data,
-  );
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  });
 }
