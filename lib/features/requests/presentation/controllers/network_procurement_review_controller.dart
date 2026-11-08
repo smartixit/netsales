@@ -66,6 +66,7 @@ class NetworkProcurementReviewController extends GetxController {
   final modificationLines = <RequestModificationLineEntity>[].obs;
   final editingRequestId = RxnInt();
   final modificationNoteController = TextEditingController();
+  int _requestListRevision = 0;
 
   Future<void> beginModification(RequestEntity request) async {
     if (!request.isPending) return;
@@ -281,6 +282,7 @@ class NetworkProcurementReviewController extends GetxController {
   void onClose() {
     searchController.dispose();
     modificationNoteController.dispose();
+    _requestListRevision++;
     super.onClose();
   }
 
@@ -306,64 +308,76 @@ class NetworkProcurementReviewController extends GetxController {
 
   /// تحميل طلبات التوريد الواردة من نقاط البيع
   Future<void> loadRequests({bool isRefresh = false}) async {
+    final revision = ++_requestListRevision;
     isLoading.value = true;
     errorMessage.value = null;
+    nextCursor.value = null;
+    isLoadingMore.value = false;
 
-    if (isRefresh) {
-      nextCursor.value = null;
-    }
+    final networkId = selectedNetworkId.value;
+    final status = statusFilter.value;
+    final query = searchQuery.value.trim();
+    final effectiveSearch = query.isEmpty ? null : query;
 
     try {
-      final query = searchQuery.value.trim();
-      final effectiveSearch = query.isEmpty ? null : query;
-
       final PaginatedList<RequestEntity> result = await getRequestsUseCase(
-        networkId: selectedNetworkId.value,
-        status: statusFilter.value,
+        networkId: networkId,
+        status: status,
         search: effectiveSearch,
         cursor: null,
       );
+      if (revision != _requestListRevision) return;
 
       requests.assignAll(result.items);
       nextCursor.value = result.nextCursor;
-    } catch (e) {
-      errorMessage.value = e is AppException
-          ? e.message
-          : 'تعذر تحميل قائمة طلبات التوريد الواردة: $e';
+    } catch (error) {
+      if (revision != _requestListRevision) return;
+      errorMessage.value = error is AppException
+          ? error.message
+          : 'تعذر تحميل قائمة طلبات التوريد الواردة: $error';
     } finally {
-      isLoading.value = false;
+      if (revision == _requestListRevision) {
+        isLoading.value = false;
+      }
     }
   }
 
-  /// تحميل المزيد من الطلبات عند التمرير
+  /// تحميل المزيد مع منع الصفحات المتأخرة من تلويث نتائج فلتر أحدث.
   Future<void> loadMoreRequests() async {
-    if (isLoadingMore.value || isLoading.value || nextCursor.value == null) {
+    final cursor = nextCursor.value;
+    if (isLoadingMore.value || isLoading.value || cursor == null) {
       return;
     }
 
+    final revision = _requestListRevision;
+    final networkId = selectedNetworkId.value;
+    final status = statusFilter.value;
+    final query = searchQuery.value.trim();
+    final effectiveSearch = query.isEmpty ? null : query;
     isLoadingMore.value = true;
 
     try {
-      final query = searchQuery.value.trim();
-      final effectiveSearch = query.isEmpty ? null : query;
-
       final PaginatedList<RequestEntity> result = await getRequestsUseCase(
-        networkId: selectedNetworkId.value,
-        status: statusFilter.value,
+        networkId: networkId,
+        status: status,
         search: effectiveSearch,
-        cursor: nextCursor.value,
+        cursor: cursor,
       );
+      if (revision != _requestListRevision) return;
 
-      final existingIds = requests.map((r) => r.requestId).toSet();
-      final newItems =
-          result.items.where((r) => !existingIds.contains(r.requestId)).toList();
+      final existingIds = requests.map((request) => request.requestId).toSet();
+      final newItems = result.items
+          .where((request) => !existingIds.contains(request.requestId))
+          .toList(growable: false);
 
       requests.addAll(newItems);
       nextCursor.value = result.nextCursor;
     } catch (_) {
-      // Non-fatal
+      // Keep loaded requests and allow a later retry.
     } finally {
-      isLoadingMore.value = false;
+      if (revision == _requestListRevision) {
+        isLoadingMore.value = false;
+      }
     }
   }
 
