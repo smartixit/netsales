@@ -6,7 +6,9 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_dual_wallet_card.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_wallet_log_item_row.dart';
+import 'package:netsales/features/finance/presentation/widgets/wallet_log_entry_skeleton.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
@@ -37,6 +39,15 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
               Obx(() {
                 if (controller.isLoading.value && controller.wallets.isEmpty) {
                   return const CustomSkeletonFeed(itemCount: 2);
+                }
+
+                if (controller.wallets.isEmpty &&
+                    controller.walletsErrorMessage.value != null) {
+                  return CustomErrorState.compact(
+                    title: 'تعذر تحميل المحافظ',
+                    subtitle: controller.walletsErrorMessage.value,
+                    onRetry: controller.loadWallets,
+                  );
                 }
 
                 if (controller.wallets.isEmpty) {
@@ -82,6 +93,21 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                     return const CustomSkeletonFeed(itemCount: 3);
                   }
 
+                  if (controller.logs.isEmpty &&
+                      controller.logsErrorMessage.value != null) {
+                    final walletId = controller.selectedWallet.value?.walletId;
+                    return CustomErrorState.compact(
+                      title: 'تعذر تحميل دفتر الأستاذ',
+                      subtitle: controller.logsErrorMessage.value,
+                      onRetry: walletId == null
+                          ? null
+                          : () => controller.loadWalletLogs(
+                                walletId,
+                                isRefresh: true,
+                              ),
+                    );
+                  }
+
                   if (controller.logs.isEmpty) {
                     return CustomEmptyState(
                       icon: Icons.receipt_long_outlined,
@@ -103,19 +129,25 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                     child: ListView.separated(
                       itemCount:
                           controller.logs.length +
-                          (controller.hasMoreLogs ? 1 : 0),
+                          (controller.hasMoreLogs ? 1 : 0) +
+                          (controller.logsErrorMessage.value != null &&
+                                  controller.logs.isNotEmpty
+                              ? 1
+                              : 0),
                       separatorBuilder: (context, index) => AppSpacing.vXs,
                       itemBuilder: (context, index) {
                         if (index == controller.logs.length) {
-                          return Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(AppSpacing.cardPadding),
-                              child: CircularProgressIndicator(
-                                color: colors.primary,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          );
+                          if (controller.logsErrorMessage.value != null) {
+                            return CustomErrorState.compact(
+                              title: 'تعذر تحميل المزيد من الحركات',
+                              subtitle: controller.logsErrorMessage.value,
+                              onRetry: controller.loadMoreLogs,
+                            );
+                          }
+                          return const WalletLogEntrySkeleton();
+                        }
+                        if (index > controller.logs.length) {
+                          return const SizedBox.shrink();
                         }
                         return PosWalletLogItemRow(
                           log: controller.logs[index],
