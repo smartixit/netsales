@@ -98,6 +98,8 @@ class RepaymentCollectionController extends GetxController {
   void onNetworkChanged(int? netId) {
     if (netId == null || selectedNetworkId.value == netId) return;
     selectedNetworkId.value = netId;
+    posList.clear();
+    selectedPosId.value = null;
     loadPosForNetwork(netId);
   }
 
