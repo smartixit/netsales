@@ -223,6 +223,7 @@ class PosDebtLedgerController extends GetxController {
     );
   }
 
+  /// Loads the next cursor page while retaining the active POS and remote-search scope.
   Future<void> loadMoreNetworkOptions() async {
     final posId = selectedPosId.value;
     if (posId == null ||
