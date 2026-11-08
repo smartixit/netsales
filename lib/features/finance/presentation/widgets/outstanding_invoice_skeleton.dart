@@ -60,14 +60,14 @@ class OutstandingInvoiceSkeleton extends StatelessWidget {
     AppColors colors,
     double width,
     double height, {
-    double radius = AppRadius.xs,
+    double? radius,
   }) {
     return Container(
       width: width.isFinite ? width : null,
       height: height,
       decoration: BoxDecoration(
         color: colors.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(radius),
+        borderRadius: BorderRadius.circular(radius ?? AppRadius.xs),
       ),
     );
   }
