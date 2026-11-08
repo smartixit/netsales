@@ -42,6 +42,7 @@ class NetworkWalletTransferController extends GetxController {
   String? _pendingFingerprint;
 
   bool get hasMorePos => posNextCursor.value?.trim().isNotEmpty ?? false;
+  String get searchQuery => _searchQuery;
 
   Future<void> initialize(NetworkWalletEntity wallet) async {
     ++_requestVersion;

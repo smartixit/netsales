@@ -79,7 +79,8 @@ class NetworkWalletTransferSheet
                   onRetry: controller.loadPosForNetwork,
                 )
               else if (controller.posList.isEmpty &&
-                  controller.hasLoadedPosList.value)
+                  controller.hasLoadedPosList.value &&
+                  !controller.hasMorePos)
                 const CustomEmptyState(
                   icon: Icons.point_of_sale_outlined,
                   title: 'لا توجد نقاط بيع مرتبطة',
@@ -89,6 +90,15 @@ class NetworkWalletTransferSheet
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (controller.posErrorMessage.value != null) ...[
+                      CustomErrorState.compact(
+                        title: 'تعذر تحديث نتائج البحث',
+                        subtitle: controller.posErrorMessage.value,
+                        onRetry: () =>
+                            controller.searchPos(controller.searchQuery),
+                      ),
+                      AppSpacing.vXs,
+                    ],
                     CustomDropdown<int>(
                       label: 'نقطة البيع المستفيدة',
                       hint: 'ابحث واختر نقطة البيع',
