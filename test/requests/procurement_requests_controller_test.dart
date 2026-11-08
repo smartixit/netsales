@@ -17,6 +17,8 @@ import 'package:netsales/features/requests/domain/usecases/approve_request_use_c
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
@@ -327,6 +329,12 @@ void main() {
         getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
         approveRequestUseCase: ApproveRequestUseCase(mockRequestRepo),
         rejectRequestUseCase: RejectRequestUseCase(mockRequestRepo),
+        previewRequestModificationUseCase:
+            PreviewRequestModificationUseCase(mockRequestRepo),
+        getPackagesUseCase: GetPackagesUseCase(
+          MockPackageCatalogRepository([samplePackage]),
+        ),
+        getRequestDetailsUseCase: GetRequestDetailsUseCase(mockRequestRepo),
         getMyNetworksUseCase: GetMyNetworksUseCase(mockCommercialRepo),
       );
       controller.onInit();

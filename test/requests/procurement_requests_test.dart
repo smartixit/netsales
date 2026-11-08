@@ -6,6 +6,8 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/requests/data/models/request_item_model.dart';
 import 'package:netsales/features/requests/data/models/request_model.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
@@ -109,9 +111,42 @@ class MockRequestRepository implements RequestRepository {
   }
 
   @override
+  Future<RequestModificationPreviewEntity> previewRequestModification(
+    int requestId,
+    List<RequestModificationLineEntity> items,
+  ) async {
+    return RequestModificationPreviewEntity(
+      requestId: requestId,
+      originalTotalAmount: 10000,
+      previewTotalAmount: 9000,
+      grossTotalAmount: 10000,
+      totalDiscountAmount: 1000,
+      saleType: 'CASH',
+      saleTypeLabel: 'نقدي',
+      hasModifications: true,
+      items: items.map((item) => RequestModificationPreviewItemEntity(
+        packageId: item.packageId,
+        packageName: 'باقة اختبار',
+        voucherCount: item.voucherCount,
+        voucherPrice: 1000,
+        itemDiscount: 10,
+        itemTotalAmount: item.voucherCount * 900,
+        grossTotalAmount: item.voucherCount * 1000,
+        discountAmount: item.voucherCount * 100,
+        source: 'ORIGINAL',
+        pricingToken: item.pricingToken,
+        changeType: 'QUANTITY_CHANGED',
+        originalVoucherCount: item.voucherCount - 1,
+      )).toList(growable: false),
+      removedItems: const [],
+    );
+  }
+
+  @override
   Future<RequestEntity> approveRequest(
     int requestId, {
     String? requestNote,
+    List<RequestModificationLineEntity>? items,
   }) async {
     final index = _requests.indexWhere((r) => r.requestId == requestId);
     if (index >= 0) {
