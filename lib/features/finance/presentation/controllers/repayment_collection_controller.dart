@@ -36,6 +36,8 @@ class RepaymentCollectionController extends GetxController {
 
   final isLoadingInitial = false.obs;
   final isLoadingPos = false.obs;
+  final initialErrorMessage = RxnString();
+  final posErrorMessage = RxnString();
   final isSubmitting = false.obs;
   final lastResult = Rxn<PosRepaymentEntity>();
 
@@ -55,7 +57,9 @@ class RepaymentCollectionController extends GetxController {
   }
 
   Future<void> loadInitialData() async {
+    if (isLoadingInitial.value) return;
     isLoadingInitial.value = true;
+    initialErrorMessage.value = null;
     try {
       final netList = await getMyNetworksUseCase();
       // Financial collections require an explicit beneficiary selection.
@@ -64,8 +68,14 @@ class RepaymentCollectionController extends GetxController {
       selectedNetworkId.value = null;
       selectedPosId.value = null;
       posList.clear();
-    } catch (_) {
-      // initial load
+      posErrorMessage.value = null;
+    } on AppException catch (e) {
+      initialErrorMessage.value = e.message;
+    } catch (e) {
+      initialErrorMessage.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل الشبكات المتاحة للتحصيل. يرجى المحاولة مجدداً.',
+      );
     } finally {
       isLoadingInitial.value = false;
     }
@@ -76,6 +86,7 @@ class RepaymentCollectionController extends GetxController {
     selectedPosId.value = null;
     posList.clear();
     isLoadingPos.value = true;
+    posErrorMessage.value = null;
     try {
       final res = await getNetworkPosListUseCase(networkId);
       if (revision != _posLoadRevision ||
@@ -86,13 +97,26 @@ class RepaymentCollectionController extends GetxController {
         res.items.map((link) => link.pos).whereType<PosEntity>(),
       );
       selectedPosId.value = null;
-    } catch (_) {
+      posErrorMessage.value = null;
+    } on AppException catch (e) {
       if (revision != _posLoadRevision ||
           selectedNetworkId.value != networkId) {
         return;
       }
       posList.clear();
       selectedPosId.value = null;
+      posErrorMessage.value = e.message;
+    } catch (e) {
+      if (revision != _posLoadRevision ||
+          selectedNetworkId.value != networkId) {
+        return;
+      }
+      posList.clear();
+      selectedPosId.value = null;
+      posErrorMessage.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل نقاط البيع المرتبطة بالشبكة. يرجى المحاولة مجدداً.',
+      );
     } finally {
       if (revision == _posLoadRevision) {
         isLoadingPos.value = false;
