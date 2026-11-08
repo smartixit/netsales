@@ -1,3 +1,5 @@
+import 'package:netsales/core/enums/wallet_operation_type.dart';
+
 /// كيان محفظة مزود الشبكة ودفتر الأستاذ (Network Wallet Entity)
 class NetworkWalletEntity {
   final int walletId;
@@ -46,5 +48,8 @@ class NetworkWalletLogEntity {
     this.createdByName,
     this.createdAt,
   });
-}
 
+  /// النوع السلكي مصنف وفق Enum الباكيند دون استنتاج الاتجاه من قيمة المبلغ.
+  WalletOperationType get typedLogOperation =>
+      WalletOperationType.fromWire(logOperation);
+}
