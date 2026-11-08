@@ -121,6 +121,7 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                       if (scrollInfo.metrics.pixels >=
                               scrollInfo.metrics.maxScrollExtent - 200 &&
                           controller.hasMoreLogs &&
+                          controller.logsErrorMessage.value == null &&
                           !controller.isLoadingMoreLogs.value) {
                         controller.loadMoreLogs();
                       }
