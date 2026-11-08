@@ -908,6 +908,7 @@ void main() {
       'POS debt scope selector can load every cursor page of network links',
       () async {
         const firstNetwork = NetworkPosLinkEntity(
+          networkPosId: 1001,
           networkId: 101,
           posId: 5,
           status: true,
@@ -919,6 +920,7 @@ void main() {
           ),
         );
         const secondNetwork = NetworkPosLinkEntity(
+          networkPosId: 2002,
           networkId: 202,
           posId: 5,
           status: true,
