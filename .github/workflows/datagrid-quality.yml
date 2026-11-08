@@ -144,7 +144,8 @@ jobs:
             Sort-Object FullName -Descending |
             Select-Object -First 1 -ExpandProperty FullName
           Write-Host "MSVC compiler: $clPath"
-          & $clPath /Bv
+          $msvcVersion = [regex]::Match($clPath, 'MSVC\\([^\\]+)').Groups[1].Value
+          Write-Host "MSVC toolset version: $msvcVersion"
 
       - name: Resolve dependencies and verify lockfile
         run: |
