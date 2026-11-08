@@ -13,6 +13,18 @@ class FinanceRepositoryImpl implements FinanceRepository {
 
   const FinanceRepositoryImpl({required this.remoteDataSource});
 
+  AppException _listRequestFailure<T>(
+    ApiResponse<List<T>> response, {
+    required String fallback,
+    required String code,
+  }) {
+    return AppException(
+      response.message.isNotEmpty ? response.message : fallback,
+      code: code,
+      details: response.errors,
+    );
+  }
+
   @override
   Future<PaginatedList<PosWalletEntity>> getPosWallets({
     int? networkId,
@@ -29,8 +41,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'per_page': ?perPage,
     };
     final res = await remoteDataSource.getPosWallets(query: query);
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع محافظ نقطة البيع من الخادم.',
+        code: 'POS_WALLET_LIST_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<PosWalletEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -64,8 +83,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'per_page': ?perPage,
     };
     final res = await remoteDataSource.getPosWalletLogs(walletId, query: query);
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع حركات محفظة نقطة البيع.',
+        code: 'POS_WALLET_LOGS_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<PosWalletLogEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -85,8 +111,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'per_page': ?perPage,
     };
     final res = await remoteDataSource.getNetworkWallets(query: query);
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع محافظ الشبكة من الخادم.',
+        code: 'NETWORK_WALLET_LIST_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<NetworkWalletEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -116,8 +149,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       walletId,
       query: query,
     );
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع حركات محفظة الشبكة.',
+        code: 'NETWORK_WALLET_LOGS_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<NetworkWalletLogEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -215,8 +255,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'limit': ?perPage,
     };
     final res = await remoteDataSource.getOutstandingInvoices(query: query);
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع فواتير الذمم المستحقة.',
+        code: 'OUTSTANDING_INVOICE_LIST_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<InvoiceEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
@@ -241,8 +288,15 @@ class FinanceRepositoryImpl implements FinanceRepository {
       'limit': ?perPage,
     };
     final res = await remoteDataSource.getRepayments(query: query);
+    if (!res.success || res.data == null) {
+      throw _listRequestFailure(
+        res,
+        fallback: 'تعذر استرجاع سجل سندات السداد.',
+        code: 'REPAYMENT_HISTORY_REQUEST_FAILED',
+      );
+    }
     return PaginatedList<PosRepaymentEntity>(
-      items: res.data ?? [],
+      items: res.data!,
       nextCursor: res.nextCursor,
       prevCursor: res.prevCursor,
     );
