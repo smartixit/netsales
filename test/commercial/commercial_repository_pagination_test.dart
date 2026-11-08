@@ -3,9 +3,6 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
-import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
-import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
-import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 import 'package:netsales/features/commercial/data/repositories/commercial_repository_impl.dart';
 
