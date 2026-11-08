@@ -131,6 +131,7 @@ class NetworkWalletDashboardController extends GetxController {
     final walletId = selectedWallet.value?.walletId;
     if (walletId == null || isLoadingMoreLogs.value || !hasMoreLogs) return;
 
+    logsErrorMessage.value = null;
     isLoadingMoreLogs.value = true;
     await loadWalletLogs(walletId, isRefresh: false);
   }
