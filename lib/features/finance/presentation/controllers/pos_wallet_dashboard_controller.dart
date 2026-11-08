@@ -29,6 +29,8 @@ class PosWalletDashboardController extends GetxController {
 
   int _logsRequestVersion = 0;
   int _walletsRequestVersion = 0;
+  int? _filterNetworkId;
+  int? _filterPosId;
 
   bool get hasMoreWallets =>
       walletsNextCursor.value?.trim().isNotEmpty ?? false;
@@ -72,7 +74,18 @@ class PosWalletDashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final arguments = Get.arguments;
+    if (arguments is Map) {
+      _filterNetworkId = _parseId(arguments['network_id']);
+      _filterPosId = _parseId(arguments['pos_id']);
+    }
     loadWallets();
+  }
+
+  int? _parseId(dynamic value) {
+    if (value is int && value > 0) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   Future<void> loadWallets() async {
@@ -85,7 +98,11 @@ class PosWalletDashboardController extends GetxController {
     walletsNextCursor.value = null;
 
     try {
-      final res = await getPosWalUseCase(perPage: 15);
+      final res = await getPosWalUseCase(
+        networkId: _filterNetworkId,
+        posId: _filterPosId,
+        perPage: 15,
+      );
       if (requestVersion != _walletsRequestVersion) return;
       final availableWallets = List<PosWalletEntity>.of(res.items);
       final previousSelected = selectedWallet.value;
@@ -149,6 +166,8 @@ class PosWalletDashboardController extends GetxController {
 
     try {
       final result = await getPosWalUseCase(
+        networkId: _filterNetworkId,
+        posId: _filterPosId,
         cursor: requestedCursor,
         perPage: 15,
       );
