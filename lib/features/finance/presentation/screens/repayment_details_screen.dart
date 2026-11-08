@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_history_controller.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
@@ -42,6 +44,15 @@ class RepaymentDetailsScreen extends StatelessWidget {
         ),
       );
     }
+
+    final permissions = PermissionService.to;
+    final canReverse = isNetworkView &&
+        item.isCompleted &&
+        (permissions.hasAnyRole([
+              AppRoles.networkOwner,
+              AppRoles.superAdmin,
+            ]) ||
+            permissions.can(AppPermissions.posWalletsManage));
 
     return CustomAppScaffold(
       appBar: AppBar(title: Text('سند سداد #${item.repaymentId}')),
@@ -145,7 +156,7 @@ class RepaymentDetailsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            if (isNetworkView && item.isCompleted) ...[
+            if (canReverse) ...[
               AppSpacing.vMd,
               _ReverseRepaymentAction(repayment: item),
             ],
