@@ -35,6 +35,7 @@ class RepaymentCollectionController extends GetxController {
   final selectedMethod = 'CASH'.obs;
 
   final isLoadingInitial = false.obs;
+  final isLoadingPos = false.obs;
   final isSubmitting = false.obs;
   final lastResult = Rxn<PosRepaymentEntity>();
 
@@ -74,6 +75,7 @@ class RepaymentCollectionController extends GetxController {
     final revision = ++_posLoadRevision;
     selectedPosId.value = null;
     posList.clear();
+    isLoadingPos.value = true;
     try {
       final res = await getNetworkPosListUseCase(networkId);
       if (revision != _posLoadRevision ||
@@ -91,6 +93,10 @@ class RepaymentCollectionController extends GetxController {
       }
       posList.clear();
       selectedPosId.value = null;
+    } finally {
+      if (revision == _posLoadRevision) {
+        isLoadingPos.value = false;
+      }
     }
   }
 
