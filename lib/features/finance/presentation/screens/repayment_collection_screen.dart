@@ -12,7 +12,7 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
+
 
 class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
   const RepaymentCollectionScreen({super.key});
