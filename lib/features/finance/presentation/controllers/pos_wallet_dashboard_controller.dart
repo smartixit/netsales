@@ -89,7 +89,7 @@ class PosWalletDashboardController extends GetxController {
       isLoadingLogs.value = true;
       nextCursor.value = null;
       logsErrorMessage.value = null;
-    } else if (isLoadingMoreLogs.value || !hasMoreLogs) {
+    } else if (!hasMoreLogs) {
       return;
     }
 
