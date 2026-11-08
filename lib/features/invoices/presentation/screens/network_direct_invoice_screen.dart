@@ -380,7 +380,7 @@ class NetworkDirectInvoiceScreen
         isRefresh: true,
       );
     }
-    Get.offNamed<void>(
+    await Get.offNamed<void>(
       AppRoutes.saleInvoiceDetails,
       arguments: invoice,
     );
