@@ -298,11 +298,14 @@ class NetworkDirectInvoiceController extends GetxController {
     final index = cart.indexWhere(
       (line) => line.package.packageId == package.packageId,
     );
+    final hasChanged = index < 0 || cart[index].voucherCount != quantity;
     final line = DirectInvoiceCartLine(
       package: package,
       voucherCount: quantity,
     );
-    _invalidateSubmissionIdempotencyKey();
+    if (hasChanged) {
+      _invalidateSubmissionIdempotencyKey();
+    }
     if (index >= 0) {
       cart[index] = line;
     } else {
