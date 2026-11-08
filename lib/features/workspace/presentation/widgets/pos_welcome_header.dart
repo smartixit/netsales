@@ -1,9 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 
 class PosWelcomeHeader extends StatelessWidget {
@@ -63,12 +65,10 @@ class PosWelcomeHeader extends StatelessWidget {
                     color: colors.onPrimary.withValues(alpha: 0.28),
                   ),
                 ),
-                child: Text(
-                  initial,
-                  style: AppTypography.titleLarge.copyWith(
-                    color: colors.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: _buildProfileAvatar(
+                  profileUrl: SessionService.to.currentUser?.userProfileLogo,
+                  initial: initial,
+                  foregroundColor: colors.onPrimary,
                 ),
               ),
               AppSpacing.hMd,
@@ -115,4 +115,48 @@ class PosWelcomeHeader extends StatelessWidget {
       ),
     );
   }
+}
+
+
+Widget _buildProfileAvatar({
+  required String? profileUrl,
+  required String initial,
+  required Color foregroundColor,
+}) {
+  final url = profileUrl?.trim();
+  if (url != null && url.isNotEmpty) {
+    return ClipOval(
+      child: CachedNetworkImage(
+        imageUrl: url,
+        width: 52.r,
+        height: 52.r,
+        fit: BoxFit.cover,
+        placeholder: (context, value) => Center(
+          child: Text(
+            initial,
+            style: AppTypography.titleLarge.copyWith(
+              color: foregroundColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        errorWidget: (context, value, error) => Center(
+          child: Text(
+            initial,
+            style: AppTypography.titleLarge.copyWith(
+              color: foregroundColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  return Text(
+    initial,
+    style: AppTypography.titleLarge.copyWith(
+      color: foregroundColor,
+      fontWeight: FontWeight.bold,
+    ),
+  );
 }
