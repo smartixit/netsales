@@ -46,6 +46,7 @@ class NetworkOperatingExpensesScreen extends GetView<NetworkOperatingExpensesCon
             hint: 'ابحث بوصف البند أو رقم المصروف',
             prefixIcon: const Icon(Icons.search_rounded),
             isRequired: false,
+            onChanged: controller.onSearchChanged,
             onFieldSubmitted: (v) => controller.applyFilters(search: v),
           ),
           AppSpacing.vMd,
