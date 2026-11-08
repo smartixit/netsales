@@ -73,6 +73,9 @@ class TestFinanceRepository implements FinanceRepository {
   PaginatedList<NetworkWalletLogEntity> networkLogs = const PaginatedList(
     items: [],
   );
+  bool failNetworkLogs = false;
+  bool failPosLogs = false;
+  bool failOutstandingInvoices = false;
 
   @override
   Future<PaginatedList<PosWalletEntity>> getPosWallets({
@@ -96,7 +99,10 @@ class TestFinanceRepository implements FinanceRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) async => posLogs;
+  }) async {
+    if (failPosLogs) throw Exception('POS wallet log request failed');
+    return posLogs;
+  }
 
   @override
   Future<DebtSummaryEntity> getDebtSummary({
@@ -117,7 +123,12 @@ class TestFinanceRepository implements FinanceRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) async => invoices;
+  }) async {
+    if (failOutstandingInvoices) {
+      throw Exception('Outstanding invoice request failed');
+    }
+    return invoices;
+  }
 
   @override
   Future<PaginatedList<PosRepaymentEntity>> getRepayments({
@@ -185,7 +196,10 @@ class TestFinanceRepository implements FinanceRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) async => networkLogs;
+  }) async {
+    if (failNetworkLogs) throw Exception('Network wallet log request failed');
+    return networkLogs;
+  }
 
   @override
   Future<void> transferFromNetworkToPos({
@@ -450,6 +464,79 @@ void main() {
       expect(controller.isLoading.value, isFalse);
       expect(controller.repayments.length, 1);
       expect(controller.repayments[0].amount, 250000);
+    });
+
+    test('POS wallet log failure is exposed separately from an empty ledger', () async {
+      repository.posWallets = const PaginatedList(
+        items: [
+          PosWalletEntity(
+            walletId: 1,
+            networkId: 1,
+            posId: 5,
+            walletBalance: 120000,
+          ),
+        ],
+      );
+      repository.failPosLogs = true;
+
+      final controller = PosWalletDashboardController(
+        getPosWalUseCase: GetPosWalUseCase(repository),
+        getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+      );
+
+      await controller.loadWallets();
+
+      expect(controller.wallets, hasLength(1));
+      expect(controller.logs, isEmpty);
+      expect(controller.logsErrorMessage.value, isNotNull);
+      expect(controller.isLoadingLogs.value, isFalse);
+    });
+
+    test('Network wallet log failure is exposed separately from an empty ledger', () async {
+      repository.networkWallets = const PaginatedList(
+        items: [
+          NetworkWalletEntity(
+            walletId: 1,
+            networkId: 1,
+            walletBalance: 8400000,
+          ),
+        ],
+      );
+      repository.failNetworkLogs = true;
+
+      final controller = NetworkWalletDashboardController(
+        getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
+        getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+      );
+
+      await controller.loadWallets();
+
+      expect(controller.wallets, hasLength(1));
+      expect(controller.logs, isEmpty);
+      expect(controller.logsErrorMessage.value, isNotNull);
+      expect(controller.isLoadingLogs.value, isFalse);
+    });
+
+    test('Outstanding invoice failure is not represented as no debt', () async {
+      repository.debtSummary = const DebtSummaryEntity(
+        totalReceivables: 850000,
+        unpaidInvoicesCount: 2,
+        partiallyPaidInvoicesCount: 2,
+        agingBuckets: {'0_30': 850000},
+      );
+      repository.failOutstandingInvoices = true;
+
+      final controller = PosDebtLedgerController(
+        getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+        getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+      );
+
+      await controller.loadDebtData();
+
+      expect(controller.summary.value, isNotNull);
+      expect(controller.outstandingInvoices, isEmpty);
+      expect(controller.invoicesErrorMessage.value, isNotNull);
+      expect(controller.isLoadingInvoices.value, isFalse);
     });
 
     test(
