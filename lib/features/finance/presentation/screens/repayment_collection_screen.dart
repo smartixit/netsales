@@ -88,6 +88,7 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                     searchEnabled: controller.networks.length > 5,
                     isRequired: true,
                     rxValue: controller.selectedNetworkId,
+                    enabled: !controller.isSubmitting.value,
                     items: controller.networks.map((network) {
                       return DropdownItem<int>(
                         value: network.networkId,
@@ -120,7 +121,8 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                               : 'ابحث عن نقطة البيع المستفيدة',
                     searchEnabled: controller.posList.length > 5,
                     isRequired: true,
-                    enabled: controller.selectedNetworkId.value != null,
+                    enabled: controller.selectedNetworkId.value != null &&
+                        !controller.isSubmitting.value,
                     rxValue: controller.selectedPosId,
                     isSearching: controller.isLoadingPos.value,
                     onRemoteSearch: controller.searchPosForNetwork,
@@ -148,42 +150,57 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
               );
             }),
             AppSpacing.vMd,
-            CustomTextField(
-              controller: controller.amountController,
-              label: 'مبلغ التحصيل والسداد',
-              hint: 'أدخل المبلغ المحصل...',
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              isRequired: true,
-            ),
-            AppSpacing.vMd,
-            CustomTextField(
-              controller: controller.refController,
-              label: 'رقم الإشعار / المرجع (اختياري)',
-              hint: 'مثال: REF-990021...',
-              isRequired: false,
-            ),
-            AppSpacing.vMd,
-            CustomTextField(
-              controller: controller.notesController,
-              label: 'ملاحظات السداد (اختياري)',
-              hint: 'أي تفاصيل متعلقة بالتحصيل...',
-              maxLines: 2,
-              isRequired: false,
-            ),
+            Obx(() {
+              final isSubmitting = controller.isSubmitting.value;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomTextField(
+                    controller: controller.amountController,
+                    label: 'مبلغ التحصيل والسداد',
+                    hint: 'أدخل المبلغ المحصل...',
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    isRequired: true,
+                    enabled: !isSubmitting,
+                  ),
+                  AppSpacing.vMd,
+                  CustomTextField(
+                    controller: controller.refController,
+                    label: 'رقم الإشعار / المرجع (اختياري)',
+                    hint: 'مثال: REF-990021...',
+                    isRequired: false,
+                    enabled: !isSubmitting,
+                  ),
+                  AppSpacing.vMd,
+                  CustomTextField(
+                    controller: controller.notesController,
+                    label: 'ملاحظات السداد (اختياري)',
+                    hint: 'أي تفاصيل متعلقة بالتحصيل...',
+                    maxLines: 2,
+                    isRequired: false,
+                    enabled: !isSubmitting,
+                  ),
+                ],
+              );
+            }),
             AppSpacing.vXl,
-            CustomButton(
-              text: 'تأكيد التحصيل والتوزيع السيادي (FIFO)',
-              icon: Icons.check_circle_outline,
-              onPressed: () async {
-                final ok = await controller.submitRepayment();
-                if (ok) {
-                  controller.amountController.clear();
-                  controller.refController.clear();
-                  controller.notesController.clear();
-                }
-              },
+            Obx(
+              () => CustomButton(
+                text: 'تأكيد التحصيل والتوزيع السيادي (FIFO)',
+                icon: Icons.check_circle_outline,
+                loading: controller.isSubmitting.value,
+                enabled: !controller.isSubmitting.value,
+                onPressed: () async {
+                  final ok = await controller.submitRepayment();
+                  if (ok) {
+                    controller.amountController.clear();
+                    controller.refController.clear();
+                    controller.notesController.clear();
+                  }
+                },
+              ),
             ),
           ],
         ),

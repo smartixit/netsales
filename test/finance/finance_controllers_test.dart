@@ -473,6 +473,27 @@ void main() {
       },
     );
 
+    test('Repayment beneficiary cannot change while collection is submitting', () async {
+      final controller = RepaymentCollectionController(
+        collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+        getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
+      );
+      controller.selectedNetworkId.value = 7;
+      controller.selectedPosId.value = 22;
+      controller.isSubmitting.value = true;
+
+      await controller.onNetworkChanged(8);
+      controller.onPosChanged(33);
+      await controller.loadPosForNetwork(7);
+      await controller.searchPosForNetwork('different beneficiary');
+
+      expect(controller.selectedNetworkId.value, 7);
+      expect(controller.selectedPosId.value, 22);
+      expect(commercialRepository.requestedNetworkIds, isEmpty);
+      expect(controller.isLoadingPos.value, isFalse);
+    });
+
     test('Repayment beneficiary remote search uses the server and rejects stale results', () async {
       const oldPos = PosEntity(
         posId: 11,

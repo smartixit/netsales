@@ -59,7 +59,7 @@ class RepaymentCollectionController extends GetxController {
   }
 
   Future<void> loadInitialData() async {
-    if (isLoadingInitial.value) return;
+    if (isLoadingInitial.value || isSubmitting.value) return;
     isLoadingInitial.value = true;
     initialErrorMessage.value = null;
     try {
@@ -92,6 +92,7 @@ class RepaymentCollectionController extends GetxController {
     String? search,
     bool preserveSelection = false,
   }) async {
+    if (isSubmitting.value) return;
     final revision = ++_posLoadRevision;
     if (!preserveSelection) {
       selectedPosId.value = null;
@@ -148,6 +149,7 @@ class RepaymentCollectionController extends GetxController {
   }
 
   Future<void> searchPosForNetwork(String query) async {
+    if (isSubmitting.value) return;
     final networkId = selectedNetworkId.value;
     if (networkId == null) return;
     await loadPosForNetwork(
@@ -158,14 +160,20 @@ class RepaymentCollectionController extends GetxController {
   }
 
   void onPosChanged(int? posId) {
+    if (isSubmitting.value) return;
     selectedPosId.value = posId;
-    selectedPos.value = posId == null
-        ? null
-        : posList.firstWhereOrNull((pos) => pos.posId == posId);
+    if (posId == null) {
+      selectedPos.value = null;
+      return;
+    }
+    selectedPos.value = posList.firstWhereOrNull(
+          (pos) => pos.posId == posId,
+        ) ??
+        (selectedPos.value?.posId == posId ? selectedPos.value : null);
   }
 
   Future<void> onNetworkChanged(int? netId) async {
-    if (netId == null) return;
+    if (netId == null || isSubmitting.value) return;
     // CustomDropdown writes to selectedNetworkId before calling onChanged.
     // Do not compare against the notifier here or the linked POS refresh is skipped.
     selectedNetworkId.value = netId;
