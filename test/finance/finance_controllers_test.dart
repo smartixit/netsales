@@ -122,6 +122,7 @@ class TestFinanceRepository implements FinanceRepository {
   );
   final Map<String, PaginatedList<NetworkWalletEntity>> networkWalletPages = {};
   final List<String?> requestedNetworkWalletCursors = [];
+  final Set<String> failedNetworkWalletPageCursors = {};
   PaginatedList<NetworkWalletLogEntity> networkLogs = const PaginatedList(
     items: [],
   );
@@ -263,6 +264,9 @@ class TestFinanceRepository implements FinanceRepository {
     int? perPage,
   }) async {
     requestedNetworkWalletCursors.add(cursor);
+    if (cursor != null && failedNetworkWalletPageCursors.contains(cursor)) {
+      throw Exception('Network wallet page request failed');
+    }
     return cursor == null
         ? networkWallets
         : networkWalletPages[cursor] ?? const PaginatedList(items: []);
@@ -1302,6 +1306,7 @@ void main() {
           items: [wallet],
           nextCursor: 'missing-page',
         );
+        repository.failedNetworkWalletPageCursors.add('missing-page');
 
         final controller = NetworkWalletDashboardController(
           getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
