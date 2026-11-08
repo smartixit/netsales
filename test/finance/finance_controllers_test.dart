@@ -89,7 +89,11 @@ class MockCommercialRepository implements CommercialRepository {
     final searchKey = search ?? '';
     final pending = pendingPosNetworkSearches[searchKey];
     if (pending != null) return pending.future;
-    return posNetworkSearchResults[searchKey] ?? posNetworkLinks;
+    if (search != null && search.isNotEmpty) {
+      return posNetworkSearchResults[searchKey] ??
+          const PaginatedList(items: []);
+    }
+    return posNetworkLinks;
   }
 
   @override
@@ -785,6 +789,31 @@ void main() {
         agingBuckets: {'0_30': 850000},
       );
       repository.failOutstandingInvoices = true;
+      commercialRepository.myPos = [
+        const PosEntity(
+          posId: 2,
+          ownerId: 1,
+          posUuid: 'pos-2',
+          posName: 'نقطة البيع الرئيسية',
+          posPhoneNumber: '777000111',
+        ),
+      ];
+      commercialRepository.posNetworkLinks = const PaginatedList(
+        items: [
+          NetworkPosLinkEntity(
+            networkPosId: 20,
+            networkId: 1,
+            posId: 2,
+            status: true,
+            network: NetworkEntity(
+              networkId: 1,
+              ownerId: 1,
+              networkName: 'شبكة السرعة',
+              networkPhoneNumber: '777111222',
+            ),
+          ),
+        ],
+      );
 
       final controller = PosDebtLedgerController(
         getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
@@ -794,7 +823,7 @@ void main() {
             GetPosNetworksListUseCase(commercialRepository),
       );
 
-      await controller.loadDebtData();
+      await controller.initializeScope();
 
       expect(controller.summary.value, isNotNull);
       expect(controller.outstandingInvoices, isEmpty);

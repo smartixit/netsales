@@ -34,7 +34,9 @@ class PosDebtLedgerController extends GetxController {
   final networksErrorMessage = RxnString();
   final networkSearchErrorMessage = RxnString();
   final networkSearchQuery = ''.obs;
+  final networkSearchHasNoResults = false.obs;
   final networkNextCursor = RxnString();
+  final requiresNetworkSelection = false.obs;
 
   final summary = Rxn<DebtSummaryEntity>();
   final outstandingInvoices = <InvoiceEntity>[].obs;
@@ -80,6 +82,22 @@ class PosDebtLedgerController extends GetxController {
 
   NetworkPosLinkEntity? _selectedNetworkFallback;
 
+  String posName(int posId) {
+    for (final pos in posOptions) {
+      if (pos.posId == posId) return pos.posName;
+    }
+    return 'نقطة البيع رقم $posId';
+  }
+
+  String networkName(int networkId) {
+    for (final link in networkLinks) {
+      if (link.networkId == networkId) return networkLabel(link);
+    }
+    final selected = _selectedNetworkFallback;
+    if (selected?.networkId == networkId) return networkLabel(selected!);
+    return 'مزود الشبكة رقم $networkId';
+  }
+
   String networkLabel(NetworkPosLinkEntity link) {
     final name = link.network?.networkName.trim();
     return name != null && name.isNotEmpty
@@ -103,6 +121,8 @@ class PosDebtLedgerController extends GetxController {
     scopeErrorMessage.value = null;
     networksErrorMessage.value = null;
     networkSearchErrorMessage.value = null;
+    networkSearchHasNoResults.value = false;
+    requiresNetworkSelection.value = false;
     posOptions.clear();
     networkLinks.clear();
     networkNextCursor.value = null;
@@ -171,7 +191,10 @@ class PosDebtLedgerController extends GetxController {
     networkNextCursor.value = null;
     networksErrorMessage.value = null;
     networkSearchErrorMessage.value = null;
+    networkSearchHasNoResults.value = false;
+    requiresNetworkSelection.value = false;
     networkSearchQuery.value = '';
+    networkSearchHasNoResults.value = false;
 
     await loadNetworksForSelectedPos();
   }
@@ -204,6 +227,7 @@ class PosDebtLedgerController extends GetxController {
     if (isSearch) {
       isSearchingNetworks.value = true;
       networkSearchErrorMessage.value = null;
+      networkSearchHasNoResults.value = false;
     } else {
       isLoadingNetworks.value = true;
       networksErrorMessage.value = null;
@@ -231,14 +255,25 @@ class PosDebtLedgerController extends GetxController {
         }
       }
 
-      networkLinks.assignAll(uniqueLinks);
-      networkNextCursor.value = result.nextCursor;
+      if (isSearch && search != null && uniqueLinks.isEmpty) {
+        // Preserve the last usable options and selected scope when the query
+        // has no matches; the UI shows a contextual no-results hint instead.
+        networkSearchHasNoResults.value = true;
+      } else {
+        networkLinks.assignAll(uniqueLinks);
+        networkNextCursor.value = result.nextCursor;
+      }
 
-      if (!isSearch &&
-          selectedNetworkId.value == null &&
-          uniqueLinks.length == 1 &&
-          result.nextCursor == null) {
-        autoSelectNetworkId = uniqueLinks.single.networkId;
+      if (!isSearch) {
+        final hasMultipleNetworks =
+            uniqueLinks.length > 1 || result.nextCursor != null;
+        requiresNetworkSelection.value = hasMultipleNetworks;
+
+        if (selectedNetworkId.value == null &&
+            uniqueLinks.length == 1 &&
+            result.nextCursor == null) {
+          autoSelectNetworkId = uniqueLinks.single.networkId;
+        }
       }
 
       if (isSearch &&
@@ -261,6 +296,7 @@ class PosDebtLedgerController extends GetxController {
           selectedPosId.value == posId) {
         if (isSearch) {
           networkSearchErrorMessage.value = e.message;
+        networkSearchHasNoResults.value = false;
         } else {
           networksErrorMessage.value = e.message;
         }
@@ -274,6 +310,7 @@ class PosDebtLedgerController extends GetxController {
         );
         if (isSearch) {
           networkSearchErrorMessage.value = message;
+          networkSearchHasNoResults.value = false;
         } else {
           networksErrorMessage.value = message;
         }

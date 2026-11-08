@@ -158,7 +158,8 @@ class DebtScopeSelector extends StatelessWidget {
         );
       }
 
-      if (controller.networkLinks.isEmpty) {
+      if (controller.networkLinks.isEmpty &&
+          !controller.requiresNetworkSelection.value) {
         return CustomEmptyState(
           icon: Icons.link_off_outlined,
           title: 'لا يوجد مزود شبكة مرتبط',
@@ -166,7 +167,8 @@ class DebtScopeSelector extends StatelessWidget {
         );
       }
 
-      final needsSelection = controller.networkLinks.length > 1 ||
+      final needsSelection =
+          controller.requiresNetworkSelection.value ||
           controller.hasMoreNetworkOptions;
 
       if (!needsSelection) {
@@ -225,6 +227,14 @@ class DebtScopeSelector extends StatelessWidget {
               subtitle: controller.networkSearchErrorMessage.value,
               onRetry: () => controller.searchNetworks(
                 controller.networkSearchQuery.value,
+              ),
+            ),
+          ] else if (controller.networkSearchHasNoResults.value) ...[
+            AppSpacing.vXs,
+            Text(
+              'لا توجد نتائج مطابقة لعبارة البحث. ما زال مزود الشبكة المحدد محفوظًا.',
+              style: AppTypography.bodySmall.copyWith(
+                color: colors.onSurfaceVariant,
               ),
             ),
           ],
