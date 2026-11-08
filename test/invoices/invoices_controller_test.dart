@@ -47,8 +47,12 @@ class MockInvoiceRepository implements InvoiceRepository {
     required int posId,
     required SaleType saleType,
     required List<DirectInvoiceItemInput> items,
+    required String idempotencyKey,
   }) async {
-    if (networkId <= 0 || posId <= 0 || items.isEmpty) {
+    if (networkId <= 0 ||
+        posId <= 0 ||
+        items.isEmpty ||
+        idempotencyKey.trim().isEmpty) {
       throw ArgumentError('Invalid direct invoice test payload.');
     }
     return mockDetails ??
