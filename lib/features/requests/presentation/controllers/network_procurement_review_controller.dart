@@ -54,7 +54,7 @@ class NetworkProcurementReviewController extends GetxController {
   final searchController = TextEditingController();
   final searchQuery = ''.obs;
   final statusFilter = RxnString(); // null = all, PENDING, APPROVED, REJECTED
-  final selectedNetworkId = ValueNotifier<int?>(null);
+  final selectedNetworkId = RxnInt();
 
   // شبكات المشغل التابعة
   final authorizedNetworks = <NetworkEntity>[].obs;
@@ -281,7 +281,6 @@ class NetworkProcurementReviewController extends GetxController {
   void onClose() {
     searchController.dispose();
     modificationNoteController.dispose();
-    selectedNetworkId.dispose();
     super.onClose();
   }
 
