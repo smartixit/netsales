@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -11,6 +12,7 @@ import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_li
 import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
 
+/// Reactive POS home state and tenant-scoped network account selection.
 class PosWorkspaceController extends GetxController {
   PosWorkspaceController({
     required this.getMyPosUseCase,
@@ -43,9 +45,9 @@ class PosWorkspaceController extends GetxController {
   final RxBool hasMoreNetworks = false.obs;
   final RxInt currentNetworkIndex = 0.obs;
 
+  int _posGeneration = 0;
   int _networkGeneration = 0;
   int _walletGeneration = 0;
-  bool _networkRequestInFlight = false;
 
   String get userName {
     final name = SessionService.to.currentUser?.userFullName.trim() ?? '';
@@ -70,79 +72,94 @@ class PosWorkspaceController extends GetxController {
 
   Future<void> loadWorkspace() async {
     await loadPosTenants();
-    final pos = activePos.value;
-    if (pos != null) await loadNetworks(pos.posId);
+    final posId = activePos.value?.posId;
+    if (posId != null) {
+      await loadNetworks(posId);
+    }
   }
 
   Future<void> loadPosTenants() async {
     if (isLoadingPos.value) return;
+    final generation = ++_posGeneration;
     isLoadingPos.value = true;
     posError.value = null;
+
     try {
-      final result = await getMyPosUseCase();
-      final posList = result;
-      availablePos.assignAll(posList);
-      if (posList.isEmpty) {
-        activePos.value = null;
-        networkLinks.clear();
-        selectedNetworkLink.value = null;
-        selectedWallet.value = null;
-        return;
-      }
-      final savedId = StorageService.instance.getInt(
-        StorageKeys.activePosTenantId,
+      final positions = await getMyPosUseCase();
+      if (generation != _posGeneration) return;
+
+      final previousPosId = activePos.value?.posId;
+      availablePos.assignAll(positions);
+
+      final savedPosId = StorageService.instance.getInt(
+        _posStorageKey,
       );
-      final saved = posList.where((item) => item.posId == savedId);
-      activePos.value = saved.isNotEmpty
-          ? saved.first
-          : (posList.length == 1 ? posList.first : null);
-      if (activePos.value != null) {
+      final savedPosition = positions.firstWhereOrNull(
+        (position) => position.posId == savedPosId,
+      );
+      final resolvedPosition = savedPosition ??
+          (positions.length == 1 ? positions.first : null);
+
+      if (resolvedPosition?.posId != previousPosId) {
+        _clearNetworkContext();
+      }
+      activePos.value = resolvedPosition;
+
+      if (resolvedPosition != null) {
         await StorageService.instance.setInt(
-          StorageKeys.activePosTenantId,
-          activePos.value!.posId,
+          _posStorageKey,
+          resolvedPosition.posId,
         );
       }
     } catch (error) {
-      posError.value = error.toString();
+      if (generation == _posGeneration) {
+        posError.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تحميل نقاط البيع المصرح بها.',
+        );
+      }
     } finally {
-      isLoadingPos.value = false;
+      if (generation == _posGeneration) {
+        isLoadingPos.value = false;
+      }
     }
   }
 
   Future<void> selectPos(PosEntity pos) async {
     if (activePos.value?.posId == pos.posId) return;
+
     activePos.value = pos;
-    networkLinks.clear();
-    selectedNetworkLink.value = null;
-    selectedWallet.value = null;
-    currentNetworkIndex.value = 0;
-    networkCursor.value = null;
-    hasMoreNetworks.value = false;
-    _networkGeneration++;
-    _walletGeneration++;
-    await StorageService.instance.setInt(
-      StorageKeys.activePosTenantId,
-      pos.posId,
-    );
+    _clearNetworkContext();
+    await StorageService.instance.setInt(_posStorageKey, pos.posId);
     await loadNetworks(pos.posId);
   }
 
   Future<void> loadNetworks(int posId, {bool refresh = true}) async {
-    if (_networkRequestInFlight) return;
-    if (!refresh && (!hasMoreNetworks.value || isLoadingMoreNetworks.value)) {
+    if (activePos.value?.posId != posId) return;
+    if (!refresh &&
+        (!hasMoreNetworks.value ||
+            isLoadingNetworks.value ||
+            isLoadingMoreNetworks.value)) {
       return;
     }
-    _networkRequestInFlight = true;
+
     final generation = ++_networkGeneration;
     if (refresh) {
       isLoadingNetworks.value = true;
+      isLoadingMoreNetworks.value = false;
       networksError.value = null;
       networkLinks.clear();
       networkCursor.value = null;
       hasMoreNetworks.value = false;
+      selectedNetworkLink.value = null;
+      selectedWallet.value = null;
+      currentNetworkIndex.value = 0;
+      ++_walletGeneration;
+      isLoadingWallet.value = false;
     } else {
       isLoadingMoreNetworks.value = true;
     }
+
     try {
       final result = await getPosNetworksListUseCase(
         posId,
@@ -150,79 +167,155 @@ class PosWorkspaceController extends GetxController {
         status: true,
         perPage: 12,
       );
+
       if (generation != _networkGeneration ||
-          activePos.value?.posId != posId) return;
+          activePos.value?.posId != posId) {
+        return;
+      }
+
       final knownIds = networkLinks.map((item) => item.networkId).toSet();
-      networkLinks.addAll(
-        result.items.where((item) => !knownIds.contains(item.networkId)),
-      );
+      for (final link in result.items) {
+        if (knownIds.add(link.networkId)) {
+          networkLinks.add(link);
+        }
+      }
       networkCursor.value = result.nextCursor;
       hasMoreNetworks.value = result.hasMore;
+
       if (selectedNetworkLink.value == null && networkLinks.isNotEmpty) {
-        final savedId = StorageService.instance.getInt(_networkStorageKey(posId));
-        final saved = networkLinks.where((item) => item.networkId == savedId);
-        final first = saved.isNotEmpty ? saved.first : networkLinks.first;
-        await selectNetwork(first, index: networkLinks.indexOf(first));
+        final savedNetworkId = StorageService.instance.getInt(
+          _networkStorageKey(posId),
+        );
+        final savedLink = networkLinks.firstWhereOrNull(
+          (link) => link.networkId == savedNetworkId && link.status,
+        );
+        final initialLink = savedLink ?? networkLinks.first;
+        await selectNetwork(
+          initialLink,
+          index: networkLinks.indexOf(initialLink),
+        );
       }
     } catch (error) {
-      if (generation == _networkGeneration) networksError.value = error.toString();
+      if (generation == _networkGeneration) {
+        networksError.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تحميل الشبكات المرتبطة بنقطة البيع.',
+        );
+      }
     } finally {
       if (generation == _networkGeneration) {
         isLoadingNetworks.value = false;
         isLoadingMoreNetworks.value = false;
       }
-      _networkRequestInFlight = false;
     }
   }
 
   Future<void> selectNetwork(
     NetworkPosLinkEntity link, {
     int? index,
+    bool forceRefresh = false,
   }) async {
     final posId = activePos.value?.posId;
     if (posId == null || !link.status) return;
+
+    final isSameNetwork =
+        selectedNetworkLink.value?.networkId == link.networkId;
+    if (isSameNetwork &&
+        !forceRefresh &&
+        (selectedWallet.value != null || isLoadingWallet.value)) {
+      return;
+    }
+
     selectedNetworkLink.value = link;
     currentNetworkIndex.value = index ?? networkLinks.indexOf(link);
     selectedWallet.value = null;
     walletError.value = null;
-    await StorageService.instance.setInt(
-      _networkStorageKey(posId),
-      link.networkId,
-    );
+
     final generation = ++_walletGeneration;
     isLoadingWallet.value = true;
     try {
+      await StorageService.instance.setInt(
+        _networkStorageKey(posId),
+        link.networkId,
+      );
+      if (generation != _walletGeneration) return;
+
       final wallet = await getPosWalletByNetworkAndPosUseCase(
         link.networkId,
         posId,
       );
       if (generation != _walletGeneration ||
           activePos.value?.posId != posId ||
-          selectedNetworkLink.value?.networkId != link.networkId) return;
+          selectedNetworkLink.value?.networkId != link.networkId) {
+        return;
+      }
       selectedWallet.value = wallet;
     } catch (error) {
-      if (generation == _walletGeneration) walletError.value = error.toString();
+      if (generation == _walletGeneration) {
+        walletError.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تحميل الحساب المالي لهذه الشبكة.',
+        );
+      }
     } finally {
-      if (generation == _walletGeneration) isLoadingWallet.value = false;
+      if (generation == _walletGeneration) {
+        isLoadingWallet.value = false;
+      }
     }
   }
 
   Future<void> onNetworkPageChanged(int index) async {
     if (index < 0 || index >= networkLinks.length) return;
     await selectNetwork(networkLinks[index], index: index);
+
     if (index >= networkLinks.length - 2 && hasMoreNetworks.value) {
       final posId = activePos.value?.posId;
-      if (posId != null) await loadNetworks(posId, refresh: false);
+      if (posId != null) {
+        await loadNetworks(posId, refresh: false);
+      }
     }
   }
 
   Future<void> retryNetworks() async {
     final posId = activePos.value?.posId;
-    if (posId != null) await loadNetworks(posId);
+    if (posId != null) {
+      await loadNetworks(posId);
+    }
   }
+
+  Future<void> retrySelectedWallet() async {
+    final link = selectedNetworkLink.value;
+    if (link == null) return;
+    await selectNetwork(
+      link,
+      index: currentNetworkIndex.value,
+      forceRefresh: true,
+    );
+  }
+
+  String get _posStorageKey =>
+      '${StorageKeys.activePosTenantPrefix}_${SessionService.to.currentUser?.userId ?? 0}';
 
   String _networkStorageKey(int posId) =>
       '${StorageKeys.activePosNetworkPrefix}_${SessionService.to.currentUser?.userId ?? 0}_$posId';
 
-  void onNavItemSelected(int index) => selectedNavIndex.value = index;
+  void _clearNetworkContext() {
+    ++_networkGeneration;
+    ++_walletGeneration;
+    networkLinks.clear();
+    selectedNetworkLink.value = null;
+    selectedWallet.value = null;
+    networkCursor.value = null;
+    hasMoreNetworks.value = false;
+    currentNetworkIndex.value = 0;
+    isLoadingNetworks.value = false;
+    isLoadingMoreNetworks.value = false;
+    isLoadingWallet.value = false;
+    networksError.value = null;
+    walletError.value = null;
+  }
+
+  void onNavItemSelected(int index) {
+    selectedNavIndex.value = index;
+  }
 }
