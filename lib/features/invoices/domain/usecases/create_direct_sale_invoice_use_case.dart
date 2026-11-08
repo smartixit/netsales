@@ -15,9 +15,13 @@ class CreateDirectSaleInvoiceUseCase {
     required int posId,
     required SaleType saleType,
     required List<DirectInvoiceItemInput> items,
+    required String idempotencyKey,
   }) {
     if (networkId <= 0 || posId <= 0 || items.isEmpty) {
       throw ArgumentError('Direct invoice requires a network, POS and items.');
+    }
+    if (idempotencyKey.trim().isEmpty) {
+      throw ArgumentError.value(idempotencyKey, 'idempotencyKey');
     }
     if (saleType == SaleType.unknown) {
       throw ArgumentError.value(saleType, 'saleType');
@@ -31,6 +35,7 @@ class CreateDirectSaleInvoiceUseCase {
       posId: posId,
       saleType: saleType,
       items: items,
+      idempotencyKey: idempotencyKey,
     );
   }
 }
