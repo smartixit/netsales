@@ -376,11 +376,11 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   /// تغيير الشبكة المحددة
-  void onNetworkFilterChanged(int? networkId) {
+  Future<void> onNetworkFilterChanged(int? networkId) async {
     // CustomDropdown updates its ValueNotifier before invoking onChanged.
     // Always refresh here; comparing the current value would skip the request.
     selectedNetworkId.value = networkId;
-    loadRequests(isRefresh: true);
+    await loadRequests(isRefresh: true);
   }
 
   /// مراجعة واعتماد طلب الكروت وتوليد الفاتورة آلياً
