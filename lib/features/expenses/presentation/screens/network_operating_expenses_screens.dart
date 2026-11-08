@@ -356,12 +356,29 @@ class _ExpenseItemFields {
   void dispose() { statement.dispose(); amount.dispose(); }
 }
 
-class NetworkExpenseDetailsScreen extends GetView<NetworkOperatingExpensesController> {
+class NetworkExpenseDetailsScreen extends StatefulWidget {
   const NetworkExpenseDetailsScreen({super.key, required this.expenseId});
   final int expenseId;
+
+  @override
+  State<NetworkExpenseDetailsScreen> createState() => _NetworkExpenseDetailsScreenState();
+}
+
+class _NetworkExpenseDetailsScreenState extends State<NetworkExpenseDetailsScreen> {
+  late final NetworkOperatingExpensesController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<NetworkOperatingExpensesController>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) controller.loadDetails(widget.expenseId);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    controller.loadDetails(expenseId);
+    final expenseId = widget.expenseId;
     return CustomAppScaffold(
       showBackButton: true,
       appBarTitle: 'تفاصيل المصروف #$expenseId',
