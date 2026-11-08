@@ -25,7 +25,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
     while (true) {
       final query = <String, dynamic>{
         'per_page': pageSize,
-        if (cursor != null) 'cursor': cursor,
+        'cursor': ?cursor,
       };
       final response = await _remoteDataSource.getMyNetworks(query: query);
 
@@ -67,7 +67,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
     while (true) {
       final query = <String, dynamic>{
         'per_page': pageSize,
-        if (cursor != null) 'cursor': cursor,
+        'cursor': ?cursor,
       };
       final response = await _remoteDataSource.getMyPos(query: query);
 
