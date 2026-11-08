@@ -930,7 +930,13 @@ void main() {
           ),
         );
         commercialRepository.myPos = [
-          const PosEntity(posId: 5, posName: 'نقطة البيع'),
+          const PosEntity(
+            posId: 5,
+            ownerId: 1,
+            posUuid: 'pos-5',
+            posName: 'نقطة البيع',
+            posPhoneNumber: '777000555',
+          ),
         ];
         commercialRepository.posNetworkLinks = const PaginatedList(
           items: [firstNetwork],
