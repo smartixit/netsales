@@ -37,6 +37,13 @@ import 'package:netsales/features/invoices/presentation/bindings/invoice_binding
 import 'package:netsales/features/invoices/presentation/screens/invoice_details_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/network_wholesale_invoices_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
+import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
+import 'package:netsales/features/finance/presentation/screens/network_wallet_dashboard_screen.dart';
+import 'package:netsales/features/finance/presentation/screens/pos_debt_ledger_screen.dart';
+import 'package:netsales/features/finance/presentation/screens/pos_wallet_dashboard_screen.dart';
+import 'package:netsales/features/finance/presentation/screens/repayment_collection_screen.dart';
+import 'package:netsales/features/finance/presentation/screens/repayment_details_screen.dart';
+import 'package:netsales/features/finance/presentation/screens/repayment_history_screen.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
 import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -277,9 +284,7 @@ abstract final class AppPages {
       name: AppRoutes.voucherRequestDetails,
       page: () => const ProcurementRequestDetailsScreen(),
       binding: ProcurementRequestBinding(),
-      middlewares: [
-        AuthGuard(),
-      ],
+      middlewares: [AuthGuard()],
     ),
 
     // ==========================================
@@ -322,6 +327,64 @@ abstract final class AppPages {
       ],
     ),
 
+    // ==========================================
+    // 10. المحافظ المالية والديون والتسديدات (Finance, Wallets & Repayments M8)
+    // ==========================================
+    // كشف رصيد وحركات محفظة نقطة البيع (M8.1)
+    GetPage(
+      name: AppRoutes.posWalletStatement,
+      page: () => const PosWalletDashboardScreen(),
+      binding: FinanceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+    // كشف أعمار الديون والفواتير المستحقة لنقطة البيع (M8.2)
+    GetPage(
+      name: AppRoutes.posDebtLedger,
+      page: () => const PosDebtLedgerScreen(),
+      binding: FinanceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+    // نموذج تحصيل تسديد دين نقطة البيع (M8.3 Network)
+    GetPage(
+      name: AppRoutes.repaymentCollection,
+      page: () => const RepaymentCollectionScreen(),
+      binding: FinanceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    // سجل سندات التسديد وتوزيعات FIFO (M8.3)
+    GetPage(
+      name: AppRoutes.repaymentHistory,
+      page: () => const RepaymentHistoryScreen(),
+      binding: FinanceBinding(),
+      middlewares: [AuthGuard()],
+    ),
+    // تفاصيل سند التسديد وتوزيعات الفواتير (M8.3)
+    GetPage(
+      name: AppRoutes.repaymentDetails,
+      page: () => const RepaymentDetailsScreen(),
+      binding: FinanceBinding(),
+      middlewares: [AuthGuard()],
+    ),
+    // لوحة تحكم وكشف حساب محفظة مزود الشبكة (M8.4 Network)
+    GetPage(
+      name: AppRoutes.networkWalletStatement,
+      page: () => const NetworkWalletDashboardScreen(),
+      binding: FinanceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+
     // Developer-only visual verification; omitted from release builds.
     if (kDebugMode)
       GetPage<dynamic>(
@@ -343,6 +406,5 @@ abstract final class AppPages {
         page: () => const DataGridShowcaseScreen(),
         binding: DataGridShowcaseBinding(),
       ),
-
   ];
 }

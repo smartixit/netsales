@@ -60,6 +60,7 @@ abstract final class AppRoutes {
   static const String voucherRequestDetails =
       '/network/voucher-request-details';
   static const String saleInvoiceDetails = '/network/sale-invoice-details';
+  static const String repaymentCollection = '/network/repayments/collect';
 
   // ----------------------------------------------------------------------------
   // مسارات تشغيلية فرعية لمساحة عمل نقطة البيع (POS Sub-Routes)
@@ -67,16 +68,24 @@ abstract final class AppRoutes {
   static const String newProcurementOrder = '/pos/new-procurement-order';
   static const String purchaseInvoices = '/pos/purchase-invoices';
   static const String posWalletStatement = '/pos/wallet-statement';
+  static const String posDebtLedger = '/pos/debt-ledger';
   static const String procurementOrders = '/pos/procurement-orders';
   static const String linkedNetworksCatalog = '/pos/linked-networks';
   static const String posStaffManagement = '/pos/staff-management';
   static const String purchaseInvoiceDetails = '/pos/purchase-invoice-details';
 
   // ----------------------------------------------------------------------------
+  // مسارات التسديدات المالية (Financial Repayments Routes)
+  // ----------------------------------------------------------------------------
+  static const String repaymentHistory = '/repayments/history';
+  static const String repaymentDetails = '/repayments/details';
+
+  // ----------------------------------------------------------------------------
   // مسارات الأمان الموحدة لكافة البيئات (Security Routes)
   // ----------------------------------------------------------------------------
   static const String activeSessions = '/security/active-sessions';
   static const String securitySettings = '/security/settings';
+
   /// Developer-only reusable DataGrid showcase.
   static const String dataGridShowcase = '/dev/data-grid';
 
