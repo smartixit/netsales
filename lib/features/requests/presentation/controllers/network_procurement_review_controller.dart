@@ -12,6 +12,7 @@ import 'package:netsales/features/requests/domain/entities/request_modification_
 import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -24,6 +25,8 @@ class NetworkProcurementReviewController extends GetxController {
   final GetMyNetworksUseCase? getMyNetworksUseCase;
   final PreviewRequestModificationUseCase previewRequestModificationUseCase;
   final GetPackagesUseCase getPackagesUseCase;
+  final GetRequestDetailsUseCase getRequestDetailsUseCase;
+  int _modificationRevision = 0;
 
   NetworkProcurementReviewController({
     required this.getRequestsUseCase,
@@ -31,6 +34,7 @@ class NetworkProcurementReviewController extends GetxController {
     required this.rejectRequestUseCase,
     required this.previewRequestModificationUseCase,
     required this.getPackagesUseCase,
+    required this.getRequestDetailsUseCase,
     this.getMyNetworksUseCase,
   });
 
@@ -61,9 +65,27 @@ class NetworkProcurementReviewController extends GetxController {
   final editingRequestId = RxnInt();
   final modificationNoteController = TextEditingController();
 
-  void beginModification(RequestEntity request) {
+  Future<void> beginModification(RequestEntity request) async {
     if (!request.isPending) return;
     editingRequestId.value = request.requestId;
+    _modificationRevision++;
+    currentPreview.value = null;
+    try {
+      final detailedRequest = await getRequestDetailsUseCase(request.requestId);
+      if (editingRequestId.value != request.requestId || !detailedRequest.isPending) {
+        clearModificationEditor();
+        return;
+      }
+      request = detailedRequest;
+    } catch (error) {
+      editingRequestId.value = null;
+      CustomSnackbar.show(
+        title: 'تعذر تحميل تفاصيل الطلب',
+        message: error is AppException ? error.message : error.toString(),
+        type: SnackType.error,
+      );
+      return;
+    }
     currentPreview.value = null;
     modificationLines.assignAll(
       request.items.map((item) => RequestModificationLineEntity(
@@ -97,6 +119,7 @@ class NetworkProcurementReviewController extends GetxController {
 
   void setModificationQuantity(int packageId, int quantity) {
     if (quantity < 1) return;
+    _modificationRevision++;
     final index = modificationLines.indexWhere((line) => line.packageId == packageId);
     if (index < 0) return;
     final current = modificationLines[index];
@@ -110,6 +133,7 @@ class NetworkProcurementReviewController extends GetxController {
 
   void addModificationPackage(int packageId, {int initialQuantity = 1}) {
     if (modificationLines.any((line) => line.packageId == packageId)) return;
+    _modificationRevision++;
     modificationLines.add(RequestModificationLineEntity(
       packageId: packageId,
       voucherCount: initialQuantity,
@@ -118,6 +142,7 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   void removeModificationPackage(int packageId) {
+    _modificationRevision++;
     modificationLines.removeWhere((line) => line.packageId == packageId);
     currentPreview.value = null;
   }
@@ -126,11 +151,16 @@ class NetworkProcurementReviewController extends GetxController {
     final requestId = editingRequestId.value;
     if (requestId == null || modificationLines.isEmpty) return false;
     isPreviewingModification.value = true;
+    final revision = _modificationRevision;
+    final submittedLines = modificationLines.toList(growable: false);
     try {
       final preview = await previewRequestModificationUseCase(
         requestId,
-        modificationLines.toList(growable: false),
+        submittedLines,
       );
+      if (revision != _modificationRevision || editingRequestId.value != requestId) {
+        return false;
+      }
       currentPreview.value = preview;
       return true;
     } catch (error) {
@@ -152,6 +182,21 @@ class NetworkProcurementReviewController extends GetxController {
     if (preview == null || requestId == null || !preview.hasModifications) {
       return false;
     }
+    final draft = modificationLines
+        .map((line) => '${line.packageId}:${line.voucherCount}')
+        .toSet();
+    final reviewed = preview.items
+        .map((line) => '${line.packageId}:${line.voucherCount}')
+        .toSet();
+    if (draft.length != reviewed.length || !draft.containsAll(reviewed)) {
+      currentPreview.value = null;
+      CustomSnackbar.show(
+        title: 'المعاينة لم تعد مطابقة',
+        message: 'تغيرت البنود بعد المعاينة. أعد المعاينة قبل الاعتماد.',
+        type: SnackType.warning,
+      );
+      return false;
+    }
     return approveRequest(
       requestId,
       requestNote: requestNote,
@@ -160,6 +205,7 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   void clearModificationEditor() {
+    _modificationRevision++;
     editingRequestId.value = null;
     currentPreview.value = null;
     modificationLines.clear();

@@ -16,7 +16,8 @@ class NetworkRequestModificationSheet extends GetView<NetworkProcurementReviewCo
   static Future<void> open(RequestEntity request) async {
     final controller = Get.find<NetworkProcurementReviewController>();
     if (!request.isPending) return;
-    controller.beginModification(request);
+    await controller.beginModification(request);
+    if (controller.editingRequestId.value != request.requestId) return;
     await CustomBottomSheet.show<void>(
       title: 'مراجعة طلب #\${request.requestId}',
       subtitle: 'عدّل الكميات أو أضف واحذف الباقات، ثم اطلب معاينة الأسعار قبل الاعتماد.',
@@ -161,18 +162,17 @@ class _ModificationFooter extends GetView<NetworkProcurementReviewController> {
       Expanded(child: CustomButton.primary(
         text: 'اعتماد التعديل', icon: Icons.verified_outlined, enabled: canApprove,
         onPressed: !canApprove ? null : () async {
-          final confirmed = await CustomBottomSheet.showConfirmation<bool>(
+          await CustomBottomSheet.showConfirmation<void>(
             title: 'تأكيد اعتماد التعديل',
             message: 'سيتم اعتماد البنود المعروضة في آخر معاينة وإنشاء الفاتورة وفق أسعار الخادم. لا يمكن تعديل الطلب بعد اعتماده.',
             confirmLabel: 'اعتماد وإنشاء الفاتورة',
-            onConfirm: () => Get.back<bool>(result: true),
+            onConfirm: () async {
+              final success = await controller.approvePreview(
+                requestNote: controller.modificationNoteController.text.trim().isEmpty
+                  ? null : controller.modificationNoteController.text.trim());
+              if (success) Get.back<void>();
+            },
           );
-          if (confirmed == true) {
-            final success = await controller.approvePreview(
-              requestNote: controller.modificationNoteController.text.trim().isEmpty
-                ? null : controller.modificationNoteController.text.trim());
-            if (success) Get.back<void>();
-          }
         })),
     ]);
   });

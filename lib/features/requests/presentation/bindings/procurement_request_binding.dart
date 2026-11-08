@@ -105,6 +105,7 @@ class ProcurementRequestBinding extends Bindings {
         getMyPosUseCase: Get.find<GetMyPosUseCase>(),
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
+        getRequestDetailsUseCase: Get.find<GetRequestDetailsUseCase>(),
       ),
     );
 
