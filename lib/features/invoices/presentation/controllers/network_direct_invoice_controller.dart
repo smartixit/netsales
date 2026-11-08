@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
@@ -54,6 +55,11 @@ class NetworkDirectInvoiceController extends GetxController {
   int _networkRevision = 0;
   int _posRevision = 0;
   int _packageRevision = 0;
+  String? _submissionIdempotencyKey;
+
+  void _invalidateSubmissionIdempotencyKey() {
+    _submissionIdempotencyKey = null;
+  }
 
   bool get hasSelectedNetwork => selectedNetworkId.value != null;
   bool get hasSelectedPos => selectedPosId.value != null;
@@ -133,6 +139,7 @@ class NetworkDirectInvoiceController extends GetxController {
       );
       return;
     }
+    _invalidateSubmissionIdempotencyKey();
     selectedNetworkId.value = networkId;
     selectedPosId.value = null;
     selectedPackageId.value = null;
@@ -242,6 +249,7 @@ class NetworkDirectInvoiceController extends GetxController {
       );
       return;
     }
+    _invalidateSubmissionIdempotencyKey();
     selectedPosId.value = posId;
   }
 
@@ -294,6 +302,7 @@ class NetworkDirectInvoiceController extends GetxController {
       package: package,
       voucherCount: quantity,
     );
+    _invalidateSubmissionIdempotencyKey();
     if (index >= 0) {
       cart[index] = line;
     } else {
@@ -306,20 +315,32 @@ class NetworkDirectInvoiceController extends GetxController {
     final index = cart.indexWhere(
       (line) => line.package.packageId == packageId,
     );
-    if (index < 0) return;
+    if (index < 0 || cart[index].voucherCount == quantity) return;
+    _invalidateSubmissionIdempotencyKey();
     cart[index] = cart[index].copyWith(voucherCount: quantity);
   }
 
   void removeLine(int packageId) {
+    final previousLength = cart.length;
     cart.removeWhere((line) => line.package.packageId == packageId);
+    if (cart.length != previousLength) {
+      _invalidateSubmissionIdempotencyKey();
+    }
   }
 
   void clearCart() {
-    cart.clear();
+    if (cart.isNotEmpty) {
+      _invalidateSubmissionIdempotencyKey();
+      cart.clear();
+    }
   }
 
   void setSaleType(SaleType saleType) {
-    if (saleType == SaleType.unknown) return;
+    if (saleType == SaleType.unknown ||
+        selectedSaleType.value == saleType) {
+      return;
+    }
+    _invalidateSubmissionIdempotencyKey();
     selectedSaleType.value = saleType;
   }
 
@@ -337,6 +358,8 @@ class NetworkDirectInvoiceController extends GetxController {
     if (isSubmitting.value) return null;
 
     isSubmitting.value = true;
+    final idempotencyKey = _submissionIdempotencyKey ??=
+        IdempotencyHelper.forSaleInvoice(posId);
     await CustomAnimationOverlay.showLoading(
       message: 'جاري إنشاء الفاتورة والتحقق من التسعير والتسوية لدى الخادم...',
     );
@@ -345,6 +368,7 @@ class NetworkDirectInvoiceController extends GetxController {
         networkId: networkId,
         posId: posId,
         saleType: selectedSaleType.value,
+        idempotencyKey: idempotencyKey,
         items: cart
             .map(
               (line) => DirectInvoiceItemInput(
@@ -357,6 +381,7 @@ class NetworkDirectInvoiceController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم إنشاء فاتورة المبيعات المباشرة بنجاح.',
       );
+      _invalidateSubmissionIdempotencyKey();
       return invoice;
     } on AppException catch (error) {
       if (CustomAnimationOverlay.isShowing) {
