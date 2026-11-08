@@ -82,6 +82,10 @@ class FinanceBinding extends Bindings {
       () => GetPosWalUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
+    Get.lazyPut<GetPosWalletByNetworkAndPosUseCase>(
+      () => GetPosWalletByNetworkAndPosUseCase(Get.find<FinanceRepository>()),
+      fenix: true,
+    );
     Get.lazyPut<GetPosWalletLogsUseCase>(
       () => GetPosWalletLogsUseCase(Get.find<FinanceRepository>()),
       fenix: true,

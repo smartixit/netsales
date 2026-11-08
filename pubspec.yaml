@@ -80,6 +80,9 @@ dependencies:
   mobile_scanner: ^7.5.0
   pointycastle: ^4.0.0
   cached_network_image: ^3.4.1
+  carousel_slider: ^5.1.2
+  premium_carousel_slider:
+    path: packages/premium_carousel_slider
   flutter_cache_manager: ^3.5.0
   flutter_secure_storage: ^10.3.4
   flutter_native_contact_picker: ^0.0.13

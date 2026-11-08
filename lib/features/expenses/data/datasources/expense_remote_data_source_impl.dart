@@ -52,7 +52,7 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
   }
 
   ExpenseModel _parseExpense(dynamic data) {
-    if (data is! Map) {
+    if (data is! Map<dynamic, dynamic>) {
       throw const FormatException('تنسيق استجابة المصروف غير صالح.');
     }
     return ExpenseModel.fromJson(Map<String, dynamic>.from(data));
@@ -68,7 +68,7 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
       fromJson: (data) {
         if (data is! List) return const <ExpenseModel>[];
         return data
-            .whereType<Map>()
+            .whereType<Map<dynamic, dynamic>>()
             .map(
               (item) => ExpenseModel.fromJson(
                 Map<String, dynamic>.from(item),

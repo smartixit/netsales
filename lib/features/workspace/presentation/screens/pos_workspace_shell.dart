@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
+
 import 'package:netsales/features/finance/presentation/widgets/pos_finance_workspace_hub.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/adaptive_workspace_scaffold.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
+import 'package:netsales/features/workspace/presentation/widgets/pos_home_dashboard.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 
@@ -16,37 +16,12 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     final navItems = [
       WorkspaceNavItem(
         label: 'الرئيسية',
         icon: Icons.storefront_outlined,
         activeIcon: Icons.storefront_rounded,
-        content: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.storefront_rounded, size: 64, color: colors.secondary),
-              const SizedBox(height: 16),
-              Text(
-                'مساحة عمل نقطة البيع',
-                style: AppTypography.headlineSmall.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'طلب باقات الكروت بالجملة، إدارة المحفظة، ومتابعة سداد المديونيات للشبكات المزودة',
-                style: AppTypography.bodyMedium.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+        content: PosHomeDashboard(controller: controller),
       ),
       const WorkspaceNavItem(
         label: 'طلب باقات',
