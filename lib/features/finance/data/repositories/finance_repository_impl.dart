@@ -1,3 +1,4 @@
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:netsales/features/finance/domain/entities/debt_summary_entity.dart';
@@ -126,21 +127,73 @@ class FinanceRepositoryImpl implements FinanceRepository {
   Future<DebtSummaryEntity> getDebtSummary({int? networkId, int? posId}) async {
     final query = <String, dynamic>{'network_id': ?networkId, 'pos_id': ?posId};
     final res = await remoteDataSource.getDebtSummary(query: query);
-    final data = res.data ?? {};
-    final rawBuckets = data['aging_buckets'] as Map<String, dynamic>? ?? {};
-    final buckets = <String, double>{};
-    rawBuckets.forEach((k, v) {
-      buckets[k] = (v as num?)?.toDouble() ?? 0.0;
-    });
+
+    if (!res.success || res.data == null) {
+      throw AppException(
+        res.message.isNotEmpty
+            ? res.message
+            : 'تعذر استرجاع ملخص المديونية من الخادم.',
+        code: 'DEBT_SUMMARY_REQUEST_FAILED',
+        details: res.errors,
+      );
+    }
+
+    final data = res.data!;
+    final totalDebt = _requiredDebtNumber(data, 'total_outstanding_debt');
+    final unpaidCount = _requiredDebtCount(data, 'unpaid_invoices_count');
+    final partialCount =
+        _requiredDebtCount(data, 'partially_paid_invoices_count');
+
+    final rawBuckets = data['aging_buckets'];
+    if (rawBuckets is! Map) {
+      throw const AppException(
+        'استجابة ملخص المديونية لا تحتوي على aging_buckets صالح.',
+        code: 'INVALID_DEBT_SUMMARY_CONTRACT',
+      );
+    }
+
+    final buckets = <String, double>{
+      '0_30': _requiredDebtNumber(rawBuckets, 'days_0_30'),
+      '31_60': _requiredDebtNumber(rawBuckets, 'days_31_60'),
+      '61_90': _requiredDebtNumber(rawBuckets, 'days_61_90'),
+      'over_90': _requiredDebtNumber(rawBuckets, 'days_over_90'),
+    };
 
     return DebtSummaryEntity(
-      totalReceivables: (data['total_receivables'] as num?)?.toDouble() ?? 0.0,
-      totalOutstandingInvoices:
-          (data['total_outstanding_invoices'] as num?)?.toInt() ?? 0,
+      totalReceivables: totalDebt,
+      unpaidInvoicesCount: unpaidCount,
+      partiallyPaidInvoicesCount: partialCount,
       agingBuckets: buckets,
+      oldestOutstandingInvoiceDate:
+          data['oldest_outstanding_invoice_date']?.toString(),
       networkId: networkId,
       posId: posId,
     );
+  }
+
+  double _requiredDebtNumber(Map<dynamic, dynamic> data, String key) {
+    final value = data[key];
+    if (value is! num || !value.isFinite) {
+      throw AppException(
+        'حقل ملخص المديونية "$key" مفقود أو غير رقمي.',
+        code: 'INVALID_DEBT_SUMMARY_CONTRACT',
+      );
+    }
+    return value.toDouble();
+  }
+
+  int _requiredDebtCount(Map<dynamic, dynamic> data, String key) {
+    final value = data[key];
+    if (value is! num ||
+        !value.isFinite ||
+        value < 0 ||
+        value != value.toInt()) {
+      throw AppException(
+        'حقل ملخص المديونية "$key" مفقود أو غير صحيح.',
+        code: 'INVALID_DEBT_SUMMARY_CONTRACT',
+      );
+    }
+    return value.toInt();
   }
 
   @override
