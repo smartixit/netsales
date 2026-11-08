@@ -27,13 +27,13 @@ class OutstandingInvoiceSkeleton extends StatelessWidget {
               children: [
                 _block(colors, 36, 36, radius: AppRadius.sm),
                 AppSpacing.hSm,
-                Expanded(child: _block(colors, double.infinity, 13)),
+                Expanded(child: _block(colors, 140, 13)),
                 AppSpacing.hSm,
                 _block(colors, 72, 22, radius: AppRadius.full),
               ],
             ),
             AppSpacing.vMd,
-            _block(colors, double.infinity, 1),
+            _block(colors, 300, 1),
             AppSpacing.vMd,
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
