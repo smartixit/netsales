@@ -391,10 +391,8 @@ class PosProcurementController extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
 
-    if (isRefresh) {
-      nextCursor.value = null;
-      isLoadingMore.value = false;
-    }
+    nextCursor.value = null;
+    isLoadingMore.value = false;
 
     final posId = selectedPosId.value;
     final status = statusFilter.value;
