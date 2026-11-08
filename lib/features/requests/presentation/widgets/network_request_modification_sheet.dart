@@ -151,7 +151,9 @@ class _ModificationFooter extends GetView<NetworkProcurementReviewController> {
   @override
   Widget build(BuildContext context) => Obx(() {
     final preview = controller.currentPreview.value;
-    final canApprove = preview != null && preview.hasModifications && !controller.isProcessingDecision.value;
+    final canApprove = preview != null && preview.hasModifications &&
+        !controller.isPreviewingModification.value &&
+        !controller.isProcessingDecision.value;
     return Row(children: [
       Expanded(child: CustomButton.outline(
         text: 'معاينة التعديل', icon: Icons.calculate_outlined,

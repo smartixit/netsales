@@ -150,6 +150,7 @@ class NetworkProcurementReviewController extends GetxController {
   Future<bool> previewModification() async {
     final requestId = editingRequestId.value;
     if (requestId == null || modificationLines.isEmpty) return false;
+    currentPreview.value = null;
     isPreviewingModification.value = true;
     final revision = _modificationRevision;
     final submittedLines = modificationLines.toList(growable: false);
