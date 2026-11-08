@@ -30,11 +30,13 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
 
   @override
   Future<ApiResponse<InvoiceModel>> createDirectInvoice(
-    Map<String, dynamic> payload,
-  ) {
+    Map<String, dynamic> payload, {
+    required String idempotencyKey,
+  }) {
     return ApiService.instance.post<InvoiceModel>(
       ApiConstants.saleInvoices,
       data: payload,
+      idempotencyKey: idempotencyKey,
       fromJson: (data) => InvoiceModel.fromJson(data as Map<String, dynamic>),
     );
   }
