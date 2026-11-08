@@ -1029,6 +1029,70 @@ void main() {
       },
     );
 
+
+    test(
+      'empty remote network search preserves the selected scope without showing no-link state',
+      () async {
+        const pos = PosEntity(
+          posId: 9,
+          ownerId: 1,
+          posUuid: 'pos-9',
+          posName: 'نقطة البحث الفارغ',
+          posPhoneNumber: '777000009',
+        );
+        const selectedLink = NetworkPosLinkEntity(
+          networkPosId: 91,
+          networkId: 91,
+          posId: 9,
+          status: true,
+          network: NetworkEntity(
+            networkId: 91,
+            ownerId: 1,
+            networkName: 'مزود مختار',
+            networkPhoneNumber: '777999111',
+          ),
+        );
+        const anotherLink = NetworkPosLinkEntity(
+          networkPosId: 92,
+          networkId: 92,
+          posId: 9,
+          status: true,
+          network: NetworkEntity(
+            networkId: 92,
+            ownerId: 2,
+            networkName: 'مزود آخر',
+            networkPhoneNumber: '777999222',
+          ),
+        );
+
+        commercialRepository.myPos = [pos];
+        commercialRepository.posNetworkLinks = const PaginatedList(
+          items: [selectedLink, anotherLink],
+        );
+
+        final controller = PosDebtLedgerController(
+          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+          getPosNetworksListUseCase:
+              GetPosNetworksListUseCase(commercialRepository),
+        );
+
+        await controller.initializeScope();
+        await controller.selectNetwork(91);
+        final debtRequestCount = repository.requestedDebtScopes.length;
+
+        await controller.searchNetworks('لا يوجد بهذا الاسم');
+
+        expect(controller.selectedNetworkId.value, 91);
+        expect(controller.selectedNetwork?.networkId, 91);
+        expect(controller.networkSearchHasNoResults.value, isTrue);
+        expect(controller.networkLinks.map((link) => link.networkId), [91, 92]);
+        expect(controller.hasSelectedScope, isTrue);
+        expect(repository.requestedDebtScopes, hasLength(debtRequestCount));
+      },
+    );
+
     test('Network wallet stale response cannot replace newly selected wallet ledger', () async {
       const walletA = NetworkWalletEntity(
         walletId: 1,

@@ -194,7 +194,6 @@ class PosDebtLedgerController extends GetxController {
     networkSearchHasNoResults.value = false;
     requiresNetworkSelection.value = false;
     networkSearchQuery.value = '';
-    networkSearchHasNoResults.value = false;
 
     await loadNetworksForSelectedPos();
   }
@@ -360,6 +359,7 @@ class PosDebtLedgerController extends GetxController {
     isLoadingMore.value = false;
   }
 
+  @override
   Future<void> refresh() async {
     if (!hasSelectedScope) {
       if (posOptions.isEmpty) await initializeScope();
