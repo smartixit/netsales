@@ -54,6 +54,7 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                       if (scrollInfo.metrics.pixels >=
                               scrollInfo.metrics.maxScrollExtent - 200 &&
                           controller.hasMore &&
+                          controller.errorMessage.value == null &&
                           !controller.isLoadingMore.value) {
                         controller.loadMoreRepayments();
                       }
