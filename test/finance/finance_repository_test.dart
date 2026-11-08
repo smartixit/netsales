@@ -3,12 +3,40 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:netsales/features/finance/data/repositories/finance_repository_impl.dart';
+import 'package:netsales/features/finance/data/models/pos_repayment_models.dart';
+import 'package:netsales/features/invoices/data/models/invoice_model.dart';
 
 class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
   ApiResponse<Map<String, dynamic>> response;
   Map<String, dynamic>? lastQuery;
+  Map<String, dynamic>? lastOutstandingInvoicesQuery;
+  Map<String, dynamic>? lastRepaymentsQuery;
 
   _DebtSummaryRemoteDataSource(this.response);
+
+  @override
+  Future<ApiResponse<List<InvoiceModel>>> getOutstandingInvoices({
+    Map<String, dynamic>? query,
+  }) async {
+    lastOutstandingInvoicesQuery = query;
+    return ApiResponse<List<InvoiceModel>>(
+      success: true,
+      message: 'ok',
+      data: const [],
+    );
+  }
+
+  @override
+  Future<ApiResponse<List<PosRepaymentModel>>> getRepayments({
+    Map<String, dynamic>? query,
+  }) async {
+    lastRepaymentsQuery = query;
+    return ApiResponse<List<PosRepaymentModel>>(
+      success: true,
+      message: 'ok',
+      data: const [],
+    );
+  }
 
   @override
   Future<ApiResponse<Map<String, dynamic>>> getDebtSummary({
@@ -23,6 +51,88 @@ class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
 }
 
 void main() {
+  group('FinanceRepositoryImpl cursor pagination contract', () {
+    test('enables Laravel cursor pagination for outstanding invoices', () async {
+      final remote = _DebtSummaryRemoteDataSource(
+        ApiResponse<Map<String, dynamic>>(
+          success: true,
+          message: 'ok',
+          data: {
+            'total_outstanding_debt': 0,
+            'unpaid_invoices_count': 0,
+            'partially_paid_invoices_count': 0,
+            'aging_buckets': {
+              'days_0_30': 0,
+              'days_31_60': 0,
+              'days_61_90': 0,
+              'days_over_90': 0,
+            },
+          },
+        ),
+      );
+      final repository = FinanceRepositoryImpl(remoteDataSource: remote);
+
+      await repository.getOutstandingInvoices(
+        networkId: 10,
+        posId: 20,
+        bucket: '31_60',
+        search: 'INV-20',
+        cursor: 'invoice-cursor',
+        perPage: 25,
+      );
+
+      expect(remote.lastOutstandingInvoicesQuery, {
+        'network_id': 10,
+        'pos_id': 20,
+        'bucket': '31_60',
+        'search': 'INV-20',
+        'cursor': 'invoice-cursor',
+        'paginate': true,
+        'limit': 25,
+      });
+    });
+
+    test('enables Laravel cursor pagination for repayment history', () async {
+      final remote = _DebtSummaryRemoteDataSource(
+        ApiResponse<Map<String, dynamic>>(
+          success: true,
+          message: 'ok',
+          data: {
+            'total_outstanding_debt': 0,
+            'unpaid_invoices_count': 0,
+            'partially_paid_invoices_count': 0,
+            'aging_buckets': {
+              'days_0_30': 0,
+              'days_31_60': 0,
+              'days_61_90': 0,
+              'days_over_90': 0,
+            },
+          },
+        ),
+      );
+      final repository = FinanceRepositoryImpl(remoteDataSource: remote);
+
+      await repository.getRepayments(
+        networkId: 10,
+        posId: 20,
+        status: 'COMPLETED',
+        search: 'REC-20',
+        cursor: 'repayment-cursor',
+        perPage: 30,
+      );
+
+      expect(remote.lastRepaymentsQuery, {
+        'network_id': 10,
+        'pos_id': 20,
+        'status': 'COMPLETED',
+        'search': 'REC-20',
+        'cursor': 'repayment-cursor',
+        'paginate': true,
+        'limit': 30,
+      });
+    });
+  });
+
   group('FinanceRepositoryImpl debt summary contract', () {
     test('maps Laravel names, counts and aging buckets without data loss',
         () async {

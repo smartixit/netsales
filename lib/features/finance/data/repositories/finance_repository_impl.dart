@@ -211,7 +211,8 @@ class FinanceRepositoryImpl implements FinanceRepository {
       if (bucket?.isNotEmpty ?? false) 'bucket': bucket,
       if (search?.trim().isNotEmpty ?? false) 'search': search!.trim(),
       'cursor': ?cursor,
-      'per_page': ?perPage,
+      'paginate': true,
+      'limit': ?perPage,
     };
     final res = await remoteDataSource.getOutstandingInvoices(query: query);
     return PaginatedList<InvoiceEntity>(
@@ -236,7 +237,8 @@ class FinanceRepositoryImpl implements FinanceRepository {
       if (status?.isNotEmpty ?? false) 'status': status,
       if (search?.trim().isNotEmpty ?? false) 'search': search!.trim(),
       'cursor': ?cursor,
-      'per_page': ?perPage,
+      'paginate': true,
+      'limit': ?perPage,
     };
     final res = await remoteDataSource.getRepayments(query: query);
     return PaginatedList<PosRepaymentEntity>(
