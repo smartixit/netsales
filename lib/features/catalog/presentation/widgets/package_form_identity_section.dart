@@ -38,14 +38,12 @@ class PackageFormIdentitySection extends GetView<PackageCatalogController> {
 
           if (controller.authorizedNetworks.length > 1) {
             final networks = controller.authorizedNetworks;
-            final selectedId = controller.formNetworkId.value;
-
             return Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
               child: CustomDropdown<int>(
                 label: 'شبكة الكروت التابعة',
                 searchEnabled: false,
-                valueListenable: ValueNotifier<int?>(selectedId),
+                rxValue: controller.formNetworkId,
                 items: networks.map((net) {
                   return DropdownItem<int>(
                     value: net.networkId,
