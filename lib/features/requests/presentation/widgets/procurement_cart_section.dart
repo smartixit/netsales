@@ -32,7 +32,7 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
               ),
               const Spacer(),
               Text(
-                '\${lines.length} باقة',
+                '${lines.length} باقة',
                 style: AppTypography.bodySmall.copyWith(
                   color: colors.onSurfaceVariant,
                 ),
@@ -114,7 +114,7 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
                                 ),
                                 AppSpacing.vXxs,
                                 Text(
-                                  '\${line.sheetsLabel} ورقة  •  \${line.voucherCount} كرت',
+                                  '${line.sheetsLabel} ورقة  •  ${line.voucherCount} كرت',
                                   style: AppTypography.bodySmall.copyWith(
                                     color: colors.onSurfaceVariant,
                                   ),
@@ -143,7 +143,7 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
                           AppSpacing.hSm,
                           CustomButton.icon(
                             icon: Icons.delete_outline_rounded,
-                            tooltip: 'حذف \${line.package.packageName} من الطلب',
+                            tooltip: 'حذف ${line.package.packageName} من الطلب',
                             size: AppButtonSize.small,
                             foregroundColor: colors.error,
                             backgroundColor:
