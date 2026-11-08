@@ -17,7 +17,7 @@ class RepaymentCardSkeleton extends StatelessWidget {
         height: height,
         decoration: BoxDecoration(
           color: colors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: BorderRadius.circular(radius ?? AppRadius.xs),
         ),
       );
     }
