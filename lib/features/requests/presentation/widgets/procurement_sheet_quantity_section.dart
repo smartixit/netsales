@@ -155,9 +155,7 @@ class ProcurementSheetQuantitySection
                         ),
                       ),
                       Text(
-                        'سعة الورقة لهذه الباقة: ' +
-                            package.packageVoucherCount.toString() +
-                            ' كرت',
+                        'سعة الورقة لهذه الباقة: ${package.packageVoucherCount} كرت',
                         style: AppTypography.bodySmall.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
