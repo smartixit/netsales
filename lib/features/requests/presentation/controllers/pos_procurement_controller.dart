@@ -57,12 +57,11 @@ class PosProcurementController extends GetxController {
 
   final linkedNetworks = <NetworkPosLinkEntity>[].obs;
   final selectedNetworkId = RxnInt();
-  final selectedNetworkDropdownValue = ValueNotifier<int?>(null);
   final isLoadingNetworks = false.obs;
 
   final availablePackages = <PackageEntity>[].obs;
   final selectedPackage = Rxn<PackageEntity>();
-  final selectedPackageDropdownValue = ValueNotifier<int?>(null);
+  final selectedPackageId = RxnInt();
   final isLoadingPackages = false.obs;
   final procurementCart = <ProcurementCartLine>[].obs;
 
@@ -70,12 +69,11 @@ class PosProcurementController extends GetxController {
 
   void _setSelectedNetworkId(int? value) {
     selectedNetworkId.value = value;
-    selectedNetworkDropdownValue.value = value;
   }
 
   void _setSelectedPackage(PackageEntity? value) {
     selectedPackage.value = value;
-    selectedPackageDropdownValue.value = value?.packageId;
+    selectedPackageId.value = value?.packageId;
   }
 
   bool get isSelectedPackageInCart {
@@ -164,8 +162,6 @@ class PosProcurementController extends GetxController {
     searchController.dispose();
     quantityController.dispose();
     notesController.dispose();
-    selectedNetworkDropdownValue.dispose();
-    selectedPackageDropdownValue.dispose();
     super.onClose();
   }
 
@@ -240,7 +236,6 @@ class PosProcurementController extends GetxController {
 
   /// اختيار الشبكة الموردة وتحديث الباقات
   void onNetworkSelected(int networkId) {
-    if (selectedNetworkId.value == networkId) return;
     _setSelectedNetworkId(networkId);
     clearProcurementCart();
     _setSelectedPackage(null);
