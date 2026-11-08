@@ -65,7 +65,7 @@ class PosDebtLedgerController extends GetxController {
       isLoadingInvoices.value = true;
       nextCursor.value = null;
       invoicesErrorMessage.value = null;
-    } else if (isLoadingMore.value || !hasMore) {
+    } else if (!hasMore) {
       return;
     }
 
