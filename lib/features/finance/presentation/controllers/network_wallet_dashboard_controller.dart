@@ -53,25 +53,14 @@ class NetworkWalletDashboardController extends GetxController {
     try {
       final res = await getNetworkWalletsUseCase(perPage: 15);
       if (requestVersion != _walletsRequestVersion) return;
-      final previousSelected = selectedWallet.value;
       final availableWallets = List<NetworkWalletEntity>.of(res.items);
-      NetworkWalletEntity? selected = previousSelected == null
-          ? null
-          : availableWallets.firstWhereOrNull(
-              (wallet) => wallet.walletId == previousSelected.walletId,
-            );
-      selected ??= previousSelected ?? (availableWallets.isEmpty ? null : availableWallets.first);
-
-      if (previousSelected != null &&
-          !availableWallets.any(
-            (wallet) => wallet.walletId == previousSelected.walletId,
-          )) {
-        availableWallets.insert(0, previousSelected);
-      }
-
+      final previousId = selectedWallet.value?.walletId;
+      final selected = availableWallets.firstWhereOrNull(
+        (wallet) => wallet.walletId == previousId,
+      );
       wallets.assignAll(availableWallets);
       walletsNextCursor.value = res.nextCursor;
-      selectedWallet.value = selected;
+
 
       if (selected != null) {
         await loadWalletLogs(selected.walletId, isRefresh: true);
