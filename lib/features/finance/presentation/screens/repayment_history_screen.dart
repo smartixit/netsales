@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_history_controller.dart';
 import 'package:netsales/features/finance/presentation/screens/repayment_details_screen.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_card.dart';
@@ -18,8 +17,6 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return CustomAppScaffold(
       appBar: AppBar(title: const Text('سجل سندات سداد الديون')),
       body: RefreshIndicator(
