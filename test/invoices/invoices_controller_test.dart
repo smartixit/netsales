@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/enums/sale_type.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_invoice_details_use_case.dart';
@@ -37,6 +39,26 @@ class MockInvoiceRepository implements InvoiceRepository {
       nextCursor: returnNextCursor,
       prevCursor: null,
     );
+  }
+
+  @override
+  Future<InvoiceEntity> createDirectInvoice({
+    required int networkId,
+    required int posId,
+    required SaleType saleType,
+    required List<DirectInvoiceItemInput> items,
+  }) async {
+    if (networkId <= 0 || posId <= 0 || items.isEmpty) {
+      throw ArgumentError('Invalid direct invoice test payload.');
+    }
+    return mockDetails ??
+        InvoiceEntity(
+          invoiceId: 999,
+          networkId: networkId,
+          posId: posId,
+          saleTypeRaw: saleType.wireValue,
+          invoiceTotalAmount: 0,
+        );
   }
 
   @override
