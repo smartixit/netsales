@@ -66,7 +66,7 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                   ),
                   AppSpacing.vXs,
                   DropdownButtonFormField<int>(
-                    value: controller.selectedNetworkId.value,
+                    initialValue: controller.selectedNetworkId.value,
                     items: controller.networks.map((n) {
                       return DropdownMenuItem<int>(
                         value: n.networkId,
@@ -96,7 +96,7 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                   ),
                   AppSpacing.vXs,
                   DropdownButtonFormField<int>(
-                    value: controller.selectedPosId.value,
+                    initialValue: controller.selectedPosId.value,
                     items: controller.posList.map((p) {
                       return DropdownMenuItem<int>(
                         value: p.posId,
