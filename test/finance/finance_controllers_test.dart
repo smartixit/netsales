@@ -36,6 +36,8 @@ class MockCommercialRepository implements CommercialRepository {
   final List<int> requestedPosNetworkIds = [];
   final List<String?> requestedPosNetworkSearchQueries = [];
   final List<String?> requestedPosNetworkCursors = [];
+  final List<String?> requestedNetworkPosCursors = [];
+  final Map<String, PaginatedList<NetworkPosLinkEntity>> networkPosPages = {};
   final Map<String, PaginatedList<NetworkPosLinkEntity>> posNetworkPages = {};
   final Map<String, PaginatedList<NetworkPosLinkEntity>> posNetworkSearchResults = {};
   final Map<String, Completer<PaginatedList<NetworkPosLinkEntity>>> pendingPosNetworkSearches = {};
@@ -68,12 +70,16 @@ class MockCommercialRepository implements CommercialRepository {
     Map<String, dynamic>? query,
   }) async {
     requestedNetworkIds.add(networkId);
+    requestedNetworkPosCursors.add(cursor);
     requestedPosPageSizes.add(perPage);
     requestedPosStatuses.add(status);
     requestedPosSearchQueries.add(search);
     if (failPosList) throw Exception('POS list request failed');
     final pending = pendingPosSearches[search ?? ''];
     if (pending != null) return pending.future;
+    if (cursor != null) {
+      return networkPosPages[cursor] ?? const PaginatedList(items: []);
+    }
     final items = status == null
         ? posLinks.items
         : posLinks.items.where((link) => link.status == status).toList();
@@ -915,6 +921,70 @@ void main() {
       expect(controller.logsErrorMessage.value, isNotNull);
       expect(controller.isLoadingLogs.value, isFalse);
     });
+
+    test(
+      'repayment collection can page through all POS beneficiaries',
+      () async {
+        const firstPos = PosEntity(
+          posId: 71,
+          ownerId: 1,
+          posUuid: 'pos-71',
+          posName: 'نقطة البيع الأولى',
+          posPhoneNumber: '777000071',
+        );
+        const secondPos = PosEntity(
+          posId: 72,
+          ownerId: 1,
+          posUuid: 'pos-72',
+          posName: 'نقطة البيع الثانية',
+          posPhoneNumber: '777000072',
+        );
+        commercialRepository.posLinks = const PaginatedList(
+          items: [
+            NetworkPosLinkEntity(
+              networkPosId: 7001,
+              networkId: 7,
+              posId: 71,
+              status: true,
+              pos: firstPos,
+            ),
+          ],
+          nextCursor: 'network-pos-page-2',
+        );
+        commercialRepository.networkPosPages['network-pos-page-2'] =
+            const PaginatedList(
+              items: [
+                NetworkPosLinkEntity(
+                  networkPosId: 7002,
+                  networkId: 7,
+                  posId: 72,
+                  status: true,
+                  pos: secondPos,
+                ),
+              ],
+            );
+
+        final controller = RepaymentCollectionController(
+          collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+          getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+          getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
+        );
+        controller.selectedNetworkId.value = 7;
+
+        await controller.loadPosForNetwork(7);
+        expect(controller.posList.map((pos) => pos.posId), [71]);
+        expect(controller.hasMorePosOptions, isTrue);
+
+        await controller.loadMorePosForNetwork();
+
+        expect(controller.posList.map((pos) => pos.posId), [71, 72]);
+        expect(controller.hasMorePosOptions, isFalse);
+        expect(commercialRepository.requestedNetworkPosCursors, [
+          null,
+          'network-pos-page-2',
+        ]);
+      },
+    );
 
     test(
       'network wallet refresh preserves a selected wallet outside the first page',

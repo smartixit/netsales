@@ -32,6 +32,10 @@ class RepaymentCollectionController extends GetxController {
   final selectedPosId = RxnInt();
   final selectedPos = Rxn<PosEntity>();
   final hasLoadedPosList = false.obs;
+  final posNextCursor = RxnString();
+  final isLoadingMorePos = false.obs;
+  final posLoadMoreErrorMessage = RxnString();
+  String _posSearchQuery = '';
   int _posLoadRevision = 0;
 
   final amountController = TextEditingController();
@@ -45,6 +49,9 @@ class RepaymentCollectionController extends GetxController {
   final posErrorMessage = RxnString();
   final isSubmitting = false.obs;
   final lastResult = Rxn<PosRepaymentEntity>();
+
+  bool get hasMorePosOptions =>
+      posNextCursor.value?.trim().isNotEmpty ?? false;
   String? _pendingCollectionKey;
   String? _pendingCollectionFingerprint;
 
@@ -78,6 +85,10 @@ class RepaymentCollectionController extends GetxController {
       selectedPos.value = null;
       posList.clear();
       hasLoadedPosList.value = false;
+      posNextCursor.value = null;
+      isLoadingMorePos.value = false;
+      posLoadMoreErrorMessage.value = null;
+      _posSearchQuery = '';
       isLoadingPos.value = false;
       posErrorMessage.value = null;
     } on AppException catch (e) {
@@ -96,21 +107,33 @@ class RepaymentCollectionController extends GetxController {
     int networkId, {
     String? search,
     bool preserveSelection = false,
+    String? cursor,
+    bool append = false,
   }) async {
     if (isSubmitting.value) return;
     final revision = ++_posLoadRevision;
-    if (!preserveSelection) {
+    if (!append && !preserveSelection) {
       selectedPosId.value = null;
       selectedPos.value = null;
       posList.clear();
       hasLoadedPosList.value = false;
+      posNextCursor.value = null;
+      _posSearchQuery = '';
     }
-    isLoadingPos.value = true;
-    posErrorMessage.value = null;
+
+    if (append) {
+      isLoadingMorePos.value = true;
+      posLoadMoreErrorMessage.value = null;
+    } else {
+      isLoadingPos.value = true;
+      posErrorMessage.value = null;
+    }
+
     try {
       final normalizedSearch = search?.trim();
       final res = await getNetworkPosListUseCase(
         networkId,
+        cursor: cursor,
         search: normalizedSearch == null || normalizedSearch.isEmpty
             ? null
             : normalizedSearch,
@@ -121,46 +144,86 @@ class RepaymentCollectionController extends GetxController {
           selectedNetworkId.value != networkId) {
         return;
       }
-      posList.assignAll(
-        res.items.map((link) => link.pos).whereType<PosEntity>(),
-      );
+
+      final pageItems = res.items
+          .map((link) => link.pos)
+          .whereType<PosEntity>()
+          .toList(growable: false);
+      if (append) {
+        final existingIds = posList.map((pos) => pos.posId).toSet();
+        posList.addAll(
+          pageItems.where((pos) => existingIds.add(pos.posId)),
+        );
+      } else {
+        posList.assignAll(pageItems);
+      }
+      posNextCursor.value = res.nextCursor;
       hasLoadedPosList.value = true;
       posErrorMessage.value = null;
+      posLoadMoreErrorMessage.value = null;
     } on AppException catch (e) {
       if (revision != _posLoadRevision ||
           selectedNetworkId.value != networkId) {
         return;
       }
-      if (!preserveSelection) {
-        posList.clear();
+      if (append) {
+        posLoadMoreErrorMessage.value = e.message;
+      } else {
+        if (!preserveSelection) posList.clear();
+        posErrorMessage.value = e.message;
       }
-      posErrorMessage.value = e.message;
     } catch (e) {
       if (revision != _posLoadRevision ||
           selectedNetworkId.value != networkId) {
         return;
       }
-      if (!preserveSelection) {
-        posList.clear();
-      }
-      posErrorMessage.value = AppException.sanitizeMessage(
+      final message = AppException.sanitizeMessage(
         e,
         fallback: 'تعذر تحميل نقاط البيع المرتبطة بالشبكة. يرجى المحاولة مجدداً.',
       );
+      if (append) {
+        posLoadMoreErrorMessage.value = message;
+      } else {
+        if (!preserveSelection) posList.clear();
+        posErrorMessage.value = message;
+      }
     } finally {
       if (revision == _posLoadRevision) {
         isLoadingPos.value = false;
+        isLoadingMorePos.value = false;
       }
     }
+  }
+
+  Future<void> loadMorePosForNetwork() async {
+    final networkId = selectedNetworkId.value;
+    if (networkId == null ||
+        !hasMorePosOptions ||
+        isLoadingPos.value ||
+        isLoadingMorePos.value ||
+        isSubmitting.value) {
+      return;
+    }
+
+    await loadPosForNetwork(
+      networkId,
+      search: _posSearchQuery,
+      preserveSelection: true,
+      cursor: posNextCursor.value,
+      append: true,
+    );
   }
 
   Future<void> searchPosForNetwork(String query) async {
     if (isSubmitting.value) return;
     final networkId = selectedNetworkId.value;
     if (networkId == null) return;
+    _posSearchQuery = query.trim();
+    posNextCursor.value = null;
+    posLoadMoreErrorMessage.value = null;
     await loadPosForNetwork(
       networkId,
-      search: query,
+      search: _posSearchQuery,
       preserveSelection: true,
     );
   }
@@ -187,6 +250,9 @@ class RepaymentCollectionController extends GetxController {
     selectedPos.value = null;
     posList.clear();
     hasLoadedPosList.value = false;
+    posNextCursor.value = null;
+    posLoadMoreErrorMessage.value = null;
+    _posSearchQuery = '';
     await loadPosForNetwork(netId);
   }
 

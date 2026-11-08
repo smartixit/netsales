@@ -12,6 +12,7 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 
 class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
   const RepaymentCollectionScreen({super.key});
@@ -156,6 +157,26 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                             : posId.toString()),
                     onChanged: controller.onPosChanged,
                         ),
+                        if (controller.posLoadMoreErrorMessage.value != null) ...[
+                          AppSpacing.vXs,
+                          CustomErrorState.compact(
+                            title: 'تعذر تحميل بقية نقاط البيع',
+                            subtitle: controller.posLoadMoreErrorMessage.value,
+                            onRetry: controller.loadMorePosForNetwork,
+                          ),
+                        ],
+                        if (controller.isLoadingMorePos.value) ...[
+                          AppSpacing.vXs,
+                          const RepaymentBeneficiaryFieldSkeleton(),
+                        ] else if (controller.hasMorePosOptions) ...[
+                          AppSpacing.vXs,
+                          CustomButton.secondary(
+                            text: 'تحميل مزيد من نقاط البيع',
+                            prefix: Icons.expand_more_rounded,
+                            width: double.infinity,
+                            onPressed: controller.loadMorePosForNetwork,
+                          ),
+                        ],
                       ],
                     ),
                 ],
