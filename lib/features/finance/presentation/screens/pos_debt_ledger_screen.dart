@@ -90,6 +90,7 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                       if (scrollInfo.metrics.pixels >=
                               scrollInfo.metrics.maxScrollExtent - 200 &&
                           controller.hasMore &&
+                          controller.invoicesErrorMessage.value == null &&
                           !controller.isLoadingMore.value) {
                         controller.loadMoreInvoices();
                       }
