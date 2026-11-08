@@ -11,6 +11,7 @@ import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/presentation/models/procurement_cart_line.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
@@ -61,6 +62,15 @@ class PosProcurementController extends GetxController {
   final availablePackages = <PackageEntity>[].obs;
   final selectedPackage = Rxn<PackageEntity>();
   final isLoadingPackages = false.obs;
+  final procurementCart = <ProcurementCartLine>[].obs;
+
+  bool get hasCartItems => procurementCart.isNotEmpty;
+
+  bool get isSelectedPackageInCart {
+    final packageId = selectedPackage.value?.packageId;
+    return packageId != null &&
+        procurementCart.any((line) => line.package.packageId == packageId);
+  }
 
   /// حقل الإدخال بوحدة الأوراق؛ يحول إلى عدد الكروت عند إرسال الطلب.
   final quantityController = TextEditingController(text: '1');
@@ -218,7 +228,110 @@ class PosProcurementController extends GetxController {
   void onNetworkSelected(int networkId) {
     if (selectedNetworkId.value == networkId) return;
     selectedNetworkId.value = networkId;
+    clearProcurementCart();
+    selectedPackage.value = null;
+    availablePackages.clear();
+    setSheetCount('1');
     loadNetworkPackages(networkId);
+  }
+
+  void addOrUpdateCartLine() {
+    final package = selectedPackage.value;
+    final sheets = double.tryParse(quantityInput.value.trim());
+
+    if (package == null) {
+      CustomSnackbar.show(
+        title: 'اختر الباقة أولاً',
+        message: 'حدد الباقة التي تريد إضافتها إلى طلب التوريد.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+    if (sheets == null || !sheets.isFinite || sheets <= 0) {
+      CustomSnackbar.show(
+        title: 'كمية الأوراق غير صالحة',
+        message: 'أدخل كمية أكبر من صفر قبل إضافة الباقة.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+    if (package.networkId != selectedNetworkId.value) {
+      CustomSnackbar.show(
+        title: 'الباقة لا تتبع الشبكة المحددة',
+        message: 'اختر باقة من كتالوج الشبكة الموردة الحالية.',
+        type: SnackType.error,
+      );
+      return;
+    }
+
+    if (package.packageVoucherCount <= 0) {
+      CustomSnackbar.show(
+        title: 'سعة الباقة غير صالحة',
+        message: 'لا يمكن تحويل الأوراق إلى كروت لأن سعة الباقة غير صحيحة.',
+        type: SnackType.error,
+      );
+      return;
+    }
+
+    final voucherCount = VoucherSheetCalculator.cardsForSheets(
+      sheets,
+      package.packageVoucherCount,
+    );
+    if (voucherCount <= 0) {
+      CustomSnackbar.show(
+        title: 'كمية غير صالحة',
+        message: 'الكمية المدخلة لا تنتج أي كروت.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
+    final line = ProcurementCartLine(
+      package: package,
+      sheets: sheets,
+      voucherCount: voucherCount,
+    );
+    final index = procurementCart.indexWhere(
+      (item) => item.package.packageId == package.packageId,
+    );
+
+    if (index == -1) {
+      procurementCart.add(line);
+      CustomSnackbar.show(
+        title: 'أضيفت الباقة إلى الطلب',
+        message: 'تمت إضافة ${package.packageName} إلى سلة التوريد.',
+        type: SnackType.success,
+      );
+    } else {
+      procurementCart[index] = line;
+      CustomSnackbar.show(
+        title: 'تم تحديث كمية الباقة',
+        message: 'تم تحديث كمية ${package.packageName} في سلة التوريد.',
+        type: SnackType.success,
+      );
+    }
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  void editCartLine(ProcurementCartLine line) {
+    selectedPackage.value = line.package;
+    setSheetCount(_formatSheetQuantity(line.sheets));
+  }
+
+  void removeCartLine(int packageId) {
+    procurementCart.removeWhere(
+      (line) => line.package.packageId == packageId,
+    );
+  }
+
+  void clearProcurementCart() {
+    procurementCart.clear();
+  }
+
+  String _formatSheetQuantity(double sheets) {
+    return sheets == sheets.roundToDouble()
+        ? sheets.toInt().toString()
+        : sheets.toString();
   }
 
   /// اختيار الباقة المطلوبة
@@ -298,6 +411,8 @@ class PosProcurementController extends GetxController {
 
   /// تهيئة نموذج طلب جديد
   void initNewOrderForm() {
+    clearProcurementCart();
+    selectedPackage.value = null;
     setSheetCount('1');
     notesController.clear();
     selectedSaleType.value = SaleType.cash;
@@ -332,21 +447,22 @@ class PosProcurementController extends GetxController {
       return false;
     }
 
-    if (selectedPackage.value == null) {
+    if (procurementCart.isEmpty) {
       CustomSnackbar.show(
-        title: 'تحديد الباقة مطلوب',
-        message: 'يرجى اختيار باقة الكروت المراد طلبها.',
+        title: 'سلة التوريد فارغة',
+        message: 'أضف باقة واحدة على الأقل إلى الطلب قبل إرساله.',
         type: SnackType.warning,
       );
       return false;
     }
 
-    final quantity = requestedVoucherCount;
-    if (quantity <= 0) {
+    if (procurementCart.any(
+      (line) => line.package.networkId != selectedNetworkId.value,
+    )) {
       CustomSnackbar.show(
-        title: 'كمية غير صالحة',
-        message: 'تعذر تحويل كمية الأوراق إلى عدد كروت صالح لهذه الباقة.',
-        type: SnackType.warning,
+        title: 'تعارض في الشبكة الموردة',
+        message: 'تحتوي السلة على باقات لا تنتمي إلى الشبكة المحددة.',
+        type: SnackType.error,
       );
       return false;
     }
@@ -363,16 +479,20 @@ class PosProcurementController extends GetxController {
         'sale_type': selectedSaleType.value.wireValue,
         if (notesController.text.trim().isNotEmpty)
           'request_note': notesController.text.trim(),
-        'items': [
-          {
-            'package_id': selectedPackage.value!.packageId,
-            'voucher_count': quantity,
-          }
-        ],
+        'items': procurementCart
+            .map(
+              (line) => {
+                'package_id': line.package.packageId,
+                'voucher_count': line.voucherCount,
+              },
+            )
+            .toList(growable: false),
       };
 
       final created = await createRequestUseCase(payload);
       requests.insert(0, created);
+      clearProcurementCart();
+      setSheetCount('1');
 
       await CustomAnimationOverlay.showSuccess(
         message: 'تم تقديم طلب الكروت بنجاح وهو قيد الانتظار',

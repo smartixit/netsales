@@ -6,6 +6,7 @@ import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_sheet_quantity_section.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_cart_section.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
@@ -148,6 +149,22 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
 
               // 3. تحديد كمية التوريد بوحدة الأوراق مع معاينة تحويلها إلى كروت
               const ProcurementSheetQuantitySection(),
+              AppSpacing.vMd,
+              Obx(() {
+                return CustomButton.secondary(
+                  text: controller.isSelectedPackageInCart
+                      ? 'تحديث الباقة في الطلب'
+                      : 'إضافة الباقة إلى الطلب',
+                  icon: controller.isSelectedPackageInCart
+                      ? Icons.edit_rounded
+                      : Icons.add_shopping_cart_rounded,
+                  onPressed: controller.selectedPackage.value == null
+                      ? null
+                      : controller.addOrUpdateCartLine,
+                );
+              }),
+              AppSpacing.vLg,
+              const ProcurementCartSection(),
 
               AppSpacing.vLg,
 
