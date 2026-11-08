@@ -24,7 +24,9 @@ class PosWalletDashboardController extends GetxController {
   final walletsErrorMessage = RxnString();
   final logsErrorMessage = RxnString();
 
-  bool get hasMoreLogs => nextCursor.value != null;
+  int _logsRequestVersion = 0;
+
+  bool get hasMoreLogs => nextCursor.value?.trim().isNotEmpty ?? false;
 
   @override
   void onInit() {
@@ -55,9 +57,12 @@ class PosWalletDashboardController extends GetxController {
       if (selected != null) {
         await loadWalletLogs(selected.walletId, isRefresh: true);
       } else {
+        ++_logsRequestVersion;
         logs.clear();
         nextCursor.value = null;
         logsErrorMessage.value = null;
+        isLoadingLogs.value = false;
+        isLoadingMoreLogs.value = false;
       }
     } on AppException catch (e) {
       walletsErrorMessage.value = e.message;
@@ -84,34 +89,51 @@ class PosWalletDashboardController extends GetxController {
   }
 
   Future<void> loadWalletLogs(int walletId, {bool isRefresh = false}) async {
+    if (selectedWallet.value?.walletId != walletId) return;
+
     if (isRefresh) {
       isLoadingLogs.value = true;
+      isLoadingMoreLogs.value = false;
       nextCursor.value = null;
       logsErrorMessage.value = null;
-    } else if (!hasMoreLogs) {
-      return;
+    } else {
+      if (isLoadingLogs.value || isLoadingMoreLogs.value || !hasMoreLogs) {
+        return;
+      }
+      isLoadingMoreLogs.value = true;
+      logsErrorMessage.value = null;
     }
+
+    final requestVersion = ++_logsRequestVersion;
+    final requestedCursor = isRefresh ? null : nextCursor.value;
 
     try {
       final res = await getPosWalletLogsUseCase(
         walletId,
-        cursor: isRefresh ? null : nextCursor.value,
+        cursor: requestedCursor,
         perPage: 15,
       );
 
-      if (selectedWallet.value?.walletId != walletId) return;
+      if (requestVersion != _logsRequestVersion ||
+          selectedWallet.value?.walletId != walletId) {
+        return;
+      }
+
       if (isRefresh) {
         logs.assignAll(res.items);
       } else {
+        final existingIds = logs.map((item) => item.logId).toSet();
         logs.addAll(
-          res.items.where(
-            (item) => !logs.any((existing) => existing.logId == item.logId),
-          ),
+          res.items.where((item) => existingIds.add(item.logId)),
         );
       }
       nextCursor.value = res.nextCursor;
       logsErrorMessage.value = null;
     } on AppException catch (e) {
+      if (requestVersion != _logsRequestVersion ||
+          selectedWallet.value?.walletId != walletId) {
+        return;
+      }
       logsErrorMessage.value = e.message;
       if (isRefresh) {
         CustomSnackbar.show(
@@ -121,22 +143,25 @@ class PosWalletDashboardController extends GetxController {
         );
       }
     } catch (e) {
+      if (requestVersion != _logsRequestVersion ||
+          selectedWallet.value?.walletId != walletId) {
+        return;
+      }
       logsErrorMessage.value = AppException.sanitizeMessage(
         e,
         fallback: 'تعذر تحميل حركات المحفظة. يرجى المحاولة مجدداً.',
       );
     } finally {
-      if (isRefresh) isLoadingLogs.value = false;
-      isLoadingMoreLogs.value = false;
+      if (requestVersion == _logsRequestVersion) {
+        isLoadingLogs.value = false;
+        isLoadingMoreLogs.value = false;
+      }
     }
   }
 
   Future<void> loadMoreLogs() async {
     final walletId = selectedWallet.value?.walletId;
-    if (walletId == null || isLoadingMoreLogs.value || !hasMoreLogs) return;
-
-    logsErrorMessage.value = null;
-    isLoadingMoreLogs.value = true;
+    if (walletId == null) return;
     await loadWalletLogs(walletId, isRefresh: false);
   }
 }
