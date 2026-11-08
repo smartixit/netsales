@@ -55,9 +55,11 @@ class NetworkWalletDashboardController extends GetxController {
       if (requestVersion != _walletsRequestVersion) return;
       final availableWallets = List<NetworkWalletEntity>.of(res.items);
       final previousId = selectedWallet.value?.walletId;
-      final selected = availableWallets.firstWhereOrNull(
-        (wallet) => wallet.walletId == previousId,
-      );
+      final selected = previousId == null
+          ? (availableWallets.isEmpty ? null : availableWallets.first)
+          : availableWallets.firstWhereOrNull(
+              (wallet) => wallet.walletId == previousId,
+            );
       wallets.assignAll(availableWallets);
       walletsNextCursor.value = res.nextCursor;
       selectedWallet.value = selected;
