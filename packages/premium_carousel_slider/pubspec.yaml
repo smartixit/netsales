@@ -1,0 +1,14 @@
+name: premium_carousel_slider
+description: A reusable, presentation-agnostic Flutter carousel built on carousel_slider.
+version: 1.0.0
+repository: https://github.com/smartixit/netsales
+environment:
+  sdk: ^3.13.7
+  flutter: ">=3.47.9"
+dependencies:
+  flutter:
+    sdk: flutter
+  carousel_slider: ^5.1.2
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
