@@ -60,10 +60,17 @@ class NetworkOperatingExpensesController extends GetxController {
   bool get canDeleteAttachment => PermissionService.to.can(AppPermissions.expensesDelete);
 
   @override
-  void onInit() { super.onInit(); initializeNetworks(); }
+  void onInit() {
+    super.onInit();
+    initializeNetworks();
+  }
 
   @override
-  void onClose() { _searchDebounce?.cancel(); searchTextController.dispose(); super.onClose(); }
+  void onClose() {
+    _searchDebounce?.cancel();
+    searchTextController.dispose();
+    super.onClose();
+  }
 
   void onSearchChanged(String value) {
     _searchDebounce?.cancel();
@@ -84,7 +91,9 @@ class NetworkOperatingExpensesController extends GetxController {
       final ids = <int>{};
       final unique = result.where((n) => n.networkId > 0 && ids.add(n.networkId)).toList();
       networks.assignAll(unique);
-      if (unique.length == 1) await selectNetwork(unique.single.networkId);
+      if (unique.length == 1) {
+      await selectNetwork(unique.single.networkId);
+    }
     } catch (e) {
       if (version == _networkVersion) {
         networkError.value = AppException.sanitizeMessage(e, fallback: 'تعذر تحميل الشبكات المصرح بها.');
