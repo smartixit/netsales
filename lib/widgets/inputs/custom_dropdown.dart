@@ -416,6 +416,8 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     final listenable = _resolvedValueListenable;
     if (listenable is ValueNotifier<T?>) {
       listenable.value = value;
+    } else if (listenable is WritableValueListenable<T?>) {
+      listenable.value = value;
     }
     widget.onChanged?.call(value);
   }
