@@ -16,8 +16,6 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     final navItems = [
       WorkspaceNavItem(
         label: 'الرئيسية',
