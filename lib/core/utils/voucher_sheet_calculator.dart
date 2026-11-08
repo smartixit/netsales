@@ -31,23 +31,24 @@ class VoucherSheetCalculator {
   /// - 2.0 ورقة -> 102 كرت
   /// - 2.5 ورقة -> 128 كرت (102 + 26)
   static int cardsForSheets(double sheets, int sheetSize) {
-    if (sheets <= 0 || sheetSize <= 0) return 0;
-
-    final int fullSheets = sheets.floor();
-    final double fraction = sheets - fullSheets;
-
-    // حالة الأوراق الكاملة بدون كسور
-    if (fraction < 0.001) {
-      return fullSheets * sheetSize;
+    if (!sheets.isFinite || sheets <= 0 || sheetSize <= 0) {
+      return 0;
     }
 
-    // حالة النصف ورقة الدقيقة (بين 0.45 و 0.55)
-    if ((fraction - 0.5).abs() < 0.05) {
-      return (fullSheets * sheetSize) + halfSheetCards(sheetSize);
+    final fullSheets = sheets.floor();
+    final fraction = sheets - fullSheets;
+    final fullCards = fullSheets * sheetSize;
+
+    if (fraction == 0) {
+      return fullCards;
     }
 
-    // لأي كسور أخرى (مثل الربع أو الثلث) يتم التقريب للأعلى
-    return (fullSheets * sheetSize) + (fraction * sheetSize).ceil();
+    // النصف الدقيق فقط يأخذ قاعدة ceil للنصف؛ الكسور القريبة لا تُعامل كنصف.
+    if ((fraction - 0.5).abs() < 1e-9) {
+      return fullCards + halfSheetCards(sheetSize);
+    }
+
+    return fullCards + (fraction * sheetSize).ceil();
   }
 
   /// فحص ما إذا كانت كمية كروت معينة تمثل نصف ورقة تحديداً
@@ -159,42 +160,28 @@ class VoucherSheetCalculator {
   static List<VoucherSheetPreset> getPresets(int sheetSize) {
     if (sheetSize <= 0) return const [];
 
-    final half = halfSheetCards(sheetSize);
+    const quantities = <double>[0.5, 1, 1.5, 2, 3, 5, 10, 20];
+    return quantities.map((sheets) {
+      final cards = cardsForSheets(sheets, sheetSize);
+      final shortLabel = switch (sheets) {
+        0.5 => '½ ورقة',
+        1 => 'ورقة',
+        1.5 => 'ورقة ونصف',
+        2 => '2 ورقة',
+        3 => '3 ورقات',
+        5 => '5 ورقات',
+        10 => '10 ورقات',
+        _ => '20 ورقة',
+      };
 
-    return [
-      VoucherSheetPreset(
-        label: 'نصف ورقة ($half)',
-        shortLabel: '½ ورقة',
-        cards: half,
-        sheets: 0.5,
-      ),
-      VoucherSheetPreset(
-        label: 'ورقة ($sheetSize)',
-        shortLabel: '1 ورقة',
-        cards: sheetSize,
-        sheets: 1.0,
-      ),
-      VoucherSheetPreset(
-        label: 'ورقة ونصف (${sheetSize + half})',
-        shortLabel: '1½ ورقة',
-        cards: sheetSize + half,
-        sheets: 1.5,
-      ),
-      VoucherSheetPreset(
-        label: 'ورقتان (${sheetSize * 2})',
-        shortLabel: '2 ورقة',
-        cards: sheetSize * 2,
-        sheets: 2.0,
-      ),
-      VoucherSheetPreset(
-        label: '3 ورقات (${sheetSize * 3})',
-        shortLabel: '3 ورقات',
-        cards: sheetSize * 3,
-        sheets: 3.0,
-      ),
-    ];
-  }
-}
+      return VoucherSheetPreset(
+        label: '$shortLabel ($cards)',
+        shortLabel: shortLabel,
+        cards: cards,
+        sheets: sheets,
+      );
+    }).toList(growable: false);
+  }}
 
 /// ============================================================================
 /// كائن تفكيك كمية الأوراق (SheetBreakdown)

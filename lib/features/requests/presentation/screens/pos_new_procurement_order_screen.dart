@@ -5,7 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/form_validators.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_sheet_quantity_section.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
@@ -146,26 +146,8 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
 
               AppSpacing.vLg,
 
-              // 3. كمية الكروت المطلوبة
-              Text(
-                'كمية الكروت',
-                style: AppTypography.titleSmall.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              AppSpacing.vSm,
-              CustomTextField(
-                controller: controller.quantityController,
-                label: 'عدد الكروت',
-                hint: 'أدخل عدد الكروت المطلوبة (مثال: 50)',
-                keyboardType: TextInputType.number,
-                prefixIcon: const Icon(Icons.confirmation_number_outlined),
-                validator: FormValidators.integerValidator(
-                  fieldName: 'كمية الكروت',
-                  isRequired: true,
-                ),
-              ),
+              // 3. تحديد كمية التوريد بوحدة الأوراق مع معاينة تحويلها إلى كروت
+              const ProcurementSheetQuantitySection(),
 
               AppSpacing.vLg,
 

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
@@ -61,10 +62,60 @@ class PosProcurementController extends GetxController {
   final selectedPackage = Rxn<PackageEntity>();
   final isLoadingPackages = false.obs;
 
-  final quantityController = TextEditingController(text: '10');
+  /// حقل الإدخال بوحدة الأوراق؛ يحول إلى عدد الكروت عند إرسال الطلب.
+  final quantityController = TextEditingController(text: '1');
+  final quantityInput = '1'.obs;
   final notesController = TextEditingController();
   final selectedSaleType = SaleType.cash.obs;
   final isSubmitting = false.obs;
+
+  /// يحول الأوراق إلى voucher_count الذي يقبله عقد Laravel الحالي.
+  /// هذا تحويل وحدة وليس حساباً مالياً.
+  int get requestedVoucherCount {
+    final sheets = double.tryParse(quantityInput.value.trim());
+    final sheetSize = selectedPackage.value?.packageVoucherCount ?? 0;
+
+    if (sheets == null || !sheets.isFinite || sheetSize <= 0) {
+      return 0;
+    }
+
+    return VoucherSheetCalculator.cardsForSheets(sheets, sheetSize);
+  }
+
+  String? validateSheetQuantity(String? value) {
+    final sheets = double.tryParse((value ?? '').trim());
+
+    if (sheets == null || !sheets.isFinite || sheets <= 0) {
+      return 'أدخل عدد أوراق صحيحاً أكبر من صفر.';
+    }
+
+    final package = selectedPackage.value;
+    if (package == null) {
+      return 'اختر الباقة أولاً حتى يمكن تحويل الأوراق إلى كروت.';
+    }
+
+    if (package.packageVoucherCount <= 0) {
+      return 'سعة الورقة لهذه الباقة غير صالحة. راجع بيانات الباقة لدى الشبكة.';
+    }
+
+    if (VoucherSheetCalculator.cardsForSheets(
+          sheets,
+          package.packageVoucherCount,
+        ) <
+        1) {
+      return 'الكمية المدخلة لا تنتج أي كروت.';
+    }
+
+    return null;
+  }
+
+  void setSheetCount(String value) {
+    quantityController.text = value;
+    quantityController.selection = TextSelection.collapsed(
+      offset: quantityController.text.length,
+    );
+    quantityInput.value = value;
+  }
 
   @override
   void onInit() {
@@ -72,6 +123,9 @@ class PosProcurementController extends GetxController {
 
     searchController.addListener(() {
       searchQuery.value = searchController.text;
+    });
+    quantityController.addListener(() {
+      quantityInput.value = quantityController.text;
     });
 
     debounce(
@@ -244,7 +298,7 @@ class PosProcurementController extends GetxController {
 
   /// تهيئة نموذج طلب جديد
   void initNewOrderForm() {
-    quantityController.text = '10';
+    setSheetCount('1');
     notesController.clear();
     selectedSaleType.value = SaleType.cash;
 
@@ -287,11 +341,11 @@ class PosProcurementController extends GetxController {
       return false;
     }
 
-    final quantity = int.tryParse(quantityController.text.trim()) ?? 0;
+    final quantity = requestedVoucherCount;
     if (quantity <= 0) {
       CustomSnackbar.show(
         title: 'كمية غير صالحة',
-        message: 'يرجى إدخال كمية كروت صحيحة (1 كارت على الأقل).',
+        message: 'تعذر تحويل كمية الأوراق إلى عدد كروت صالح لهذه الباقة.',
         type: SnackType.warning,
       );
       return false;
