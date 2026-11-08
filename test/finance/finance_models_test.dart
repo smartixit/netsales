@@ -1,4 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:netsales/core/enums/wallet_operation_type.dart';
+import 'package:netsales/features/finance/domain/entities/network_wallet_entity.dart';
+import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
 import 'package:netsales/features/finance/data/models/network_wallet_models.dart';
 import 'package:netsales/features/finance/data/models/pos_repayment_models.dart';
 import 'package:netsales/features/finance/data/models/pos_wallet_models.dart';
@@ -63,6 +66,33 @@ void main() {
       expect(log.logAmount, 50000.00);
       expect(log.logStatement, 'دفعة نقدية في حساب نقطة البيع');
       expect(log.createdByName, 'محاسب الشبكة');
+    });
+
+    test('Wallet ledger operation direction uses the enum, not amount sign', () {
+      const networkWithdrawal = NetworkWalletLogEntity(
+        logId: 1,
+        walletId: 10,
+        logOperation: 'WITHDRAW',
+        logAmount: 50000,
+      );
+      const posWithdrawal = PosWalletLogEntity(
+        logId: 2,
+        walletId: 20,
+        logOperationType: 'WITHDRAW',
+        logAmount: 50000,
+      );
+      const unknownOperation = NetworkWalletLogEntity(
+        logId: 3,
+        walletId: 10,
+        logOperation: 'FUTURE_OPERATION',
+        logAmount: 50000,
+      );
+
+      expect(networkWithdrawal.typedLogOperation, WalletOperationType.withdraw);
+      expect(posWithdrawal.typedLogOperationType, WalletOperationType.withdraw);
+      expect(unknownOperation.typedLogOperation, WalletOperationType.unknown);
+      expect(networkWithdrawal.logAmount, 50000);
+      expect(posWithdrawal.logAmount, 50000);
     });
 
     test('DebtSummaryEntity parses aging summary buckets correctly', () {
