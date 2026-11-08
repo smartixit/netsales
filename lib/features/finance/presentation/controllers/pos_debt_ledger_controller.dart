@@ -18,11 +18,12 @@ class PosDebtLedgerController extends GetxController {
   final outstandingInvoices = <InvoiceEntity>[].obs;
 
   final isLoading = false.obs;
+  final isLoadingInvoices = false.obs;
   final isLoadingMore = false.obs;
-  final selectedBucket =
-      RxnString(); // null, '0_30', '31_60', '61_90', 'over_90'
+  final selectedBucket = RxnString();
   final nextCursor = RxnString();
-  final errorMessage = RxnString();
+  final summaryErrorMessage = RxnString();
+  final invoicesErrorMessage = RxnString();
 
   bool get hasMore => nextCursor.value != null;
 
@@ -33,31 +34,39 @@ class PosDebtLedgerController extends GetxController {
   }
 
   Future<void> loadDebtData() async {
+    if (isLoading.value) return;
     isLoading.value = true;
-    errorMessage.value = null;
+    summaryErrorMessage.value = null;
 
     try {
-      final summaryRes = await getDebtSummaryUseCase();
-      summary.value = summaryRes;
-
-      await loadInvoices(isRefresh: true);
+      summary.value = await getDebtSummaryUseCase();
     } on AppException catch (e) {
-      errorMessage.value = e.message;
+      summaryErrorMessage.value = e.message;
       CustomSnackbar.show(
-        title: 'خطأ',
+        title: 'تعذر تحميل ملخص الذمم',
         message: e.message,
         type: SnackType.error,
       );
     } catch (e) {
-      errorMessage.value = 'تعذر تحميل بيانات الذمم والديون: $e';
+      summaryErrorMessage.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل ملخص الذمم. يرجى المحاولة مجدداً.',
+      );
     } finally {
       isLoading.value = false;
     }
+
+    await loadInvoices(isRefresh: true);
   }
 
   Future<void> loadInvoices({bool isRefresh = false}) async {
     if (isRefresh) {
+      if (isLoadingInvoices.value) return;
+      isLoadingInvoices.value = true;
       nextCursor.value = null;
+      invoicesErrorMessage.value = null;
+    } else if (isLoadingMore.value || !hasMore) {
+      return;
     }
 
     try {
@@ -70,20 +79,42 @@ class PosDebtLedgerController extends GetxController {
       if (isRefresh) {
         outstandingInvoices.assignAll(res.items);
       } else {
-        outstandingInvoices.addAll(res.items);
+        outstandingInvoices.addAll(
+          res.items.where(
+            (item) => !outstandingInvoices.any(
+              (existing) => existing.invoiceId == item.invoiceId,
+            ),
+          ),
+        );
       }
       nextCursor.value = res.nextCursor;
+      invoicesErrorMessage.value = null;
+    } on AppException catch (e) {
+      invoicesErrorMessage.value = e.message;
+      if (isRefresh) {
+        CustomSnackbar.show(
+          title: 'تعذر تحميل الفواتير المستحقة',
+          message: e.message,
+          type: SnackType.error,
+        );
+      }
     } catch (e) {
-      // invoices error
+      invoicesErrorMessage.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل الفواتير المستحقة. يرجى المحاولة مجدداً.',
+      );
     } finally {
+      if (isRefresh) isLoadingInvoices.value = false;
       isLoadingMore.value = false;
     }
   }
 
-  void onBucketSelected(String? bucket) {
+  Future<void> onBucketSelected(String? bucket) async {
     if (selectedBucket.value == bucket) return;
     selectedBucket.value = bucket;
-    loadInvoices(isRefresh: true);
+    outstandingInvoices.clear();
+    nextCursor.value = null;
+    await loadInvoices(isRefresh: true);
   }
 
   Future<void> loadMoreInvoices() async {
