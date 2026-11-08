@@ -19,7 +19,7 @@ class NetworkRequestModificationSheet extends GetView<NetworkProcurementReviewCo
     await controller.beginModification(request);
     if (controller.editingRequestId.value != request.requestId) return;
     await CustomBottomSheet.show<void>(
-      title: 'مراجعة طلب #\${request.requestId}',
+      title: 'مراجعة طلب #${request.requestId}',
       subtitle: 'عدّل الكميات أو أضف واحذف الباقات، ثم اطلب معاينة الأسعار قبل الاعتماد.',
       leadingIcon: Icons.edit_note_rounded,
       scrollable: true,
@@ -45,7 +45,7 @@ class NetworkRequestModificationSheet extends GetView<NetworkProcurementReviewCo
           if (lines.isEmpty) _infoPanel(context, 'يجب أن يحتوي الطلب على باقة واحدة على الأقل.'),
           ...lines.map((line) {
             final package = controller.availablePackages.firstWhereOrNull((item) => item.packageId == line.packageId);
-            final name = package?.packageName ?? 'باقة #\${line.packageId}';
+            final name = package?.packageName ?? 'باقة #${line.packageId}';
             return Container(
               margin: EdgeInsets.only(bottom: AppSpacing.sm),
               padding: EdgeInsets.all(AppSpacing.md),
@@ -61,13 +61,13 @@ class NetworkRequestModificationSheet extends GetView<NetworkProcurementReviewCo
                     children: [
                       Text(name, style: AppTypography.bodyMedium.copyWith(color: colors.onSurface, fontWeight: FontWeight.w700)),
                       AppSpacing.vXxs,
-                      Text('عدد الكروت: \${line.voucherCount}', style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+                      Text('عدد الكروت: ${line.voucherCount}', style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
                     ],
                   )),
                   CustomButton.icon(icon: Icons.remove_rounded, size: AppButtonSize.small,
                     onPressed: line.voucherCount <= 1 ? null : () => controller.setModificationQuantity(line.packageId, line.voucherCount - 1)),
                   Padding(padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                    child: Text('\${line.voucherCount}', style: AppTypography.titleSmall.copyWith(color: colors.onSurface, fontWeight: FontWeight.bold))),
+                    child: Text('${line.voucherCount}', style: AppTypography.titleSmall.copyWith(color: colors.onSurface, fontWeight: FontWeight.bold))),
                   CustomButton.icon(icon: Icons.add_rounded, size: AppButtonSize.small,
                     onPressed: line.voucherCount >= 1000000 ? null : () => controller.setModificationQuantity(line.packageId, line.voucherCount + 1)),
                   CustomButton.icon(icon: Icons.delete_outline_rounded, size: AppButtonSize.small,
@@ -111,13 +111,13 @@ class NetworkRequestModificationSheet extends GetView<NetworkProcurementReviewCo
             AppSpacing.vSm,
             ...preview.items.map((item) => Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.xs),
-              child: Text('\${item.packageName} — \${item.voucherCount} كرت — خصم \${item.itemDiscount}% — \${AmountFormatter.format(item.itemTotalAmount.toString())}',
+              child: Text('${item.packageName} — ${item.voucherCount} كرت — خصم ${item.itemDiscount}% — ${AmountFormatter.format(item.itemTotalAmount.toString())}',
                 style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
             )),
             if (preview.removedItems.isNotEmpty) ...[
               AppSpacing.vSm,
               Text('الباقات المحذوفة', style: AppTypography.labelLarge.copyWith(color: colors.error)),
-              ...preview.removedItems.map((item) => Text('\${item.packageName} — \${item.originalVoucherCount} كرت',
+              ...preview.removedItems.map((item) => Text('${item.packageName} — ${item.originalVoucherCount} كرت',
                 style: AppTypography.bodySmall.copyWith(color: colors.error))),
             ],
             if (!preview.hasModifications) _infoPanel(context, 'لم يتم اكتشاف أي تغيير عن الطلب الأصلي.'),
