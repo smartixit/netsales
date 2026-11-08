@@ -247,13 +247,14 @@ class DebtScopeSelector extends StatelessWidget {
               onRetry: controller.loadMoreNetworkOptions,
             ),
           ],
-          if (controller.hasMoreNetworkOptions) ...[
+          if (controller.isLoadingMoreNetworks.value) ...[
+            AppSpacing.vXs,
+            const CustomSkeletonFeed(itemCount: 2),
+          ] else if (controller.hasMoreNetworkOptions) ...[
             AppSpacing.vXs,
             CustomButton.secondary(
               text: 'تحميل مزيد من مزودي الشبكة',
               prefix: Icons.expand_more_rounded,
-              loading: controller.isLoadingMoreNetworks.value,
-              enabled: !controller.isLoadingMoreNetworks.value,
               width: double.infinity,
               onPressed: controller.loadMoreNetworkOptions,
             ),
