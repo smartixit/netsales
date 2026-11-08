@@ -201,6 +201,16 @@ abstract final class ScreenRegistry {
       requiredPermission: AppPermissions.salesView,
       implementationState: ScreenImplementationState.implemented,
     ),
+    ScreenDescriptor(
+      screenId: 'NET-12',
+      route: AppRoutes.networkCreateSaleInvoice,
+      titleAr: 'إنشاء فاتورة مبيعات مباشرة',
+      titleEn: 'Create Direct Sale Invoice',
+      workspace: AppWorkspace.network,
+      requiredPermission: AppPermissions.salesCreate,
+      isBalanceMutation: true,
+      implementationState: ScreenImplementationState.implemented,
+    ),
 
     // -------------------------------------------------------------------------
     // شاشات مساحة عمل نقطة البيع والوكيل (POS Workspace Screens - Phase 3.1 / 4)
