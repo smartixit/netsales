@@ -29,9 +29,14 @@ class MockCommercialRepository implements CommercialRepository {
   List<NetworkEntity> networks = [];
   PaginatedList<NetworkPosLinkEntity> posLinks = const PaginatedList(items: []);
   final List<int> requestedNetworkIds = [];
+  bool failNetworkList = false;
+  bool failPosList = false;
 
   @override
-  Future<List<NetworkEntity>> getMyNetworks() async => networks;
+  Future<List<NetworkEntity>> getMyNetworks() async {
+    if (failNetworkList) throw Exception('Network list request failed');
+    return networks;
+  }
 
   @override
   Future<List<PosEntity>> getMyPos() async => [];
@@ -46,6 +51,7 @@ class MockCommercialRepository implements CommercialRepository {
     Map<String, dynamic>? query,
   }) async {
     requestedNetworkIds.add(networkId);
+    if (failPosList) throw Exception('POS list request failed');
     return posLinks;
   }
 
@@ -458,6 +464,37 @@ void main() {
         expect(controller.selectedPosId.value, 20);
       },
     );
+
+    test('Repayment collection exposes network list failure for retry', () async {
+      commercialRepository.failNetworkList = true;
+      final controller = RepaymentCollectionController(
+        collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+        getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
+      );
+
+      await controller.loadInitialData();
+
+      expect(controller.networks, isEmpty);
+      expect(controller.initialErrorMessage.value, isNotNull);
+      expect(controller.isLoadingInitial.value, isFalse);
+    });
+
+    test('Repayment collection exposes linked POS failure instead of empty result', () async {
+      commercialRepository.failPosList = true;
+      final controller = RepaymentCollectionController(
+        collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+        getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
+      );
+      controller.selectedNetworkId.value = 7;
+
+      await controller.loadPosForNetwork(7);
+
+      expect(controller.posList, isEmpty);
+      expect(controller.posErrorMessage.value, isNotNull);
+      expect(controller.isLoadingPos.value, isFalse);
+    });
 
     test('RepaymentHistoryController loads repayment list', () async {
       repository.repayments = const PaginatedList(
