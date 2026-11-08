@@ -50,10 +50,8 @@ class RegisterPosController extends GetxController {
   final ValueNotifier<File?> agentAvatar = ValueNotifier<File?>(null);
 
   // قنوات القيمة التفاعلية للقوائم المنسدلة (CustomDropdown)
-  final ValueNotifier<GovernorateEntity?> selectedGovernorate =
-      ValueNotifier<GovernorateEntity?>(null);
-  final ValueNotifier<DirectorateEntity?> selectedDirectorate =
-      ValueNotifier<DirectorateEntity?>(null);
+  final selectedGovernorate = Rxn<GovernorateEntity>();
+  final selectedDirectorate = Rxn<DirectorateEntity>();
 
   // الحالات التفاعلية
   final RxList<GovernorateEntity> governorates = <GovernorateEntity>[].obs;
@@ -225,8 +223,6 @@ class RegisterPosController extends GetxController {
     agentEmailController.dispose();
     posLogo.dispose();
     agentAvatar.dispose();
-    selectedGovernorate.dispose();
-    selectedDirectorate.dispose();
     super.onClose();
   }
 }
