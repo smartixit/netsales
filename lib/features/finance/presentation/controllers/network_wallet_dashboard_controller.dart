@@ -22,9 +22,16 @@ class NetworkWalletDashboardController extends GetxController {
   final isLoadingMoreLogs = false.obs;
   final nextCursor = RxnString();
   final walletsErrorMessage = RxnString();
+  final walletsLoadMoreErrorMessage = RxnString();
+  final walletsNextCursor = RxnString();
+  final isLoadingMoreWallets = false.obs;
   final logsErrorMessage = RxnString();
 
   int _logsRequestVersion = 0;
+  int _walletsRequestVersion = 0;
+
+  bool get hasMoreWallets =>
+      walletsNextCursor.value?.trim().isNotEmpty ?? false;
 
   bool get hasMoreLogs => nextCursor.value?.trim().isNotEmpty ?? false;
 
@@ -36,12 +43,18 @@ class NetworkWalletDashboardController extends GetxController {
 
   Future<void> loadWallets() async {
     if (isLoading.value) return;
+    final requestVersion = ++_walletsRequestVersion;
     isLoading.value = true;
+    isLoadingMoreWallets.value = false;
     walletsErrorMessage.value = null;
+    walletsLoadMoreErrorMessage.value = null;
+    walletsNextCursor.value = null;
 
     try {
-      final res = await getNetworkWalletsUseCase();
+      final res = await getNetworkWalletsUseCase(perPage: 15);
+      if (requestVersion != _walletsRequestVersion) return;
       wallets.assignAll(res.items);
+      walletsNextCursor.value = res.nextCursor;
 
       final selectedId = selectedWallet.value?.walletId;
       NetworkWalletEntity? selected;
@@ -65,6 +78,7 @@ class NetworkWalletDashboardController extends GetxController {
         isLoadingMoreLogs.value = false;
       }
     } on AppException catch (e) {
+      if (requestVersion != _walletsRequestVersion) return;
       walletsErrorMessage.value = e.message;
       CustomSnackbar.show(
         title: 'خطأ',
@@ -72,12 +86,55 @@ class NetworkWalletDashboardController extends GetxController {
         type: SnackType.error,
       );
     } catch (e) {
+      if (requestVersion != _walletsRequestVersion) return;
       walletsErrorMessage.value = AppException.sanitizeMessage(
         e,
         fallback: 'تعذر تحميل محافظ الشبكة. يرجى المحاولة مجدداً.',
       );
     } finally {
-      isLoading.value = false;
+      if (requestVersion == _walletsRequestVersion) {
+        isLoading.value = false;
+      }
+    }
+  }
+
+  Future<void> loadMoreWallets() async {
+    if (isLoading.value || isLoadingMoreWallets.value || !hasMoreWallets) {
+      return;
+    }
+
+    final requestVersion = ++_walletsRequestVersion;
+    final requestedCursor = walletsNextCursor.value;
+    isLoadingMoreWallets.value = true;
+    walletsLoadMoreErrorMessage.value = null;
+
+    try {
+      final result = await getNetworkWalletsUseCase(
+        cursor: requestedCursor,
+        perPage: 15,
+      );
+      if (requestVersion != _walletsRequestVersion) return;
+
+      final existingIds = wallets.map((wallet) => wallet.walletId).toSet();
+      wallets.addAll(
+        result.items.where((wallet) => existingIds.add(wallet.walletId)),
+      );
+      walletsNextCursor.value = result.nextCursor;
+    } on AppException catch (e) {
+      if (requestVersion == _walletsRequestVersion) {
+        walletsLoadMoreErrorMessage.value = e.message;
+      }
+    } catch (e) {
+      if (requestVersion == _walletsRequestVersion) {
+        walletsLoadMoreErrorMessage.value = AppException.sanitizeMessage(
+          e,
+          fallback: 'تعذر تحميل بقية المحافظ. يرجى المحاولة مجدداً.',
+        );
+      }
+    } finally {
+      if (requestVersion == _walletsRequestVersion) {
+        isLoadingMoreWallets.value = false;
+      }
     }
   }
 

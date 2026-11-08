@@ -107,6 +107,8 @@ class MockCommercialRepository implements CommercialRepository {
 
 class TestFinanceRepository implements FinanceRepository {
   PaginatedList<PosWalletEntity> posWallets = const PaginatedList(items: []);
+  final Map<String, PaginatedList<PosWalletEntity>> posWalletPages = {};
+  final List<String?> requestedPosWalletCursors = [];
   PaginatedList<PosWalletLogEntity> posLogs = const PaginatedList(items: []);
   DebtSummaryEntity? debtSummary;
   PaginatedList<InvoiceEntity> invoices = const PaginatedList(items: []);
@@ -118,6 +120,8 @@ class TestFinanceRepository implements FinanceRepository {
   PaginatedList<NetworkWalletEntity> networkWallets = const PaginatedList(
     items: [],
   );
+  final Map<String, PaginatedList<NetworkWalletEntity>> networkWalletPages = {};
+  final List<String?> requestedNetworkWalletCursors = [];
   PaginatedList<NetworkWalletLogEntity> networkLogs = const PaginatedList(
     items: [],
   );
@@ -140,7 +144,12 @@ class TestFinanceRepository implements FinanceRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) async => posWallets;
+  }) async {
+    requestedPosWalletCursors.add(cursor);
+    return cursor == null
+        ? posWallets
+        : posWalletPages[cursor] ?? const PaginatedList(items: []);
+  }
 
   @override
   Future<PosWalletEntity> getPosWalletByNetworkAndPos(
@@ -252,7 +261,12 @@ class TestFinanceRepository implements FinanceRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) async => networkWallets;
+  }) async {
+    requestedNetworkWalletCursors.add(cursor);
+    return cursor == null
+        ? networkWallets
+        : networkWalletPages[cursor] ?? const PaginatedList(items: []);
+  }
 
   @override
   Future<NetworkWalletEntity> getNetworkWalletById(int walletId) async =>
@@ -1188,6 +1202,119 @@ void main() {
         expect(controller.networkLinks.map((link) => link.networkId), [91, 92]);
         expect(controller.hasSelectedScope, isTrue);
         expect(repository.requestedDebtScopes, hasLength(debtRequestCount));
+      },
+    );
+
+
+    test(
+      'Network wallet selection appends cursor pages and deduplicates wallet IDs',
+      () async {
+        const firstWallet = NetworkWalletEntity(
+          walletId: 1,
+          networkId: 101,
+          walletBalance: 1000,
+          networkName: 'الشبكة الأولى',
+        );
+        const secondWallet = NetworkWalletEntity(
+          walletId: 2,
+          networkId: 202,
+          walletBalance: 2000,
+          networkName: 'الشبكة الثانية',
+        );
+        repository.networkWallets = const PaginatedList(
+          items: [firstWallet],
+          nextCursor: 'network-wallet-page-2',
+        );
+        repository.networkWalletPages['network-wallet-page-2'] =
+            const PaginatedList(items: [firstWallet, secondWallet]);
+
+        final controller = NetworkWalletDashboardController(
+          getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
+          getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+        );
+
+        await controller.loadWallets();
+        await controller.loadMoreWallets();
+
+        expect(controller.wallets.map((wallet) => wallet.walletId), [1, 2]);
+        expect(controller.selectedWallet.value?.walletId, 1);
+        expect(repository.requestedNetworkWalletCursors, [
+          null,
+          'network-wallet-page-2',
+        ]);
+        expect(controller.hasMoreWallets, isFalse);
+        expect(controller.isLoadingMoreWallets.value, isFalse);
+      },
+    );
+
+    test(
+      'POS wallet selection appends cursor pages and preserves selected wallet',
+      () async {
+        const firstWallet = PosWalletEntity(
+          walletId: 11,
+          networkId: 101,
+          posId: 5,
+          walletBalance: 3000,
+          networkName: 'الشبكة الأولى',
+        );
+        const secondWallet = PosWalletEntity(
+          walletId: 22,
+          networkId: 202,
+          posId: 5,
+          walletBalance: 4000,
+          networkName: 'الشبكة الثانية',
+        );
+        repository.posWallets = const PaginatedList(
+          items: [firstWallet],
+          nextCursor: 'pos-wallet-page-2',
+        );
+        repository.posWalletPages['pos-wallet-page-2'] =
+            const PaginatedList(items: [firstWallet, secondWallet]);
+
+        final controller = PosWalletDashboardController(
+          getPosWalUseCase: GetPosWalUseCase(repository),
+          getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+        );
+
+        await controller.loadWallets();
+        await controller.loadMoreWallets();
+
+        expect(controller.wallets.map((wallet) => wallet.walletId), [11, 22]);
+        expect(controller.selectedWallet.value?.walletId, 11);
+        expect(repository.requestedPosWalletCursors, [
+          null,
+          'pos-wallet-page-2',
+        ]);
+        expect(controller.hasMoreWallets, isFalse);
+        expect(controller.isLoadingMoreWallets.value, isFalse);
+      },
+    );
+
+    test(
+      'Network wallet page failure preserves already loaded wallet options',
+      () async {
+        const wallet = NetworkWalletEntity(
+          walletId: 101,
+          networkId: 10,
+          walletBalance: 100,
+        );
+        repository.networkWallets = const PaginatedList(
+          items: [wallet],
+          nextCursor: 'missing-page',
+        );
+
+        final controller = NetworkWalletDashboardController(
+          getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
+          getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+        );
+
+        await controller.loadWallets();
+        await controller.loadMoreWallets();
+
+        expect(controller.wallets.map((item) => item.walletId), [101]);
+        expect(controller.walletsLoadMoreErrorMessage.value, isNotNull);
+        expect(controller.hasMoreWallets, isTrue);
+        expect(controller.isLoadingMoreWallets.value, isFalse);
       },
     );
 
