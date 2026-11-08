@@ -144,6 +144,7 @@ class FinanceBinding extends Bindings {
     Get.lazyPut<RepaymentHistoryController>(
       () => RepaymentHistoryController(
         getRepaymentsUseCase: Get.find<GetRepaymentsUseCase>(),
+        getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
         reverseRepaymentUseCase: Get.find<ReverseRepaymentUseCase>(),
       ),
       fenix: true,

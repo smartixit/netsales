@@ -111,6 +111,7 @@ class TestFinanceRepository implements FinanceRepository {
   DebtSummaryEntity? debtSummary;
   PaginatedList<InvoiceEntity> invoices = const PaginatedList(items: []);
   PaginatedList<PosRepaymentEntity> repayments = const PaginatedList(items: []);
+  final List<Map<String, int?>> requestedRepaymentScopes = [];
   final List<Map<String, int?>> requestedDebtScopes = [];
   final List<Map<String, int?>> requestedInvoiceScopes = [];
   PaginatedList<NetworkWalletEntity> networkWallets = const PaginatedList(
@@ -200,6 +201,7 @@ class TestFinanceRepository implements FinanceRepository {
     String? cursor,
     int? perPage,
   }) async {
+    requestedRepaymentScopes.add({'networkId': networkId, 'posId': posId});
     final pending = pendingRepaymentPages[status];
     if (pending != null) return pending.future;
     return repayments;
@@ -701,17 +703,83 @@ void main() {
         ],
       );
 
+      commercialRepository.networks = [
+        const NetworkEntity(
+          networkId: 1,
+          ownerId: 1,
+          networkName: 'شبكة الاختبار',
+          networkPhoneNumber: '777111222',
+        ),
+      ];
+
       final controller = RepaymentHistoryController(
         getRepaymentsUseCase: GetRepaymentsUseCase(repository),
+        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
         reverseRepaymentUseCase: ReverseRepaymentUseCase(repository),
       );
 
-      await controller.loadRepayments(isRefresh: true);
+      await controller.initializeNetworks();
 
       expect(controller.isLoading.value, isFalse);
       expect(controller.repayments.length, 1);
       expect(controller.repayments[0].amount, 250000);
+      expect(controller.selectedNetworkId.value, 1);
+      expect(repository.requestedRepaymentScopes, [
+        {'networkId': 1, 'posId': null},
+      ]);
     });
+
+
+    test(
+      'repayment history requires explicit network selection when multiple networks exist',
+      () async {
+        commercialRepository.networks = [
+          const NetworkEntity(
+            networkId: 11,
+            ownerId: 1,
+            networkName: 'الشبكة الأولى',
+            networkPhoneNumber: '777111111',
+          ),
+          const NetworkEntity(
+            networkId: 22,
+            ownerId: 1,
+            networkName: 'الشبكة الثانية',
+            networkPhoneNumber: '777222222',
+          ),
+        ];
+        repository.repayments = const PaginatedList(
+          items: [
+            PosRepaymentEntity(
+              repaymentId: 22,
+              repaymentUuid: 'rep-network-22',
+              posId: 2,
+              networkId: 22,
+              amount: 200,
+              repaymentDate: '2026-11-08',
+            ),
+          ],
+        );
+
+        final controller = RepaymentHistoryController(
+          getRepaymentsUseCase: GetRepaymentsUseCase(repository),
+          getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+        );
+
+        await controller.initializeNetworks();
+
+        expect(controller.selectedNetworkId.value, isNull);
+        expect(repository.requestedRepaymentScopes, isEmpty);
+        expect(controller.repayments, isEmpty);
+
+        await controller.selectNetwork(22);
+
+        expect(controller.selectedNetworkId.value, 22);
+        expect(repository.requestedRepaymentScopes, [
+          {'networkId': 22, 'posId': null},
+        ]);
+        expect(controller.repayments.single.networkId, 22);
+      },
+    );
 
     test('Repayment status stale response cannot replace latest filter results', () async {
       const oldRepayment = PosRepaymentEntity(
@@ -738,7 +806,9 @@ void main() {
 
       final controller = RepaymentHistoryController(
         getRepaymentsUseCase: GetRepaymentsUseCase(repository),
+        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
       );
+      controller.selectedNetworkId.value = 1;
       controller.selectedStatus.value = 'PENDING';
       final oldFuture = controller.loadRepayments(isRefresh: true);
       controller.onStatusChanged('COMPLETED');
