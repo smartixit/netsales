@@ -54,12 +54,12 @@ class NetworkWalletDashboardScreen
               Obx(() {
                 final wallet = controller.selectedWallet.value;
                 final permissions = PermissionService.to;
+                final isPlatformActor =
+                    permissions.hasRole(AppRoles.superAdmin);
                 final canTransfer = wallet != null &&
                     wallet.status &&
-                    (permissions.hasAnyRole([
-                          AppRoles.networkOwner,
-                          AppRoles.superAdmin,
-                        ]) ||
+                    !isPlatformActor &&
+                    (permissions.hasRole(AppRoles.networkOwner) ||
                         permissions.can(AppPermissions.posWalletsCreate));
                 if (!canTransfer) return const SizedBox.shrink();
 
