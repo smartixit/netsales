@@ -264,15 +264,6 @@ class PosProcurementController extends GetxController {
       return;
     }
 
-    if (package.networkId != selectedNetworkId.value) {
-      CustomSnackbar.show(
-        title: 'الباقة لا تتبع الشبكة المحددة',
-        message: 'اختر باقة من كتالوج الشبكة الموردة الحالية.',
-        type: SnackType.error,
-      );
-      return;
-    }
-
     if (package.packageVoucherCount <= 0) {
       CustomSnackbar.show(
         title: 'سعة الباقة غير صالحة',
