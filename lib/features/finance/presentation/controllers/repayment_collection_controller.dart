@@ -27,6 +27,8 @@ class RepaymentCollectionController extends GetxController {
   /// GetX remains the single source of truth for both selections.
   final selectedNetworkId = RxnInt();
   final selectedPosId = RxnInt();
+  final selectedPos = Rxn<PosEntity>();
+  final hasLoadedPosList = false.obs;
   int _posLoadRevision = 0;
 
   final amountController = TextEditingController();
@@ -65,9 +67,13 @@ class RepaymentCollectionController extends GetxController {
       // Financial collections require an explicit beneficiary selection.
       // Never default to the first tenant or POS returned by the API.
       networks.assignAll(netList);
+      ++_posLoadRevision;
       selectedNetworkId.value = null;
       selectedPosId.value = null;
+      selectedPos.value = null;
       posList.clear();
+      hasLoadedPosList.value = false;
+      isLoadingPos.value = false;
       posErrorMessage.value = null;
     } on AppException catch (e) {
       initialErrorMessage.value = e.message;
@@ -81,14 +87,29 @@ class RepaymentCollectionController extends GetxController {
     }
   }
 
-  Future<void> loadPosForNetwork(int networkId) async {
+  Future<void> loadPosForNetwork(
+    int networkId, {
+    String? search,
+    bool preserveSelection = false,
+  }) async {
     final revision = ++_posLoadRevision;
-    selectedPosId.value = null;
-    posList.clear();
+    if (!preserveSelection) {
+      selectedPosId.value = null;
+      selectedPos.value = null;
+      posList.clear();
+      hasLoadedPosList.value = false;
+    }
     isLoadingPos.value = true;
     posErrorMessage.value = null;
     try {
-      final res = await getNetworkPosListUseCase(networkId);
+      final normalizedSearch = search?.trim();
+      final res = await getNetworkPosListUseCase(
+        networkId,
+        search: normalizedSearch == null || normalizedSearch.isEmpty
+            ? null
+            : normalizedSearch,
+        perPage: 50,
+      );
       if (revision != _posLoadRevision ||
           selectedNetworkId.value != networkId) {
         return;
@@ -96,23 +117,25 @@ class RepaymentCollectionController extends GetxController {
       posList.assignAll(
         res.items.map((link) => link.pos).whereType<PosEntity>(),
       );
-      selectedPosId.value = null;
+      hasLoadedPosList.value = true;
       posErrorMessage.value = null;
     } on AppException catch (e) {
       if (revision != _posLoadRevision ||
           selectedNetworkId.value != networkId) {
         return;
       }
-      posList.clear();
-      selectedPosId.value = null;
+      if (!preserveSelection) {
+        posList.clear();
+      }
       posErrorMessage.value = e.message;
     } catch (e) {
       if (revision != _posLoadRevision ||
           selectedNetworkId.value != networkId) {
         return;
       }
-      posList.clear();
-      selectedPosId.value = null;
+      if (!preserveSelection) {
+        posList.clear();
+      }
       posErrorMessage.value = AppException.sanitizeMessage(
         e,
         fallback: 'تعذر تحميل نقاط البيع المرتبطة بالشبكة. يرجى المحاولة مجدداً.',
@@ -124,13 +147,32 @@ class RepaymentCollectionController extends GetxController {
     }
   }
 
+  Future<void> searchPosForNetwork(String query) async {
+    final networkId = selectedNetworkId.value;
+    if (networkId == null) return;
+    await loadPosForNetwork(
+      networkId,
+      search: query,
+      preserveSelection: true,
+    );
+  }
+
+  void onPosChanged(int? posId) {
+    selectedPosId.value = posId;
+    selectedPos.value = posId == null
+        ? null
+        : posList.firstWhereOrNull((pos) => pos.posId == posId);
+  }
+
   Future<void> onNetworkChanged(int? netId) async {
     if (netId == null) return;
     // CustomDropdown writes to selectedNetworkId before calling onChanged.
     // Do not compare against the notifier here or the linked POS refresh is skipped.
     selectedNetworkId.value = netId;
-    posList.clear();
     selectedPosId.value = null;
+    selectedPos.value = null;
+    posList.clear();
+    hasLoadedPosList.value = false;
     await loadPosForNetwork(netId);
   }
 
@@ -186,7 +228,10 @@ class RepaymentCollectionController extends GetxController {
       if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide();
       CustomSnackbar.show(
         title: 'خطأ',
-        message: 'تعذر إتمام السداد: $e',
+        message: AppException.sanitizeMessage(
+          e,
+          fallback: 'تعذر إتمام السداد. يرجى المحاولة مجدداً.',
+        ),
         type: SnackType.error,
       );
       return false;

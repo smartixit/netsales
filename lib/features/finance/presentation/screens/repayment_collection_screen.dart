@@ -5,6 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_collection_controller.dart';
+import 'package:netsales/features/finance/presentation/widgets/repayment_beneficiary_skeleton.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -54,7 +55,7 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
             AppSpacing.vLg,
             Obx(() {
               if (controller.isLoadingInitial.value) {
-                return const Center(child: CircularProgressIndicator());
+                return const RepaymentBeneficiarySkeleton();
               }
               if (controller.initialErrorMessage.value != null) {
                 return CustomErrorState.compact(
@@ -109,19 +110,26 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                                 controller.selectedNetworkId.value!,
                               ),
                     )
-                  else if (controller.isLoadingPos.value)
-                    const LinearProgressIndicator()
+                  else if (controller.isLoadingPos.value &&
+                      !controller.hasLoadedPosList.value)
+                    const RepaymentBeneficiaryFieldSkeleton()
                   else
                     CustomDropdown<int>(
                           hint: controller.selectedNetworkId.value == null
                               ? 'اختر الشبكة أولاً'
-                              : controller.posList.isEmpty
-                                  ? 'لا توجد نقاط بيع مرتبطة بهذه الشبكة'
-                                  : 'اختر نقطة البيع المستفيدة',
+                              : 'ابحث عن نقطة البيع المستفيدة',
                     searchEnabled: controller.posList.length > 5,
                     isRequired: true,
-                    enabled: controller.posList.isNotEmpty,
+                    enabled: controller.selectedNetworkId.value != null,
                     rxValue: controller.selectedPosId,
+                    isSearching: controller.isLoadingPos.value,
+                    onRemoteSearch: controller.searchPosForNetwork,
+                    selectedItemFallback: controller.selectedPos.value == null
+                        ? null
+                        : DropdownItem<int>(
+                            value: controller.selectedPos.value!.posId,
+                            child: Text(controller.selectedPos.value!.posName),
+                          ),
                     items: controller.posList.map((pos) {
                       return DropdownItem<int>(
                         value: pos.posId,
@@ -129,11 +137,12 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                       );
                     }).toList(growable: false),
                     itemSearchText: (posId) => controller.posList
-                        .firstWhereOrNull((pos) => pos.posId == posId)
-                        ?.posName ?? posId.toString(),
-                    onChanged: (posId) {
-                      controller.selectedPosId.value = posId;
-                    },
+                            .firstWhereOrNull((pos) => pos.posId == posId)
+                            ?.posName ??
+                        (controller.selectedPos.value?.posId == posId
+                            ? controller.selectedPos.value!.posName
+                            : posId.toString()),
+                    onChanged: controller.onPosChanged,
                   ),
                 ],
               );

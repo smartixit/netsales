@@ -29,6 +29,10 @@ class MockCommercialRepository implements CommercialRepository {
   List<NetworkEntity> networks = [];
   PaginatedList<NetworkPosLinkEntity> posLinks = const PaginatedList(items: []);
   final List<int> requestedNetworkIds = [];
+  final List<int?> requestedPosPageSizes = [];
+  final List<String?> requestedPosSearchQueries = [];
+  final Map<String, Completer<PaginatedList<NetworkPosLinkEntity>>>
+      pendingPosSearches = {};
   bool failNetworkList = false;
   bool failPosList = false;
 
@@ -51,7 +55,11 @@ class MockCommercialRepository implements CommercialRepository {
     Map<String, dynamic>? query,
   }) async {
     requestedNetworkIds.add(networkId);
+    requestedPosPageSizes.add(perPage);
+    requestedPosSearchQueries.add(search);
     if (failPosList) throw Exception('POS list request failed');
+    final pending = pendingPosSearches[search ?? ''];
+    if (pending != null) return pending.future;
     return posLinks;
   }
 
@@ -464,6 +472,61 @@ void main() {
         expect(controller.selectedPosId.value, 20);
       },
     );
+
+    test('Repayment beneficiary remote search uses the server and rejects stale results', () async {
+      const oldPos = PosEntity(
+        posId: 11,
+        ownerId: 1,
+        posUuid: 'pos-uuid-old',
+        posName: 'نقطة قديمة',
+        posPhoneNumber: '777111111',
+        status: 'ACTIVE',
+      );
+      const newPos = PosEntity(
+        posId: 22,
+        ownerId: 1,
+        posUuid: 'pos-uuid-new',
+        posName: 'نقطة حديثة',
+        posPhoneNumber: '777222222',
+        status: 'ACTIVE',
+      );
+      const oldLink = NetworkPosLinkEntity(
+        networkPosId: 11,
+        networkId: 7,
+        posId: 11,
+        status: true,
+        pos: oldPos,
+      );
+      const newLink = NetworkPosLinkEntity(
+        networkPosId: 22,
+        networkId: 7,
+        posId: 22,
+        status: true,
+        pos: newPos,
+      );
+      final oldRequest = Completer<PaginatedList<NetworkPosLinkEntity>>();
+      commercialRepository.pendingPosSearches['old'] = oldRequest;
+      commercialRepository.pendingPosSearches['new'] =
+          Completer<PaginatedList<NetworkPosLinkEntity>>()
+            ..complete(const PaginatedList(items: [newLink]));
+
+      final controller = RepaymentCollectionController(
+        collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+        getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
+      );
+      controller.selectedNetworkId.value = 7;
+
+      final oldFuture = controller.searchPosForNetwork('old');
+      await controller.searchPosForNetwork('new');
+      oldRequest.complete(const PaginatedList(items: [oldLink]));
+      await oldFuture;
+
+      expect(controller.posList.map((pos) => pos.posId), [22]);
+      expect(commercialRepository.requestedPosSearchQueries, ['old', 'new']);
+      expect(commercialRepository.requestedPosPageSizes, [50, 50]);
+      expect(controller.isLoadingPos.value, isFalse);
+    });
 
     test('Repayment collection exposes network list failure for retry', () async {
       commercialRepository.failNetworkList = true;
