@@ -75,7 +75,6 @@ class MockFinanceRepository implements FinanceRepository {
       mockDebtSummary ??
       const DebtSummaryEntity(
         totalReceivables: 0,
-        totalOutstandingInvoices: 0,
         agingBuckets: {},
       );
 
@@ -214,7 +213,8 @@ void main() {
     test('GetDebtSummaryUseCase delegates correctly to repository', () async {
       repository.mockDebtSummary = const DebtSummaryEntity(
         totalReceivables: 750000,
-        totalOutstandingInvoices: 5,
+        unpaidInvoicesCount: 3,
+        partiallyPaidInvoicesCount: 2,
         agingBuckets: {
           '0_30': 300000,
           '31_60': 200000,
@@ -228,6 +228,8 @@ void main() {
 
       expect(result.totalReceivables, 750000);
       expect(result.totalOutstandingInvoices, 5);
+      expect(result.unpaidInvoicesCount, 3);
+      expect(result.partiallyPaidInvoicesCount, 2);
       expect(result.agingBuckets['over_90'], 100000);
     });
 
