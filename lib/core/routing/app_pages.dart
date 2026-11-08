@@ -36,6 +36,7 @@ import 'package:netsales/features/commercial/presentation/screens/pos_linked_net
 import 'package:netsales/features/invoices/presentation/bindings/invoice_binding.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoice_details_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/network_wholesale_invoices_screen.dart';
+import 'package:netsales/features/invoices/presentation/screens/network_direct_invoice_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
 import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/finance/presentation/screens/network_wallet_dashboard_screen.dart';
@@ -290,6 +291,15 @@ abstract final class AppPages {
     // ==========================================
     // 9. فواتير المبيعات والمشتريات والمحاسبة (Invoicing & Accounting)
     // ==========================================
+    GetPage(
+      name: AppRoutes.networkCreateSaleInvoice,
+      page: () => const NetworkDirectInvoiceScreen(),
+      binding: InvoiceBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
     GetPage(
       name: AppRoutes.wholesaleInvoices,
       page: () => const NetworkWholesaleInvoicesScreen(),
