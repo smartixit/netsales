@@ -112,8 +112,8 @@ class MockRequestRepository implements RequestRepository {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
   }) async {
-    final index = items.indexWhere((r) => r.requestId == requestId);
-    final existing = items[index];
+    final index = this.items.indexWhere((r) => r.requestId == requestId);
+    final existing = this.items[index];
     final updated = RequestEntity(
       requestId: existing.requestId,
       networkId: existing.networkId,
@@ -124,7 +124,7 @@ class MockRequestRepository implements RequestRepository {
       statusLabel: 'تمت الموافقة',
       invoiceId: 777,
     );
-    items[index] = updated;
+    this.items[index] = updated;
     return updated;
   }
 
