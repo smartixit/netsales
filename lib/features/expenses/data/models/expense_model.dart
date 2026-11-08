@@ -34,7 +34,7 @@ class ExpenseModel extends ExpenseEntity {
               )).toList(growable: false)
           : const [],
       attachments: rawAttachments is List
-          ? rawAttachments.whereType<Map>().map((item) => ExpenseAttachmentEntity(
+          ? rawAttachments.whereType<Map<dynamic, dynamic>>().map((item) => ExpenseAttachmentEntity(
                 attachmentId: (item['attachment_id'] as num?)?.toInt() ?? 0,
                 name: item['attachment_name'] as String? ?? '',
                 mimeType: item['attachment_mime'] as String?,
