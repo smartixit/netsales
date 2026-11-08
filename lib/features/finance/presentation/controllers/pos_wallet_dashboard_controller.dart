@@ -53,18 +53,24 @@ class PosWalletDashboardController extends GetxController {
     try {
       final res = await getPosWalUseCase(perPage: 15);
       if (requestVersion != _walletsRequestVersion) return;
-      wallets.assignAll(res.items);
-      walletsNextCursor.value = res.nextCursor;
+      final previousSelected = selectedWallet.value;
+      final availableWallets = List<PosWalletEntity>.of(res.items);
+      PosWalletEntity? selected = previousSelected == null
+          ? null
+          : availableWallets.firstWhereOrNull(
+              (wallet) => wallet.walletId == previousSelected.walletId,
+            );
+      selected ??= previousSelected ?? (availableWallets.isEmpty ? null : availableWallets.first);
 
-      PosWalletEntity? selected;
-      final previousId = selectedWallet.value?.walletId;
-      for (final wallet in res.items) {
-        if (wallet.walletId == previousId) {
-          selected = wallet;
-          break;
-        }
+      if (previousSelected != null &&
+          !availableWallets.any(
+            (wallet) => wallet.walletId == previousSelected.walletId,
+          )) {
+        availableWallets.insert(0, previousSelected);
       }
-      selected ??= res.items.isEmpty ? null : res.items.first;
+
+      wallets.assignAll(availableWallets);
+      walletsNextCursor.value = res.nextCursor;
       selectedWallet.value = selected;
 
       if (selected != null) {

@@ -143,11 +143,16 @@ class NetworkWalletDashboardScreen
     return Obx(() {
       if (controller.isLoading.value && controller.wallets.isEmpty) {
         return SizedBox(
-          height: 150.h,
-          child: const CustomSkeletonFeed(
-            itemCount: 1,
-            cardHeight: 132,
-            shrinkWrap: true,
+          height: 142.h,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                WalletSelectorSkeleton(width: 264.w, height: 128.h),
+                AppSpacing.hSm,
+                WalletSelectorSkeleton(width: 264.w, height: 128.h),
+              ],
+            ),
           ),
         );
       }
@@ -180,6 +185,14 @@ class NetworkWalletDashboardScreen
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (controller.walletsErrorMessage.value != null) ...[
+            CustomErrorState.compact(
+              title: 'تعذر تحديث قائمة المحافظ',
+              subtitle: controller.walletsErrorMessage.value,
+              onRetry: controller.loadWallets,
+            ),
+            AppSpacing.vXs,
+          ],
           if (controller.walletsLoadMoreErrorMessage.value != null) ...[
             CustomErrorState.compact(
               title: 'تعذر تحميل بقية المحافظ',

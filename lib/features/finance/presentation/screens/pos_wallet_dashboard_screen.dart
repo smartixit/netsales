@@ -137,11 +137,16 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
     return Obx(() {
       if (controller.isLoading.value && controller.wallets.isEmpty) {
         return SizedBox(
-          height: 188.h,
-          child: const CustomSkeletonFeed(
-            itemCount: 1,
-            cardHeight: 170,
-            shrinkWrap: true,
+          height: 194.h,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                WalletSelectorSkeleton(width: 310.w, height: 180.h),
+                AppSpacing.hSm,
+                WalletSelectorSkeleton(width: 310.w, height: 180.h),
+              ],
+            ),
           ),
         );
       }
@@ -174,6 +179,14 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (controller.walletsErrorMessage.value != null) ...[
+            CustomErrorState.compact(
+              title: 'تعذر تحديث قائمة المحافظ',
+              subtitle: controller.walletsErrorMessage.value,
+              onRetry: controller.loadWallets,
+            ),
+            AppSpacing.vXs,
+          ],
           if (controller.walletsLoadMoreErrorMessage.value != null) ...[
             CustomErrorState.compact(
               title: 'تعذر تحميل بقية المحافظ',
