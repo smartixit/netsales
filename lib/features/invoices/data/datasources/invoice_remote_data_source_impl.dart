@@ -29,6 +29,17 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   }
 
   @override
+  Future<ApiResponse<InvoiceModel>> createDirectInvoice(
+    Map<String, dynamic> payload,
+  ) {
+    return ApiService.instance.post<InvoiceModel>(
+      ApiConstants.saleInvoices,
+      data: payload,
+      fromJson: (data) => InvoiceModel.fromJson(data as Map<String, dynamic>),
+    );
+  }
+
+  @override
   Future<ApiResponse<InvoiceModel>> getInvoiceDetails(int invoiceId) {
     return ApiService.instance.get<InvoiceModel>(
       ApiConstants.saleInvoice(invoiceId),
