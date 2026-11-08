@@ -7,6 +7,8 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_collection_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
@@ -54,6 +56,20 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
               if (controller.isLoadingInitial.value) {
                 return const Center(child: CircularProgressIndicator());
               }
+              if (controller.initialErrorMessage.value != null) {
+                return CustomErrorState.compact(
+                  title: 'تعذر تحميل الشبكات',
+                  subtitle: controller.initialErrorMessage.value,
+                  onRetry: controller.loadInitialData,
+                );
+              }
+              if (controller.networks.isEmpty) {
+                return const CustomEmptyState(
+                  icon: Icons.account_tree_outlined,
+                  title: 'لا توجد شبكات متاحة',
+                  subtitle: 'لا توجد شبكة مخوّلة لإجراء تحصيل السداد حالياً.',
+                );
+              }
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,9 +99,20 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                     onChanged: controller.onNetworkChanged,
                   ),
                   AppSpacing.vMd,
-                  controller.isLoadingPos.value
-                      ? const LinearProgressIndicator()
-                      : CustomDropdown<int>(
+                  if (controller.posErrorMessage.value != null)
+                    CustomErrorState.compact(
+                      title: 'تعذر تحميل نقاط البيع',
+                      subtitle: controller.posErrorMessage.value,
+                      onRetry: controller.selectedNetworkId.value == null
+                          ? null
+                          : () => controller.loadPosForNetwork(
+                                controller.selectedNetworkId.value!,
+                              ),
+                    )
+                  else if (controller.isLoadingPos.value)
+                    const LinearProgressIndicator()
+                  else
+                    CustomDropdown<int>(
                           hint: controller.selectedNetworkId.value == null
                               ? 'اختر الشبكة أولاً'
                               : controller.posList.isEmpty
