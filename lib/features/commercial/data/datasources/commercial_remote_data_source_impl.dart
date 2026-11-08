@@ -13,9 +13,12 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   const CommercialRemoteDataSourceImpl();
 
   @override
-  Future<ApiResponse<List<NetworkModel>>> getMyNetworks() {
+  Future<ApiResponse<List<NetworkModel>>> getMyNetworks({
+    Map<String, dynamic>? query,
+  }) {
     return ApiService.instance.get<List<NetworkModel>>(
       ApiConstants.networks,
+      queryParameters: query,
       fromJson: (data) {
         if (data is List) {
           return data.map((item) => NetworkModel.fromJson(item)).toList();
@@ -26,10 +29,12 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
-  Future<ApiResponse<List<PosModel>>> getMyPos() {
+  Future<ApiResponse<List<PosModel>>> getMyPos({
+    Map<String, dynamic>? query,
+  }) {
     return ApiService.instance.get<List<PosModel>>(
       ApiConstants.pos,
-      queryParameters: const {'all': true},
+      queryParameters: query,
       fromJson: (data) {
         if (data is List) {
           return data.map((item) => PosModel.fromJson(item)).toList();
