@@ -244,6 +244,7 @@ class TestFinanceRepository implements FinanceRepository {
     String? paymentMethod,
     String? referenceNumber,
     String? notes,
+    String? idempotencyKey,
   }) async => PosRepaymentEntity(
     repaymentId: 10,
     repaymentUuid: 'rep-10',
@@ -260,6 +261,7 @@ class TestFinanceRepository implements FinanceRepository {
   Future<PosRepaymentEntity> reverseRepayment({
     required int repaymentId,
     required String reversalReason,
+    String? idempotencyKey,
   }) async => PosRepaymentEntity(
     repaymentId: repaymentId,
     networkId: 1,
@@ -312,6 +314,7 @@ class TestFinanceRepository implements FinanceRepository {
     required int posId,
     required double amount,
     String? statement,
+    String? idempotencyKey,
   }) async {}
 }
 
