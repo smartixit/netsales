@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
@@ -76,6 +78,12 @@ class TestFinanceRepository implements FinanceRepository {
   bool failNetworkLogs = false;
   bool failPosLogs = false;
   bool failOutstandingInvoices = false;
+  final Map<int, Completer<PaginatedList<NetworkWalletLogEntity>>>
+      pendingNetworkLogs = {};
+  final Map<int, Completer<PaginatedList<PosWalletLogEntity>>>
+      pendingPosLogs = {};
+  final Map<String, Completer<PaginatedList<InvoiceEntity>>>
+      pendingInvoicePages = {};
 
   @override
   Future<PaginatedList<PosWalletEntity>> getPosWallets({
@@ -101,6 +109,8 @@ class TestFinanceRepository implements FinanceRepository {
     int? perPage,
   }) async {
     if (failPosLogs) throw Exception('POS wallet log request failed');
+    final pending = pendingPosLogs[walletId];
+    if (pending != null) return pending.future;
     return posLogs;
   }
 
@@ -127,6 +137,8 @@ class TestFinanceRepository implements FinanceRepository {
     if (failOutstandingInvoices) {
       throw Exception('Outstanding invoice request failed');
     }
+    final pending = pendingInvoicePages[bucket ?? 'all'];
+    if (pending != null) return pending.future;
     return invoices;
   }
 
@@ -198,6 +210,8 @@ class TestFinanceRepository implements FinanceRepository {
     int? perPage,
   }) async {
     if (failNetworkLogs) throw Exception('Network wallet log request failed');
+    final pending = pendingNetworkLogs[walletId];
+    if (pending != null) return pending.future;
     return networkLogs;
   }
 
@@ -536,6 +550,138 @@ void main() {
       expect(controller.summary.value, isNotNull);
       expect(controller.outstandingInvoices, isEmpty);
       expect(controller.invoicesErrorMessage.value, isNotNull);
+      expect(controller.isLoadingInvoices.value, isFalse);
+    });
+
+    test('Network wallet stale response cannot replace newly selected wallet ledger', () async {
+      const walletA = NetworkWalletEntity(
+        walletId: 1,
+        networkId: 1,
+        walletBalance: 1000,
+      );
+      const walletB = NetworkWalletEntity(
+        walletId: 2,
+        networkId: 1,
+        walletBalance: 2000,
+      );
+      const oldLog = NetworkWalletLogEntity(
+        logId: 101,
+        walletId: 1,
+        logOperation: 'DEPOSIT',
+        logAmount: 100,
+      );
+      const newLog = NetworkWalletLogEntity(
+        logId: 202,
+        walletId: 2,
+        logOperation: 'DEPOSIT',
+        logAmount: 200,
+      );
+      final oldRequest = Completer<PaginatedList<NetworkWalletLogEntity>>();
+      repository.pendingNetworkLogs[1] = oldRequest;
+      repository.pendingNetworkLogs[2] = Completer<PaginatedList<NetworkWalletLogEntity>>()
+        ..complete(const PaginatedList(items: [newLog]));
+
+      final controller = NetworkWalletDashboardController(
+        getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
+        getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+      );
+      controller.selectedWallet.value = walletA;
+      final oldFuture = controller.loadWalletLogs(1, isRefresh: true);
+
+      await controller.selectWallet(walletB);
+      oldRequest.complete(const PaginatedList(items: [oldLog]));
+      await oldFuture;
+
+      expect(controller.selectedWallet.value?.walletId, 2);
+      expect(controller.logs.map((item) => item.logId), [202]);
+      expect(controller.isLoadingLogs.value, isFalse);
+    });
+
+    test('POS wallet stale response cannot replace newly selected wallet ledger', () async {
+      const walletA = PosWalletEntity(
+        walletId: 1,
+        networkId: 1,
+        posId: 1,
+        walletBalance: 1000,
+      );
+      const walletB = PosWalletEntity(
+        walletId: 2,
+        networkId: 1,
+        posId: 2,
+        walletBalance: 2000,
+      );
+      const oldLog = PosWalletLogEntity(
+        logId: 101,
+        walletId: 1,
+        logOperationType: 'DEPOSIT',
+        logAmount: 100,
+      );
+      const newLog = PosWalletLogEntity(
+        logId: 202,
+        walletId: 2,
+        logOperationType: 'DEPOSIT',
+        logAmount: 200,
+      );
+      final oldRequest = Completer<PaginatedList<PosWalletLogEntity>>();
+      repository.pendingPosLogs[1] = oldRequest;
+      repository.pendingPosLogs[2] = Completer<PaginatedList<PosWalletLogEntity>>()
+        ..complete(const PaginatedList(items: [newLog]));
+
+      final controller = PosWalletDashboardController(
+        getPosWalUseCase: GetPosWalUseCase(repository),
+        getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+      );
+      controller.selectedWallet.value = walletA;
+      final oldFuture = controller.loadWalletLogs(1, isRefresh: true);
+
+      await controller.selectWallet(walletB);
+      oldRequest.complete(const PaginatedList(items: [oldLog]));
+      await oldFuture;
+
+      expect(controller.selectedWallet.value?.walletId, 2);
+      expect(controller.logs.map((item) => item.logId), [202]);
+      expect(controller.isLoadingLogs.value, isFalse);
+    });
+
+    test('Debt bucket stale response cannot replace latest bucket invoices', () async {
+      const oldInvoice = InvoiceEntity(
+        invoiceId: 101,
+        networkId: 1,
+        posId: 1,
+        invoiceTotalAmount: 1000,
+        paidAmount: 0,
+        remainingAmount: 1000,
+        paymentStatusRaw: 'UNPAID',
+        invoiceDate: '2026-11-01',
+      );
+      const newInvoice = InvoiceEntity(
+        invoiceId: 202,
+        networkId: 1,
+        posId: 1,
+        invoiceTotalAmount: 2000,
+        paidAmount: 0,
+        remainingAmount: 2000,
+        paymentStatusRaw: 'UNPAID',
+        invoiceDate: '2026-11-02',
+      );
+      final oldRequest = Completer<PaginatedList<InvoiceEntity>>();
+      repository.pendingInvoicePages['0_30'] = oldRequest;
+      repository.pendingInvoicePages['31_60'] =
+          Completer<PaginatedList<InvoiceEntity>>()
+            ..complete(const PaginatedList(items: [newInvoice]));
+
+      final controller = PosDebtLedgerController(
+        getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+        getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+      );
+      final oldFuture = controller.loadInvoices(isRefresh: true);
+      await controller.onBucketSelected('0_30');
+      await controller.onBucketSelected('31_60');
+      oldRequest.complete(const PaginatedList(items: [oldInvoice]));
+      await oldFuture;
+
+      expect(controller.selectedBucket.value, '31_60');
+      expect(controller.outstandingInvoices.map((item) => item.invoiceId), [202]);
       expect(controller.isLoadingInvoices.value, isFalse);
     });
 
