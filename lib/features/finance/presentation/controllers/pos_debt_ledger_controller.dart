@@ -61,7 +61,6 @@ class PosDebtLedgerController extends GetxController {
 
   Future<void> loadInvoices({bool isRefresh = false}) async {
     if (isRefresh) {
-      if (isLoadingInvoices.value) return;
       isLoadingInvoices.value = true;
       nextCursor.value = null;
       invoicesErrorMessage.value = null;
