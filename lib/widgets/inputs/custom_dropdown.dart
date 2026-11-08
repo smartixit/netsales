@@ -461,7 +461,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
       builder: (context, child) =>
           Transform.translate(offset: _shakeAnimation.value, child: child),
       child: DropdownButtonFormField2<T>(
-        valueListenable: widget.valueListenable,
+        valueListenable: _resolvedValueListenable,
         isExpanded: true,
         validator: _wrappedValidator,
         autovalidateMode: AutovalidateMode.onUserInteraction,
