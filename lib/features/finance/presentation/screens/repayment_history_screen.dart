@@ -127,7 +127,10 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                           isNetworkView: isNetworkView,
                           onTap: () {
                             Get.to<void>(
-                              () => RepaymentDetailsScreen(repayment: repayment),
+                              () => RepaymentDetailsScreen(
+                                repayment: repayment,
+                                isNetworkView: isNetworkView,
+                              ),
                             );
                           },
                         );
