@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
@@ -135,6 +136,8 @@ class TestFinanceRepository implements FinanceRepository {
   );
   bool failNetworkLogs = false;
   bool failPosLogs = false;
+  bool denyNetworkLogs = false;
+  bool denyPosLogs = false;
   bool failOutstandingInvoices = false;
   final Map<int, Completer<PaginatedList<NetworkWalletLogEntity>>>
       pendingNetworkLogs = {};
@@ -173,6 +176,9 @@ class TestFinanceRepository implements FinanceRepository {
     String? cursor,
     int? perPage,
   }) async {
+    if (denyPosLogs) {
+      throw const AppException('غير مصرح لك باستعراض كشف حساب هذه المحفظة.');
+    }
     if (failPosLogs) throw Exception('POS wallet log request failed');
     final pending = pendingPosLogs[walletId];
     if (pending != null) return pending.future;
@@ -291,6 +297,9 @@ class TestFinanceRepository implements FinanceRepository {
     String? cursor,
     int? perPage,
   }) async {
+    if (denyNetworkLogs) {
+      throw const AppException('غير مصرح لك باستعراض كشف حساب هذه المحفظة.');
+    }
     if (failNetworkLogs) throw Exception('Network wallet log request failed');
     final pending = pendingNetworkLogs[walletId];
     if (pending != null) return pending.future;
@@ -903,6 +912,70 @@ void main() {
       expect(controller.logsErrorMessage.value, isNotNull);
       expect(controller.isLoadingLogs.value, isFalse);
     });
+
+    test(
+      'network wallet refresh preserves a selected wallet outside the first page',
+      () async {
+        const firstWallet = NetworkWalletEntity(
+          walletId: 31,
+          networkId: 301,
+          walletBalance: 1000,
+        );
+        const selectedWallet = NetworkWalletEntity(
+          walletId: 32,
+          networkId: 302,
+          walletBalance: 2000,
+        );
+        repository.networkWallets = const PaginatedList(
+          items: [firstWallet],
+          nextCursor: 'wallet-refresh-page-2',
+        );
+        repository.networkWalletPages['wallet-refresh-page-2'] =
+            const PaginatedList(items: [selectedWallet]);
+
+        final controller = NetworkWalletDashboardController(
+          getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
+          getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+        );
+
+        await controller.loadWallets();
+        await controller.loadMoreWallets();
+        await controller.selectWallet(selectedWallet);
+
+        repository.networkWallets = const PaginatedList(
+          items: [firstWallet],
+          nextCursor: 'wallet-refresh-page-2',
+        );
+        await controller.loadWallets();
+
+        expect(controller.selectedWallet.value?.walletId, 32);
+        expect(controller.wallets.map((wallet) => wallet.walletId), [32, 31]);
+      },
+    );
+
+    test(
+      'network wallet selection is cleared when the ledger confirms access was revoked',
+      () async {
+        const wallet = NetworkWalletEntity(
+          walletId: 41,
+          networkId: 401,
+          walletBalance: 1000,
+        );
+        repository.networkWallets = const PaginatedList(items: [wallet]);
+        repository.denyNetworkLogs = true;
+
+        final controller = NetworkWalletDashboardController(
+          getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
+          getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+        );
+
+        await controller.loadWallets();
+
+        expect(controller.selectedWallet.value, isNull);
+        expect(controller.wallets, isEmpty);
+        expect(controller.walletsErrorMessage.value, isNotNull);
+      },
+    );
 
     test(
       'POS debt scope selector can load every cursor page of network links',
