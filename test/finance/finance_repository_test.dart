@@ -17,6 +17,7 @@ class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
   ApiResponse<List<PosWalletLogModel>>? posWalletLogsResponse;
   ApiResponse<List<NetworkWalletModel>>? networkWalletsResponse;
   ApiResponse<List<NetworkWalletLogModel>>? networkWalletLogsResponse;
+  ApiResponse<NetworkWalletModel>? networkWalletByIdResponse;
   ApiResponse<List<InvoiceModel>>? outstandingInvoicesResponse;
   ApiResponse<List<PosRepaymentModel>>? repaymentsResponse;
 
@@ -101,6 +102,19 @@ class _DebtSummaryRemoteDataSource implements FinanceRemoteDataSource {
         success: true,
         message: 'ok',
         data: const [],
+      );
+
+  @override
+  Future<ApiResponse<NetworkWalletModel>> getNetworkWalletById(int walletId) async =>
+      networkWalletByIdResponse ??
+      ApiResponse<NetworkWalletModel>(
+        success: true,
+        message: 'ok',
+        data: const NetworkWalletModel(
+          walletId: 1,
+          networkId: 1,
+          walletBalance: 0,
+        ),
       );
 
   @override
@@ -190,6 +204,34 @@ void main() {
     });
   });
 
+
+  group('FinanceRepositoryImpl single request failure contracts', () {
+    test('surfaces failed wallet detail responses instead of force-unwrapping data', () async {
+      final remote = _DebtSummaryRemoteDataSource(
+        ApiResponse<Map<String, dynamic>>(
+          success: true,
+          message: 'ok',
+          data: const {},
+        ),
+      );
+      remote.networkWalletByIdResponse = ApiResponse<NetworkWalletModel>(
+        success: false,
+        message: 'Wallet details unavailable',
+      );
+      final repository = FinanceRepositoryImpl(remoteDataSource: remote);
+
+      await expectLater(
+        repository.getNetworkWalletById(1),
+        throwsA(
+          isA<AppException>().having(
+            (error) => error.code,
+            'code',
+            'NETWORK_WALLET_DETAILS_REQUEST_FAILED',
+          ),
+        ),
+      );
+    });
+  });
 
   group('FinanceRepositoryImpl list failure contracts', () {
     test('surfaces unsuccessful wallet and ledger responses as failures', () async {
