@@ -218,8 +218,6 @@ class NetworkWalletDashboardScreen
 
                         final log = controller.logs[index];
                         return NetworkWalletLogItemRow(log: log, index: index);
-
-                        */
                       },
                     ),
                   );
