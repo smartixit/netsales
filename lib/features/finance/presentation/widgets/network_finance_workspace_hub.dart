@@ -114,6 +114,15 @@ class NetworkFinanceWorkspaceHub extends StatelessWidget {
                   SizedBox(
                     width: actionWidth,
                     child: _FinanceHubAction(
+                      icon: Icons.receipt_long_outlined,
+                      title: 'المصروفات التشغيلية',
+                      subtitle: 'سندات الصرف والبنود والمرفقات',
+                      onTap: () => Get.toNamed<void>(AppRoutes.operatingExpenses),
+                    ),
+                  ),
+                  SizedBox(
+                    width: actionWidth,
+                    child: _FinanceHubAction(
                       icon: Icons.account_balance_wallet_outlined,
                       title: 'محفظة الشبكة',
                       subtitle: 'الرصيد والحركات ودفتر الأستاذ',

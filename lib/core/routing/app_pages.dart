@@ -39,6 +39,8 @@ import 'package:netsales/features/invoices/presentation/screens/invoice_details_
 import 'package:netsales/features/invoices/presentation/screens/network_wholesale_invoices_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/network_direct_invoice_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
+import 'package:netsales/features/expenses/presentation/bindings/network_operating_expenses_binding.dart';
+import 'package:netsales/features/expenses/presentation/screens/network_operating_expenses_screens.dart';
 import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/finance/presentation/screens/network_wallet_dashboard_screen.dart';
 import 'package:netsales/features/finance/presentation/screens/pos_debt_ledger_screen.dart';
@@ -345,6 +347,19 @@ abstract final class AppPages {
     // 10. المحافظ المالية والديون والتسديدات (Finance, Wallets & Repayments M8)
     // ==========================================
     // كشف رصيد وحركات محفظة نقطة البيع (M8.1)
+    GetPage(
+      name: AppRoutes.operatingExpenses,
+      page: () => const NetworkOperatingExpensesScreen(),
+      binding: NetworkOperatingExpensesBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.expensesView,
+        ),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+
     GetPage(
       name: AppRoutes.posWalletStatement,
       page: () => const PosWalletDashboardScreen(),

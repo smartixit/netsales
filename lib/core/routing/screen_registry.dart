@@ -163,7 +163,7 @@ abstract final class ScreenRegistry {
       titleEn: 'Operational Expenses',
       workspace: AppWorkspace.network,
       requiredPermission: AppPermissions.expensesView,
-      implementationState: ScreenImplementationState.placeholder,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'NET-08',
