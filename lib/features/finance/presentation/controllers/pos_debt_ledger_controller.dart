@@ -25,7 +25,9 @@ class PosDebtLedgerController extends GetxController {
   final summaryErrorMessage = RxnString();
   final invoicesErrorMessage = RxnString();
 
-  bool get hasMore => nextCursor.value != null;
+  int _invoiceRequestVersion = 0;
+
+  bool get hasMore => nextCursor.value?.trim().isNotEmpty ?? false;
 
   @override
   void onInit() {
@@ -35,6 +37,7 @@ class PosDebtLedgerController extends GetxController {
 
   Future<void> loadDebtData() async {
     if (isLoading.value) return;
+    final invoiceVersionAtStart = _invoiceRequestVersion;
     isLoading.value = true;
     summaryErrorMessage.value = null;
 
@@ -56,39 +59,60 @@ class PosDebtLedgerController extends GetxController {
       isLoading.value = false;
     }
 
-    await loadInvoices(isRefresh: true);
+    // A bucket change during the summary request already started a newer
+    // invoice query. Do not invalidate it with a redundant stale refresh.
+    if (_invoiceRequestVersion == invoiceVersionAtStart) {
+      await loadInvoices(isRefresh: true);
+    }
   }
 
   Future<void> loadInvoices({bool isRefresh = false}) async {
     if (isRefresh) {
       isLoadingInvoices.value = true;
+      isLoadingMore.value = false;
       nextCursor.value = null;
       invoicesErrorMessage.value = null;
-    } else if (!hasMore) {
-      return;
+    } else {
+      if (isLoadingInvoices.value || isLoadingMore.value || !hasMore) {
+        return;
+      }
+      isLoadingMore.value = true;
+      invoicesErrorMessage.value = null;
     }
+
+    final requestVersion = ++_invoiceRequestVersion;
+    final requestedBucket = selectedBucket.value;
+    final requestedCursor = isRefresh ? null : nextCursor.value;
 
     try {
       final res = await getOutstandingInvoicesUseCase(
-        bucket: selectedBucket.value,
-        cursor: isRefresh ? null : nextCursor.value,
+        bucket: requestedBucket,
+        cursor: requestedCursor,
         perPage: 15,
       );
+
+      if (requestVersion != _invoiceRequestVersion ||
+          selectedBucket.value != requestedBucket) {
+        return;
+      }
 
       if (isRefresh) {
         outstandingInvoices.assignAll(res.items);
       } else {
+        final existingIds = outstandingInvoices
+            .map((invoice) => invoice.invoiceId)
+            .toSet();
         outstandingInvoices.addAll(
-          res.items.where(
-            (item) => !outstandingInvoices.any(
-              (existing) => existing.invoiceId == item.invoiceId,
-            ),
-          ),
+          res.items.where((invoice) => existingIds.add(invoice.invoiceId)),
         );
       }
       nextCursor.value = res.nextCursor;
       invoicesErrorMessage.value = null;
     } on AppException catch (e) {
+      if (requestVersion != _invoiceRequestVersion ||
+          selectedBucket.value != requestedBucket) {
+        return;
+      }
       invoicesErrorMessage.value = e.message;
       if (isRefresh) {
         CustomSnackbar.show(
@@ -98,13 +122,19 @@ class PosDebtLedgerController extends GetxController {
         );
       }
     } catch (e) {
+      if (requestVersion != _invoiceRequestVersion ||
+          selectedBucket.value != requestedBucket) {
+        return;
+      }
       invoicesErrorMessage.value = AppException.sanitizeMessage(
         e,
         fallback: 'تعذر تحميل الفواتير المستحقة. يرجى المحاولة مجدداً.',
       );
     } finally {
-      if (isRefresh) isLoadingInvoices.value = false;
-      isLoadingMore.value = false;
+      if (requestVersion == _invoiceRequestVersion) {
+        isLoadingInvoices.value = false;
+        isLoadingMore.value = false;
+      }
     }
   }
 
@@ -117,9 +147,6 @@ class PosDebtLedgerController extends GetxController {
   }
 
   Future<void> loadMoreInvoices() async {
-    if (isLoadingMore.value || !hasMore) return;
-    invoicesErrorMessage.value = null;
-    isLoadingMore.value = true;
     await loadInvoices(isRefresh: false);
   }
 }
