@@ -247,7 +247,7 @@ class _NetworkFinanceSnapshot extends StatelessWidget {
       final metrics = overview.metrics;
       final cards = <Widget>[];
       final wallet = metrics['wallet'];
-      if (wallet is Map) {
+      if (wallet is Map<String, dynamic>) {
         cards.add(_FinanceSnapshotCard(
           icon: Icons.account_balance_wallet_rounded,
           label: 'رصيد محفظة الشبكة',

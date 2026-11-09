@@ -48,7 +48,7 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final rawWorkspaceRoles = json['workspace_roles'];
-    final workspaceRoles = rawWorkspaceRoles is List
+    final workspaceRoles = rawWorkspaceRoles is List<dynamic>
         ? rawWorkspaceRoles
             .whereType<Map<String, dynamic>>()
             .map((item) => item['role_key'])

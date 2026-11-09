@@ -243,7 +243,7 @@ class _MetricsGrid extends StatelessWidget {
       ));
     }
     final wallet = metrics['wallet'];
-    if (wallet is Map) {
+    if (wallet is Map<String, dynamic>) {
       tiles.add(_MetricCard(
         icon: Icons.account_balance_wallet_rounded,
         title: 'رصيد محفظة الشبكة',

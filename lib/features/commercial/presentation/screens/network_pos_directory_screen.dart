@@ -23,6 +23,7 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
   final bool embedded;
 
   void _ensureDataLoaded() {
+    if (networkId == null || networkId! <= 0) return;
     if (networkId != null &&
         networkId! > 0 &&
         controller.activeNetworkId.value != networkId) {

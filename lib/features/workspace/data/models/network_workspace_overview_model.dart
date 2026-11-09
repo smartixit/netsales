@@ -11,7 +11,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
   });
 
   factory NetworkWorkspaceOverviewModel.fromJson(dynamic raw) {
-    if (raw is! Map) {
+    if (raw is! Map<String, dynamic>) {
       throw const FormatException('استجابة ملخص مساحة الشبكة ليست كائناً.');
     }
     final json = Map<String, dynamic>.from(raw);
@@ -19,7 +19,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
     final period = json['period'];
     final metrics = json['metrics'];
     final recent = json['recent_pending_requests'];
-    if (network is! Map || period is! Map || metrics is! Map || recent is! List) {
+    if (network is! Map<String, dynamic> || period is! Map<String, dynamic> || metrics is! Map<String, dynamic> || recent is! List<dynamic>) {
       throw const FormatException('عقد ملخص مساحة الشبكة غير مكتمل.');
     }
     final networkMap = Map<String, dynamic>.from(network);
@@ -36,14 +36,14 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
     for (final entry in Map<String, dynamic>.from(metrics).entries) {
       if (entry.value == null) {
         normalizedMetrics[entry.key] = null;
-      } else if (entry.value is Map) {
+      } else if (entry.value is Map<String, dynamic>) {
         normalizedMetrics[entry.key] = Map<String, dynamic>.from(entry.value as Map);
       } else {
         throw FormatException('مجموعة المؤشرات ${entry.key} غير صالحة.');
       }
     }
     final pending = recent.map((item) {
-      if (item is! Map) {
+      if (item is! Map<String, dynamic>) {
         throw const FormatException('عنصر طلب التوريد غير صالح.');
       }
       return Map<String, dynamic>.from(item);
