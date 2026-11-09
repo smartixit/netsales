@@ -5,6 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_collection_controller.dart';
+import 'package:netsales/features/finance/domain/entities/repayment_payment_method.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_beneficiary_skeleton.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
@@ -188,6 +189,32 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    'طريقة استلام السداد',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  AppSpacing.vXs,
+                  CustomDropdown<RepaymentPaymentMethod>(
+                    hint: 'اختر طريقة الدفع',
+                    searchEnabled: false,
+                    isRequired: true,
+                    rxValue: controller.selectedMethod,
+                    enabled: !isSubmitting,
+                    items: RepaymentPaymentMethod.values.map((method) {
+                      return DropdownItem<RepaymentPaymentMethod>(
+                        value: method,
+                        child: Text(method.label),
+                      );
+                    }).toList(growable: false),
+                    itemSearchText: (method) => method.label,
+                    onChanged: (method) {
+                      if (method != null) controller.selectedMethod.value = method;
+                    },
+                  ),
+                  AppSpacing.vMd,
                   CustomTextField(
                     controller: controller.amountController,
                     label: 'مبلغ التحصيل والسداد',
