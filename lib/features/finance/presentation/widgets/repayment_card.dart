@@ -7,7 +7,7 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
-import 'package:netsales/features/finance/domain/entities/repayment_payment_method.dart';
+import 'package:netsales/core/enums/repayment_payment_method.dart';
 import 'package:netsales/widgets/badges/custom_chip.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';

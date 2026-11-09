@@ -2,7 +2,7 @@ import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/invoices/data/datasources/invoice_remote_data_source.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 
@@ -49,7 +49,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     required int networkId,
     required int posId,
     required SaleType saleType,
-    required List<DirectInvoiceItemInput> items,
+    required List<DirectInvoiceItemInputEntity> items,
     required String idempotencyKey,
   }) async {
     if (idempotencyKey.trim().isEmpty) {

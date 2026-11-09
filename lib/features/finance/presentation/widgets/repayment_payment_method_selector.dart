@@ -8,7 +8,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/finance/domain/entities/repayment_payment_method.dart';
+import 'package:netsales/core/enums/repayment_payment_method.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// اختيار بصري سريع وواضح لقناة استلام السداد.

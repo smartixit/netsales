@@ -14,8 +14,8 @@ import 'package:netsales/core/enums/user_status.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
-import 'package:netsales/features/commercial/domain/entities/network_status.dart';
-import 'package:netsales/features/commercial/domain/entities/pos_status.dart';
+import 'package:netsales/core/enums/network_status.dart';
+import 'package:netsales/core/enums/pos_status.dart';
 
 /// السجل المركزي الموحد لتمثيل الـ Enums بصرياً (Centralized Enum Presentation Registry)
 /// هو المرجع المعتمد والوحيد لكافة واجهات التطبيق في ترجمة حالات الـ Enums إلى معانٍ بصرية

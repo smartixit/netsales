@@ -14,8 +14,8 @@ import 'package:netsales/core/enums/user_status.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
-import 'package:netsales/features/commercial/domain/entities/network_status.dart';
-import 'package:netsales/features/commercial/domain/entities/pos_status.dart';
+import 'package:netsales/core/enums/network_status.dart';
+import 'package:netsales/core/enums/pos_status.dart';
 
 void main() {
   group('Cross-Repository Enum Contract Parity Tests', () {

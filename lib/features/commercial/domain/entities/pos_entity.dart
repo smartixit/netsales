@@ -1,4 +1,4 @@
-import 'package:netsales/features/commercial/domain/entities/pos_status.dart';
+import 'package:netsales/core/enums/pos_status.dart';
 
 /// كيان نقطة البيع التجارية (POS Commercial Entity)
 class PosEntity {

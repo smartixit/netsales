@@ -4,7 +4,7 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/invoices/data/datasources/invoice_remote_data_source.dart';
 import 'package:netsales/features/invoices/data/models/invoice_model.dart';
 import 'package:netsales/features/invoices/data/repositories/invoice_repository_impl.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
 
 class _RecordingInvoiceRemoteDataSource implements InvoiceRemoteDataSource {
   Map<String, dynamic>? submittedPayload;
@@ -79,8 +79,8 @@ void main() {
         saleType: SaleType.credit,
         idempotencyKey: 'sale-pos20-idempotent-key',
         items: const [
-          DirectInvoiceItemInput(packageId: 31, voucherCount: 100),
-          DirectInvoiceItemInput(packageId: 32, voucherCount: 250),
+          DirectInvoiceItemInputEntity(packageId: 31, voucherCount: 100),
+          DirectInvoiceItemInputEntity(packageId: 32, voucherCount: 250),
         ],
       );
 
@@ -96,7 +96,10 @@ void main() {
         ],
       });
       expect(remote.submittedPayload!.containsKey('paid_amount'), isFalse);
-      expect(remote.submittedPayload!.containsKey('invoice_total_amount'), isFalse);
+      expect(
+        remote.submittedPayload!.containsKey('invoice_total_amount'),
+        isFalse,
+      );
       final sentItems = remote.submittedPayload!['items'] as List;
       for (final item in sentItems.cast<Map<String, dynamic>>()) {
         expect(item.containsKey('voucher_price'), isFalse);
@@ -117,7 +120,7 @@ void main() {
           saleType: SaleType.cash,
           idempotencyKey: 'sale-pos20-error-key',
           items: const [
-            DirectInvoiceItemInput(packageId: 31, voucherCount: 1),
+            DirectInvoiceItemInputEntity(packageId: 31, voucherCount: 1),
           ],
         ),
         throwsA(

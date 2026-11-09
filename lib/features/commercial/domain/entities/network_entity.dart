@@ -1,4 +1,4 @@
-import 'package:netsales/features/commercial/domain/entities/network_status.dart';
+import 'package:netsales/core/enums/network_status.dart';
 
 /// كيان مزود الشبكة التجاري (Network Commercial Entity)
 class NetworkEntity {

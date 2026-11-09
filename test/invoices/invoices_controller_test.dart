@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/enums/sale_type.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_invoice_details_use_case.dart';
@@ -46,7 +46,7 @@ class MockInvoiceRepository implements InvoiceRepository {
     required int networkId,
     required int posId,
     required SaleType saleType,
-    required List<DirectInvoiceItemInput> items,
+    required List<DirectInvoiceItemInputEntity> items,
     required String idempotencyKey,
   }) async {
     if (networkId <= 0 ||

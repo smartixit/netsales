@@ -9,7 +9,7 @@ import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
-import 'package:netsales/features/finance/domain/entities/repayment_payment_method.dart';
+import 'package:netsales/core/enums/repayment_payment_method.dart';
 import 'package:netsales/features/finance/domain/usecases/repayment_use_cases.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';

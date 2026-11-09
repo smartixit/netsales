@@ -1,7 +1,7 @@
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/core/enums/sale_type.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
 
 /// واجهة مستودع فواتير المبيعات والمشتريات
 abstract interface class InvoiceRepository {
@@ -22,7 +22,7 @@ abstract interface class InvoiceRepository {
     required int networkId,
     required int posId,
     required SaleType saleType,
-    required List<DirectInvoiceItemInput> items,
+    required List<DirectInvoiceItemInputEntity> items,
     required String idempotencyKey,
   });
 

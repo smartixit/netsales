@@ -1,5 +1,5 @@
 import 'package:netsales/features/finance/domain/entities/repayment_allocation_invoice_entity.dart';
-import 'package:netsales/features/finance/domain/entities/repayment_payment_method.dart';
+import 'package:netsales/core/enums/repayment_payment_method.dart';
 
 /// كيان توزيع سداد الديون على فاتورة محددة وفق أسبقية FIFO.
 class RepaymentAllocationEntity {

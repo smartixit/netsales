@@ -1,5 +1,5 @@
 import 'package:netsales/core/enums/sale_type.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 
@@ -14,7 +14,7 @@ class CreateDirectSaleInvoiceUseCase {
     required int networkId,
     required int posId,
     required SaleType saleType,
-    required List<DirectInvoiceItemInput> items,
+    required List<DirectInvoiceItemInputEntity> items,
     required String idempotencyKey,
   }) {
     if (networkId <= 0 || posId <= 0 || items.isEmpty) {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:netsales/features/finance/domain/entities/repayment_payment_method.dart';
+import 'package:netsales/core/enums/repayment_payment_method.dart';
 
 void main() {
   group('RepaymentPaymentMethod', () {
