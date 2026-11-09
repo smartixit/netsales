@@ -102,10 +102,9 @@ class _AllocationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final invoiceDate = allocation.invoiceDate;
-    final paymentStatus = allocation.invoicePaymentStatusLabel ??
-        allocation.invoicePaymentStatus ??
-        'حالة غير متاحة';
+    final invoice = allocation.invoice;
+    final invoiceDate = invoice.invoiceDate;
+    final paymentStatus = invoice.paymentStatusLabel;
 
     return CustomInteractiveBounce(
       onTap: onTap,
@@ -151,8 +150,7 @@ class _AllocationCard extends StatelessWidget {
                           color: colors.onSurface,
                         ),
                       ),
-                      if (invoiceDate != null)
-                        Text(
+                      Text(
                           _dateLabel(invoiceDate),
                           style: AppTypography.bodySmall.copyWith(
                             color: colors.onSurfaceVariant,
@@ -175,37 +173,30 @@ class _AllocationCard extends StatelessWidget {
               runSpacing: AppSpacing.xs,
               children: [
                 CustomChip(label: paymentStatus, isCompact: true),
-                if (allocation.saleTypeLabel?.isNotEmpty ?? false)
-                  CustomChip(
-                    label: allocation.saleTypeLabel!,
+                CustomChip(
+                    label: invoice.saleTypeLabel,
                     icon: Icons.sell_outlined,
                     isCompact: true,
                   ),
               ],
             ),
-            if (allocation.invoiceTotalAmount != null ||
-                allocation.invoicePaidAmount != null ||
-                allocation.invoiceRemainingAmount != null) ...[
-              AppSpacing.vMd,
-              Wrap(
+            AppSpacing.vMd,
+            Wrap(
                 spacing: AppSpacing.xl,
                 runSpacing: AppSpacing.sm,
                 children: [
-                  if (allocation.invoiceTotalAmount != null)
-                    _InvoiceValue(
-                      label: 'قيمة الفاتورة',
-                      value: allocation.invoiceTotalAmount!,
-                    ),
-                  if (allocation.invoicePaidAmount != null)
-                    _InvoiceValue(
-                      label: 'المسدد',
-                      value: allocation.invoicePaidAmount!,
-                    ),
-                  if (allocation.invoiceRemainingAmount != null)
-                    _InvoiceValue(
-                      label: 'المتبقي',
-                      value: allocation.invoiceRemainingAmount!,
-                    ),
+                  _InvoiceValue(
+                    label: 'قيمة الفاتورة',
+                    value: invoice.totalAmount,
+                  ),
+                  _InvoiceValue(
+                    label: 'المسدد',
+                    value: invoice.paidAmount,
+                  ),
+                  _InvoiceValue(
+                    label: 'المتبقي',
+                    value: invoice.remainingAmount,
+                  ),
                 ],
               ),
             ],

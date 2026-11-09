@@ -1,4 +1,35 @@
 import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
+import 'package:netsales/features/finance/domain/entities/repayment_allocation_invoice_entity.dart';
+
+class RepaymentAllocationInvoiceModel extends RepaymentAllocationInvoiceEntity {
+  const RepaymentAllocationInvoiceModel({
+    required super.invoiceUuid,
+    required super.totalAmount,
+    required super.paidAmount,
+    required super.remainingAmount,
+    required super.paymentStatus,
+    required super.paymentStatusLabel,
+    required super.invoiceDate,
+    required super.saleType,
+    required super.saleTypeLabel,
+  });
+
+  factory RepaymentAllocationInvoiceModel.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return RepaymentAllocationInvoiceModel(
+      invoiceUuid: json['invoice_uuid'] as String,
+      totalAmount: (json['invoice_total_amount'] as num).toDouble(),
+      paidAmount: (json['paid_amount'] as num).toDouble(),
+      remainingAmount: (json['remaining_amount'] as num).toDouble(),
+      paymentStatus: json['payment_status'] as String,
+      paymentStatusLabel: json['payment_status_label'] as String,
+      invoiceDate: json['invoice_date'] as String,
+      saleType: json['sale_type'] as String,
+      saleTypeLabel: json['sale_type_label'] as String,
+    );
+  }
+}
 
 class RepaymentAllocationModel extends RepaymentAllocationEntity {
   const RepaymentAllocationModel({
@@ -8,45 +39,29 @@ class RepaymentAllocationModel extends RepaymentAllocationEntity {
     required super.networkId,
     required super.posId,
     required super.allocatedAmount,
+    required super.invoice,
     super.status,
     super.allocatedAt,
-    super.invoiceUuid,
-    super.invoiceTotalAmount,
-    super.invoicePaidAmount,
-    super.invoiceRemainingAmount,
-    super.invoicePaymentStatus,
-    super.invoicePaymentStatusLabel,
-    super.invoiceDate,
-    super.saleType,
-    super.saleTypeLabel,
   });
 
   factory RepaymentAllocationModel.fromJson(Map<String, dynamic> json) {
-    final invoice = json['invoice'] is Map<String, dynamic>
-        ? json['invoice'] as Map<String, dynamic>
-        : null;
+    final rawInvoice = json['invoice'];
+    if (rawInvoice is! Map<String, dynamic>) {
+      throw const FormatException(
+        'Repayment allocation contract violation: nested invoice is required.',
+      );
+    }
 
     return RepaymentAllocationModel(
-      allocationId: json['allocation_id'] as int? ?? 0,
-      repaymentId: json['repayment_id'] as int? ?? 0,
-      invoiceId: json['invoice_id'] as int? ?? 0,
-      networkId: json['network_id'] as int? ?? 0,
-      posId: json['pos_id'] as int? ?? 0,
-      allocatedAmount: (json['allocated_amount'] as num?)?.toDouble() ?? 0.0,
-      status: json['status'] as String?,
-      allocatedAt: json['allocated_at'] as String?,
-      invoiceUuid: invoice?['invoice_uuid'] as String?,
-      invoiceTotalAmount:
-          (invoice?['invoice_total_amount'] as num?)?.toDouble(),
-      invoicePaidAmount: (invoice?['paid_amount'] as num?)?.toDouble(),
-      invoiceRemainingAmount:
-          (invoice?['remaining_amount'] as num?)?.toDouble(),
-      invoicePaymentStatus: invoice?['payment_status'] as String?,
-      invoicePaymentStatusLabel:
-          invoice?['payment_status_label'] as String?,
-      invoiceDate: invoice?['invoice_date'] as String?,
-      saleType: invoice?['sale_type'] as String?,
-      saleTypeLabel: invoice?['sale_type_label'] as String?,
+      allocationId: json['allocation_id'] as int,
+      repaymentId: json['repayment_id'] as int,
+      invoiceId: json['invoice_id'] as int,
+      networkId: json['network_id'] as int,
+      posId: json['pos_id'] as int,
+      allocatedAmount: (json['allocated_amount'] as num).toDouble(),
+      status: json['status'] as String,
+      allocatedAt: json['allocated_at'] as String,
+      invoice: RepaymentAllocationInvoiceModel.fromJson(rawInvoice),
     );
   }
 }

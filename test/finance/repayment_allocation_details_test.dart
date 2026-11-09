@@ -50,20 +50,18 @@ void main() {
       expect(allocation.saleTypeLabel, 'آجل');
     });
 
-    test('keeps invoice context optional for older responses without nested invoice', () {
-      final allocation = RepaymentAllocationModel.fromJson({
-        'allocation_id': 2,
-        'repayment_id': 50,
-        'invoice_id': 101,
-        'network_id': 1,
-        'pos_id': 2,
-        'allocated_amount': 100000.00,
-      });
-
-      expect(allocation.invoiceId, 101);
-      expect(allocation.allocatedAmount, 100000.00);
-      expect(allocation.invoiceTotalAmount, isNull);
-      expect(allocation.invoicePaymentStatusLabel, isNull);
+    test('rejects an allocation response that omits its required nested invoice', () {
+      expect(
+        () => RepaymentAllocationModel.fromJson({
+          'allocation_id': 2,
+          'repayment_id': 50,
+          'invoice_id': 101,
+          'network_id': 1,
+          'pos_id': 2,
+          'allocated_amount': 100000.00,
+        }),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('unknown repayment payment methods remain unknown', () {

@@ -1,3 +1,4 @@
+import 'package:netsales/features/finance/domain/entities/repayment_allocation_invoice_entity.dart';
 import 'package:netsales/features/finance/domain/entities/repayment_payment_method.dart';
 
 /// كيان توزيع سداد الديون على فاتورة محددة وفق أسبقية FIFO.
@@ -10,15 +11,7 @@ class RepaymentAllocationEntity {
   final double allocatedAmount;
   final String? status;
   final String? allocatedAt;
-  final String? invoiceUuid;
-  final double? invoiceTotalAmount;
-  final double? invoicePaidAmount;
-  final double? invoiceRemainingAmount;
-  final String? invoicePaymentStatus;
-  final String? invoicePaymentStatusLabel;
-  final String? invoiceDate;
-  final String? saleType;
-  final String? saleTypeLabel;
+  final RepaymentAllocationInvoiceEntity invoice;
 
   const RepaymentAllocationEntity({
     required this.allocationId,
@@ -27,17 +20,9 @@ class RepaymentAllocationEntity {
     required this.networkId,
     required this.posId,
     required this.allocatedAmount,
+    required this.invoice,
     this.status,
     this.allocatedAt,
-    this.invoiceUuid,
-    this.invoiceTotalAmount,
-    this.invoicePaidAmount,
-    this.invoiceRemainingAmount,
-    this.invoicePaymentStatus,
-    this.invoicePaymentStatusLabel,
-    this.invoiceDate,
-    this.saleType,
-    this.saleTypeLabel,
   });
 }
 
