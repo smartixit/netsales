@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/membership_status.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -10,6 +12,7 @@ import 'package:netsales/features/membership/presentation/controllers/membership
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 class MembershipList extends StatelessWidget {
   const MembershipList({super.key, required this.controller});
@@ -26,11 +29,9 @@ class _MembershipTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final active = member.isActive;
-    final presentation = EnumPresentation(
-      label: member.status == 'ACTIVE' ? 'نشط' : member.status == 'SUSPENDED' ? 'موقوف' : member.status == 'INVITED' ? 'بانتظار التفعيل' : 'غير معروف',
-      tone: active ? SemanticTone.success : member.status == 'SUSPENDED' ? SemanticTone.warning : SemanticTone.neutral,
-      icon: active ? Icons.check_circle_rounded : Icons.pause_circle_outline_rounded,
-    );
+    final presentation = EnumPresentationRegistry.resolveMembershipStatus(
+      MembershipStatus.fromWire(member.status),
+    )
     return Container(
       padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(color: colors.surface, borderRadius: BorderRadius.circular(18), border: Border.all(color: colors.outlineVariant.withValues(alpha: .45))),
@@ -63,10 +64,17 @@ class _MembershipTile extends StatelessWidget {
   }
 
   Future<void> _chooseRole(BuildContext context, MembershipEntity member) async {
-    final selected = await Get.bottomSheet<int>(SafeArea(child: Material(color: context.colors.surface, borderRadius: const BorderRadius.vertical(top: Radius.circular(24)), child: Padding(padding: EdgeInsets.all(AppSpacing.lg), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('تغيير الدور التشغيلي', style: AppTypography.titleLarge), AppSpacing.vMd,
-      ...controller.roles.map((role) => ListTile(title: Text(role.name), trailing: role.roleId == member.roleId ? const Icon(Icons.check_circle_rounded) : null, onTap: () => Get.back<int>(role.roleId))),
-    ])))), isScrollControlled: true);
+    final selected = await CustomBottomSheet(
+      title: 'تغيير الدور التشغيلي',
+      subtitle: 'اختر الدور الجديد لهذا العضو.',
+      leadingIcon: Icons.badge_outlined,
+      scrollable: true,
+      child: Column(mainAxisSize: MainAxisSize.min, children: controller.roles.map((role) => ListTile(
+        title: Text(role.name),
+        trailing: role.roleId == member.roleId ? const Icon(Icons.check_circle_rounded) : null,
+        onTap: () => Get.back<int>(role.roleId),
+      )).toList()),
+    ).show<int>();
     if (selected != null && selected != member.roleId) await controller.changeRole(member, selected);
   }
 
