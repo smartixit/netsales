@@ -71,7 +71,7 @@ class SessionService extends GetxService {
       );
       if (Get.isRegistered<PermissionService>()) {
         PermissionService.to.updateAccess(
-          roleKey: cachedUser.role?.roleKey ?? '',
+          roleKey: cachedUser.primaryWorkspaceRoleKey ?? '',
           permissions: cachedPermissions,
         );
       }
@@ -122,7 +122,7 @@ class SessionService extends GetxService {
 
     if (Get.isRegistered<PermissionService>()) {
       PermissionService.to.updateAccess(
-        roleKey: user.role?.roleKey ?? '',
+        roleKey: user.primaryWorkspaceRoleKey ?? '',
         permissions: permissions,
       );
     }
@@ -163,6 +163,7 @@ class SessionService extends GetxService {
         statusLabel: current.statusLabel,
         lastLoginAt: current.lastLoginAt,
         role: current.role,
+        workspaceRoles: current.workspaceRoles,
       );
       await updateCurrentUser(updated);
     }
