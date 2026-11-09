@@ -4,7 +4,6 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/models/user_session_model.dart';
 import 'package:netsales/core/services/device_service.dart';
-import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';

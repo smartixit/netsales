@@ -53,8 +53,9 @@ class NetworkOperatingExpensesScreen
           AppSpacing.vMd,
           Expanded(
             child: Obx(() {
-              if (controller.isLoadingNetworks.value)
+              if (controller.isLoadingNetworks.value) {
                 return const CustomSkeletonFeed(itemCount: 3);
+              }
               if (controller.networkError.value != null &&
                   controller.networks.isEmpty) {
                 return CustomErrorState.compact(
@@ -407,11 +408,12 @@ class _ExpenseFormBodyState extends State<_ExpenseFormBody> {
                     firstDate: DateTime(2020),
                     lastDate: DateTime.now().add(const Duration(days: 365)),
                   );
-                  if (date != null)
+                  if (date != null) {
                     setState(() {
                       _selectedDate = date;
                       _date.text = date.toIso8601String().substring(0, 10);
                     });
+                  }
                 },
               ),
             ),
@@ -580,8 +582,9 @@ class _NetworkExpenseDetailsScreenState
       showBackButton: true,
       appBarTitle: 'تفاصيل المصروف #$expenseId',
       body: Obx(() {
-        if (controller.isLoadingDetails.value)
+        if (controller.isLoadingDetails.value) {
           return const CustomSkeletonFeed(itemCount: 4);
+        }
         final expense = controller.selectedExpense.value;
         if (expense == null) {
           return CustomErrorState.compact(

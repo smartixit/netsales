@@ -429,7 +429,7 @@ class UrlLauncherService {
   ///
   /// [latitude]: خط العرض.
   /// [longitude]: خط الطول.
-  /// [label]: التسمية التوضيحية للموقع أو اسم المنشأة (اختياري).
+  /// [label]: التسمية التوضيحية للموقع أو اسم الشبكة (اختياري).
   /// [preference]: تفضيل التطبيق المطلوب (Google Maps, Apple Maps, Waze, إلخ).
   static Future<UrlLaunchResult> openMapCoordinates({
     required double latitude,

@@ -31,8 +31,9 @@ class MembershipRemoteDataSource {
           )
           .toList(),
     );
-    if (!response.success || response.data == null)
+    if (!response.success || response.data == null) {
       throw Exception(response.message);
+    }
     return response.data!;
   }
 
@@ -47,8 +48,9 @@ class MembershipRemoteDataSource {
           )
           .toList(),
     );
-    if (!response.success || response.data == null)
+    if (!response.success || response.data == null) {
       throw Exception(response.message);
+    }
     return response.data!;
   }
 
@@ -64,8 +66,9 @@ class MembershipRemoteDataSource {
       fromJson: (data) =>
           MembershipModel.fromJson(Map<String, dynamic>.from(data as Map)),
     );
-    if (!response.success || response.data == null)
+    if (!response.success || response.data == null) {
       throw Exception(response.message);
+    }
     return response.data!;
   }
 
@@ -81,8 +84,9 @@ class MembershipRemoteDataSource {
       fromJson: (data) =>
           MembershipModel.fromJson(Map<String, dynamic>.from(data as Map)),
     );
-    if (!response.success || response.data == null)
+    if (!response.success || response.data == null) {
       throw Exception(response.message);
+    }
     return response.data!;
   }
 
@@ -98,8 +102,9 @@ class MembershipRemoteDataSource {
       fromJson: (data) =>
           MembershipModel.fromJson(Map<String, dynamic>.from(data as Map)),
     );
-    if (!response.success || response.data == null)
+    if (!response.success || response.data == null) {
       throw Exception(response.message);
+    }
     return response.data!;
   }
 

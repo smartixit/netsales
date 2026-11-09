@@ -32,19 +32,22 @@ class MembershipScreen extends GetView<MembershipController> {
                     DropdownItem<int>(value: e.posId, child: Text(e.posName)),
               )
               .toList();
-    if (controller.isLoadingTenants.value)
+    if (controller.isLoadingTenants.value) {
       return const CustomSkeletonFeed(itemCount: 3);
-    if (controller.errorMessage.value != null && tenants.isEmpty)
+    }
+    if (controller.errorMessage.value != null && tenants.isEmpty) {
       return CustomErrorState(
         title: 'تعذر تحميل البيانات',
         subtitle: controller.errorMessage.value,
         onRetry: controller.loadTenants,
       );
-    if (tenants.isEmpty)
+    }
+    if (tenants.isEmpty) {
       return const CustomEmptyState(
         title: 'لا توجد منشآت متاحة',
         subtitle: 'لا توجد شبكة أو نقطة بيع مرتبطة بحسابك لإدارة أعضائها.',
       );
+    }
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1040),
@@ -57,7 +60,7 @@ class MembershipScreen extends GetView<MembershipController> {
             ),
             AppSpacing.vXs,
             Text(
-              'إدارة العضويات التشغيلية والصلاحيات داخل المنشأة المحددة.',
+              'إدارة العضويات التشغيلية والصلاحيات داخل الشبكة المحددة.',
               style: AppTypography.bodyMedium,
             ),
             if (tenants.length > 1) ...[
@@ -73,7 +76,7 @@ class MembershipScreen extends GetView<MembershipController> {
             AppSpacing.vLg,
             if (controller.selectedTenantId.value == null)
               const CustomEmptyState(
-                title: 'حدد المنشأة أولاً',
+                title: 'حدد الشبكة أولاً',
                 subtitle: 'اختر الشبكة أو نقطة البيع التي تريد إدارة فريقها.',
               )
             else ...[
@@ -94,7 +97,7 @@ class MembershipScreen extends GetView<MembershipController> {
                 controller.members.isEmpty)
               const CustomEmptyState(
                 title: 'لا يوجد أعضاء بعد',
-                subtitle: 'أضف أول عضو تشغيلي إلى هذه المنشأة.',
+                subtitle: 'أضف أول عضو تشغيلي إلى هذه الشبكة.',
               )
             else if (controller.selectedTenantId.value != null)
               MembershipList(controller: controller),

@@ -112,8 +112,9 @@ class NetworkOperatingExpensesController extends GetxController {
 
   Future<void> selectNetwork(int id) async {
     if (!networks.any((n) => n.networkId == id) ||
-        selectedNetworkId.value == id)
+        selectedNetworkId.value == id) {
       return;
+    }
     selectedNetworkId.value = id;
     expenses.clear();
     _cursor = null;
@@ -125,8 +126,9 @@ class NetworkOperatingExpensesController extends GetxController {
     final networkId = selectedNetworkId.value;
     if (networkId == null) return;
     if (!refresh &&
-        (isLoading.value || isLoadingMore.value || !_loaded || !hasMore))
+        (isLoading.value || isLoadingMore.value || !_loaded || !hasMore)) {
       return;
+    }
     final version = ++_listVersion;
     if (refresh) {
       _cursor = null;
@@ -145,8 +147,9 @@ class NetworkOperatingExpensesController extends GetxController {
         toDate: toDate.value == null ? null : _date(toDate.value!),
         cursor: refresh ? null : _cursor,
       );
-      if (version != _listVersion || selectedNetworkId.value != networkId)
+      if (version != _listVersion || selectedNetworkId.value != networkId) {
         return;
+      }
       if (refresh) {
         expenses.assignAll(page.items);
       } else {

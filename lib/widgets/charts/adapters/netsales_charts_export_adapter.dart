@@ -36,8 +36,9 @@ abstract final class NetSalesChartsExportAdapter {
     required String title,
   }) async {
     final bytes = await capturePng(boundaryKey);
-    if (bytes == null || bytes.isEmpty)
+    if (bytes == null || bytes.isEmpty) {
       return FileExportResult.failure('تعذر التقاط صورة المخطط.');
+    }
     return FileExportService.instance.saveFile(
       bytes: bytes,
       fileName: title,
@@ -53,8 +54,9 @@ abstract final class NetSalesChartsExportAdapter {
     required String title,
   }) async {
     final bytes = await capturePng(boundaryKey);
-    if (bytes == null || bytes.isEmpty)
+    if (bytes == null || bytes.isEmpty) {
       return FileExportResult.failure('تعذر التقاط المخطط لإنشاء PDF.');
+    }
     final document = pw.Document();
     document.addPage(
       pw.Page(

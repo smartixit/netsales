@@ -165,15 +165,16 @@ class _MembershipTile extends StatelessWidget {
             .toList(),
       ),
     );
-    if (selected != null && selected != member.roleId)
+    if (selected != null && selected != member.roleId) {
       await controller.changeRole(member, selected);
+    }
   }
 
   Future<void> _confirmRemove(MembershipEntity member) async {
     final confirmed = await CustomDialog.showDanger(
       title: 'إزالة العضو',
       message:
-          'سيتم إنهاء عضوية ${member.fullName} في هذه المنشأة. لن يتم حذف حساب المستخدم.',
+          'سيتم إنهاء عضوية ${member.fullName} في هذه الشبكة. لن يتم حذف حساب المستخدم.',
       confirmLabel: 'إزالة العضوية',
     );
     if (confirmed == true) await controller.remove(member);

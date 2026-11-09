@@ -64,12 +64,14 @@ class MembershipController extends GetxController {
     try {
       if (isNetwork) {
         networks.assignAll(await getMyNetworks());
-        if (networks.length == 1)
+        if (networks.length == 1) {
           selectedTenantId.value = networks.first.networkId;
+        }
       } else {
         positions.assignAll(await getMyPos());
-        if (positions.length == 1)
+        if (positions.length == 1) {
           selectedTenantId.value = positions.first.posId;
+        }
       }
       if (selectedTenantId.value != null) await loadMembers();
     } catch (error) {
