@@ -10,6 +10,7 @@ import 'package:netsales/features/workspace/presentation/widgets/adaptive_worksp
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 
 /// هيكل مساحة عمل مزود الشبكة (Network Workspace Shell)
 class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
@@ -64,6 +65,12 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         icon: Icons.storefront_outlined,
         activeIcon: Icons.storefront_rounded,
         content: NetworkPosDirectoryScreen(),
+      ),
+      const WorkspaceNavItem(
+        label: 'فريق العمل',
+        icon: Icons.groups_outlined,
+        activeIcon: Icons.groups_rounded,
+        content: MembershipScreen(),
       ),
       const WorkspaceNavItem(
         label: 'المالية والديون',
