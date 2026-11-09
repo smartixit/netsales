@@ -9,6 +9,7 @@ import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
+import 'package:netsales/features/finance/domain/entities/repayment_payment_method.dart';
 import 'package:netsales/features/finance/domain/usecases/repayment_use_cases.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -41,7 +42,7 @@ class RepaymentCollectionController extends GetxController {
   final amountController = TextEditingController();
   final refController = TextEditingController();
   final notesController = TextEditingController();
-  final selectedMethod = 'CASH'.obs;
+  final selectedMethod = RepaymentPaymentMethod.cash.obs;
 
   final isLoadingInitial = false.obs;
   final isLoadingPos = false.obs;
@@ -275,7 +276,7 @@ class RepaymentCollectionController extends GetxController {
       'network_id': netId,
       'pos_id': pId,
       'amount': amount,
-      'payment_method': selectedMethod.value,
+      'payment_method': selectedMethod.value.wireValue,
       'reference_number': refController.text.trim(),
       'notes': notesController.text.trim(),
     });
@@ -296,7 +297,7 @@ class RepaymentCollectionController extends GetxController {
         networkId: netId,
         posId: pId,
         amount: amount,
-        paymentMethod: selectedMethod.value,
+        paymentMethod: selectedMethod.value.wireValue,
         referenceNumber: refController.text.trim().isEmpty
             ? null
             : refController.text.trim(),
