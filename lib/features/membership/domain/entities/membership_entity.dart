@@ -8,6 +8,7 @@ class MembershipEntity {
     required this.roleLabel,
     required this.status,
     this.profileLogo,
+    this.isOwner = false,
   });
 
   final int userId;
@@ -18,7 +19,7 @@ class MembershipEntity {
   final String roleLabel;
   final String status;
   final String? profileLogo;
+  final bool isOwner;
 
-  bool get isOwner => roleKey == 'NETWORK_OWNER' || roleKey == 'POS_AGENT';
   bool get isActive => status == 'ACTIVE';
 }
