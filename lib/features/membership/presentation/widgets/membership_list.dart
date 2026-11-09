@@ -17,7 +17,12 @@ class MembershipList extends StatelessWidget {
   const MembershipList({super.key, required this.controller});
   final MembershipController controller;
   @override
-  Widget build(BuildContext context) => Column(children: controller.members.map((member) => Padding(padding: EdgeInsets.only(bottom: AppSpacing.sm), child: _MembershipTile(member: member, controller: controller))).toList());
+  Widget build(BuildContext context) => Column(
+    children: controller.members.map((member) => Padding(
+      padding: EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Obx(() => _MembershipTile(member: member, controller: controller)),
+    )).toList(),
+  );
 }
 
 class _MembershipTile extends StatelessWidget {
