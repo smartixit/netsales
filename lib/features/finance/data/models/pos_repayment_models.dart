@@ -11,14 +11,20 @@ class RepaymentAllocationModel extends RepaymentAllocationEntity {
     super.status,
     super.allocatedAt,
     super.invoiceUuid,
+    super.invoiceTotalAmount,
+    super.invoicePaidAmount,
+    super.invoiceRemainingAmount,
+    super.invoicePaymentStatus,
+    super.invoicePaymentStatusLabel,
+    super.invoiceDate,
+    super.saleType,
+    super.saleTypeLabel,
   });
 
   factory RepaymentAllocationModel.fromJson(Map<String, dynamic> json) {
-    String? invUuid;
-    if (json['invoice'] is Map<String, dynamic>) {
-      invUuid =
-          (json['invoice'] as Map<String, dynamic>)['invoice_uuid'] as String?;
-    }
+    final invoice = json['invoice'] is Map<String, dynamic>
+        ? json['invoice'] as Map<String, dynamic>
+        : null;
 
     return RepaymentAllocationModel(
       allocationId: json['allocation_id'] as int? ?? 0,
@@ -29,7 +35,18 @@ class RepaymentAllocationModel extends RepaymentAllocationEntity {
       allocatedAmount: (json['allocated_amount'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String?,
       allocatedAt: json['allocated_at'] as String?,
-      invoiceUuid: invUuid,
+      invoiceUuid: invoice?['invoice_uuid'] as String?,
+      invoiceTotalAmount:
+          (invoice?['invoice_total_amount'] as num?)?.toDouble(),
+      invoicePaidAmount: (invoice?['paid_amount'] as num?)?.toDouble(),
+      invoiceRemainingAmount:
+          (invoice?['remaining_amount'] as num?)?.toDouble(),
+      invoicePaymentStatus: invoice?['payment_status'] as String?,
+      invoicePaymentStatusLabel:
+          invoice?['payment_status_label'] as String?,
+      invoiceDate: invoice?['invoice_date'] as String?,
+      saleType: invoice?['sale_type'] as String?,
+      saleTypeLabel: invoice?['sale_type_label'] as String?,
     );
   }
 }
@@ -72,9 +89,11 @@ class PosRepaymentModel extends PosRepaymentEntity {
     final rawAllocations = json['allocations'];
     final parsedAllocations = <RepaymentAllocationModel>[];
     if (rawAllocations is List) {
-      for (final a in rawAllocations) {
-        if (a is Map<String, dynamic>) {
-          parsedAllocations.add(RepaymentAllocationModel.fromJson(a));
+      for (final allocation in rawAllocations) {
+        if (allocation is Map<String, dynamic>) {
+          parsedAllocations.add(
+            RepaymentAllocationModel.fromJson(allocation),
+          );
         }
       }
     }
