@@ -66,6 +66,10 @@ class WorkspaceService extends GetxService {
 
     final roleKey = user.role?.roleKey.toUpperCase() ?? '';
     final scopedRoleKeys = user.workspaceRoles.map((key) => key.toUpperCase()).toSet();
+    final preferred = preferredWorkspace ??
+        (currentWorkspace.value != AppWorkspace.unsupported
+            ? currentWorkspace.value.name
+            : StorageService.instance.getString(StorageKeys.activeWorkspaceKey));
 
     // 1. حسابات إدارة المنصة العامة مستبعدة كلياً ومحظورة على تطبيق الهاتف
     if (roleKey == AppRoles.superAdmin ||
@@ -85,8 +89,8 @@ class WorkspaceService extends GetxService {
         key == 'POS_ACCOUNTANT');
 
     if (hasNetworkRole && hasPosRole) {
-      if (preferredWorkspace == 'pos') return AppWorkspace.pos;
-      if (preferredWorkspace == 'network') return AppWorkspace.network;
+      if (preferred == 'pos') return AppWorkspace.pos;
+      if (preferred == 'network') return AppWorkspace.network;
       return AppWorkspace.network;
     }
     if (hasNetworkRole || roleKey == AppRoles.networkOwner ||
