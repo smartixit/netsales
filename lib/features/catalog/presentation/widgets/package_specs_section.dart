@@ -11,10 +11,7 @@ import 'package:netsales/features/catalog/presentation/widgets/package_specs_tab
 class PackageSpecsSection extends StatelessWidget {
   final PackageEntity package;
 
-  const PackageSpecsSection({
-    super.key,
-    required this.package,
-  });
+  const PackageSpecsSection({super.key, required this.package});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +23,11 @@ class PackageSpecsSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.tune_rounded, size: AppSpacing.xl, color: colors.primary),
+            Icon(
+              Icons.tune_rounded,
+              size: AppSpacing.xl,
+              color: colors.primary,
+            ),
             AppSpacing.hXs,
             Text(
               'المواصفات الفنية للكرت',

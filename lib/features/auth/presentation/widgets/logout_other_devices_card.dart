@@ -76,4 +76,3 @@ class LogoutOtherDevicesCard extends StatelessWidget {
     );
   }
 }
-

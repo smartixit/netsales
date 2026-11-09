@@ -17,10 +17,8 @@ class ChartsShowcaseController extends GetxController {
       ChartLiveDataSource<ChartDataPoint>(
         initialData: List<ChartDataPoint>.generate(
           12,
-          (index) => ChartDataPoint(
-            x: pointLabel(index + 1),
-            y: 30 + index * 2,
-          ),
+          (index) =>
+              ChartDataPoint(x: pointLabel(index + 1), y: 30 + index * 2),
         ),
         maxDataPoints: 24,
       );
@@ -39,10 +37,7 @@ class ChartsShowcaseController extends GetxController {
       liveTick.value = tick;
       final random = math.Random(tick);
       liveSales.append(
-        ChartDataPoint(
-          x: pointLabel(tick + 12),
-          y: 30 + random.nextInt(55),
-        ),
+        ChartDataPoint(x: pointLabel(tick + 12), y: 30 + random.nextInt(55)),
       );
     });
   }

@@ -18,4 +18,3 @@ enum WalletOperationType {
 
   bool get isKnown => this != WalletOperationType.unknown;
 }
-

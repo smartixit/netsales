@@ -77,10 +77,11 @@ class DashboardSidebar extends StatelessWidget {
                       collapsed: collapsed,
                       selectedNavigationId: selectedNavigationId,
                       onSelected: onNavigationSelected,
-                      expanded: group.id != null &&
+                      expanded:
+                          group.id != null &&
                           expandedGroupIds.contains(group.id),
-                      onExpandedChanged: group.id == null ||
-                              onGroupExpansionChanged == null
+                      onExpandedChanged:
+                          group.id == null || onGroupExpansionChanged == null
                           ? null
                           : (_) => onGroupExpansionChanged!(group.id!),
                     ),
@@ -130,8 +131,8 @@ class _NavigationTile extends StatelessWidget {
     final color = selected
         ? theme.sidebarSelectedForeground
         : item.enabled
-            ? theme.sidebarForeground
-            : theme.sidebarMuted;
+        ? theme.sidebarForeground
+        : theme.sidebarMuted;
     final leading = Icon(
       selected ? (item.selectedIcon ?? item.icon) : item.icon,
       size: 20,
@@ -151,9 +152,7 @@ class _NavigationTile extends StatelessWidget {
             start: 12 + depth * 12,
             end: 8,
           ),
-          childrenPadding: EdgeInsetsDirectional.only(
-            start: 12 + depth * 12,
-          ),
+          childrenPadding: EdgeInsetsDirectional.only(start: 12 + depth * 12),
           leading: leading,
           title: Text(
             item.label,
@@ -186,7 +185,9 @@ class _NavigationTile extends StatelessWidget {
       child: Tooltip(
         message: collapsed ? (item.tooltip ?? item.label) : '',
         child: Material(
-          color: selected ? theme.sidebarSelectedBackground : Colors.transparent,
+          color: selected
+              ? theme.sidebarSelectedBackground
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(theme.itemRadius),
           child: InkWell(
             hoverColor: theme.sidebarHoverBackground,
@@ -214,11 +215,11 @@ class _NavigationTile extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: color,
-                              fontWeight: selected
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                            ),
+                          color: color,
+                          fontWeight: selected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                        ),
                       ),
                     ),
                     if (item.badge != null) _Badge(label: item.badge!),
@@ -250,9 +251,9 @@ class _Badge extends StatelessWidget {
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: theme.badgeForeground,
-              fontWeight: FontWeight.w700,
-            ),
+          color: theme.badgeForeground,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

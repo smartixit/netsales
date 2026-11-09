@@ -15,8 +15,7 @@ class NetworkWalletLogItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final presentation =
-        EnumPresentationRegistry.resolveWalletOperationType(
+    final presentation = EnumPresentationRegistry.resolveWalletOperationType(
       log.typedLogOperation,
       serverLabel: log.logOperationLabel,
     );

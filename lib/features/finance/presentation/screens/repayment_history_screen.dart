@@ -88,8 +88,7 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                         return const CustomEmptyState(
                           icon: Icons.account_tree_outlined,
                           title: 'اختر الشبكة أولاً',
-                          subtitle:
-                              'حدد الشبكة التي تريد مراجعة سندات سدادها.',
+                          subtitle: 'حدد الشبكة التي تريد مراجعة سندات سدادها.',
                         );
                       }
 
@@ -114,10 +113,9 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                           title: controller.selectedStatus.value == 'ALL'
                               ? 'لا توجد سندات سداد'
                               : controller.selectedStatus.value == 'REVERSED'
-                                  ? 'لا توجد سندات معكوسة'
-                                  : 'لا توجد سندات مكتملة',
-                          subtitle:
-                              'لا توجد نتائج لهذه الشبكة وفق حالة السند المحددة.',
+                              ? 'لا توجد سندات معكوسة'
+                              : 'لا توجد سندات مكتملة',
+                          subtitle: 'لا توجد نتائج لهذه الشبكة وفق حالة السند المحددة.',
                         );
                       }
 
@@ -134,7 +132,8 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                         },
                         child: ListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: controller.repayments.length +
+                          itemCount:
+                              controller.repayments.length +
                               (controller.hasMore ||
                                       (controller.errorMessage.value != null &&
                                           controller.repayments.isNotEmpty)
@@ -149,8 +148,8 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                                   onRetry: controller.hasMore
                                       ? controller.loadMoreRepayments
                                       : () => controller.loadRepayments(
-                                            isRefresh: true,
-                                          ),
+                                          isRefresh: true,
+                                        ),
                                 );
                               }
                               return const RepaymentCardSkeleton();

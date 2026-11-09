@@ -29,16 +29,13 @@ class RequestItemModel extends RequestItemEntity {
       updatedAt: json['updated_at'] as String?,
       voucherPackage: json['voucher_package'] is Map<String, dynamic>
           ? PackageModel.fromJson(
-              json['voucher_package'] as Map<String, dynamic>)
+              json['voucher_package'] as Map<String, dynamic>,
+            )
           : null,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'package_id': packageId,
-      'voucher_count': voucherCount,
-    };
+    return {'package_id': packageId, 'voucher_count': voucherCount};
   }
 }
-

@@ -80,10 +80,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
               if (controller.isLoading.value) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
-                  child: CustomSkeletonFeed(
-                    itemCount: 4,
-                    cardHeight: 130.h,
-                  ),
+                  child: CustomSkeletonFeed(itemCount: 4, cardHeight: 130.h),
                 );
               }
 
@@ -126,13 +123,16 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                   child: ListView.separated(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.all(AppSpacing.cardPadding),
-                    itemCount: controller.requests.length +
+                    itemCount:
+                        controller.requests.length +
                         (controller.isLoadingMore.value ? 1 : 0),
                     separatorBuilder: (context, index) => AppSpacing.vSm,
                     itemBuilder: (context, index) {
                       if (index == controller.requests.length) {
                         return Padding(
-                          padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                          padding: EdgeInsets.symmetric(
+                            vertical: AppSpacing.sm,
+                          ),
                           child: Center(
                             child: SizedBox(
                               width: 24.r,
@@ -157,10 +157,10 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                         },
                         onCancel: request.isPending
                             ? () => ProcurementActionDialogs.showCancelDialog(
-                                  requestId: request.requestId,
-                                  onConfirm: () =>
-                                      controller.cancelRequest(request.requestId),
-                                )
+                                requestId: request.requestId,
+                                onConfirm: () =>
+                                    controller.cancelRequest(request.requestId),
+                              )
                             : null,
                       );
                     },
@@ -174,4 +174,3 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
     );
   }
 }
-

@@ -10,4 +10,3 @@ class GetPackageDetailsUseCase {
     return _repository.getPackageDetails(packageId);
   }
 }
-

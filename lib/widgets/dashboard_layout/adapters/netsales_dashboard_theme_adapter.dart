@@ -38,10 +38,16 @@ class NetSalesDashboardThemeAdapter {
       badgeBackground: colors.primary,
       badgeForeground: colors.onPrimary,
       itemRadius: AppRadius.md / radiusScale,
-      sidebarPadding: isDesktop ? AppSpacing.lg / widthScale : AppSpacing.md / widthScale,
+      sidebarPadding: isDesktop
+          ? AppSpacing.lg / widthScale
+          : AppSpacing.md / widthScale,
       itemSpacing: AppSpacing.xs / widthScale,
-      sectionSpacing: isDesktop ? AppSpacing.xl / widthScale : AppSpacing.lg / widthScale,
-      contentPadding: isDesktop ? AppSpacing.xxl / widthScale : AppSpacing.lg / widthScale,
+      sectionSpacing: isDesktop
+          ? AppSpacing.xl / widthScale
+          : AppSpacing.lg / widthScale,
+      contentPadding: isDesktop
+          ? AppSpacing.xxl / widthScale
+          : AppSpacing.lg / widthScale,
       motionDuration: AppMotion.duration(context, AppMotion.normal),
       motionCurve: AppMotion.standard,
     );
@@ -49,10 +55,7 @@ class NetSalesDashboardThemeAdapter {
 
   /// Wrap the shell once at the host boundary; generic widgets consume only
   /// the ThemeExtension and never import NetSales core services.
-  static Widget wrap({
-    required BuildContext context,
-    required Widget child,
-  }) {
+  static Widget wrap({required BuildContext context, required Widget child}) {
     final baseTheme = Theme.of(context);
     return Theme(
       data: baseTheme.copyWith(

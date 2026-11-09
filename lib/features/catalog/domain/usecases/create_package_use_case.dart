@@ -10,4 +10,3 @@ class CreatePackageUseCase {
     return _repository.createPackage(data);
   }
 }
-

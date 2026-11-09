@@ -592,10 +592,24 @@ class EnumPresentationRegistry {
     });
 
     return switch (status) {
-      MembershipStatus.active => EnumPresentation(label: label, tone: SemanticTone.success, icon: Icons.check_circle_rounded),
-      MembershipStatus.suspended => EnumPresentation(label: label, tone: SemanticTone.warning, icon: Icons.pause_circle_outline_rounded),
-      MembershipStatus.invited => EnumPresentation(label: label, tone: SemanticTone.info, icon: Icons.hourglass_top_rounded),
-      MembershipStatus.unknown => EnumPresentation.unknown(fallbackLabel: label),
+      MembershipStatus.active => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.check_circle_rounded,
+      ),
+      MembershipStatus.suspended => EnumPresentation(
+        label: label,
+        tone: SemanticTone.warning,
+        icon: Icons.pause_circle_outline_rounded,
+      ),
+      MembershipStatus.invited => EnumPresentation(
+        label: label,
+        tone: SemanticTone.info,
+        icon: Icons.hourglass_top_rounded,
+      ),
+      MembershipStatus.unknown => EnumPresentation.unknown(
+        fallbackLabel: label,
+      ),
     };
   }
 

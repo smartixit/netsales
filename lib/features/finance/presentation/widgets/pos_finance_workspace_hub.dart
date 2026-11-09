@@ -75,9 +75,7 @@ class PosFinanceWorkspaceHub extends StatelessWidget {
           AppSpacing.vXl,
           Text(
             'إدارة الحساب',
-            style: AppTypography.titleMedium.copyWith(
-              color: colors.onSurface,
-            ),
+            style: AppTypography.titleMedium.copyWith(color: colors.onSurface),
           ),
           AppSpacing.vXs,
           Text(

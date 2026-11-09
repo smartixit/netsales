@@ -99,8 +99,7 @@ class WelcomeScreen extends GetView<WelcomeController> {
             // 4. بطاقات اختيار الدور الموحدة (CustomActionCard)
             CustomActionCard(
                   title: 'مزود شبكة',
-                  description:
-                      'تحكم متكامل في مبيعات الشبكة، باقات الخدمة، ربط نقاط البيع، وإدارة الأرصدة والتقارير المالية.',
+                  description: 'تحكم متكامل في مبيعات الشبكة، باقات الخدمة، ربط نقاط البيع، وإدارة الأرصدة والتقارير المالية.',
                   icon: Icons.router_rounded,
                   accentColor: colors.primary,
                   onTap: controller.goToRegisterNetwork,
@@ -118,8 +117,7 @@ class WelcomeScreen extends GetView<WelcomeController> {
 
             CustomActionCard(
                   title: 'وكيل نقطة بيع',
-                  description:
-                      'إدارة ذكية لمبيعات النقطة، إرسال طلبات التزويد، إصدار الفواتير وطباعة كشوفات الحساب بكل سهولة.',
+                  description: 'إدارة ذكية لمبيعات النقطة، إرسال طلبات التزويد، إصدار الفواتير وطباعة كشوفات الحساب بكل سهولة.',
                   icon: Icons.storefront_rounded,
                   accentColor: colors.secondary,
                   onTap: controller.goToRegisterPos,

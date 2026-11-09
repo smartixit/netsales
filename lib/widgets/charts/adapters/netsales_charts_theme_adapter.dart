@@ -44,10 +44,7 @@ class NetSalesChartsThemeAdapter {
     );
   }
 
-  static Widget wrap({
-    required BuildContext context,
-    required Widget child,
-  }) {
+  static Widget wrap({required BuildContext context, required Widget child}) {
     final baseTheme = Theme.of(context);
     final extensions = baseTheme.extensions.values
         .where((extension) => extension is! ChartsTheme)

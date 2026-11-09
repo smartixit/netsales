@@ -19,4 +19,3 @@ enum InvoicePaymentStatus {
 
   bool get isKnown => this != InvoicePaymentStatus.unknown;
 }
-

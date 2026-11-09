@@ -60,33 +60,36 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
       if (entry.value == null) {
         normalizedMetrics[entry.key] = null;
       } else if (entry.value is Map<String, dynamic>) {
-        normalizedMetrics[entry.key] =
-            Map<String, dynamic>.from(entry.value as Map);
+        normalizedMetrics[entry.key] = Map<String, dynamic>.from(
+          entry.value as Map,
+        );
       } else {
         throw FormatException('مجموعة المؤشرات غير صالحة: ${entry.key}.');
       }
     }
 
-    final pending = recent.map((dynamic item) {
-      if (item is! Map<String, dynamic>) {
-        throw const FormatException('عنصر طلب التوريد غير صالح.');
-      }
+    final pending = recent
+        .map((dynamic item) {
+          if (item is! Map<String, dynamic>) {
+            throw const FormatException('عنصر طلب التوريد غير صالح.');
+          }
 
-      final request = Map<String, dynamic>.from(item);
-      if (request['request_id'] is! num ||
-          request['request_uuid'] is! String ||
-          request['pos_id'] is! num ||
-          request['pos_name'] is! String ||
-          request['sale_type_label'] is! String ||
-          request['request_date'] is! String ||
-          request['request_total_amount'] is! String ||
-          request['status'] is! String ||
-          request['status_label'] is! String) {
-        throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
-      }
+          final request = Map<String, dynamic>.from(item);
+          if (request['request_id'] is! num ||
+              request['request_uuid'] is! String ||
+              request['pos_id'] is! num ||
+              request['pos_name'] is! String ||
+              request['sale_type_label'] is! String ||
+              request['request_date'] is! String ||
+              request['request_total_amount'] is! String ||
+              request['status'] is! String ||
+              request['status_label'] is! String) {
+            throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
+          }
 
-      return request;
-    }).toList(growable: false);
+          return request;
+        })
+        .toList(growable: false);
 
     return NetworkWorkspaceOverviewModel(
       networkId: networkId.toInt(),

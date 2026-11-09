@@ -11,4 +11,3 @@ class GetInvoiceDetailsUseCase {
     return repository.getInvoiceDetails(invoiceId);
   }
 }
-

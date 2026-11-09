@@ -26,13 +26,11 @@ class ChartDefinition {
   final String? stateMessage;
   final String? stateDetails;
 
-  bool get hasData => series.any(
-    (item) => item.isVisible && item.dataSource.isNotEmpty,
-  );
+  bool get hasData =>
+      series.any((item) => item.isVisible && item.dataSource.isNotEmpty);
 
-  bool get hasLiveSources => series.any(
-    (item) => item.isVisible && item.liveDataSource != null,
-  );
+  bool get hasLiveSources =>
+      series.any((item) => item.isVisible && item.liveDataSource != null);
 
   /// Keep an empty live source mounted so Syncfusion can register its series
   /// controller before the first point is appended.

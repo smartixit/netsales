@@ -61,11 +61,11 @@ class PackageDetailsScreen extends GetView<PackageCatalogController> {
                 icon: package.status
                     ? Icons.toggle_on_rounded
                     : Icons.toggle_off_rounded,
-                tooltip:
-                    package.status ? 'تعطيل الباقة' : 'تفعيل الباقة',
+                tooltip: package.status ? 'تعطيل الباقة' : 'تفعيل الباقة',
                 backgroundColor: Colors.transparent,
-                foregroundColor:
-                    package.status ? colors.success : colors.outline,
+                foregroundColor: package.status
+                    ? colors.success
+                    : colors.outline,
                 iconSize: AppSpacing.xxl,
                 onPressed: controller.isTogglingStatus.value
                     ? null
@@ -90,8 +90,9 @@ class PackageDetailsScreen extends GetView<PackageCatalogController> {
               onPressed: () => PackageDeleteConfirmDialog.show(
                 packageName: package.packageName,
                 onConfirm: () async {
-                  final deleted =
-                      await controller.deletePackage(package.packageId);
+                  final deleted = await controller.deletePackage(
+                    package.packageId,
+                  );
                   if (deleted) Get.back<void>();
                 },
               ),
@@ -99,8 +100,7 @@ class PackageDetailsScreen extends GetView<PackageCatalogController> {
           ],
         ),
         body: RefreshIndicator.adaptive(
-          onRefresh: () =>
-              controller.loadPackageDetails(package.packageId),
+          onRefresh: () => controller.loadPackageDetails(package.packageId),
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.all(AppSpacing.cardPadding),

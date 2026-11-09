@@ -29,4 +29,3 @@ abstract interface class InvoiceRepository {
   /// استرجاع تفاصيل فاتورة محددة بكافة بنودها وأطرافها
   Future<InvoiceEntity> getInvoiceDetails(int invoiceId);
 }
-

@@ -85,8 +85,7 @@ class NetworkWalletTransferSheet
                   const CustomEmptyState(
                     icon: Icons.point_of_sale_outlined,
                     title: 'لا توجد نقاط بيع مرتبطة',
-                    subtitle:
-                        'لا توجد نقطة بيع نشطة يمكن تحويل الرصيد إليها.',
+                    subtitle: 'لا توجد نقطة بيع نشطة يمكن تحويل الرصيد إليها.',
                   )
                 else
                   Column(
@@ -112,14 +111,13 @@ class NetworkWalletTransferSheet
                         onRemoteSearch: controller.searchPos,
                         selectedItemFallback:
                             controller.selectedPos.value == null
-                                ? null
-                                : DropdownItem<int>(
-                                    value:
-                                        controller.selectedPos.value!.posId,
-                                    child: Text(
-                                      controller.selectedPos.value!.posName,
-                                    ),
-                                  ),
+                            ? null
+                            : DropdownItem<int>(
+                                value: controller.selectedPos.value!.posId,
+                                child: Text(
+                                  controller.selectedPos.value!.posName,
+                                ),
+                              ),
                         items: controller.posList
                             .map(
                               (pos) => DropdownItem<int>(
@@ -139,8 +137,7 @@ class NetworkWalletTransferSheet
                         AppSpacing.vXs,
                         CustomErrorState.compact(
                           title: 'تعذر تحميل بقية نقاط البيع',
-                          subtitle:
-                              controller.posLoadMoreErrorMessage.value,
+                          subtitle: controller.posLoadMoreErrorMessage.value,
                           onRetry: controller.loadMorePos,
                         ),
                       ],
@@ -184,7 +181,8 @@ class NetworkWalletTransferSheet
                   prefix: Icons.swap_horiz_rounded,
                   width: double.infinity,
                   loading: controller.isSubmitting.value,
-                  enabled: !controller.isSubmitting.value &&
+                  enabled:
+                      !controller.isSubmitting.value &&
                       controller.selectedPosId.value != null,
                   onPressed: controller.submitTransfer,
                 ),

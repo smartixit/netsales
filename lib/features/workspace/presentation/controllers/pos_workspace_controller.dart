@@ -22,8 +22,7 @@ class PosWorkspaceController extends GetxController {
 
   final GetMyPosUseCase getMyPosUseCase;
   final GetPosNetworksListUseCase getPosNetworksListUseCase;
-  final GetPosWalletByNetworkAndPosUseCase
-  getPosWalletByNetworkAndPosUseCase;
+  final GetPosWalletByNetworkAndPosUseCase getPosWalletByNetworkAndPosUseCase;
 
   final RxInt selectedNavIndex = 0.obs;
   final RxList<PosEntity> availablePos = <PosEntity>[].obs;
@@ -91,14 +90,12 @@ class PosWorkspaceController extends GetxController {
       final previousPosId = activePos.value?.posId;
       availablePos.assignAll(positions);
 
-      final savedPosId = StorageService.instance.getInt(
-        _posStorageKey,
-      );
+      final savedPosId = StorageService.instance.getInt(_posStorageKey);
       final savedPosition = positions.firstWhereOrNull(
         (position) => position.posId == savedPosId,
       );
-      final resolvedPosition = savedPosition ??
-          (positions.length == 1 ? positions.first : null);
+      final resolvedPosition =
+          savedPosition ?? (positions.length == 1 ? positions.first : null);
 
       if (resolvedPosition?.posId != previousPosId) {
         _clearNetworkContext();
@@ -168,8 +165,7 @@ class PosWorkspaceController extends GetxController {
         perPage: 12,
       );
 
-      if (generation != _networkGeneration ||
-          activePos.value?.posId != posId) {
+      if (generation != _networkGeneration || activePos.value?.posId != posId) {
         return;
       }
 

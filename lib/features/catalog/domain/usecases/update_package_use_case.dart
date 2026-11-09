@@ -10,4 +10,3 @@ class UpdatePackageUseCase {
     return _repository.updatePackage(packageId, data);
   }
 }
-

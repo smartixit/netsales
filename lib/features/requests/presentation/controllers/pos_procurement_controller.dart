@@ -207,10 +207,7 @@ class PosProcurementController extends GetxController {
     isLoadingPackages.value = false;
 
     try {
-      final paginated = await getPosNetworksListUseCase!(
-        posId,
-        status: true,
-      );
+      final paginated = await getPosNetworksListUseCase!(posId, status: true);
       if (revision != _networkLoadRevision || selectedPosId.value != posId) {
         return;
       }
@@ -365,9 +362,7 @@ class PosProcurementController extends GetxController {
   }
 
   void removeCartLine(int packageId) {
-    procurementCart.removeWhere(
-      (line) => line.package.packageId == packageId,
-    );
+    procurementCart.removeWhere((line) => line.package.packageId == packageId);
   }
 
   void clearProcurementCart() {
@@ -640,4 +635,3 @@ class PosProcurementController extends GetxController {
     }
   }
 }
-

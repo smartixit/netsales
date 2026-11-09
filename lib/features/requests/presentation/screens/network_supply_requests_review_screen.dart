@@ -41,7 +41,9 @@ class NetworkSupplyRequestsReviewScreen
                 Expanded(
                   child: Text(
                     'مراجعة طلبات التوريد الواردة',
-                    style: AppTypography.titleMedium.copyWith(color: colors.onSurface),
+                    style: AppTypography.titleMedium.copyWith(
+                      color: colors.onSurface,
+                    ),
                   ),
                 ),
                 CustomButton.icon(
@@ -54,140 +56,138 @@ class NetworkSupplyRequestsReviewScreen
               ],
             ),
           ),
-          // شريط البحث والفلترة
-          Obx(() {
-            return ProcurementSearchFilterHeader(
-              searchController: controller.searchController,
-              searchQuery: controller.searchQuery.value,
-              selectedStatus: controller.statusFilter.value,
-              onStatusChanged: controller.setStatusFilter,
-              onClearSearch: controller.searchController.clear,
-            );
-          }),
+        // شريط البحث والفلترة
+        Obx(() {
+          return ProcurementSearchFilterHeader(
+            searchController: controller.searchController,
+            searchQuery: controller.searchQuery.value,
+            selectedStatus: controller.statusFilter.value,
+            onStatusChanged: controller.setStatusFilter,
+            onClearSearch: controller.searchController.clear,
+          );
+        }),
 
-          // منتقي الشبكة عند تعدد شبكات المشغل
-          Obx(() {
-            final networks = controller.authorizedNetworks;
-            if (networks.length <= 1) return const SizedBox.shrink();
+        // منتقي الشبكة عند تعدد شبكات المشغل
+        Obx(() {
+          final networks = controller.authorizedNetworks;
+          if (networks.length <= 1) return const SizedBox.shrink();
 
-            return Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
-              ),
-              child: CustomDropdown<int>(
-                label: 'تصفية بحسب الشبكة',
-                searchEnabled: false,
-                rxValue: controller.selectedNetworkId,
-                items: networks.map((net) {
-                  return DropdownItem<int>(
-                    value: net.networkId,
-                    child: Text(net.networkName),
-                  );
-                }).toList(),
-                onChanged: controller.onNetworkFilterChanged,
-              ),
-            );
-          }),
-
-          // قائمة الطلبات الواردة
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return Padding(
-                  padding: EdgeInsets.all(AppSpacing.md),
-                  child: CustomSkeletonFeed(
-                    itemCount: 4,
-                    cardHeight: 140.h,
-                  ),
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
+            child: CustomDropdown<int>(
+              label: 'تصفية بحسب الشبكة',
+              searchEnabled: false,
+              rxValue: controller.selectedNetworkId,
+              items: networks.map((net) {
+                return DropdownItem<int>(
+                  value: net.networkId,
+                  child: Text(net.networkName),
                 );
-              }
+              }).toList(),
+              onChanged: controller.onNetworkFilterChanged,
+            ),
+          );
+        }),
 
-              if (controller.errorMessage.value != null &&
-                  controller.requests.isEmpty) {
-                return Center(
-                  child: CustomErrorState(
-                    title: 'تعذر جلب طلبات التوريد الواردة',
-                    subtitle: controller.errorMessage.value,
-                    onRetry: () => controller.loadRequests(isRefresh: true),
-                  ),
-                );
-              }
+        // قائمة الطلبات الواردة
+        Expanded(
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return Padding(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: CustomSkeletonFeed(itemCount: 4, cardHeight: 140.h),
+              );
+            }
 
-              if (controller.requests.isEmpty) {
-                return const Center(
-                  child: CustomEmptyState(
-                    icon: Icons.inbox_outlined,
-                    title: 'لا توجد طلبات توريد واردة',
-                    subtitle: 'جميع طلبات الكروت الواردة تمت معالجتها واعتمادها.',
-                  ),
-                );
-              }
-
-              return RefreshIndicator.adaptive(
-                onRefresh: () => controller.loadRequests(isRefresh: true),
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification scroll) {
-                    if (scroll.metrics.pixels >=
-                        scroll.metrics.maxScrollExtent - 200) {
-                      controller.loadMoreRequests();
-                    }
-                    return false;
-                  },
-                  child: ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.all(AppSpacing.cardPadding),
-                    itemCount: controller.requests.length +
-                        (controller.isLoadingMore.value ? 1 : 0),
-                    separatorBuilder: (context, index) => AppSpacing.vSm,
-                    itemBuilder: (context, index) {
-                      if (index == controller.requests.length) {
-                        return const CustomSkeletonFeed(
-                          itemCount: 1,
-                          cardHeight: 132,
-                        );
-                      }
-
-                      final request = controller.requests[index];
-                      return ProcurementRequestCard(
-                        request: request,
-                        isNetworkView: true,
-                        onTap: () {
-                          Get.toNamed<void>(
-                            AppRoutes.voucherRequestDetails,
-                            arguments: request,
-                          );
-                        },
-                        onModify: request.isPending
-                            ? () => NetworkRequestModificationSheet.open(request)
-                            : null,
-                        onApprove: request.isPending
-                            ? () => ProcurementActionDialogs.showApprovalDialog(
-                                  requestId: request.requestId,
-                                  onConfirm: (note) => controller.approveRequest(
-                                    request.requestId,
-                                    requestNote: note,
-                                  ),
-                                )
-                            : null,
-                        onReject: request.isPending
-                            ? () => ProcurementActionDialogs.showRejectionDialog(
-                                  requestId: request.requestId,
-                                  onConfirm: (reason) => controller.rejectRequest(
-                                    request.requestId,
-                                    reason,
-                                  ),
-                                )
-                            : null,
-                      );
-                    },
-                  ),
+            if (controller.errorMessage.value != null &&
+                controller.requests.isEmpty) {
+              return Center(
+                child: CustomErrorState(
+                  title: 'تعذر جلب طلبات التوريد الواردة',
+                  subtitle: controller.errorMessage.value,
+                  onRetry: () => controller.loadRequests(isRefresh: true),
                 ),
               );
-            }),
-          ),
-        ],
-      );
+            }
+
+            if (controller.requests.isEmpty) {
+              return const Center(
+                child: CustomEmptyState(
+                  icon: Icons.inbox_outlined,
+                  title: 'لا توجد طلبات توريد واردة',
+                  subtitle: 'جميع طلبات الكروت الواردة تمت معالجتها واعتمادها.',
+                ),
+              );
+            }
+
+            return RefreshIndicator.adaptive(
+              onRefresh: () => controller.loadRequests(isRefresh: true),
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification scroll) {
+                  if (scroll.metrics.pixels >=
+                      scroll.metrics.maxScrollExtent - 200) {
+                    controller.loadMoreRequests();
+                  }
+                  return false;
+                },
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.all(AppSpacing.cardPadding),
+                  itemCount:
+                      controller.requests.length +
+                      (controller.isLoadingMore.value ? 1 : 0),
+                  separatorBuilder: (context, index) => AppSpacing.vSm,
+                  itemBuilder: (context, index) {
+                    if (index == controller.requests.length) {
+                      return const CustomSkeletonFeed(
+                        itemCount: 1,
+                        cardHeight: 132,
+                      );
+                    }
+
+                    final request = controller.requests[index];
+                    return ProcurementRequestCard(
+                      request: request,
+                      isNetworkView: true,
+                      onTap: () {
+                        Get.toNamed<void>(
+                          AppRoutes.voucherRequestDetails,
+                          arguments: request,
+                        );
+                      },
+                      onModify: request.isPending
+                          ? () => NetworkRequestModificationSheet.open(request)
+                          : null,
+                      onApprove: request.isPending
+                          ? () => ProcurementActionDialogs.showApprovalDialog(
+                              requestId: request.requestId,
+                              onConfirm: (note) => controller.approveRequest(
+                                request.requestId,
+                                requestNote: note,
+                              ),
+                            )
+                          : null,
+                      onReject: request.isPending
+                          ? () => ProcurementActionDialogs.showRejectionDialog(
+                              requestId: request.requestId,
+                              onConfirm: (reason) => controller.rejectRequest(
+                                request.requestId,
+                                reason,
+                              ),
+                            )
+                          : null,
+                    );
+                  },
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
 
     if (embedded) return content;
 
@@ -217,4 +217,3 @@ class NetworkSupplyRequestsReviewScreen
     );
   }
 }
-

@@ -95,18 +95,22 @@ class PosHomeDashboard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('نقطة البيع النشطة',
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: colors.onSurfaceVariant,
-                                )),
+                            Text(
+                              'نقطة البيع النشطة',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
                             SizedBox(height: 3.h),
-                            Text(activePos.posName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTypography.titleMedium.copyWith(
-                                  color: colors.onSurface,
-                                  fontWeight: FontWeight.bold,
-                                )),
+                            Text(
+                              activePos.posName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.titleMedium.copyWith(
+                                color: colors.onSurface,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -126,16 +130,20 @@ class PosHomeDashboard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('شبكاتك المرتبطة',
-                                style: AppTypography.titleLarge.copyWith(
-                                  color: colors.onSurface,
-                                  fontWeight: FontWeight.bold,
-                                )),
+                            Text(
+                              'شبكاتك المرتبطة',
+                              style: AppTypography.titleLarge.copyWith(
+                                color: colors.onSurface,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             SizedBox(height: 3.h),
-                            Text('اسحب لاستعراض حساباتك لدى كل شبكة',
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: colors.onSurfaceVariant,
-                                )),
+                            Text(
+                              'اسحب لاستعراض حساباتك لدى كل شبكة',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -179,11 +187,15 @@ class PosHomeDashboard extends StatelessWidget {
                       ),
                       itemBuilder: (context, link, index) =>
                           PosNetworkCarouselCard(
-                        link: link,
-                        isSelected: controller.selectedNetworkLink.value?.networkId ==
-                            link.networkId,
-                        onTap: () => controller.onNetworkPageChanged(index),
-                      ),
+                            link: link,
+                            isSelected:
+                                controller
+                                    .selectedNetworkLink
+                                    .value
+                                    ?.networkId ==
+                                link.networkId,
+                            onTap: () => controller.onNetworkPageChanged(index),
+                          ),
                       onPageChanged: controller.onNetworkPageChanged,
                       hasMoreItems: controller.hasMoreNetworks.value,
                       loadingItemBuilder: (_) =>
@@ -196,14 +208,18 @@ class PosHomeDashboard extends StatelessWidget {
                       },
                       indicatorBuilder: (context, current, total) =>
                           CustomPageIndicator(
-                        itemCount: total,
-                        currentIndex: current,
-                      ),
+                            itemCount: total,
+                            currentIndex: current,
+                          ),
                     ),
                   AppSpacing.vXl,
                   if (controller.selectedNetworkLink.value != null) ...[
                     PosSelectedNetworkFinancialSummary(
-                      networkName: controller.selectedNetworkLink.value!.network
+                      networkName:
+                          controller
+                              .selectedNetworkLink
+                              .value!
+                              .network
                               ?.networkName ??
                           'شبكة #${controller.selectedNetworkLink.value!.networkId}',
                       wallet: controller.selectedWallet.value,
@@ -224,10 +240,13 @@ class PosHomeDashboard extends StatelessWidget {
                     ),
                     AppSpacing.vXl,
                   ],
-                  Text('ابدأ عملك', style: AppTypography.titleLarge.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
-                  )),
+                  Text(
+                    'ابدأ عملك',
+                    style: AppTypography.titleLarge.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   AppSpacing.vMd,
                   Row(
                     children: [
@@ -236,7 +255,8 @@ class PosHomeDashboard extends StatelessWidget {
                           icon: Icons.add_shopping_cart_rounded,
                           title: 'طلب توريد',
                           subtitle: 'اطلب باقات بالجملة',
-                          onTap: () => Get.toNamed<void>(AppRoutes.newProcurementOrder),
+                          onTap: () =>
+                              Get.toNamed<void>(AppRoutes.newProcurementOrder),
                         ),
                       ),
                       AppSpacing.hMd,
@@ -245,7 +265,8 @@ class PosHomeDashboard extends StatelessWidget {
                           icon: Icons.receipt_long_rounded,
                           title: 'فواتيري',
                           subtitle: 'راجع مشترياتك',
-                          onTap: () => Get.toNamed<void>(AppRoutes.purchaseInvoices),
+                          onTap: () =>
+                              Get.toNamed<void>(AppRoutes.purchaseInvoices),
                         ),
                       ),
                     ],
@@ -321,14 +342,20 @@ class _QuickAction extends StatelessWidget {
           children: [
             Icon(icon, color: colors.primary, size: 25.r),
             AppSpacing.vMd,
-            Text(title, style: AppTypography.titleSmall.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.bold,
-            )),
+            Text(
+              title,
+              style: AppTypography.titleSmall.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             SizedBox(height: 3.h),
-            Text(subtitle, style: AppTypography.bodySmall.copyWith(
-              color: colors.onSurfaceVariant,
-            )),
+            Text(
+              subtitle,
+              style: AppTypography.bodySmall.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),

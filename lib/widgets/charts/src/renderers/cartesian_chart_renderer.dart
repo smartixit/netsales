@@ -46,7 +46,11 @@ class CartesianChartRenderer extends StatelessWidget {
         options.showMajorGridLines,
         autoScrollingDelta: options.autoScrollingDelta,
       ),
-      primaryYAxis: _buildAxis(options.yAxis, theme, options.showMajorGridLines),
+      primaryYAxis: _buildAxis(
+        options.yAxis,
+        theme,
+        options.showMajorGridLines,
+      ),
       axes: options.additionalAxes
           .map((axis) => _buildAxis(axis, theme, options.showMajorGridLines))
           .toList(growable: false),
@@ -79,7 +83,6 @@ class CartesianChartRenderer extends StatelessWidget {
           .toList(growable: false),
     );
   }
-
 
   List<PlotBand> _buildPlotBands(
     List<ChartPlotBandConfig> configs,
@@ -178,96 +181,96 @@ class CartesianChartRenderer extends StatelessWidget {
 
     return switch (config.kind) {
       ChartAxisKind.category => CategoryAxis(
-          name: config.name,
-          title: title,
-          axisLabelFormatter: config.labelFormat == null
-              ? null
-              : (details) => ChartAxisLabel(
-                    config.labelFormat!.replaceAll('{value}', details.text),
-                    details.textStyle,
-                  ),
-          labelStyle: labelStyle,
-          labelRotation: config.labelRotation,
-          isVisible: config.isVisible,
-          isInversed: config.isInversed,
-          opposedPosition: config.opposedPosition,
-          axisLine: axisLine,
-          majorGridLines: majorGridLines,
+        name: config.name,
+        title: title,
+        axisLabelFormatter: config.labelFormat == null
+            ? null
+            : (details) => ChartAxisLabel(
+                config.labelFormat!.replaceAll('{value}', details.text),
+                details.textStyle,
+              ),
+        labelStyle: labelStyle,
+        labelRotation: config.labelRotation,
+        isVisible: config.isVisible,
+        isInversed: config.isInversed,
+        opposedPosition: config.opposedPosition,
+        axisLine: axisLine,
+        majorGridLines: majorGridLines,
 
-          plotBands: _buildPlotBands(config.plotBands, theme),
-          autoScrollingDelta: autoScrollingDelta,
-        ),
+        plotBands: _buildPlotBands(config.plotBands, theme),
+        autoScrollingDelta: autoScrollingDelta,
+      ),
       ChartAxisKind.numeric => NumericAxis(
-          name: config.name,
-          title: title,
-          labelFormat: config.labelFormat,
-          labelStyle: labelStyle,
-          minimum: config.minimum?.toDouble(),
-          maximum: config.maximum?.toDouble(),
-          interval: config.interval?.toDouble(),
-          labelRotation: config.labelRotation,
-          isVisible: config.isVisible,
-          isInversed: config.isInversed,
-          opposedPosition: config.opposedPosition,
-          axisLine: axisLine,
-          majorGridLines: majorGridLines,
+        name: config.name,
+        title: title,
+        labelFormat: config.labelFormat,
+        labelStyle: labelStyle,
+        minimum: config.minimum?.toDouble(),
+        maximum: config.maximum?.toDouble(),
+        interval: config.interval?.toDouble(),
+        labelRotation: config.labelRotation,
+        isVisible: config.isVisible,
+        isInversed: config.isInversed,
+        opposedPosition: config.opposedPosition,
+        axisLine: axisLine,
+        majorGridLines: majorGridLines,
 
-          plotBands: _buildPlotBands(config.plotBands, theme),
-          autoScrollingDelta: autoScrollingDelta,
-        ),
+        plotBands: _buildPlotBands(config.plotBands, theme),
+        autoScrollingDelta: autoScrollingDelta,
+      ),
       ChartAxisKind.dateTime => DateTimeAxis(
-          name: config.name,
-          title: title,
-          labelFormat: config.labelFormat,
-          labelStyle: labelStyle,
-          labelRotation: config.labelRotation,
-          isVisible: config.isVisible,
-          isInversed: config.isInversed,
-          opposedPosition: config.opposedPosition,
-          axisLine: axisLine,
-          majorGridLines: majorGridLines,
+        name: config.name,
+        title: title,
+        labelFormat: config.labelFormat,
+        labelStyle: labelStyle,
+        labelRotation: config.labelRotation,
+        isVisible: config.isVisible,
+        isInversed: config.isInversed,
+        opposedPosition: config.opposedPosition,
+        axisLine: axisLine,
+        majorGridLines: majorGridLines,
 
-          plotBands: _buildPlotBands(config.plotBands, theme),
-          autoScrollingDelta: autoScrollingDelta,
-        ),
+        plotBands: _buildPlotBands(config.plotBands, theme),
+        autoScrollingDelta: autoScrollingDelta,
+      ),
       ChartAxisKind.dateTimeCategory => DateTimeCategoryAxis(
-          name: config.name,
-          title: title,
-          axisLabelFormatter: config.labelFormat == null
-              ? null
-              : (details) => ChartAxisLabel(
-                    config.labelFormat!.replaceAll('{value}', details.text),
-                    details.textStyle,
-                  ),
-          labelStyle: labelStyle,
-          labelRotation: config.labelRotation,
-          isVisible: config.isVisible,
-          isInversed: config.isInversed,
-          opposedPosition: config.opposedPosition,
-          axisLine: axisLine,
-          majorGridLines: majorGridLines,
+        name: config.name,
+        title: title,
+        axisLabelFormatter: config.labelFormat == null
+            ? null
+            : (details) => ChartAxisLabel(
+                config.labelFormat!.replaceAll('{value}', details.text),
+                details.textStyle,
+              ),
+        labelStyle: labelStyle,
+        labelRotation: config.labelRotation,
+        isVisible: config.isVisible,
+        isInversed: config.isInversed,
+        opposedPosition: config.opposedPosition,
+        axisLine: axisLine,
+        majorGridLines: majorGridLines,
 
-          plotBands: _buildPlotBands(config.plotBands, theme),
-          autoScrollingDelta: autoScrollingDelta,
-        ),
+        plotBands: _buildPlotBands(config.plotBands, theme),
+        autoScrollingDelta: autoScrollingDelta,
+      ),
       ChartAxisKind.logarithmic => LogarithmicAxis(
-          name: config.name,
-          title: title,
-          labelFormat: config.labelFormat,
-          labelStyle: labelStyle,
-          minimum: config.minimum?.toDouble(),
-          maximum: config.maximum?.toDouble(),
-          interval: config.interval?.toDouble(),
-          labelRotation: config.labelRotation,
-          isVisible: config.isVisible,
-          isInversed: config.isInversed,
-          opposedPosition: config.opposedPosition,
-          axisLine: axisLine,
-          majorGridLines: majorGridLines,
+        name: config.name,
+        title: title,
+        labelFormat: config.labelFormat,
+        labelStyle: labelStyle,
+        minimum: config.minimum?.toDouble(),
+        maximum: config.maximum?.toDouble(),
+        interval: config.interval?.toDouble(),
+        labelRotation: config.labelRotation,
+        isVisible: config.isVisible,
+        isInversed: config.isInversed,
+        opposedPosition: config.opposedPosition,
+        axisLine: axisLine,
+        majorGridLines: majorGridLines,
 
-          plotBands: _buildPlotBands(config.plotBands, theme),
-          autoScrollingDelta: autoScrollingDelta,
-        ),
+        plotBands: _buildPlotBands(config.plotBands, theme),
+        autoScrollingDelta: autoScrollingDelta,
+      ),
     };
   }
 
@@ -922,8 +925,7 @@ class CartesianChartRenderer extends StatelessWidget {
             ChartErrorBarMode.horizontal => RenderingMode.horizontal,
             ChartErrorBarMode.both => RenderingMode.both,
           },
-          verticalErrorValue:
-              definition.options.errorBar.verticalErrorValue,
+          verticalErrorValue: definition.options.errorBar.verticalErrorValue,
           horizontalErrorValue:
               definition.options.errorBar.horizontalErrorValue,
           verticalPositiveErrorValue:
@@ -1045,14 +1047,14 @@ class CartesianChartRenderer extends StatelessWidget {
           onPointTap: pointTap,
         );
       case ChartType.pie ||
-           ChartType.doughnut ||
-           ChartType.radialBar ||
-           ChartType.funnel ||
-           ChartType.pyramid ||
-           ChartType.sparkLine ||
-           ChartType.sparkArea ||
-           ChartType.sparkBar ||
-           ChartType.sparkWinLoss:
+          ChartType.doughnut ||
+          ChartType.radialBar ||
+          ChartType.funnel ||
+          ChartType.pyramid ||
+          ChartType.sparkLine ||
+          ChartType.sparkArea ||
+          ChartType.sparkBar ||
+          ChartType.sparkWinLoss:
         throw ArgumentError.value(
           type,
           'series.type',

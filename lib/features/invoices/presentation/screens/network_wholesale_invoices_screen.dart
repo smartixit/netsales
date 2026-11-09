@@ -33,9 +33,8 @@ class NetworkWholesaleInvoicesScreen
               tooltip: 'إنشاء فاتورة مبيعات مباشرة',
               backgroundColor: Colors.transparent,
               foregroundColor: colors.primary,
-              onPressed: () => Get.toNamed<void>(
-                AppRoutes.networkCreateSaleInvoice,
-              ),
+              onPressed: () =>
+                  Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice),
             ),
           AppSpacing.hXs,
         ],

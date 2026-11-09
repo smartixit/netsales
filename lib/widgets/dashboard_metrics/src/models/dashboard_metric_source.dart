@@ -1,10 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-enum DashboardMetricFreshness {
-  fresh,
-  stale,
-  unknown,
-}
+enum DashboardMetricFreshness { fresh, stale, unknown }
 
 /// Provenance and freshness metadata for the displayed value.
 @immutable

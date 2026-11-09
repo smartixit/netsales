@@ -89,7 +89,8 @@ class RepaymentHistoryController extends GetxController {
       if (requestVersion == _networksRequestVersion) {
         networkErrorMessage.value = AppException.sanitizeMessage(
           e,
-          fallback: 'تعذر تحميل الشبكات المتاحة لسجل السداد. يرجى المحاولة مجدداً.',
+          fallback:
+              'تعذر تحميل الشبكات المتاحة لسجل السداد. يرجى المحاولة مجدداً.',
         );
       }
     } finally {
@@ -98,8 +99,7 @@ class RepaymentHistoryController extends GetxController {
       }
     }
 
-    if (requestVersion == _networksRequestVersion &&
-        autoSelectNetworkId > 0) {
+    if (requestVersion == _networksRequestVersion && autoSelectNetworkId > 0) {
       await selectNetwork(autoSelectNetworkId);
     }
   }
@@ -145,10 +145,9 @@ class RepaymentHistoryController extends GetxController {
     final requestVersion = ++_requestVersion;
     final requestedStatus = selectedStatus.value;
     final requestedCursor = isRefresh ? null : nextCursor.value;
-    final statusFilter =
-        requestedStatus == null || requestedStatus == 'ALL'
-            ? null
-            : requestedStatus;
+    final statusFilter = requestedStatus == null || requestedStatus == 'ALL'
+        ? null
+        : requestedStatus;
 
     try {
       final result = await getRepaymentsUseCase(
@@ -230,8 +229,7 @@ class RepaymentHistoryController extends GetxController {
 
     final networkId = selectedNetworkId.value;
     final repayment = repayments.firstWhereOrNull(
-      (item) =>
-          item.repaymentId == repaymentId && item.networkId == networkId,
+      (item) => item.repaymentId == repaymentId && item.networkId == networkId,
     );
     if (repayment == null) return false;
 

@@ -14,7 +14,6 @@ import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
-
 class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
   const RepaymentCollectionScreen({super.key});
 
@@ -91,15 +90,21 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                     isRequired: true,
                     rxValue: controller.selectedNetworkId,
                     enabled: !controller.isSubmitting.value,
-                    items: controller.networks.map((network) {
-                      return DropdownItem<int>(
-                        value: network.networkId,
-                        child: Text(network.networkName),
-                      );
-                    }).toList(growable: false),
-                    itemSearchText: (networkId) => controller.networks
-                        .firstWhereOrNull((network) => network.networkId == networkId)
-                        ?.networkName ?? networkId.toString(),
+                    items: controller.networks
+                        .map((network) {
+                          return DropdownItem<int>(
+                            value: network.networkId,
+                            child: Text(network.networkName),
+                          );
+                        })
+                        .toList(growable: false),
+                    itemSearchText: (networkId) =>
+                        controller.networks
+                            .firstWhereOrNull(
+                              (network) => network.networkId == networkId,
+                            )
+                            ?.networkName ??
+                        networkId.toString(),
                     onChanged: controller.onNetworkChanged,
                   ),
                   AppSpacing.vMd,
@@ -111,8 +116,8 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                       onRetry: controller.selectedNetworkId.value == null
                           ? null
                           : () => controller.loadPosForNetwork(
-                                controller.selectedNetworkId.value!,
-                              ),
+                              controller.selectedNetworkId.value!,
+                            ),
                     )
                   else if (controller.isLoadingPos.value &&
                       !controller.hasLoadedPosList.value)
@@ -131,34 +136,42 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                           hint: controller.selectedNetworkId.value == null
                               ? 'اختر الشبكة أولاً'
                               : 'ابحث عن نقطة البيع المستفيدة',
-                    searchEnabled: true,
-                    isRequired: true,
-                    enabled: controller.selectedNetworkId.value != null &&
-                        !controller.isSubmitting.value,
-                    rxValue: controller.selectedPosId,
-                    isSearching: controller.isLoadingPos.value,
-                    onRemoteSearch: controller.searchPosForNetwork,
-                    selectedItemFallback: controller.selectedPos.value == null
-                        ? null
-                        : DropdownItem<int>(
-                            value: controller.selectedPos.value!.posId,
-                            child: Text(controller.selectedPos.value!.posName),
-                          ),
-                    items: controller.posList.map((pos) {
-                      return DropdownItem<int>(
-                        value: pos.posId,
-                        child: Text(pos.posName),
-                      );
-                    }).toList(growable: false),
-                    itemSearchText: (posId) => controller.posList
-                            .firstWhereOrNull((pos) => pos.posId == posId)
-                            ?.posName ??
-                        (controller.selectedPos.value?.posId == posId
-                            ? controller.selectedPos.value!.posName
-                            : posId.toString()),
-                    onChanged: controller.onPosChanged,
+                          searchEnabled: true,
+                          isRequired: true,
+                          enabled:
+                              controller.selectedNetworkId.value != null &&
+                              !controller.isSubmitting.value,
+                          rxValue: controller.selectedPosId,
+                          isSearching: controller.isLoadingPos.value,
+                          onRemoteSearch: controller.searchPosForNetwork,
+                          selectedItemFallback:
+                              controller.selectedPos.value == null
+                              ? null
+                              : DropdownItem<int>(
+                                  value: controller.selectedPos.value!.posId,
+                                  child: Text(
+                                    controller.selectedPos.value!.posName,
+                                  ),
+                                ),
+                          items: controller.posList
+                              .map((pos) {
+                                return DropdownItem<int>(
+                                  value: pos.posId,
+                                  child: Text(pos.posName),
+                                );
+                              })
+                              .toList(growable: false),
+                          itemSearchText: (posId) =>
+                              controller.posList
+                                  .firstWhereOrNull((pos) => pos.posId == posId)
+                                  ?.posName ??
+                              (controller.selectedPos.value?.posId == posId
+                                  ? controller.selectedPos.value!.posName
+                                  : posId.toString()),
+                          onChanged: controller.onPosChanged,
                         ),
-                        if (controller.posLoadMoreErrorMessage.value != null) ...[
+                        if (controller.posLoadMoreErrorMessage.value !=
+                            null) ...[
                           AppSpacing.vXs,
                           CustomErrorState.compact(
                             title: 'تعذر تحميل بقية نقاط البيع',

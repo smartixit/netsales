@@ -28,8 +28,7 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
       for (var index = 0; index < rawItems.length; index++) {
         fields['items[$index][item_statement]'] =
             rawItems[index]['item_statement'];
-        fields['items[$index][item_amount]'] =
-            rawItems[index]['item_amount'];
+        fields['items[$index][item_amount]'] = rawItems[index]['item_amount'];
       }
     }
 
@@ -70,9 +69,7 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
         return data
             .whereType<Map<dynamic, dynamic>>()
             .map(
-              (item) => ExpenseModel.fromJson(
-                Map<String, dynamic>.from(item),
-              ),
+              (item) => ExpenseModel.fromJson(Map<String, dynamic>.from(item)),
             )
             .toList(growable: false);
       },

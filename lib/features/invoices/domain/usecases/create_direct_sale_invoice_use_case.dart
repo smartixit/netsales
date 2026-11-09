@@ -27,7 +27,9 @@ class CreateDirectSaleInvoiceUseCase {
       throw ArgumentError.value(saleType, 'saleType');
     }
     if (items.any((item) => item.packageId <= 0 || item.voucherCount <= 0)) {
-      throw ArgumentError('Direct invoice item identifiers and quantities must be positive.');
+      throw ArgumentError(
+        'Direct invoice item identifiers and quantities must be positive.',
+      );
     }
 
     return _repository.createDirectInvoice(

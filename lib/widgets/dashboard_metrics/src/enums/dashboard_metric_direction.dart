@@ -1,5 +1,1 @@
-enum DashboardMetricDirection {
-  increase,
-  decrease,
-  unchanged,
-}
+enum DashboardMetricDirection { increase, decrease, unchanged }

@@ -29,9 +29,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
-  Future<ApiResponse<List<PosModel>>> getMyPos({
-    Map<String, dynamic>? query,
-  }) {
+  Future<ApiResponse<List<PosModel>>> getMyPos({Map<String, dynamic>? query}) {
     return ApiService.instance.get<List<PosModel>>(
       ApiConstants.pos,
       queryParameters: query,

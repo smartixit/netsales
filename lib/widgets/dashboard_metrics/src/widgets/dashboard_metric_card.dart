@@ -66,7 +66,8 @@ class DashboardMetricCard extends StatelessWidget {
                   : DashboardMetricStateView(
                       state: state,
                       emptyMessage: emptyMessage ?? 'No metric data available',
-                      errorMessage: errorMessage ?? 'Unable to load this metric',
+                      errorMessage:
+                          errorMessage ?? 'Unable to load this metric',
                       retryLabel: retryLabel,
                       onRetry: onRetry,
                     ),
@@ -94,4 +95,3 @@ class DashboardMetricCard extends StatelessWidget {
     return parts.join(', ');
   }
 }
-

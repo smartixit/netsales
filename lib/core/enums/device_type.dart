@@ -22,4 +22,3 @@ enum DeviceType {
 
   bool get isKnown => this != DeviceType.unknown;
 }
-

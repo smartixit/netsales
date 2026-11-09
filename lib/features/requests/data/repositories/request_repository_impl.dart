@@ -66,9 +66,7 @@ class RequestRepositoryImpl implements RequestRepository {
     int requestId,
     List<RequestModificationLineEntity> items,
   ) async {
-    final payload = <String, dynamic>{
-      'items': _mapModificationItems(items),
-    };
+    final payload = <String, dynamic>{'items': _mapModificationItems(items)};
     final response = await _remoteDataSource.previewRequestModification(
       requestId,
       payload,
@@ -115,8 +113,7 @@ class RequestRepositoryImpl implements RequestRepository {
           (item) => <String, dynamic>{
             'package_id': item.packageId,
             'voucher_count': item.voucherCount,
-            if (item.pricingToken != null)
-              'pricing_token': item.pricingToken,
+            if (item.pricingToken != null) 'pricing_token': item.pricingToken,
           },
         )
         .toList(growable: false);
@@ -127,10 +124,9 @@ class RequestRepositoryImpl implements RequestRepository {
     int requestId,
     String rejectionReason,
   ) async {
-    final response = await _remoteDataSource.rejectRequest(
-      requestId,
-      {'rejection_reason': rejectionReason},
-    );
+    final response = await _remoteDataSource.rejectRequest(requestId, {
+      'rejection_reason': rejectionReason,
+    });
     return response.data!;
   }
 }

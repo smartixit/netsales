@@ -19,7 +19,9 @@ class PackageCatalogRemoteDataSourceImpl
       fromJson: (data) {
         if (data is List) {
           return data
-              .map((item) => PackageModel.fromJson(item as Map<String, dynamic>))
+              .map(
+                (item) => PackageModel.fromJson(item as Map<String, dynamic>),
+              )
               .toList();
         }
         return [];
@@ -38,7 +40,9 @@ class PackageCatalogRemoteDataSourceImpl
       fromJson: (data) {
         if (data is List) {
           return data
-              .map((item) => PackageModel.fromJson(item as Map<String, dynamic>))
+              .map(
+                (item) => PackageModel.fromJson(item as Map<String, dynamic>),
+              )
               .toList();
         }
         return [];
@@ -93,4 +97,3 @@ class PackageCatalogRemoteDataSourceImpl
     );
   }
 }
-

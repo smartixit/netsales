@@ -1,8 +1,1 @@
-enum DashboardMetricTone {
-  primary,
-  success,
-  warning,
-  danger,
-  info,
-  neutral,
-}
+enum DashboardMetricTone { primary, success, warning, danger, info, neutral }

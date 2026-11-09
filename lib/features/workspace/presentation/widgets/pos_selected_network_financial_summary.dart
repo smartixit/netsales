@@ -47,13 +47,12 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
             Expanded(
               child: Text(
                 'تعذر تحميل الحساب المالي لشبكة $networkName',
-                style: AppTypography.bodySmall.copyWith(color: colors.onSurface),
+                style: AppTypography.bodySmall.copyWith(
+                  color: colors.onSurface,
+                ),
               ),
             ),
-            CustomButton.text(
-              text: 'إعادة المحاولة',
-              onPressed: onRetry,
-            ),
+            CustomButton.text(text: 'إعادة المحاولة', onPressed: onRetry),
           ],
         ),
       );
@@ -98,8 +97,11 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.account_balance_wallet_rounded,
-                  color: colors.primary, size: 24.r),
+              Icon(
+                Icons.account_balance_wallet_rounded,
+                color: colors.primary,
+                size: 24.r,
+              ),
             ],
           ),
           AppSpacing.vLg,
@@ -167,14 +169,20 @@ class _FinancialValue extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTypography.bodySmall.copyWith(
-          color: colors.onSurfaceVariant,
-        )),
+        Text(
+          label,
+          style: AppTypography.bodySmall.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+        ),
         SizedBox(height: 5.h),
-        Text(value, style: AppTypography.titleSmall.copyWith(
-          color: colors.onSurface,
-          fontWeight: FontWeight.w700,
-        )),
+        Text(
+          value,
+          style: AppTypography.titleSmall.copyWith(
+            color: colors.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ],
     );
   }

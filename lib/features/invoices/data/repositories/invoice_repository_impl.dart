@@ -61,10 +61,12 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
       'pos_id': posId,
       'sale_type': saleType.wireValue,
       'items': items
-          .map((item) => <String, dynamic>{
-                'package_id': item.packageId,
-                'voucher_count': item.voucherCount,
-              })
+          .map(
+            (item) => <String, dynamic>{
+              'package_id': item.packageId,
+              'voucher_count': item.voucherCount,
+            },
+          )
           .toList(growable: false),
     };
 

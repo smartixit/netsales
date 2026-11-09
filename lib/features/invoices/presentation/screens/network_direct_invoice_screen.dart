@@ -93,16 +93,20 @@ class NetworkDirectInvoiceScreen
                   label: 'الشبكة الموردة',
                   hint: 'اختر الشبكة',
                   rxValue: controller.selectedNetworkId,
-                  enabled: controller.canChangeTarget &&
+                  enabled:
+                      controller.canChangeTarget &&
                       !controller.isLoadingNetworks.value,
                   searchEnabled: controller.authorizedNetworks.length > 5,
-                  items: controller.authorizedNetworks.map((network) {
-                    return DropdownItem<int>(
-                      value: network.networkId,
-                      child: Text(network.networkName),
-                    );
-                  }).toList(growable: false),
-                  itemSearchText: (networkId) => controller.authorizedNetworks
+                  items: controller.authorizedNetworks
+                      .map((network) {
+                        return DropdownItem<int>(
+                          value: network.networkId,
+                          child: Text(network.networkName),
+                        );
+                      })
+                      .toList(growable: false),
+                  itemSearchText: (networkId) =>
+                      controller.authorizedNetworks
                           .firstWhereOrNull(
                             (network) => network.networkId == networkId,
                           )
@@ -134,13 +138,18 @@ class NetworkDirectInvoiceScreen
                     rxValue: controller.selectedPosId,
                     enabled: controller.canChangeTarget,
                     searchEnabled: controller.linkedPos.length > 5,
-                    items: controller.linkedPos.map((link) {
-                      return DropdownItem<int>(
-                        value: link.posId,
-                        child: Text(link.pos?.posName ?? 'نقطة بيع #${link.posId}'),
-                      );
-                    }).toList(growable: false),
-                    itemSearchText: (posId) => controller.linkedPos
+                    items: controller.linkedPos
+                        .map((link) {
+                          return DropdownItem<int>(
+                            value: link.posId,
+                            child: Text(
+                              link.pos?.posName ?? 'نقطة بيع #${link.posId}',
+                            ),
+                          );
+                        })
+                        .toList(growable: false),
+                    itemSearchText: (posId) =>
+                        controller.linkedPos
                             .firstWhereOrNull((link) => link.posId == posId)
                             ?.pos
                             ?.posName ??
@@ -185,13 +194,16 @@ class NetworkDirectInvoiceScreen
                     rxValue: controller.selectedPackageId,
                     enabled: controller.hasSelectedNetwork,
                     searchEnabled: controller.availablePackages.length > 5,
-                    items: controller.availablePackages.map((package) {
-                      return DropdownItem<int>(
-                        value: package.packageId,
-                        child: Text(package.packageName),
-                      );
-                    }).toList(growable: false),
-                    itemSearchText: (packageId) => controller.availablePackages
+                    items: controller.availablePackages
+                        .map((package) {
+                          return DropdownItem<int>(
+                            value: package.packageId,
+                            child: Text(package.packageName),
+                          );
+                        })
+                        .toList(growable: false),
+                    itemSearchText: (packageId) =>
+                        controller.availablePackages
                             .firstWhereOrNull(
                               (package) => package.packageId == packageId,
                             )
@@ -222,7 +234,8 @@ class NetworkDirectInvoiceScreen
                         ? Icons.edit_rounded
                         : Icons.add_shopping_cart_rounded,
                     width: double.infinity,
-                    enabled: controller.selectedPackage != null &&
+                    enabled:
+                        controller.selectedPackage != null &&
                         controller.hasSelectedPos,
                     onPressed: controller.addOrUpdateCartLine,
                   ),
@@ -240,8 +253,8 @@ class NetworkDirectInvoiceScreen
                   () => CustomSegmentedBar(
                     selectedIndex:
                         controller.selectedSaleType.value == SaleType.cash
-                            ? 0
-                            : 1,
+                        ? 0
+                        : 1,
                     onSegmentChanged: (index) {
                       controller.setSaleType(
                         index == 0 ? SaleType.cash : SaleType.credit,
@@ -268,7 +281,8 @@ class NetworkDirectInvoiceScreen
                     icon: Icons.receipt_long_rounded,
                     width: double.infinity,
                     loading: controller.isSubmitting.value,
-                    enabled: !controller.isSubmitting.value &&
+                    enabled:
+                        !controller.isSubmitting.value &&
                         controller.hasSelectedPos &&
                         controller.cart.isNotEmpty,
                     onPressed: _submitInvoice,
@@ -351,9 +365,7 @@ class NetworkDirectInvoiceScreen
       decoration: BoxDecoration(
         color: colors.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: colors.primary.withValues(alpha: 0.18),
-        ),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.18)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,13 +391,8 @@ class NetworkDirectInvoiceScreen
     if (invoice == null) return;
 
     if (Get.isRegistered<NetworkInvoicesController>()) {
-      await Get.find<NetworkInvoicesController>().loadInvoices(
-        isRefresh: true,
-      );
+      await Get.find<NetworkInvoicesController>().loadInvoices(isRefresh: true);
     }
-    await Get.offNamed<void>(
-      AppRoutes.saleInvoiceDetails,
-      arguments: invoice,
-    );
+    await Get.offNamed<void>(AppRoutes.saleInvoiceDetails, arguments: invoice);
   }
 }

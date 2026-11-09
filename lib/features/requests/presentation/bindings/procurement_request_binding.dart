@@ -50,9 +50,7 @@ class ProcurementRequestBinding extends Bindings {
     }
     if (!Get.isRegistered<CommercialRepository>()) {
       Get.lazyPut<CommercialRepository>(
-        () => CommercialRepositoryImpl(
-          Get.find<CommercialRemoteDataSource>(),
-        ),
+        () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
       );
     }
     if (!Get.isRegistered<GetMyPosUseCase>()) {
@@ -64,9 +62,7 @@ class ProcurementRequestBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<GetMyNetworksUseCase>()) {
-      Get.lazyPut(
-        () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
-      );
+      Get.lazyPut(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
     }
 
     if (!Get.isRegistered<PackageCatalogRemoteDataSource>()) {
@@ -94,7 +90,9 @@ class ProcurementRequestBinding extends Bindings {
     Get.lazyPut(() => CancelRequestUseCase(Get.find<RequestRepository>()));
     Get.lazyPut(() => ApproveRequestUseCase(Get.find<RequestRepository>()));
     Get.lazyPut(() => RejectRequestUseCase(Get.find<RequestRepository>()));
-    Get.lazyPut(() => PreviewRequestModificationUseCase(Get.find<RequestRepository>()));
+    Get.lazyPut(
+      () => PreviewRequestModificationUseCase(Get.find<RequestRepository>()),
+    );
 
     // 4. Controllers
     Get.lazyPut<PosProcurementController>(
@@ -105,7 +103,6 @@ class ProcurementRequestBinding extends Bindings {
         getMyPosUseCase: Get.find<GetMyPosUseCase>(),
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
-        
       ),
     );
 
@@ -114,7 +111,8 @@ class ProcurementRequestBinding extends Bindings {
         getRequestsUseCase: Get.find<GetRequestsUseCase>(),
         approveRequestUseCase: Get.find<ApproveRequestUseCase>(),
         rejectRequestUseCase: Get.find<RejectRequestUseCase>(),
-        previewRequestModificationUseCase: Get.find<PreviewRequestModificationUseCase>(),
+        previewRequestModificationUseCase:
+            Get.find<PreviewRequestModificationUseCase>(),
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
         getRequestDetailsUseCase: Get.find<GetRequestDetailsUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
@@ -128,4 +126,3 @@ class ProcurementRequestBinding extends Bindings {
     );
   }
 }
-

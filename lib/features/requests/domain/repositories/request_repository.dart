@@ -38,9 +38,5 @@ abstract interface class RequestRepository {
   });
 
   /// رفض طلب الكروت مع توثيق السبب المعتمد من قبل مزود الشبكة
-  Future<RequestEntity> rejectRequest(
-    int requestId,
-    String rejectionReason,
-  );
+  Future<RequestEntity> rejectRequest(int requestId, String rejectionReason);
 }
-

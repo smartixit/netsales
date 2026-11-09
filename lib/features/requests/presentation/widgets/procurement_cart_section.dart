@@ -146,8 +146,9 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
                             tooltip: 'حذف ${line.package.packageName} من الطلب',
                             size: AppButtonSize.small,
                             foregroundColor: colors.error,
-                            backgroundColor:
-                                colors.error.withValues(alpha: 0.08),
+                            backgroundColor: colors.error.withValues(
+                              alpha: 0.08,
+                            ),
                             onPressed: () => controller.removeCartLine(
                               line.package.packageId,
                             ),

@@ -18,8 +18,7 @@ class ProcurementActionDialogs {
     await CustomDialog.show(
       type: DialogType.confirmation,
       title: 'اعتماد طلب التوريد #$requestId',
-      message:
-          'سيتم احتساب وتوليد فاتورة المبيعات آلياً عبر الخادم وتسوية الرصيد المالي.',
+      message: 'سيتم احتساب وتوليد فاتورة المبيعات آلياً عبر الخادم وتسوية الرصيد المالي.',
       confirmLabel: 'تأكيد الاعتماد',
       cancelLabel: 'تراجع',
       content: Padding(

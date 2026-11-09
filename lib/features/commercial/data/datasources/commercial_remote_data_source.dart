@@ -13,9 +13,7 @@ abstract interface class CommercialRemoteDataSource {
   });
 
   /// جلب قائمة نقاط البيع التابعة للمستخدم الحالي
-  Future<ApiResponse<List<PosModel>>> getMyPos({
-    Map<String, dynamic>? query,
-  });
+  Future<ApiResponse<List<PosModel>>> getMyPos({Map<String, dynamic>? query});
 
   /// جلب قائمة نقاط البيع المرتبطة بشبكة
   Future<ApiResponse<List<NetworkPosLinkModel>>> getNetworkPosList(

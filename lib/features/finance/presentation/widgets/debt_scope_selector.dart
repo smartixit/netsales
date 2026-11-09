@@ -121,7 +121,9 @@ class DebtScopeSelector extends StatelessWidget {
                 else
                   _ScopeValue(
                     label: 'نقطة البيع',
-                    value: controller.posName(controller.posOptions.single.posId),
+                    value: controller.posName(
+                      controller.posOptions.single.posId,
+                    ),
                     icon: Icons.storefront_outlined,
                   ),
                 if (controller.selectedPosId.value != null) ...[
@@ -307,9 +309,7 @@ class _ScopeValue extends StatelessWidget {
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.titleSmall.copyWith(
-                color: colors.onSurface,
-              ),
+              style: AppTypography.titleSmall.copyWith(color: colors.onSurface),
             ),
           ),
           Icon(Icons.verified_outlined, color: colors.success, size: 17),

@@ -13,7 +13,9 @@ class MembershipRoleModel extends MembershipRoleEntity {
             ? json['role_id'] as int
             : int.tryParse(json['role_id']?.toString() ?? '') ?? 0,
         roleKey: json['role_key']?.toString() ?? '',
-        name: json['role_key_label']?.toString() ??
-            json['role_name']?.toString() ?? '',
+        name:
+            json['role_key_label']?.toString() ??
+            json['role_name']?.toString() ??
+            '',
       );
 }

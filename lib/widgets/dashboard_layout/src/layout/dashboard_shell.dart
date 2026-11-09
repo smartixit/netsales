@@ -102,23 +102,30 @@ class DashboardShell extends StatelessWidget {
                         leading: isCompact
                             ? Builder(
                                 builder: (context) => IconButton(
-                                  tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-                                  onPressed: () => Scaffold.of(context).openDrawer(),
+                                  tooltip: MaterialLocalizations.of(context)
+                                      .openAppDrawerTooltip,
+                                  onPressed: () =>
+                                      Scaffold.of(context).openDrawer(),
                                   icon: const Icon(Icons.menu_rounded),
                                 ),
                               )
                             : topbarLeading ??
-                                (onSidebarCollapsedChanged == null
-                                    ? null
-                                    : IconButton(
-                                        tooltip: sidebarCollapsed
-                                            ? 'Expand navigation'
-                                            : 'Collapse navigation',
-                                        onPressed: () => onSidebarCollapsedChanged!(!sidebarCollapsed),
-                                        icon: Icon(sidebarCollapsed
-                                            ? Icons.menu_open_rounded
-                                            : Icons.menu_rounded),
-                                      )),
+                                  (onSidebarCollapsedChanged == null
+                                      ? null
+                                      : IconButton(
+                                          tooltip: sidebarCollapsed
+                                              ? 'Expand navigation'
+                                              : 'Collapse navigation',
+                                          onPressed: () =>
+                                              onSidebarCollapsedChanged!(
+                                                !sidebarCollapsed,
+                                              ),
+                                          icon: Icon(
+                                            sidebarCollapsed
+                                                ? Icons.menu_open_rounded
+                                                : Icons.menu_rounded,
+                                          ),
+                                        )),
                         search: search,
                         notifications: notifications,
                         actions: topbarActions,
@@ -127,17 +134,21 @@ class DashboardShell extends StatelessWidget {
                       ),
                       Expanded(
                         child: SingleChildScrollView(
-                          padding: EdgeInsets.all(config.contentPadding ?? theme.contentPadding),
+                          padding: EdgeInsets.all(
+                            config.contentPadding ?? theme.contentPadding,
+                          ),
                           child: Align(
                             alignment: AlignmentDirectional.topCenter,
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxWidth: config.maxContentWidth ?? double.infinity,
+                                maxWidth:
+                                    config.maxContentWidth ?? double.infinity,
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  if (config.showBreadcrumbs && breadcrumbs.isNotEmpty)
+                                  if (config.showBreadcrumbs &&
+                                      breadcrumbs.isNotEmpty)
                                     _BreadcrumbRow(
                                       breadcrumbs: breadcrumbs,
                                       onTap: onBreadcrumbTap,
@@ -146,7 +157,8 @@ class DashboardShell extends StatelessWidget {
                                     const SizedBox(height: 12),
                                     DashboardPageHeader(data: pageHeader!),
                                   ],
-                                  if (pageHeader != null) const SizedBox(height: 20),
+                                  if (pageHeader != null)
+                                    const SizedBox(height: 20),
                                   content ?? child,
                                 ],
                               ),
@@ -190,7 +202,10 @@ class _BreadcrumbRow extends StatelessWidget {
               color: scheme.onSurfaceVariant,
             ),
           InkWell(
-            onTap: breadcrumbs[index].enabled && breadcrumbs[index].id != null && onTap != null
+            onTap:
+                breadcrumbs[index].enabled &&
+                    breadcrumbs[index].id != null &&
+                    onTap != null
                 ? () => onTap!(breadcrumbs[index].id!)
                 : null,
             child: Padding(
@@ -199,7 +214,11 @@ class _BreadcrumbRow extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (breadcrumbs[index].icon != null) ...[
-                    Icon(breadcrumbs[index].icon, size: 14, color: scheme.onSurfaceVariant),
+                    Icon(
+                      breadcrumbs[index].icon,
+                      size: 14,
+                      color: scheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 4),
                   ],
                   Text(

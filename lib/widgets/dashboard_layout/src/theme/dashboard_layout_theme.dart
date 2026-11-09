@@ -90,9 +90,12 @@ class DashboardLayoutTheme extends ThemeExtension<DashboardLayoutTheme> {
     sidebarBackground: sidebarBackground ?? this.sidebarBackground,
     sidebarForeground: sidebarForeground ?? this.sidebarForeground,
     sidebarMuted: sidebarMuted ?? this.sidebarMuted,
-    sidebarSelectedBackground: sidebarSelectedBackground ?? this.sidebarSelectedBackground,
-    sidebarSelectedForeground: sidebarSelectedForeground ?? this.sidebarSelectedForeground,
-    sidebarHoverBackground: sidebarHoverBackground ?? this.sidebarHoverBackground,
+    sidebarSelectedBackground:
+        sidebarSelectedBackground ?? this.sidebarSelectedBackground,
+    sidebarSelectedForeground:
+        sidebarSelectedForeground ?? this.sidebarSelectedForeground,
+    sidebarHoverBackground:
+        sidebarHoverBackground ?? this.sidebarHoverBackground,
     topbarBackground: topbarBackground ?? this.topbarBackground,
     contentBackground: contentBackground ?? this.contentBackground,
     border: border ?? this.border,
@@ -109,17 +112,48 @@ class DashboardLayoutTheme extends ThemeExtension<DashboardLayoutTheme> {
   );
 
   @override
-  DashboardLayoutTheme lerp(ThemeExtension<DashboardLayoutTheme>? other, double t) {
+  DashboardLayoutTheme lerp(
+    ThemeExtension<DashboardLayoutTheme>? other,
+    double t,
+  ) {
     if (other is! DashboardLayoutTheme) return this;
     return DashboardLayoutTheme(
-      sidebarBackground: Color.lerp(sidebarBackground, other.sidebarBackground, t)!,
-      sidebarForeground: Color.lerp(sidebarForeground, other.sidebarForeground, t)!,
+      sidebarBackground: Color.lerp(
+        sidebarBackground,
+        other.sidebarBackground,
+        t,
+      )!,
+      sidebarForeground: Color.lerp(
+        sidebarForeground,
+        other.sidebarForeground,
+        t,
+      )!,
       sidebarMuted: Color.lerp(sidebarMuted, other.sidebarMuted, t)!,
-      sidebarSelectedBackground: Color.lerp(sidebarSelectedBackground, other.sidebarSelectedBackground, t)!,
-      sidebarSelectedForeground: Color.lerp(sidebarSelectedForeground, other.sidebarSelectedForeground, t)!,
-      sidebarHoverBackground: Color.lerp(sidebarHoverBackground, other.sidebarHoverBackground, t)!,
-      topbarBackground: Color.lerp(topbarBackground, other.topbarBackground, t)!,
-      contentBackground: Color.lerp(contentBackground, other.contentBackground, t)!,
+      sidebarSelectedBackground: Color.lerp(
+        sidebarSelectedBackground,
+        other.sidebarSelectedBackground,
+        t,
+      )!,
+      sidebarSelectedForeground: Color.lerp(
+        sidebarSelectedForeground,
+        other.sidebarSelectedForeground,
+        t,
+      )!,
+      sidebarHoverBackground: Color.lerp(
+        sidebarHoverBackground,
+        other.sidebarHoverBackground,
+        t,
+      )!,
+      topbarBackground: Color.lerp(
+        topbarBackground,
+        other.topbarBackground,
+        t,
+      )!,
+      contentBackground: Color.lerp(
+        contentBackground,
+        other.contentBackground,
+        t,
+      )!,
       border: Color.lerp(border, other.border, t)!,
       badgeBackground: Color.lerp(badgeBackground, other.badgeBackground, t)!,
       badgeForeground: Color.lerp(badgeForeground, other.badgeForeground, t)!,

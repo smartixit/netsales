@@ -27,8 +27,7 @@ class RepaymentCard extends StatelessWidget {
   IconData _paymentIcon() => switch (repayment.typedPaymentMethod) {
     RepaymentPaymentMethod.cash => Icons.payments_outlined,
     RepaymentPaymentMethod.bank => Icons.account_balance_outlined,
-    RepaymentPaymentMethod.wallet =>
-      Icons.account_balance_wallet_outlined,
+    RepaymentPaymentMethod.wallet => Icons.account_balance_wallet_outlined,
     RepaymentPaymentMethod.unknown => Icons.help_outline_rounded,
   };
 
@@ -42,13 +41,13 @@ class RepaymentCard extends StatelessWidget {
     final statusLabel = repayment.isCompleted
         ? 'مكتمل'
         : repayment.isReversed
-            ? 'معكوس'
-            : 'غير معروف';
+        ? 'معكوس'
+        : 'غير معروف';
     final statusTone = repayment.isCompleted
         ? SemanticTone.success
         : repayment.isReversed
-            ? SemanticTone.danger
-            : SemanticTone.neutral;
+        ? SemanticTone.danger
+        : SemanticTone.neutral;
 
     return CustomInteractiveBounce(
       onTap: onTap,

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:netsales/widgets/dashboard_metrics/src/models/dashboard_metric_threshold.dart';
 
@@ -12,7 +11,8 @@ import '../theme/dashboard_metrics_theme.dart';
 import 'dashboard_metric_sparkline.dart';
 
 class DashboardMetricContent extends StatelessWidget {
-  const DashboardMetricContent({super.key, 
+  const DashboardMetricContent({
+    super.key,
     required this.metric,
     required this.accent,
     required this.tokens,
@@ -27,7 +27,8 @@ class DashboardMetricContent extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     final showTrend = metric.trend != null;
-    final showSparkline = metric.sparkline.length >= 2 &&
+    final showSparkline =
+        metric.sparkline.length >= 2 &&
         metric.variant == DashboardMetricVariant.trend;
 
     return Column(
@@ -118,9 +119,7 @@ class DashboardMetricContent extends StatelessWidget {
             metric.description!,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: textTheme.bodySmall?.copyWith(
-              color: tokens.mutedForeground,
-            ),
+            style: textTheme.bodySmall?.copyWith(color: tokens.mutedForeground),
           ),
         ],
         if (showTrend) ...[
@@ -186,23 +185,19 @@ class _TrendLine extends StatelessWidget {
         Icon(icon, size: 17, color: color),
         Text(
           trend.valueLabel,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w700,
-          ),
+          style: Theme.of(context).textTheme.labelLarge
+              ?.copyWith(color: color, fontWeight: FontWeight.w700),
         ),
         Text(
           trend.comparisonLabel,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: tokens.mutedForeground,
-          ),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: tokens.mutedForeground),
         ),
         if (trend.description != null)
           Text(
             trend.description!,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: tokens.mutedForeground,
-            ),
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: tokens.mutedForeground),
           ),
       ],
     );
@@ -221,10 +216,7 @@ class _TargetProgress extends StatelessWidget {
     final markerWidgets = target.thresholds.map((threshold) {
       return Positioned.fill(
         child: Align(
-          alignment: AlignmentDirectional(
-            -1 + (2 * threshold.position),
-            0,
-          ),
+          alignment: AlignmentDirectional(-1 + (2 * threshold.position), 0),
           child: Tooltip(
             message: threshold.label,
             child: Container(
@@ -245,9 +237,8 @@ class _TargetProgress extends StatelessWidget {
             Expanded(
               child: Text(
                 target.label ?? 'Progress',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: tokens.mutedForeground,
-                ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: tokens.mutedForeground),
               ),
             ),
             Text(
@@ -308,10 +299,8 @@ class _StatusCaption extends StatelessWidget {
             label ?? '',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(context).textTheme.labelMedium
+                ?.copyWith(color: color, fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -349,9 +338,8 @@ class _SourceLine extends StatelessWidget {
                 : '${source.label} · ${source.updatedAtLabel} · ${source.freshnessLabel ?? ''}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: freshnessColor,
-            ),
+            style: Theme.of(context).textTheme.labelSmall
+                ?.copyWith(color: freshnessColor),
           ),
         ),
         if (source.detail != null)
@@ -367,4 +355,3 @@ class _SourceLine extends StatelessWidget {
     );
   }
 }
-

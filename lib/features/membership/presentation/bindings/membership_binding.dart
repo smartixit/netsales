@@ -12,8 +12,12 @@ class MembershipBinding extends Bindings {
   final bool isNetwork;
   @override
   void dependencies() {
-    Get.lazyPut<MembershipRemoteDataSource>(() => const MembershipRemoteDataSource());
-    Get.lazyPut<MembershipRepository>(() => MembershipRepositoryImpl(Get.find<MembershipRemoteDataSource>()));
+    Get.lazyPut<MembershipRemoteDataSource>(
+      () => const MembershipRemoteDataSource(),
+    );
+    Get.lazyPut<MembershipRepository>(
+      () => MembershipRepositoryImpl(Get.find<MembershipRemoteDataSource>()),
+    );
     final repository = Get.find<MembershipRepository>();
     Get.lazyPut(() => GetMembersUseCase(repository));
     Get.lazyPut(() => GetAssignableMembershipRolesUseCase(repository));
@@ -21,16 +25,18 @@ class MembershipBinding extends Bindings {
     Get.lazyPut(() => UpdateMembershipRoleUseCase(repository));
     Get.lazyPut(() => UpdateMembershipStatusUseCase(repository));
     Get.lazyPut(() => RemoveMembershipUseCase(repository));
-    Get.lazyPut(() => MembershipController(
-      isNetwork: isNetwork,
-      getMyNetworks: Get.find<GetMyNetworksUseCase>(),
-      getMyPos: Get.find<GetMyPosUseCase>(),
-      getMembers: Get.find<GetMembersUseCase>(),
-      getRoles: Get.find<GetAssignableMembershipRolesUseCase>(),
-      addMember: Get.find<AddMembershipUseCase>(),
-      updateRole: Get.find<UpdateMembershipRoleUseCase>(),
-      updateStatus: Get.find<UpdateMembershipStatusUseCase>(),
-      removeMember: Get.find<RemoveMembershipUseCase>(),
-    ));
+    Get.lazyPut(
+      () => MembershipController(
+        isNetwork: isNetwork,
+        getMyNetworks: Get.find<GetMyNetworksUseCase>(),
+        getMyPos: Get.find<GetMyPosUseCase>(),
+        getMembers: Get.find<GetMembersUseCase>(),
+        getRoles: Get.find<GetAssignableMembershipRolesUseCase>(),
+        addMember: Get.find<AddMembershipUseCase>(),
+        updateRole: Get.find<UpdateMembershipRoleUseCase>(),
+        updateStatus: Get.find<UpdateMembershipStatusUseCase>(),
+        removeMember: Get.find<RemoveMembershipUseCase>(),
+      ),
+    );
   }
 }

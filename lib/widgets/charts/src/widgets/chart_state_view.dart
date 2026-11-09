@@ -71,19 +71,16 @@ class ChartStateView extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               message ?? defaultMessage,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: theme.text,
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: theme.text, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             if (details != null) ...[
               const SizedBox(height: 5),
               Text(
                 details!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: theme.mutedText,
-                    ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: theme.mutedText),
                 textAlign: TextAlign.center,
               ),
             ],

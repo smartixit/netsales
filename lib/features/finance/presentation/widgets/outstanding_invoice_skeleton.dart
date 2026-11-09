@@ -37,18 +37,12 @@ class OutstandingInvoiceSkeleton extends StatelessWidget {
             AppSpacing.vMd,
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _block(colors, 92, 11),
-                _block(colors, 116, 16),
-              ],
+              children: [_block(colors, 92, 11), _block(colors, 116, 16)],
             ),
             AppSpacing.vSm,
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _block(colors, 72, 10),
-                _block(colors, 88, 15),
-              ],
+              children: [_block(colors, 72, 10), _block(colors, 88, 15)],
             ),
           ],
         ),

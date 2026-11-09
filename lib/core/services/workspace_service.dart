@@ -12,7 +12,8 @@ import 'package:netsales/core/services/storage_service.dart';
 /// ============================================================================
 /// خدمة إدارة وتوجيه مساحات العمل التشغيلية (Workspace Routing & Resolution Service)
 /// ============================================================================
-/// تحدد مساحة العمل الفعالة للمستخدم (NETWORK أم POS) وتمنع وصول حسابات إدارة المنصة.
+/// تحدد مساحة العمل الفعالة للمستخدم (NETWORK أم POS) بناءً على عضوياته النشطة،
+/// وتمنع وصول حسابات إدارة المنصة.
 class WorkspaceService extends GetxService {
   WorkspaceService._();
 
@@ -55,7 +56,7 @@ class WorkspaceService extends GetxService {
     return this;
   }
 
-  /// تحديد مساحة العمل تلقائياً بناءً على دور المستخدم وهويته
+  /// تحديد مساحة العمل تلقائياً وبشكل حتمي بناءً على عضويات المستخدم وهويته
   AppWorkspace resolveWorkspaceForUser(
     UserModel? user, {
     String? preferredWorkspace,
@@ -64,45 +65,53 @@ class WorkspaceService extends GetxService {
       return AppWorkspace.unsupported;
     }
 
-    final roleKey = user.role?.roleKey.toUpperCase() ?? '';
-    final scopedRoleKeys = user.workspaceRoles.map((key) => key.toUpperCase()).toSet();
-    final preferred = preferredWorkspace ??
-        (currentWorkspace.value != AppWorkspace.unsupported
-            ? currentWorkspace.value.name
-            : StorageService.instance.getString(StorageKeys.activeWorkspaceKey));
-
     // 1. حسابات إدارة المنصة العامة مستبعدة كلياً ومحظورة على تطبيق الهاتف
-    if (roleKey == AppRoles.superAdmin ||
-        roleKey == AppRoles.supportAgent ||
-        user.isSuperAdmin) {
+    if (user.isSuperAdmin ||
+        user.role?.roleKey == AppRoles.superAdmin ||
+        user.role?.roleKey == AppRoles.supportAgent) {
       return AppWorkspace.unsupported;
     }
 
-    // 2. Resolve operational workspaces from tenant-scoped memberships.
-    final hasNetworkRole = scopedRoleKeys.any((key) =>
-        key == AppRoles.networkOwner ||
-        key == AppRoles.networkUser ||
-        key == 'NETWORK_ACCOUNTANT');
-    final hasPosRole = scopedRoleKeys.any((key) =>
-        key == AppRoles.posAgent ||
-        key == AppRoles.posUser ||
-        key == 'POS_ACCOUNTANT');
+    final preferred =
+        preferredWorkspace ??
+        (currentWorkspace.value != AppWorkspace.unsupported
+            ? currentWorkspace.value.name
+            : StorageService.instance.getString(
+                StorageKeys.activeWorkspaceKey,
+              ));
 
+    // 2. فحص العضويات التشغيلية عبر WorkspaceMembershipModel أولاً
+    final hasNetworkRole =
+        user.hasNetworkMembership ||
+        user.role?.roleKey == AppRoles.networkOwner ||
+        user.role?.roleKey == AppRoles.networkUser ||
+        user.role?.roleKey == AppRoles.networkAccountant;
+
+    final hasPosRole =
+        user.hasPosMembership ||
+        user.role?.roleKey == AppRoles.posAgent ||
+        user.role?.roleKey == AppRoles.posUser ||
+        user.role?.roleKey == AppRoles.posAccountant;
+
+    // الحالة 3: يملك كلا النطاقين -> احترام التفضيل السابق إذا كان لا يزال سارياً
     if (hasNetworkRole && hasPosRole) {
       if (preferred == 'pos') return AppWorkspace.pos;
       if (preferred == 'network') return AppWorkspace.network;
       return AppWorkspace.network;
     }
-    if (hasNetworkRole || roleKey == AppRoles.networkOwner ||
-        roleKey == AppRoles.networkUser || roleKey == 'NETWORK_ACCOUNTANT') {
+
+    // الحالة 1: عضوية شبكة فقط
+    if (hasNetworkRole) {
       return AppWorkspace.network;
     }
-    if (hasPosRole || roleKey == AppRoles.posAgent ||
-        roleKey == AppRoles.posUser || roleKey == 'POS_ACCOUNTANT') {
+
+    // الحالة 2: عضوية نقطة بيع فقط
+    if (hasPosRole) {
       return AppWorkspace.pos;
     }
 
-    // fallback: إذا احتوى اسم الدور أو وصفه على NETWORK أو POS
+    // Fallback آمن إن تطابق مفتاح الدور
+    final roleKey = user.role?.roleKey.toUpperCase() ?? '';
     if (roleKey.contains('NET') ||
         (user.role?.roleName.contains('شبك') ?? false)) {
       return AppWorkspace.network;
@@ -113,6 +122,43 @@ class WorkspaceService extends GetxService {
     }
 
     return AppWorkspace.unsupported;
+  }
+
+  /// مزامنة سياق مساحة العمل والمستأجر مع عضويات المستخدم النشطة
+  Future<void> syncWithUserMemberships(UserModel? user) async {
+    if (user == null) {
+      await setActiveWorkspace(AppWorkspace.unsupported);
+      return;
+    }
+
+    final storage = StorageService.instance;
+    final savedWorkspace = storage.getString(StorageKeys.activeWorkspaceKey);
+    final resolved = resolveWorkspaceForUser(
+      user,
+      preferredWorkspace: savedWorkspace,
+    );
+
+    // الحالة 5: التحقق من سريان العضوية السابقة لنقاط البيع ومسح السياق الملغى
+    final activePosMemberships = user.workspaceMemberships
+        .where((m) => m.isPos)
+        .toList();
+    final savedPosId = storage.getInt(
+      '${StorageKeys.activePosTenantPrefix}_${user.userId}',
+    );
+    if (savedPosId != null &&
+        !activePosMemberships.any((m) => m.tenantId == savedPosId)) {
+      await storage.remove(
+        '${StorageKeys.activePosTenantPrefix}_${user.userId}',
+      );
+      await storage.remove(
+        '${StorageKeys.activePosNetworkPrefix}_${user.userId}_$savedPosId',
+      );
+      log(
+        '🧹 [WorkspaceService] Inactive/removed POS membership context #$savedPosId purged.',
+      );
+    }
+
+    await setActiveWorkspace(resolved);
   }
 
   /// تعيين وحفظ مساحة العمل النشطة

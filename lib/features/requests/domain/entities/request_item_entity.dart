@@ -26,4 +26,3 @@ class RequestItemEntity {
     this.voucherPackage,
   });
 }
-

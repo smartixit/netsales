@@ -110,10 +110,15 @@ class ApiService {
         options: options,
         cancelToken: cancelToken,
       );
+      log('📍 Response -> ${response.data}');
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
+      log(
+        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+      );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
+      log('📍 Error -> $e');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -161,11 +166,16 @@ class ApiService {
             return list.map((item) => fromJson(item)).toList();
           }
         }
+        log('📍 Response -> ${response.data}');
         return <T>[];
       });
     } on DioException catch (e) {
+      log(
+        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+      );
       return _handleDioError<List<T>>(e, endpoint);
     } catch (e) {
+      log('📍 Error -> $e');
       return _handleUnexpectedError<List<T>>(e, endpoint);
     }
   }
@@ -194,6 +204,7 @@ class ApiService {
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
       );
+      log('📍 Response -> ${response.data}');
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
@@ -201,6 +212,7 @@ class ApiService {
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
+      log('📍 Error -> $e');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -227,10 +239,15 @@ class ApiService {
         options: effectiveOptions,
         cancelToken: cancelToken,
       );
+      log('📍 Response -> ${response.data}');
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
+      log(
+        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+      );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
+      log('📍 Error -> $e');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -257,10 +274,15 @@ class ApiService {
         options: effectiveOptions,
         cancelToken: cancelToken,
       );
+      log('📍 Response -> ${response.data}');
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
+      log(
+        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+      );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
+      log('📍 Error -> $e');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -287,10 +309,15 @@ class ApiService {
         options: effectiveOptions,
         cancelToken: cancelToken,
       );
+      log('📍 Response -> ${response.data}');
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
+      log(
+        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+      );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
+      log('📍 Error -> $e');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -337,10 +364,15 @@ class ApiService {
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
       );
+      log('📍 Response -> ${response.data}');
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
+      log(
+        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+      );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
+      log('📍 Error -> $e');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }

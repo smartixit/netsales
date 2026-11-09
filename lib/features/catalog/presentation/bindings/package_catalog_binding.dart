@@ -41,21 +41,15 @@ class PackageCatalogBinding extends Bindings {
     }
     if (!Get.isRegistered<CommercialRepository>()) {
       Get.lazyPut<CommercialRepository>(
-        () => CommercialRepositoryImpl(
-          Get.find<CommercialRemoteDataSource>(),
-        ),
+        () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
       );
     }
     if (!Get.isRegistered<GetMyNetworksUseCase>()) {
-      Get.lazyPut(
-        () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
-      );
+      Get.lazyPut(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
     }
 
     // 4. Use Cases
-    Get.lazyPut(
-      () => GetPackagesUseCase(Get.find<PackageCatalogRepository>()),
-    );
+    Get.lazyPut(() => GetPackagesUseCase(Get.find<PackageCatalogRepository>()));
     Get.lazyPut(
       () => GetNetworkPackagesUseCase(Get.find<PackageCatalogRepository>()),
     );

@@ -14,24 +14,21 @@ class OnboardingLocalDataSourceImpl implements OnboardingLocalDataSource {
       OnboardingItemModel(
         badge: 'كفاءة تشغيلية',
         title: 'أدِر مبيعات شبكتك بذكاء واحترافية',
-        description:
-            'نظام مركزية متطورة تمنحك السيطرة المطلقة على باقات الخدمة، تسعير المنتجات، ومتابعة مؤشرات أداء المبيعات لحظة بلحظة.',
+        description: 'نظام مركزية متطورة تمنحك السيطرة المطلقة على باقات الخدمة، تسعير المنتجات، ومتابعة مؤشرات أداء المبيعات لحظة بلحظة.',
         icon: Icons.hub_rounded,
         animationAsset: 'assets/animations/onboarding_network.json',
       ),
       OnboardingItemModel(
         badge: 'توسع لا محدود',
         title: 'اربط نقاط بيعك، وعزّز انتشارك',
-        description:
-            'تنسيق لحظي يجمعك بوكلائك ومنافذ التوزيع، مع معالجة ذكية لطلبات التزويد وإدارة فورية للمحافظ الرقمية المشتركة.',
+        description: 'تنسيق لحظي يجمعك بوكلائك ومنافذ التوزيع، مع معالجة ذكية لطلبات التزويد وإدارة فورية للمحافظ الرقمية المشتركة.',
         icon: Icons.storefront_rounded,
         animationAsset: 'assets/animations/onboarding_pos.json',
       ),
       OnboardingItemModel(
         badge: 'شفافية مالية',
         title: 'فواتير دقيقة، وتقارير ترسم نجاحك',
-        description:
-            'أصدر الفواتير الرسمية واطبع كشوفات الحسابات المعتمدة، مع رؤية مالية شاملة للإيرادات والأرباح تدعم قراراتك الاستراتيجية.',
+        description: 'أصدر الفواتير الرسمية واطبع كشوفات الحسابات المعتمدة، مع رؤية مالية شاملة للإيرادات والأرباح تدعم قراراتك الاستراتيجية.',
         icon: Icons.analytics_rounded,
         animationAsset: 'assets/animations/onboarding_analytics.json',
       ),

@@ -11,7 +11,8 @@ class PackageCatalogEmptyState extends GetView<PackageCatalogController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final hasFilter = controller.searchQuery.value.isNotEmpty ||
+      final hasFilter =
+          controller.searchQuery.value.isNotEmpty ||
           controller.statusFilter.value != null;
 
       return CustomEmptyState(

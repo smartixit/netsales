@@ -207,7 +207,9 @@ class ProcurementRequestCard extends StatelessWidget {
                           child: CustomButton(
                             text: 'رفض',
                             icon: Icons.cancel_outlined,
-                            backgroundColor: colors.error.withValues(alpha: 0.1),
+                            backgroundColor: colors.error.withValues(
+                              alpha: 0.1,
+                            ),
                             foregroundColor: colors.error,
                             onPressed: onReject,
                           ),

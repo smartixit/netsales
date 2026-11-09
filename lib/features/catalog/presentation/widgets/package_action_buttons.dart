@@ -14,10 +14,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 class PackageActionButtons extends GetView<PackageCatalogController> {
   final PackageEntity package;
 
-  const PackageActionButtons({
-    super.key,
-    required this.package,
-  });
+  const PackageActionButtons({super.key, required this.package});
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +25,7 @@ class PackageActionButtons extends GetView<PackageCatalogController> {
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,8 +74,9 @@ class PackageActionButtons extends GetView<PackageCatalogController> {
             onPressed: () => PackageDeleteConfirmDialog.show(
               packageName: package.packageName,
               onConfirm: () async {
-                final deleted =
-                    await controller.deletePackage(package.packageId);
+                final deleted = await controller.deletePackage(
+                  package.packageId,
+                );
                 if (deleted) {
                   Get.back<void>();
                 }
@@ -92,4 +88,3 @@ class PackageActionButtons extends GetView<PackageCatalogController> {
     );
   }
 }
-

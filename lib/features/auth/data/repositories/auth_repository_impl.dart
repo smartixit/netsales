@@ -103,23 +103,22 @@ class AuthRepositoryImpl implements AuthRepository {
         final profileData = profileResp.data!;
         final rawUser = profileData['user'];
         if (rawUser is Map) {
-          final updatedUser = UserModel.fromJson(
-            {
-              ...Map<String, dynamic>.from(rawUser),
-              'workspace_roles': profileData['workspace_roles'] ?? const <dynamic>[],
-            },
-          );
-          await SessionService.to.updateCurrentUser(updatedUser);
-        }
-        final rawPerms = profileData['permissions'];
-        final permissions = rawPerms is List
-            ? rawPerms.map((e) => e.toString()).toList()
-            : <String>[];
-        if (Get.isRegistered<PermissionService>()) {
-          final roleKey = profileData['role_key']?.toString() ?? '';
-          PermissionService.to.updateAccess(
-            roleKey: roleKey,
+          final updatedUser = UserModel.fromJson({
+            ...Map<String, dynamic>.from(rawUser),
+            'workspace_roles':
+                profileData['workspace_roles'] ?? const <dynamic>[],
+            'is_super_admin': profileData['is_super_admin'],
+            'role_key': profileData['role_key'],
+          });
+          final rawPerms = profileData['permissions'];
+          final permissions = rawPerms is List
+              ? rawPerms.map((e) => e.toString()).toList()
+              : const <String>[];
+
+          await SessionService.to.syncSessionProfile(
+            user: updatedUser,
             permissions: permissions,
+            roleKey: profileData['role_key']?.toString(),
           );
         }
       }

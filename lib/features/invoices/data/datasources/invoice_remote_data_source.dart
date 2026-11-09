@@ -17,4 +17,3 @@ abstract interface class InvoiceRemoteDataSource {
   /// استرجاع تفاصيل فاتورة محددة
   Future<ApiResponse<InvoiceModel>> getInvoiceDetails(int invoiceId);
 }
-

@@ -54,9 +54,11 @@ class NetworkWalletDashboardScreen
               Obx(() {
                 final wallet = controller.selectedWallet.value;
                 final permissions = PermissionService.to;
-                final isPlatformActor =
-                    permissions.hasRole(AppRoles.superAdmin);
-                final canTransfer = wallet != null &&
+                final isPlatformActor = permissions.hasRole(
+                  AppRoles.superAdmin,
+                );
+                final canTransfer =
+                    wallet != null &&
                     wallet.status &&
                     !isPlatformActor &&
                     (permissions.hasRole(AppRoles.networkOwner) ||
@@ -109,9 +111,9 @@ class NetworkWalletDashboardScreen
                       onRetry: walletId == null
                           ? null
                           : () => controller.loadWalletLogs(
-                                walletId,
-                                isRefresh: true,
-                              ),
+                              walletId,
+                              isRefresh: true,
+                            ),
                     );
                   }
 
@@ -152,9 +154,9 @@ class NetworkWalletDashboardScreen
                               onRetry: controller.hasMoreLogs
                                   ? controller.loadMoreLogs
                                   : () => controller.loadWalletLogs(
-                                        controller.selectedWallet.value!.walletId,
-                                        isRefresh: true,
-                                      ),
+                                      controller.selectedWallet.value!.walletId,
+                                      isRefresh: true,
+                                    ),
                             );
                           }
                           return const WalletLogEntrySkeleton();
@@ -258,7 +260,8 @@ class NetworkWalletDashboardScreen
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                itemCount: controller.wallets.length +
+                itemCount:
+                    controller.wallets.length +
                     (controller.hasMoreWallets &&
                             controller.walletsLoadMoreErrorMessage.value == null
                         ? 1
@@ -266,10 +269,7 @@ class NetworkWalletDashboardScreen
                 separatorBuilder: (context, index) => AppSpacing.hSm,
                 itemBuilder: (context, index) {
                   if (index == controller.wallets.length) {
-                    return WalletSelectorSkeleton(
-                      width: 264.w,
-                      height: 128.h,
-                    );
+                    return WalletSelectorSkeleton(width: 264.w, height: 128.h);
                   }
 
                   final wallet = controller.wallets[index];
@@ -352,5 +352,4 @@ class NetworkWalletDashboardScreen
       );
     });
   }
-
 }

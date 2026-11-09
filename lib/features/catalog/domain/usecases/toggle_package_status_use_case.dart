@@ -10,4 +10,3 @@ class TogglePackageStatusUseCase {
     return _repository.togglePackageStatus(packageId);
   }
 }
-

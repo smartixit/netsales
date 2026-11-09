@@ -178,4 +178,3 @@ class PackageFormSpecsSection extends GetView<PackageCatalogController> {
     );
   }
 }
-

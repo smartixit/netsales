@@ -1,6 +1,1 @@
-enum DashboardMetricVariant {
-  standard,
-  trend,
-  status,
-  target,
-}
+enum DashboardMetricVariant { standard, trend, status, target }

@@ -90,7 +90,9 @@ class PushNotificationService extends GetxService {
     // على أنظمة سطح المكتب غير المدعومة من FCM نولد رمز جهاز ديسك توب متوافق ومستقر
     if (!isFcmSupported) {
       final deviceUuid = DeviceService.instance.deviceUuid;
-      final fallbackUuid = deviceUuid.isNotEmpty ? deviceUuid : 'dashboard_client';
+      final fallbackUuid = deviceUuid.isNotEmpty
+          ? deviceUuid
+          : 'dashboard_client';
       _fcmToken = 'desktop_windows_$fallbackUuid';
       return _fcmToken!;
     }
@@ -119,12 +121,16 @@ class PushNotificationService extends GetxService {
           options: DefaultFirebaseOptions.currentPlatform,
         );
       } catch (e) {
-        log('⚠️ [PushNotificationService] Firebase.initializeApp skipped or failed: $e');
+        log(
+          '⚠️ [PushNotificationService] Firebase.initializeApp skipped or failed: $e',
+        );
       }
 
       // 2. تسجيل دالة استقبال إشعارات الخلفية (للمنصات المدعومة فقط)
       if (isFcmSupported) {
-        FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+        FirebaseMessaging.onBackgroundMessage(
+          firebaseMessagingBackgroundHandler,
+        );
       }
 
       // 3. تهيئة قنوات وأدوات الإشعارات المحلية (تعمل على كل المنصات بما فيها Windows)
@@ -146,7 +152,9 @@ class PushNotificationService extends GetxService {
       } else {
         // على منصات سطح المكتب، نجهز رمز ديسك توب المتوافق فورياً
         await getOrFetchFcmToken();
-        log('ℹ️ [PushNotificationService] Running on Desktop (Windows/Linux) - using native local notifications & synthetic device token.');
+        log(
+          'ℹ️ [PushNotificationService] Running on Desktop (Windows/Linux) - using native local notifications & synthetic device token.',
+        );
       }
 
       log(

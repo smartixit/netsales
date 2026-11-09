@@ -8,9 +8,7 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class ProcurementRequestDetailsController extends GetxController {
   final GetRequestDetailsUseCase getRequestDetailsUseCase;
 
-  ProcurementRequestDetailsController({
-    required this.getRequestDetailsUseCase,
-  });
+  ProcurementRequestDetailsController({required this.getRequestDetailsUseCase});
 
   final request = Rxn<RequestEntity>();
   final isLoading = false.obs;
@@ -49,4 +47,3 @@ class ProcurementRequestDetailsController extends GetxController {
     }
   }
 }
-

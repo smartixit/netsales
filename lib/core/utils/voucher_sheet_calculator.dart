@@ -161,26 +161,28 @@ class VoucherSheetCalculator {
     if (sheetSize <= 0) return const [];
 
     const quantities = <double>[0.5, 1, 1.5, 2, 3, 5, 10, 20];
-    return quantities.map((sheets) {
-      final cards = cardsForSheets(sheets, sheetSize);
-      final shortLabel = switch (sheets) {
-        0.5 => '½ ورقة',
-        1 => 'ورقة',
-        1.5 => 'ورقة ونصف',
-        2 => '2 ورقة',
-        3 => '3 ورقات',
-        5 => '5 ورقات',
-        10 => '10 ورقات',
-        _ => '20 ورقة',
-      };
+    return quantities
+        .map((sheets) {
+          final cards = cardsForSheets(sheets, sheetSize);
+          final shortLabel = switch (sheets) {
+            0.5 => '½ ورقة',
+            1 => 'ورقة',
+            1.5 => 'ورقة ونصف',
+            2 => '2 ورقة',
+            3 => '3 ورقات',
+            5 => '5 ورقات',
+            10 => '10 ورقات',
+            _ => '20 ورقة',
+          };
 
-      return VoucherSheetPreset(
-        label: '$shortLabel ($cards)',
-        shortLabel: shortLabel,
-        cards: cards,
-        sheets: sheets,
-      );
-    }).toList(growable: false);
+          return VoucherSheetPreset(
+            label: '$shortLabel ($cards)',
+            shortLabel: shortLabel,
+            cards: cards,
+            sheets: sheets,
+          );
+        })
+        .toList(growable: false);
   }
 }
 

@@ -28,10 +28,7 @@ abstract class PackageCatalogRepository {
   Future<PackageEntity> createPackage(Map<String, dynamic> data);
 
   /// تحديث بيانات باقة كروت
-  Future<PackageEntity> updatePackage(
-    int packageId,
-    Map<String, dynamic> data,
-  );
+  Future<PackageEntity> updatePackage(int packageId, Map<String, dynamic> data);
 
   /// تبديل حالة تفعيل الباقة
   Future<PackageEntity> togglePackageStatus(int packageId);

@@ -13,11 +13,12 @@ class NetworkWorkspaceRemoteDataSourceImpl
     int networkId, {
     required String period,
   }) async {
-    final response = await ApiService.instance.get<NetworkWorkspaceOverviewModel>(
-      ApiConstants.networkWorkspaceOverview(networkId),
-      queryParameters: {'period': period},
-      fromJson: NetworkWorkspaceOverviewModel.fromJson,
-    );
+    final response = await ApiService.instance
+        .get<NetworkWorkspaceOverviewModel>(
+          ApiConstants.networkWorkspaceOverview(networkId),
+          queryParameters: {'period': period},
+          fromJson: NetworkWorkspaceOverviewModel.fromJson,
+        );
     if (!response.success || response.data == null) {
       throw AppException(response.message);
     }

@@ -50,8 +50,9 @@ class PackageFormPricingSection extends GetView<PackageCatalogController> {
                 controller: controller.cashDiscountController,
                 label: 'الخصم النقدي الافتراضي %',
                 hint: 'مثال: 10.0',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 prefixIcon: const Icon(Icons.price_change_outlined),
                 isRequired: false,
                 validator: FormValidators.percentageValidator(
@@ -68,8 +69,9 @@ class PackageFormPricingSection extends GetView<PackageCatalogController> {
                 controller: controller.creditDiscountController,
                 label: 'الخصم الآجل الافتراضي %',
                 hint: 'مثال: 5.0',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 prefixIcon: const Icon(Icons.credit_card_outlined),
                 isRequired: false,
                 validator: FormValidators.percentageValidator(
@@ -91,9 +93,7 @@ class PackageFormPricingSection extends GetView<PackageCatalogController> {
           decoration: BoxDecoration(
             color: colors.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(
-              color: colors.primary.withValues(alpha: 0.15),
-            ),
+            border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
           ),
           child: Row(
             children: [
@@ -118,4 +118,3 @@ class PackageFormPricingSection extends GetView<PackageCatalogController> {
     );
   }
 }
-

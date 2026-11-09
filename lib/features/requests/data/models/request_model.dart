@@ -82,12 +82,10 @@ class RequestModel extends RequestEntity {
       if (saleTypeRaw != null) 'sale_type': saleTypeRaw,
       if (requestNote != null) 'request_note': requestNote,
       'items': items
-          .map((i) => {
-                'package_id': i.packageId,
-                'voucher_count': i.voucherCount,
-              })
+          .map(
+            (i) => {'package_id': i.packageId, 'voucher_count': i.voucherCount},
+          )
           .toList(),
     };
   }
 }
-

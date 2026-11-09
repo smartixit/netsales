@@ -14,9 +14,7 @@ class RepaymentAllocationInvoiceModel extends RepaymentAllocationInvoiceEntity {
     required super.saleTypeLabel,
   });
 
-  factory RepaymentAllocationInvoiceModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory RepaymentAllocationInvoiceModel.fromJson(Map<String, dynamic> json) {
     return RepaymentAllocationInvoiceModel(
       invoiceUuid: json['invoice_uuid'] as String,
       totalAmount: (json['invoice_total_amount'] as num).toDouble(),
@@ -106,9 +104,7 @@ class PosRepaymentModel extends PosRepaymentEntity {
     if (rawAllocations is List) {
       for (final allocation in rawAllocations) {
         if (allocation is Map<String, dynamic>) {
-          parsedAllocations.add(
-            RepaymentAllocationModel.fromJson(allocation),
-          );
+          parsedAllocations.add(RepaymentAllocationModel.fromJson(allocation));
         }
       }
     }

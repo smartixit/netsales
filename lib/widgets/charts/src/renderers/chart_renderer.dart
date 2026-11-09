@@ -131,9 +131,7 @@ class _ChartRendererState extends State<ChartRenderer> {
             identical(newSeries.liveDataSource, oldSeries.liveDataSource),
       );
       if (!isStillBound) {
-        oldSeries.liveDataSource?.unbind(
-          bindingId: _bindingId(oldSeries.id),
-        );
+        oldSeries.liveDataSource?.unbind(bindingId: _bindingId(oldSeries.id));
       }
     }
   }

@@ -12,10 +12,7 @@ import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 class PackageFilterBottomSheet extends StatelessWidget {
   final PackageCatalogController controller;
 
-  const PackageFilterBottomSheet({
-    super.key,
-    required this.controller,
-  });
+  const PackageFilterBottomSheet({super.key, required this.controller});
 
   static Future<void> show(PackageCatalogController controller) {
     return CustomBottomSheet.show<void>(
@@ -66,10 +63,7 @@ class PackageFilterBottomSheet extends StatelessWidget {
               ],
             ),
             AppSpacing.vXl,
-            CustomButton(
-              text: 'إغلاق',
-              onPressed: () => Get.back<void>(),
-            ),
+            CustomButton(text: 'إغلاق', onPressed: () => Get.back<void>()),
             AppSpacing.vMd,
           ],
         ),

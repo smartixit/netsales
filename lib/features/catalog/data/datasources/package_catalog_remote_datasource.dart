@@ -25,4 +25,3 @@ abstract class PackageCatalogRemoteDataSource {
 
   Future<ApiResponse<void>> deletePackage(int packageId);
 }
-

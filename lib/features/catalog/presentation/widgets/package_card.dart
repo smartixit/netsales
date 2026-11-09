@@ -76,7 +76,9 @@ class PackageCard extends StatelessWidget {
                               height: AppSpacing.giant,
                               decoration: BoxDecoration(
                                 color: packageColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(AppRadius.sm),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.sm,
+                                ),
                               ),
                               child: Icon(
                                 Icons.wifi_tethering_rounded,
@@ -122,7 +124,10 @@ class PackageCard extends StatelessWidget {
                         ),
 
                         AppSpacing.vSm,
-                        Divider(height: 1, color: colors.outlineVariant.withValues(alpha: 0.3)),
+                        Divider(
+                          height: 1,
+                          color: colors.outlineVariant.withValues(alpha: 0.3),
+                        ),
                         AppSpacing.vSm,
 
                         // تفاصيل التسعير والخصم المالي
@@ -141,7 +146,9 @@ class PackageCard extends StatelessWidget {
                                 ),
                                 AppSpacing.vXxs,
                                 Text(
-                                  AmountFormatter.format(package.packageVoucherPrice.toString()),
+                                  AmountFormatter.format(
+                                    package.packageVoucherPrice.toString(),
+                                  ),
                                   style: AppTypography.titleMedium.copyWith(
                                     color: colors.primary,
                                     fontWeight: FontWeight.bold,
@@ -160,10 +167,16 @@ class PackageCard extends StatelessWidget {
                                     vertical: AppSpacing.xxs,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: colors.success.withValues(alpha: 0.08),
-                                    borderRadius: BorderRadius.circular(AppRadius.xs),
+                                    color: colors.success.withValues(
+                                      alpha: 0.08,
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.xs,
+                                    ),
                                     border: Border.all(
-                                      color: colors.success.withValues(alpha: 0.2),
+                                      color: colors.success.withValues(
+                                        alpha: 0.2,
+                                      ),
                                     ),
                                   ),
                                   child: Row(
@@ -176,10 +189,11 @@ class PackageCard extends StatelessWidget {
                                       AppSpacing.hXxs,
                                       Text(
                                         'نقدي: ${package.packageDefaultCashDiscount}%',
-                                        style: AppTypography.labelSmall.copyWith(
-                                          color: colors.success,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: colors.success,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -194,10 +208,16 @@ class PackageCard extends StatelessWidget {
                                     vertical: AppSpacing.xxs,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: colors.secondary.withValues(alpha: 0.08),
-                                    borderRadius: BorderRadius.circular(AppRadius.xs),
+                                    color: colors.secondary.withValues(
+                                      alpha: 0.08,
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.xs,
+                                    ),
                                     border: Border.all(
-                                      color: colors.secondary.withValues(alpha: 0.2),
+                                      color: colors.secondary.withValues(
+                                        alpha: 0.2,
+                                      ),
                                     ),
                                   ),
                                   child: Row(
@@ -210,10 +230,11 @@ class PackageCard extends StatelessWidget {
                                       AppSpacing.hXxs,
                                       Text(
                                         'آجل: ${package.packageDefaultCreditDiscount}%',
-                                        style: AppTypography.labelSmall.copyWith(
-                                          color: colors.secondary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: colors.secondary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                     ],
                                   ),

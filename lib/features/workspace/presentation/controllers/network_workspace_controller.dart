@@ -63,8 +63,12 @@ class NetworkWorkspaceController extends GetxController {
       if (revision != _revision) return;
       networks.assignAll(result);
       if (selectedNetworkId.value == null ||
-          !result.any((network) => network.networkId == selectedNetworkId.value)) {
-        selectedNetworkId.value = result.isEmpty ? null : result.first.networkId;
+          !result.any(
+            (network) => network.networkId == selectedNetworkId.value,
+          )) {
+        selectedNetworkId.value = result.isEmpty
+            ? null
+            : result.first.networkId;
       }
       await loadOverview(revision: revision);
     } catch (error) {
@@ -94,7 +98,9 @@ class NetworkWorkspaceController extends GetxController {
       );
       if (requestRevision != _revision) return;
       if (result.networkId != networkId) {
-        throw const FormatException('أعاد الخادم ملخص شبكة غير الشبكة المحددة.');
+        throw const FormatException(
+          'أعاد الخادم ملخص شبكة غير الشبكة المحددة.',
+        );
       }
       overview.value = result;
     } catch (error) {
@@ -103,8 +109,8 @@ class NetworkWorkspaceController extends GetxController {
       errorMessage.value = error is AppException
           ? error.message
           : error is FormatException
-              ? error.message
-              : 'تعذر جلب مؤشرات الشبكة.';
+          ? error.message
+          : 'تعذر جلب مؤشرات الشبكة.';
     } finally {
       if (requestRevision == _revision) isLoading.value = false;
     }

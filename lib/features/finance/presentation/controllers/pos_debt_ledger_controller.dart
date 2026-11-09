@@ -160,7 +160,8 @@ class PosDebtLedgerController extends GetxController {
       if (requestVersion == _posOptionsRequestVersion) {
         scopeErrorMessage.value = AppException.sanitizeMessage(
           e,
-          fallback: 'تعذر تحميل نقاط البيع التابعة لحسابك. يرجى المحاولة مجدداً.',
+          fallback:
+              'تعذر تحميل نقاط البيع التابعة لحسابك. يرجى المحاولة مجدداً.',
         );
       }
     } finally {
@@ -294,7 +295,9 @@ class PosDebtLedgerController extends GetxController {
         networkNextCursor.value = result.nextCursor;
       } else {
         if (append) {
-          final existingIds = networkLinks.map((link) => link.networkId).toSet();
+          final existingIds = networkLinks
+              .map((link) => link.networkId)
+              .toSet();
           networkLinks.addAll(
             uniqueLinks.where((link) => existingIds.add(link.networkId)),
           );

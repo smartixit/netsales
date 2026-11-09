@@ -83,9 +83,7 @@ class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
           AppSpacing.vXl,
           Text(
             'الإجراءات المالية',
-            style: AppTypography.titleMedium.copyWith(
-              color: colors.onSurface,
-            ),
+            style: AppTypography.titleMedium.copyWith(color: colors.onSurface),
           ),
           AppSpacing.vXs,
           Text(
@@ -123,7 +121,8 @@ class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
                       icon: Icons.receipt_long_outlined,
                       title: 'المصروفات التشغيلية',
                       subtitle: 'سندات الصرف والبنود والمرفقات',
-                      onTap: () => Get.toNamed<void>(AppRoutes.operatingExpenses),
+                      onTap: () =>
+                          Get.toNamed<void>(AppRoutes.operatingExpenses),
                     ),
                   ),
                   SizedBox(
@@ -132,9 +131,8 @@ class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
                       icon: Icons.account_balance_wallet_outlined,
                       title: 'محفظة الشبكة',
                       subtitle: 'الرصيد والحركات ودفتر الأستاذ',
-                      onTap: () => Get.toNamed<void>(
-                        AppRoutes.networkWalletStatement,
-                      ),
+                      onTap: () =>
+                          Get.toNamed<void>(AppRoutes.networkWalletStatement),
                     ),
                   ),
                   SizedBox(
@@ -143,9 +141,8 @@ class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
                       icon: Icons.receipt_long_outlined,
                       title: 'سجل سندات السداد',
                       subtitle: 'تصفية السندات ومراجعة حالاتها',
-                      onTap: () => Get.toNamed<void>(
-                        AppRoutes.repaymentHistory,
-                      ),
+                      onTap: () =>
+                          Get.toNamed<void>(AppRoutes.repaymentHistory),
                     ),
                   ),
                 ],
@@ -232,7 +229,6 @@ class _FinanceHubAction extends StatelessWidget {
   }
 }
 
-
 class _NetworkFinanceSnapshot extends StatelessWidget {
   const _NetworkFinanceSnapshot({required this.controller});
 
@@ -260,35 +256,53 @@ class _NetworkFinanceSnapshot extends StatelessWidget {
       final cards = <Widget>[];
       final wallet = metrics['wallet'];
       if (wallet is Map<String, dynamic>) {
-        cards.add(_FinanceSnapshotCard(
-          icon: Icons.account_balance_wallet_rounded,
-          label: 'رصيد محفظة الشبكة',
-          value: AmountFormatter.format(overview.amount('wallet', 'balance')),
-        ));
+        cards.add(
+          _FinanceSnapshotCard(
+            icon: Icons.account_balance_wallet_rounded,
+            label: 'رصيد محفظة الشبكة',
+            value: AmountFormatter.format(overview.amount('wallet', 'balance')),
+          ),
+        );
       }
       if (metrics.containsKey('sales')) {
-        cards.add(_FinanceSnapshotCard(
-          icon: Icons.receipt_long_rounded,
-          label: 'مبيعات الفترة',
-          value: AmountFormatter.format(overview.amount('sales', 'total_amount')),
-        ));
-        cards.add(_FinanceSnapshotCard(
-          icon: Icons.pending_actions_rounded,
-          label: 'المبالغ المتبقية على الفواتير',
-          value: AmountFormatter.format(overview.amount('sales', 'outstanding_amount')),
-        ));
-        cards.add(_FinanceSnapshotCard(
-          icon: Icons.payments_rounded,
-          label: 'المبالغ المحصلة',
-          value: AmountFormatter.format(overview.amount('sales', 'paid_amount')),
-        ));
+        cards.add(
+          _FinanceSnapshotCard(
+            icon: Icons.receipt_long_rounded,
+            label: 'مبيعات الفترة',
+            value: AmountFormatter.format(
+              overview.amount('sales', 'total_amount'),
+            ),
+          ),
+        );
+        cards.add(
+          _FinanceSnapshotCard(
+            icon: Icons.pending_actions_rounded,
+            label: 'المبالغ المتبقية على الفواتير',
+            value: AmountFormatter.format(
+              overview.amount('sales', 'outstanding_amount'),
+            ),
+          ),
+        );
+        cards.add(
+          _FinanceSnapshotCard(
+            icon: Icons.payments_rounded,
+            label: 'المبالغ المحصلة',
+            value: AmountFormatter.format(
+              overview.amount('sales', 'paid_amount'),
+            ),
+          ),
+        );
       }
       if (metrics.containsKey('expenses')) {
-        cards.add(_FinanceSnapshotCard(
-          icon: Icons.trending_down_rounded,
-          label: 'مصروفات الشبكة خلال الفترة',
-          value: AmountFormatter.format(overview.amount('expenses', 'total_amount')),
-        ));
+        cards.add(
+          _FinanceSnapshotCard(
+            icon: Icons.trending_down_rounded,
+            label: 'مصروفات الشبكة خلال الفترة',
+            value: AmountFormatter.format(
+              overview.amount('expenses', 'total_amount'),
+            ),
+          ),
+        );
       }
       if (cards.isEmpty) {
         return Container(
@@ -300,7 +314,9 @@ class _NetworkFinanceSnapshot extends StatelessWidget {
           ),
           child: Text(
             'لا تتوفر مؤشرات مالية لهذا الحساب وفق صلاحياته الحالية.',
-            style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant),
+            style: AppTypography.bodySmall.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
           ),
         );
       }
@@ -315,13 +331,16 @@ class _NetworkFinanceSnapshot extends StatelessWidget {
           AppSpacing.vXs,
           Text(
             'قيم مباشرة من الخادم؛ غيّر الفترة من لوحة الرئيسية لتحديث مؤشرات الفترة.',
-            style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant),
+            style: AppTypography.bodySmall.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
           ),
           AppSpacing.vMd,
           LayoutBuilder(
             builder: (context, constraints) {
               final gap = AppSpacing.sm;
-              final itemWidth = (constraints.maxWidth - gap * (columns - 1)) / columns;
+              final itemWidth =
+                  (constraints.maxWidth - gap * (columns - 1)) / columns;
               return Wrap(
                 spacing: gap,
                 runSpacing: gap,
@@ -376,11 +395,23 @@ class _FinanceSnapshotCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(label, maxLines: 2, overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+                Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
                 AppSpacing.vXxs,
-                Text(value, maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: AppTypography.titleMedium.copyWith(color: colors.onSurface)),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: colors.onSurface,
+                  ),
+                ),
               ],
             ),
           ),

@@ -40,10 +40,7 @@ class NetSalesDashboardMetricsThemeAdapter {
     );
   }
 
-  static Widget wrap({
-    required BuildContext context,
-    required Widget child,
-  }) {
+  static Widget wrap({required BuildContext context, required Widget child}) {
     final theme = Theme.of(context);
     return Theme(
       data: theme.copyWith(

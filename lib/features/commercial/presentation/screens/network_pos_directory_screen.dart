@@ -17,7 +17,11 @@ import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 /// شاشة دليل نقاط البيع وإدارة روابط الشراكة بمساحة عمل الشبكة
 /// مسؤوليتها: تركيب الصفحة وتنسيق المكونات وتوصيلها بالمتحكم (Page Composition)
 class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
-  const NetworkPosDirectoryScreen({super.key, this.networkId, this.embedded = false});
+  const NetworkPosDirectoryScreen({
+    super.key,
+    this.networkId,
+    this.embedded = false,
+  });
 
   final int? networkId;
   final bool embedded;
@@ -44,48 +48,51 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
       return const CustomEmptyState(
         icon: Icons.hub_outlined,
         title: 'حدد الشبكة أولاً',
-        subtitle: 'اختر شبكة متاحة من لوحة الرئيسية لعرض نقاط البيع المرتبطة بها.',
+        subtitle:
+            'اختر شبكة متاحة من لوحة الرئيسية لعرض نقاط البيع المرتبطة بها.',
       );
     }
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: embedded ? null : AppBar(
-        title: const Text('دليل نقاط البيع المرتبطة'),
-        centerTitle: true,
-        actions: [
-          CustomButton.icon(
-            icon: Icons.qr_code_2_rounded,
-            tooltip: 'دعوة ربط عبر QR',
-            onPressed: () async {
-              final netId = controller.activeNetworkId.value;
-              final net = await controller.fetchNetworkDetails(netId);
-              if (net != null) {
-                await NetworkPosQrChallengeSheet.show(
-                  networkId: netId,
-                  networkName: net.networkName,
-                  networkPhone: net.networkPhoneNumber,
-                );
-              }
-            },
-          ),
-          CustomButton.icon(
-            icon: Icons.business_outlined,
-            tooltip: 'بيانات الشبكة',
-            onPressed: () async {
-              final network = await controller.fetchNetworkDetails(
-                controller.activeNetworkId.value,
-              );
-              if (network != null) {
-                await NetworkDetailsBottomSheet.show(
-                  network: network,
-                  canEdit: true,
-                );
-              }
-            },
-          ),
-        ],
-      ),
+      appBar: embedded
+          ? null
+          : AppBar(
+              title: const Text('دليل نقاط البيع المرتبطة'),
+              centerTitle: true,
+              actions: [
+                CustomButton.icon(
+                  icon: Icons.qr_code_2_rounded,
+                  tooltip: 'دعوة ربط عبر QR',
+                  onPressed: () async {
+                    final netId = controller.activeNetworkId.value;
+                    final net = await controller.fetchNetworkDetails(netId);
+                    if (net != null) {
+                      await NetworkPosQrChallengeSheet.show(
+                        networkId: netId,
+                        networkName: net.networkName,
+                        networkPhone: net.networkPhoneNumber,
+                      );
+                    }
+                  },
+                ),
+                CustomButton.icon(
+                  icon: Icons.business_outlined,
+                  tooltip: 'بيانات الشبكة',
+                  onPressed: () async {
+                    final network = await controller.fetchNetworkDetails(
+                      controller.activeNetworkId.value,
+                    );
+                    if (network != null) {
+                      await NetworkDetailsBottomSheet.show(
+                        network: network,
+                        canEdit: true,
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
       body: Column(
         children: [
           if (embedded)
@@ -102,7 +109,9 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
                     tooltip: 'دعوة ربط عبر QR',
                     onPressed: () async {
                       final netId = controller.activeNetworkId.value;
-                      final network = await controller.fetchNetworkDetails(netId);
+                      final network = await controller.fetchNetworkDetails(
+                        netId,
+                      );
                       if (network != null) {
                         await NetworkPosQrChallengeSheet.show(
                           networkId: netId,
@@ -225,16 +234,18 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
           ),
         ],
       ),
-      floatingActionButton: embedded ? null : CustomButton.primary(
-        text: 'ربط نقطة بيع',
-        icon: Icons.add_link_rounded,
-        shape: AppButtonShape.pill,
-        size: AppButtonSize.medium,
-        shadow: AppElevation.level4(context),
-        onPressed: () => LinkPosBottomSheet.show(
-          networkId: controller.activeNetworkId.value,
-        ),
-      ),
+      floatingActionButton: embedded
+          ? null
+          : CustomButton.primary(
+              text: 'ربط نقطة بيع',
+              icon: Icons.add_link_rounded,
+              shape: AppButtonShape.pill,
+              size: AppButtonSize.medium,
+              shadow: AppElevation.level4(context),
+              onPressed: () => LinkPosBottomSheet.show(
+                networkId: controller.activeNetworkId.value,
+              ),
+            ),
     );
   }
 }

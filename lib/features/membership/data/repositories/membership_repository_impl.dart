@@ -8,26 +8,45 @@ class MembershipRepositoryImpl implements MembershipRepository {
   final MembershipRemoteDataSource remote;
 
   @override
-  Future<List<MembershipEntity>> getMembers({required bool isNetwork, required int tenantId}) =>
-      remote.getMembers(isNetwork, tenantId);
+  Future<List<MembershipEntity>> getMembers({
+    required bool isNetwork,
+    required int tenantId,
+  }) => remote.getMembers(isNetwork, tenantId);
 
   @override
-  Future<List<MembershipRoleEntity>> getAssignableRoles({required bool isNetwork, required int tenantId}) =>
-      remote.getRoles(isNetwork, tenantId);
+  Future<List<MembershipRoleEntity>> getAssignableRoles({
+    required bool isNetwork,
+    required int tenantId,
+  }) => remote.getRoles(isNetwork, tenantId);
 
   @override
-  Future<MembershipEntity> addMember({required bool isNetwork, required int tenantId, required String phoneNumber, required int roleId}) =>
-      remote.add(isNetwork, tenantId, phoneNumber, roleId);
+  Future<MembershipEntity> addMember({
+    required bool isNetwork,
+    required int tenantId,
+    required String phoneNumber,
+    required int roleId,
+  }) => remote.add(isNetwork, tenantId, phoneNumber, roleId);
 
   @override
-  Future<MembershipEntity> updateRole({required bool isNetwork, required int tenantId, required int userId, required int roleId}) =>
-      remote.updateRole(isNetwork, tenantId, userId, roleId);
+  Future<MembershipEntity> updateRole({
+    required bool isNetwork,
+    required int tenantId,
+    required int userId,
+    required int roleId,
+  }) => remote.updateRole(isNetwork, tenantId, userId, roleId);
 
   @override
-  Future<MembershipEntity> updateStatus({required bool isNetwork, required int tenantId, required int userId, required String status}) =>
-      remote.updateStatus(isNetwork, tenantId, userId, status);
+  Future<MembershipEntity> updateStatus({
+    required bool isNetwork,
+    required int tenantId,
+    required int userId,
+    required String status,
+  }) => remote.updateStatus(isNetwork, tenantId, userId, status);
 
   @override
-  Future<void> removeMember({required bool isNetwork, required int tenantId, required int userId}) =>
-      remote.remove(isNetwork, tenantId, userId);
+  Future<void> removeMember({
+    required bool isNetwork,
+    required int tenantId,
+    required int userId,
+  }) => remote.remove(isNetwork, tenantId, userId);
 }

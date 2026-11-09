@@ -11,4 +11,3 @@ class CreateRequestUseCase {
     return _repository.createRequest(data);
   }
 }
-

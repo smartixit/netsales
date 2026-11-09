@@ -103,18 +103,11 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }) async {
     final response = await remoteDataSource.updateExpense(
       expenseId: expenseId,
-      payload: {
-        'expense_date': expenseDate,
-        'items': items,
-      },
+      payload: {'expense_date': expenseDate, 'items': items},
       attachments: attachments,
     );
     if (!response.success || response.data == null) {
-      throw _failure(
-        response,
-        'تعذر تحديث المصروف.',
-        'EXPENSE_UPDATE_FAILED',
-      );
+      throw _failure(response, 'تعذر تحديث المصروف.', 'EXPENSE_UPDATE_FAILED');
     }
     return response.data!;
   }

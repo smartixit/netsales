@@ -92,10 +92,12 @@ class NetworkProcurementReviewController extends GetxController {
       }
 
       modificationLines.assignAll(
-        detailedRequest.items.map((item) => RequestModificationLineEntity(
-          packageId: item.packageId,
-          voucherCount: item.voucherCount,
-        )),
+        detailedRequest.items.map(
+          (item) => RequestModificationLineEntity(
+            packageId: item.packageId,
+            voucherCount: item.voucherCount,
+          ),
+        ),
       );
       modificationNoteController.text = detailedRequest.requestNote ?? '';
       await loadModificationPackages(
@@ -159,7 +161,9 @@ class NetworkProcurementReviewController extends GetxController {
   void setModificationQuantity(int packageId, int quantity) {
     if (quantity < 1) return;
     _modificationRevision++;
-    final index = modificationLines.indexWhere((line) => line.packageId == packageId);
+    final index = modificationLines.indexWhere(
+      (line) => line.packageId == packageId,
+    );
     if (index < 0) return;
     final current = modificationLines[index];
     modificationLines[index] = RequestModificationLineEntity(
@@ -173,10 +177,12 @@ class NetworkProcurementReviewController extends GetxController {
   void addModificationPackage(int packageId, {int initialQuantity = 1}) {
     if (modificationLines.any((line) => line.packageId == packageId)) return;
     _modificationRevision++;
-    modificationLines.add(RequestModificationLineEntity(
-      packageId: packageId,
-      voucherCount: initialQuantity,
-    ));
+    modificationLines.add(
+      RequestModificationLineEntity(
+        packageId: packageId,
+        voucherCount: initialQuantity,
+      ),
+    );
     currentPreview.value = null;
   }
 
@@ -203,7 +209,8 @@ class NetworkProcurementReviewController extends GetxController {
         requestId,
         submittedLines,
       );
-      if (revision != _modificationRevision || editingRequestId.value != requestId) {
+      if (revision != _modificationRevision ||
+          editingRequestId.value != requestId) {
         return false;
       }
       currentPreview.value = preview;
@@ -425,7 +432,8 @@ class NetworkProcurementReviewController extends GetxController {
       );
       CustomSnackbar.show(
         title: 'نجاح الاعتماد',
-        message: 'تم اعتماد الطلب رقم #${approved.requestId} وتوليد فاتورة المبيعات.',
+        message:
+            'تم اعتماد الطلب رقم #${approved.requestId} وتوليد فاتورة المبيعات.',
         type: SnackType.success,
       );
       return true;
@@ -458,10 +466,7 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   /// رفض طلب الكروت مع توثيق السبب الإلزامي
-  Future<bool> rejectRequest(
-    int requestId,
-    String rejectionReason,
-  ) async {
+  Future<bool> rejectRequest(int requestId, String rejectionReason) async {
     if (rejectionReason.trim().isEmpty) {
       CustomSnackbar.show(
         title: 'سبب الرفض إلزامي',
@@ -524,4 +529,3 @@ class NetworkProcurementReviewController extends GetxController {
     }
   }
 }
-

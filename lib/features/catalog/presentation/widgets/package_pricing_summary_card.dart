@@ -10,10 +10,7 @@ import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 class PackagePricingSummaryCard extends StatelessWidget {
   final PackageEntity package;
 
-  const PackagePricingSummaryCard({
-    super.key,
-    required this.package,
-  });
+  const PackagePricingSummaryCard({super.key, required this.package});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +28,11 @@ class PackagePricingSummaryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.monetization_on_outlined, size: AppSpacing.xl, color: colors.primary),
+              Icon(
+                Icons.monetization_on_outlined,
+                size: AppSpacing.xl,
+                color: colors.primary,
+              ),
               AppSpacing.hXs,
               Text(
                 'التعرفة المالية والأسعار الافتراضية',
@@ -44,7 +45,10 @@ class PackagePricingSummaryCard extends StatelessWidget {
           ),
 
           AppSpacing.vSm,
-          Divider(height: 1, color: colors.outlineVariant.withValues(alpha: 0.4)),
+          Divider(
+            height: 1,
+            color: colors.outlineVariant.withValues(alpha: 0.4),
+          ),
           AppSpacing.vSm,
 
           // السعر الأساسي
@@ -79,14 +83,20 @@ class PackagePricingSummaryCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: colors.success.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(color: colors.success.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: colors.success.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.payments_outlined, size: AppSpacing.lg, color: colors.success),
+                          Icon(
+                            Icons.payments_outlined,
+                            size: AppSpacing.lg,
+                            color: colors.success,
+                          ),
                           AppSpacing.hXs,
                           Text(
                             'السعر النقدي',
@@ -112,7 +122,9 @@ class PackagePricingSummaryCard extends StatelessWidget {
                       ),
                       AppSpacing.vSm,
                       Text(
-                        AmountFormatter.format(package.effectiveCashPrice.toString()),
+                        AmountFormatter.format(
+                          package.effectiveCashPrice.toString(),
+                        ),
                         style: AppTypography.titleMedium.copyWith(
                           color: colors.success,
                           fontWeight: FontWeight.bold,
@@ -132,14 +144,20 @@ class PackagePricingSummaryCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: colors.secondary.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(color: colors.secondary.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: colors.secondary.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.credit_card_outlined, size: AppSpacing.lg, color: colors.secondary),
+                          Icon(
+                            Icons.credit_card_outlined,
+                            size: AppSpacing.lg,
+                            color: colors.secondary,
+                          ),
                           AppSpacing.hXs,
                           Text(
                             'السعر الآجل',
@@ -165,7 +183,9 @@ class PackagePricingSummaryCard extends StatelessWidget {
                       ),
                       AppSpacing.vSm,
                       Text(
-                        AmountFormatter.format(package.effectiveCreditPrice.toString()),
+                        AmountFormatter.format(
+                          package.effectiveCreditPrice.toString(),
+                        ),
                         style: AppTypography.titleMedium.copyWith(
                           color: colors.secondary,
                           fontWeight: FontWeight.bold,

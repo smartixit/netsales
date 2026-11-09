@@ -80,10 +80,7 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
               }
             },
             items: const [
-              CustomSegmentItem(
-                label: 'الكل',
-                icon: Icons.list_alt_rounded,
-              ),
+              CustomSegmentItem(label: 'الكل', icon: Icons.list_alt_rounded),
               CustomSegmentItem(
                 label: 'قيد الانتظار',
                 icon: Icons.hourglass_top_rounded,
@@ -92,10 +89,7 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
                 label: 'معتمدة',
                 icon: Icons.check_circle_outline_rounded,
               ),
-              CustomSegmentItem(
-                label: 'مرفوضة',
-                icon: Icons.cancel_outlined,
-              ),
+              CustomSegmentItem(label: 'مرفوضة', icon: Icons.cancel_outlined),
             ],
           ),
         ],
@@ -103,4 +97,3 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
     );
   }
 }
-

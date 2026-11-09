@@ -18,39 +18,39 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final navItems = [
-      const WorkspaceNavItem(
-        label: 'الرئيسية',
-        icon: Icons.dashboard_outlined,
-        activeIcon: Icons.dashboard_rounded,
-        content: NetworkWorkspaceDashboard(),
-      ),
-      const WorkspaceNavItem(
-        label: 'طلبات التوريد',
-        icon: Icons.receipt_long_outlined,
-        activeIcon: Icons.receipt_long_rounded,
-        content: NetworkSupplyRequestsReviewScreen(embedded: true),
-      ),
-      WorkspaceNavItem(
-        label: 'نقاط البيع',
-        icon: Icons.storefront_outlined,
-        activeIcon: Icons.storefront_rounded,
-        content: NetworkPosDirectoryScreen(
-          networkId: controller.selectedNetworkId.value,
-          embedded: true,
+        const WorkspaceNavItem(
+          label: 'الرئيسية',
+          icon: Icons.dashboard_outlined,
+          activeIcon: Icons.dashboard_rounded,
+          content: NetworkWorkspaceDashboard(),
         ),
-      ),
-      const WorkspaceNavItem(
-        label: 'فريق العمل',
-        icon: Icons.groups_outlined,
-        activeIcon: Icons.groups_rounded,
-        content: MembershipScreen(),
-      ),
-      const WorkspaceNavItem(
-        label: 'المالية والديون',
-        icon: Icons.account_balance_wallet_outlined,
-        activeIcon: Icons.account_balance_wallet_rounded,
-        content: NetworkFinanceWorkspaceHub(),
-      ),
+        const WorkspaceNavItem(
+          label: 'طلبات التوريد',
+          icon: Icons.receipt_long_outlined,
+          activeIcon: Icons.receipt_long_rounded,
+          content: NetworkSupplyRequestsReviewScreen(embedded: true),
+        ),
+        WorkspaceNavItem(
+          label: 'نقاط البيع',
+          icon: Icons.storefront_outlined,
+          activeIcon: Icons.storefront_rounded,
+          content: NetworkPosDirectoryScreen(
+            networkId: controller.selectedNetworkId.value,
+            embedded: true,
+          ),
+        ),
+        const WorkspaceNavItem(
+          label: 'فريق العمل',
+          icon: Icons.groups_outlined,
+          activeIcon: Icons.groups_rounded,
+          content: MembershipScreen(),
+        ),
+        const WorkspaceNavItem(
+          label: 'المالية والديون',
+          icon: Icons.account_balance_wallet_outlined,
+          activeIcon: Icons.account_balance_wallet_rounded,
+          content: NetworkFinanceWorkspaceHub(),
+        ),
       ];
 
       return AdaptiveWorkspaceScaffold(

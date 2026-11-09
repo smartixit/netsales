@@ -130,13 +130,16 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                   items: packages.map((pkg) {
                     return DropdownItem<int>(
                       value: pkg.packageId,
-                      child: Text('${pkg.packageName} (سعر أساسي: ${pkg.packageVoucherPrice})'),
+                      child: Text(
+                        '${pkg.packageName} (سعر أساسي: ${pkg.packageVoucherPrice})',
+                      ),
                     );
                   }).toList(),
                   onChanged: (id) {
                     if (id != null) {
-                      final found =
-                          packages.firstWhereOrNull((p) => p.packageId == id);
+                      final found = packages.firstWhereOrNull(
+                        (p) => p.packageId == id,
+                      );
                       if (found != null) controller.onPackageSelected(found);
                     }
                   },
@@ -181,8 +184,9 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                 return CustomSegmentedBar(
                   selectedIndex: isCash ? 0 : 1,
                   onSegmentChanged: (idx) {
-                    controller.selectedSaleType.value =
-                        idx == 0 ? SaleType.cash : SaleType.credit;
+                    controller.selectedSaleType.value = idx == 0
+                        ? SaleType.cash
+                        : SaleType.credit;
                   },
                   items: const [
                     CustomSegmentItem(
@@ -265,4 +269,3 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
     );
   }
 }
-

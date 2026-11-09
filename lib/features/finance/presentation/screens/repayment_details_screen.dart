@@ -23,7 +23,8 @@ class RepaymentDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final item = repayment ??
+    final item =
+        repayment ??
         (Get.arguments is PosRepaymentEntity
             ? Get.arguments as PosRepaymentEntity
             : null);
@@ -40,12 +41,10 @@ class RepaymentDetailsScreen extends StatelessWidget {
     }
 
     final permissions = PermissionService.to;
-    final canReverse = isNetworkView &&
+    final canReverse =
+        isNetworkView &&
         item.isCompleted &&
-        (permissions.hasAnyRole([
-              AppRoles.networkOwner,
-              AppRoles.superAdmin,
-            ]) ||
+        (permissions.hasAnyRole([AppRoles.networkOwner, AppRoles.superAdmin]) ||
             permissions.can(AppPermissions.posWalletsManage));
 
     return CustomAppScaffold(

@@ -51,8 +51,7 @@ class RepaymentCollectionController extends GetxController {
   final isSubmitting = false.obs;
   final lastResult = Rxn<PosRepaymentEntity>();
 
-  bool get hasMorePosOptions =>
-      posNextCursor.value?.trim().isNotEmpty ?? false;
+  bool get hasMorePosOptions => posNextCursor.value?.trim().isNotEmpty ?? false;
   String? _pendingCollectionKey;
   String? _pendingCollectionFingerprint;
 
@@ -152,9 +151,7 @@ class RepaymentCollectionController extends GetxController {
           .toList(growable: false);
       if (append) {
         final existingIds = posList.map((pos) => pos.posId).toSet();
-        posList.addAll(
-          pageItems.where((pos) => existingIds.add(pos.posId)),
-        );
+        posList.addAll(pageItems.where((pos) => existingIds.add(pos.posId)));
       } else {
         posList.assignAll(pageItems);
       }
@@ -180,7 +177,8 @@ class RepaymentCollectionController extends GetxController {
       }
       final message = AppException.sanitizeMessage(
         e,
-        fallback: 'تعذر تحميل نقاط البيع المرتبطة بالشبكة. يرجى المحاولة مجدداً.',
+        fallback:
+            'تعذر تحميل نقاط البيع المرتبطة بالشبكة. يرجى المحاولة مجدداً.',
       );
       if (append) {
         posLoadMoreErrorMessage.value = message;
@@ -236,9 +234,8 @@ class RepaymentCollectionController extends GetxController {
       selectedPos.value = null;
       return;
     }
-    selectedPos.value = posList.firstWhereOrNull(
-          (pos) => pos.posId == posId,
-        ) ??
+    selectedPos.value =
+        posList.firstWhereOrNull((pos) => pos.posId == posId) ??
         (selectedPos.value?.posId == posId ? selectedPos.value : null);
   }
 

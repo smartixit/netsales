@@ -31,11 +31,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
     ApiResponse<List<T>> response, {
     required String fallback,
     required String code,
-  }) => _requestFailure(
-    response,
-    fallback: fallback,
-    code: code,
-  );
+  }) => _requestFailure(response, fallback: fallback, code: code);
 
   @override
   Future<PaginatedList<PosWalletEntity>> getPosWallets({
@@ -207,8 +203,10 @@ class FinanceRepositoryImpl implements FinanceRepository {
     final data = res.data!;
     final totalDebt = _requiredDebtNumber(data, 'total_outstanding_debt');
     final unpaidCount = _requiredDebtCount(data, 'unpaid_invoices_count');
-    final partialCount =
-        _requiredDebtCount(data, 'partially_paid_invoices_count');
+    final partialCount = _requiredDebtCount(
+      data,
+      'partially_paid_invoices_count',
+    );
 
     final rawBuckets = data['aging_buckets'];
     if (rawBuckets is! Map) {
@@ -230,8 +228,8 @@ class FinanceRepositoryImpl implements FinanceRepository {
       unpaidInvoicesCount: unpaidCount,
       partiallyPaidInvoicesCount: partialCount,
       agingBuckets: buckets,
-      oldestOutstandingInvoiceDate:
-          data['oldest_outstanding_invoice_date']?.toString(),
+      oldestOutstandingInvoiceDate: data['oldest_outstanding_invoice_date']
+          ?.toString(),
       networkId: networkId,
       posId: posId,
     );

@@ -11,4 +11,3 @@ class CancelRequestUseCase {
     return _repository.cancelRequest(requestId);
   }
 }
-

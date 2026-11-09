@@ -13,10 +13,7 @@ import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 class PackageDetailsHeader extends StatelessWidget {
   final PackageEntity package;
 
-  const PackageDetailsHeader({
-    super.key,
-    required this.package,
-  });
+  const PackageDetailsHeader({super.key, required this.package});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +37,10 @@ class PackageDetailsHeader extends StatelessWidget {
             decoration: BoxDecoration(
               color: packageColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: packageColor.withValues(alpha: 0.3), width: 1.5),
+              border: Border.all(
+                color: packageColor.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
             ),
             child: Icon(
               Icons.wifi_tethering_rounded,
@@ -79,7 +79,8 @@ class PackageDetailsHeader extends StatelessWidget {
                   ],
                 ),
                 AppSpacing.vXs,
-                if (package.networkName != null && package.networkName!.isNotEmpty) ...[
+                if (package.networkName != null &&
+                    package.networkName!.isNotEmpty) ...[
                   Text(
                     'الشبكة: ${package.networkName}',
                     style: AppTypography.bodySmall.copyWith(

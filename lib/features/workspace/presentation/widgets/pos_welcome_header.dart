@@ -117,7 +117,6 @@ class PosWelcomeHeader extends StatelessWidget {
   }
 }
 
-
 Widget _buildProfileAvatar({
   required String? profileUrl,
   required String initial,

@@ -71,19 +71,18 @@ class _ChartsShowcaseContent extends StatelessWidget {
     ChartType type,
     List<ChartDataPoint> points, {
     ChartOptions options = const ChartOptions(),
-  }) =>
-      ChartDefinition(
-        family: family,
-        type: type,
-        options: options,
-        series: [
-          ChartSeries(
-            id: '${family.name}-${type.name}',
-            name: 'الإجمالي',
-            data: points,
-          ),
-        ],
-      );
+  }) => ChartDefinition(
+    family: family,
+    type: type,
+    options: options,
+    series: [
+      ChartSeries(
+        id: '${family.name}-${type.name}',
+        name: 'الإجمالي',
+        data: points,
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -155,16 +154,12 @@ class _ChartsShowcaseContent extends StatelessWidget {
         description: 'Funnel / Pyramid لمراحل التحويل',
         height: 280,
         chart: ChartRenderer(
-          definition: _definition(
-            ChartFamily.funnel,
-            ChartType.funnel,
-            const [
-              ChartDataPoint(x: 'الزيارات', y: 100),
-              ChartDataPoint(x: 'التسجيلات', y: 72),
-              ChartDataPoint(x: 'الاشتراكات', y: 48),
-              ChartDataPoint(x: 'العملاء النشطون', y: 31),
-            ],
-          ),
+          definition: _definition(ChartFamily.funnel, ChartType.funnel, const [
+            ChartDataPoint(x: 'الزيارات', y: 100),
+            ChartDataPoint(x: 'التسجيلات', y: 72),
+            ChartDataPoint(x: 'الاشتراكات', y: 48),
+            ChartDataPoint(x: 'العملاء النشطون', y: 31),
+          ]),
         ),
       ),
       ChartCard(
@@ -300,20 +295,20 @@ class _LiveBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(20),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.primaryContainer,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      child: Text(
+        'LIVE',
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+          fontWeight: FontWeight.w800,
+          fontSize: 10,
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          child: Text(
-            'LIVE',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.w800,
-              fontSize: 10,
-            ),
-          ),
-        ),
-      );
+      ),
+    ),
+  );
 }

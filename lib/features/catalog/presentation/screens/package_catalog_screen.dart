@@ -83,10 +83,7 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
               if (controller.isLoading.value) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
-                  child: CustomSkeletonFeed(
-                    itemCount: 4,
-                    cardHeight: 140.h,
-                  ),
+                  child: CustomSkeletonFeed(itemCount: 4, cardHeight: 140.h),
                 );
               }
 

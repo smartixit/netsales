@@ -18,7 +18,9 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
       fromJson: (data) {
         if (data is List) {
           return data
-              .map((item) => RequestModel.fromJson(item as Map<String, dynamic>))
+              .map(
+                (item) => RequestModel.fromJson(item as Map<String, dynamic>),
+              )
               .toList();
         }
         return [];
@@ -62,7 +64,8 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
       fromJson: (resData) {
         if (resData is Map<String, dynamic> && resData.containsKey('request')) {
           return RequestModel.fromJson(
-              resData['request'] as Map<String, dynamic>);
+            resData['request'] as Map<String, dynamic>,
+          );
         } else if (resData is Map<String, dynamic>) {
           return RequestModel.fromJson(resData);
         }
@@ -103,4 +106,3 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
     );
   }
 }
-

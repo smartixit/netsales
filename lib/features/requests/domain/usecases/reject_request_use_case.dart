@@ -7,14 +7,7 @@ class RejectRequestUseCase {
 
   const RejectRequestUseCase(this._repository);
 
-  Future<RequestEntity> call(
-    int requestId,
-    String rejectionReason,
-  ) {
-    return _repository.rejectRequest(
-      requestId,
-      rejectionReason,
-    );
+  Future<RequestEntity> call(int requestId, String rejectionReason) {
+    return _repository.rejectRequest(requestId, rejectionReason);
   }
 }
-

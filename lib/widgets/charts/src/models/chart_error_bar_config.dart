@@ -10,11 +10,7 @@ enum ChartErrorBarType {
 }
 
 /// Axis direction in which the error bar is drawn.
-enum ChartErrorBarMode {
-  vertical,
-  horizontal,
-  both,
-}
+enum ChartErrorBarMode { vertical, horizontal, both }
 
 /// Neutral error-bar options mapped to Syncfusion's ErrorBarSeries properties.
 @immutable

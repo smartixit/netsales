@@ -74,10 +74,24 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
         final profileData = response.data!;
         final rawUser = profileData['user'];
         if (rawUser is Map) {
-          final updatedUser = UserModel.fromJson(
-            Map<String, dynamic>.from(rawUser),
+          final updatedUser = UserModel.fromJson({
+            ...Map<String, dynamic>.from(rawUser),
+            'workspace_roles':
+                profileData['workspace_roles'] ?? const <dynamic>[],
+            'is_super_admin': profileData['is_super_admin'],
+            'role_key': profileData['role_key'],
+          });
+
+          final rawPerms = profileData['permissions'];
+          final permissions = rawPerms is List
+              ? rawPerms.map((e) => e.toString()).toList()
+              : const <String>[];
+
+          await SessionService.to.syncSessionProfile(
+            user: updatedUser,
+            permissions: permissions,
+            roleKey: profileData['role_key']?.toString(),
           );
-          await SessionService.to.updateCurrentUser(updatedUser);
         }
         return true;
       }
@@ -100,12 +114,18 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
             json is Map ? Map<String, dynamic>.from(json) : <String, dynamic>{},
       );
       if (response.success) {
-        log('🟢 [Backend Health Warm-up] Server is active & ready: ${response.message}');
+        log(
+          '🟢 [Backend Health Warm-up] Server is active & ready: ${response.message}',
+        );
       } else {
-        log('🟡 [Backend Health Warm-up] Server responded with notice: ${response.message}');
+        log(
+          '🟡 [Backend Health Warm-up] Server responded with notice: ${response.message}',
+        );
       }
     } catch (e) {
-      log('⚠️ [Backend Health Warm-up] Server warm-up ping failed (tolerated): $e');
+      log(
+        '⚠️ [Backend Health Warm-up] Server warm-up ping failed (tolerated): $e',
+      );
     }
   }
 }

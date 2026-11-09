@@ -215,8 +215,9 @@ class PackageCatalogController extends GetxController {
 
       // منع التكرار بناء على packageId
       final existingIds = packages.map((p) => p.packageId).toSet();
-      final newItems =
-          result.items.where((p) => !existingIds.contains(p.packageId)).toList();
+      final newItems = result.items
+          .where((p) => !existingIds.contains(p.packageId))
+          .toList();
 
       packages.addAll(newItems);
       filteredPackages.assignAll(packages);
@@ -327,7 +328,8 @@ class PackageCatalogController extends GetxController {
     isEditing.value = false;
     editingPackageId.value = null;
 
-    formNetworkId.value = networkId ??
+    formNetworkId.value =
+        networkId ??
         selectedNetworkId.value ??
         (authorizedNetworks.length == 1
             ? authorizedNetworks.first.networkId
@@ -366,8 +368,8 @@ class PackageCatalogController extends GetxController {
       selectedBalanceUnit.value = DataUnit.mb;
       balanceController.text = pkg.packageBalance > 0
           ? (pkg.packageBalance % 1 == 0
-              ? pkg.packageBalance.toInt().toString()
-              : pkg.packageBalance.toString())
+                ? pkg.packageBalance.toInt().toString()
+                : pkg.packageBalance.toString())
           : '';
     }
 
@@ -379,8 +381,9 @@ class PackageCatalogController extends GetxController {
       uptimeController.text = (pkg.packageUptime! ~/ 60).toString();
     } else {
       selectedUptimeUnit.value = UptimeUnit.minutes;
-      uptimeController.text =
-          pkg.packageUptime != null ? pkg.packageUptime.toString() : '';
+      uptimeController.text = pkg.packageUptime != null
+          ? pkg.packageUptime.toString()
+          : '';
     }
 
     // وحدة وقيمة مدة الصلاحية
@@ -391,8 +394,9 @@ class PackageCatalogController extends GetxController {
       validityController.text = (pkg.packageValidity! ~/ 24).toString();
     } else {
       selectedValidityUnit.value = ValidityUnit.hours;
-      validityController.text =
-          pkg.packageValidity != null ? pkg.packageValidity.toString() : '';
+      validityController.text = pkg.packageValidity != null
+          ? pkg.packageValidity.toString()
+          : '';
     }
 
     voucherCountController.text = pkg.packageVoucherCount.toString();
@@ -563,8 +567,9 @@ class PackageCatalogController extends GetxController {
     try {
       final updated = await togglePackageStatusUseCase(package.packageId);
 
-      final index =
-          packages.indexWhere((p) => p.packageId == package.packageId);
+      final index = packages.indexWhere(
+        (p) => p.packageId == package.packageId,
+      );
       if (index != -1) {
         packages[index] = updated;
       }

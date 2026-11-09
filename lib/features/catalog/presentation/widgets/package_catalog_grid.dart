@@ -37,30 +37,27 @@ class PackageCatalogGrid extends GetView<PackageCatalogController> {
                   crossAxisSpacing: AppSpacing.md,
                   mainAxisSpacing: AppSpacing.md,
                 ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final package = items[index];
-                    return PackageCard(
-                      package: package,
-                      onTap: () {
-                        controller.selectPackage(package);
-                        Get.toNamed<void>(AppRoutes.packageDetails);
-                      },
-                      onToggleStatus: () =>
-                          controller.togglePackageStatus(package),
-                      onEdit: () {
-                        controller.initEditForm(package);
-                        Get.toNamed<void>(AppRoutes.packageForm);
-                      },
-                      onDelete: () => PackageDeleteConfirmDialog.show(
-                        packageName: package.packageName,
-                        onConfirm: () =>
-                            controller.deletePackage(package.packageId),
-                      ),
-                    );
-                  },
-                  childCount: items.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final package = items[index];
+                  return PackageCard(
+                    package: package,
+                    onTap: () {
+                      controller.selectPackage(package);
+                      Get.toNamed<void>(AppRoutes.packageDetails);
+                    },
+                    onToggleStatus: () =>
+                        controller.togglePackageStatus(package),
+                    onEdit: () {
+                      controller.initEditForm(package);
+                      Get.toNamed<void>(AppRoutes.packageForm);
+                    },
+                    onDelete: () => PackageDeleteConfirmDialog.show(
+                      packageName: package.packageName,
+                      onConfirm: () =>
+                          controller.deletePackage(package.packageId),
+                    ),
+                  );
+                }, childCount: items.length),
               ),
             ),
             if (isLoadingMore)

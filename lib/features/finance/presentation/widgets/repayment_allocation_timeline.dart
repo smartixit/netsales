@@ -11,10 +11,7 @@ import 'package:netsales/widgets/badges/custom_chip.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 class RepaymentAllocationTimeline extends StatelessWidget {
-  const RepaymentAllocationTimeline({
-    super.key,
-    required this.allocations,
-  });
+  const RepaymentAllocationTimeline({super.key, required this.allocations});
 
   final List<RepaymentAllocationEntity> allocations;
 
@@ -81,9 +78,9 @@ class RepaymentAllocationTimeline extends StatelessWidget {
                 allocation: allocation,
                 onTap: allocation.invoiceId > 0
                     ? () => Get.toNamed<void>(
-                          AppRoutes.saleInvoiceDetails,
-                          arguments: allocation.invoiceId,
-                        )
+                        AppRoutes.saleInvoiceDetails,
+                        arguments: allocation.invoiceId,
+                      )
                     : null,
               );
             },
@@ -94,10 +91,7 @@ class RepaymentAllocationTimeline extends StatelessWidget {
 }
 
 class _AllocationCard extends StatelessWidget {
-  const _AllocationCard({
-    required this.allocation,
-    required this.onTap,
-  });
+  const _AllocationCard({required this.allocation, required this.onTap});
 
   final RepaymentAllocationEntity allocation;
   final VoidCallback? onTap;
@@ -173,10 +167,7 @@ class _AllocationCard extends StatelessWidget {
               spacing: AppSpacing.xs,
               runSpacing: AppSpacing.xs,
               children: [
-                CustomChip(
-                  label: invoice.paymentStatusLabel,
-                  isCompact: true,
-                ),
+                CustomChip(label: invoice.paymentStatusLabel, isCompact: true),
                 CustomChip(
                   label: invoice.saleTypeLabel,
                   icon: Icons.sell_outlined,
@@ -193,14 +184,8 @@ class _AllocationCard extends StatelessWidget {
                   label: 'قيمة الفاتورة',
                   value: invoice.totalAmount,
                 ),
-                _InvoiceValue(
-                  label: 'المسدد',
-                  value: invoice.paidAmount,
-                ),
-                _InvoiceValue(
-                  label: 'المتبقي',
-                  value: invoice.remainingAmount,
-                ),
+                _InvoiceValue(label: 'المسدد', value: invoice.paidAmount),
+                _InvoiceValue(label: 'المتبقي', value: invoice.remainingAmount),
               ],
             ),
             AppSpacing.vMd,
@@ -248,10 +233,7 @@ class _AllocationCard extends StatelessWidget {
 }
 
 class _InvoiceValue extends StatelessWidget {
-  const _InvoiceValue({
-    required this.label,
-    required this.value,
-  });
+  const _InvoiceValue({required this.label, required this.value});
 
   final String label;
   final double value;
@@ -271,9 +253,7 @@ class _InvoiceValue extends StatelessWidget {
         AppSpacing.vXxs,
         Text(
           AmountFormatter.format(value.toString()),
-          style: AppTypography.titleSmall.copyWith(
-            color: colors.onSurface,
-          ),
+          style: AppTypography.titleSmall.copyWith(color: colors.onSurface),
         ),
       ],
     );

@@ -23,8 +23,7 @@ class RepaymentDetailsSummary extends StatelessWidget {
   IconData get _paymentIcon => switch (repayment.typedPaymentMethod) {
     RepaymentPaymentMethod.cash => Icons.payments_outlined,
     RepaymentPaymentMethod.bank => Icons.account_balance_outlined,
-    RepaymentPaymentMethod.wallet =>
-      Icons.account_balance_wallet_outlined,
+    RepaymentPaymentMethod.wallet => Icons.account_balance_wallet_outlined,
     RepaymentPaymentMethod.unknown => Icons.help_outline_rounded,
   };
 
@@ -34,13 +33,13 @@ class RepaymentDetailsSummary extends StatelessWidget {
     final statusLabel = repayment.isCompleted
         ? 'سداد مكتمل'
         : repayment.isReversed
-            ? 'سند معكوس'
-            : 'حالة غير معروفة';
+        ? 'سند معكوس'
+        : 'حالة غير معروفة';
     final statusTone = repayment.isCompleted
         ? SemanticTone.success
         : repayment.isReversed
-            ? SemanticTone.danger
-            : SemanticTone.neutral;
+        ? SemanticTone.danger
+        : SemanticTone.neutral;
 
     final primaryPartyLabel = isNetworkView ? 'نقطة البيع' : 'الشبكة';
     final primaryPartyName = isNetworkView
@@ -56,9 +55,7 @@ class RepaymentDetailsSummary extends StatelessWidget {
           decoration: BoxDecoration(
             color: colors.primaryContainer.withValues(alpha: 0.35),
             borderRadius: AppRadius.xlRadius,
-            border: Border.all(
-              color: colors.primary.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,10 +177,7 @@ class RepaymentDetailsSummary extends StatelessWidget {
 }
 
 class _MetadataRow extends StatelessWidget {
-  const _MetadataRow({
-    required this.label,
-    required this.value,
-  });
+  const _MetadataRow({required this.label, required this.value});
 
   final String label;
   final String value;

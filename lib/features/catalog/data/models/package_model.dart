@@ -62,7 +62,8 @@ class PackageModel extends PackageEntity {
       packageBalance: (json['package_balance'] as num?)?.toDouble() ?? 0.0,
       packageUptime: (json['package_uptime'] as num?)?.toInt(),
       packageValidity: (json['package_validity'] as num?)?.toInt(),
-      packageVoucherCount: (json['package_voucher_count'] as num?)?.toInt() ?? 1,
+      packageVoucherCount:
+          (json['package_voucher_count'] as num?)?.toInt() ?? 1,
       packageVoucherPrice: price,
       packageDefaultCashDiscount: cashDiscount,
       packageDefaultCreditDiscount: creditDiscount,
@@ -97,4 +98,3 @@ class PackageModel extends PackageEntity {
     };
   }
 }
-

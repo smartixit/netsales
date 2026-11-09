@@ -9,10 +9,7 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class RepaymentReversalAction extends StatelessWidget {
-  const RepaymentReversalAction({
-    super.key,
-    required this.repayment,
-  });
+  const RepaymentReversalAction({super.key, required this.repayment});
 
   final PosRepaymentEntity repayment;
 
@@ -22,8 +19,7 @@ class RepaymentReversalAction extends StatelessWidget {
       final confirmed = await CustomDialog.show(
         type: DialogType.warning,
         title: 'تأكيد عكس سند السداد',
-        message:
-            'سيُرسل طلب العكس إلى الخادم ليعيد تقييم التسويات والقيود المرتبطة بالسند. لا يمكن تنفيذ هذا الإجراء دون سبب موثق.',
+        message: 'سيُرسل طلب العكس إلى الخادم ليعيد تقييم التسويات والقيود المرتبطة بالسند. لا يمكن تنفيذ هذا الإجراء دون سبب موثق.',
         content: Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: CustomTextField(

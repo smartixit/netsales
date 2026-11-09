@@ -52,6 +52,8 @@ class LoginResponseModel extends AuthResultEntity {
         ? UserModel.fromJson({
             ...Map<String, dynamic>.from(rawUser),
             'workspace_roles': map['workspace_roles'] ?? const <dynamic>[],
+            'is_super_admin': map['is_super_admin'],
+            'role_key': map['role_key'],
           })
         : null;
 

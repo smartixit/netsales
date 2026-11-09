@@ -15,7 +15,8 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/pickers/custom_file_picker.dart';
 
-class NetworkOperatingExpensesScreen extends GetView<NetworkOperatingExpensesController> {
+class NetworkOperatingExpensesScreen
+    extends GetView<NetworkOperatingExpensesController> {
   const NetworkOperatingExpensesScreen({super.key});
 
   @override
@@ -29,7 +30,8 @@ class NetworkOperatingExpensesScreen extends GetView<NetworkOperatingExpensesCon
           child: CustomButton.primary(
             text: 'مصروف جديد',
             prefix: Icons.add_rounded,
-            onPressed: () => Get.to<void>(() => const NetworkExpenseFormScreen()),
+            onPressed: () =>
+                Get.to<void>(() => const NetworkExpenseFormScreen()),
           ),
         ),
     ],
@@ -49,91 +51,103 @@ class NetworkOperatingExpensesScreen extends GetView<NetworkOperatingExpensesCon
             onFieldSubmitted: (v) => controller.applyFilters(search: v),
           ),
           AppSpacing.vMd,
-          Expanded(child: Obx(() {
-            if (controller.isLoadingNetworks.value) return const CustomSkeletonFeed(itemCount: 3);
-            if (controller.networkError.value != null && controller.networks.isEmpty) {
-              return CustomErrorState.compact(
-                title: 'تعذر تحميل الشبكات',
-                subtitle: controller.networkError.value,
-                onRetry: controller.initializeNetworks,
-              );
-            }
-            if (controller.networks.isEmpty) {
-              return const CustomEmptyState.compact(
-                title: 'لا توجد شبكة متاحة',
-                subtitle: 'لا توجد شبكة مصرح بها لهذا الحساب.',
-              );
-            }
-            if (!controller.hasSelectedNetwork) {
-              return const CustomEmptyState.compact(
-                title: 'اختر الشبكة',
-                subtitle: 'حدد شبكة لعرض مصروفاتها. لا يتم اختيار شبكة تلقائياً عند تعدد الشبكات.',
-                icon: Icons.account_tree_outlined,
-              );
-            }
-            if (controller.isLoading.value && controller.expenses.isEmpty) {
-              return const CustomSkeletonFeed(itemCount: 5);
-            }
-            if (controller.error.value != null && controller.expenses.isEmpty) {
-              return CustomErrorState.compact(
-                title: 'تعذر تحميل المصروفات',
-                subtitle: controller.error.value,
-                onRetry: () => controller.loadExpenses(refresh: true),
-              );
-            }
-            if (controller.expenses.isEmpty) {
-              return CustomEmptyState(
-                title: 'لا توجد مصروفات مسجلة',
-                subtitle: 'ستظهر هنا سندات الصرف الخاصة بالشبكة المحددة.',
-                icon: Icons.receipt_long_outlined,
-                actionLabel: controller.canCreate ? 'تسجيل أول مصروف' : null,
-                onAction: controller.canCreate
-                    ? () => Get.to<void>(() => const NetworkExpenseFormScreen())
-                    : null,
-              );
-            }
-            return RefreshIndicator(
-              onRefresh: () => controller.loadExpenses(refresh: true),
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (n) {
-                  if (n.metrics.pixels >= n.metrics.maxScrollExtent - 180 &&
-                      controller.hasMore &&
-                      !controller.isLoadingMore.value &&
-                      controller.loadMoreError.value == null) {
-                    controller.loadExpenses();
-                  }
-                  return false;
-                },
-                child: ListView.separated(
-                  itemCount: controller.expenses.length +
-                      ((controller.hasMore || controller.loadMoreError.value != null) ? 1 : 0),
-                  separatorBuilder: (_, _) => AppSpacing.vSm,
-                  itemBuilder: (context, index) {
-                    if (index == controller.expenses.length) {
-                      if (controller.loadMoreError.value != null) {
-                        return CustomErrorState.compact(
-                          title: 'تعذر تحميل بقية السجلات',
-                          subtitle: controller.loadMoreError.value,
-                          onRetry: () {
-                            controller.loadMoreError.value = null;
-                            controller.loadExpenses();
-                          },
-                        );
-                      }
-                      return const CustomSkeletonFeed(itemCount: 1);
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoadingNetworks.value)
+                return const CustomSkeletonFeed(itemCount: 3);
+              if (controller.networkError.value != null &&
+                  controller.networks.isEmpty) {
+                return CustomErrorState.compact(
+                  title: 'تعذر تحميل الشبكات',
+                  subtitle: controller.networkError.value,
+                  onRetry: controller.initializeNetworks,
+                );
+              }
+              if (controller.networks.isEmpty) {
+                return const CustomEmptyState.compact(
+                  title: 'لا توجد شبكة متاحة',
+                  subtitle: 'لا توجد شبكة مصرح بها لهذا الحساب.',
+                );
+              }
+              if (!controller.hasSelectedNetwork) {
+                return const CustomEmptyState.compact(
+                  title: 'اختر الشبكة',
+                  subtitle: 'حدد شبكة لعرض مصروفاتها. لا يتم اختيار شبكة تلقائياً عند تعدد الشبكات.',
+                  icon: Icons.account_tree_outlined,
+                );
+              }
+              if (controller.isLoading.value && controller.expenses.isEmpty) {
+                return const CustomSkeletonFeed(itemCount: 5);
+              }
+              if (controller.error.value != null &&
+                  controller.expenses.isEmpty) {
+                return CustomErrorState.compact(
+                  title: 'تعذر تحميل المصروفات',
+                  subtitle: controller.error.value,
+                  onRetry: () => controller.loadExpenses(refresh: true),
+                );
+              }
+              if (controller.expenses.isEmpty) {
+                return CustomEmptyState(
+                  title: 'لا توجد مصروفات مسجلة',
+                  subtitle: 'ستظهر هنا سندات الصرف الخاصة بالشبكة المحددة.',
+                  icon: Icons.receipt_long_outlined,
+                  actionLabel: controller.canCreate ? 'تسجيل أول مصروف' : null,
+                  onAction: controller.canCreate
+                      ? () =>
+                            Get.to<void>(() => const NetworkExpenseFormScreen())
+                      : null,
+                );
+              }
+              return RefreshIndicator(
+                onRefresh: () => controller.loadExpenses(refresh: true),
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (n) {
+                    if (n.metrics.pixels >= n.metrics.maxScrollExtent - 180 &&
+                        controller.hasMore &&
+                        !controller.isLoadingMore.value &&
+                        controller.loadMoreError.value == null) {
+                      controller.loadExpenses();
                     }
-                    final expense = controller.expenses[index];
-                    return _ExpenseCard(
-                      expense: expense,
-                      onTap: () => Get.to<void>(
-                        () => NetworkExpenseDetailsScreen(expenseId: expense.expenseId),
-                      ),
-                    );
+                    return false;
                   },
+                  child: ListView.separated(
+                    itemCount:
+                        controller.expenses.length +
+                        ((controller.hasMore ||
+                                controller.loadMoreError.value != null)
+                            ? 1
+                            : 0),
+                    separatorBuilder: (_, _) => AppSpacing.vSm,
+                    itemBuilder: (context, index) {
+                      if (index == controller.expenses.length) {
+                        if (controller.loadMoreError.value != null) {
+                          return CustomErrorState.compact(
+                            title: 'تعذر تحميل بقية السجلات',
+                            subtitle: controller.loadMoreError.value,
+                            onRetry: () {
+                              controller.loadMoreError.value = null;
+                              controller.loadExpenses();
+                            },
+                          );
+                        }
+                        return const CustomSkeletonFeed(itemCount: 1);
+                      }
+                      final expense = controller.expenses[index];
+                      return _ExpenseCard(
+                        expense: expense,
+                        onTap: () => Get.to<void>(
+                          () => NetworkExpenseDetailsScreen(
+                            expenseId: expense.expenseId,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            );
-          })),
+              );
+            }),
+          ),
         ],
       ),
     ),
@@ -147,33 +161,61 @@ class _NetworkScope extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Obx(() {
-      final selected = controller.networks.where((n) => n.networkId == controller.selectedNetworkId.value);
+      final selected = controller.networks.where(
+        (n) => n.networkId == controller.selectedNetworkId.value,
+      );
       final current = selected.isEmpty ? null : selected.first;
       return Container(
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: colors.surfaceContainerLow,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: colors.outlineVariant.withValues(alpha: .55)),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: .55),
+          ),
         ),
-        child: Row(children: [
-          Icon(Icons.account_tree_outlined, color: colors.primary),
-          AppSpacing.hSm,
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('نطاق المصروفات', style: AppTypography.labelMedium.copyWith(color: colors.onSurfaceVariant)),
-            Text(current?.networkName ?? 'حدد الشبكة', style: AppTypography.titleSmall.copyWith(color: colors.onSurface)),
-          ])),
-          if (controller.networks.length > 1)
-            PopupMenuButton<int>(
-              tooltip: 'تغيير الشبكة',
-              onSelected: controller.selectNetwork,
-              itemBuilder: (_) => controller.networks.map((n) => PopupMenuItem<int>(
-                value: n.networkId,
-                child: Text(n.networkName),
-              )).toList(),
-              child: Icon(Icons.unfold_more_rounded, color: colors.onSurfaceVariant),
+        child: Row(
+          children: [
+            Icon(Icons.account_tree_outlined, color: colors.primary),
+            AppSpacing.hSm,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'نطاق المصروفات',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    current?.networkName ?? 'حدد الشبكة',
+                    style: AppTypography.titleSmall.copyWith(
+                      color: colors.onSurface,
+                    ),
+                  ),
+                ],
+              ),
             ),
-        ]),
+            if (controller.networks.length > 1)
+              PopupMenuButton<int>(
+                tooltip: 'تغيير الشبكة',
+                onSelected: controller.selectNetwork,
+                itemBuilder: (_) => controller.networks
+                    .map(
+                      (n) => PopupMenuItem<int>(
+                        value: n.networkId,
+                        child: Text(n.networkName),
+                      ),
+                    )
+                    .toList(),
+                child: Icon(
+                  Icons.unfold_more_rounded,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+          ],
+        ),
       );
     });
   }
@@ -192,31 +234,75 @@ class _ExpenseCard extends StatelessWidget {
       padding: EdgeInsets.all(AppSpacing.md),
       borderColor: colors.outlineVariant.withValues(alpha: .55),
       foregroundColor: colors.onSurface,
-      child: Row(children: [
-        Container(
-          width: 46, height: 46,
-          decoration: BoxDecoration(color: colors.primaryContainer, borderRadius: BorderRadius.circular(AppRadius.md)),
-          child: Icon(Icons.receipt_long_rounded, color: colors.onPrimaryContainer),
-        ),
-        AppSpacing.hMd,
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('مصروف #${expense.expenseId}', style: AppTypography.titleSmall.copyWith(color: colors.onSurface)),
-          AppSpacing.vXxs,
-          Text(expense.expenseDate ?? 'بدون تاريخ', style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
-          Text('${expense.items.length} بند • ${expense.attachments.length} مرفق', style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
-        ])),
-        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Text(expense.totalAmount.toStringAsFixed(2), style: AppTypography.titleMedium.copyWith(color: colors.primary, fontWeight: FontWeight.bold)),
-          Text('إجمالي الخادم', style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
-        ]),
-        AppSpacing.hXs,
-        Icon(Icons.chevron_left_rounded, color: colors.onSurfaceVariant),
-      ]),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: colors.primaryContainer,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+            child: Icon(
+              Icons.receipt_long_rounded,
+              color: colors.onPrimaryContainer,
+            ),
+          ),
+          AppSpacing.hMd,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'مصروف #${expense.expenseId}',
+                  style: AppTypography.titleSmall.copyWith(
+                    color: colors.onSurface,
+                  ),
+                ),
+                AppSpacing.vXxs,
+                Text(
+                  expense.expenseDate ?? 'بدون تاريخ',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  '${expense.items.length} بند • ${expense.attachments.length} مرفق',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                expense.totalAmount.toStringAsFixed(2),
+                style: AppTypography.titleMedium.copyWith(
+                  color: colors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'إجمالي الخادم',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.hXs,
+          Icon(Icons.chevron_left_rounded, color: colors.onSurfaceVariant),
+        ],
+      ),
     );
   }
 }
 
-class NetworkExpenseFormScreen extends GetView<NetworkOperatingExpensesController> {
+class NetworkExpenseFormScreen
+    extends GetView<NetworkOperatingExpensesController> {
   const NetworkExpenseFormScreen({super.key, this.expense});
   final ExpenseEntity? expense;
 
@@ -241,17 +327,30 @@ class _ExpenseFormBodyState extends State<_ExpenseFormBody> {
   void initState() {
     super.initState();
     Get.find<NetworkOperatingExpensesController>().formAttachments.clear();
-    _selectedDate = DateTime.tryParse(widget.expense?.expenseDate ?? '') ?? DateTime.now();
-    _date = TextEditingController(text: _selectedDate.toIso8601String().substring(0, 10));
+    _selectedDate =
+        DateTime.tryParse(widget.expense?.expenseDate ?? '') ?? DateTime.now();
+    _date = TextEditingController(
+      text: _selectedDate.toIso8601String().substring(0, 10),
+    );
     _items = widget.expense == null
-      ? [_ExpenseItemFields()]
-      : widget.expense!.items.map((i) => _ExpenseItemFields(statement: i.statement, amount: i.amount.toString())).toList();
+        ? [_ExpenseItemFields()]
+        : widget.expense!.items
+              .map(
+                (i) => _ExpenseItemFields(
+                  statement: i.statement,
+                  amount: i.amount.toString(),
+                ),
+              )
+              .toList();
   }
 
   @override
   void dispose() {
     _date.dispose();
-    for (final item in _items) { item.statement.dispose(); item.amount.dispose(); }
+    for (final item in _items) {
+      item.statement.dispose();
+      item.amount.dispose();
+    }
     super.dispose();
   }
 
@@ -270,12 +369,27 @@ class _ExpenseFormBodyState extends State<_ExpenseFormBody> {
           children: [
             Container(
               padding: EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(color: colors.primaryContainer, borderRadius: BorderRadius.circular(AppRadius.lg)),
-              child: Row(children: [
-                Icon(Icons.info_outline_rounded, color: colors.onPrimaryContainer),
-                AppSpacing.hSm,
-                Expanded(child: Text('سيتم احتساب الإجمالي وخصم المحفظة من الخادم بعد اعتماد الطلب.', style: AppTypography.bodySmall.copyWith(color: colors.onPrimaryContainer))),
-              ]),
+              decoration: BoxDecoration(
+                color: colors.primaryContainer,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: colors.onPrimaryContainer,
+                  ),
+                  AppSpacing.hSm,
+                  Expanded(
+                    child: Text(
+                      'سيتم احتساب الإجمالي وخصم المحفظة من الخادم بعد اعتماد الطلب.',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: colors.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             AppSpacing.vLg,
             CustomTextField(
@@ -287,33 +401,98 @@ class _ExpenseFormBodyState extends State<_ExpenseFormBody> {
               suffixIcon: CustomButton.icon(
                 icon: Icons.edit_calendar_outlined,
                 onPressed: () async {
-                  final date = await showDatePicker(context: context, initialDate: _selectedDate, firstDate: DateTime(2020), lastDate: DateTime.now().add(const Duration(days: 365)));
-                  if (date != null) setState(() { _selectedDate = date; _date.text = date.toIso8601String().substring(0,10); });
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (date != null)
+                    setState(() {
+                      _selectedDate = date;
+                      _date.text = date.toIso8601String().substring(0, 10);
+                    });
                 },
               ),
             ),
             AppSpacing.vLg,
-            Row(children: [
-              Expanded(child: Text('بنود المصروف', style: AppTypography.titleMedium.copyWith(color: colors.onSurface))),
-              CustomButton.outline(text: 'إضافة بند', icon: Icons.add_rounded, onPressed: () => setState(() => _items.add(_ExpenseItemFields()))),
-            ]),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'بنود المصروف',
+                    style: AppTypography.titleMedium.copyWith(
+                      color: colors.onSurface,
+                    ),
+                  ),
+                ),
+                CustomButton.outline(
+                  text: 'إضافة بند',
+                  icon: Icons.add_rounded,
+                  onPressed: () =>
+                      setState(() => _items.add(_ExpenseItemFields())),
+                ),
+              ],
+            ),
             AppSpacing.vSm,
             ...List.generate(_items.length, (index) {
               final item = _items[index];
               return Container(
                 margin: EdgeInsets.only(bottom: AppSpacing.md),
                 padding: EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(color: colors.surfaceContainerLow, borderRadius: BorderRadius.circular(AppRadius.lg), border: Border.all(color: colors.outlineVariant.withValues(alpha: .5))),
-                child: Column(children: [
-                  Row(children: [
-                    Expanded(child: Text('البند ${index + 1}', style: AppTypography.titleSmall.copyWith(color: colors.onSurface))),
-                    if (_items.length > 1) CustomButton.icon(icon: Icons.delete_outline_rounded, foregroundColor: colors.error, onPressed: () => setState(() { _items.removeAt(index); item.dispose(); })),
-                  ]),
-                  AppSpacing.vSm,
-                  CustomTextField(controller: item.statement, label: 'وصف المصروف', hint: 'مثال: إيجار مقر الشبكة', validator: (v) => v == null || v.trim().isEmpty ? 'أدخل وصف البند' : null),
-                  AppSpacing.vSm,
-                  CustomTextField(controller: item.amount, label: 'المبلغ', keyboardType: const TextInputType.numberWithOptions(decimal: true), prefixIcon: const Icon(Icons.payments_outlined), validator: (v) => (double.tryParse(v ?? '') ?? 0) <= 0 ? 'أدخل مبلغاً أكبر من صفر' : null),
-                ]),
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(
+                    color: colors.outlineVariant.withValues(alpha: .5),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'البند ${index + 1}',
+                            style: AppTypography.titleSmall.copyWith(
+                              color: colors.onSurface,
+                            ),
+                          ),
+                        ),
+                        if (_items.length > 1)
+                          CustomButton.icon(
+                            icon: Icons.delete_outline_rounded,
+                            foregroundColor: colors.error,
+                            onPressed: () => setState(() {
+                              _items.removeAt(index);
+                              item.dispose();
+                            }),
+                          ),
+                      ],
+                    ),
+                    AppSpacing.vSm,
+                    CustomTextField(
+                      controller: item.statement,
+                      label: 'وصف المصروف',
+                      hint: 'مثال: إيجار مقر الشبكة',
+                      validator: (v) => v == null || v.trim().isEmpty
+                          ? 'أدخل وصف البند'
+                          : null,
+                    ),
+                    AppSpacing.vSm,
+                    CustomTextField(
+                      controller: item.amount,
+                      label: 'المبلغ',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      prefixIcon: const Icon(Icons.payments_outlined),
+                      validator: (v) => (double.tryParse(v ?? '') ?? 0) <= 0
+                          ? 'أدخل مبلغاً أكبر من صفر'
+                          : null,
+                    ),
+                  ],
+                ),
               );
             }),
             AppSpacing.vMd,
@@ -322,25 +501,37 @@ class _ExpenseFormBodyState extends State<_ExpenseFormBody> {
               hint: 'PDF أو صور أو مستندات داعمة — حتى 5 ملفات',
               maxFiles: 5,
               maxFileSizeBytes: 10 * 1024 * 1024,
-              allowedExtensions: const ['pdf','jpg','jpeg','png','webp'],
+              allowedExtensions: const ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
               onFilesChanged: (files) => c.formAttachments.assignAll(files),
             ),
             AppSpacing.vXl,
-            Obx(() => CustomButton.primary(
-              text: widget.expense == null ? 'حفظ المصروف' : 'حفظ التعديلات',
-              width: double.infinity,
-              size: AppButtonSize.large,
-              loading: c.isSaving.value,
-              onPressed: c.isSaving.value ? null : () async {
-                if (!_formKey.currentState!.validate()) return;
-                final payload = _items.map((i) => {
-                  'item_statement': i.statement.text.trim(),
-                  'item_amount': i.amount.text.trim(),
-                }).toList();
-                final success = await c.saveExpense(expenseId: widget.expense?.expenseId, date: _selectedDate, items: payload);
-                if (success && context.mounted) Get.back<void>();
-              },
-            )),
+            Obx(
+              () => CustomButton.primary(
+                text: widget.expense == null ? 'حفظ المصروف' : 'حفظ التعديلات',
+                width: double.infinity,
+                size: AppButtonSize.large,
+                loading: c.isSaving.value,
+                onPressed: c.isSaving.value
+                    ? null
+                    : () async {
+                        if (!_formKey.currentState!.validate()) return;
+                        final payload = _items
+                            .map(
+                              (i) => {
+                                'item_statement': i.statement.text.trim(),
+                                'item_amount': i.amount.text.trim(),
+                              },
+                            )
+                            .toList();
+                        final success = await c.saveExpense(
+                          expenseId: widget.expense?.expenseId,
+                          date: _selectedDate,
+                          items: payload,
+                        );
+                        if (success && context.mounted) Get.back<void>();
+                      },
+              ),
+            ),
           ],
         ),
       ),
@@ -354,7 +545,10 @@ class _ExpenseItemFields {
       amount = TextEditingController(text: amount);
   final TextEditingController statement;
   final TextEditingController amount;
-  void dispose() { statement.dispose(); amount.dispose(); }
+  void dispose() {
+    statement.dispose();
+    amount.dispose();
+  }
 }
 
 class NetworkExpenseDetailsScreen extends StatefulWidget {
@@ -362,10 +556,12 @@ class NetworkExpenseDetailsScreen extends StatefulWidget {
   final int expenseId;
 
   @override
-  State<NetworkExpenseDetailsScreen> createState() => _NetworkExpenseDetailsScreenState();
+  State<NetworkExpenseDetailsScreen> createState() =>
+      _NetworkExpenseDetailsScreenState();
 }
 
-class _NetworkExpenseDetailsScreenState extends State<NetworkExpenseDetailsScreen> {
+class _NetworkExpenseDetailsScreenState
+    extends State<NetworkExpenseDetailsScreen> {
   late final NetworkOperatingExpensesController controller;
 
   @override
@@ -384,7 +580,8 @@ class _NetworkExpenseDetailsScreenState extends State<NetworkExpenseDetailsScree
       showBackButton: true,
       appBarTitle: 'تفاصيل المصروف #$expenseId',
       body: Obx(() {
-        if (controller.isLoadingDetails.value) return const CustomSkeletonFeed(itemCount: 4);
+        if (controller.isLoadingDetails.value)
+          return const CustomSkeletonFeed(itemCount: 4);
         final expense = controller.selectedExpense.value;
         if (expense == null) {
           return CustomErrorState.compact(
@@ -400,39 +597,102 @@ class _NetworkExpenseDetailsScreenState extends State<NetworkExpenseDetailsScree
             Container(
               padding: EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [colors.primary, colors.primary.withValues(alpha: .78)]),
+                gradient: LinearGradient(
+                  colors: [
+                    colors.primary,
+                    colors.primary.withValues(alpha: .78),
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(AppRadius.xl),
               ),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('إجمالي المصروف', style: AppTypography.labelLarge.copyWith(color: colors.onPrimary.withValues(alpha: .85))),
-                AppSpacing.vXs,
-                Text(expense.totalAmount.toStringAsFixed(2), style: AppTypography.headlineMedium.copyWith(color: colors.onPrimary, fontWeight: FontWeight.bold)),
-                AppSpacing.vXs,
-                Text(expense.expenseDate ?? '—', style: AppTypography.bodySmall.copyWith(color: colors.onPrimary)),
-              ]),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'إجمالي المصروف',
+                    style: AppTypography.labelLarge.copyWith(
+                      color: colors.onPrimary.withValues(alpha: .85),
+                    ),
+                  ),
+                  AppSpacing.vXs,
+                  Text(
+                    expense.totalAmount.toStringAsFixed(2),
+                    style: AppTypography.headlineMedium.copyWith(
+                      color: colors.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  AppSpacing.vXs,
+                  Text(
+                    expense.expenseDate ?? '—',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onPrimary,
+                    ),
+                  ),
+                ],
+              ),
             ),
             AppSpacing.vLg,
-            Text('تفاصيل البنود', style: AppTypography.titleMedium.copyWith(color: colors.onSurface)),
+            Text(
+              'تفاصيل البنود',
+              style: AppTypography.titleMedium.copyWith(
+                color: colors.onSurface,
+              ),
+            ),
             AppSpacing.vSm,
-            ...expense.items.map((item) => ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.receipt_outlined, color: colors.primary),
-              title: Text(item.statement),
-              trailing: Text(item.amount.toStringAsFixed(2), style: AppTypography.titleSmall.copyWith(color: colors.onSurface)),
-            )),
+            ...expense.items.map(
+              (item) => ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.receipt_outlined, color: colors.primary),
+                title: Text(item.statement),
+                trailing: Text(
+                  item.amount.toStringAsFixed(2),
+                  style: AppTypography.titleSmall.copyWith(
+                    color: colors.onSurface,
+                  ),
+                ),
+              ),
+            ),
             AppSpacing.vLg,
-            Text('المرفقات', style: AppTypography.titleMedium.copyWith(color: colors.onSurface)),
+            Text(
+              'المرفقات',
+              style: AppTypography.titleMedium.copyWith(
+                color: colors.onSurface,
+              ),
+            ),
             AppSpacing.vSm,
             if (expense.attachments.isEmpty)
-              const CustomEmptyState.compact(title: 'لا توجد مرفقات', icon: Icons.attach_file_rounded)
+              const CustomEmptyState.compact(
+                title: 'لا توجد مرفقات',
+                icon: Icons.attach_file_rounded,
+              )
             else
-              ...expense.attachments.map((attachment) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(attachment.mimeType?.startsWith('image/') == true ? Icons.image_outlined : Icons.picture_as_pdf_outlined, color: colors.primary),
-                title: Text(attachment.name),
-                subtitle: Text(attachment.sizeBytes > 0 ? '${(attachment.sizeBytes / 1024).toStringAsFixed(0)} KB' : 'مستند مرفق'),
-                trailing: attachment.fileUrl == null ? null : CustomButton.icon(icon: Icons.open_in_new_rounded, onPressed: () => UrlLauncherService.openInExternalBrowser(attachment.fileUrl!)),
-              )),
+              ...expense.attachments.map(
+                (attachment) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    attachment.mimeType?.startsWith('image/') == true
+                        ? Icons.image_outlined
+                        : Icons.picture_as_pdf_outlined,
+                    color: colors.primary,
+                  ),
+                  title: Text(attachment.name),
+                  subtitle: Text(
+                    attachment.sizeBytes > 0
+                        ? '${(attachment.sizeBytes / 1024).toStringAsFixed(0)} KB'
+                        : 'مستند مرفق',
+                  ),
+                  trailing: attachment.fileUrl == null
+                      ? null
+                      : CustomButton.icon(
+                          icon: Icons.open_in_new_rounded,
+                          onPressed: () =>
+                              UrlLauncherService.openInExternalBrowser(
+                                attachment.fileUrl!,
+                              ),
+                        ),
+                ),
+              ),
             if (controller.canEdit)
               Padding(
                 padding: EdgeInsets.only(top: AppSpacing.lg),
@@ -440,7 +700,9 @@ class _NetworkExpenseDetailsScreenState extends State<NetworkExpenseDetailsScree
                   width: double.infinity,
                   text: 'تعديل المصروف',
                   prefix: Icons.edit_outlined,
-                  onPressed: () => Get.to<void>(() => NetworkExpenseFormScreen(expense: expense)),
+                  onPressed: () => Get.to<void>(
+                    () => NetworkExpenseFormScreen(expense: expense),
+                  ),
                 ),
               ),
           ],

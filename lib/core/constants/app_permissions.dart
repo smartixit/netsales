@@ -8,8 +8,10 @@ abstract final class AppRoles {
   static const String superAdmin = 'SUPER_ADMIN';
   static const String networkOwner = 'NETWORK_OWNER';
   static const String networkUser = 'NETWORK_USER';
+  static const String networkAccountant = 'NETWORK_ACCOUNTANT';
   static const String posAgent = 'POS_AGENT';
   static const String posUser = 'POS_USER';
+  static const String posAccountant = 'POS_ACCOUNTANT';
   static const String supportAgent = 'SUPPORT_AGENT';
   static const String accountant = 'ACCOUNTANT';
 }

@@ -27,4 +27,3 @@ class DebtSummaryEntity {
     this.posId,
   });
 }
-

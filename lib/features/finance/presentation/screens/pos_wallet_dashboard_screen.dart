@@ -64,9 +64,9 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                       onRetry: walletId == null
                           ? null
                           : () => controller.loadWalletLogs(
-                                walletId,
-                                isRefresh: true,
-                              ),
+                              walletId,
+                              isRefresh: true,
+                            ),
                     );
                   }
 
@@ -107,9 +107,9 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                               onRetry: controller.hasMoreLogs
                                   ? controller.loadMoreLogs
                                   : () => controller.loadWalletLogs(
-                                        controller.selectedWallet.value!.walletId,
-                                        isRefresh: true,
-                                      ),
+                                      controller.selectedWallet.value!.walletId,
+                                      isRefresh: true,
+                                    ),
                             );
                           }
                           return const WalletLogEntrySkeleton();
@@ -212,7 +212,8 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                itemCount: controller.wallets.length +
+                itemCount:
+                    controller.wallets.length +
                     (controller.hasMoreWallets &&
                             controller.walletsLoadMoreErrorMessage.value == null
                         ? 1
@@ -220,10 +221,7 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                 separatorBuilder: (context, index) => AppSpacing.hSm,
                 itemBuilder: (context, index) {
                   if (index == controller.wallets.length) {
-                    return WalletSelectorSkeleton(
-                      width: 310.w,
-                      height: 180.h,
-                    );
+                    return WalletSelectorSkeleton(width: 310.w, height: 180.h);
                   }
 
                   final wallet = controller.wallets[index];
@@ -245,5 +243,4 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
       );
     });
   }
-
 }

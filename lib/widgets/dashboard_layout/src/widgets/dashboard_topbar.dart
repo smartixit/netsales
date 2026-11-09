@@ -59,8 +59,12 @@ class DashboardTopbar extends StatelessWidget {
                           ? null
                           : Text(
                               profile!.initials ??
-                                  (profile!.name.isEmpty ? '?' : profile!.name.substring(0, 1)),
-                              style: TextStyle(color: scheme.onPrimaryContainer),
+                                  (profile!.name.isEmpty
+                                      ? '?'
+                                      : profile!.name.substring(0, 1)),
+                              style: TextStyle(
+                                color: scheme.onPrimaryContainer,
+                              ),
                             ),
                     ),
                     const SizedBox(width: 9),
@@ -70,15 +74,18 @@ class DashboardTopbar extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(profile!.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(
+                            profile!.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           if (profile!.subtitle != null)
                             Text(
                               profile!.subtitle!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: scheme.onSurfaceVariant,
-                                  ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
                             ),
                         ],
                       ),

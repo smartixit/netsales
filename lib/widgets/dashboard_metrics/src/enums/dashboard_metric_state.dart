@@ -1,6 +1,1 @@
-enum DashboardMetricState {
-  loading,
-  data,
-  empty,
-  error,
-}
+enum DashboardMetricState { loading, data, empty, error }

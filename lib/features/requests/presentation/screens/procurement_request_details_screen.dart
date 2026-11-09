@@ -50,8 +50,7 @@ class ProcurementRequestDetailsScreen
         );
       }
 
-      final statusPresentation =
-          EnumPresentationRegistry.resolveRequestStatus(
+      final statusPresentation = EnumPresentationRegistry.resolveRequestStatus(
         request.status,
         serverLabel: request.statusLabel,
       );
@@ -73,8 +72,7 @@ class ProcurementRequestDetailsScreen
               tooltip: 'تحديث التفاصيل',
               backgroundColor: Colors.transparent,
               foregroundColor: colors.onSurfaceVariant,
-              onPressed: () =>
-                  controller.loadRequestDetails(request.requestId),
+              onPressed: () => controller.loadRequestDetails(request.requestId),
             ),
             AppSpacing.hXs,
           ],
@@ -288,4 +286,3 @@ class ProcurementRequestDetailsScreen
     );
   }
 }
-

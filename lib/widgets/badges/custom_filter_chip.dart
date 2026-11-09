@@ -94,13 +94,15 @@ class CustomFilterChip extends StatelessWidget {
               style: isCompact
                   ? AppTypography.labelSmall.copyWith(
                       color: isSelected ? colors.onPrimary : colors.onSurface,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                     )
                   : AppTypography.labelMedium.copyWith(
                       color: isSelected ? colors.onPrimary : colors.onSurface,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.w600,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w600,
                     ),
             ),
             if (count != null) ...[

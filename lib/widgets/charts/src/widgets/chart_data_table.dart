@@ -14,14 +14,16 @@ class ChartDataTable extends StatelessWidget {
     final theme = ChartsTheme.of(context);
     final points = <({ChartSeries series, ChartDataPoint point})>[
       for (final item in series)
-        for (final point in item.dataSource)
-          (series: item, point: point),
+        for (final point in item.dataSource) (series: item, point: point),
     ];
     if (points.isEmpty) return const SizedBox.shrink();
 
     final columns = <({String title, String Function(ChartDataPoint) value})>[
       (title: 'السلسلة', value: (_) => ''),
-      (title: 'الفئة / الوقت', value: (point) => _string(point.label ?? point.x)),
+      (
+        title: 'الفئة / الوقت',
+        value: (point) => _string(point.label ?? point.x),
+      ),
       if (points.any((row) => row.point.y != null))
         (title: 'القيمة', value: (point) => _string(point.y)),
       if (points.any((row) => row.point.low != null))
@@ -46,8 +48,8 @@ class ChartDataTable extends StatelessWidget {
           value: (point) => point.isTotalSum
               ? 'الإجمالي النهائي'
               : point.isIntermediateSum
-                  ? 'مجموع مرحلي'
-                  : '—',
+              ? 'مجموع مرحلي'
+              : '—',
         ),
     ];
 

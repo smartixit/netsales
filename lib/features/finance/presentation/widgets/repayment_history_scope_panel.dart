@@ -9,10 +9,7 @@ import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class RepaymentHistoryScopePanel extends StatelessWidget {
-  const RepaymentHistoryScopePanel({
-    super.key,
-    required this.controller,
-  });
+  const RepaymentHistoryScopePanel({super.key, required this.controller});
 
   final RepaymentHistoryController controller;
 
@@ -129,8 +126,9 @@ class RepaymentHistoryScopePanel extends StatelessWidget {
                 AppSpacing.vXs,
                 Obx(
                   () => CustomSegmentedBar(
-                    selectedIndex:
-                        _selectedIndex(controller.selectedStatus.value),
+                    selectedIndex: _selectedIndex(
+                      controller.selectedStatus.value,
+                    ),
                     items: const [
                       CustomSegmentItem(
                         label: 'الكل',
@@ -192,9 +190,7 @@ class _SelectedNetworkValue extends StatelessWidget {
               name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.titleSmall.copyWith(
-                color: colors.onSurface,
-              ),
+              style: AppTypography.titleSmall.copyWith(color: colors.onSurface),
             ),
           ),
           Icon(

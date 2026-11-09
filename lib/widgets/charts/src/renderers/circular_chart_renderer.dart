@@ -69,7 +69,9 @@ class CircularChartRenderer extends StatelessWidget {
             }
           };
 
-    void onRendererCreated(CircularSeriesController<ChartDataPoint, dynamic> controller) {
+    void onRendererCreated(
+      CircularSeriesController<ChartDataPoint, dynamic> controller,
+    ) {
       source?.bindSyncfusion(
         controller.updateDataSource,
         bindingId: '$bindingScope:${series.id}',
@@ -85,7 +87,8 @@ class CircularChartRenderer extends StatelessWidget {
               : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
-          pointColorMapper: (_, index) => theme.palette[index % theme.palette.length],
+          pointColorMapper: (_, index) =>
+              theme.palette[index % theme.palette.length],
           name: series.name,
           radius: '82%',
           explode: false,
@@ -103,7 +106,8 @@ class CircularChartRenderer extends StatelessWidget {
               : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
-          pointColorMapper: (_, index) => theme.palette[index % theme.palette.length],
+          pointColorMapper: (_, index) =>
+              theme.palette[index % theme.palette.length],
           name: series.name,
           radius: '82%',
           innerRadius: '64%',
@@ -121,7 +125,8 @@ class CircularChartRenderer extends StatelessWidget {
               : 0,
           xValueMapper: (point, index) => point.x ?? index,
           yValueMapper: (point, _) => point.y ?? 0,
-          pointColorMapper: (_, index) => theme.palette[index % theme.palette.length],
+          pointColorMapper: (_, index) =>
+              theme.palette[index % theme.palette.length],
           name: series.name,
           radius: '86%',
           innerRadius: '28%',
@@ -132,41 +137,45 @@ class CircularChartRenderer extends StatelessWidget {
           onPointTap: pointTap,
         );
       case ChartType.line ||
-           ChartType.spline ||
-           ChartType.fastLine ||
-           ChartType.area ||
-           ChartType.splineArea ||
-           ChartType.stepLine ||
-           ChartType.stepArea ||
-           ChartType.rangeArea ||
-           ChartType.splineRangeArea ||
-           ChartType.column ||
-           ChartType.bar ||
-           ChartType.stackedColumn ||
-           ChartType.stackedBar ||
-           ChartType.stackedArea ||
-           ChartType.stackedLine ||
-           ChartType.stackedColumn100 ||
-           ChartType.stackedBar100 ||
-           ChartType.stackedArea100 ||
-           ChartType.stackedLine100 ||
-           ChartType.waterfall ||
-           ChartType.scatter ||
-           ChartType.bubble ||
-           ChartType.histogram ||
-           ChartType.boxAndWhisker ||
-           ChartType.errorBar ||
-           ChartType.rangeColumn ||
-           ChartType.candle ||
-           ChartType.hilo ||
-           ChartType.ohlc ||
-           ChartType.funnel ||
-           ChartType.pyramid ||
-           ChartType.sparkLine ||
-           ChartType.sparkArea ||
-           ChartType.sparkBar ||
-           ChartType.sparkWinLoss:
-        throw ArgumentError.value(type, 'series.type', 'This chart type is not circular.');
+          ChartType.spline ||
+          ChartType.fastLine ||
+          ChartType.area ||
+          ChartType.splineArea ||
+          ChartType.stepLine ||
+          ChartType.stepArea ||
+          ChartType.rangeArea ||
+          ChartType.splineRangeArea ||
+          ChartType.column ||
+          ChartType.bar ||
+          ChartType.stackedColumn ||
+          ChartType.stackedBar ||
+          ChartType.stackedArea ||
+          ChartType.stackedLine ||
+          ChartType.stackedColumn100 ||
+          ChartType.stackedBar100 ||
+          ChartType.stackedArea100 ||
+          ChartType.stackedLine100 ||
+          ChartType.waterfall ||
+          ChartType.scatter ||
+          ChartType.bubble ||
+          ChartType.histogram ||
+          ChartType.boxAndWhisker ||
+          ChartType.errorBar ||
+          ChartType.rangeColumn ||
+          ChartType.candle ||
+          ChartType.hilo ||
+          ChartType.ohlc ||
+          ChartType.funnel ||
+          ChartType.pyramid ||
+          ChartType.sparkLine ||
+          ChartType.sparkArea ||
+          ChartType.sparkBar ||
+          ChartType.sparkWinLoss:
+        throw ArgumentError.value(
+          type,
+          'series.type',
+          'This chart type is not circular.',
+        );
     }
   }
 }

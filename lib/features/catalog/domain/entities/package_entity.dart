@@ -54,8 +54,7 @@ class PackageEntity {
   String get balanceDisplay =>
       PackageSpecFormatter.formatBalance(packageBalance);
 
-  String get uptimeDisplay =>
-      PackageSpecFormatter.formatUptime(packageUptime);
+  String get uptimeDisplay => PackageSpecFormatter.formatUptime(packageUptime);
 
   String get validityDisplay =>
       PackageSpecFormatter.formatValidity(packageValidity);

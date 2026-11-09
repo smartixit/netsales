@@ -7,10 +7,7 @@ import 'package:netsales/features/catalog/presentation/widgets/package_spec_tile
 class PackageSpecsMobileLayout extends StatelessWidget {
   final PackageEntity package;
 
-  const PackageSpecsMobileLayout({
-    super.key,
-    required this.package,
-  });
+  const PackageSpecsMobileLayout({super.key, required this.package});
 
   @override
   Widget build(BuildContext context) {

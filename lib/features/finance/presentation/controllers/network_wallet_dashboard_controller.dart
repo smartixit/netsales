@@ -219,9 +219,7 @@ class NetworkWalletDashboardController extends GetxController {
         logs.assignAll(res.items);
       } else {
         final existingIds = logs.map((item) => item.logId).toSet();
-        logs.addAll(
-          res.items.where((item) => existingIds.add(item.logId)),
-        );
+        logs.addAll(res.items.where((item) => existingIds.add(item.logId)));
       }
       nextCursor.value = res.nextCursor;
       logsErrorMessage.value = null;

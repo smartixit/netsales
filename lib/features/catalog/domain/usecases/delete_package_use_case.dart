@@ -9,4 +9,3 @@ class DeletePackageUseCase {
     return _repository.deletePackage(packageId);
   }
 }
-

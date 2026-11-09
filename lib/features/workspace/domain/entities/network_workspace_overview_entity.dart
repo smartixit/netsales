@@ -17,7 +17,9 @@ class NetworkWorkspaceOverviewEntity {
 
   Map<String, dynamic>? metric(String group) {
     final value = metrics[group];
-    return value is Map<String, dynamic> ? Map<String, dynamic>.from(value) : null;
+    return value is Map<String, dynamic>
+        ? Map<String, dynamic>.from(value)
+        : null;
   }
 
   String count(String group, String key) {

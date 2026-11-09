@@ -103,7 +103,9 @@ class ChartCard extends StatelessWidget {
       ],
       if (onToggleDataTable != null)
         ChartToolbarAction(
-          icon: showDataTable ? Icons.show_chart_rounded : Icons.table_chart_outlined,
+          icon: showDataTable
+              ? Icons.show_chart_rounded
+              : Icons.table_chart_outlined,
           tooltip: showDataTable ? 'عرض المخطط' : 'عرض البيانات',
           onPressed: onToggleDataTable,
         ),
@@ -214,7 +216,9 @@ class ChartCard extends StatelessWidget {
                         color: selected
                             ? scheme.onPrimaryContainer
                             : theme.mutedText,
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
                       side: BorderSide(color: theme.border),
                       showCheckmark: false,
@@ -233,8 +237,8 @@ class ChartCard extends StatelessWidget {
             width: double.infinity,
             child: state == ChartState.data
                 ? (showDataTable
-                    ? ChartDataTable(series: series)
-                    : RepaintBoundary(key: chartBoundaryKey, child: chart))
+                      ? ChartDataTable(series: series)
+                      : RepaintBoundary(key: chartBoundaryKey, child: chart))
                 : ChartStateView(
                     state: state,
                     message: stateMessage,
@@ -242,10 +246,7 @@ class ChartCard extends StatelessWidget {
                     onRetry: onRetry,
                   ),
           ),
-          if (footer != null) ...[
-            const SizedBox(height: 10),
-            footer!,
-          ],
+          if (footer != null) ...[const SizedBox(height: 10), footer!],
         ],
       ),
     );
@@ -282,9 +283,9 @@ class _ChartCardHeader extends StatelessWidget {
                   Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: theme.text,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      color: theme.text,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   ?badge,
                 ],
@@ -293,20 +294,15 @@ class _ChartCardHeader extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   description!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: theme.mutedText,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: theme.mutedText),
                 ),
               ],
             ],
           ),
         ),
         if (actions.isNotEmpty)
-          Wrap(
-            spacing: 4,
-            runSpacing: 4,
-            children: actions,
-          ),
+          Wrap(spacing: 4, runSpacing: 4, children: actions),
       ],
     );
   }

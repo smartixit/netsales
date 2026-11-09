@@ -105,19 +105,21 @@ class FunnelChartRenderer extends StatelessWidget {
           : 0,
       xValueMapper: (point, index) => point.x ?? index,
       yValueMapper: (point, _) => point.y ?? 0,
-      pointColorMapper: (_, index) => theme.palette[index % theme.palette.length],
+      pointColorMapper: (_, index) =>
+          theme.palette[index % theme.palette.length],
       name: series.name,
       opacity: series.opacity,
       dataLabelSettings: DataLabelSettings(
         isVisible: definition.options.showDataLabels,
         textStyle: TextStyle(color: theme.text, fontSize: 11),
       ),
-      onRendererCreated: (FunnelSeriesController<ChartDataPoint, dynamic> controller) {
-        source?.bindSyncfusion(
-          controller.updateDataSource,
-          bindingId: '$bindingScope:${series.id}',
-        );
-      },
+      onRendererCreated:
+          (FunnelSeriesController<ChartDataPoint, dynamic> controller) {
+            source?.bindSyncfusion(
+              controller.updateDataSource,
+              bindingId: '$bindingScope:${series.id}',
+            );
+          },
       onPointTap: pointTap,
     );
   }
@@ -147,19 +149,21 @@ class FunnelChartRenderer extends StatelessWidget {
           : 0,
       xValueMapper: (point, index) => point.x ?? index,
       yValueMapper: (point, _) => point.y ?? 0,
-      pointColorMapper: (_, index) => theme.palette[index % theme.palette.length],
+      pointColorMapper: (_, index) =>
+          theme.palette[index % theme.palette.length],
       name: series.name,
       opacity: series.opacity,
       dataLabelSettings: DataLabelSettings(
         isVisible: definition.options.showDataLabels,
         textStyle: TextStyle(color: theme.text, fontSize: 11),
       ),
-      onRendererCreated: (PyramidSeriesController<ChartDataPoint, dynamic> controller) {
-        source?.bindSyncfusion(
-          controller.updateDataSource,
-          bindingId: '$bindingScope:${series.id}',
-        );
-      },
+      onRendererCreated:
+          (PyramidSeriesController<ChartDataPoint, dynamic> controller) {
+            source?.bindSyncfusion(
+              controller.updateDataSource,
+              bindingId: '$bindingScope:${series.id}',
+            );
+          },
       onPointTap: pointTap,
     );
   }

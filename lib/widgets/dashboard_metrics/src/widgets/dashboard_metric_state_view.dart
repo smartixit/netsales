@@ -24,14 +24,14 @@ class DashboardMetricStateView extends StatelessWidget {
     return switch (state) {
       DashboardMetricState.loading => const _MetricSkeleton(),
       DashboardMetricState.empty => _StateMessage(
-          icon: Icons.query_stats_rounded,
-          message: emptyMessage,
-        ),
+        icon: Icons.query_stats_rounded,
+        message: emptyMessage,
+      ),
       DashboardMetricState.error => _ErrorMessage(
-          message: errorMessage,
-          retryLabel: retryLabel,
-          onRetry: onRetry,
-        ),
+        message: errorMessage,
+        retryLabel: retryLabel,
+        onRetry: onRetry,
+      ),
       DashboardMetricState.data => const SizedBox.shrink(),
     };
   }
@@ -45,15 +45,15 @@ class _StateMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
-            const SizedBox(height: 8),
-            Text(message, textAlign: TextAlign.center),
-          ],
-        ),
-      );
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        const SizedBox(height: 8),
+        Text(message, textAlign: TextAlign.center),
+      ],
+    ),
+  );
 }
 
 class _ErrorMessage extends StatelessWidget {
@@ -69,26 +69,26 @@ class _ErrorMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 8),
-            Text(message, textAlign: TextAlign.center),
-            if (onRetry != null) ...[
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(retryLabel),
-              ),
-            ],
-          ],
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.error_outline_rounded,
+          color: Theme.of(context).colorScheme.error,
         ),
-      );
+        const SizedBox(height: 8),
+        Text(message, textAlign: TextAlign.center),
+        if (onRetry != null) ...[
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded),
+            label: Text(retryLabel),
+          ),
+        ],
+      ],
+    ),
+  );
 }
 
 class _MetricSkeleton extends StatelessWidget {
@@ -123,11 +123,11 @@ class _SkeletonBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(6),
-        ),
-      );
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(6),
+    ),
+  );
 }

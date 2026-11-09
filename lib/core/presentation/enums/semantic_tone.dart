@@ -19,4 +19,3 @@ enum SemanticTone {
   /// تمييز بعلامة النظام الأساسية عند الحاجة (Primary)
   primary,
 }
-

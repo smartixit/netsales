@@ -32,22 +32,31 @@ class NetworkOperatingExpensesBinding extends Bindings {
         fenix: true,
       );
     }
-    Get.lazyPut<ExpenseRemoteDataSource>(() => const ExpenseRemoteDataSourceImpl());
-    Get.lazyPut<ExpenseRepository>(() => ExpenseRepositoryImpl(
-      remoteDataSource: Get.find<ExpenseRemoteDataSource>(),
-    ));
+    Get.lazyPut<ExpenseRemoteDataSource>(
+      () => const ExpenseRemoteDataSourceImpl(),
+    );
+    Get.lazyPut<ExpenseRepository>(
+      () => ExpenseRepositoryImpl(
+        remoteDataSource: Get.find<ExpenseRemoteDataSource>(),
+      ),
+    );
     Get.lazyPut(() => GetExpensesUseCase(Get.find<ExpenseRepository>()));
     Get.lazyPut(() => GetExpenseDetailsUseCase(Get.find<ExpenseRepository>()));
     Get.lazyPut(() => CreateExpenseUseCase(Get.find<ExpenseRepository>()));
     Get.lazyPut(() => UpdateExpenseUseCase(Get.find<ExpenseRepository>()));
-    Get.lazyPut(() => DeleteExpenseAttachmentUseCase(Get.find<ExpenseRepository>()));
-    Get.lazyPut(() => NetworkOperatingExpensesController(
-      getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
-      getExpensesUseCase: Get.find<GetExpensesUseCase>(),
-      getExpenseDetailsUseCase: Get.find<GetExpenseDetailsUseCase>(),
-      createExpenseUseCase: Get.find<CreateExpenseUseCase>(),
-      updateExpenseUseCase: Get.find<UpdateExpenseUseCase>(),
-      deleteExpenseAttachmentUseCase: Get.find<DeleteExpenseAttachmentUseCase>(),
-    ));
+    Get.lazyPut(
+      () => DeleteExpenseAttachmentUseCase(Get.find<ExpenseRepository>()),
+    );
+    Get.lazyPut(
+      () => NetworkOperatingExpensesController(
+        getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
+        getExpensesUseCase: Get.find<GetExpensesUseCase>(),
+        getExpenseDetailsUseCase: Get.find<GetExpenseDetailsUseCase>(),
+        createExpenseUseCase: Get.find<CreateExpenseUseCase>(),
+        updateExpenseUseCase: Get.find<UpdateExpenseUseCase>(),
+        deleteExpenseAttachmentUseCase:
+            Get.find<DeleteExpenseAttachmentUseCase>(),
+      ),
+    );
   }
 }

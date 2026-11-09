@@ -14,11 +14,7 @@ class RepaymentBeneficiarySkeleton extends StatelessWidget {
     return CustomSkeletonShimmer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _field(colors, 92),
-          AppSpacing.vMd,
-          _field(colors, 118),
-        ],
+        children: [_field(colors, 92), AppSpacing.vMd, _field(colors, 118)],
       ),
     );
   }

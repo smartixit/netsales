@@ -18,4 +18,3 @@ enum SaleType {
 
   bool get isKnown => this != SaleType.unknown;
 }
-

@@ -61,26 +61,28 @@ class ProcurementSheetQuantitySection
           return Wrap(
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
-            children: presets.map((preset) {
-              final isSelected =
-                  (enteredSheets - preset.sheets).abs() < 1e-9;
+            children: presets
+                .map((preset) {
+                  final isSelected =
+                      (enteredSheets - preset.sheets).abs() < 1e-9;
 
-              if (isSelected) {
-                return CustomButton.secondary(
-                  text: preset.shortLabel,
-                  size: AppButtonSize.small,
-                  onPressed: () =>
-                      controller.setSheetCount(preset.sheets.toString()),
-                );
-              }
+                  if (isSelected) {
+                    return CustomButton.secondary(
+                      text: preset.shortLabel,
+                      size: AppButtonSize.small,
+                      onPressed: () =>
+                          controller.setSheetCount(preset.sheets.toString()),
+                    );
+                  }
 
-              return CustomButton.outline(
-                text: preset.shortLabel,
-                size: AppButtonSize.small,
-                onPressed: () =>
-                    controller.setSheetCount(preset.sheets.toString()),
-              );
-            }).toList(growable: false),
+                  return CustomButton.outline(
+                    text: preset.shortLabel,
+                    size: AppButtonSize.small,
+                    onPressed: () =>
+                        controller.setSheetCount(preset.sheets.toString()),
+                  );
+                })
+                .toList(growable: false),
           );
         }),
         AppSpacing.vSm,
@@ -100,9 +102,7 @@ class ProcurementSheetQuantitySection
           if (voucherCount <= 0) {
             return Text(
               'أدخل كمية أوراق صحيحة لعرض عدد الكروت المكافئ.',
-              style: AppTypography.bodySmall.copyWith(
-                color: colors.error,
-              ),
+              style: AppTypography.bodySmall.copyWith(color: colors.error),
             );
           }
 
@@ -116,9 +116,7 @@ class ProcurementSheetQuantitySection
             decoration: BoxDecoration(
               color: colors.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: colors.primary.withValues(alpha: 0.18),
-              ),
+              border: Border.all(color: colors.primary.withValues(alpha: 0.18)),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -184,8 +184,12 @@ class NetworkWalletTransferController extends GetxController {
     final wallet = selectedWallet.value;
     final posId = selectedPosId.value;
     final amount = double.tryParse(amountController.text.trim());
-    if (wallet == null || !wallet.status || posId == null ||
-        amount == null || !amount.isFinite || amount < 0.01) {
+    if (wallet == null ||
+        !wallet.status ||
+        posId == null ||
+        amount == null ||
+        !amount.isFinite ||
+        amount < 0.01) {
       CustomSnackbar.show(
         title: 'بيانات التحويل غير مكتملة',
         message: 'اختر نقطة البيع وأدخل مبلغاً صحيحاً لا يقل عن 0.01.',

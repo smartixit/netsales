@@ -20,4 +20,3 @@ enum BackupStatus {
 
   bool get isKnown => this != BackupStatus.unknown;
 }
-

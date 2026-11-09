@@ -30,4 +30,3 @@ class PackageFormStatusSection extends GetView<PackageCatalogController> {
     });
   }
 }
-

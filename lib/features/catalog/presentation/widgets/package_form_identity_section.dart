@@ -91,4 +91,3 @@ class PackageFormIdentitySection extends GetView<PackageCatalogController> {
     );
   }
 }
-

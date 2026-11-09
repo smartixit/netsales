@@ -42,7 +42,8 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                           height: 230,
                           child: CustomEmptyState(
                             icon: Icons.account_balance_wallet_outlined,
-                            title: controller.selectedPosId.value == null &&
+                            title:
+                                controller.selectedPosId.value == null &&
                                     controller.posOptions.length > 1
                                 ? 'حدد نقطة البيع'
                                 : 'حدد مزود الشبكة',
@@ -60,8 +61,7 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                     children: [
                       Obx(() {
                         final debtSummary = controller.summary.value;
-                        if (debtSummary == null &&
-                            controller.isLoading.value) {
+                        if (debtSummary == null && controller.isLoading.value) {
                           return const CustomSkeletonFeed(itemCount: 1);
                         }
                         if (debtSummary == null &&
@@ -119,9 +119,11 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                           return NotificationListener<ScrollNotification>(
                             onNotification: (scrollInfo) {
                               if (scrollInfo.metrics.pixels >=
-                                      scrollInfo.metrics.maxScrollExtent - 200 &&
+                                      scrollInfo.metrics.maxScrollExtent -
+                                          200 &&
                                   controller.hasMore &&
-                                  controller.invoicesErrorMessage.value == null &&
+                                  controller.invoicesErrorMessage.value ==
+                                      null &&
                                   !controller.isLoadingMore.value) {
                                 controller.loadMoreInvoices();
                               }
@@ -131,9 +133,12 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                               itemCount:
                                   controller.outstandingInvoices.length +
                                   (controller.hasMore ||
-                                          (controller.invoicesErrorMessage.value !=
+                                          (controller
+                                                      .invoicesErrorMessage
+                                                      .value !=
                                                   null &&
-                                              controller.outstandingInvoices
+                                              controller
+                                                  .outstandingInvoices
                                                   .isNotEmpty)
                                       ? 1
                                       : 0),
@@ -149,8 +154,8 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                                       onRetry: controller.hasMore
                                           ? controller.loadMoreInvoices
                                           : () => controller.loadInvoices(
-                                                isRefresh: true,
-                                              ),
+                                              isRefresh: true,
+                                            ),
                                     );
                                   }
                                   return const OutstandingInvoiceSkeleton();

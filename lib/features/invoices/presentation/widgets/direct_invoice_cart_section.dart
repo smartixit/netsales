@@ -8,8 +8,7 @@ import 'package:netsales/features/invoices/presentation/controllers/network_dire
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// Editable list of direct invoice lines. No client-side prices or totals.
-class DirectInvoiceCartSection
-    extends GetView<NetworkDirectInvoiceController> {
+class DirectInvoiceCartSection extends GetView<NetworkDirectInvoiceController> {
   const DirectInvoiceCartSection({super.key});
 
   @override
@@ -138,9 +137,9 @@ class DirectInvoiceCartSection
                       foregroundColor: colors.onSurfaceVariant,
                       onPressed: line.voucherCount > 1
                           ? () => controller.updateLineQuantity(
-                                line.package.packageId,
-                                line.voucherCount - 1,
-                              )
+                              line.package.packageId,
+                              line.voucherCount - 1,
+                            )
                           : null,
                     ),
                     Text(

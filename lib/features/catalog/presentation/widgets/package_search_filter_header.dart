@@ -57,12 +57,13 @@ class PackageSearchFilterHeader extends GetView<PackageCatalogController> {
             final selectedIndex = activeFilter == null
                 ? 0
                 : activeFilter
-                    ? 1
-                    : 2;
+                ? 1
+                : 2;
 
             final allCount = controller.packages.length;
-            final activeCount =
-                controller.packages.where((p) => p.status).length;
+            final activeCount = controller.packages
+                .where((p) => p.status)
+                .length;
             final inactiveCount = allCount - activeCount;
 
             return CustomSegmentedBar(
@@ -100,4 +101,3 @@ class PackageSearchFilterHeader extends GetView<PackageCatalogController> {
     );
   }
 }
-

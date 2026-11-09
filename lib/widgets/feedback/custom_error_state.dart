@@ -100,8 +100,7 @@ class CustomErrorState extends StatelessWidget {
   factory CustomErrorState.server({
     Key? key,
     String title = 'الخدمة غير متاحة مؤقتاً',
-    String subtitle =
-        'حدث خطأ غير متوقع أثناء معالجة الطلب في الخادم. يجري العمل على حل المشكلة.',
+    String subtitle = 'حدث خطأ غير متوقع أثناء معالجة الطلب في الخادم. يجري العمل على حل المشكلة.',
     String retryLabel = 'إعادة المحاولة',
     VoidCallback? onRetry,
     String? technicalDetails,
@@ -454,9 +453,7 @@ class CustomErrorState extends StatelessWidget {
       color: colors.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.card),
-        side: BorderSide(
-          color: colors.outlineVariant.withValues(alpha: 0.4),
-        ),
+        side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.4)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Theme(

@@ -37,10 +37,7 @@ class PosNetworkCarouselCard extends StatelessWidget {
             end: Alignment.bottomLeft,
             colors: isSelected
                 ? [colors.primary, colors.secondary]
-                : [
-                    colors.surfaceContainerHigh,
-                    colors.surfaceContainerLow,
-                  ],
+                : [colors.surfaceContainerHigh, colors.surfaceContainerLow],
           ),
           border: Border.all(
             color: isSelected
@@ -74,19 +71,24 @@ class PosNetworkCarouselCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: network?.networkProfileLogoUrl != null &&
+                  child:
+                      network?.networkProfileLogoUrl != null &&
                           network!.networkProfileLogoUrl!.trim().isNotEmpty
                       ? CachedNetworkImage(
                           imageUrl: network.networkProfileLogoUrl!,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Icon(
                             Icons.hub_rounded,
-                            color: isSelected ? colors.onPrimary : colors.primary,
+                            color: isSelected
+                                ? colors.onPrimary
+                                : colors.primary,
                             size: 24.r,
                           ),
                           errorWidget: (context, url, error) => Icon(
                             Icons.hub_rounded,
-                            color: isSelected ? colors.onPrimary : colors.primary,
+                            color: isSelected
+                                ? colors.onPrimary
+                                : colors.primary,
                             size: 24.r,
                           ),
                         )

@@ -20,4 +20,3 @@ enum RequestStatus {
 
   bool get isKnown => this != RequestStatus.unknown;
 }
-

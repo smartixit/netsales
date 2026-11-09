@@ -11,4 +11,3 @@ class GetRequestDetailsUseCase {
     return _repository.getRequestDetails(requestId);
   }
 }
-

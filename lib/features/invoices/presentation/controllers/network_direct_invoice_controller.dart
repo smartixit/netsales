@@ -79,10 +79,8 @@ class NetworkDirectInvoiceController extends GetxController {
         cart.any((line) => line.package.packageId == packageId);
   }
 
-  int get requestedItemCount => cart.fold<int>(
-        0,
-        (total, line) => total + line.voucherCount,
-      );
+  int get requestedItemCount =>
+      cart.fold<int>(0, (total, line) => total + line.voucherCount);
 
   @override
   void onInit() {
@@ -106,7 +104,8 @@ class NetworkDirectInvoiceController extends GetxController {
       final networks = await getMyNetworksUseCase();
       authorizedNetworks.assignAll(networks);
       if (networks.isEmpty) {
-        errorMessage.value = 'لا توجد شبكة مخولة بإصدار فواتير مبيعات لهذا الحساب.';
+        errorMessage.value =
+            'لا توجد شبكة مخولة بإصدار فواتير مبيعات لهذا الحساب.';
         return;
       }
 
@@ -343,8 +342,7 @@ class NetworkDirectInvoiceController extends GetxController {
   }
 
   void setSaleType(SaleType saleType) {
-    if (saleType == SaleType.unknown ||
-        selectedSaleType.value == saleType) {
+    if (saleType == SaleType.unknown || selectedSaleType.value == saleType) {
       return;
     }
     _invalidateSubmissionIdempotencyKey();

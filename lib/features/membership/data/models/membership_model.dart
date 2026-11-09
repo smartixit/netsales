@@ -24,12 +24,15 @@ class MembershipModel extends MembershipEntity {
       userId: _toInt(json['user_id'] ?? user['user_id']),
       fullName: user['user_full_name']?.toString() ?? 'مستخدم',
       phoneNumber: user['user_phone_number']?.toString() ?? '',
-      profileLogo: user['user_profile_logo_url']?.toString() ??
+      profileLogo:
+          user['user_profile_logo_url']?.toString() ??
           user['user_profile_logo']?.toString(),
       roleId: _toInt(json['role_id'] ?? role['role_id']),
       roleKey: role['role_key']?.toString() ?? '',
-      roleLabel: role['role_key_label']?.toString() ??
-          role['role_name']?.toString() ?? 'دور غير محدد',
+      roleLabel:
+          role['role_key_label']?.toString() ??
+          role['role_name']?.toString() ??
+          'دور غير محدد',
       status: json['status']?.toString() ?? 'UNKNOWN',
       isOwner: json['is_owner'] == true || json['is_owner'] == 1,
     );

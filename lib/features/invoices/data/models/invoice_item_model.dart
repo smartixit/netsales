@@ -54,4 +54,3 @@ class InvoiceItemModel extends InvoiceItemEntity {
     };
   }
 }
-

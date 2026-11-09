@@ -28,4 +28,3 @@ abstract interface class RequestRemoteDataSource {
     Map<String, dynamic> data,
   );
 }
-

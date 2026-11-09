@@ -1,7 +1,6 @@
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 
-class RequestModificationPreviewModel
-    extends RequestModificationPreviewEntity {
+class RequestModificationPreviewModel extends RequestModificationPreviewEntity {
   const RequestModificationPreviewModel({
     required super.requestId,
     super.requestUuid,
@@ -16,9 +15,7 @@ class RequestModificationPreviewModel
     required super.removedItems,
   });
 
-  factory RequestModificationPreviewModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory RequestModificationPreviewModel.fromJson(Map<String, dynamic> json) {
     return RequestModificationPreviewModel(
       requestId: _requiredInt(json, 'request_id'),
       requestUuid: json['request_uuid'] as String?,
@@ -29,18 +26,18 @@ class RequestModificationPreviewModel
       saleType: _requiredString(json, 'sale_type'),
       saleTypeLabel: _requiredString(json, 'sale_type_label'),
       hasModifications: json['has_modifications'] == true,
-      items: _requiredList(json, 'items')
-          .map(_parsePreviewItem)
-          .toList(growable: false),
-      removedItems: _requiredList(json, 'removed_items')
-          .map(_parseRemovedItem)
-          .toList(growable: false),
+      items: _requiredList(
+        json,
+        'items',
+      ).map(_parsePreviewItem).toList(growable: false),
+      removedItems: _requiredList(
+        json,
+        'removed_items',
+      ).map(_parseRemovedItem).toList(growable: false),
     );
   }
 
-  static RequestModificationPreviewItemEntity _parsePreviewItem(
-    dynamic value,
-  ) {
+  static RequestModificationPreviewItemEntity _parsePreviewItem(dynamic value) {
     if (value is! Map<String, dynamic>) {
       throw const FormatException('Invalid request modification preview item.');
     }
@@ -62,9 +59,7 @@ class RequestModificationPreviewModel
     );
   }
 
-  static RequestModificationRemovedItemEntity _parseRemovedItem(
-    dynamic value,
-  ) {
+  static RequestModificationRemovedItemEntity _parseRemovedItem(dynamic value) {
     if (value is! Map<String, dynamic>) {
       throw const FormatException('Invalid removed request item.');
     }
@@ -79,10 +74,7 @@ class RequestModificationPreviewModel
     );
   }
 
-  static List<dynamic> _requiredList(
-    Map<String, dynamic> json,
-    String key,
-  ) {
+  static List<dynamic> _requiredList(Map<String, dynamic> json, String key) {
     final value = json[key];
     if (value is! List) {
       throw FormatException('Missing or invalid "$key" in preview response.');

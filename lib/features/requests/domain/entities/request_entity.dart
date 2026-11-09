@@ -58,4 +58,3 @@ class RequestEntity {
   bool get isRejected => status == RequestStatus.rejected;
   bool get isCancelled => status == RequestStatus.cancelled;
 }
-

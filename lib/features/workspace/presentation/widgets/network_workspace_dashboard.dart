@@ -43,7 +43,9 @@ class NetworkWorkspaceDashboard extends GetView<NetworkWorkspaceController> {
       if (overview == null) {
         return CustomErrorState.boxed(
           title: 'بيانات لوحة الشبكة غير متاحة',
-          subtitle: controller.errorMessage.value ?? 'لم تصل استجابة صالحة من الخادم.',
+          subtitle:
+              controller.errorMessage.value ??
+              'لم تصل استجابة صالحة من الخادم.',
           onRetry: () => controller.loadOverview(),
         );
       }
@@ -78,10 +80,12 @@ class _DashboardContent extends GetView<NetworkWorkspaceController> {
               rxValue: controller.selectedNetworkId,
               searchEnabled: controller.networks.length > 5,
               items: controller.networks
-                  .map((network) => DropdownItem<int>(
-                        value: network.networkId,
-                        child: Text(network.networkName),
-                      ))
+                  .map(
+                    (network) => DropdownItem<int>(
+                      value: network.networkId,
+                      child: Text(network.networkName),
+                    ),
+                  )
                   .toList(growable: false),
               onChanged: controller.selectNetwork,
             ),
@@ -92,7 +96,9 @@ class _DashboardContent extends GetView<NetworkWorkspaceController> {
               Expanded(
                 child: Text(
                   'مؤشرات التشغيل',
-                  style: AppTypography.titleLarge.copyWith(color: colors.onSurface),
+                  style: AppTypography.titleLarge.copyWith(
+                    color: colors.onSurface,
+                  ),
                 ),
               ),
               SizedBox(
@@ -139,7 +145,8 @@ class _DashboardContent extends GetView<NetworkWorkspaceController> {
               _QuickAction(
                 label: 'كتالوج الباقات',
                 icon: Icons.widgets_outlined,
-                onTap: () => Get.toNamed<void>(AppRoutes.voucherPackagesCatalog),
+                onTap: () =>
+                    Get.toNamed<void>(AppRoutes.voucherPackagesCatalog),
               ),
               _QuickAction(
                 label: 'فواتير الجملة',
@@ -149,7 +156,8 @@ class _DashboardContent extends GetView<NetworkWorkspaceController> {
               _QuickAction(
                 label: 'إصدار فاتورة',
                 icon: Icons.add_card_rounded,
-                onTap: () => Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice),
+                onTap: () =>
+                    Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice),
               ),
               _QuickAction(
                 label: 'المالية والديون',
@@ -177,7 +185,9 @@ class _DashboardContent extends GetView<NetworkWorkspaceController> {
           Text(
             'آخر تحديث: ${overview.generatedAt.replaceFirst('T', ' ').split('+').first}',
             textAlign: TextAlign.end,
-            style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant),
+            style: AppTypography.bodySmall.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -253,8 +263,7 @@ class _MetricsGrid extends StatelessWidget {
               value: AmountFormatter.format(
                 overview.amount('expenses', 'total_amount'),
               ),
-              detail:
-                  '${overview.count('expenses', 'count')} سند خلال الفترة',
+              detail: '${overview.count('expenses', 'count')} سند خلال الفترة',
             ),
           );
         }
@@ -349,10 +358,14 @@ class _NetworkIdentityPanel extends StatelessWidget {
                   name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.titleLarge.copyWith(color: colors.onPrimary),
+                  style: AppTypography.titleLarge.copyWith(
+                    color: colors.onPrimary,
+                  ),
                 ),
                 Text(
-                  networkCount == 1 ? 'إدارة عمليات شبكتك من مكان واحد' : '$networkCount شبكات مرتبطة بحسابك',
+                  networkCount == 1
+                      ? 'إدارة عمليات شبكتك من مكان واحد'
+                      : '$networkCount شبكات مرتبطة بحسابك',
                   style: AppTypography.bodySmall.copyWith(
                     color: colors.onPrimary.withValues(alpha: 0.86),
                   ),
@@ -415,13 +428,31 @@ class _MetricCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, maxLines: 2, overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
                 AppSpacing.vXs,
-                Text(value, maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: AppTypography.titleLarge.copyWith(color: colors.onSurface)),
-                Text(detail, maxLines: 2, overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.titleLarge.copyWith(
+                    color: colors.onSurface,
+                  ),
+                ),
+                Text(
+                  detail,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
               ],
             ),
           ),
@@ -432,7 +463,11 @@ class _MetricCard extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title, required this.subtitle, this.action});
+  const _SectionTitle({
+    required this.title,
+    required this.subtitle,
+    this.action,
+  });
 
   final String title;
   final String subtitle;
@@ -447,8 +482,18 @@ class _SectionTitle extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTypography.titleLarge.copyWith(color: colors.onSurface)),
-              Text(subtitle, style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+              Text(
+                title,
+                style: AppTypography.titleLarge.copyWith(
+                  color: colors.onSurface,
+                ),
+              ),
+              Text(
+                subtitle,
+                style: AppTypography.bodySmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
         ),
@@ -459,7 +504,11 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _QuickAction extends StatelessWidget {
-  const _QuickAction({required this.label, required this.icon, required this.onTap});
+  const _QuickAction({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
 
   final String label;
   final IconData icon;
@@ -467,11 +516,7 @@ class _QuickAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomButton.outline(
-      text: label,
-      prefix: icon,
-      onPressed: onTap,
-    );
+    return CustomButton.outline(text: label, prefix: icon, onPressed: onTap);
   }
 }
 
@@ -489,9 +534,12 @@ class _PendingRequestTile extends StatelessWidget {
     final saleTypeLabel = request['sale_type_label'];
     final totalAmount = request['request_total_amount'];
     final requestDate = request['request_date'];
-    if (requestId is! num || requestUuid is! String ||
-        posName is! String || saleTypeLabel is! String ||
-        totalAmount is! String || requestDate is! String) {
+    if (requestId is! num ||
+        requestUuid is! String ||
+        posName is! String ||
+        saleTypeLabel is! String ||
+        totalAmount is! String ||
+        requestDate is! String) {
       throw const FormatException('بيانات الطلب المعلق غير مكتملة.');
     }
     return Padding(
@@ -510,19 +558,41 @@ class _PendingRequestTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(posName, style: AppTypography.titleSmall.copyWith(color: colors.onSurface)),
-                  Text(requestUuid, style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
-                  Text(requestDate, style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+                  Text(
+                    posName,
+                    style: AppTypography.titleSmall.copyWith(
+                      color: colors.onSurface,
+                    ),
+                  ),
+                  Text(
+                    requestUuid,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    requestDate,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(saleTypeLabel, style: AppTypography.bodySmall.copyWith(color: colors.primary)),
+                Text(
+                  saleTypeLabel,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.primary,
+                  ),
+                ),
                 Text(
                   AmountFormatter.format(totalAmount),
-                  style: AppTypography.titleSmall.copyWith(color: colors.onSurface),
+                  style: AppTypography.titleSmall.copyWith(
+                    color: colors.onSurface,
+                  ),
                 ),
               ],
             ),
