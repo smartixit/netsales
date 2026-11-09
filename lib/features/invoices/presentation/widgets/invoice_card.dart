@@ -78,7 +78,7 @@ class InvoiceCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'فاتورة #${invoice.invoiceId}',
+                          'فاتورة #${invoice.invoiceUuid}',
                           style: AppTypography.titleMedium.copyWith(
                             color: colors.onSurface,
                             fontWeight: FontWeight.bold,

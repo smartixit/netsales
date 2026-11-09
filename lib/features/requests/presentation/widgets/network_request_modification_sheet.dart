@@ -20,7 +20,7 @@ class NetworkRequestModificationSheet
     await controller.beginModification(request);
     if (controller.editingRequestId.value != request.requestId) return;
     await CustomBottomSheet.show<void>(
-      title: 'مراجعة طلب #${request.requestId}',
+      title: 'مراجعة طلب #${request.requestUuid}',
       subtitle: 'عدّل الكميات أو أضف واحذف الباقات، ثم اطلب معاينة الأسعار قبل الاعتماد.',
       leadingIcon: Icons.edit_note_rounded,
       scrollable: true,

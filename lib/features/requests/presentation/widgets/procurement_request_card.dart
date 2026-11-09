@@ -89,7 +89,7 @@ class ProcurementRequestCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'طلب توريد #${request.requestId}',
+                          'طلب توريد #${request.requestUuid}',
                           style: AppTypography.titleSmall.copyWith(
                             color: colors.onSurface,
                             fontWeight: FontWeight.bold,

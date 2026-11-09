@@ -6,6 +6,7 @@ class NetworkEntity {
   final int ownerId;
   final String networkName;
   final String networkPhoneNumber;
+  final String? networkUuid;
   final String? networkEmail;
   final String? networkAddress;
   final int? governorateId;
@@ -20,6 +21,7 @@ class NetworkEntity {
   const NetworkEntity({
     required this.networkId,
     required this.ownerId,
+    this.networkUuid,
     required this.networkName,
     required this.networkPhoneNumber,
     this.networkEmail,

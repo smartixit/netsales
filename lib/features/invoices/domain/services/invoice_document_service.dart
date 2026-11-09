@@ -109,7 +109,7 @@ class InvoiceDocumentService {
           crossAxisAlignment: pw.CrossAxisAlignment.end,
           children: [
             pw.Text(
-              'فاتورة رقم: #${invoice.invoiceId}',
+              'فاتورة رقم: #${invoice.invoiceUuid}',
               style: pw.TextStyle(
                 fontSize: 16,
                 fontWeight: pw.FontWeight.bold,
@@ -433,7 +433,7 @@ class InvoiceDocumentService {
   /// حفظ المستند في جهاز المستخدم عبر FileExportService
   Future<FileExportResult> exportAndSaveInvoice(InvoiceEntity invoice) async {
     final pdfBytes = await generateInvoicePdf(invoice);
-    final fileName = 'فاتورة_${invoice.invoiceId}';
+    final fileName = 'فاتورة_${invoice.invoiceUuid}';
 
     return FileExportService.instance.saveFile(
       bytes: pdfBytes,
@@ -449,7 +449,7 @@ class InvoiceDocumentService {
   /// مشاركة المستند عبر نافذة النظام الرسمية
   Future<bool> shareInvoice(InvoiceEntity invoice) async {
     final pdfBytes = await generateInvoicePdf(invoice);
-    final fileName = 'فاتورة_${invoice.invoiceId}';
+    final fileName = 'فاتورة_${invoice.invoiceUuid}';
 
     return FileExportService.instance.shareBytes(
       bytes: pdfBytes,
@@ -464,7 +464,7 @@ class InvoiceDocumentService {
     final pdfBytes = await generateInvoicePdf(invoice);
     return Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: 'فاتورة_${invoice.invoiceId}.pdf',
+      name: 'فاتورة_${invoice.invoiceUuid}.pdf',
     );
   }
 }

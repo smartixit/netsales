@@ -62,7 +62,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
 
       return CustomAppScaffold(
         appBar: AppBar(
-          title: Text('فاتورة #${invoice.invoiceId}'),
+          title: Text('فاتورة #${invoice.invoiceUuid}'),
           actions: [
             // زر الطباعة
             CustomButton.icon(

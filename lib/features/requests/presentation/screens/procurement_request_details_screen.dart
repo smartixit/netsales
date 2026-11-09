@@ -58,7 +58,7 @@ class ProcurementRequestDetailsScreen
       return CustomAppScaffold(
         appBar: AppBar(
           title: Text(
-            'طلب توريد #${request.requestId}',
+            'طلب توريد #${request.requestUuid}',
             style: AppTypography.titleMedium.copyWith(
               color: colors.onSurface,
               fontWeight: FontWeight.bold,

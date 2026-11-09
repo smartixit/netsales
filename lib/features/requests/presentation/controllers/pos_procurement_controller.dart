@@ -11,7 +11,7 @@ import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
-import 'package:netsales/features/requests/presentation/models/procurement_cart_line.dart';
+import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
@@ -63,7 +63,7 @@ class PosProcurementController extends GetxController {
   final selectedPackage = Rxn<PackageEntity>();
   final selectedPackageId = RxnInt();
   final isLoadingPackages = false.obs;
-  final procurementCart = <ProcurementCartLine>[].obs;
+  final procurementCart = <ProcurementCartLineEntity>[].obs;
 
   bool get hasCartItems => procurementCart.isNotEmpty;
 
@@ -329,7 +329,7 @@ class PosProcurementController extends GetxController {
       return;
     }
 
-    final line = ProcurementCartLine(
+    final line = ProcurementCartLineEntity(
       package: package,
       sheets: sheets,
       voucherCount: voucherCount,
@@ -356,7 +356,7 @@ class PosProcurementController extends GetxController {
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
-  void editCartLine(ProcurementCartLine line) {
+  void editCartLine(ProcurementCartLineEntity line) {
     _setSelectedPackage(line.package);
     setSheetCount(_formatSheetQuantity(line.sheets));
   }

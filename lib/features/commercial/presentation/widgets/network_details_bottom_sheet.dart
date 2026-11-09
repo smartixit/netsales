@@ -73,7 +73,7 @@ class NetworkDetailsBottomSheet {
                           ),
                           AppSpacing.hSm,
                           Text(
-                            'معرف الشبكة #${network.networkId}',
+                            'معرف الشبكة #${network.networkUuid}',
                             style: AppTypography.bodyMedium.copyWith(
                               fontWeight: FontWeight.bold,
                               color: colors.onSurface,

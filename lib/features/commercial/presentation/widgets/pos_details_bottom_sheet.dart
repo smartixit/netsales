@@ -68,7 +68,7 @@ class PosDetailsBottomSheet {
                           ),
                           AppSpacing.hSm,
                           Text(
-                            'معرف نقطة البيع #${pos.posId}',
+                            'معرف نقطة البيع #${pos.posUuid}',
                             style: AppTypography.bodyMedium.copyWith(
                               fontWeight: FontWeight.bold,
                               color: colors.onSurface,

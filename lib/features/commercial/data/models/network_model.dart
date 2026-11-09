@@ -7,6 +7,7 @@ class NetworkModel extends NetworkEntity {
     required super.ownerId,
     required super.networkName,
     required super.networkPhoneNumber,
+    super.networkUuid,
     super.networkEmail,
     super.networkAddress,
     super.governorateId,
@@ -52,6 +53,7 @@ class NetworkModel extends NetworkEntity {
       networkProfileLogoUrl: json['network_profile_logo_url']?.toString(),
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
+      networkUuid: json['network_uuid']?.toString() ?? '',
     );
   }
 
@@ -67,6 +69,7 @@ class NetworkModel extends NetworkEntity {
       'directorate_id': directorateId,
       'status': status,
       'network_profile_logo_url': networkProfileLogoUrl,
+      'network_uuid': networkUuid,
     };
   }
 

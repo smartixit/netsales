@@ -33,22 +33,26 @@ class MockCommercialRepository implements CommercialRepository {
   List<NetworkEntity> networks = [];
   List<PosEntity> myPos = [];
   PaginatedList<NetworkPosLinkEntity> posLinks = const PaginatedList(items: []);
-  PaginatedList<NetworkPosLinkEntity> posNetworkLinks = const PaginatedList(items: []);
+  PaginatedList<NetworkPosLinkEntity> posNetworkLinks = const PaginatedList(
+    items: [],
+  );
   final List<int> requestedPosNetworkIds = [];
   final List<String?> requestedPosNetworkSearchQueries = [];
   final List<String?> requestedPosNetworkCursors = [];
   final List<String?> requestedNetworkPosCursors = [];
   final Map<String, PaginatedList<NetworkPosLinkEntity>> networkPosPages = {};
   final Map<String, PaginatedList<NetworkPosLinkEntity>> posNetworkPages = {};
-  final Map<String, PaginatedList<NetworkPosLinkEntity>> posNetworkSearchResults = {};
-  final Map<String, Completer<PaginatedList<NetworkPosLinkEntity>>> pendingPosNetworkSearches = {};
+  final Map<String, PaginatedList<NetworkPosLinkEntity>>
+  posNetworkSearchResults = {};
+  final Map<String, Completer<PaginatedList<NetworkPosLinkEntity>>>
+  pendingPosNetworkSearches = {};
   bool failPosNetworksList = false;
   final List<int> requestedNetworkIds = [];
   final List<int?> requestedPosPageSizes = [];
   final List<bool?> requestedPosStatuses = [];
   final List<String?> requestedPosSearchQueries = [];
   final Map<String, Completer<PaginatedList<NetworkPosLinkEntity>>>
-      pendingPosSearches = {};
+  pendingPosSearches = {};
   bool failNetworkList = false;
   bool failPosList = false;
 
@@ -107,8 +111,7 @@ class MockCommercialRepository implements CommercialRepository {
     if (pending != null) return pending.future;
     if (search != null && search.isNotEmpty) {
       return cursor == null
-          ? posNetworkSearchResults[searchKey] ??
-              const PaginatedList(items: [])
+          ? posNetworkSearchResults[searchKey] ?? const PaginatedList(items: [])
           : posNetworkPages[cursor] ?? const PaginatedList(items: []);
     }
     return cursor == null
@@ -147,13 +150,13 @@ class TestFinanceRepository implements FinanceRepository {
   bool denyPosLogs = false;
   bool failOutstandingInvoices = false;
   final Map<int, Completer<PaginatedList<NetworkWalletLogEntity>>>
-      pendingNetworkLogs = {};
-  final Map<int, Completer<PaginatedList<PosWalletLogEntity>>>
-      pendingPosLogs = {};
+  pendingNetworkLogs = {};
+  final Map<int, Completer<PaginatedList<PosWalletLogEntity>>> pendingPosLogs =
+      {};
   final Map<String, Completer<PaginatedList<InvoiceEntity>>>
-      pendingInvoicePages = {};
+  pendingInvoicePages = {};
   final Map<String?, Completer<PaginatedList<PosRepaymentEntity>>>
-      pendingRepaymentPages = {};
+  pendingRepaymentPages = {};
 
   @override
   Future<PaginatedList<PosWalletEntity>> getPosWallets({
@@ -193,16 +196,10 @@ class TestFinanceRepository implements FinanceRepository {
   }
 
   @override
-  Future<DebtSummaryEntity> getDebtSummary({
-    int? networkId,
-    int? posId,
-  }) async {
+  Future<DebtSummaryEntity> getDebtSummary({int? networkId, int? posId}) async {
     requestedDebtScopes.add({'networkId': networkId, 'posId': posId});
     return debtSummary ??
-        const DebtSummaryEntity(
-          totalReceivables: 0,
-          agingBuckets: {},
-        );
+        const DebtSummaryEntity(totalReceivables: 0, agingBuckets: {});
   }
 
   @override
@@ -433,6 +430,7 @@ void main() {
                 ownerId: 1,
                 networkName: 'شبكة السرعة',
                 networkPhoneNumber: '777111222',
+                networkUuid: 'NET-123',
               ),
             ),
           ],
@@ -440,10 +438,13 @@ void main() {
 
         final controller = PosDebtLedgerController(
           getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
-          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(
+            repository,
+          ),
           getMyPosUseCase: GetMyPosUseCase(commercialRepository),
-          getPosNetworksListUseCase:
-              GetPosNetworksListUseCase(commercialRepository),
+          getPosNetworksListUseCase: GetPosNetworksListUseCase(
+            commercialRepository,
+          ),
         );
 
         await controller.initializeScope();
@@ -469,6 +470,7 @@ void main() {
             networkName: 'شبكة السرعة',
             networkPhoneNumber: '777000111',
             status: 'ACTIVE',
+            networkUuid: 'NET-342',
           ),
         ];
         commercialRepository.posLinks = const PaginatedList(
@@ -546,6 +548,7 @@ void main() {
             networkName: 'الشبكة الأولى',
             networkPhoneNumber: '777000111',
             status: 'ACTIVE',
+            networkUuid: 'NET-255',
           ),
           const NetworkEntity(
             networkId: 2,
@@ -553,6 +556,7 @@ void main() {
             networkName: 'الشبكة الثانية',
             networkPhoneNumber: '777000222',
             status: 'ACTIVE',
+            networkUuid: 'NET-784',
           ),
         ];
         commercialRepository.posLinks = const PaginatedList(
@@ -597,26 +601,31 @@ void main() {
       },
     );
 
-    test('Repayment beneficiary cannot change while collection is submitting', () async {
-      final controller = RepaymentCollectionController(
-        collectRepaymentUseCase: CollectRepaymentUseCase(repository),
-        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
-        getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
-      );
-      controller.selectedNetworkId.value = 7;
-      controller.selectedPosId.value = 22;
-      controller.isSubmitting.value = true;
+    test(
+      'Repayment beneficiary cannot change while collection is submitting',
+      () async {
+        final controller = RepaymentCollectionController(
+          collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+          getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+          getNetworkPosListUseCase: GetNetworkPosListUseCase(
+            commercialRepository,
+          ),
+        );
+        controller.selectedNetworkId.value = 7;
+        controller.selectedPosId.value = 22;
+        controller.isSubmitting.value = true;
 
-      await controller.onNetworkChanged(8);
-      controller.onPosChanged(33);
-      await controller.loadPosForNetwork(7);
-      await controller.searchPosForNetwork('different beneficiary');
+        await controller.onNetworkChanged(8);
+        controller.onPosChanged(33);
+        await controller.loadPosForNetwork(7);
+        await controller.searchPosForNetwork('different beneficiary');
 
-      expect(controller.selectedNetworkId.value, 7);
-      expect(controller.selectedPosId.value, 22);
-      expect(commercialRepository.requestedNetworkIds, isEmpty);
-      expect(controller.isLoadingPos.value, isFalse);
-    });
+        expect(controller.selectedNetworkId.value, 7);
+        expect(controller.selectedPosId.value, 22);
+        expect(commercialRepository.requestedNetworkIds, isEmpty);
+        expect(controller.isLoadingPos.value, isFalse);
+      },
+    );
 
     test('Repayment beneficiary remote search uses the server and rejects stale results', () async {
       const oldPos = PosEntity(
@@ -658,7 +667,9 @@ void main() {
       final controller = RepaymentCollectionController(
         collectRepaymentUseCase: CollectRepaymentUseCase(repository),
         getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
-        getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
+        getNetworkPosListUseCase: GetNetworkPosListUseCase(
+          commercialRepository,
+        ),
       );
       controller.selectedNetworkId.value = 7;
 
@@ -673,66 +684,81 @@ void main() {
       expect(controller.isLoadingPos.value, isFalse);
     });
 
-    test('Repayment remote search failure preserves the selected beneficiary', () async {
-      const selected = PosEntity(
-        posId: 22,
-        ownerId: 1,
-        posUuid: 'pos-uuid-selected',
-        posName: 'نقطة البيع المحددة',
-        posPhoneNumber: '777222222',
-        status: 'ACTIVE',
-      );
-      final controller = RepaymentCollectionController(
-        collectRepaymentUseCase: CollectRepaymentUseCase(repository),
-        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
-        getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
-      );
-      controller.selectedNetworkId.value = 7;
-      controller.selectedPosId.value = selected.posId;
-      controller.selectedPos.value = selected;
-      controller.posList.assignAll([selected]);
-      controller.hasLoadedPosList.value = true;
-      commercialRepository.failPosList = true;
+    test(
+      'Repayment remote search failure preserves the selected beneficiary',
+      () async {
+        const selected = PosEntity(
+          posId: 22,
+          ownerId: 1,
+          posUuid: 'pos-uuid-selected',
+          posName: 'نقطة البيع المحددة',
+          posPhoneNumber: '777222222',
+          status: 'ACTIVE',
+        );
+        final controller = RepaymentCollectionController(
+          collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+          getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+          getNetworkPosListUseCase: GetNetworkPosListUseCase(
+            commercialRepository,
+          ),
+        );
+        controller.selectedNetworkId.value = 7;
+        controller.selectedPosId.value = selected.posId;
+        controller.selectedPos.value = selected;
+        controller.posList.assignAll([selected]);
+        controller.hasLoadedPosList.value = true;
+        commercialRepository.failPosList = true;
 
-      await controller.searchPosForNetwork('نتيجة غير متاحة');
+        await controller.searchPosForNetwork('نتيجة غير متاحة');
 
-      expect(controller.selectedPosId.value, selected.posId);
-      expect(controller.selectedPos.value, selected);
-      expect(controller.posList, [selected]);
-      expect(controller.posErrorMessage.value, isNotNull);
-      expect(controller.hasLoadedPosList.value, isTrue);
-    });
+        expect(controller.selectedPosId.value, selected.posId);
+        expect(controller.selectedPos.value, selected);
+        expect(controller.posList, [selected]);
+        expect(controller.posErrorMessage.value, isNotNull);
+        expect(controller.hasLoadedPosList.value, isTrue);
+      },
+    );
 
-    test('Repayment collection exposes network list failure for retry', () async {
-      commercialRepository.failNetworkList = true;
-      final controller = RepaymentCollectionController(
-        collectRepaymentUseCase: CollectRepaymentUseCase(repository),
-        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
-        getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
-      );
+    test(
+      'Repayment collection exposes network list failure for retry',
+      () async {
+        commercialRepository.failNetworkList = true;
+        final controller = RepaymentCollectionController(
+          collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+          getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+          getNetworkPosListUseCase: GetNetworkPosListUseCase(
+            commercialRepository,
+          ),
+        );
 
-      await controller.loadInitialData();
+        await controller.loadInitialData();
 
-      expect(controller.networks, isEmpty);
-      expect(controller.initialErrorMessage.value, isNotNull);
-      expect(controller.isLoadingInitial.value, isFalse);
-    });
+        expect(controller.networks, isEmpty);
+        expect(controller.initialErrorMessage.value, isNotNull);
+        expect(controller.isLoadingInitial.value, isFalse);
+      },
+    );
 
-    test('Repayment collection exposes linked POS failure instead of empty result', () async {
-      commercialRepository.failPosList = true;
-      final controller = RepaymentCollectionController(
-        collectRepaymentUseCase: CollectRepaymentUseCase(repository),
-        getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
-        getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
-      );
-      controller.selectedNetworkId.value = 7;
+    test(
+      'Repayment collection exposes linked POS failure instead of empty result',
+      () async {
+        commercialRepository.failPosList = true;
+        final controller = RepaymentCollectionController(
+          collectRepaymentUseCase: CollectRepaymentUseCase(repository),
+          getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+          getNetworkPosListUseCase: GetNetworkPosListUseCase(
+            commercialRepository,
+          ),
+        );
+        controller.selectedNetworkId.value = 7;
 
-      await controller.loadPosForNetwork(7);
+        await controller.loadPosForNetwork(7);
 
-      expect(controller.posList, isEmpty);
-      expect(controller.posErrorMessage.value, isNotNull);
-      expect(controller.isLoadingPos.value, isFalse);
-    });
+        expect(controller.posList, isEmpty);
+        expect(controller.posErrorMessage.value, isNotNull);
+        expect(controller.isLoadingPos.value, isFalse);
+      },
+    );
 
     test('RepaymentHistoryController loads repayment list', () async {
       repository.repayments = const PaginatedList(
@@ -755,6 +781,7 @@ void main() {
           ownerId: 1,
           networkName: 'شبكة الاختبار',
           networkPhoneNumber: '777111222',
+          networkUuid: 'NET-126',
         ),
       ];
 
@@ -775,153 +802,160 @@ void main() {
       ]);
     });
 
-
-    test(
-      'repayment history requires explicit network selection when multiple networks exist',
-      () async {
-        commercialRepository.networks = [
-          const NetworkEntity(
-            networkId: 11,
-            ownerId: 1,
-            networkName: 'الشبكة الأولى',
-            networkPhoneNumber: '777111111',
-          ),
-          const NetworkEntity(
+    test('repayment history requires explicit network selection when multiple networks exist', () async {
+      commercialRepository.networks = [
+        const NetworkEntity(
+          networkId: 11,
+          ownerId: 1,
+          networkName: 'الشبكة الأولى',
+          networkPhoneNumber: '777111111',
+          networkUuid: 'NET-124',
+        ),
+        const NetworkEntity(
+          networkId: 22,
+          ownerId: 1,
+          networkName: 'الشبكة الثانية',
+          networkPhoneNumber: '777222222',
+          networkUuid: 'NET-125',
+        ),
+      ];
+      repository.repayments = const PaginatedList(
+        items: [
+          PosRepaymentEntity(
+            repaymentId: 22,
+            repaymentUuid: 'rep-network-22',
+            posId: 2,
             networkId: 22,
-            ownerId: 1,
-            networkName: 'الشبكة الثانية',
-            networkPhoneNumber: '777222222',
+            amount: 200,
+            repaymentDate: '2026-11-08',
           ),
-        ];
-        repository.repayments = const PaginatedList(
-          items: [
-            PosRepaymentEntity(
-              repaymentId: 22,
-              repaymentUuid: 'rep-network-22',
-              posId: 2,
-              networkId: 22,
-              amount: 200,
-              repaymentDate: '2026-11-08',
-            ),
-          ],
-        );
-
-        final controller = RepaymentHistoryController(
-          getRepaymentsUseCase: GetRepaymentsUseCase(repository),
-          getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
-        );
-
-        await controller.initializeNetworks();
-
-        expect(controller.selectedNetworkId.value, isNull);
-        expect(repository.requestedRepaymentScopes, isEmpty);
-        expect(controller.repayments, isEmpty);
-
-        await controller.selectNetwork(22);
-
-        expect(controller.selectedNetworkId.value, 22);
-        expect(repository.requestedRepaymentScopes, [
-          {'networkId': 22, 'posId': null},
-        ]);
-        expect(controller.repayments.single.networkId, 22);
-      },
-    );
-
-    test('Repayment status stale response cannot replace latest filter results', () async {
-      const oldRepayment = PosRepaymentEntity(
-        repaymentId: 101,
-        repaymentUuid: 'rep-old',
-        posId: 1,
-        networkId: 1,
-        amount: 100,
-        repaymentDate: '2026-11-01',
+        ],
       );
-      const newRepayment = PosRepaymentEntity(
-        repaymentId: 202,
-        repaymentUuid: 'rep-new',
-        posId: 1,
-        networkId: 1,
-        amount: 200,
-        repaymentDate: '2026-11-02',
-      );
-      final oldRequest = Completer<PaginatedList<PosRepaymentEntity>>();
-      repository.pendingRepaymentPages['PENDING'] = oldRequest;
-      repository.pendingRepaymentPages['COMPLETED'] =
-          Completer<PaginatedList<PosRepaymentEntity>>()
-            ..complete(const PaginatedList(items: [newRepayment]));
 
       final controller = RepaymentHistoryController(
         getRepaymentsUseCase: GetRepaymentsUseCase(repository),
         getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
       );
-      controller.selectedNetworkId.value = 1;
-      controller.selectedStatus.value = 'PENDING';
-      final oldFuture = controller.loadRepayments(isRefresh: true);
-      controller.onStatusChanged('COMPLETED');
-      await Future<void>.delayed(Duration.zero);
-      oldRequest.complete(const PaginatedList(items: [oldRepayment]));
-      await oldFuture;
 
-      expect(controller.selectedStatus.value, 'COMPLETED');
+      await controller.initializeNetworks();
+
+      expect(controller.selectedNetworkId.value, isNull);
+      expect(repository.requestedRepaymentScopes, isEmpty);
+      expect(controller.repayments, isEmpty);
+
+      await controller.selectNetwork(22);
+
+      expect(controller.selectedNetworkId.value, 22);
       expect(repository.requestedRepaymentScopes, [
-        {'networkId': 1, 'posId': null},
-        {'networkId': 1, 'posId': null},
+        {'networkId': 22, 'posId': null},
       ]);
-      expect(repository.requestedRepaymentStatuses, ['PENDING', 'COMPLETED']);
-      expect(controller.repayments.map((item) => item.repaymentId), [202]);
-      expect(controller.isLoading.value, isFalse);
+      expect(controller.repayments.single.networkId, 22);
     });
 
-    test('POS wallet log failure is exposed separately from an empty ledger', () async {
-      repository.posWallets = const PaginatedList(
-        items: [
-          PosWalletEntity(
-            walletId: 1,
-            networkId: 1,
-            posId: 5,
-            walletBalance: 120000,
-          ),
-        ],
-      );
-      repository.failPosLogs = true;
+    test(
+      'Repayment status stale response cannot replace latest filter results',
+      () async {
+        const oldRepayment = PosRepaymentEntity(
+          repaymentId: 101,
+          repaymentUuid: 'rep-old',
+          posId: 1,
+          networkId: 1,
+          amount: 100,
+          repaymentDate: '2026-11-01',
+        );
+        const newRepayment = PosRepaymentEntity(
+          repaymentId: 202,
+          repaymentUuid: 'rep-new',
+          posId: 1,
+          networkId: 1,
+          amount: 200,
+          repaymentDate: '2026-11-02',
+        );
+        final oldRequest = Completer<PaginatedList<PosRepaymentEntity>>();
+        repository.pendingRepaymentPages['PENDING'] = oldRequest;
+        repository.pendingRepaymentPages['COMPLETED'] =
+            Completer<PaginatedList<PosRepaymentEntity>>()
+              ..complete(const PaginatedList(items: [newRepayment]));
 
-      final controller = PosWalletDashboardController(
-        getPosWalUseCase: GetPosWalUseCase(repository),
-        getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
-      );
+        final controller = RepaymentHistoryController(
+          getRepaymentsUseCase: GetRepaymentsUseCase(repository),
+          getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
+        );
+        controller.selectedNetworkId.value = 1;
+        controller.selectedStatus.value = 'PENDING';
+        final oldFuture = controller.loadRepayments(isRefresh: true);
+        controller.onStatusChanged('COMPLETED');
+        await Future<void>.delayed(Duration.zero);
+        oldRequest.complete(const PaginatedList(items: [oldRepayment]));
+        await oldFuture;
 
-      await controller.loadWallets();
+        expect(controller.selectedStatus.value, 'COMPLETED');
+        expect(repository.requestedRepaymentScopes, [
+          {'networkId': 1, 'posId': null},
+          {'networkId': 1, 'posId': null},
+        ]);
+        expect(repository.requestedRepaymentStatuses, ['PENDING', 'COMPLETED']);
+        expect(controller.repayments.map((item) => item.repaymentId), [202]);
+        expect(controller.isLoading.value, isFalse);
+      },
+    );
 
-      expect(controller.wallets, hasLength(1));
-      expect(controller.logs, isEmpty);
-      expect(controller.logsErrorMessage.value, isNotNull);
-      expect(controller.isLoadingLogs.value, isFalse);
-    });
+    test(
+      'POS wallet log failure is exposed separately from an empty ledger',
+      () async {
+        repository.posWallets = const PaginatedList(
+          items: [
+            PosWalletEntity(
+              walletId: 1,
+              networkId: 1,
+              posId: 5,
+              walletBalance: 120000,
+            ),
+          ],
+        );
+        repository.failPosLogs = true;
 
-    test('Network wallet log failure is exposed separately from an empty ledger', () async {
-      repository.networkWallets = const PaginatedList(
-        items: [
-          NetworkWalletEntity(
-            walletId: 1,
-            networkId: 1,
-            walletBalance: 8400000,
-          ),
-        ],
-      );
-      repository.failNetworkLogs = true;
+        final controller = PosWalletDashboardController(
+          getPosWalUseCase: GetPosWalUseCase(repository),
+          getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+        );
 
-      final controller = NetworkWalletDashboardController(
-        getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
-        getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
-      );
+        await controller.loadWallets();
 
-      await controller.loadWallets();
+        expect(controller.wallets, hasLength(1));
+        expect(controller.logs, isEmpty);
+        expect(controller.logsErrorMessage.value, isNotNull);
+        expect(controller.isLoadingLogs.value, isFalse);
+      },
+    );
 
-      expect(controller.wallets, hasLength(1));
-      expect(controller.logs, isEmpty);
-      expect(controller.logsErrorMessage.value, isNotNull);
-      expect(controller.isLoadingLogs.value, isFalse);
-    });
+    test(
+      'Network wallet log failure is exposed separately from an empty ledger',
+      () async {
+        repository.networkWallets = const PaginatedList(
+          items: [
+            NetworkWalletEntity(
+              walletId: 1,
+              networkId: 1,
+              walletBalance: 8400000,
+            ),
+          ],
+        );
+        repository.failNetworkLogs = true;
+
+        final controller = NetworkWalletDashboardController(
+          getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
+          getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+        );
+
+        await controller.loadWallets();
+
+        expect(controller.wallets, hasLength(1));
+        expect(controller.logs, isEmpty);
+        expect(controller.logsErrorMessage.value, isNotNull);
+        expect(controller.isLoadingLogs.value, isFalse);
+      },
+    );
 
     test(
       'network wallet transfer can page through all linked POS beneficiaries',
@@ -966,10 +1000,12 @@ void main() {
             );
 
         final controller = NetworkWalletTransferController(
-          transferFromNetworkToPosUseCase:
-              TransferFromNetworkToPosUseCase(repository),
-          getNetworkPosListUseCase:
-              GetNetworkPosListUseCase(commercialRepository),
+          transferFromNetworkToPosUseCase: TransferFromNetworkToPosUseCase(
+            repository,
+          ),
+          getNetworkPosListUseCase: GetNetworkPosListUseCase(
+            commercialRepository,
+          ),
         );
 
         await controller.initialize(
@@ -1034,7 +1070,9 @@ void main() {
         final controller = RepaymentCollectionController(
           collectRepaymentUseCase: CollectRepaymentUseCase(repository),
           getMyNetworksUseCase: GetMyNetworksUseCase(commercialRepository),
-          getNetworkPosListUseCase: GetNetworkPosListUseCase(commercialRepository),
+          getNetworkPosListUseCase: GetNetworkPosListUseCase(
+            commercialRepository,
+          ),
         );
         controller.selectedNetworkId.value = 7;
 
@@ -1053,69 +1091,63 @@ void main() {
       },
     );
 
-    test(
-      'network wallet refresh preserves a selected wallet outside the first page',
-      () async {
-        const firstWallet = NetworkWalletEntity(
-          walletId: 31,
-          networkId: 301,
-          walletBalance: 1000,
-        );
-        const selectedWallet = NetworkWalletEntity(
-          walletId: 32,
-          networkId: 302,
-          walletBalance: 2000,
-        );
-        repository.networkWallets = const PaginatedList(
-          items: [firstWallet],
-          nextCursor: 'wallet-refresh-page-2',
-        );
-        repository.networkWalletPages['wallet-refresh-page-2'] =
-            const PaginatedList(items: [selectedWallet]);
+    test('network wallet refresh preserves a selected wallet outside the first page', () async {
+      const firstWallet = NetworkWalletEntity(
+        walletId: 31,
+        networkId: 301,
+        walletBalance: 1000,
+      );
+      const selectedWallet = NetworkWalletEntity(
+        walletId: 32,
+        networkId: 302,
+        walletBalance: 2000,
+      );
+      repository.networkWallets = const PaginatedList(
+        items: [firstWallet],
+        nextCursor: 'wallet-refresh-page-2',
+      );
+      repository.networkWalletPages['wallet-refresh-page-2'] =
+          const PaginatedList(items: [selectedWallet]);
 
-        final controller = NetworkWalletDashboardController(
-          getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
-          getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
-        );
+      final controller = NetworkWalletDashboardController(
+        getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
+        getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+      );
 
-        await controller.loadWallets();
-        await controller.loadMoreWallets();
-        await controller.selectWallet(selectedWallet);
+      await controller.loadWallets();
+      await controller.loadMoreWallets();
+      await controller.selectWallet(selectedWallet);
 
-        repository.networkWallets = const PaginatedList(
-          items: [firstWallet],
-          nextCursor: 'wallet-refresh-page-2',
-        );
-        await controller.loadWallets();
+      repository.networkWallets = const PaginatedList(
+        items: [firstWallet],
+        nextCursor: 'wallet-refresh-page-2',
+      );
+      await controller.loadWallets();
 
-        expect(controller.selectedWallet.value?.walletId, 32);
-        expect(controller.wallets.map((wallet) => wallet.walletId), [32, 31]);
-      },
-    );
+      expect(controller.selectedWallet.value?.walletId, 32);
+      expect(controller.wallets.map((wallet) => wallet.walletId), [32, 31]);
+    });
 
-    test(
-      'network wallet selection is cleared when the ledger confirms access was revoked',
-      () async {
-        const wallet = NetworkWalletEntity(
-          walletId: 41,
-          networkId: 401,
-          walletBalance: 1000,
-        );
-        repository.networkWallets = const PaginatedList(items: [wallet]);
-        repository.denyNetworkLogs = true;
+    test('network wallet selection is cleared when the ledger confirms access was revoked', () async {
+      const wallet = NetworkWalletEntity(
+        walletId: 41,
+        networkId: 401,
+        walletBalance: 1000,
+      );
+      repository.networkWallets = const PaginatedList(items: [wallet]);
+      repository.denyNetworkLogs = true;
 
-        final controller = NetworkWalletDashboardController(
-          getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
-          getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
-        );
+      final controller = NetworkWalletDashboardController(
+        getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
+        getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+      );
 
-        await controller.loadWallets();
+      await controller.loadWallets();
 
-        expect(controller.selectedWallet.value, isNull);
-        expect(controller.wallets, isEmpty);
-        expect(controller.walletsErrorMessage.value, isNotNull);
-      },
-    );
+      expect(controller.selectedWallet.value, isNull);
+      expect(controller.wallets, isEmpty);
+      expect(controller.walletsErrorMessage.value, isNotNull);
+    });
 
     test(
       'POS wallet refresh preserves a selected wallet outside the first page',
@@ -1159,30 +1191,27 @@ void main() {
       },
     );
 
-    test(
-      'POS wallet selection is cleared when the ledger confirms access was revoked',
-      () async {
-        const wallet = PosWalletEntity(
-          walletId: 61,
-          networkId: 601,
-          posId: 6,
-          walletBalance: 1000,
-        );
-        repository.posWallets = const PaginatedList(items: [wallet]);
-        repository.denyPosLogs = true;
+    test('POS wallet selection is cleared when the ledger confirms access was revoked', () async {
+      const wallet = PosWalletEntity(
+        walletId: 61,
+        networkId: 601,
+        posId: 6,
+        walletBalance: 1000,
+      );
+      repository.posWallets = const PaginatedList(items: [wallet]);
+      repository.denyPosLogs = true;
 
-        final controller = PosWalletDashboardController(
-          getPosWalUseCase: GetPosWalUseCase(repository),
-          getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
-        );
+      final controller = PosWalletDashboardController(
+        getPosWalUseCase: GetPosWalUseCase(repository),
+        getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+      );
 
-        await controller.loadWallets();
+      await controller.loadWallets();
 
-        expect(controller.selectedWallet.value, isNull);
-        expect(controller.wallets, isEmpty);
-        expect(controller.walletsErrorMessage.value, isNotNull);
-      },
-    );
+      expect(controller.selectedWallet.value, isNull);
+      expect(controller.wallets, isEmpty);
+      expect(controller.walletsErrorMessage.value, isNotNull);
+    });
 
     test(
       'POS debt scope selector can load every cursor page of network links',
@@ -1197,6 +1226,7 @@ void main() {
             ownerId: 1,
             networkName: 'الشبكة الأولى',
             networkPhoneNumber: '777111101',
+            networkUuid: 'NET-127',
           ),
         );
         const secondNetwork = NetworkPosLinkEntity(
@@ -1209,6 +1239,7 @@ void main() {
             ownerId: 1,
             networkName: 'الشبكة الثانية',
             networkPhoneNumber: '777111202',
+            networkUuid: 'NET-128',
           ),
         );
         commercialRepository.myPos = [
@@ -1229,9 +1260,13 @@ void main() {
 
         final controller = PosDebtLedgerController(
           getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
-          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(
+            repository,
+          ),
           getMyPosUseCase: GetMyPosUseCase(commercialRepository),
-          getPosNetworksListUseCase: GetPosNetworksListUseCase(commercialRepository),
+          getPosNetworksListUseCase: GetPosNetworksListUseCase(
+            commercialRepository,
+          ),
         );
 
         await controller.initializeScope();
@@ -1241,7 +1276,10 @@ void main() {
 
         await controller.loadMoreNetworkOptions();
 
-        expect(controller.networkLinks.map((link) => link.networkId), [101, 202]);
+        expect(controller.networkLinks.map((link) => link.networkId), [
+          101,
+          202,
+        ]);
         expect(controller.hasMoreNetworkOptions, isFalse);
         expect(commercialRepository.requestedPosNetworkCursors, [
           null,
@@ -1285,6 +1323,7 @@ void main() {
               ownerId: 1,
               networkName: 'شبكة السرعة',
               networkPhoneNumber: '777111222',
+              networkUuid: 'NET-121',
             ),
           ),
         ],
@@ -1292,10 +1331,13 @@ void main() {
 
       final controller = PosDebtLedgerController(
         getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
-        getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
+        getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(
+          repository,
+        ),
         getMyPosUseCase: GetMyPosUseCase(commercialRepository),
-        getPosNetworksListUseCase:
-            GetPosNetworksListUseCase(commercialRepository),
+        getPosNetworksListUseCase: GetPosNetworksListUseCase(
+          commercialRepository,
+        ),
       );
 
       await controller.initializeScope();
@@ -1306,309 +1348,309 @@ void main() {
       expect(controller.isLoadingInvoices.value, isFalse);
     });
 
-
-    test(
-      'POS debt summary and invoices remain blocked until the network scope is explicit',
-      () async {
-        const pos = PosEntity(
-          posId: 5,
-          ownerId: 1,
-          posUuid: 'pos-5',
-          posName: 'نقطة بيع متعددة الشبكات',
-          posPhoneNumber: '777000555',
-        );
-        const firstLink = NetworkPosLinkEntity(
-          networkPosId: 51,
+    test('POS debt summary and invoices remain blocked until the network scope is explicit', () async {
+      const pos = PosEntity(
+        posId: 5,
+        ownerId: 1,
+        posUuid: 'pos-5',
+        posName: 'نقطة بيع متعددة الشبكات',
+        posPhoneNumber: '777000555',
+      );
+      const firstLink = NetworkPosLinkEntity(
+        networkPosId: 51,
+        networkId: 11,
+        posId: 5,
+        status: true,
+        network: NetworkEntity(
           networkId: 11,
-          posId: 5,
-          status: true,
-          network: NetworkEntity(
-            networkId: 11,
-            ownerId: 1,
-            networkName: 'الشبكة الأولى',
-            networkPhoneNumber: '777111111',
-          ),
-        );
-        const secondLink = NetworkPosLinkEntity(
-          networkPosId: 52,
-          networkId: 22,
-          posId: 5,
-          status: false,
-          network: NetworkEntity(
-            networkId: 22,
-            ownerId: 2,
-            networkName: 'الشبكة الثانية',
-            networkPhoneNumber: '777222222',
-          ),
-        );
-        commercialRepository.myPos = [pos];
-        commercialRepository.posNetworkLinks = const PaginatedList(
-          items: [firstLink, secondLink],
-        );
-
-        final controller = PosDebtLedgerController(
-          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
-          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
-          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
-          getPosNetworksListUseCase:
-              GetPosNetworksListUseCase(commercialRepository),
-        );
-
-        await controller.initializeScope();
-
-        expect(controller.selectedPosId.value, 5);
-        expect(controller.selectedNetworkId.value, isNull);
-        expect(repository.requestedDebtScopes, isEmpty);
-        expect(repository.requestedInvoiceScopes, isEmpty);
-        expect(commercialRepository.requestedPosNetworkIds, [5]);
-
-        await controller.selectNetwork(22);
-
-        expect(repository.requestedDebtScopes, [
-          {'networkId': 22, 'posId': 5},
-        ]);
-        expect(repository.requestedInvoiceScopes, [
-          {'networkId': 22, 'posId': 5},
-        ]);
-      },
-    );
-
-    test(
-      'multiple POS memberships require explicit POS selection before loading debt',
-      () async {
-        commercialRepository.myPos = [
-          const PosEntity(
-            posId: 1,
-            ownerId: 1,
-            posUuid: 'pos-1',
-            posName: 'نقطة البيع الأولى',
-            posPhoneNumber: '777000001',
-          ),
-          const PosEntity(
-            posId: 2,
-            ownerId: 1,
-            posUuid: 'pos-2',
-            posName: 'نقطة البيع الثانية',
-            posPhoneNumber: '777000002',
-          ),
-        ];
-        commercialRepository.posNetworkLinks = const PaginatedList(
-          items: [
-            NetworkPosLinkEntity(
-              networkPosId: 201,
-              networkId: 20,
-              posId: 2,
-              status: true,
-              network: NetworkEntity(
-                networkId: 20,
-                ownerId: 1,
-                networkName: 'شبكة النقطة الثانية',
-                networkPhoneNumber: '777222000',
-              ),
-            ),
-          ],
-        );
-
-        final controller = PosDebtLedgerController(
-          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
-          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
-          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
-          getPosNetworksListUseCase:
-              GetPosNetworksListUseCase(commercialRepository),
-        );
-
-        await controller.initializeScope();
-
-        expect(controller.selectedPosId.value, isNull);
-        expect(commercialRepository.requestedPosNetworkIds, isEmpty);
-        expect(repository.requestedDebtScopes, isEmpty);
-
-        await controller.selectPos(2);
-
-        expect(controller.selectedPosId.value, 2);
-        expect(controller.selectedNetworkId.value, 20);
-        expect(repository.requestedDebtScopes.single, {
-          'networkId': 20,
-          'posId': 2,
-        });
-        expect(repository.requestedInvoiceScopes.single, {
-          'networkId': 20,
-          'posId': 2,
-        });
-      },
-    );
-
-    test(
-      'remote network search preserves selected supplier and records the server query',
-      () async {
-        const pos = PosEntity(
-          posId: 8,
           ownerId: 1,
-          posUuid: 'pos-8',
-          posName: 'نقطة البحث',
-          posPhoneNumber: '777000008',
-        );
-        const firstLink = NetworkPosLinkEntity(
-          networkPosId: 81,
-          networkId: 81,
-          posId: 8,
-          status: true,
-          network: NetworkEntity(
-            networkId: 81,
-            ownerId: 1,
-            networkName: 'شبكة ألف',
-            networkPhoneNumber: '777888111',
-          ),
-        );
-        const secondLink = NetworkPosLinkEntity(
-          networkPosId: 82,
-          networkId: 82,
-          posId: 8,
-          status: true,
-          network: NetworkEntity(
-            networkId: 82,
-            ownerId: 2,
-            networkName: 'شبكة باء',
-            networkPhoneNumber: '777888222',
-          ),
-        );
-        commercialRepository.myPos = [pos];
-        commercialRepository.posNetworkLinks = const PaginatedList(
-          items: [firstLink, secondLink],
-        );
-        commercialRepository.posNetworkSearchResults['شبكة باء'] =
-            const PaginatedList(items: [secondLink]);
-
-        final controller = PosDebtLedgerController(
-          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
-          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
-          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
-          getPosNetworksListUseCase:
-              GetPosNetworksListUseCase(commercialRepository),
-        );
-
-        await controller.initializeScope();
-        await controller.selectNetwork(81);
-        await controller.searchNetworks('شبكة باء');
-
-        expect(commercialRepository.requestedPosNetworkSearchQueries, [
-          null,
-          'شبكة باء',
-        ]);
-        expect(controller.networkLinks.map((link) => link.networkId), [82]);
-        expect(controller.selectedNetworkId.value, 81);
-        expect(controller.selectedNetwork?.networkId, 81);
-        expect(repository.requestedDebtScopes, [
-          {'networkId': 81, 'posId': 8},
-        ]);
-      },
-    );
-
-
-    test(
-      'empty remote network search preserves the selected scope without showing no-link state',
-      () async {
-        const pos = PosEntity(
-          posId: 9,
-          ownerId: 1,
-          posUuid: 'pos-9',
-          posName: 'نقطة البحث الفارغ',
-          posPhoneNumber: '777000009',
-        );
-        const selectedLink = NetworkPosLinkEntity(
-          networkPosId: 91,
-          networkId: 91,
-          posId: 9,
-          status: true,
-          network: NetworkEntity(
-            networkId: 91,
-            ownerId: 1,
-            networkName: 'مزود مختار',
-            networkPhoneNumber: '777999111',
-          ),
-        );
-        const anotherLink = NetworkPosLinkEntity(
-          networkPosId: 92,
-          networkId: 92,
-          posId: 9,
-          status: true,
-          network: NetworkEntity(
-            networkId: 92,
-            ownerId: 2,
-            networkName: 'مزود آخر',
-            networkPhoneNumber: '777999222',
-          ),
-        );
-
-        commercialRepository.myPos = [pos];
-        commercialRepository.posNetworkLinks = const PaginatedList(
-          items: [selectedLink, anotherLink],
-        );
-
-        final controller = PosDebtLedgerController(
-          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
-          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
-          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
-          getPosNetworksListUseCase:
-              GetPosNetworksListUseCase(commercialRepository),
-        );
-
-        await controller.initializeScope();
-        await controller.selectNetwork(91);
-        final debtRequestCount = repository.requestedDebtScopes.length;
-
-        await controller.searchNetworks('لا يوجد بهذا الاسم');
-
-        expect(controller.selectedNetworkId.value, 91);
-        expect(controller.selectedNetwork?.networkId, 91);
-        expect(controller.networkSearchHasNoResults.value, isTrue);
-        expect(controller.networkLinks.map((link) => link.networkId), [91, 92]);
-        expect(controller.hasSelectedScope, isTrue);
-        expect(repository.requestedDebtScopes, hasLength(debtRequestCount));
-      },
-    );
-
-
-    test(
-      'Network wallet selection appends cursor pages and deduplicates wallet IDs',
-      () async {
-        const firstWallet = NetworkWalletEntity(
-          walletId: 1,
-          networkId: 101,
-          walletBalance: 1000,
           networkName: 'الشبكة الأولى',
-        );
-        const secondWallet = NetworkWalletEntity(
-          walletId: 2,
-          networkId: 202,
-          walletBalance: 2000,
+          networkPhoneNumber: '777111111',
+          networkUuid: 'NET-122',
+        ),
+      );
+      const secondLink = NetworkPosLinkEntity(
+        networkPosId: 52,
+        networkId: 22,
+        posId: 5,
+        status: false,
+        network: NetworkEntity(
+          networkId: 22,
+          ownerId: 2,
           networkName: 'الشبكة الثانية',
-        );
-        repository.networkWallets = const PaginatedList(
-          items: [firstWallet],
-          nextCursor: 'network-wallet-page-2',
-        );
-        repository.networkWalletPages['network-wallet-page-2'] =
-            const PaginatedList(items: [firstWallet, secondWallet]);
+          networkPhoneNumber: '777222222',
+          networkUuid: 'NET-224',
+        ),
+      );
+      commercialRepository.myPos = [pos];
+      commercialRepository.posNetworkLinks = const PaginatedList(
+        items: [firstLink, secondLink],
+      );
 
-        final controller = NetworkWalletDashboardController(
-          getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
-          getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
-        );
+      final controller = PosDebtLedgerController(
+        getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+        getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(
+          repository,
+        ),
+        getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+        getPosNetworksListUseCase: GetPosNetworksListUseCase(
+          commercialRepository,
+        ),
+      );
 
-        await controller.loadWallets();
-        await controller.loadMoreWallets();
+      await controller.initializeScope();
 
-        expect(controller.wallets.map((wallet) => wallet.walletId), [1, 2]);
-        expect(controller.selectedWallet.value?.walletId, 1);
-        expect(repository.requestedNetworkWalletCursors, [
-          null,
-          'network-wallet-page-2',
-        ]);
-        expect(controller.hasMoreWallets, isFalse);
-        expect(controller.isLoadingMoreWallets.value, isFalse);
-      },
-    );
+      expect(controller.selectedPosId.value, 5);
+      expect(controller.selectedNetworkId.value, isNull);
+      expect(repository.requestedDebtScopes, isEmpty);
+      expect(repository.requestedInvoiceScopes, isEmpty);
+      expect(commercialRepository.requestedPosNetworkIds, [5]);
+
+      await controller.selectNetwork(22);
+
+      expect(repository.requestedDebtScopes, [
+        {'networkId': 22, 'posId': 5},
+      ]);
+      expect(repository.requestedInvoiceScopes, [
+        {'networkId': 22, 'posId': 5},
+      ]);
+    });
+
+    test('multiple POS memberships require explicit POS selection before loading debt', () async {
+      commercialRepository.myPos = [
+        const PosEntity(
+          posId: 1,
+          ownerId: 1,
+          posUuid: 'pos-1',
+          posName: 'نقطة البيع الأولى',
+          posPhoneNumber: '777000001',
+        ),
+        const PosEntity(
+          posId: 2,
+          ownerId: 1,
+          posUuid: 'pos-2',
+          posName: 'نقطة البيع الثانية',
+          posPhoneNumber: '777000002',
+        ),
+      ];
+      commercialRepository.posNetworkLinks = const PaginatedList(
+        items: [
+          NetworkPosLinkEntity(
+            networkPosId: 201,
+            networkId: 20,
+            posId: 2,
+            status: true,
+            network: NetworkEntity(
+              networkId: 20,
+              ownerId: 1,
+              networkName: 'شبكة النقطة الثانية',
+              networkPhoneNumber: '777222000',
+              networkUuid: 'NET-222',
+            ),
+          ),
+        ],
+      );
+
+      final controller = PosDebtLedgerController(
+        getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+        getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(
+          repository,
+        ),
+        getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+        getPosNetworksListUseCase: GetPosNetworksListUseCase(
+          commercialRepository,
+        ),
+      );
+
+      await controller.initializeScope();
+
+      expect(controller.selectedPosId.value, isNull);
+      expect(commercialRepository.requestedPosNetworkIds, isEmpty);
+      expect(repository.requestedDebtScopes, isEmpty);
+
+      await controller.selectPos(2);
+
+      expect(controller.selectedPosId.value, 2);
+      expect(controller.selectedNetworkId.value, 20);
+      expect(repository.requestedDebtScopes.single, {
+        'networkId': 20,
+        'posId': 2,
+      });
+      expect(repository.requestedInvoiceScopes.single, {
+        'networkId': 20,
+        'posId': 2,
+      });
+    });
+
+    test('remote network search preserves selected supplier and records the server query', () async {
+      const pos = PosEntity(
+        posId: 8,
+        ownerId: 1,
+        posUuid: 'pos-8',
+        posName: 'نقطة البحث',
+        posPhoneNumber: '777000008',
+      );
+      const firstLink = NetworkPosLinkEntity(
+        networkPosId: 81,
+        networkId: 81,
+        posId: 8,
+        status: true,
+        network: NetworkEntity(
+          networkId: 81,
+          ownerId: 1,
+          networkName: 'شبكة ألف',
+          networkPhoneNumber: '777888111',
+          networkUuid: 'NET-223',
+        ),
+      );
+      const secondLink = NetworkPosLinkEntity(
+        networkPosId: 82,
+        networkId: 82,
+        posId: 8,
+        status: true,
+        network: NetworkEntity(
+          networkId: 82,
+          ownerId: 2,
+          networkName: 'شبكة باء',
+          networkPhoneNumber: '777888222',
+          networkUuid: 'NET-224',
+        ),
+      );
+      commercialRepository.myPos = [pos];
+      commercialRepository.posNetworkLinks = const PaginatedList(
+        items: [firstLink, secondLink],
+      );
+      commercialRepository.posNetworkSearchResults['شبكة باء'] =
+          const PaginatedList(items: [secondLink]);
+
+      final controller = PosDebtLedgerController(
+        getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+        getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(
+          repository,
+        ),
+        getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+        getPosNetworksListUseCase: GetPosNetworksListUseCase(
+          commercialRepository,
+        ),
+      );
+
+      await controller.initializeScope();
+      await controller.selectNetwork(81);
+      await controller.searchNetworks('شبكة باء');
+
+      expect(commercialRepository.requestedPosNetworkSearchQueries, [
+        null,
+        'شبكة باء',
+      ]);
+      expect(controller.networkLinks.map((link) => link.networkId), [82]);
+      expect(controller.selectedNetworkId.value, 81);
+      expect(controller.selectedNetwork?.networkId, 81);
+      expect(repository.requestedDebtScopes, [
+        {'networkId': 81, 'posId': 8},
+      ]);
+    });
+
+    test('empty remote network search preserves the selected scope without showing no-link state', () async {
+      const pos = PosEntity(
+        posId: 9,
+        ownerId: 1,
+        posUuid: 'pos-9',
+        posName: 'نقطة البحث الفارغ',
+        posPhoneNumber: '777000009',
+      );
+      const selectedLink = NetworkPosLinkEntity(
+        networkPosId: 91,
+        networkId: 91,
+        posId: 9,
+        status: true,
+        network: NetworkEntity(
+          networkId: 91,
+          ownerId: 1,
+          networkName: 'مزود مختار',
+          networkPhoneNumber: '777999111',
+          networkUuid: 'NET-225',
+        ),
+      );
+      const anotherLink = NetworkPosLinkEntity(
+        networkPosId: 92,
+        networkId: 92,
+        posId: 9,
+        status: true,
+        network: NetworkEntity(
+          networkId: 92,
+          ownerId: 2,
+          networkName: 'مزود آخر',
+          networkPhoneNumber: '777999222',
+        ),
+      );
+
+      commercialRepository.myPos = [pos];
+      commercialRepository.posNetworkLinks = const PaginatedList(
+        items: [selectedLink, anotherLink],
+      );
+
+      final controller = PosDebtLedgerController(
+        getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+        getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(
+          repository,
+        ),
+        getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+        getPosNetworksListUseCase: GetPosNetworksListUseCase(
+          commercialRepository,
+        ),
+      );
+
+      await controller.initializeScope();
+      await controller.selectNetwork(91);
+      final debtRequestCount = repository.requestedDebtScopes.length;
+
+      await controller.searchNetworks('لا يوجد بهذا الاسم');
+
+      expect(controller.selectedNetworkId.value, 91);
+      expect(controller.selectedNetwork?.networkId, 91);
+      expect(controller.networkSearchHasNoResults.value, isTrue);
+      expect(controller.networkLinks.map((link) => link.networkId), [91, 92]);
+      expect(controller.hasSelectedScope, isTrue);
+      expect(repository.requestedDebtScopes, hasLength(debtRequestCount));
+    });
+
+    test('Network wallet selection appends cursor pages and deduplicates wallet IDs', () async {
+      const firstWallet = NetworkWalletEntity(
+        walletId: 1,
+        networkId: 101,
+        walletBalance: 1000,
+        networkName: 'الشبكة الأولى',
+      );
+      const secondWallet = NetworkWalletEntity(
+        walletId: 2,
+        networkId: 202,
+        walletBalance: 2000,
+        networkName: 'الشبكة الثانية',
+      );
+      repository.networkWallets = const PaginatedList(
+        items: [firstWallet],
+        nextCursor: 'network-wallet-page-2',
+      );
+      repository.networkWalletPages['network-wallet-page-2'] =
+          const PaginatedList(items: [firstWallet, secondWallet]);
+
+      final controller = NetworkWalletDashboardController(
+        getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
+        getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+      );
+
+      await controller.loadWallets();
+      await controller.loadMoreWallets();
+
+      expect(controller.wallets.map((wallet) => wallet.walletId), [1, 2]);
+      expect(controller.selectedWallet.value?.walletId, 1);
+      expect(repository.requestedNetworkWalletCursors, [
+        null,
+        'network-wallet-page-2',
+      ]);
+      expect(controller.hasMoreWallets, isFalse);
+      expect(controller.isLoadingMoreWallets.value, isFalse);
+    });
 
     test(
       'POS wallet selection appends cursor pages and preserves selected wallet',
@@ -1631,8 +1673,9 @@ void main() {
           items: [firstWallet],
           nextCursor: 'pos-wallet-page-2',
         );
-        repository.posWalletPages['pos-wallet-page-2'] =
-            const PaginatedList(items: [firstWallet, secondWallet]);
+        repository.posWalletPages['pos-wallet-page-2'] = const PaginatedList(
+          items: [firstWallet, secondWallet],
+        );
 
         final controller = PosWalletDashboardController(
           getPosWalUseCase: GetPosWalUseCase(repository),
@@ -1707,8 +1750,9 @@ void main() {
       );
       final oldRequest = Completer<PaginatedList<NetworkWalletLogEntity>>();
       repository.pendingNetworkLogs[1] = oldRequest;
-      repository.pendingNetworkLogs[2] = Completer<PaginatedList<NetworkWalletLogEntity>>()
-        ..complete(const PaginatedList(items: [newLog]));
+      repository.pendingNetworkLogs[2] =
+          Completer<PaginatedList<NetworkWalletLogEntity>>()
+            ..complete(const PaginatedList(items: [newLog]));
 
       final controller = NetworkWalletDashboardController(
         getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
@@ -1726,98 +1770,110 @@ void main() {
       expect(controller.isLoadingLogs.value, isFalse);
     });
 
-    test('POS wallet stale response cannot replace newly selected wallet ledger', () async {
-      const walletA = PosWalletEntity(
-        walletId: 1,
-        networkId: 1,
-        posId: 1,
-        walletBalance: 1000,
-      );
-      const walletB = PosWalletEntity(
-        walletId: 2,
-        networkId: 1,
-        posId: 2,
-        walletBalance: 2000,
-      );
-      const oldLog = PosWalletLogEntity(
-        logId: 101,
-        walletId: 1,
-        logOperationType: 'DEPOSIT',
-        logAmount: 100,
-      );
-      const newLog = PosWalletLogEntity(
-        logId: 202,
-        walletId: 2,
-        logOperationType: 'DEPOSIT',
-        logAmount: 200,
-      );
-      final oldRequest = Completer<PaginatedList<PosWalletLogEntity>>();
-      repository.pendingPosLogs[1] = oldRequest;
-      repository.pendingPosLogs[2] = Completer<PaginatedList<PosWalletLogEntity>>()
-        ..complete(const PaginatedList(items: [newLog]));
+    test(
+      'POS wallet stale response cannot replace newly selected wallet ledger',
+      () async {
+        const walletA = PosWalletEntity(
+          walletId: 1,
+          networkId: 1,
+          posId: 1,
+          walletBalance: 1000,
+        );
+        const walletB = PosWalletEntity(
+          walletId: 2,
+          networkId: 1,
+          posId: 2,
+          walletBalance: 2000,
+        );
+        const oldLog = PosWalletLogEntity(
+          logId: 101,
+          walletId: 1,
+          logOperationType: 'DEPOSIT',
+          logAmount: 100,
+        );
+        const newLog = PosWalletLogEntity(
+          logId: 202,
+          walletId: 2,
+          logOperationType: 'DEPOSIT',
+          logAmount: 200,
+        );
+        final oldRequest = Completer<PaginatedList<PosWalletLogEntity>>();
+        repository.pendingPosLogs[1] = oldRequest;
+        repository.pendingPosLogs[2] =
+            Completer<PaginatedList<PosWalletLogEntity>>()
+              ..complete(const PaginatedList(items: [newLog]));
 
-      final controller = PosWalletDashboardController(
-        getPosWalUseCase: GetPosWalUseCase(repository),
-        getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
-      );
-      controller.selectedWallet.value = walletA;
-      final oldFuture = controller.loadWalletLogs(1, isRefresh: true);
+        final controller = PosWalletDashboardController(
+          getPosWalUseCase: GetPosWalUseCase(repository),
+          getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+        );
+        controller.selectedWallet.value = walletA;
+        final oldFuture = controller.loadWalletLogs(1, isRefresh: true);
 
-      await controller.selectWallet(walletB);
-      oldRequest.complete(const PaginatedList(items: [oldLog]));
-      await oldFuture;
+        await controller.selectWallet(walletB);
+        oldRequest.complete(const PaginatedList(items: [oldLog]));
+        await oldFuture;
 
-      expect(controller.selectedWallet.value?.walletId, 2);
-      expect(controller.logs.map((item) => item.logId), [202]);
-      expect(controller.isLoadingLogs.value, isFalse);
-    });
+        expect(controller.selectedWallet.value?.walletId, 2);
+        expect(controller.logs.map((item) => item.logId), [202]);
+        expect(controller.isLoadingLogs.value, isFalse);
+      },
+    );
 
-    test('Debt bucket stale response cannot replace latest bucket invoices', () async {
-      const oldInvoice = InvoiceEntity(
-        invoiceId: 101,
-        networkId: 1,
-        posId: 1,
-        invoiceTotalAmount: 1000,
-        paidAmount: 0,
-        remainingAmount: 1000,
-        paymentStatusRaw: 'UNPAID',
-        invoiceDate: '2026-11-01',
-      );
-      const newInvoice = InvoiceEntity(
-        invoiceId: 202,
-        networkId: 1,
-        posId: 1,
-        invoiceTotalAmount: 2000,
-        paidAmount: 0,
-        remainingAmount: 2000,
-        paymentStatusRaw: 'UNPAID',
-        invoiceDate: '2026-11-02',
-      );
-      final oldRequest = Completer<PaginatedList<InvoiceEntity>>();
-      repository.pendingInvoicePages['0_30'] = oldRequest;
-      repository.pendingInvoicePages['31_60'] =
-          Completer<PaginatedList<InvoiceEntity>>()
-            ..complete(const PaginatedList(items: [newInvoice]));
+    test(
+      'Debt bucket stale response cannot replace latest bucket invoices',
+      () async {
+        const oldInvoice = InvoiceEntity(
+          invoiceId: 101,
+          networkId: 1,
+          posId: 1,
+          invoiceTotalAmount: 1000,
+          paidAmount: 0,
+          remainingAmount: 1000,
+          paymentStatusRaw: 'UNPAID',
+          invoiceDate: '2026-11-01',
+        );
+        const newInvoice = InvoiceEntity(
+          invoiceId: 202,
+          networkId: 1,
+          posId: 1,
+          invoiceTotalAmount: 2000,
+          paidAmount: 0,
+          remainingAmount: 2000,
+          paymentStatusRaw: 'UNPAID',
+          invoiceDate: '2026-11-02',
+        );
+        final oldRequest = Completer<PaginatedList<InvoiceEntity>>();
+        repository.pendingInvoicePages['0_30'] = oldRequest;
+        repository.pendingInvoicePages['31_60'] =
+            Completer<PaginatedList<InvoiceEntity>>()
+              ..complete(const PaginatedList(items: [newInvoice]));
 
-      final controller = PosDebtLedgerController(
-        getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
-        getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(repository),
-        getMyPosUseCase: GetMyPosUseCase(commercialRepository),
-        getPosNetworksListUseCase:
-            GetPosNetworksListUseCase(commercialRepository),
-      );
-      controller.selectedBucket.value = '0_30';
-      controller.selectedPosId.value = 1;
-      controller.selectedNetworkId.value = 1;
-      final oldFuture = controller.loadInvoices(isRefresh: true);
-      await controller.onBucketSelected('31_60');
-      oldRequest.complete(const PaginatedList(items: [oldInvoice]));
-      await oldFuture;
+        final controller = PosDebtLedgerController(
+          getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+          getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(
+            repository,
+          ),
+          getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+          getPosNetworksListUseCase: GetPosNetworksListUseCase(
+            commercialRepository,
+          ),
+        );
+        controller.selectedBucket.value = '0_30';
+        controller.selectedPosId.value = 1;
+        controller.selectedNetworkId.value = 1;
+        final oldFuture = controller.loadInvoices(isRefresh: true);
+        await controller.onBucketSelected('31_60');
+        oldRequest.complete(const PaginatedList(items: [oldInvoice]));
+        await oldFuture;
 
-      expect(controller.selectedBucket.value, '31_60');
-      expect(controller.outstandingInvoices.map((item) => item.invoiceId), [202]);
-      expect(controller.isLoadingInvoices.value, isFalse);
-    });
+        expect(controller.selectedBucket.value, '31_60');
+        expect(controller.outstandingInvoices.map((item) => item.invoiceId), [
+          202,
+        ]);
+        expect(controller.isLoadingInvoices.value, isFalse);
+      },
+    );
 
     test(
       'NetworkWalletDashboardController loads network wallet balances',
