@@ -40,6 +40,14 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
   Widget build(BuildContext context) {
     _ensureDataLoaded();
 
+    if (networkId == null || networkId! <= 0) {
+      return const CustomEmptyState(
+        icon: Icons.hub_outlined,
+        title: 'حدد الشبكة أولاً',
+        subtitle: 'اختر شبكة متاحة من لوحة الرئيسية لعرض نقاط البيع المرتبطة بها.',
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: embedded ? null : AppBar(
