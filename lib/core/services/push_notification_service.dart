@@ -19,6 +19,7 @@ import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/sound_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/features/notifications/presentation/controllers/notification_controller.dart';
 
 /// دالة المعالجة المعزولة في الخلفية عند وصول إشعار والتطبيق بالخلفية أو مغلق.
 /// يجب أن تكون في المستوى الأعلى (Top-Level) ومحمية بـ @pragma('vm:entry-point').
@@ -335,6 +336,11 @@ class PushNotificationService extends GetxService {
       _showLocalNotification(message);
       // إطلاق النغمة المميزة فورياً عبر مجرى المنبه لتجاوز الوضع الصامت/الهزاز
       SoundService.instance.playSound();
+
+      // تحديث عداد الإشعارات وقائمة مركز الإشعارات لحظياً
+      if (Get.isRegistered<NotificationController>()) {
+        NotificationController.to.onNewNotificationReceived();
+      }
     });
 
     // 2. التفاعل مع النقر على الإشعار عند عودة التطبيق من الخلفية (Background)

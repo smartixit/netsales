@@ -82,6 +82,11 @@ abstract final class AppRoutes {
   static const String repaymentDetails = '/repayments/details';
 
   // ----------------------------------------------------------------------------
+  // مسار مركز الإشعارات والتنبيهات الموجهة (Notifications Center)
+  // ----------------------------------------------------------------------------
+  static const String notifications = '/notifications';
+
+  // ----------------------------------------------------------------------------
   // مسارات الأمان الموحدة لكافة البيئات (Security Routes)
   // ----------------------------------------------------------------------------
   static const String activeSessions = '/security/active-sessions';

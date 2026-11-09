@@ -3,6 +3,7 @@ import 'package:netsales/core/services/app_exit_service.dart';
 import 'package:netsales/core/services/credential_service.dart';
 import 'package:netsales/core/services/date_picker_service.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
+import 'package:netsales/features/notifications/presentation/bindings/notification_binding.dart';
 
 /// ============================================================================
 /// حقن الاعتماديات العام الموحد للتطبيق (Global Application Bindings)
@@ -32,5 +33,8 @@ class InitialBinding extends Bindings {
       () => CredentialService.instance,
       fenix: true,
     );
+
+    // 5. مركز الإشعارات والتنبيهات الموجهة
+    NotificationBinding().dependencies();
   }
 }

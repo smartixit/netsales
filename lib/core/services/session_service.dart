@@ -12,6 +12,7 @@ import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/features/notifications/presentation/controllers/notification_controller.dart';
 
 /// ============================================================================
 /// خدمة إدارة الجلسة والهوية (Enterprise Identity & Session Lifecycle Service)
@@ -239,6 +240,11 @@ class SessionService extends GetxService {
 
     if (Get.isRegistered<PushNotificationService>()) {
       await PushNotificationService.to.clearFcmToken();
+    }
+
+    if (Get.isRegistered<NotificationController>()) {
+      NotificationController.to.unreadCount.value = 0;
+      NotificationController.to.notifications.clear();
     }
 
     if (Get.isRegistered<WorkspaceService>()) {

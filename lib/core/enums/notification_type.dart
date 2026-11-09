@@ -1,4 +1,6 @@
+import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 
 /// أنواع الإشعارات الرسمية المعتمدة لنظام NetSales (22 نوعاً مطابقاً لـ NotificationType في netsales_api)
 enum NotificationType {
@@ -45,26 +47,51 @@ enum NotificationType {
   bool get isKnown => this != NotificationType.unknown;
 
   String get defaultRoute {
+    final isPos = WorkspaceService.instance.activeWorkspace == AppWorkspace.pos;
+
     switch (this) {
       case NotificationType.saleInvoiceCreated:
       case NotificationType.saleInvoiceCompleted:
       case NotificationType.saleInvoiceCancelled:
-        return AppRoutes.dashboard;
+        return isPos ? AppRoutes.purchaseInvoices : AppRoutes.wholesaleInvoices;
+
       case NotificationType.voucherRequestCreated:
       case NotificationType.voucherRequestApproved:
       case NotificationType.voucherRequestRejected:
       case NotificationType.voucherRequestCancelled:
-        return AppRoutes.dashboard;
+        return isPos
+            ? AppRoutes.procurementOrders
+            : AppRoutes.supplyRequestsReview;
+
       case NotificationType.walletDeposit:
       case NotificationType.walletWithdrawal:
       case NotificationType.walletTransfer:
-        return AppRoutes.dashboard;
+        return isPos
+            ? AppRoutes.posWalletStatement
+            : AppRoutes.networkWalletStatement;
+
+      case NotificationType.networkApproved:
+      case NotificationType.networkRejected:
+        return isPos
+            ? AppRoutes.linkedNetworksCatalog
+            : AppRoutes.networkWorkspace;
+
+      case NotificationType.posApproved:
+      case NotificationType.posRejected:
+        return isPos ? AppRoutes.posWorkspace : AppRoutes.posDirectory;
+
       case NotificationType.securityLoginAlert:
       case NotificationType.securityDeviceBlocked:
       case NotificationType.securityPasswordChanged:
         return AppRoutes.activeSessions;
-      default:
-        return AppRoutes.dashboard;
+
+      case NotificationType.systemAnnouncement:
+      case NotificationType.generalInfo:
+      case NotificationType.supportTicketCreated:
+      case NotificationType.supportTicketReplied:
+      case NotificationType.supportTicketClosed:
+      case NotificationType.unknown:
+        return AppRoutes.notifications;
     }
   }
 }

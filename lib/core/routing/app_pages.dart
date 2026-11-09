@@ -48,6 +48,8 @@ import 'package:netsales/features/finance/presentation/screens/pos_wallet_dashbo
 import 'package:netsales/features/finance/presentation/screens/repayment_collection_screen.dart';
 import 'package:netsales/features/finance/presentation/screens/repayment_details_screen.dart';
 import 'package:netsales/features/finance/presentation/screens/repayment_history_screen.dart';
+import 'package:netsales/features/notifications/presentation/bindings/notification_binding.dart';
+import 'package:netsales/features/notifications/presentation/screens/notification_center_screen.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
 import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -198,6 +200,16 @@ abstract final class AppPages {
       name: AppRoutes.activeSessions,
       page: () => const ActiveSessionsScreen(),
       binding: ActiveSessionsBinding(),
+      middlewares: [AuthGuard()],
+    ),
+
+    // ========================================================================
+    // 5.1 مسار مركز الإشعارات والتنبيهات الموجهة (Notification Center)
+    // ========================================================================
+    GetPage(
+      name: AppRoutes.notifications,
+      page: () => const NotificationCenterScreen(),
+      binding: NotificationBinding(),
       middlewares: [AuthGuard()],
     ),
 

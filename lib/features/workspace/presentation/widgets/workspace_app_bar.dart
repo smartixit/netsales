@@ -6,6 +6,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/features/notifications/presentation/widgets/notification_badge_button.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_coordinator_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/buttons/custom_theme_toggle_button.dart';
@@ -73,6 +74,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         ...?actions,
+        const NotificationBadgeButton(),
         CustomButton.icon(
           icon: Icons.devices_rounded,
           foregroundColor: colors.onSurfaceVariant,
