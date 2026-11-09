@@ -10,6 +10,7 @@ class MembershipModel extends MembershipEntity {
     required super.roleLabel,
     required super.status,
     super.profileLogo,
+    super.isOwner,
   });
 
   factory MembershipModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +31,7 @@ class MembershipModel extends MembershipEntity {
       roleLabel: role['role_key_label']?.toString() ??
           role['role_name']?.toString() ?? 'دور غير محدد',
       status: json['status']?.toString() ?? 'UNKNOWN',
+      isOwner: json['is_owner'] == true || json['is_owner'] == 1,
     );
   }
 
