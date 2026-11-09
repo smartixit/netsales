@@ -4,9 +4,16 @@ import 'package:netsales/core/models/role_model.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/services/storage_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
+    await StorageService.instance.init();
+  });
 
   group('WorkspaceService Resolution & Scope Boundaries Tests', () {
     final workspaceService = WorkspaceService.instance;
