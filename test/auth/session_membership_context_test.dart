@@ -845,4 +845,290 @@ void main() {
       );
     });
   });
+
+  group('P0-1: Mandatory Acceptance Criteria Matrix (اختبارات القبول الإلزامية)', () {
+    // 1. مستخدم Network فقط -> يستعيد مساحة Network
+    test('Acceptance 1: مستخدم Network فقط يستعيد مساحة Network', () async {
+      final user = UserModel.fromJson({
+        'user_id': 1001,
+        'user_full_name': 'مالك شبكة فقط',
+        'user_phone_number': '771001001',
+        'workspace_roles': [
+          {
+            'scope': 'NETWORK',
+            'tenant_id': 15,
+            'role_key': 'NETWORK_OWNER',
+            'role_name': 'مالك شبكة الفجر',
+          },
+        ],
+      });
+
+      await SessionService.instance.syncSessionProfile(
+        user: user,
+        permissions: ['networks.view', 'vouchers.manage'],
+      );
+
+      expect(WorkspaceService.instance.activeWorkspace, equals(AppWorkspace.network));
+      expect(SessionService.instance.currentUser?.hasNetworkMembership, isTrue);
+      expect(SessionService.instance.currentUser?.hasPosMembership, isFalse);
+    });
+
+    // 2. مستخدم POS فقط -> يستعيد مساحة POS
+    test('Acceptance 2: مستخدم POS فقط يستعيد مساحة POS', () async {
+      final user = UserModel.fromJson({
+        'user_id': 1002,
+        'user_full_name': 'وكيل نقطة فقط',
+        'user_phone_number': '771001002',
+        'workspace_roles': [
+          {
+            'scope': 'POS',
+            'tenant_id': 25,
+            'role_key': 'POS_AGENT',
+            'role_name': 'وكيل نقطة الفجر',
+          },
+        ],
+      });
+
+      await SessionService.instance.syncSessionProfile(
+        user: user,
+        permissions: ['pos.sales.create'],
+      );
+
+      expect(WorkspaceService.instance.activeWorkspace, equals(AppWorkspace.pos));
+      expect(SessionService.instance.currentUser?.hasNetworkMembership, isFalse);
+      expect(SessionService.instance.currentUser?.hasPosMembership, isTrue);
+    });
+
+    // 3. مستخدم لديه المساحتان -> يحتفظ بالمساحتين ويمكنه التبديل بينهما
+    test('Acceptance 3: مستخدم لديه المساحتان يحتفظ بهما ويمكنه التبديل بينهما', () async {
+      final user = UserModel.fromJson({
+        'user_id': 1003,
+        'user_full_name': 'مستخدم متعدد المساحات',
+        'user_phone_number': '771001003',
+        'workspace_roles': [
+          {
+            'scope': 'NETWORK',
+            'tenant_id': 15,
+            'role_key': 'NETWORK_USER',
+            'role_name': 'عضو شبكة',
+          },
+          {
+            'scope': 'POS',
+            'tenant_id': 25,
+            'role_key': 'POS_AGENT',
+            'role_name': 'وكيل نقطة',
+          },
+        ],
+      });
+
+      await SessionService.instance.syncSessionProfile(
+        user: user,
+        permissions: ['networks.view', 'pos.sales.create'],
+      );
+
+      expect(SessionService.instance.currentUser?.hasNetworkMembership, isTrue);
+      expect(SessionService.instance.currentUser?.hasPosMembership, isTrue);
+
+      // تبديل إلى Network
+      await WorkspaceService.instance.setActiveWorkspace(AppWorkspace.network);
+      expect(WorkspaceService.instance.activeWorkspace, equals(AppWorkspace.network));
+
+      // تبديل إلى POS
+      await WorkspaceService.instance.setActiveWorkspace(AppWorkspace.pos);
+      expect(WorkspaceService.instance.activeWorkspace, equals(AppWorkspace.pos));
+    });
+
+    // 4. مستخدم بلا دور عام -> يعمل بناءً على العضوية الصحيحة
+    test('Acceptance 4: مستخدم بلا دور عام (role_id: null) يعمل بناءً على العضوية الصحيحة', () async {
+      final user = UserModel.fromJson({
+        'user': {
+          'user_id': 1004,
+          'role_id': null,
+          'user_full_name': 'مستخدم بدون دور عام',
+          'user_phone_number': '771001004',
+          'role': null,
+        },
+        'role_key': null,
+        'workspace_roles': [
+          {
+            'scope': 'POS',
+            'tenant_id': 33,
+            'role_key': 'POS_AGENT',
+            'role_name': 'وكيل معتمد',
+          },
+        ],
+      });
+
+      expect(user.roleId, isNull);
+      expect(user.role, isNull);
+      expect(user.isPosAgent, isTrue);
+      expect(WorkspaceService.instance.resolveWorkspaceForUser(user), equals(AppWorkspace.pos));
+    });
+
+    // 5. تغيير الدور -> تتحدث الصلاحيات دون إعادة تشغيل التطبيق
+    test('Acceptance 5: تغيير الدور يحدث الصلاحيات والقدرات فوراً دون إعادة تشغيل', () async {
+      final userV1 = UserModel.fromJson({
+        'user_id': 1005,
+        'user_full_name': 'صالح ترقية',
+        'user_phone_number': '771001005',
+        'workspace_roles': [
+          {
+            'scope': 'NETWORK',
+            'tenant_id': 10,
+            'role_key': 'NETWORK_USER',
+            'role_name': 'مستخدم',
+          },
+        ],
+      });
+
+      await SessionService.instance.syncSessionProfile(
+        user: userV1,
+        permissions: ['vouchers.view'],
+        roleKey: 'NETWORK_USER',
+      );
+
+      expect(PermissionService.instance.currentRole, equals('NETWORK_USER'));
+      expect(PermissionService.instance.can('network.settings.manage'), isFalse);
+
+      // ترقية الدور من الخادم
+      final userV2 = UserModel.fromJson({
+        'user_id': 1005,
+        'user_full_name': 'صالح ترقية',
+        'user_phone_number': '771001005',
+        'workspace_roles': [
+          {
+            'scope': 'NETWORK',
+            'tenant_id': 10,
+            'role_key': 'NETWORK_OWNER',
+            'role_name': 'مالك',
+          },
+        ],
+      });
+
+      await SessionService.instance.syncSessionProfile(
+        user: userV2,
+        permissions: ['vouchers.view', 'network.settings.manage'],
+        roleKey: 'NETWORK_OWNER',
+      );
+
+      expect(PermissionService.instance.currentRole, equals('NETWORK_OWNER'));
+      expect(PermissionService.instance.can('network.settings.manage'), isTrue);
+    });
+
+    // 6. إلغاء العضوية -> يُمنع الوصول إلى المساحة الملغاة
+    test('Acceptance 6: إلغاء العضوية يمنع الوصول للمساحة الملغاة ويمسح سياق المستأجر', () async {
+      final storage = StorageService.instance;
+      await storage.setInt('${StorageKeys.activePosTenantPrefix}_1006', 77);
+
+      final userWithRevokedMembership = UserModel.fromJson({
+        'user_id': 1006,
+        'user_full_name': 'مستخدم ألغيت عضويته',
+        'user_phone_number': '771001006',
+        'workspace_roles': <dynamic>[], // عضوية مسحوبة
+      });
+
+      await SessionService.instance.syncSessionProfile(
+        user: userWithRevokedMembership,
+        permissions: [],
+      );
+
+      expect(storage.getInt('${StorageKeys.activePosTenantPrefix}_1006'), isNull);
+      expect(WorkspaceService.instance.activeWorkspace, equals(AppWorkspace.unsupported));
+    });
+
+    // 7. اختلاف المستأجر -> لا تنتقل صلاحيات مستأجر إلى آخر
+    test('Acceptance 7: اختلاف المستأجر يعزل الهوية ولا ينقل صلاحيات مستأجر لآخر', () {
+      final user = UserModel.fromJson({
+        'user_id': 1007,
+        'user_full_name': 'مستأجرين منفصلين',
+        'user_phone_number': '771001007',
+        'workspace_roles': [
+          {
+            'scope': 'NETWORK',
+            'tenant_id': 501,
+            'role_key': 'NETWORK_OWNER',
+            'role_name': 'شبكة مالك',
+          },
+          {
+            'scope': 'NETWORK',
+            'tenant_id': 502,
+            'role_key': 'NETWORK_USER',
+            'role_name': 'شبكة موظف',
+          },
+        ],
+      });
+
+      final ownerMembership = user.workspaceMemberships.firstWhere((m) => m.tenantId == 501);
+      final userMembership = user.workspaceMemberships.firstWhere((m) => m.tenantId == 502);
+
+      expect(ownerMembership.roleKey, equals('NETWORK_OWNER'));
+      expect(userMembership.roleKey, equals('NETWORK_USER'));
+      expect(ownerMembership.tenantId, isNot(equals(userMembership.tenantId)));
+    });
+
+    // 8. استعادة الجلسة بعد إغلاق التطبيق وإعادة تشغيله (App reboot & cold start simulation)
+    test('Acceptance 8: شرط الإغلاق — استعادة الجلسة بعد إغلاق التطبيق وإعادة تشغيله مع كامل العضويات', () async {
+      // 1. بدء جلسة وحفظها
+      final user = UserModel.fromJson({
+        'user_id': 1008,
+        'user_full_name': 'مستخدم إعادة التشغيل',
+        'user_phone_number': '771001008',
+        'workspace_roles': [
+          {
+            'scope': 'POS',
+            'tenant_id': 888,
+            'role_key': 'POS_AGENT',
+            'role_name': 'وكيل إعادة تشغيل',
+          },
+        ],
+      });
+
+      await SessionService.instance.startSession(
+        user: user,
+        session: const UserSessionModel(
+          sessionId: 'persisted-session-token',
+          userId: 1008,
+          deviceUuid: 'device-reboot-1',
+        ),
+        permissions: ['pos.sales.create', 'reports.view'],
+      );
+
+      expect(SessionService.instance.isAuthenticated, isTrue);
+
+      // 2. محاكاة إغلاق التطبيق تماماً (Cold App Restart)
+      // تفريغ ذاكرة GetX بالكامل
+      Get.reset();
+
+      // 3. إعادة إقلاع خدمات التطبيق من التخزين الدائم
+      Get.put<StorageService>(StorageService.instance);
+      Get.put<PermissionService>(PermissionService.instance);
+      Get.put<WorkspaceService>(WorkspaceService.instance);
+      Get.put<SessionService>(SessionService.instance);
+
+      await SessionService.instance.init();
+      await WorkspaceService.instance.init();
+
+      // 4. التحقق من الاستعادة الكاملة
+      expect(SessionService.instance.isAuthenticated, isTrue);
+      expect(SessionService.instance.currentSessionId, equals('persisted-session-token'));
+
+      final restoredUser = SessionService.instance.currentUser;
+      expect(restoredUser, isNotNull);
+      expect(restoredUser!.userId, equals(1008));
+      expect(restoredUser.workspaceMemberships.length, equals(1));
+
+      final restoredMembership = restoredUser.workspaceMemberships.first;
+      expect(restoredMembership.scope, equals(RoleScope.pos));
+      expect(restoredMembership.tenantId, equals(888));
+      expect(restoredMembership.roleKey, equals('POS_AGENT'));
+      expect(restoredMembership.roleName, equals('وكيل إعادة تشغيل'));
+
+      // التحقق من استعادة الصلاحيات دون ضياع
+      expect(PermissionService.instance.can('pos.sales.create'), isTrue);
+      expect(PermissionService.instance.can('reports.view'), isTrue);
+
+      // التحقق من استعادة مساحة العمل الصحيحة
+      expect(WorkspaceService.instance.activeWorkspace, equals(AppWorkspace.pos));
+    });
+  });
 }

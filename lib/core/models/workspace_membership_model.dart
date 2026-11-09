@@ -68,3 +68,4 @@ class WorkspaceMembershipModel {
   String toString() =>
       'WorkspaceMembershipModel(scope: ${scope.wireValue}, tenantId: $tenantId, roleKey: $roleKey, roleName: $roleName)';
 }
+

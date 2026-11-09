@@ -7,6 +7,7 @@ import 'package:netsales/features/auth/data/repositories/auth_repository_impl.da
 import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
 import 'package:netsales/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:netsales/features/workspace/data/datasources/workspace_local_data_source.dart';
+import 'package:netsales/features/workspace/data/datasources/workspace_local_data_source_impl.dart';
 import 'package:netsales/features/workspace/data/repositories/workspace_repository_impl.dart';
 import 'package:netsales/features/workspace/domain/repositories/workspace_repository.dart';
 import 'package:netsales/features/workspace/domain/usecases/get_active_workspace_use_case.dart';
