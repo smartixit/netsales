@@ -60,7 +60,9 @@ class MockNotificationRepository implements NotificationRepository {
 
     return PaginatedList(
       items: filtered,
-      nextCursor: cursor == null && filtered.length > 2 ? 'cursor_page_2' : null,
+      nextCursor: cursor == null && filtered.length > 2
+          ? 'cursor_page_2'
+          : null,
     );
   }
 
@@ -155,11 +157,13 @@ void main() {
 
     controller = NotificationController(
       getMyNotificationsUseCase: GetMyNotificationsUseCase(mockRepo),
-      getUnreadNotificationsCountUseCase:
-          GetUnreadNotificationsCountUseCase(mockRepo),
+      getUnreadNotificationsCountUseCase: GetUnreadNotificationsCountUseCase(
+        mockRepo,
+      ),
       markNotificationAsReadUseCase: MarkNotificationAsReadUseCase(mockRepo),
-      markAllNotificationsAsReadUseCase:
-          MarkAllNotificationsAsReadUseCase(mockRepo),
+      markAllNotificationsAsReadUseCase: MarkAllNotificationsAsReadUseCase(
+        mockRepo,
+      ),
     );
   });
 
@@ -223,16 +227,19 @@ void main() {
       expect(mockRepo.lastIsReadFilter, isNull);
     });
 
-    test('Scenario 7: Search filter correctly sends query to repository', () async {
-      await controller.loadInitialData();
+    test(
+      'Scenario 7: Search filter correctly sends query to repository',
+      () async {
+        await controller.loadInitialData();
 
-      controller.searchQuery.value = 'توريد';
-      await controller.loadNotifications();
+        controller.searchQuery.value = 'توريد';
+        await controller.loadNotifications();
 
-      expect(mockRepo.lastSearch, equals('توريد'));
-      expect(controller.notifications.length, equals(1));
-      expect(controller.notifications.first.notificationId, equals(101));
-    });
+        expect(mockRepo.lastSearch, equals('توريد'));
+        expect(controller.notifications.length, equals(1));
+        expect(controller.notifications.first.notificationId, equals(101));
+      },
+    );
 
     test('Scenario 8: Foreground push arrival increments unread counter and prepends notification', () async {
       await controller.loadInitialData();
@@ -288,14 +295,20 @@ void main() {
       );
     });
 
-    test('Scenario 10: Server error states are surfaced gracefully to the user', () async {
-      mockRepo.shouldThrow = true;
+    test(
+      'Scenario 10: Server error states are surfaced gracefully to the user',
+      () async {
+        mockRepo.shouldThrow = true;
 
-      await controller.loadNotifications();
+        await controller.loadNotifications();
 
-      expect(controller.errorMessage.value, contains('فشل الاتصال بخادم الإشعارات'));
-      expect(controller.isLoading.value, isFalse);
-    });
+        expect(
+          controller.errorMessage.value,
+          contains('فشل الاتصال بخادم الإشعارات'),
+        );
+        expect(controller.isLoading.value, isFalse);
+      },
+    );
 
     test('Scenario 11: Empty list state is handled properly', () async {
       mockRepo.items.clear();
@@ -327,8 +340,14 @@ void main() {
 
       expect(model.notificationId, equals(505));
       expect(model.userId, equals(12));
-      expect(model.notificationType, equals(NotificationType.voucherRequestApproved));
-      expect(model.notificationTypeLabel, equals('تمت الموافقة على طلب الكروت'));
+      expect(
+        model.notificationType,
+        equals(NotificationType.voucherRequestApproved),
+      );
+      expect(
+        model.notificationTypeLabel,
+        equals('تمت الموافقة على طلب الكروت'),
+      );
       expect(model.notificationTitle, equals('طلبك معتمد'));
       expect(model.notificationImage, equals('https://example.com/logo.png'));
       expect(model.isRead, isFalse);
@@ -336,7 +355,10 @@ void main() {
 
       final backToJson = model.toJson();
       expect(backToJson['notification_id'], equals(505));
-      expect(backToJson['notification_type'], equals('VOUCHER_REQUEST_APPROVED'));
+      expect(
+        backToJson['notification_type'],
+        equals('VOUCHER_REQUEST_APPROVED'),
+      );
       expect(backToJson['is_read'], isFalse);
     });
 

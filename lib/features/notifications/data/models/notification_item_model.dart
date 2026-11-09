@@ -39,7 +39,8 @@ class NotificationItemModel extends NotificationItemEntity {
       notificationTitle: json['notification_title']?.toString() ?? '',
       notificationMessage: json['notification_message']?.toString() ?? '',
       notificationImage: json['notification_image']?.toString(),
-      isRead: json['is_read'] == true ||
+      isRead:
+          json['is_read'] == true ||
           json['is_read'] == 1 ||
           json['is_read'] == '1',
       readAt: parseDateTime(json['read_at']),

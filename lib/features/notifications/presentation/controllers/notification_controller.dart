@@ -70,10 +70,7 @@ class NotificationController extends GetxController {
 
   /// تحميل البيانات الأولية للإشعارات مع عداد غير المقروء
   Future<void> loadInitialData() async {
-    await Future.wait([
-      fetchUnreadCount(),
-      loadNotifications(isRefresh: true),
-    ]);
+    await Future.wait([fetchUnreadCount(), loadNotifications(isRefresh: true)]);
   }
 
   /// جلب وتحديث عداد الإشعارات غير المقروءة
@@ -102,16 +99,17 @@ class NotificationController extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
 
-    final effectiveSearch =
-        searchQuery.value.trim().isEmpty ? null : searchQuery.value.trim();
+    final effectiveSearch = searchQuery.value.trim().isEmpty
+        ? null
+        : searchQuery.value.trim();
 
     try {
       final PaginatedList<NotificationItemEntity> result =
           await getMyNotificationsUseCase(
-        isRead: selectedFilter.value,
-        search: effectiveSearch,
-        cursor: null,
-      );
+            isRead: selectedFilter.value,
+            search: effectiveSearch,
+            cursor: null,
+          );
 
       if (revision != _loadRevision) return;
 
@@ -139,16 +137,17 @@ class NotificationController extends GetxController {
     final revision = _loadRevision;
     isLoadingMore.value = true;
 
-    final effectiveSearch =
-        searchQuery.value.trim().isEmpty ? null : searchQuery.value.trim();
+    final effectiveSearch = searchQuery.value.trim().isEmpty
+        ? null
+        : searchQuery.value.trim();
 
     try {
       final PaginatedList<NotificationItemEntity> result =
           await getMyNotificationsUseCase(
-        isRead: selectedFilter.value,
-        search: effectiveSearch,
-        cursor: cursor,
-      );
+            isRead: selectedFilter.value,
+            search: effectiveSearch,
+            cursor: cursor,
+          );
 
       if (revision != _loadRevision) return;
 
@@ -211,9 +210,7 @@ class NotificationController extends GetxController {
     unreadCount.value = 0;
     notifications.assignAll(
       notifications.map(
-        (n) => n.isRead
-            ? n
-            : n.copyWith(isRead: true, readAt: DateTime.now()),
+        (n) => n.isRead ? n : n.copyWith(isRead: true, readAt: DateTime.now()),
       ),
     );
 
@@ -230,7 +227,9 @@ class NotificationController extends GetxController {
       notifications.assignAll(previousList);
       CustomSnackbar.show(
         title: 'فشل التحديث',
-        message: e is AppException ? e.message : 'تعذر تعليم الإشعارات كمقروءة.',
+        message: e is AppException
+            ? e.message
+            : 'تعذر تعليم الإشعارات كمقروءة.',
         type: SnackType.error,
       );
     } finally {

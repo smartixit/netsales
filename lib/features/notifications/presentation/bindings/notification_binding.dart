@@ -20,9 +20,8 @@ class NotificationBinding extends Bindings {
 
     // Repository
     Get.lazyPut<NotificationRepository>(
-      () => NotificationRepositoryImpl(
-        Get.find<NotificationRemoteDataSource>(),
-      ),
+      () =>
+          NotificationRepositoryImpl(Get.find<NotificationRemoteDataSource>()),
       fenix: true,
     );
 

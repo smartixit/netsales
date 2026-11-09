@@ -12,11 +12,7 @@ class NotificationBadgeButton extends StatelessWidget {
   final Color? color;
   final VoidCallback? onPressed;
 
-  const NotificationBadgeButton({
-    super.key,
-    this.color,
-    this.onPressed,
-  });
+  const NotificationBadgeButton({super.key, this.color, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +29,8 @@ class NotificationBadgeButton extends StatelessWidget {
           backgroundColor: Colors.transparent,
           dimension: 40.r,
           iconSize: 22.r,
-          onPressed: onPressed ??
+          onPressed:
+              onPressed ??
               () {
                 if (Get.currentRoute != AppRoutes.notifications) {
                   Get.toNamed<dynamic>(AppRoutes.notifications);
@@ -59,17 +56,11 @@ class NotificationBadgeButton extends StatelessWidget {
                   horizontal: count > 9 ? 4.w : 5.w,
                   vertical: 1.h,
                 ),
-                constraints: BoxConstraints(
-                  minWidth: 18.r,
-                  minHeight: 18.r,
-                ),
+                constraints: BoxConstraints(minWidth: 18.r, minHeight: 18.r),
                 decoration: BoxDecoration(
                   color: colors.error,
                   borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(
-                    color: colors.surface,
-                    width: 1.5,
-                  ),
+                  border: Border.all(color: colors.surface, width: 1.5),
                 ),
                 child: Center(
                   child: Text(

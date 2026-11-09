@@ -45,10 +45,7 @@ class NotificationItemCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: borderColor,
-            width: isUnread ? 1.4 : 1.0,
-          ),
+          border: Border.all(color: borderColor, width: isUnread ? 1.4 : 1.0),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,8 +79,9 @@ class NotificationItemCard extends StatelessWidget {
                         child: Text(
                           notification.notificationTitle,
                           style: AppTypography.titleSmall.copyWith(
-                            fontWeight:
-                                isUnread ? FontWeight.bold : FontWeight.w600,
+                            fontWeight: isUnread
+                                ? FontWeight.bold
+                                : FontWeight.w600,
                             color: colors.onSurface,
                           ),
                           maxLines: 1,
@@ -127,8 +125,9 @@ class NotificationItemCard extends StatelessWidget {
                             vertical: 2.h,
                           ),
                           decoration: BoxDecoration(
-                            color: colors.surfaceContainerHighest
-                                .withValues(alpha: 0.6),
+                            color: colors.surfaceContainerHighest.withValues(
+                              alpha: 0.6,
+                            ),
                             borderRadius: BorderRadius.circular(AppRadius.xs),
                           ),
                           child: Text(

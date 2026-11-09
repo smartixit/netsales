@@ -4,8 +4,7 @@ import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/notifications/data/datasources/notification_remote_data_source.dart';
 import 'package:netsales/features/notifications/data/models/notification_item_model.dart';
 
-class NotificationRemoteDataSourceImpl
-    implements NotificationRemoteDataSource {
+class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   final ApiService? apiService;
 
   const NotificationRemoteDataSourceImpl({this.apiService});
