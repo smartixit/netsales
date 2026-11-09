@@ -19,7 +19,12 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
     final period = json['period'];
     final metrics = json['metrics'];
     final recent = json['recent_pending_requests'];
-    if (network is! Map || period is! Map || metrics is! Map || recent is! List) {
+    final timezone = json['timezone'];
+    if (network is! Map ||
+        period is! Map ||
+        metrics is! Map ||
+        recent is! List ||
+        timezone is! String) {
       throw const FormatException('عقد ملخص مساحة الشبكة غير مكتمل.');
     }
     final networkMap = Map<String, dynamic>.from(network);
@@ -28,8 +33,17 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
     final networkName = networkMap['network_name'];
     final generatedAt = json['generated_at'];
     final periodKey = periodMap['key'];
-    if (networkId is! num || networkName is! String ||
-        generatedAt is! String || periodKey is! String) {
+    final periodDays = periodMap['days'];
+    final periodFrom = periodMap['from'];
+    final periodTo = periodMap['to'];
+    if (networkId is! num ||
+        networkName is! String ||
+        generatedAt is! String ||
+        periodKey is! String ||
+        periodDays is! num ||
+        periodFrom is! String ||
+        periodTo is! String ||
+        timezone.isEmpty) {
       throw const FormatException('حقول تعريف ملخص الشبكة غير صالحة.');
     }
     final normalizedMetrics = <String, dynamic>{};
@@ -46,7 +60,17 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
       if (item is! Map) {
         throw const FormatException('عنصر طلب التوريد غير صالح.');
       }
-      return Map<String, dynamic>.from(item);
+      final request = Map<String, dynamic>.from(item);
+      if (request['request_id'] is! num ||
+          request['request_uuid'] is! String ||
+          request['pos_id'] is! num ||
+          request['pos_name'] is! String ||
+          request['sale_type_label'] is! String ||
+          request['status'] is! String ||
+          request['status_label'] is! String) {
+        throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
+      }
+      return request;
     }).toList(growable: false);
     return NetworkWorkspaceOverviewModel(
       networkId: networkId.toInt(),

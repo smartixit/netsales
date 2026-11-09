@@ -56,7 +56,8 @@ void main() {
     test('preserves an explicitly null wallet when the server has no wallet record', () {
       final model = NetworkWorkspaceOverviewModel.fromJson({
         'generated_at': '2026-11-09T10:00:00+03:00',
-        'period': {'key': '30d'},
+        'timezone': 'Asia/Aden',
+        'period': {'key': '30d', 'days': 30, 'from': '2026-10-11T00:00:00+03:00', 'to': '2026-11-09T10:00:00+03:00'},
         'network': {'network_id': 12, 'network_name': 'شبكة الاختبار'},
         'metrics': {'wallet': null},
         'recent_pending_requests': <Map<String, dynamic>>[],
