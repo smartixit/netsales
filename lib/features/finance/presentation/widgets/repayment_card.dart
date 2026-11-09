@@ -7,6 +7,8 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
+import 'package:netsales/features/finance/domain/entities/repayment_payment_method.dart';
+import 'package:netsales/widgets/badges/custom_chip.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
@@ -22,13 +24,31 @@ class RepaymentCard extends StatelessWidget {
     this.isNetworkView = true,
   });
 
+  IconData _paymentIcon() => switch (repayment.typedPaymentMethod) {
+    RepaymentPaymentMethod.cash => Icons.payments_outlined,
+    RepaymentPaymentMethod.bank => Icons.account_balance_outlined,
+    RepaymentPaymentMethod.wallet =>
+      Icons.account_balance_wallet_outlined,
+    RepaymentPaymentMethod.unknown => Icons.help_outline_rounded,
+  };
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final partyLabel = isNetworkView ? 'نقطة البيع:' : 'المزود (الشبكة):';
+    final partyLabel = isNetworkView ? 'نقطة البيع' : 'الشبكة';
     final partyName = isNetworkView
         ? (repayment.posName ?? 'نقطة بيع #${repayment.posId}')
         : (repayment.networkName ?? 'شبكة #${repayment.networkId}');
+    final statusLabel = repayment.isCompleted
+        ? 'مكتمل'
+        : repayment.isReversed
+            ? 'معكوس'
+            : 'غير معروف';
+    final statusTone = repayment.isCompleted
+        ? SemanticTone.success
+        : repayment.isReversed
+            ? SemanticTone.danger
+            : SemanticTone.neutral;
 
     return CustomInteractiveBounce(
       onTap: onTap,
@@ -37,7 +57,7 @@ class RepaymentCard extends StatelessWidget {
         padding: EdgeInsets.all(AppSpacing.cardPadding),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.card),
+          borderRadius: AppRadius.lgRadius,
           boxShadow: AppElevation.level1(context),
           border: Border.all(
             color: colors.outlineVariant.withValues(alpha: 0.5),
@@ -47,108 +67,125 @@ class RepaymentCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: colors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                Container(
+                  width: AppSpacing.xxxl,
+                  height: AppSpacing.xxxl,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: colors.primaryContainer,
+                    borderRadius: AppRadius.mdRadius,
+                  ),
+                  child: Icon(
+                    Icons.receipt_long_outlined,
+                    color: colors.onPrimaryContainer,
+                    size: AppSpacing.xl,
+                  ),
+                ),
+                AppSpacing.hSm,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'سند سداد #${repayment.repaymentId}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.titleMedium.copyWith(
+                          color: colors.onSurface,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.payments_outlined,
-                        color: colors.primary,
-                        size: 20,
-                      ),
-                    ),
-                    AppSpacing.hSm,
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      if (repayment.repaymentDate != null)
                         Text(
-                          'سند سداد #${repayment.repaymentId}',
-                          style: AppTypography.titleMedium.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.bold,
+                          _dateLabel(repayment.repaymentDate!),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.onSurfaceVariant,
                           ),
                         ),
-                        if (repayment.repaymentDate != null)
-                          Text(
-                            repayment.repaymentDate!.substring(0, 10),
-                            style: AppTypography.bodySmall.copyWith(
-                              color: colors.onSurfaceVariant,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                CustomStatusBadge(
-                  label: repayment.isCompleted ? 'مسدد وموزع' : 'معكوس / ملغي',
-                  tone: repayment.isCompleted
-                      ? SemanticTone.success
-                      : SemanticTone.danger,
-                ),
+                AppSpacing.hXs,
+                CustomStatusBadge(label: statusLabel, tone: statusTone),
               ],
             ),
-            AppSpacing.vSm,
-            Divider(color: colors.outlineVariant.withValues(alpha: 0.3)),
-            AppSpacing.vXs,
+            AppSpacing.vMd,
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  partyLabel,
+                  '$partyLabel:',
                   style: AppTypography.bodySmall.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
                 ),
-                Text(
-                  partyName,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w600,
+                AppSpacing.hXs,
+                Expanded(
+                  child: Text(
+                    partyName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+                ),
+              ],
+            ),
+            AppSpacing.vSm,
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                CustomChip(
+                  label: repayment.typedPaymentMethod.label,
+                  icon: _paymentIcon(),
+                  isCompact: true,
+                ),
+                CustomChip(
+                  label: '${repayment.allocations.length} فاتورة',
+                  icon: Icons.account_balance_outlined,
+                  isCompact: true,
                 ),
               ],
             ),
             AppSpacing.vSm,
             Container(
-              padding: const EdgeInsets.all(10),
+              width: double.infinity,
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: colors.surfaceContainerLowest,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
+                color: colors.surfaceContainerLow,
+                borderRadius: AppRadius.mdRadius,
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'مبلغ السند المحصل',
-                        style: AppTypography.bodySmall.copyWith(
-                          fontSize: 11,
-                          color: colors.onSurfaceVariant,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'مبلغ سند السداد',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                      Text(
-                        AmountFormatter.format(repayment.amount.toString()),
-                        style: AppTypography.titleMedium.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.bold,
+                        AppSpacing.vXxs,
+                        Text(
+                          AmountFormatter.format(repayment.amount.toString()),
+                          style: AppTypography.titleLarge.copyWith(
+                            color: repayment.isReversed
+                                ? colors.onSurfaceVariant
+                                : colors.primary,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    '${repayment.allocations.length} فواتير مسواة (FIFO)',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.w600,
+                      ],
                     ),
+                  ),
+                  Icon(
+                    Icons.arrow_back_rounded,
+                    color: colors.onSurfaceVariant,
+                    size: AppSpacing.lg,
                   ),
                 ],
               ),
@@ -157,5 +194,10 @@ class RepaymentCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _dateLabel(String value) {
+    if (value.length <= 10) return value;
+    return value.substring(0, 10);
   }
 }

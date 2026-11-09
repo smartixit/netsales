@@ -1,4 +1,7 @@
-/// كيان توزيع سداد الديون على فاتورة محددة وفق أسبقية FIFO (Repayment Allocation Entity)
+import 'package:netsales/features/finance/domain/entities/repayment_allocation_invoice_entity.dart';
+import 'package:netsales/features/finance/domain/entities/repayment_payment_method.dart';
+
+/// كيان توزيع سداد الديون على فاتورة محددة وفق أسبقية FIFO.
 class RepaymentAllocationEntity {
   final int allocationId;
   final int repaymentId;
@@ -8,7 +11,7 @@ class RepaymentAllocationEntity {
   final double allocatedAmount;
   final String? status;
   final String? allocatedAt;
-  final String? invoiceUuid;
+  final RepaymentAllocationInvoiceEntity invoice;
 
   const RepaymentAllocationEntity({
     required this.allocationId,
@@ -17,13 +20,13 @@ class RepaymentAllocationEntity {
     required this.networkId,
     required this.posId,
     required this.allocatedAmount,
+    required this.invoice,
     this.status,
     this.allocatedAt,
-    this.invoiceUuid,
   });
 }
 
-/// كيان سند سداد مديونية نقطة البيع (POS Repayment Entity)
+/// كيان سند سداد مديونية نقطة البيع.
 class PosRepaymentEntity {
   final int repaymentId;
   final String? repaymentUuid;
@@ -34,7 +37,7 @@ class PosRepaymentEntity {
   final String? referenceNumber;
   final String? notes;
   final String? repaymentDate;
-  final String? status; // 'COMPLETED', 'REVERSED'
+  final String? status;
   final int? createdBy;
   final String? reversedAt;
   final int? reversedBy;
@@ -67,7 +70,9 @@ class PosRepaymentEntity {
     this.allocations = const [],
   });
 
+  RepaymentPaymentMethod get typedPaymentMethod =>
+      RepaymentPaymentMethod.fromWire(paymentMethod);
+
   bool get isCompleted => status == 'COMPLETED';
   bool get isReversed => status == 'REVERSED';
 }
-

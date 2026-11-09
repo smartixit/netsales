@@ -1,4 +1,35 @@
 import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
+import 'package:netsales/features/finance/domain/entities/repayment_allocation_invoice_entity.dart';
+
+class RepaymentAllocationInvoiceModel extends RepaymentAllocationInvoiceEntity {
+  const RepaymentAllocationInvoiceModel({
+    required super.invoiceUuid,
+    required super.totalAmount,
+    required super.paidAmount,
+    required super.remainingAmount,
+    required super.paymentStatus,
+    required super.paymentStatusLabel,
+    required super.invoiceDate,
+    required super.saleType,
+    required super.saleTypeLabel,
+  });
+
+  factory RepaymentAllocationInvoiceModel.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return RepaymentAllocationInvoiceModel(
+      invoiceUuid: json['invoice_uuid'] as String,
+      totalAmount: (json['invoice_total_amount'] as num).toDouble(),
+      paidAmount: (json['paid_amount'] as num).toDouble(),
+      remainingAmount: (json['remaining_amount'] as num).toDouble(),
+      paymentStatus: json['payment_status'] as String,
+      paymentStatusLabel: json['payment_status_label'] as String,
+      invoiceDate: json['invoice_date'] as String,
+      saleType: json['sale_type'] as String,
+      saleTypeLabel: json['sale_type_label'] as String,
+    );
+  }
+}
 
 class RepaymentAllocationModel extends RepaymentAllocationEntity {
   const RepaymentAllocationModel({
@@ -8,28 +39,29 @@ class RepaymentAllocationModel extends RepaymentAllocationEntity {
     required super.networkId,
     required super.posId,
     required super.allocatedAmount,
+    required super.invoice,
     super.status,
     super.allocatedAt,
-    super.invoiceUuid,
   });
 
   factory RepaymentAllocationModel.fromJson(Map<String, dynamic> json) {
-    String? invUuid;
-    if (json['invoice'] is Map<String, dynamic>) {
-      invUuid =
-          (json['invoice'] as Map<String, dynamic>)['invoice_uuid'] as String?;
+    final rawInvoice = json['invoice'];
+    if (rawInvoice is! Map<String, dynamic>) {
+      throw const FormatException(
+        'Repayment allocation contract violation: nested invoice is required.',
+      );
     }
 
     return RepaymentAllocationModel(
-      allocationId: json['allocation_id'] as int? ?? 0,
-      repaymentId: json['repayment_id'] as int? ?? 0,
-      invoiceId: json['invoice_id'] as int? ?? 0,
-      networkId: json['network_id'] as int? ?? 0,
-      posId: json['pos_id'] as int? ?? 0,
-      allocatedAmount: (json['allocated_amount'] as num?)?.toDouble() ?? 0.0,
-      status: json['status'] as String?,
-      allocatedAt: json['allocated_at'] as String?,
-      invoiceUuid: invUuid,
+      allocationId: json['allocation_id'] as int,
+      repaymentId: json['repayment_id'] as int,
+      invoiceId: json['invoice_id'] as int,
+      networkId: json['network_id'] as int,
+      posId: json['pos_id'] as int,
+      allocatedAmount: (json['allocated_amount'] as num).toDouble(),
+      status: json['status'] as String,
+      allocatedAt: json['allocated_at'] as String,
+      invoice: RepaymentAllocationInvoiceModel.fromJson(rawInvoice),
     );
   }
 }
@@ -72,9 +104,11 @@ class PosRepaymentModel extends PosRepaymentEntity {
     final rawAllocations = json['allocations'];
     final parsedAllocations = <RepaymentAllocationModel>[];
     if (rawAllocations is List) {
-      for (final a in rawAllocations) {
-        if (a is Map<String, dynamic>) {
-          parsedAllocations.add(RepaymentAllocationModel.fromJson(a));
+      for (final allocation in rawAllocations) {
+        if (allocation is Map<String, dynamic>) {
+          parsedAllocations.add(
+            RepaymentAllocationModel.fromJson(allocation),
+          );
         }
       }
     }

@@ -142,7 +142,17 @@ void main() {
             'allocated_amount': 200000.00,
             'status': 'COMPLETED',
             'allocated_at': '2026-11-07T14:00:00Z',
-            'invoice': {'invoice_uuid': 'inv-uuid-100'},
+            '''invoice''': {
+              'invoice_uuid': 'inv-uuid-100',
+              'invoice_total_amount': 250000.00,
+              'paid_amount': 250000.00,
+              'remaining_amount': 0.00,
+              'payment_status': 'PAID',
+              'payment_status_label': 'مدفوعة بالكامل',
+              'invoice_date': '2026-11-07 13:00:00',
+              'sale_type': 'CREDIT',
+              'sale_type_label': 'آجل',
+            },
           },
           {
             'allocation_id': 2,
@@ -153,7 +163,17 @@ void main() {
             'allocated_amount': 100000.00,
             'status': 'COMPLETED',
             'allocated_at': '2026-11-07T14:00:00Z',
-            'invoice': {'invoice_uuid': 'inv-uuid-101'},
+            '''invoice''': {
+              'invoice_uuid': 'inv-uuid-101',
+              'invoice_total_amount': 200000.00,
+              'paid_amount': 100000.00,
+              'remaining_amount': 100000.00,
+              'payment_status': 'PARTIALLY_PAID',
+              'payment_status_label': 'مدفوعة جزئياً',
+              'invoice_date': '2026-11-06 13:00:00',
+              'sale_type': 'CREDIT',
+              'sale_type_label': 'آجل',
+            },
           },
         ],
       };
@@ -169,8 +189,11 @@ void main() {
       expect(repayment.allocations.length, 2);
       expect(repayment.allocations[0].invoiceId, 100);
       expect(repayment.allocations[0].allocatedAmount, 200000.00);
+      expect(repayment.allocations[0].invoice.totalAmount, 250000.00);
+      expect(repayment.allocations[0].invoice.paymentStatusLabel, 'مدفوعة بالكامل');
       expect(repayment.allocations[1].invoiceId, 101);
       expect(repayment.allocations[1].allocatedAmount, 100000.00);
+      expect(repayment.allocations[1].invoice.remainingAmount, 100000.00);
     });
 
     test('NetworkWalletModel.fromJson parses network wallet correctly', () {
