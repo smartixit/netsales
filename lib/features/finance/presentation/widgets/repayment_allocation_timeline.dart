@@ -74,16 +74,19 @@ class RepaymentAllocationTimeline extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: allocations.length,
-            separatorBuilder: (context, index) => AppSpacing.sm,
-            itemBuilder: (context, index) => _AllocationCard(
-              allocation: allocations[index],
-              onTap: allocations[index].invoiceId > 0
-                  ? () => Get.toNamed<void>(
-                        AppRoutes.saleInvoiceDetails,
-                        arguments: allocations[index].invoiceId,
-                      )
-                  : null,
-            ),
+            separatorBuilder: (context, index) => AppSpacing.vSm,
+            itemBuilder: (context, index) {
+              final allocation = allocations[index];
+              return _AllocationCard(
+                allocation: allocation,
+                onTap: allocation.invoiceId > 0
+                    ? () => Get.toNamed<void>(
+                          AppRoutes.saleInvoiceDetails,
+                          arguments: allocation.invoiceId,
+                        )
+                    : null,
+              );
+            },
           ),
       ],
     );
@@ -103,8 +106,6 @@ class _AllocationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final invoice = allocation.invoice;
-    final invoiceDate = invoice.invoiceDate;
-    final paymentStatus = invoice.paymentStatusLabel;
 
     return CustomInteractiveBounce(
       onTap: onTap,
@@ -151,11 +152,11 @@ class _AllocationCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                          _dateLabel(invoiceDate),
-                          style: AppTypography.bodySmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                          ),
+                        _dateLabel(invoice.invoiceDate),
+                        style: AppTypography.bodySmall.copyWith(
+                          color: colors.onSurfaceVariant,
                         ),
+                      ),
                     ],
                   ),
                 ),
@@ -172,34 +173,36 @@ class _AllocationCard extends StatelessWidget {
               spacing: AppSpacing.xs,
               runSpacing: AppSpacing.xs,
               children: [
-                CustomChip(label: paymentStatus, isCompact: true),
                 CustomChip(
-                    label: invoice.saleTypeLabel,
-                    icon: Icons.sell_outlined,
-                    isCompact: true,
-                  ),
+                  label: invoice.paymentStatusLabel,
+                  isCompact: true,
+                ),
+                CustomChip(
+                  label: invoice.saleTypeLabel,
+                  icon: Icons.sell_outlined,
+                  isCompact: true,
+                ),
               ],
             ),
             AppSpacing.vMd,
             Wrap(
-                spacing: AppSpacing.xl,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  _InvoiceValue(
-                    label: 'قيمة الفاتورة',
-                    value: invoice.totalAmount,
-                  ),
-                  _InvoiceValue(
-                    label: 'المسدد',
-                    value: invoice.paidAmount,
-                  ),
-                  _InvoiceValue(
-                    label: 'المتبقي',
-                    value: invoice.remainingAmount,
-                  ),
-                ],
-              ),
-            ],
+              spacing: AppSpacing.xl,
+              runSpacing: AppSpacing.sm,
+              children: [
+                _InvoiceValue(
+                  label: 'قيمة الفاتورة',
+                  value: invoice.totalAmount,
+                ),
+                _InvoiceValue(
+                  label: 'المسدد',
+                  value: invoice.paidAmount,
+                ),
+                _InvoiceValue(
+                  label: 'المتبقي',
+                  value: invoice.remainingAmount,
+                ),
+              ],
+            ),
             AppSpacing.vMd,
             Container(
               width: double.infinity,

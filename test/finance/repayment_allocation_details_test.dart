@@ -21,6 +21,7 @@ void main() {
             'pos_id': 2,
             'allocated_amount': 200000.00,
             'status': 'COMPLETED',
+            'allocated_at': '2026-11-01 09:00:00',
             'invoice': {
               'invoice_uuid': 'INV-100',
               'invoice_total_amount': 250000.00,
@@ -39,15 +40,15 @@ void main() {
       final allocation = model.allocations.single;
 
       expect(model.typedPaymentMethod, RepaymentPaymentMethod.bank);
-      expect(allocation.invoiceUuid, 'INV-100');
-      expect(allocation.invoiceTotalAmount, 250000.00);
-      expect(allocation.invoicePaidAmount, 250000.00);
-      expect(allocation.invoiceRemainingAmount, 0.00);
-      expect(allocation.invoicePaymentStatus, 'PAID');
-      expect(allocation.invoicePaymentStatusLabel, 'مسدد');
-      expect(allocation.invoiceDate, '2026-11-01 09:00:00');
-      expect(allocation.saleType, 'CREDIT');
-      expect(allocation.saleTypeLabel, 'آجل');
+      expect(allocation.invoice.invoiceUuid, 'INV-100');
+      expect(allocation.invoice.totalAmount, 250000.00);
+      expect(allocation.invoice.paidAmount, 250000.00);
+      expect(allocation.invoice.remainingAmount, 0.00);
+      expect(allocation.invoice.paymentStatus, 'PAID');
+      expect(allocation.invoice.paymentStatusLabel, 'مسدد');
+      expect(allocation.invoice.invoiceDate, '2026-11-01 09:00:00');
+      expect(allocation.invoice.saleType, 'CREDIT');
+      expect(allocation.invoice.saleTypeLabel, 'آجل');
     });
 
     test('rejects an allocation response that omits its required nested invoice', () {
