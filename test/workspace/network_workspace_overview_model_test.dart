@@ -45,8 +45,8 @@ void main() {
           'generated_at': '2026-11-09T10:00:00+03:00',
           'period': {'key': '30d'},
           'network': {'network_id': 17, 'network_name': 'شبكة الاختبار'},
-          'metrics': {},
-          'recent_pending_requests': [],
+          'metrics': <String, dynamic>{},
+          'recent_pending_requests': <Map<String, dynamic>>[],
         }),
         throwsA(isA<FormatException>()),
       );
