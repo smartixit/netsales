@@ -71,7 +71,7 @@ class _MembershipTile extends StatelessWidget {
       child: Column(mainAxisSize: MainAxisSize.min, children: controller.roles.map((role) => ListTile(
         title: Text(role.name),
         trailing: role.roleId == member.roleId ? const Icon(Icons.check_circle_rounded) : null,
-        onTap: () => Get.back<int>(role.roleId),
+        onTap: () => Get.back<int>(result: role.roleId),
       )).toList()),
     );
     if (selected != null && selected != member.roleId) await controller.changeRole(member, selected);
