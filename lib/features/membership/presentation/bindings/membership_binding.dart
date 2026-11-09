@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
-import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/membership/data/datasources/membership_remote_data_source.dart';
 import 'package:netsales/features/membership/data/repositories/membership_repository_impl.dart';
 import 'package:netsales/features/membership/domain/repositories/membership_repository.dart';
@@ -13,7 +12,6 @@ class MembershipBinding extends Bindings {
   final bool isNetwork;
   @override
   void dependencies() {
-    CommercialBinding().dependencies();
     Get.lazyPut<MembershipRemoteDataSource>(() => const MembershipRemoteDataSource());
     Get.lazyPut<MembershipRepository>(() => MembershipRepositoryImpl(Get.find<MembershipRemoteDataSource>()));
     final repository = Get.find<MembershipRepository>();
