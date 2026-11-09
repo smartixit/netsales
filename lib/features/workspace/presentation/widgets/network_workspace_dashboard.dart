@@ -170,7 +170,10 @@ class _DashboardContent extends GetView<NetworkWorkspaceController> {
             ),
             AppSpacing.vSm,
             ...overview.recentPendingRequests.map(
-              (request) => _PendingRequestTile(request: request),
+              (request) => _PendingRequestTile(
+                request: request,
+                onTap: () => controller.onNavItemSelected(1),
+              ),
             ),
           ],
           AppSpacing.vLg,
@@ -451,9 +454,10 @@ class _QuickAction extends StatelessWidget {
 }
 
 class _PendingRequestTile extends StatelessWidget {
-  const _PendingRequestTile({required this.request});
+  const _PendingRequestTile({required this.request, required this.onTap});
 
   final Map<String, dynamic> request;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -470,10 +474,7 @@ class _PendingRequestTile extends StatelessWidget {
       padding: EdgeInsets.only(bottom: AppSpacing.sm),
       child: CustomButton.outline(
         width: double.infinity,
-        onPressed: () => Get.toNamed<void>(
-          AppRoutes.voucherRequestDetails,
-          arguments: request,
-        ),
+        onPressed: onTap,
         child: Row(
           children: [
             Icon(Icons.receipt_long_outlined, color: colors.primary),
