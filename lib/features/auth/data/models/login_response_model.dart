@@ -49,7 +49,10 @@ class LoginResponseModel extends AuthResultEntity {
 
     final rawUser = map['user'];
     final userModel = rawUser is Map
-        ? UserModel.fromJson(Map<String, dynamic>.from(rawUser))
+        ? UserModel.fromJson({
+            ...Map<String, dynamic>.from(rawUser),
+            'workspace_roles': map['workspace_roles'] ?? const <dynamic>[],
+          })
         : null;
 
     final userPhone =

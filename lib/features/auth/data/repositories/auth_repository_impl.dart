@@ -104,7 +104,10 @@ class AuthRepositoryImpl implements AuthRepository {
         final rawUser = profileData['user'];
         if (rawUser is Map) {
           final updatedUser = UserModel.fromJson(
-            Map<String, dynamic>.from(rawUser),
+            {
+              ...Map<String, dynamic>.from(rawUser),
+              'workspace_roles': profileData['workspace_roles'] ?? const <dynamic>[],
+            },
           );
           await SessionService.to.updateCurrentUser(updatedUser);
         }

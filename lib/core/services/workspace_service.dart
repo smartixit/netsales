@@ -35,7 +35,10 @@ class WorkspaceService extends GetxService {
         ? SessionService.to.currentUser
         : null;
 
-    final resolved = resolveWorkspaceForUser(currentUser);
+    final resolved = resolveWorkspaceForUser(
+      currentUser,
+      preferredWorkspace: savedWorkspace,
+    );
 
     if (savedWorkspace == 'pos' && resolved == AppWorkspace.pos) {
       currentWorkspace.value = AppWorkspace.pos;
@@ -53,12 +56,16 @@ class WorkspaceService extends GetxService {
   }
 
   /// تحديد مساحة العمل تلقائياً بناءً على دور المستخدم وهويته
-  AppWorkspace resolveWorkspaceForUser(UserModel? user) {
+  AppWorkspace resolveWorkspaceForUser(
+    UserModel? user, {
+    String? preferredWorkspace,
+  }) {
     if (user == null) {
       return AppWorkspace.unsupported;
     }
 
     final roleKey = user.role?.roleKey.toUpperCase() ?? '';
+    final scopedRoleKeys = user.workspaceRoles.map((key) => key.toUpperCase()).toSet();
 
     // 1. حسابات إدارة المنصة العامة مستبعدة كلياً ومحظورة على تطبيق الهاتف
     if (roleKey == AppRoles.superAdmin ||
@@ -67,19 +74,27 @@ class WorkspaceService extends GetxService {
       return AppWorkspace.unsupported;
     }
 
-    // 2. أدوار مساحة عمل مزود الشبكة (NETWORK)
-    if (roleKey == AppRoles.networkOwner ||
-        roleKey == AppRoles.networkUser ||
-        roleKey == 'NETWORK_ACCOUNTANT' ||
-        user.isNetworkOwner) {
+    // 2. Resolve operational workspaces from tenant-scoped memberships.
+    final hasNetworkRole = scopedRoleKeys.any((key) =>
+        key == AppRoles.networkOwner ||
+        key == AppRoles.networkUser ||
+        key == 'NETWORK_ACCOUNTANT');
+    final hasPosRole = scopedRoleKeys.any((key) =>
+        key == AppRoles.posAgent ||
+        key == AppRoles.posUser ||
+        key == 'POS_ACCOUNTANT');
+
+    if (hasNetworkRole && hasPosRole) {
+      if (preferredWorkspace == 'pos') return AppWorkspace.pos;
+      if (preferredWorkspace == 'network') return AppWorkspace.network;
       return AppWorkspace.network;
     }
-
-    // 3. أدوار مساحة عمل نقطة البيع والوكيل (POS)
-    if (roleKey == AppRoles.posAgent ||
-        roleKey == AppRoles.posUser ||
-        roleKey == 'POS_ACCOUNTANT' ||
-        user.isPosAgent) {
+    if (hasNetworkRole || roleKey == AppRoles.networkOwner ||
+        roleKey == AppRoles.networkUser || roleKey == 'NETWORK_ACCOUNTANT') {
+      return AppWorkspace.network;
+    }
+    if (hasPosRole || roleKey == AppRoles.posAgent ||
+        roleKey == AppRoles.posUser || roleKey == 'POS_ACCOUNTANT') {
       return AppWorkspace.pos;
     }
 
