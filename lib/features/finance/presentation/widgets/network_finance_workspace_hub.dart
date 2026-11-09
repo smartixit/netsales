@@ -5,11 +5,14 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// مركز دخول عمليات المالية في مساحة عمل مزود الشبكة.
 /// لا يجري أي حساب أو تحميل مالي؛ يوجّه إلى الشاشات التي تجلب بياناتها من API.
-class NetworkFinanceWorkspaceHub extends StatelessWidget {
+class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
   const NetworkFinanceWorkspaceHub({super.key});
 
   @override
@@ -74,6 +77,8 @@ class NetworkFinanceWorkspaceHub extends StatelessWidget {
               ],
             ),
           ),
+          AppSpacing.vXl,
+          _NetworkFinanceSnapshot(controller: controller),
           AppSpacing.vXl,
           Text(
             'الإجراءات المالية',
@@ -219,6 +224,149 @@ class _FinanceHubAction extends StatelessWidget {
             Icons.arrow_forward_ios_rounded,
             size: 14,
             color: colors.onSurfaceVariant,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class _NetworkFinanceSnapshot extends StatelessWidget {
+  const _NetworkFinanceSnapshot({required this.controller});
+
+  final NetworkWorkspaceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Obx(() {
+      final overview = controller.overview.value;
+      if (overview == null) {
+        return const SizedBox.shrink();
+      }
+      final metrics = overview.metrics;
+      final cards = <Widget>[];
+      final wallet = metrics['wallet'];
+      if (wallet is Map) {
+        cards.add(_FinanceSnapshotCard(
+          icon: Icons.account_balance_wallet_rounded,
+          label: 'رصيد محفظة الشبكة',
+          value: AmountFormatter.format(overview.amount('wallet', 'balance')),
+        ));
+      }
+      if (metrics.containsKey('sales')) {
+        cards.add(_FinanceSnapshotCard(
+          icon: Icons.receipt_long_rounded,
+          label: 'مبيعات الفترة',
+          value: AmountFormatter.format(overview.amount('sales', 'total_amount')),
+        ));
+        cards.add(_FinanceSnapshotCard(
+          icon: Icons.pending_actions_rounded,
+          label: 'المبالغ المتبقية على الفواتير',
+          value: AmountFormatter.format(overview.amount('sales', 'outstanding_amount')),
+        ));
+      }
+      if (metrics.containsKey('expenses')) {
+        cards.add(_FinanceSnapshotCard(
+          icon: Icons.trending_down_rounded,
+          label: 'مصروفات الشبكة خلال الفترة',
+          value: AmountFormatter.format(overview.amount('expenses', 'total_amount')),
+        ));
+      }
+      if (cards.isEmpty) {
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: colors.surfaceContainerLow,
+            borderRadius: AppRadius.lgRadius,
+          ),
+          child: Text(
+            'لا تتوفر مؤشرات مالية لهذا الحساب وفق صلاحياته الحالية.',
+            style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant),
+          ),
+        );
+      }
+      final columns = MediaQuery.sizeOf(context).width < 600 ? 1 : 2;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'الوضع المالي للشبكة',
+            style: AppTypography.titleMedium.copyWith(color: colors.onSurface),
+          ),
+          AppSpacing.vXs,
+          Text(
+            'قيم مباشرة من الخادم؛ غيّر الفترة من لوحة الرئيسية لتحديث مؤشرات الفترة.',
+            style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant),
+          ),
+          AppSpacing.vMd,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final gap = AppSpacing.sm;
+              final itemWidth = (constraints.maxWidth - gap * (columns - 1)) / columns;
+              return Wrap(
+                spacing: gap,
+                runSpacing: gap,
+                children: cards
+                    .map((card) => SizedBox(width: itemWidth, child: card))
+                    .toList(growable: false),
+              );
+            },
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _FinanceSnapshotCard extends StatelessWidget {
+  const _FinanceSnapshotCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 92),
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLow,
+        borderRadius: AppRadius.lgRadius,
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: colors.primary.withValues(alpha: 0.1),
+              borderRadius: AppRadius.mdRadius,
+            ),
+            child: Icon(icon, color: colors.primary, size: 20),
+          ),
+          AppSpacing.hSm,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(label, maxLines: 2, overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+                AppSpacing.vXxs,
+                Text(value, maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: AppTypography.titleMedium.copyWith(color: colors.onSurface)),
+              ],
+            ),
           ),
         ],
       ),
