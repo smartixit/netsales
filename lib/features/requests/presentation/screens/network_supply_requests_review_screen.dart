@@ -142,17 +142,9 @@ class NetworkSupplyRequestsReviewScreen
                     separatorBuilder: (context, index) => AppSpacing.vSm,
                     itemBuilder: (context, index) {
                       if (index == controller.requests.length) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                          child: Center(
-                            child: SizedBox(
-                              width: 24.r,
-                              height: 24.r,
-                              child: const CircularProgressIndicator.adaptive(
-                                strokeWidth: 2.5,
-                              ),
-                            ),
-                          ),
+                        return const CustomSkeletonFeed(
+                          itemCount: 1,
+                          cardHeight: 132,
                         );
                       }
 
