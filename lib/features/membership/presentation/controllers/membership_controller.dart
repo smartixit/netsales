@@ -77,7 +77,7 @@ class MembershipController extends GetxController {
       members.assignAll(memberRows); roles.assignAll(roleRows);
     } catch (error) {
       if (generation == _loadGeneration) {
-        errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر تحميل أعضاء ${tenantLabel}.');
+        errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر تحميل أعضاء $tenantLabel.');
       }
     } finally {
       if (generation == _loadGeneration) isLoading.value = false;
