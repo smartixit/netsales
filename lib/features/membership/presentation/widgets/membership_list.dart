@@ -64,7 +64,7 @@ class _MembershipTile extends StatelessWidget {
   }
 
   Future<void> _chooseRole(BuildContext context, MembershipEntity member) async {
-    final selected = await CustomBottomSheet(
+    final selected = await CustomBottomSheet.show<int>(
       title: 'تغيير الدور التشغيلي',
       subtitle: 'اختر الدور الجديد لهذا العضو.',
       leadingIcon: Icons.badge_outlined,
@@ -74,7 +74,7 @@ class _MembershipTile extends StatelessWidget {
         trailing: role.roleId == member.roleId ? const Icon(Icons.check_circle_rounded) : null,
         onTap: () => Get.back<int>(role.roleId),
       )).toList()),
-    ).show<int>();
+    );
     if (selected != null && selected != member.roleId) await controller.changeRole(member, selected);
   }
 
