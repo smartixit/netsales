@@ -78,6 +78,24 @@ void main() {
       );
     });
 
+    test('rejects a response that omits the server timezone contract', () {
+      expect(
+        () => NetworkWorkspaceOverviewModel.fromJson({
+          'generated_at': '2026-11-09T10:00:00+03:00',
+          'period': {
+            'key': '30d',
+            'days': 30,
+            'from': '2026-10-11T00:00:00+03:00',
+            'to': '2026-11-09T10:00:00+03:00',
+          },
+          'network': {'network_id': 12, 'network_name': 'شبكة الاختبار'},
+          'metrics': <String, dynamic>{},
+          'recent_pending_requests': <Map<String, dynamic>>[],
+        }),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
     test('rejects malformed metric groups instead of silently accepting them', () {
       expect(
         () => NetworkWorkspaceOverviewModel.fromJson({
