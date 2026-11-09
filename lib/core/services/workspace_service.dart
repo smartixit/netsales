@@ -171,6 +171,53 @@ class WorkspaceService extends GetxService {
     log('🏢 [WorkspaceService] Active workspace set to: ${workspace.name}');
   }
 
+  /// مفتاح التخزين الموحد لنقطة البيع النشطة للمستخدم الحالي
+  String get activePosStorageKey =>
+      '${StorageKeys.activePosTenantPrefix}_${SessionService.to.currentUser?.userId ?? 0}';
+
+  /// قراءة معرف نقطة البيع النشطة المحفوظة بأمان
+  int? get savedActivePosId {
+    try {
+      return StorageService.instance.getInt(activePosStorageKey);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// حفظ معرف نقطة البيع النشطة بأمان
+  Future<void> saveActivePosId(int posId) async {
+    try {
+      await StorageService.instance.setInt(activePosStorageKey, posId);
+    } catch (_) {}
+  }
+
+  /// مسح معرف نقطة البيع النشطة بأمان
+  Future<void> clearActivePosId() async {
+    try {
+      await StorageService.instance.remove(activePosStorageKey);
+    } catch (_) {}
+  }
+
+  /// تحديد معرف نقطة البيع النشطة حتمياً دون اعتماد على first أو ترتيب الاستجابة:
+  /// 1. نقطة بيع واحدة فقط -> اختيار تلقائي.
+  /// 2. عدة نقاط بيع -> استعادة المعرف المحفوظ إن كان موجوداً ضمن القائمة المصرح بها.
+  /// 3. عدة نقاط بيع دون اختيار محفوظ صالح -> إرجاع null لإلزام المستخدم بالاختيار الصريح.
+  int? resolveActivePosId(List<int> availablePosIds) {
+    if (availablePosIds.isEmpty) return null;
+
+    final savedId = savedActivePosId;
+    if (savedId != null && availablePosIds.contains(savedId)) {
+      return savedId;
+    }
+
+    if (availablePosIds.length == 1) {
+      return availablePosIds.first;
+    }
+
+    // لا يتم اختيار first أبداً عند تعدد نقاط البيع دون اختيار محفوظ
+    return null;
+  }
+
   /// المسار المستهدف عند توجيه مساحة العمل
   String get workspaceRoute {
     switch (currentWorkspace.value) {

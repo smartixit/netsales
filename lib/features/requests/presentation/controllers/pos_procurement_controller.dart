@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
@@ -55,6 +56,10 @@ class PosProcurementController extends GetxController {
   final myPosList = <PosEntity>[].obs;
   final selectedPosId = RxnInt();
 
+  /// نقطة البيع النشطة المحددة حالياً
+  PosEntity? get activePos =>
+      myPosList.firstWhereOrNull((p) => p.posId == selectedPosId.value);
+
   final linkedNetworks = <NetworkPosLinkEntity>[].obs;
   final selectedNetworkId = RxnInt();
   final isLoadingNetworks = false.obs;
@@ -89,8 +94,6 @@ class PosProcurementController extends GetxController {
   final selectedSaleType = SaleType.cash.obs;
   final isSubmitting = false.obs;
 
-  int _networkLoadRevision = 0;
-  int _packageLoadRevision = 0;
   int _requestListRevision = 0;
 
   /// يحول الأوراق إلى voucher_count الذي يقبله عقد Laravel الحالي.
@@ -166,8 +169,6 @@ class PosProcurementController extends GetxController {
     searchController.dispose();
     quantityController.dispose();
     notesController.dispose();
-    _networkLoadRevision++;
-    _packageLoadRevision++;
     _requestListRevision++;
     super.onClose();
   }
@@ -178,27 +179,56 @@ class PosProcurementController extends GetxController {
     await loadRequests(isRefresh: true);
   }
 
-  /// جلب نقطة البيع التابعة للمستخدم الحالي
+  /// جلب وتحديد نقطة البيع النشطة التابعة للمستخدم الحالي
   Future<void> loadMyPos() async {
     if (getMyPosUseCase == null) return;
     try {
       final posList = await getMyPosUseCase!();
       myPosList.assignAll(posList);
-      if (posList.isNotEmpty) {
-        selectedPosId.value = posList.first.posId;
-        await loadLinkedNetworks(posList.first.posId);
+
+      final resolvedId = WorkspaceService.to.resolveActivePosId(
+        posList.map((p) => p.posId).toList(),
+      );
+
+      if (resolvedId != null) {
+        selectedPosId.value = resolvedId;
+        await loadLinkedNetworks(resolvedId);
+      } else {
+        selectedPosId.value = null;
+        _setSelectedNetworkId(null);
+        _setSelectedPackage(null);
+        linkedNetworks.clear();
+        availablePackages.clear();
       }
     } catch (_) {
       // Non-fatal, handled gracefully
     }
   }
 
+  /// تغيير نقطة البيع النشطة صراحة من واجهة طلب التوريد
+  Future<void> onPosSelected(int posId) async {
+    if (selectedPosId.value == posId) return;
+
+    final isAuthorized = myPosList.any((p) => p.posId == posId);
+    if (!isAuthorized) return;
+
+    selectedPosId.value = posId;
+    await WorkspaceService.to.saveActivePosId(posId);
+
+    // تصفير بيانات وسلة وسياق الشبكات والباقات السابقة كلياً
+    clearProcurementCart();
+    _setSelectedPackage(null);
+    _setSelectedNetworkId(null);
+    linkedNetworks.clear();
+    availablePackages.clear();
+
+    await loadLinkedNetworks(posId);
+  }
+
   /// جلب قائمة الشبكات الموردة المرتبطة بنقطة البيع المحددة
   Future<void> loadLinkedNetworks(int posId) async {
     if (getPosNetworksListUseCase == null) return;
 
-    final revision = ++_networkLoadRevision;
-    _packageLoadRevision++;
     _setSelectedNetworkId(null);
     _setSelectedPackage(null);
     linkedNetworks.clear();
@@ -208,7 +238,7 @@ class PosProcurementController extends GetxController {
 
     try {
       final paginated = await getPosNetworksListUseCase!(posId, status: true);
-      if (revision != _networkLoadRevision || selectedPosId.value != posId) {
+      if (selectedPosId.value != null && selectedPosId.value != posId) {
         return;
       }
 
@@ -219,7 +249,7 @@ class PosProcurementController extends GetxController {
         await loadNetworkPackages(networkId);
       }
     } catch (_) {
-      if (revision != _networkLoadRevision || selectedPosId.value != posId) {
+      if (selectedPosId.value != null && selectedPosId.value != posId) {
         return;
       }
       linkedNetworks.clear();
@@ -227,9 +257,7 @@ class PosProcurementController extends GetxController {
       _setSelectedNetworkId(null);
       _setSelectedPackage(null);
     } finally {
-      if (revision == _networkLoadRevision) {
-        isLoadingNetworks.value = false;
-      }
+      isLoadingNetworks.value = false;
     }
   }
 
@@ -237,14 +265,13 @@ class PosProcurementController extends GetxController {
   Future<void> loadNetworkPackages(int networkId) async {
     if (getPackagesUseCase == null) return;
 
-    final revision = ++_packageLoadRevision;
     isLoadingPackages.value = true;
     try {
       final paginated = await getPackagesUseCase!(
         networkId: networkId,
         status: true,
       );
-      if (revision != _packageLoadRevision ||
+      if (selectedNetworkId.value != null &&
           selectedNetworkId.value != networkId) {
         return;
       }
@@ -254,22 +281,19 @@ class PosProcurementController extends GetxController {
         availablePackages.isNotEmpty ? availablePackages.first : null,
       );
     } catch (_) {
-      if (revision != _packageLoadRevision ||
+      if (selectedNetworkId.value != null &&
           selectedNetworkId.value != networkId) {
         return;
       }
       availablePackages.clear();
       _setSelectedPackage(null);
     } finally {
-      if (revision == _packageLoadRevision) {
-        isLoadingPackages.value = false;
-      }
+      isLoadingPackages.value = false;
     }
   }
 
   /// اختيار الشبكة الموردة وتحديث الباقات
   void onNetworkSelected(int networkId) {
-    _networkLoadRevision++;
     _setSelectedNetworkId(networkId);
     clearProcurementCart();
     _setSelectedPackage(null);
@@ -479,14 +503,25 @@ class PosProcurementController extends GetxController {
 
   /// إرسال وتقديم طلب التوريد الجديد إلى الخادم
   Future<bool> submitOrder() async {
-    if (!formKey.currentState!.validate()) {
+    if (formKey.currentState != null && !formKey.currentState!.validate()) {
       return false;
     }
 
-    if (selectedPosId.value == null) {
+    final posId = selectedPosId.value;
+    if (posId == null) {
       CustomSnackbar.show(
         title: 'نقطة البيع مفقودة',
-        message: 'لا توجد نقطة بيع معتمدة مرتبطة بحسابك.',
+        message: 'يرجى اختيار نقطة البيع النشطة لتنفيذ الطلب باسمها.',
+        type: SnackType.warning,
+      );
+      return false;
+    }
+
+    final isAuthorizedPos = myPosList.any((p) => p.posId == posId);
+    if (!isAuthorizedPos) {
+      CustomSnackbar.show(
+        title: 'نقطة البيع غير صالحة',
+        message: 'نقطة البيع المحددة لم تعد متاحة أو سارية في حسابك.',
         type: SnackType.error,
       );
       return false;
@@ -497,6 +532,18 @@ class PosProcurementController extends GetxController {
         title: 'تحديد الشبكة مطلوب',
         message: 'يرجى اختيار شبكة الإنترنت الموردة للكروت.',
         type: SnackType.warning,
+      );
+      return false;
+    }
+
+    final isLinkedNetwork = linkedNetworks.any(
+      (link) => link.networkId == selectedNetworkId.value,
+    );
+    if (!isLinkedNetwork) {
+      CustomSnackbar.show(
+        title: 'تعارض في الشبكة الموردة',
+        message: 'الشبكة المحددة غير مرتبطة بنقطة البيع الحالية.',
+        type: SnackType.error,
       );
       return false;
     }
@@ -553,7 +600,7 @@ class PosProcurementController extends GetxController {
       );
       CustomSnackbar.show(
         title: 'نجاح تقديم الطلب',
-        message: 'تم إرسال الطلب رقم #${created.requestId} للشبكة بنجاح.',
+        message: 'تم إرسال الطلب رقم #${created.requestUuid} للشبكة بنجاح.',
         type: SnackType.success,
       );
       return true;
@@ -597,6 +644,8 @@ class PosProcurementController extends GetxController {
       final index = requests.indexWhere((r) => r.requestId == requestId);
       if (index != -1) {
         requests[index] = cancelled;
+      } else {
+        requests.add(cancelled);
       }
 
       await CustomAnimationOverlay.showSuccess(
@@ -604,7 +653,7 @@ class PosProcurementController extends GetxController {
       );
       CustomSnackbar.show(
         title: 'تم الإلغاء',
-        message: 'تم إلغاء الطلب رقم #${cancelled.requestId} بنجاح.',
+        message: 'تم إلغاء الطلب رقم #${cancelled.requestUuid} بنجاح.',
         type: SnackType.success,
       );
       return true;

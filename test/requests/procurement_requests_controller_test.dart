@@ -57,7 +57,9 @@ class MockRequestRepository implements RequestRepository {
 
     return PaginatedList<RequestEntity>(
       items: filtered,
-      nextCursor: cursor == null && filtered.isNotEmpty ? 'cursor_page_2' : null,
+      nextCursor: cursor == null && filtered.isNotEmpty
+          ? 'cursor_page_2'
+          : null,
     );
   }
 
@@ -274,8 +276,7 @@ void main() {
     late PosProcurementController controller;
 
     setUp(() {
-      mockRequestRepo =
-          MockRequestRepository([sampleRequest1, sampleRequest2]);
+      mockRequestRepo = MockRequestRepository([sampleRequest1, sampleRequest2]);
       mockCommercialRepo = MockCommercialRepository(
         posList: [samplePos],
         links: [sampleLink],
@@ -287,8 +288,9 @@ void main() {
         createRequestUseCase: CreateRequestUseCase(mockRequestRepo),
         cancelRequestUseCase: CancelRequestUseCase(mockRequestRepo),
         getMyPosUseCase: GetMyPosUseCase(mockCommercialRepo),
-        getPosNetworksListUseCase:
-            GetPosNetworksListUseCase(mockCommercialRepo),
+        getPosNetworksListUseCase: GetPosNetworksListUseCase(
+          mockCommercialRepo,
+        ),
         getPackagesUseCase: GetPackagesUseCase(mockPackageRepo),
       );
       controller.onInit();
@@ -310,22 +312,27 @@ void main() {
       expect(controller.requests.first.requestId, 1);
     });
 
-    test('cancelRequest updates request status to CANCELLED in-place', () async {
-      final success = await controller.cancelRequest(1);
-      expect(success, true);
-      expect(controller.requests.first.isCancelled, true);
-    });
+    test(
+      'cancelRequest updates request status to CANCELLED in-place',
+      () async {
+        final success = await controller.cancelRequest(1);
+        expect(success, true);
+        expect(controller.requests.first.isCancelled, true);
+      },
+    );
 
-    test('loadLinkedNetworks and loadNetworkPackages populates wizard form',
-        () async {
-      await controller.loadLinkedNetworks(20);
-      expect(controller.linkedNetworks.length, 1);
-      expect(controller.selectedNetworkId.value, 10);
+    test(
+      'loadLinkedNetworks and loadNetworkPackages populates wizard form',
+      () async {
+        await controller.loadLinkedNetworks(20);
+        expect(controller.linkedNetworks.length, 1);
+        expect(controller.selectedNetworkId.value, 10);
 
-      await controller.loadNetworkPackages(10);
-      expect(controller.availablePackages.length, 1);
-      expect(controller.selectedPackage.value?.packageId, 5);
-    });
+        await controller.loadNetworkPackages(10);
+        expect(controller.availablePackages.length, 1);
+        expect(controller.selectedPackage.value?.packageId, 5);
+      },
+    );
   });
 
   group('NetworkProcurementReviewController Tests (M6.2)', () {
@@ -334,18 +341,16 @@ void main() {
     late NetworkProcurementReviewController controller;
 
     setUp(() {
-      mockRequestRepo =
-          MockRequestRepository([sampleRequest1, sampleRequest2]);
-      mockCommercialRepo = MockCommercialRepository(
-        networks: [sampleNetwork],
-      );
+      mockRequestRepo = MockRequestRepository([sampleRequest1, sampleRequest2]);
+      mockCommercialRepo = MockCommercialRepository(networks: [sampleNetwork]);
 
       controller = NetworkProcurementReviewController(
         getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
         approveRequestUseCase: ApproveRequestUseCase(mockRequestRepo),
         rejectRequestUseCase: RejectRequestUseCase(mockRequestRepo),
-        previewRequestModificationUseCase:
-            PreviewRequestModificationUseCase(mockRequestRepo),
+        previewRequestModificationUseCase: PreviewRequestModificationUseCase(
+          mockRequestRepo,
+        ),
         getPackagesUseCase: GetPackagesUseCase(
           MockPackageCatalogRepository([samplePackage]),
         ),
@@ -355,12 +360,15 @@ void main() {
       controller.onInit();
     });
 
-    test('Initializes incoming review queue and auto-selects network', () async {
-      await controller.loadNetworksAndRequests();
-      expect(controller.requests.length, 2);
-      expect(controller.selectedNetworkId.value, 10);
-      expect(controller.nextCursor.value, 'cursor_page_2');
-    });
+    test(
+      'Initializes incoming review queue and auto-selects network',
+      () async {
+        await controller.loadNetworksAndRequests();
+        expect(controller.requests.length, 2);
+        expect(controller.selectedNetworkId.value, 10);
+        expect(controller.nextCursor.value, 'cursor_page_2');
+      },
+    );
 
     test(
       'network filter reloads after CustomDropdown pre-updates its listenable',
@@ -374,25 +382,34 @@ void main() {
     );
 
     test('approveRequest approves pending request and updates list', () async {
-      final success = await controller.approveRequest(1, requestNote: 'تم الفحص');
+      final success = await controller.approveRequest(
+        1,
+        requestNote: 'تم الفحص',
+      );
       expect(success, true);
       expect(controller.requests.first.isApproved, true);
     });
 
     test('rejectRequest rejects request with mandatory reason', () async {
-      final success =
-          await controller.rejectRequest(1, 'الكمية المطلوبة غير متوفرة حالياً');
+      final success = await controller.rejectRequest(
+        1,
+        'الكمية المطلوبة غير متوفرة حالياً',
+      );
       expect(success, true);
       expect(controller.requests.first.isRejected, true);
-      expect(controller.requests.first.requestNote,
-          'الكمية المطلوبة غير متوفرة حالياً');
+      expect(
+        controller.requests.first.requestNote,
+        'الكمية المطلوبة غير متوفرة حالياً',
+      );
     });
 
-    test('rejectRequest with empty reason returns false and prevents mutation',
-        () async {
-      final success = await controller.rejectRequest(1, '');
-      expect(success, false);
-      expect(controller.requests.first.isPending, true);
-    });
+    test(
+      'rejectRequest with empty reason returns false and prevents mutation',
+      () async {
+        final success = await controller.rejectRequest(1, '');
+        expect(success, false);
+        expect(controller.requests.first.isPending, true);
+      },
+    );
   });
 }

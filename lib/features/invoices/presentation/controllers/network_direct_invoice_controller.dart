@@ -14,7 +14,7 @@ import 'package:netsales/features/commercial/domain/usecases/get_network_pos_lis
 import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/create_direct_sale_invoice_use_case.dart';
-import 'package:netsales/features/invoices/presentation/models/direct_invoice_cart_line.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_invoice_cart_line.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -39,7 +39,7 @@ class NetworkDirectInvoiceController extends GetxController {
   final authorizedNetworks = <NetworkEntity>[].obs;
   final linkedPos = <NetworkPosLinkEntity>[].obs;
   final availablePackages = <PackageEntity>[].obs;
-  final cart = <DirectInvoiceCartLine>[].obs;
+  final cart = <DirectInvoiceCartLineEntity>[].obs;
 
   final selectedNetworkId = RxnInt();
   final selectedPosId = RxnInt();
@@ -302,7 +302,7 @@ class NetworkDirectInvoiceController extends GetxController {
       (line) => line.package.packageId == package.packageId,
     );
     final hasChanged = index < 0 || cart[index].voucherCount != quantity;
-    final line = DirectInvoiceCartLine(
+    final line = DirectInvoiceCartLineEntity(
       package: package,
       voucherCount: quantity,
     );

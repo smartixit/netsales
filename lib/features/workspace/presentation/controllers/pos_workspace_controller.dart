@@ -90,12 +90,12 @@ class PosWorkspaceController extends GetxController {
       final previousPosId = activePos.value?.posId;
       availablePos.assignAll(positions);
 
-      final savedPosId = StorageService.instance.getInt(_posStorageKey);
-      final savedPosition = positions.firstWhereOrNull(
-        (position) => position.posId == savedPosId,
+      final resolvedId = WorkspaceService.to.resolveActivePosId(
+        positions.map((p) => p.posId).toList(),
       );
-      final resolvedPosition =
-          savedPosition ?? (positions.length == 1 ? positions.first : null);
+      final resolvedPosition = resolvedId != null
+          ? positions.firstWhereOrNull((p) => p.posId == resolvedId)
+          : null;
 
       if (resolvedPosition?.posId != previousPosId) {
         _clearNetworkContext();
@@ -103,10 +103,7 @@ class PosWorkspaceController extends GetxController {
       activePos.value = resolvedPosition;
 
       if (resolvedPosition != null) {
-        await StorageService.instance.setInt(
-          _posStorageKey,
-          resolvedPosition.posId,
-        );
+        await WorkspaceService.to.saveActivePosId(resolvedPosition.posId);
       }
     } catch (error) {
       if (generation == _posGeneration) {
@@ -127,7 +124,7 @@ class PosWorkspaceController extends GetxController {
 
     activePos.value = pos;
     _clearNetworkContext();
-    await StorageService.instance.setInt(_posStorageKey, pos.posId);
+    await WorkspaceService.to.saveActivePosId(pos.posId);
     await loadNetworks(pos.posId);
   }
 
@@ -288,9 +285,6 @@ class PosWorkspaceController extends GetxController {
       forceRefresh: true,
     );
   }
-
-  String get _posStorageKey =>
-      '${StorageKeys.activePosTenantPrefix}_${SessionService.to.currentUser?.userId ?? 0}';
 
   String _networkStorageKey(int posId) =>
       '${StorageKeys.activePosNetworkPrefix}_${SessionService.to.currentUser?.userId ?? 0}_$posId';
