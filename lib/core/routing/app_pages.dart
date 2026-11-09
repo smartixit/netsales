@@ -12,6 +12,7 @@ import 'package:netsales/features/auth/presentation/bindings/login_binding.dart'
 import 'package:netsales/features/auth/presentation/bindings/register_network_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/register_pos_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/reset_password_binding.dart';
+import 'package:netsales/features/auth/presentation/bindings/security_settings_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/two_factor_auth_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/verify_otp_binding.dart';
 import 'package:netsales/features/auth/presentation/screens/active_sessions_screen.dart';
@@ -20,6 +21,7 @@ import 'package:netsales/features/auth/presentation/screens/login_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/register_network_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/register_pos_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/reset_password_screen.dart';
+import 'package:netsales/features/auth/presentation/screens/security_settings_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/two_factor_auth_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:netsales/features/catalog/presentation/bindings/package_catalog_binding.dart';
@@ -200,6 +202,12 @@ abstract final class AppPages {
       name: AppRoutes.activeSessions,
       page: () => const ActiveSessionsScreen(),
       binding: ActiveSessionsBinding(),
+      middlewares: [AuthGuard()],
+    ),
+    GetPage(
+      name: AppRoutes.securitySettings,
+      page: () => const SecuritySettingsScreen(),
+      binding: SecuritySettingsBinding(),
       middlewares: [AuthGuard()],
     ),
 

@@ -9,3 +9,4 @@ class MarkAllNotificationsAsReadUseCase {
     return repository.markAllAsRead();
   }
 }
+

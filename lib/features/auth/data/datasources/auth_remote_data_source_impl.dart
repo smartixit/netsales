@@ -189,4 +189,42 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       ApiConstants.disconnectDevice(deviceId),
     );
   }
+
+  @override
+  Future<ApiResponse<void>> requestTwoFactorOtp({
+    String? deviceUuid,
+    String? appHash,
+  }) {
+    final data = <String, dynamic>{
+      if (deviceUuid != null && deviceUuid.isNotEmpty)
+        'device_uuid': deviceUuid,
+      if (appHash != null && appHash.isNotEmpty) 'app_hash': appHash,
+    };
+
+    return ApiService.instance.post<void>(
+      ApiConstants.request2faOtp,
+      data: data.isNotEmpty ? data : null,
+    );
+  }
+
+  @override
+  Future<ApiResponse<void>> toggleTwoFactor({
+    required bool enable,
+    String? otp,
+    String? currentPassword,
+    String? deviceUuid,
+    String? appHash,
+  }) {
+    final data = <String, dynamic>{
+      'enable': enable,
+      if (otp != null && otp.isNotEmpty) 'otp': otp,
+      if (currentPassword != null && currentPassword.isNotEmpty)
+        'current_password': currentPassword,
+      if (deviceUuid != null && deviceUuid.isNotEmpty)
+        'device_uuid': deviceUuid,
+      if (appHash != null && appHash.isNotEmpty) 'app_hash': appHash,
+    };
+
+    return ApiService.instance.post<void>(ApiConstants.toggle2fa, data: data);
+  }
 }

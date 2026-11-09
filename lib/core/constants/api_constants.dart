@@ -37,6 +37,7 @@ abstract final class ApiConstants {
   static const String logoutOtherDevices = '/auth/logout-other-devices';
   static const String me = '/auth/me';
   static const String updatePassword = '/auth/update-password';
+  static const String request2faOtp = '/auth/2fa/request-otp';
   static const String toggle2fa = '/auth/toggle-2fa';
   static const String authDevices = '/auth/devices';
   static String disconnectDevice(int id) => '/auth/devices/$id';

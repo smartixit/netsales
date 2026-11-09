@@ -79,4 +79,19 @@ abstract interface class AuthRemoteDataSource {
 
   /// فصل وإلغاء اقتران جهاز محدد
   Future<ApiResponse<void>> disconnectDevice(int deviceId);
+
+  /// طلب رمز تحقق OTP جديد لتفعيل أو إدارة المصادقة الثنائية
+  Future<ApiResponse<void>> requestTwoFactorOtp({
+    String? deviceUuid,
+    String? appHash,
+  });
+
+  /// تفعيل أو تعطيل المصادقة الثنائية 2FA للحساب
+  Future<ApiResponse<void>> toggleTwoFactor({
+    required bool enable,
+    String? otp,
+    String? currentPassword,
+    String? deviceUuid,
+    String? appHash,
+  });
 }

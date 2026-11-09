@@ -12,3 +12,4 @@ abstract class NotificationRemoteDataSource {
 
   Future<ApiResponse<Map<String, dynamic>>> markAllAsRead();
 }
+

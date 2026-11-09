@@ -396,4 +396,50 @@ class AuthRepositoryImpl implements AuthRepository {
       throw AppException(response.message);
     }
   }
+
+  @override
+  Future<void> requestTwoFactorOtp({
+    String? deviceUuid,
+    String? appHash,
+  }) async {
+    final resolvedDeviceUuid =
+        deviceUuid ??
+        (Get.isRegistered<DeviceService>()
+            ? DeviceService.to.deviceUuid
+            : null);
+
+    final response = await _remoteDataSource.requestTwoFactorOtp(
+      deviceUuid: resolvedDeviceUuid,
+      appHash: appHash,
+    );
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+  }
+
+  @override
+  Future<void> toggleTwoFactor({
+    required bool enable,
+    String? otp,
+    String? currentPassword,
+    String? deviceUuid,
+    String? appHash,
+  }) async {
+    final resolvedDeviceUuid =
+        deviceUuid ??
+        (Get.isRegistered<DeviceService>()
+            ? DeviceService.to.deviceUuid
+            : null);
+
+    final response = await _remoteDataSource.toggleTwoFactor(
+      enable: enable,
+      otp: otp,
+      currentPassword: currentPassword,
+      deviceUuid: resolvedDeviceUuid,
+      appHash: appHash,
+    );
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+  }
 }

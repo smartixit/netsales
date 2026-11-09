@@ -113,4 +113,16 @@ abstract interface class AuthRepository {
 
   /// إلغاء إقران وفصل جهاز محدد
   Future<void> disconnectDevice(int deviceId);
+
+  /// طلب رمز تحقق OTP لتفعيل أو إدارة المصادقة الثنائية للمستخدم الحالي
+  Future<void> requestTwoFactorOtp({String? deviceUuid, String? appHash});
+
+  /// تفعيل أو تعطيل المصادقة الثنائية 2FA للحساب
+  Future<void> toggleTwoFactor({
+    required bool enable,
+    String? otp,
+    String? currentPassword,
+    String? deviceUuid,
+    String? appHash,
+  });
 }

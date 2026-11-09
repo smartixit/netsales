@@ -146,6 +146,42 @@ class UserModel {
     );
   }
 
+  UserModel copyWith({
+    int? userId,
+    int? roleId,
+    String? userFullName,
+    String? userProfileLogo,
+    String? userPhoneNumber,
+    String? userEmail,
+    bool? user2faEnabled,
+    bool? mustChangePassword,
+    String? status,
+    String? statusLabel,
+    String? lastLoginAt,
+    RoleModel? role,
+    bool? rawIsSuperAdmin,
+    String? generalRoleKey,
+    List<WorkspaceMembershipModel>? workspaceMemberships,
+  }) {
+    return UserModel(
+      userId: userId ?? this.userId,
+      roleId: roleId ?? this.roleId,
+      userFullName: userFullName ?? this.userFullName,
+      userProfileLogo: userProfileLogo ?? this.userProfileLogo,
+      userPhoneNumber: userPhoneNumber ?? this.userPhoneNumber,
+      userEmail: userEmail ?? this.userEmail,
+      user2faEnabled: user2faEnabled ?? this.user2faEnabled,
+      mustChangePassword: mustChangePassword ?? this.mustChangePassword,
+      status: status ?? this.status,
+      statusLabel: statusLabel ?? this.statusLabel,
+      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      role: role ?? this.role,
+      rawIsSuperAdmin: rawIsSuperAdmin ?? this.rawIsSuperAdmin,
+      generalRoleKey: generalRoleKey ?? this.generalRoleKey,
+      workspaceMemberships: workspaceMemberships ?? this.workspaceMemberships,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'user_id': userId,

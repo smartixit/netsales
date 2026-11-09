@@ -76,6 +76,15 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
         ...?actions,
         const NotificationBadgeButton(),
         CustomButton.icon(
+          icon: Icons.shield_outlined,
+          foregroundColor: colors.onSurfaceVariant,
+          tooltip: 'إعدادات الأمان',
+          backgroundColor: Colors.transparent,
+          dimension: 40.r,
+          iconSize: 22.r,
+          onPressed: () => Get.toNamed<dynamic>(AppRoutes.securitySettings),
+        ),
+        CustomButton.icon(
           icon: Icons.devices_rounded,
           foregroundColor: colors.onSurfaceVariant,
           tooltip: 'الأجهزة والجلسات النشطة',
