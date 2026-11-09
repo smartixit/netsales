@@ -32,12 +32,16 @@ class MembershipScreen extends GetView<MembershipController> {
           CustomDropdown<int>(items: tenantItems, rxValue: controller.selectedTenantId, onChanged: controller.selectTenant, label: controller.tenantLabel, hint: 'اختر ${controller.tenantLabel}'),
         ],
         AppSpacing.vLg,
-        MembershipAddForm(controller: controller),
-        AppSpacing.vLg,
-        if (controller.isLoading.value) const CustomSkeletonFeed(itemCount: 4)
-        else if (controller.errorMessage.value != null) CustomErrorState.boxed(title: 'تعذر تحميل الأعضاء', subtitle: controller.errorMessage.value, onRetry: controller.loadMembers)
-        else if (controller.members.isEmpty) const CustomEmptyState(title: 'لا يوجد أعضاء بعد', subtitle: 'أضف أول عضو تشغيلي إلى هذه المنشأة.')
-        else MembershipList(controller: controller),
+        if (controller.selectedTenantId.value == null)
+          const CustomEmptyState(title: 'حدد المنشأة أولاً', subtitle: 'اختر الشبكة أو نقطة البيع التي تريد إدارة فريقها.')
+        else ...[
+          MembershipAddForm(controller: controller),
+          AppSpacing.vLg,
+        ],
+        if (controller.selectedTenantId.value != null && controller.isLoading.value) const CustomSkeletonFeed(itemCount: 4)
+        else if (controller.selectedTenantId.value != null && controller.errorMessage.value != null) CustomErrorState.boxed(title: 'تعذر تحميل الأعضاء', subtitle: controller.errorMessage.value, onRetry: controller.loadMembers)
+        else if (controller.selectedTenantId.value != null && controller.members.isEmpty) const CustomEmptyState(title: 'لا يوجد أعضاء بعد', subtitle: 'أضف أول عضو تشغيلي إلى هذه المنشأة.')
+        else if (controller.selectedTenantId.value != null) MembershipList(controller: controller),
       ],
     )));
   });
