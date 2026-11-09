@@ -17,9 +17,10 @@ import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 /// شاشة دليل نقاط البيع وإدارة روابط الشراكة بمساحة عمل الشبكة
 /// مسؤوليتها: تركيب الصفحة وتنسيق المكونات وتوصيلها بالمتحكم (Page Composition)
 class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
-  const NetworkPosDirectoryScreen({super.key, this.networkId});
+  const NetworkPosDirectoryScreen({super.key, this.networkId, this.embedded = false});
 
   final int? networkId;
+  final bool embedded;
 
   void _ensureDataLoaded() {
     if (networkId != null &&
@@ -40,7 +41,7 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
+      appBar: embedded ? null : AppBar(
         title: const Text('دليل نقاط البيع المرتبطة'),
         centerTitle: true,
         actions: [
@@ -78,6 +79,55 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
       ),
       body: Column(
         children: [
+          if (embedded)
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.cardPadding,
+                vertical: AppSpacing.sm,
+              ),
+              child: Row(
+                children: [
+                  const Expanded(child: Text('دليل نقاط البيع المرتبطة')),
+                  CustomButton.icon(
+                    icon: Icons.qr_code_2_rounded,
+                    tooltip: 'دعوة ربط عبر QR',
+                    onPressed: () async {
+                      final netId = controller.activeNetworkId.value;
+                      final network = await controller.fetchNetworkDetails(netId);
+                      if (network != null) {
+                        await NetworkPosQrChallengeSheet.show(
+                          networkId: netId,
+                          networkName: network.networkName,
+                          networkPhone: network.networkPhoneNumber,
+                        );
+                      }
+                    },
+                  ),
+                  CustomButton.icon(
+                    icon: Icons.business_outlined,
+                    tooltip: 'بيانات الشبكة',
+                    onPressed: () async {
+                      final network = await controller.fetchNetworkDetails(
+                        controller.activeNetworkId.value,
+                      );
+                      if (network != null) {
+                        await NetworkDetailsBottomSheet.show(
+                          network: network,
+                          canEdit: true,
+                        );
+                      }
+                    },
+                  ),
+                  CustomButton.icon(
+                    icon: Icons.add_link_rounded,
+                    tooltip: 'ربط نقطة بيع',
+                    onPressed: () => LinkPosBottomSheet.show(
+                      networkId: controller.activeNetworkId.value,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           // 1. شريط البحث والفلترة المفصول (Feature Widget)
           const NetworkPosSearchFilterHeader(),
 
@@ -166,7 +216,7 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
           ),
         ],
       ),
-      floatingActionButton: CustomButton.primary(
+      floatingActionButton: embedded ? null : CustomButton.primary(
         text: 'ربط نقطة بيع',
         icon: Icons.add_link_rounded,
         shape: AppButtonShape.pill,

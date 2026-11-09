@@ -16,7 +16,8 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
 
   @override
   Widget build(BuildContext context) {
-    final navItems = [
+    return Obx(() {
+      final navItems = [
       const WorkspaceNavItem(
         label: 'الرئيسية',
         icon: Icons.dashboard_outlined,
@@ -33,7 +34,10 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         label: 'نقاط البيع',
         icon: Icons.storefront_outlined,
         activeIcon: Icons.storefront_rounded,
-        content: NetworkPosDirectoryScreen(),
+        content: NetworkPosDirectoryScreen(
+          networkId: controller.selectedNetworkId.value,
+          embedded: true,
+        ),
       ),
       const WorkspaceNavItem(
         label: 'فريق العمل',
@@ -47,16 +51,17 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         activeIcon: Icons.account_balance_wallet_rounded,
         content: NetworkFinanceWorkspaceHub(),
       ),
-    ];
+      ];
 
-    return Obx(() => AdaptiveWorkspaceScaffold(
-      appBar: const WorkspaceAppBar(
-        title: 'لوحة التحكم',
-        workspace: AppWorkspace.network,
-      ),
-      items: navItems,
-      currentIndex: controller.selectedNavIndex.value,
-      onIndexChanged: controller.onNavItemSelected,
-    ));
+      return AdaptiveWorkspaceScaffold(
+        appBar: const WorkspaceAppBar(
+          title: 'لوحة التحكم',
+          workspace: AppWorkspace.network,
+        ),
+        items: navItems,
+        currentIndex: controller.selectedNavIndex.value,
+        onIndexChanged: controller.onNavItemSelected,
+      );
+    });
   }
 }
