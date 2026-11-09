@@ -1,11 +1,14 @@
-import 'package:audioplayers/audioplayers.dart';
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
+import 'package:just_audio/just_audio.dart';
 
 /// ============================================================================
 /// خدمة المؤثرات الصوتية والتنبيهات المخصصة (Custom Sound Service)
 /// ============================================================================
 /// مسؤولة عن إدارة وتشغيل الأصوات والتنبيهات المميزة لنظام NetSales.
-/// تدعم البث عبر مجرى المنبه (STREAM_ALARM) لتجاوز الوضع الصامت والهزاز،
-/// وجلسة صوت Playback لنظام iOS للعمل عبر مكبر الصوت حتى في وضع الصامت.
+/// تعتمد على حزمة [just_audio] مع دعم أصيل لكافة المنصات بما فيها Windows عبر
+/// [just_audio_windows] دون أي اعتماديات خارجية على NuGet.
 class SoundService {
   SoundService._();
   static final SoundService instance = SoundService._();
@@ -14,38 +17,27 @@ class SoundService {
 
   /// تشغيل الصوت المخصص
   ///
-  /// [soundPath]: مسار ملف الصوت داخل assets/sounds (افتراضياً: 'sounds/netsales_notification.wav')
-  /// [usageType]: نوع الاستخدام لأندرويد (افتراضياً: [AndroidUsageType.alarm] لتجاوز الصامت والهزاز)
-  /// [volume]: مستوى الصوت (افتراضياً: 1.0 أقصى صوت)
+  /// [soundPath]: مسار ملف الصوت (مثلاً: 'assets/sounds/netsales_notification.wav' أو 'sounds/netsales_notification.wav')
+  /// [volume]: مستوى الصوت من 0.0 إلى 1.0 (افتراضياً: 1.0)
   Future<void> playSound({
-    String soundPath = 'sounds/netsales_notification.wav',
-    AndroidUsageType usageType = AndroidUsageType.alarm,
+    String soundPath = 'assets/sounds/netsales_notification.wav',
     double volume = 1.0,
   }) async {
     try {
-      await _player.stop();
+      final assetKey = soundPath.startsWith('assets/')
+          ? soundPath
+          : 'assets/$soundPath';
+      if (_player.playing) {
+        await _player.stop();
+      }
+      await _player.setAsset(assetKey);
       await _player.setVolume(volume.clamp(0.0, 1.0));
-      await _player.play(
-        AssetSource(soundPath),
-        volume: volume.clamp(0.0, 1.0),
-        ctx: AudioContext(
-          android: AudioContextAndroid(
-            usageType: usageType,
-            contentType: AndroidContentType.sonification,
-            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
-            isSpeakerphoneOn: true,
-            stayAwake: true,
-          ),
-          iOS: AudioContextIOS(
-            category: AVAudioSessionCategory.playback,
-            options: const {
-              AVAudioSessionOptions.mixWithOthers,
-              AVAudioSessionOptions.duckOthers,
-            },
-          ),
-        ),
-      );
-    } catch (_) {}
+      await _player.play();
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        log('SoundService.playSound failed: $e', stackTrace: stackTrace);
+      }
+    }
   }
 
   void dispose() {

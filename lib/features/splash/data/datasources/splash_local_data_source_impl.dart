@@ -29,6 +29,9 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
       InternetConnectionService.instance.initialize(),
     ]);
 
+    // ── Warm-up & Health Check: إيقاظ الخادم وتهيئة اتصال الشبكة مسبقاً ──
+    unawaited(_warmUpBackendServer());
+
     // مزامنة مفاتيح السيرفر السيادية في الخلفية فور جاهزية محرك التشفير
     unawaited(
       AppCryptoService.instance.syncServerPublicKeys(
@@ -84,6 +87,25 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
     } catch (_) {
       // عند الرفض بـ 401، يقوم معترض ApiService.onUnauthorized بإنهاء الجلسة تلقائياً
       return false;
+    }
+  }
+
+  /// إيقاظ الخادم وفحص صحته مسبقاً (Warm-up / Health Activity)
+  /// يحل مشكلة الـ Cold Start ويفتح اتصال الـ TCP/TLS مسبقاً قبل وصول المستخدم لتسجيل الدخول
+  Future<void> _warmUpBackendServer() async {
+    try {
+      final response = await ApiService.instance.get<Map<String, dynamic>>(
+        ApiConstants.healthCheck,
+        fromJson: (json) =>
+            json is Map ? Map<String, dynamic>.from(json) : <String, dynamic>{},
+      );
+      if (response.success) {
+        log('🟢 [Backend Health Warm-up] Server is active & ready: ${response.message}');
+      } else {
+        log('🟡 [Backend Health Warm-up] Server responded with notice: ${response.message}');
+      }
+    } catch (e) {
+      log('⚠️ [Backend Health Warm-up] Server warm-up ping failed (tolerated): $e');
     }
   }
 }
