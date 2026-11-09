@@ -100,10 +100,16 @@ void main() {
       expect(
         () => NetworkWorkspaceOverviewModel.fromJson({
           'generated_at': '2026-11-09T10:00:00+03:00',
-          'period': {'key': '30d'},
+          'timezone': 'Asia/Aden',
+          'period': {
+            'key': '30d',
+            'days': 30,
+            'from': '2026-10-11T00:00:00+03:00',
+            'to': '2026-11-09T10:00:00+03:00',
+          },
           'network': {'network_id': 12, 'network_name': 'شبكة الاختبار'},
           'metrics': <String, dynamic>{'sales': 'not-an-object'},
-          'recent_pending_requests': [],
+          'recent_pending_requests': <Map<String, dynamic>>[],
         }),
         throwsA(isA<FormatException>()),
       );
