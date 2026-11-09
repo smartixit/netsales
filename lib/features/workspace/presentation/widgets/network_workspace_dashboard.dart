@@ -462,8 +462,11 @@ class _PendingRequestTile extends StatelessWidget {
     final requestUuid = request['request_uuid'];
     final posName = request['pos_name'];
     final saleTypeLabel = request['sale_type_label'];
+    final totalAmount = request['request_total_amount'];
+    final requestDate = request['request_date'];
     if (requestId is! num || requestUuid is! String ||
-        posName is! String || saleTypeLabel is! String) {
+        posName is! String || saleTypeLabel is! String ||
+        totalAmount is! String || requestDate is! String) {
       throw const FormatException('بيانات الطلب المعلق غير مكتملة.');
     }
     return Padding(
@@ -472,7 +475,7 @@ class _PendingRequestTile extends StatelessWidget {
         width: double.infinity,
         onPressed: () => Get.toNamed<void>(
           AppRoutes.voucherRequestDetails,
-          arguments: request,
+          arguments: requestId.toInt(),
         ),
         child: Row(
           children: [
@@ -484,10 +487,20 @@ class _PendingRequestTile extends StatelessWidget {
                 children: [
                   Text(posName, style: AppTypography.titleSmall.copyWith(color: colors.onSurface)),
                   Text(requestUuid, style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+                  Text(requestDate, style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
                 ],
               ),
             ),
-            Text(saleTypeLabel, style: AppTypography.bodySmall.copyWith(color: colors.primary)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(saleTypeLabel, style: AppTypography.bodySmall.copyWith(color: colors.primary)),
+                Text(
+                  AmountFormatter.format(totalAmount),
+                  style: AppTypography.titleSmall.copyWith(color: colors.onSurface),
+                ),
+              ],
+            ),
             AppSpacing.hXs,
             Icon(Icons.chevron_left_rounded, color: colors.onSurfaceVariant),
           ],

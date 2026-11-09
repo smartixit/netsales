@@ -51,6 +51,7 @@ class NetworkWorkspaceController extends GetxController {
     final revision = ++_revision;
     isLoading.value = true;
     errorMessage.value = null;
+    overview.value = null;
     try {
       final result = await getMyNetworksUseCase();
       if (revision != _revision) return;
@@ -106,12 +107,14 @@ class NetworkWorkspaceController extends GetxController {
   Future<void> selectNetwork(int? networkId) async {
     if (networkId == null || networkId == selectedNetworkId.value) return;
     selectedNetworkId.value = networkId;
+    overview.value = null;
     await loadOverview();
   }
 
   Future<void> selectPeriod(String period) async {
     if (selectedPeriod.value == period) return;
     selectedPeriod.value = period;
+    overview.value = null;
     await loadOverview();
   }
 }
