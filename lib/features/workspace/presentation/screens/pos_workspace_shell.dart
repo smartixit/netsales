@@ -9,6 +9,7 @@ import 'package:netsales/features/workspace/presentation/widgets/workspace_app_b
 import 'package:netsales/features/workspace/presentation/widgets/pos_home_dashboard.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 
 /// هيكل مساحة عمل نقطة البيع (POS Workspace Shell)
 class PosWorkspaceShell extends GetView<PosWorkspaceController> {
@@ -41,6 +42,12 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           subtitle:
               'استعراض فواتير التوريد الصادرة ومستندات السداد النقدي والآجل',
         ),
+      ),
+      const WorkspaceNavItem(
+        label: 'فريق العمل',
+        icon: Icons.groups_outlined,
+        activeIcon: Icons.groups_rounded,
+        content: MembershipScreen(),
       ),
       const WorkspaceNavItem(
         label: 'الرصيد والديون',

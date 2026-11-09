@@ -3,6 +3,7 @@ import 'package:netsales/core/enums/backup_status.dart';
 import 'package:netsales/core/enums/device_type.dart';
 import 'package:netsales/core/enums/invoice_payment_status.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
+import 'package:netsales/core/enums/membership_status.dart';
 import 'package:netsales/core/enums/provider_subscription_status.dart';
 import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/core/enums/role_key.dart';
@@ -576,6 +577,25 @@ class EnumPresentationRegistry {
         icon: Icons.help_outline_rounded,
         isKnown: false,
       ),
+    };
+  }
+
+  static EnumPresentation resolveMembershipStatus(
+    MembershipStatus status, {
+    String? serverLabel,
+  }) {
+    final label = _effectiveLabel(serverLabel, switch (status) {
+      MembershipStatus.active => 'نشط',
+      MembershipStatus.suspended => 'موقوف',
+      MembershipStatus.invited => 'بانتظار التفعيل',
+      MembershipStatus.unknown => 'حالة غير معروفة',
+    });
+
+    return switch (status) {
+      MembershipStatus.active => EnumPresentation(label: label, tone: SemanticTone.success, icon: Icons.check_circle_rounded),
+      MembershipStatus.suspended => EnumPresentation(label: label, tone: SemanticTone.warning, icon: Icons.pause_circle_outline_rounded),
+      MembershipStatus.invited => EnumPresentation(label: label, tone: SemanticTone.info, icon: Icons.hourglass_top_rounded),
+      MembershipStatus.unknown => EnumPresentation.unknown(fallbackLabel: label),
     };
   }
 

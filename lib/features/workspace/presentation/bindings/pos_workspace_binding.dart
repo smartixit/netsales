@@ -6,6 +6,7 @@ import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.d
 import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/workspace/presentation/bindings/workspace_coordinator_binding.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
+import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
 
 class PosWorkspaceBinding extends Bindings {
   @override
@@ -13,6 +14,7 @@ class PosWorkspaceBinding extends Bindings {
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();
     FinanceBinding().dependencies();
+    MembershipBinding(isNetwork: false).dependencies();
     Get.lazyPut<PosWorkspaceController>(
       () => PosWorkspaceController(
         getMyPosUseCase: Get.find<GetMyPosUseCase>(),

@@ -172,7 +172,7 @@ abstract final class ScreenRegistry {
       titleEn: 'Network Staff',
       workspace: AppWorkspace.network,
       requiredPermission: AppPermissions.usersView,
-      implementationState: ScreenImplementationState.planned,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'NET-09',
@@ -296,7 +296,7 @@ abstract final class ScreenRegistry {
       titleEn: 'POS Staff',
       workspace: AppWorkspace.pos,
       requiredPermission: AppPermissions.usersView,
-      implementationState: ScreenImplementationState.planned,
+      implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
       screenId: 'POS-08',
