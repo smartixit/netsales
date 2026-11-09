@@ -82,6 +82,8 @@ abstract final class ApiConstants {
   static const String networks = '/networks';
   static const String networksTrashed = '/networks/trashed';
   static String network(int id) => '/networks/$id';
+  static String networkWorkspaceOverview(int id) =>
+      '/networks/$id/workspace-overview';
   static String networkMembers(int id) => '/networks/$id/members';
   static String networkMemberRoles(int id) => '/networks/$id/members/assignable-roles';
   static String networkMemberRole(int networkId, int userId) =>
