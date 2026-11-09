@@ -170,10 +170,7 @@ class _DashboardContent extends GetView<NetworkWorkspaceController> {
             ),
             AppSpacing.vSm,
             ...overview.recentPendingRequests.map(
-              (request) => _PendingRequestTile(
-                request: request,
-                onTap: () => controller.onNavItemSelected(1),
-              ),
+              (request) => _PendingRequestTile(request: request),
             ),
           ],
           AppSpacing.vLg,
@@ -205,63 +202,88 @@ class _MetricsGrid extends StatelessWidget {
         final tiles = <Widget>[];
 
         if (metrics.containsKey('points_of_sale')) {
-      tiles.add(_MetricCard(
-        icon: Icons.storefront_rounded,
-        title: 'نقاط البيع المرتبطة',
-        value: overview.count('points_of_sale', 'total'),
-        detail: 'نشطة ${overview.count('points_of_sale', 'active')} · غير نشطة ${overview.count('points_of_sale', 'inactive')}',
-      ));
-    }
-    if (metrics.containsKey('requests')) {
-      tiles.add(_MetricCard(
-        icon: Icons.inbox_rounded,
-        title: 'طلبات التوريد',
-        value: overview.count('requests', 'total'),
-        detail: 'بانتظار المراجعة ${overview.count('requests', 'pending')}',
-        highlighted: true,
-      ));
-    }
-    if (metrics.containsKey('packages')) {
-      tiles.add(_MetricCard(
-        icon: Icons.widgets_rounded,
-        title: 'باقات الكتالوج',
-        value: overview.count('packages', 'total'),
-        detail: 'نشطة ${overview.count('packages', 'active')}',
-      ));
-    }
-    if (metrics.containsKey('sales')) {
-      tiles.add(_MetricCard(
-        icon: Icons.receipt_long_rounded,
-        title: 'فواتير الفترة',
-        value: overview.count('sales', 'invoice_count'),
-        detail: 'إجمالي ${AmountFormatter.format(overview.amount('sales', 'total_amount'))}',
-      ));
-    }
-    if (metrics.containsKey('expenses')) {
-      tiles.add(_MetricCard(
-        icon: Icons.trending_down_rounded,
-        title: 'مصروفات الشبكة',
-        value: AmountFormatter.format(overview.amount('expenses', 'total_amount')),
-        detail: '${overview.count('expenses', 'count')} سند خلال الفترة',
-      ));
-    }
-    final wallet = metrics['wallet'];
-    if (wallet is Map) {
-      tiles.add(_MetricCard(
-        icon: Icons.account_balance_wallet_rounded,
-        title: 'رصيد محفظة الشبكة',
-        value: AmountFormatter.format(overview.amount('wallet', 'balance')),
-        detail: wallet['is_active'] == true ? 'المحفظة نشطة' : 'المحفظة غير نشطة',
-        highlighted: true,
-      ));
-    }
-    if (tiles.isEmpty) {
-      return const CustomEmptyState(
-        icon: Icons.analytics_outlined,
-        title: 'لا توجد مؤشرات متاحة لهذا الدور',
-        subtitle: 'لا يمتلك حسابك صلاحيات عرض مؤشرات التشغيل في هذه الشبكة.',
-      );
-    }
+          tiles.add(
+            _MetricCard(
+              icon: Icons.storefront_rounded,
+              title: 'نقاط البيع المرتبطة',
+              value: overview.count('points_of_sale', 'total'),
+              detail:
+                  'نشطة ${overview.count('points_of_sale', 'active')} · غير نشطة ${overview.count('points_of_sale', 'inactive')}',
+            ),
+          );
+        }
+        if (metrics.containsKey('requests')) {
+          tiles.add(
+            _MetricCard(
+              icon: Icons.inbox_rounded,
+              title: 'طلبات التوريد',
+              value: overview.count('requests', 'total'),
+              detail:
+                  'بانتظار المراجعة ${overview.count('requests', 'pending')}',
+              highlighted: true,
+            ),
+          );
+        }
+        if (metrics.containsKey('packages')) {
+          tiles.add(
+            _MetricCard(
+              icon: Icons.widgets_rounded,
+              title: 'باقات الكتالوج',
+              value: overview.count('packages', 'total'),
+              detail: 'نشطة ${overview.count('packages', 'active')}',
+            ),
+          );
+        }
+        if (metrics.containsKey('sales')) {
+          tiles.add(
+            _MetricCard(
+              icon: Icons.receipt_long_rounded,
+              title: 'فواتير الفترة',
+              value: overview.count('sales', 'invoice_count'),
+              detail:
+                  'إجمالي ${AmountFormatter.format(overview.amount('sales', 'total_amount'))}',
+            ),
+          );
+        }
+        if (metrics.containsKey('expenses')) {
+          tiles.add(
+            _MetricCard(
+              icon: Icons.trending_down_rounded,
+              title: 'مصروفات الشبكة',
+              value: AmountFormatter.format(
+                overview.amount('expenses', 'total_amount'),
+              ),
+              detail:
+                  '${overview.count('expenses', 'count')} سند خلال الفترة',
+            ),
+          );
+        }
+        final wallet = metrics['wallet'];
+        if (wallet is Map<String, dynamic>) {
+          tiles.add(
+            _MetricCard(
+              icon: Icons.account_balance_wallet_rounded,
+              title: 'رصيد محفظة الشبكة',
+              value: AmountFormatter.format(
+                overview.amount('wallet', 'balance'),
+              ),
+              detail: wallet['is_active'] == true
+                  ? 'المحفظة نشطة'
+                  : 'المحفظة غير نشطة',
+              highlighted: true,
+            ),
+          );
+        }
+
+        if (tiles.isEmpty) {
+          return const CustomEmptyState(
+            icon: Icons.analytics_outlined,
+            title: 'لا توجد مؤشرات متاحة لهذا الدور',
+            subtitle:
+                'لا يمتلك حسابك صلاحيات عرض مؤشرات التشغيل في هذه الشبكة.',
+          );
+        }
+
         return Wrap(
           spacing: gap,
           runSpacing: gap,
@@ -430,7 +452,7 @@ class _SectionTitle extends StatelessWidget {
             ],
           ),
         ),
-        ?action,
+        if (action != null) action!,
       ],
     );
   }
@@ -454,10 +476,9 @@ class _QuickAction extends StatelessWidget {
 }
 
 class _PendingRequestTile extends StatelessWidget {
-  const _PendingRequestTile({required this.request, required this.onTap});
+  const _PendingRequestTile({required this.request});
 
   final Map<String, dynamic> request;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -466,15 +487,21 @@ class _PendingRequestTile extends StatelessWidget {
     final requestUuid = request['request_uuid'];
     final posName = request['pos_name'];
     final saleTypeLabel = request['sale_type_label'];
+    final totalAmount = request['request_total_amount'];
+    final requestDate = request['request_date'];
     if (requestId is! num || requestUuid is! String ||
-        posName is! String || saleTypeLabel is! String) {
+        posName is! String || saleTypeLabel is! String ||
+        totalAmount is! String || requestDate is! String) {
       throw const FormatException('بيانات الطلب المعلق غير مكتملة.');
     }
     return Padding(
       padding: EdgeInsets.only(bottom: AppSpacing.sm),
       child: CustomButton.outline(
         width: double.infinity,
-        onPressed: onTap,
+        onPressed: () => Get.toNamed<void>(
+          AppRoutes.voucherRequestDetails,
+          arguments: requestId.toInt(),
+        ),
         child: Row(
           children: [
             Icon(Icons.receipt_long_outlined, color: colors.primary),
@@ -485,10 +512,20 @@ class _PendingRequestTile extends StatelessWidget {
                 children: [
                   Text(posName, style: AppTypography.titleSmall.copyWith(color: colors.onSurface)),
                   Text(requestUuid, style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+                  Text(requestDate, style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
                 ],
               ),
             ),
-            Text(saleTypeLabel, style: AppTypography.bodySmall.copyWith(color: colors.primary)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(saleTypeLabel, style: AppTypography.bodySmall.copyWith(color: colors.primary)),
+                Text(
+                  AmountFormatter.format(totalAmount),
+                  style: AppTypography.titleSmall.copyWith(color: colors.onSurface),
+                ),
+              ],
+            ),
             AppSpacing.hXs,
             Icon(Icons.chevron_left_rounded, color: colors.onSurfaceVariant),
           ],
