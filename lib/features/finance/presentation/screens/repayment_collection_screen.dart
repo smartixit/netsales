@@ -5,6 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_collection_controller.dart';
+import 'package:netsales/features/finance/presentation/widgets/repayment_payment_method_selector.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_beneficiary_skeleton.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
@@ -43,7 +44,7 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                   AppSpacing.hSm,
                   Expanded(
                     child: Text(
-                      'يتم توزيع مبلغ السداد آلياً على الفواتير الآجلة المستحقة بنظام الأسبقية FIFO بواسطة الخادم.',
+                      'يوزّع الخادم مبلغ السداد تلقائياً على الفواتير المستحقة بدءاً من الأقدم، وفق نظام FIFO.',
                       style: AppTypography.bodySmall.copyWith(
                         color: colors.onSurface,
                         fontWeight: FontWeight.w600,
@@ -188,6 +189,28 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    'طريقة السداد',
+                    style: AppTypography.titleSmall.copyWith(
+                      color: colors.onSurface,
+                    ),
+                  ),
+                  AppSpacing.vXxs,
+                  Text(
+                    'اختر القناة التي تم عبرها استلام المبلغ.',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                  AppSpacing.vSm,
+                  RepaymentPaymentMethodSelector(
+                    selectedMethod: controller.selectedMethod.value,
+                    enabled: !isSubmitting,
+                    onChanged: (method) {
+                      controller.selectedMethod.value = method;
+                    },
+                  ),
+                  AppSpacing.vMd,
                   CustomTextField(
                     controller: controller.amountController,
                     label: 'مبلغ التحصيل والسداد',
@@ -201,8 +224,8 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                   AppSpacing.vMd,
                   CustomTextField(
                     controller: controller.refController,
-                    label: 'رقم الإشعار / المرجع (اختياري)',
-                    hint: 'مثال: REF-990021...',
+                    label: controller.selectedMethod.value.referenceLabel,
+                    hint: controller.selectedMethod.value.referenceHint,
                     isRequired: false,
                     enabled: !isSubmitting,
                   ),
@@ -221,7 +244,7 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
             AppSpacing.vXl,
             Obx(
               () => CustomButton(
-                text: 'تأكيد التحصيل والتوزيع السيادي (FIFO)',
+                text: 'تأكيد تحصيل السداد',
                 icon: Icons.check_circle_outline,
                 loading: controller.isSubmitting.value,
                 enabled: !controller.isSubmitting.value,
