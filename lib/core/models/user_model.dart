@@ -50,7 +50,7 @@ class UserModel {
     final rawWorkspaceRoles = json['workspace_roles'];
     final workspaceRoles = rawWorkspaceRoles is List
         ? rawWorkspaceRoles
-            .whereType<Map>()
+            .whereType<Map<String, dynamic>>()
             .map((item) => item['role_key'])
             .whereType<String>()
             .toList(growable: false)
