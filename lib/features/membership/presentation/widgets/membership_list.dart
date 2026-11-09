@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/membership_status.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -31,7 +30,7 @@ class _MembershipTile extends StatelessWidget {
     final active = member.isActive;
     final presentation = EnumPresentationRegistry.resolveMembershipStatus(
       MembershipStatus.fromWire(member.status),
-    )
+    );
     return Container(
       padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(color: colors.surface, borderRadius: BorderRadius.circular(18), border: Border.all(color: colors.outlineVariant.withValues(alpha: .45))),
