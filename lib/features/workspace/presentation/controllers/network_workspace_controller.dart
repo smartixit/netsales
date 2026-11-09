@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -33,10 +35,14 @@ class NetworkWorkspaceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    unawaited(_initializeWorkspace());
+  }
+
+  Future<void> _initializeWorkspace() async {
     if (WorkspaceService.to.activeWorkspace != AppWorkspace.network) {
-      WorkspaceService.to.setActiveWorkspace(AppWorkspace.network);
+      await WorkspaceService.to.setActiveWorkspace(AppWorkspace.network);
     }
-    loadWorkspace();
+    await loadWorkspace();
   }
 
   @override
