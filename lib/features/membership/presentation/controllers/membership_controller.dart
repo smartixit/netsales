@@ -33,6 +33,7 @@ class MembershipController extends GetxController {
   final errorMessage = RxnString();
   final phoneController = TextEditingController();
   final RxnInt selectedRoleId = RxnInt();
+  int _loadGeneration = 0;
   String get tenantLabel => isNetwork ? 'الشبكة' : 'نقطة البيع';
 
   @override
@@ -67,14 +68,20 @@ class MembershipController extends GetxController {
   Future<void> loadMembers() async {
     final id = selectedTenantId.value;
     if (id == null) return;
+    final generation = ++_loadGeneration;
     isLoading.value = true; errorMessage.value = null;
     try {
       final memberRows = await getMembers(isNetwork, id);
       final roleRows = await getRoles(isNetwork, id);
+      if (generation != _loadGeneration || selectedTenantId.value != id) return;
       members.assignAll(memberRows); roles.assignAll(roleRows);
     } catch (error) {
-      errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر تحميل أعضاء ${tenantLabel}.');
-    } finally { isLoading.value = false; }
+      if (generation == _loadGeneration) {
+        errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر تحميل أعضاء ${tenantLabel}.');
+      }
+    } finally {
+      if (generation == _loadGeneration) isLoading.value = false;
+    }
   }
 
   Future<void> add() async {
