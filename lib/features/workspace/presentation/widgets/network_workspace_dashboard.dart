@@ -202,63 +202,88 @@ class _MetricsGrid extends StatelessWidget {
         final tiles = <Widget>[];
 
         if (metrics.containsKey('points_of_sale')) {
-      tiles.add(_MetricCard(
-        icon: Icons.storefront_rounded,
-        title: 'نقاط البيع المرتبطة',
-        value: overview.count('points_of_sale', 'total'),
-        detail: 'نشطة ${overview.count('points_of_sale', 'active')} · غير نشطة ${overview.count('points_of_sale', 'inactive')}',
-      ));
-    }
-    if (metrics.containsKey('requests')) {
-      tiles.add(_MetricCard(
-        icon: Icons.inbox_rounded,
-        title: 'طلبات التوريد',
-        value: overview.count('requests', 'total'),
-        detail: 'بانتظار المراجعة ${overview.count('requests', 'pending')}',
-        highlighted: true,
-      ));
-    }
-    if (metrics.containsKey('packages')) {
-      tiles.add(_MetricCard(
-        icon: Icons.widgets_rounded,
-        title: 'باقات الكتالوج',
-        value: overview.count('packages', 'total'),
-        detail: 'نشطة ${overview.count('packages', 'active')}',
-      ));
-    }
-    if (metrics.containsKey('sales')) {
-      tiles.add(_MetricCard(
-        icon: Icons.receipt_long_rounded,
-        title: 'فواتير الفترة',
-        value: overview.count('sales', 'invoice_count'),
-        detail: 'إجمالي ${AmountFormatter.format(overview.amount('sales', 'total_amount'))}',
-      ));
-    }
-    if (metrics.containsKey('expenses')) {
-      tiles.add(_MetricCard(
-        icon: Icons.trending_down_rounded,
-        title: 'مصروفات الشبكة',
-        value: AmountFormatter.format(overview.amount('expenses', 'total_amount')),
-        detail: '${overview.count('expenses', 'count')} سند خلال الفترة',
-      ));
-    }
-    final wallet = metrics['wallet'];
-    if (wallet is Map<String, dynamic>) {
-      tiles.add(_MetricCard(
-        icon: Icons.account_balance_wallet_rounded,
-        title: 'رصيد محفظة الشبكة',
-        value: AmountFormatter.format(overview.amount('wallet', 'balance')),
-        detail: wallet['is_active'] == true ? 'المحفظة نشطة' : 'المحفظة غير نشطة',
-        highlighted: true,
-      ));
-    }
-    if (tiles.isEmpty) {
-      return const CustomEmptyState(
-        icon: Icons.analytics_outlined,
-        title: 'لا توجد مؤشرات متاحة لهذا الدور',
-        subtitle: 'لا يمتلك حسابك صلاحيات عرض مؤشرات التشغيل في هذه الشبكة.',
-      );
-    }
+          tiles.add(
+            _MetricCard(
+              icon: Icons.storefront_rounded,
+              title: 'نقاط البيع المرتبطة',
+              value: overview.count('points_of_sale', 'total'),
+              detail:
+                  'نشطة ${overview.count('points_of_sale', 'active')} · غير نشطة ${overview.count('points_of_sale', 'inactive')}',
+            ),
+          );
+        }
+        if (metrics.containsKey('requests')) {
+          tiles.add(
+            _MetricCard(
+              icon: Icons.inbox_rounded,
+              title: 'طلبات التوريد',
+              value: overview.count('requests', 'total'),
+              detail:
+                  'بانتظار المراجعة ${overview.count('requests', 'pending')}',
+              highlighted: true,
+            ),
+          );
+        }
+        if (metrics.containsKey('packages')) {
+          tiles.add(
+            _MetricCard(
+              icon: Icons.widgets_rounded,
+              title: 'باقات الكتالوج',
+              value: overview.count('packages', 'total'),
+              detail: 'نشطة ${overview.count('packages', 'active')}',
+            ),
+          );
+        }
+        if (metrics.containsKey('sales')) {
+          tiles.add(
+            _MetricCard(
+              icon: Icons.receipt_long_rounded,
+              title: 'فواتير الفترة',
+              value: overview.count('sales', 'invoice_count'),
+              detail:
+                  'إجمالي ${AmountFormatter.format(overview.amount('sales', 'total_amount'))}',
+            ),
+          );
+        }
+        if (metrics.containsKey('expenses')) {
+          tiles.add(
+            _MetricCard(
+              icon: Icons.trending_down_rounded,
+              title: 'مصروفات الشبكة',
+              value: AmountFormatter.format(
+                overview.amount('expenses', 'total_amount'),
+              ),
+              detail:
+                  '${overview.count('expenses', 'count')} سند خلال الفترة',
+            ),
+          );
+        }
+        final wallet = metrics['wallet'];
+        if (wallet is Map<String, dynamic>) {
+          tiles.add(
+            _MetricCard(
+              icon: Icons.account_balance_wallet_rounded,
+              title: 'رصيد محفظة الشبكة',
+              value: AmountFormatter.format(
+                overview.amount('wallet', 'balance'),
+              ),
+              detail: wallet['is_active'] == true
+                  ? 'المحفظة نشطة'
+                  : 'المحفظة غير نشطة',
+              highlighted: true,
+            ),
+          );
+        }
+
+        if (tiles.isEmpty) {
+          return const CustomEmptyState(
+            icon: Icons.analytics_outlined,
+            title: 'لا توجد مؤشرات متاحة لهذا الدور',
+            subtitle:
+                'لا يمتلك حسابك صلاحيات عرض مؤشرات التشغيل في هذه الشبكة.',
+          );
+        }
+
         return Wrap(
           spacing: gap,
           runSpacing: gap,

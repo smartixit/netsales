@@ -8,6 +8,8 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 
 /// مركز دخول عمليات المالية في مساحة عمل مزود الشبكة.
 /// لا يجري أي حساب أو تحميل مالي؛ يوجّه إلى الشاشات التي تجلب بياناتها من API.
@@ -242,6 +244,16 @@ class _NetworkFinanceSnapshot extends StatelessWidget {
     return Obx(() {
       final overview = controller.overview.value;
       if (overview == null) {
+        if (controller.errorMessage.value != null) {
+          return CustomErrorState.boxed(
+            title: 'تعذر تحميل الملخص المالي',
+            subtitle: controller.errorMessage.value,
+            onRetry: controller.loadWorkspace,
+          );
+        }
+        if (controller.isLoading.value) {
+          return const CustomSkeletonFeed(itemCount: 2, cardHeight: 92);
+        }
         return const SizedBox.shrink();
       }
       final metrics = overview.metrics;
@@ -264,6 +276,11 @@ class _NetworkFinanceSnapshot extends StatelessWidget {
           icon: Icons.pending_actions_rounded,
           label: 'المبالغ المتبقية على الفواتير',
           value: AmountFormatter.format(overview.amount('sales', 'outstanding_amount')),
+        ));
+        cards.add(_FinanceSnapshotCard(
+          icon: Icons.payments_rounded,
+          label: 'المبالغ المحصلة',
+          value: AmountFormatter.format(overview.amount('sales', 'paid_amount')),
         ));
       }
       if (metrics.containsKey('expenses')) {
