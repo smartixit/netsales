@@ -82,6 +82,14 @@ abstract final class ApiConstants {
   static const String networks = '/networks';
   static const String networksTrashed = '/networks/trashed';
   static String network(int id) => '/networks/$id';
+  static String networkMembers(int id) => '/networks/$id/members';
+  static String networkMemberRoles(int id) => '/networks/$id/members/assignable-roles';
+  static String networkMemberRole(int networkId, int userId) =>
+      '/networks/$networkId/members/$userId/role';
+  static String networkMemberStatus(int networkId, int userId) =>
+      '/networks/$networkId/members/$userId/status';
+  static String networkMember(int networkId, int userId) =>
+      '/networks/$networkId/members/$userId';
   static String networkApprove(int id) => '/networks/$id/approve';
   static String networkReject(int id) => '/networks/$id/reject';
   static String networkRestore(int id) => '/networks/$id/restore';
@@ -99,6 +107,14 @@ abstract final class ApiConstants {
   static const String pos = '/pos';
   static const String posTrashed = '/pos/trashed';
   static String posItem(int id) => '/pos/$id';
+  static String posMembers(int id) => '/pos/$id/members';
+  static String posMemberRoles(int id) => '/pos/$id/members/assignable-roles';
+  static String posMemberRole(int posId, int userId) =>
+      '/pos/$posId/members/$userId/role';
+  static String posMemberStatus(int posId, int userId) =>
+      '/pos/$posId/members/$userId/status';
+  static String posMember(int posId, int userId) =>
+      '/pos/$posId/members/$userId';
   static String posApprove(int id) => '/pos/$id/approve';
   static String posReject(int id) => '/pos/$id/reject';
   static String posRestore(int id) => '/pos/$id/restore';
