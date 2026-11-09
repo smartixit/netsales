@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_coordinator_controller.dart';
@@ -31,6 +32,16 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
     final colors = context.colors;
     final isNetwork = workspace == AppWorkspace.network;
     final badgeColor = isNetwork ? colors.primary : colors.secondary;
+    final workspaceRoles = SessionService.to.currentUser?.workspaceRoles ?? [];
+    final hasNetworkWorkspace = workspaceRoles.any((role) =>
+        role == 'NETWORK_OWNER' ||
+        role == 'NETWORK_USER' ||
+        role == 'NETWORK_ACCOUNTANT');
+    final hasPosWorkspace = workspaceRoles.any((role) =>
+        role == 'POS_AGENT' ||
+        role == 'POS_USER' ||
+        role == 'POS_ACCOUNTANT');
+    final canSwitchWorkspace = hasNetworkWorkspace && hasPosWorkspace;
 
     return AppBar(
       title: Row(
@@ -73,6 +84,24 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         ...?actions,
+        if (canSwitchWorkspace)
+          CustomButton.icon(
+            icon: Icons.swap_horiz_rounded,
+            foregroundColor: colors.primary,
+            tooltip: isNetwork ? 'التبديل إلى مساحة نقطة البيع' : 'التبديل إلى مساحة الشبكة',
+            backgroundColor: Colors.transparent,
+            dimension: 40.r,
+            iconSize: 22.r,
+            onPressed: () async {
+              final target = isNetwork ? AppWorkspace.pos : AppWorkspace.network;
+              await WorkspaceService.to.setActiveWorkspace(target);
+              await Get.offAllNamed<void>(
+                target == AppWorkspace.network
+                    ? AppRoutes.networkWorkspace
+                    : AppRoutes.posWorkspace,
+              );
+            },
+          ),
         CustomButton.icon(
           icon: Icons.devices_rounded,
           foregroundColor: colors.onSurfaceVariant,
