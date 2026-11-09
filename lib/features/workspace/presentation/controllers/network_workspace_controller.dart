@@ -6,7 +6,6 @@ import 'package:netsales/features/commercial/domain/entities/network_entity.dart
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/domain/usecases/get_network_workspace_overview_use_case.dart';
-import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class NetworkWorkspaceController extends GetxController {
   NetworkWorkspaceController({

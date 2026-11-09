@@ -44,7 +44,7 @@ class NetworkWorkspaceDashboard extends GetView<NetworkWorkspaceController> {
         return CustomErrorState.boxed(
           title: 'بيانات لوحة الشبكة غير متاحة',
           subtitle: controller.errorMessage.value ?? 'لم تصل استجابة صالحة من الخادم.',
-          onRetry: controller.loadOverview,
+          onRetry: () => controller.loadOverview(),
         );
       }
       return _DashboardContent(overview: overview);
@@ -193,14 +193,15 @@ class _MetricsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gap = AppBreakpoints.gridGutter(context);
-    final width = MediaQuery.sizeOf(context).width -
-        (AppBreakpoints.screenMargin(context) * 2);
-    final itemWidth = (width - (gap * (columns - 1))) / columns;
-    final metrics = overview.metrics;
-    final tiles = <Widget>[];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final gap = AppBreakpoints.gridGutter(context);
+        final itemWidth =
+            (constraints.maxWidth - (gap * (columns - 1))) / columns;
+        final metrics = overview.metrics;
+        final tiles = <Widget>[];
 
-    if (metrics.containsKey('points_of_sale')) {
+        if (metrics.containsKey('points_of_sale')) {
       tiles.add(_MetricCard(
         icon: Icons.storefront_rounded,
         title: 'نقاط البيع المرتبطة',
@@ -258,10 +259,14 @@ class _MetricsGrid extends StatelessWidget {
         subtitle: 'لا يمتلك حسابك صلاحيات عرض مؤشرات التشغيل في هذه الشبكة.',
       );
     }
-    return Wrap(
-      spacing: gap,
-      runSpacing: gap,
-      children: tiles.map((tile) => SizedBox(width: itemWidth, child: tile)).toList(),
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: tiles
+              .map((tile) => SizedBox(width: itemWidth, child: tile))
+              .toList(growable: false),
+        );
+      },
     );
   }
 }
