@@ -34,10 +34,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         label: 'نقاط البيع',
         icon: Icons.storefront_outlined,
         activeIcon: Icons.storefront_rounded,
-        content: NetworkPosDirectoryScreen(
-          networkId: controller.selectedNetworkId.value,
-          embedded: true,
-        ),
+        content: NetworkPosDirectoryScreen(embedded: true),
       ),
       const WorkspaceNavItem(
         label: 'فريق العمل',

@@ -59,7 +59,7 @@ void main() {
         'period': {'key': '30d'},
         'network': {'network_id': 12, 'network_name': 'شبكة الاختبار'},
         'metrics': {'wallet': null},
-        'recent_pending_requests': [],
+        'recent_pending_requests': <Map<String, dynamic>>[],
       });
 
       expect(model.metrics.containsKey('wallet'), isTrue);
@@ -71,7 +71,7 @@ void main() {
         () => NetworkWorkspaceOverviewModel.fromJson({
           'network': {'network_id': 12, 'network_name': 'شبكة الاختبار'},
           'period': {'key': '30d'},
-          'metrics': {},
+          'metrics': <String, dynamic>{},
         }),
         throwsA(isA<FormatException>()),
       );
@@ -83,7 +83,7 @@ void main() {
           'generated_at': '2026-11-09T10:00:00+03:00',
           'period': {'key': '30d'},
           'network': {'network_id': 12, 'network_name': 'شبكة الاختبار'},
-          'metrics': {'sales': 'not-an-object'},
+          'metrics': <String, dynamic>{'sales': 'not-an-object'},
           'recent_pending_requests': [],
         }),
         throwsA(isA<FormatException>()),
