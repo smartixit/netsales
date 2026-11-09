@@ -74,7 +74,7 @@ class RepaymentAllocationTimeline extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: allocations.length,
-            separatorBuilder: (context, index) => AppSpacing.sm,
+            separatorBuilder: (context, index) => AppSpacing.vSm,
             itemBuilder: (context, index) => _AllocationCard(
               allocation: allocations[index],
               onTap: allocations[index].invoiceId > 0
@@ -199,7 +199,6 @@ class _AllocationCard extends StatelessWidget {
                   ),
                 ],
               ),
-            ],
             AppSpacing.vMd,
             Container(
               width: double.infinity,

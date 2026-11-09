@@ -20,36 +20,40 @@ import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 /// شاشة مراجعة واعتماد طلبات التوريد لمشغلي الشبكة (Network Procurement Review Queue Screen)
 class NetworkSupplyRequestsReviewScreen
     extends GetView<NetworkProcurementReviewController> {
-  const NetworkSupplyRequestsReviewScreen({super.key});
+  const NetworkSupplyRequestsReviewScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return CustomAppScaffold(
-      appBar: AppBar(
-        title: Text(
-          'مراجعة طلبات التوريد الواردة',
-          style: AppTypography.titleMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
+    final content = Column(
+      children: [
+        if (embedded)
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.cardPadding,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'مراجعة طلبات التوريد الواردة',
+                    style: AppTypography.titleMedium.copyWith(color: colors.onSurface),
+                  ),
+                ),
+                CustomButton.icon(
+                  icon: Icons.refresh_rounded,
+                  tooltip: 'تحديث الطلبات',
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: colors.onSurfaceVariant,
+                  onPressed: () => controller.loadRequests(isRefresh: true),
+                ),
+              ],
+            ),
           ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        actions: [
-          CustomButton.icon(
-            icon: Icons.refresh_rounded,
-            tooltip: 'تحديث الطلبات',
-            backgroundColor: Colors.transparent,
-            foregroundColor: colors.onSurfaceVariant,
-            onPressed: () => controller.loadRequests(isRefresh: true),
-          ),
-          AppSpacing.hXs,
-        ],
-      ),
-      body: Column(
-        children: [
           // شريط البحث والفلترة
           Obx(() {
             return ProcurementSearchFilterHeader(
@@ -191,7 +195,33 @@ class NetworkSupplyRequestsReviewScreen
             }),
           ),
         ],
+      );
+
+    if (embedded) return content;
+
+    return CustomAppScaffold(
+      appBar: AppBar(
+        title: Text(
+          'مراجعة طلبات التوريد الواردة',
+          style: AppTypography.titleMedium.copyWith(
+            color: colors.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        actions: [
+          CustomButton.icon(
+            icon: Icons.refresh_rounded,
+            tooltip: 'تحديث الطلبات',
+            backgroundColor: Colors.transparent,
+            foregroundColor: colors.onSurfaceVariant,
+            onPressed: () => controller.loadRequests(isRefresh: true),
+          ),
+          AppSpacing.hXs,
+        ],
       ),
+      body: content,
     );
   }
 }

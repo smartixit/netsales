@@ -16,6 +16,7 @@ class UserModel {
   final String? statusLabel;
   final String? lastLoginAt;
   final RoleModel? role;
+  final List<String> workspaceRoles;
 
   const UserModel({
     required this.userId,
@@ -30,15 +31,31 @@ class UserModel {
     this.statusLabel,
     this.lastLoginAt,
     this.role,
+    this.workspaceRoles = const [],
   });
 
   bool get isSuperAdmin => role?.roleKey == AppRoles.superAdmin;
-  bool get isNetworkOwner => role?.roleKey == AppRoles.networkOwner;
-  bool get isPosAgent => role?.roleKey == AppRoles.posAgent;
+  bool get isNetworkOwner =>
+      role?.roleKey == AppRoles.networkOwner ||
+      workspaceRoles.any((key) => key == AppRoles.networkOwner || key == AppRoles.networkUser || key == 'NETWORK_ACCOUNTANT');
+  bool get isPosAgent =>
+      role?.roleKey == AppRoles.posAgent ||
+      workspaceRoles.any((key) => key == AppRoles.posAgent || key == AppRoles.posUser || key == 'POS_ACCOUNTANT');
+  String? get primaryWorkspaceRoleKey =>
+      role?.roleKey ?? (workspaceRoles.isEmpty ? null : workspaceRoles.first);
   UserStatus get typedStatus => UserStatus.fromWire(status);
   bool get isActive => typedStatus == UserStatus.active;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final rawWorkspaceRoles = json['workspace_roles'];
+    final workspaceRoles = rawWorkspaceRoles is List<dynamic>
+        ? rawWorkspaceRoles
+            .whereType<Map<String, dynamic>>()
+            .map((item) => item['role_key'])
+            .whereType<String>()
+            .toList(growable: false)
+        : const <String>[];
+
     return UserModel(
       userId: json['user_id'] as int? ?? 0,
       roleId: json['role_id'] as int?,
@@ -54,6 +71,7 @@ class UserModel {
       role: json['role'] is Map
           ? RoleModel.fromJson(Map<String, dynamic>.from(json['role'] as Map))
           : null,
+      workspaceRoles: workspaceRoles,
     );
   }
 
@@ -71,6 +89,7 @@ class UserModel {
       'status_label': statusLabel,
       'last_login_at': lastLoginAt,
       'role': role?.toJson(),
+      'workspace_roles': workspaceRoles.map((roleKey) => {'role_key': roleKey}).toList(growable: false),
     };
   }
 }
