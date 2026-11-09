@@ -7,7 +7,6 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
-import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// مركز دخول عمليات المالية في مساحة عمل مزود الشبكة.
