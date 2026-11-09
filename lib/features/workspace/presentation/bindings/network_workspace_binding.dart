@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
+import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
 import 'package:netsales/features/workspace/presentation/bindings/workspace_coordinator_binding.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/data/datasources/network_workspace_remote_data_source.dart';
@@ -37,6 +39,11 @@ class NetworkWorkspaceBinding extends Bindings {
         ),
       );
     }
-    Get.lazyPut<NetworkWorkspaceController>(() => NetworkWorkspaceController());
+    Get.lazyPut<NetworkWorkspaceController>(
+      () => NetworkWorkspaceController(
+        getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
+        getOverviewUseCase: Get.find<GetNetworkWorkspaceOverviewUseCase>(),
+      ),
+    );
   }
 }
