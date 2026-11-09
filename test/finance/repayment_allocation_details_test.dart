@@ -21,6 +21,7 @@ void main() {
             'pos_id': 2,
             'allocated_amount': 200000.00,
             'status': 'COMPLETED',
+            'allocated_at': '2026-11-01 09:00:00',
             'invoice': {
               'invoice_uuid': 'INV-100',
               'invoice_total_amount': 250000.00,
