@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_search_filter_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -68,10 +66,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                   title: 'لا توجد طلبات توريد حالياً',
                   subtitle: 'يمكنك إنشاء طلب كروت جديد من شبكاتك الموردة.',
                   actionLabel: 'طلب توريد جديد',
-                  onAction: () {
-                    controller.initNewOrderForm();
-                    Get.toNamed<void>(AppRoutes.newProcurementOrder);
-                  },
+                  onAction: controller.navigateToNewOrder,
                 ),
               );
             }
@@ -96,9 +91,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                   itemBuilder: (context, index) {
                     if (index == controller.requests.length) {
                       return Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: AppSpacing.sm,
-                        ),
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
                         child: Center(
                           child: SizedBox(
                             width: 24.r,
@@ -115,18 +108,9 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                     return ProcurementRequestCard(
                       request: request,
                       isNetworkView: false,
-                      onTap: () {
-                        Get.toNamed<void>(
-                          AppRoutes.voucherRequestDetails,
-                          arguments: request,
-                        );
-                      },
+                      onTap: () => controller.openRequestDetails(request),
                       onCancel: request.isPending
-                          ? () => ProcurementActionDialogs.showCancelDialog(
-                              requestId: request.requestId,
-                              onConfirm: () =>
-                                  controller.cancelRequest(request.requestId),
-                            )
+                          ? () => controller.promptCancelRequest(request)
                           : null,
                     );
                   },
@@ -163,10 +147,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          controller.initNewOrderForm();
-          Get.toNamed<void>(AppRoutes.newProcurementOrder);
-        },
+        onPressed: controller.navigateToNewOrder,
         backgroundColor: colors.primary,
         foregroundColor: colors.onPrimary,
         icon: const Icon(Icons.add_shopping_cart_rounded),
@@ -212,10 +193,7 @@ class _EmbeddedOrdersHeader extends StatelessWidget {
             text: 'طلب جديد',
             icon: Icons.add_shopping_cart_rounded,
             size: AppButtonSize.small,
-            onPressed: () {
-              controller.initNewOrderForm();
-              Get.toNamed<void>(AppRoutes.newProcurementOrder);
-            },
+            onPressed: controller.navigateToNewOrder,
           ),
           AppSpacing.hXs,
           CustomButton.icon(

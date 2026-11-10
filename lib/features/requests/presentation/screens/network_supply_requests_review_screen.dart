@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_card.dart';
-import 'package:netsales/features/requests/presentation/widgets/network_request_modification_sheet.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_search_filter_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -152,32 +149,15 @@ class NetworkSupplyRequestsReviewScreen
                     return ProcurementRequestCard(
                       request: request,
                       isNetworkView: true,
-                      onTap: () {
-                        Get.toNamed<void>(
-                          AppRoutes.voucherRequestDetails,
-                          arguments: request,
-                        );
-                      },
+                      onTap: () => controller.openRequestDetails(request),
                       onModify: request.isPending
-                          ? () => NetworkRequestModificationSheet.open(request)
+                          ? () => controller.openModificationSheet(request)
                           : null,
                       onApprove: request.isPending
-                          ? () => ProcurementActionDialogs.showApprovalDialog(
-                              requestId: request.requestId,
-                              onConfirm: (note) => controller.approveRequest(
-                                request.requestId,
-                                requestNote: note,
-                              ),
-                            )
+                          ? () => controller.promptApproveRequest(request)
                           : null,
                       onReject: request.isPending
-                          ? () => ProcurementActionDialogs.showRejectionDialog(
-                              requestId: request.requestId,
-                              onConfirm: (reason) => controller.rejectRequest(
-                                request.requestId,
-                                reason,
-                              ),
-                            )
+                          ? () => controller.promptRejectRequest(request)
                           : null,
                     );
                   },

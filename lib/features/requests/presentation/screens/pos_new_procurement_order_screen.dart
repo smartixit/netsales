@@ -449,10 +449,7 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                   loading: controller.isSubmitting.value,
                   onPressed: controller.isSubmitting.value
                       ? null
-                      : () async {
-                          final ok = await controller.submitOrder();
-                          if (ok) Get.back<void>();
-                        },
+                      : controller.submitOrderAndClose,
                 );
               }),
 

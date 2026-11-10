@@ -120,41 +120,36 @@ class ProcurementRequestDetailsScreen
                         color: colors.outlineVariant.withValues(alpha: 0.3),
                       ),
                       AppSpacing.vSm,
-                      _buildInfoRow(
-                        'الشبكة الموردة:',
-                        request.networkName ?? 'شبكة #${request.networkId}',
-                        context,
+                      _RequestInfoRow(
+                        label: 'الشبكة الموردة:',
+                        value:
+                            request.networkName ?? 'شبكة #${request.networkId}',
                       ),
-                      _buildInfoRow(
-                        'نقطة البيع (الوكيل):',
-                        request.posName ?? 'نقطة بيع #${request.posId}',
-                        context,
+                      _RequestInfoRow(
+                        label: 'نقطة البيع (الوكيل):',
+                        value: request.posName ?? 'نقطة بيع #${request.posId}',
                       ),
-                      _buildInfoRow(
-                        'طريقة الدفع:',
-                        EnumPresentationRegistry.resolveSaleType(
+                      _RequestInfoRow(
+                        label: 'طريقة الدفع:',
+                        value: EnumPresentationRegistry.resolveSaleType(
                           request.saleType,
                           serverLabel: request.saleTypeLabel,
                         ).label,
-                        context,
                       ),
                       if (request.requestDate != null)
-                        _buildInfoRow(
-                          'تاريخ تقديم الطلب:',
-                          request.requestDate!,
-                          context,
+                        _RequestInfoRow(
+                          label: 'تاريخ تقديم الطلب:',
+                          value: request.requestDate!,
                         ),
                       if (request.reviewDate != null)
-                        _buildInfoRow(
-                          'تاريخ المراجعة:',
-                          request.reviewDate!,
-                          context,
+                        _RequestInfoRow(
+                          label: 'تاريخ المراجعة:',
+                          value: request.reviewDate!,
                         ),
                       if (request.invoiceId != null)
-                        _buildInfoRow(
-                          'رقم فاتورة المبيعات:',
-                          'فاتورة #${request.invoiceId}',
-                          context,
+                        _RequestInfoRow(
+                          label: 'رقم فاتورة المبيعات:',
+                          value: 'فاتورة #${request.invoiceId}',
                           isHighlight: true,
                         ),
                       if (request.requestNote != null &&
@@ -228,7 +223,7 @@ class ProcurementRequestDetailsScreen
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'إجمالي المبلغ المستحق (خادم النظام):',
+                        'إجمالي المبلغ المستحق:',
                         style: AppTypography.bodyMedium.copyWith(
                           color: colors.onSurface,
                           fontWeight: FontWeight.bold,
@@ -256,15 +251,24 @@ class ProcurementRequestDetailsScreen
     });
   }
 
-  Widget _buildInfoRow(
-    String label,
-    String value,
-    BuildContext context, {
-    bool isHighlight = false,
-  }) {
+}
+
+class _RequestInfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isHighlight;
+
+  const _RequestInfoRow({
+    required this.label,
+    required this.value,
+    this.isHighlight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 3.0),
+      padding: const EdgeInsets.symmetric(vertical: 3.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

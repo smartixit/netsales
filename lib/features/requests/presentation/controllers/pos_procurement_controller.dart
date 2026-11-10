@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
@@ -22,6 +23,7 @@ import 'package:netsales/features/requests/domain/usecases/cancel_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -346,7 +348,9 @@ class PosProcurementController extends GetxController {
       }
 
       availablePackages.assignAll(paginated.items);
-      final initialPkg = availablePackages.isNotEmpty ? availablePackages.first : null;
+      final initialPkg = availablePackages.isNotEmpty
+          ? availablePackages.first
+          : null;
       _setSelectedPackage(initialPkg);
       if (initialPkg != null) {
         setDefaultSheetIfEmpty();
@@ -428,7 +432,8 @@ class PosProcurementController extends GetxController {
       procurementCart.add(line);
       CustomSnackbar.show(
         title: 'أضيفت الباقة إلى الطلب',
-        message: 'تمت إضافة ${package.packageName} إلى سلة التوريد ($voucherCount كرت).',
+        message:
+            'تمت إضافة ${package.packageName} إلى سلة التوريد ($voucherCount كرت).',
         type: SnackType.success,
       );
     } else {
@@ -858,5 +863,33 @@ class PosProcurementController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
     }
+  }
+
+  /// فتح شاشة تفاصيل طلب التوريد
+  Future<void> openRequestDetails(RequestEntity request) async {
+    await Get.toNamed<void>(
+      AppRoutes.voucherRequestDetails,
+      arguments: request,
+    );
+  }
+
+  /// التوجيه لشاشة إنشاء طلب توريد جديد
+  Future<void> navigateToNewOrder() async {
+    initNewOrderForm();
+    await Get.toNamed<void>(AppRoutes.newProcurementOrder);
+  }
+
+  /// حوار إلغاء طلب التوريد
+  Future<void> promptCancelRequest(RequestEntity request) async {
+    await ProcurementActionDialogs.showCancelDialog(
+      requestId: request.requestId,
+      onConfirm: () => cancelRequest(request.requestId),
+    );
+  }
+
+  /// تقديم طلب التوريد والعودة في حال النجاح
+  Future<void> submitOrderAndClose() async {
+    final ok = await submitOrder();
+    if (ok) Get.back<void>();
   }
 }

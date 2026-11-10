@@ -29,7 +29,9 @@ class NotificationBadgeButton extends StatelessWidget {
       onPressed:
           onPressed ??
           () {
-            if (Get.currentRoute != AppRoutes.notifications) {
+            if (Get.isRegistered<NotificationController>()) {
+              NotificationController.to.openNotificationCenter();
+            } else if (Get.currentRoute != AppRoutes.notifications) {
               Get.toNamed<dynamic>(AppRoutes.notifications);
             }
           },

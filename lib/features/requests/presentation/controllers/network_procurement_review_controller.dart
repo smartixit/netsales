@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
@@ -14,7 +15,10 @@ import 'package:netsales/features/requests/domain/usecases/approve_request_use_c
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
+import 'package:netsales/features/requests/presentation/widgets/network_request_modification_sheet.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم مراجعة واعتماد طلبات التوريد لمشغلي الشبكة (Network Procurement Review Controller)
@@ -542,5 +546,61 @@ class NetworkProcurementReviewController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
     }
+  }
+
+  /// فتح تفاصيل طلب التوريد
+  Future<void> openRequestDetails(RequestEntity request) async {
+    await Get.toNamed<void>(
+      AppRoutes.voucherRequestDetails,
+      arguments: request,
+    );
+  }
+
+  /// فتح شاشة تعديل طلب التوريد
+  Future<void> openModificationSheet(RequestEntity request) async {
+    await NetworkRequestModificationSheet.open(request);
+  }
+
+  /// حوار اعتماد طلب التوريد
+  Future<void> promptApproveRequest(RequestEntity request) async {
+    await ProcurementActionDialogs.showApprovalDialog(
+      requestId: request.requestId,
+      onConfirm: (note) => approveRequest(
+        request.requestId,
+        requestNote: note,
+      ),
+    );
+  }
+
+  /// حوار رفض طلب التوريد
+  Future<void> promptRejectRequest(RequestEntity request) async {
+    await ProcurementActionDialogs.showRejectionDialog(
+      requestId: request.requestId,
+      onConfirm: (reason) => rejectRequest(
+        request.requestId,
+        reason,
+      ),
+    );
+  }
+
+  /// تأكيد واعتماد التعديل بعد المعاينة
+  Future<void> confirmAndApproveModification() async {
+    final preview = currentPreview.value;
+    if (preview == null || !preview.hasModifications) return;
+
+    await CustomBottomSheet.showConfirmation<void>(
+      title: 'تأكيد اعتماد التعديل',
+      message:
+          'سيتم اعتماد البنود المعروضة في آخر معاينة وإنشاء الفاتورة وفق أسعار النظام المعتمدة. لا يمكن تعديل الطلب بعد اعتماده.',
+      confirmLabel: 'اعتماد وإنشاء الفاتورة',
+      onConfirm: () async {
+        final success = await approvePreview(
+          requestNote: modificationNoteController.text.trim().isEmpty
+              ? null
+              : modificationNoteController.text.trim(),
+        );
+        if (success) Get.back<void>();
+      },
+    );
   }
 }

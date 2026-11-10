@@ -43,10 +43,10 @@ class NetworkRequestModificationSheet
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle(context, 'بنود الطلب المقترحة'),
+          const _SectionTitle('بنود الطلب المقترحة'),
           AppSpacing.vSm,
           if (lines.isEmpty)
-            _infoPanel(context, 'يجب أن يحتوي الطلب على باقة واحدة على الأقل.'),
+            const _InfoPanel('يجب أن يحتوي الطلب على باقة واحدة على الأقل.'),
           ...lines.map((line) {
             final package = controller.availablePackages.firstWhereOrNull(
               (item) => item.packageId == line.packageId,
@@ -199,7 +199,7 @@ class NetworkRequestModificationSheet
             );
           }),
           AppSpacing.vMd,
-          _sectionTitle(context, 'إضافة باقة من كتالوج الشبكة'),
+          const _SectionTitle('إضافة باقة من كتالوج الشبكة'),
           AppSpacing.vSm,
           if (controller.isLoadingPackages.value)
             const Center(child: CircularProgressIndicator.adaptive())
@@ -243,22 +243,29 @@ class NetworkRequestModificationSheet
                   ),
                 ),
           AppSpacing.vMd,
-          _sectionTitle(context, 'معاينة الخادم'),
+          const _SectionTitle('معاينة الأسعار'),
           AppSpacing.vXs,
-          _infoPanel(
-            context,
-            'المعاينة لا تغيّر الطلب ولا تنشئ فاتورة. الأسعار والخصومات والإجماليات يحسبها Laravel.',
+          const _InfoPanel(
+            'المعاينة لا تغيّر الطلب ولا تنشئ فاتورة. يتم احتساب الأسعار والخصومات والإجماليات وفق قواعد التسعير المعتمدة.',
           ),
           if (preview != null) ...[
             AppSpacing.vMd,
-            _totalRow(context, 'الإجمالي الأصلي', preview.originalTotalAmount),
-            _totalRow(context, 'الإجمالي قبل الخصم', preview.grossTotalAmount),
-            _totalRow(context, 'إجمالي الخصم', preview.totalDiscountAmount),
+            _TotalRow(
+              label: 'الإجمالي الأصلي',
+              amount: preview.originalTotalAmount,
+            ),
+            _TotalRow(
+              label: 'الإجمالي قبل الخصم',
+              amount: preview.grossTotalAmount,
+            ),
+            _TotalRow(
+              label: 'إجمالي الخصم',
+              amount: preview.totalDiscountAmount,
+            ),
             Divider(color: colors.outlineVariant.withValues(alpha: 0.4)),
-            _totalRow(
-              context,
-              'الإجمالي المقترح',
-              preview.previewTotalAmount,
+            _TotalRow(
+              label: 'الإجمالي المقترح',
+              amount: preview.previewTotalAmount,
               emphasize: true,
             ),
             AppSpacing.vSm,
@@ -313,66 +320,93 @@ class NetworkRequestModificationSheet
               ),
             ],
             if (!preview.hasModifications)
-              _infoPanel(context, 'لم يتم اكتشاف أي تغيير عن الطلب الأصلي.'),
+              const _InfoPanel('لم يتم اكتشاف أي تغيير عن الطلب الأصلي.'),
           ],
         ],
       );
     });
   }
+}
 
-  Widget _sectionTitle(BuildContext context, String title) => Text(
-    title,
-    style: AppTypography.titleSmall.copyWith(
-      color: context.colors.onSurface,
-      fontWeight: FontWeight.bold,
-    ),
-  );
+class _SectionTitle extends StatelessWidget {
+  final String title;
 
-  Widget _infoPanel(BuildContext context, String text) => Container(
-    width: double.infinity,
-    padding: EdgeInsets.all(AppSpacing.md),
-    decoration: BoxDecoration(
-      color: context.colors.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(AppRadius.md),
-    ),
-    child: Text(
-      text,
-      style: AppTypography.bodySmall.copyWith(
-        color: context.colors.onSurfaceVariant,
+  const _SectionTitle(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: AppTypography.titleSmall.copyWith(
+        color: context.colors.onSurface,
+        fontWeight: FontWeight.bold,
       ),
-    ),
-  );
+    );
+  }
+}
 
-  Widget _totalRow(
-    BuildContext context,
-    String label,
-    double amount, {
-    bool emphasize = false,
-  }) => Padding(
-    padding: EdgeInsets.symmetric(vertical: AppSpacing.xxs),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: AppTypography.bodySmall.copyWith(
-            color: context.colors.onSurfaceVariant,
+class _InfoPanel extends StatelessWidget {
+  final String text;
+
+  const _InfoPanel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Text(
+        text,
+        style: AppTypography.bodySmall.copyWith(
+          color: context.colors.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
+class _TotalRow extends StatelessWidget {
+  final String label;
+  final double amount;
+  final bool emphasize;
+
+  const _TotalRow({
+    required this.label,
+    required this.amount,
+    this.emphasize = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: AppTypography.bodySmall.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
           ),
-        ),
-        Text(
-          AmountFormatter.format(amount.toString()),
-          style:
-              (emphasize ? AppTypography.titleMedium : AppTypography.bodyMedium)
-                  .copyWith(
-                    color: emphasize
-                        ? context.colors.primary
-                        : context.colors.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-        ),
-      ],
-    ),
-  );
+          Text(
+            AmountFormatter.format(amount.toString()),
+            style:
+                (emphasize ? AppTypography.titleMedium : AppTypography.bodyMedium)
+                    .copyWith(
+                      color: emphasize ? colors.primary : colors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _ModificationFooter extends GetView<NetworkProcurementReviewController> {
@@ -408,25 +442,7 @@ class _ModificationFooter extends GetView<NetworkProcurementReviewController> {
             enabled: canApprove,
             onPressed: !canApprove
                 ? null
-                : () async {
-                    await CustomBottomSheet.showConfirmation<void>(
-                      title: 'تأكيد اعتماد التعديل',
-                      message: 'سيتم اعتماد البنود المعروضة في آخر معاينة وإنشاء الفاتورة وفق أسعار الخادم. لا يمكن تعديل الطلب بعد اعتماده.',
-                      confirmLabel: 'اعتماد وإنشاء الفاتورة',
-                      onConfirm: () async {
-                        final success = await controller.approvePreview(
-                          requestNote:
-                              controller.modificationNoteController.text
-                                  .trim()
-                                  .isEmpty
-                              ? null
-                              : controller.modificationNoteController.text
-                                    .trim(),
-                        );
-                        if (success) Get.back<void>();
-                      },
-                    );
-                  },
+                : controller.confirmAndApproveModification,
           ),
         ),
       ],

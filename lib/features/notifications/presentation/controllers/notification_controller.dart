@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/notifications/domain/entities/notification_item_entity.dart';
 import 'package:netsales/features/notifications/domain/usecases/get_my_notifications_use_case.dart';
 import 'package:netsales/features/notifications/domain/usecases/get_unread_notifications_count_use_case.dart';
@@ -234,6 +235,13 @@ class NotificationController extends GetxController {
       );
     } finally {
       isMarkingAllRead.value = false;
+    }
+  }
+
+  /// فتح شاشة مركز الإشعارات
+  Future<void> openNotificationCenter() async {
+    if (Get.currentRoute != AppRoutes.notifications) {
+      await Get.toNamed<dynamic>(AppRoutes.notifications);
     }
   }
 
