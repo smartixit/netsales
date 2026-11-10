@@ -4,7 +4,6 @@ import 'package:netsales/core/enums/device_type.dart';
 import 'package:netsales/core/enums/invoice_payment_status.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/enums/notification_type.dart';
-import 'package:netsales/core/enums/provider_subscription_status.dart';
 import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
@@ -125,7 +124,7 @@ void main() {
       expect(InvoicePaymentStatus.fromWire(null), InvoicePaymentStatus.unknown);
     });
 
-    test('WalletOperationType, ProviderSubscriptionStatus, and BackupStatus parse exact wire values', () {
+    test('WalletOperationType and BackupStatus parse exact wire values', () {
       expect(
         WalletOperationType.fromWire('DEPOSIT'),
         WalletOperationType.deposit,
@@ -137,27 +136,6 @@ void main() {
       expect(
         WalletOperationType.fromWire('deposit'),
         WalletOperationType.unknown,
-      );
-
-      expect(
-        ProviderSubscriptionStatus.fromWire('ACTIVE'),
-        ProviderSubscriptionStatus.active,
-      );
-      expect(
-        ProviderSubscriptionStatus.fromWire('QUEUED'),
-        ProviderSubscriptionStatus.queued,
-      );
-      expect(
-        ProviderSubscriptionStatus.fromWire('EXPIRED'),
-        ProviderSubscriptionStatus.expired,
-      );
-      expect(
-        ProviderSubscriptionStatus.fromWire('CANCELLED'),
-        ProviderSubscriptionStatus.cancelled,
-      );
-      expect(
-        ProviderSubscriptionStatus.fromWire('SUSPENDED'),
-        ProviderSubscriptionStatus.suspended,
       );
 
       expect(BackupStatus.fromWire('QUEUED'), BackupStatus.queued);

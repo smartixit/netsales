@@ -4,7 +4,6 @@ import 'package:netsales/core/enums/device_type.dart';
 import 'package:netsales/core/enums/invoice_payment_status.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/enums/membership_status.dart';
-import 'package:netsales/core/enums/provider_subscription_status.dart';
 import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
@@ -383,55 +382,7 @@ class EnumPresentationRegistry {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // 10. اشتراك المزود بالباقات (ProviderSubscriptionStatus)
-  // ──────────────────────────────────────────────────────────────────────────
-  static EnumPresentation resolveProviderSubscriptionStatus(
-    ProviderSubscriptionStatus status, {
-    String? serverLabel,
-  }) {
-    final label = _effectiveLabel(serverLabel, switch (status) {
-      ProviderSubscriptionStatus.active => 'نشط',
-      ProviderSubscriptionStatus.queued => 'قيد الانتظار',
-      ProviderSubscriptionStatus.expired => 'منتهي',
-      ProviderSubscriptionStatus.cancelled => 'ملغي',
-      ProviderSubscriptionStatus.suspended => 'معلق',
-      ProviderSubscriptionStatus.unknown => 'حالة غير معروفة',
-    });
-
-    return switch (status) {
-      ProviderSubscriptionStatus.active => EnumPresentation(
-        label: label,
-        tone: SemanticTone.success,
-        icon: Icons.verified_rounded,
-      ),
-      ProviderSubscriptionStatus.queued => EnumPresentation(
-        label: label,
-        tone: SemanticTone.info,
-        icon: Icons.schedule_rounded,
-      ),
-      ProviderSubscriptionStatus.expired => EnumPresentation(
-        label: label,
-        tone: SemanticTone.neutral,
-        icon: Icons.history_rounded,
-      ),
-      ProviderSubscriptionStatus.cancelled => EnumPresentation(
-        label: label,
-        tone: SemanticTone.neutral,
-        icon: Icons.cancel_outlined,
-      ),
-      ProviderSubscriptionStatus.suspended => EnumPresentation(
-        label: label,
-        tone: SemanticTone.danger,
-        icon: Icons.pause_circle_filled_rounded,
-      ),
-      ProviderSubscriptionStatus.unknown => EnumPresentation.unknown(
-        fallbackLabel: label,
-      ),
-    };
-  }
-
-  // ──────────────────────────────────────────────────────────────────────────
-  // 11. النسخ الاحتياطي (BackupStatus)
+  // 10. النسخ الاحتياطي (BackupStatus)
   // ──────────────────────────────────────────────────────────────────────────
   static EnumPresentation resolveBackupStatus(
     BackupStatus status, {

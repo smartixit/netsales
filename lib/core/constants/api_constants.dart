@@ -293,29 +293,6 @@ abstract final class ApiConstants {
   static const String expensesBatchForceDelete = '/expenses/batch-force-delete';
 
   // ==========================================================================
-  // 16. باقات الاشتراك السحابية لمزودي الشبكات (Subscription Plans)
-  // ==========================================================================
-  static const String subscriptionPlans = '/subscription-plans';
-  static const String subscriptionPlansTrashed = '/subscription-plans/trashed';
-  static String subscriptionPlan(int id) => '/subscription-plans/$id';
-  static String subscriptionPlanToggleStatus(int id) =>
-      '/subscription-plans/$id/toggle-status';
-  static String subscriptionPlanAttachFeature(int id) =>
-      '/subscription-plans/$id/features';
-  static String subscriptionPlanDetachFeature(int id, int featureId) =>
-      '/subscription-plans/$id/features/$featureId';
-  static String subscriptionPlanRestore(int id) =>
-      '/subscription-plans/$id/restore';
-  static String subscriptionPlanForceDelete(int id) =>
-      '/subscription-plans/$id/force';
-  static const String subscriptionPlansBatchDelete =
-      '/subscription-plans/batch-delete';
-  static const String subscriptionPlansBatchRestore =
-      '/subscription-plans/batch-restore';
-  static const String subscriptionPlansBatchForceDelete =
-      '/subscription-plans/batch-force-delete';
-
-  // ==========================================================================
   // 17. كتالوج ميزات النظام (System Features)
   // ==========================================================================
   static const String features = '/features';
@@ -343,47 +320,6 @@ abstract final class ApiConstants {
   static const String bankAccountsBatchRestore = '/bank-accounts/batch-restore';
   static const String bankAccountsBatchForceDelete =
       '/bank-accounts/batch-force-delete';
-
-  // ==========================================================================
-  // 19. طلبات الاشتراك والترقية (Subscription Plan Requests)
-  // ==========================================================================
-  static const String subscriptionPlanRequests = '/subscription-plan-requests';
-  static const String subscriptionPlanRequestsTrashed =
-      '/subscription-plan-requests/trashed';
-  static String subscriptionPlanRequest(int id) =>
-      '/subscription-plan-requests/$id';
-  static String subscriptionPlanRequestApprove(int id) =>
-      '/subscription-plan-requests/$id/approve';
-  static String subscriptionPlanRequestReject(int id) =>
-      '/subscription-plan-requests/$id/reject';
-  static String subscriptionPlanRequestCancel(int id) =>
-      '/subscription-plan-requests/$id/cancel';
-  static String subscriptionPlanRequestRestore(int id) =>
-      '/subscription-plan-requests/$id/restore';
-  static String subscriptionPlanRequestForceDelete(int id) =>
-      '/subscription-plan-requests/$id/force';
-  static const String subscriptionPlanRequestsBatchDelete =
-      '/subscription-plan-requests/batch-delete';
-  static const String subscriptionPlanRequestsBatchRestore =
-      '/subscription-plan-requests/batch-restore';
-  static const String subscriptionPlanRequestsBatchForceDelete =
-      '/subscription-plan-requests/batch-force-delete';
-
-  // ==========================================================================
-  // 20. اشتراكات مزودي الشبكات وتتبع الحصص (Provider Subscriptions & Feature Quotas)
-  // ==========================================================================
-  static const String providerSubscriptions = '/provider-subscriptions';
-  static String providerSubscription(int id) => '/provider-subscriptions/$id';
-  static String providerSubscriptionActiveForNetwork(int networkId) =>
-      '/provider-subscriptions/network/$networkId/active';
-  static String providerSubscriptionConsumptions(int id) =>
-      '/provider-subscriptions/$id/consumptions';
-  static String providerSubscriptionExtend(int id) =>
-      '/provider-subscriptions/$id/extend';
-  static String providerSubscriptionConsume(int networkId) =>
-      '/provider-subscriptions/network/$networkId/consume';
-  static String providerSubscriptionActivateEarly(int networkId) =>
-      '/provider-subscriptions/network/$networkId/activate-early';
 
   // ==========================================================================
   // 21. تذاكر الدعم الفني والمراسلات (Support Tickets & Communications)

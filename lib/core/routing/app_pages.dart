@@ -52,8 +52,6 @@ import 'package:netsales/features/finance/presentation/screens/repayment_details
 import 'package:netsales/features/finance/presentation/screens/repayment_history_screen.dart';
 import 'package:netsales/features/notifications/presentation/bindings/notification_binding.dart';
 import 'package:netsales/features/notifications/presentation/screens/notification_center_screen.dart';
-import 'package:netsales/features/subscription/presentation/bindings/network_subscription_binding.dart';
-import 'package:netsales/features/subscription/presentation/screens/network_subscription_screen.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/welcome_binding.dart';
 import 'package:netsales/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -220,16 +218,6 @@ abstract final class AppPages {
       name: AppRoutes.notifications,
       page: () => const NotificationCenterScreen(),
       binding: NotificationBinding(),
-      middlewares: [AuthGuard()],
-    ),
-
-    // ========================================================================
-    // 5.2 مسار اشتراك الشبكة وتتبع الحصص (Network Subscription & Quotas)
-    // ========================================================================
-    GetPage(
-      name: AppRoutes.networkSubscription,
-      page: () => const NetworkSubscriptionScreen(),
-      binding: NetworkSubscriptionBinding(),
       middlewares: [AuthGuard()],
     ),
 
