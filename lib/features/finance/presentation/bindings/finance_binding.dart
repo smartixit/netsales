@@ -21,12 +21,14 @@ import 'package:netsales/features/finance/domain/usecases/transfer_pos_to_networ
 import 'package:netsales/features/finance/domain/usecases/update_pos_credit_limit_use_case.dart';
 import 'package:netsales/features/finance/domain/usecases/withdraw_network_wallet_use_case.dart';
 import 'package:netsales/features/finance/domain/usecases/withdraw_pos_wallet_use_case.dart';
+import 'package:netsales/features/finance/presentation/controllers/manual_wallet_transaction_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_transfer_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_debt_ledger_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_collection_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_history_controller.dart';
+import 'package:netsales/features/finance/presentation/controllers/update_pos_credit_limit_controller.dart';
 
 class FinanceBinding extends Bindings {
   @override
@@ -213,6 +215,23 @@ class FinanceBinding extends Bindings {
         transferPosToNetworkUseCase:
             Get.find<TransferPosToNetworkUseCase>(),
         getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
+      ),
+      fenix: true,
+    );
+
+    Get.lazyPut<UpdatePosCreditLimitController>(
+      () => UpdatePosCreditLimitController(
+        updatePosCreditLimitUseCase: Get.find<UpdatePosCreditLimitUseCase>(),
+      ),
+      fenix: true,
+    );
+
+    Get.lazyPut<ManualWalletTransactionController>(
+      () => ManualWalletTransactionController(
+        depositPosWalletUseCase: Get.find<DepositPosWalletUseCase>(),
+        withdrawPosWalletUseCase: Get.find<WithdrawPosWalletUseCase>(),
+        depositNetworkWalletUseCase: Get.find<DepositNetworkWalletUseCase>(),
+        withdrawNetworkWalletUseCase: Get.find<WithdrawNetworkWalletUseCase>(),
       ),
       fenix: true,
     );

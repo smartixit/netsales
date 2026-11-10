@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
@@ -61,6 +62,13 @@ class PosDebtLedgerController extends GetxController {
       networkNextCursor.value?.trim().isNotEmpty ?? false;
   bool get hasSelectedScope =>
       selectedPosId.value != null && selectedNetworkId.value != null;
+
+  void openInvoiceDetails(InvoiceEntity invoice) {
+    Get.toNamed<void>(
+      AppRoutes.purchaseInvoiceDetails,
+      arguments: invoice,
+    );
+  }
 
   PosEntity? get selectedPos {
     final id = selectedPosId.value;

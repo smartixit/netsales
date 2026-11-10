@@ -17,6 +17,8 @@ import 'package:netsales/features/expenses/domain/usecases/delete_expense_use_ca
 import 'package:netsales/features/expenses/domain/usecases/get_expense_details_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/get_expenses_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/update_expense_use_case.dart';
+import 'package:netsales/features/expenses/presentation/screens/network_expense_details_screen.dart';
+import 'package:netsales/features/expenses/presentation/screens/network_expense_form_screen.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -255,6 +257,33 @@ class NetworkOperatingExpensesController extends GetxController {
   }
 
   // ── تهيئة وإدارة نموذج المصروفات التفاعلي بالكامل (GetX) ──
+  void navigateToCreateForm() {
+    prepareCreateForm();
+    Get.to<void>(() => const NetworkExpenseFormScreen());
+  }
+
+  void navigateToEditForm(ExpenseEntity expense) {
+    prepareEditForm(expense);
+    Get.to<void>(() => const NetworkExpenseFormScreen());
+  }
+
+  void navigateToDetails(int expenseId) {
+    loadDetails(expenseId);
+    Get.to<void>(
+      () => NetworkExpenseDetailsScreen(expenseId: expenseId),
+    );
+  }
+
+  Future<void> saveExpenseAndClose() async {
+    if (formKey.currentState != null && !formKey.currentState!.validate()) {
+      return;
+    }
+    final success = await submitExpenseForm();
+    if (success) {
+      Get.back<void>();
+    }
+  }
+
   void prepareCreateForm() {
     editingExpenseId.value = null;
     formDate.value = DateTime.now();

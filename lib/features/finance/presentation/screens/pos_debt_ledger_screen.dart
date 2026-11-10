@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_debt_ledger_controller.dart';
@@ -170,12 +169,8 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                                 return InvoiceCard(
                                   invoice: invoice,
                                   isNetworkView: false,
-                                  onTap: () {
-                                    Get.toNamed<void>(
-                                      AppRoutes.purchaseInvoiceDetails,
-                                      arguments: invoice,
-                                    );
-                                  },
+                                  onTap: () =>
+                                      controller.openInvoiceDetails(invoice),
                                 );
                               },
                             ),

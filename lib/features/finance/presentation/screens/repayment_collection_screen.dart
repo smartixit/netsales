@@ -219,9 +219,7 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                   RepaymentPaymentMethodSelector(
                     selectedMethod: controller.selectedMethod.value,
                     enabled: !isSubmitting,
-                    onChanged: (method) {
-                      controller.selectedMethod.value = method;
-                    },
+                    onChanged: controller.selectPaymentMethod,
                   ),
                   AppSpacing.vMd,
                   CustomTextField(
@@ -261,14 +259,7 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                 icon: Icons.check_circle_outline,
                 loading: controller.isSubmitting.value,
                 enabled: !controller.isSubmitting.value,
-                onPressed: () async {
-                  final ok = await controller.submitRepayment();
-                  if (ok) {
-                    controller.amountController.clear();
-                    controller.refController.clear();
-                    controller.notesController.clear();
-                  }
-                },
+                onPressed: controller.submitRepayment,
               ),
             ),
           ],

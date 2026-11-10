@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/expenses/presentation/controllers/network_operating_expenses_controller.dart';
-import 'package:netsales/features/expenses/presentation/screens/network_expense_details_screen.dart';
-import 'package:netsales/features/expenses/presentation/screens/network_expense_form_screen.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_card.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_network_scope_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -29,10 +27,7 @@ class NetworkOperatingExpensesScreen
             child: CustomButton.primary(
               text: 'مصروف جديد',
               prefix: Icons.add_rounded,
-              onPressed: () {
-                controller.prepareCreateForm();
-                Get.to<void>(() => const NetworkExpenseFormScreen());
-              },
+              onPressed: controller.navigateToCreateForm,
             ),
           ),
       ],
@@ -98,10 +93,7 @@ class NetworkOperatingExpensesScreen
                     actionLabel:
                         controller.canCreate ? 'تسجيل أول مصروف' : null,
                     onAction: controller.canCreate
-                        ? () {
-                            controller.prepareCreateForm();
-                            Get.to<void>(() => const NetworkExpenseFormScreen());
-                          }
+                        ? controller.navigateToCreateForm
                         : null,
                   );
                 }
@@ -142,14 +134,8 @@ class NetworkOperatingExpensesScreen
                         final expense = controller.expenses[index];
                         return ExpenseCard(
                           expense: expense,
-                          onTap: () {
-                            controller.loadDetails(expense.expenseId);
-                            Get.to<void>(
-                              () => NetworkExpenseDetailsScreen(
-                                expenseId: expense.expenseId,
-                              ),
-                            );
-                          },
+                          onTap: () =>
+                              controller.navigateToDetails(expense.expenseId),
                           onDelete: controller.canDelete
                               ? () => controller.confirmAndDeleteExpense(
                                     expense.expenseId,

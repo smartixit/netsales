@@ -115,8 +115,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _buildInfoRow(
-                    context,
+                  _NetworkPosInfoRow(
                     icon: Icons.cell_tower_rounded,
                     label: 'اسم الشبكة:',
                     value: preview.networkName,
@@ -125,8 +124,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                   if (preview.networkPhone != null &&
                       preview.networkPhone!.isNotEmpty) ...[
                     AppSpacing.vSm,
-                    _buildInfoRow(
-                      context,
+                    _NetworkPosInfoRow(
                       icon: Icons.phone_outlined,
                       label: 'رقم هاتف الشبكة:',
                       value: preview.networkPhone!,
@@ -134,8 +132,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                   ],
                   if (preview.governorateName != null) ...[
                     AppSpacing.vSm,
-                    _buildInfoRow(
-                      context,
+                    _NetworkPosInfoRow(
                       icon: Icons.location_on_outlined,
                       label: 'المحافظة والمديرية:',
                       value:
@@ -143,8 +140,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                     ),
                   ],
                   AppSpacing.vSm,
-                  _buildInfoRow(
-                    context,
+                  _NetworkPosInfoRow(
                     icon: Icons.timer_outlined,
                     label: 'صلاحية الدعوة:',
                     value: formattedExpiry,
@@ -216,13 +212,23 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-    bool isBold = false,
-  }) {
+}
+
+class _NetworkPosInfoRow extends StatelessWidget {
+  const _NetworkPosInfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.isBold = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isBold;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     return Row(
       children: [

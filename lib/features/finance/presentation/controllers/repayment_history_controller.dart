@@ -1,11 +1,18 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/utils/idempotency_key_generator.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/utils/idempotency_key_generator.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
 import 'package:netsales/features/finance/domain/usecases/repayment_use_cases.dart';
+import 'package:netsales/features/finance/presentation/screens/repayment_details_screen.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/dialogs/custom_dialog.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class RepaymentHistoryController extends GetxController {
@@ -38,6 +45,79 @@ class RepaymentHistoryController extends GetxController {
 
   bool get hasMore => nextCursor.value?.trim().isNotEmpty ?? false;
   bool get hasSelectedNetwork => selectedNetworkId.value != null;
+
+  bool canReverseRepayment(
+    PosRepaymentEntity item, {
+    required bool isNetworkView,
+  }) {
+    if (!isNetworkView || !item.isCompleted) return false;
+    final permissions = PermissionService.to;
+    return permissions.hasAnyRole(
+          [AppRoles.networkOwner, AppRoles.superAdmin],
+        ) ||
+        permissions.can(AppPermissions.posWalletsManage);
+  }
+
+  void openRepaymentDetails(
+    PosRepaymentEntity repayment, {
+    required bool isNetworkView,
+  }) {
+    Get.to<void>(
+      () => RepaymentDetailsScreen(
+        repayment: repayment,
+        isNetworkView: isNetworkView,
+      ),
+    );
+  }
+
+  Future<void> requestReversal(PosRepaymentEntity repayment) async {
+    final reasonController = TextEditingController();
+    try {
+      final confirmed = await CustomDialog.show(
+        type: DialogType.warning,
+        title: 'تأكيد عكس سند السداد',
+        message:
+            'سيُرسل طلب العكس إلى الخادم ليعيد تقييم التسويات والقيود المرتبطة بالسند. لا يمكن تنفيذ هذا الإجراء دون سبب موثق.',
+        content: Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: CustomTextField(
+            controller: reasonController,
+            label: 'سبب عكس السند',
+            hint: 'اكتب سبباً واضحاً للعكس',
+            minLines: 2,
+            maxLines: 4,
+            maxLength: 500,
+            textInputAction: TextInputAction.newline,
+            isRequired: true,
+          ),
+        ),
+        confirmLabel: 'تأكيد العكس',
+        cancelLabel: 'الاحتفاظ بالسند',
+      );
+
+      if (confirmed != true) return;
+
+      final reason = reasonController.text.trim();
+      if (reason.length < 3 || reason.length > 500) {
+        CustomSnackbar.show(
+          title: 'سبب العكس مطلوب',
+          message: 'اكتب سبباً من 3 إلى 500 حرف قبل تأكيد العملية.',
+          type: SnackType.warning,
+        );
+        return;
+      }
+
+      final reversed = await reverseRepayment(
+        repayment.repaymentId,
+        reason,
+      );
+      if (reversed) {
+        Get.back<void>();
+      }
+    } finally {
+      reasonController.dispose();
+    }
+  }
 
   NetworkEntity? get selectedNetwork {
     final id = selectedNetworkId.value;

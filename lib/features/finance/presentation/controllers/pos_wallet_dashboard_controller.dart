@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
+import 'package:netsales/features/finance/presentation/widgets/manual_wallet_transaction_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class PosWalletDashboardController extends GetxController {
@@ -36,6 +41,30 @@ class PosWalletDashboardController extends GetxController {
       walletsNextCursor.value?.trim().isNotEmpty ?? false;
 
   bool get hasMoreLogs => nextCursor.value?.trim().isNotEmpty ?? false;
+
+  bool get canManage {
+    final wallet = selectedWallet.value;
+    if (wallet == null) return false;
+    final permissions = PermissionService.to;
+    return permissions.hasRole(AppRoles.networkOwner) ||
+        permissions.can(AppPermissions.posWalletsCreate) ||
+        permissions.can(AppPermissions.posWalletsEdit);
+  }
+
+  void openManualAdjustmentSheet() {
+    final wallet = selectedWallet.value;
+    if (wallet == null) return;
+    unawaited(
+      ManualWalletTransactionSheet.show(
+        walletId: wallet.walletId,
+        accountName:
+            wallet.posName ?? 'محفظة نقطة البيع #${wallet.posId}',
+        currentBalance: wallet.walletBalance,
+        isPosWallet: true,
+        onSuccess: loadWallets,
+      ),
+    );
+  }
 
   bool _isAccessUnavailable(AppException error) {
     final message = error.message.toLowerCase();

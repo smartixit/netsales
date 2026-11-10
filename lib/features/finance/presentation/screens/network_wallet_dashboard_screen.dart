@@ -1,23 +1,16 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
-import 'package:netsales/core/constants/app_permissions.dart';
-import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
-import 'package:netsales/features/finance/presentation/controllers/network_wallet_transfer_controller.dart';
-import 'package:netsales/features/finance/presentation/widgets/manual_wallet_transaction_sheet.dart';
 import 'package:netsales/features/finance/presentation/widgets/network_wallet_log_item_row.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_selector_skeleton.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_log_entry_skeleton.dart';
-import 'package:netsales/features/finance/presentation/widgets/network_wallet_transfer_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -51,20 +44,9 @@ class NetworkWalletDashboardScreen
                 ),
               ),
               AppSpacing.vSm,
-              _buildWalletSelector(context),
+              _NetworkWalletSelector(controller: controller),
               Obx(() {
-                final wallet = controller.selectedWallet.value;
-                final permissions = PermissionService.to;
-                final isPlatformActor = permissions.hasRole(
-                  AppRoles.superAdmin,
-                );
-                final canTransfer =
-                    wallet != null &&
-                    wallet.status &&
-                    !isPlatformActor &&
-                    (permissions.hasRole(AppRoles.networkOwner) ||
-                        permissions.can(AppPermissions.posWalletsCreate));
-                if (!canTransfer) return const SizedBox.shrink();
+                if (!controller.canTransfer) return const SizedBox.shrink();
 
                 return Padding(
                   padding: EdgeInsets.only(top: AppSpacing.sm),
@@ -74,38 +56,14 @@ class NetworkWalletDashboardScreen
                         text: 'تحويل رصيد إلى نقطة بيع',
                         prefix: Icons.swap_horiz_rounded,
                         width: double.infinity,
-                        onPressed: () {
-                          final transferController =
-                              Get.find<NetworkWalletTransferController>();
-                          unawaited(transferController.initialize(wallet));
-                          Get.bottomSheet<void>(
-                            const NetworkWalletTransferSheet(),
-                            isScrollControlled: true,
-                            isDismissible: false,
-                            enableDrag: false,
-                            backgroundColor: Colors.transparent,
-                          );
-                        },
+                        onPressed: controller.openTransferSheet,
                       ),
                       AppSpacing.vXs,
                       CustomButton.outline(
                         text: 'إدراج قيد مالي مباشر بمحفظة الشبكة',
                         prefix: Icons.account_balance_wallet_outlined,
                         width: double.infinity,
-                        onPressed: () {
-                          Get.bottomSheet<void>(
-                            ManualWalletTransactionSheet(
-                              walletId: wallet.walletId,
-                              accountName: wallet.networkName ??
-                                  'محفظة الشبكة #${wallet.networkId}',
-                              currentBalance: wallet.walletBalance,
-                              isPosWallet: false,
-                              onSuccess: () => controller.loadWallets(),
-                            ),
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                          );
-                        },
+                        onPressed: controller.openManualTransactionSheet,
                       ),
                     ],
                   ),
@@ -204,7 +162,15 @@ class NetworkWalletDashboardScreen
     );
   }
 
-  Widget _buildWalletSelector(BuildContext context) {
+}
+
+class _NetworkWalletSelector extends StatelessWidget {
+  const _NetworkWalletSelector({required this.controller});
+
+  final NetworkWalletDashboardController controller;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
 
     return Obx(() {

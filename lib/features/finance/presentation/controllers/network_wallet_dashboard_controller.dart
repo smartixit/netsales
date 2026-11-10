@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/finance/domain/entities/network_wallet_entity.dart';
 import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cases.dart';
+import 'package:netsales/features/finance/presentation/widgets/manual_wallet_transaction_sheet.dart';
+import 'package:netsales/features/finance/presentation/widgets/network_wallet_transfer_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class NetworkWalletDashboardController extends GetxController {
@@ -34,6 +40,36 @@ class NetworkWalletDashboardController extends GetxController {
       walletsNextCursor.value?.trim().isNotEmpty ?? false;
 
   bool get hasMoreLogs => nextCursor.value?.trim().isNotEmpty ?? false;
+
+  bool get canTransfer {
+    final wallet = selectedWallet.value;
+    if (wallet == null || !wallet.status) return false;
+    final permissions = PermissionService.to;
+    if (permissions.hasRole(AppRoles.superAdmin)) return false;
+    return permissions.hasRole(AppRoles.networkOwner) ||
+        permissions.can(AppPermissions.posWalletsCreate);
+  }
+
+  void openTransferSheet() {
+    final wallet = selectedWallet.value;
+    if (wallet == null) return;
+    unawaited(NetworkWalletTransferSheet.show(wallet));
+  }
+
+  void openManualTransactionSheet() {
+    final wallet = selectedWallet.value;
+    if (wallet == null) return;
+    unawaited(
+      ManualWalletTransactionSheet.show(
+        walletId: wallet.walletId,
+        accountName:
+            wallet.networkName ?? 'محفظة الشبكة #${wallet.networkId}',
+        currentBalance: wallet.walletBalance,
+        isPosWallet: false,
+        onSuccess: loadWallets,
+      ),
+    );
+  }
 
   bool _isAccessUnavailable(AppException error) {
     final message = error.message.toLowerCase();

@@ -6,7 +6,6 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/expenses/presentation/controllers/network_operating_expenses_controller.dart';
-import 'package:netsales/features/expenses/presentation/screens/network_expense_form_screen.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_attachment_card.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_item_row.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -202,10 +201,7 @@ class NetworkExpenseDetailsScreen
                 width: double.infinity,
                 text: 'تعديل المصروف',
                 prefix: Icons.edit_outlined,
-                onPressed: () {
-                  controller.prepareEditForm(expense);
-                  Get.to<void>(() => const NetworkExpenseFormScreen());
-                },
+                onPressed: () => controller.navigateToEditForm(expense),
               ),
             ],
           ],

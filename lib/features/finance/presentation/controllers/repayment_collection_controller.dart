@@ -55,6 +55,10 @@ class RepaymentCollectionController extends GetxController {
   String? _pendingCollectionKey;
   String? _pendingCollectionFingerprint;
 
+  void selectPaymentMethod(RepaymentPaymentMethod method) {
+    selectedMethod.value = method;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -305,6 +309,9 @@ class RepaymentCollectionController extends GetxController {
       );
 
       lastResult.value = repayment;
+      amountController.clear();
+      refController.clear();
+      notesController.clear();
       await CustomAnimationOverlay.showSuccess(
         message: 'تم تحصيل السداد وتسويته بنجاح',
       );

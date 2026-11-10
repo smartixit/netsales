@@ -99,17 +99,7 @@ class NetworkExpenseFormScreen
                 width: double.infinity,
                 size: AppButtonSize.large,
                 loading: isSaving,
-                onPressed: isSaving
-                    ? null
-                    : () async {
-                        if (!controller.formKey.currentState!.validate()) {
-                          return;
-                        }
-                        final success = await controller.submitExpenseForm();
-                        if (success && context.mounted) {
-                          Get.back<void>();
-                        }
-                      },
+                onPressed: isSaving ? null : controller.saveExpenseAndClose,
               ),
 
               AppSpacing.vMd,

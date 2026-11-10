@@ -128,7 +128,7 @@ class DebtScopeSelector extends StatelessWidget {
                   ),
                 if (controller.selectedPosId.value != null) ...[
                   AppSpacing.vSm,
-                  _buildNetworkSelector(context),
+                  _DebtNetworkSelector(controller: controller),
                 ] else
                   Padding(
                     padding: EdgeInsets.only(top: AppSpacing.sm),
@@ -144,7 +144,15 @@ class DebtScopeSelector extends StatelessWidget {
     );
   }
 
-  Widget _buildNetworkSelector(BuildContext context) {
+}
+
+class _DebtNetworkSelector extends StatelessWidget {
+  const _DebtNetworkSelector({required this.controller});
+
+  final PosDebtLedgerController controller;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
 
     return Obx(() {

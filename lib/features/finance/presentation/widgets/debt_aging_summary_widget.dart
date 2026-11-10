@@ -100,39 +100,44 @@ class DebtAgingSummaryWidget extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildBucketChip(
-                  'الكل',
-                  null,
-                  summary.totalReceivables,
-                  context,
+                _DebtAgingBucketChip(
+                  label: 'الكل',
+                  bucketKey: null,
+                  amount: summary.totalReceivables,
+                  isSelected: selectedBucket == null,
+                  onSelected: onBucketSelected,
                 ),
                 AppSpacing.hSm,
-                _buildBucketChip(
-                  '1-30 يوم',
-                  '0_30',
-                  summary.agingBuckets['0_30'] ?? 0.0,
-                  context,
+                _DebtAgingBucketChip(
+                  label: '1-30 يوم',
+                  bucketKey: '0_30',
+                  amount: summary.agingBuckets['0_30'] ?? 0.0,
+                  isSelected: selectedBucket == '0_30',
+                  onSelected: onBucketSelected,
                 ),
                 AppSpacing.hSm,
-                _buildBucketChip(
-                  '31-60 يوم',
-                  '31_60',
-                  summary.agingBuckets['31_60'] ?? 0.0,
-                  context,
+                _DebtAgingBucketChip(
+                  label: '31-60 يوم',
+                  bucketKey: '31_60',
+                  amount: summary.agingBuckets['31_60'] ?? 0.0,
+                  isSelected: selectedBucket == '31_60',
+                  onSelected: onBucketSelected,
                 ),
                 AppSpacing.hSm,
-                _buildBucketChip(
-                  '61-90 يوم',
-                  '61_90',
-                  summary.agingBuckets['61_90'] ?? 0.0,
-                  context,
+                _DebtAgingBucketChip(
+                  label: '61-90 يوم',
+                  bucketKey: '61_90',
+                  amount: summary.agingBuckets['61_90'] ?? 0.0,
+                  isSelected: selectedBucket == '61_90',
+                  onSelected: onBucketSelected,
                 ),
                 AppSpacing.hSm,
-                _buildBucketChip(
-                  '> 90 يوم (حرجة)',
-                  'over_90',
-                  summary.agingBuckets['over_90'] ?? 0.0,
-                  context,
+                _DebtAgingBucketChip(
+                  label: '> 90 يوم (حرجة)',
+                  bucketKey: 'over_90',
+                  amount: summary.agingBuckets['over_90'] ?? 0.0,
+                  isSelected: selectedBucket == 'over_90',
+                  onSelected: onBucketSelected,
                   isCritical: true,
                 ),
               ],
@@ -142,19 +147,31 @@ class DebtAgingSummaryWidget extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildBucketChip(
-    String label,
-    String? bucketKey,
-    double amount,
-    BuildContext context, {
-    bool isCritical = false,
-  }) {
+class _DebtAgingBucketChip extends StatelessWidget {
+  const _DebtAgingBucketChip({
+    required this.label,
+    required this.bucketKey,
+    required this.amount,
+    required this.isSelected,
+    required this.onSelected,
+    this.isCritical = false,
+  });
+
+  final String label;
+  final String? bucketKey;
+  final double amount;
+  final bool isSelected;
+  final ValueChanged<String?> onSelected;
+  final bool isCritical;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
-    final isSelected = selectedBucket == bucketKey;
 
     return CustomInteractiveBounce(
-      onTap: () => onBucketSelected(bucketKey),
+      onTap: () => onSelected(bucketKey),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(

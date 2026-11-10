@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/features/finance/domain/entities/network_wallet_entity.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_transfer_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -14,19 +15,27 @@ class NetworkWalletTransferSheet
     extends GetView<NetworkWalletTransferController> {
   const NetworkWalletTransferSheet({super.key});
 
+  static Future<void> show(NetworkWalletEntity wallet) async {
+    final transferController = Get.find<NetworkWalletTransferController>();
+    await transferController.initialize(wallet);
+    return CustomBottomSheet.show<void>(
+      title: 'تحويل رصيد من محفظة الشبكة',
+      subtitle: wallet.networkName ?? 'شبكة #${wallet.networkId}',
+      leadingIcon: Icons.swap_horiz_rounded,
+      scrollable: true,
+      isDismissible: false,
+      enableDrag: false,
+      child: const NetworkWalletTransferSheet(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final wallet = controller.selectedWallet.value;
-
-      return CustomBottomSheet(
-        title: 'تحويل رصيد من محفظة الشبكة',
-        subtitle: wallet?.networkName ?? 'شبكة #${wallet?.networkId ?? ''}',
-        scrollable: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
             AppSpacing.vSm,
             if (controller.isLoadingPos.value &&
                 !controller.hasLoadedPosList.value)
@@ -153,8 +162,8 @@ class NetworkWalletTransferSheet
               onPressed: () => Get.back<void>(),
             ),
           ],
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 }

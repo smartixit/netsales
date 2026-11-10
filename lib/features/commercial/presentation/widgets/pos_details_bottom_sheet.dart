@@ -388,13 +388,9 @@ class PosDetailsBottomSheet {
                 text: 'تعديل السقف الائتماني للنقطة',
                 icon: Icons.credit_card_rounded,
                 onPressed: () {
-                  Get.bottomSheet<void>(
-                    UpdatePosCreditLimitSheet(
-                      posWalletId: pos.posId,
-                      posName: pos.posName,
-                    ),
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
+                  UpdatePosCreditLimitSheet.show(
+                    posWalletId: pos.posId,
+                    posName: pos.posName,
                   );
                 },
               ),
@@ -403,23 +399,19 @@ class PosDetailsBottomSheet {
                 text: 'إدراج قيد تسوية مالي في محفظة النقطة',
                 icon: Icons.account_balance_wallet_outlined,
                 onPressed: () {
-                  Get.bottomSheet<void>(
-                    ManualWalletTransactionSheet(
-                      walletId: pos.posId,
-                      accountName: pos.posName,
-                      currentBalance: 0.0,
-                      isPosWallet: true,
-                      onSuccess: () {
-                        CustomSnackbar.show(
-                          title: 'تم إدراج القيد',
-                          message:
-                              'تم إدراج القيد المالي في محفظة نقطة البيع بنجاح.',
-                          type: SnackType.success,
-                        );
-                      },
-                    ),
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
+                  ManualWalletTransactionSheet.show(
+                    walletId: pos.posId,
+                    accountName: pos.posName,
+                    currentBalance: 0.0,
+                    isPosWallet: true,
+                    onSuccess: () {
+                      CustomSnackbar.show(
+                        title: 'تم إدراج القيد',
+                        message:
+                            'تم إدراج القيد المالي في محفظة نقطة البيع بنجاح.',
+                        type: SnackType.success,
+                      );
+                    },
                   );
                 },
               ),

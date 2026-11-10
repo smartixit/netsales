@@ -5,7 +5,6 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_history_controller.dart';
-import 'package:netsales/features/finance/presentation/screens/repayment_details_screen.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_card.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_card_skeleton.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_history_scope_panel.dart';
@@ -163,14 +162,10 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                             return RepaymentCard(
                               repayment: repayment,
                               isNetworkView: isNetworkView,
-                              onTap: () {
-                                Get.to<void>(
-                                  () => RepaymentDetailsScreen(
-                                    repayment: repayment,
-                                    isNetworkView: isNetworkView,
-                                  ),
-                                );
-                              },
+                              onTap: () => controller.openRepaymentDetails(
+                                repayment,
+                                isNetworkView: isNetworkView,
+                              ),
                             );
                           },
                         ),
