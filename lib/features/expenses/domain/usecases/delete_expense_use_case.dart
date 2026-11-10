@@ -7,3 +7,4 @@ class DeleteExpenseUseCase {
 
   Future<void> call(int expenseId) => repository.deleteExpense(expenseId);
 }
+

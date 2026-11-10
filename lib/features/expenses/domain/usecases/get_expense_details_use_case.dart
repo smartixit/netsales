@@ -8,3 +8,4 @@ class GetExpenseDetailsUseCase {
 
   Future<ExpenseEntity> call(int id) => repository.getExpense(id);
 }
+

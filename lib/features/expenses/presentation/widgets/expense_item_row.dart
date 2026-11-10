@@ -74,3 +74,4 @@ class ExpenseItemRow extends StatelessWidget {
     );
   }
 }
+
