@@ -175,15 +175,6 @@ abstract final class ScreenRegistry {
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
-      screenId: 'NET-09',
-      route: AppRoutes.networkSubscription,
-      titleAr: 'اشتراك الشبكة وحصص الاستهلاك',
-      titleEn: 'Provider Subscription',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.networksView,
-      implementationState: ScreenImplementationState.placeholder,
-    ),
-    ScreenDescriptor(
       screenId: 'NET-10',
       route: AppRoutes.voucherRequestDetails,
       titleAr: 'تفاصيل وبنود طلب التوريد',
