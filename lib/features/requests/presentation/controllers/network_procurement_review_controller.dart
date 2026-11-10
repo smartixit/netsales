@@ -174,6 +174,21 @@ class NetworkProcurementReviewController extends GetxController {
     currentPreview.value = null;
   }
 
+  /// زيادة أو إنقاص كمية التعديل بمقدار ورقة كاملة وفق سعة الباقة (Zero Clamp)
+  void stepModificationSheet(int packageId, {required bool isIncrement}) {
+    final line = modificationLines.firstWhereOrNull((l) => l.packageId == packageId);
+    if (line == null) return;
+    final package = availablePackages.firstWhereOrNull((p) => p.packageId == packageId);
+    final sheetSize = package?.packageVoucherCount ?? 0;
+    final step = sheetSize > 0 ? sheetSize : 1;
+
+    final target = isIncrement
+        ? line.voucherCount + step
+        : (line.voucherCount - step > 0 ? line.voucherCount - step : 1);
+
+    setModificationQuantity(packageId, target);
+  }
+
   void addModificationPackage(int packageId, {int initialQuantity = 1}) {
     if (modificationLines.any((line) => line.packageId == packageId)) return;
     _modificationRevision++;

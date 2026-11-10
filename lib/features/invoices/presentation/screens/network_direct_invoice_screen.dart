@@ -15,7 +15,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/inputs/voucher_quantity_stepper.dart';
 
 /// Network-side standalone invoice creation. Laravel remains the sole
 /// authority for package pricing, discounts, invoice totals and settlement.
@@ -217,13 +217,23 @@ class NetworkDirectInvoiceScreen
                   );
                 }),
                 AppSpacing.vMd,
-                CustomTextField(
-                  controller: controller.quantityController,
-                  label: 'عدد الكروت',
-                  hint: 'مثال: 100',
-                  keyboardType: TextInputType.number,
-                  validator: controller.validateVoucherCount,
-                ),
+                Obx(() {
+                  final package = controller.selectedPackage;
+                  final sheetSize = package?.packageVoucherCount ?? 0;
+                  final currentCount = controller.currentVoucherCount;
+
+                  return VoucherQuantityStepper(
+                    controller: controller.quantityController,
+                    sheetSize: sheetSize,
+                    currentCount: currentCount,
+                    label: 'عدد الكروت',
+                    showPresets: sheetSize > 0,
+                    showSummaryCard: sheetSize > 0,
+                    showClearAction: true,
+                    validator: controller.validateVoucherCount,
+                    onCountChanged: controller.setVoucherCount,
+                  );
+                }),
                 AppSpacing.vSm,
                 Obx(
                   () => CustomButton.secondary(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
@@ -35,6 +36,7 @@ class NetworkDirectInvoiceController extends GetxController {
 
   final formKey = GlobalKey<FormState>();
   final quantityController = TextEditingController(text: '1');
+  final quantityInput = '1'.obs;
 
   final authorizedNetworks = <NetworkEntity>[].obs;
   final linkedPos = <NetworkPosLinkEntity>[].obs;
@@ -85,6 +87,9 @@ class NetworkDirectInvoiceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    quantityController.addListener(() {
+      quantityInput.value = quantityController.text;
+    });
     unawaited(loadInitialData());
   }
 
@@ -256,16 +261,38 @@ class NetworkDirectInvoiceController extends GetxController {
     selectedPosId.value = posId;
   }
 
+  int get currentSheetSize => selectedPackage?.packageVoucherCount ?? 0;
+
+  int get currentVoucherCount {
+    final count = int.tryParse(quantityInput.value.trim());
+    return count ?? 0;
+  }
+
+  void setVoucherCount(int count) {
+    final safeCount = count < 0 ? 0 : count;
+    final text = safeCount == 0 ? '' : safeCount.toString();
+    quantityController.text = text;
+    quantityController.selection = TextSelection.collapsed(
+      offset: quantityController.text.length,
+    );
+    quantityInput.value = text;
+  }
+
   void onPackageSelected(int packageId) {
     selectedPackageId.value = packageId;
+    final package = availablePackages.firstWhereOrNull(
+      (p) => p.packageId == packageId,
+    );
+    if (package != null && (currentVoucherCount == 0 || quantityInput.value.trim() == '1')) {
+      setVoucherCount(package.packageVoucherCount);
+    }
   }
 
   String? validateVoucherCount(String? value) {
-    final count = int.tryParse(value?.trim() ?? '');
-    if (count == null || count <= 0) {
-      return 'أدخل عدد كروت صحيحاً أكبر من صفر.';
-    }
-    return null;
+    return FormValidators.positiveIntegerValidator(
+      fieldName: 'عدد الكروت',
+      min: 1,
+    )(value);
   }
 
   void addOrUpdateCartLine() {
