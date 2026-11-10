@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
+import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
 import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
 import 'package:netsales/features/workspace/data/datasources/network_workspace_remote_data_source_impl.dart';
@@ -17,6 +18,7 @@ class NetworkWorkspaceBinding extends Bindings {
   void dependencies() {
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();
+    FinanceBinding().dependencies();
     MembershipBinding(isNetwork: true).dependencies();
     ProcurementRequestBinding().dependencies();
 

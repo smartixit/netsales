@@ -7,37 +7,40 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/invoices/presentation/controllers/pos_invoices_controller.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_card.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_search_filter_header.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// شاشة قائمة فواتير المشتريات لنقطة البيع (POS Purchase Invoices Screen)
 class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
-  const PosPurchaseInvoicesScreen({super.key});
+  const PosPurchaseInvoicesScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return CustomAppScaffold(
-      appBar: AppBar(title: const Text('فواتير المشتريات')),
-      body: RefreshIndicator(
-        onRefresh: () => controller.loadInvoices(isRefresh: true),
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.cardPadding),
-          child: Column(
-            children: [
-              // 1. رأس البحث والفلترة
-              Obx(
-                () => InvoiceSearchFilterHeader(
-                  searchController: controller.searchController,
-                  selectedSaleType: controller.selectedSaleType.value,
-                  onSaleTypeChanged: controller.onSaleTypeChanged,
-                  onClear: controller.resetFilters,
-                  searchHint:
-                      'بحث برقم الفاتورة، UUID، أو اسم الشبكة المزودة...',
-                ),
+    final content = RefreshIndicator(
+      onRefresh: () => controller.loadInvoices(isRefresh: true),
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.cardPadding),
+        child: Column(
+          children: [
+            if (embedded) _EmbeddedInvoicesHeader(controller: controller),
+
+            // 1. رأس البحث والفلترة
+            Obx(
+              () => InvoiceSearchFilterHeader(
+                searchController: controller.searchController,
+                selectedSaleType: controller.selectedSaleType.value,
+                onSaleTypeChanged: controller.onSaleTypeChanged,
+                onClear: controller.resetFilters,
+                searchHint:
+                    'بحث برقم الفاتورة، UUID، أو اسم الشبكة المزودة...',
               ),
+            ),
 
               AppSpacing.vMd,
 
@@ -138,6 +141,48 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
             ],
           ),
         ),
+      );
+    
+
+    if (embedded) return content;
+
+    return CustomAppScaffold(
+      appBar: AppBar(title: const Text('فواتير المشتريات')),
+      body: content,
+    );
+  }
+}
+
+class _EmbeddedInvoicesHeader extends StatelessWidget {
+  const _EmbeddedInvoicesHeader({required this.controller});
+
+  final PosInvoicesController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'فواتير المشتريات',
+              style: AppTypography.titleMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          CustomButton.icon(
+            icon: Icons.refresh_rounded,
+            tooltip: 'تحديث الفواتير',
+            backgroundColor: Colors.transparent,
+            foregroundColor: colors.onSurfaceVariant,
+            onPressed: () => controller.loadInvoices(isRefresh: true),
+          ),
+        ],
       ),
     );
   }

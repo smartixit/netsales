@@ -44,6 +44,29 @@ class WorkspaceCoordinatorController extends GetxController {
     }
   }
 
+  /// التحقق من صلاحية المستخدم للتبديل بين مساحتي عمل (شبكة ونقطة بيع)
+  bool get canSwitchWorkspace {
+    final user = Get.isRegistered<SessionService>()
+        ? SessionService.to.currentUser
+        : null;
+    return WorkspaceService.to.canSwitchWorkspace(user);
+  }
+
+  /// نص التلميح للتنقل بين المساحات
+  String get switchWorkspaceTooltip {
+    final isNetwork = activeContext.value.workspace == AppWorkspace.network;
+    return isNetwork
+        ? 'التبديل إلى مساحة عمل نقطة البيع'
+        : 'التبديل إلى مساحة عمل مزود الشبكة';
+  }
+
+  /// التبديل التلقائي إلى المساحة المقابلة
+  Future<void> toggleWorkspace() async {
+    final isNetwork = activeContext.value.workspace == AppWorkspace.network;
+    final target = isNetwork ? AppWorkspace.pos : AppWorkspace.network;
+    await switchWorkspace(target);
+  }
+
   /// التبديل المنسق لمساحة العمل مع التوجيه الآمن
   Future<void> switchWorkspace(AppWorkspace workspace) async {
     if (workspace == AppWorkspace.unsupported) {

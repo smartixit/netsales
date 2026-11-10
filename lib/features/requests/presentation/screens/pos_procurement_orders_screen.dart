@@ -27,43 +27,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
 
     final content = Column(
       children: [
-        if (embedded)
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.cardPadding,
-              vertical: AppSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'طلبات التوريد والمشتريات',
-                    style: AppTypography.titleMedium.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                CustomButton.outline(
-                  text: 'طلب جديد',
-                  icon: Icons.add_shopping_cart_rounded,
-                  size: AppButtonSize.small,
-                  onPressed: () {
-                    controller.initNewOrderForm();
-                    Get.toNamed<void>(AppRoutes.newProcurementOrder);
-                  },
-                ),
-                AppSpacing.hXs,
-                CustomButton.icon(
-                  icon: Icons.refresh_rounded,
-                  tooltip: 'تحديث الطلبات',
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: colors.onSurfaceVariant,
-                  onPressed: () => controller.loadRequests(isRefresh: true),
-                ),
-              ],
-            ),
-          ),
+        if (embedded) _EmbeddedOrdersHeader(controller: controller),
 
         // شريط البحث والفلترة
         Obx(() {
@@ -215,6 +179,54 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
         ),
       ),
       body: content,
+    );
+  }
+}
+
+class _EmbeddedOrdersHeader extends StatelessWidget {
+  const _EmbeddedOrdersHeader({required this.controller});
+
+  final PosProcurementController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.cardPadding,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'طلبات التوريد والمشتريات',
+              style: AppTypography.titleMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          CustomButton.outline(
+            text: 'طلب جديد',
+            icon: Icons.add_shopping_cart_rounded,
+            size: AppButtonSize.small,
+            onPressed: () {
+              controller.initNewOrderForm();
+              Get.toNamed<void>(AppRoutes.newProcurementOrder);
+            },
+          ),
+          AppSpacing.hXs,
+          CustomButton.icon(
+            icon: Icons.refresh_rounded,
+            tooltip: 'تحديث الطلبات',
+            backgroundColor: Colors.transparent,
+            foregroundColor: colors.onSurfaceVariant,
+            onPressed: () => controller.loadRequests(isRefresh: true),
+          ),
+        ],
+      ),
     );
   }
 }

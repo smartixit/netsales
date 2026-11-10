@@ -124,6 +124,24 @@ class WorkspaceService extends GetxService {
     return AppWorkspace.unsupported;
   }
 
+  /// التحقق مما إذا كان المستخدم يملك صلاحية التبديل بين مساحتي عمل (شبكة ونقطة بيع)
+  bool canSwitchWorkspace(UserModel? user) {
+    if (user == null || user.isSuperAdmin) return false;
+    final hasNetworkRole =
+        user.hasNetworkMembership ||
+        user.role?.roleKey == AppRoles.networkOwner ||
+        user.role?.roleKey == AppRoles.networkUser ||
+        user.role?.roleKey == AppRoles.networkAccountant;
+
+    final hasPosRole =
+        user.hasPosMembership ||
+        user.role?.roleKey == AppRoles.posAgent ||
+        user.role?.roleKey == AppRoles.posUser ||
+        user.role?.roleKey == AppRoles.posAccountant;
+
+    return hasNetworkRole && hasPosRole;
+  }
+
   /// مزامنة سياق مساحة العمل والمستأجر مع عضويات المستخدم النشطة
   Future<void> syncWithUserMemberships(UserModel? user) async {
     if (user == null) {

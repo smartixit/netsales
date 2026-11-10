@@ -32,6 +32,53 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
     final colors = context.colors;
     final isNetwork = workspace == AppWorkspace.network;
     final badgeColor = isNetwork ? colors.primary : colors.secondary;
+    final coordinator = Get.isRegistered<WorkspaceCoordinatorController>()
+        ? WorkspaceCoordinatorController.to
+        : null;
+    final canSwitch = coordinator?.canSwitchWorkspace ?? false;
+
+    Widget badgeContent = Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: badgeColor.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: badgeColor.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isNetwork ? Icons.hub_rounded : Icons.storefront_rounded,
+            size: 16.sp,
+            color: badgeColor,
+          ),
+          SizedBox(width: 6.w),
+          Text(
+            isNetwork ? 'مزود الشبكة' : 'نقطة البيع',
+            style: AppTypography.badgeText.copyWith(color: badgeColor),
+          ),
+          if (canSwitch) ...[
+            SizedBox(width: 4.w),
+            Icon(
+              Icons.swap_horiz_rounded,
+              size: 14.sp,
+              color: badgeColor,
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (canSwitch && coordinator != null) {
+      badgeContent = InkWell(
+        onTap: coordinator.toggleWorkspace,
+        borderRadius: BorderRadius.circular(20.r),
+        child: Tooltip(
+          message: coordinator.switchWorkspaceTooltip,
+          child: badgeContent,
+        ),
+      );
+    }
 
     return AppBar(
       title: FittedBox(
@@ -40,29 +87,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: badgeColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: badgeColor.withValues(alpha: 0.4)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isNetwork ? Icons.hub_rounded : Icons.storefront_rounded,
-                    size: 16.sp,
-                    color: badgeColor,
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    isNetwork ? 'مزود الشبكة' : 'نقطة البيع',
-                    style: AppTypography.badgeText.copyWith(color: badgeColor),
-                  ),
-                ],
-              ),
-            ),
+            badgeContent,
             SizedBox(width: 8.w),
             Text(
               title,
@@ -75,6 +100,16 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         ...?actions,
+        if (canSwitch && coordinator != null)
+          CustomButton.icon(
+            icon: Icons.swap_horiz_rounded,
+            foregroundColor: badgeColor,
+            tooltip: coordinator.switchWorkspaceTooltip,
+            backgroundColor: badgeColor.withValues(alpha: 0.12),
+            dimension: 40.r,
+            iconSize: 22.r,
+            onPressed: coordinator.toggleWorkspace,
+          ),
         const NotificationBadgeButton(),
         CustomButton.icon(
           icon: Icons.shield_outlined,
@@ -103,8 +138,8 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
           dimension: 40.r,
           iconSize: 22.r,
           onPressed: () {
-            if (Get.isRegistered<WorkspaceCoordinatorController>()) {
-              WorkspaceCoordinatorController.to.logout();
+            if (coordinator != null) {
+              coordinator.logout();
             } else if (Get.isRegistered<SessionService>()) {
               SessionService.to.terminateSession();
             }

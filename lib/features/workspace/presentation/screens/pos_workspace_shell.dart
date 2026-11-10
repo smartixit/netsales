@@ -3,13 +3,14 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 
 import 'package:netsales/features/finance/presentation/widgets/pos_finance_workspace_hub.dart';
+import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
+import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
+import 'package:netsales/features/requests/presentation/screens/pos_procurement_orders_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/adaptive_workspace_scaffold.dart';
-import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_home_dashboard.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 
 /// هيكل مساحة عمل نقطة البيع (POS Workspace Shell)
 class PosWorkspaceShell extends GetView<PosWorkspaceController> {
@@ -25,23 +26,16 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         content: PosHomeDashboard(controller: controller),
       ),
       const WorkspaceNavItem(
-        label: 'طلب باقات',
-        icon: Icons.add_shopping_cart_outlined,
-        activeIcon: Icons.add_shopping_cart_rounded,
-        content: CustomEmptyState(
-          title: 'طلب باقات كروت بالجملة',
-          subtitle: 'إنشاء طلبات التوريد بأسعار الخصم التعاقدي المعتمدة',
-        ),
+        label: 'طلبات التوريد',
+        icon: Icons.receipt_long_outlined,
+        activeIcon: Icons.receipt_long_rounded,
+        content: PosProcurementOrdersScreen(embedded: true),
       ),
       const WorkspaceNavItem(
         label: 'فواتيري',
         icon: Icons.receipt_outlined,
         activeIcon: Icons.receipt_rounded,
-        content: CustomEmptyState(
-          title: 'سجل فواتير المشتريات',
-          subtitle:
-              'استعراض فواتير التوريد الصادرة ومستندات السداد النقدي والآجل',
-        ),
+        content: PosPurchaseInvoicesScreen(embedded: true),
       ),
       const WorkspaceNavItem(
         label: 'فريق العمل',
