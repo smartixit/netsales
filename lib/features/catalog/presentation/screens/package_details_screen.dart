@@ -6,7 +6,6 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_action_buttons.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_delete_confirm_dialog.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_details_header.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_pricing_summary_card.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_specs_section.dart';
@@ -87,15 +86,7 @@ class PackageDetailsScreen extends GetView<PackageCatalogController> {
               tooltip: 'حذف الباقة',
               backgroundColor: Colors.transparent,
               foregroundColor: colors.error,
-              onPressed: () => PackageDeleteConfirmDialog.show(
-                packageName: package.packageName,
-                onConfirm: () async {
-                  final deleted = await controller.deletePackage(
-                    package.packageId,
-                  );
-                  if (deleted) Get.back<void>();
-                },
-              ),
+              onPressed: () => controller.promptDeletePackage(package),
             ),
           ],
         ),

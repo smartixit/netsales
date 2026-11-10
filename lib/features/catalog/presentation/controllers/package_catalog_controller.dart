@@ -11,6 +11,7 @@ import 'package:netsales/features/catalog/domain/usecases/get_package_details_us
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/toggle_package_status_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/update_package_use_case.dart';
+import 'package:netsales/features/catalog/presentation/widgets/package_delete_confirm_dialog.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
@@ -557,6 +558,14 @@ class PackageCatalogController extends GetxController {
     }
   }
 
+  /// إرسال وحفظ بيانات الباقة وإغلاق الشاشة عند النجاح
+  Future<void> savePackage() async {
+    final success = await submitPackageForm();
+    if (success) {
+      Get.back<void>();
+    }
+  }
+
   /// تبديل حالة تفعيل الباقة (نشطة / معطلة) مع Overlay و Snackbar
   Future<void> togglePackageStatus(PackageEntity package) async {
     isTogglingStatus.value = true;
@@ -667,5 +676,16 @@ class PackageCatalogController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
     }
+  }
+
+  /// طلب تأكيد حذف الباقة وإغلاق شاشة التفاصيل عند إتمام الحذف
+  void promptDeletePackage(PackageEntity package) {
+    PackageDeleteConfirmDialog.show(
+      packageName: package.packageName,
+      onConfirm: () async {
+        final deleted = await deletePackage(package.packageId);
+        if (deleted) Get.back<void>();
+      },
+    );
   }
 }

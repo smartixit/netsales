@@ -4,10 +4,8 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/link_pos_bottom_sheet.dart';
-import 'package:netsales/features/commercial/presentation/widgets/network_details_bottom_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_card.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_card_skeleton.dart';
-import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_challenge_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_search_filter_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -26,23 +24,16 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
   final int? networkId;
   final bool embedded;
 
-  void _ensureDataLoaded() {
-    if (networkId == null || networkId! <= 0) return;
-    if (networkId != null &&
-        networkId! > 0 &&
-        controller.activeNetworkId.value != networkId) {
-      controller.activeNetworkId.value = networkId!;
-      controller.fetchNetworkPosLinks(networkId: networkId);
-    } else if (controller.links.isEmpty &&
-        !controller.isLoading.value &&
-        controller.errorMessage.value == null) {
-      controller.fetchNetworkPosLinks(networkId: networkId);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    _ensureDataLoaded();
+    if (networkId != null && networkId! > 0) {
+      if (controller.activeNetworkId.value != networkId) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.activeNetworkId.value = networkId!;
+          controller.fetchNetworkPosLinks(networkId: networkId);
+        });
+      }
+    }
 
     if (networkId == null || networkId! <= 0) {
       return const CustomEmptyState(
@@ -64,32 +55,12 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
                 CustomButton.icon(
                   icon: Icons.qr_code_2_rounded,
                   tooltip: 'دعوة ربط عبر QR',
-                  onPressed: () async {
-                    final netId = controller.activeNetworkId.value;
-                    final net = await controller.fetchNetworkDetails(netId);
-                    if (net != null) {
-                      await NetworkPosQrChallengeSheet.show(
-                        networkId: netId,
-                        networkName: net.networkName,
-                        networkPhone: net.networkPhoneNumber,
-                      );
-                    }
-                  },
+                  onPressed: controller.openQrInviteSheet,
                 ),
                 CustomButton.icon(
                   icon: Icons.business_outlined,
                   tooltip: 'بيانات الشبكة',
-                  onPressed: () async {
-                    final network = await controller.fetchNetworkDetails(
-                      controller.activeNetworkId.value,
-                    );
-                    if (network != null) {
-                      await NetworkDetailsBottomSheet.show(
-                        network: network,
-                        canEdit: true,
-                      );
-                    }
-                  },
+                  onPressed: controller.openNetworkDetailsSheet,
                 ),
               ],
             ),
@@ -107,34 +78,12 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
                   CustomButton.icon(
                     icon: Icons.qr_code_2_rounded,
                     tooltip: 'دعوة ربط عبر QR',
-                    onPressed: () async {
-                      final netId = controller.activeNetworkId.value;
-                      final network = await controller.fetchNetworkDetails(
-                        netId,
-                      );
-                      if (network != null) {
-                        await NetworkPosQrChallengeSheet.show(
-                          networkId: netId,
-                          networkName: network.networkName,
-                          networkPhone: network.networkPhoneNumber,
-                        );
-                      }
-                    },
+                    onPressed: controller.openQrInviteSheet,
                   ),
                   CustomButton.icon(
                     icon: Icons.business_outlined,
                     tooltip: 'بيانات الشبكة',
-                    onPressed: () async {
-                      final network = await controller.fetchNetworkDetails(
-                        controller.activeNetworkId.value,
-                      );
-                      if (network != null) {
-                        await NetworkDetailsBottomSheet.show(
-                          network: network,
-                          canEdit: true,
-                        );
-                      }
-                    },
+                    onPressed: controller.openNetworkDetailsSheet,
                   ),
                   CustomButton.icon(
                     icon: Icons.add_link_rounded,

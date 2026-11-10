@@ -25,7 +25,12 @@ import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/update_network_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/update_pos_details_use_case.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_details_bottom_sheet.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_pos_link_confirm_sheet.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_challenge_sheet.dart';
+import 'package:netsales/features/commercial/presentation/widgets/pos_details_bottom_sheet.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم إدارة الروابط التجارية ودليل نقاط البيع والشبكات
@@ -941,5 +946,75 @@ class CommercialDirectoryController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
     }
+  }
+
+  // ============================================================
+  // واجهات التفاعل وتنسيق الشاشات (Clean Presentation Helpers)
+  // ============================================================
+
+  /// فتح نافذة دعوة ربط نقطة بيع عبر رمز QR
+  Future<void> openQrInviteSheet() async {
+    final netId = activeNetworkId.value;
+    if (netId <= 0) return;
+    final network = await fetchNetworkDetails(netId);
+    if (network != null) {
+      await NetworkPosQrChallengeSheet.show(
+        networkId: netId,
+        networkName: network.networkName,
+        networkPhone: network.networkPhoneNumber,
+      );
+    }
+  }
+
+  /// فتح نافذة استعراض وتعديل بيانات الشبكة
+  Future<void> openNetworkDetailsSheet() async {
+    final netId = activeNetworkId.value;
+    if (netId <= 0) return;
+    final network = await fetchNetworkDetails(netId);
+    if (network != null) {
+      await NetworkDetailsBottomSheet.show(
+        network: network,
+        canEdit: true,
+      );
+    }
+  }
+
+  /// فتح نافذة استعراض وتعديل بيانات نقطة البيع
+  Future<void> openPosDetailsSheet() async {
+    final posId = activePosId.value;
+    if (posId <= 0) return;
+    final pos = await fetchPosDetails(posId);
+    if (pos != null) {
+      await PosDetailsBottomSheet.show(pos: pos, canEdit: true);
+    }
+  }
+
+  /// فتح كاميرا مسح رمز QR ومعاينة دعوة الارتباط
+  void openQrScanner() {
+    Get.to<void>(
+      () => CustomQrScanner(
+        title: 'مسح رمز ربط شبكة',
+        instruction: 'وجّه الكاميرا نحو رمز QR لدعوة شبكة المزود',
+        onClose: () => Get.back<void>(),
+        onScan: (result) async {
+          Get.back<void>();
+          final preview = await previewQrChallenge(
+            result.rawValue,
+            posId: activePosId.value,
+          );
+
+          if (preview != null) {
+            await NetworkPosLinkConfirmSheet.show(
+              preview: preview,
+              onConfirm: () => confirmQrChallenge(
+                challengeUuid: preview.challengeUuid,
+                posId: activePosId.value,
+              ),
+            );
+          }
+        },
+      ),
+      fullscreenDialog: true,
+    );
   }
 }

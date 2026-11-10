@@ -67,14 +67,7 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                   text: isEditing ? 'حفظ التعديلات' : 'إنشاء الباقة الآن',
                   icon: isEditing ? Icons.save_rounded : Icons.add_rounded,
                   loading: isSaving,
-                  onPressed: isSaving
-                      ? null
-                      : () async {
-                          final ok = await controller.submitPackageForm();
-                          if (ok) {
-                            Get.back<void>();
-                          }
-                        },
+                  onPressed: isSaving ? null : controller.savePackage,
                 ),
 
                 AppSpacing.vMd,

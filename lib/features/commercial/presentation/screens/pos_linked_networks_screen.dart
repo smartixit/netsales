@@ -4,15 +4,12 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_card_skeleton.dart';
-import 'package:netsales/features/commercial/presentation/widgets/network_pos_link_confirm_sheet.dart';
-import 'package:netsales/features/commercial/presentation/widgets/pos_details_bottom_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/pos_linked_network_card.dart';
 import 'package:netsales/features/commercial/presentation/widgets/pos_linked_networks_search_filter_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
-import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
 
 /// شاشة استعراض الشبكات المزودة لنقطة البيع (POS Linked Networks Screen)
 /// مسؤوليتها: تركيب الصفحة وتنسيق المكونات وتوصيلها بالمتحكم (Page Composition)
@@ -21,48 +18,16 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
 
   final int? posId;
 
-  void _ensureDataLoaded() {
-    if (posId != null && posId! > 0 && controller.activePosId.value != posId) {
-      controller.activePosId.value = posId!;
-      controller.fetchPosNetworks(posId: posId);
-    } else if (controller.links.isEmpty &&
-        !controller.isLoading.value &&
-        controller.errorMessage.value == null) {
-      controller.fetchPosNetworks(posId: posId);
-    }
-  }
-
-  void _openQrScanner(BuildContext context) {
-    Get.to<void>(
-      () => CustomQrScanner(
-        title: 'مسح رمز ربط شبكة',
-        instruction: 'وجّه الكاميرا نحو رمز QR لدعوة شبكة المزود',
-        onClose: () => Get.back<void>(),
-        onScan: (result) async {
-          Get.back<void>(); // إغلاق شاشة الكاميرا
-          final preview = await controller.previewQrChallenge(
-            result.rawValue,
-            posId: controller.activePosId.value,
-          );
-
-          if (preview != null) {
-            await NetworkPosLinkConfirmSheet.show(
-              preview: preview,
-              onConfirm: () => controller.confirmQrChallenge(
-                challengeUuid: preview.challengeUuid,
-                posId: controller.activePosId.value,
-              ),
-            );
-          }
-        },
-      ),
-      fullscreenDialog: true,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    _ensureDataLoaded();
+    if (posId != null && posId! > 0) {
+      if (controller.activePosId.value != posId) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.activePosId.value = posId!;
+          controller.fetchPosNetworks(posId: posId);
+        });
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -72,19 +37,12 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
           CustomButton.icon(
             icon: Icons.qr_code_scanner_rounded,
             tooltip: 'مسح رمز ربط شبكة',
-            onPressed: () => _openQrScanner(context),
+            onPressed: controller.openQrScanner,
           ),
           CustomButton.icon(
             icon: Icons.storefront_outlined,
             tooltip: 'بيانات نقطة البيع',
-            onPressed: () async {
-              final pos = await controller.fetchPosDetails(
-                controller.activePosId.value,
-              );
-              if (pos != null) {
-                await PosDetailsBottomSheet.show(pos: pos, canEdit: true);
-              }
-            },
+            onPressed: controller.openPosDetailsSheet,
           ),
         ],
       ),
@@ -178,7 +136,7 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
         shape: AppButtonShape.pill,
         size: AppButtonSize.medium,
         shadow: AppElevation.level4(context),
-        onPressed: () => _openQrScanner(context),
+        onPressed: controller.openQrScanner,
       ),
     );
   }
