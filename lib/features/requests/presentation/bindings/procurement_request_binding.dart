@@ -19,6 +19,7 @@ import 'package:netsales/features/requests/domain/repositories/request_repositor
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
@@ -101,6 +102,7 @@ class ProcurementRequestBinding extends Bindings {
     Get.lazyPut(
       () => PreviewRequestModificationUseCase(Get.find<RequestRepository>()),
     );
+    Get.lazyPut(() => GetProcurementQuoteUseCase(Get.find<RequestRepository>()));
 
     // 4. Controllers
     Get.lazyPut<PosProcurementController>(
@@ -113,6 +115,7 @@ class ProcurementRequestBinding extends Bindings {
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
         getEffectivePackageDiscountUseCase:
             Get.find<GetEffectivePackageDiscountUseCase>(),
+        getProcurementQuoteUseCase: Get.find<GetProcurementQuoteUseCase>(),
       ),
     );
 

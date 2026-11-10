@@ -34,43 +34,44 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
     final badgeColor = isNetwork ? colors.primary : colors.secondary;
 
     return AppBar(
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: badgeColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: badgeColor.withValues(alpha: 0.4)),
+      title: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerStart,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: badgeColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: badgeColor.withValues(alpha: 0.4)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isNetwork ? Icons.hub_rounded : Icons.storefront_rounded,
+                    size: 16.sp,
+                    color: badgeColor,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    isNetwork ? 'مزود الشبكة' : 'نقطة البيع',
+                    style: AppTypography.badgeText.copyWith(color: badgeColor),
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  isNetwork ? Icons.hub_rounded : Icons.storefront_rounded,
-                  size: 16.sp,
-                  color: badgeColor,
-                ),
-                SizedBox(width: 6.w),
-                Text(
-                  isNetwork ? 'مزود الشبكة' : 'نقطة البيع',
-                  style: AppTypography.badgeText.copyWith(color: badgeColor),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 8.w),
-          Flexible(
-            child: Text(
+            SizedBox(width: 8.w),
+            Text(
               title,
               style: AppTypography.titleMedium.copyWith(
                 color: colors.onSurface,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       actions: [
         ...?actions,

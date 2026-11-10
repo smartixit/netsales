@@ -55,7 +55,7 @@ class AuthRepositoryImpl implements AuthRepository {
       throw AppException(
         response.message.isNotEmpty
             ? response.message
-            : 'تعذر استلام بيانات المصادقة من الخادم',
+            : 'تعذر استلام بيانات المصادقة',
       );
     }
 
@@ -197,7 +197,7 @@ class AuthRepositoryImpl implements AuthRepository {
       throw AppException(
         response.message.isNotEmpty
             ? response.message
-            : 'تعذر استلام بيانات المصادقة من الخادم',
+            : 'تعذر استلام بيانات المصادقة.',
       );
     }
 
@@ -297,7 +297,7 @@ class AuthRepositoryImpl implements AuthRepository {
       throw AppException(
         response.message.isNotEmpty
             ? response.message
-            : 'تعذر استلام نتيجة التسجيل من الخادم',
+            : 'تعذر استلام نتيجة التسجيل',
       );
     }
 
@@ -350,7 +350,7 @@ class AuthRepositoryImpl implements AuthRepository {
       throw AppException(
         response.message.isNotEmpty
             ? response.message
-            : 'تعذر استلام نتيجة تسجيل نقطة البيع من الخادم',
+            : 'تعذر استلام نتيجة تسجيل نقطة البيع',
       );
     }
 

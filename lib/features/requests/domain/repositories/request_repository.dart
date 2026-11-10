@@ -1,10 +1,14 @@
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 
 /// واجهة مستودع دورة حياة طلبات الكروت والتوريد
 abstract interface class RequestRepository {
+  /// احتساب ومعاينة عرض أسعار سيادي معتمد لطلب توريد جديد
+  Future<ProcurementQuoteEntity> getQuote(Map<String, dynamic> payload);
+
   /// جلب قائمة طلبات الكروت مع ترقيم الصفحات القائم على المؤشر (Cursor Pagination)
   Future<PaginatedList<RequestEntity>> getRequests({
     int? networkId,

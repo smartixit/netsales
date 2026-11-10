@@ -45,7 +45,7 @@ class NetworkWorkspaceDashboard extends GetView<NetworkWorkspaceController> {
           title: 'بيانات لوحة الشبكة غير متاحة',
           subtitle:
               controller.errorMessage.value ??
-              'لم تصل استجابة صالحة من الخادم.',
+              'لم تصل استجابة صالحة.',
           onRetry: () => controller.loadOverview(),
         );
       }

@@ -49,7 +49,7 @@ class NetworkExpenseFormScreen
                     AppSpacing.hSm,
                     Expanded(
                       child: Text(
-                        'سيتم احتساب الإجمالي وخصم أو تسوية المحفظة من الخادم بعد اعتماد الطلب.',
+                        'سيتم احتساب الإجمالي وخصم أو تسوية المحفظة بعد اعتماد الطلب.',
                         style: AppTypography.bodySmall.copyWith(
                           color: colors.onPrimaryContainer,
                         ),

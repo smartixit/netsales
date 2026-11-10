@@ -41,7 +41,7 @@ class RepaymentAllocationTimeline extends StatelessWidget {
         ),
         AppSpacing.vXxs,
         Text(
-          'تفاصيل التوزيع المسجلة من الخادم لكل فاتورة.',
+          'تفاصيل التوزيع المسجلة لكل فاتورة.',
           style: AppTypography.bodySmall.copyWith(
             color: colors.onSurfaceVariant,
           ),

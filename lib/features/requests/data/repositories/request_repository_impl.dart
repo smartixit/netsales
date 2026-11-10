@@ -1,5 +1,6 @@
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/requests/data/datasources/request_remote_data_source.dart';
+import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
@@ -11,6 +12,12 @@ class RequestRepositoryImpl implements RequestRepository {
   final RequestRemoteDataSource _remoteDataSource;
 
   const RequestRepositoryImpl(this._remoteDataSource);
+
+  @override
+  Future<ProcurementQuoteEntity> getQuote(Map<String, dynamic> payload) async {
+    final response = await _remoteDataSource.getQuote(payload);
+    return response.data!;
+  }
 
   @override
   Future<PaginatedList<RequestEntity>> getRequests({

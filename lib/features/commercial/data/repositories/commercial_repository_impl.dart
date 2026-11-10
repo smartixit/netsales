@@ -46,7 +46,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
       }
       if (!seenCursors.add(nextCursor)) {
         throw AppException(
-          'توقف تحميل الشبكات بسبب تكرار مؤشر الصفحة من الخادم.',
+          'توقف تحميل الشبكات بسبب تكرار مؤشر الصفحة.',
         );
       }
       cursor = nextCursor;
@@ -85,7 +85,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
       }
       if (!seenCursors.add(nextCursor)) {
         throw AppException(
-          'توقف تحميل نقاط البيع بسبب تكرار مؤشر الصفحة من الخادم.',
+          'توقف تحميل نقاط البيع بسبب تكرار مؤشر الصفحة.',
         );
       }
       cursor = nextCursor;

@@ -330,7 +330,7 @@ class _NetworkFinanceSnapshot extends StatelessWidget {
           ),
           AppSpacing.vXs,
           Text(
-            'قيم مباشرة من الخادم؛ غيّر الفترة من لوحة الرئيسية لتحديث مؤشرات الفترة.',
+            'قيم مباشرة غيّر الفترة من لوحة الرئيسية لتحديث مؤشرات الفترة.',
             style: AppTypography.bodySmall.copyWith(
               color: colors.onSurfaceVariant,
             ),

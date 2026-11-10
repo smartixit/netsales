@@ -19,30 +19,32 @@ class NotificationBadgeButton extends StatelessWidget {
     final colors = context.colors;
     final iconColor = color ?? colors.onSurfaceVariant;
 
+    final baseButton = CustomButton.icon(
+      icon: Icons.notifications_none_rounded,
+      foregroundColor: iconColor,
+      tooltip: 'مركز الإشعارات',
+      backgroundColor: Colors.transparent,
+      dimension: 40.r,
+      iconSize: 22.r,
+      onPressed:
+          onPressed ??
+          () {
+            if (Get.currentRoute != AppRoutes.notifications) {
+              Get.toNamed<dynamic>(AppRoutes.notifications);
+            }
+          },
+    );
+
+    if (!Get.isRegistered<NotificationController>()) {
+      return baseButton;
+    }
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        CustomButton.icon(
-          icon: Icons.notifications_none_rounded,
-          foregroundColor: iconColor,
-          tooltip: 'مركز الإشعارات',
-          backgroundColor: Colors.transparent,
-          dimension: 40.r,
-          iconSize: 22.r,
-          onPressed:
-              onPressed ??
-              () {
-                if (Get.currentRoute != AppRoutes.notifications) {
-                  Get.toNamed<dynamic>(AppRoutes.notifications);
-                }
-              },
-        ),
+        baseButton,
         Obx(() {
-          int count = 0;
-          if (Get.isRegistered<NotificationController>()) {
-            count = NotificationController.to.unreadCount.value;
-          }
-
+          final count = NotificationController.to.unreadCount.value;
           if (count <= 0) return const SizedBox.shrink();
 
           final countText = count > 99 ? '99+' : count.toString();

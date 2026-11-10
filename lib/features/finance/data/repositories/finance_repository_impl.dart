@@ -52,7 +52,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
     if (!res.success || res.data == null) {
       throw _listRequestFailure(
         res,
-        fallback: 'تعذر استرجاع محافظ نقطة البيع من الخادم.',
+        fallback: 'تعذر استرجاع محافظ نقطة البيع.',
         code: 'POS_WALLET_LIST_REQUEST_FAILED',
       );
     }
@@ -129,7 +129,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
     if (!res.success || res.data == null) {
       throw _listRequestFailure(
         res,
-        fallback: 'تعذر استرجاع محافظ الشبكة من الخادم.',
+        fallback: 'تعذر استرجاع محافظ الشبكة.',
         code: 'NETWORK_WALLET_LIST_REQUEST_FAILED',
       );
     }
@@ -194,7 +194,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
       throw AppException(
         res.message.isNotEmpty
             ? res.message
-            : 'تعذر استرجاع ملخص المديونية من الخادم.',
+            : 'تعذر استرجاع ملخص المديونية.',
         code: 'DEBT_SUMMARY_REQUEST_FAILED',
         details: res.errors,
       );

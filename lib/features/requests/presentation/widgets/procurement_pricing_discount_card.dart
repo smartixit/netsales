@@ -52,7 +52,7 @@ class ProcurementPricingDiscountCard extends StatelessWidget {
             AppSpacing.hSm,
             Expanded(
               child: Text(
-                'جاري جلب السعر والخصم الفعلي المعتمد لنقطتك من الخادم...',
+                'جاري جلب السعر والخصم الفعلي المعتمد لنقطتك...',
                 style: AppTypography.bodySmall.copyWith(
                   color: colors.onSurfaceVariant,
                 ),
@@ -89,7 +89,7 @@ class ProcurementPricingDiscountCard extends StatelessWidget {
                   ),
                   AppSpacing.vXxs,
                   Text(
-                    'سيتم احتساب واعتماد الأسعار النهائية سيادياً لدى الخادم عند إرسال الطلب.',
+                    'سيتم اعتماد الأسعار والخصومات الرسمية بدقة عند مراجعة الطلب.',
                     style: AppTypography.bodySmall.copyWith(
                       color: colors.onSurfaceVariant,
                     ),
@@ -143,7 +143,7 @@ class ProcurementPricingDiscountCard extends StatelessWidget {
               ),
               AppSpacing.hXs,
               Text(
-                'التسعير المعتمد من الخادم',
+                'التسعير المعتمد',
                 style: AppTypography.labelMedium.copyWith(
                   color: colors.onSurface,
                   fontWeight: FontWeight.bold,

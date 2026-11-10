@@ -17,8 +17,10 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
+import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -32,6 +34,7 @@ class PosProcurementController extends GetxController {
   final GetPosNetworksListUseCase? getPosNetworksListUseCase;
   final GetPackagesUseCase? getPackagesUseCase;
   final GetEffectivePackageDiscountUseCase? getEffectivePackageDiscountUseCase;
+  final GetProcurementQuoteUseCase? getProcurementQuoteUseCase;
 
   PosProcurementController({
     required this.getRequestsUseCase,
@@ -41,6 +44,7 @@ class PosProcurementController extends GetxController {
     this.getPosNetworksListUseCase,
     this.getPackagesUseCase,
     this.getEffectivePackageDiscountUseCase,
+    this.getProcurementQuoteUseCase,
   });
 
   // State: قائمة الطلبات والترقيم
@@ -80,6 +84,12 @@ class PosProcurementController extends GetxController {
   final isLoadingDiscount = false.obs;
   final discountError = RxnString();
   int _discountLoadRevision = 0;
+
+  // عرض الأسعار الرسمي المعتمد سيادياً من الخادم لكامل سلة التوريد (Phase 3.1 Quote)
+  final serverQuote = Rxn<ProcurementQuoteEntity>();
+  final isLoadingQuote = false.obs;
+  final quoteError = RxnString();
+  int _quoteRevision = 0;
 
   final procurementCart = <ProcurementCartLineEntity>[].obs;
 
@@ -211,6 +221,12 @@ class PosProcurementController extends GetxController {
       (_) => loadRequests(isRefresh: true),
       time: const Duration(milliseconds: 500),
     );
+
+    ever(selectedSaleType, (_) {
+      if (procurementCart.isNotEmpty) {
+        unawaited(fetchServerQuote());
+      }
+    });
 
     loadInitialData();
   }
@@ -423,6 +439,7 @@ class PosProcurementController extends GetxController {
         type: SnackType.success,
       );
     }
+    unawaited(fetchServerQuote());
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
@@ -433,10 +450,76 @@ class PosProcurementController extends GetxController {
 
   void removeCartLine(int packageId) {
     procurementCart.removeWhere((line) => line.package.packageId == packageId);
+    if (procurementCart.isEmpty) {
+      serverQuote.value = null;
+      quoteError.value = null;
+    } else {
+      unawaited(fetchServerQuote());
+    }
   }
 
   void clearProcurementCart() {
     procurementCart.clear();
+    serverQuote.value = null;
+    quoteError.value = null;
+  }
+
+  /// جلب واحتساب عرض الأسعار الرسمي المعتمد سيادياً من الخادم لبنود السلة وطريقة الدفع المختارة
+  Future<void> fetchServerQuote() async {
+    final networkId = selectedNetworkId.value;
+    final posId = selectedPosId.value;
+    final items = procurementCart.toList(growable: false);
+
+    if (networkId == null ||
+        posId == null ||
+        items.isEmpty ||
+        getProcurementQuoteUseCase == null) {
+      serverQuote.value = null;
+      quoteError.value = null;
+      return;
+    }
+
+    final revision = ++_quoteRevision;
+    isLoadingQuote.value = true;
+    quoteError.value = null;
+
+    try {
+      final payload = <String, dynamic>{
+        'network_id': networkId,
+        'pos_id': posId,
+        'sale_type': selectedSaleType.value.wireValue,
+        'items': items
+            .map(
+              (line) => {
+                'package_id': line.package.packageId,
+                'voucher_count': line.voucherCount,
+              },
+            )
+            .toList(growable: false),
+      };
+
+      final quote = await getProcurementQuoteUseCase!(payload);
+
+      if (revision != _quoteRevision ||
+          selectedNetworkId.value != networkId ||
+          selectedPosId.value != posId) {
+        return;
+      }
+
+      serverQuote.value = quote;
+    } on AppException catch (e) {
+      if (revision != _quoteRevision) return;
+      quoteError.value = e.message;
+      serverQuote.value = null;
+    } catch (e) {
+      if (revision != _quoteRevision) return;
+      quoteError.value = 'تعذر جلب عرض الأسعار المعتمد: $e';
+      serverQuote.value = null;
+    } finally {
+      if (revision == _quoteRevision) {
+        isLoadingQuote.value = false;
+      }
+    }
   }
 
   /// اختيار الباقة المطلوبة
@@ -660,10 +743,12 @@ class PosProcurementController extends GetxController {
     );
 
     try {
+      final token = serverQuote.value?.pricingToken;
       final payload = <String, dynamic>{
         'network_id': selectedNetworkId.value!,
         'pos_id': selectedPosId.value!,
         'sale_type': selectedSaleType.value.wireValue,
+        if (token != null && token.isNotEmpty) 'pricing_token': token,
         if (notesController.text.trim().isNotEmpty)
           'request_note': notesController.text.trim(),
         'items': procurementCart
@@ -693,6 +778,11 @@ class PosProcurementController extends GetxController {
     } on AppException catch (e) {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
+      }
+      if (e.message.contains('أسعار') ||
+          e.message.contains('pricing') ||
+          e.message.contains('عرض الأسعار')) {
+        unawaited(fetchServerQuote());
       }
       CustomSnackbar.show(
         title: 'فشل تقديم الطلب',

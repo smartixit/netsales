@@ -7,6 +7,7 @@ import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_cart_section.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_pricing_discount_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_sheet_quantity_section.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
@@ -392,7 +393,12 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
 
               AppSpacing.vLg,
 
-              // 5. ملاحظات إضافية
+              // 5. بطاقة عرض الأسعار الرسمي المعتمد
+              const ProcurementFinancialQuoteCard(),
+
+              AppSpacing.vLg,
+
+              // 6. ملاحظات إضافية
               CustomTextField(
                 controller: controller.notesController,
                 label: 'ملاحظات الطلب (اختياري)',
