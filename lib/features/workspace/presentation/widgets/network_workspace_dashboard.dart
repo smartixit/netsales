@@ -138,11 +138,6 @@ class _DashboardContent extends GetView<NetworkWorkspaceController> {
                 onTap: () => controller.onNavItemSelected(1),
               ),
               _QuickAction(
-                label: 'اشتراك الشبكة والحصص',
-                icon: Icons.card_membership_rounded,
-                onTap: () => Get.toNamed<void>(AppRoutes.networkSubscription),
-              ),
-              _QuickAction(
                 label: 'نقاط البيع',
                 icon: Icons.storefront_outlined,
                 onTap: () => controller.onNavItemSelected(2),
