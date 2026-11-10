@@ -1,4 +1,5 @@
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 
 /// واجهة مستودع كتالوج باقات الكروت (Clean Architecture Domain Contract)
@@ -23,6 +24,13 @@ abstract class PackageCatalogRepository {
 
   /// استرجاع تفاصيل باقة محددة
   Future<PackageEntity> getPackageDetails(int packageId);
+
+  /// استرجاع الخصم الفعلي المعتمد لنقطة بيع على باقة معينة من الخادم
+  Future<EffectivePackageDiscountEntity> getEffectiveDiscount({
+    required int networkId,
+    required int posId,
+    required int packageId,
+  });
 
   /// إنشاء باقة كروت جديدة
   Future<PackageEntity> createPackage(Map<String, dynamic> data);

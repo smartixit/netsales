@@ -2,6 +2,7 @@ import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource.dart';
+import 'package:netsales/features/catalog/data/models/effective_package_discount_model.dart';
 import 'package:netsales/features/catalog/data/models/package_model.dart';
 
 /// تطبيق مصدر البيانات البعيد لكتالوج الباقات عبر ApiService
@@ -55,6 +56,24 @@ class PackageCatalogRemoteDataSourceImpl
     return ApiService.instance.get<PackageModel>(
       ApiConstants.voucherPackage(packageId),
       fromJson: (data) => PackageModel.fromJson(data as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Future<ApiResponse<EffectivePackageDiscountModel>> getEffectiveDiscount({
+    required int networkId,
+    required int posId,
+    required int packageId,
+  }) {
+    return ApiService.instance.get<EffectivePackageDiscountModel>(
+      ApiConstants.voucherPackageDiscountsEffective,
+      queryParameters: {
+        'network_id': networkId,
+        'pos_id': posId,
+        'package_id': packageId,
+      },
+      fromJson: (data) =>
+          EffectivePackageDiscountModel.fromJson(data as Map<String, dynamic>),
     );
   }
 

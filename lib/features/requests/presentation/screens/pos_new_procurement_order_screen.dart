@@ -6,8 +6,9 @@ import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_sheet_quantity_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_cart_section.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_pricing_discount_card.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_sheet_quantity_section.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -279,26 +280,41 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                   );
                 }
 
-                return CustomDropdown<int>(
-                  label: 'اختر باقة الكروت',
-                  searchEnabled: true,
-                  rxValue: controller.selectedPackageId,
-                  items: packages.map((pkg) {
-                    return DropdownItem<int>(
-                      value: pkg.packageId,
-                      child: Text(
-                        '${pkg.packageName} (سعر أساسي: ${pkg.packageVoucherPrice})',
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomDropdown<int>(
+                      label: 'اختر باقة الكروت',
+                      searchEnabled: true,
+                      rxValue: controller.selectedPackageId,
+                      items: packages.map((pkg) {
+                        return DropdownItem<int>(
+                          value: pkg.packageId,
+                          child: Text(
+                            '${pkg.packageName} (سعر أساسي: ${pkg.packageVoucherPrice})',
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (id) {
+                        if (id != null) {
+                          final found = packages.firstWhereOrNull(
+                            (p) => p.packageId == id,
+                          );
+                          if (found != null) controller.onPackageSelected(found);
+                        }
+                      },
+                    ),
+                    if (controller.selectedPackage.value != null) ...[
+                      AppSpacing.vSm,
+                      ProcurementPricingDiscountCard(
+                        package: controller.selectedPackage.value!,
+                        discount: controller.effectiveDiscount.value,
+                        isLoading: controller.isLoadingDiscount.value,
+                        errorMessage: controller.discountError.value,
+                        saleType: controller.selectedSaleType.value,
                       ),
-                    );
-                  }).toList(),
-                  onChanged: (id) {
-                    if (id != null) {
-                      final found = packages.firstWhereOrNull(
-                        (p) => p.packageId == id,
-                      );
-                      if (found != null) controller.onPackageSelected(found);
-                    }
-                  },
+                    ],
+                  ],
                 );
               }),
 

@@ -1,6 +1,7 @@
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource.dart';
+import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 
@@ -81,6 +82,25 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
   @override
   Future<PackageEntity> getPackageDetails(int packageId) async {
     final response = await _remoteDataSource.getPackageDetails(packageId);
+
+    if (response.success && response.data != null) {
+      return response.data!;
+    }
+
+    throw AppException(response.message);
+  }
+
+  @override
+  Future<EffectivePackageDiscountEntity> getEffectiveDiscount({
+    required int networkId,
+    required int posId,
+    required int packageId,
+  }) async {
+    final response = await _remoteDataSource.getEffectiveDiscount(
+      networkId: networkId,
+      posId: posId,
+      packageId: packageId,
+    );
 
     if (response.success && response.data != null) {
       return response.data!;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
@@ -5,7 +7,9 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/form_validators.dart';
+import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discount_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
@@ -27,6 +31,7 @@ class PosProcurementController extends GetxController {
   final GetMyPosUseCase? getMyPosUseCase;
   final GetPosNetworksListUseCase? getPosNetworksListUseCase;
   final GetPackagesUseCase? getPackagesUseCase;
+  final GetEffectivePackageDiscountUseCase? getEffectivePackageDiscountUseCase;
 
   PosProcurementController({
     required this.getRequestsUseCase,
@@ -35,6 +40,7 @@ class PosProcurementController extends GetxController {
     this.getMyPosUseCase,
     this.getPosNetworksListUseCase,
     this.getPackagesUseCase,
+    this.getEffectivePackageDiscountUseCase,
   });
 
   // State: قائمة الطلبات والترقيم
@@ -68,6 +74,13 @@ class PosProcurementController extends GetxController {
   final selectedPackage = Rxn<PackageEntity>();
   final selectedPackageId = RxnInt();
   final isLoadingPackages = false.obs;
+
+  // الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية
+  final effectiveDiscount = Rxn<EffectivePackageDiscountEntity>();
+  final isLoadingDiscount = false.obs;
+  final discountError = RxnString();
+  int _discountLoadRevision = 0;
+
   final procurementCart = <ProcurementCartLineEntity>[].obs;
 
   bool get hasCartItems => procurementCart.isNotEmpty;
@@ -253,10 +266,12 @@ class PosProcurementController extends GetxController {
     selectedPosId.value = posId;
     await WorkspaceService.to.saveActivePosId(posId);
 
-    // تصفير بيانات وسلة وسياق الشبكات والباقات السابقة كلياً
+    // تصفير بيانات وسلة وسياق الشبكات والباقات والخصومات السابقة كلياً
     clearProcurementCart();
     _setSelectedPackage(null);
     _setSelectedNetworkId(null);
+    effectiveDiscount.value = null;
+    discountError.value = null;
     linkedNetworks.clear();
     availablePackages.clear();
 
@@ -315,9 +330,12 @@ class PosProcurementController extends GetxController {
       }
 
       availablePackages.assignAll(paginated.items);
-      _setSelectedPackage(
-        availablePackages.isNotEmpty ? availablePackages.first : null,
-      );
+      final initialPkg = availablePackages.isNotEmpty ? availablePackages.first : null;
+      _setSelectedPackage(initialPkg);
+      if (initialPkg != null) {
+        setDefaultSheetIfEmpty();
+        unawaited(loadEffectiveDiscount());
+      }
     } catch (_) {
       if (selectedNetworkId.value != null &&
           selectedNetworkId.value != networkId) {
@@ -335,6 +353,8 @@ class PosProcurementController extends GetxController {
     _setSelectedNetworkId(networkId);
     clearProcurementCart();
     _setSelectedPackage(null);
+    effectiveDiscount.value = null;
+    discountError.value = null;
     availablePackages.clear();
     clearVoucherQuantity();
     loadNetworkPackages(networkId);
@@ -423,6 +443,51 @@ class PosProcurementController extends GetxController {
   void onPackageSelected(PackageEntity package) {
     _setSelectedPackage(package);
     setDefaultSheetIfEmpty();
+    unawaited(loadEffectiveDiscount());
+  }
+
+  /// استرجاع الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية من Laravel
+  Future<void> loadEffectiveDiscount() async {
+    final posId = selectedPosId.value;
+    final networkId = selectedNetworkId.value;
+    final packageId = selectedPackage.value?.packageId;
+
+    effectiveDiscount.value = null;
+    discountError.value = null;
+
+    if (posId == null ||
+        networkId == null ||
+        packageId == null ||
+        getEffectivePackageDiscountUseCase == null) {
+      return;
+    }
+
+    final revision = ++_discountLoadRevision;
+    isLoadingDiscount.value = true;
+
+    try {
+      final result = await getEffectivePackageDiscountUseCase!(
+        networkId: networkId,
+        posId: posId,
+        packageId: packageId,
+      );
+
+      if (revision != _discountLoadRevision ||
+          selectedPosId.value != posId ||
+          selectedNetworkId.value != networkId ||
+          selectedPackage.value?.packageId != packageId) {
+        return;
+      }
+
+      effectiveDiscount.value = result;
+    } catch (e) {
+      if (revision != _discountLoadRevision) return;
+      discountError.value = e is AppException ? e.message : e.toString();
+    } finally {
+      if (revision == _discountLoadRevision) {
+        isLoadingDiscount.value = false;
+      }
+    }
   }
 
   /// تحميل طلبات التوريد من الخادم مع ترقيم المؤشر
