@@ -11,3 +11,4 @@ class GetActiveNetworkSubscriptionUseCase {
     return _repository.getActiveForNetwork(networkId);
   }
 }
+

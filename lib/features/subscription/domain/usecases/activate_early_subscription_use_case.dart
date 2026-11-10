@@ -11,3 +11,4 @@ class ActivateEarlySubscriptionUseCase {
     return _repository.activateEarlyForNetwork(networkId);
   }
 }
+

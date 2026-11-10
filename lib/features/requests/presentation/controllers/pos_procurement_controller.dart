@@ -4,7 +4,7 @@ import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
+import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
@@ -87,61 +87,99 @@ class PosProcurementController extends GetxController {
         procurementCart.any((line) => line.package.packageId == packageId);
   }
 
-  /// حقل الإدخال بوحدة الأوراق؛ يحول إلى عدد الكروت عند إرسال الطلب.
-  final quantityController = TextEditingController(text: '1');
-  final quantityInput = '1'.obs;
+  /// حقل الإدخال بوحدة الكروت المباشرة؛ يحول إلى كروت ويرسل كـ voucher_count إلى Laravel.
+  final quantityController = TextEditingController();
+  final quantityInput = ''.obs;
   final notesController = TextEditingController();
   final selectedSaleType = SaleType.cash.obs;
   final isSubmitting = false.obs;
 
   int _requestListRevision = 0;
 
-  /// يحول الأوراق إلى voucher_count الذي يقبله عقد Laravel الحالي.
-  /// هذا تحويل وحدة وليس حساباً مالياً.
-  int get requestedVoucherCount {
-    final sheets = double.tryParse(quantityInput.value.trim());
-    final sheetSize = selectedPackage.value?.packageVoucherCount ?? 0;
+  /// سعة الورقة الواحدة للباقة المحددة حالياً.
+  int get currentSheetSize => selectedPackage.value?.packageVoucherCount ?? 0;
 
-    if (sheets == null || !sheets.isFinite || sheetSize <= 0) {
+  /// عدد الكروت المدخل مباشرة.
+  int get requestedVoucherCount {
+    final count = int.tryParse(quantityInput.value.trim());
+    if (count == null || count <= 0) {
       return 0;
     }
-
-    return VoucherSheetCalculator.cardsForSheets(sheets, sheetSize);
+    return count;
   }
 
-  String? validateSheetQuantity(String? value) {
-    final sheets = double.tryParse((value ?? '').trim());
-
-    if (sheets == null || !sheets.isFinite || sheets <= 0) {
-      return 'أدخل عدد أوراق صحيحاً أكبر من صفر.';
-    }
+  /// التحقق من صحة عدد الكروت المدخل بالاعتماد على FormValidators
+  String? validateVoucherQuantity(String? value) {
+    final formatError = FormValidators.positiveIntegerValidator(
+      fieldName: 'عدد الكروت',
+      min: 1,
+    )(value);
+    if (formatError != null) return formatError;
 
     final package = selectedPackage.value;
     if (package == null) {
-      return 'اختر الباقة أولاً حتى يمكن تحويل الأوراق إلى كروت.';
+      return 'اختر الباقة أولاً لتحديد الطلب.';
     }
 
     if (package.packageVoucherCount <= 0) {
       return 'سعة الورقة لهذه الباقة غير صالحة. راجع بيانات الباقة لدى الشبكة.';
     }
 
-    if (VoucherSheetCalculator.cardsForSheets(
-          sheets,
-          package.packageVoucherCount,
-        ) <
-        1) {
-      return 'الكمية المدخلة لا تنتج أي كروت.';
-    }
-
     return null;
   }
 
-  void setSheetCount(String value) {
-    quantityController.text = value;
+  /// التعيين المباشر لعدد الكروت
+  void setVoucherCount(int count) {
+    final safeCount = count < 0 ? 0 : count;
+    final text = safeCount == 0 ? '' : safeCount.toString();
+    quantityController.text = text;
     quantityController.selection = TextSelection.collapsed(
       offset: quantityController.text.length,
     );
-    quantityInput.value = value;
+    quantityInput.value = text;
+  }
+
+  /// الإدخال التراكمي لعدد الكروت (Additive Tapping)
+  void addVoucherQuantity(int additionalCount) {
+    if (additionalCount <= 0) return;
+    final current = requestedVoucherCount;
+    setVoucherCount(current + additionalCount);
+  }
+
+  /// زيادة ورقة واحدة كاملة وفق سعة الباقة المحددة
+  void stepUpSheet() {
+    final sheetSize = currentSheetSize;
+    if (sheetSize <= 0) {
+      addVoucherQuantity(1);
+      return;
+    }
+    addVoucherQuantity(sheetSize);
+  }
+
+  /// إنقاص ورقة واحدة كاملة مع حماية من الأرقام السالبة (Zero Clamp)
+  void stepDownSheet() {
+    final sheetSize = currentSheetSize;
+    final current = requestedVoucherCount;
+    if (current <= 0) return;
+
+    final decrement = sheetSize > 0 ? sheetSize : 1;
+    final target = current - decrement;
+    setVoucherCount(target > 0 ? target : 0);
+  }
+
+  /// تصفير كمية الكروت بنقرة واحدة
+  void clearVoucherQuantity() {
+    setVoucherCount(0);
+  }
+
+  /// تعيين كمية مبدئية لورقة واحدة عند اختيار الباقة إن كان الحقل فارغاً
+  void setDefaultSheetIfEmpty() {
+    if (quantityInput.value.trim().isEmpty || requestedVoucherCount == 0) {
+      final sheetSize = currentSheetSize;
+      if (sheetSize > 0) {
+        setVoucherCount(sheetSize);
+      }
+    }
   }
 
   @override
@@ -298,13 +336,13 @@ class PosProcurementController extends GetxController {
     clearProcurementCart();
     _setSelectedPackage(null);
     availablePackages.clear();
-    setSheetCount('1');
+    clearVoucherQuantity();
     loadNetworkPackages(networkId);
   }
 
   void addOrUpdateCartLine() {
     final package = selectedPackage.value;
-    final sheets = double.tryParse(quantityInput.value.trim());
+    final voucherCount = requestedVoucherCount;
 
     if (package == null) {
       CustomSnackbar.show(
@@ -314,10 +352,10 @@ class PosProcurementController extends GetxController {
       );
       return;
     }
-    if (sheets == null || !sheets.isFinite || sheets <= 0) {
+    if (voucherCount <= 0) {
       CustomSnackbar.show(
-        title: 'كمية الأوراق غير صالحة',
-        message: 'أدخل كمية أكبر من صفر قبل إضافة الباقة.',
+        title: 'كمية الكروت غير صالحة',
+        message: 'أدخل عدداً صحيحاً من الكروت أكبر من صفر قبل إضافة الباقة.',
         type: SnackType.warning,
       );
       return;
@@ -334,28 +372,16 @@ class PosProcurementController extends GetxController {
     if (package.packageVoucherCount <= 0) {
       CustomSnackbar.show(
         title: 'سعة الباقة غير صالحة',
-        message: 'لا يمكن تحويل الأوراق إلى كروت لأن سعة الباقة غير صحيحة.',
+        message: 'بيانات سعة الباقة غير صالحة لدى الشبكة.',
         type: SnackType.error,
       );
       return;
     }
 
-    final voucherCount = VoucherSheetCalculator.cardsForSheets(
-      sheets,
-      package.packageVoucherCount,
-    );
-    if (voucherCount <= 0) {
-      CustomSnackbar.show(
-        title: 'كمية غير صالحة',
-        message: 'الكمية المدخلة لا تنتج أي كروت.',
-        type: SnackType.warning,
-      );
-      return;
-    }
-
+    final calculatedSheets = voucherCount / package.packageVoucherCount;
     final line = ProcurementCartLineEntity(
       package: package,
-      sheets: sheets,
+      sheets: calculatedSheets,
       voucherCount: voucherCount,
     );
     final index = procurementCart.indexWhere(
@@ -366,14 +392,14 @@ class PosProcurementController extends GetxController {
       procurementCart.add(line);
       CustomSnackbar.show(
         title: 'أضيفت الباقة إلى الطلب',
-        message: 'تمت إضافة ${package.packageName} إلى سلة التوريد.',
+        message: 'تمت إضافة ${package.packageName} إلى سلة التوريد ($voucherCount كرت).',
         type: SnackType.success,
       );
     } else {
       procurementCart[index] = line;
       CustomSnackbar.show(
         title: 'تم تحديث كمية الباقة',
-        message: 'تم تحديث كمية ${package.packageName} في سلة التوريد.',
+        message: 'تم تحديث كمية ${package.packageName} إلى $voucherCount كرت.',
         type: SnackType.success,
       );
     }
@@ -382,7 +408,7 @@ class PosProcurementController extends GetxController {
 
   void editCartLine(ProcurementCartLineEntity line) {
     _setSelectedPackage(line.package);
-    setSheetCount(_formatSheetQuantity(line.sheets));
+    setVoucherCount(line.voucherCount);
   }
 
   void removeCartLine(int packageId) {
@@ -393,15 +419,10 @@ class PosProcurementController extends GetxController {
     procurementCart.clear();
   }
 
-  String _formatSheetQuantity(double sheets) {
-    return sheets == sheets.roundToDouble()
-        ? sheets.toInt().toString()
-        : sheets.toString();
-  }
-
   /// اختيار الباقة المطلوبة
   void onPackageSelected(PackageEntity package) {
     _setSelectedPackage(package);
+    setDefaultSheetIfEmpty();
   }
 
   /// تحميل طلبات التوريد من الخادم مع ترقيم المؤشر
@@ -491,7 +512,7 @@ class PosProcurementController extends GetxController {
   void initNewOrderForm() {
     clearProcurementCart();
     _setSelectedPackage(null);
-    setSheetCount('1');
+    clearVoucherQuantity();
     notesController.clear();
     selectedSaleType.value = SaleType.cash;
 
@@ -593,7 +614,7 @@ class PosProcurementController extends GetxController {
       final created = await createRequestUseCase(payload);
       requests.insert(0, created);
       clearProcurementCart();
-      setSheetCount('1');
+      clearVoucherQuantity();
 
       await CustomAnimationOverlay.showSuccess(
         message: 'تم تقديم طلب الكروت بنجاح وهو قيد الانتظار',

@@ -201,14 +201,63 @@ class FormValidators {
   static FormFieldValidator<String> integerValidator({
     String? fieldName,
     bool isRequired = true,
+    int? minValue,
+    int? maxValue,
   }) {
-    return FormBuilderValidators.compose([
-      if (isRequired) required(fieldName: fieldName),
-      FormBuilderValidators.integer(
-        errorText: '$fieldName يجب ان يكون عدد صحيح',
-        checkNullOrEmpty: false,
-      ),
-    ]);
+    final name = fieldName ?? 'هذا الحقل';
+    return _transform(
+      (value) => value.replaceAll(',', '').trim(),
+      FormBuilderValidators.compose([
+        if (isRequired) required(fieldName: name),
+        FormBuilderValidators.integer(
+          errorText: '$name يجب ان يكون عدد صحيح',
+          checkNullOrEmpty: false,
+        ),
+        if (minValue != null)
+          FormBuilderValidators.min(
+            minValue,
+            errorText: '$name يجب ان يكون أكبر من أو يساوي $minValue',
+            checkNullOrEmpty: false,
+          ),
+        if (maxValue != null)
+          FormBuilderValidators.max(
+            maxValue,
+            errorText: '$name يجب ان يكون أقل من أو يساوي $maxValue',
+            checkNullOrEmpty: false,
+          ),
+      ]),
+    );
+  }
+
+  /// التحقق من صحة كمية الكروت أو الوحدات المطلوبة (عدد صحيح موجب > 0)
+  static FormFieldValidator<String> positiveIntegerValidator({
+    String? fieldName,
+    bool isRequired = true,
+    int min = 1,
+    int? max,
+  }) {
+    final name = fieldName ?? 'الكمية';
+    return _transform(
+      (value) => value.replaceAll(',', '').trim(),
+      FormBuilderValidators.compose([
+        if (isRequired) required(fieldName: name),
+        FormBuilderValidators.integer(
+          errorText: '$name يجب أن تكون عدداً صحيحاً',
+          checkNullOrEmpty: false,
+        ),
+        FormBuilderValidators.min(
+          min,
+          errorText: '$name يجب أن تكون $min على الأقل',
+          checkNullOrEmpty: false,
+        ),
+        if (max != null)
+          FormBuilderValidators.max(
+            max,
+            errorText: '$name يجب ألا تتجاوز $max',
+            checkNullOrEmpty: false,
+          ),
+      ]),
+    );
   }
 
   static FormFieldValidator<String> doubleValidator({

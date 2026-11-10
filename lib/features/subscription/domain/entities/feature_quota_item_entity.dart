@@ -42,3 +42,4 @@ class FeatureQuotaItemEntity {
   bool get isNearExhaustion =>
       !isUnlimited && !isExhausted && percentage >= 0.8;
 }
+

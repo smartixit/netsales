@@ -9,7 +9,10 @@ import 'package:netsales/features/requests/presentation/controllers/pos_procurem
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
-/// واجهة كمية التوريد بوحدة الأوراق مع عرض تحويلها إلى voucher_count.
+/// واجهة إدخال كمية التوريد بعدد الكروت المباشر مع دعم:
+/// - الإدخال التراكمي السريع (Additive Presets)
+/// - أزرار زيادة وإنقاص ورقة كاملة مع الحماية من السالب
+/// - التصفير الفوري
 class ProcurementSheetQuantitySection
     extends GetView<PosProcurementController> {
   const ProcurementSheetQuantitySection({super.key});
@@ -21,76 +24,138 @@ class ProcurementSheetQuantitySection
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'كمية التوريد',
-          style: AppTypography.titleSmall.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'كمية الكروت المطلوبة',
+              style: AppTypography.titleSmall.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Obx(() {
+              final count = controller.requestedVoucherCount;
+              if (count <= 0) return const SizedBox.shrink();
+              return GestureDetector(
+                onTap: controller.clearVoucherQuantity,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xs,
+                    vertical: AppSpacing.xxs,
+                  ),
+                  child: Text(
+                    'مسح الكمية',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ],
         ),
         AppSpacing.vXs,
         Text(
-          'أدخل عدد الأوراق أو جزءاً منها؛ ويمكنك كتابة أي كمية غير موجودة في الاختصارات.',
+          'أدخل عدد الكروت المطلوبة مباشرة، أو اضغط على الكبسولات والأزرار للإضافة التراكمية السريعة.',
           style: AppTypography.bodySmall.copyWith(
             color: colors.onSurfaceVariant,
           ),
         ),
         AppSpacing.vSm,
-        CustomTextField(
-          controller: controller.quantityController,
-          label: 'عدد الأوراق',
-          hint: 'مثال: 1 أو 1.5 أو 12',
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          prefixIcon: const Icon(Icons.layers_outlined),
-          validator: controller.validateSheetQuantity,
+
+        // حقل الإدخال مع أزرار التحكم الدقيق (+ ورقة / - ورقة)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // زر إنقاص ورقة كاملة
+            Obx(() {
+              final count = controller.requestedVoucherCount;
+              final canDecrement = count > 0;
+
+              return SizedBox(
+                height: 48,
+                child: CustomButton.outline(
+                  text: '- ورقة',
+                  size: AppButtonSize.small,
+                  icon: Icons.remove_rounded,
+                  onPressed: canDecrement ? controller.stepDownSheet : null,
+                ),
+              );
+            }),
+            AppSpacing.hSm,
+
+            // حقل إدخال الكروت المباشر
+            Expanded(
+              child: CustomTextField(
+                controller: controller.quantityController,
+                label: 'عدد الكروت',
+                hint: 'مثال: 51 أو 102 أو 500',
+                keyboardType: TextInputType.number,
+                prefixIcon: const Icon(Icons.style_outlined),
+                validator: controller.validateVoucherQuantity,
+              ),
+            ),
+            AppSpacing.hSm,
+
+            // زر زيادة ورقة كاملة
+            SizedBox(
+              height: 48,
+              child: CustomButton.outline(
+                text: '+ ورقة',
+                size: AppButtonSize.small,
+                icon: Icons.add_rounded,
+                onPressed: controller.stepUpSheet,
+              ),
+            ),
+          ],
         ),
         AppSpacing.vSm,
+
+        // كبسولات الإضافة التراكمية السريعة (+ كروت / + أوراق)
         Obx(() {
           final package = controller.selectedPackage.value;
-          final presets = VoucherSheetCalculator.getPresets(
-            package?.packageVoucherCount ?? 0,
-          );
+          final sheetSize = package?.packageVoucherCount ?? 0;
+          final presets = VoucherSheetCalculator.getPresets(sheetSize);
 
           if (presets.isEmpty) {
             return const SizedBox.shrink();
           }
 
-          final enteredSheets =
-              double.tryParse(controller.quantityInput.value.trim()) ?? -1;
-
-          return Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
-            children: presets
-                .map((preset) {
-                  final isSelected =
-                      (enteredSheets - preset.sheets).abs() < 1e-9;
-
-                  if (isSelected) {
-                    return CustomButton.secondary(
-                      text: preset.shortLabel,
-                      size: AppButtonSize.small,
-                      onPressed: () =>
-                          controller.setSheetCount(preset.sheets.toString()),
-                    );
-                  }
-
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'إضافة سريعة تراكمية (انقر للإضافة إلى الإجمالي):',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              AppSpacing.vXs,
+              Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                children: presets.map((preset) {
                   return CustomButton.outline(
-                    text: preset.shortLabel,
+                    text: '+ ${preset.shortLabel} (${preset.cards})',
                     size: AppButtonSize.small,
-                    onPressed: () =>
-                        controller.setSheetCount(preset.sheets.toString()),
+                    onPressed: () => controller.addVoucherQuantity(preset.cards),
                   );
-                })
-                .toList(growable: false),
+                }).toList(growable: false),
+              ),
+            ],
           );
         }),
         AppSpacing.vSm,
+
+        // بطاقة توضيحية لعدد الكروت وما يقابلها من أوراق
         Obx(() {
           final package = controller.selectedPackage.value;
           if (package == null) {
             return Text(
-              'اختر الباقة لعرض عدد الكروت المكافئ لسعة الورقة.',
+              'اختر الباقة لعرض تفكيك الكروت وسعة الورقة.',
               style: AppTypography.bodySmall.copyWith(
                 color: colors.onSurfaceVariant,
               ),
@@ -98,10 +163,9 @@ class ProcurementSheetQuantitySection
           }
 
           final voucherCount = controller.requestedVoucherCount;
-          final quantityText = controller.quantityInput.value.trim();
           if (voucherCount <= 0) {
             return Text(
-              'أدخل كمية أوراق صحيحة لعرض عدد الكروت المكافئ.',
+              'أدخل عدد كروت أكبر من صفر لعرض التفكيك.',
               style: AppTypography.bodySmall.copyWith(color: colors.error),
             );
           }
@@ -132,7 +196,7 @@ class ProcurementSheetQuantitySection
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'الكمية التي سترسل إلى النظام',
+                        'إجمالي الكروت المطلوبة للإرسال للنظام',
                         style: AppTypography.bodySmall.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
@@ -147,11 +211,13 @@ class ProcurementSheetQuantitySection
                       ),
                       AppSpacing.vXxs,
                       Text(
-                        '$quantityText ورقة · $breakdown',
+                        'المعادل تقريباً: $breakdown',
                         style: AppTypography.bodySmall.copyWith(
-                          color: colors.onSurfaceVariant,
+                          color: colors.primary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
+                      AppSpacing.vXxs,
                       Text(
                         'سعة الورقة لهذه الباقة: ${package.packageVoucherCount} كرت',
                         style: AppTypography.bodySmall.copyWith(

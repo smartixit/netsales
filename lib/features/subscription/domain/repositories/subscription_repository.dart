@@ -15,3 +15,4 @@ abstract interface class SubscriptionRepository {
     int amount = 1,
   });
 }
+

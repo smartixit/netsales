@@ -47,3 +47,4 @@ class ProviderSubscriptionEntity {
   /// هل توجد أي حصص على وشك النفاد؟
   bool get hasNearExhaustionQuotas => quotas.any((q) => q.isNearExhaustion);
 }
+
