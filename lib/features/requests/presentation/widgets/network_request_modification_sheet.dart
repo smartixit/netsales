@@ -9,6 +9,7 @@ import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 class NetworkRequestModificationSheet
@@ -52,13 +53,13 @@ class NetworkRequestModificationSheet
             );
             final name = package?.packageName ?? 'باقة #${line.packageId}';
             final sheetSize = package?.packageVoucherCount ?? 0;
+            final packageColor = CustomColorPicker.parseHex(package?.packageColor);
             final breakdown = sheetSize > 0
                 ? VoucherSheetCalculator.describe(line.voucherCount, sheetSize)
                 : '';
 
             return Container(
               margin: EdgeInsets.only(bottom: AppSpacing.sm),
-              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: colors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -66,100 +67,134 @@ class NetworkRequestModificationSheet
                   color: colors.outlineVariant.withValues(alpha: 0.35),
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // الشريط اللوني المميز للباقة
+                      Container(
+                        width: 5,
+                        color: packageColor,
+                      ),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              name,
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w700,
+                        child: Padding(
+                          padding: EdgeInsets.all(AppSpacing.md),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: packageColor.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                                    ),
+                                    child: Icon(
+                                      Icons.wifi_tethering_rounded,
+                                      color: packageColor,
+                                      size: 18,
+                                    ),
+                                  ),
+                                  AppSpacing.hSm,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          name,
+                                          style: AppTypography.bodyMedium.copyWith(
+                                            color: colors.onSurface,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        if (breakdown.isNotEmpty) ...[
+                                          AppSpacing.vXxs,
+                                          Text(
+                                            breakdown,
+                                            style: AppTypography.bodySmall.copyWith(
+                                              color: colors.primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  CustomButton.icon(
+                                    icon: Icons.delete_outline_rounded,
+                                    size: AppButtonSize.small,
+                                    foregroundColor: colors.error,
+                                    onPressed: () =>
+                                        controller.removeModificationPackage(line.packageId),
+                                  ),
+                                ],
                               ),
-                            ),
-                            if (breakdown.isNotEmpty) ...[
-                              AppSpacing.vXxs,
-                              Text(
-                                breakdown,
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: colors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              AppSpacing.vSm,
+                              Row(
+                                children: [
+                                  // زر إنقاص ورقة كاملة
+                                  CustomButton.outline(
+                                    text: '- ورقة',
+                                    size: AppButtonSize.small,
+                                    icon: Icons.remove_rounded,
+                                    onPressed: line.voucherCount <= 1
+                                        ? null
+                                        : () => controller.stepModificationSheet(
+                                              line.packageId,
+                                              isIncrement: false,
+                                            ),
+                                  ),
+                                  AppSpacing.hSm,
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: AppSpacing.sm,
+                                        vertical: AppSpacing.xs,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colors.surfaceContainerLowest,
+                                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                                        border: Border.all(
+                                          color: colors.outlineVariant.withValues(alpha: 0.3),
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${line.voucherCount} كرت',
+                                          style: AppTypography.titleSmall.copyWith(
+                                            color: colors.onSurface,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  AppSpacing.hSm,
+                                  // زر زيادة ورقة كاملة
+                                  CustomButton.outline(
+                                    text: '+ ورقة',
+                                    size: AppButtonSize.small,
+                                    icon: Icons.add_rounded,
+                                    onPressed: line.voucherCount >= 1000000
+                                        ? null
+                                        : () => controller.stepModificationSheet(
+                                              line.packageId,
+                                              isIncrement: true,
+                                            ),
+                                  ),
+                                ],
                               ),
                             ],
-                          ],
-                        ),
-                      ),
-                      CustomButton.icon(
-                        icon: Icons.delete_outline_rounded,
-                        size: AppButtonSize.small,
-                        foregroundColor: colors.error,
-                        onPressed: () =>
-                            controller.removeModificationPackage(line.packageId),
-                      ),
-                    ],
-                  ),
-                  AppSpacing.vSm,
-                  Row(
-                    children: [
-                      // زر إنقاص ورقة كاملة
-                      CustomButton.outline(
-                        text: '- ورقة',
-                        size: AppButtonSize.small,
-                        icon: Icons.remove_rounded,
-                        onPressed: line.voucherCount <= 1
-                            ? null
-                            : () => controller.stepModificationSheet(
-                                  line.packageId,
-                                  isIncrement: false,
-                                ),
-                      ),
-                      AppSpacing.hSm,
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                            vertical: AppSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.surfaceContainerLowest,
-                            borderRadius: BorderRadius.circular(AppRadius.sm),
-                            border: Border.all(
-                              color: colors.outlineVariant.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${line.voucherCount} كرت',
-                              style: AppTypography.titleSmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
                           ),
                         ),
                       ),
-                      AppSpacing.hSm,
-                      // زر زيادة ورقة كاملة
-                      CustomButton.outline(
-                        text: '+ ورقة',
-                        size: AppButtonSize.small,
-                        icon: Icons.add_rounded,
-                        onPressed: line.voucherCount >= 1000000
-                            ? null
-                            : () => controller.stepModificationSheet(
-                                  line.packageId,
-                                  isIncrement: true,
-                                ),
-                      ),
                     ],
                   ),
-                ],
+                ),
               ),
             );
           }),
@@ -228,15 +263,28 @@ class NetworkRequestModificationSheet
             ),
             AppSpacing.vSm,
             ...preview.items.map(
-              (item) => Padding(
-                padding: EdgeInsets.only(bottom: AppSpacing.xs),
-                child: Text(
-                  '${item.packageName} — ${item.voucherCount} كرت — خصم ${item.itemDiscount}% — ${AmountFormatter.format(item.itemTotalAmount.toString())}',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurfaceVariant,
+              (item) {
+                final package = controller.availablePackages.firstWhereOrNull(
+                  (p) => p.packageId == item.packageId,
+                );
+                final sheetSize = package?.packageVoucherCount ?? 0;
+                final desc = sheetSize > 0
+                    ? VoucherSheetCalculator.describe(item.voucherCount, sheetSize)
+                    : null;
+                final qtyLabel = desc != null
+                    ? '$desc (${item.voucherCount} كرت)'
+                    : '${item.voucherCount} كرت';
+
+                return Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                  child: Text(
+                    '${item.packageName} — $qtyLabel — خصم ${item.itemDiscount}% — ${AmountFormatter.format(item.itemTotalAmount.toString())}',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
             if (preview.removedItems.isNotEmpty) ...[
               AppSpacing.vSm,
@@ -245,10 +293,23 @@ class NetworkRequestModificationSheet
                 style: AppTypography.labelLarge.copyWith(color: colors.error),
               ),
               ...preview.removedItems.map(
-                (item) => Text(
-                  '${item.packageName} — ${item.originalVoucherCount} كرت',
-                  style: AppTypography.bodySmall.copyWith(color: colors.error),
-                ),
+                (item) {
+                  final package = controller.availablePackages.firstWhereOrNull(
+                    (p) => p.packageId == item.packageId,
+                  );
+                  final sheetSize = package?.packageVoucherCount ?? 0;
+                  final desc = sheetSize > 0
+                      ? VoucherSheetCalculator.describe(item.originalVoucherCount, sheetSize)
+                      : null;
+                  final qtyLabel = desc != null
+                      ? '$desc (${item.originalVoucherCount} كرت)'
+                      : '${item.originalVoucherCount} كرت';
+
+                  return Text(
+                    '${item.packageName} — $qtyLabel',
+                    style: AppTypography.bodySmall.copyWith(color: colors.error),
+                  );
+                },
               ),
             ],
             if (!preview.hasModifications)

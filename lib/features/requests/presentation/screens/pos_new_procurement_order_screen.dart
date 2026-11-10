@@ -16,6 +16,7 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 
 /// شاشة إنشاء وتقديم طلب توريد كروت جديد من نقطة البيع (New Procurement Order Wizard)
 class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
@@ -288,10 +289,26 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                       searchEnabled: true,
                       rxValue: controller.selectedPackageId,
                       items: packages.map((pkg) {
+                        final pkgColor = CustomColorPicker.parseHex(pkg.packageColor);
                         return DropdownItem<int>(
                           value: pkg.packageId,
-                          child: Text(
-                            '${pkg.packageName} (سعر أساسي: ${pkg.packageVoucherPrice})',
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: pkgColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              AppSpacing.hSm,
+                              Expanded(
+                                child: Text(
+                                  '${pkg.packageName} (سعر أساسي: ${pkg.packageVoucherPrice})',
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       }).toList(),

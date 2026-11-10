@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/data/models/package_model.dart';
+import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 import 'package:netsales/features/catalog/domain/usecases/create_package_use_case.dart';
@@ -175,6 +176,11 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
       'الباقة غير موجودة',
       code: '404',
     );
+  }
+
+  @override
+  Future<EffectivePackageDiscountEntity> getEffectiveDiscount({required int networkId, required int posId, required int packageId}) {
+    throw UnimplementedError();
   }
 }
 

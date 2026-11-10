@@ -48,10 +48,10 @@ class PackageSpecsMobileLayout extends StatelessWidget {
             AppSpacing.hSm,
             Expanded(
               child: PackageSpecTile(
-                icon: Icons.confirmation_number_outlined,
-                title: 'عدد الكروت',
+                icon: Icons.layers_outlined,
+                title: 'سعة الورقة',
                 value: '${package.packageVoucherCount}',
-                subtitle: 'كرت / حزمة',
+                subtitle: 'كرت / ورقة',
               ),
             ),
           ],
