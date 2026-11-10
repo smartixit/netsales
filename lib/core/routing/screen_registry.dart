@@ -52,7 +52,7 @@ abstract final class ScreenRegistry {
     // -------------------------------------------------------------------------
     ScreenDescriptor(
       screenId: 'AUTH-01',
-      route: AppRoutes.login,
+      route: AppRoutes.unsupportedPlatform,
       titleAr: 'تسجيل الدخول',
       titleEn: 'Sign In',
       workspace: AppWorkspace.unsupported,

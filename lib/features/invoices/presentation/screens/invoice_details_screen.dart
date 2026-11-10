@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -139,28 +138,23 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                         color: colors.outlineVariant.withValues(alpha: 0.3),
                       ),
                       AppSpacing.vXs,
-                      _buildInfoRow(
-                        'تاريخ الإصدار:',
-                        invoice.invoiceDate ?? invoice.createdAt ?? '-',
-                        context,
+                      _InvoiceInfoRow(
+                        label: 'تاريخ الإصدار:',
+                        value: invoice.invoiceDate ?? invoice.createdAt ?? '-',
                       ),
-                      _buildInfoRow(
-                        'نوع البيع:',
-                        invoice.saleTypeLabel ?? saleTypePresentation.label,
-                        context,
+                      _InvoiceInfoRow(
+                        label: 'نوع البيع:',
+                        value:
+                            invoice.saleTypeLabel ?? saleTypePresentation.label,
                       ),
                       if (invoice.requestId != null)
                         InkWell(
-                          onTap: () {
-                            Get.toNamed<void>(
-                              AppRoutes.voucherRequestDetails,
-                              arguments: invoice.requestId,
-                            );
-                          },
-                          child: _buildInfoRow(
-                            'طلب التوريد المرتبط:',
-                            'طلب #${invoice.requestId} (عرض)',
-                            context,
+                          onTap: () => controller.openVoucherRequestDetails(
+                            invoice.requestId!,
+                          ),
+                          child: _InvoiceInfoRow(
+                            label: 'طلب التوريد المرتبط:',
+                            value: 'طلب #${invoice.requestId} (عرض)',
                             isHighlight: true,
                           ),
                         ),
@@ -191,21 +185,19 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                         ),
                       ),
                       AppSpacing.vSm,
-                      _buildInfoRow(
-                        'المزود (الشبكة):',
-                        invoice.networkName ?? 'شبكة #${invoice.networkId}',
-                        context,
+                      _InvoiceInfoRow(
+                        label: 'المزود (الشبكة):',
+                        value:
+                            invoice.networkName ?? 'شبكة #${invoice.networkId}',
                       ),
-                      _buildInfoRow(
-                        'العميل (نقطة البيع):',
-                        invoice.posName ?? 'نقطة بيع #${invoice.posId}',
-                        context,
+                      _InvoiceInfoRow(
+                        label: 'العميل (نقطة البيع):',
+                        value: invoice.posName ?? 'نقطة بيع #${invoice.posId}',
                       ),
                       if (invoice.posPhoneNumber != null)
-                        _buildInfoRow(
-                          'هاتف نقطة البيع:',
-                          invoice.posPhoneNumber!,
-                          context,
+                        _InvoiceInfoRow(
+                          label: 'هاتف نقطة البيع:',
+                          value: invoice.posPhoneNumber!,
                         ),
                     ],
                   ),
@@ -411,13 +403,21 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
       );
     });
   }
+}
 
-  Widget _buildInfoRow(
-    String label,
-    String value,
-    BuildContext context, {
-    bool isHighlight = false,
-  }) {
+class _InvoiceInfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isHighlight;
+
+  const _InvoiceInfoRow({
+    required this.label,
+    required this.value,
+    this.isHighlight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3.0),

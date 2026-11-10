@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/services/invoice_document_service.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_invoice_details_use_case.dart';
@@ -128,5 +129,13 @@ class InvoiceDetailsController extends GetxController {
     } finally {
       isExporting.value = false;
     }
+  }
+
+  /// فتح تفاصيل طلب التوريد المرتبط
+  Future<void> openVoucherRequestDetails(int requestId) async {
+    await Get.toNamed<void>(
+      AppRoutes.voucherRequestDetails,
+      arguments: requestId,
+    );
   }
 }

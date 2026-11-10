@@ -1,15 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/sale_type.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_direct_invoice_controller.dart';
-import 'package:netsales/features/invoices/presentation/controllers/network_invoices_controller.dart';
 import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_cart_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
@@ -84,10 +80,9 @@ class NetworkDirectInvoiceScreen
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionHeading(
-                  context,
-                  'الجهة المستفيدة',
-                  'حدد الشبكة ونقطة البيع المرتبطة بها.',
+                const _SectionHeading(
+                  title: 'الجهة المستفيدة',
+                  description: 'حدد الشبكة ونقطة البيع المرتبطة بها.',
                 ),
                 AppSpacing.vSm,
                 CustomDropdown<int>(
@@ -115,7 +110,7 @@ class NetworkDirectInvoiceScreen
                       networkId.toString(),
                   onChanged: (networkId) {
                     if (networkId != null) {
-                      unawaited(controller.onNetworkSelected(networkId));
+                      controller.onNetworkSelected(networkId);
                     }
                   },
                 ),
@@ -125,12 +120,11 @@ class NetworkDirectInvoiceScreen
                     return const LinearProgressIndicator();
                   }
                   if (controller.linkedPos.isEmpty) {
-                    return _buildInlineNotice(
-                      context,
-                      controller.selectedNetworkId.value == null
+                    return _InlineNotice(
+                      message: controller.selectedNetworkId.value == null
                           ? 'اختر الشبكة أولاً لعرض نقاط البيع المرتبطة بها.'
                           : 'لا توجد نقاط بيع نشطة مرتبطة بهذه الشبكة.',
-                      Icons.store_mall_directory_outlined,
+                      icon: Icons.store_mall_directory_outlined,
                     );
                   }
                   return CustomDropdown<int>(
@@ -170,10 +164,10 @@ class NetworkDirectInvoiceScreen
                   ),
                 ],
                 AppSpacing.vLg,
-                _buildSectionHeading(
-                  context,
-                  'باقات الكروت والكميات',
-                  'أدخل عدد الكروت المطلوب لكل باقة، ثم أضفها إلى الفاتورة.',
+                const _SectionHeading(
+                  title: 'باقات الكروت والكميات',
+                  description:
+                      'أدخل عدد الكروت المطلوب لكل باقة، ثم أضفها إلى الفاتورة.',
                 ),
                 AppSpacing.vSm,
                 Obx(() {
@@ -181,12 +175,11 @@ class NetworkDirectInvoiceScreen
                     return const LinearProgressIndicator();
                   }
                   if (controller.availablePackages.isEmpty) {
-                    return _buildInlineNotice(
-                      context,
-                      controller.selectedNetworkId.value == null
+                    return _InlineNotice(
+                      message: controller.selectedNetworkId.value == null
                           ? 'اختر الشبكة أولاً لعرض باقاتها.'
                           : 'لا توجد باقات نشطة متاحة لهذه الشبكة.',
-                      Icons.inventory_2_outlined,
+                      icon: Icons.inventory_2_outlined,
                     );
                   }
                   return CustomDropdown<int>(
@@ -268,10 +261,10 @@ class NetworkDirectInvoiceScreen
                 AppSpacing.vLg,
                 const DirectInvoiceCartSection(),
                 AppSpacing.vLg,
-                _buildSectionHeading(
-                  context,
-                  'طريقة البيع',
-                  'اختر نوع الفاتورة؛ يتم التحقق من الرصيد والسقف الائتماني لدى الخادم.',
+                const _SectionHeading(
+                  title: 'طريقة البيع',
+                  description:
+                      'اختر نوع الفاتورة؛ يتم التحقق من الرصيد والسقف الائتماني لدى الخادم.',
                 ),
                 AppSpacing.vSm,
                 Obx(
@@ -298,7 +291,7 @@ class NetworkDirectInvoiceScreen
                   ),
                 ),
                 AppSpacing.vMd,
-                _buildFinancialAuthorityNotice(context),
+                const _FinancialAuthorityNotice(),
                 AppSpacing.vLg,
                 Obx(
                   () => CustomButton.primary(
@@ -310,7 +303,7 @@ class NetworkDirectInvoiceScreen
                         !controller.isSubmitting.value &&
                         controller.hasSelectedPos &&
                         controller.cart.isNotEmpty,
-                    onPressed: _submitInvoice,
+                    onPressed: controller.submitAndNavigate,
                   ),
                 ),
                 AppSpacing.vLg,
@@ -321,12 +314,19 @@ class NetworkDirectInvoiceScreen
       }),
     );
   }
+}
 
-  Widget _buildSectionHeading(
-    BuildContext context,
-    String title,
-    String description,
-  ) {
+class _SectionHeading extends StatelessWidget {
+  final String title;
+  final String description;
+
+  const _SectionHeading({
+    required this.title,
+    required this.description,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,12 +348,19 @@ class NetworkDirectInvoiceScreen
       ],
     );
   }
+}
 
-  Widget _buildInlineNotice(
-    BuildContext context,
-    String message,
-    IconData icon,
-  ) {
+class _InlineNotice extends StatelessWidget {
+  final String message;
+  final IconData icon;
+
+  const _InlineNotice({
+    required this.message,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     return Container(
       width: double.infinity,
@@ -381,8 +388,13 @@ class NetworkDirectInvoiceScreen
       ),
     );
   }
+}
 
-  Widget _buildFinancialAuthorityNotice(BuildContext context) {
+class _FinancialAuthorityNotice extends StatelessWidget {
+  const _FinancialAuthorityNotice();
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     return Container(
       width: double.infinity,
@@ -409,15 +421,5 @@ class NetworkDirectInvoiceScreen
         ],
       ),
     );
-  }
-
-  Future<void> _submitInvoice() async {
-    final invoice = await controller.submitInvoice();
-    if (invoice == null) return;
-
-    if (Get.isRegistered<NetworkInvoicesController>()) {
-      await Get.find<NetworkInvoicesController>().loadInvoices(isRefresh: true);
-    }
-    await Get.offNamed<void>(AppRoutes.saleInvoiceDetails, arguments: invoice);
   }
 }

@@ -9,6 +9,8 @@ import 'package:netsales/features/membership/domain/entities/membership_entity.d
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 import 'package:netsales/features/membership/domain/usecases/membership_use_cases.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/dialogs/custom_dialog.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class MembershipController extends GetxController {
@@ -166,6 +168,46 @@ class MembershipController extends GetxController {
       await removeMember(isNetwork, id, member.userId);
       await loadMembers();
     }, 'تمت إزالة العضوية.');
+  }
+
+  Future<void> promptChangeRole(MembershipEntity member) async {
+    final selected = await CustomBottomSheet.show<int>(
+      title: 'تغيير الدور التشغيلي',
+      subtitle: 'اختر الدور الجديد لهذا العضو.',
+      leadingIcon: Icons.badge_outlined,
+      scrollable: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: roles
+            .map(
+              (role) => ListTile(
+                title: Text(role.name),
+                trailing: role.roleId == member.roleId
+                    ? const Icon(Icons.check_circle_rounded)
+                    : null,
+                onTap: () => Get.back<int>(result: role.roleId),
+              ),
+            )
+            .toList(),
+      ),
+    );
+    if (selected != null && selected != member.roleId) {
+      await changeRole(member, selected);
+    }
+  }
+
+  Future<void> promptRemoveMember(MembershipEntity member) async {
+    final confirmed = await CustomDialog.show(
+      type: DialogType.danger,
+      title: 'إزالة عضو من الفريق',
+      message:
+          'هل أنت متأكد من رغبتك في إزالة ${member.fullName} نهائياً؟ ستلغى صلاحياته فوراً.',
+      confirmLabel: 'نعم، إزالة العضو',
+      cancelLabel: 'إلغاء',
+    );
+    if (confirmed == true) {
+      await remove(member);
+    }
   }
 
   Future<void> _mutate(

@@ -10,8 +10,6 @@ import 'package:netsales/features/membership/domain/entities/membership_entity.d
 import 'package:netsales/features/membership/presentation/controllers/membership_controller.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/dialogs/custom_dialog.dart';
-import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 class MembershipList extends StatelessWidget {
   const MembershipList({super.key, required this.controller});
@@ -125,13 +123,13 @@ class _MembershipTile extends StatelessWidget {
                   icon: Icons.swap_horiz_rounded,
                   onPressed: controller.roles.isEmpty
                       ? null
-                      : () => _chooseRole(context, member),
+                      : () => controller.promptChangeRole(member),
                 ),
                 CustomButton.text(
                   text: 'إزالة',
                   icon: Icons.person_remove_alt_1_rounded,
                   foregroundColor: colors.error,
-                  onPressed: () => _confirmRemove(member),
+                  onPressed: () => controller.promptRemoveMember(member),
                 ),
               ],
             ),
@@ -139,44 +137,5 @@ class _MembershipTile extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _chooseRole(
-    BuildContext context,
-    MembershipEntity member,
-  ) async {
-    final selected = await CustomBottomSheet.show<int>(
-      title: 'تغيير الدور التشغيلي',
-      subtitle: 'اختر الدور الجديد لهذا العضو.',
-      leadingIcon: Icons.badge_outlined,
-      scrollable: true,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: controller.roles
-            .map(
-              (role) => ListTile(
-                title: Text(role.name),
-                trailing: role.roleId == member.roleId
-                    ? const Icon(Icons.check_circle_rounded)
-                    : null,
-                onTap: () => Get.back<int>(result: role.roleId),
-              ),
-            )
-            .toList(),
-      ),
-    );
-    if (selected != null && selected != member.roleId) {
-      await controller.changeRole(member, selected);
-    }
-  }
-
-  Future<void> _confirmRemove(MembershipEntity member) async {
-    final confirmed = await CustomDialog.showDanger(
-      title: 'إزالة العضو',
-      message:
-          'سيتم إنهاء عضوية ${member.fullName} في هذه الشبكة. لن يتم حذف حساب المستخدم.',
-      confirmLabel: 'إزالة العضوية',
-    );
-    if (confirmed == true) await controller.remove(member);
   }
 }

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
@@ -26,6 +29,20 @@ class NetworkInvoicesController extends GetxController {
   final nextCursor = RxnString();
 
   bool get hasMore => nextCursor.value != null;
+
+  bool get canCreateInvoice =>
+      PermissionService.to.can(AppPermissions.salesCreate);
+
+  void navigateToCreateInvoice() {
+    Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice);
+  }
+
+  void openInvoiceDetails(InvoiceEntity invoice) {
+    Get.toNamed<void>(
+      AppRoutes.saleInvoiceDetails,
+      arguments: invoice,
+    );
+  }
 
   // فلاتر البحث ونوع البيع
   final searchController = TextEditingController();

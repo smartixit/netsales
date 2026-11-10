@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
@@ -12,10 +13,11 @@ import 'package:netsales/features/commercial/domain/entities/network_entity.dart
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_invoice_cart_line_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/create_direct_sale_invoice_use_case.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_cart_line_entity.dart';
+import 'package:netsales/features/invoices/presentation/controllers/network_invoices_controller.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -441,5 +443,18 @@ class NetworkDirectInvoiceController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
     }
+  }
+
+  Future<void> submitAndNavigate() async {
+    final invoice = await submitInvoice();
+    if (invoice == null) return;
+
+    if (Get.isRegistered<NetworkInvoicesController>()) {
+      await Get.find<NetworkInvoicesController>().loadInvoices(isRefresh: true);
+    }
+    await Get.offNamed<void>(
+      AppRoutes.saleInvoiceDetails,
+      arguments: invoice,
+    );
   }
 }

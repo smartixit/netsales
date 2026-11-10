@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_invoices_controller.dart';
@@ -27,14 +24,13 @@ class NetworkWholesaleInvoicesScreen
       appBar: AppBar(
         title: const Text('فواتير مبيعات الجملة'),
         actions: [
-          if (PermissionService.to.can(AppPermissions.salesCreate))
+          if (controller.canCreateInvoice)
             CustomButton.icon(
               icon: Icons.add_rounded,
               tooltip: 'إنشاء فاتورة مبيعات مباشرة',
               backgroundColor: Colors.transparent,
               foregroundColor: colors.primary,
-              onPressed: () =>
-                  Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice),
+              onPressed: controller.navigateToCreateInvoice,
             ),
           AppSpacing.hXs,
         ],
@@ -140,12 +136,7 @@ class NetworkWholesaleInvoicesScreen
                         return InvoiceCard(
                           invoice: invoice,
                           isNetworkView: true,
-                          onTap: () {
-                            Get.toNamed<void>(
-                              AppRoutes.saleInvoiceDetails,
-                              arguments: invoice,
-                            );
-                          },
+                          onTap: () => controller.openInvoiceDetails(invoice),
                         );
                       },
                     ),

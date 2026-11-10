@@ -60,25 +60,22 @@ class InvoiceSearchFilterHeader extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildFilterChip(
+                _InvoiceFilterChip(
                   label: 'كافة المعاملات',
                   isSelected: selectedSaleType == null,
                   onSelected: () => onSaleTypeChanged(null),
-                  context: context,
                 ),
                 AppSpacing.hSm,
-                _buildFilterChip(
+                _InvoiceFilterChip(
                   label: 'نقدية (كاش)',
                   isSelected: selectedSaleType == 'CASH',
                   onSelected: () => onSaleTypeChanged('CASH'),
-                  context: context,
                 ),
                 AppSpacing.hSm,
-                _buildFilterChip(
+                _InvoiceFilterChip(
                   label: 'آجلة (ائتمان)',
                   isSelected: selectedSaleType == 'CREDIT',
                   onSelected: () => onSaleTypeChanged('CREDIT'),
-                  context: context,
                 ),
               ],
             ),
@@ -87,13 +84,21 @@ class InvoiceSearchFilterHeader extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildFilterChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onSelected,
-    required BuildContext context,
-  }) {
+class _InvoiceFilterChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onSelected;
+
+  const _InvoiceFilterChip({
+    required this.label,
+    required this.isSelected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
 
     return GestureDetector(

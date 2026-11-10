@@ -89,7 +89,7 @@ class CustomTextField extends StatefulWidget {
 class _CustomTextFieldState extends State<CustomTextField>
     with SingleTickerProviderStateMixin {
   late bool _obscureText;
-  late final FocusNode _effectiveFocusNode;
+  late FocusNode _effectiveFocusNode;
   bool _isInternalFocusNode = false;
   late final AnimationController _shakeController;
   late final Animation<Offset> _shakeAnimation;
@@ -158,6 +158,28 @@ class _CustomTextFieldState extends State<CustomTextField>
   }
 
   @override
+  void didUpdateWidget(CustomTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.obscureText != oldWidget.obscureText) {
+      _obscureText = widget.obscureText;
+    }
+    if (widget.focusNode != oldWidget.focusNode) {
+      _effectiveFocusNode.removeListener(_handleFocusChange);
+      if (_isInternalFocusNode) {
+        _effectiveFocusNode.dispose();
+      }
+      if (widget.focusNode == null) {
+        _effectiveFocusNode = FocusNode();
+        _isInternalFocusNode = true;
+      } else {
+        _effectiveFocusNode = widget.focusNode!;
+        _isInternalFocusNode = false;
+      }
+      _effectiveFocusNode.addListener(_handleFocusChange);
+    }
+  }
+
+  @override
   void dispose() {
     _shakeController.dispose();
     _effectiveFocusNode.removeListener(_handleFocusChange);
@@ -168,11 +190,16 @@ class _CustomTextFieldState extends State<CustomTextField>
   }
 
   void _handleFocusChange() {
+    if (!mounted) return;
     if (!_effectiveFocusNode.hasFocus) {
-      final text = widget.controller.text;
-      final trimmed = text.trim();
-      if (text != trimmed) {
-        widget.controller.text = trimmed;
+      try {
+        final text = widget.controller.text;
+        final trimmed = text.trim();
+        if (text != trimmed) {
+          widget.controller.text = trimmed;
+        }
+      } catch (_) {
+        // حماية ضد استدعاء المتحكم بعد تحريره أثناء الانتقال بين الشاشات
       }
     }
   }
@@ -193,6 +220,7 @@ class _CustomTextFieldState extends State<CustomTextField>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isCurrentRoute = ModalRoute.of(context)?.isCurrent ?? true;
 
     final shouldDenyAllSpaces =
         widget.allowSpaces == false ||
@@ -210,44 +238,50 @@ class _CustomTextFieldState extends State<CustomTextField>
       if (widget.inputFormatters != null) ...widget.inputFormatters!,
     ];
 
-    return AnimatedBuilder(
-      animation: _shakeAnimation,
-      builder: (context, child) =>
-          Transform.translate(offset: _shakeAnimation.value, child: child),
-      child: TextFormField(
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+    return IgnorePointer(
+      ignoring: !isCurrentRoute,
+      child: AnimatedBuilder(
+        animation: _shakeAnimation,
+        builder: (context, child) =>
+            Transform.translate(offset: _shakeAnimation.value, child: child),
+        child: TextFormField(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
 
-        controller: widget.controller,
+          controller: widget.controller,
 
-        focusNode: _effectiveFocusNode,
+          focusNode: _effectiveFocusNode,
 
-        obscureText: _obscureText,
+          obscureText: _obscureText,
 
-        enabled: widget.enabled,
+          enabled: widget.enabled,
 
-        readOnly: widget.readOnly,
+          readOnly: widget.readOnly,
 
-        autofocus: widget.autofocus,
+          autofocus: widget.autofocus,
 
-        keyboardType: widget.keyboardType,
+          keyboardType: widget.keyboardType,
 
-        textInputAction: widget.textInputAction,
+          textInputAction: widget.textInputAction,
 
-        maxLines: widget.obscureText ? 1 : widget.maxLines,
+          maxLines: widget.obscureText ? 1 : widget.maxLines,
 
-        minLines: widget.minLines,
+          minLines: widget.minLines,
 
-        maxLength: widget.maxLength,
+          maxLength: widget.maxLength,
 
-        onChanged: widget.onChanged,
+          onChanged: widget.onChanged,
 
-        onFieldSubmitted: (value) {
-          final trimmed = widget.controller.text.trim();
-          if (widget.controller.text != trimmed) {
-            widget.controller.text = trimmed;
-          }
-          widget.onFieldSubmitted?.call(trimmed);
-        },
+          onFieldSubmitted: (value) {
+            try {
+              final trimmed = widget.controller.text.trim();
+              if (widget.controller.text != trimmed) {
+                widget.controller.text = trimmed;
+              }
+              widget.onFieldSubmitted?.call(trimmed);
+            } catch (_) {
+              widget.onFieldSubmitted?.call(value.trim());
+            }
+          },
 
         validator: _effectiveValidator,
 
@@ -349,6 +383,7 @@ class _CustomTextFieldState extends State<CustomTextField>
 
           //   borderSide: BorderSide(color: colorScheme.error, width: 1.8),
           // ),
+          ),
         ),
       ),
     );
