@@ -3,9 +3,9 @@ import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/features/expenses/domain/repositories/expense_repository.dart';
 
 class GetExpensesUseCase {
-  final ExpenseRepository repository;
-
   const GetExpensesUseCase(this.repository);
+
+  final ExpenseRepository repository;
 
   Future<PaginatedList<ExpenseEntity>> call({
     required int networkId,
@@ -13,6 +13,7 @@ class GetExpensesUseCase {
     String? fromDate,
     String? toDate,
     String? cursor,
+    int perPage = 20,
   }) {
     return repository.getExpenses(
       networkId: networkId,
@@ -20,6 +21,7 @@ class GetExpensesUseCase {
       fromDate: fromDate,
       toDate: toDate,
       cursor: cursor,
+      perPage: perPage,
     );
   }
 }

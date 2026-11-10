@@ -32,4 +32,6 @@ abstract interface class ExpenseRepository {
     required int expenseId,
     required int attachmentId,
   });
+
+  Future<void> deleteExpense(int expenseId);
 }

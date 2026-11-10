@@ -24,4 +24,6 @@ abstract interface class ExpenseRemoteDataSource {
     required int expenseId,
     required int attachmentId,
   });
+
+  Future<ApiResponse<bool>> deleteExpense(int expenseId);
 }

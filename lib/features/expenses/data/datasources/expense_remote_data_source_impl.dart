@@ -128,4 +128,12 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
       fromJson: (data) => data is bool ? data : true,
     );
   }
+
+  @override
+  Future<ApiResponse<bool>> deleteExpense(int expenseId) {
+    return ApiService.instance.delete<bool>(
+      ApiConstants.expense(expenseId),
+      fromJson: (data) => data is bool ? data : true,
+    );
+  }
 }

@@ -42,7 +42,7 @@ import 'package:netsales/features/invoices/presentation/screens/network_wholesal
 import 'package:netsales/features/invoices/presentation/screens/network_direct_invoice_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
 import 'package:netsales/features/expenses/presentation/bindings/network_operating_expenses_binding.dart';
-import 'package:netsales/features/expenses/presentation/screens/network_operating_expenses_screens.dart';
+import 'package:netsales/features/expenses/presentation/screens/network_operating_expenses_screen.dart';
 import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/finance/presentation/screens/network_wallet_dashboard_screen.dart';
 import 'package:netsales/features/finance/presentation/screens/pos_debt_ledger_screen.dart';
