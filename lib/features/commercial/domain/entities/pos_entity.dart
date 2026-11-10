@@ -11,6 +11,8 @@ class PosEntity {
   final String? posAddress;
   final int? governorateId;
   final int? directorateId;
+  final String? governorateName;
+  final String? directorateName;
   final String? status;
   final String? statusLabel;
   final String? ownerName;
@@ -28,6 +30,8 @@ class PosEntity {
     this.posAddress,
     this.governorateId,
     this.directorateId,
+    this.governorateName,
+    this.directorateName,
     this.status,
     this.statusLabel,
     this.ownerName,

@@ -51,4 +51,14 @@ abstract interface class FinanceRemoteDataSource {
     Map<String, dynamic> data, {
     required String idempotencyKey,
   });
+
+  Future<ApiResponse<dynamic>> transferPosToNetwork(
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  });
+
+  Future<ApiResponse<dynamic>> updatePosCreditLimit(
+    int posWalletId, {
+    required double? creditLimit,
+  });
 }

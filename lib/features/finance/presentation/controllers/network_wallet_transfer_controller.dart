@@ -8,19 +8,29 @@ import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/finance/domain/entities/network_wallet_entity.dart';
 import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cases.dart';
+import 'package:netsales/features/finance/domain/usecases/transfer_pos_to_network_use_case.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
+
+enum WalletTransferDirection {
+  networkToPos,
+  posToNetwork,
+}
 
 class NetworkWalletTransferController extends GetxController {
   final TransferFromNetworkToPosUseCase transferFromNetworkToPosUseCase;
+  final TransferPosToNetworkUseCase transferPosToNetworkUseCase;
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
 
   NetworkWalletTransferController({
     required this.transferFromNetworkToPosUseCase,
+    required this.transferPosToNetworkUseCase,
     required this.getNetworkPosListUseCase,
   });
 
+  final transferDirection = WalletTransferDirection.networkToPos.obs;
   final selectedWallet = Rxn<NetworkWalletEntity>();
   final posList = <PosEntity>[].obs;
   final selectedPosId = RxnInt();
@@ -180,10 +190,20 @@ class NetworkWalletTransferController extends GetxController {
         : posList.firstWhereOrNull((pos) => pos.posId == posId);
   }
 
+  void setTransferDirection(WalletTransferDirection direction) {
+    if (transferDirection.value != direction) {
+      transferDirection.value = direction;
+      _pendingKey = null;
+      _pendingFingerprint = null;
+    }
+  }
+
   Future<bool> submitTransfer() async {
     final wallet = selectedWallet.value;
     final posId = selectedPosId.value;
     final amount = double.tryParse(amountController.text.trim());
+    final isReverse = transferDirection.value == WalletTransferDirection.posToNetwork;
+
     if (wallet == null ||
         !wallet.status ||
         posId == null ||
@@ -191,7 +211,7 @@ class NetworkWalletTransferController extends GetxController {
         !amount.isFinite ||
         amount < 0.01) {
       CustomSnackbar.show(
-        title: 'بيانات التحويل غير مكتملة',
+        title: 'بيانات العملية غير مكتملة',
         message: 'اختر نقطة البيع وأدخل مبلغاً صحيحاً لا يقل عن 0.01.',
         type: SnackType.warning,
       );
@@ -199,7 +219,22 @@ class NetworkWalletTransferController extends GetxController {
     }
     if (isSubmitting.value) return false;
 
+    final posName = selectedPos.value?.posName ?? 'نقطة البيع #$posId';
+
+    final confirmed = await CustomDialog.show(
+      type: isReverse ? DialogType.warning : DialogType.confirmation,
+      title: isReverse ? 'تأكيد استرجاع الرصيد' : 'تأكيد تحويل الرصيد',
+      message: isReverse
+          ? 'هل أنت متأكد من استرجاع مبلغ $amount من محفظة ($posName) وإيداعه في محفظة الشبكة؟'
+          : 'هل أنت متأكد من تحويل مبلغ $amount من محفظة الشبكة إلى ($posName)؟',
+      confirmLabel: isReverse ? 'تأكيد الاسترجاع' : 'تأكيد التحويل',
+      cancelLabel: 'إلغاء',
+    );
+
+    if (confirmed != true) return false;
+
     final fingerprint = jsonEncode({
+      'direction': transferDirection.value.name,
       'network_id': wallet.networkId,
       'pos_id': posId,
       'amount': amount,
@@ -213,19 +248,35 @@ class NetworkWalletTransferController extends GetxController {
     isSubmitting.value = true;
     try {
       await CustomAnimationOverlay.showLoading(
-        message: 'جاري تحويل الرصيد والتحقق من صلاحية المحفظة...',
+        message: isReverse
+            ? 'جاري استرجاع الرصيد من محفظة نقطة البيع...'
+            : 'جاري تحويل الرصيد والتحقق من صلاحية المحفظة...',
       );
-      await transferFromNetworkToPosUseCase(
-        networkId: wallet.networkId,
-        posId: posId,
-        amount: amount,
-        statement: statementController.text.trim().isEmpty
-            ? null
-            : statementController.text.trim(),
-        idempotencyKey: _pendingKey,
-      );
+      if (isReverse) {
+        await transferPosToNetworkUseCase(
+          networkId: wallet.networkId,
+          posId: posId,
+          amount: amount,
+          statement: statementController.text.trim().isEmpty
+              ? null
+              : statementController.text.trim(),
+          idempotencyKey: _pendingKey,
+        );
+      } else {
+        await transferFromNetworkToPosUseCase(
+          networkId: wallet.networkId,
+          posId: posId,
+          amount: amount,
+          statement: statementController.text.trim().isEmpty
+              ? null
+              : statementController.text.trim(),
+          idempotencyKey: _pendingKey,
+        );
+      }
       await CustomAnimationOverlay.showSuccess(
-        message: 'تم تحويل الرصيد إلى نقطة البيع بنجاح',
+        message: isReverse
+            ? 'تم استرجاع الرصيد إلى محفظة الشبكة بنجاح'
+            : 'تم تحويل الرصيد إلى نقطة البيع بنجاح',
       );
       _pendingKey = null;
       _pendingFingerprint = null;
@@ -239,7 +290,7 @@ class NetworkWalletTransferController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
       CustomSnackbar.show(
-        title: 'فشل التحويل',
+        title: isReverse ? 'فشل الاسترجاع' : 'فشل التحويل',
         message: e.message,
         type: SnackType.error,
       );
@@ -249,10 +300,10 @@ class NetworkWalletTransferController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
       CustomSnackbar.show(
-        title: 'تعذر تنفيذ التحويل',
+        title: isReverse ? 'تعذر تنفيذ الاسترجاع' : 'تعذر تنفيذ التحويل',
         message: AppException.sanitizeMessage(
           e,
-          fallback: 'تعذر تحويل الرصيد. يرجى المحاولة مجدداً.',
+          fallback: 'تعذر إتمام العملية المالية. يرجى المحاولة مجدداً.',
         ),
         type: SnackType.error,
       );

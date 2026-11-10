@@ -180,6 +180,21 @@ class MockFinanceRepository implements FinanceRepository {
     String? statement,
     String? idempotencyKey,
   }) async {}
+
+  @override
+  Future<void> transferPosToNetwork({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+    String? idempotencyKey,
+  }) async {}
+
+  @override
+  Future<void> updatePosCreditLimit({
+    required int posWalletId,
+    required double? creditLimit,
+  }) async {}
 }
 
 void main() {

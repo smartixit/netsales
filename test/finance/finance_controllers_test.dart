@@ -21,6 +21,7 @@ import 'package:netsales/features/finance/domain/usecases/debt_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/repayment_use_cases.dart';
+import 'package:netsales/features/finance/domain/usecases/transfer_pos_to_network_use_case.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_transfer_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_debt_ledger_controller.dart';
@@ -319,6 +320,21 @@ class TestFinanceRepository implements FinanceRepository {
     required double amount,
     String? statement,
     String? idempotencyKey,
+  }) async {}
+
+  @override
+  Future<void> transferPosToNetwork({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+    String? idempotencyKey,
+  }) async {}
+
+  @override
+  Future<void> updatePosCreditLimit({
+    required int posWalletId,
+    required double? creditLimit,
   }) async {}
 }
 
@@ -1001,6 +1017,9 @@ void main() {
 
         final controller = NetworkWalletTransferController(
           transferFromNetworkToPosUseCase: TransferFromNetworkToPosUseCase(
+            repository,
+          ),
+          transferPosToNetworkUseCase: TransferPosToNetworkUseCase(
             repository,
           ),
           getNetworkPosListUseCase: GetNetworkPosListUseCase(

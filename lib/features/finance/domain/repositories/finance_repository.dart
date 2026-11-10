@@ -92,4 +92,17 @@ abstract interface class FinanceRepository {
     String? statement,
     String? idempotencyKey,
   });
+
+  Future<void> transferPosToNetwork({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+    String? idempotencyKey,
+  });
+
+  Future<void> updatePosCreditLimit({
+    required int posWalletId,
+    required double? creditLimit,
+  });
 }

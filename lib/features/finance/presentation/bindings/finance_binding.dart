@@ -15,6 +15,8 @@ import 'package:netsales/features/finance/domain/usecases/debt_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/repayment_use_cases.dart';
+import 'package:netsales/features/finance/domain/usecases/transfer_pos_to_network_use_case.dart';
+import 'package:netsales/features/finance/domain/usecases/update_pos_credit_limit_use_case.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_transfer_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_debt_ledger_controller.dart';
@@ -103,6 +105,14 @@ class FinanceBinding extends Bindings {
       () => TransferFromNetworkToPosUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
+    Get.lazyPut<TransferPosToNetworkUseCase>(
+      () => TransferPosToNetworkUseCase(Get.find<FinanceRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<UpdatePosCreditLimitUseCase>(
+      () => UpdatePosCreditLimitUseCase(Get.find<FinanceRepository>()),
+      fenix: true,
+    );
 
     Get.lazyPut<GetDebtSummaryUseCase>(
       () => GetDebtSummaryUseCase(Get.find<FinanceRepository>()),
@@ -180,6 +190,8 @@ class FinanceBinding extends Bindings {
       () => NetworkWalletTransferController(
         transferFromNetworkToPosUseCase:
             Get.find<TransferFromNetworkToPosUseCase>(),
+        transferPosToNetworkUseCase:
+            Get.find<TransferPosToNetworkUseCase>(),
         getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
       ),
       fenix: true,

@@ -170,4 +170,27 @@ class FinanceRemoteDataSourceImpl implements FinanceRemoteDataSource {
       idempotencyKey: idempotencyKey,
     );
   }
+
+  @override
+  Future<ApiResponse<dynamic>> transferPosToNetwork(
+    Map<String, dynamic> data, {
+    required String idempotencyKey,
+  }) {
+    return ApiService.instance.post<dynamic>(
+      ApiConstants.posWalletTransferToNetwork,
+      data: data,
+      idempotencyKey: idempotencyKey,
+    );
+  }
+
+  @override
+  Future<ApiResponse<dynamic>> updatePosCreditLimit(
+    int posWalletId, {
+    required double? creditLimit,
+  }) {
+    return ApiService.instance.put<dynamic>(
+      ApiConstants.posWalletCreditLimit(posWalletId),
+      data: {'credit_limit': creditLimit},
+    );
+  }
 }

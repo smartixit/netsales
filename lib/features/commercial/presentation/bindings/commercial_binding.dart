@@ -1,4 +1,10 @@
 import 'package:get/get.dart';
+import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:netsales/features/auth/data/datasources/auth_remote_data_source_impl.dart';
+import 'package:netsales/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:netsales/features/auth/domain/repositories/auth_repository.dart';
+import 'package:netsales/features/auth/domain/usecases/get_directorates_use_case.dart';
+import 'package:netsales/features/auth/domain/usecases/get_governorates_use_case.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source_impl.dart';
 import 'package:netsales/features/commercial/data/repositories/commercial_repository_impl.dart';
@@ -85,7 +91,23 @@ class CommercialBinding extends Bindings {
       ),
     );
 
-    // 4. Controller
+    // 4. Geography (المحافظات والمديريات)
+    if (!Get.isRegistered<AuthRemoteDataSource>()) {
+      Get.lazyPut<AuthRemoteDataSource>(() => const AuthRemoteDataSourceImpl());
+    }
+    if (!Get.isRegistered<AuthRepository>()) {
+      Get.lazyPut<AuthRepository>(
+        () => AuthRepositoryImpl(Get.find<AuthRemoteDataSource>()),
+      );
+    }
+    if (!Get.isRegistered<GetGovernoratesUseCase>()) {
+      Get.lazyPut(() => GetGovernoratesUseCase(Get.find<AuthRepository>()));
+    }
+    if (!Get.isRegistered<GetDirectoratesUseCase>()) {
+      Get.lazyPut(() => GetDirectoratesUseCase(Get.find<AuthRepository>()));
+    }
+
+    // 5. Controller
     Get.lazyPut<CommercialDirectoryController>(
       () => CommercialDirectoryController(
         getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
@@ -108,6 +130,8 @@ class CommercialBinding extends Bindings {
             Get.find<ConfirmNetworkPosLinkChallengeUseCase>(),
         revokeNetworkPosLinkChallengeUseCase:
             Get.find<RevokeNetworkPosLinkChallengeUseCase>(),
+        getGovernoratesUseCase: Get.find<GetGovernoratesUseCase>(),
+        getDirectoratesUseCase: Get.find<GetDirectoratesUseCase>(),
       ),
     );
   }

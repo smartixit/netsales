@@ -1,6 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
+import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
+import 'package:netsales/features/auth/domain/usecases/get_directorates_use_case.dart';
+import 'package:netsales/features/auth/domain/usecases/get_governorates_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
@@ -43,6 +47,8 @@ class CommercialDirectoryController extends GetxController {
     this.previewNetworkPosLinkChallengeUseCase,
     this.confirmNetworkPosLinkChallengeUseCase,
     this.revokeNetworkPosLinkChallengeUseCase,
+    this.getGovernoratesUseCase,
+    this.getDirectoratesUseCase,
   });
 
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
@@ -64,6 +70,53 @@ class CommercialDirectoryController extends GetxController {
   confirmNetworkPosLinkChallengeUseCase;
   final RevokeNetworkPosLinkChallengeUseCase?
   revokeNetworkPosLinkChallengeUseCase;
+  final GetGovernoratesUseCase? getGovernoratesUseCase;
+  final GetDirectoratesUseCase? getDirectoratesUseCase;
+
+  // ============================================================
+  // البيانات الجغرافية الموحدة (المحافظات والمديريات)
+  // ============================================================
+
+  /// قائمة المحافظات المتاحة
+  final RxList<GovernorateEntity> governorates = <GovernorateEntity>[].obs;
+
+  /// حالة تحميل قائمة المحافظات
+  final RxBool isLoadingGovernorates = false.obs;
+
+  /// جلب المحافظات إذا لم تكن محملة مسبقاً
+  Future<void> loadGovernorates() async {
+    if (governorates.isNotEmpty) return;
+    try {
+      isLoadingGovernorates.value = true;
+      final useCase = getGovernoratesUseCase ??
+          (Get.isRegistered<GetGovernoratesUseCase>()
+              ? Get.find<GetGovernoratesUseCase>()
+              : null);
+      if (useCase != null) {
+        final list = await useCase.execute();
+        governorates.assignAll(list);
+      }
+    } catch (_) {
+    } finally {
+      isLoadingGovernorates.value = false;
+    }
+  }
+
+  /// جلب مديريات محافظة معينة
+  Future<List<DirectorateEntity>> loadDirectorates(int governorateId) async {
+    try {
+      final useCase = getDirectoratesUseCase ??
+          (Get.isRegistered<GetDirectoratesUseCase>()
+              ? Get.find<GetDirectoratesUseCase>()
+              : null);
+      if (useCase != null) {
+        return await useCase.execute(governorateId);
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
 
   // ============================================================
   // حالات القائمة التفاعلية مع دعم الترقيم بالمؤشر

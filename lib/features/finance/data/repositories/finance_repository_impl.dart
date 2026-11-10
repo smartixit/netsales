@@ -419,4 +419,49 @@ class FinanceRepositoryImpl implements FinanceRepository {
       );
     }
   }
+
+  @override
+  Future<void> transferPosToNetwork({
+    required int networkId,
+    required int posId,
+    required double amount,
+    String? statement,
+    String? idempotencyKey,
+  }) async {
+    final payload = <String, dynamic>{
+      'network_id': networkId,
+      'pos_id': posId,
+      'amount': amount,
+      'statement': ?statement,
+    };
+    final res = await remoteDataSource.transferPosToNetwork(
+      payload,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
+    if (!res.success) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر استرجاع الرصيد من نقطة البيع إلى محفظة الشبكة.',
+        code: 'POS_TO_NETWORK_TRANSFER_REQUEST_FAILED',
+      );
+    }
+  }
+
+  @override
+  Future<void> updatePosCreditLimit({
+    required int posWalletId,
+    required double? creditLimit,
+  }) async {
+    final res = await remoteDataSource.updatePosCreditLimit(
+      posWalletId,
+      creditLimit: creditLimit,
+    );
+    if (!res.success) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر تحديث السقف الائتماني لنقطة البيع.',
+        code: 'POS_CREDIT_LIMIT_UPDATE_FAILED',
+      );
+    }
+  }
 }

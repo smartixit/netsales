@@ -12,6 +12,8 @@ class NetworkModel extends NetworkEntity {
     super.networkAddress,
     super.governorateId,
     super.directorateId,
+    super.governorateName,
+    super.directorateName,
     super.status,
     super.statusLabel,
     super.ownerName,
@@ -34,6 +36,20 @@ class NetworkModel extends NetworkEntity {
       ownerName = json['owner_name']?.toString();
     }
 
+    String? governorateName;
+    if (json['governorate'] is Map) {
+      governorateName = json['governorate']['governorate_name']?.toString();
+    } else if (json['governorate_name'] != null) {
+      governorateName = json['governorate_name']?.toString();
+    }
+
+    String? directorateName;
+    if (json['directorate'] is Map) {
+      directorateName = json['directorate']['directorate_name']?.toString();
+    } else if (json['directorate_name'] != null) {
+      directorateName = json['directorate_name']?.toString();
+    }
+
     return NetworkModel(
       networkId: _toInt(json['network_id']),
       ownerId: _toInt(json['owner_id']),
@@ -47,6 +63,8 @@ class NetworkModel extends NetworkEntity {
       directorateId: json['directorate_id'] != null
           ? _toInt(json['directorate_id'])
           : null,
+      governorateName: governorateName,
+      directorateName: directorateName,
       status: json['status']?.toString(),
       statusLabel: json['status_label']?.toString(),
       ownerName: ownerName,
