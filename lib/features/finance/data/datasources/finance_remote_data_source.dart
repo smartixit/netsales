@@ -61,4 +61,36 @@ abstract interface class FinanceRemoteDataSource {
     int posWalletId, {
     required double? creditLimit,
   });
+
+  Future<ApiResponse<dynamic>> depositToPosWallet(
+    int posWalletId, {
+    required double amount,
+    required String statement,
+    String? logDate,
+    required String idempotencyKey,
+  });
+
+  Future<ApiResponse<dynamic>> withdrawFromPosWallet(
+    int posWalletId, {
+    required double amount,
+    required String statement,
+    String? logDate,
+    required String idempotencyKey,
+  });
+
+  Future<ApiResponse<dynamic>> depositToNetworkWallet(
+    int networkWalletId, {
+    required double amount,
+    required String statement,
+    String? logDate,
+    required String idempotencyKey,
+  });
+
+  Future<ApiResponse<dynamic>> withdrawFromNetworkWallet(
+    int networkWalletId, {
+    required double amount,
+    required String statement,
+    String? logDate,
+    required String idempotencyKey,
+  });
 }

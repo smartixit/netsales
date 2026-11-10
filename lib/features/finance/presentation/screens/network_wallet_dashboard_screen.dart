@@ -13,6 +13,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_transfer_controller.dart';
+import 'package:netsales/features/finance/presentation/widgets/manual_wallet_transaction_sheet.dart';
 import 'package:netsales/features/finance/presentation/widgets/network_wallet_log_item_row.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_selector_skeleton.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_log_entry_skeleton.dart';
@@ -67,22 +68,46 @@ class NetworkWalletDashboardScreen
 
                 return Padding(
                   padding: EdgeInsets.only(top: AppSpacing.sm),
-                  child: CustomButton.primary(
-                    text: 'تحويل رصيد إلى نقطة بيع',
-                    prefix: Icons.swap_horiz_rounded,
-                    width: double.infinity,
-                    onPressed: () {
-                      final transferController =
-                          Get.find<NetworkWalletTransferController>();
-                      unawaited(transferController.initialize(wallet));
-                      Get.bottomSheet<void>(
-                        const NetworkWalletTransferSheet(),
-                        isScrollControlled: true,
-                        isDismissible: false,
-                        enableDrag: false,
-                        backgroundColor: Colors.transparent,
-                      );
-                    },
+                  child: Column(
+                    children: [
+                      CustomButton.primary(
+                        text: 'تحويل رصيد إلى نقطة بيع',
+                        prefix: Icons.swap_horiz_rounded,
+                        width: double.infinity,
+                        onPressed: () {
+                          final transferController =
+                              Get.find<NetworkWalletTransferController>();
+                          unawaited(transferController.initialize(wallet));
+                          Get.bottomSheet<void>(
+                            const NetworkWalletTransferSheet(),
+                            isScrollControlled: true,
+                            isDismissible: false,
+                            enableDrag: false,
+                            backgroundColor: Colors.transparent,
+                          );
+                        },
+                      ),
+                      AppSpacing.vXs,
+                      CustomButton.outline(
+                        text: 'إدراج قيد مالي مباشر بمحفظة الشبكة',
+                        prefix: Icons.account_balance_wallet_outlined,
+                        width: double.infinity,
+                        onPressed: () {
+                          Get.bottomSheet<void>(
+                            ManualWalletTransactionSheet(
+                              walletId: wallet.walletId,
+                              accountName: wallet.networkName ??
+                                  'محفظة الشبكة #${wallet.networkId}',
+                              currentBalance: wallet.walletBalance,
+                              isPosWallet: false,
+                              onSuccess: () => controller.loadWallets(),
+                            ),
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 );
               }),

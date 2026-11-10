@@ -13,12 +13,14 @@ import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
+import 'package:netsales/features/finance/presentation/widgets/manual_wallet_transaction_sheet.dart';
 import 'package:netsales/features/finance/presentation/widgets/update_pos_credit_limit_sheet.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 import 'package:netsales/widgets/toasts/custom_toast.dart';
 
 /// نافذة استعراض وتحديث بيانات نقطة البيع
@@ -379,7 +381,7 @@ class PosDetailsBottomSheet {
 
             AppSpacing.vLg,
 
-            // زر تعديل السقف الائتماني (لمالكي الشبكة المصرح لهم)
+            // أزرار العمليات المالية والائتمانية (لمالكي الشبكة المصرح لهم)
             if (PermissionService.to.can(AppPermissions.posWalletsManage) ||
                 PermissionService.to.can(AppPermissions.posWalletsEdit)) ...[
               CustomButton.outline(
@@ -390,6 +392,31 @@ class PosDetailsBottomSheet {
                     UpdatePosCreditLimitSheet(
                       posWalletId: pos.posId,
                       posName: pos.posName,
+                    ),
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                  );
+                },
+              ),
+              AppSpacing.vXs,
+              CustomButton.outline(
+                text: 'إدراج قيد تسوية مالي في محفظة النقطة',
+                icon: Icons.account_balance_wallet_outlined,
+                onPressed: () {
+                  Get.bottomSheet<void>(
+                    ManualWalletTransactionSheet(
+                      walletId: pos.posId,
+                      accountName: pos.posName,
+                      currentBalance: 0.0,
+                      isPosWallet: true,
+                      onSuccess: () {
+                        CustomSnackbar.show(
+                          title: 'تم إدراج القيد',
+                          message:
+                              'تم إدراج القيد المالي في محفظة نقطة البيع بنجاح.',
+                          type: SnackType.success,
+                        );
+                      },
                     ),
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,

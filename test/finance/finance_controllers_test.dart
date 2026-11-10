@@ -336,6 +336,42 @@ class TestFinanceRepository implements FinanceRepository {
     required int posWalletId,
     required double? creditLimit,
   }) async {}
+
+  @override
+  Future<void> depositToPosWallet({
+    required int posWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  }) async {}
+
+  @override
+  Future<void> withdrawFromPosWallet({
+    required int posWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  }) async {}
+
+  @override
+  Future<void> depositToNetworkWallet({
+    required int networkWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  }) async {}
+
+  @override
+  Future<void> withdrawFromNetworkWallet({
+    required int networkWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  }) async {}
 }
 
 void main() {

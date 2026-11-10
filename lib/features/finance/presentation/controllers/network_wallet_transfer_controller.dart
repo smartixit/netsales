@@ -202,7 +202,6 @@ class NetworkWalletTransferController extends GetxController {
     final wallet = selectedWallet.value;
     final posId = selectedPosId.value;
     final amount = double.tryParse(amountController.text.trim());
-    final isReverse = transferDirection.value == WalletTransferDirection.posToNetwork;
 
     if (wallet == null ||
         !wallet.status ||
@@ -222,19 +221,17 @@ class NetworkWalletTransferController extends GetxController {
     final posName = selectedPos.value?.posName ?? 'نقطة البيع #$posId';
 
     final confirmed = await CustomDialog.show(
-      type: isReverse ? DialogType.warning : DialogType.confirmation,
-      title: isReverse ? 'تأكيد استرجاع الرصيد' : 'تأكيد تحويل الرصيد',
-      message: isReverse
-          ? 'هل أنت متأكد من استرجاع مبلغ $amount من محفظة ($posName) وإيداعه في محفظة الشبكة؟'
-          : 'هل أنت متأكد من تحويل مبلغ $amount من محفظة الشبكة إلى ($posName)؟',
-      confirmLabel: isReverse ? 'تأكيد الاسترجاع' : 'تأكيد التحويل',
+      type: DialogType.confirmation,
+      title: 'تأكيد تحويل الرصيد',
+      message:
+          'هل أنت متأكد من تحويل مبلغ $amount من محفظة الشبكة إلى ($posName)؟',
+      confirmLabel: 'تأكيد التحويل',
       cancelLabel: 'إلغاء',
     );
 
     if (confirmed != true) return false;
 
     final fingerprint = jsonEncode({
-      'direction': transferDirection.value.name,
       'network_id': wallet.networkId,
       'pos_id': posId,
       'amount': amount,
@@ -248,35 +245,19 @@ class NetworkWalletTransferController extends GetxController {
     isSubmitting.value = true;
     try {
       await CustomAnimationOverlay.showLoading(
-        message: isReverse
-            ? 'جاري استرجاع الرصيد من محفظة نقطة البيع...'
-            : 'جاري تحويل الرصيد والتحقق من صلاحية المحفظة...',
+        message: 'جاري تحويل الرصيد والتحقق من صلاحية المحفظة...',
       );
-      if (isReverse) {
-        await transferPosToNetworkUseCase(
-          networkId: wallet.networkId,
-          posId: posId,
-          amount: amount,
-          statement: statementController.text.trim().isEmpty
-              ? null
-              : statementController.text.trim(),
-          idempotencyKey: _pendingKey,
-        );
-      } else {
-        await transferFromNetworkToPosUseCase(
-          networkId: wallet.networkId,
-          posId: posId,
-          amount: amount,
-          statement: statementController.text.trim().isEmpty
-              ? null
-              : statementController.text.trim(),
-          idempotencyKey: _pendingKey,
-        );
-      }
+      await transferFromNetworkToPosUseCase(
+        networkId: wallet.networkId,
+        posId: posId,
+        amount: amount,
+        statement: statementController.text.trim().isEmpty
+            ? null
+            : statementController.text.trim(),
+        idempotencyKey: _pendingKey,
+      );
       await CustomAnimationOverlay.showSuccess(
-        message: isReverse
-            ? 'تم استرجاع الرصيد إلى محفظة الشبكة بنجاح'
-            : 'تم تحويل الرصيد إلى نقطة البيع بنجاح',
+        message: 'تم تحويل الرصيد إلى نقطة البيع بنجاح',
       );
       _pendingKey = null;
       _pendingFingerprint = null;
@@ -290,7 +271,7 @@ class NetworkWalletTransferController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
       CustomSnackbar.show(
-        title: isReverse ? 'فشل الاسترجاع' : 'فشل التحويل',
+        title: 'فشل التحويل',
         message: e.message,
         type: SnackType.error,
       );
@@ -300,10 +281,10 @@ class NetworkWalletTransferController extends GetxController {
         await CustomAnimationOverlay.hide();
       }
       CustomSnackbar.show(
-        title: isReverse ? 'تعذر تنفيذ الاسترجاع' : 'تعذر تنفيذ التحويل',
+        title: 'تعذر تنفيذ التحويل',
         message: AppException.sanitizeMessage(
           e,
-          fallback: 'تعذر إتمام العملية المالية. يرجى المحاولة مجدداً.',
+          fallback: 'تعذر إتمام عملية التحويل. يرجى المحاولة مجدداً.',
         ),
         type: SnackType.error,
       );

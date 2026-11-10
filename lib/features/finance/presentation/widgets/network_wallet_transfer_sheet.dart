@@ -6,7 +6,6 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
-import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -19,42 +18,16 @@ class NetworkWalletTransferSheet
   Widget build(BuildContext context) {
     return Obx(() {
       final wallet = controller.selectedWallet.value;
-      final isNetworkToPos =
-          controller.transferDirection.value ==
-          WalletTransferDirection.networkToPos;
 
       return CustomBottomSheet(
-        title: isNetworkToPos
-            ? 'تحويل رصيد من محفظة الشبكة'
-            : 'استرجاع رصيد من محفظة نقطة البيع',
+        title: 'تحويل رصيد من محفظة الشبكة',
         subtitle: wallet?.networkName ?? 'شبكة #${wallet?.networkId ?? ''}',
         scrollable: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // شريط تبديل اتجاه العملية باستخدام CustomSegmentedBar الموحد
-            CustomSegmentedBar(
-              selectedIndex: isNetworkToPos ? 0 : 1,
-              onSegmentChanged: (index) {
-                controller.setTransferDirection(
-                  index == 0
-                      ? WalletTransferDirection.networkToPos
-                      : WalletTransferDirection.posToNetwork,
-                );
-              },
-              items: const [
-                CustomSegmentItem(
-                  label: 'تحويل إلى النقطة',
-                  icon: Icons.arrow_downward_rounded,
-                ),
-                CustomSegmentItem(
-                  label: 'استرجاع للشبكة',
-                  icon: Icons.arrow_upward_rounded,
-                ),
-              ],
-            ),
-            AppSpacing.vMd,
+            AppSpacing.vSm,
             if (controller.isLoadingPos.value &&
                 !controller.hasLoadedPosList.value)
               const CustomSkeletonFeed(itemCount: 2)
@@ -71,7 +44,7 @@ class NetworkWalletTransferSheet
               const CustomEmptyState(
                 icon: Icons.point_of_sale_outlined,
                 title: 'لا توجد نقاط بيع مرتبطة',
-                subtitle: 'لا توجد نقطة بيع نشطة يمكن إجراء العملية معها.',
+                subtitle: 'لا توجد نقطة بيع نشطة يمكن تحويل الرصيد إليها.',
               )
             else
               Column(
@@ -87,9 +60,7 @@ class NetworkWalletTransferSheet
                     AppSpacing.vXs,
                   ],
                   CustomDropdown<int>(
-                    label: isNetworkToPos
-                        ? 'نقطة البيع المستفيدة'
-                        : 'نقطة البيع المصدر (المسترجع منها)',
+                    label: 'نقطة البيع المستفيدة',
                     hint: 'ابحث واختر نقطة البيع',
                     prefixIcon: Icons.storefront_outlined,
                     isRequired: true,
@@ -146,8 +117,8 @@ class NetworkWalletTransferSheet
             AppSpacing.vMd,
             CustomTextField(
               controller: controller.amountController,
-              label: isNetworkToPos ? 'مبلغ التحويل' : 'مبلغ الاسترجاع',
-              hint: 'أدخل المبلغ',
+              label: 'مبلغ التحويل',
+              hint: 'أدخل المبلغ المراد تحويله',
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
@@ -157,18 +128,16 @@ class NetworkWalletTransferSheet
             AppSpacing.vSm,
             CustomTextField(
               controller: controller.statementController,
-              label: isNetworkToPos ? 'بيان التحويل' : 'بيان الاسترجاع',
-              hint: 'سبب أو وصف مختصر للعملية (اختياري)',
+              label: 'بيان التحويل (اختياري)',
+              hint: 'سبب أو وصف مختصر للعملية',
               maxLength: 255,
               isRequired: false,
               enabled: !controller.isSubmitting.value,
             ),
             AppSpacing.vMd,
             CustomButton.primary(
-              text: isNetworkToPos ? 'تأكيد التحويل' : 'تأكيد الاسترجاع',
-              prefix: isNetworkToPos
-                  ? Icons.swap_horiz_rounded
-                  : Icons.keyboard_return_rounded,
+              text: 'تأكيد التحويل',
+              prefix: Icons.swap_horiz_rounded,
               width: double.infinity,
               loading: controller.isSubmitting.value,
               enabled:

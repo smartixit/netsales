@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_wallet_dashboard_controller.dart';
+import 'package:netsales/features/finance/presentation/widgets/manual_wallet_transaction_sheet.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_dual_wallet_card.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_selector_skeleton.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_wallet_log_item_row.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_log_entry_skeleton.dart';
@@ -39,6 +43,38 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
               ),
               AppSpacing.vSm,
               _buildWalletSelector(context),
+              Obx(() {
+                final wallet = controller.selectedWallet.value;
+                final permissions = PermissionService.to;
+                final canManage = wallet != null &&
+                    (permissions.hasRole(AppRoles.networkOwner) ||
+                        permissions.can(AppPermissions.posWalletsCreate) ||
+                        permissions.can(AppPermissions.posWalletsEdit));
+                if (!canManage) return const SizedBox.shrink();
+
+                return Padding(
+                  padding: EdgeInsets.only(top: AppSpacing.sm),
+                  child: CustomButton.outline(
+                    text: 'إدراج قيد تسوية بمحفظة نقطة البيع',
+                    prefix: Icons.edit_note_rounded,
+                    width: double.infinity,
+                    onPressed: () {
+                      Get.bottomSheet<void>(
+                        ManualWalletTransactionSheet(
+                          walletId: wallet.walletId,
+                          accountName: wallet.posName ??
+                              'محفظة نقطة البيع #${wallet.posId}',
+                          currentBalance: wallet.walletBalance,
+                          isPosWallet: true,
+                          onSuccess: () => controller.loadWallets(),
+                        ),
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                      );
+                    },
+                  ),
+                );
+              }),
               AppSpacing.vLg,
               Text(
                 'دفتر الأستاذ وحركات المحفظة المحددة',

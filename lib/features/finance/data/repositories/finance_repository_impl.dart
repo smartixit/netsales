@@ -464,4 +464,100 @@ class FinanceRepositoryImpl implements FinanceRepository {
       );
     }
   }
+
+  @override
+  Future<void> depositToPosWallet({
+    required int posWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  }) async {
+    final res = await remoteDataSource.depositToPosWallet(
+      posWalletId,
+      amount: amount,
+      statement: statement,
+      logDate: logDate,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
+    if (!res.success) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر إتمام الإيداع في محفظة نقطة البيع.',
+        code: 'POS_WALLET_DEPOSIT_FAILED',
+      );
+    }
+  }
+
+  @override
+  Future<void> withdrawFromPosWallet({
+    required int posWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  }) async {
+    final res = await remoteDataSource.withdrawFromPosWallet(
+      posWalletId,
+      amount: amount,
+      statement: statement,
+      logDate: logDate,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
+    if (!res.success) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر إتمام السحب من محفظة نقطة البيع.',
+        code: 'POS_WALLET_WITHDRAW_FAILED',
+      );
+    }
+  }
+
+  @override
+  Future<void> depositToNetworkWallet({
+    required int networkWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  }) async {
+    final res = await remoteDataSource.depositToNetworkWallet(
+      networkWalletId,
+      amount: amount,
+      statement: statement,
+      logDate: logDate,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
+    if (!res.success) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر إتمام الإيداع في محفظة الشبكة.',
+        code: 'NETWORK_WALLET_DEPOSIT_FAILED',
+      );
+    }
+  }
+
+  @override
+  Future<void> withdrawFromNetworkWallet({
+    required int networkWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  }) async {
+    final res = await remoteDataSource.withdrawFromNetworkWallet(
+      networkWalletId,
+      amount: amount,
+      statement: statement,
+      logDate: logDate,
+      idempotencyKey: idempotencyKey ?? IdempotencyKeyGenerator.generate(),
+    );
+    if (!res.success) {
+      throw _requestFailure(
+        res,
+        fallback: 'تعذر إتمام السحب من محفظة الشبكة.',
+        code: 'NETWORK_WALLET_WITHDRAW_FAILED',
+      );
+    }
+  }
 }

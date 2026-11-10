@@ -14,9 +14,13 @@ import 'package:netsales/features/finance/domain/repositories/finance_repository
 import 'package:netsales/features/finance/domain/usecases/debt_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
+import 'package:netsales/features/finance/domain/usecases/deposit_network_wallet_use_case.dart';
+import 'package:netsales/features/finance/domain/usecases/deposit_pos_wallet_use_case.dart';
 import 'package:netsales/features/finance/domain/usecases/repayment_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/transfer_pos_to_network_use_case.dart';
 import 'package:netsales/features/finance/domain/usecases/update_pos_credit_limit_use_case.dart';
+import 'package:netsales/features/finance/domain/usecases/withdraw_network_wallet_use_case.dart';
+import 'package:netsales/features/finance/domain/usecases/withdraw_pos_wallet_use_case.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_transfer_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_debt_ledger_controller.dart';
@@ -111,6 +115,22 @@ class FinanceBinding extends Bindings {
     );
     Get.lazyPut<UpdatePosCreditLimitUseCase>(
       () => UpdatePosCreditLimitUseCase(Get.find<FinanceRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<DepositPosWalletUseCase>(
+      () => DepositPosWalletUseCase(Get.find<FinanceRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<WithdrawPosWalletUseCase>(
+      () => WithdrawPosWalletUseCase(Get.find<FinanceRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<DepositNetworkWalletUseCase>(
+      () => DepositNetworkWalletUseCase(Get.find<FinanceRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<WithdrawNetworkWalletUseCase>(
+      () => WithdrawNetworkWalletUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
 

@@ -193,4 +193,80 @@ class FinanceRemoteDataSourceImpl implements FinanceRemoteDataSource {
       data: {'credit_limit': creditLimit},
     );
   }
+
+  @override
+  Future<ApiResponse<dynamic>> depositToPosWallet(
+    int posWalletId, {
+    required double amount,
+    required String statement,
+    String? logDate,
+    required String idempotencyKey,
+  }) {
+    return ApiService.instance.post<dynamic>(
+      ApiConstants.posWalletDeposit(posWalletId),
+      data: {
+        'amount': amount,
+        'statement': statement,
+        if (logDate != null && logDate.isNotEmpty) 'log_date': logDate,
+      },
+      idempotencyKey: idempotencyKey,
+    );
+  }
+
+  @override
+  Future<ApiResponse<dynamic>> withdrawFromPosWallet(
+    int posWalletId, {
+    required double amount,
+    required String statement,
+    String? logDate,
+    required String idempotencyKey,
+  }) {
+    return ApiService.instance.post<dynamic>(
+      ApiConstants.posWalletWithdraw(posWalletId),
+      data: {
+        'amount': amount,
+        'statement': statement,
+        if (logDate != null && logDate.isNotEmpty) 'log_date': logDate,
+      },
+      idempotencyKey: idempotencyKey,
+    );
+  }
+
+  @override
+  Future<ApiResponse<dynamic>> depositToNetworkWallet(
+    int networkWalletId, {
+    required double amount,
+    required String statement,
+    String? logDate,
+    required String idempotencyKey,
+  }) {
+    return ApiService.instance.post<dynamic>(
+      ApiConstants.networkWalletDeposit(networkWalletId),
+      data: {
+        'amount': amount,
+        'statement': statement,
+        if (logDate != null && logDate.isNotEmpty) 'log_date': logDate,
+      },
+      idempotencyKey: idempotencyKey,
+    );
+  }
+
+  @override
+  Future<ApiResponse<dynamic>> withdrawFromNetworkWallet(
+    int networkWalletId, {
+    required double amount,
+    required String statement,
+    String? logDate,
+    required String idempotencyKey,
+  }) {
+    return ApiService.instance.post<dynamic>(
+      ApiConstants.networkWalletWithdraw(networkWalletId),
+      data: {
+        'amount': amount,
+        'statement': statement,
+        if (logDate != null && logDate.isNotEmpty) 'log_date': logDate,
+      },
+      idempotencyKey: idempotencyKey,
+    );
+  }
 }

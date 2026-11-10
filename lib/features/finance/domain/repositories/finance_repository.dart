@@ -105,4 +105,36 @@ abstract interface class FinanceRepository {
     required int posWalletId,
     required double? creditLimit,
   });
+
+  Future<void> depositToPosWallet({
+    required int posWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  });
+
+  Future<void> withdrawFromPosWallet({
+    required int posWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  });
+
+  Future<void> depositToNetworkWallet({
+    required int networkWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  });
+
+  Future<void> withdrawFromNetworkWallet({
+    required int networkWalletId,
+    required double amount,
+    required String statement,
+    String? logDate,
+    String? idempotencyKey,
+  });
 }
