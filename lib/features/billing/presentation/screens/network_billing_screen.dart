@@ -8,6 +8,8 @@ import 'package:netsales/features/billing/presentation/controllers/network_billi
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 
 class NetworkBillingScreen extends GetView<NetworkBillingController> {
   const NetworkBillingScreen({super.key});
@@ -15,11 +17,12 @@ class NetworkBillingScreen extends GetView<NetworkBillingController> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Scaffold(
-      appBar: AppBar(title: const Text('اشتراك الشبكة والفوترة')),
+    return CustomAppScaffold(
+      appBarTitle: 'اشتراك الشبكة والفوترة',
+      appBarSubtitle: 'إدارة الاشتراكات والفواتير والمدفوعات وكشوف الحساب',
       body: Obx(() {
         if (controller.isLoading.value && controller.accounts.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const CustomSkeletonFeed(itemCount: 5);
         }
         if (controller.errorMessage.value != null &&
             controller.accounts.isEmpty &&
