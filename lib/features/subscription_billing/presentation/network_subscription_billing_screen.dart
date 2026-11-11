@@ -196,7 +196,8 @@ class _BillingRecordCard extends StatelessWidget {
           children: [
             Row(children: [
               Expanded(child: Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
-              Chip(label: Text(record.value('status'))),
+              if (record.value('status_label', '').isNotEmpty)
+                Chip(label: Text(record.value('status_label'))),
             ]),
             if (amount != null) ...[
               AppSpacing.vXs,
