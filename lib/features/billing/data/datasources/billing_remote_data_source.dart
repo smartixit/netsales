@@ -6,6 +6,8 @@ abstract interface class BillingRemoteDataSource {
   Future<ApiResponse<List<BillingAccountModel>>> getAccounts(int networkId);
   Future<ApiResponse<List<BillingPlanModel>>> getPlans(int accountId);
   Future<ApiResponse<BillingPurchaseResultModel>> purchaseSubscription(int accountId, int priceId);
+  Future<ApiResponse<List<BillingPaymentMethodModel>>> getPaymentMethods(int accountId);
+  Future<ApiResponse<BillingPaymentModel>> submitInvoicePayment({required int invoiceId, required int paymentMethodId, required int amountMinor, required String idempotencyKey, String? externalReference, String? proofPath});
   Future<ApiResponse<BillingAccountModel>> createAccount(
     int networkId,
     int currencyId,

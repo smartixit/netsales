@@ -107,6 +107,50 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
       );
 }
 
+
+  @override
+  Future<ApiResponse<List<BillingPaymentMethodModel>>> getPaymentMethods(int accountId) =>
+      ApiService.instance.getList<BillingPaymentMethodModel>(
+        ApiConstants.billingAccountPaymentMethods(accountId),
+        fromJson: (json) => BillingPaymentMethodModel.fromJson(
+          Map<String, dynamic>.from(json as Map),
+        ),
+        perPage: 50,
+      );
+
+  @override
+  Future<ApiResponse<BillingPaymentModel>> submitInvoicePayment({
+    required int invoiceId,
+    required int paymentMethodId,
+    required int amountMinor,
+    required String idempotencyKey,
+    String? externalReference,
+    String? proofPath,
+  }) async {
+    final fields = <String, dynamic>{
+      'payment_method_id': paymentMethodId,
+      'amount_minor': amountMinor,
+      'idempotency_key': idempotencyKey,
+      if (externalReference != null && externalReference.trim().isNotEmpty)
+        'external_reference': externalReference.trim(),
+    };
+    dynamic payload = fields;
+    if (proofPath != null && proofPath.trim().isNotEmpty) {
+      payload = FormData.fromMap({
+        ...fields,
+        'proof': await MultipartFile.fromFile(proofPath),
+      });
+    }
+    return ApiService.instance.post<BillingPaymentModel>(
+      ApiConstants.billingInvoicePayments(invoiceId),
+      data: payload,
+      idempotencyKey: idempotencyKey,
+      fromJson: (json) => BillingPaymentModel.fromJson(
+        Map<String, dynamic>.from(json as Map),
+      ),
+    );
+  }
+
   @override
   Future<ApiResponse<BillingStatementModel>> getStatement(
     int accountId, {

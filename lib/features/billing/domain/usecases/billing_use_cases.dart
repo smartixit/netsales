@@ -86,3 +86,30 @@ class PurchaseNetworkSubscriptionUseCase {
   Future<BillingPurchaseResultEntity> call(int accountId, int priceId) =>
       repository.purchaseSubscription(accountId, priceId);
 }
+
+class GetNetworkBillingPaymentMethodsUseCase {
+  const GetNetworkBillingPaymentMethodsUseCase(this.repository);
+  final BillingRepository repository;
+  Future<List<BillingPaymentMethodEntity>> call(int accountId) =>
+      repository.getPaymentMethods(accountId);
+}
+
+class SubmitNetworkBillingInvoicePaymentUseCase {
+  const SubmitNetworkBillingInvoicePaymentUseCase(this.repository);
+  final BillingRepository repository;
+  Future<BillingPaymentEntity> call({
+    required int invoiceId,
+    required int paymentMethodId,
+    required int amountMinor,
+    required String idempotencyKey,
+    String? externalReference,
+    String? proofPath,
+  }) => repository.submitInvoicePayment(
+    invoiceId: invoiceId,
+    paymentMethodId: paymentMethodId,
+    amountMinor: amountMinor,
+    idempotencyKey: idempotencyKey,
+    externalReference: externalReference,
+    proofPath: proofPath,
+  );
+}
