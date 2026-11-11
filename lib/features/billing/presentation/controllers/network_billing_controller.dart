@@ -16,6 +16,7 @@ class NetworkBillingController extends GetxController {
     required this.getPayments,
     required this.getCreditNotes,
     required this.getRefunds,
+    required this.getStatement,
   });
 
   final GetBillingCurrenciesUseCase getCurrencies;
@@ -26,6 +27,7 @@ class NetworkBillingController extends GetxController {
   final GetBillingPaymentsUseCase getPayments;
   final GetBillingCreditNotesUseCase getCreditNotes;
   final GetBillingRefundsUseCase getRefunds;
+  final GetBillingStatementUseCase getStatement;
 
   final isLoading = false.obs;
   final isCreatingAccount = false.obs;
@@ -33,14 +35,36 @@ class NetworkBillingController extends GetxController {
   final currencies = <BillingCurrencyEntity>[].obs;
   final accounts = <BillingAccountEntity>[].obs;
   final selectedAccountId = RxnInt();
+  final selectedCurrencyId = RxnInt();
   final subscriptions = <BillingSubscriptionEntity>[].obs;
   final invoices = <BillingInvoiceEntity>[].obs;
   final payments = <BillingPaymentEntity>[].obs;
   final creditNotes = <BillingCreditNoteEntity>[].obs;
   final refunds = <BillingRefundEntity>[].obs;
+  final statement = Rxn<BillingStatementEntity>();
   final selectedSection = BillingSection.overview.obs;
 
+  final isLoadingMoreSubscriptions = false.obs;
+  final isLoadingMoreInvoices = false.obs;
+  final isLoadingMorePayments = false.obs;
+  final isLoadingMoreCreditNotes = false.obs;
+  final isLoadingMoreRefunds = false.obs;
+
+  String? _subscriptionsCursor;
+  String? _invoicesCursor;
+  String? _paymentsCursor;
+  String? _creditNotesCursor;
+  String? _refundsCursor;
+  int _requestRevision = 0;
+
+  bool get canLoadMoreSubscriptions => _hasCursor(_subscriptionsCursor);
+  bool get canLoadMoreInvoices => _hasCursor(_invoicesCursor);
+  bool get canLoadMorePayments => _hasCursor(_paymentsCursor);
+  bool get canLoadMoreCreditNotes => _hasCursor(_creditNotesCursor);
+  bool get canLoadMoreRefunds => _hasCursor(_refundsCursor);
+
   int? get networkId => WorkspaceService.to.savedActiveNetworkId;
+
   BillingAccountEntity? get selectedAccount {
     final id = selectedAccountId.value;
     for (final account in accounts) {
@@ -55,38 +79,49 @@ class NetworkBillingController extends GetxController {
     load();
   }
 
+  bool _hasCursor(String? cursor) => cursor != null && cursor.trim().isNotEmpty;
+
+  void _setError(Object error, String fallback) {
+    errorMessage.value = AppException.sanitizeMessage(error, fallback: fallback);
+  }
+
   Future<void> load() async {
     final id = networkId;
     if (id == null) {
       errorMessage.value = 'تعذر تحديد الشبكة النشطة. اختر شبكة أولاً.';
       return;
     }
+
+    final revision = ++_requestRevision;
     isLoading.value = true;
     errorMessage.value = null;
     try {
-      final results = await Future.wait([
+      final results = await Future.wait<Object>([
         getCurrencies(),
         getAccounts(id),
       ]);
+      if (revision != _requestRevision) return;
+
       currencies.assignAll(results[0] as List<BillingCurrencyEntity>);
       accounts.assignAll(results[1] as List<BillingAccountEntity>);
+
       if (accounts.isEmpty) {
         selectedAccountId.value = null;
         _clearHistory();
-      } else {
-        final current = selectedAccountId.value;
-        selectedAccountId.value = accounts.any((a) => a.billingAccountId == current)
-            ? current
-            : accounts.first.billingAccountId;
-        await loadAccountHistory();
+        return;
       }
+
+      final current = selectedAccountId.value;
+      selectedAccountId.value = accounts.any((a) => a.billingAccountId == current)
+          ? current
+          : accounts.first.billingAccountId;
+      await loadAccountHistory();
     } catch (error) {
-      errorMessage.value = AppException.sanitizeMessage(
-        error,
-        fallback: 'تعذر تحميل بيانات فوترة الشبكة.',
-      );
+      if (revision == _requestRevision) {
+        _setError(error, 'تعذر تحميل بيانات فوترة الشبكة.');
+      }
     } finally {
-      isLoading.value = false;
+      if (revision == _requestRevision) isLoading.value = false;
     }
   }
 
@@ -98,27 +133,50 @@ class NetworkBillingController extends GetxController {
 
   Future<void> loadAccountHistory() async {
     final id = selectedAccountId.value;
+    final revision = ++_requestRevision;
     if (id == null) {
       _clearHistory();
       return;
     }
+
     isLoading.value = true;
     errorMessage.value = null;
+    _resetCursors();
+    _clearHistory();
     try {
-      await Future.wait([
-        getSubscriptions(id).then((page) => subscriptions.assignAll(page.items)),
-        getInvoices(id).then((page) => invoices.assignAll(page.items)),
-        getPayments(id).then((page) => payments.assignAll(page.items)),
-        getCreditNotes(id).then((page) => creditNotes.assignAll(page.items)),
-        getRefunds(id).then((page) => refunds.assignAll(page.items)),
+      final pages = await Future.wait<Object>([
+        getSubscriptions(id),
+        getInvoices(id),
+        getPayments(id),
+        getCreditNotes(id),
+        getRefunds(id),
+        getStatement(id),
       ]);
+      if (revision != _requestRevision || selectedAccountId.value != id) return;
+
+      final subscriptionPage = pages[0] as dynamic;
+      final invoicePage = pages[1] as dynamic;
+      final paymentPage = pages[2] as dynamic;
+      final creditPage = pages[3] as dynamic;
+      final refundPage = pages[4] as dynamic;
+
+      subscriptions.assignAll(subscriptionPage.items as List<BillingSubscriptionEntity>);
+      invoices.assignAll(invoicePage.items as List<BillingInvoiceEntity>);
+      payments.assignAll(paymentPage.items as List<BillingPaymentEntity>);
+      creditNotes.assignAll(creditPage.items as List<BillingCreditNoteEntity>);
+      refunds.assignAll(refundPage.items as List<BillingRefundEntity>);
+      _subscriptionsCursor = subscriptionPage.nextCursor as String?;
+      _invoicesCursor = invoicePage.nextCursor as String?;
+      _paymentsCursor = paymentPage.nextCursor as String?;
+      _creditNotesCursor = creditPage.nextCursor as String?;
+      _refundsCursor = refundPage.nextCursor as String?;
+      statement.value = pages[5] as BillingStatementEntity;
     } catch (error) {
-      errorMessage.value = AppException.sanitizeMessage(
-        error,
-        fallback: 'تعذر تحميل سجل الاشتراكات والفواتير.',
-      );
+      if (revision == _requestRevision) {
+        _setError(error, 'تعذر تحميل سجل الاشتراكات والفواتير وكشف الحساب.');
+      }
     } finally {
-      isLoading.value = false;
+      if (revision == _requestRevision) isLoading.value = false;
     }
   }
 
@@ -129,26 +187,130 @@ class NetworkBillingController extends GetxController {
     errorMessage.value = null;
     try {
       final created = await createAccount(id, currencyId);
-      accounts.add(created);
+      final existingIndex = accounts.indexWhere(
+        (item) => item.billingAccountId == created.billingAccountId,
+      );
+      if (existingIndex >= 0) {
+        accounts[existingIndex] = created;
+      } else {
+        accounts.add(created);
+      }
       selectedAccountId.value = created.billingAccountId;
       await loadAccountHistory();
     } catch (error) {
-      errorMessage.value = AppException.sanitizeMessage(
-        error,
-        fallback: 'تعذر إنشاء حساب الفوترة.',
-      );
+      _setError(error, 'تعذر إنشاء حساب الفوترة.');
     } finally {
       isCreatingAccount.value = false;
     }
   }
 
+  Future<void> loadMoreSubscriptions() => _loadMore(
+    cursor: _subscriptionsCursor,
+    loading: isLoadingMoreSubscriptions,
+    request: (cursor) => getSubscriptions(selectedAccountId.value!, cursor: cursor),
+    append: (page) => _appendUnique<BillingSubscriptionEntity>(
+      subscriptions, page.items, (item) => item.subscriptionId,
+    ),
+    saveCursor: (cursor) => _subscriptionsCursor = cursor,
+    fallback: 'تعذر تحميل بقية الاشتراكات.',
+  );
+
+  Future<void> loadMoreInvoices() => _loadMore(
+    cursor: _invoicesCursor,
+    loading: isLoadingMoreInvoices,
+    request: (cursor) => getInvoices(selectedAccountId.value!, cursor: cursor),
+    append: (page) => _appendUnique<BillingInvoiceEntity>(
+      invoices, page.items, (item) => item.invoiceId,
+    ),
+    saveCursor: (cursor) => _invoicesCursor = cursor,
+    fallback: 'تعذر تحميل بقية الفواتير.',
+  );
+
+  Future<void> loadMorePayments() => _loadMore(
+    cursor: _paymentsCursor,
+    loading: isLoadingMorePayments,
+    request: (cursor) => getPayments(selectedAccountId.value!, cursor: cursor),
+    append: (page) => _appendUnique<BillingPaymentEntity>(
+      payments, page.items, (item) => item.paymentId,
+    ),
+    saveCursor: (cursor) => _paymentsCursor = cursor,
+    fallback: 'تعذر تحميل بقية المدفوعات.',
+  );
+
+  Future<void> loadMoreCreditNotes() => _loadMore(
+    cursor: _creditNotesCursor,
+    loading: isLoadingMoreCreditNotes,
+    request: (cursor) => getCreditNotes(selectedAccountId.value!, cursor: cursor),
+    append: (page) => _appendUnique<BillingCreditNoteEntity>(
+      creditNotes, page.items, (item) => item.creditNoteId,
+    ),
+    saveCursor: (cursor) => _creditNotesCursor = cursor,
+    fallback: 'تعذر تحميل بقية الإشعارات الدائنة.',
+  );
+
+  Future<void> loadMoreRefunds() => _loadMore(
+    cursor: _refundsCursor,
+    loading: isLoadingMoreRefunds,
+    request: (cursor) => getRefunds(selectedAccountId.value!, cursor: cursor),
+    append: (page) => _appendUnique<BillingRefundEntity>(
+      refunds, page.items, (item) => item.refundId,
+    ),
+    saveCursor: (cursor) => _refundsCursor = cursor,
+    fallback: 'تعذر تحميل بقية عمليات الاسترداد.',
+  );
+
+  Future<void> _loadMore<T>({
+    required String? cursor,
+    required RxBool loading,
+    required Future<dynamic> Function(String cursor) request,
+    required void Function(dynamic page) append,
+    required void Function(String?) saveCursor,
+    required String fallback,
+  }) async {
+    final accountId = selectedAccountId.value;
+    if (accountId == null || !_hasCursor(cursor) || loading.value) return;
+    final revision = _requestRevision;
+    loading.value = true;
+    try {
+      final page = await request(cursor!);
+      if (revision != _requestRevision || accountId != selectedAccountId.value) return;
+      append(page);
+      saveCursor(page.nextCursor as String?);
+    } catch (error) {
+      if (revision == _requestRevision) _setError(error, fallback);
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  void _appendUnique<T>(
+    RxList<T> target,
+    List<T> incoming,
+    int Function(T item) idOf,
+  ) {
+    final seen = target.map(idOf).toSet();
+    for (final item in incoming) {
+      if (seen.add(idOf(item))) target.add(item);
+    }
+  }
+
   void selectSection(BillingSection section) => selectedSection.value = section;
 
+  void _resetCursors() {
+    _subscriptionsCursor = null;
+    _invoicesCursor = null;
+    _paymentsCursor = null;
+    _creditNotesCursor = null;
+    _refundsCursor = null;
+  }
+
   void _clearHistory() {
+    _resetCursors();
     subscriptions.clear();
     invoices.clear();
     payments.clear();
     creditNotes.clear();
     refunds.clear();
+    statement.value = null;
   }
 }
