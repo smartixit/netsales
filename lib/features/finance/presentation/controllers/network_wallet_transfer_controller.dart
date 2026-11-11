@@ -280,13 +280,21 @@ class NetworkWalletTransferController extends GetxController {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
+      final isTimeout = e.toString().toLowerCase().contains('timeout') ||
+          e.toString().toLowerCase().contains('connection') ||
+          e.toString().toLowerCase().contains('socket');
+
+      final message = isTimeout
+          ? 'انقطع الاتصال أثناء انتظار تأكيد التحويل المالي. يرجى مراجعة كشف حركات المحفظة للتأكد من إتمام العملية قبل إعادة المحاولة تجنباً للتكرار.'
+          : AppException.sanitizeMessage(
+              e,
+              fallback: 'تعذر إتمام عملية التحويل. يرجى المحاولة مجدداً.',
+            );
+
       CustomSnackbar.show(
-        title: 'تعذر تنفيذ التحويل',
-        message: AppException.sanitizeMessage(
-          e,
-          fallback: 'تعذر إتمام عملية التحويل. يرجى المحاولة مجدداً.',
-        ),
-        type: SnackType.error,
+        title: isTimeout ? 'حالة العملية غير مؤكدة' : 'تعذر تنفيذ التحويل',
+        message: message,
+        type: isTimeout ? SnackType.warning : SnackType.error,
       );
       return false;
     } finally {

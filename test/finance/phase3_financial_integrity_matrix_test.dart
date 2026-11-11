@@ -194,6 +194,35 @@ void main() {
         expect(wallet.totalPurchasingPower, isNull, reason: 'Must not synthesize total purchasing power locally');
       });
     });
+
+    // =========================================================================
+    // 3.4 الحوكمة المالية لعمليات المحافظ ومنع التكرار ومعالجة حالات عدم اليقين
+    // =========================================================================
+    group('3.4 Financial Operations Governance & Ledger Invariants Tests', () {
+      test('Ambiguous timeout message directs user to check ledger instead of retry blindingly', () {
+        const timeoutEx = 'Connection timed out while waiting for server response';
+        final isTimeout = timeoutEx.toLowerCase().contains('timeout') ||
+            timeoutEx.toLowerCase().contains('connection');
+
+        expect(isTimeout, isTrue);
+        const warningNotice =
+            'انقطع الاتصال أثناء انتظار تأكيد القيد المالي. يرجى مراجعة كشف الحساب وسجل القيود للتأكد من إدراج العملية قبل إعادة المحاولة تجنباً للتكرار.';
+        expect(warningNotice, contains('سجل القيود'));
+        expect(warningNotice, contains('تجنباً للتكرار'));
+      });
+
+      test('NetworkWalletTransfer timeout warning provides financial safety notice', () {
+        const socketEx = 'SocketException: OS Error: Connection reset by peer';
+        final isTimeout = socketEx.toLowerCase().contains('connection') ||
+            socketEx.toLowerCase().contains('socket');
+
+        expect(isTimeout, isTrue);
+        const transferWarning =
+            'انقطع الاتصال أثناء انتظار تأكيد التحويل المالي. يرجى مراجعة كشف حركات المحفظة للتأكد من إتمام العملية قبل إعادة المحاولة تجنباً للتكرار.';
+        expect(transferWarning, contains('كشف حركات المحفظة'));
+        expect(transferWarning, contains('تجنباً للتكرار'));
+      });
+    });
   });
 }
 

@@ -123,17 +123,15 @@ class ManualWalletTransactionSheet
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'الرصيد التقديري بعد القيد:',
+                        'مبلغ القيد المطلوب:',
                         style: AppTypography.bodySmall.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
                       ),
                       Text(
-                        AmountFormatter.formatValue(controller.expectedBalance),
+                        '${isDeposit ? '+' : '-'} ${AmountFormatter.formatValue(controller.enteredAmount.value)}',
                         style: AppTypography.titleMedium.copyWith(
-                          color: isNegative
-                              ? colors.error
-                              : (isDeposit ? colors.primary : colors.onSurface),
+                          color: isDeposit ? colors.primary : colors.error,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -144,16 +142,16 @@ class ManualWalletTransactionSheet
                     Row(
                       children: [
                         Icon(
-                          Icons.warning_amber_rounded,
+                          Icons.info_outline_rounded,
                           size: 14.r,
-                          color: colors.error,
+                          color: colors.primary,
                         ),
                         AppSpacing.hXs,
                         Expanded(
                           child: Text(
-                            'تنبيه: سينتج عن هذا القيد رصيد سالب (سحب على المكشوف).',
+                            'ملاحظة: سيتم احتساب وتأكيد الرصيد النهائي المعتمد بدفتر الأستاذ من الخادم فورياً.',
                             style: AppTypography.labelSmall.copyWith(
-                              color: colors.error,
+                              color: colors.onSurfaceVariant,
                               fontSize: 10.sp,
                             ),
                           ),

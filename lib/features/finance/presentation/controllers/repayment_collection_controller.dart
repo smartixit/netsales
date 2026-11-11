@@ -335,13 +335,21 @@ class RepaymentCollectionController extends GetxController {
       return false;
     } catch (e) {
       if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide();
+      final isTimeout = e.toString().toLowerCase().contains('timeout') ||
+          e.toString().toLowerCase().contains('connection') ||
+          e.toString().toLowerCase().contains('socket');
+
+      final message = isTimeout
+          ? 'انقطع الاتصال أثناء انتظار تأكيد تحصيل السداد. يرجى مراجعة سجل سندات السداد قبل إعادة المحاولة تجنباً لتكرار التحصيل.'
+          : AppException.sanitizeMessage(
+              e,
+              fallback: 'تعذر إتمام السداد. يرجى المحاولة مجدداً.',
+            );
+
       CustomSnackbar.show(
-        title: 'خطأ',
-        message: AppException.sanitizeMessage(
-          e,
-          fallback: 'تعذر إتمام السداد. يرجى المحاولة مجدداً.',
-        ),
-        type: SnackType.error,
+        title: isTimeout ? 'حالة السداد غير مؤكدة' : 'خطأ في التحصيل',
+        message: message,
+        type: isTimeout ? SnackType.warning : SnackType.error,
       );
       return false;
     } finally {

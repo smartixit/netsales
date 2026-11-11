@@ -39,6 +39,9 @@ class ManualWalletTransactionController extends GetxController {
   final enteredAmount = 0.0.obs;
   final isSubmitting = false.obs;
 
+  String? _pendingKey;
+  String? _pendingFingerprint;
+
   int _walletId = 0;
   String _accountName = '';
   double _currentBalance = 0.0;
@@ -53,11 +56,8 @@ class ManualWalletTransactionController extends GetxController {
   bool get isDeposit =>
       transactionType.value == ManualTransactionType.deposit;
 
-  double get expectedBalance => isDeposit
-      ? _currentBalance + enteredAmount.value
-      : _currentBalance - enteredAmount.value;
-
-  bool get isNegativeBalance => expectedBalance < 0;
+  bool get isNegativeBalance =>
+      !isDeposit && enteredAmount.value > _currentBalance;
 
   static const List<String> posDepositSuggestions = [
     'تسوية مبيعات',
@@ -180,13 +180,20 @@ class ManualWalletTransactionController extends GetxController {
 
     if (confirmed != true) return;
 
+    final fingerprint =
+        '$_walletId-$isDeposit-$amount-$statement-${logDateController.text.trim()}';
+    if (_pendingFingerprint != fingerprint || _pendingKey == null) {
+      _pendingFingerprint = fingerprint;
+      _pendingKey = IdempotencyKeyGenerator.generate();
+    }
+
     isSubmitting.value = true;
     await CustomAnimationOverlay.showLoading(
       message: 'جاري تسجيل القيد المالي بدفتر الأستاذ...',
     );
 
     try {
-      final idempotencyKey = IdempotencyKeyGenerator.generate();
+      final idempotencyKey = _pendingKey!;
       final date = logDateController.text.trim().isEmpty
           ? null
           : logDateController.text.trim();
@@ -235,19 +242,30 @@ class ManualWalletTransactionController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم إدراج القيد المالي وتحديث الرصيد بنجاح',
       );
+      _pendingKey = null;
+      _pendingFingerprint = null;
       Get.back<void>();
       _onSuccess?.call();
     } catch (e) {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
+      final isTimeout = e.toString().toLowerCase().contains('timeout') ||
+          e.toString().toLowerCase().contains('connection') ||
+          e.toString().toLowerCase().contains('socket');
+
+      final message = isTimeout
+          ? 'انقطع الاتصال أثناء انتظار تأكيد القيد المالي. يرجى مراجعة كشف الحساب وسجل القيود للتأكد من إدراج العملية قبل إعادة المحاولة تجنباً للتكرار.'
+          : AppException.sanitizeMessage(
+              e,
+              fallback:
+                  'تعذر تسجيل القيد المالي بدفتر الأستاذ. يرجى المحاولة مجدداً.',
+            );
+
       CustomSnackbar.show(
-        title: 'تعذر تنفيذ القيد',
-        message: AppException.sanitizeMessage(
-          e,
-          fallback: 'تعذر تسجيل القيد المالي بدفتر الأستاذ. يرجى المحاولة مجدداً.',
-        ),
-        type: SnackType.error,
+        title: isTimeout ? 'حالة العملية غير مؤكدة' : 'تعذر تنفيذ القيد',
+        message: message,
+        type: isTimeout ? SnackType.warning : SnackType.error,
       );
     } finally {
       isSubmitting.value = false;
