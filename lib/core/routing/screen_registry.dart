@@ -184,6 +184,15 @@ abstract final class ScreenRegistry {
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
+      screenId: 'NET-12',
+      route: AppRoutes.networkSubscriptionBilling,
+      titleAr: 'اشتراكات الشبكة وفواتيرها',
+      titleEn: 'Network Platform Subscriptions and Invoices',
+      workspace: AppWorkspace.network,
+      requiredPermission: AppPermissions.subscriptionsView,
+      implementationState: ScreenImplementationState.implemented,
+    ),
+    ScreenDescriptor(
       screenId: 'NET-08',
       route: AppRoutes.networkTeamManagement,
       titleAr: 'إدارة فريق عمل وموظفي الشبكة',

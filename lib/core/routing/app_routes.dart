@@ -58,6 +58,7 @@ abstract final class AppRoutes {
   static const String operatingExpenses = '/network/operating-expenses';
   static const String networkReports = '/network/reports';
   static const String networkSubscriptionBilling = '/network/subscription-billing';
+  static const String networkSubscriptionBilling = '/network/subscription-billing';
   static const String networkTeamManagement = '/network/team-management';
   static const String voucherRequestDetails =
       '/network/voucher-request-details';
