@@ -4,6 +4,8 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/reports/domain/entities/report_catalog_item.dart';
 import 'package:netsales/features/reports/domain/entities/report_run.dart';
+import 'package:netsales/features/reports/domain/entities/report_engine_definition_factory.dart';
+import 'package:document_engine/document_engine.dart';
 import 'package:netsales/features/reports/domain/usecases/report_use_cases.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -32,6 +34,12 @@ class NetworkReportsController extends GetxController {
   final isRefreshing = false.obs;
   final isDownloading = false.obs;
   final error = RxnString();
+  final selectedDefinition = Rxn<ReportCatalogItem>();
+  final engineDefinition = Rxn<ReportDefinition>();
+  final criteria = ReportCriteria().obs;
+  final presentation = ReportPresentationOptions().obs;
+  final Map<String, TextEditingController> filterControllers = {};
+  final _definitionFactory = const ReportEngineDefinitionFactory();
 
   int? get networkId => WorkspaceService.to.savedActiveNetworkId;
 
@@ -44,6 +52,10 @@ class NetworkReportsController extends GetxController {
   @override
   void onClose() {
     billingAccountIdController.dispose();
+    for (final field in filterControllers.values) {
+      field.dispose();
+    }
+    filterControllers.clear();
     fromDateController.dispose();
     toDateController.dispose();
     paymentStatusController.dispose();
@@ -68,6 +80,78 @@ class NetworkReportsController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void configureReport(ReportCatalogItem report) {
+    for (final field in filterControllers.values) {
+      field.dispose();
+    }
+    filterControllers.clear();
+    selectedDefinition.value = report;
+    engineDefinition.value = _definitionFactory.create(report);
+    criteria.value = ReportCriteria();
+    presentation.value = ReportPresentationOptions();
+    for (final filter in engineDefinition.value!.filters) {
+      filterControllers[filter.id] = TextEditingController();
+    }
+  }
+
+  TextEditingController textControllerFor(String filterId) =>
+      filterControllers.putIfAbsent(filterId, TextEditingController.new);
+
+  void updateFilter(String filterId, ReportFilterValue? value) {
+    final next = Map<String, ReportFilterValue>.from(criteria.value.filters);
+    if (value == null) {
+      next.remove(filterId);
+    } else {
+      next[filterId] = value;
+    }
+    criteria.value = ReportCriteria(filters: next);
+  }
+
+  void updatePresentation(ReportPresentationOptions value) {
+    presentation.value = value;
+  }
+
+  Future<void> runConfiguredReport() async {
+    final report = selectedDefinition.value;
+    final definition = engineDefinition.value;
+    if (report == null || definition == null) return;
+    final issues = criteria.value.validateAgainst(definition);
+    if (issues.isNotEmpty) {
+      CustomSnackbar.show(
+        title: 'مرشحات غير مكتملة',
+        message: 'راجع الحقول المطلوبة وصيغ المرشحات قبل التنفيذ.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+    final filters = criteria.value.filters.map(
+      (key, value) => MapEntry(key, value.jsonValue),
+    );
+    isCreating.value = true;
+    try {
+      activeRun.value = await createRun(
+        networkId: networkId!,
+        reportKey: report.key,
+        filters: filters,
+      );
+      selectedDefinition.value = null;
+      engineDefinition.value = null;
+      CustomSnackbar.show(
+        title: 'تم تسجيل التقرير',
+        message: 'يمكنك متابعة حالة التنفيذ وتنزيل ملف النتيجة بعد اكتماله.',
+        type: SnackType.success,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'تعذر إنشاء التقرير',
+        message: AppException.sanitizeMessage(e, fallback: 'حدث خطأ أثناء تسجيل التقرير.'),
+        type: SnackType.error,
+      );
+    } finally {
+      isCreating.value = false;
     }
   }
 
