@@ -676,6 +676,14 @@ class PosProcurementController extends GetxController {
     loadRequests(isRefresh: true);
   }
 
+  /// إعادة تعيين الفلاتر والبحث
+  void resetFilters() {
+    searchController.clear();
+    searchQuery.value = '';
+    statusFilter.value = null;
+    loadRequests(isRefresh: true);
+  }
+
   /// تهيئة نموذج طلب جديد
   void initNewOrderForm() {
     clearProcurementCart();

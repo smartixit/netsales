@@ -441,6 +441,14 @@ class NetworkProcurementReviewController extends GetxController {
     loadRequests(isRefresh: true);
   }
 
+  /// إعادة تعيين الفلاتر والبحث
+  void resetFilters() {
+    searchController.clear();
+    searchQuery.value = '';
+    statusFilter.value = null;
+    loadRequests(isRefresh: true);
+  }
+
   /// تغيير الشبكة المحددة
   Future<void> onNetworkFilterChanged(int? networkId) async {
     // CustomDropdown updates its ValueNotifier before invoking onChanged.

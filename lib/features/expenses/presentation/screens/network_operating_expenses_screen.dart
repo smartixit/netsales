@@ -9,6 +9,7 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 class NetworkOperatingExpensesScreen
@@ -46,7 +47,19 @@ class NetworkOperatingExpensesScreen
               onChanged: controller.onSearchChanged,
               onFieldSubmitted: (v) => controller.applyFilters(search: v),
             ),
-            AppSpacing.vMd,
+            AppSpacing.vSm,
+            Obx(
+              () => CustomResultsCounterBar(
+                count: controller.expenses.length,
+                recordLabel: 'مصروف',
+                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                    controller.fromDate.value != null ||
+                    controller.toDate.value != null,
+                isLoading: controller.isLoading.value && controller.expenses.isEmpty,
+                onClear: controller.resetFilters,
+              ),
+            ),
+            AppSpacing.vSm,
             Expanded(
               child: Obx(() {
                 if (controller.isLoadingNetworks.value) {

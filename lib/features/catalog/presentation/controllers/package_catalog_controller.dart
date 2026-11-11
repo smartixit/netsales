@@ -724,4 +724,12 @@ class PackageCatalogController extends GetxController {
       },
     );
   }
+
+  /// إعادة تعيين الفلاتر والبحث
+  void resetFilters() {
+    searchController.clear();
+    searchQuery.value = '';
+    statusFilter.value = null;
+    refreshCatalog();
+  }
 }

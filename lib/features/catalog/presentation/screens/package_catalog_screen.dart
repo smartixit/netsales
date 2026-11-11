@@ -16,6 +16,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// شاشة كتالوج باقات الكروت — مسؤوليتها تركيب الصفحة فقط دون أي دوال بناء خاصة
 class PackageCatalogScreen extends GetView<PackageCatalogController> {
@@ -77,6 +78,24 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
         children: [
           // 1. شريط البحث والفلترة القطاعية
           const PackageSearchFilterHeader(),
+
+          // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Obx(
+              () => CustomResultsCounterBar(
+                count: controller.filteredPackages.length,
+                totalCount: controller.packages.length,
+                recordLabel: 'باقة كروت',
+                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                    controller.statusFilter.value != null,
+                isLoading: controller.isLoading.value && controller.packages.isEmpty,
+                onClear: controller.resetFilters,
+              ),
+            ),
+          ),
+
+          AppSpacing.vSm,
 
           // 2. محتوى القائمة مع حالات التحميل والخطأ والفراغ
           Expanded(

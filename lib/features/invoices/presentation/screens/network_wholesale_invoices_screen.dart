@@ -9,6 +9,7 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// شاشة قائمة فواتير مبيعات الجملة لمشغل الشبكة (Network Wholesale Invoices Screen)
 class NetworkWholesaleInvoicesScreen
@@ -48,6 +49,20 @@ class NetworkWholesaleInvoicesScreen
                   onSaleTypeChanged: controller.onSaleTypeChanged,
                   onClear: controller.resetFilters,
                   searchHint: 'بحث برقم الفاتورة، UUID، أو اسم نقطة البيع...',
+                ),
+              ),
+
+              AppSpacing.vSm,
+
+              // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
+              Obx(
+                () => CustomResultsCounterBar(
+                  count: controller.invoices.length,
+                  recordLabel: 'فاتورة',
+                  isFiltered: controller.searchQuery.value.isNotEmpty ||
+                      controller.selectedSaleType.value != null,
+                  isLoading: controller.isLoading.value && controller.invoices.isEmpty,
+                  onClear: controller.resetFilters,
                 ),
               ),
 

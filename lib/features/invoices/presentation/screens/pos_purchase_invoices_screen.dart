@@ -8,6 +8,7 @@ import 'package:netsales/features/invoices/presentation/widgets/pos_embedded_inv
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// شاشة قائمة فواتير المشتريات لنقطة البيع (POS Purchase Invoices Screen)
 class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
@@ -37,7 +38,21 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
               ),
             ),
 
-              AppSpacing.vMd,
+            AppSpacing.vSm,
+
+            // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
+            Obx(
+              () => CustomResultsCounterBar(
+                count: controller.invoices.length,
+                recordLabel: 'فاتورة مشتريات',
+                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                    controller.selectedSaleType.value != null,
+                isLoading: controller.isLoading.value && controller.invoices.isEmpty,
+                onClear: controller.resetFilters,
+              ),
+            ),
+
+            AppSpacing.vMd,
 
               // 2. قائمة الفواتير مع الترقيم بالمؤشر
               Expanded(

@@ -13,6 +13,7 @@ import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// شاشة مركز الإشعارات والتنبيهات الموجهة داخل التطبيق (NotificationCenterScreen)
@@ -89,7 +90,7 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                       : null,
                   label: 'بحث في الإشعارات...',
                 ),
-                SizedBox(height: AppSpacing.sm),
+               AppSpacing.vSm,
                 Obx(() {
                   final activeFilter = controller.selectedFilter.value;
                   return Row(
@@ -118,6 +119,38 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                   );
                 }),
               ],
+            ),
+          ),
+
+          AppSpacing.vSm,
+
+          // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
+           Obx(
+              () => CustomResultsCounterBar(
+                count: controller.notifications.length,
+                recordLabel: 'إشعار',
+                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                    controller.selectedFilter.value != null,
+                isLoading: controller.isLoading.value && controller.notifications.isEmpty,
+                onClear: controller.resetFilters,
+              ),
+            ),
+
+          // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
+            child: Obx(
+              () => CustomResultsCounterBar(
+                count: controller.notifications.length,
+                recordLabel: 'إشعار',
+                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                    controller.selectedFilter.value != null,
+                isLoading: controller.isLoading.value && controller.notifications.isEmpty,
+                onClear: controller.resetFilters,
+              ),
             ),
           ),
 

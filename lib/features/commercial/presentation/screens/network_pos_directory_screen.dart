@@ -11,6 +11,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// شاشة دليل نقاط البيع وإدارة روابط الشراكة بمساحة عمل الشبكة
 /// مسؤوليتها: تركيب الصفحة وتنسيق المكونات وتوصيلها بالمتحكم (Page Composition)
@@ -97,6 +98,23 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
             ),
           // 1. شريط البحث والفلترة المفصول (Feature Widget)
           const NetworkPosSearchFilterHeader(),
+
+          // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Obx(
+              () => CustomResultsCounterBar(
+                count: controller.links.length,
+                recordLabel: 'نقطة بيع مرتبطة',
+                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                    controller.selectedStatusFilter.value != null,
+                isLoading: controller.isLoading.value && controller.links.isEmpty,
+                onClear: controller.resetFilters,
+              ),
+            ),
+          ),
+
+          AppSpacing.vSm,
 
           // 2. قائمة نقاط البيع وحالات التحميل والخطأ والفراغ
           Expanded(

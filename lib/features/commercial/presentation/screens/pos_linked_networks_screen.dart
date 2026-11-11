@@ -10,6 +10,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// شاشة استعراض الشبكات المزودة لنقطة البيع (POS Linked Networks Screen)
 /// مسؤوليتها: تركيب الصفحة وتنسيق المكونات وتوصيلها بالمتحكم (Page Composition)
@@ -50,6 +51,40 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
         children: [
           // 1. شريط البحث والفلترة المفصول (Feature Widget)
           const PosLinkedNetworksSearchFilterHeader(),
+
+          // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Obx(
+              () => CustomResultsCounterBar(
+                count: controller.links.length,
+                recordLabel: 'شبكة مزودة',
+                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                    controller.selectedStatusFilter.value != null,
+                isLoading: controller.isLoading.value && controller.links.isEmpty,
+                onClear: controller.resetFilters,
+              ),
+            ),
+          ),
+
+          AppSpacing.vSm,
+
+          // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Obx(
+              () => CustomResultsCounterBar(
+                count: controller.links.length,
+                recordLabel: 'شبكة مزودة',
+                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                    controller.selectedStatusFilter.value != null,
+                isLoading: controller.isLoading.value && controller.links.isEmpty,
+                onClear: controller.resetFilters,
+              ),
+            ),
+          ),
+
+          AppSpacing.vSm,
 
           // 2. قائمة الشبكات المزودة وحالات التحميل والخطأ والفراغ
           Expanded(

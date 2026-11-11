@@ -226,6 +226,18 @@ class CommercialDirectoryController extends GetxController {
     searchQuery.value = '';
   }
 
+  /// إعادة تعيين الفلاتر والبحث بالكامل
+  void resetFilters() {
+    searchController.clear();
+    searchQuery.value = '';
+    selectedStatusFilter.value = null;
+    if (activeNetworkId.value > 0) {
+      fetchNetworkPosLinks(networkId: activeNetworkId.value);
+    } else if (activePosId.value > 0) {
+      fetchPosNetworks(posId: activePosId.value);
+    }
+  }
+
   /// تغيير فلتر الحالة وإعادة التحميل فوراً
   void setStatusFilter(bool? status) {
     selectedStatusFilter.value = status;

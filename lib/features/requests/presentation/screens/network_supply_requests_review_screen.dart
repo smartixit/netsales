@@ -13,6 +13,7 @@ import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// شاشة مراجعة واعتماد طلبات التوريد لمشغلي الشبكة (Network Procurement Review Queue Screen)
 class NetworkSupplyRequestsReviewScreen
@@ -63,6 +64,23 @@ class NetworkSupplyRequestsReviewScreen
             onClearSearch: controller.searchController.clear,
           );
         }),
+
+        AppSpacing.vSm,
+
+        // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: Obx(
+            () => CustomResultsCounterBar(
+              count: controller.requests.length,
+              recordLabel: 'طلب توريد',
+              isFiltered: controller.searchQuery.value.isNotEmpty ||
+                  controller.statusFilter.value != null,
+              isLoading: controller.isLoading.value && controller.requests.isEmpty,
+              onClear: controller.resetFilters,
+            ),
+          ),
+        ),
 
         // منتقي الشبكة عند تعدد شبكات المشغل
         Obx(() {

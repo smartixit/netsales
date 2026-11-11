@@ -14,6 +14,7 @@ import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// شاشة قائمة طلبات التوريد والشراء لنقطة البيع (POS Procurement Orders Screen)
 class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
@@ -39,6 +40,23 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
             onClearSearch: controller.searchController.clear,
           );
         }),
+
+        AppSpacing.vSm,
+
+        // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: Obx(
+            () => CustomResultsCounterBar(
+              count: controller.requests.length,
+              recordLabel: 'طلب شراء',
+              isFiltered: controller.searchQuery.value.isNotEmpty ||
+                  controller.statusFilter.value != null,
+              isLoading: controller.isLoading.value && controller.requests.isEmpty,
+              onClear: controller.resetFilters,
+            ),
+          ),
+        ),
 
         // قائمة الطلبات مع حالات التحميل والخطأ
         Expanded(

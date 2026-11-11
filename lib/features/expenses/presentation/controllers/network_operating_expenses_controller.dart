@@ -237,6 +237,16 @@ class NetworkOperatingExpensesController extends GetxController {
     await loadExpenses(refresh: true);
   }
 
+  /// إعادة تعيين الفلاتر والبحث
+  void resetFilters() {
+    _searchDebounce?.cancel();
+    searchTextController.clear();
+    searchQuery.value = '';
+    fromDate.value = null;
+    toDate.value = null;
+    loadExpenses(refresh: true);
+  }
+
   Future<void> loadDetails(int id) async {
     final version = ++_detailVersion;
     isLoadingDetails.value = true;

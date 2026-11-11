@@ -91,6 +91,14 @@ class NotificationController extends GetxController {
     loadNotifications(isRefresh: true);
   }
 
+  /// إعادة تعيين الفلاتر والبحث
+  void resetFilters() {
+    searchController.clear();
+    searchQuery.value = '';
+    selectedFilter.value = null;
+    loadNotifications(isRefresh: true);
+  }
+
   /// تحميل قائمة الإشعارات من الخادم مع ترقيم المؤشر
   Future<void> loadNotifications({bool isRefresh = false}) async {
     final revision = ++_loadRevision;
