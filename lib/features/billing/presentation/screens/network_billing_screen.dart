@@ -39,6 +39,7 @@ class NetworkBillingScreen extends GetView<NetworkBillingController> {
         }
 
         final account = controller.selectedAccount;
+        final recentPurchaseInvoice = controller.lastPurchase.value?.invoice;
         return RefreshIndicator(
           onRefresh: controller.load,
           child: ListView(
@@ -51,8 +52,8 @@ class NetworkBillingScreen extends GetView<NetworkBillingController> {
                 onAccountChanged: controller.selectAccount,
               ),
               SizedBox(height: 16.h),
-              if (controller.lastPurchase.value?.invoice case final invoice?)
-                _PurchaseNotice(invoice: invoice),
+              if (recentPurchaseInvoice != null)
+                _PurchaseNotice(invoice: recentPurchaseInvoice),
               _SectionNavigation(controller: controller),
               SizedBox(height: 16.h),
               switch (controller.selectedSection.value) {

@@ -263,6 +263,8 @@ abstract final class ApiConstants {
       '/billing/accounts/$accountId/subscriptions';
   static String billingAccountInvoices(int accountId) =>
       '/billing/accounts/$accountId/invoices';
+  static String billingAccountStatement(int accountId) =>
+      '/billing/accounts/$accountId/statement';
   static String billingAccountPayments(int accountId) =>
       '/billing/accounts/$accountId/payments';
   static String billingAccountCreditNotes(int accountId) =>

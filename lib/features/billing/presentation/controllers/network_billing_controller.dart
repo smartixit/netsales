@@ -111,6 +111,7 @@ class NetworkBillingController extends GetxController {
       if (revision != _requestRevision) return;
 
       currencies.assignAll(results[0] as List<BillingCurrencyEntity>);
+      selectedCurrencyId.value ??= currencies.isEmpty ? null : currencies.first.currencyId;
       accounts.assignAll(results[1] as List<BillingAccountEntity>);
 
       if (accounts.isEmpty) {
