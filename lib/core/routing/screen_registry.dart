@@ -171,7 +171,7 @@ abstract final class ScreenRegistry {
       titleAr: 'التقارير وكشوف حساب اشتراك المنصة',
       titleEn: 'Network Reports and Platform Subscription Statements',
       workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.networksReport,
+      requiredPermission: null,
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(

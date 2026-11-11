@@ -142,7 +142,9 @@ class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
                         ),
                       ),
                     ),
-                  if (PermissionService.to.can(AppPermissions.networksReport))
+                  if (PermissionService.to.can(AppPermissions.salesReport) ||
+                      PermissionService.to.can(AppPermissions.expensesReport) ||
+                      PermissionService.to.hasRole(AppRoles.networkOwner))
                     SizedBox(
                       width: actionWidth,
                       child: _FinanceHubAction(

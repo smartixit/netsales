@@ -401,9 +401,6 @@ abstract final class AppPages {
       binding: NetworkReportsBinding(),
       middlewares: [
         AuthGuard(),
-        PermissionGuardMiddleware(
-          requiredPermission: AppPermissions.networksReport,
-        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
