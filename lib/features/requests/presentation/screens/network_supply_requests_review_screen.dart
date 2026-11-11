@@ -111,11 +111,26 @@ class NetworkSupplyRequestsReviewScreen
             }
 
             if (controller.requests.isEmpty) {
-              return const Center(
+              final hasFilter = controller.searchQuery.value.isNotEmpty ||
+                  controller.statusFilter.value != null;
+              return Center(
                 child: CustomEmptyState(
-                  icon: Icons.inbox_outlined,
-                  title: 'لا توجد طلبات توريد واردة',
-                  subtitle: 'جميع طلبات الكروت الواردة تمت معالجتها واعتمادها.',
+                  icon: hasFilter
+                      ? Icons.search_off_rounded
+                      : Icons.inbox_outlined,
+                  title: hasFilter
+                      ? 'لا توجد طلبات مطابقة للفلتر'
+                      : 'لا توجد طلبات توريد واردة حالياً',
+                  subtitle: hasFilter
+                      ? 'لم يتم العثور على أي طلبات توريد تطابق الفلاتر المحددة.'
+                      : 'ستظهر هنا طلبات شراء الكروت الواردة من نقاط البيع المرتبطة.',
+                  actionLabel: hasFilter ? 'إعادة ضبط الفلاتر' : null,
+                  onAction: hasFilter
+                      ? () {
+                          controller.searchController.clear();
+                          controller.setStatusFilter(null);
+                        }
+                      : null,
                 ),
               );
             }

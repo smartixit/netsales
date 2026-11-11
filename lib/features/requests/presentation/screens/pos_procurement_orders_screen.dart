@@ -61,13 +61,26 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
             }
 
             if (controller.requests.isEmpty) {
+              final hasFilter = controller.statusFilter.value != null;
               return Center(
                 child: CustomEmptyState(
-                  icon: Icons.inventory_2_outlined,
-                  title: 'لا توجد طلبات توريد حالياً',
-                  subtitle: 'يمكنك إنشاء طلب كروت جديد من شبكاتك الموردة.',
-                  actionLabel: 'طلب توريد جديد',
-                  onAction: controller.navigateToNewOrder,
+                  icon: hasFilter
+                      ? Icons.search_off_rounded
+                      : Icons.inventory_2_outlined,
+                  title: hasFilter
+                      ? 'لا توجد طلبات مطابقة للحالة'
+                      : 'لا توجد طلبات توريد حالياً',
+                  subtitle: hasFilter
+                      ? 'لم يتم العثور على أي طلبات بالحالة المختارة.'
+                      : 'يمكنك إنشاء طلب كروت جديد من شبكاتك الموردة.',
+                  actionLabel: hasFilter
+                      ? 'عرض جميع الطلبات'
+                      : (controller.canCreateOrder ? 'طلب توريد جديد' : null),
+                  onAction: hasFilter
+                      ? () => controller.setStatusFilter(null)
+                      : (controller.canCreateOrder
+                          ? controller.navigateToNewOrder
+                          : null),
                 ),
               );
             }

@@ -58,7 +58,7 @@ class AppException implements Exception {
       'LateInitializationError',
       'was called on null',
       'NullPointerException',
-      'Bad state: No element',
+      'No element',
       'Assertion failed',
       'Unhandled Exception',
       'Stack Overflow',
