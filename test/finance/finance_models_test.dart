@@ -18,6 +18,7 @@ void main() {
         'wallet_balance': 250000.50,
         'credit_limit': 500000.00,
         'available_overdraft_capacity': 250000.00,
+        'total_purchasing_power': 500000.50,
         'status': true,
         'accounting_status': 'NORMAL',
         'accounting_status_label': 'طبيعي',

@@ -17,6 +17,7 @@ class PosWalletModel extends PosWalletEntity {
     super.creditAmount = 0.0,
     super.networkName,
     super.posName,
+    super.totalPurchasingPower,
     super.createdAt,
     super.updatedAt,
   });
@@ -48,6 +49,8 @@ class PosWalletModel extends PosWalletEntity {
       isOverdrawn: json['is_overdrawn'] as bool? ?? false,
       debitAmount: (json['debit_amount'] as num?)?.toDouble() ?? 0.0,
       creditAmount: (json['credit_amount'] as num?)?.toDouble() ?? 0.0,
+      totalPurchasingPower:
+          (json['total_purchasing_power'] as num?)?.toDouble(),
       networkName: netName,
       posName: pName,
       createdAt: json['created_at'] as String?,

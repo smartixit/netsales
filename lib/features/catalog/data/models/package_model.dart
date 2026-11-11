@@ -40,19 +40,15 @@ class PackageModel extends PackageEntity {
     final creditDiscount =
         (json['package_default_credit_discount'] as num?)?.toDouble() ?? 0.0;
 
-    // Use server values if present, otherwise compute fallback display representation
+    // قراءة القيم المالية المعتمدة سيادياً والمحسوبة على الخادم حصراً دون أي عمليات حسابية محلية احتياطية
     final cashDiscountAmt =
-        (json['cash_discount_amount'] as num?)?.toDouble() ??
-        ((price * cashDiscount) / 100);
+        (json['cash_discount_amount'] as num?)?.toDouble() ?? 0.0;
     final creditDiscountAmt =
-        (json['credit_discount_amount'] as num?)?.toDouble() ??
-        ((price * creditDiscount) / 100);
+        (json['credit_discount_amount'] as num?)?.toDouble() ?? 0.0;
     final effCash =
-        (json['effective_cash_price'] as num?)?.toDouble() ??
-        (price - cashDiscountAmt);
+        (json['effective_cash_price'] as num?)?.toDouble() ?? price;
     final effCredit =
-        (json['effective_credit_price'] as num?)?.toDouble() ??
-        (price - creditDiscountAmt);
+        (json['effective_credit_price'] as num?)?.toDouble() ?? price;
 
     return PackageModel(
       packageId: (json['package_id'] as num?)?.toInt() ?? 0,

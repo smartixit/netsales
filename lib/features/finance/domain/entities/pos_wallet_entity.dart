@@ -17,6 +17,7 @@ class PosWalletEntity {
   final double creditAmount;
   final String? networkName;
   final String? posName;
+  final double? totalPurchasingPower;
   final String? createdAt;
   final String? updatedAt;
 
@@ -36,12 +37,10 @@ class PosWalletEntity {
     this.creditAmount = 0.0,
     this.networkName,
     this.posName,
+    this.totalPurchasingPower,
     this.createdAt,
     this.updatedAt,
   });
-
-  /// الرصيد المتاح الفعلي للاستخدام (الرصيد النقدي + السقف الائتماني المتبقي)
-  double get totalPurchasingPower => walletBalance + availableOverdraftCapacity;
 }
 
 /// كيان قيد دفتر الأستاذ لمحفظة نقطة البيع (POS Wallet Log Entity)
