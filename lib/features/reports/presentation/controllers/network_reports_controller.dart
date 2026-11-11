@@ -87,6 +87,17 @@ class NetworkReportsController extends GetxController {
     }
   }
 
+  void clearConfiguration() {
+    for (final field in filterControllers.values) {
+      field.dispose();
+    }
+    filterControllers.clear();
+    selectedDefinition.value = null;
+    engineDefinition.value = null;
+    criteria.value = ReportCriteria();
+    presentation.value = ReportPresentationOptions();
+  }
+
   TextEditingController textControllerFor(String filterId) =>
       filterControllers.putIfAbsent(filterId, TextEditingController.new);
 
@@ -141,8 +152,7 @@ class NetworkReportsController extends GetxController {
         reportKey: report.key,
         filters: filters,
       );
-      selectedDefinition.value = null;
-      engineDefinition.value = null;
+      clearConfiguration();
       CustomSnackbar.show(
         title: 'تم تسجيل التقرير',
         message: 'يمكنك متابعة حالة التنفيذ وتنزيل ملف النتيجة بعد اكتماله.',
