@@ -229,6 +229,8 @@ class BillingStatementBalanceEntity {
     required this.currency,
     required this.openingReceivableMinor,
     required this.openingReceivable,
+    this.openingCustomerCreditMinor = 0,
+    this.openingCustomerCredit = '0',
     required this.invoicedMinor,
     required this.invoiced,
     required this.verifiedPaymentsMinor,
@@ -237,12 +239,16 @@ class BillingStatementBalanceEntity {
     required this.creditsApplied,
     required this.closingReceivableMinor,
     required this.closingReceivable,
+    this.closingCustomerCreditMinor = 0,
+    this.closingCustomerCredit = '0',
     required this.counts,
   });
 
   final BillingCurrencyEntity currency;
   final int openingReceivableMinor;
   final String openingReceivable;
+  final int openingCustomerCreditMinor;
+  final String openingCustomerCredit;
   final int invoicedMinor;
   final String invoiced;
   final int verifiedPaymentsMinor;
@@ -251,6 +257,8 @@ class BillingStatementBalanceEntity {
   final String creditsApplied;
   final int closingReceivableMinor;
   final String closingReceivable;
+  final int closingCustomerCreditMinor;
+  final String closingCustomerCredit;
   final Map<String, int> counts;
 }
 

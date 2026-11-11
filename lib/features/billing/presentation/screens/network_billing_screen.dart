@@ -1115,11 +1115,18 @@ class _StatementCard extends StatelessWidget {
             ),
             Divider(color: context.colors.outlineVariant),
             _MoneyLine(
-              label: 'الرصيد الختامي',
+              label: 'الرصيد الختامي المستحق',
               value: balance.closingReceivable,
               currency: balance.currency.code,
               emphasis: true,
             ),
+            if (balance.closingCustomerCreditMinor > 0)
+              _MoneyLine(
+                label: 'رصيد دائن لصالح الشبكة',
+                value: balance.closingCustomerCredit,
+                currency: balance.currency.code,
+                emphasis: true,
+              ),
           ],
         ),
       );

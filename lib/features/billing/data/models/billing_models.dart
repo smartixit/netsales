@@ -324,6 +324,8 @@ class BillingStatementModel extends BillingStatementEntity {
         currency: currency,
         openingReceivableMinor: _integer(row, 'opening_receivable_minor', fallback: 0),
         openingReceivable: _text(row, 'opening_receivable', fallback: '0'),
+        openingCustomerCreditMinor: _integer(row, 'opening_customer_credit_minor', fallback: 0),
+        openingCustomerCredit: _text(row, 'opening_customer_credit', fallback: '0'),
         invoicedMinor: _integer(row, 'invoiced_minor', fallback: 0),
         invoiced: _text(row, 'invoiced', fallback: '0'),
         verifiedPaymentsMinor: _integer(row, 'verified_payments_minor', fallback: 0),
@@ -332,6 +334,8 @@ class BillingStatementModel extends BillingStatementEntity {
         creditsApplied: _text(row, 'credits_applied', fallback: '0'),
         closingReceivableMinor: _integer(row, 'closing_receivable_minor', fallback: 0),
         closingReceivable: _text(row, 'closing_receivable', fallback: '0'),
+        closingCustomerCreditMinor: _integer(row, 'closing_customer_credit_minor', fallback: 0),
+        closingCustomerCredit: _text(row, 'closing_customer_credit', fallback: '0'),
         counts: rawCounts.map((key, value) => MapEntry(
           key,
           value is int ? value : int.tryParse(value.toString()) ?? 0,
