@@ -1,3 +1,7 @@
+import 'dart:math' as math;
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
@@ -20,6 +24,8 @@ class NetworkBillingController extends GetxController {
     required this.getStatement,
     required this.getPlans,
     required this.purchaseSubscription,
+    required this.getPaymentMethods,
+    required this.submitInvoicePayment,
   });
 
   final GetBillingCurrenciesUseCase getCurrencies;
@@ -33,6 +39,8 @@ class NetworkBillingController extends GetxController {
   final GetBillingStatementUseCase getStatement;
   final GetNetworkBillingPlansUseCase getPlans;
   final PurchaseNetworkSubscriptionUseCase purchaseSubscription;
+  final GetNetworkBillingPaymentMethodsUseCase getPaymentMethods;
+  final SubmitNetworkBillingInvoicePaymentUseCase submitInvoicePayment;
 
   final isLoading = false.obs;
   final isCreatingAccount = false.obs;
@@ -47,6 +55,12 @@ class NetworkBillingController extends GetxController {
   final creditNotes = <BillingCreditNoteEntity>[].obs;
   final refunds = <BillingRefundEntity>[].obs;
   final plans = <BillingPlanEntity>[].obs;
+  final paymentMethods = <BillingPaymentMethodEntity>[].obs;
+  final selectedPaymentMethodId = RxnInt();
+  final paymentAmountController = TextEditingController();
+  final paymentReferenceController = TextEditingController();
+  final selectedProofPath = RxnString();
+  final isSubmittingPayment = false.obs;
   final isPurchasing = false.obs;
   final Rxn<BillingPurchaseResultEntity> lastPurchase = Rxn<BillingPurchaseResultEntity>();
   final statement = Rxn<BillingStatementEntity>();
@@ -161,6 +175,7 @@ class NetworkBillingController extends GetxController {
         getRefunds(id),
         getStatement(id),
         getPlans(id),
+        getPaymentMethods(id),
       ]);
       if (revision != _requestRevision || selectedAccountId.value != id) return;
 
@@ -182,6 +197,10 @@ class NetworkBillingController extends GetxController {
       _refundsCursor = refundPage.nextCursor;
       statement.value = pages[5] as BillingStatementEntity;
       plans.assignAll((pages[6] as PaginatedList<BillingPlanEntity>).items);
+      paymentMethods.assignAll(pages[7] as List<BillingPaymentMethodEntity>);
+      if (!paymentMethods.any((item) => item.paymentMethodId == selectedPaymentMethodId.value)) {
+        selectedPaymentMethodId.value = paymentMethods.isEmpty ? null : paymentMethods.first.paymentMethodId;
+      }
     } catch (error) {
       if (revision == _requestRevision) {
         _setError(error, 'تعذر تحميل سجل الاشتراكات والفواتير وكشف الحساب.');
@@ -302,6 +321,154 @@ class NetworkBillingController extends GetxController {
     final seen = target.map(idOf).toSet();
     for (final item in incoming) {
       if (seen.add(idOf(item))) target.add(item);
+    }
+  }
+
+  void preparePayment(BillingInvoiceEntity invoice) {
+    paymentAmountController.text = invoice.remaining;
+    paymentReferenceController.clear();
+    selectedProofPath.value = null;
+    final matching = paymentMethods.where((method) => method.isActive).toList();
+    selectedPaymentMethodId.value = matching.isEmpty
+        ? null
+        : matching.first.paymentMethodId;
+    errorMessage.value = null;
+  }
+
+  Future<void> choosePaymentProof() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+        allowMultiple: false,
+        withData: false,
+      );
+      final path = result?.files.single.path;
+      if (path != null && path.isNotEmpty) {
+        selectedProofPath.value = path;
+      }
+    } catch (error) {
+      _setError(error, 'تعذر اختيار إثبات الدفع.');
+    }
+  }
+
+  int? _parseMinorUnits(String input, int decimalPlaces) {
+    final normalized = input.trim().replaceAll(',', '.');
+    if (normalized.isEmpty || decimalPlaces < 0 || decimalPlaces > 6) {
+      return null;
+    }
+    if (!RegExp(r'^\d+(?:\.\d+)?
+    final accountId = selectedAccountId.value;
+    if (accountId == null || isPurchasing.value) return null;
+    isPurchasing.value = true;
+    errorMessage.value = null;
+    try {
+      final result = await purchaseSubscription(accountId, priceId);
+      lastPurchase.value = result;
+      await loadAccountHistory();
+      return result;
+    } catch (error) {
+      _setError(error, 'تعذر إتمام طلب الاشتراك.');
+      return null;
+    } finally {
+      isPurchasing.value = false;
+    }
+  }
+
+  @override
+  void onClose() {
+    paymentAmountController.dispose();
+    paymentReferenceController.dispose();
+    super.onClose();
+  }
+
+  void selectSection(BillingSection section) => selectedSection.value = section;
+
+  void _resetCursors() {
+    _subscriptionsCursor = null;
+    _invoicesCursor = null;
+    _paymentsCursor = null;
+    _creditNotesCursor = null;
+    _refundsCursor = null;
+  }
+
+  void _clearHistory() {
+    _resetCursors();
+    subscriptions.clear();
+    invoices.clear();
+    payments.clear();
+    creditNotes.clear();
+    refunds.clear();
+    plans.clear();
+    paymentMethods.clear();
+    selectedPaymentMethodId.value = null;
+    statement.value = null;
+    lastPurchase.value = null;
+  }
+}
+).hasMatch(normalized)) return null;
+
+    final parts = normalized.split('.');
+    final whole = BigInt.tryParse(parts.first);
+    if (whole == null) return null;
+    final fraction = parts.length == 1 ? '' : parts[1];
+    if (fraction.length > decimalPlaces &&
+        fraction.substring(decimalPlaces).split('').any((digit) => digit != '0')) {
+      return null;
+    }
+    final normalizedFraction = fraction
+        .padRight(decimalPlaces, '0')
+        .substring(0, decimalPlaces);
+    final scale = BigInt.from(10).pow(decimalPlaces);
+    final fractionalMinor = normalizedFraction.isEmpty
+        ? BigInt.zero
+        : BigInt.parse(normalizedFraction);
+    final minor = whole * scale + fractionalMinor;
+    if (minor <= BigInt.zero || minor > BigInt.parse('9223372036854775807')) {
+      return null;
+    }
+    return int.tryParse(minor.toString());
+  }
+
+  Future<BillingPaymentEntity?> submitPayment(BillingInvoiceEntity invoice) async {
+    if (isSubmittingPayment.value) return null;
+    final methodId = selectedPaymentMethodId.value;
+    final currencyPlaces = invoice.currency?.decimalPlaces ?? 2;
+    final amountMinor = _parseMinorUnits(
+      paymentAmountController.text,
+      currencyPlaces,
+    );
+    if (methodId == null) {
+      errorMessage.value = 'اختر وسيلة الدفع أولاً.';
+      return null;
+    }
+    if (amountMinor == null) {
+      errorMessage.value = 'أدخل مبلغاً موجباً صالحاً وفق عدد منازل العملة العشرية.';
+      return null;
+    }
+
+    isSubmittingPayment.value = true;
+    errorMessage.value = null;
+    try {
+      final randomPart = math.Random.secure().nextInt(0x7fffffff).toRadixString(16);
+      final key = 'NSBILL-\u0024{DateTime.now().microsecondsSinceEpoch}-$randomPart';
+      final payment = await submitInvoicePayment(
+        invoiceId: invoice.invoiceId,
+        paymentMethodId: methodId,
+        amountMinor: amountMinor,
+        idempotencyKey: key,
+        externalReference: paymentReferenceController.text.trim().isEmpty
+            ? null
+            : paymentReferenceController.text.trim(),
+        proofPath: selectedProofPath.value,
+      );
+      await loadAccountHistory();
+      return payment;
+    } catch (error) {
+      _setError(error, 'تعذر تسجيل طلب السداد.');
+      return null;
+    } finally {
+      isSubmittingPayment.value = false;
     }
   }
 
