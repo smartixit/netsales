@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -38,16 +37,13 @@ class RepaymentCard extends StatelessWidget {
     final partyName = isNetworkView
         ? (repayment.posName ?? 'نقطة بيع #${repayment.posId}')
         : (repayment.networkName ?? 'شبكة #${repayment.networkId}');
-    final statusLabel = repayment.isCompleted
+    final status = repayment.typedStatus;
+    final statusLabel = status.isCompleted
         ? 'مكتمل'
-        : repayment.isReversed
+        : status.isReversed
         ? 'معكوس'
         : 'غير معروف';
-    final statusTone = repayment.isCompleted
-        ? SemanticTone.success
-        : repayment.isReversed
-        ? SemanticTone.danger
-        : SemanticTone.neutral;
+    final statusTone = status.tone;
 
     return CustomInteractiveBounce(
       onTap: onTap,

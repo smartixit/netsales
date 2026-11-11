@@ -22,12 +22,85 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
     final colors = context.colors;
 
     return CustomAppScaffold(
-      appBar: AppBar(title: const Text('تحصيل سداد مديونية (FIFO)')),
+      appBar: AppBar(
+        title: const Text('تحصيل سداد مديونية (FIFO)'),
+        actions: [
+          Obx(() {
+            if (controller.lastResult.value == null) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+              child: CustomButton.icon(
+                icon: Icons.receipt_long_outlined,
+                tooltip: 'عرض تفاصيل آخر سند سداد',
+                size: AppButtonSize.small,
+                onPressed: controller.openLastRepaymentDetails,
+              ),
+            );
+          }),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(AppSpacing.cardPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Obx(() {
+              final last = controller.lastResult.value;
+              if (last == null) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.md),
+                child: Container(
+                  padding: EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: colors.primary.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle_outline, color: colors.primary),
+                      AppSpacing.hSm,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'تم تسجيل سند سداد حديث #${last.repaymentUuid ?? last.repaymentId}',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: colors.onSurface,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (last.remainingDebtAfter != null) ...[
+                              AppSpacing.vXxs,
+                              Text(
+                                last.remainingDebtAfter! <= 0.001
+                                    ? 'تمت تصفية مديونية النقطة بالكامل'
+                                    : 'المديونية المتبقية: ${last.remainingDebtAfter} ر.ي',
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      CustomButton.outline(
+                        text: 'عرض السند',
+                        size: AppButtonSize.small,
+                        onPressed: controller.openLastRepaymentDetails,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
             Container(
               padding: EdgeInsets.all(AppSpacing.cardPadding),
               decoration: BoxDecoration(

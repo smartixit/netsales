@@ -84,6 +84,8 @@ class PosRepaymentModel extends PosRepaymentEntity {
     super.createdAt,
     super.networkName,
     super.posName,
+    super.remainingDebtAfter,
+    super.posBalanceAfter,
     super.allocations = const [],
   });
 
@@ -128,6 +130,8 @@ class PosRepaymentModel extends PosRepaymentEntity {
       createdAt: json['created_at'] as String?,
       networkName: netName,
       posName: pName,
+      remainingDebtAfter: (json['remaining_debt_after'] as num?)?.toDouble(),
+      posBalanceAfter: (json['pos_balance_after'] as num?)?.toDouble(),
       allocations: parsedAllocations,
     );
   }

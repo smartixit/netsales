@@ -1,5 +1,6 @@
-import 'package:netsales/features/finance/domain/entities/repayment_allocation_invoice_entity.dart';
 import 'package:netsales/core/enums/repayment_payment_method.dart';
+import 'package:netsales/core/enums/repayment_status.dart';
+import 'package:netsales/features/finance/domain/entities/repayment_allocation_invoice_entity.dart';
 
 /// كيان توزيع سداد الديون على فاتورة محددة وفق أسبقية FIFO.
 class RepaymentAllocationEntity {
@@ -46,6 +47,8 @@ class PosRepaymentEntity {
   final String? createdAt;
   final String? networkName;
   final String? posName;
+  final double? remainingDebtAfter;
+  final double? posBalanceAfter;
   final List<RepaymentAllocationEntity> allocations;
 
   const PosRepaymentEntity({
@@ -67,12 +70,16 @@ class PosRepaymentEntity {
     this.createdAt,
     this.networkName,
     this.posName,
+    this.remainingDebtAfter,
+    this.posBalanceAfter,
     this.allocations = const [],
   });
 
   RepaymentPaymentMethod get typedPaymentMethod =>
       RepaymentPaymentMethod.fromWire(paymentMethod);
 
-  bool get isCompleted => status == 'COMPLETED';
-  bool get isReversed => status == 'REVERSED';
+  RepaymentStatus get typedStatus => RepaymentStatus.fromWire(status);
+
+  bool get isCompleted => typedStatus.isCompleted;
+  bool get isReversed => typedStatus.isReversed;
 }
