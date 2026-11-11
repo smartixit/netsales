@@ -130,6 +130,18 @@ class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
                           Get.toNamed<void>(AppRoutes.operatingExpenses),
                     ),
                   ),
+                  if (PermissionService.to.can(AppPermissions.subscriptionsView))
+                    SizedBox(
+                      width: actionWidth,
+                      child: _FinanceHubAction(
+                        icon: Icons.receipt_long_rounded,
+                        title: 'اشتراكات وفوترة المنصة',
+                        subtitle: 'حسابات الاشتراك والفواتير والمدفوعات والإشعارات الدائنة',
+                        onTap: () => Get.toNamed<void>(
+                          AppRoutes.networkSubscriptionBilling,
+                        ),
+                      ),
+                    ),
                   if (PermissionService.to.can(AppPermissions.networksReport))
                     SizedBox(
                       width: actionWidth,

@@ -45,6 +45,8 @@ import 'package:netsales/features/expenses/presentation/bindings/network_operati
 import 'package:netsales/features/expenses/presentation/screens/network_operating_expenses_screen.dart';
 import 'package:netsales/features/reports/presentation/bindings/network_reports_binding.dart';
 import 'package:netsales/features/reports/presentation/screens/network_reports_screen.dart';
+import 'package:netsales/features/subscription_billing/presentation/network_subscription_billing_binding.dart';
+import 'package:netsales/features/subscription_billing/presentation/network_subscription_billing_screen.dart';
 import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/finance/presentation/screens/network_wallet_dashboard_screen.dart';
 import 'package:netsales/features/finance/presentation/screens/pos_debt_ledger_screen.dart';
@@ -401,6 +403,19 @@ abstract final class AppPages {
         AuthGuard(),
         PermissionGuardMiddleware(
           requiredPermission: AppPermissions.networksReport,
+        ),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+
+    GetPage(
+      name: AppRoutes.networkSubscriptionBilling,
+      page: () => const NetworkSubscriptionBillingScreen(),
+      binding: NetworkSubscriptionBillingBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.subscriptionsView,
         ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],

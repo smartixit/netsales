@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/subscription_billing/domain/entities/network_billing_record.dart';
 import 'package:netsales/features/subscription_billing/presentation/network_subscription_billing_controller.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
@@ -137,15 +136,6 @@ class _BillingRecordCard extends StatelessWidget {
             ],
             AppSpacing.vXs,
             Text(_secondary(record, section), style: Theme.of(context).textTheme.bodySmall),
-            if (section == NetworkBillingSection.invoices)
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: CustomButton.secondary(
-                  text: 'عرض التفاصيل',
-                  prefix: Icons.open_in_new_rounded,
-                  onPressed: () => Get.toNamed<void>('/billing/invoice/${record.id}'),
-                ),
-              ),
           ],
         ),
       ),
@@ -173,18 +163,18 @@ class _StatementView extends StatelessWidget {
       children: [
         Text('كشف حركة حساب الاشتراك', style: Theme.of(context).textTheme.titleLarge),
         AppSpacing.vSm,
-        Text('الفترة: ${data['from'] ?? '—'} إلى ${data['to'] ?? '—'}'),
+        Text('الفترة: ${(data['period'] as Map?)?['from'] ?? '—'} إلى ${(data['period'] as Map?)?['to'] ?? '—'}'),
         AppSpacing.vMd,
         for (final raw in balances.whereType<Map>())
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('${raw['currency_code'] ?? raw['currency'] ?? 'العملة'}', style: Theme.of(context).textTheme.titleMedium),
+                Text('${(raw['currency'] is Map ? raw['currency']['code'] : null) ?? 'العملة'}', style: Theme.of(context).textTheme.titleMedium),
                 Text('الرصيد الافتتاحي: ${raw['opening_receivable'] ?? raw['opening_receivable_minor'] ?? '—'}'),
-                Text('الفواتير: ${raw['billed'] ?? raw['billed_minor'] ?? '—'}'),
-                Text('المدفوع: ${raw['paid'] ?? raw['paid_minor'] ?? '—'}'),
-                Text('الإشعارات الدائنة: ${raw['credited'] ?? raw['credited_minor'] ?? '—'}'),
+                Text('الفواتير: ${raw['invoiced'] ?? raw['invoiced_minor'] ?? '—'}'),
+                Text('المدفوع: ${raw['verified_payments'] ?? raw['verified_payments_minor'] ?? '—'}'),
+                Text('الإشعارات الدائنة: ${raw['credits_applied'] ?? raw['credits_applied_minor'] ?? '—'}'),
                 Text('الرصيد الختامي: ${raw['closing_receivable'] ?? raw['closing_receivable_minor'] ?? '—'}'),
                 Text('رصيد العميل الدائن: ${raw['closing_customer_credit'] ?? raw['closing_customer_credit_minor'] ?? '—'}'),
               ]),
