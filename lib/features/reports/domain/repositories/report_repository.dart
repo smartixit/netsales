@@ -16,4 +16,8 @@ abstract interface class ReportRepository {
     required String url,
     required String fileName,
   });
+  Future<void> shareArtifact({
+    required String url,
+    required String fileName,
+  });
 }

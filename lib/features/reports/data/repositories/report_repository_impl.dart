@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/file_export_service.dart';
+import 'package:netsales/core/services/share_service.dart';
 import 'package:netsales/features/reports/data/datasources/report_remote_data_source.dart';
 import 'package:netsales/features/reports/domain/entities/report_catalog_item.dart';
 import 'package:netsales/features/reports/domain/entities/report_run.dart';
@@ -19,7 +20,21 @@ class ReportRepositoryImpl implements ReportRepository {
         response.message.isNotEmpty ? response.message : 'تعذر تحميل كتالوج التقارير.',
         code: 'REPORT_CATALOG_FAILED',
       );
-    }
+      @override
+  Future<void> shareArtifact({
+    required String url,
+    required String fileName,
+  }) async {
+    final bytes = await remote.downloadArtifact(url);
+    await ShareService.instance.shareBytes(
+      bytes: Uint8List.fromList(bytes),
+      fileName: '$fileName.json',
+      mimeType: 'application/json',
+      subject: 'تقرير NetSales',
+    );
+  }
+
+}
     return response.data!;
   }
 

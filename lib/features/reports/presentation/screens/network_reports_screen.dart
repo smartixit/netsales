@@ -57,6 +57,8 @@ class NetworkReportsScreen extends GetView<NetworkReportsController> {
                 run: controller.activeRun.value!,
                 refreshing: controller.isRefreshing.value,
                 downloading: controller.isDownloading.value,
+                sharing: controller.isSharing.value,
+                onShare: controller.shareRun,
                 onRefresh: controller.refreshRun,
                 onDownload: controller.downloadRun,
               ),
@@ -304,6 +306,8 @@ class _ReportRunPanel extends StatelessWidget {
     required this.run,
     required this.refreshing,
     required this.downloading,
+    required this.sharing,
+    required this.onShare,
     required this.onRefresh,
     required this.onDownload,
   });
@@ -311,6 +315,8 @@ class _ReportRunPanel extends StatelessWidget {
   final ReportRun run;
   final bool refreshing;
   final bool downloading;
+  final bool sharing;
+  final VoidCallback onShare;
   final VoidCallback onRefresh;
   final VoidCallback onDownload;
 
@@ -345,6 +351,13 @@ class _ReportRunPanel extends StatelessWidget {
                   prefix: Icons.download_rounded,
                   onPressed: downloading ? null : onDownload,
                   loading: downloading,
+                ),
+              if (run.isCompleted)
+                CustomButton.secondary(
+                  text: 'مشاركة JSON',
+                  prefix: Icons.share_rounded,
+                  onPressed: sharing ? null : onShare,
+                  loading: sharing,
                 ),
             ],
           ),

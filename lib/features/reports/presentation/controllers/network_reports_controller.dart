@@ -15,12 +15,14 @@ class NetworkReportsController extends GetxController {
     required this.createRun,
     required this.getRun,
     required this.downloadArtifact,
+    required this.shareArtifact,
   });
 
   final GetNetworkReportCatalogUseCase getCatalog;
   final CreateNetworkReportRunUseCase createRun;
   final GetNetworkReportRunUseCase getRun;
   final DownloadReportArtifactUseCase downloadArtifact;
+  final DownloadReportArtifactUseCase shareArtifact;
 
   final catalog = <ReportCatalogItem>[].obs;
   final activeRun = Rxn<ReportRun>();
@@ -28,6 +30,7 @@ class NetworkReportsController extends GetxController {
   final isCreating = false.obs;
   final isRefreshing = false.obs;
   final isDownloading = false.obs;
+  final isSharing = false.obs;
   final error = RxnString();
   final selectedDefinition = Rxn<ReportCatalogItem>();
   final engineDefinition = Rxn<ReportDefinition>();
@@ -184,6 +187,24 @@ class NetworkReportsController extends GetxController {
       );
     } finally {
       isRefreshing.value = false;
+    }
+  }
+
+  Future<void> shareRun() async {
+    final run = activeRun.value;
+    final url = run?.downloadUrl;
+    if (run == null || !run.isCompleted || url == null || url.isEmpty) return;
+    isSharing.value = true;
+    try {
+      await shareArtifact(url: url, fileName: run.reportKey);
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'تعذر مشاركة التقرير',
+        message: AppException.sanitizeMessage(e, fallback: 'تعذر مشاركة ملف التقرير.'),
+        type: SnackType.error,
+      );
+    } finally {
+      isSharing.value = false;
     }
   }
 
