@@ -24,7 +24,44 @@ class NetworkSubscriptionBillingScreen extends GetView<NetworkSubscriptionBillin
           return CustomErrorState.compact(title: 'تعذر تحميل حسابات الاشتراك', subtitle: controller.error.value, onRetry: controller.loadAccounts);
         }
         if (controller.accounts.isEmpty) {
-          return const CustomEmptyState.compact(title: 'لا يوجد حساب فوترة', subtitle: 'لا يوجد حساب اشتراك متاح لهذه الشبكة حالياً.', icon: Icons.receipt_long_outlined);
+          return ListView(
+            children: [
+              const CustomEmptyState.compact(
+                title: 'لا يوجد حساب فوترة',
+                subtitle: 'أنشئ حساب فوترة للشبكة لتتمكن من شراء الخطط ومتابعة الفواتير والمدفوعات.',
+                icon: Icons.receipt_long_outlined,
+              ),
+              if (controller.currencies.isNotEmpty) ...[
+                AppSpacing.vMd,
+                CustomDropdown<int>(
+                  label: 'العملة الأساسية لحساب الفوترة',
+                  hint: 'اختر عملة الحساب',
+                  rxValue: controller.selectedCurrencyId,
+                  items: controller.currencies.map((currency) => DropdownItem<int>(
+                    value: (currency['currency_id'] as num).toInt(),
+                    child: Text('${currency['code'] ?? ''} — ${currency['name'] ?? ''}'),
+                  )).toList(growable: false),
+                  onChanged: (value) => controller.selectedCurrencyId.value = value,
+                  isRequired: true,
+                ),
+                AppSpacing.vMd,
+                CustomButton.primary(
+                  text: 'إنشاء حساب الفوترة',
+                  prefix: Icons.add_card_rounded,
+                  loading: controller.isCreatingAccount.value,
+                  onPressed: controller.isCreatingAccount.value
+                      ? null
+                      : controller.createBillingAccount,
+                ),
+              ],
+              if (controller.error.value != null)
+                CustomErrorState.compact(
+                  title: 'تعذر إنشاء الحساب',
+                  subtitle: controller.error.value,
+                  onRetry: controller.loadAccounts,
+                ),
+            ],
+          );
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

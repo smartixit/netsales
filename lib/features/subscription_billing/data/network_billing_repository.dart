@@ -5,6 +5,34 @@ import 'package:netsales/features/subscription_billing/domain/entities/network_b
 class NetworkBillingRepository {
   const NetworkBillingRepository();
 
+  Future<List<Map<String, dynamic>>> currencies() async {
+    final response = await ApiService.instance.get<List<Map<String, dynamic>>>(
+      '/billing/currencies',
+      fromJson: (data) => data is List
+          ? data.whereType<Map>().map((row) => Map<String, dynamic>.from(row)).toList(growable: false)
+          : const <Map<String, dynamic>>[],
+    );
+    if (!response.success || response.data == null) {
+      throw StateError(response.message.isEmpty ? 'تعذر تحميل العملات المتاحة.' : response.message);
+    }
+    return response.data!;
+  }
+
+  Future<NetworkBillingRecord> createAccount({
+    required int networkId,
+    required int currencyId,
+  }) async {
+    final response = await ApiService.instance.post<NetworkBillingRecord>(
+      '/networks/$networkId/billing/accounts',
+      data: {'currency_id': currencyId},
+      fromJson: (data) => NetworkBillingRecord(Map<String, dynamic>.from(data as Map)),
+    );
+    if (!response.success || response.data == null) {
+      throw StateError(response.message.isEmpty ? 'تعذر إنشاء حساب الفوترة.' : response.message);
+    }
+    return response.data!;
+  }
+
   Future<List<NetworkBillingRecord>> accounts(int networkId) async {
     final response = await ApiService.instance.get<List<NetworkBillingRecord>>(
       '/networks/$networkId/billing/accounts',

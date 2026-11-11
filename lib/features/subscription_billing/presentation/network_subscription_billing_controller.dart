@@ -10,6 +10,9 @@ class NetworkSubscriptionBillingController extends GetxController {
   final NetworkBillingRepository repository;
 
   final accounts = <NetworkBillingRecord>[].obs;
+  final currencies = <Map<String, dynamic>>[].obs;
+  final selectedCurrencyId = RxnInt();
+  final isCreatingAccount = false.obs;
   final records = <NetworkBillingRecord>[].obs;
   final statementData = Rxn<Map<String, dynamic>>();
   final selectedAccountId = RxnInt();
@@ -40,6 +43,12 @@ class NetworkSubscriptionBillingController extends GetxController {
     error.value = null;
     try {
       accounts.assignAll(await repository.accounts(id));
+      if (accounts.isEmpty) {
+        currencies.assignAll(await repository.currencies());
+        selectedCurrencyId.value = currencies.isEmpty
+            ? null
+            : (currencies.first['currency_id'] as num?)?.toInt();
+      }
       if (accounts.isNotEmpty) {
         final selected = accounts.firstWhereOrNull((a) => a.id == selectedAccountId.value);
         selectedAccountId.value = selected?.id ?? accounts.first.id;
@@ -49,6 +58,22 @@ class NetworkSubscriptionBillingController extends GetxController {
       error.value = e.toString();
     } finally {
       isLoadingAccounts.value = false;
+    }
+  }
+
+  Future<void> createBillingAccount() async {
+    final network = networkId;
+    final currency = selectedCurrencyId.value;
+    if (network == null || currency == null) return;
+    isCreatingAccount.value = true;
+    error.value = null;
+    try {
+      await repository.createAccount(networkId: network, currencyId: currency);
+      await loadAccounts();
+    } catch (e) {
+      error.value = e.toString();
+    } finally {
+      isCreatingAccount.value = false;
     }
   }
 
