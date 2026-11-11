@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_to_words_converter.dart';
-import 'package:netsales/widgets/toasts/custom_snackbar.dart';
+import 'package:netsales/widgets/toasts/custom_toast.dart';
 
 /// ويدجيت تفقيط وعرض المبلغ بالكلمات (CustomAmountToWordsBanner)
 /// يختفي تلقائياً وبشكل قطعي عندما يكون المبلغ صفراً أو فارغاً أو غير صالح.
@@ -96,13 +96,14 @@ class CustomAmountToWordsBanner extends StatelessWidget {
             SizedBox(width: AppSpacing.xs),
             InkWell(
               borderRadius: BorderRadius.circular(AppRadius.xs),
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: words));
-                CustomSnackbar.show(
-                  title: 'تم النسخ',
-                  message: 'تم نسخ تفقيط المبلغ إلى الحافظة بنجاح.',
-                  type: SnackType.success,
-                );
+              onTap: () async {
+                final success = await UrlLauncherService.copyToClipboard(words);
+                if (success) {
+                  CustomToast.show(
+                    message: 'تم نسخ تفقيط المبلغ إلى الحافظة بنجاح.',
+                    icon: Icons.check_circle_outline_rounded,
+                  );
+                }
               },
               child: Padding(
                 padding: EdgeInsets.all(3.r),

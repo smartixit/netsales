@@ -5,9 +5,9 @@ import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 
@@ -145,10 +145,8 @@ class PackageCard extends StatelessWidget {
                                   ),
                                 ),
                                 AppSpacing.vXxs,
-                                Text(
-                                  AmountFormatter.format(
-                                    package.packageVoucherPrice.toString(),
-                                  ),
+                                CustomInteractiveAmountText(
+                                  amount: package.packageVoucherPrice,
                                   style: AppTypography.titleMedium.copyWith(
                                     color: colors.primary,
                                     fontWeight: FontWeight.bold,

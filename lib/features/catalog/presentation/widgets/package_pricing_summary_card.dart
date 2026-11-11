@@ -5,6 +5,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
 
 /// بطاقة عرض الهيكل المالي والتسعيري والخصومات للباقة (Server-Authoritative Values §34)
 class PackagePricingSummaryCard extends StatelessWidget {
@@ -61,8 +62,8 @@ class PackagePricingSummaryCard extends StatelessWidget {
                   color: colors.onSurfaceVariant,
                 ),
               ),
-              Text(
-                AmountFormatter.format(package.packageVoucherPrice.toString()),
+              CustomInteractiveAmountText(
+                amount: package.packageVoucherPrice,
                 style: AppTypography.titleMedium.copyWith(
                   color: colors.onSurface,
                   fontWeight: FontWeight.bold,

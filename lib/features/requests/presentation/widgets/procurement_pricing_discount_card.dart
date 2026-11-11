@@ -9,6 +9,7 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
 
 /// بطاقة عرض وتفسير الخصم الفعلي والسعر المعتمد من الخادم لنقطة البيع (Server-Authoritative Pricing §34)
 class ProcurementPricingDiscountCard extends StatelessWidget {
@@ -179,8 +180,8 @@ class ProcurementPricingDiscountCard extends StatelessWidget {
                   AppSpacing.vXxs,
                   Row(
                     children: [
-                      Text(
-                        AmountFormatter.formatValue(effectivePrice),
+                      CustomInteractiveAmountText(
+                        amount: effectivePrice,
                         style: AppTypography.titleMedium.copyWith(
                           color: colors.primary,
                           fontWeight: FontWeight.bold,
@@ -188,8 +189,8 @@ class ProcurementPricingDiscountCard extends StatelessWidget {
                       ),
                       if (discountRate > 0) ...[
                         AppSpacing.hSm,
-                        Text(
-                          AmountFormatter.formatValue(discount!.originalPackagePrice),
+                        CustomInteractiveAmountText(
+                          amount: discount!.originalPackagePrice,
                           style: AppTypography.bodySmall.copyWith(
                             color: colors.onSurfaceVariant,
                             decoration: TextDecoration.lineThrough,
