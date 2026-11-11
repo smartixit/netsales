@@ -251,6 +251,31 @@ abstract final class ApiConstants {
       '/requests/batch-force-delete';
 
   // ==========================================================================
+  // Platform Subscription Billing — Network Owner Self-Service
+  // These routes are scoped to the active network owner by the API.
+  // ==========================================================================
+  static const String billingCurrencies = '/billing/currencies';
+  static String networkBillingAccounts(int networkId) =>
+      '/networks/$networkId/billing/accounts';
+  static String billingAccountPlans(int accountId) =>
+      '/billing/accounts/$accountId/plans';
+  static String billingAccountSubscriptions(int accountId) =>
+      '/billing/accounts/$accountId/subscriptions';
+  static String billingAccountInvoices(int accountId) =>
+      '/billing/accounts/$accountId/invoices';
+  static String billingAccountPayments(int accountId) =>
+      '/billing/accounts/$accountId/payments';
+  static String billingAccountCreditNotes(int accountId) =>
+      '/billing/accounts/$accountId/credit-notes';
+  static String billingAccountRefunds(int accountId) =>
+      '/billing/accounts/$accountId/refunds';
+  static String billingSubscriptionEvents(int subscriptionId) =>
+      '/billing/subscriptions/$subscriptionId/events';
+  static String billingInvoice(int invoiceId) => '/billing/invoices/$invoiceId';
+  static String billingInvoicePayments(int invoiceId) =>
+      '/billing/invoices/$invoiceId/payments';
+
+  // ==========================================================================
   // 14. فواتير مبيعات الكروت (Sale Invoices)
   // ==========================================================================
   static const String saleInvoices = '/sale-invoices';
