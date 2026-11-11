@@ -6,6 +6,8 @@ abstract interface class BillingRepository {
   Future<List<BillingAccountEntity>> getAccounts(int networkId);
   Future<PaginatedList<BillingPlanEntity>> getPlans(int accountId);
   Future<BillingPurchaseResultEntity> purchaseSubscription(int accountId, int priceId);
+  Future<List<BillingPaymentMethodEntity>> getPaymentMethods(int accountId);
+  Future<BillingPaymentEntity> submitInvoicePayment({required int invoiceId, required int paymentMethodId, required int amountMinor, required String idempotencyKey, String? externalReference, String? proofPath});
   Future<BillingAccountEntity> createAccount(int networkId, int currencyId);
   Future<PaginatedList<BillingSubscriptionEntity>> getSubscriptions(int accountId, {String? cursor});
   Future<PaginatedList<BillingInvoiceEntity>> getInvoices(int accountId, {String? cursor});

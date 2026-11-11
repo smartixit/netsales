@@ -452,3 +452,34 @@ class BillingPurchaseResultModel extends BillingPurchaseResultEntity {
     );
   }
 }
+
+class BillingPaymentMethodModel extends BillingPaymentMethodEntity {
+  const BillingPaymentMethodModel({
+    required super.paymentMethodId,
+    required super.methodKey,
+    required super.name,
+    required super.methodType,
+    required super.requiresProof,
+    required super.isActive,
+    super.instructions,
+    super.currencies,
+  });
+
+  factory BillingPaymentMethodModel.fromJson(Map<String, dynamic> json) {
+    final values = json['currencies'];
+    return BillingPaymentMethodModel(
+      paymentMethodId: _integer(json, 'payment_method_id'),
+      methodKey: _text(json, 'method_key'),
+      name: _text(json, 'name'),
+      methodType: _text(json, 'method_type', fallback: 'MANUAL'),
+      requiresProof: json['requires_proof'] == true,
+      isActive: json['is_active'] == true,
+      instructions: json['instructions']?.toString(),
+      currencies: values is List
+          ? values.map((item) => BillingCurrencyModel.fromJson(
+              _jsonMap(item, 'payment method currency'),
+            )).toList(growable: false)
+          : const <BillingCurrencyEntity>[],
+    );
+  }
+}

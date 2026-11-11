@@ -340,3 +340,24 @@ class BillingPurchaseResultEntity {
   final BillingSubscriptionEntity subscription;
   final BillingInvoiceEntity? invoice;
 }
+
+class BillingPaymentMethodEntity {
+  const BillingPaymentMethodEntity({
+    required this.paymentMethodId,
+    required this.methodKey,
+    required this.name,
+    required this.methodType,
+    required this.requiresProof,
+    required this.isActive,
+    this.instructions,
+    this.currencies = const [],
+  });
+  final int paymentMethodId;
+  final String methodKey;
+  final String name;
+  final String methodType;
+  final bool requiresProof;
+  final bool isActive;
+  final String? instructions;
+  final List<BillingCurrencyEntity> currencies;
+}
