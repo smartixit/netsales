@@ -166,7 +166,7 @@ abstract final class ScreenRegistry {
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
-      screenId: 'NET-11',
+      screenId: 'NET-14',
       route: AppRoutes.networkReports,
       titleAr: 'التقارير وكشوف حساب اشتراك المنصة',
       titleEn: 'Network Reports and Platform Subscription Statements',
@@ -175,7 +175,7 @@ abstract final class ScreenRegistry {
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
-      screenId: 'NET-12',
+      screenId: 'NET-15',
       route: AppRoutes.networkSubscriptionBilling,
       titleAr: 'اشتراكات الشبكة وفواتيرها',
       titleEn: 'Network Platform Subscriptions and Invoices',
