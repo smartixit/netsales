@@ -166,6 +166,15 @@ abstract final class ScreenRegistry {
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
+      screenId: 'NET-11',
+      route: AppRoutes.networkReports,
+      titleAr: 'التقارير وكشوف حساب اشتراك المنصة',
+      titleEn: 'Network Reports and Platform Subscription Statements',
+      workspace: AppWorkspace.network,
+      requiredPermission: AppPermissions.networksReport,
+      implementationState: ScreenImplementationState.implemented,
+    ),
+    ScreenDescriptor(
       screenId: 'NET-08',
       route: AppRoutes.networkTeamManagement,
       titleAr: 'إدارة فريق عمل وموظفي الشبكة',
