@@ -25,6 +25,8 @@ class NetworkBillingBinding extends Bindings {
     Get.lazyPut(() => GetBillingCreditNotesUseCase(repository));
     Get.lazyPut(() => GetBillingRefundsUseCase(repository));
     Get.lazyPut(() => GetBillingStatementUseCase(repository));
+    Get.lazyPut(() => GetNetworkBillingPlansUseCase(repository));
+    Get.lazyPut(() => PurchaseNetworkSubscriptionUseCase(repository));
     Get.lazyPut(() => NetworkBillingController(
       getCurrencies: Get.find(),
       getAccounts: Get.find(),
@@ -35,6 +37,8 @@ class NetworkBillingBinding extends Bindings {
       getCreditNotes: Get.find(),
       getRefunds: Get.find(),
       getStatement: Get.find(),
+      getPlans: Get.find(),
+      purchaseSubscription: Get.find(),
     ));
   }
 }

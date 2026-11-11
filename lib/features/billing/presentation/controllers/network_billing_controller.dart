@@ -18,6 +18,8 @@ class NetworkBillingController extends GetxController {
     required this.getCreditNotes,
     required this.getRefunds,
     required this.getStatement,
+    required this.getPlans,
+    required this.purchaseSubscription,
   });
 
   final GetBillingCurrenciesUseCase getCurrencies;
@@ -29,6 +31,8 @@ class NetworkBillingController extends GetxController {
   final GetBillingCreditNotesUseCase getCreditNotes;
   final GetBillingRefundsUseCase getRefunds;
   final GetBillingStatementUseCase getStatement;
+  final GetNetworkBillingPlansUseCase getPlans;
+  final PurchaseNetworkSubscriptionUseCase purchaseSubscription;
 
   final isLoading = false.obs;
   final isCreatingAccount = false.obs;
@@ -42,6 +46,9 @@ class NetworkBillingController extends GetxController {
   final payments = <BillingPaymentEntity>[].obs;
   final creditNotes = <BillingCreditNoteEntity>[].obs;
   final refunds = <BillingRefundEntity>[].obs;
+  final plans = <BillingPlanEntity>[].obs;
+  final isPurchasing = false.obs;
+  final Rxn<BillingPurchaseResultEntity> lastPurchase = Rxn<BillingPurchaseResultEntity>();
   final statement = Rxn<BillingStatementEntity>();
   final selectedSection = BillingSection.overview.obs;
 
@@ -152,6 +159,7 @@ class NetworkBillingController extends GetxController {
         getCreditNotes(id),
         getRefunds(id),
         getStatement(id),
+        getPlans(id),
       ]);
       if (revision != _requestRevision || selectedAccountId.value != id) return;
 
@@ -172,6 +180,7 @@ class NetworkBillingController extends GetxController {
       _creditNotesCursor = creditPage.nextCursor;
       _refundsCursor = refundPage.nextCursor;
       statement.value = pages[5] as BillingStatementEntity;
+      plans.assignAll((pages[6] as PaginatedList<BillingPlanEntity>).items);
     } catch (error) {
       if (revision == _requestRevision) {
         _setError(error, 'تعذر تحميل سجل الاشتراكات والفواتير وكشف الحساب.');
@@ -295,6 +304,24 @@ class NetworkBillingController extends GetxController {
     }
   }
 
+  Future<BillingPurchaseResultEntity?> buyPlan(int priceId) async {
+    final accountId = selectedAccountId.value;
+    if (accountId == null || isPurchasing.value) return null;
+    isPurchasing.value = true;
+    errorMessage.value = null;
+    try {
+      final result = await purchaseSubscription(accountId, priceId);
+      lastPurchase.value = result;
+      await loadAccountHistory();
+      return result;
+    } catch (error) {
+      _setError(error, 'تعذر إتمام طلب الاشتراك.');
+      return null;
+    } finally {
+      isPurchasing.value = false;
+    }
+  }
+
   void selectSection(BillingSection section) => selectedSection.value = section;
 
   void _resetCursors() {
@@ -312,6 +339,8 @@ class NetworkBillingController extends GetxController {
     payments.clear();
     creditNotes.clear();
     refunds.clear();
+    plans.clear();
     statement.value = null;
+    lastPurchase.value = null;
   }
 }
