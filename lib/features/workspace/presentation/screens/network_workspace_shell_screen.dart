@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
 import 'package:netsales/features/finance/presentation/widgets/network_finance_workspace_hub.dart';
+import 'package:netsales/features/billing/presentation/screens/network_billing_screen.dart';
 import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/network_supply_requests_review_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
@@ -50,6 +51,12 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           icon: Icons.account_balance_wallet_outlined,
           activeIcon: Icons.account_balance_wallet_rounded,
           content: NetworkFinanceWorkspaceHub(),
+        ),
+        const WorkspaceNavItem(
+          label: 'اشتراكات الشبكة',
+          icon: Icons.workspace_premium_outlined,
+          activeIcon: Icons.workspace_premium_rounded,
+          content: NetworkBillingScreen(),
         ),
       ];
 

@@ -5,6 +5,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/billing/presentation/controllers/network_billing_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class NetworkBillingScreen extends GetView<NetworkBillingController> {
   const NetworkBillingScreen({super.key});
@@ -62,15 +63,18 @@ class NetworkBillingScreen extends GetView<NetworkBillingController> {
                     Text('رقم الحساب: ${account?.accountNumber ?? '—'}'),
                     Text('الحالة: ${account?.status ?? '—'}'),
                     if (controller.accounts.length > 1)
-                      DropdownButton<int>(
-                        value: account?.billingAccountId,
-                        isExpanded: true,
+                      CustomDropdown<int>(
+                        label: 'حساب الفوترة',
+                        rxValue: controller.selectedAccountId,
                         items: controller.accounts
-                            .map((a) => DropdownMenuItem(
+                            .map((a) => DropdownItem<int>(
                                   value: a.billingAccountId,
                                   child: Text(a.accountNumber),
                                 ))
                             .toList(),
+                        itemSearchText: (id) => controller.accounts
+                            .firstWhere((a) => a.billingAccountId == id)
+                            .accountNumber,
                         onChanged: controller.selectAccount,
                       ),
                   ],
