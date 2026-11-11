@@ -5,6 +5,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/update_pos_credit_limit_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
@@ -48,6 +49,15 @@ class UpdatePosCreditLimitSheet
           hint: '0.00 (أو اتركه فارغاً لإلغاء التسهيل)',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           prefixIcon: const Icon(Icons.credit_card_rounded),
+        ),
+        ValueListenableBuilder<TextEditingValue>(
+          valueListenable: controller.creditLimitController,
+          builder: (context, value, child) {
+            return CustomAmountToWordsBanner(
+              amount: value.text,
+              currencyCode: 'YER',
+            );
+          },
         ),
         AppSpacing.vSm,
         Text(

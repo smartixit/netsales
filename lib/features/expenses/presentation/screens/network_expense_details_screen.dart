@@ -13,6 +13,7 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 
 class NetworkExpenseDetailsScreen
     extends GetView<NetworkOperatingExpensesController> {
@@ -96,6 +97,16 @@ class NetworkExpenseDetailsScreen
                     style: AppTypography.headlineMedium.copyWith(
                       color: colors.onPrimary,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  CustomAmountToWordsBanner(
+                    amount: expense.totalAmount,
+                    currencyCode: 'YER',
+                    backgroundColor: colors.surface.withValues(alpha: 0.15),
+                    borderColor: colors.onPrimary.withValues(alpha: 0.25),
+                    textStyle: AppTypography.bodySmall.copyWith(
+                      color: colors.onPrimary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   AppSpacing.vXs,

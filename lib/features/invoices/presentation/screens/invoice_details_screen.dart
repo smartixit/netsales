@@ -14,6 +14,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 
 /// شاشة استعراض تفاصيل الفاتورة وبنودها والعمليات المستندية (Invoice Details Screen)
 class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
@@ -335,6 +336,10 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                             ),
                           ),
                         ],
+                      ),
+                      CustomAmountToWordsBanner(
+                        amount: invoice.invoiceTotalAmount,
+                        currencyCode: 'YER',
                       ),
                       AppSpacing.vSm,
                       Row(

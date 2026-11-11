@@ -11,6 +11,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
@@ -304,6 +305,15 @@ class RepaymentCollectionScreen extends GetView<RepaymentCollectionController> {
                     ),
                     isRequired: true,
                     enabled: !isSubmitting,
+                  ),
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: controller.amountController,
+                    builder: (context, value, child) {
+                      return CustomAmountToWordsBanner(
+                        amount: value.text,
+                        currencyCode: 'YER',
+                      );
+                    },
                   ),
                   AppSpacing.vMd,
                   CustomTextField(

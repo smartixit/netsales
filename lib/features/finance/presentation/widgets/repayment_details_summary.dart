@@ -8,6 +8,7 @@ import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.d
 import 'package:netsales/core/enums/repayment_payment_method.dart';
 import 'package:netsales/widgets/badges/custom_chip.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 
 class RepaymentDetailsSummary extends StatelessWidget {
   const RepaymentDetailsSummary({
@@ -71,6 +72,10 @@ class RepaymentDetailsSummary extends StatelessWidget {
                 style: AppTypography.displaySmall.copyWith(
                   color: colors.primary,
                 ),
+              ),
+              CustomAmountToWordsBanner(
+                amount: repayment.amount,
+                currencyCode: 'YER',
               ),
               AppSpacing.vMd,
               Wrap(

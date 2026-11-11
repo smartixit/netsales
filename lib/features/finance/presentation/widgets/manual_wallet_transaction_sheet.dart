@@ -8,6 +8,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/finance/presentation/controllers/manual_wallet_transaction_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -181,6 +182,12 @@ class ManualWalletTransactionSheet
               }
               return null;
             },
+          ),
+          Obx(
+            () => CustomAmountToWordsBanner(
+              amount: controller.enteredAmount.value,
+              currencyCode: 'YER',
+            ),
           ),
 
           AppSpacing.vMd,

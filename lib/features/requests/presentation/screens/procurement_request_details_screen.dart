@@ -14,6 +14,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 
 /// شاشة استعراض تفاصيل طلب التوريد والبنود والتسلسل الزمني (Procurement Request Details Screen)
 class ProcurementRequestDetailsScreen
@@ -220,24 +221,32 @@ class ProcurementRequestDetailsScreen
                       color: colors.primary.withValues(alpha: 0.2),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                     children: [
-                      Text(
-                        'إجمالي المبلغ المستحق:',
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: colors.onSurface,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'إجمالي المبلغ المستحق:',
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: colors.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            AmountFormatter.format(
+                              request.requestTotalAmount.toString(),
+                            ),
+                            style: AppTypography.titleLarge.copyWith(
+                              color: colors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        AmountFormatter.format(
-                          request.requestTotalAmount.toString(),
-                        ),
-                        style: AppTypography.titleLarge.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      CustomAmountToWordsBanner(
+                        amount: request.requestTotalAmount,
+                        currencyCode: 'YER',
                       ),
                     ],
                   ),
