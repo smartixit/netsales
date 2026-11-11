@@ -108,6 +108,46 @@ class BillingRepositoryImpl implements BillingRepository {
     return response.data!;
   }
 
+  @override
+  Future<List<BillingPaymentMethodEntity>> getPaymentMethods(int accountId) async {
+    final response = await remoteDataSource.getPaymentMethods(accountId);
+    if (!response.success || response.data == null) {
+      throw _failure(
+        response,
+        'تعذر تحميل وسائل الدفع المتاحة.',
+        'BILLING_PAYMENT_METHODS_FAILED',
+      );
+    }
+    return response.data!;
+  }
+
+  @override
+  Future<BillingPaymentEntity> submitInvoicePayment({
+    required int invoiceId,
+    required int paymentMethodId,
+    required int amountMinor,
+    required String idempotencyKey,
+    String? externalReference,
+    String? proofPath,
+  }) async {
+    final response = await remoteDataSource.submitInvoicePayment(
+      invoiceId: invoiceId,
+      paymentMethodId: paymentMethodId,
+      amountMinor: amountMinor,
+      idempotencyKey: idempotencyKey,
+      externalReference: externalReference,
+      proofPath: proofPath,
+    );
+    if (!response.success || response.data == null) {
+      throw _failure(
+        response,
+        'تعذر تسجيل طلب سداد الفاتورة.',
+        'BILLING_PAYMENT_SUBMISSION_FAILED',
+      );
+    }
+    return response.data!;
+  }
+
 }
 
   @override
