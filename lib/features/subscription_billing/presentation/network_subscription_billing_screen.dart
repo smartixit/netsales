@@ -7,6 +7,7 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class NetworkSubscriptionBillingScreen extends GetView<NetworkSubscriptionBillingController> {
   const NetworkSubscriptionBillingScreen({super.key});
@@ -109,15 +110,17 @@ class _AccountSelector extends StatelessWidget {
           children: [
             Text('حساب الفوترة', style: Theme.of(context).textTheme.titleMedium),
             AppSpacing.vSm,
-            DropdownButtonFormField<int>(
-              value: controller.selectedAccountId.value,
-              isExpanded: true,
-              decoration: const InputDecoration(border: OutlineInputBorder(), labelText: 'الحساب'),
-              items: controller.accounts.map((item) => DropdownMenuItem<int>(
+            CustomDropdown<int>(
+              label: 'الحساب',
+              hint: 'اختر حساب الفوترة',
+              rxValue: controller.selectedAccountId,
+              searchEnabled: controller.accounts.length > 5,
+              items: controller.accounts.map((item) => DropdownItem<int>(
                 value: item.id,
                 child: Text('${item.value('account_number')} — ${item.value('legal_name')}'),
               )).toList(growable: false),
               onChanged: controller.selectAccount,
+              isRequired: true,
             ),
             if (account != null) ...[
               AppSpacing.vXs,
