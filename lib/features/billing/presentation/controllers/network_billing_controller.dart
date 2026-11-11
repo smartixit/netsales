@@ -383,12 +383,6 @@ class NetworkBillingController extends GetxController {
   }
 
   @override
-  void onClose() {
-    paymentAmountController.dispose();
-    paymentReferenceController.dispose();
-    super.onClose();
-  }
-
   void selectSection(BillingSection section) => selectedSection.value = section;
 
   void _resetCursors() {
