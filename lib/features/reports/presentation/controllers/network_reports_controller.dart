@@ -24,11 +24,6 @@ class NetworkReportsController extends GetxController {
 
   final catalog = <ReportCatalogItem>[].obs;
   final activeRun = Rxn<ReportRun>();
-  final billingAccountIdController = TextEditingController();
-  final fromDateController = TextEditingController();
-  final toDateController = TextEditingController();
-  final paymentStatusController = TextEditingController();
-  final saleTypeController = TextEditingController();
   final isLoading = false.obs;
   final isCreating = false.obs;
   final isRefreshing = false.obs;
@@ -51,15 +46,10 @@ class NetworkReportsController extends GetxController {
 
   @override
   void onClose() {
-    billingAccountIdController.dispose();
     for (final field in filterControllers.values) {
       field.dispose();
     }
     filterControllers.clear();
-    fromDateController.dispose();
-    toDateController.dispose();
-    paymentStatusController.dispose();
-    saleTypeController.dispose();
     super.onClose();
   }
 
@@ -110,6 +100,10 @@ class NetworkReportsController extends GetxController {
     criteria.value = ReportCriteria(filters: next);
   }
 
+  void updateCriteria(ReportCriteria value) {
+    criteria.value = value;
+  }
+
   void updatePresentation(ReportPresentationOptions value) {
     presentation.value = value;
   }
@@ -142,55 +136,6 @@ class NetworkReportsController extends GetxController {
       CustomSnackbar.show(
         title: 'تم تسجيل التقرير',
         message: 'يمكنك متابعة حالة التنفيذ وتنزيل ملف النتيجة بعد اكتماله.',
-        type: SnackType.success,
-      );
-    } catch (e) {
-      CustomSnackbar.show(
-        title: 'تعذر إنشاء التقرير',
-        message: AppException.sanitizeMessage(e, fallback: 'حدث خطأ أثناء تسجيل التقرير.'),
-        type: SnackType.error,
-      );
-    } finally {
-      isCreating.value = false;
-    }
-  }
-
-  Future<void> runReport(ReportCatalogItem definition) async {
-    final id = networkId;
-    if (id == null) return;
-    final availableFilters = definition.filters.keys.toSet();
-    final filters = <String, dynamic>{
-      if (availableFilters.contains('from') && fromDateController.text.trim().isNotEmpty)
-        'from': fromDateController.text.trim(),
-      if (availableFilters.contains('to') && toDateController.text.trim().isNotEmpty)
-        'to': toDateController.text.trim(),
-      if (availableFilters.contains('payment_status') && paymentStatusController.text.trim().isNotEmpty)
-        'payment_status': paymentStatusController.text.trim(),
-      if (availableFilters.contains('sale_type') && saleTypeController.text.trim().isNotEmpty)
-        'sale_type': saleTypeController.text.trim(),
-    };
-    if (definition.key == 'billing-account-statement') {
-      final accountId = int.tryParse(billingAccountIdController.text.trim());
-      if (accountId == null || accountId < 1) {
-        CustomSnackbar.show(
-          title: 'بيانات مطلوبة',
-          message: 'أدخل رقم حساب فوترة الاشتراك لعرض كشف الحساب.',
-          type: SnackType.warning,
-        );
-        return;
-      }
-      filters['billing_account_id'] = accountId;
-    }
-    isCreating.value = true;
-    try {
-      activeRun.value = await createRun(
-        networkId: id,
-        reportKey: definition.key,
-        filters: filters,
-      );
-      CustomSnackbar.show(
-        title: 'تم تسجيل التقرير',
-        message: 'يمكنك تحديث حالته حتى يكتمل ثم تنزيل ملف النتيجة.',
         type: SnackType.success,
       );
     } catch (e) {

@@ -46,54 +46,6 @@ class NetworkReportsScreen extends GetView<NetworkReportsController> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             AppSpacing.vMd,
-            if (controller.catalog.any((r) => r.filters.containsKey('from') || r.filters.containsKey('to'))) ...[
-              Row(
-                children: [
-                  Expanded(child: CustomTextField(
-                    controller: controller.fromDateController,
-                    label: 'من تاريخ',
-                    hint: 'YYYY-MM-DD',
-                    isRequired: false,
-                  )),
-                  AppSpacing.hSm,
-                  Expanded(child: CustomTextField(
-                    controller: controller.toDateController,
-                    label: 'إلى تاريخ',
-                    hint: 'YYYY-MM-DD',
-                    isRequired: false,
-                  )),
-                ],
-              ),
-              AppSpacing.vMd,
-            ],
-            if (controller.catalog.any((r) => r.filters.containsKey('payment_status'))) ...[
-              CustomTextField(
-                controller: controller.paymentStatusController,
-                label: 'حالة السداد',
-                hint: 'PAID / PARTIALLY_PAID / UNPAID',
-                isRequired: false,
-              ),
-              AppSpacing.vMd,
-            ],
-            if (controller.catalog.any((r) => r.filters.containsKey('sale_type'))) ...[
-              CustomTextField(
-                controller: controller.saleTypeController,
-                label: 'نوع البيع',
-                hint: 'WHOLESALE / DIRECT',
-                isRequired: false,
-              ),
-              AppSpacing.vMd,
-            ],
-            if (controller.catalog.any((r) => r.key == 'billing-account-statement')) ...[
-              CustomTextField(
-                controller: controller.billingAccountIdController,
-                label: 'رقم حساب فوترة الاشتراك',
-                hint: 'أدخل معرّف حساب الفوترة',
-                keyboardType: TextInputType.number,
-                isRequired: false,
-              ),
-              AppSpacing.vMd,
-            ],
             ...controller.catalog.map((report) => _ReportCatalogCard(
               report: report,
               busy: controller.isCreating.value,
@@ -139,7 +91,8 @@ class _ReportConfigurationPanel extends StatelessWidget {
           ),
         ),
         AppSpacing.vMd,
-        ReportConfigurationStudio(
+        Expanded(
+          child: ReportConfigurationStudio(
           definition: definition,
           criteria: controller.criteria.value,
           presentation: controller.presentation.value,
@@ -196,13 +149,17 @@ class _ReportConfigurationPanel extends StatelessWidget {
                             case ReportFilterKind.integer:
                               final number = int.tryParse(value.trim());
                               if (number != null) parsed = ReportIntegerFilterValue(number);
+                              break;
                             case ReportFilterKind.date:
                               final date = DateTime.tryParse(value.trim());
                               if (date != null) parsed = ReportDateFilterValue(date);
+                              break;
                             case ReportFilterKind.text:
                               parsed = ReportTextFilterValue(value.trim());
+                              break;
                             default:
                               parsed = ReportTextFilterValue(value.trim());
+                              break;
                           }
                         }
                         controller.updateFilter(filter.id, parsed);
@@ -241,6 +198,7 @@ class _ReportConfigurationPanel extends StatelessWidget {
                 ],
               ),
             ),
+          ),
           ),
         ),
       ],
