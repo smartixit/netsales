@@ -349,3 +349,88 @@ class BillingStatementModel extends BillingStatementEntity {
     );
   }
 }
+
+class BillingPriceModel extends BillingPriceEntity {
+  const BillingPriceModel({
+    required super.priceId,
+    required super.unitAmount,
+    required super.unitAmountMinor,
+    required super.setupFee,
+    required super.setupFeeMinor,
+    required super.billingInterval,
+    required super.billingIntervalLabel,
+    required super.intervalCount,
+    required super.isActive,
+    super.currency,
+    super.trialPolicyVersionId,
+    super.dunningPolicyVersionId,
+  });
+
+  factory BillingPriceModel.fromJson(Map<String, dynamic> json) =>
+      BillingPriceModel(
+        priceId: _integer(json, 'price_id'),
+        unitAmount: _text(json, 'unit_amount', fallback: '0'),
+        unitAmountMinor: _integer(json, 'unit_amount_minor', fallback: 0),
+        setupFee: _text(json, 'setup_fee', fallback: '0'),
+        setupFeeMinor: _integer(json, 'setup_fee_minor', fallback: 0),
+        billingInterval: _text(json, 'billing_interval', fallback: 'ONCE'),
+        billingIntervalLabel: _text(json, 'billing_interval_label', fallback: 'مرة واحدة'),
+        intervalCount: _integer(json, 'interval_count', fallback: 1),
+        isActive: json['is_active'] == true,
+        currency: _currency(json['currency']),
+        trialPolicyVersionId: json['trial_policy_version_id'] == null
+            ? null
+            : _integer(json, 'trial_policy_version_id'),
+        dunningPolicyVersionId: json['dunning_policy_version_id'] == null
+            ? null
+            : _integer(json, 'dunning_policy_version_id'),
+      );
+}
+
+class BillingPlanModel extends BillingPlanEntity {
+  const BillingPlanModel({
+    required super.planId,
+    required super.planKey,
+    required super.name,
+    required super.description,
+    required super.isPublic,
+    required super.isActive,
+    required super.prices,
+    super.productName,
+    super.versionNumber,
+    super.trialDurationValue,
+    super.trialDurationUnit,
+  });
+
+  factory BillingPlanModel.fromJson(Map<String, dynamic> json) {
+    final product = json['product'] == null
+        ? null
+        : _jsonMap(json['product'], 'product');
+    final version = json['current_version'] == null
+        ? null
+        : _jsonMap(json['current_version'], 'current_version');
+    final rawPrices = version?['prices'];
+    final prices = rawPrices is List
+        ? rawPrices.map((value) => BillingPriceModel.fromJson(
+            _jsonMap(value, 'billing price'),
+          )).toList(growable: false)
+        : const <BillingPriceEntity>[];
+    final trial = version?['trial_policy'] == null
+        ? null
+        : _jsonMap(version?['trial_policy'], 'trial_policy');
+
+    return BillingPlanModel(
+      planId: _integer(json, 'plan_id'),
+      planKey: _text(json, 'plan_key'),
+      name: _text(json, 'name'),
+      description: _text(json, 'description', fallback: ''),
+      isPublic: json['is_public'] == true,
+      isActive: json['is_active'] == true,
+      productName: product?['name']?.toString(),
+      versionNumber: version == null ? null : _integer(version, 'version_number', fallback: 0),
+      trialDurationValue: trial == null ? null : _integer(trial, 'duration_value', fallback: 0),
+      trialDurationUnit: trial?['duration_unit']?.toString(),
+      prices: prices,
+    );
+  }
+}

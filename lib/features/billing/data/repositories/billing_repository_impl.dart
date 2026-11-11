@@ -49,6 +49,13 @@ class BillingRepositoryImpl implements BillingRepository {
     return response.data!;
   }
 
+
+  @override
+  Future<PaginatedList<BillingPlanEntity>> getPlans(int accountId) async {
+    final response = await remoteDataSource.getPlans(accountId);
+    return _page(response, 'تعذر تحميل خطط الاشتراك المتاحة.', 'BILLING_PLANS_FAILED');
+  }
+
   @override
   Future<PaginatedList<BillingSubscriptionEntity>> getSubscriptions(int accountId, {String? cursor}) async {
     final response = await remoteDataSource.getSubscriptions(accountId, cursor: cursor);

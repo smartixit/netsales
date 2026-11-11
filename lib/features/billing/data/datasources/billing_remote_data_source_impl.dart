@@ -40,6 +40,17 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
         ),
       );
 
+
+  @override
+  Future<ApiResponse<List<BillingPlanModel>>> getPlans(int accountId) =>
+      ApiService.instance.getList<BillingPlanModel>(
+        ApiConstants.billingAccountPlans(accountId),
+        fromJson: (json) => BillingPlanModel.fromJson(
+          Map<String, dynamic>.from(json as Map),
+        ),
+        perPage: 50,
+      );
+
   @override
   Future<ApiResponse<List<BillingSubscriptionModel>>> getSubscriptions(int accountId, {String? cursor}) =>
       ApiService.instance.getList<BillingSubscriptionModel>(

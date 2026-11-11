@@ -273,3 +273,61 @@ class BillingStatementEntity {
   final List<BillingStatementBalanceEntity> balances;
   final String currencyAggregation;
 }
+
+class BillingPriceEntity {
+  const BillingPriceEntity({
+    required this.priceId,
+    required this.unitAmount,
+    required this.unitAmountMinor,
+    required this.setupFee,
+    required this.setupFeeMinor,
+    required this.billingInterval,
+    required this.billingIntervalLabel,
+    required this.intervalCount,
+    required this.isActive,
+    this.currency,
+    this.trialPolicyVersionId,
+    this.dunningPolicyVersionId,
+  });
+
+  final int priceId;
+  final String unitAmount;
+  final int unitAmountMinor;
+  final String setupFee;
+  final int setupFeeMinor;
+  final String billingInterval;
+  final String billingIntervalLabel;
+  final int intervalCount;
+  final bool isActive;
+  final BillingCurrencyEntity? currency;
+  final int? trialPolicyVersionId;
+  final int? dunningPolicyVersionId;
+}
+
+class BillingPlanEntity {
+  const BillingPlanEntity({
+    required this.planId,
+    required this.planKey,
+    required this.name,
+    required this.description,
+    required this.isPublic,
+    required this.isActive,
+    required this.prices,
+    this.productName,
+    this.versionNumber,
+    this.trialDurationValue,
+    this.trialDurationUnit,
+  });
+
+  final int planId;
+  final String planKey;
+  final String name;
+  final String description;
+  final bool isPublic;
+  final bool isActive;
+  final String? productName;
+  final int? versionNumber;
+  final int? trialDurationValue;
+  final String? trialDurationUnit;
+  final List<BillingPriceEntity> prices;
+}

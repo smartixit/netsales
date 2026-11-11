@@ -72,3 +72,10 @@ class GetBillingStatementUseCase {
     currencyId: currencyId,
   );
 }
+
+class GetNetworkBillingPlansUseCase {
+  const GetNetworkBillingPlansUseCase(this.repository);
+  final BillingRepository repository;
+  Future<PaginatedList<BillingPlanEntity>> call(int accountId) =>
+      repository.getPlans(accountId);
+}

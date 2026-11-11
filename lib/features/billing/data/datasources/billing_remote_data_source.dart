@@ -4,6 +4,7 @@ import 'package:netsales/features/billing/data/models/billing_models.dart';
 abstract interface class BillingRemoteDataSource {
   Future<ApiResponse<List<BillingCurrencyModel>>> getCurrencies();
   Future<ApiResponse<List<BillingAccountModel>>> getAccounts(int networkId);
+  Future<ApiResponse<List<BillingPlanModel>>> getPlans(int accountId);
   Future<ApiResponse<BillingAccountModel>> createAccount(
     int networkId,
     int currencyId,
