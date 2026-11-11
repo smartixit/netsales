@@ -130,9 +130,10 @@ class NetworkReportsController extends GetxController {
       );
       return;
     }
-    final filters = criteria.value.filters.map(
-      (key, value) => MapEntry(key, value.jsonValue),
-    );
+    final filters = <String, dynamic>{
+      for (final entry in criteria.value.filters.entries)
+        entry.key: entry.value.jsonValue,
+    };
     isCreating.value = true;
     try {
       activeRun.value = await createRun(
