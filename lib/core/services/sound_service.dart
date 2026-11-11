@@ -8,7 +8,7 @@ class SoundService {
 
   Future<void> playSound({
     String soundPath = 'sounds/netsales_success.wav',
-    AndroidUsageType usageType = AndroidUsageType.notification,
+    AndroidUsageType usageType = AndroidUsageType.alarm,
   }) async {
     try {
       await _player.stop();

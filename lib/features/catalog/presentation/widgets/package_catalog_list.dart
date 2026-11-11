@@ -6,6 +6,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_delete_confirm_dialog.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 
 /// قائمة باقات الكروت المخصصة للهواتف الذكية مع ترقيم الصفحات القائم على المؤشر (Infinite Scroll)
 class PackageCatalogList extends GetView<PackageCatalogController> {
@@ -33,16 +34,8 @@ class PackageCatalogList extends GetView<PackageCatalogController> {
           itemBuilder: (context, index) {
             if (index == items.length) {
               return Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                child: Center(
-                  child: SizedBox(
-                    width: 24.r,
-                    height: 24.r,
-                    child: const CircularProgressIndicator.adaptive(
-                      strokeWidth: 2.5,
-                    ),
-                  ),
-                ),
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                child: CustomSkeletonCard(height: 110.h),
               );
             }
 

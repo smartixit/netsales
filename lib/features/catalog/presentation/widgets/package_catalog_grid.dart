@@ -6,6 +6,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_delete_confirm_dialog.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 
 /// شبكة باقات الكروت المخصصة للأجهزة اللوحية مع ترقيم الصفحات القائم على المؤشر (Infinite Scroll)
 class PackageCatalogGrid extends GetView<PackageCatalogController> {
@@ -63,16 +64,11 @@ class PackageCatalogGrid extends GetView<PackageCatalogController> {
             if (isLoadingMore)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  child: Center(
-                    child: SizedBox(
-                      width: 24.r,
-                      height: 24.r,
-                      child: const CircularProgressIndicator.adaptive(
-                        strokeWidth: 2.5,
-                      ),
-                    ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.cardPadding,
+                    vertical: AppSpacing.xs,
                   ),
+                  child: CustomSkeletonCard(height: 140.h),
                 ),
               ),
           ],

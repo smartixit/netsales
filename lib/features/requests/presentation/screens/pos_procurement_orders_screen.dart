@@ -10,6 +10,7 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_sear
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
@@ -91,15 +92,9 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                   itemBuilder: (context, index) {
                     if (index == controller.requests.length) {
                       return Padding(
-                        padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                        child: Center(
-                          child: SizedBox(
-                            width: 24.r,
-                            height: 24.r,
-                            child: const CircularProgressIndicator.adaptive(
-                              strokeWidth: 2.5,
-                            ),
-                          ),
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                        child: CustomSkeletonCard(
+                          height: 130.h,
                         ),
                       );
                     }

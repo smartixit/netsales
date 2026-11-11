@@ -10,6 +10,7 @@ import 'package:netsales/widgets/badges/custom_filter_chip.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -167,17 +168,11 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                     itemBuilder: (context, index) {
                       if (index >= controller.notifications.length) {
                         return Padding(
-                          padding: EdgeInsets.all(AppSpacing.md),
-                          child: Center(
-                            child: SizedBox(
-                              width: 24.r,
-                              height: 24.r,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.2,
-                                color: colors.primary,
-                              ),
-                            ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.xs,
                           ),
+                          child: CustomSkeletonCard(height: 72.h),
                         );
                       }
 

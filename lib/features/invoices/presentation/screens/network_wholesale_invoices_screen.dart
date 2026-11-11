@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_invoices_controller.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_card.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_search_filter_header.dart';
@@ -105,29 +104,13 @@ class NetworkWholesaleInvoicesScreen
                           (controller.hasMore ? 1 : 0),
                       itemBuilder: (context, index) {
                         if (index == controller.invoices.length) {
-                          return Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(AppSpacing.cardPadding),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: colors.primary,
-                                    ),
-                                  ),
-                                  AppSpacing.hSm,
-                                  Text(
-                                    'جاري تحميل المزيد من الفواتير...',
-                                    style: AppTypography.bodySmall.copyWith(
-                                      color: colors.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.sm,
+                            ),
+                            child: const CustomSkeletonFeed(
+                              itemCount: 1,
+                              cardHeight: 120,
                             ),
                           );
                         }

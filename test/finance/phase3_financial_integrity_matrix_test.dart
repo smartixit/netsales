@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/enums/repayment_payment_method.dart';
 import 'package:netsales/core/enums/repayment_status.dart';
-import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
-import 'package:netsales/features/finance/domain/entities/repayment_allocation_invoice_entity.dart';
 import 'package:netsales/features/finance/data/models/pos_repayment_models.dart';
 import 'package:netsales/features/catalog/data/models/package_model.dart';
 import 'package:netsales/features/finance/data/models/pos_wallet_models.dart';
