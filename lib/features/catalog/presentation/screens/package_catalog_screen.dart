@@ -55,22 +55,24 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
           AppSpacing.hXs,
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          controller.initCreateForm();
-          Get.toNamed<void>(AppRoutes.packageForm);
-        },
-        backgroundColor: colors.primary,
-        foregroundColor: colors.onPrimary,
-        icon: const Icon(Icons.add_rounded),
-        label: Text(
-          'إنشاء باقة كروت',
-          style: AppTypography.labelLarge.copyWith(
-            color: colors.onPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+      floatingActionButton: controller.canCreatePackage
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                controller.initCreateForm();
+                Get.toNamed<void>(AppRoutes.packageForm);
+              },
+              backgroundColor: colors.primary,
+              foregroundColor: colors.onPrimary,
+              icon: const Icon(Icons.add_rounded),
+              label: Text(
+                'إنشاء باقة كروت',
+                style: AppTypography.labelLarge.copyWith(
+                  color: colors.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : null,
       body: Column(
         children: [
           // 1. شريط البحث والفلترة القطاعية

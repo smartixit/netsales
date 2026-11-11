@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
@@ -120,6 +122,12 @@ class PosProcurementController extends GetxController {
   final isSubmitting = false.obs;
 
   int _requestListRevision = 0;
+
+  /// التحقق من صلاحيات طلبات التوريد لنقطة البيع
+  bool get canCreateOrder =>
+      PermissionService.to.can(AppPermissions.requestsCreate);
+  bool get canCancelOrder =>
+      PermissionService.to.can(AppPermissions.requestsEdit);
 
   /// سعة الورقة الواحدة للباقة المحددة حالياً.
   int get currentSheetSize => selectedPackage.value?.packageVoucherCount ?? 0;

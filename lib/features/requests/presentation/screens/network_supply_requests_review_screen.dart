@@ -150,13 +150,13 @@ class NetworkSupplyRequestsReviewScreen
                       request: request,
                       isNetworkView: true,
                       onTap: () => controller.openRequestDetails(request),
-                      onModify: request.isPending
+                      onModify: (request.isPending && controller.canModifyRequests)
                           ? () => controller.openModificationSheet(request)
                           : null,
-                      onApprove: request.isPending
+                      onApprove: (request.isPending && controller.canApproveRequests)
                           ? () => controller.promptApproveRequest(request)
                           : null,
-                      onReject: request.isPending
+                      onReject: (request.isPending && controller.canRejectRequests)
                           ? () => controller.promptRejectRequest(request)
                           : null,
                     );

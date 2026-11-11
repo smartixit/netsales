@@ -104,7 +104,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                       request: request,
                       isNetworkView: false,
                       onTap: () => controller.openRequestDetails(request),
-                      onCancel: request.isPending
+                      onCancel: (request.isPending && controller.canCancelOrder)
                           ? () => controller.promptCancelRequest(request)
                           : null,
                     );
@@ -141,19 +141,21 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
           AppSpacing.hXs,
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: controller.navigateToNewOrder,
-        backgroundColor: colors.primary,
-        foregroundColor: colors.onPrimary,
-        icon: const Icon(Icons.add_shopping_cart_rounded),
-        label: Text(
-          'طلب توريد جديد',
-          style: AppTypography.labelLarge.copyWith(
-            color: colors.onPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+      floatingActionButton: controller.canCreateOrder
+          ? FloatingActionButton.extended(
+              onPressed: controller.navigateToNewOrder,
+              backgroundColor: colors.primary,
+              foregroundColor: colors.onPrimary,
+              icon: const Icon(Icons.add_shopping_cart_rounded),
+              label: Text(
+                'طلب توريد جديد',
+                style: AppTypography.labelLarge.copyWith(
+                  color: colors.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : null,
       body: content,
     );
   }

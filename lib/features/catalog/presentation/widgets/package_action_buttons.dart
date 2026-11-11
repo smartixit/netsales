@@ -20,6 +20,13 @@ class PackageActionButtons extends GetView<PackageCatalogController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    final canEdit = controller.canEditPackage;
+    final canDelete = controller.canDeletePackage;
+
+    if (!canEdit && !canDelete) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       padding: EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
@@ -38,51 +45,54 @@ class PackageActionButtons extends GetView<PackageCatalogController> {
             ),
           ),
           AppSpacing.vMd,
-          Row(
-            children: [
-              Expanded(
-                child: CustomButton(
-                  text: 'تعديل الباقة',
-                  icon: Icons.edit_rounded,
-                  onPressed: () {
-                    controller.initEditForm(package);
-                    Get.toNamed<void>(AppRoutes.packageForm);
-                  },
+          if (canEdit) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    text: 'تعديل الباقة',
+                    icon: Icons.edit_rounded,
+                    onPressed: () {
+                      controller.initEditForm(package);
+                      Get.toNamed<void>(AppRoutes.packageForm);
+                    },
+                  ),
                 ),
-              ),
-              AppSpacing.hSm,
-              Expanded(
-                child: Obx(() {
-                  return CustomButton.outline(
-                    text: package.status ? 'تعطيل مؤقت' : 'تفعيل الباقة',
-                    icon: package.status
-                        ? Icons.pause_circle_outline_rounded
-                        : Icons.play_circle_outline_rounded,
-                    onPressed: controller.isTogglingStatus.value
-                        ? null
-                        : () => controller.togglePackageStatus(package),
-                    loading: controller.isTogglingStatus.value,
-                  );
-                }),
-              ),
-            ],
-          ),
-          AppSpacing.vSm,
-          CustomButton.danger(
-            text: 'حذف الباقة',
-            icon: Icons.delete_outline_rounded,
-            onPressed: () => PackageDeleteConfirmDialog.show(
-              packageName: package.packageName,
-              onConfirm: () async {
-                final deleted = await controller.deletePackage(
-                  package.packageId,
-                );
-                if (deleted) {
-                  Get.back<void>();
-                }
-              },
+                AppSpacing.hSm,
+                Expanded(
+                  child: Obx(() {
+                    return CustomButton.outline(
+                      text: package.status ? 'تعطيل مؤقت' : 'تفعيل الباقة',
+                      icon: package.status
+                          ? Icons.pause_circle_outline_rounded
+                          : Icons.play_circle_outline_rounded,
+                      onPressed: controller.isTogglingStatus.value
+                          ? null
+                          : () => controller.togglePackageStatus(package),
+                      loading: controller.isTogglingStatus.value,
+                    );
+                  }),
+                ),
+              ],
             ),
-          ),
+            if (canDelete) AppSpacing.vSm,
+          ],
+          if (canDelete)
+            CustomButton.danger(
+              text: 'حذف الباقة',
+              icon: Icons.delete_outline_rounded,
+              onPressed: () => PackageDeleteConfirmDialog.show(
+                packageName: package.packageName,
+                onConfirm: () async {
+                  final deleted = await controller.deletePackage(
+                    package.packageId,
+                  );
+                  if (deleted) {
+                    Get.back<void>();
+                  }
+                },
+              ),
+            ),
         ],
       ),
     );

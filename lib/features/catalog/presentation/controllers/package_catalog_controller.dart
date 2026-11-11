@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/utils/package_spec_formatter.dart';
@@ -86,6 +88,14 @@ class PackageCatalogController extends GetxController {
   final packageActiveStatus = true.obs;
   final isEditing = false.obs;
   final editingPackageId = RxnInt();
+
+  /// التحقق من صلاحيات إدارة الباقات
+  bool get canCreatePackage =>
+      PermissionService.to.can(AppPermissions.voucherPackagesCreate);
+  bool get canEditPackage =>
+      PermissionService.to.can(AppPermissions.voucherPackagesEdit);
+  bool get canDeletePackage =>
+      PermissionService.to.can(AppPermissions.voucherPackagesDelete);
 
   @override
   void onInit() {

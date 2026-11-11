@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
@@ -72,6 +74,14 @@ class NetworkProcurementReviewController extends GetxController {
   final editingRequestId = RxnInt();
   final modificationNoteController = TextEditingController();
   int _requestListRevision = 0;
+
+  /// التحقق من صلاحيات مراجعة واعتماد وتعديل طلبات التوريد لمشغل الشبكة
+  bool get canApproveRequests =>
+      PermissionService.to.can(AppPermissions.requestsApprove);
+  bool get canRejectRequests =>
+      PermissionService.to.can(AppPermissions.requestsReject);
+  bool get canModifyRequests =>
+      PermissionService.to.can(AppPermissions.requestsEdit);
 
   Future<void> beginModification(RequestEntity request) async {
     if (!request.isPending) return;

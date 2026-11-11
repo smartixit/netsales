@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -92,17 +94,20 @@ class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
               color: colors.onSurfaceVariant,
             ),
           ),
-          AppSpacing.vLg,
-          SizedBox(
-            width: double.infinity,
-            child: CustomButton.primary(
-              text: 'تحصيل سداد مديونية نقطة بيع',
-              prefix: Icons.payments_rounded,
-              size: AppButtonSize.large,
+          if (PermissionService.to.can(AppPermissions.posWalletsCreate) ||
+              PermissionService.to.can(AppPermissions.posWalletsManage)) ...[
+            AppSpacing.vLg,
+            SizedBox(
               width: double.infinity,
-              onPressed: () => Get.toNamed<void>(AppRoutes.repaymentCollection),
+              child: CustomButton.primary(
+                text: 'تحصيل سداد مديونية نقطة بيع',
+                prefix: Icons.payments_rounded,
+                size: AppButtonSize.large,
+                width: double.infinity,
+                onPressed: () => Get.toNamed<void>(AppRoutes.repaymentCollection),
+              ),
             ),
-          ),
+          ],
           AppSpacing.vMd,
           LayoutBuilder(
             builder: (context, constraints) {
