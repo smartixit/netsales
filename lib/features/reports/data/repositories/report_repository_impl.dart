@@ -20,21 +20,7 @@ class ReportRepositoryImpl implements ReportRepository {
         response.message.isNotEmpty ? response.message : 'تعذر تحميل كتالوج التقارير.',
         code: 'REPORT_CATALOG_FAILED',
       );
-      @override
-  Future<void> shareArtifact({
-    required String url,
-    required String fileName,
-  }) async {
-    final bytes = await remote.downloadArtifact(url);
-    await ShareService.instance.shareBytes(
-      bytes: Uint8List.fromList(bytes),
-      fileName: '$fileName.json',
-      mimeType: 'application/json',
-      subject: 'تقرير NetSales',
-    );
-  }
-
-}
+    }
     return response.data!;
   }
 
@@ -95,5 +81,19 @@ class ReportRepositoryImpl implements ReportRepository {
         code: 'REPORT_ARTIFACT_SAVE_FAILED',
       );
     }
+  }
+
+  @override
+  Future<void> shareArtifact({
+    required String url,
+    required String fileName,
+  }) async {
+    final bytes = await remote.downloadArtifact(url);
+    await ShareService.instance.shareBytes(
+      bytes: Uint8List.fromList(bytes),
+      fileName: '$fileName.json',
+      mimeType: 'application/json',
+      subject: 'تقرير NetSales',
+    );
   }
 }

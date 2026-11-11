@@ -17,12 +17,14 @@ class NetworkReportsBinding extends Bindings {
     Get.lazyPut(() => CreateNetworkReportRunUseCase(Get.find<ReportRepository>()));
     Get.lazyPut(() => GetNetworkReportRunUseCase(Get.find<ReportRepository>()));
     Get.lazyPut(() => DownloadReportArtifactUseCase(Get.find<ReportRepository>()));
+    Get.lazyPut(() => ShareReportArtifactUseCase(Get.find<ReportRepository>()));
     Get.lazyPut(
       () => NetworkReportsController(
         getCatalog: Get.find<GetNetworkReportCatalogUseCase>(),
         createRun: Get.find<CreateNetworkReportRunUseCase>(),
         getRun: Get.find<GetNetworkReportRunUseCase>(),
         downloadArtifact: Get.find<DownloadReportArtifactUseCase>(),
+        shareArtifact: Get.find<ShareReportArtifactUseCase>(),
       ),
     );
   }

@@ -22,7 +22,7 @@ class NetworkReportsController extends GetxController {
   final CreateNetworkReportRunUseCase createRun;
   final GetNetworkReportRunUseCase getRun;
   final DownloadReportArtifactUseCase downloadArtifact;
-  final DownloadReportArtifactUseCase shareArtifact;
+  final ShareReportArtifactUseCase shareArtifact;
 
   final catalog = <ReportCatalogItem>[].obs;
   final activeRun = Rxn<ReportRun>();

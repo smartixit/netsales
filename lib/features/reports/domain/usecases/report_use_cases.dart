@@ -41,3 +41,10 @@ class DownloadReportArtifactUseCase {
   Future<void> call({required String url, required String fileName}) =>
       repository.downloadArtifact(url: url, fileName: fileName);
 }
+
+class ShareReportArtifactUseCase {
+  const ShareReportArtifactUseCase(this.repository);
+  final ReportRepository repository;
+  Future<void> call({required String url, required String fileName}) =>
+      repository.shareArtifact(url: url, fileName: fileName);
+}
