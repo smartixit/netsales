@@ -23,6 +23,10 @@ class NetworkReportsController extends GetxController {
   final catalog = <ReportCatalogItem>[].obs;
   final activeRun = Rxn<ReportRun>();
   final billingAccountIdController = TextEditingController();
+  final fromDateController = TextEditingController();
+  final toDateController = TextEditingController();
+  final paymentStatusController = TextEditingController();
+  final saleTypeController = TextEditingController();
   final isLoading = false.obs;
   final isCreating = false.obs;
   final isRefreshing = false.obs;
@@ -40,6 +44,10 @@ class NetworkReportsController extends GetxController {
   @override
   void onClose() {
     billingAccountIdController.dispose();
+    fromDateController.dispose();
+    toDateController.dispose();
+    paymentStatusController.dispose();
+    saleTypeController.dispose();
     super.onClose();
   }
 
@@ -66,7 +74,17 @@ class NetworkReportsController extends GetxController {
   Future<void> runReport(ReportCatalogItem definition) async {
     final id = networkId;
     if (id == null) return;
-    final filters = <String, dynamic>{};
+    final availableFilters = definition.filters.keys.toSet();
+    final filters = <String, dynamic>{
+      if (availableFilters.contains('from') && fromDateController.text.trim().isNotEmpty)
+        'from': fromDateController.text.trim(),
+      if (availableFilters.contains('to') && toDateController.text.trim().isNotEmpty)
+        'to': toDateController.text.trim(),
+      if (availableFilters.contains('payment_status') && paymentStatusController.text.trim().isNotEmpty)
+        'payment_status': paymentStatusController.text.trim(),
+      if (availableFilters.contains('sale_type') && saleTypeController.text.trim().isNotEmpty)
+        'sale_type': saleTypeController.text.trim(),
+    };
     if (definition.key == 'billing-account-statement') {
       final accountId = int.tryParse(billingAccountIdController.text.trim());
       if (accountId == null || accountId < 1) {

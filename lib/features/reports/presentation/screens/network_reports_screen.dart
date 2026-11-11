@@ -42,6 +42,44 @@ class NetworkReportsScreen extends GetView<NetworkReportsController> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             AppSpacing.vMd,
+            if (controller.catalog.any((r) => r.filters.containsKey('from') || r.filters.containsKey('to'))) ...[
+              Row(
+                children: [
+                  Expanded(child: CustomTextField(
+                    controller: controller.fromDateController,
+                    label: 'من تاريخ',
+                    hint: 'YYYY-MM-DD',
+                    isRequired: false,
+                  )),
+                  AppSpacing.hSm,
+                  Expanded(child: CustomTextField(
+                    controller: controller.toDateController,
+                    label: 'إلى تاريخ',
+                    hint: 'YYYY-MM-DD',
+                    isRequired: false,
+                  )),
+                ],
+              ),
+              AppSpacing.vMd,
+            ],
+            if (controller.catalog.any((r) => r.filters.containsKey('payment_status'))) ...[
+              CustomTextField(
+                controller: controller.paymentStatusController,
+                label: 'حالة السداد',
+                hint: 'PAID / PARTIALLY_PAID / UNPAID',
+                isRequired: false,
+              ),
+              AppSpacing.vMd,
+            ],
+            if (controller.catalog.any((r) => r.filters.containsKey('sale_type'))) ...[
+              CustomTextField(
+                controller: controller.saleTypeController,
+                label: 'نوع البيع',
+                hint: 'WHOLESALE / DIRECT',
+                isRequired: false,
+              ),
+              AppSpacing.vMd,
+            ],
             if (controller.catalog.any((r) => r.key == 'billing-account-statement')) ...[
               CustomTextField(
                 controller: controller.billingAccountIdController,
