@@ -76,8 +76,12 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                   hint: 'بحث في الإشعارات...',
                   prefixIcon: Icon(Icons.search_rounded),
                   suffixIcon: controller.searchQuery.value.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear_rounded),
+                      ? CustomButton.icon(
+                          icon: Icons.clear_rounded,
+                          iconSize: 18,
+                          dimension: 36,
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
                           onPressed: () {
                             controller.searchController.clear();
                           },

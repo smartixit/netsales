@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:netsales/core/enums/notification_type.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 
@@ -59,52 +58,6 @@ class NotificationItemEntity {
     );
   }
 
-  /// أيقونة تصنيف الإشعار الدوميني
-  IconData get iconData {
-    switch (notificationType) {
-      case NotificationType.saleInvoiceCreated:
-      case NotificationType.saleInvoiceCompleted:
-      case NotificationType.saleInvoiceCancelled:
-        return Icons.receipt_long_rounded;
-
-      case NotificationType.voucherRequestCreated:
-      case NotificationType.voucherRequestApproved:
-      case NotificationType.voucherRequestRejected:
-      case NotificationType.voucherRequestCancelled:
-        return Icons.inventory_2_rounded;
-
-      case NotificationType.walletDeposit:
-      case NotificationType.walletWithdrawal:
-      case NotificationType.walletTransfer:
-        return Icons.account_balance_wallet_rounded;
-
-      case NotificationType.supportTicketCreated:
-      case NotificationType.supportTicketReplied:
-      case NotificationType.supportTicketClosed:
-        return Icons.support_agent_rounded;
-
-      case NotificationType.networkApproved:
-      case NotificationType.networkRejected:
-        return Icons.hub_rounded;
-
-      case NotificationType.posApproved:
-      case NotificationType.posRejected:
-        return Icons.storefront_rounded;
-
-      case NotificationType.securityLoginAlert:
-      case NotificationType.securityDeviceBlocked:
-      case NotificationType.securityPasswordChanged:
-        return Icons.security_rounded;
-
-      case NotificationType.systemAnnouncement:
-        return Icons.campaign_rounded;
-
-      case NotificationType.generalInfo:
-      case NotificationType.unknown:
-        return Icons.notifications_rounded;
-    }
-  }
-
   /// المسار المستهدف عند النقر للتوجيه الذكي
   String get targetRoute => notificationType.defaultRoute;
 
@@ -114,3 +67,4 @@ class NotificationItemEntity {
     return DateFormatter.timeAgo(createdAt!);
   }
 }
+

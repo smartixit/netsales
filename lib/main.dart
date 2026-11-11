@@ -22,7 +22,6 @@ import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/core/services/integration_gate_service.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
@@ -132,10 +131,6 @@ void main() async {
   Get.put<SessionService>(SessionService.instance, permanent: true);
   await WorkspaceService.instance.init();
   Get.put<WorkspaceService>(WorkspaceService.instance, permanent: true);
-  Get.put<IntegrationGateService>(
-    IntegrationGateService.instance,
-    permanent: true,
-  );
 
   // 3. تسجيل الخدمات العامة الدائمة في حاوية GetX لضمان استقرار التبعيات
   Get.put<DeviceService>(DeviceService.instance, permanent: true);

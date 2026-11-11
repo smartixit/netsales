@@ -60,8 +60,8 @@ import 'package:netsales/features/splash/presentation/bindings/splash_binding.da
 import 'package:netsales/features/splash/presentation/screens/splash_screen.dart';
 import 'package:netsales/features/workspace/presentation/bindings/network_workspace_binding.dart';
 import 'package:netsales/features/workspace/presentation/bindings/pos_workspace_binding.dart';
-import 'package:netsales/features/workspace/presentation/screens/network_workspace_shell.dart';
-import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell.dart';
+import 'package:netsales/features/workspace/presentation/screens/network_workspace_shell_screen.dart';
+import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell_screen.dart';
 import 'package:netsales/widgets/charts/showcase/charts_showcase_binding.dart';
 import 'package:netsales/widgets/charts/showcase/charts_showcase_screen.dart';
 import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_binding.dart';

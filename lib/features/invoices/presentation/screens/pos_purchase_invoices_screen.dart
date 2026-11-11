@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/invoices/presentation/controllers/pos_invoices_controller.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_card.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_search_filter_header.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/features/invoices/presentation/widgets/pos_embedded_invoices_header.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
@@ -25,7 +23,7 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
         padding: EdgeInsets.all(AppSpacing.cardPadding),
         child: Column(
           children: [
-            if (embedded) _EmbeddedInvoicesHeader(controller: controller),
+            if (embedded) PosEmbeddedInvoicesHeader(controller: controller),
 
             // 1. رأس البحث والفلترة
             Obx(
@@ -129,37 +127,3 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
   }
 }
 
-class _EmbeddedInvoicesHeader extends StatelessWidget {
-  const _EmbeddedInvoicesHeader({required this.controller});
-
-  final PosInvoicesController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              'فواتير المشتريات',
-              style: AppTypography.titleMedium.copyWith(
-                color: colors.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          CustomButton.icon(
-            icon: Icons.refresh_rounded,
-            tooltip: 'تحديث الفواتير',
-            backgroundColor: Colors.transparent,
-            foregroundColor: colors.onSurfaceVariant,
-            onPressed: () => controller.loadInvoices(isRefresh: true),
-          ),
-        ],
-      ),
-    );
-  }
-}

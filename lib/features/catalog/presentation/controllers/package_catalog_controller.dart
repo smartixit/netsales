@@ -53,7 +53,9 @@ class PackageCatalogController extends GetxController {
   final isDeleting = false.obs;
   final isTogglingStatus = false.obs;
   final errorMessage = RxnString();
+  final loadMoreError = RxnString();
   final nextCursor = RxnString();
+  int _packageListRevision = 0;
 
   bool get hasMore => nextCursor.value != null;
 
@@ -157,12 +159,14 @@ class PackageCatalogController extends GetxController {
 
   /// تحميل الباقات من الخادم مع ترقيم الصفحات القائم على المؤشر (Cursor Pagination)
   Future<void> loadPackages({int? networkId, bool isRefresh = false}) async {
+    final revision = ++_packageListRevision;
     if (networkId != null) {
       selectedNetworkId.value = networkId;
     }
 
     isLoading.value = true;
     errorMessage.value = null;
+    loadMoreError.value = null;
 
     if (isRefresh) {
       nextCursor.value = null;
@@ -189,25 +193,33 @@ class PackageCatalogController extends GetxController {
         );
       }
 
+      if (revision != _packageListRevision) return;
+
       packages.assignAll(result.items);
       filteredPackages.assignAll(result.items);
       nextCursor.value = result.nextCursor;
     } catch (e) {
+      if (revision != _packageListRevision) return;
       errorMessage.value = e is AppException
           ? e.message
           : 'تعذر تحميل باقات الكروت: $e';
     } finally {
-      isLoading.value = false;
+      if (revision == _packageListRevision) {
+        isLoading.value = false;
+      }
     }
   }
 
   /// تحميل المزيد من الباقات عند التمرير لنهاية القائمة
   Future<void> loadMorePackages() async {
-    if (isLoadingMore.value || isLoading.value || nextCursor.value == null) {
+    final cursor = nextCursor.value;
+    if (isLoadingMore.value || isLoading.value || cursor == null) {
       return;
     }
 
+    final revision = _packageListRevision;
     isLoadingMore.value = true;
+    loadMoreError.value = null;
 
     try {
       final query = searchQuery.value.trim();
@@ -219,16 +231,18 @@ class PackageCatalogController extends GetxController {
           selectedNetworkId.value!,
           status: statusFilter.value,
           search: effectiveSearch,
-          cursor: nextCursor.value,
+          cursor: cursor,
         );
       } else {
         result = await getPackagesUseCase(
           networkId: selectedNetworkId.value,
           status: statusFilter.value,
           search: effectiveSearch,
-          cursor: nextCursor.value,
+          cursor: cursor,
         );
       }
+
+      if (revision != _packageListRevision) return;
 
       // منع التكرار بناء على packageId
       final existingIds = packages.map((p) => p.packageId).toSet();
@@ -240,9 +254,15 @@ class PackageCatalogController extends GetxController {
       filteredPackages.assignAll(packages);
       nextCursor.value = result.nextCursor;
     } catch (e) {
-      // Non-fatal for load-more; cursor remains so user can retry by scrolling
+      if (revision != _packageListRevision) return;
+      loadMoreError.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل المزيد من الباقات.',
+      );
     } finally {
-      isLoadingMore.value = false;
+      if (revision == _packageListRevision) {
+        isLoadingMore.value = false;
+      }
     }
   }
 

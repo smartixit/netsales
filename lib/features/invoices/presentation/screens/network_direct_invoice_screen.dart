@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_direct_invoice_controller.dart';
 import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_cart_section.dart';
+import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_section_widgets.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
@@ -38,7 +39,10 @@ class NetworkDirectInvoiceScreen
       body: Obx(() {
         if (controller.isLoadingNetworks.value &&
             controller.authorizedNetworks.isEmpty) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return Padding(
+            padding: EdgeInsets.all(AppSpacing.cardPadding),
+            child: const CustomSkeletonFeed(itemCount: 3, cardHeight: 90),
+          );
         }
 
         if (controller.authorizedNetworks.isEmpty) {
@@ -80,7 +84,7 @@ class NetworkDirectInvoiceScreen
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _SectionHeading(
+                const DirectInvoiceSectionHeading(
                   title: 'الجهة المستفيدة',
                   description: 'حدد الشبكة ونقطة البيع المرتبطة بها.',
                 ),
@@ -120,7 +124,7 @@ class NetworkDirectInvoiceScreen
                     return const LinearProgressIndicator();
                   }
                   if (controller.linkedPos.isEmpty) {
-                    return _InlineNotice(
+                    return DirectInvoiceInlineNotice(
                       message: controller.selectedNetworkId.value == null
                           ? 'اختر الشبكة أولاً لعرض نقاط البيع المرتبطة بها.'
                           : 'لا توجد نقاط بيع نشطة مرتبطة بهذه الشبكة.',
@@ -164,7 +168,7 @@ class NetworkDirectInvoiceScreen
                   ),
                 ],
                 AppSpacing.vLg,
-                const _SectionHeading(
+                const DirectInvoiceSectionHeading(
                   title: 'باقات الكروت والكميات',
                   description:
                       'أدخل عدد الكروت المطلوب لكل باقة، ثم أضفها إلى الفاتورة.',
@@ -175,7 +179,7 @@ class NetworkDirectInvoiceScreen
                     return const LinearProgressIndicator();
                   }
                   if (controller.availablePackages.isEmpty) {
-                    return _InlineNotice(
+                    return DirectInvoiceInlineNotice(
                       message: controller.selectedNetworkId.value == null
                           ? 'اختر الشبكة أولاً لعرض باقاتها.'
                           : 'لا توجد باقات نشطة متاحة لهذه الشبكة.',
@@ -261,7 +265,7 @@ class NetworkDirectInvoiceScreen
                 AppSpacing.vLg,
                 const DirectInvoiceCartSection(),
                 AppSpacing.vLg,
-                const _SectionHeading(
+                const DirectInvoiceSectionHeading(
                   title: 'طريقة البيع',
                   description:
                       'اختر نوع الفاتورة؛ يتم التحقق من الرصيد والسقف الائتماني لدى الخادم.',
@@ -291,7 +295,7 @@ class NetworkDirectInvoiceScreen
                   ),
                 ),
                 AppSpacing.vMd,
-                const _FinancialAuthorityNotice(),
+                const DirectInvoiceFinancialAuthorityNotice(),
                 AppSpacing.vLg,
                 Obx(
                   () => CustomButton.primary(
@@ -316,110 +320,3 @@ class NetworkDirectInvoiceScreen
   }
 }
 
-class _SectionHeading extends StatelessWidget {
-  final String title;
-  final String description;
-
-  const _SectionHeading({
-    required this.title,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: AppTypography.titleSmall.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        AppSpacing.vXxs,
-        Text(
-          description,
-          style: AppTypography.bodySmall.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _InlineNotice extends StatelessWidget {
-  final String message;
-  final IconData icon;
-
-  const _InlineNotice({
-    required this.message,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.35),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: colors.onSurfaceVariant),
-          AppSpacing.hSm,
-          Expanded(
-            child: Text(
-              message,
-              style: AppTypography.bodySmall.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FinancialAuthorityNotice extends StatelessWidget {
-  const _FinancialAuthorityNotice();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: colors.primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: colors.primary.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.verified_user_outlined, color: colors.primary),
-          AppSpacing.hSm,
-          Expanded(
-            child: Text(
-              'لن يحسب التطبيق أي سعر أو خصم أو إجمالي. سيعيد الخادم بيانات الفاتورة بعد التحقق من الباقات والأسعار التعاقدية والمحافظ والسقف الائتماني.',
-              style: AppTypography.bodySmall.copyWith(
-                color: colors.onSurface,
-                height: 1.45,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

@@ -3,6 +3,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// رأس شاشة البحث والفلترة لفواتير المبيعات والمشتريات
@@ -42,8 +43,12 @@ class InvoiceSearchFilterHeader extends StatelessWidget {
             hint: searchHint,
             prefixIcon: const Icon(Icons.search),
             suffixIcon: searchController.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear, size: 18),
+                ? CustomButton.icon(
+                    icon: Icons.clear,
+                    iconSize: 18,
+                    dimension: 36,
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: colors.onSurfaceVariant,
                     onPressed: () {
                       searchController.clear();
                       onClear();

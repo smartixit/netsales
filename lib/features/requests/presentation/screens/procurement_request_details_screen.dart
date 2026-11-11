@@ -7,6 +7,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/procurement_request_details_controller.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_request_info_row.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_item_row.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -120,16 +121,16 @@ class ProcurementRequestDetailsScreen
                         color: colors.outlineVariant.withValues(alpha: 0.3),
                       ),
                       AppSpacing.vSm,
-                      _RequestInfoRow(
+                      ProcurementRequestInfoRow(
                         label: 'الشبكة الموردة:',
                         value:
                             request.networkName ?? 'شبكة #${request.networkId}',
                       ),
-                      _RequestInfoRow(
+                      ProcurementRequestInfoRow(
                         label: 'نقطة البيع (الوكيل):',
                         value: request.posName ?? 'نقطة بيع #${request.posId}',
                       ),
-                      _RequestInfoRow(
+                      ProcurementRequestInfoRow(
                         label: 'طريقة الدفع:',
                         value: EnumPresentationRegistry.resolveSaleType(
                           request.saleType,
@@ -137,17 +138,17 @@ class ProcurementRequestDetailsScreen
                         ).label,
                       ),
                       if (request.requestDate != null)
-                        _RequestInfoRow(
+                        ProcurementRequestInfoRow(
                           label: 'تاريخ تقديم الطلب:',
                           value: request.requestDate!,
                         ),
                       if (request.reviewDate != null)
-                        _RequestInfoRow(
+                        ProcurementRequestInfoRow(
                           label: 'تاريخ المراجعة:',
                           value: request.reviewDate!,
                         ),
                       if (request.invoiceId != null)
-                        _RequestInfoRow(
+                        ProcurementRequestInfoRow(
                           label: 'رقم فاتورة المبيعات:',
                           value: 'فاتورة #${request.invoiceId}',
                           isHighlight: true,
@@ -250,43 +251,5 @@ class ProcurementRequestDetailsScreen
       );
     });
   }
-
 }
 
-class _RequestInfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isHighlight;
-
-  const _RequestInfoRow({
-    required this.label,
-    required this.value,
-    this.isHighlight = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: AppTypography.bodySmall.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-          Text(
-            value,
-            style: AppTypography.bodySmall.copyWith(
-              color: isHighlight ? colors.primary : colors.onSurface,
-              fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

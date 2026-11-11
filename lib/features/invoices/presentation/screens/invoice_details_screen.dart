@@ -7,6 +7,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/invoices/presentation/controllers/invoice_details_controller.dart';
+import 'package:netsales/features/invoices/presentation/widgets/invoice_info_row.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_item_row.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -138,11 +139,11 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                         color: colors.outlineVariant.withValues(alpha: 0.3),
                       ),
                       AppSpacing.vXs,
-                      _InvoiceInfoRow(
+                      InvoiceInfoRow(
                         label: 'تاريخ الإصدار:',
                         value: invoice.invoiceDate ?? invoice.createdAt ?? '-',
                       ),
-                      _InvoiceInfoRow(
+                      InvoiceInfoRow(
                         label: 'نوع البيع:',
                         value:
                             invoice.saleTypeLabel ?? saleTypePresentation.label,
@@ -152,7 +153,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                           onTap: () => controller.openVoucherRequestDetails(
                             invoice.requestId!,
                           ),
-                          child: _InvoiceInfoRow(
+                          child: InvoiceInfoRow(
                             label: 'طلب التوريد المرتبط:',
                             value: 'طلب #${invoice.requestId} (عرض)',
                             isHighlight: true,
@@ -185,17 +186,17 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                         ),
                       ),
                       AppSpacing.vSm,
-                      _InvoiceInfoRow(
+                      InvoiceInfoRow(
                         label: 'المزود (الشبكة):',
                         value:
                             invoice.networkName ?? 'شبكة #${invoice.networkId}',
                       ),
-                      _InvoiceInfoRow(
+                      InvoiceInfoRow(
                         label: 'العميل (نقطة البيع):',
                         value: invoice.posName ?? 'نقطة بيع #${invoice.posId}',
                       ),
                       if (invoice.posPhoneNumber != null)
-                        _InvoiceInfoRow(
+                        InvoiceInfoRow(
                           label: 'هاتف نقطة البيع:',
                           value: invoice.posPhoneNumber!,
                         ),
@@ -405,40 +406,3 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
   }
 }
 
-class _InvoiceInfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isHighlight;
-
-  const _InvoiceInfoRow({
-    required this.label,
-    required this.value,
-    this.isHighlight = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: AppTypography.bodySmall.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-          Text(
-            value,
-            style: AppTypography.bodySmall.copyWith(
-              color: isHighlight ? colors.primary : colors.onSurface,
-              fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

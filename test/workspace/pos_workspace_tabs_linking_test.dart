@@ -3,7 +3,7 @@ import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/pos_procurement_orders_screen.dart';
-import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell.dart';
+import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell_screen.dart';
 
 void main() {
   group('POS Workspace Shell Tab Linking & Completeness', () {

@@ -56,6 +56,7 @@ class PosProcurementController extends GetxController {
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
   final errorMessage = RxnString();
+  final loadMoreError = RxnString();
   final nextCursor = RxnString();
 
   bool get hasMore => nextCursor.value != null;
@@ -653,8 +654,14 @@ class PosProcurementController extends GetxController {
 
       requests.addAll(newItems);
       nextCursor.value = result.nextCursor;
-    } catch (_) {
-      // Keep the already loaded page and allow an explicit retry.
+      loadMoreError.value = null;
+    } catch (error) {
+      if (revision == _requestListRevision) {
+        loadMoreError.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تحميل المزيد من طلبات التوريد.',
+        );
+      }
     } finally {
       if (revision == _requestListRevision) {
         isLoadingMore.value = false;

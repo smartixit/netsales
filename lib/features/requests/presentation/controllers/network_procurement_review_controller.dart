@@ -53,6 +53,7 @@ class NetworkProcurementReviewController extends GetxController {
   final isLoadingMore = false.obs;
   final isProcessingDecision = false.obs;
   final errorMessage = RxnString();
+  final loadMoreError = RxnString();
   final nextCursor = RxnString();
 
   bool get hasMore => nextCursor.value != null;
@@ -418,8 +419,14 @@ class NetworkProcurementReviewController extends GetxController {
 
       requests.addAll(newItems);
       nextCursor.value = result.nextCursor;
-    } catch (_) {
-      // Keep loaded requests and allow a later retry.
+      loadMoreError.value = null;
+    } catch (error) {
+      if (revision == _requestListRevision) {
+        loadMoreError.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تحميل المزيد من طلبات التوريد.',
+        );
+      }
     } finally {
       if (revision == _requestListRevision) {
         isLoadingMore.value = false;
