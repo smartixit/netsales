@@ -41,52 +41,76 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
       );
 
   @override
-  Future<ApiResponse<List<BillingSubscriptionModel>>> getSubscriptions(int accountId) =>
+  Future<ApiResponse<List<BillingSubscriptionModel>>> getSubscriptions(int accountId, {String? cursor}) =>
       ApiService.instance.getList<BillingSubscriptionModel>(
         ApiConstants.billingAccountSubscriptions(accountId),
         fromJson: (json) => BillingSubscriptionModel.fromJson(
           Map<String, dynamic>.from(json as Map),
         ),
         perPage: 15,
+        cursor: cursor,
       );
 
   @override
-  Future<ApiResponse<List<BillingInvoiceModel>>> getInvoices(int accountId) =>
+  Future<ApiResponse<List<BillingInvoiceModel>>> getInvoices(int accountId, {String? cursor}) =>
       ApiService.instance.getList<BillingInvoiceModel>(
         ApiConstants.billingAccountInvoices(accountId),
         fromJson: (json) => BillingInvoiceModel.fromJson(
           Map<String, dynamic>.from(json as Map),
         ),
         perPage: 15,
+        cursor: cursor,
       );
 
   @override
-  Future<ApiResponse<List<BillingPaymentModel>>> getPayments(int accountId) =>
+  Future<ApiResponse<List<BillingPaymentModel>>> getPayments(int accountId, {String? cursor}) =>
       ApiService.instance.getList<BillingPaymentModel>(
         ApiConstants.billingAccountPayments(accountId),
         fromJson: (json) => BillingPaymentModel.fromJson(
           Map<String, dynamic>.from(json as Map),
         ),
         perPage: 15,
+        cursor: cursor,
       );
 
   @override
-  Future<ApiResponse<List<BillingCreditNoteModel>>> getCreditNotes(int accountId) =>
+  Future<ApiResponse<List<BillingCreditNoteModel>>> getCreditNotes(int accountId, {String? cursor}) =>
       ApiService.instance.getList<BillingCreditNoteModel>(
         ApiConstants.billingAccountCreditNotes(accountId),
         fromJson: (json) => BillingCreditNoteModel.fromJson(
           Map<String, dynamic>.from(json as Map),
         ),
         perPage: 15,
+        cursor: cursor,
       );
 
   @override
-  Future<ApiResponse<List<BillingRefundModel>>> getRefunds(int accountId) =>
+  Future<ApiResponse<List<BillingRefundModel>>> getRefunds(int accountId, {String? cursor}) =>
       ApiService.instance.getList<BillingRefundModel>(
         ApiConstants.billingAccountRefunds(accountId),
         fromJson: (json) => BillingRefundModel.fromJson(
           Map<String, dynamic>.from(json as Map),
         ),
         perPage: 15,
+        cursor: cursor,
       );
 }
+
+  @override
+  Future<ApiResponse<BillingStatementModel>> getStatement(
+    int accountId, {
+    String? from,
+    String? to,
+    int? currencyId,
+  }) =>
+      ApiService.instance.get<BillingStatementModel>(
+        ApiConstants.billingAccountStatement(accountId),
+        queryParameters: {
+          if (from != null) 'from': from,
+          if (to != null) 'to': to,
+          if (currencyId != null) 'currency_id': currencyId,
+        },
+        fromJson: (json) => BillingStatementModel.fromJson(
+          Map<String, dynamic>.from(json as Map),
+        ),
+      );

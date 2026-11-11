@@ -75,16 +75,22 @@ class BillingSubscriptionEntity {
 class BillingInvoiceLineEntity {
   const BillingInvoiceLineEntity({
     required this.description,
-    required this.quantityMicros,
+    required this.quantity,
     required this.unitAmountMinor,
-    required this.lineSubtotalMinor,
+    required this.subtotalMinor,
+    required this.discountMinor,
+    required this.taxMinor,
+    required this.totalMinor,
     this.currency,
   });
 
   final String description;
-  final int quantityMicros;
+  final String quantity;
   final int unitAmountMinor;
-  final int lineSubtotalMinor;
+  final int subtotalMinor;
+  final int discountMinor;
+  final int taxMinor;
+  final int totalMinor;
   final BillingCurrencyEntity? currency;
 }
 
@@ -216,4 +222,54 @@ class BillingRefundEntity {
   final String? invoiceNumber;
   final String? reason;
   final String? processedAt;
+}
+
+class BillingStatementBalanceEntity {
+  const BillingStatementBalanceEntity({
+    required this.currency,
+    required this.openingReceivableMinor,
+    required this.openingReceivable,
+    required this.invoicedMinor,
+    required this.invoiced,
+    required this.verifiedPaymentsMinor,
+    required this.verifiedPayments,
+    required this.creditsAppliedMinor,
+    required this.creditsApplied,
+    required this.closingReceivableMinor,
+    required this.closingReceivable,
+    required this.counts,
+  });
+
+  final BillingCurrencyEntity currency;
+  final int openingReceivableMinor;
+  final String openingReceivable;
+  final int invoicedMinor;
+  final String invoiced;
+  final int verifiedPaymentsMinor;
+  final String verifiedPayments;
+  final int creditsAppliedMinor;
+  final String creditsApplied;
+  final int closingReceivableMinor;
+  final String closingReceivable;
+  final Map<String, int> counts;
+}
+
+class BillingStatementEntity {
+  const BillingStatementEntity({
+    required this.billingAccountId,
+    required this.accountNumber,
+    required this.from,
+    required this.to,
+    required this.timezone,
+    required this.balances,
+    required this.currencyAggregation,
+  });
+
+  final int billingAccountId;
+  final String accountNumber;
+  final String from;
+  final String to;
+  final String timezone;
+  final List<BillingStatementBalanceEntity> balances;
+  final String currencyAggregation;
 }

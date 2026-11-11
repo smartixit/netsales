@@ -120,18 +120,24 @@ class BillingSubscriptionModel extends BillingSubscriptionEntity {
 class BillingInvoiceLineModel extends BillingInvoiceLineEntity {
   const BillingInvoiceLineModel({
     required super.description,
-    required super.quantityMicros,
+    required super.quantity,
     required super.unitAmountMinor,
-    required super.lineSubtotalMinor,
+    required super.subtotalMinor,
+    required super.discountMinor,
+    required super.taxMinor,
+    required super.totalMinor,
     super.currency,
   });
 
   factory BillingInvoiceLineModel.fromJson(Map<String, dynamic> json) =>
       BillingInvoiceLineModel(
         description: _text(json, 'description', fallback: ''),
-        quantityMicros: _integer(json, 'quantity_micros', fallback: 0),
+        quantity: _text(json, 'quantity', fallback: '0'),
         unitAmountMinor: _integer(json, 'unit_amount_minor', fallback: 0),
-        lineSubtotalMinor: _integer(json, 'line_subtotal_minor', fallback: 0),
+        subtotalMinor: _integer(json, 'subtotal_minor', fallback: 0),
+        discountMinor: _integer(json, 'discount_minor', fallback: 0),
+        taxMinor: _integer(json, 'tax_minor', fallback: 0),
+        totalMinor: _integer(json, 'total_minor', fallback: 0),
         currency: _currency(json['currency']),
       );
 }
@@ -289,4 +295,57 @@ class BillingRefundModel extends BillingRefundEntity {
         reason: json['reason']?.toString(),
         processedAt: json['processed_at']?.toString(),
       );
+}
+
+class BillingStatementModel extends BillingStatementEntity {
+  const BillingStatementModel({
+    required super.billingAccountId,
+    required super.accountNumber,
+    required super.from,
+    required super.to,
+    required super.timezone,
+    required super.balances,
+    required super.currencyAggregation,
+  });
+
+  factory BillingStatementModel.fromJson(Map<String, dynamic> json) {
+    final period = _jsonMap(json['period'], 'period');
+    final rawBalances = json['balances_by_currency'];
+    if (rawBalances is! List) {
+      throw const FormatException('بيانات أرصدة كشف الحساب غير صالحة.');
+    }
+    final balances = rawBalances.map((value) {
+      final row = _jsonMap(value, 'statement balance');
+      final currency = BillingCurrencyModel.fromJson(
+        _jsonMap(row['currency'], 'statement currency'),
+      );
+      final rawCounts = _jsonMap(row['counts'], 'statement counts');
+      return BillingStatementBalanceEntity(
+        currency: currency,
+        openingReceivableMinor: _integer(row, 'opening_receivable_minor', fallback: 0),
+        openingReceivable: _text(row, 'opening_receivable', fallback: '0'),
+        invoicedMinor: _integer(row, 'invoiced_minor', fallback: 0),
+        invoiced: _text(row, 'invoiced', fallback: '0'),
+        verifiedPaymentsMinor: _integer(row, 'verified_payments_minor', fallback: 0),
+        verifiedPayments: _text(row, 'verified_payments', fallback: '0'),
+        creditsAppliedMinor: _integer(row, 'credits_applied_minor', fallback: 0),
+        creditsApplied: _text(row, 'credits_applied', fallback: '0'),
+        closingReceivableMinor: _integer(row, 'closing_receivable_minor', fallback: 0),
+        closingReceivable: _text(row, 'closing_receivable', fallback: '0'),
+        counts: rawCounts.map((key, value) => MapEntry(
+          key,
+          value is int ? value : int.tryParse(value.toString()) ?? 0,
+        )),
+      );
+    }).toList(growable: false);
+    return BillingStatementModel(
+      billingAccountId: _integer(json, 'billing_account_id'),
+      accountNumber: _text(json, 'account_number'),
+      from: _text(period, 'from'),
+      to: _text(period, 'to'),
+      timezone: _text(period, 'timezone', fallback: 'UTC'),
+      balances: balances,
+      currencyAggregation: _text(json, 'currency_aggregation'),
+    );
+  }
 }

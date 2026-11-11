@@ -5,9 +5,10 @@ abstract interface class BillingRepository {
   Future<List<BillingCurrencyEntity>> getCurrencies();
   Future<List<BillingAccountEntity>> getAccounts(int networkId);
   Future<BillingAccountEntity> createAccount(int networkId, int currencyId);
-  Future<PaginatedList<BillingSubscriptionEntity>> getSubscriptions(int accountId);
-  Future<PaginatedList<BillingInvoiceEntity>> getInvoices(int accountId);
-  Future<PaginatedList<BillingPaymentEntity>> getPayments(int accountId);
-  Future<PaginatedList<BillingCreditNoteEntity>> getCreditNotes(int accountId);
-  Future<PaginatedList<BillingRefundEntity>> getRefunds(int accountId);
+  Future<PaginatedList<BillingSubscriptionEntity>> getSubscriptions(int accountId, {String? cursor});
+  Future<PaginatedList<BillingInvoiceEntity>> getInvoices(int accountId, {String? cursor});
+  Future<PaginatedList<BillingPaymentEntity>> getPayments(int accountId, {String? cursor});
+  Future<PaginatedList<BillingCreditNoteEntity>> getCreditNotes(int accountId, {String? cursor});
+  Future<PaginatedList<BillingRefundEntity>> getRefunds(int accountId, {String? cursor});
+  Future<BillingStatementEntity> getStatement(int accountId, {String? from, String? to, int? currencyId});
 }

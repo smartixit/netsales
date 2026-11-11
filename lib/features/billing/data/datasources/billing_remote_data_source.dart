@@ -8,9 +8,10 @@ abstract interface class BillingRemoteDataSource {
     int networkId,
     int currencyId,
   );
-  Future<ApiResponse<List<BillingSubscriptionModel>>> getSubscriptions(int accountId);
-  Future<ApiResponse<List<BillingInvoiceModel>>> getInvoices(int accountId);
-  Future<ApiResponse<List<BillingPaymentModel>>> getPayments(int accountId);
-  Future<ApiResponse<List<BillingCreditNoteModel>>> getCreditNotes(int accountId);
-  Future<ApiResponse<List<BillingRefundModel>>> getRefunds(int accountId);
+  Future<ApiResponse<List<BillingSubscriptionModel>>> getSubscriptions(int accountId, {String? cursor});
+  Future<ApiResponse<List<BillingInvoiceModel>>> getInvoices(int accountId, {String? cursor});
+  Future<ApiResponse<List<BillingPaymentModel>>> getPayments(int accountId, {String? cursor});
+  Future<ApiResponse<List<BillingCreditNoteModel>>> getCreditNotes(int accountId, {String? cursor});
+  Future<ApiResponse<List<BillingRefundModel>>> getRefunds(int accountId, {String? cursor});
+  Future<ApiResponse<BillingStatementModel>> getStatement(int accountId, {String? from, String? to, int? currencyId});
 }

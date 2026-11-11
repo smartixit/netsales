@@ -50,32 +50,55 @@ class BillingRepositoryImpl implements BillingRepository {
   }
 
   @override
-  Future<PaginatedList<BillingSubscriptionEntity>> getSubscriptions(int accountId) async {
-    final response = await remoteDataSource.getSubscriptions(accountId);
+  Future<PaginatedList<BillingSubscriptionEntity>> getSubscriptions(int accountId, {String? cursor}) async {
+    final response = await remoteDataSource.getSubscriptions(accountId, cursor: cursor);
     return _page(response, 'تعذر تحميل اشتراكات الحساب.', 'BILLING_SUBSCRIPTIONS_FAILED');
   }
 
   @override
-  Future<PaginatedList<BillingInvoiceEntity>> getInvoices(int accountId) async {
-    final response = await remoteDataSource.getInvoices(accountId);
+  Future<PaginatedList<BillingInvoiceEntity>> getInvoices(int accountId, {String? cursor}) async {
+    final response = await remoteDataSource.getInvoices(accountId, cursor: cursor);
     return _page(response, 'تعذر تحميل فواتير الاشتراك.', 'BILLING_INVOICES_FAILED');
   }
 
   @override
-  Future<PaginatedList<BillingPaymentEntity>> getPayments(int accountId) async {
-    final response = await remoteDataSource.getPayments(accountId);
+  Future<PaginatedList<BillingPaymentEntity>> getPayments(int accountId, {String? cursor}) async {
+    final response = await remoteDataSource.getPayments(accountId, cursor: cursor);
     return _page(response, 'تعذر تحميل مدفوعات الاشتراك.', 'BILLING_PAYMENTS_FAILED');
   }
 
   @override
-  Future<PaginatedList<BillingCreditNoteEntity>> getCreditNotes(int accountId) async {
-    final response = await remoteDataSource.getCreditNotes(accountId);
+  Future<PaginatedList<BillingCreditNoteEntity>> getCreditNotes(int accountId, {String? cursor}) async {
+    final response = await remoteDataSource.getCreditNotes(accountId, cursor: cursor);
     return _page(response, 'تعذر تحميل الإشعارات الدائنة.', 'BILLING_CREDIT_NOTES_FAILED');
   }
 
   @override
-  Future<PaginatedList<BillingRefundEntity>> getRefunds(int accountId) async {
-    final response = await remoteDataSource.getRefunds(accountId);
+  Future<PaginatedList<BillingRefundEntity>> getRefunds(int accountId, {String? cursor}) async {
+    final response = await remoteDataSource.getRefunds(accountId, cursor: cursor);
     return _page(response, 'تعذر تحميل عمليات الاسترداد.', 'BILLING_REFUNDS_FAILED');
   }
+  @override
+  Future<BillingStatementEntity> getStatement(
+    int accountId, {
+    String? from,
+    String? to,
+    int? currencyId,
+  }) async {
+    final response = await remoteDataSource.getStatement(
+      accountId,
+      from: from,
+      to: to,
+      currencyId: currencyId,
+    );
+    if (!response.success || response.data == null) {
+      throw _failure(
+        response,
+        'تعذر تحميل كشف حساب الاشتراك.',
+        'BILLING_STATEMENT_FAILED',
+      );
+    }
+    return response.data!;
+  }
+
 }
