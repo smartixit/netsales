@@ -148,7 +148,6 @@ class BillingRepositoryImpl implements BillingRepository {
     return response.data!;
   }
 
-}
 
   @override
   Future<BillingPurchaseResultEntity> purchaseSubscription(
