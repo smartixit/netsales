@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/billing/domain/entities/billing_entities.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
@@ -154,22 +155,22 @@ class NetworkBillingController extends GetxController {
       ]);
       if (revision != _requestRevision || selectedAccountId.value != id) return;
 
-      final subscriptionPage = pages[0] as dynamic;
-      final invoicePage = pages[1] as dynamic;
-      final paymentPage = pages[2] as dynamic;
-      final creditPage = pages[3] as dynamic;
-      final refundPage = pages[4] as dynamic;
+      final subscriptionPage = pages[0] as PaginatedList<BillingSubscriptionEntity>;
+      final invoicePage = pages[1] as PaginatedList<BillingInvoiceEntity>;
+      final paymentPage = pages[2] as PaginatedList<BillingPaymentEntity>;
+      final creditPage = pages[3] as PaginatedList<BillingCreditNoteEntity>;
+      final refundPage = pages[4] as PaginatedList<BillingRefundEntity>;
 
-      subscriptions.assignAll(subscriptionPage.items as List<BillingSubscriptionEntity>);
-      invoices.assignAll(invoicePage.items as List<BillingInvoiceEntity>);
-      payments.assignAll(paymentPage.items as List<BillingPaymentEntity>);
-      creditNotes.assignAll(creditPage.items as List<BillingCreditNoteEntity>);
-      refunds.assignAll(refundPage.items as List<BillingRefundEntity>);
-      _subscriptionsCursor = subscriptionPage.nextCursor as String?;
-      _invoicesCursor = invoicePage.nextCursor as String?;
-      _paymentsCursor = paymentPage.nextCursor as String?;
-      _creditNotesCursor = creditPage.nextCursor as String?;
-      _refundsCursor = refundPage.nextCursor as String?;
+      subscriptions.assignAll(subscriptionPage.items);
+      invoices.assignAll(invoicePage.items);
+      payments.assignAll(paymentPage.items);
+      creditNotes.assignAll(creditPage.items);
+      refunds.assignAll(refundPage.items);
+      _subscriptionsCursor = subscriptionPage.nextCursor;
+      _invoicesCursor = invoicePage.nextCursor;
+      _paymentsCursor = paymentPage.nextCursor;
+      _creditNotesCursor = creditPage.nextCursor;
+      _refundsCursor = refundPage.nextCursor;
       statement.value = pages[5] as BillingStatementEntity;
     } catch (error) {
       if (revision == _requestRevision) {
@@ -262,8 +263,8 @@ class NetworkBillingController extends GetxController {
   Future<void> _loadMore<T>({
     required String? cursor,
     required RxBool loading,
-    required Future<dynamic> Function(String cursor) request,
-    required void Function(dynamic page) append,
+    required Future<PaginatedList<T>> Function(String cursor) request,
+    required void Function(PaginatedList<T> page) append,
     required void Function(String?) saveCursor,
     required String fallback,
   }) async {
@@ -275,7 +276,7 @@ class NetworkBillingController extends GetxController {
       final page = await request(cursor!);
       if (revision != _requestRevision || accountId != selectedAccountId.value) return;
       append(page);
-      saveCursor(page.nextCursor as String?);
+      saveCursor(page.nextCursor);
     } catch (error) {
       if (revision == _requestRevision) _setError(error, fallback);
     } finally {
