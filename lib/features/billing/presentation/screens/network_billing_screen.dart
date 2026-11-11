@@ -7,6 +7,7 @@ import 'package:netsales/features/billing/domain/entities/billing_entities.dart'
 import 'package:netsales/features/billing/presentation/controllers/network_billing_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 class NetworkBillingScreen extends GetView<NetworkBillingController> {
   const NetworkBillingScreen({super.key});
@@ -366,7 +367,10 @@ class _OverviewSection extends StatelessWidget {
             message: 'لا توجد فواتير اشتراك حتى الآن.',
           )
         else
-          ...controller.invoices.take(3).map((invoice) => _InvoiceCard(invoice: invoice)),
+          ...controller.invoices.take(3).map((invoice) => _InvoiceCard(
+            invoice: invoice,
+            onPay: invoice.remainingMinor > 0 ? () => _showPaymentSheet(invoice) : null,
+          )),
         SizedBox(height: 10.h),
         Align(
           alignment: AlignmentDirectional.centerEnd,
@@ -504,7 +508,10 @@ class _InvoicesSection extends StatelessWidget {
               message: 'لا توجد فواتير.',
             )
           else
-            ...controller.invoices.map((invoice) => _InvoiceCard(invoice: invoice)),
+            ...controller.invoices.map((invoice) => _InvoiceCard(
+              invoice: invoice,
+              onPay: invoice.remainingMinor > 0 ? () => _showPaymentSheet(invoice) : null,
+            )),
           if (controller.canLoadMoreInvoices)
             _LoadMoreButton(
               loading: controller.isLoadingMoreInvoices.value,
@@ -706,8 +713,9 @@ class _PlanCard extends StatelessWidget {
 }
 
 class _InvoiceCard extends StatelessWidget {
-  const _InvoiceCard({required this.invoice});
+  const _InvoiceCard({required this.invoice, this.onPay});
   final BillingInvoiceEntity invoice;
+  final VoidCallback? onPay;
   @override
   Widget build(BuildContext context) => _SurfaceCard(
         child: Column(
@@ -726,16 +734,183 @@ class _InvoiceCard extends StatelessWidget {
             _MoneyLine(label: 'إجمالي الفاتورة', value: invoice.total, currency: invoice.currency?.code),
             _MoneyLine(label: 'المدفوع', value: invoice.paid, currency: invoice.currency?.code),
             _MoneyLine(label: 'المتبقي', value: invoice.remaining, currency: invoice.currency?.code, emphasis: true),
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: CustomButton.outline(
-                text: 'تفاصيل البنود',
-                size: AppButtonSize.small,
-                onPressed: () => _showInvoiceDetails(invoice),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CustomButton.outline(
+                  text: 'تفاصيل البنود',
+                  size: AppButtonSize.small,
+                  onPressed: () => _showInvoiceDetails(invoice),
+                ),
+                if (onPay != null) ...[
+                  SizedBox(width: 8.w),
+                  CustomButton.primary(
+                    text: 'تسجيل السداد',
+                    size: AppButtonSize.small,
+                    onPressed: onPay,
+                  ),
+                ],
+              ],
             ),
           ],
         ),
+      );
+}
+
+void _showPaymentSheet(BillingInvoiceEntity invoice) {
+  final controller = Get.find<NetworkBillingController>();
+  controller.preparePayment(invoice);
+  Get.bottomSheet<void>(
+    _PaymentSubmissionSheet(invoice: invoice, controller: controller),
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+  );
+}
+
+class _PaymentSubmissionSheet extends StatelessWidget {
+  const _PaymentSubmissionSheet({
+    required this.invoice,
+    required this.controller,
+  });
+  final BillingInvoiceEntity invoice;
+  final NetworkBillingController controller;
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+        top: false,
+        child: Obx(() {
+          final selectedMethod = controller.paymentMethods.firstWhereOrNull(
+            (item) => item.paymentMethodId == controller.selectedPaymentMethodId.value,
+          );
+          return Container(
+            constraints: BoxConstraints(maxHeight: Get.height * .9),
+            padding: EdgeInsets.fromLTRB(20.r, 18.r, 20.r, 24.r),
+            decoration: BoxDecoration(
+              color: Get.theme.colorScheme.surface,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('تسجيل طلب سداد', style: AppTypography.titleLarge),
+                  SizedBox(height: 6.h),
+                  Text('الفاتورة ${invoice.invoiceNumber}'),
+                  _MoneyLine(
+                    label: 'المتبقي وفق الخادم',
+                    value: invoice.remaining,
+                    currency: invoice.currency?.code,
+                    emphasis: true,
+                  ),
+                  SizedBox(height: 14.h),
+                  if (controller.paymentMethods.isEmpty)
+                    const _InlineNotice(
+                      text: 'لا توجد وسيلة دفع نشطة متاحة بعملة هذه الفاتورة. تواصل مع إدارة المنصة.',
+                    )
+                  else
+                    CustomDropdown<int>(
+                      label: 'وسيلة الدفع',
+                      rxValue: controller.selectedPaymentMethodId,
+                      items: controller.paymentMethods
+                          .where((method) => method.isActive)
+                          .map((method) => DropdownItem<int>(
+                                value: method.paymentMethodId,
+                                child: Text(method.name),
+                              ))
+                          .toList(),
+                      itemSearchText: (id) => controller.paymentMethods
+                          .firstWhere((item) => item.paymentMethodId == id)
+                          .name,
+                      onChanged: (value) =>
+                          controller.selectedPaymentMethodId.value = value,
+                    ),
+                  if (selectedMethod?.instructions != null &&
+                      selectedMethod!.instructions!.trim().isNotEmpty) ...[
+                    SizedBox(height: 8.h),
+                    _InfoPanel(
+                      icon: Icons.info_outline_rounded,
+                      message: selectedMethod.instructions!,
+                    ),
+                  ],
+                  SizedBox(height: 12.h),
+                  CustomTextField(
+                    controller: controller.paymentAmountController,
+                    label: 'المبلغ',
+                    hint: 'المبلغ بعملة ${invoice.currency?.code ?? ''}',
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    prefixIcon: const Icon(Icons.payments_outlined),
+                  ),
+                  SizedBox(height: 10.h),
+                  CustomTextField(
+                    controller: controller.paymentReferenceController,
+                    label: 'المرجع الخارجي (اختياري)',
+                    hint: 'رقم الحوالة أو العملية',
+                    isRequired: false,
+                    prefixIcon: const Icon(Icons.tag_rounded),
+                  ),
+                  SizedBox(height: 12.h),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          controller.selectedProofPath.value == null
+                              ? 'لم يتم إرفاق إثبات دفع'
+                              : controller.selectedProofPath.value!.split(RegExp(r'[/\\\\]')).last,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodySmall,
+                        ),
+                      ),
+                      CustomButton.outline(
+                        text: controller.selectedProofPath.value == null
+                            ? 'إرفاق الإثبات'
+                            : 'تغيير الملف',
+                        size: AppButtonSize.small,
+                        prefix: const Icon(Icons.attach_file_rounded),
+                        onPressed: controller.choosePaymentProof,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.h),
+                  const _InlineNotice(
+                    text: 'سيُسجّل الطلب بانتظار المراجعة. إرسال الإثبات لا يعني اعتماد الدفع أو تفعيل الاشتراك تلقائياً.',
+                  ),
+                  if (controller.errorMessage.value != null) ...[
+                    SizedBox(height: 8.h),
+                    Text(
+                      controller.errorMessage.value!,
+                      style: TextStyle(color: context.colors.error),
+                    ),
+                  ],
+                  SizedBox(height: 16.h),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomButton.outline(
+                          text: 'إلغاء',
+                          onPressed: () => Get.back<void>(),
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: CustomButton.primary(
+                          text: 'إرسال طلب السداد',
+                          loading: controller.isSubmittingPayment.value,
+                          enabled: controller.paymentMethods.any((method) => method.isActive) &&
+                              !controller.isSubmittingPayment.value,
+                          onPressed: () async {
+                            final payment = await controller.submitPayment(invoice);
+                            if (payment != null) Get.back<void>();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
       );
 }
 
