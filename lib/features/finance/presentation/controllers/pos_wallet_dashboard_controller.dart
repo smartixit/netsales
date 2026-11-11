@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
 import 'package:netsales/features/finance/presentation/widgets/manual_wallet_transaction_sheet.dart';
@@ -127,9 +128,10 @@ class PosWalletDashboardController extends GetxController {
     walletsNextCursor.value = null;
 
     try {
+      final effectivePosId = _filterPosId ?? WorkspaceService.to.savedActivePosId;
       final res = await getPosWalUseCase(
         networkId: _filterNetworkId,
-        posId: _filterPosId,
+        posId: effectivePosId,
         perPage: 15,
       );
       if (requestVersion != _walletsRequestVersion) return;

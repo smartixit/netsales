@@ -46,6 +46,9 @@ abstract final class StorageKeys {
   /// نقطة البيع النشطة لكل مستخدم.
   static const String activePosTenantPrefix = 'active_pos_tenant';
 
+  /// الشبكة النشطة لكل مستخدم (Network Workspace Tenant).
+  static const String activeNetworkTenantPrefix = 'active_network_tenant';
+
   /// بادئة تخزين الشبكة المختارة لكل مستخدم ونقطة بيع.
   static const String activePosNetworkPrefix = 'active_pos_network';
 }

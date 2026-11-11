@@ -148,7 +148,7 @@ class WorkspaceService extends GetxService {
       preferredWorkspace: savedWorkspace,
     );
 
-    // الحالة 5: التحقق من سريان العضوية السابقة لنقاط البيع ومسح السياق الملغى
+    // الحالة 5: التحقق من سريان العضوية السابقة لنقاط البيع والشبكات ومسح السياق الملغى
     final activePosMemberships = user.workspaceMemberships
         .where((m) => m.isPos)
         .toList();
@@ -165,6 +165,22 @@ class WorkspaceService extends GetxService {
       );
       log(
         '🧹 [WorkspaceService] Inactive/removed POS membership context #$savedPosId purged.',
+      );
+    }
+
+    final activeNetworkMemberships = user.workspaceMemberships
+        .where((m) => m.isNetwork)
+        .toList();
+    final savedNetworkId = storage.getInt(
+      '${StorageKeys.activeNetworkTenantPrefix}_${user.userId}',
+    );
+    if (savedNetworkId != null &&
+        !activeNetworkMemberships.any((m) => m.tenantId == savedNetworkId)) {
+      await storage.remove(
+        '${StorageKeys.activeNetworkTenantPrefix}_${user.userId}',
+      );
+      log(
+        '🧹 [WorkspaceService] Inactive/removed Network membership context #$savedNetworkId purged.',
       );
     }
 
@@ -225,6 +241,53 @@ class WorkspaceService extends GetxService {
     }
 
     // لا يتم اختيار first أبداً عند تعدد نقاط البيع دون اختيار محفوظ
+    return null;
+  }
+
+  /// مفتاح التخزين الموحد للشبكة النشطة للمستخدم الحالي
+  String get activeNetworkStorageKey =>
+      '${StorageKeys.activeNetworkTenantPrefix}_${SessionService.to.currentUser?.userId ?? 0}';
+
+  /// قراءة معرف الشبكة النشطة المحفوظة بأمان
+  int? get savedActiveNetworkId {
+    try {
+      return StorageService.instance.getInt(activeNetworkStorageKey);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// حفظ معرف الشبكة النشطة بأمان
+  Future<void> saveActiveNetworkId(int networkId) async {
+    try {
+      await StorageService.instance.setInt(activeNetworkStorageKey, networkId);
+    } catch (_) {}
+  }
+
+  /// مسح معرف الشبكة النشطة بأمان
+  Future<void> clearActiveNetworkId() async {
+    try {
+      await StorageService.instance.remove(activeNetworkStorageKey);
+    } catch (_) {}
+  }
+
+  /// تحديد معرف الشبكة النشطة حتمياً:
+  /// 1. شبكة واحدة فقط -> اختيار تلقائي.
+  /// 2. عدة شبكات -> استعادة المعرف المحفوظ إن كان موجوداً ضمن القائمة المصرح بها.
+  /// 3. عدة شبكات دون اختيار محفوظ صالح -> إرجاع null لإلزام المستخدم بالاختيار الصريح.
+  int? resolveActiveNetworkId(List<int> availableNetworkIds) {
+    if (availableNetworkIds.isEmpty) return null;
+
+    final savedId = savedActiveNetworkId;
+    if (savedId != null && availableNetworkIds.contains(savedId)) {
+      return savedId;
+    }
+
+    if (availableNetworkIds.length == 1) {
+      return availableNetworkIds.first;
+    }
+
+    // لا يتم اختيار first أبداً عند تعدد الشبكات دون اختيار محفوظ
     return null;
   }
 

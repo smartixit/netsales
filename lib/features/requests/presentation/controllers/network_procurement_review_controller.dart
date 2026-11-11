@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
@@ -324,8 +325,17 @@ class NetworkProcurementReviewController extends GetxController {
     try {
       final networks = await getMyNetworksUseCase!();
       authorizedNetworks.assignAll(networks);
-      if (selectedNetworkId.value == null && networks.length == 1) {
-        selectedNetworkId.value = networks.first.networkId;
+      if (selectedNetworkId.value == null) {
+        final networkIds = networks.map((n) => n.networkId).toList(growable: false);
+        final resolvedId = Get.isRegistered<WorkspaceService>()
+            ? WorkspaceService.to.resolveActiveNetworkId(networkIds)
+            : (networks.length == 1 ? networks.first.networkId : null);
+        if (resolvedId != null) {
+          selectedNetworkId.value = resolvedId;
+          if (Get.isRegistered<WorkspaceService>()) {
+            await WorkspaceService.to.saveActiveNetworkId(resolvedId);
+          }
+        }
       }
     } catch (_) {
       // Non-fatal
@@ -419,6 +429,9 @@ class NetworkProcurementReviewController extends GetxController {
     // CustomDropdown updates its ValueNotifier before invoking onChanged.
     // Always refresh here; comparing the current value would skip the request.
     selectedNetworkId.value = networkId;
+    if (networkId != null && Get.isRegistered<WorkspaceService>()) {
+      await WorkspaceService.to.saveActiveNetworkId(networkId);
+    }
     await loadRequests(isRefresh: true);
   }
 

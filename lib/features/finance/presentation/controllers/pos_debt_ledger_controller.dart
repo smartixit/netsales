@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
@@ -157,8 +158,10 @@ class PosDebtLedgerController extends GetxController {
       }
       posOptions.assignAll(uniquePositions);
 
-      if (uniquePositions.length == 1) {
-        autoSelectPosId = uniquePositions.single.posId;
+      final posIds = uniquePositions.map((p) => p.posId).toList(growable: false);
+      final resolvedId = WorkspaceService.to.resolveActivePosId(posIds);
+      if (resolvedId != null) {
+        autoSelectPosId = resolvedId;
       }
     } on AppException catch (e) {
       if (requestVersion == _posOptionsRequestVersion) {
@@ -194,6 +197,7 @@ class PosDebtLedgerController extends GetxController {
     if (nextPos == null || selectedPosId.value == posId) return;
 
     selectedPosId.value = posId;
+    await WorkspaceService.to.saveActivePosId(posId);
     selectedNetworkId.value = null;
     _selectedNetworkFallback = null;
     _scopeVersion++;

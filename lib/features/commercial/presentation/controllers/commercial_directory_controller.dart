@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/usecases/get_directorates_use_case.dart';
@@ -256,8 +257,10 @@ class CommercialDirectoryController extends GetxController {
       if (targetNetworkId <= 0) {
         final networks = await getMyNetworksUseCase();
         if (networks.isNotEmpty) {
-          targetNetworkId = networks.first.networkId;
+          final networkIds = networks.map((n) => n.networkId).toList(growable: false);
+          targetNetworkId = WorkspaceService.to.resolveActiveNetworkId(networkIds) ?? networks.first.networkId;
           activeNetworkId.value = targetNetworkId;
+          await WorkspaceService.to.saveActiveNetworkId(targetNetworkId);
         }
       }
 

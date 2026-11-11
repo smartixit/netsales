@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/utils/package_spec_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
@@ -129,8 +130,13 @@ class PackageCatalogController extends GetxController {
     try {
       final networks = await getMyNetworksUseCase!();
       authorizedNetworks.assignAll(networks);
-      if (formNetworkId.value == null && networks.length == 1) {
-        formNetworkId.value = networks.first.networkId;
+      final networkIds = networks.map((n) => n.networkId).toList(growable: false);
+      final resolvedId = WorkspaceService.to.resolveActiveNetworkId(networkIds);
+      if (formNetworkId.value == null && resolvedId != null) {
+        formNetworkId.value = resolvedId;
+      }
+      if (selectedNetworkId.value == null && resolvedId != null) {
+        selectedNetworkId.value = resolvedId;
       }
     } catch (_) {
       // Non-blocking, handled during submission validation

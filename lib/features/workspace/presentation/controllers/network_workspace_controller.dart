@@ -62,14 +62,17 @@ class NetworkWorkspaceController extends GetxController {
       final result = await getMyNetworksUseCase();
       if (revision != _revision) return;
       networks.assignAll(result);
-      if (selectedNetworkId.value == null ||
-          !result.any(
-            (network) => network.networkId == selectedNetworkId.value,
-          )) {
-        selectedNetworkId.value = result.isEmpty
-            ? null
-            : result.first.networkId;
+
+      final networkIds = result.map((n) => n.networkId).toList(growable: false);
+      final resolvedId = WorkspaceService.to.resolveActiveNetworkId(networkIds);
+
+      selectedNetworkId.value = resolvedId;
+      if (resolvedId != null) {
+        await WorkspaceService.to.saveActiveNetworkId(resolvedId);
+      } else {
+        await WorkspaceService.to.clearActiveNetworkId();
       }
+
       await loadOverview(revision: revision);
     } catch (error) {
       if (revision != _revision) return;
@@ -119,6 +122,7 @@ class NetworkWorkspaceController extends GetxController {
   Future<void> selectNetwork(int? networkId) async {
     if (networkId == null || networkId == selectedNetworkId.value) return;
     selectedNetworkId.value = networkId;
+    await WorkspaceService.to.saveActiveNetworkId(networkId);
     overview.value = null;
     await loadOverview();
   }

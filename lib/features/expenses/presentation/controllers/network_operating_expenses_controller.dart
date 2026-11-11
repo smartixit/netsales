@@ -7,6 +7,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
@@ -139,8 +140,11 @@ class NetworkOperatingExpensesController extends GetxController {
           .where((n) => n.networkId > 0 && ids.add(n.networkId))
           .toList();
       networks.assignAll(unique);
-      if (unique.length == 1) {
-        await selectNetwork(unique.single.networkId);
+
+      final networkIds = unique.map((n) => n.networkId).toList(growable: false);
+      final resolvedId = WorkspaceService.to.resolveActiveNetworkId(networkIds);
+      if (resolvedId != null) {
+        await selectNetwork(resolvedId);
       }
     } catch (e) {
       if (version == _networkVersion) {
@@ -160,6 +164,7 @@ class NetworkOperatingExpensesController extends GetxController {
       return;
     }
     selectedNetworkId.value = id;
+    await WorkspaceService.to.saveActiveNetworkId(id);
     expenses.clear();
     _cursor = null;
     _loaded = false;

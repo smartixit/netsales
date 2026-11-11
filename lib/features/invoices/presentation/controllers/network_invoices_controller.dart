@@ -5,6 +5,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
@@ -85,8 +86,11 @@ class NetworkInvoicesController extends GetxController {
       try {
         final networks = await getMyNetworksUseCase!();
         authorizedNetworks.assignAll(networks);
-        if (networks.isNotEmpty) {
-          selectedNetworkId.value = networks.first.networkId;
+        final networkIds = networks.map((n) => n.networkId).toList(growable: false);
+        final resolvedId = WorkspaceService.to.resolveActiveNetworkId(networkIds);
+        selectedNetworkId.value = resolvedId;
+        if (resolvedId != null) {
+          await WorkspaceService.to.saveActiveNetworkId(resolvedId);
         }
       } catch (_) {
         // الاستمرار بدون شبكة محددة ليعتمد الخادم Scoping التلقائي
@@ -171,6 +175,9 @@ class NetworkInvoicesController extends GetxController {
   void onNetworkChanged(int? networkId) {
     if (selectedNetworkId.value == networkId) return;
     selectedNetworkId.value = networkId;
+    if (networkId != null) {
+      WorkspaceService.to.saveActiveNetworkId(networkId);
+    }
     loadInvoices(isRefresh: true);
   }
 
