@@ -121,13 +121,22 @@ class NetworkReportsController extends GetxController {
       );
       return;
     }
+    final id = networkId;
+    if (id == null || id <= 0) {
+      CustomSnackbar.show(
+        title: 'لا توجد شبكة نشطة',
+        message: 'حدد شبكة نشطة قبل تنفيذ التقرير.',
+        type: SnackType.warning,
+      );
+      return;
+    }
     final filters = criteria.value.filters.map(
       (key, value) => MapEntry(key, value.jsonValue),
     );
     isCreating.value = true;
     try {
       activeRun.value = await createRun(
-        networkId: networkId!,
+        networkId: id,
         reportKey: report.key,
         filters: filters,
       );
