@@ -1,4 +1,5 @@
 import 'package:netsales/core/services/api_service.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/subscription_billing/domain/entities/network_billing_record.dart';
 
 class NetworkBillingRepository {
@@ -15,20 +16,31 @@ class NetworkBillingRepository {
     return response.data!;
   }
 
-  Future<List<NetworkBillingRecord>> list({
+  Future<PaginatedList<NetworkBillingRecord>> list({
     required int accountId,
     required String resource,
+    String? cursor,
     Map<String, dynamic> filters = const {},
   }) async {
-    final response = await ApiService.instance.get<List<NetworkBillingRecord>>(
+    final response = await ApiService.instance.getList<NetworkBillingRecord>(
       '/billing/accounts/$accountId/$resource',
-      queryParameters: {'per_page': 50, ...filters},
-      fromJson: (data) => _records(data),
+      queryParameters: filters,
+      cursor: cursor,
+      perPage: 30,
+      fromJson: (data) {
+        if (data is! Map) throw const FormatException('Invalid billing record.');
+        return NetworkBillingRecord(Map<String, dynamic>.from(data));
+      },
     );
     if (!response.success || response.data == null) {
       throw StateError(response.message.isEmpty ? 'تعذر تحميل بيانات الفوترة.' : response.message);
     }
-    return response.data!;
+    return PaginatedList<NetworkBillingRecord>(
+      items: response.data!,
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: 30,
+    );
   }
 
   Future<Map<String, dynamic>> statement({

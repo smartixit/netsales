@@ -53,10 +53,38 @@ class NetworkSubscriptionBillingScreen extends GetView<NetworkSubscriptionBillin
                           ? _StatementView(data: controller.statementData.value ?? const {})
                           : controller.records.isEmpty
                               ? const CustomEmptyState.compact(title: 'لا توجد سجلات', subtitle: 'لا توجد بيانات ضمن هذا القسم لحساب الفوترة المحدد.')
-                              : ListView.separated(
-                                  itemCount: controller.records.length,
-                                  separatorBuilder: (_, _) => AppSpacing.vSm,
-                                  itemBuilder: (context, index) => _BillingRecordCard(record: controller.records[index], section: controller.selectedSection.value),
+                              : NotificationListener<ScrollNotification>(
+                                  onNotification: (notification) {
+                                    if (notification.metrics.pixels >=
+                                            notification.metrics.maxScrollExtent - 160 &&
+                                        controller.hasMore &&
+                                        !controller.isLoadingMore.value) {
+                                      controller.loadMore();
+                                    }
+                                    return false;
+                                  },
+                                  child: ListView.separated(
+                                    itemCount: controller.records.length +
+                                        ((controller.hasMore || controller.loadMoreError.value != null ||
+                                                controller.isLoadingMore.value) ? 1 : 0),
+                                    separatorBuilder: (_, _) => AppSpacing.vSm,
+                                    itemBuilder: (context, index) {
+                                      if (index < controller.records.length) {
+                                        return _BillingRecordCard(
+                                          record: controller.records[index],
+                                          section: controller.selectedSection.value,
+                                        );
+                                      }
+                                      if (controller.loadMoreError.value != null) {
+                                        return CustomErrorState.compact(
+                                          title: 'تعذر تحميل بقية السجلات',
+                                          subtitle: controller.loadMoreError.value,
+                                          onRetry: controller.loadMore,
+                                        );
+                                      }
+                                      return const CustomSkeletonFeed(itemCount: 1);
+                                    },
+                                  ),
                                 ),
             ),
           ],
