@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/auth/presentation/controllers/security_settings_controller.dart';
-import 'package:netsales/features/auth/presentation/widgets/two_factor_disable_dialog.dart';
-import 'package:netsales/features/auth/presentation/widgets/two_factor_enable_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_switch.dart';
@@ -89,19 +86,7 @@ class SecuritySettingsScreen extends GetView<SecuritySettingsController> {
                                 ),
                                 CustomSwitch(
                                   value: isEnabled,
-                                  onChanged: (val) {
-                                    if (val) {
-                                      TwoFactorEnableSheet.show(
-                                        context,
-                                        controller,
-                                      );
-                                    } else {
-                                      TwoFactorDisableDialog.show(
-                                        context,
-                                        controller,
-                                      );
-                                    }
-                                  },
+                                  onChanged: controller.onTwoFactorToggle,
                                 ),
                               ],
                             ),
@@ -147,16 +132,12 @@ class SecuritySettingsScreen extends GetView<SecuritySettingsController> {
                             text: 'تعطيل الحماية الثنائية',
                             icon: Icons.shield_outlined,
                             foregroundColor: colors.error,
-                            onPressed: () => TwoFactorDisableDialog.show(
-                              context,
-                              controller,
-                            ),
+                            onPressed: controller.openTwoFactorDisableDialog,
                           )
                         : CustomButton.primary(
                             text: 'تفعيل المصادقة الثنائية الآن',
                             icon: Icons.verified_user_rounded,
-                            onPressed: () =>
-                                TwoFactorEnableSheet.show(context, controller),
+                            onPressed: controller.openTwoFactorEnableSheet,
                           ),
                   ),
                 ],
@@ -207,7 +188,7 @@ class SecuritySettingsScreen extends GetView<SecuritySettingsController> {
                 size: 16.sp,
                 color: colors.onSurfaceVariant,
               ),
-              onTap: () => Get.toNamed<dynamic>(AppRoutes.activeSessions),
+              onTap: controller.openActiveSessions,
             ),
           ),
 

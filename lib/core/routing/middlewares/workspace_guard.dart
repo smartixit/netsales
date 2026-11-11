@@ -30,12 +30,12 @@ class WorkspaceGuard extends GetMiddleware {
     final resolved = workspaceService.resolveWorkspaceForUser(user);
 
     // إذا كان الحساب مشرف منصة (SUPER_ADMIN / SUPPORT_AGENT)، اعتراض وتوجيه لـ AUTH-06
-    if (resolved == AppWorkspace.unsupported) {
-      if (route != AppRoutes.unsupportedPlatform) {
-        return const RouteSettings(name: AppRoutes.unsupportedPlatform);
-      }
-      return null;
-    }
+    // if (resolved == AppWorkspace.unsupported) {
+    //   // if (route != AppRoutes.unsupportedPlatform) {
+    //     // return const RouteSettings(name: AppRoutes.unsupportedPlatform);
+    //   // }
+    //   // return null;
+    // }
 
     // إذا كان المسار مقيداً بمساحة معينة لا تتطابق مع المستخدم، التوجيه لمساحته الصحيحة
     if (targetWorkspace != null && targetWorkspace != resolved) {

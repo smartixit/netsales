@@ -367,7 +367,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } finally {
       await SessionService.to.terminateSession();
       if (Get.isRegistered<WorkspaceService>()) {
-        await WorkspaceService.to.setActiveWorkspace(AppWorkspace.unsupported);
+        await WorkspaceService.to.setActiveWorkspace(AppWorkspace.network);
       }
     }
   }

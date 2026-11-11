@@ -18,7 +18,6 @@ class WorkspaceContextEntity {
 
   bool get isNetwork => workspace == AppWorkspace.network;
   bool get isPos => workspace == AppWorkspace.pos;
-  bool get isUnsupported => workspace == AppWorkspace.unsupported;
 
   WorkspaceContextEntity copyWith({
     AppWorkspace? workspace,

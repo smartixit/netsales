@@ -23,7 +23,7 @@ class WorkspaceService extends GetxService {
       ? Get.find<WorkspaceService>()
       : instance;
 
-  final Rx<AppWorkspace> currentWorkspace = AppWorkspace.unsupported.obs;
+  final Rx<AppWorkspace> currentWorkspace = AppWorkspace.network.obs;
 
   AppWorkspace get activeWorkspace => currentWorkspace.value;
 
@@ -62,19 +62,11 @@ class WorkspaceService extends GetxService {
     String? preferredWorkspace,
   }) {
     if (user == null) {
-      return AppWorkspace.unsupported;
+      return AppWorkspace.network;
     }
 
-    // 1. حسابات إدارة المنصة العامة مستبعدة كلياً ومحظورة على تطبيق الهاتف
-    if (user.isSuperAdmin ||
-        user.role?.roleKey == AppRoles.superAdmin ||
-        user.role?.roleKey == AppRoles.supportAgent) {
-      return AppWorkspace.unsupported;
-    }
-
-    final preferred =
-        preferredWorkspace ??
-        (currentWorkspace.value != AppWorkspace.unsupported
+    final preferred = preferredWorkspace ??
+        (currentWorkspace.value.name.isNotEmpty
             ? currentWorkspace.value.name
             : StorageService.instance.getString(
                 StorageKeys.activeWorkspaceKey,
@@ -121,7 +113,7 @@ class WorkspaceService extends GetxService {
       return AppWorkspace.pos;
     }
 
-    return AppWorkspace.unsupported;
+    return AppWorkspace.network;
   }
 
   /// التحقق مما إذا كان المستخدم يملك صلاحية التبديل بين مساحتي عمل (شبكة ونقطة بيع)
@@ -145,7 +137,7 @@ class WorkspaceService extends GetxService {
   /// مزامنة سياق مساحة العمل والمستأجر مع عضويات المستخدم النشطة
   Future<void> syncWithUserMemberships(UserModel? user) async {
     if (user == null) {
-      await setActiveWorkspace(AppWorkspace.unsupported);
+      await setActiveWorkspace(AppWorkspace.network);
       return;
     }
 
@@ -243,8 +235,8 @@ class WorkspaceService extends GetxService {
         return AppRoutes.networkWorkspace;
       case AppWorkspace.pos:
         return AppRoutes.posWorkspace;
-      case AppWorkspace.unsupported:
-        return AppRoutes.unsupportedPlatform;
+      // case AppWorkspace.unsupported:
+      //   return AppRoutes.unsupportedPlatform;
     }
   }
 }

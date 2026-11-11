@@ -12,10 +12,10 @@ class WorkspaceContextModel extends WorkspaceContextEntity {
   });
 
   factory WorkspaceContextModel.fromJson(Map<String, dynamic> json) {
-    final workspaceName = json['workspace']?.toString() ?? 'unsupported';
+    final workspaceName = json['workspace']?.toString() ?? 'network';
     final workspace = AppWorkspace.values.firstWhere(
       (w) => w.name == workspaceName,
-      orElse: () => AppWorkspace.unsupported,
+      orElse: () => AppWorkspace.network,
     );
 
     return WorkspaceContextModel(

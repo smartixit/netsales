@@ -18,49 +18,10 @@ void main() {
   group('WorkspaceService Resolution & Scope Boundaries Tests', () {
     final workspaceService = WorkspaceService.instance;
 
-    test('Null user resolves to AppWorkspace.unsupported', () {
+    test('Null user resolves to AppWorkspace.network', () {
       final workspace = workspaceService.resolveWorkspaceForUser(null);
-      expect(workspace, equals(AppWorkspace.unsupported));
+      expect(workspace, equals(AppWorkspace.network));
     });
-
-    test('SUPER_ADMIN role is strictly resolved to AppWorkspace.unsupported (AUTH-06)', () {
-      final superAdminUser = UserModel(
-        userId: 1,
-        userFullName: 'Super Admin User',
-        userPhoneNumber: '+967770000001',
-        userEmail: 'admin@platform.com',
-        role: const RoleModel(
-          roleId: 1,
-          roleKey: 'SUPER_ADMIN',
-          roleName: 'مدير المنصة',
-        ),
-      );
-
-      final workspace = workspaceService.resolveWorkspaceForUser(
-        superAdminUser,
-      );
-      expect(workspace, equals(AppWorkspace.unsupported));
-    });
-
-    test(
-      'SUPPORT_AGENT role is strictly resolved to AppWorkspace.unsupported',
-      () {
-        final supportUser = UserModel(
-          userId: 2,
-          userFullName: 'Support Agent',
-          userPhoneNumber: '+967770000002',
-          userEmail: 'support@platform.com',
-          role: const RoleModel(
-            roleId: 2,
-            roleKey: 'SUPPORT_AGENT',
-            roleName: 'وكيل دعم فني',
-          ),
-        );
-
-        final workspace = workspaceService.resolveWorkspaceForUser(supportUser);
-        expect(workspace, equals(AppWorkspace.unsupported));
-      },
-    );
 
     test('NETWORK_OWNER role resolves to AppWorkspace.network', () {
       final networkUser = UserModel(
@@ -130,7 +91,7 @@ void main() {
       expect(workspace, equals(AppWorkspace.pos));
     });
 
-    test('workspaceRoute returns correct route strings for all workspaces', () {
+    test('workspaceRoute returns correct route strings for valid workspaces', () {
       workspaceService.currentWorkspace.value = AppWorkspace.network;
       expect(
         workspaceService.workspaceRoute,
@@ -139,12 +100,6 @@ void main() {
 
       workspaceService.currentWorkspace.value = AppWorkspace.pos;
       expect(workspaceService.workspaceRoute, equals(AppRoutes.posWorkspace));
-
-      workspaceService.currentWorkspace.value = AppWorkspace.unsupported;
-      expect(
-        workspaceService.workspaceRoute,
-        equals(AppRoutes.unsupportedPlatform),
-      );
     });
   });
 }

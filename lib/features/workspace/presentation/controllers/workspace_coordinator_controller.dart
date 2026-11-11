@@ -22,7 +22,7 @@ class WorkspaceCoordinatorController extends GetxController {
       Get.find<WorkspaceCoordinatorController>();
 
   final Rx<WorkspaceContextEntity> activeContext = const WorkspaceContextEntity(
-    workspace: AppWorkspace.unsupported,
+    workspace: AppWorkspace.network,
   ).obs;
 
   final RxBool isLoading = false.obs;
@@ -69,10 +69,10 @@ class WorkspaceCoordinatorController extends GetxController {
 
   /// التبديل المنسق لمساحة العمل مع التوجيه الآمن
   Future<void> switchWorkspace(AppWorkspace workspace) async {
-    if (workspace == AppWorkspace.unsupported) {
-      await Get.offAllNamed<dynamic>(AppRoutes.unsupportedPlatform);
-      return;
-    }
+    // if (workspace == AppWorkspace.unsupported) {
+    //   await Get.offAllNamed<dynamic>(AppRoutes.unsupportedPlatform);
+    //   return;
+    // }
 
     await _setActiveWorkspaceUseCase(workspace);
     await refreshWorkspaceContext();
@@ -99,7 +99,7 @@ class WorkspaceCoordinatorController extends GetxController {
       }
     } finally {
       if (Get.isRegistered<WorkspaceService>()) {
-        await WorkspaceService.to.setActiveWorkspace(AppWorkspace.unsupported);
+        await WorkspaceService.to.setActiveWorkspace(AppWorkspace.network);
       }
       isLoading.value = false;
       await Get.offAllNamed<dynamic>(AppRoutes.login);

@@ -5,10 +5,8 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/widgets/images/custom_brand_logo.dart';
-import 'package:netsales/features/splash/presentation/controllers/splash_controller.dart';
-
 import 'package:netsales/widgets/feedback/custom_loading_indicator_bar.dart';
+import 'package:netsales/widgets/images/custom_brand_logo.dart';
 
 /// المحتوى البصري المركزي لشاشة الإقلاع
 ///
@@ -16,9 +14,7 @@ import 'package:netsales/widgets/feedback/custom_loading_indicator_bar.dart';
 /// - خالية من أي متحكمات أو منطق أعمال.
 /// - تدعم التخزين الثابت (const constructor) لأعلى أداء لمحرك فلاتر.
 class SplashBodyContent extends StatelessWidget {
-  const SplashBodyContent({super.key, required this.controller});
-
-  final SplashController controller;
+  const SplashBodyContent({super.key});
 
   @override
   Widget build(BuildContext context) {

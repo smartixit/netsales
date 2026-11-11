@@ -1,11 +1,15 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/features/auth/domain/usecases/request_two_factor_otp_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/toggle_two_factor_use_case.dart';
+import 'package:netsales/features/auth/presentation/widgets/two_factor_disable_dialog.dart';
+import 'package:netsales/features/auth/presentation/widgets/two_factor_enable_sheet.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -22,6 +26,9 @@ class SecuritySettingsController extends GetxController {
   final RxBool is2faEnabled = false.obs;
   final RxBool isActionLoading = false.obs;
   final RxBool isRequestingOtp = false.obs;
+
+  final otpController = TextEditingController();
+  final disablePasswordController = TextEditingController();
 
   // مؤقت التهدئة لإعادة إرسال رمز التحقق
   final RxInt cooldownSeconds = 60.obs;
@@ -195,9 +202,59 @@ class SecuritySettingsController extends GetxController {
     }
   }
 
+  /// فتح نافذة تفعيل المصادقة الثنائية
+  Future<void> openTwoFactorEnableSheet() async {
+    await TwoFactorEnableSheet.show(this);
+  }
+
+  /// فتح حوار تعطيل المصادقة الثنائية
+  Future<void> openTwoFactorDisableDialog() async {
+    await TwoFactorDisableDialog.show(this);
+  }
+
+  /// معالجة تبديل حالة المصادقة الثنائية من الواجهة
+  void onTwoFactorToggle(bool enable) {
+    if (enable) {
+      openTwoFactorEnableSheet();
+    } else {
+      openTwoFactorDisableDialog();
+    }
+  }
+
+  /// فتح شاشة الأجهزة والجلسات النشطة
+  Future<void> openActiveSessions() async {
+    await Get.toNamed<dynamic>(AppRoutes.activeSessions);
+  }
+
+  /// إرسال رمز OTP لتفعيل المصادقة الثنائية
+  Future<void> submitEnableOtp() async {
+    final otp = otpController.text.trim();
+    if (otp.length != 6) return;
+
+    final success = await confirmEnable2fa(otp);
+    if (success) {
+      otpController.clear();
+      Get.back<void>();
+    }
+  }
+
+  /// تأكيد كلمة المرور لتعطيل المصادقة الثنائية
+  Future<void> submitDisable2fa() async {
+    final password = disablePasswordController.text.trim();
+    if (password.isEmpty) return;
+
+    final success = await confirmDisable2fa(password);
+    if (success) {
+      disablePasswordController.clear();
+      Get.back<void>();
+    }
+  }
+
   @override
   void onClose() {
     _cooldownTimer?.cancel();
+    otpController.dispose();
+    disablePasswordController.dispose();
     super.onClose();
   }
 }

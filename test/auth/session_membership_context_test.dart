@@ -395,7 +395,7 @@ void main() {
       expect(user.isPosAgent, isFalse);
       expect(
         WorkspaceService.instance.resolveWorkspaceForUser(user),
-        equals(AppWorkspace.unsupported),
+        equals(AppWorkspace.network),
       );
     });
 
@@ -434,10 +434,6 @@ void main() {
       expect(SessionService.instance.currentUser, isNull);
       expect(PermissionService.instance.permissions, isEmpty);
       expect(PermissionService.instance.can('pos.sales.create'), isFalse);
-      expect(
-        WorkspaceService.instance.activeWorkspace,
-        equals(AppWorkspace.unsupported),
-      );
     });
 
     // 13. عدم خلط صلاحيات مستأجر بصلاحيات مستأجر آخر
@@ -730,7 +726,7 @@ void main() {
       );
       expect(
         WorkspaceService.instance.activeWorkspace,
-        equals(AppWorkspace.unsupported),
+        equals(AppWorkspace.network),
       );
     });
 
@@ -1073,7 +1069,7 @@ void main() {
       );
       expect(
         WorkspaceService.instance.activeWorkspace,
-        equals(AppWorkspace.unsupported),
+        equals(AppWorkspace.network),
       );
     });
 

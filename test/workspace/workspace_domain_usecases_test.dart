@@ -64,14 +64,14 @@ void main() {
       },
     );
 
-    test('WorkspaceContextEntity unsupported state check', () {
-      const unsupported = WorkspaceContextEntity(
-        workspace: AppWorkspace.unsupported,
-      );
+    // test('WorkspaceContextEntity unsupported state check', () {
+    //   const unsupported = WorkspaceContextEntity(
+    //     workspace: AppWorkspace.unsupported,
+    //   );
 
-      expect(unsupported.isUnsupported, isTrue);
-      expect(unsupported.isNetwork, isFalse);
-      expect(unsupported.isPos, isFalse);
-    });
+  //     expect(unsupported.isUnsupported, isTrue);
+  //     expect(unsupported.isNetwork, isFalse);
+  //     expect(unsupported.isPos, isFalse);
+  //   });
   });
 }

@@ -13,13 +13,13 @@ enum AppWorkspace {
   pos,
 
   /// حساب إدارة المنصة العامة (غير مدعوم بتطبيق الهاتف ومخصص لحواسيب Windows)
-  unsupported,
+  // unsupported,
 }
 
 extension AppWorkspaceExtension on AppWorkspace {
   bool get isNetwork => this == AppWorkspace.network;
   bool get isPos => this == AppWorkspace.pos;
-  bool get isUnsupported => this == AppWorkspace.unsupported;
+  // bool get isUnsupported => this == AppWorkspace.unsupported;
 
   String get labelAr {
     switch (this) {
@@ -27,8 +27,8 @@ extension AppWorkspaceExtension on AppWorkspace {
         return 'مساحة عمل مزود الشبكة';
       case AppWorkspace.pos:
         return 'مساحة عمل نقطة البيع';
-      case AppWorkspace.unsupported:
-        return 'إدارة المنصة العامة';
+      // case AppWorkspace.unsupported:
+      //   return 'إدارة المنصة العامة';
     }
   }
 
@@ -38,8 +38,8 @@ extension AppWorkspaceExtension on AppWorkspace {
         return 'Network Workspace';
       case AppWorkspace.pos:
         return 'POS Workspace';
-      case AppWorkspace.unsupported:
-        return 'Platform Administration';
+      // case AppWorkspace.unsupported:
+      //   return 'Platform Administration';
     }
   }
 }

@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
-import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/models/user_session_model.dart';
 import 'package:netsales/core/routing/app_routes.dart';
@@ -247,9 +246,9 @@ class SessionService extends GetxService {
       NotificationController.to.notifications.clear();
     }
 
-    if (Get.isRegistered<WorkspaceService>()) {
-      await WorkspaceService.to.setActiveWorkspace(AppWorkspace.unsupported);
-    }
+    // if (Get.isRegistered<WorkspaceService>()) {
+    //   await WorkspaceService.to.setActiveWorkspace(AppWorkspace.unsupported);
+    // }
 
     log('🚪 [SessionService] Session terminated.');
   }

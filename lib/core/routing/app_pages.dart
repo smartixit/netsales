@@ -62,7 +62,6 @@ import 'package:netsales/features/workspace/presentation/bindings/network_worksp
 import 'package:netsales/features/workspace/presentation/bindings/pos_workspace_binding.dart';
 import 'package:netsales/features/workspace/presentation/screens/network_workspace_shell.dart';
 import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell.dart';
-import 'package:netsales/features/workspace/presentation/screens/unsupported_platform_screen.dart';
 import 'package:netsales/widgets/charts/showcase/charts_showcase_binding.dart';
 import 'package:netsales/widgets/charts/showcase/charts_showcase_screen.dart';
 import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_binding.dart';
@@ -189,11 +188,11 @@ abstract final class AppPages {
     ),
 
     // شاشة حظر وتوجيه حسابات إدارة المنصة العامة (Platform Scope Exclusion)
-    GetPage(
-      name: AppRoutes.unsupportedPlatform,
-      page: () => const UnsupportedPlatformScreen(),
-      middlewares: [AuthGuard()],
-    ),
+    // GetPage(
+    //   name: AppRoutes.unsupportedPlatform,
+    //   page: () => const UnsupportedPlatformScreen(),
+    //   middlewares: [AuthGuard()],
+    // ),
 
     // ========================================================================
     // 5. مسارات الأمان والجلسات المعتمدة (Security & Active Sessions)
