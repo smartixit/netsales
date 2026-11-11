@@ -106,8 +106,6 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
         perPage: 15,
         cursor: cursor,
       );
-}
-
 
   @override
   Future<ApiResponse<List<BillingPaymentMethodModel>>> getPaymentMethods(int accountId) =>
