@@ -105,18 +105,13 @@ class NetworkBillingController extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
     try {
-      final results = await Future.wait([
-        getSubscriptions(id),
-        getInvoices(id),
-        getPayments(id),
-        getCreditNotes(id),
-        getRefunds(id),
+      await Future.wait([
+        getSubscriptions(id).then((page) => subscriptions.assignAll(page.items)),
+        getInvoices(id).then((page) => invoices.assignAll(page.items)),
+        getPayments(id).then((page) => payments.assignAll(page.items)),
+        getCreditNotes(id).then((page) => creditNotes.assignAll(page.items)),
+        getRefunds(id).then((page) => refunds.assignAll(page.items)),
       ]);
-      subscriptions.assignAll(results[0].items);
-      invoices.assignAll(results[1].items);
-      payments.assignAll(results[2].items);
-      creditNotes.assignAll(results[3].items);
-      refunds.assignAll(results[4].items);
     } catch (error) {
       errorMessage.value = AppException.sanitizeMessage(
         error,
