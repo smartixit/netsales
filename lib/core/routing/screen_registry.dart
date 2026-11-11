@@ -180,7 +180,7 @@ abstract final class ScreenRegistry {
       titleAr: 'اشتراكات الشبكة وفواتيرها',
       titleEn: 'Network Platform Subscriptions and Invoices',
       workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.subscriptionsView,
+      requiredPermission: null,
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(

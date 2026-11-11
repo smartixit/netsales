@@ -414,9 +414,6 @@ abstract final class AppPages {
       binding: NetworkBillingBinding(),
       middlewares: [
         AuthGuard(),
-        PermissionGuardMiddleware(
-          requiredPermission: AppPermissions.subscriptionsView,
-        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),

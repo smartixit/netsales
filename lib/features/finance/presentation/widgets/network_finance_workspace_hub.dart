@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/constants/app_roles.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
@@ -130,7 +131,7 @@ class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
                           Get.toNamed<void>(AppRoutes.operatingExpenses),
                     ),
                   ),
-                  if (PermissionService.to.can(AppPermissions.subscriptionsView))
+                  if (PermissionService.to.hasRole(AppRoles.networkOwner))
                     SizedBox(
                       width: actionWidth,
                       child: _FinanceHubAction(
