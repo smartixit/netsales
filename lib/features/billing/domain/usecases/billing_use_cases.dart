@@ -79,3 +79,10 @@ class GetNetworkBillingPlansUseCase {
   Future<PaginatedList<BillingPlanEntity>> call(int accountId) =>
       repository.getPlans(accountId);
 }
+
+class PurchaseNetworkSubscriptionUseCase {
+  const PurchaseNetworkSubscriptionUseCase(this.repository);
+  final BillingRepository repository;
+  Future<BillingPurchaseResultEntity> call(int accountId, int priceId) =>
+      repository.purchaseSubscription(accountId, priceId);
+}

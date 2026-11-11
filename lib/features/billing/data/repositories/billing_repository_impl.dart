@@ -109,3 +109,19 @@ class BillingRepositoryImpl implements BillingRepository {
   }
 
 }
+
+  @override
+  Future<BillingPurchaseResultEntity> purchaseSubscription(
+    int accountId,
+    int priceId,
+  ) async {
+    final response = await remoteDataSource.purchaseSubscription(accountId, priceId);
+    if (!response.success || response.data == null) {
+      throw _failure(
+        response,
+        'تعذر إكمال طلب الاشتراك.',
+        'BILLING_SUBSCRIPTION_PURCHASE_FAILED',
+      );
+    }
+    return response.data!;
+  }

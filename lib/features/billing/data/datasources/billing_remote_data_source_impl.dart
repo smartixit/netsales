@@ -125,3 +125,16 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
           Map<String, dynamic>.from(json as Map),
         ),
       );
+
+  @override
+  Future<ApiResponse<BillingPurchaseResultModel>> purchaseSubscription(
+    int accountId,
+    int priceId,
+  ) =>
+      ApiService.instance.post<BillingPurchaseResultModel>(
+        ApiConstants.billingAccountSubscriptions(accountId),
+        data: {'price_id': priceId},
+        fromJson: (json) => BillingPurchaseResultModel.fromJson(
+          Map<String, dynamic>.from(json as Map),
+        ),
+      );

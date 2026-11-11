@@ -331,3 +331,12 @@ class BillingPlanEntity {
   final String? trialDurationUnit;
   final List<BillingPriceEntity> prices;
 }
+
+class BillingPurchaseResultEntity {
+  const BillingPurchaseResultEntity({
+    required this.subscription,
+    this.invoice,
+  });
+  final BillingSubscriptionEntity subscription;
+  final BillingInvoiceEntity? invoice;
+}

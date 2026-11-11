@@ -434,3 +434,21 @@ class BillingPlanModel extends BillingPlanEntity {
     );
   }
 }
+
+class BillingPurchaseResultModel extends BillingPurchaseResultEntity {
+  const BillingPurchaseResultModel({
+    required super.subscription,
+    super.invoice,
+  });
+
+  factory BillingPurchaseResultModel.fromJson(Map<String, dynamic> json) {
+    final subscription = _jsonMap(json['subscription'], 'subscription');
+    final invoiceValue = json['invoice'];
+    return BillingPurchaseResultModel(
+      subscription: BillingSubscriptionModel.fromJson(subscription),
+      invoice: invoiceValue == null
+          ? null
+          : BillingInvoiceModel.fromJson(_jsonMap(invoiceValue, 'invoice')),
+    );
+  }
+}
