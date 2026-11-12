@@ -4,8 +4,9 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
-import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
 
 class OperationalReportRecordCard extends StatelessWidget {
   const OperationalReportRecordCard({
@@ -23,6 +24,23 @@ class OperationalReportRecordCard extends StatelessWidget {
       if (value.isNotEmpty) return value;
     }
     return fallback;
+  }
+
+  SemanticTone _statusTone(String value) {
+    final status = value.toUpperCase();
+    if (status.contains('PAID') ||
+        status == 'DEPOSIT' ||
+        status == 'COMPLETED' ||
+        status == 'APPROVED') {
+      return SemanticTone.success;
+    }
+    if (status.contains('PARTIAL') || status == 'PENDING' || status == 'WITHDRAW') {
+      return SemanticTone.warning;
+    }
+    if (status == 'REJECTED' || status == 'REVERSED' || status == 'UNPAID') {
+      return SemanticTone.danger;
+    }
+    return SemanticTone.neutral;
   }
 
   String _amount(String key) {
@@ -120,7 +138,7 @@ class OperationalReportRecordCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                CustomStatusBadge.fromText(descriptor.status),
+                CustomStatusBadge(label: descriptor.status, tone: _statusTone(descriptor.status), isCompact: true),
               ],
             ),
             AppSpacing.vSm,
