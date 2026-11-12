@@ -3,13 +3,12 @@ import 'dart:ui' show Color;
 
 import 'package:dio/dio.dart';
 import 'package:document_engine/document_engine.dart';
-import 'package:document_engine/document_engine_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/services/api_service.dart';
-import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
