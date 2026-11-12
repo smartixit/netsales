@@ -6,6 +6,7 @@ import 'package:netsales/features/reports/data/datasources/operational_report_re
 import 'package:netsales/features/reports/data/models/operational_report_record_model.dart';
 import 'package:netsales/features/reports/data/services/operational_report_document_service.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
+import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
