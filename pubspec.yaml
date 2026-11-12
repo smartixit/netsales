@@ -144,6 +144,12 @@ flutter:
   fonts:
     - family: IBM
       fonts:
+        - asset: assets/fonts/IBM-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/IBM-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/IBM-Light.ttf
+          weight: 300
         - asset: assets/fonts/IBM-Regular.ttf
           weight: 400
         - asset: assets/fonts/IBM-Medium.ttf
