@@ -11,6 +11,7 @@ import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
+import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
@@ -19,6 +20,7 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class OperationalReportsController extends GetxController {
   OperationalReportsController({
+    required this.getReportCatalogUseCase,
     required this.getReportUseCase,
     required this.getSummaryUseCase,
     required this.requestExportUseCase,
@@ -30,7 +32,9 @@ class OperationalReportsController extends GetxController {
     required this.printSummaryPdfUseCase,
   });
 
+  final GetOperationalReportCatalogUseCase getReportCatalogUseCase;
   final GetOperationalReportUseCase getReportUseCase;
+  final Rxn<OperationalReportCatalog> catalog = Rxn<OperationalReportCatalog>();
   final GetOperationalReportSummaryUseCase getSummaryUseCase;
   final RequestOperationalReportExportUseCase requestExportUseCase;
   final GetOperationalReportExportStatusUseCase getExportStatusUseCase;
@@ -105,10 +109,33 @@ class OperationalReportsController extends GetxController {
   }
 
   List<OperationalReportType> get availableTypes {
+    final serverCatalog = catalog.value;
+    if (serverCatalog != null) {
+      return serverCatalog.availableTypes.where((type) {
+        return PermissionService.to.can(type.requiredPermission);
+      }).toList(growable: false);
+    }
     return OperationalReportType.values.where((type) {
       if (!_isNetworkWorkspace && !type.availableForPos) return false;
       return PermissionService.to.can(type.requiredPermission);
     }).toList(growable: false);
+  }
+
+  Future<void> _loadReportCatalog() async {
+    final networkId = _networkId;
+    if (networkId == null) {
+      catalog.value = null;
+      return;
+    }
+    try {
+      catalog.value = await getReportCatalogUseCase(
+        networkId: networkId,
+        posId: _isNetworkWorkspace ? null : _workspacePosId,
+      );
+    } catch (_) {
+      catalog.value = null;
+      rethrow;
+    }
   }
 
   bool get canExport {
@@ -201,6 +228,14 @@ class OperationalReportsController extends GetxController {
       } else {
         posOptions.clear();
       }
+    }
+
+    try {
+      await _loadReportCatalog();
+    } catch (error) {
+      errorMessage.value = _friendlyMessage(error);
+      isLoading.value = false;
+      return;
     }
 
     final types = availableTypes;
