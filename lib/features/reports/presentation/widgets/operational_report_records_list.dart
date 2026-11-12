@@ -79,7 +79,7 @@ class OperationalReportRecordsList extends StatelessWidget {
                   return CustomErrorState.compact(
                     title: 'تعذر تحميل بقية السجلات',
                     subtitle: controller.loadMoreError.value,
-                    onRetry: () => controller.loadReport(),
+                    onRetry: () => controller.loadReport(refresh: true),
                   );
                 }
                 if (controller.isLoadingMore.value) {
