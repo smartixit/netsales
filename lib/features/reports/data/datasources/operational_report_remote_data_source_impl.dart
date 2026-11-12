@@ -11,6 +11,23 @@ class OperationalReportRemoteDataSourceImpl
     implements OperationalReportRemoteDataSource {
   const OperationalReportRemoteDataSourceImpl();
 
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> getCatalog({
+    required Map<String, dynamic> query,
+  }) {
+    return ApiService.instance.get<Map<String, dynamic>>(
+      ApiConstants.operationalReportCatalog,
+      queryParameters: query,
+      fromJson: (data) {
+        if (data is! Map) {
+          throw const FormatException('تنسيق كتالوج التقارير غير صالح.');
+        }
+        return Map<String, dynamic>.from(data);
+      },
+    );
+  }
+
   @override
   Future<ApiResponse<List<Map<String, dynamic>>>> getReport({
     required Map<String, dynamic> query,
