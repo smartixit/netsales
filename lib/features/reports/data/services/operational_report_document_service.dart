@@ -278,7 +278,7 @@ class OperationalReportDocumentService {
               direction: DocumentTextDirection.rightToLeft,
             ),
             DocumentTable(
-              columns: const [
+              columns: [
                 DocumentTableColumn(id: 'metric', label: 'المؤشر'),
                 DocumentTableColumn(
                   id: 'value',
