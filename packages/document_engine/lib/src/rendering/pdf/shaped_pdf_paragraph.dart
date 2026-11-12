@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../document/document_locale.dart';
+import 'document_font_weight.dart';
 import 'payv_text_shaping_provider.dart';
 import 'shaped_pdf_text_line.dart';
 
@@ -18,6 +19,7 @@ final class ShapedPdfParagraph extends pw.StatelessWidget {
     required this.width,
     required this.fontSize,
     this.color = PdfColors.black,
+    this.fontWeight = DocumentFontWeight.regular,
     this.direction = DocumentTextDirection.auto,
     this.alignment = ShapedPdfTextAlignment.start,
     this.lineHeight = 1.65,
@@ -48,15 +50,20 @@ final class ShapedPdfParagraph extends pw.StatelessWidget {
   final double width;
   final double fontSize;
   final PdfColor color;
+  final DocumentFontWeight fontWeight;
   final DocumentTextDirection direction;
   final ShapedPdfTextAlignment alignment;
   final double lineHeight;
   final double paragraphSpacing;
 
   double _measure(String value, DocumentTextDirection resolvedDirection) {
-    return provider.shapeLine(value, direction: resolvedDirection).advance *
+    return provider.shapeLine(
+          value,
+          direction: resolvedDirection,
+          fontWeight: fontWeight,
+        ).advance *
         fontSize /
-        provider.font.unitsPerEm;
+        provider.fontFor(fontWeight).unitsPerEm;
   }
 
   @override
@@ -99,6 +106,7 @@ final class ShapedPdfParagraph extends pw.StatelessWidget {
             height: fontSize * lineHeight,
             color: color,
             direction: resolvedDirection,
+            fontWeight: fontWeight,
             alignment: alignment,
           ),
         );
