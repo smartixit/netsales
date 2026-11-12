@@ -21,6 +21,14 @@ enum OperationalReportType {
     requests => 'requests.report',
   };
 
+  String get exportPermission => switch (this) {
+    sales || debtAging => 'sales.export',
+    expenses => 'expenses.export',
+    networkWallet => 'network_wallets.export',
+    posWallet || repayments => 'pos_wallets.export',
+    requests => 'requests.export',
+  };
+
   bool get availableForPos => switch (this) {
     sales || posWallet || repayments || debtAging || requests => true,
     expenses || networkWallet => false,
@@ -28,8 +36,7 @@ enum OperationalReportType {
 
   List<String> get statusOptions => switch (this) {
     sales || debtAging => const ['PAID', 'PARTIALLY_PAID', 'UNPAID'],
-    networkWallet => const ['DEPOSIT', 'WITHDRAW'],
-    posWallet => const ['DEPOSIT', 'WITHDRAW'],
+    networkWallet || posWallet => const ['DEPOSIT', 'WITHDRAW'],
     repayments => const ['COMPLETED', 'REVERSED'],
     requests => const ['PENDING', 'APPROVED', 'REJECTED'],
     expenses => const [],
