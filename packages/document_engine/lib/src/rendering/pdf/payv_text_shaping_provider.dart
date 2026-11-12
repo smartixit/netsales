@@ -15,11 +15,26 @@ final class PayvTextShapingProvider {
   factory PayvTextShapingProvider(
     Uint8List fontBytes, {
     String languageTag = 'ar',
+    Uint8List? thinFontBytes,
+    Uint8List? extraLightFontBytes,
+    Uint8List? lightFontBytes,
     Uint8List? mediumFontBytes,
     Uint8List? semiBoldFontBytes,
     Uint8List? boldFontBytes,
   }) {
     final regularFace = _loadFace(fontBytes, weight: DocumentFontWeight.regular);
+    final thinSource = thinFontBytes ?? extraLightFontBytes ?? lightFontBytes;
+    final extraLightSource = extraLightFontBytes ?? lightFontBytes;
+    final lightSource = lightFontBytes ?? extraLightFontBytes;
+    final thinFace = thinSource == null
+        ? regularFace
+        : _loadFace(thinSource, weight: DocumentFontWeight.thin);
+    final extraLightFace = extraLightSource == null
+        ? regularFace
+        : _loadFace(extraLightSource, weight: DocumentFontWeight.extraLight);
+    final lightFace = lightSource == null
+        ? regularFace
+        : _loadFace(lightSource, weight: DocumentFontWeight.light);
     final mediumSource = mediumFontBytes ?? semiBoldFontBytes;
     final mediumFace = mediumSource == null
         ? regularFace
@@ -35,6 +50,9 @@ final class PayvTextShapingProvider {
 
     return PayvTextShapingProvider._(
       faces: {
+        DocumentFontWeight.thin: thinFace,
+        DocumentFontWeight.extraLight: extraLightFace,
+        DocumentFontWeight.light: lightFace,
         DocumentFontWeight.regular: regularFace,
         DocumentFontWeight.medium: mediumFace,
         DocumentFontWeight.semiBold: semiBoldFace,
