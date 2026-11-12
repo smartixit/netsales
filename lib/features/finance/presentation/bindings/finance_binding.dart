@@ -10,6 +10,10 @@ import 'package:netsales/features/commercial/domain/usecases/get_network_pos_lis
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source_impl.dart';
 import 'package:netsales/features/finance/data/repositories/finance_repository_impl.dart';
+import 'package:netsales/features/finance/data/repositories/repayment_document_repository_impl.dart';
+import 'package:netsales/features/finance/data/services/repayment_document_service.dart';
+import 'package:netsales/features/finance/domain/repositories/repayment_document_repository.dart';
+import 'package:netsales/features/finance/domain/usecases/repayment_document_use_case.dart';
 import 'package:netsales/features/finance/domain/repositories/finance_repository.dart';
 import 'package:netsales/features/finance/domain/usecases/debt_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cases.dart';
@@ -162,6 +166,23 @@ class FinanceBinding extends Bindings {
       fenix: true,
     );
 
+    if (!Get.isRegistered<RepaymentDocumentRepository>()) {
+      Get.lazyPut<RepaymentDocumentRepository>(
+        () => RepaymentDocumentRepositoryImpl(
+          documentService: RepaymentDocumentService.instance,
+        ),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<RepaymentDocumentUseCase>()) {
+      Get.lazyPut<RepaymentDocumentUseCase>(
+        () => RepaymentDocumentUseCase(
+          Get.find<RepaymentDocumentRepository>(),
+        ),
+        fenix: true,
+      );
+    }
+
     // 5. Controllers
     Get.lazyPut<PosWalletDashboardController>(
       () => PosWalletDashboardController(
@@ -187,6 +208,7 @@ class FinanceBinding extends Bindings {
         getRepaymentsUseCase: Get.find<GetRepaymentsUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
         reverseRepaymentUseCase: Get.find<ReverseRepaymentUseCase>(),
+        repaymentDocumentUseCase: Get.find<RepaymentDocumentUseCase>(),
       ),
       fenix: true,
     );
