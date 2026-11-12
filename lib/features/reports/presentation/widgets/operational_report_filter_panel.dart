@@ -146,41 +146,56 @@ class OperationalReportFilterPanel extends StatelessWidget {
             ),
           ],
           AppSpacing.vSm,
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'الإجماليات من الخادم؛ القائمة أدناه تعرض سجلات التقرير.',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              if (controller.searchQuery.value.isNotEmpty ||
-                  controller.fromDate.value != null ||
-                  controller.toDate.value != null ||
-                  controller.selectedStatus.value != null ||
-                  controller.selectedSaleType.value != null ||
-                  (canFilterByPos && controller.selectedPosId.value != null))
-                CustomButton.text(
-                  text: 'مسح الفلاتر',
-                  prefix: Icons.filter_alt_off_rounded,
-                  onPressed: controller.clearFilters,
-                  foregroundColor: colors.error,
-                ),
-              if (controller.canExport) ...[
-                AppSpacing.hXs,
-                CustomButton.primary(
-                  text: 'تصدير CSV',
-                  prefix: Icons.file_download_outlined,
-                  loading: controller.isExportActionRunning.value,
-                  onPressed: controller.isExportActionRunning.value
-                      ? null
-                      : controller.requestExport,
-                ),
-              ],
-            ],
+          Text(
+            'الإجماليات من الخادم. PDF ملخص تنفيذي كامل الإجماليات، وCSV للتفاصيل الكاملة.',
+            style: AppTypography.labelSmall.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
           ),
+          if (controller.canExport) ...[
+            AppSpacing.vXs,
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  if (controller.summary.value != null) ...[
+                    CustomButton.outline(
+                      text: 'ملخص PDF',
+                      prefix: Icons.picture_as_pdf_outlined,
+                      loading: controller.isPdfActionRunning.value,
+                      onPressed: controller.isPdfActionRunning.value
+                          ? null
+                          : controller.exportSummaryPdf,
+                    ),
+                    CustomButton.icon(
+                      icon: Icons.share_outlined,
+                      tooltip: 'مشاركة ملخص PDF',
+                      onPressed: controller.isPdfActionRunning.value
+                          ? null
+                          : controller.shareSummaryPdf,
+                    ),
+                    CustomButton.icon(
+                      icon: Icons.print_outlined,
+                      tooltip: 'طباعة ملخص PDF',
+                      onPressed: controller.isPdfActionRunning.value
+                          ? null
+                          : controller.printSummaryPdf,
+                    ),
+                  ],
+                  CustomButton.primary(
+                    text: 'تصدير CSV',
+                    prefix: Icons.file_download_outlined,
+                    loading: controller.isExportActionRunning.value,
+                    onPressed: controller.isExportActionRunning.value
+                        ? null
+                        : controller.requestExport,
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (controller.exportJob.value != null) ...[
             AppSpacing.vXs,
             _buildExportStatus(context),
