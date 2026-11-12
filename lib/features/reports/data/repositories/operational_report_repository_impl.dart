@@ -17,6 +17,25 @@ class OperationalReportRepositoryImpl
 
   final OperationalReportRemoteDataSource remoteDataSource;
 
+  @override
+  Future<OperationalReportCatalog> getCatalog({
+    required int networkId,
+    int? posId,
+  }) async {
+    final response = await remoteDataSource.getCatalog(query: {
+      'network_id': networkId,
+      if (posId != null) 'pos_id': posId,
+    });
+    if (!response.success || response.data == null) {
+      throw AppException(
+        response.message.isNotEmpty ? response.message : 'تعذر تحميل كتالوج التقارير.',
+        code: 'OPERATIONAL_REPORT_CATALOG_FAILED',
+        details: response.errors,
+      );
+    }
+    return response.data!;
+  }
+
   Map<String, dynamic> _filters({
     String? fromDate,
     String? toDate,
