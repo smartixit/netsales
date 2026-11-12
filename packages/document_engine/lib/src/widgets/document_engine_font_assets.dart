@@ -23,6 +23,9 @@ Future<Uint8List> loadDocumentEngineArabicFont() async {
 /// without duplicating large font binaries inside this package.
 Future<Map<DocumentFontWeight, Uint8List>> loadDocumentEngineFontFaces({
   required String regularAssetPath,
+  String? thinAssetPath,
+  String? extraLightAssetPath,
+  String? lightAssetPath,
   String? mediumAssetPath,
   String? semiBoldAssetPath,
   String? boldAssetPath,
@@ -38,6 +41,15 @@ Future<Map<DocumentFontWeight, Uint8List>> loadDocumentEngineFontFaces({
     DocumentFontWeight.regular: await load(regularAssetPath),
   };
 
+  if (thinAssetPath != null) {
+    entries[DocumentFontWeight.thin] = await load(thinAssetPath);
+  }
+  if (extraLightAssetPath != null) {
+    entries[DocumentFontWeight.extraLight] = await load(extraLightAssetPath);
+  }
+  if (lightAssetPath != null) {
+    entries[DocumentFontWeight.light] = await load(lightAssetPath);
+  }
   if (mediumAssetPath != null) {
     entries[DocumentFontWeight.medium] = await load(mediumAssetPath);
   }
