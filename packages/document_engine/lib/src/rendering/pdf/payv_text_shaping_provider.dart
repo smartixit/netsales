@@ -20,9 +20,10 @@ final class PayvTextShapingProvider {
     Uint8List? boldFontBytes,
   }) {
     final regularFace = _loadFace(fontBytes, weight: DocumentFontWeight.regular);
-    final mediumFace = mediumFontBytes == null
+    final mediumSource = mediumFontBytes ?? semiBoldFontBytes;
+    final mediumFace = mediumSource == null
         ? regularFace
-        : _loadFace(mediumFontBytes, weight: DocumentFontWeight.medium);
+        : _loadFace(mediumSource, weight: DocumentFontWeight.medium);
     final semiBoldSource = semiBoldFontBytes ?? boldFontBytes ?? mediumFontBytes;
     final semiBoldFace = semiBoldSource == null
         ? regularFace
