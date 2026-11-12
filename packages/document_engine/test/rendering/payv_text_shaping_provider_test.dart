@@ -13,6 +13,48 @@ void main() {
     provider = PayvTextShapingProvider(fontBytes, languageTag: 'ar-YE');
   });
 
+  test('loads and selects all four supplied IBM Arabic font weights', () async {
+    final faces = await loadDocumentEngineFontFaces(
+      regularAssetPath: 'assets/fonts/IBM-Regular.ttf',
+      mediumAssetPath: 'assets/fonts/IBM-Medium.ttf',
+      semiBoldAssetPath: 'assets/fonts/IBM-SemiBold.ttf',
+      boldAssetPath: 'assets/fonts/IBM-Bold.ttf',
+    );
+
+    expect(faces.keys, containsAll(DocumentFontWeight.values));
+
+    final family = PayvTextShapingProvider(
+      faces[DocumentFontWeight.regular]!,
+      languageTag: 'ar-YE',
+      mediumFontBytes: faces[DocumentFontWeight.medium],
+      semiBoldFontBytes: faces[DocumentFontWeight.semiBold],
+      boldFontBytes: faces[DocumentFontWeight.bold],
+    );
+
+    final selectedFaces = [
+      for (final weight in DocumentFontWeight.values) family.fontFor(weight),
+    ];
+    for (var left = 0; left < selectedFaces.length; left++) {
+      for (var right = left + 1; right < selectedFaces.length; right++) {
+        expect(
+          identical(selectedFaces[left], selectedFaces[right]),
+          isFalse,
+          reason: 'Each semantic weight must use its own supplied font face.',
+        );
+      }
+    }
+
+    for (final weight in DocumentFontWeight.values) {
+      final shaped = family.shapeLine(
+        'فاتورة مبيعات NetSales',
+        direction: DocumentTextDirection.rightToLeft,
+        fontWeight: weight,
+      );
+      expect(shaped.visualRuns, isNotEmpty, reason: weight.name);
+      expect(shaped.advance, greaterThan(0), reason: weight.name);
+    }
+  });
+
   test('resolves paragraph base direction before wrapping', () {
     expect(
       provider.resolveDirection('فاتورة INV-2026/0017'),
