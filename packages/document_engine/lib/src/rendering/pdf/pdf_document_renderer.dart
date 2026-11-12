@@ -523,6 +523,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                     : null,
               ),
               fontWeight: DocumentFontWeight.semiBold,
+              branding: branding,
             ),
           ),
         );
