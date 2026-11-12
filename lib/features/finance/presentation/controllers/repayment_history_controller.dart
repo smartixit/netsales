@@ -313,7 +313,6 @@ class RepaymentHistoryController extends GetxController {
     required bool isNetworkView,
   }) {
     return _runDocumentAction(
-      repayment,
       title: 'تصدير سند السداد',
       successMessage: 'تم حفظ سند السداد في مجلد Receipts.',
       failureMessage: 'تعذر حفظ سند السداد.',
@@ -329,7 +328,6 @@ class RepaymentHistoryController extends GetxController {
     required bool isNetworkView,
   }) {
     return _runDocumentAction(
-      repayment,
       title: 'مشاركة سند السداد',
       successMessage: 'تم تجهيز سند السداد للمشاركة.',
       failureMessage: 'تعذرت مشاركة سند السداد.',
@@ -345,7 +343,6 @@ class RepaymentHistoryController extends GetxController {
     required bool isNetworkView,
   }) {
     return _runDocumentAction(
-      repayment,
       title: 'طباعة سند السداد',
       successMessage: 'تم إرسال سند السداد إلى خدمة الطباعة.',
       failureMessage: 'تعذر إرسال سند السداد للطباعة.',
@@ -356,8 +353,7 @@ class RepaymentHistoryController extends GetxController {
     );
   }
 
-  Future<void> _runDocumentAction(
-    PosRepaymentEntity repayment, {
+  Future<void> _runDocumentAction({
     required String title,
     required String successMessage,
     required String failureMessage,
