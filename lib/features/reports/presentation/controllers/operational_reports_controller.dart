@@ -70,6 +70,7 @@ class OperationalReportsController extends GetxController {
   Timer? _searchDebounce;
   int _requestRevision = 0;
   int _posRevision = 0;
+  final Set<String> _seenReportCursors = <String>{};
   String _posSearchQuery = '';
   int? _networkId;
   int? _workspacePosId;
@@ -167,6 +168,9 @@ class OperationalReportsController extends GetxController {
     _organizationName = organizationName;
     _logoUrl = logoUrl;
     ++_requestRevision;
+    ++_posRevision;
+    isLoadingPos.value = false;
+    isLoadingMorePos.value = false;
     reports.clear();
     summary.value = null;
     summaryError.value = null;
@@ -180,6 +184,7 @@ class OperationalReportsController extends GetxController {
     fromDate.value = null;
     toDate.value = null;
     exportJob.value = null;
+    _seenReportCursors.clear();
 
     _posSearchQuery = '';
     if (!isNetworkWorkspace) {
@@ -190,7 +195,7 @@ class OperationalReportsController extends GetxController {
     } else {
       selectedPosId.value = null;
       if (networkId != null) {
-        await loadPosOptions(refresh: true);
+        unawaited(loadPosOptions(refresh: true));
       } else {
         posOptions.clear();
       }
@@ -354,6 +359,27 @@ class OperationalReportsController extends GetxController {
     }
   }
 
+  String _reportRecordIdentity(
+    OperationalReportRecord record,
+    OperationalReportType type,
+  ) {
+    final identity = switch (type) {
+      OperationalReportType.sales ||
+      OperationalReportType.debtAging =>
+        record.textAt('invoice_id', fallback: record.textAt('invoice_uuid', fallback: '')),
+      OperationalReportType.expenses =>
+        record.textAt('expense_id', fallback: record.textAt('expense_uuid', fallback: '')),
+      OperationalReportType.networkWallet ||
+      OperationalReportType.posWallet => record.textAt('log_id', fallback: ''),
+      OperationalReportType.repayments =>
+        record.textAt('repayment_id', fallback: record.textAt('repayment_uuid', fallback: '')),
+      OperationalReportType.requests =>
+        record.textAt('request_id', fallback: record.textAt('request_uuid', fallback: '')),
+    };
+
+    return identity.isEmpty ? record.values.toString() : identity;
+  }
+
   Future<void> loadReport({bool refresh = false}) async {
     if (refresh) {
       _searchDebounce?.cancel();
@@ -401,13 +427,19 @@ class OperationalReportsController extends GetxController {
 
     final revision = ++_requestRevision;
     final requestedPosId = _queryPosId;
+    final requestedCursor = refresh ? null : nextCursor.value;
     if (refresh) {
       isLoading.value = true;
       isLoadingMore.value = false;
       errorMessage.value = null;
       loadMoreError.value = null;
+      _seenReportCursors.clear();
       nextCursor.value = null;
     } else {
+      if (requestedCursor == null || !_seenReportCursors.add(requestedCursor)) {
+        loadMoreError.value = 'توقف تحميل التقرير بسبب تكرار مؤشر الصفحة.';
+        return;
+      }
       isLoadingMore.value = true;
       loadMoreError.value = null;
     }
@@ -423,7 +455,7 @@ class OperationalReportsController extends GetxController {
         search: searchTextController.text,
         status: selectedStatus.value,
         saleType: selectedSaleType.value,
-        cursor: refresh ? null : nextCursor.value,
+        cursor: requestedCursor,
       );
       if (revision != _requestRevision ||
           networkId != _networkId ||
@@ -432,10 +464,25 @@ class OperationalReportsController extends GetxController {
         return;
       }
 
+      if (page.nextCursor != null &&
+          (page.nextCursor == requestedCursor ||
+              _seenReportCursors.contains(page.nextCursor))) {
+        throw const AppException(
+          'توقف تحميل التقرير لأن الخادم أعاد مؤشر صفحة سبق استخدامه.',
+        );
+      }
+
+      final seenRecords = reports
+          .map((record) => _reportRecordIdentity(record, type))
+          .toSet();
+      final uniquePageItems = page.items.where(
+        (record) => seenRecords.add(_reportRecordIdentity(record, type)),
+      );
+
       if (refresh) {
-        reports.assignAll(page.items);
+        reports.assignAll(uniquePageItems);
       } else {
-        reports.addAll(page.items);
+        reports.addAll(uniquePageItems);
       }
       nextCursor.value = page.nextCursor;
       errorMessage.value = null;
@@ -468,6 +515,9 @@ class OperationalReportsController extends GetxController {
       }
     } catch (error) {
       if (revision != _requestRevision) return;
+      if (!refresh && requestedCursor != null) {
+        _seenReportCursors.remove(requestedCursor);
+      }
       final message = AppException.sanitizeMessage(
         error,
         fallback: 'تعذر تحميل سجلات التقرير.',
