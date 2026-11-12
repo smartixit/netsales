@@ -40,11 +40,28 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
     });
 
     return CustomAppScaffold(
-      appBarTitle: 'التقارير التشغيلية',
-      appBarSubtitle: 'تقارير موثقة من بيانات الخادم حسب صلاحية مساحة العمل',
       body: Padding(
         padding: EdgeInsets.all(AppSpacing.cardPadding),
-        child: Obx(() {
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'التقارير التشغيلية',
+              style: AppTypography.titleLarge.copyWith(
+                color: context.colors.onSurface,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            AppSpacing.vXs,
+            Text(
+              'بيانات موثقة من الخادم، مع تصفية وتصدير وفق صلاحية مساحة العمل.',
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+            AppSpacing.vMd,
+            Expanded(
+              child: Obx(() {
           final types = controller.availableTypes;
           if (types.isEmpty) {
             return const CustomEmptyState.boxed(
@@ -62,17 +79,20 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
             );
           }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTypeSelector(types),
-              AppSpacing.vMd,
-              _buildSearchAndFilters(context),
-              AppSpacing.vMd,
-              Expanded(child: _buildRecords(context)),
-            ],
-          );
-        }),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTypeSelector(types),
+                    AppSpacing.vMd,
+                    _buildSearchAndFilters(context),
+                    AppSpacing.vMd,
+                    Expanded(child: _buildRecords(context)),
+                  ],
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
