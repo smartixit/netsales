@@ -258,10 +258,11 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
             ),
           ),
         ],
-        if (type == OperationalReportType.sales) ...[
+        if (type == OperationalReportType.sales ||
+            type == OperationalReportType.requests) ...[
           AppSpacing.vSm,
           Text(
-            'نوع البيع',
+            type == OperationalReportType.sales ? 'نوع البيع' : 'نوع الطلب',
             style: AppTypography.labelMedium.copyWith(
               color: colors.onSurfaceVariant,
               fontWeight: FontWeight.w700,
