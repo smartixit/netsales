@@ -20,6 +20,7 @@ class InvoiceModel extends InvoiceEntity {
     super.isFullyPaid = false,
     super.invoiceDate,
     super.createdBy,
+    super.createdByName,
     super.networkName,
     super.networkLogoUrl,
     super.posName,
@@ -53,6 +54,11 @@ class InvoiceModel extends InvoiceEntity {
       posLogoUrl = posObj['pos_profile_logo']?.toString();
     }
 
+    final creator = json['created_by_user'];
+    final createdByName = creator is Map
+        ? creator['user_full_name']?.toString()
+        : null;
+
     final rawItems = json['items'];
     final parsedItems = <InvoiceItemModel>[];
     if (rawItems is List) {
@@ -81,6 +87,7 @@ class InvoiceModel extends InvoiceEntity {
       isFullyPaid: json['is_fully_paid'] as bool? ?? false,
       invoiceDate: json['invoice_date'] as String?,
       createdBy: json['created_by'] as int?,
+      createdByName: createdByName,
       networkName: netName,
       networkLogoUrl: networkLogoUrl,
       posName: pName,
@@ -110,6 +117,9 @@ class InvoiceModel extends InvoiceEntity {
       'is_fully_paid': isFullyPaid,
       'invoice_date': invoiceDate,
       'created_by': createdBy,
+      'created_by_user': createdByName == null
+          ? null
+          : {'user_full_name': createdByName},
       'created_at': createdAt,
       'updated_at': updatedAt,
     };
