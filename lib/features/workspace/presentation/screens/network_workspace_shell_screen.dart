@@ -5,6 +5,7 @@ import 'package:netsales/features/commercial/presentation/screens/network_pos_di
 import 'package:netsales/features/finance/presentation/widgets/network_finance_workspace_hub.dart';
 import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/network_supply_requests_review_screen.dart';
+import 'package:netsales/features/reports/presentation/screens/reports_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/adaptive_workspace_scaffold.dart';
 import 'package:netsales/features/workspace/presentation/widgets/network_workspace_dashboard.dart';
@@ -44,6 +45,12 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           icon: Icons.groups_outlined,
           activeIcon: Icons.groups_rounded,
           content: MembershipScreen(),
+        ),
+        const WorkspaceNavItem(
+          label: 'التقارير',
+          icon: Icons.analytics_outlined,
+          activeIcon: Icons.analytics_rounded,
+          content: ReportsScreen(),
         ),
         const WorkspaceNavItem(
           label: 'المالية والديون',
