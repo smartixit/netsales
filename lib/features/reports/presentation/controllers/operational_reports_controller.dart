@@ -295,6 +295,10 @@ class OperationalReportsController extends GetxController {
   }
 
   Future<void> loadReport({bool refresh = false}) async {
+    if (refresh) {
+      _searchDebounce?.cancel();
+      _searchDebounce = null;
+    }
     final networkId = _networkId;
     final type = selectedType.value;
     if (networkId == null || type == null) {
