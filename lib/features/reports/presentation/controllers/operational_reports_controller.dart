@@ -203,29 +203,23 @@ class OperationalReportsController extends GetxController {
     await loadReport(refresh: true);
   }
 
-  Future<void> selectDate({required bool isFrom}) async {
-    final current = DateTime.tryParse(
-      isFrom ? fromDate.value ?? '' : toDate.value ?? '',
-    );
-    final now = DateTime.now();
-    final initial = current ?? (isFrom ? DateTime(now.year, now.month, 1) : now);
-    final picked = await showDatePicker(
-      context: Get.context!,
-      initialDate: initial,
-      firstDate: DateTime(2010),
-      lastDate: DateTime(now.year + 2),
-      helpText: isFrom ? 'تاريخ بداية التقرير' : 'تاريخ نهاية التقرير',
-    );
-    if (picked == null) return;
-    final value = DateFormatter.iso(picked);
+  Future<void> setDate({
+    required bool isFrom,
+    required DateTime? date,
+  }) async {
+    final value = date == null ? null : DateFormatter.iso(date);
     if (isFrom) {
       fromDate.value = value;
-      if (toDate.value != null && toDate.value!.compareTo(value) < 0) {
+      if (value != null &&
+          toDate.value != null &&
+          toDate.value!.compareTo(value) < 0) {
         toDate.value = value;
       }
     } else {
       toDate.value = value;
-      if (fromDate.value != null && fromDate.value!.compareTo(value) > 0) {
+      if (value != null &&
+          fromDate.value != null &&
+          fromDate.value!.compareTo(value) > 0) {
         fromDate.value = value;
       }
     }
