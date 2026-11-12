@@ -259,6 +259,8 @@ class OperationalReportFilterPanel extends StatelessWidget {
             rxValue: controller.selectedPosId,
             items: options,
             isRequired: requiresOne,
+            onRemoteSearch: controller.searchPosOptions,
+            isSearching: controller.isLoadingPos.value,
             itemSearchText: (posId) {
               final item = controller.posOptions.firstWhereOrNull(
                 (link) => link.posId == posId,
