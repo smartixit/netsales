@@ -241,6 +241,9 @@ class OperationalReportsController extends GetxController {
     toDate.value = null;
     selectedStatus.value = null;
     selectedSaleType.value = null;
+    if (_isNetworkWorkspace) {
+      selectedPosId.value = null;
+    }
     await loadReport(refresh: true);
   }
 
