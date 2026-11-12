@@ -4,6 +4,32 @@ import 'package:document_engine/document_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('paragraphs and headings retain all seven semantic font weights', () {
+    const weights = DocumentTextWeight.values;
+    expect(weights, hasLength(7));
+    for (final weight in weights) {
+      final paragraph = DocumentParagraph(
+        text: 'نص تجريبي',
+        weight: weight,
+      );
+      final heading = DocumentHeading(
+        text: 'عنوان تجريبي',
+        weight: weight,
+      );
+      expect(paragraph.weight, weight);
+      expect(heading.weight, weight);
+    }
+
+    expect(
+      const DocumentParagraph(text: 'نص').weight,
+      DocumentTextWeight.regular,
+    );
+    expect(
+      DocumentHeading(text: 'عنوان').weight,
+      DocumentTextWeight.semiBold,
+    );
+  });
+
   test('information grids defensively copy items and validate bounds', () {
     final source = <DocumentInfoItem>[
       DocumentInfoItem(
