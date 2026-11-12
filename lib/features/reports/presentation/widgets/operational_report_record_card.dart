@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
@@ -63,6 +64,19 @@ class OperationalReportRecordCard extends StatelessWidget {
     _ => value,
   };
 
+  String _date(String key) {
+    final raw = record.valueAt(key);
+    if (raw == null) return '—';
+    final parsed = DateTime.tryParse(raw.toString());
+    return parsed == null ? raw.toString() : DateFormatter.date(parsed);
+  }
+
+  String _saleTypeLabel(String value) => switch (value.toUpperCase()) {
+    'CASH' => 'نقدي',
+    'CREDIT' => 'آجل',
+    _ => value,
+  };
+
   String _amount(String key) {
     final raw = record.valueAt(key);
     if (raw == null) return '—';
@@ -76,7 +90,7 @@ class OperationalReportRecordCard extends StatelessWidget {
       OperationalReportType.sales => (
         reference: _first(['invoice_uuid', 'invoice_id']),
         party: _first(['pos.pos_name', 'created_by.user_full_name']),
-        date: _first(['invoice_date']),
+        date: _date('invoice_date'),
         amount: _amount('invoice_total_amount'),
         status: _first(['payment_status']),
         detail: 'المسدّد: ' + _amount('paid_amount') + '  •  المتبقي: ' + _amount('remaining_amount'),
@@ -84,7 +98,7 @@ class OperationalReportRecordCard extends StatelessWidget {
       OperationalReportType.expenses => (
         reference: _first(['expense_uuid', 'expense_id']),
         party: _first(['created_by.user_full_name', 'network.network_name']),
-        date: _first(['expense_date']),
+        date: _date('expense_date'),
         amount: _amount('expense_total_amount'),
         status: 'مصروف تشغيلي',
         detail: _first(['items.0.item_statement'], fallback: 'سند مصروف الشبكة'),
@@ -92,7 +106,7 @@ class OperationalReportRecordCard extends StatelessWidget {
       OperationalReportType.networkWallet => (
         reference: _first(['log_id']),
         party: _first(['log_statement']),
-        date: _first(['log_date']),
+        date: _date('log_date'),
         amount: _amount('log_amount'),
         status: _first(['log_operation']),
         detail: _first(['created_by.user_full_name']),
@@ -108,7 +122,7 @@ class OperationalReportRecordCard extends StatelessWidget {
       OperationalReportType.repayments => (
         reference: _first(['repayment_uuid', 'repayment_id']),
         party: _first(['pos.pos_name']),
-        date: _first(['repayment_date']),
+        date: _date('repayment_date'),
         amount: _amount('amount'),
         status: _first(['status']),
         detail: _first(['payment_method', 'reference_number', 'notes']),
@@ -124,10 +138,10 @@ class OperationalReportRecordCard extends StatelessWidget {
       OperationalReportType.requests => (
         reference: _first(['request_uuid', 'request_id']),
         party: _first(['pos.pos_name']),
-        date: _first(['request_date']),
+        date: _date('request_date'),
         amount: _amount('request_total_amount'),
         status: _first(['status']),
-        detail: _first(['sale_type']),
+        detail: _saleTypeLabel(_first(['sale_type'])),
       ),
     };
 
