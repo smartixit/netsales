@@ -2,11 +2,17 @@ import 'dart:typed_data';
 
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
+import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 
 abstract interface class OperationalReportRepository {
+  Future<OperationalReportCatalog> getCatalog({
+    required int networkId,
+    int? posId,
+  });
+
   Future<PaginatedList<OperationalReportRecord>> getReport({
     required OperationalReportType type,
     required int networkId,
