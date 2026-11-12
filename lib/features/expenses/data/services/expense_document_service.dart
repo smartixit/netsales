@@ -165,14 +165,14 @@ class ExpenseDocumentService {
         direction: DocumentTextDirection.rightToLeft,
       ),
       if (rows.isEmpty)
-        const DocumentCallout(
+        DocumentCallout(
           title: 'لا توجد بنود مفصلة',
           body: 'لم تتضمن استجابة الخادم بنوداً لعرضها في هذا السند.',
           tone: DocumentStatusTone.warning,
         )
       else
         DocumentTable(
-          columns: const [
+          columns: [
             DocumentTableColumn(id: 'statement', label: 'بيان المصروف'),
             DocumentTableColumn(
               id: 'amount',
@@ -181,7 +181,7 @@ class ExpenseDocumentService {
             ),
           ],
           rows: rows,
-          style: const DocumentTableStyle(
+          style: DocumentTableStyle(
             stripedRows: true,
             compact: true,
             showBorders: true,
