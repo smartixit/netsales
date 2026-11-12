@@ -177,6 +177,8 @@ class OperationalReportsController extends GetxController {
 
   void onSearchChanged(String value) {
     searchQuery.value = value;
+    summary.value = null;
+    summaryError.value = null;
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
       loadReport(refresh: true);
