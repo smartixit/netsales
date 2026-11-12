@@ -16,6 +16,7 @@ import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class OperationalReportsScreen extends GetView<OperationalReportsController> {
   const OperationalReportsScreen({
@@ -362,16 +363,21 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
         );
       }
 
-      final items = <DropdownMenuItem<int>>[
-        const DropdownMenuItem<int>(
+      final posLabels = <int, String>{
+        for (final link in controller.posOptions)
+          link.posId:
+              link.pos?.posName ?? ('نقطة بيع #' + link.posId.toString()),
+      };
+      final items = <DropdownItem<int>>[
+        const DropdownItem<int>(
           value: 0,
           child: Text('كل نقاط البيع'),
         ),
         ...controller.posOptions.map(
-          (link) => DropdownMenuItem<int>(
+          (link) => DropdownItem<int>(
             value: link.posId,
             child: Text(
-              link.pos?.posName ?? ('نقطة بيع #' + link.posId.toString()),
+              posLabels[link.posId]!,
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -381,32 +387,25 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
       return Row(
         children: [
           Expanded(
-            child: InputDecorator(
-              decoration: InputDecoration(
-                labelText: controller.selectedType.value ==
-                        OperationalReportType.posWallet
-                    ? 'نقطة البيع المطلوبة'
-                    : 'تصفية حسب نقطة البيع',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                contentPadding: const EdgeInsetsDirectional.fromSTEB(
-                  12,
-                  4,
-                  12,
-                  4,
-                ),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<int>(
-                  isExpanded: true,
-                  value: controller.selectedPosId.value ?? 0,
-                  items: items,
-                  onChanged: (value) =>
-                      controller.selectPos(value == 0 ? null : value),
-                  hint: const Text('اختر نقطة بيع'),
-                ),
-              ),
+            child: CustomDropdown<int>(
+              items: items,
+              rxValue: controller.selectedPosId,
+              label: controller.selectedType.value ==
+                      OperationalReportType.posWallet
+                  ? 'نقطة البيع المطلوبة'
+                  : 'تصفية حسب نقطة البيع',
+              hint: controller.selectedType.value ==
+                      OperationalReportType.posWallet
+                  ? 'اختر نقطة البيع'
+                  : 'كل نقاط البيع',
+              prefixIcon: Icons.storefront_outlined,
+              searchEnabled: true,
+              isRequired: false,
+              itemSearchText: (id) => id == 0
+                  ? 'كل نقاط البيع'
+                  : (posLabels[id] ?? 'نقطة بيع #$id'),
+              onChanged: (value) =>
+                  controller.selectPos(value == 0 ? null : value),
             ),
           ),
           if (controller.hasMorePos) ...[
