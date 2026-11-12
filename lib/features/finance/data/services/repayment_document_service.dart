@@ -237,14 +237,14 @@ class RepaymentDocumentService {
         direction: DocumentTextDirection.rightToLeft,
       ),
       if (allocationRows.isEmpty)
-        const DocumentCallout(
+        DocumentCallout(
           title: 'لا توجد توزيعات متاحة',
           body: 'لم تتضمن استجابة الخادم توزيعات فواتير لهذا السند.',
           tone: DocumentStatusTone.neutral,
         )
       else
         DocumentTable(
-          columns: const [
+          columns: [
             DocumentTableColumn(id: 'invoice', label: 'رقم الفاتورة'),
             DocumentTableColumn(
               id: 'allocated',
@@ -255,7 +255,7 @@ class RepaymentDocumentService {
             DocumentTableColumn(id: 'status', label: 'حالة الفاتورة'),
           ],
           rows: allocationRows,
-          style: const DocumentTableStyle(
+          style: DocumentTableStyle(
             stripedRows: true,
             compact: true,
             showBorders: true,
