@@ -43,10 +43,28 @@ class OperationalReportRecordCard extends StatelessWidget {
     return SemanticTone.neutral;
   }
 
+  String _statusLabel(String value) => switch (value.toUpperCase()) {
+    'PAID' => 'مسددة',
+    'PARTIALLY_PAID' => 'مسددة جزئياً',
+    'UNPAID' => 'غير مسددة',
+    'DEPOSIT' => 'إيداع',
+    'WITHDRAW' => 'سحب',
+    'COMPLETED' => 'مكتمل',
+    'REVERSED' => 'معكوس',
+    'PENDING' => 'قيد الانتظار',
+    'APPROVED' => 'معتمد',
+    'REJECTED' => 'مرفوض',
+    '0_30' => 'حتى 30 يوماً',
+    '31_60' => '31–60 يوماً',
+    '61_90' => '61–90 يوماً',
+    'OVER_90' => 'أكثر من 90 يوماً',
+    _ => value,
+  };
+
   String _amount(String key) {
     final raw = record.valueAt(key);
     if (raw == null) return '—';
-    return AmountFormatter.format(raw.toString());
+    return AmountFormatter.format(raw.toString()) + ' ر.ي';
   }
 
   @override
@@ -55,7 +73,7 @@ class OperationalReportRecordCard extends StatelessWidget {
     final descriptor = switch (type) {
       OperationalReportType.sales => (
         reference: _first(['invoice_uuid', 'invoice_id']),
-        party: _first(['pos.pos_name', 'created_by.name']),
+        party: _first(['pos.pos_name', 'created_by.user_full_name']),
         date: _first(['invoice_date']),
         amount: _amount('invoice_total_amount'),
         status: _first(['payment_status']),
@@ -63,7 +81,7 @@ class OperationalReportRecordCard extends StatelessWidget {
       ),
       OperationalReportType.expenses => (
         reference: _first(['expense_uuid', 'expense_id']),
-        party: _first(['created_by_user.name', 'created_by.name', 'network.network_name']),
+        party: _first(['created_by.user_full_name', 'network.network_name']),
         date: _first(['expense_date']),
         amount: _amount('expense_total_amount'),
         status: 'مصروف تشغيلي',
@@ -75,7 +93,7 @@ class OperationalReportRecordCard extends StatelessWidget {
         date: _first(['log_date']),
         amount: _amount('log_amount'),
         status: _first(['log_operation']),
-        detail: _first(['created_by.name']),
+        detail: _first(['created_by.user_full_name']),
       ),
       OperationalReportType.posWallet => (
         reference: _first(['log_id']),
@@ -138,7 +156,11 @@ class OperationalReportRecordCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                CustomStatusBadge(label: descriptor.status, tone: _statusTone(descriptor.status), isCompact: true),
+                CustomStatusBadge(
+                  label: _statusLabel(descriptor.status),
+                  tone: _statusTone(descriptor.status),
+                  isCompact: true,
+                ),
               ],
             ),
             AppSpacing.vSm,
