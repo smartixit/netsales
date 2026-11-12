@@ -1,13 +1,10 @@
 import 'dart:typed_data';
 import 'dart:ui' show Color;
 
-import 'package:dio/dio.dart';
 import 'package:document_engine/document_engine.dart';
-import 'package:flutter/services.dart';
-import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -22,11 +19,10 @@ class InvoiceDocumentService {
 
   static final InvoiceDocumentService instance = InvoiceDocumentService._();
 
-  Future<Uint8List>? _applicationIconFuture;
-
   Future<Uint8List> generateInvoicePdf(InvoiceEntity invoice) async {
     final brand = _resolveBrandContext(invoice);
-    final logoBytes = await _resolveLogoBytes(brand.logoUrl);
+    final logoBytes = await DocumentEngineBrandAssetService.instance
+        .resolveLogoBytes(brand.logoUrl);
     final fontService = DocumentEngineFontService.instance;
     final brandingFonts = await fontService.loadArabicBrandingFonts();
     final shapingProvider = await fontService.arabicTextShapingProvider();
@@ -337,76 +333,6 @@ class InvoiceDocumentService {
 
     // Never borrow another tenant's logo when workspace identity is ambiguous.
     return const _InvoiceBrandContext(organizationName: 'NetSales', logoUrl: null);
-  }
-
-  Future<Uint8List> _resolveLogoBytes(String? rawUrl) async {
-    final tenantLogo = await _downloadTenantLogo(rawUrl);
-    if (tenantLogo != null) return tenantLogo;
-    return _loadApplicationIcon();
-  }
-
-  Future<Uint8List?> _downloadTenantLogo(String? rawUrl) async {
-    final source = rawUrl?.trim();
-    if (source == null || source.isEmpty) return null;
-    final resolved = ApiService.resolveStorageUrl(source);
-    final uri = Uri.tryParse(resolved);
-    final apiUri = Uri.tryParse(ApiConstants.baseUrl);
-
-    // Session headers must never be sent to an unrelated image host.
-    if (uri == null ||
-        apiUri == null ||
-        !uri.hasAuthority ||
-        (uri.scheme != 'https' && uri.scheme != 'http') ||
-        uri.origin != apiUri.origin) {
-      return null;
-    }
-
-    try {
-      final response = await ApiService.instance.dio.get<List<int>>(
-        uri.toString(),
-        options: Options(
-          responseType: ResponseType.bytes,
-          followRedirects: false,
-          receiveTimeout: const Duration(seconds: 12),
-          headers: const {'Accept': 'image/png,image/jpeg'},
-        ),
-      );
-      final bytes = response.data;
-      if (response.statusCode != 200 ||
-          bytes == null ||
-          bytes.isEmpty ||
-          bytes.length > 2 * 1024 * 1024 ||
-          !_isPngOrJpeg(bytes)) {
-        return null;
-      }
-      return Uint8List.fromList(bytes);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<Uint8List> _loadApplicationIcon() async {
-    final future = _applicationIconFuture ??= _readApplicationIcon();
-    return Uint8List.fromList(await future);
-  }
-
-  Future<Uint8List> _readApplicationIcon() async {
-    final data = await rootBundle.load('assets/images/brand_icon.png');
-    return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-  }
-
-  static bool _isPngOrJpeg(List<int> bytes) {
-    final png = bytes.length >= 8 &&
-        bytes[0] == 0x89 &&
-        bytes[1] == 0x50 &&
-        bytes[2] == 0x4E &&
-        bytes[3] == 0x47 &&
-        bytes[4] == 0x0D &&
-        bytes[5] == 0x0A &&
-        bytes[6] == 0x1A &&
-        bytes[7] == 0x0A;
-    final jpeg = bytes.length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
-    return png || jpeg;
   }
 
   static String _colorHex(Color color) =>
