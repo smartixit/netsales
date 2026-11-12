@@ -13,9 +13,12 @@ void main() {
     provider = PayvTextShapingProvider(fontBytes, languageTag: 'ar-YE');
   });
 
-  test('loads and selects all four supplied IBM Arabic font weights', () async {
+  test('loads and selects all seven supplied IBM Arabic font weights', () async {
     final faces = await loadDocumentEngineFontFaces(
       regularAssetPath: 'assets/fonts/IBM-Regular.ttf',
+      thinAssetPath: 'assets/fonts/IBM-Thin.ttf',
+      extraLightAssetPath: 'assets/fonts/IBM-ExtraLight.ttf',
+      lightAssetPath: 'assets/fonts/IBM-Light.ttf',
       mediumAssetPath: 'assets/fonts/IBM-Medium.ttf',
       semiBoldAssetPath: 'assets/fonts/IBM-SemiBold.ttf',
       boldAssetPath: 'assets/fonts/IBM-Bold.ttf',
@@ -26,6 +29,9 @@ void main() {
     final family = PayvTextShapingProvider(
       faces[DocumentFontWeight.regular]!,
       languageTag: 'ar-YE',
+      thinFontBytes: faces[DocumentFontWeight.thin],
+      extraLightFontBytes: faces[DocumentFontWeight.extraLight],
+      lightFontBytes: faces[DocumentFontWeight.light],
       mediumFontBytes: faces[DocumentFontWeight.medium],
       semiBoldFontBytes: faces[DocumentFontWeight.semiBold],
       boldFontBytes: faces[DocumentFontWeight.bold],
