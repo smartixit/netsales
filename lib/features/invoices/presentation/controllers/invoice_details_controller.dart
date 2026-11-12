@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
-import 'package:netsales/features/invoices/domain/services/invoice_document_service.dart';
+import 'package:netsales/features/invoices/domain/usecases/invoice_document_use_case.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_invoice_details_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -10,10 +10,12 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 /// متحكم شاشة تفاصيل الفاتورة المالية وعمليات التصدير والطباعة
 class InvoiceDetailsController extends GetxController {
   final GetInvoiceDetailsUseCase getInvoiceDetailsUseCase;
-  final InvoiceDocumentService documentService =
-      InvoiceDocumentService.instance;
+  final InvoiceDocumentUseCase invoiceDocumentUseCase;
 
-  InvoiceDetailsController({required this.getInvoiceDetailsUseCase});
+  InvoiceDetailsController({
+    required this.getInvoiceDetailsUseCase,
+    required this.invoiceDocumentUseCase,
+  });
 
   final invoice = Rxn<InvoiceEntity>();
   final isLoading = false.obs;
@@ -65,8 +67,8 @@ class InvoiceDetailsController extends GetxController {
     );
 
     try {
-      final result = await documentService.exportAndSaveInvoice(currentInvoice);
-      if (result.isSuccess) {
+      final succeeded = await invoiceDocumentUseCase.exportAndSaveInvoice(currentInvoice);
+      if (succeeded) {
         CustomSnackbar.show(
           title: 'تم تصدير الفاتورة',
           message: 'تم حفظ الفاتورة بنجاح في مجلد Invoices.',
@@ -100,7 +102,14 @@ class InvoiceDetailsController extends GetxController {
 
     isExporting.value = true;
     try {
-      await documentService.printInvoice(currentInvoice);
+      final succeeded = await invoiceDocumentUseCase.printInvoice(currentInvoice);
+      if (!succeeded) {
+        CustomSnackbar.show(
+          title: 'تعذر الطباعة',
+          message: 'لم يتم تأكيد إرسال الفاتورة إلى خدمة الطباعة.',
+          type: SnackType.warning,
+        );
+      }
     } catch (e) {
       CustomSnackbar.show(
         title: 'فشل الطباعة',
@@ -119,7 +128,14 @@ class InvoiceDetailsController extends GetxController {
 
     isExporting.value = true;
     try {
-      await documentService.shareInvoice(currentInvoice);
+      final succeeded = await invoiceDocumentUseCase.shareInvoice(currentInvoice);
+      if (!succeeded) {
+        CustomSnackbar.show(
+          title: 'تعذرت المشاركة',
+          message: 'لم يتم تأكيد مشاركة ملف الفاتورة.',
+          type: SnackType.warning,
+        );
+      }
     } catch (e) {
       CustomSnackbar.show(
         title: 'فشل المشاركة',
