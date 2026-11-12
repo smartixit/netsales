@@ -488,8 +488,12 @@ class OperationalReportsController extends GetxController {
       final status = await getExportStatusUseCase(job.exportId);
       exportJob.value = status;
       if (status.isReady) {
-        final url = status.downloadUrl ??
-            ApiConstants.operationalReportExportDownload(status.exportId);
+        // Never pass a server-supplied absolute URL to the authenticated
+        // Dio client. Build the download path from the trusted API route and
+        // the opaque export identifier returned by this API.
+        final url = ApiConstants.operationalReportExportDownload(
+          status.exportId,
+        );
         final bytes = await downloadExportUseCase(url);
         if (bytes == null || bytes.isEmpty) {
           throw const AppException('التصدير جاهز لكن تعذر تنزيل الملف.');
