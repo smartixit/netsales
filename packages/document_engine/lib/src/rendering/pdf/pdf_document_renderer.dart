@@ -985,10 +985,18 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     if (branding == null) return null;
     final bodyBytes =
         branding.fontBytes(DocumentFontRole.body) ??
-        branding.fontBytes(DocumentFontRole.numeric);
-    final headingBytes =
+        branding.fontBytes(DocumentFontRole.medium) ??
+        branding.fontBytes(DocumentFontRole.semiBold) ??
         branding.fontBytes(DocumentFontRole.heading) ??
         branding.fontBytes(DocumentFontRole.display) ??
+        branding.fontBytes(DocumentFontRole.numeric) ??
+        branding.fontBytes(DocumentFontRole.bold);
+    final headingBytes =
+        branding.fontBytes(DocumentFontRole.bold) ??
+        branding.fontBytes(DocumentFontRole.heading) ??
+        branding.fontBytes(DocumentFontRole.display) ??
+        branding.fontBytes(DocumentFontRole.semiBold) ??
+        branding.fontBytes(DocumentFontRole.medium) ??
         bodyBytes;
     if (bodyBytes == null && headingBytes == null) return null;
     final baseBytes = bodyBytes ?? headingBytes!;
