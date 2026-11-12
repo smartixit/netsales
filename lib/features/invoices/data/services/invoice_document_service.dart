@@ -298,6 +298,8 @@ class InvoiceDocumentService {
     supportedLocaleTags: const ['ar'],
     capabilities: TemplateCapabilities([
       TemplateCapability.pageNumbering,
+      TemplateCapability.repeatingHeader,
+      TemplateCapability.repeatingFooter,
       TemplateCapability.tables,
       TemplateCapability.watermark,
       TemplateCapability.portraitPage,
