@@ -124,6 +124,9 @@ class OperationalReportRepositoryImpl
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) async {
     final result = await OperationalReportDocumentService.instance
         .exportAndSaveSummary(
@@ -134,6 +137,9 @@ class OperationalReportRepositoryImpl
           fromDate: fromDate,
           toDate: toDate,
           scopeLabel: scopeLabel,
+          search: search,
+          status: status,
+          saleType: saleType,
         );
     if (!result.isSuccess) {
       throw AppException(
@@ -153,6 +159,9 @@ class OperationalReportRepositoryImpl
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) {
     return OperationalReportDocumentService.instance.shareSummary(
       type: type,
@@ -162,6 +171,9 @@ class OperationalReportRepositoryImpl
       fromDate: fromDate,
       toDate: toDate,
       scopeLabel: scopeLabel,
+      search: search,
+      status: status,
+      saleType: saleType,
     );
   }
 
@@ -174,6 +186,9 @@ class OperationalReportRepositoryImpl
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) {
     return OperationalReportDocumentService.instance.printSummary(
       type: type,
@@ -183,6 +198,9 @@ class OperationalReportRepositoryImpl
       fromDate: fromDate,
       toDate: toDate,
       scopeLabel: scopeLabel,
+      search: search,
+      status: status,
+      saleType: saleType,
     );
   }
 
