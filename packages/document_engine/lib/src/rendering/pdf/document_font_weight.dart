@@ -1,8 +1,9 @@
-/// Semantic font weights used by the document PDF shaping pipeline.
-///
-/// Each weight selects a real OpenType face. The renderer never simulates
-/// weight by stroking or scaling glyph outlines.
+/// Semantic IBM Plex Sans Arabic weights used by the PDF shaping pipeline.
+/// Each value resolves to a real OpenType face; no synthetic weight is used.
 enum DocumentFontWeight {
+  thin,
+  extraLight,
+  light,
   regular,
   medium,
   semiBold,
