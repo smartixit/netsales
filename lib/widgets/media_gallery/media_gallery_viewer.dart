@@ -226,15 +226,22 @@ class _MediaGalleryViewerState extends State<MediaGalleryViewer> {
 
       Uint8List printBytes = bytes;
 
-      if (!item.isPdf) {
+      if (item.isImage) {
         // Convert a single image through the shared bounded document engine.
         printBytes = await DocumentEngineImagePdfService.instance.renderA4Image(
           imageBytes: bytes,
           title: item.title,
         );
+      } else if (!item.isPdf) {
+        CustomSnackbar.show(
+          title: 'الطباعة غير مدعومة',
+          message: 'نزّل هذا النوع من الملفات وافتحه في التطبيق المناسب للطباعة.',
+          type: SnackType.warning,
+        );
+        return;
       }
 
-      await Printing.layoutPdf(onLayout: (_) => printBytes, name: item.title);
+      await Printing.layoutPdf(onLayout: (_) async => printBytes, name: item.title);
     } catch (_) {
       CustomSnackbar.show(
         title: 'خطأ',
