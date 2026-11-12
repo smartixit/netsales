@@ -471,10 +471,12 @@ abstract final class ApiConstants {
   static String operationalReportExportStatus(String exportId) =>
       '/reports/exports/$exportId';
   static String operationalReportExportDownload(String exportId) =>
+      '/reports/exports/$exportId/download';
+
+  // Immutable operational document snapshots and official PDF artifacts.
   static const String operationalDocumentSnapshots = '/documents/snapshots';
   static String operationalDocumentSnapshotArtifact(String snapshotUuid) =>
       '/documents/snapshots/$snapshotUuid/artifact';
   static String operationalDocumentSnapshotDownload(String snapshotUuid) =>
       '/documents/snapshots/$snapshotUuid/download';
-      '/reports/exports/$exportId/download';
 }
