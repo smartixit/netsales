@@ -56,7 +56,6 @@ class OperationalReportRecordCard extends StatelessWidget {
     'APPROVED' => 'معتمد',
     'REJECTED' => 'مرفوض',
     'CANCELLED' => 'ملغى',
-    'CANCELLED' => 'ملغى',
     '0_30' => 'حتى 30 يوماً',
     '31_60' => '31–60 يوماً',
     '61_90' => '61–90 يوماً',
