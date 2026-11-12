@@ -465,6 +465,7 @@ abstract final class ApiConstants {
 
   // Operational reports — Network / POS workspaces only.
   static const String operationalReports = '/reports';
+  static const String operationalReportSummary = '/reports/summary';
   static const String operationalReportExports = '/reports/exports';
   static String operationalReportExportStatus(String exportId) =>
       '/reports/exports/$exportId';
