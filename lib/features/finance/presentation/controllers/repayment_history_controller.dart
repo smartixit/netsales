@@ -9,6 +9,7 @@ import 'package:netsales/features/commercial/domain/entities/network_entity.dart
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
 import 'package:netsales/features/finance/domain/usecases/repayment_use_cases.dart';
+import 'package:netsales/features/finance/domain/usecases/repayment_document_use_case.dart';
 import 'package:netsales/features/finance/presentation/screens/repayment_details_screen.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
@@ -19,11 +20,13 @@ class RepaymentHistoryController extends GetxController {
   final GetRepaymentsUseCase getRepaymentsUseCase;
   final GetMyNetworksUseCase getMyNetworksUseCase;
   final ReverseRepaymentUseCase? reverseRepaymentUseCase;
+  final RepaymentDocumentUseCase? repaymentDocumentUseCase;
 
   RepaymentHistoryController({
     required this.getRepaymentsUseCase,
     required this.getMyNetworksUseCase,
     this.reverseRepaymentUseCase,
+    this.repaymentDocumentUseCase,
   });
 
   final networks = <NetworkEntity>[].obs;
@@ -37,6 +40,7 @@ class RepaymentHistoryController extends GetxController {
   final nextCursor = RxnString();
   final selectedStatus = RxnString('ALL');
   final errorMessage = RxnString();
+  final isDocumentActionRunning = false.obs;
 
   int _networksRequestVersion = 0;
   int _requestVersion = 0;
@@ -301,6 +305,90 @@ class RepaymentHistoryController extends GetxController {
     nextCursor.value = null;
     if (hasSelectedNetwork) {
       loadRepayments(isRefresh: true);
+    }
+  }
+
+  Future<void> exportRepaymentPdf(
+    PosRepaymentEntity repayment, {
+    required bool isNetworkView,
+  }) {
+    return _runDocumentAction(
+      repayment,
+      title: 'تصدير سند السداد',
+      successMessage: 'تم حفظ سند السداد في مجلد Receipts.',
+      failureMessage: 'تعذر حفظ سند السداد.',
+      action: (useCase) => useCase.exportAndSave(
+        repayment,
+        isNetworkView: isNetworkView,
+      ),
+    );
+  }
+
+  Future<void> shareRepaymentPdf(
+    PosRepaymentEntity repayment, {
+    required bool isNetworkView,
+  }) {
+    return _runDocumentAction(
+      repayment,
+      title: 'مشاركة سند السداد',
+      successMessage: 'تم تجهيز سند السداد للمشاركة.',
+      failureMessage: 'تعذرت مشاركة سند السداد.',
+      action: (useCase) => useCase.share(
+        repayment,
+        isNetworkView: isNetworkView,
+      ),
+    );
+  }
+
+  Future<void> printRepaymentPdf(
+    PosRepaymentEntity repayment, {
+    required bool isNetworkView,
+  }) {
+    return _runDocumentAction(
+      repayment,
+      title: 'طباعة سند السداد',
+      successMessage: 'تم إرسال سند السداد إلى خدمة الطباعة.',
+      failureMessage: 'تعذر إرسال سند السداد للطباعة.',
+      action: (useCase) => useCase.print(
+        repayment,
+        isNetworkView: isNetworkView,
+      ),
+    );
+  }
+
+  Future<void> _runDocumentAction(
+    PosRepaymentEntity repayment, {
+    required String title,
+    required String successMessage,
+    required String failureMessage,
+    required Future<bool> Function(RepaymentDocumentUseCase useCase) action,
+  }) async {
+    final useCase = repaymentDocumentUseCase;
+    if (useCase == null || isDocumentActionRunning.value) return;
+
+    isDocumentActionRunning.value = true;
+    await CustomAnimationOverlay.showLoading(message: 'جاري إعداد $title...');
+    try {
+      final succeeded = await action(useCase);
+      CustomSnackbar.show(
+        title: succeeded ? 'اكتملت العملية' : 'تعذرت العملية',
+        message: succeeded ? successMessage : failureMessage,
+        type: succeeded ? SnackType.success : SnackType.warning,
+      );
+    } catch (error) {
+      CustomSnackbar.show(
+        title: 'تعذر تنفيذ العملية',
+        message: AppException.sanitizeMessage(
+          error,
+          fallback: failureMessage,
+        ),
+        type: SnackType.error,
+      );
+    } finally {
+      isDocumentActionRunning.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 
