@@ -4,6 +4,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/reports/data/datasources/operational_report_remote_data_source.dart';
 import 'package:netsales/features/reports/data/models/operational_report_record_model.dart';
+import 'package:netsales/features/reports/data/services/operational_report_document_service.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
@@ -112,6 +113,77 @@ class OperationalReportRepositoryImpl
       );
     }
     return response.data!;
+  }
+
+  @override
+  Future<bool> saveSummaryPdf({
+    required OperationalReportType type,
+    required OperationalReportSummary summary,
+    required String organizationName,
+    String? logoUrl,
+    String? fromDate,
+    String? toDate,
+    String? scopeLabel,
+  }) async {
+    final result = await OperationalReportDocumentService.instance
+        .exportAndSaveSummary(
+          type: type,
+          summary: summary,
+          organizationName: organizationName,
+          logoUrl: logoUrl,
+          fromDate: fromDate,
+          toDate: toDate,
+          scopeLabel: scopeLabel,
+        );
+    if (!result.isSuccess) {
+      throw AppException(
+        result.errorMessage ?? 'تعذر حفظ ملخص التقرير بصيغة PDF.',
+        code: 'OPERATIONAL_REPORT_PDF_SAVE_FAILED',
+      );
+    }
+    return true;
+  }
+
+  @override
+  Future<bool> shareSummaryPdf({
+    required OperationalReportType type,
+    required OperationalReportSummary summary,
+    required String organizationName,
+    String? logoUrl,
+    String? fromDate,
+    String? toDate,
+    String? scopeLabel,
+  }) {
+    return OperationalReportDocumentService.instance.shareSummary(
+      type: type,
+      summary: summary,
+      organizationName: organizationName,
+      logoUrl: logoUrl,
+      fromDate: fromDate,
+      toDate: toDate,
+      scopeLabel: scopeLabel,
+    );
+  }
+
+  @override
+  Future<bool> printSummaryPdf({
+    required OperationalReportType type,
+    required OperationalReportSummary summary,
+    required String organizationName,
+    String? logoUrl,
+    String? fromDate,
+    String? toDate,
+    String? scopeLabel,
+  }) {
+    return OperationalReportDocumentService.instance.printSummary(
+      type: type,
+      summary: summary,
+      organizationName: organizationName,
+      logoUrl: logoUrl,
+      fromDate: fromDate,
+      toDate: toDate,
+      scopeLabel: scopeLabel,
+    );
   }
 
   @override
