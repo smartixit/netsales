@@ -5,6 +5,7 @@ import 'package:document_engine/document_engine.dart';
 import 'package:netsales/core/enums/repayment_status.dart';
 import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
 import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/official_document_artifact_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -75,7 +76,20 @@ class RepaymentDocumentService {
       ),
     );
 
-    if (result is DocumentRenderSuccess) return result.artifact.bytes;
+    if (result is DocumentRenderSuccess) {
+      final bytes = result.artifact.bytes;
+      await OfficialDocumentArtifactService.instance.issueAndUpload(
+      documentType: 'pos_repayment',
+      documentId: repayment.repaymentId,
+      networkId: repayment.networkId,
+      posId: repayment.posId,
+      templateId: 'netsales.repayment.receipt.executive',
+      templateVersion: '1.0.0',
+        pdfBytes: bytes,
+        fileName: _fileName(repayment),
+      );
+      return bytes;
+    }
     if (result is DocumentRenderFailure) throw StateError(result.message);
     throw StateError('تعذر إنشاء سند السداد.');
   }
