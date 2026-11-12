@@ -171,7 +171,12 @@ abstract final class NetSalesChartsExportAdapter {
     final bytes = await capturePng(boundaryKey);
     if (bytes == null || bytes.isEmpty) return false;
     try {
-      final pdfBytes = await _buildChartPdfBytes(bytes, title);
+      final pdfBytes = await DocumentEngineImagePdfService.instance
+          .renderA4Image(
+            imageBytes: bytes,
+            title: title,
+            orientation: DocumentPageOrientation.landscape,
+          );
       final result = await SharePlus.instance.share(
         ShareParams(
           files: [
