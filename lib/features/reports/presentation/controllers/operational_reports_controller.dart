@@ -53,6 +53,7 @@ class OperationalReportsController extends GetxController {
   final fromDate = RxnString();
   final toDate = RxnString();
   final searchTextController = TextEditingController();
+  final RxString searchQuery = ''.obs;
 
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
