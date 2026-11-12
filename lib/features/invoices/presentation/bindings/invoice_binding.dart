@@ -13,8 +13,12 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use
 import 'package:netsales/features/invoices/data/datasources/invoice_remote_data_source.dart';
 import 'package:netsales/features/invoices/data/datasources/invoice_remote_data_source_impl.dart';
 import 'package:netsales/features/invoices/data/repositories/invoice_repository_impl.dart';
+import 'package:netsales/features/invoices/data/repositories/invoice_document_repository_impl.dart';
+import 'package:netsales/features/invoices/data/services/invoice_document_service.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
+import 'package:netsales/features/invoices/domain/repositories/invoice_document_repository.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_invoice_details_use_case.dart';
+import 'package:netsales/features/invoices/domain/usecases/invoice_document_use_case.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_network_invoices_use_case.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/invoices/domain/usecases/create_direct_sale_invoice_use_case.dart';
@@ -102,6 +106,20 @@ class InvoiceBinding extends Bindings {
       () => GetInvoiceDetailsUseCase(Get.find<InvoiceRepository>()),
       fenix: true,
     );
+    Get.lazyPut<InvoiceDocumentService>(
+      () => InvoiceDocumentService.instance,
+      fenix: true,
+    );
+    Get.lazyPut<InvoiceDocumentRepository>(
+      () => InvoiceDocumentRepositoryImpl(
+        documentService: Get.find<InvoiceDocumentService>(),
+      ),
+      fenix: true,
+    );
+    Get.lazyPut<InvoiceDocumentUseCase>(
+      () => InvoiceDocumentUseCase(Get.find<InvoiceDocumentRepository>()),
+      fenix: true,
+    );
     Get.lazyPut<CreateDirectSaleInvoiceUseCase>(
       () => CreateDirectSaleInvoiceUseCase(Get.find<InvoiceRepository>()),
       fenix: true,
@@ -137,6 +155,7 @@ class InvoiceBinding extends Bindings {
     Get.lazyPut<InvoiceDetailsController>(
       () => InvoiceDetailsController(
         getInvoiceDetailsUseCase: Get.find<GetInvoiceDetailsUseCase>(),
+        invoiceDocumentUseCase: Get.find<InvoiceDocumentUseCase>(),
       ),
       fenix: true,
     );
