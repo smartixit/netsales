@@ -8,6 +8,12 @@ class OperationalReportRecord {
     for (final segment in path.split('.')) {
       if (current is Map) {
         current = current[segment];
+      } else if (current is List) {
+        final index = int.tryParse(segment);
+        if (index == null || index < 0 || index >= current.length) {
+          return null;
+        }
+        current = current[index];
       } else {
         return null;
       }
