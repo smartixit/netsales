@@ -312,17 +312,25 @@ class OperationalReportsController extends GetxController {
     }
     if (!_isNetworkWorkspace && _workspacePosId == null) {
       reports.clear();
+      nextCursor.value = null;
+      isLoading.value = false;
+      isLoadingMore.value = false;
       errorMessage.value = 'حدد نقطة البيع النشطة أولاً لعرض تقاريرها.';
       return;
     }
     if (requiresPosSelection) {
       reports.clear();
       nextCursor.value = null;
+      isLoading.value = false;
+      isLoadingMore.value = false;
       errorMessage.value = 'حدد نقطة بيع لعرض كشف حساب محفظتها.';
       return;
     }
     if (!PermissionService.to.can(type.requiredPermission)) {
       reports.clear();
+      nextCursor.value = null;
+      isLoading.value = false;
+      isLoadingMore.value = false;
       errorMessage.value = 'لا تملك صلاحية عرض هذا التقرير.';
       return;
     }
