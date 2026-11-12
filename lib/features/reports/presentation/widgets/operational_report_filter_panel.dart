@@ -112,10 +112,11 @@ class OperationalReportFilterPanel extends StatelessWidget {
               ],
             ),
           ],
-          if (type == OperationalReportType.sales) ...[
+          if (type == OperationalReportType.sales ||
+              type == OperationalReportType.requests) ...[
             AppSpacing.vSm,
             Text(
-              'نوع البيع',
+              type == OperationalReportType.sales ? 'نوع البيع' : 'نوع الطلب',
               style: AppTypography.labelMedium.copyWith(
                 color: colors.onSurfaceVariant,
                 fontWeight: FontWeight.w700,
@@ -331,6 +332,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
     'PENDING' => 'قيد الانتظار',
     'APPROVED' => 'معتمد',
     'REJECTED' => 'مرفوض',
+    'CANCELLED' => 'ملغى',
     _ => status,
   };
 }
