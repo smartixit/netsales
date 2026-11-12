@@ -91,6 +91,75 @@ class GetOperationalReportExportStatusUseCase {
       repository.getExportStatus(exportId);
 }
 
+class SaveOperationalReportSummaryPdfUseCase {
+  const SaveOperationalReportSummaryPdfUseCase(this.repository);
+  final OperationalReportRepository repository;
+
+  Future<bool> call({
+    required OperationalReportType type,
+    required OperationalReportSummary summary,
+    required String organizationName,
+    String? logoUrl,
+    String? fromDate,
+    String? toDate,
+    String? scopeLabel,
+  }) => repository.saveSummaryPdf(
+    type: type,
+    summary: summary,
+    organizationName: organizationName,
+    logoUrl: logoUrl,
+    fromDate: fromDate,
+    toDate: toDate,
+    scopeLabel: scopeLabel,
+  );
+}
+
+class ShareOperationalReportSummaryPdfUseCase {
+  const ShareOperationalReportSummaryPdfUseCase(this.repository);
+  final OperationalReportRepository repository;
+
+  Future<bool> call({
+    required OperationalReportType type,
+    required OperationalReportSummary summary,
+    required String organizationName,
+    String? logoUrl,
+    String? fromDate,
+    String? toDate,
+    String? scopeLabel,
+  }) => repository.shareSummaryPdf(
+    type: type,
+    summary: summary,
+    organizationName: organizationName,
+    logoUrl: logoUrl,
+    fromDate: fromDate,
+    toDate: toDate,
+    scopeLabel: scopeLabel,
+  );
+}
+
+class PrintOperationalReportSummaryPdfUseCase {
+  const PrintOperationalReportSummaryPdfUseCase(this.repository);
+  final OperationalReportRepository repository;
+
+  Future<bool> call({
+    required OperationalReportType type,
+    required OperationalReportSummary summary,
+    required String organizationName,
+    String? logoUrl,
+    String? fromDate,
+    String? toDate,
+    String? scopeLabel,
+  }) => repository.printSummaryPdf(
+    type: type,
+    summary: summary,
+    organizationName: organizationName,
+    logoUrl: logoUrl,
+    fromDate: fromDate,
+    toDate: toDate,
+    scopeLabel: scopeLabel,
+  );
+}
+
 class DownloadOperationalReportExportUseCase {
   const DownloadOperationalReportExportUseCase(this.repository);
   final OperationalReportRepository repository;
