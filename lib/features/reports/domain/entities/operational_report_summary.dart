@@ -81,6 +81,11 @@ class OperationalReportSummary {
           label: 'سندات معكوسة',
           value: _value('reversed_count'),
         ),
+        OperationalReportMetric(
+          label: 'قيمة السندات المعكوسة',
+          value: _value('reversed_amount'),
+          isCurrency: true,
+        ),
       ],
       OperationalReportType.debtAging => [
         count,
