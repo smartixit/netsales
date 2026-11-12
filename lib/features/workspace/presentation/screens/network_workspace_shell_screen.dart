@@ -59,6 +59,8 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           content: OperationalReportsScreen(
             networkId: controller.selectedNetworkId.value,
             isNetworkWorkspace: true,
+            organizationName: controller.selectedNetwork?.networkName,
+            logoUrl: controller.selectedNetwork?.networkProfileLogoUrl,
           ),
         ),
       ];
