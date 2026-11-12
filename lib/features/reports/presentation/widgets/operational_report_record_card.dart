@@ -113,7 +113,7 @@ class OperationalReportRecordCard extends StatelessWidget {
       OperationalReportType.posWallet => (
         reference: _first(['log_id']),
         party: _first(['log_statement']),
-        date: _first(['log_date']),
+        date: _date('log_date'),
         amount: _amount('log_amount'),
         status: _first(['log_operation_type']),
         detail: _first(['created_by.user_full_name']),
@@ -129,7 +129,7 @@ class OperationalReportRecordCard extends StatelessWidget {
       OperationalReportType.debtAging => (
         reference: _first(['invoice_uuid', 'invoice_id']),
         party: _first(['pos.pos_name']),
-        date: _first(['invoice_date']),
+        date: _date('invoice_date'),
         amount: _amount('remaining_amount'),
         status: _first(['aging_bucket', 'payment_status']),
         detail: 'إجمالي الفاتورة: ' + _amount('invoice_total_amount') + '  •  عمر الدين: ' + _first(['age_days']) + ' يوم',
