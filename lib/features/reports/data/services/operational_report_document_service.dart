@@ -27,6 +27,9 @@ class OperationalReportDocumentService {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) async {
     final normalizedOrganization = _display(organizationName, 'NetSales');
     final logoBytes = await DocumentEngineBrandAssetService.instance
@@ -56,6 +59,9 @@ class OperationalReportDocumentService {
       fromDate: fromDate,
       toDate: toDate,
       scopeLabel: scopeLabel,
+      search: search,
+      status: status,
+      saleType: saleType,
       generatedAt: generatedAt,
     );
 
@@ -103,6 +109,9 @@ class OperationalReportDocumentService {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) async {
     final bytes = await generateSummaryPdf(
       type: type,
@@ -112,6 +121,9 @@ class OperationalReportDocumentService {
       fromDate: fromDate,
       toDate: toDate,
       scopeLabel: scopeLabel,
+      search: search,
+      status: status,
+      saleType: saleType,
     );
     return FileExportService.instance.saveFile(
       bytes: bytes,
@@ -132,6 +144,9 @@ class OperationalReportDocumentService {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) async {
     final bytes = await generateSummaryPdf(
       type: type,
@@ -141,6 +156,9 @@ class OperationalReportDocumentService {
       fromDate: fromDate,
       toDate: toDate,
       scopeLabel: scopeLabel,
+      search: search,
+      status: status,
+      saleType: saleType,
     );
     return FileExportService.instance.shareBytes(
       bytes: bytes,
@@ -158,6 +176,9 @@ class OperationalReportDocumentService {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) async {
     final bytes = await generateSummaryPdf(
       type: type,
@@ -167,6 +188,9 @@ class OperationalReportDocumentService {
       fromDate: fromDate,
       toDate: toDate,
       scopeLabel: scopeLabel,
+      search: search,
+      status: status,
+      saleType: saleType,
     );
     return Printing.layoutPdf(
       onLayout: (_) async => bytes,
@@ -182,6 +206,9 @@ class OperationalReportDocumentService {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) {
     final metrics = summary.metricsFor(type);
     final rows = metrics.indexed.map((entry) {
@@ -236,6 +263,24 @@ class OperationalReportDocumentService {
         value: DocumentTextValue(_date(generatedAt)),
         direction: DocumentTextDirection.leftToRight,
       ),
+      if (_hasText(status))
+        DocumentInfoItem(
+          label: 'الحالة المحددة',
+          value: DocumentTextValue(_statusLabel(status!.trim())),
+          direction: DocumentTextDirection.rightToLeft,
+        ),
+      if (_hasText(saleType))
+        DocumentInfoItem(
+          label: type == OperationalReportType.requests ? 'نوع الطلب' : 'نوع البيع',
+          value: DocumentTextValue(_saleTypeLabel(saleType!.trim())),
+          direction: DocumentTextDirection.rightToLeft,
+        ),
+      if (_hasText(search))
+        DocumentInfoItem(
+          label: 'عبارة البحث',
+          value: DocumentTextValue(search!.trim()),
+          direction: DocumentTextDirection.rightToLeft,
+        ),
     ];
 
     return DocumentSnapshot(
@@ -340,6 +385,27 @@ class OperationalReportDocumentService {
 
   static bool _hasText(String? value) =>
       value != null && value.trim().isNotEmpty;
+
+  static String _statusLabel(String status) => switch (status) {
+    'PAID' => 'مسددة',
+    'PARTIALLY_PAID' => 'مسددة جزئياً',
+    'UNPAID' => 'غير مسددة',
+    'DEPOSIT' => 'إيداع',
+    'WITHDRAW' => 'سحب',
+    'COMPLETED' => 'مكتمل',
+    'REVERSED' => 'معكوس',
+    'PENDING' => 'قيد الانتظار',
+    'APPROVED' => 'معتمد',
+    'REJECTED' => 'مرفوض',
+    'CANCELLED' => 'ملغى',
+    _ => status,
+  };
+
+  static String _saleTypeLabel(String value) => switch (value) {
+    'CASH' => 'نقدي',
+    'CREDIT' => 'آجل',
+    _ => value,
+  };
 
   static String _display(String? value, [String fallback = '—']) {
     final normalized = value?.trim();
