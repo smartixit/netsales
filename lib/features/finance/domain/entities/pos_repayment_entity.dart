@@ -47,6 +47,8 @@ class PosRepaymentEntity {
   final String? createdAt;
   final String? networkName;
   final String? posName;
+  final String? networkLogoUrl;
+  final String? posLogoUrl;
   final double? remainingDebtAfter;
   final double? posBalanceAfter;
   final List<RepaymentAllocationEntity> allocations;
@@ -70,6 +72,8 @@ class PosRepaymentEntity {
     this.createdAt,
     this.networkName,
     this.posName,
+    this.networkLogoUrl,
+    this.posLogoUrl,
     this.remainingDebtAfter,
     this.posBalanceAfter,
     this.allocations = const [],
