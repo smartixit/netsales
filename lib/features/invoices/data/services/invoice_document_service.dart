@@ -9,6 +9,7 @@ import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
+import 'package:netsales/core/services/document_engine_font_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -22,26 +23,14 @@ class InvoiceDocumentService {
 
   static final InvoiceDocumentService instance = InvoiceDocumentService._();
 
-  Future<Map<DocumentFontWeight, Uint8List>>? _arabicFontFacesFuture;
-  PayvTextShapingProvider? _arabicTextShapingProvider;
   Future<Uint8List>? _applicationIconFuture;
 
   Future<Uint8List> generateInvoicePdf(InvoiceEntity invoice) async {
     final brand = _resolveBrandContext(invoice);
     final logoBytes = await _resolveLogoBytes(brand.logoUrl);
-    final fontFaces = await _loadArabicFontFaces();
-    final regularFont = fontFaces[DocumentFontWeight.regular]!;
-    final mediumFont = fontFaces[DocumentFontWeight.medium]!;
-    final semiBoldFont = fontFaces[DocumentFontWeight.semiBold]!;
-    final boldFont = fontFaces[DocumentFontWeight.bold]!;
-    final shapingProvider = _arabicTextShapingProvider ??=
-        PayvTextShapingProvider(
-          regularFont,
-          languageTag: 'ar-YE',
-          mediumFontBytes: mediumFont,
-          semiBoldFontBytes: semiBoldFont,
-          boldFontBytes: boldFont,
-        );
+    final fontService = DocumentEngineFontService.instance;
+    final brandingFonts = await fontService.loadArabicBrandingFonts();
+    final shapingProvider = await fontService.arabicTextShapingProvider();
     final branding = DocumentBranding(
       organizationName: brand.organizationName,
       tagline: 'إدارة مبيعات الشبكات ونقاط البيع',
@@ -52,15 +41,7 @@ class InvoiceDocumentService {
       textColor: _colorHex(AppColors.lightColors.onSurface),
       mutedTextColor: _colorHex(AppColors.lightColors.onSurfaceVariant),
       logoBytes: logoBytes,
-      fonts: {
-        DocumentFontRole.body: regularFont,
-        DocumentFontRole.medium: mediumFont,
-        DocumentFontRole.semiBold: semiBoldFont,
-        DocumentFontRole.bold: boldFont,
-        DocumentFontRole.heading: boldFont,
-        DocumentFontRole.display: boldFont,
-        DocumentFontRole.numeric: regularFont,
-      },
+      fonts: brandingFonts,
     );
 
     final result = await PdfDocumentRenderer(
@@ -413,20 +394,6 @@ class InvoiceDocumentService {
   Future<Uint8List> _readApplicationIcon() async {
     final data = await rootBundle.load('assets/images/brand_icon.png');
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-  }
-
-  Future<Map<DocumentFontWeight, Uint8List>> _loadArabicFontFaces() async {
-    final future = _arabicFontFacesFuture ??= loadDocumentEngineFontFaces(
-      regularAssetPath: 'assets/fonts/IBM-Regular.ttf',
-      mediumAssetPath: 'assets/fonts/IBM-Medium.ttf',
-      semiBoldAssetPath: 'assets/fonts/IBM-SemiBold.ttf',
-      boldAssetPath: 'assets/fonts/IBM-Bold.ttf',
-    );
-    final faces = await future;
-    return Map<DocumentFontWeight, Uint8List>.unmodifiable({
-      for (final entry in faces.entries)
-        entry.key: Uint8List.fromList(entry.value),
-    });
   }
 
   static bool _isPngOrJpeg(List<int> bytes) {
