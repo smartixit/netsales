@@ -12,6 +12,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -459,7 +460,8 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: controller.reports.length +
                 ((controller.hasMore ||
-                        controller.loadMoreError.value != null)
+                        controller.loadMoreError.value != null ||
+                        controller.isLoadingMore.value)
                     ? 1
                     : 0),
             separatorBuilder: (_, _) => AppSpacing.vSm,
@@ -472,7 +474,14 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                     onRetry: () => controller.loadReport(),
                   );
                 }
-                return const CustomSkeletonFeed(itemCount: 1);
+                if (controller.isLoadingMore.value) {
+                  return const CustomSkeletonCard(height: 104);
+                }
+                return CustomButton.outline(
+                  text: 'تحميل المزيد من السجلات',
+                  suffix: Icons.expand_more_rounded,
+                  onPressed: () => controller.loadReport(),
+                );
               }
               return OperationalReportRecordCard(
                 record: controller.reports[index],
