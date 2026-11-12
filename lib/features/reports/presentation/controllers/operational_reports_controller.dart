@@ -134,6 +134,10 @@ class OperationalReportsController extends GetxController {
     loadMoreError.value = null;
     selectedStatus.value = null;
     selectedSaleType.value = null;
+    searchTextController.clear();
+    searchQuery.value = '';
+    fromDate.value = null;
+    toDate.value = null;
     exportJob.value = null;
 
     if (!isNetworkWorkspace) {
@@ -172,6 +176,7 @@ class OperationalReportsController extends GetxController {
   }
 
   void onSearchChanged(String value) {
+    searchQuery.value = value;
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
       loadReport(refresh: true);
@@ -229,6 +234,7 @@ class OperationalReportsController extends GetxController {
   Future<void> clearFilters() async {
     _searchDebounce?.cancel();
     searchTextController.clear();
+    searchQuery.value = '';
     fromDate.value = null;
     toDate.value = null;
     selectedStatus.value = null;
