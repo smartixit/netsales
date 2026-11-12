@@ -442,8 +442,10 @@ class OperationalReportsController extends GetxController {
           throw const AppException('التصدير جاهز لكن تعذر تنزيل الملف.');
         }
         final type = selectedType.value;
-        final fileName =
-            'تقرير_\${type?.wireValue ?? 'تشغيلي'}_\${DateTime.now().millisecondsSinceEpoch}';
+        final fileName = 'تقرير_' +
+            (type?.wireValue ?? 'تشغيلي') +
+            '_' +
+            DateTime.now().millisecondsSinceEpoch.toString();
         final result = await FileExportService.instance.saveFile(
           bytes: bytes,
           fileName: fileName,
