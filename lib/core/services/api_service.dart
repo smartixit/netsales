@@ -377,6 +377,45 @@ class ApiService {
     }
   }
 
+  /// رفع بايتات ملف مباشرة دون إنشاء نسخة مؤقتة على القرص.
+  Future<ApiResponse<T>> uploadBytes<T>(
+    String endpoint, {
+    required Uint8List bytes,
+    required String fileName,
+    required String fileField,
+    Map<String, dynamic>? extraFields,
+    T Function(dynamic json)? fromJson,
+    String? idempotencyKey,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      if (bytes.isEmpty) {
+        return ApiResponse<T>(success: false, message: 'محتوى الملف فارغ');
+      }
+      final multipartFile = MultipartFile.fromBytes(
+        bytes,
+        filename: fileName,
+      );
+      final formData = FormData.fromMap({
+        fileField: multipartFile,
+        ...?extraFields,
+      });
+      final response = await _dio.post<dynamic>(
+        endpoint,
+        data: formData,
+        options: Options(extra: {'idempotency_key': ?idempotencyKey}),
+        cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
+      );
+      return _processResponse<T>(response, fromJson);
+    } on DioException catch (e) {
+      return _handleDioError<T>(e, endpoint);
+    } catch (e) {
+      return _handleUnexpectedError<T>(e, endpoint);
+    }
+  }
+
   /// تحميل ملف وحفظه في مسار محلي
   Future<ApiResponse<String>> downloadFile(
     String url,
