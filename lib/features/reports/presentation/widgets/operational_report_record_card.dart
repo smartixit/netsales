@@ -38,7 +38,7 @@ class OperationalReportRecordCard extends StatelessWidget {
     if (status == 'PARTIALLY_PAID' || status == 'PENDING' || status == 'WITHDRAW' || status == '31_60' || status == '61_90') {
       return SemanticTone.warning;
     }
-    if (status == 'REJECTED' || status == 'REVERSED' || status == 'UNPAID' || status == 'OVER_90') {
+    if (status == 'REJECTED' || status == 'REVERSED' || status == 'UNPAID' || status == 'CANCELLED' || status == 'OVER_90') {
       return SemanticTone.danger;
     }
     return SemanticTone.neutral;
