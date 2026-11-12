@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 
@@ -31,8 +31,27 @@ class OperationalReportSummaryStrip extends StatelessWidget {
         itemBuilder: (context, index) {
           final metric = metrics[index];
           final displayValue = metric.isCurrency
-              ? AmountFormatter.format(metric.value)
-              : metric.value;
+              ? CustomInteractiveAmountText(
+                  amount: metric.value,
+                  currencyCode: 'YER',
+                  trailingText: 'ر.ي',
+                  enableTooltip: true,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w800,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                )
+              : Text(
+                  metric.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w800,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                );
           return Container(
             width: 176,
             padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 14, 12),
@@ -56,16 +75,7 @@ class OperationalReportSummaryStrip extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                Text(
-                  displayValue,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.titleMedium.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w800,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
+                displayValue,
               ],
             ),
           );
