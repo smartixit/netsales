@@ -5,8 +5,8 @@ import 'dart:ui' as ui;
 import 'package:document_engine/document_engine.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/widgets/charts/src/models/chart_series.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -57,21 +57,28 @@ abstract final class NetSalesChartsExportAdapter {
     if (bytes == null || bytes.isEmpty) {
       return FileExportResult.failure('تعذر التقاط المخطط لإنشاء PDF.');
     }
-    final pdfBytes = await _buildChartPdfBytes(bytes, title);
-    return FileExportService.instance.saveFile(
-      bytes: pdfBytes,
-      fileName: title,
-      extension: 'pdf',
-      folderName: 'Charts',
-      namingStrategy: FileNamingStrategy.report,
-      autoOpen: false,
-    );
+    try {
+      final pdfBytes = await _buildChartPdfBytes(bytes, title);
+      return FileExportService.instance.saveFile(
+        bytes: pdfBytes,
+        fileName: title,
+        extension: 'pdf',
+        folderName: 'Charts',
+        namingStrategy: FileNamingStrategy.report,
+        autoOpen: false,
+      );
+    } catch (error) {
+      return FileExportResult.failure(
+        'تعذر إنشاء ملف PDF للمخطط: $error',
+      );
+    }
   }
 
   static Future<Uint8List> _buildChartPdfBytes(
     Uint8List chartPng,
     String title,
   ) async {
+    final normalizedChartPng = await _normalizePdfChartImage(chartPng);
     final safeTitle = title.trim().isEmpty ? 'Chart export' : title.trim();
     final generatedAt = DateTime.now();
     final renderer = PdfDocumentRenderer(
@@ -94,7 +101,7 @@ abstract final class NetSalesChartsExportAdapter {
           id: 'chart-visual',
           nodes: [
             DocumentImage(
-              bytes: chartPng,
+              bytes: normalizedChartPng,
               widthPoints: 780,
               heightPoints: 460,
               fit: DocumentImageFit.contain,
@@ -135,6 +142,67 @@ abstract final class NetSalesChartsExportAdapter {
     if (result is DocumentRenderSuccess) return result.artifact.bytes;
     if (result is DocumentRenderFailure) throw StateError(result.message);
     throw StateError('تعذر إنشاء ملف PDF للمخطط.');
+  }
+
+  static Future<Uint8List> _normalizePdfChartImage(
+    Uint8List sourceBytes,
+  ) async {
+    const maxImageBytes = 4 * 1024 * 1024;
+    if (sourceBytes.length <= maxImageBytes) {
+      return Uint8List.fromList(sourceBytes);
+    }
+
+    final sourceCodec = await ui.instantiateImageCodec(sourceBytes);
+    int sourceWidth;
+    int sourceHeight;
+    try {
+      final frame = await sourceCodec.getNextFrame();
+      sourceWidth = frame.image.width;
+      sourceHeight = frame.image.height;
+      frame.image.dispose();
+    } finally {
+      sourceCodec.dispose();
+    }
+
+    for (final maxWidth in [1600, 1200, 900]) {
+      const maxHeight = 1000;
+      final scale = [
+        1.0,
+        maxWidth / sourceWidth,
+        maxHeight / sourceHeight,
+      ].reduce((a, b) => a < b ? a : b);
+      final targetWidth = (sourceWidth * scale).round().clamp(1, maxWidth);
+      final targetHeight = (sourceHeight * scale).round().clamp(1, maxHeight);
+      final codec = await ui.instantiateImageCodec(
+        sourceBytes,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+      );
+      try {
+        final frame = await codec.getNextFrame();
+        try {
+          final data = await frame.image.toByteData(
+            format: ui.ImageByteFormat.png,
+          );
+          if (data == null) continue;
+          final resized = data.buffer.asUint8List(
+            data.offsetInBytes,
+            data.lengthInBytes,
+          );
+          if (resized.length <= maxImageBytes) {
+            return Uint8List.fromList(resized);
+          }
+        } finally {
+          frame.image.dispose();
+        }
+      } finally {
+        codec.dispose();
+      }
+    }
+
+    throw StateError(
+      'حجم صورة المخطط ما زال يتجاوز الحد المسموح به بعد التصغير.',
+    );
   }
 
   static Uint8List buildCsvBytes(List<ChartSeries> series) {
