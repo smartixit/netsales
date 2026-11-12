@@ -1085,7 +1085,6 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       ],
       DocumentFontWeight.regular => const [
         DocumentFontRole.body,
-        DocumentFontRole.regular,
       ],
       DocumentFontWeight.medium => const [
         DocumentFontRole.medium,
