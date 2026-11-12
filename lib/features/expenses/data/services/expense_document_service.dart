@@ -4,6 +4,7 @@ import 'dart:ui' show Color;
 import 'package:document_engine/document_engine.dart';
 import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
 import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/official_document_artifact_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -67,7 +68,19 @@ class ExpenseDocumentService {
       ),
     );
 
-    if (result is DocumentRenderSuccess) return result.artifact.bytes;
+    if (result is DocumentRenderSuccess) {
+      final bytes = result.artifact.bytes;
+      await OfficialDocumentArtifactService.instance.issueAndUpload(
+      documentType: 'expense',
+      documentId: expense.expenseId,
+      networkId: expense.networkId,
+      templateId: 'netsales.expense.voucher.executive',
+      templateVersion: '1.0.0',
+        pdfBytes: bytes,
+        fileName: _fileName(expense),
+      );
+      return bytes;
+    }
     if (result is DocumentRenderFailure) throw StateError(result.message);
     throw StateError('تعذر إنشاء سند المصروف.');
   }
