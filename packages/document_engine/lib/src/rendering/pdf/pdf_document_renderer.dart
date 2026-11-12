@@ -15,10 +15,10 @@ import '../document_page_profile.dart';
 import '../document_render_options.dart';
 import '../document_render_result.dart';
 import '../document_renderer.dart';
-import 'payv_text_shaping_provider.dart';
 import 'document_font_weight.dart';
-import 'shaped_pdf_paragraph.dart';
+import 'payv_text_shaping_provider.dart';
 import 'pdf_font_face_cache.dart';
+import 'shaped_pdf_paragraph.dart';
 
 /// PDF backend for bounded, non-official client-side documents.
 ///
