@@ -8,7 +8,9 @@ class ExpenseModel extends ExpenseEntity {
     required super.totalAmount,
     super.expenseDate,
     super.networkName,
+    super.networkLogoUrl,
     super.createdByName,
+    super.createdAt,
     super.items,
     super.attachments,
   });
@@ -24,8 +26,12 @@ class ExpenseModel extends ExpenseEntity {
       expenseUuid: json['expense_uuid'] as String? ?? '',
       totalAmount: (json['expense_total_amount'] as num?)?.toDouble() ?? 0,
       expenseDate: json['expense_date'] as String?,
+      createdAt: json['created_at'] as String?,
       networkName: network is Map<dynamic, dynamic>
           ? network['network_name'] as String?
+          : null,
+      networkLogoUrl: network is Map<dynamic, dynamic>
+          ? network['network_profile_logo'] as String?
           : null,
       createdByName: creator is Map<dynamic, dynamic>
           ? creator['name'] as String?
