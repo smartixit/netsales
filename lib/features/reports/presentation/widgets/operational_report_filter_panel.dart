@@ -31,9 +31,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
       final type = controller.selectedType.value;
       if (type == null) return const SizedBox.shrink();
 
-      final canFilterByPos = isNetworkWorkspace &&
-          type != OperationalReportType.expenses &&
-          type != OperationalReportType.networkWallet;
+      final canFilterByPos = isNetworkWorkspace && controller.canFilterByPos;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +81,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
             AppSpacing.vSm,
             _buildPosSelector(context, type),
           ],
-          if (type.statusOptions.isNotEmpty) ...[
+          if (controller.selectedStatusOptions.isNotEmpty) ...[
             AppSpacing.vSm,
             Text(
               'الحالة',
@@ -102,7 +100,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
                   selected: controller.selectedStatus.value == null,
                   onPressed: () => controller.selectStatus(null),
                 ),
-                ...type.statusOptions.map(
+                ...controller.selectedStatusOptions.map(
                   (value) => _filterButton(
                     label: _statusLabel(value),
                     selected: controller.selectedStatus.value == value,
@@ -112,11 +110,10 @@ class OperationalReportFilterPanel extends StatelessWidget {
               ],
             ),
           ],
-          if (type == OperationalReportType.sales ||
-              type == OperationalReportType.requests) ...[
+          if (controller.selectedSaleTypeOptions.isNotEmpty) ...[
             AppSpacing.vSm,
             Text(
-              type == OperationalReportType.sales ? 'نوع البيع' : 'نوع الطلب',
+              'نوع البيع / الطلب',
               style: AppTypography.labelMedium.copyWith(
                 color: colors.onSurfaceVariant,
                 fontWeight: FontWeight.w700,
@@ -132,16 +129,11 @@ class OperationalReportFilterPanel extends StatelessWidget {
                   selected: controller.selectedSaleType.value == null,
                   onPressed: () => controller.selectSaleType(null),
                 ),
-                _filterButton(
-                  label: 'نقدي',
-                  selected: controller.selectedSaleType.value == 'CASH',
-                  onPressed: () => controller.selectSaleType('CASH'),
-                ),
-                _filterButton(
-                  label: 'آجل',
-                  selected: controller.selectedSaleType.value == 'CREDIT',
-                  onPressed: () => controller.selectSaleType('CREDIT'),
-                ),
+                ...controller.selectedSaleTypeOptions.map((value) => _filterButton(
+                  label: value == 'CASH' ? 'نقدي' : value == 'CREDIT' ? 'آجل' : value,
+                  selected: controller.selectedSaleType.value == value,
+                  onPressed: () => controller.selectSaleType(value),
+                )),
               ],
             ),
           ],
