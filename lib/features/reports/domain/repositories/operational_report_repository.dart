@@ -4,6 +4,7 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
+import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 
 abstract interface class OperationalReportRepository {
   Future<PaginatedList<OperationalReportRecord>> getReport({
@@ -17,6 +18,17 @@ abstract interface class OperationalReportRepository {
     String? saleType,
     String? cursor,
     int perPage = 25,
+  });
+
+  Future<OperationalReportSummary> getSummary({
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+    String? fromDate,
+    String? toDate,
+    String? search,
+    String? status,
+    String? saleType,
   });
 
   Future<OperationalReportExport> requestExport({
