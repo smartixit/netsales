@@ -4,6 +4,7 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
+import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 import 'package:netsales/features/reports/domain/repositories/operational_report_repository.dart';
 
 class GetOperationalReportUseCase {
@@ -30,6 +31,31 @@ class GetOperationalReportUseCase {
     status: status,
     saleType: saleType,
     cursor: cursor,
+  );
+}
+
+class GetOperationalReportSummaryUseCase {
+  const GetOperationalReportSummaryUseCase(this.repository);
+  final OperationalReportRepository repository;
+
+  Future<OperationalReportSummary> call({
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+    String? fromDate,
+    String? toDate,
+    String? search,
+    String? status,
+    String? saleType,
+  }) => repository.getSummary(
+    type: type,
+    networkId: networkId,
+    posId: posId,
+    fromDate: fromDate,
+    toDate: toDate,
+    search: search,
+    status: status,
+    saleType: saleType,
   );
 }
 
