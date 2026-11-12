@@ -88,9 +88,23 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
           final type = types[index];
           final isSelected = controller.selectedType.value == type;
           return isSelected
-              ? CustomButton.primary(
-                  text: type.label,
-                  onPressed: () {},
+              ? Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.28),
+                    ),
+                  ),
+                  child: Text(
+                    type.label,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 )
               : CustomButton.outline(
                   text: type.label,
