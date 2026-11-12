@@ -92,6 +92,7 @@ abstract final class AppPermissions {
   static const String requestsApprove = 'requests.approve';
   static const String requestsReject = 'requests.reject';
   static const String requestsReport = 'requests.report';
+  static const String requestsExport = 'requests.export';
 
   // 11. المبيعات وفواتير البيع (sales)
   static const String salesView = 'sales.view';

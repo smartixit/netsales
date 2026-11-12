@@ -3,8 +3,11 @@ import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/share_service.dart';
+import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
@@ -82,7 +85,12 @@ class ReportsController extends GetxController {
         }
       }
       networks.assignAll(options);
-      final savedId = WorkspaceService.to.savedActiveNetworkId;
+      final activePosId = WorkspaceService.to.savedActivePosId;
+      final userId = SessionService.to.currentUser?.userId;
+      final posNetworkId = isPosWorkspace && activePosId != null && userId != null
+          ? StorageService.instance.getInt('${StorageKeys.activePosNetworkPrefix}_${userId}_${activePosId}')
+          : null;
+      final savedId = posNetworkId ?? WorkspaceService.to.savedActiveNetworkId;
       if (savedId != null && options.any((item) => item.networkId == savedId)) {
         selectedNetworkId.value = savedId;
       } else if (options.length == 1) {
