@@ -23,6 +23,7 @@ class InvoiceDocumentService {
   static final InvoiceDocumentService instance = InvoiceDocumentService._();
 
   Future<Map<DocumentFontWeight, Uint8List>>? _arabicFontFacesFuture;
+  PayvTextShapingProvider? _arabicTextShapingProvider;
   Future<Uint8List>? _applicationIconFuture;
 
   Future<Uint8List> generateInvoicePdf(InvoiceEntity invoice) async {
@@ -33,6 +34,14 @@ class InvoiceDocumentService {
     final mediumFont = fontFaces[DocumentFontWeight.medium]!;
     final semiBoldFont = fontFaces[DocumentFontWeight.semiBold]!;
     final boldFont = fontFaces[DocumentFontWeight.bold]!;
+    final shapingProvider = _arabicTextShapingProvider ??=
+        PayvTextShapingProvider(
+          regularFont,
+          languageTag: 'ar-YE',
+          mediumFontBytes: mediumFont,
+          semiBoldFontBytes: semiBoldFont,
+          boldFontBytes: boldFont,
+        );
     final branding = DocumentBranding(
       organizationName: brand.organizationName,
       tagline: 'إدارة مبيعات الشبكات ونقاط البيع',
@@ -55,13 +64,7 @@ class InvoiceDocumentService {
     );
 
     final result = await PdfDocumentRenderer(
-      textShapingProvider: PayvTextShapingProvider(
-        regularFont,
-        languageTag: 'ar-YE',
-        mediumFontBytes: mediumFont,
-        semiBoldFontBytes: semiBoldFont,
-        boldFontBytes: boldFont,
-      ),
+      textShapingProvider: shapingProvider,
     ).render(
       snapshot: _buildSnapshot(invoice),
       template: _invoiceTemplate,
