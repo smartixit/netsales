@@ -20,6 +20,9 @@ import 'payv_text_shaping_provider.dart';
 import 'pdf_font_face_cache.dart';
 import 'shaped_pdf_paragraph.dart';
 
+final Expando<Map<DocumentFontRole, pw.Font>> _brandingFontFaces =
+    Expando<Map<DocumentFontRole, pw.Font>>('document-engine-branding-font-faces');
+
 /// PDF backend for bounded, non-official client-side documents.
 ///
 /// RTL and mixed-direction text require an explicitly injected, licensed
@@ -536,6 +539,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                 text,
                 direction: direction,
                 fontWeight: _pdfFontWeight(weight),
+                branding: branding,
               ),
             );
           case DocumentHeading(
@@ -551,6 +555,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                   text,
                   direction: direction,
                   fontWeight: _pdfFontWeight(weight),
+                  branding: branding,
                 ),
               ),
             );
@@ -1052,6 +1057,64 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       base: baseFont ?? boldFont!,
       bold: boldFont ?? baseFont!,
     );
+  }
+
+  pw.Font? _brandingPdfFont(
+    DocumentBranding? branding,
+    DocumentFontWeight weight,
+  ) {
+    if (branding == null) return null;
+    final roles = switch (weight) {
+      DocumentFontWeight.thin => const [
+        DocumentFontRole.thin,
+        DocumentFontRole.extraLight,
+        DocumentFontRole.light,
+        DocumentFontRole.body,
+      ],
+      DocumentFontWeight.extraLight => const [
+        DocumentFontRole.extraLight,
+        DocumentFontRole.thin,
+        DocumentFontRole.light,
+        DocumentFontRole.body,
+      ],
+      DocumentFontWeight.light => const [
+        DocumentFontRole.light,
+        DocumentFontRole.extraLight,
+        DocumentFontRole.body,
+      ],
+      DocumentFontWeight.regular => const [
+        DocumentFontRole.body,
+        DocumentFontRole.regular,
+      ],
+      DocumentFontWeight.medium => const [
+        DocumentFontRole.medium,
+        DocumentFontRole.semiBold,
+        DocumentFontRole.body,
+      ],
+      DocumentFontWeight.semiBold => const [
+        DocumentFontRole.semiBold,
+        DocumentFontRole.medium,
+        DocumentFontRole.bold,
+      ],
+      DocumentFontWeight.bold => const [
+        DocumentFontRole.bold,
+        DocumentFontRole.display,
+        DocumentFontRole.heading,
+        DocumentFontRole.semiBold,
+      ],
+    };
+    for (final role in roles) {
+      final bytes = branding.fontBytes(role);
+      if (bytes != null) {
+        final faces = _brandingFontFaces[branding] ??=
+            <DocumentFontRole, pw.Font>{};
+        return faces.putIfAbsent(
+          role,
+          () => pw.Font.ttf(ByteData.sublistView(bytes)),
+        );
+      }
+    }
+    return null;
   }
 
   pw.Font? _brandingFont(
@@ -1686,6 +1749,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     int? maxLines,
     DocumentTextDirection direction = DocumentTextDirection.auto,
     DocumentFontWeight? fontWeight,
+    DocumentBranding? branding,
   }) {
     final provider = textShapingProvider;
     final resolvedFontWeight = fontWeight ??
@@ -1705,10 +1769,13 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           r'[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]',
         ).hasMatch(text);
     if (provider == null || !containsRtl) {
-      final effectiveStyle = provider == null
+      final selectedFont = provider == null
+          ? _brandingPdfFont(branding, resolvedFontWeight)
+          : pdfFontFace(provider, resolvedFontWeight);
+      final effectiveStyle = selectedFont == null
           ? style
           : (style ?? pw.TextStyle()).copyWith(
-              font: pdfFontFace(provider, resolvedFontWeight),
+              font: selectedFont,
               // The selected OpenType face already carries its actual weight.
               // Prevent pdf/widgets from substituting a synthetic theme bold.
               fontWeight: pw.FontWeight.normal,
@@ -1770,12 +1837,14 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     pw.TextAlign? textAlign,
     DocumentTextDirection direction = DocumentTextDirection.auto,
     DocumentFontWeight? fontWeight,
+    DocumentBranding? branding,
   }) => _text(
     text,
     style: style,
     textAlign: textAlign,
     direction: direction,
     fontWeight: fontWeight,
+    branding: branding,
   );
 
   String _valueText(DocumentValue value) => switch (value) {
