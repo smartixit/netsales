@@ -214,6 +214,7 @@ class RepaymentDocumentService {
         text: 'سند تحصيل وسداد مديونية',
         level: 1,
         direction: DocumentTextDirection.rightToLeft,
+        weight: DocumentTextWeight.bold,
       ),
       DocumentStatusBanner(
         label: status.label,
@@ -281,11 +282,13 @@ class RepaymentDocumentService {
           DocumentParagraph(
             text: 'تاريخ العكس: ${repayment.reversedAt}',
             direction: DocumentTextDirection.rightToLeft,
+            weight: DocumentTextWeight.light,
           ),
       ],
       const DocumentParagraph(
         text: 'يعرض هذا المستند المبلغ والتوزيعات كما وردت من الخادم. لا يعيد التطبيق احتساب التسويات أو الأرصدة.',
         direction: DocumentTextDirection.rightToLeft,
+        weight: DocumentTextWeight.light,
       ),
     ];
 
