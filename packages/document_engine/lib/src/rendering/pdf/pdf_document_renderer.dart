@@ -1257,14 +1257,14 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           child: _text(
             text,
             style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-            fontWeight: DocumentFontWeight.medium,
+            fontWeight: DocumentFontWeight.thin,
           ),
         ),
       if (pageNumber != null)
         _text(
           pageNumber,
           style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-          fontWeight: DocumentFontWeight.medium,
+          fontWeight: DocumentFontWeight.thin,
         ),
     ];
     return pw.Container(
@@ -1322,6 +1322,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
               child: _text(
                 caption,
                 style: pw.TextStyle(fontSize: 8, color: muted),
+                fontWeight: DocumentFontWeight.extraLight,
               ),
             ),
         ],
