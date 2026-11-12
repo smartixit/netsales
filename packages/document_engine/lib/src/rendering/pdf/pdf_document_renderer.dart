@@ -64,7 +64,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       if (options.coverPage) {
         document.addPage(
           pw.Page(
-            theme: _pdfTheme(options.branding),
+            theme: _pdfTheme(options.branding, textShapingProvider),
             pageFormat: pageFormat,
             margin: pw.EdgeInsets.fromLTRB(
               profile.marginLeft,
@@ -982,30 +982,59 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     );
   }
 
-  pw.ThemeData? _pdfTheme(DocumentBranding? branding) {
+  pw.ThemeData? _pdfTheme(
+    DocumentBranding? branding,
+    PayvTextShapingProvider? provider,
+  ) {
     if (branding == null) return null;
-    final bodyBytes =
-        branding.fontBytes(DocumentFontRole.body) ??
-        branding.fontBytes(DocumentFontRole.medium) ??
-        branding.fontBytes(DocumentFontRole.semiBold) ??
-        branding.fontBytes(DocumentFontRole.heading) ??
-        branding.fontBytes(DocumentFontRole.display) ??
-        branding.fontBytes(DocumentFontRole.numeric) ??
-        branding.fontBytes(DocumentFontRole.bold);
-    final headingBytes =
-        branding.fontBytes(DocumentFontRole.bold) ??
-        branding.fontBytes(DocumentFontRole.heading) ??
-        branding.fontBytes(DocumentFontRole.display) ??
-        branding.fontBytes(DocumentFontRole.semiBold) ??
-        branding.fontBytes(DocumentFontRole.medium) ??
-        bodyBytes;
-    if (bodyBytes == null && headingBytes == null) return null;
-    final baseBytes = bodyBytes ?? headingBytes!;
-    final boldBytes = headingBytes ?? bodyBytes!;
+
+    final baseFont = provider != null
+        ? pdfFontFace(provider, DocumentFontWeight.regular)
+        : _brandingFont(
+            branding,
+            const [
+              DocumentFontRole.body,
+              DocumentFontRole.medium,
+              DocumentFontRole.semiBold,
+              DocumentFontRole.heading,
+              DocumentFontRole.display,
+              DocumentFontRole.numeric,
+              DocumentFontRole.bold,
+            ],
+          );
+    final boldFont = provider != null
+        ? pdfFontFace(provider, DocumentFontWeight.bold)
+        : _brandingFont(
+            branding,
+            const [
+              DocumentFontRole.bold,
+              DocumentFontRole.heading,
+              DocumentFontRole.display,
+              DocumentFontRole.semiBold,
+              DocumentFontRole.medium,
+              DocumentFontRole.body,
+              DocumentFontRole.numeric,
+            ],
+          );
+    if (baseFont == null && boldFont == null) return null;
+
     return pw.ThemeData.withFont(
-      base: pw.Font.ttf(ByteData.sublistView(baseBytes)),
-      bold: pw.Font.ttf(ByteData.sublistView(boldBytes)),
+      base: baseFont ?? boldFont!,
+      bold: boldFont ?? baseFont!,
     );
+  }
+
+  pw.Font? _brandingFont(
+    DocumentBranding branding,
+    List<DocumentFontRole> roles,
+  ) {
+    for (final role in roles) {
+      final bytes = branding.fontBytes(role);
+      if (bytes != null) {
+        return pw.Font.ttf(ByteData.sublistView(bytes));
+      }
+    }
+    return null;
   }
 
   pw.Widget _coverWidget(DocumentRenderOptions options) {
