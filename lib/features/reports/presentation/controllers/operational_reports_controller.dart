@@ -25,6 +25,9 @@ class OperationalReportsController extends GetxController {
     required this.getExportStatusUseCase,
     required this.downloadExportUseCase,
     required this.getNetworkPosListUseCase,
+    required this.saveSummaryPdfUseCase,
+    required this.shareSummaryPdfUseCase,
+    required this.printSummaryPdfUseCase,
   });
 
   final GetOperationalReportUseCase getReportUseCase;
@@ -33,6 +36,9 @@ class OperationalReportsController extends GetxController {
   final GetOperationalReportExportStatusUseCase getExportStatusUseCase;
   final DownloadOperationalReportExportUseCase downloadExportUseCase;
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
+  final SaveOperationalReportSummaryPdfUseCase saveSummaryPdfUseCase;
+  final ShareOperationalReportSummaryPdfUseCase shareSummaryPdfUseCase;
+  final PrintOperationalReportSummaryPdfUseCase printSummaryPdfUseCase;
 
   final reports = <OperationalReportRecord>[].obs;
   final Rxn<OperationalReportSummary> summary = Rxn<OperationalReportSummary>();
@@ -54,6 +60,7 @@ class OperationalReportsController extends GetxController {
   final isLoadingMorePos = false.obs;
   final isExportActionRunning = false.obs;
   final isCheckingExport = false.obs;
+  final isPdfActionRunning = false.obs;
   final errorMessage = RxnString();
   final loadMoreError = RxnString();
   final posError = RxnString();
@@ -66,11 +73,33 @@ class OperationalReportsController extends GetxController {
   int? _workspacePosId;
   bool _isNetworkWorkspace = true;
   bool _scopeConfigured = false;
+  String? _organizationName;
+  String? _logoUrl;
 
   bool get hasMore => nextCursor.value?.trim().isNotEmpty ?? false;
   bool get hasMorePos => posCursor.value?.trim().isNotEmpty ?? false;
   bool get hasNetworkScope => _networkId != null;
   bool get hasPosScope => _workspacePosId != null;
+
+  String get reportOrganizationName {
+    final value = _organizationName?.trim();
+    return value == null || value.isEmpty ? 'NetSales' : value;
+  }
+
+  String? get reportLogoUrl => _logoUrl;
+
+  String get reportScopeLabel {
+    if (!_isNetworkWorkspace) return 'نقطة البيع الحالية';
+    final type = selectedType.value;
+    if (type == OperationalReportType.expenses ||
+        type == OperationalReportType.networkWallet) {
+      return 'نطاق الشبكة بالكامل';
+    }
+    final posId = selectedPosId.value;
+    if (posId == null) return 'جميع نقاط البيع';
+    final link = posOptions.firstWhereOrNull((item) => item.posId == posId);
+    return link?.pos?.posName ?? 'نقطة بيع #' + posId.toString();
+  }
 
   List<OperationalReportType> get availableTypes {
     return OperationalReportType.values.where((type) {
@@ -102,21 +131,29 @@ class OperationalReportsController extends GetxController {
     required int? networkId,
     required int? posId,
     required bool isNetworkWorkspace,
+    String? organizationName,
+    String? logoUrl,
   }) =>
       !_scopeConfigured ||
       _networkId != networkId ||
       _workspacePosId != posId ||
-      _isNetworkWorkspace != isNetworkWorkspace;
+      _isNetworkWorkspace != isNetworkWorkspace ||
+      _organizationName != organizationName ||
+      _logoUrl != logoUrl;
 
   Future<void> configureScope({
     required int? networkId,
     required int? posId,
     required bool isNetworkWorkspace,
+    String? organizationName,
+    String? logoUrl,
   }) async {
     if (!needsScope(
       networkId: networkId,
       posId: posId,
       isNetworkWorkspace: isNetworkWorkspace,
+      organizationName: organizationName,
+      logoUrl: logoUrl,
     )) {
       return;
     }
@@ -125,6 +162,8 @@ class OperationalReportsController extends GetxController {
     _networkId = networkId;
     _workspacePosId = posId;
     _isNetworkWorkspace = isNetworkWorkspace;
+    _organizationName = organizationName;
+    _logoUrl = logoUrl;
     ++_requestRevision;
     reports.clear();
     summary.value = null;
@@ -477,6 +516,121 @@ class OperationalReportsController extends GetxController {
       );
     } finally {
       isExportActionRunning.value = false;
+    }
+  }
+
+  Future<void> exportSummaryPdf() async {
+    final type = selectedType.value;
+    final data = summary.value;
+    if (type == null || data == null || isPdfActionRunning.value || !canExport) {
+      return;
+    }
+
+    isPdfActionRunning.value = true;
+    try {
+      await saveSummaryPdfUseCase(
+        type: type,
+        summary: data,
+        organizationName: reportOrganizationName,
+        logoUrl: reportLogoUrl,
+        fromDate: fromDate.value,
+        toDate: toDate.value,
+        scopeLabel: reportScopeLabel,
+      );
+      CustomSnackbar.show(
+        title: 'تم إنشاء ملخص PDF',
+        message: 'حُفظ الملخص التنفيذي في مجلد Reports.',
+        type: SnackType.success,
+      );
+    } catch (error) {
+      CustomSnackbar.show(
+        title: 'تعذر إنشاء ملخص PDF',
+        message: AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر إنشاء مستند ملخص التقرير.',
+        ),
+        type: SnackType.error,
+      );
+    } finally {
+      isPdfActionRunning.value = false;
+    }
+  }
+
+  Future<void> shareSummaryPdf() async {
+    final type = selectedType.value;
+    final data = summary.value;
+    if (type == null || data == null || isPdfActionRunning.value || !canExport) {
+      return;
+    }
+
+    isPdfActionRunning.value = true;
+    try {
+      final shared = await shareSummaryPdfUseCase(
+        type: type,
+        summary: data,
+        organizationName: reportOrganizationName,
+        logoUrl: reportLogoUrl,
+        fromDate: fromDate.value,
+        toDate: toDate.value,
+        scopeLabel: reportScopeLabel,
+      );
+      if (shared) {
+        CustomSnackbar.show(
+          title: 'تم تجهيز المستند للمشاركة',
+          message: 'تم إنشاء ملخص PDF وفتح نافذة المشاركة.',
+          type: SnackType.success,
+        );
+      }
+    } catch (error) {
+      CustomSnackbar.show(
+        title: 'تعذرت مشاركة الملخص',
+        message: AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر إنشاء أو مشاركة مستند التقرير.',
+        ),
+        type: SnackType.error,
+      );
+    } finally {
+      isPdfActionRunning.value = false;
+    }
+  }
+
+  Future<void> printSummaryPdf() async {
+    final type = selectedType.value;
+    final data = summary.value;
+    if (type == null || data == null || isPdfActionRunning.value || !canExport) {
+      return;
+    }
+
+    isPdfActionRunning.value = true;
+    try {
+      final printed = await printSummaryPdfUseCase(
+        type: type,
+        summary: data,
+        organizationName: reportOrganizationName,
+        logoUrl: reportLogoUrl,
+        fromDate: fromDate.value,
+        toDate: toDate.value,
+        scopeLabel: reportScopeLabel,
+      );
+      if (printed) {
+        CustomSnackbar.show(
+          title: 'تم فتح نافذة الطباعة',
+          message: 'أُرسل ملخص التقرير إلى خدمة الطباعة.',
+          type: SnackType.success,
+        );
+      }
+    } catch (error) {
+      CustomSnackbar.show(
+        title: 'تعذرت طباعة الملخص',
+        message: AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر إنشاء مستند التقرير للطباعة.',
+        ),
+        type: SnackType.error,
+      );
+    } finally {
+      isPdfActionRunning.value = false;
     }
   }
 
