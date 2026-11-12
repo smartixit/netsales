@@ -435,6 +435,8 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
     'PENDING' => 'قيد الانتظار',
     'APPROVED' => 'معتمد',
     'REJECTED' => 'مرفوض',
+    'CANCELLED' => 'ملغى',
+    'CANCELLED' => 'ملغى',
     _ => status,
   };
 
