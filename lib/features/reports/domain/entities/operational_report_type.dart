@@ -35,10 +35,11 @@ enum OperationalReportType {
   };
 
   List<String> get statusOptions => switch (this) {
-    sales || debtAging => const ['PAID', 'PARTIALLY_PAID', 'UNPAID'],
+    sales => const ['PAID', 'PARTIALLY_PAID', 'UNPAID'],
+    debtAging => const ['PARTIALLY_PAID', 'UNPAID'],
     networkWallet || posWallet => const ['DEPOSIT', 'WITHDRAW'],
     repayments => const ['COMPLETED', 'REVERSED'],
-    requests => const ['PENDING', 'APPROVED', 'REJECTED'],
+    requests => const ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'],
     expenses => const [],
   };
 }
