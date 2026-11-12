@@ -5,7 +5,9 @@ class ExpenseEntity {
   final double totalAmount;
   final String? expenseDate;
   final String? networkName;
+  final String? networkLogoUrl;
   final String? createdByName;
+  final String? createdAt;
   final List<ExpenseItemEntity> items;
   final List<ExpenseAttachmentEntity> attachments;
 
@@ -16,7 +18,9 @@ class ExpenseEntity {
     required this.totalAmount,
     this.expenseDate,
     this.networkName,
+    this.networkLogoUrl,
     this.createdByName,
+    this.createdAt,
     this.items = const [],
     this.attachments = const [],
   });
