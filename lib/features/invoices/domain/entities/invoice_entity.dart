@@ -21,7 +21,9 @@ class InvoiceEntity {
   final String? invoiceDate;
   final int? createdBy;
   final String? networkName;
+  final String? networkLogoUrl;
   final String? posName;
+  final String? posLogoUrl;
   final String? posPhoneNumber;
   final List<InvoiceItemEntity> items;
   final String? createdAt;
@@ -45,7 +47,9 @@ class InvoiceEntity {
     this.invoiceDate,
     this.createdBy,
     this.networkName,
+    this.networkLogoUrl,
     this.posName,
+    this.posLogoUrl,
     this.posPhoneNumber,
     this.items = const [],
     this.createdAt,
