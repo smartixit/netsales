@@ -44,5 +44,35 @@ abstract interface class OperationalReportRepository {
 
   Future<OperationalReportExport> getExportStatus(String exportId);
 
+  Future<bool> saveSummaryPdf({
+    required OperationalReportType type,
+    required OperationalReportSummary summary,
+    required String organizationName,
+    String? logoUrl,
+    String? fromDate,
+    String? toDate,
+    String? scopeLabel,
+  });
+
+  Future<bool> shareSummaryPdf({
+    required OperationalReportType type,
+    required OperationalReportSummary summary,
+    required String organizationName,
+    String? logoUrl,
+    String? fromDate,
+    String? toDate,
+    String? scopeLabel,
+  });
+
+  Future<bool> printSummaryPdf({
+    required OperationalReportType type,
+    required OperationalReportSummary summary,
+    required String organizationName,
+    String? logoUrl,
+    String? fromDate,
+    String? toDate,
+    String? scopeLabel,
+  });
+
   Future<Uint8List?> downloadExport(String url);
 }
