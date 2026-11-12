@@ -49,7 +49,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
               'التقارير التشغيلية',
               style: AppTypography.titleLarge.copyWith(
                 color: context.colors.onSurface,
-                fontWeight: FontWeight.w800,
+                fontWeight: AppTypography.bold,
               ),
             ),
             AppSpacing.vXs,
