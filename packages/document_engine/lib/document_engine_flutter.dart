@@ -9,3 +9,5 @@ export 'src/widgets/report_configuration_studio.dart';
 export 'src/widgets/document_artifact_preview.dart';
 
 export 'src/widgets/document_pdf_bytes_preview.dart';
+
+export 'src/widgets/document_engine_font_assets.dart';

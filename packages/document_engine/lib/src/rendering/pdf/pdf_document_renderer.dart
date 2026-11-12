@@ -15,19 +15,25 @@ import '../document_page_profile.dart';
 import '../document_render_options.dart';
 import '../document_render_result.dart';
 import '../document_renderer.dart';
+import 'payv_text_shaping_provider.dart';
+import 'shaped_pdf_paragraph.dart';
 
 /// PDF backend for bounded, non-official client-side documents.
 ///
-/// Complex RTL scripts are rejected until a shaping provider is selected and
-/// validated in the dedicated typography milestone.
+/// RTL and mixed-direction text require an explicitly injected, licensed
+/// OpenType shaping provider. The default configuration remains fail-closed.
 final class PdfDocumentRenderer implements DocumentRenderer {
-  const PdfDocumentRenderer();
+  const PdfDocumentRenderer({this.textShapingProvider});
+
+  /// OpenType/BiDi provider injected by the host after loading a licensed font.
+  /// It is deliberately injected rather than loading Flutter assets here.
+  final PayvTextShapingProvider? textShapingProvider;
 
   @override
   String get rendererId => 'document-engine.pdf';
 
   @override
-  String get rendererVersion => '1.2.0';
+  String get rendererVersion => '1.3.0';
 
   @override
   Future<DocumentRenderResult> render({
@@ -104,19 +110,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           },
           build: (_) => [
             if (options.watermark != null)
-              pw.Watermark.text(
-                options.watermark!.text,
-                angle: options.watermark!.angleRadians,
-                style: pw.TextStyle(
-                  fontSize: 38,
-                  color: PdfColor(
-                    _pdfColor(options.watermark!.color).red,
-                    _pdfColor(options.watermark!.color).green,
-                    _pdfColor(options.watermark!.color).blue,
-                    options.watermark!.opacity,
-                  ),
-                ),
-              ),
+              _watermarkWidget(options.watermark!, profile),
             ..._buildContent(snapshot, template, options.branding),
           ],
         ),
@@ -171,11 +165,15 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       );
     }
 
+    final rtlPattern = RegExp(
+      r'[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]',
+    );
     final locale = snapshot.metadata.locale.languageTag.toLowerCase();
-    if (snapshot.metadata.locale.direction ==
-            DocumentTextDirection.rightToLeft ||
-        RegExp(r'^(ar|fa|ur|he|ps|sd)(-|$)').hasMatch(locale) ||
-        _containsUnshapedRtl(snapshot, options)) {
+    if (textShapingProvider == null &&
+        (snapshot.metadata.locale.direction ==
+                DocumentTextDirection.rightToLeft ||
+            RegExp(r'^(ar|fa|ur|he|ps|sd)(-|$)').hasMatch(locale) ||
+            _containsUnshapedRtl(snapshot, options))) {
       return const DocumentRenderFailure(
         code: DocumentRenderFailureCode.unsupportedTextShaping,
         message:
@@ -251,7 +249,6 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     );
     final branding = options.branding;
     final optionTexts = <String?>[
-      options.watermark?.text,
       options.headerText,
       options.footerText,
       options.firstPageHeaderText,
@@ -434,7 +431,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                 ? pw.CrossAxisAlignment.center
                 : pw.CrossAxisAlignment.start,
             children: [
-              pw.Text(
+              _text(
                 branding.organizationName,
                 style: pw.TextStyle(fontSize: 9, color: textColor),
                 textAlign: layout == DocumentTemplateLayout.receipt
@@ -444,7 +441,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
               if (branding.tagline case final tagline?)
                 pw.Padding(
                   padding: const pw.EdgeInsets.only(top: 2),
-                  child: pw.Text(
+                  child: _text(
                     tagline,
                     style: pw.TextStyle(fontSize: 8, color: muted),
                     textAlign: layout == DocumentTemplateLayout.receipt
@@ -470,7 +467,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
         ),
       pw.Header(
         level: 0,
-        child: pw.Text(
+        child: _text(
           snapshot.metadata.title,
           textAlign: layout == DocumentTemplateLayout.receipt
               ? pw.TextAlign.center
@@ -487,8 +484,8 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     ];
     if (snapshot.metadata.subtitle case final subtitle?) {
       widgets.add(
-        pw.Paragraph(
-          text: subtitle,
+        _paragraph(
+          subtitle,
           style: pw.TextStyle(
             fontSize: layout == DocumentTemplateLayout.compact ? 8 : 11,
             color: muted,
@@ -508,7 +505,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
         widgets.add(
           pw.Header(
             level: 1,
-            child: pw.Text(
+            child: _text(
               title,
               style: pw.TextStyle(
                 fontSize: layout == DocumentTemplateLayout.compact ? 10 : 14,
@@ -523,11 +520,14 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       }
       for (final node in section.nodes) {
         switch (node) {
-          case DocumentParagraph(:final text):
-            widgets.add(pw.Paragraph(text: text));
-          case DocumentHeading(:final text, :final level):
+          case DocumentParagraph(:final text, :final direction):
+            widgets.add(_paragraph(text, direction: direction));
+          case DocumentHeading(:final text, :final level, :final direction):
             widgets.add(
-              pw.Header(level: level > 5 ? 5 : level, child: pw.Text(text)),
+              pw.Header(
+                level: level > 5 ? 5 : level,
+                child: _text(text, direction: direction),
+              ),
             );
           case DocumentMetric(:final label, :final value, :final caption):
             widgets.add(_metricWidget(label, value, caption, branding));
@@ -594,7 +594,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
+                      _text(
                         item.label,
                         style: pw.TextStyle(
                           fontSize: node.compact ? 7 : 8,
@@ -602,8 +602,9 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                         ),
                       ),
                       pw.SizedBox(height: node.compact ? 3 : 5),
-                      pw.Text(
+                      _text(
                         _valueText(item.value),
+                        direction: item.direction,
                         style: pw.TextStyle(
                           fontSize: node.compact ? 8 : 9,
                           fontWeight: pw.FontWeight.bold,
@@ -654,7 +655,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text(
+                _text(
                   node.label,
                   style: pw.TextStyle(
                     color: textColor,
@@ -665,7 +666,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                 if (node.detail != null)
                   pw.Padding(
                     padding: const pw.EdgeInsets.only(top: 3),
-                    child: pw.Text(
+                    child: _text(
                       node.detail!,
                       style: pw.TextStyle(fontSize: 8, color: muted),
                     ),
@@ -720,7 +721,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(
+                    _text(
                       line.label,
                       style: pw.TextStyle(
                         color: isSecondary ? muted : textColor,
@@ -733,7 +734,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                     if (line.note != null)
                       pw.Padding(
                         padding: const pw.EdgeInsets.only(top: 2),
-                        child: pw.Text(
+                        child: _text(
                           line.note!,
                           style: pw.TextStyle(fontSize: 7, color: muted),
                         ),
@@ -742,7 +743,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                 ),
               ),
               pw.SizedBox(width: 12),
-              pw.Text(
+              _text(
                 _valueText(line.value),
                 textAlign: pw.TextAlign.right,
                 style: pw.TextStyle(
@@ -782,7 +783,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           if (node.title != null)
             pw.Padding(
               padding: const pw.EdgeInsets.fromLTRB(10, 9, 10, 4),
-              child: pw.Text(
+              child: _text(
                 node.title!,
                 style: pw.TextStyle(
                   color: primary,
@@ -815,7 +816,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(
+          _text(
             node.title,
             style: pw.TextStyle(
               color: textColor,
@@ -824,7 +825,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
             ),
           ),
           pw.SizedBox(height: 4),
-          pw.Text(
+          _text(
             node.body,
             style: pw.TextStyle(color: muted, fontSize: 8.5),
           ),
@@ -892,7 +893,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       children: [
         aligned,
         pw.SizedBox(height: 4),
-        pw.Text(
+        _text(
           node.caption!,
           textAlign: switch (node.alignment) {
             DocumentImageAlignment.leading => pw.TextAlign.left,
@@ -918,20 +919,20 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       if (node.caption != null)
         pw.Padding(
           padding: const pw.EdgeInsets.only(top: 4),
-          child: pw.Text(node.caption!, style: const pw.TextStyle(fontSize: 8)),
+          child: _text(node.caption!, style: const pw.TextStyle(fontSize: 8)),
         ),
     ],
   );
 
   pw.Widget _signatureAreaWidget(DocumentSignatureArea node) {
     final details = <pw.Widget>[
-      pw.Text(node.label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-      if (node.signerName != null) pw.Text(node.signerName!),
-      if (node.roleLabel != null) pw.Text(node.roleLabel!),
+      _text(node.label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+      if (node.signerName != null) _text(node.signerName!),
+      if (node.roleLabel != null) _text(node.roleLabel!),
       if (node.approvalReference != null)
-        pw.Text('Approval reference: ${node.approvalReference!}'),
+        _text('Approval reference: ${node.approvalReference!}'),
       if (node.approvedAt != null)
-        pw.Text('Approved at: ${node.approvedAt!.toIso8601String()}'),
+        _text('Approved at: ${node.approvedAt!.toIso8601String()}'),
     ];
     final imageBytes = node.visualSignatureBytes;
     return pw.Container(
@@ -994,7 +995,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
             child: pw.Image(pw.MemoryImage(logo), fit: pw.BoxFit.contain),
           ),
         if (options.branding case final branding?)
-          pw.Text(
+          _text(
             branding.organizationName,
             style: pw.TextStyle(
               fontSize: 10,
@@ -1007,7 +1008,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           color: _pdfColor(options.branding?.primaryColor ?? '0D7A5F'),
           margin: const pw.EdgeInsets.only(bottom: 28),
         ),
-        pw.Text(
+        _text(
           options.coverTitle!,
           style: pw.TextStyle(
             fontSize: 30,
@@ -1018,7 +1019,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
         if (options.coverSubtitle case final subtitle?)
           pw.Padding(
             padding: const pw.EdgeInsets.only(top: 12),
-            child: pw.Text(
+            child: _text(
               subtitle,
               style: const pw.TextStyle(fontSize: 14, color: PdfColors.grey700),
             ),
@@ -1036,7 +1037,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                         children: [
                           pw.SizedBox(
                             width: 110,
-                            child: pw.Text(
+                            child: _text(
                               entry.key,
                               style: const pw.TextStyle(
                                 fontSize: 9,
@@ -1045,7 +1046,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                             ),
                           ),
                           pw.Expanded(
-                            child: pw.Text(
+                            child: _text(
                               entry.value,
                               style: const pw.TextStyle(fontSize: 10),
                             ),
@@ -1058,11 +1059,30 @@ final class PdfDocumentRenderer implements DocumentRenderer {
             ),
           ),
         pw.Spacer(),
-        pw.Text(
+        _text(
           'Generated ${options.generatedAt.toUtc().toIso8601String()}',
           style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
         ),
       ],
+    );
+  }
+
+  pw.Widget _watermarkWidget(
+    DocumentWatermark watermark,
+    DocumentPageProfile profile,
+  ) {
+    return pw.Watermark(
+      angle: watermark.angleRadians,
+      fit: pw.BoxFit.contain,
+      child: pw.Opacity(
+        opacity: watermark.opacity,
+        child: pw.Image(
+          pw.MemoryImage(watermark.imageBytes),
+          width: profile.widthPoints * watermark.widthFactor,
+          height: profile.heightPoints * watermark.heightFactor,
+          fit: pw.BoxFit.contain,
+        ),
+      ),
     );
   }
 
@@ -1074,7 +1094,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
         bottom: pw.BorderSide(color: PdfColors.grey400, width: 0.5),
       ),
     ),
-    child: pw.Text(
+    child: _text(
       text,
       style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
     ),
@@ -1084,13 +1104,13 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     final parts = <pw.Widget>[
       if (text != null)
         pw.Expanded(
-          child: pw.Text(
+          child: _text(
             text,
             style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
           ),
         ),
       if (pageNumber != null)
-        pw.Text(
+        _text(
           pageNumber,
           style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
         ),
@@ -1130,9 +1150,9 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(label, style: pw.TextStyle(fontSize: 9, color: muted)),
+          _text(label, style: pw.TextStyle(fontSize: 9, color: muted)),
           pw.SizedBox(height: 4),
-          pw.Text(
+          _text(
             _valueText(value),
             style: pw.TextStyle(
               fontSize: 16,
@@ -1143,7 +1163,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           if (caption != null)
             pw.Padding(
               padding: const pw.EdgeInsets.only(top: 3),
-              child: pw.Text(
+              child: _text(
                 caption,
                 style: pw.TextStyle(fontSize: 8, color: muted),
               ),
@@ -1218,6 +1238,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                 columns[index].alignment,
                 false,
                 style.compact,
+                entry.$2.cells[index].direction,
               ),
           ],
         ),
@@ -1247,8 +1268,9 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     String text,
     DocumentCellAlignment alignment,
     bool isHeader,
-    bool compact,
-  ) {
+    bool compact, [
+    DocumentTextDirection direction = DocumentTextDirection.auto,
+  ]) {
     final textAlign = switch (alignment) {
       DocumentCellAlignment.leading => pw.TextAlign.left,
       DocumentCellAlignment.center => pw.TextAlign.center,
@@ -1257,9 +1279,10 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     };
     return pw.Padding(
       padding: pw.EdgeInsets.all(compact ? 3 : 6),
-      child: pw.Text(
+      child: _text(
         text,
         textAlign: textAlign,
+        direction: direction,
         style: pw.TextStyle(
           fontSize: isHeader ? 9 : 8,
           fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
@@ -1273,14 +1296,14 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     final widgets = <pw.Widget>[
       pw.Header(
         level: 2,
-        child: pw.Text(
+        child: _text(
           chart.title,
           style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
         ),
       ),
       if (chart.subtitle != null)
-        pw.Paragraph(
-          text: chart.subtitle!,
+        _paragraph(
+          chart.subtitle!,
           style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
         ),
       pw.SvgImage(svg: _chartSvg(chart), height: 180),
@@ -1296,7 +1319,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
             runSpacing: 3,
             children: categories
                 .map(
-                  (point) => pw.Text(
+                  (point) => _text(
                     point.label,
                     style: const pw.TextStyle(fontSize: 7),
                   ),
@@ -1328,7 +1351,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                         ),
                       ),
                       pw.SizedBox(width: 4),
-                      pw.Text(
+                      _text(
                         series.label,
                         style: const pw.TextStyle(fontSize: 8),
                       ),
@@ -1386,7 +1409,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
 
   pw.Widget _chartTableCell(String value, bool header) => pw.Padding(
     padding: const pw.EdgeInsets.symmetric(vertical: 3, horizontal: 4),
-    child: pw.Text(
+    child: _text(
       value,
       style: pw.TextStyle(
         fontSize: 7,
@@ -1537,6 +1560,95 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       (value & 0xFF) / 255,
     );
   }
+
+
+  /// Central text gateway: all RTL and mixed-direction strings use the same
+  /// Payv shaping pipeline, including table cells, metadata, headers, footers,
+  /// metric cards, chart labels, signatures, QR captions and cover fields.
+  /// LTR-only strings retain the PDF package's native text layout.
+  pw.Widget _text(
+    String text, {
+    pw.TextStyle? style,
+    pw.TextAlign? textAlign,
+    pw.TextDirection? textDirection,
+    bool? softWrap,
+    int? maxLines,
+    DocumentTextDirection direction = DocumentTextDirection.auto,
+  }) {
+    final provider = textShapingProvider;
+    final requestedDirection = direction != DocumentTextDirection.auto
+        ? direction
+        : switch (textDirection) {
+            pw.TextDirection.rtl => DocumentTextDirection.rightToLeft,
+            pw.TextDirection.ltr => DocumentTextDirection.leftToRight,
+            null => DocumentTextDirection.auto,
+          };
+    final containsRtl =
+        requestedDirection == DocumentTextDirection.rightToLeft ||
+        RegExp(
+          r'[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]',
+        ).hasMatch(text);
+    if (provider == null || !containsRtl) {
+      return pw.Text(
+        text,
+        style: style,
+        textAlign: textAlign,
+        textDirection: textDirection,
+        softWrap: softWrap,
+        maxLines: maxLines,
+      );
+    }
+
+    return pw.LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints?.maxWidth;
+        final fontSize = style?.fontSize ?? 10.0;
+        final resolvedDirection = provider.resolveDirection(
+          text,
+          requested: requestedDirection,
+        );
+        final intrinsicWidth = provider.shapeLine(
+              text,
+              direction: resolvedDirection,
+            ).advance *
+            fontSize /
+            provider.font.unitsPerEm;
+        final width = availableWidth != null &&
+                availableWidth.isFinite &&
+                availableWidth > 0
+            ? availableWidth
+            : math.max(1.0, intrinsicWidth);
+        final alignment = switch (textAlign) {
+          pw.TextAlign.left => ShapedPdfTextAlignment.left,
+          pw.TextAlign.right => ShapedPdfTextAlignment.right,
+          pw.TextAlign.center => ShapedPdfTextAlignment.center,
+          pw.TextAlign.end => ShapedPdfTextAlignment.end,
+          _ => ShapedPdfTextAlignment.start,
+        };
+        return ShapedPdfParagraph(
+          text: text,
+          provider: provider,
+          width: width,
+          fontSize: fontSize,
+          color: style?.color ?? PdfColors.black,
+          direction: resolvedDirection,
+          alignment: alignment,
+        );
+      },
+    );
+  }
+
+  pw.Widget _paragraph(
+    String text, {
+    pw.TextStyle? style,
+    pw.TextAlign? textAlign,
+    DocumentTextDirection direction = DocumentTextDirection.auto,
+  }) => _text(
+    text,
+    style: style,
+    textAlign: textAlign,
+    direction: direction,
+  );
 
   String _valueText(DocumentValue value) => switch (value) {
     DocumentTextValue(:final value) => value,
