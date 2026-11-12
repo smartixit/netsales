@@ -22,13 +22,17 @@ class InvoiceDocumentService {
 
   static final InvoiceDocumentService instance = InvoiceDocumentService._();
 
-  Future<Uint8List>? _arabicFontFuture;
+  Future<Map<DocumentFontWeight, Uint8List>>? _arabicFontFacesFuture;
   Future<Uint8List>? _applicationIconFuture;
 
   Future<Uint8List> generateInvoicePdf(InvoiceEntity invoice) async {
     final brand = _resolveBrandContext(invoice);
     final logoBytes = await _resolveLogoBytes(brand.logoUrl);
-    final fontBytes = await _loadArabicFont();
+    final fontFaces = await _loadArabicFontFaces();
+    final regularFont = fontFaces[DocumentFontWeight.regular]!;
+    final mediumFont = fontFaces[DocumentFontWeight.medium]!;
+    final semiBoldFont = fontFaces[DocumentFontWeight.semiBold]!;
+    final boldFont = fontFaces[DocumentFontWeight.bold]!;
     final branding = DocumentBranding(
       organizationName: brand.organizationName,
       tagline: 'إدارة مبيعات الشبكات ونقاط البيع',
@@ -40,14 +44,24 @@ class InvoiceDocumentService {
       mutedTextColor: _colorHex(AppColors.lightColors.onSurfaceVariant),
       logoBytes: logoBytes,
       fonts: {
-        DocumentFontRole.body: fontBytes,
-        DocumentFontRole.heading: fontBytes,
-        DocumentFontRole.numeric: fontBytes,
+        DocumentFontRole.body: regularFont,
+        DocumentFontRole.medium: mediumFont,
+        DocumentFontRole.semiBold: semiBoldFont,
+        DocumentFontRole.bold: boldFont,
+        DocumentFontRole.heading: boldFont,
+        DocumentFontRole.display: boldFont,
+        DocumentFontRole.numeric: regularFont,
       },
     );
 
     final result = await PdfDocumentRenderer(
-      textShapingProvider: PayvTextShapingProvider(fontBytes, languageTag: 'ar-YE'),
+      textShapingProvider: PayvTextShapingProvider(
+        regularFont,
+        languageTag: 'ar-YE',
+        mediumFontBytes: mediumFont,
+        semiBoldFontBytes: semiBoldFont,
+        boldFontBytes: boldFont,
+      ),
     ).render(
       snapshot: _buildSnapshot(invoice),
       template: _invoiceTemplate,
@@ -398,9 +412,18 @@ class InvoiceDocumentService {
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
 
-  Future<Uint8List> _loadArabicFont() async {
-    final future = _arabicFontFuture ??= loadDocumentEngineArabicFont();
-    return Uint8List.fromList(await future);
+  Future<Map<DocumentFontWeight, Uint8List>> _loadArabicFontFaces() async {
+    final future = _arabicFontFacesFuture ??= loadDocumentEngineFontFaces(
+      regularAssetPath: 'assets/fonts/IBM-Regular.ttf',
+      mediumAssetPath: 'assets/fonts/IBM-Medium.ttf',
+      semiBoldAssetPath: 'assets/fonts/IBM-SemiBold.ttf',
+      boldAssetPath: 'assets/fonts/IBM-Bold.ttf',
+    );
+    final faces = await future;
+    return Map<DocumentFontWeight, Uint8List>.unmodifiable({
+      for (final entry in faces.entries)
+        entry.key: Uint8List.fromList(entry.value),
+    });
   }
 
   static bool _isPngOrJpeg(List<int> bytes) {
