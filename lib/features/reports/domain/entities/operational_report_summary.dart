@@ -118,7 +118,7 @@ class OperationalReportSummary {
       OperationalReportType.requests => [
         count,
         OperationalReportMetric(
-          label: 'إجمالي الطلبات',
+          label: 'قيمة الطلبات المسجلة',
           value: _value('total_amount'),
           isCurrency: true,
         ),
