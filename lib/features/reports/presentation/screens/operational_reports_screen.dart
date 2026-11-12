@@ -20,11 +20,15 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
     required this.networkId,
     required this.isNetworkWorkspace,
     this.posId,
+    this.organizationName,
+    this.logoUrl,
     super.key,
   });
 
   final int? networkId;
   final int? posId;
+  final String? organizationName;
+  final String? logoUrl;
   final bool isNetworkWorkspace;
 
   @override
@@ -35,6 +39,8 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
           networkId: networkId,
           posId: posId,
           isNetworkWorkspace: isNetworkWorkspace,
+          organizationName: organizationName,
+          logoUrl: logoUrl,
         ),
       );
     });
