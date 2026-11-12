@@ -5,6 +5,7 @@ import 'package:document_engine/document_engine.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/services/document_engine_font_service.dart';
 import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
+import 'package:netsales/core/services/official_document_artifact_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -67,7 +68,20 @@ class InvoiceDocumentService {
       ),
     );
 
-    if (result is DocumentRenderSuccess) return result.artifact.bytes;
+    if (result is DocumentRenderSuccess) {
+      final bytes = result.artifact.bytes;
+      await OfficialDocumentArtifactService.instance.issueAndUpload(
+        documentType: 'sale_invoice',
+        documentId: invoice.invoiceId,
+        networkId: invoice.networkId,
+        posId: invoice.posId,
+        templateId: 'netsales.invoice.executive',
+        templateVersion: '1.0.0',
+        pdfBytes: bytes,
+        fileName: _fileName(invoice),
+      );
+      return bytes;
+    }
     if (result is DocumentRenderFailure) throw StateError(result.message);
     throw StateError('تعذر إنشاء مستند الفاتورة.');
   }
@@ -309,39 +323,15 @@ class InvoiceDocumentService {
   );
 
   _InvoiceBrandContext _resolveBrandContext(InvoiceEntity invoice) {
-    final workspace = WorkspaceService.to;
-    final memberships = SessionService.to.currentUser?.workspaceMemberships ?? const [];
-
-    if (workspace.activeWorkspace == AppWorkspace.network) {
-      final ids = memberships
-          .where((membership) => membership.isNetwork && membership.tenantId > 0)
-          .map((membership) => membership.tenantId)
-          .toList(growable: false);
-      final activeNetworkId = workspace.resolveActiveNetworkId(ids);
-      if (activeNetworkId == null || activeNetworkId == invoice.networkId) {
-        return _InvoiceBrandContext(
-          organizationName: _display(invoice.networkName, 'شبكة #' + invoice.networkId.toString()),
-          logoUrl: invoice.networkLogoUrl,
-        );
-      }
-    }
-
-    if (workspace.activeWorkspace == AppWorkspace.pos) {
-      final ids = memberships
-          .where((membership) => membership.isPos && membership.tenantId > 0)
-          .map((membership) => membership.tenantId)
-          .toList(growable: false);
-      final activePosId = workspace.resolveActivePosId(ids);
-      if (activePosId == null || activePosId == invoice.posId) {
-        return _InvoiceBrandContext(
-          organizationName: _display(invoice.posName, 'نقطة بيع #' + invoice.posId.toString()),
-          logoUrl: invoice.posLogoUrl,
-        );
-      }
-    }
-
-    // Never borrow another tenant's logo when workspace identity is ambiguous.
-    return const _InvoiceBrandContext(organizationName: 'NetSales', logoUrl: null);
+    // The network is the commercial supplier on every invoice, including POS workspace.
+    // POS identity remains a customer/recipient field inside the document body.
+    return _InvoiceBrandContext(
+      organizationName: _display(
+        invoice.networkName,
+        'شبكة #' + invoice.networkId.toString(),
+      ),
+      logoUrl: invoice.networkLogoUrl,
+    );
   }
 
   static String _colorHex(Color color) =>
