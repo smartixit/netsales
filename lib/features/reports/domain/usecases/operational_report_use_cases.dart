@@ -1,7 +1,15 @@
+class GetOperationalReportCatalogUseCase {
+  const GetOperationalReportCatalogUseCase(this.repository);
+  final OperationalReportRepository repository;
+  Future<OperationalReportCatalog> call({required int networkId, int? posId}) =>
+      repository.getCatalog(networkId: networkId, posId: posId);
+}
+
 import 'dart:typed_data';
 
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
+import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
