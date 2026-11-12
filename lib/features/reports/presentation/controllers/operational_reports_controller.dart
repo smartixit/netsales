@@ -108,18 +108,40 @@ class OperationalReportsController extends GetxController {
     return link?.pos?.posName ?? 'نقطة بيع #' + posId.toString();
   }
 
-  List<OperationalReportType> get availableTypes {
-    final serverCatalog = catalog.value;
-    if (serverCatalog != null) {
-      return serverCatalog.availableTypes.where((type) {
-        return PermissionService.to.can(type.requiredPermission);
-      }).toList(growable: false);
-    }
-    return OperationalReportType.values.where((type) {
-      if (!_isNetworkWorkspace && !type.availableForPos) return false;
-      return PermissionService.to.can(type.requiredPermission);
-    }).toList(growable: false);
+  List<OperationalReportType> get availableTypes =>
+      catalog.value?.availableTypes ?? const <OperationalReportType>[];
+
+  Map<String, dynamic>? get selectedDefinition {
+    final type = selectedType.value;
+    return type == null ? null : catalog.value?.definitionFor(type);
   }
+
+  List<String> get selectedStatusOptions {
+    final filters = selectedDefinition?['filters'];
+    if (filters is! List) return const [];
+    for (final filter in filters) {
+      if (filter is Map && filter['id'] == 'status') {
+        final choices = filter['choices'];
+        if (choices is List) return choices.map((value) => value.toString()).toList(growable: false);
+      }
+    }
+    return const [];
+  }
+
+  List<String> get selectedSaleTypeOptions {
+    final filters = selectedDefinition?['filters'];
+    if (filters is! List) return const [];
+    for (final filter in filters) {
+      if (filter is Map && filter['id'] == 'sale_type') {
+        final choices = filter['choices'];
+        if (choices is List) return choices.map((value) => value.toString()).toList(growable: false);
+      }
+    }
+    return const [];
+  }
+
+  bool get canFilterByPos =>
+      selectedDefinition?['pos_selection'] != 'forbidden';
 
   Future<void> _loadReportCatalog() async {
     final networkId = _networkId;
@@ -140,7 +162,9 @@ class OperationalReportsController extends GetxController {
 
   bool get canExport {
     final type = selectedType.value;
-    return type != null && PermissionService.to.can(type.exportPermission);
+    final permission = selectedDefinition?['permissions'];
+    final exportPermission = permission is Map ? permission['export'] : null;
+    return type != null && exportPermission is String && PermissionService.to.can(exportPermission);
   }
 
   bool get requiresPosSelection =>
