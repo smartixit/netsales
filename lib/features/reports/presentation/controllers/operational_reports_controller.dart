@@ -167,6 +167,8 @@ class OperationalReportsController extends GetxController {
     _isNetworkWorkspace = isNetworkWorkspace;
     _organizationName = organizationName;
     _logoUrl = logoUrl;
+    _searchDebounce?.cancel();
+    _searchDebounce = null;
     ++_requestRevision;
     ++_posRevision;
     isLoadingPos.value = false;
@@ -290,6 +292,8 @@ class OperationalReportsController extends GetxController {
     selectedSaleType.value = null;
     if (_isNetworkWorkspace) {
       selectedPosId.value = null;
+      _posSearchQuery = '';
+      unawaited(loadPosOptions(refresh: true, search: ''));
     }
     await loadReport(refresh: true);
   }
