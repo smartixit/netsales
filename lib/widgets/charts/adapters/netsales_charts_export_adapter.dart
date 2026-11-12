@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:document_engine/document_engine.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:netsales/core/services/file_export_service.dart';
+import 'package:netsales/core/services/document_engine_font_service.dart';
 import 'package:netsales/widgets/charts/src/models/chart_series.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
 /// NetSales integration for exporting reusable charts as PNG, PDF or CSV.
@@ -57,36 +57,84 @@ abstract final class NetSalesChartsExportAdapter {
     if (bytes == null || bytes.isEmpty) {
       return FileExportResult.failure('تعذر التقاط المخطط لإنشاء PDF.');
     }
-    final document = pw.Document();
-    document.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4.landscape,
-        margin: const pw.EdgeInsets.all(28),
-        build: (_) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-          children: [
-            pw.Text(
-              title,
-              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.SizedBox(height: 16),
-            pw.Expanded(
-              child: pw.Center(
-                child: pw.Image(pw.MemoryImage(bytes), fit: pw.BoxFit.contain),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    final pdfBytes = await _buildChartPdfBytes(bytes, title);
     return FileExportService.instance.saveFile(
-      bytes: await document.save(),
+      bytes: pdfBytes,
       fileName: title,
       extension: 'pdf',
       folderName: 'Charts',
       namingStrategy: FileNamingStrategy.report,
       autoOpen: false,
     );
+  }
+
+  static Future<Uint8List> _buildChartPdfBytes(
+    Uint8List chartPng,
+    String title,
+  ) async {
+    final safeTitle = title.trim().isEmpty ? 'Chart export' : title.trim();
+    final generatedAt = DateTime.now();
+    final renderer = PdfDocumentRenderer(
+      textShapingProvider:
+          await DocumentEngineFontService.instance.arabicTextShapingProvider(),
+    );
+    final snapshot = DocumentSnapshot(
+      metadata: DocumentMetadata(
+        id: DocumentId('netsales-chart-${generatedAt.microsecondsSinceEpoch}'),
+        documentTypeId: DocumentTypeId('netsales.chart-export'),
+        title: safeTitle,
+        locale: DocumentLocale(
+          languageTag: 'ar-YE',
+          direction: DocumentTextDirection.auto,
+        ),
+        createdAt: generatedAt,
+      ),
+      sections: [
+        DocumentSection(
+          id: 'chart-visual',
+          nodes: [
+            DocumentImage(
+              bytes: chartPng,
+              widthPoints: 780,
+              heightPoints: 460,
+              fit: DocumentImageFit.contain,
+              alignment: DocumentImageAlignment.center,
+            ),
+          ],
+        ),
+      ],
+    );
+    final template = DocumentTemplateDefinition(
+      id: TemplateId('netsales.chart-export.landscape'),
+      version: TemplateVersion(major: 1, minor: 0, patch: 0),
+      documentTypeId: DocumentTypeId('netsales.chart-export'),
+      displayName: 'NetSales Landscape Chart Export',
+      supportedLocaleTags: const ['ar', 'en'],
+      capabilities: TemplateCapabilities([
+        TemplateCapability.images,
+        TemplateCapability.landscapePage,
+      ]),
+      isDefault: true,
+      layout: DocumentTemplateLayout.standard,
+    );
+    final result = await renderer.render(
+      snapshot: snapshot,
+      template: template,
+      options: DocumentRenderOptions(
+        pageProfile: DocumentPageProfile.a4Landscape(
+          marginTop: 28,
+          marginRight: 28,
+          marginBottom: 28,
+          marginLeft: 28,
+        ),
+        generatedAt: generatedAt,
+        showPageNumbers: false,
+        maxPages: 1,
+      ),
+    );
+    if (result is DocumentRenderSuccess) return result.artifact.bytes;
+    if (result is DocumentRenderFailure) throw StateError(result.message);
+    throw StateError('تعذر إنشاء ملف PDF للمخطط.');
   }
 
   static Uint8List buildCsvBytes(List<ChartSeries> series) {
@@ -180,20 +228,12 @@ abstract final class NetSalesChartsExportAdapter {
   }) async {
     final bytes = await capturePng(boundaryKey);
     if (bytes == null || bytes.isEmpty) return false;
-    final document = pw.Document();
-    document.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4.landscape,
-        build: (_) => pw.Center(
-          child: pw.Image(pw.MemoryImage(bytes), fit: pw.BoxFit.contain),
-        ),
-      ),
-    );
     try {
+      final pdfBytes = await _buildChartPdfBytes(bytes, title);
       final result = await SharePlus.instance.share(
         ShareParams(
           files: [
-            XFile.fromData(await document.save(), mimeType: 'application/pdf'),
+            XFile.fromData(pdfBytes, mimeType: 'application/pdf'),
           ],
           fileNameOverrides: ['$title.pdf'],
           downloadFallbackEnabled: true,
