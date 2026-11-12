@@ -243,6 +243,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
             prefixIcon: Icons.storefront_outlined,
             rxValue: controller.selectedPosId,
             items: options,
+            isRequired: requiresOne,
             itemSearchText: (posId) {
               final item = controller.posOptions.firstWhereOrNull(
                 (link) => link.posId == posId,
