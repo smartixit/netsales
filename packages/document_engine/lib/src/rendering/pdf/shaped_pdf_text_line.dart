@@ -5,9 +5,11 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:payv/payv.dart' as payv;
 
 import '../../document/document_locale.dart';
+import 'document_font_weight.dart';
 import 'payv_text_shaping_provider.dart';
 
-final Expando<pw.Font> _unicodeFontCache = Expando<pw.Font>(
+final Expando<Map<DocumentFontWeight, pw.Font>> _unicodeFontCache =
+    Expando<Map<DocumentFontWeight, pw.Font>>(
   'document-engine-shaped-text-font',
 );
 
@@ -26,6 +28,7 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
     required this.fontSize,
     this.height,
     this.color = PdfColors.black,
+    this.fontWeight = DocumentFontWeight.regular,
     this.direction = DocumentTextDirection.auto,
     this.alignment = ShapedPdfTextAlignment.start,
   }) {
@@ -51,13 +54,14 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
   final double fontSize;
   final double? height;
   final PdfColor color;
+  final DocumentFontWeight fontWeight;
   final DocumentTextDirection direction;
   final ShapedPdfTextAlignment alignment;
 
   @override
   pw.Widget build(pw.Context context) {
-    final shaped = provider.shapeLine(text, direction: direction);
-    final scale = fontSize / provider.font.unitsPerEm;
+    final shaped = provider.shapeLine(text, direction: direction, fontWeight: fontWeight);
+    final scale = fontSize / provider.fontFor(fontWeight).unitsPerEm;
     final measuredWidth = shaped.advance * scale;
     final boxHeight = height ?? fontSize * 1.8;
 
@@ -80,8 +84,13 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
       ShapedPdfTextAlignment.right => freeSpace,
     };
 
-    final unicodeFont = _unicodeFontCache[provider] ??= pw.Font.ttf(
-      ByteData.sublistView(provider.fontBytes),
+    final fonts = _unicodeFontCache[provider] ??=
+        <DocumentFontWeight, pw.Font>{};
+    final unicodeFont = fonts.putIfAbsent(
+      fontWeight,
+      () => pw.Font.ttf(
+        ByteData.sublistView(provider.fontBytesFor(fontWeight)),
+      ),
     );
 
     return pw.Stack(
