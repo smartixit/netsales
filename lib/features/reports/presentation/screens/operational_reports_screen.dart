@@ -104,7 +104,16 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                       final summary = controller.summary.value;
                       final type = controller.selectedType.value;
                       if (summary == null || type == null) {
-                        return const SizedBox.shrink();
+                        final failure = controller.summaryError.value;
+                        if (failure == null) return const SizedBox.shrink();
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: CustomErrorState.compact(
+                            title: 'تعذر تحميل الملخص المالي',
+                            subtitle: failure,
+                            onRetry: () => controller.loadReport(refresh: true),
+                          ),
+                        );
                       }
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
