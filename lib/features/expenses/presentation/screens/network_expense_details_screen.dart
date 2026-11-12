@@ -30,6 +30,30 @@ class NetworkExpenseDetailsScreen
       appBarTitle: 'تفاصيل المصروف #$expenseId',
       appBarSubtitle: 'بيانات سند الصرف والبنود والمرفقات',
       actions: [
+        Obx(() {
+          final expense = controller.selectedExpense.value;
+          if (expense == null) return const SizedBox.shrink();
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomButton.icon(
+                icon: Icons.file_download_outlined,
+                tooltip: 'تصدير سند المصروف PDF',
+                onPressed: () => controller.exportExpensePdf(expense),
+              ),
+              CustomButton.icon(
+                icon: Icons.share_outlined,
+                tooltip: 'مشاركة سند المصروف',
+                onPressed: () => controller.shareExpensePdf(expense),
+              ),
+              CustomButton.icon(
+                icon: Icons.print_outlined,
+                tooltip: 'طباعة سند المصروف',
+                onPressed: () => controller.printExpensePdf(expense),
+              ),
+            ],
+          );
+        }),
         if (controller.canDelete)
           Padding(
             padding: EdgeInsetsDirectional.only(end: AppSpacing.sm),
