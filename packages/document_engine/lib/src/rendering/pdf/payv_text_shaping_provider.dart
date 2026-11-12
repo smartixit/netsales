@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:payv/payv.dart' as payv;
 
 import '../../document/document_locale.dart';
+import 'document_font_weight.dart';
 
 /// The selected OpenType shaping and Unicode bidirectional provider for PDFs.
 ///
@@ -14,44 +15,72 @@ final class PayvTextShapingProvider {
   factory PayvTextShapingProvider(
     Uint8List fontBytes, {
     String languageTag = 'ar',
+    Uint8List? mediumFontBytes,
+    Uint8List? semiBoldFontBytes,
+    Uint8List? boldFontBytes,
   }) {
-    if (fontBytes.isEmpty) {
-      throw ArgumentError.value(fontBytes, 'fontBytes', 'Font bytes are empty.');
-    }
-
-    final font = payv.PayvFont.load(Uint8List.fromList(fontBytes));
-    if (!font.canEmbedInPdf || !font.canSubset) {
-      throw const DocumentFontEmbeddingException();
-    }
+    final regularFace = _loadFace(fontBytes, weight: DocumentFontWeight.regular);
+    final mediumFace = mediumFontBytes == null
+        ? regularFace
+        : _loadFace(mediumFontBytes, weight: DocumentFontWeight.medium);
+    final semiBoldSource = semiBoldFontBytes ?? boldFontBytes ?? mediumFontBytes;
+    final semiBoldFace = semiBoldSource == null
+        ? regularFace
+        : _loadFace(semiBoldSource, weight: DocumentFontWeight.semiBold);
+    final boldSource = boldFontBytes ?? semiBoldFontBytes ?? mediumFontBytes;
+    final boldFace = boldSource == null
+        ? regularFace
+        : _loadFace(boldSource, weight: DocumentFontWeight.bold);
 
     return PayvTextShapingProvider._(
-      font: font,
-      fontBytes: Uint8List.fromList(fontBytes),
-      shaper: payv.Shaper(font.raw),
+      faces: {
+        DocumentFontWeight.regular: regularFace,
+        DocumentFontWeight.medium: mediumFace,
+        DocumentFontWeight.semiBold: semiBoldFace,
+        DocumentFontWeight.bold: boldFace,
+      },
       language: _openTypeLanguageTag(languageTag),
     );
   }
 
   PayvTextShapingProvider._({
-    required this.font,
-    required Uint8List fontBytes,
-    required payv.Shaper shaper,
+    required Map<DocumentFontWeight, _PayvFontFace> faces,
     required int language,
-  }) : _fontBytes = Uint8List.fromList(fontBytes),
-       _shaper = shaper,
+  }) : _faces = Map<DocumentFontWeight, _PayvFontFace>.unmodifiable(faces),
        _language = language;
 
-  /// The validated font face used for shaping and later PDF embedding.
-  final payv.PayvFont font;
-  final Uint8List _fontBytes;
-
-  /// Original validated font bytes shared with the PDF Unicode text layer.
-  /// A defensive copy prevents a caller from mutating the shaping face after
-  /// it has been parsed.
-  Uint8List get fontBytes => Uint8List.fromList(_fontBytes);
-
-  final payv.Shaper _shaper;
+  final Map<DocumentFontWeight, _PayvFontFace> _faces;
   final int _language;
+
+  /// Backwards-compatible regular face accessors.
+  payv.PayvFont get font => fontFor(DocumentFontWeight.regular);
+  Uint8List get fontBytes => fontBytesFor(DocumentFontWeight.regular);
+
+  /// Returns the validated OpenType face selected for a semantic weight.
+  payv.PayvFont fontFor(DocumentFontWeight weight) => _faces[weight]!.font;
+
+  /// Returns a defensive copy of the selected face for PDF embedding.
+  Uint8List fontBytesFor(DocumentFontWeight weight) =>
+      Uint8List.fromList(_faces[weight]!.fontBytes);
+
+  static _PayvFontFace _loadFace(
+    Uint8List bytes, {
+    required DocumentFontWeight weight,
+  }) {
+    if (bytes.isEmpty) {
+      throw ArgumentError.value(bytes, 'fontBytes', 'Font bytes are empty.');
+    }
+    final copy = Uint8List.fromList(bytes);
+    final font = payv.PayvFont.load(copy);
+    if (!font.canEmbedInPdf || !font.canSubset) {
+      throw DocumentFontEmbeddingException(weight: weight);
+    }
+    return _PayvFontFace(
+      font: font,
+      fontBytes: copy,
+      shaper: payv.Shaper(font.raw),
+    );
+  }
 
   /// Resolves the paragraph's base direction once, before line wrapping.
   ///
@@ -79,7 +108,9 @@ final class PayvTextShapingProvider {
   ShapedDocumentLine shapeLine(
     String text, {
     DocumentTextDirection direction = DocumentTextDirection.auto,
+    DocumentFontWeight fontWeight = DocumentFontWeight.regular,
   }) {
+    final face = _faces[fontWeight]!;
     if (text.contains('\n') || text.contains('\r') ||
         text.contains('\u2028') || text.contains('\u2029')) {
       throw ArgumentError.value(
@@ -122,7 +153,7 @@ final class PayvTextShapingProvider {
 
       for (final slice in visualSlices) {
         final runScalars = scalars.sublist(slice.$1, slice.$2);
-        final shaped = _shaper.shapeScalars(
+        final shaped = face.shaper.shapeScalars(
           runScalars,
           script: slice.$3,
           language: _language,
@@ -146,7 +177,7 @@ final class PayvTextShapingProvider {
             throw DocumentTextGlyphMissingException(info.codepoint);
           }
 
-          final outline = font.raw.outline(info.glyphId);
+          final outline = face.font.raw.outline(info.glyphId);
           if (outline == null) {
             throw const UnsupportedDocumentFontException(
               'Only TrueType glyf outlines are supported by the selected '
@@ -280,6 +311,18 @@ final class PayvTextShapingProvider {
   }
 }
 
+final class _PayvFontFace {
+  const _PayvFontFace({
+    required this.font,
+    required this.fontBytes,
+    required this.shaper,
+  });
+
+  final payv.PayvFont font;
+  final Uint8List fontBytes;
+  final payv.Shaper shaper;
+}
+
 /// One glyph with shaped positioning and its original Unicode cluster.
 final class ShapedDocumentGlyph {
   const ShapedDocumentGlyph({
@@ -348,11 +391,14 @@ final class ShapedDocumentLine {
 
 /// The selected font does not permit PDF embedding or subsetting.
 final class DocumentFontEmbeddingException implements Exception {
-  const DocumentFontEmbeddingException();
+  const DocumentFontEmbeddingException({this.weight});
+
+  final DocumentFontWeight? weight;
 
   @override
-  String toString() =>
-      'The supplied font licence flags do not permit PDF embedding/subsetting.';
+  String toString() => weight == null
+      ? 'The supplied font licence flags do not permit PDF embedding/subsetting.'
+      : 'The ${weight!.name} font licence flags do not permit PDF embedding/subsetting.';
 }
 
 /// The selected font has no glyph for a required source character.
