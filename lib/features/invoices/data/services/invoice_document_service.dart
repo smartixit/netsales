@@ -137,6 +137,12 @@ class InvoiceDocumentService {
         value: DocumentTextValue(paymentLabel),
         direction: DocumentTextDirection.rightToLeft,
       ),
+      if (invoice.createdByName?.trim().isNotEmpty ?? false)
+        DocumentInfoItem(
+          label: 'أُصدرت بواسطة',
+          value: DocumentTextValue(invoice.createdByName!.trim()),
+          direction: DocumentTextDirection.rightToLeft,
+        ),
       DocumentInfoItem(
         label: 'معرّف الشبكة',
         value: DocumentTextValue('#' + invoice.networkId.toString()),
