@@ -311,7 +311,8 @@ class InvoiceDocumentService {
           .where((membership) => membership.isNetwork && membership.tenantId > 0)
           .map((membership) => membership.tenantId)
           .toList(growable: false);
-      if (workspace.resolveActiveNetworkId(ids) == invoice.networkId) {
+      final activeNetworkId = workspace.resolveActiveNetworkId(ids);
+      if (activeNetworkId == null || activeNetworkId == invoice.networkId) {
         return _InvoiceBrandContext(
           organizationName: _display(invoice.networkName, 'شبكة #' + invoice.networkId.toString()),
           logoUrl: invoice.networkLogoUrl,
@@ -324,7 +325,8 @@ class InvoiceDocumentService {
           .where((membership) => membership.isPos && membership.tenantId > 0)
           .map((membership) => membership.tenantId)
           .toList(growable: false);
-      if (workspace.resolveActivePosId(ids) == invoice.posId) {
+      final activePosId = workspace.resolveActivePosId(ids);
+      if (activePosId == null || activePosId == invoice.posId) {
         return _InvoiceBrandContext(
           organizationName: _display(invoice.posName, 'نقطة بيع #' + invoice.posId.toString()),
           logoUrl: invoice.posLogoUrl,
