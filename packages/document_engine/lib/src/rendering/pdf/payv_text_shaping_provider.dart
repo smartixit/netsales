@@ -7,7 +7,7 @@ import 'document_font_weight.dart';
 
 /// The selected OpenType shaping and Unicode bidirectional provider for PDFs.
 ///
-/// One provider instance is created per embedded font and reused for all text
+/// One provider instance is created per supplied font family and reused for all text
 /// runs in a document. The provider shapes one logical line at a time; line
 /// breaking remains a layout responsibility so the paragraph base direction
 /// can be preserved across wrapped lines.
