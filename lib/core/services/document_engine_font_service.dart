@@ -61,9 +61,9 @@ class DocumentEngineFontService {
       DocumentFontRole.medium: faces[DocumentFontWeight.medium]!,
       DocumentFontRole.semiBold: faces[DocumentFontWeight.semiBold]!,
       DocumentFontRole.bold: faces[DocumentFontWeight.bold]!,
-      DocumentFontRole.heading: faces[DocumentFontWeight.bold]!,
+      DocumentFontRole.heading: faces[DocumentFontWeight.semiBold]!,
       DocumentFontRole.display: faces[DocumentFontWeight.bold]!,
-      DocumentFontRole.numeric: faces[DocumentFontWeight.regular]!,
+      DocumentFontRole.numeric: faces[DocumentFontWeight.medium]!,
     });
   }
 }
