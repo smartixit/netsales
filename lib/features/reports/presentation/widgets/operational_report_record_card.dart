@@ -28,13 +28,13 @@ class OperationalReportRecordCard extends StatelessWidget {
 
   SemanticTone _statusTone(String value) {
     final status = value.toUpperCase();
-    if (status.contains('PAID') ||
+    if (status == 'PAID' ||
         status == 'DEPOSIT' ||
         status == 'COMPLETED' ||
         status == 'APPROVED') {
       return SemanticTone.success;
     }
-    if (status.contains('PARTIAL') || status == 'PENDING' || status == 'WITHDRAW') {
+    if (status == 'PARTIALLY_PAID' || status == 'PENDING' || status == 'WITHDRAW') {
       return SemanticTone.warning;
     }
     if (status == 'REJECTED' || status == 'REVERSED' || status == 'UNPAID') {
