@@ -134,6 +134,10 @@ class OperationalReportSummary {
           label: 'طلبات مرفوضة',
           value: _value('rejected_count'),
         ),
+        OperationalReportMetric(
+          label: 'طلبات ملغاة',
+          value: _value('cancelled_count'),
+        ),
       ],
     };
   }
