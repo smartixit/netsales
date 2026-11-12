@@ -15,6 +15,7 @@ import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/features/expenses/domain/usecases/create_expense_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/delete_expense_attachment_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/delete_expense_use_case.dart';
+import 'package:netsales/features/expenses/domain/usecases/expense_document_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/get_expense_details_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/get_expenses_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/update_expense_use_case.dart';
@@ -49,6 +50,7 @@ class NetworkOperatingExpensesController extends GetxController {
     required this.updateExpenseUseCase,
     required this.deleteExpenseAttachmentUseCase,
     required this.deleteExpenseUseCase,
+    this.expenseDocumentUseCase,
   });
 
   final GetMyNetworksUseCase getMyNetworksUseCase;
@@ -58,6 +60,7 @@ class NetworkOperatingExpensesController extends GetxController {
   final UpdateExpenseUseCase updateExpenseUseCase;
   final DeleteExpenseAttachmentUseCase deleteExpenseAttachmentUseCase;
   final DeleteExpenseUseCase deleteExpenseUseCase;
+  final ExpenseDocumentUseCase? expenseDocumentUseCase;
 
   // ── القائمة والبحث والفلترة ──
   final searchTextController = TextEditingController();
@@ -77,6 +80,7 @@ class NetworkOperatingExpensesController extends GetxController {
   // ── شاشة التفاصيل ──
   final selectedExpense = Rxn<ExpenseEntity>();
   final isLoadingDetails = false.obs;
+  final isDocumentActionRunning = false.obs;
 
   // ── إدارة حالة الفورم التفاعلية ──
   final formKey = GlobalKey<FormState>();
@@ -518,6 +522,68 @@ class NetworkOperatingExpensesController extends GetxController {
       );
     } finally {
       if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide();
+    }
+  }
+
+  Future<void> exportExpensePdf(ExpenseEntity expense) {
+    return _runExpenseDocumentAction(
+      title: 'تصدير سند المصروف',
+      successMessage: 'تم حفظ سند المصروف في مجلد Expenses.',
+      failureMessage: 'تعذر حفظ سند المصروف.',
+      action: (useCase) => useCase.exportAndSave(expense),
+    );
+  }
+
+  Future<void> shareExpensePdf(ExpenseEntity expense) {
+    return _runExpenseDocumentAction(
+      title: 'مشاركة سند المصروف',
+      successMessage: 'تم تجهيز سند المصروف للمشاركة.',
+      failureMessage: 'تعذرت مشاركة سند المصروف.',
+      action: (useCase) => useCase.share(expense),
+    );
+  }
+
+  Future<void> printExpensePdf(ExpenseEntity expense) {
+    return _runExpenseDocumentAction(
+      title: 'طباعة سند المصروف',
+      successMessage: 'تم إرسال سند المصروف إلى خدمة الطباعة.',
+      failureMessage: 'تعذر إرسال سند المصروف للطباعة.',
+      action: (useCase) => useCase.print(expense),
+    );
+  }
+
+  Future<void> _runExpenseDocumentAction({
+    required String title,
+    required String successMessage,
+    required String failureMessage,
+    required Future<bool> Function(ExpenseDocumentUseCase useCase) action,
+  }) async {
+    final useCase = expenseDocumentUseCase;
+    if (useCase == null || isDocumentActionRunning.value) return;
+
+    isDocumentActionRunning.value = true;
+    await CustomAnimationOverlay.showLoading(message: 'جاري إعداد $title...');
+    try {
+      final succeeded = await action(useCase);
+      CustomSnackbar.show(
+        title: succeeded ? 'اكتملت العملية' : 'تعذرت العملية',
+        message: succeeded ? successMessage : failureMessage,
+        type: succeeded ? SnackType.success : SnackType.warning,
+      );
+    } catch (error) {
+      CustomSnackbar.show(
+        title: 'تعذر تنفيذ العملية',
+        message: AppException.sanitizeMessage(
+          error,
+          fallback: failureMessage,
+        ),
+        type: SnackType.error,
+      );
+    } finally {
+      isDocumentActionRunning.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 
