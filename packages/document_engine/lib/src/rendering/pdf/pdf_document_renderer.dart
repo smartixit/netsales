@@ -450,6 +450,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                     textAlign: layout == DocumentTemplateLayout.receipt
                         ? pw.TextAlign.center
                         : pw.TextAlign.left,
+                    fontWeight: DocumentFontWeight.extraLight,
                   ),
                 ),
             ],
@@ -496,6 +497,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           textAlign: layout == DocumentTemplateLayout.receipt
               ? pw.TextAlign.center
               : pw.TextAlign.left,
+          fontWeight: DocumentFontWeight.light,
         ),
       );
     }
