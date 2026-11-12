@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/reports/data/datasources/operational_report_remote_data_source.dart';
+import 'package:netsales/features/reports/data/models/operational_report_record_model.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
@@ -68,7 +69,7 @@ class OperationalReportRepositoryImpl
 
     return PaginatedList<OperationalReportRecord>(
       items: response.data!
-          .map(OperationalReportRecord.new)
+          .map(OperationalReportRecordModel.new)
           .toList(growable: false),
       nextCursor: response.nextCursor,
       prevCursor: response.prevCursor,
