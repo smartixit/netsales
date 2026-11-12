@@ -7,6 +7,7 @@ import 'package:netsales/features/reports/data/models/operational_report_record_
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
+import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 import 'package:netsales/features/reports/domain/repositories/operational_report_repository.dart';
 
 class OperationalReportRepositoryImpl
@@ -75,6 +76,42 @@ class OperationalReportRepositoryImpl
       prevCursor: response.prevCursor,
       perPage: perPage,
     );
+  }
+
+  @override
+  Future<OperationalReportSummary> getSummary({
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+    String? fromDate,
+    String? toDate,
+    String? search,
+    String? status,
+    String? saleType,
+  }) async {
+    final query = <String, dynamic>{
+      'report_type': type.wireValue,
+      'network_id': networkId,
+      if (posId != null) 'pos_id': posId,
+      ..._filters(
+        fromDate: fromDate,
+        toDate: toDate,
+        search: search,
+        status: status,
+        saleType: saleType,
+      ),
+    };
+    final response = await remoteDataSource.getSummary(query: query);
+    if (!response.success || response.data == null) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر تحميل ملخص التقرير.',
+        code: 'OPERATIONAL_REPORT_SUMMARY_FAILED',
+        details: response.errors,
+      );
+    }
+    return response.data!;
   }
 
   @override
