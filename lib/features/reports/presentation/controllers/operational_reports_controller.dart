@@ -606,6 +606,9 @@ class OperationalReportsController extends GetxController {
         fromDate: fromDate.value,
         toDate: toDate.value,
         scopeLabel: reportScopeLabel,
+        search: searchTextController.text.trim(),
+        status: selectedStatus.value,
+        saleType: selectedSaleType.value,
       );
       CustomSnackbar.show(
         title: 'تم إنشاء ملخص PDF',
@@ -643,6 +646,9 @@ class OperationalReportsController extends GetxController {
         fromDate: fromDate.value,
         toDate: toDate.value,
         scopeLabel: reportScopeLabel,
+        search: searchTextController.text.trim(),
+        status: selectedStatus.value,
+        saleType: selectedSaleType.value,
       );
       if (shared) {
         CustomSnackbar.show(
@@ -682,6 +688,9 @@ class OperationalReportsController extends GetxController {
         fromDate: fromDate.value,
         toDate: toDate.value,
         scopeLabel: reportScopeLabel,
+        search: searchTextController.text.trim(),
+        status: selectedStatus.value,
+        saleType: selectedSaleType.value,
       );
       if (printed) {
         CustomSnackbar.show(
