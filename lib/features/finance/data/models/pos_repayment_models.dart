@@ -84,6 +84,8 @@ class PosRepaymentModel extends PosRepaymentEntity {
     super.createdAt,
     super.networkName,
     super.posName,
+    super.networkLogoUrl,
+    super.posLogoUrl,
     super.remainingDebtAfter,
     super.posBalanceAfter,
     super.allocations = const [],
@@ -97,8 +99,18 @@ class PosRepaymentModel extends PosRepaymentEntity {
     }
 
     String? pName;
+    String? pLogoUrl;
     if (json['pos'] is Map<String, dynamic>) {
-      pName = (json['pos'] as Map<String, dynamic>)['pos_name'] as String?;
+      final pos = json['pos'] as Map<String, dynamic>;
+      pName = pos['pos_name'] as String?;
+      pLogoUrl = pos['pos_profile_logo'] as String?;
+    }
+
+    String? networkLogoUrl;
+    if (json['network'] is Map<String, dynamic>) {
+      networkLogoUrl = (json['network'] as Map<String, dynamic>)[
+        'network_profile_logo'
+      ] as String?;
     }
 
     final rawAllocations = json['allocations'];
@@ -130,6 +142,8 @@ class PosRepaymentModel extends PosRepaymentEntity {
       createdAt: json['created_at'] as String?,
       networkName: netName,
       posName: pName,
+      networkLogoUrl: networkLogoUrl,
+      posLogoUrl: pLogoUrl,
       remainingDebtAfter: (json['remaining_debt_after'] as num?)?.toDouble(),
       posBalanceAfter: (json['pos_balance_after'] as num?)?.toDouble(),
       allocations: parsedAllocations,
