@@ -13,12 +13,14 @@ import 'package:netsales/features/commercial/domain/usecases/get_network_pos_lis
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
+import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 import 'package:netsales/features/reports/domain/usecases/operational_report_use_cases.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class OperationalReportsController extends GetxController {
   OperationalReportsController({
     required this.getReportUseCase,
+    required this.getSummaryUseCase,
     required this.requestExportUseCase,
     required this.getExportStatusUseCase,
     required this.downloadExportUseCase,
@@ -26,12 +28,15 @@ class OperationalReportsController extends GetxController {
   });
 
   final GetOperationalReportUseCase getReportUseCase;
+  final GetOperationalReportSummaryUseCase getSummaryUseCase;
   final RequestOperationalReportExportUseCase requestExportUseCase;
   final GetOperationalReportExportStatusUseCase getExportStatusUseCase;
   final DownloadOperationalReportExportUseCase downloadExportUseCase;
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
 
   final reports = <OperationalReportRecord>[].obs;
+  final Rxn<OperationalReportSummary> summary = Rxn<OperationalReportSummary>();
+  final RxnString summaryError = RxnString();
   final selectedType = Rxn<OperationalReportType>();
   final selectedStatus = RxnString();
   final selectedSaleType = RxnString();
@@ -122,6 +127,8 @@ class OperationalReportsController extends GetxController {
     _isNetworkWorkspace = isNetworkWorkspace;
     ++_requestRevision;
     reports.clear();
+    summary.value = null;
+    summaryError.value = null;
     nextCursor.value = null;
     errorMessage.value = null;
     loadMoreError.value = null;
@@ -324,6 +331,8 @@ class OperationalReportsController extends GetxController {
       isLoading.value = true;
       isLoadingMore.value = false;
       errorMessage.value = null;
+      summary.value = null;
+      summaryError.value = null;
       loadMoreError.value = null;
       nextCursor.value = null;
     } else {
@@ -358,6 +367,33 @@ class OperationalReportsController extends GetxController {
       }
       nextCursor.value = page.nextCursor;
       errorMessage.value = null;
+
+      if (refresh) {
+        try {
+          final reportSummary = await getSummaryUseCase(
+            type: type,
+            networkId: networkId,
+            posId: requestedPosId,
+            fromDate: fromDate.value,
+            toDate: toDate.value,
+            search: searchTextController.text,
+            status: selectedStatus.value,
+            saleType: selectedSaleType.value,
+          );
+          if (revision == _requestRevision) {
+            summary.value = reportSummary;
+            summaryError.value = null;
+          }
+        } catch (summaryFailure) {
+          if (revision == _requestRevision) {
+            summary.value = null;
+            summaryError.value = AppException.sanitizeMessage(
+              summaryFailure,
+              fallback: 'تعذر تحميل إجماليات التقرير.',
+            );
+          }
+        }
+      }
     } catch (error) {
       if (revision != _requestRevision) return;
       final message = AppException.sanitizeMessage(
