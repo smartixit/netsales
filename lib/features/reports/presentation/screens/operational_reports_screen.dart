@@ -88,6 +88,19 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                     AppSpacing.vMd,
                     _buildSearchAndFilters(context),
                     Obx(() {
+                      final message = controller.summaryError.value;
+                      if (message == null) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          message,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: context.colors.error,
+                          ),
+                        ),
+                      );
+                    }),
+                    Obx(() {
                       final summary = controller.summary.value;
                       final type = controller.selectedType.value;
                       if (summary == null || type == null) {
