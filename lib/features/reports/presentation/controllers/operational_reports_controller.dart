@@ -70,6 +70,7 @@ class OperationalReportsController extends GetxController {
   Timer? _searchDebounce;
   int _requestRevision = 0;
   int _posRevision = 0;
+  String _posSearchQuery = '';
   int? _networkId;
   int? _workspacePosId;
   bool _isNetworkWorkspace = true;
@@ -180,6 +181,7 @@ class OperationalReportsController extends GetxController {
     toDate.value = null;
     exportJob.value = null;
 
+    _posSearchQuery = '';
     if (!isNetworkWorkspace) {
       selectedPosId.value = posId;
       posOptions.clear();
@@ -287,7 +289,16 @@ class OperationalReportsController extends GetxController {
     await loadReport(refresh: true);
   }
 
-  Future<void> loadPosOptions({bool refresh = false}) async {
+  Future<void> searchPosOptions(String query) async {
+    final normalized = query.trim();
+    if (normalized == _posSearchQuery && posOptions.isNotEmpty) return;
+    await loadPosOptions(refresh: true, search: normalized);
+  }
+
+  Future<void> loadPosOptions({
+    bool refresh = false,
+    String? search,
+  }) async {
     final networkId = _networkId;
     if (!_isNetworkWorkspace || networkId == null) return;
     if (!refresh &&
@@ -295,6 +306,9 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    if (refresh) {
+      _posSearchQuery = search?.trim() ?? '';
+    }
     final revision = ++_posRevision;
     if (refresh) {
       isLoadingPos.value = true;
@@ -312,6 +326,7 @@ class OperationalReportsController extends GetxController {
         networkId,
         cursor: refresh ? null : posCursor.value,
         status: true,
+        search: _posSearchQuery.isEmpty ? null : _posSearchQuery,
         perPage: 100,
       );
       if (revision != _posRevision || networkId != _networkId) return;
