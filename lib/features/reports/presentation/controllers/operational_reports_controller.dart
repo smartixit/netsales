@@ -327,7 +327,7 @@ class OperationalReportsController extends GetxController {
         cursor: refresh ? null : posCursor.value,
         status: true,
         search: _posSearchQuery.isEmpty ? null : _posSearchQuery,
-        perPage: 100,
+        perPage: 50,
       );
       if (revision != _posRevision || networkId != _networkId) return;
       final known = posOptions.map((item) => item.posId).toSet();
