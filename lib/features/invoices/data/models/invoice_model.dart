@@ -35,12 +35,20 @@ class InvoiceModel extends InvoiceEntity {
           (json['network'] as Map<String, dynamic>)['network_name'] as String?;
     }
 
+    String? networkLogoUrl;
+    if (json['network'] is Map) {
+      final networkObj = Map<String, dynamic>.from(json['network'] as Map);
+      networkLogoUrl = networkObj['network_profile_logo']?.toString();
+    }
+
     String? pName;
     String? pPhone;
+    String? posLogoUrl;
     if (json['pos'] is Map<String, dynamic>) {
       final posObj = json['pos'] as Map<String, dynamic>;
       pName = posObj['pos_name'] as String?;
       pPhone = posObj['pos_phone_number'] as String?;
+      posLogoUrl = posObj['pos_profile_logo']?.toString();
     }
 
     final rawItems = json['items'];
@@ -72,7 +80,9 @@ class InvoiceModel extends InvoiceEntity {
       invoiceDate: json['invoice_date'] as String?,
       createdBy: json['created_by'] as int?,
       networkName: netName,
+      networkLogoUrl: networkLogoUrl,
       posName: pName,
+      posLogoUrl: posLogoUrl,
       posPhoneNumber: pPhone,
       items: parsedItems,
       createdAt: json['created_at'] as String?,
