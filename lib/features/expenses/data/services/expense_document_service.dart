@@ -157,6 +157,7 @@ class ExpenseDocumentService {
         text: 'سند صرف مصروف تشغيلي',
         level: 1,
         direction: DocumentTextDirection.rightToLeft,
+        weight: DocumentTextWeight.bold,
       ),
       DocumentInfoGrid(items: info, columns: 2, compact: true),
       DocumentHeading(
@@ -215,6 +216,7 @@ class ExpenseDocumentService {
       const DocumentParagraph(
         text: 'قيمة الإجمالي وبنود المصروف من سجل الخادم. لم يُعد التطبيق احتساب إجمالي المستند.',
         direction: DocumentTextDirection.rightToLeft,
+        weight: DocumentTextWeight.light,
       ),
     ];
 
