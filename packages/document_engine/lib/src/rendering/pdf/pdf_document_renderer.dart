@@ -16,6 +16,7 @@ import '../document_render_options.dart';
 import '../document_render_result.dart';
 import '../document_renderer.dart';
 import 'payv_text_shaping_provider.dart';
+import 'document_font_weight.dart';
 import 'shaped_pdf_paragraph.dart';
 
 /// PDF backend for bounded, non-official client-side documents.
@@ -1574,8 +1575,13 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     bool? softWrap,
     int? maxLines,
     DocumentTextDirection direction = DocumentTextDirection.auto,
+    DocumentFontWeight? fontWeight,
   }) {
     final provider = textShapingProvider;
+    final resolvedFontWeight = fontWeight ??
+        (style?.fontWeight == pw.FontWeight.bold
+            ? DocumentFontWeight.bold
+            : DocumentFontWeight.regular);
     final requestedDirection = direction != DocumentTextDirection.auto
         ? direction
         : switch (textDirection) {
@@ -1610,6 +1616,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
         final intrinsicWidth = provider.shapeLine(
               text,
               direction: resolvedDirection,
+              fontWeight: resolvedFontWeight,
             ).advance *
             fontSize /
             provider.font.unitsPerEm;
@@ -1632,6 +1639,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           fontSize: fontSize,
           color: style?.color ?? PdfColors.black,
           direction: resolvedDirection,
+          fontWeight: resolvedFontWeight,
           alignment: alignment,
         );
       },
@@ -1643,11 +1651,13 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     pw.TextStyle? style,
     pw.TextAlign? textAlign,
     DocumentTextDirection direction = DocumentTextDirection.auto,
+    DocumentFontWeight? fontWeight,
   }) => _text(
     text,
     style: style,
     textAlign: textAlign,
     direction: direction,
+    fontWeight: fontWeight,
   );
 
   String _valueText(DocumentValue value) => switch (value) {
