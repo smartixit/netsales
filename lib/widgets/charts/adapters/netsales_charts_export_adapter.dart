@@ -171,8 +171,8 @@ abstract final class NetSalesChartsExportAdapter {
         maxWidth / sourceWidth,
         maxHeight / sourceHeight,
       ].reduce((a, b) => a < b ? a : b);
-      final targetWidth = (sourceWidth * scale).round().clamp(1, maxWidth);
-      final targetHeight = (sourceHeight * scale).round().clamp(1, maxHeight);
+      final targetWidth = (sourceWidth * scale).round().clamp(1, maxWidth).toInt();
+      final targetHeight = (sourceHeight * scale).round().clamp(1, maxHeight).toInt();
       final codec = await ui.instantiateImageCodec(
         sourceBytes,
         targetWidth: targetWidth,
