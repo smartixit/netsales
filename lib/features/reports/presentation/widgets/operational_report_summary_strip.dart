@@ -38,7 +38,7 @@ class OperationalReportSummaryStrip extends StatelessWidget {
                   enableTooltip: true,
                   style: AppTypography.titleMedium.copyWith(
                     color: colors.primary,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: AppTypography.bold,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 )
