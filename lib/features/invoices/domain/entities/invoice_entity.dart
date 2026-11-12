@@ -20,6 +20,7 @@ class InvoiceEntity {
   final bool isFullyPaid;
   final String? invoiceDate;
   final int? createdBy;
+  final String? createdByName;
   final String? networkName;
   final String? networkLogoUrl;
   final String? posName;
@@ -46,6 +47,7 @@ class InvoiceEntity {
     this.isFullyPaid = false,
     this.invoiceDate,
     this.createdBy,
+    this.createdByName,
     this.networkName,
     this.networkLogoUrl,
     this.posName,
