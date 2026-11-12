@@ -6,6 +6,9 @@ import 'package:netsales/features/reports/data/datasources/reports_remote_data_s
 import 'package:netsales/features/reports/data/repositories/reports_repository_impl.dart';
 import 'package:netsales/features/reports/domain/repositories/reports_repository.dart';
 import 'package:netsales/features/reports/domain/usecases/get_report_use_case.dart';
+import 'package:netsales/features/reports/domain/usecases/request_report_export_use_case.dart';
+import 'package:netsales/features/reports/domain/usecases/get_report_export_status_use_case.dart';
+import 'package:netsales/features/reports/domain/usecases/download_report_export_use_case.dart';
 import 'package:netsales/features/reports/presentation/controllers/reports_controller.dart';
 
 class ReportsBinding extends Bindings {
@@ -20,6 +23,9 @@ class ReportsBinding extends Bindings {
       fenix: true,
     );
     Get.lazyPut(() => GetReportUseCase(Get.find()), fenix: true);
+    Get.lazyPut(() => RequestReportExportUseCase(Get.find()), fenix: true);
+    Get.lazyPut(() => GetReportExportStatusUseCase(Get.find()), fenix: true);
+    Get.lazyPut(() => DownloadReportExportUseCase(Get.find()), fenix: true);
     Get.lazyPut(
       () => ReportsController(
         Get.find(),

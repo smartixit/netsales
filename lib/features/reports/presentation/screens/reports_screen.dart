@@ -53,6 +53,30 @@ class ReportsScreen extends GetView<ReportsController> {
           )).toList(growable: false),
         )),
       ),
+      Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 12, 8),
+        child: Obx(() => Row(
+          children: [
+            Expanded(
+              child: Text(
+                controller.exportStatusMessage.value ?? 'يمكنك تصدير النتائج من الخادم كملف CSV.',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+            const SizedBox(width: 8),
+            CustomButton(
+              text: 'تصدير CSV',
+              prefix: Icons.file_download_outlined,
+              size: AppButtonSize.small,
+              loading: controller.isExporting.value,
+              enabled: !controller.isExporting.value && controller.selectedNetworkId.value != null,
+              onPressed: () => controller.exportCsv(),
+            ),
+          ],
+        )),
+      ),
       Expanded(child: Obx(() {
         if (controller.loading.value && controller.rows.isEmpty) {
           return const CustomSkeletonFeed(itemCount: 5);

@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:get/get.dart';
+import 'package:netsales/core/services/file_export_service.dart';
+import 'package:netsales/core/services/share_service.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -7,12 +11,18 @@ import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_li
 import 'package:netsales/features/reports/domain/entities/report_network_option.dart';
 import 'package:netsales/features/reports/domain/entities/report_type.dart';
 import 'package:netsales/features/reports/domain/usecases/get_report_use_case.dart';
+import 'package:netsales/features/reports/domain/usecases/request_report_export_use_case.dart';
+import 'package:netsales/features/reports/domain/usecases/get_report_export_status_use_case.dart';
+import 'package:netsales/features/reports/domain/usecases/download_report_export_use_case.dart';
 
 class ReportsController extends GetxController {
-  ReportsController(this.getReport, this.getMyNetworks, this.getPosNetworks);
+  ReportsController(this.getReport, this.getMyNetworks, this.getPosNetworks, this.requestExport, this.getExportStatus, this.downloadExport);
   final GetReportUseCase getReport;
   final GetMyNetworksUseCase getMyNetworks;
   final GetPosNetworksListUseCase getPosNetworks;
+  final RequestReportExportUseCase requestExport;
+  final GetReportExportStatusUseCase getExportStatus;
+  final DownloadReportExportUseCase downloadExport;
 
   final types = ReportType.values.obs;
   final selectedType = ReportType.sales.obs;
@@ -22,6 +32,8 @@ class ReportsController extends GetxController {
   final loading = false.obs;
   final loadingMore = false.obs;
   final isResolvingContext = false.obs;
+  final isExporting = false.obs;
+  final exportStatusMessage = RxnString();
   final error = RxnString();
   final nextCursor = RxnString();
   String? fromDate;
