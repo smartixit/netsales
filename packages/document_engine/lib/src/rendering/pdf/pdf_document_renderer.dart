@@ -79,7 +79,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
 
       document.addPage(
         pw.MultiPage(
-          theme: _pdfTheme(options.branding),
+          theme: _pdfTheme(options.branding, textShapingProvider),
           pageFormat: pageFormat,
           margin: pw.EdgeInsets.fromLTRB(
             profile.marginLeft,
@@ -807,6 +807,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                   fontSize: 10,
                   fontWeight: pw.FontWeight.bold,
                 ),
+                fontWeight: DocumentFontWeight.semiBold,
               ),
             ),
           ...rows,
@@ -944,13 +945,25 @@ final class PdfDocumentRenderer implements DocumentRenderer {
 
   pw.Widget _signatureAreaWidget(DocumentSignatureArea node) {
     final details = <pw.Widget>[
-      _text(node.label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-      if (node.signerName != null) _text(node.signerName!),
-      if (node.roleLabel != null) _text(node.roleLabel!),
+      _text(
+        node.label,
+        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+        fontWeight: DocumentFontWeight.semiBold,
+      ),
+      if (node.signerName != null)
+        _text(node.signerName!, fontWeight: DocumentFontWeight.medium),
+      if (node.roleLabel != null)
+        _text(node.roleLabel!, fontWeight: DocumentFontWeight.regular),
       if (node.approvalReference != null)
-        _text('Approval reference: ${node.approvalReference!}'),
+        _text(
+          'Approval reference: ${node.approvalReference!}',
+          fontWeight: DocumentFontWeight.regular,
+        ),
       if (node.approvedAt != null)
-        _text('Approved at: ${node.approvedAt!.toIso8601String()}'),
+        _text(
+          'Approved at: ${node.approvedAt!.toIso8601String()}',
+          fontWeight: DocumentFontWeight.regular,
+        ),
     ];
     final imageBytes = node.visualSignatureBytes;
     return pw.Container(
@@ -1163,12 +1176,14 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           child: _text(
             text,
             style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+            fontWeight: DocumentFontWeight.medium,
           ),
         ),
       if (pageNumber != null)
         _text(
           pageNumber,
           style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+          fontWeight: DocumentFontWeight.medium,
         ),
     ];
     return pw.Container(
@@ -1347,6 +1362,9 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           fontSize: isHeader ? 9 : 8,
           fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
         ),
+        fontWeight: isHeader
+            ? DocumentFontWeight.semiBold
+            : DocumentFontWeight.regular,
       ),
     );
   }
@@ -1415,6 +1433,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                       _text(
                         series.label,
                         style: const pw.TextStyle(fontSize: 8),
+                        fontWeight: DocumentFontWeight.medium,
                       ),
                     ],
                   ),
@@ -1476,6 +1495,9 @@ final class PdfDocumentRenderer implements DocumentRenderer {
         fontSize: 7,
         fontWeight: header ? pw.FontWeight.bold : pw.FontWeight.normal,
       ),
+      fontWeight: header
+          ? DocumentFontWeight.semiBold
+          : DocumentFontWeight.regular,
     ),
   );
 
