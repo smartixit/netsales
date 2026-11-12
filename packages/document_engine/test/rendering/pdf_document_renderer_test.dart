@@ -12,9 +12,24 @@ void main() {
   late PayvTextShapingProvider shapingProvider;
 
   setUpAll(() async {
+    final faces = await loadDocumentEngineFontFaces(
+      regularAssetPath: 'assets/fonts/IBM-Regular.ttf',
+      thinAssetPath: 'assets/fonts/IBM-Thin.ttf',
+      extraLightAssetPath: 'assets/fonts/IBM-ExtraLight.ttf',
+      lightAssetPath: 'assets/fonts/IBM-Light.ttf',
+      mediumAssetPath: 'assets/fonts/IBM-Medium.ttf',
+      semiBoldAssetPath: 'assets/fonts/IBM-SemiBold.ttf',
+      boldAssetPath: 'assets/fonts/IBM-Bold.ttf',
+    );
     shapingProvider = PayvTextShapingProvider(
-      await loadDocumentEngineArabicFont(),
+      faces[DocumentFontWeight.regular]!,
       languageTag: 'ar-YE',
+      thinFontBytes: faces[DocumentFontWeight.thin],
+      extraLightFontBytes: faces[DocumentFontWeight.extraLight],
+      lightFontBytes: faces[DocumentFontWeight.light],
+      mediumFontBytes: faces[DocumentFontWeight.medium],
+      semiBoldFontBytes: faces[DocumentFontWeight.semiBold],
+      boldFontBytes: faces[DocumentFontWeight.bold],
     );
   });
 
@@ -426,6 +441,30 @@ void main() {
       (result as DocumentRenderSuccess).artifact.byteLength,
       greaterThan(100),
     );
+  });
+
+  test('embeds and renders every supplied IBM Arabic weight', () async {
+    final renderer = PdfDocumentRenderer(textShapingProvider: shapingProvider);
+    final result = await renderer.render(
+      snapshot: snapshot(
+        languageTag: 'en-US',
+        nodes: [
+          for (final weight in DocumentTextWeight.values)
+            DocumentParagraph(
+              text: 'نموذج وزن ${weight.name} — NetSales 2026',
+              direction: DocumentTextDirection.rightToLeft,
+              weight: weight,
+            ),
+        ],
+      ),
+      template: template,
+      options: options(),
+    );
+
+    expect(result, isA<DocumentRenderSuccess>());
+    final artifact = (result as DocumentRenderSuccess).artifact;
+    expect(artifact.bytes, containsAll([37, 80, 68, 70, 45]));
+    expect(artifact.byteLength, greaterThan(1000));
   });
 
   test('renders Arabic text when a shaping provider is injected', () async {
