@@ -34,10 +34,10 @@ class OperationalReportRecordCard extends StatelessWidget {
         status == 'APPROVED') {
       return SemanticTone.success;
     }
-    if (status == 'PARTIALLY_PAID' || status == 'PENDING' || status == 'WITHDRAW') {
+    if (status == 'PARTIALLY_PAID' || status == 'PENDING' || status == 'WITHDRAW' || status == '31_60' || status == '61_90') {
       return SemanticTone.warning;
     }
-    if (status == 'REJECTED' || status == 'REVERSED' || status == 'UNPAID') {
+    if (status == 'REJECTED' || status == 'REVERSED' || status == 'UNPAID' || status == 'OVER_90') {
       return SemanticTone.danger;
     }
     return SemanticTone.neutral;
@@ -101,7 +101,7 @@ class OperationalReportRecordCard extends StatelessWidget {
         date: _first(['log_date']),
         amount: _amount('log_amount'),
         status: _first(['log_operation_type']),
-        detail: _first(['created_by.name']),
+        detail: _first(['created_by.user_full_name']),
       ),
       OperationalReportType.repayments => (
         reference: _first(['repayment_uuid', 'repayment_id']),
