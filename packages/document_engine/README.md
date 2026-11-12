@@ -19,7 +19,7 @@ Reusable, framework-agnostic document contracts, template registry, and bounded 
 - Concrete PDF backend with multipage layout, headers, footers, page numbers, metrics, and structured tables.
 - Artifact provenance, byte length, SHA-256 digest, and defensive byte copies.
 - Template/document type, locale, capability, and orientation validation before rendering.
-- The renderer keeps the fail-closed guard for complex RTL until the shaped-line adapter is integrated into every document node and the final output/accessibility matrix is accepted.
+- Complex RTL is rendered only when a licensed shaping provider is explicitly injected; requests without one remain fail-closed. Renderer-wide shaping is integrated, while extraction and cross-platform output acceptance remain final-stage validation.
 
 ## M3 — Reusable visual components
 
@@ -43,7 +43,7 @@ and protected artifact delivery.
 
 ## Deliberate non-goals
 
-- No Arabic shaping provider selection or RTL PDF output.
+- No implicit font-family or tenant-brand selection; the host supplies licensed font faces and resolved identity assets.
 - No printing/preview widgets or platform output adapters.
 - No Flutter widgets, GetX, routing, or application-specific models.
 - No Laravel client, API endpoint, authorization policy, or persistence adapter.
@@ -162,9 +162,9 @@ Business labels, source values, currency rules, permissions, and financial
 calculations remain owned by the host API and domain layer. The renderer only
 lays out the supplied content.
 
-The generic PDF renderer continues to fail closed for complex RTL text until a
-validated shaping provider is integrated. Adding semantic nodes does not relax
-that safety boundary.
+The generic PDF renderer requires an explicitly injected, validated shaping
+provider for complex RTL text. Without that provider it fails closed; with the
+provider, renderer-owned text nodes are routed through the shared shaping gateway.
 
 
 ## Arabic shaping provider — integration foundation
@@ -183,18 +183,22 @@ provider refuses fonts whose embedding/subsetting flags disallow PDF use and
 rejects CFF/CFF2 outlines rather than silently drawing missing glyphs.
 
 The package bundles IBM Plex Sans Arabic Regular with its SIL Open Font
-License 1.1 text. Flutter hosts can load it through
-`loadDocumentEngineArabicFont()` from `document_engine_flutter.dart`, then
-supply the bytes to `PayvTextShapingProvider` or `DocumentBranding`.
+License 1.1 text. Flutter hosts can load this face through
+`loadDocumentEngineArabicFont()`. Hosts that already own a complete font family
+can load multiple licensed faces through `loadDocumentEngineFontFaces()`,
+providing asset paths for Regular, Medium, SemiBold, and Bold. The returned
+faces map to `DocumentFontWeight` and `DocumentFontRole`; optional missing
+weights fall back to the nearest supplied face in `PayvTextShapingProvider`.
+The engine does not copy or silently substitute unrelated font assets.
 
 ### Current integration boundary
 
-This is the shaping and single-line vector-painting foundation, not yet the
-production renderer-wide RTL enablement. The main `PdfDocumentRenderer`
-continues to fail closed for Arabic and mixed-direction content until all
-text-bearing nodes (metadata, headers/footers, paragraphs, headings, table
-headers/cells, metrics, chart labels, signatures, QR captions, callouts,
-watermarks, and cover fields) use the same shaping adapter.
+The Payv shaper and measured paragraph layout are wired into the central
+`PdfDocumentRenderer` text gateway. Renderer-owned Arabic and mixed-direction
+text (metadata, headers/footers, paragraphs, headings, table headers/cells,
+metrics, chart labels, signatures, QR captions, callouts, and cover fields)
+uses the same injected shaping provider. The renderer still fails closed when
+a host does not provide a compatible, embeddable TrueType face.
 
 The shaped-line widget currently requires a fixed single-line box and rejects
 overflow; it does not yet perform paragraph line breaking, cross-page flow,
@@ -223,7 +227,7 @@ verification stage passes.
 - The PDF Unicode font object is cached per shaping-provider instance, not reparsed for every line.
 - Watermarks are image-only and use the host-supplied Network/POS logo or application icon fallback; they do not pass through the text shaping gateway.
 - The default renderer remains fail-closed for RTL when no provider is injected. Hosts must load `loadDocumentEngineArabicFont()` or supply another appropriately licensed TrueType font and inject the provider.
-- The current bundled face is IBM Plex Sans Arabic Regular. Bold/italic face selection, full extraction/search validation, complex font coverage/fallback, visual baselines, and Windows/Android/iOS output verification remain final-stage validation work. Tests have been authored but not run by instruction.
+- The package bundles IBM Plex Sans Arabic Regular; hosts may inject their licensed Regular, Medium, SemiBold, and Bold faces. Each requested weight selects its own Payv shaper, glyph outlines, advances, and matching invisible Unicode font face. Semantic renderer styles select Regular, Medium, SemiBold, or Bold rather than simulating weight by stroke expansion. Full extraction/search validation, complex font coverage/fallback, visual baselines, and Windows/Android/iOS output verification remain final-stage validation work. Tests have been authored but not run by instruction.
 
 - Page watermarks are image-only, with the active Network/POS logo selected by the host and the bundled application icon used as fallback. The engine accepts defensive-copied PNG/JPEG bytes only, enforces a 2 MiB limit, and renders through the PDF package's fitted/rotated watermark decoration with configurable opacity.
 - Running headers and footers, including first-page overrides, route through the shared shaping gateway. Table cells pass explicit cell direction where provided; table headers and chart-table labels use automatic first-strong direction detection.
