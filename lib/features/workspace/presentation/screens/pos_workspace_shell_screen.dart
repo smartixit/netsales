@@ -58,6 +58,8 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
             networkId: controller.selectedNetworkLink.value?.networkId,
             posId: controller.activePos.value?.posId,
             isNetworkWorkspace: false,
+            organizationName: controller.activePos.value?.posName,
+            logoUrl: controller.activePos.value?.posProfileLogoUrl,
           ),
         ),
       ];
