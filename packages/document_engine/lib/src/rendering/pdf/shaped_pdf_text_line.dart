@@ -7,11 +7,7 @@ import 'package:payv/payv.dart' as payv;
 import '../../document/document_locale.dart';
 import 'document_font_weight.dart';
 import 'payv_text_shaping_provider.dart';
-
-final Expando<Map<DocumentFontWeight, pw.Font>> _unicodeFontCache =
-    Expando<Map<DocumentFontWeight, pw.Font>>(
-  'document-engine-shaped-text-font',
-);
+import 'pdf_font_face_cache.dart';
 
 /// A single-line, vector-outline PDF text widget.
 ///
@@ -84,14 +80,7 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
       ShapedPdfTextAlignment.right => freeSpace,
     };
 
-    final fonts = _unicodeFontCache[provider] ??=
-        <DocumentFontWeight, pw.Font>{};
-    final unicodeFont = fonts.putIfAbsent(
-      fontWeight,
-      () => pw.Font.ttf(
-        ByteData.sublistView(provider.fontBytesFor(fontWeight)),
-      ),
-    );
+    final unicodeFont = pdfFontFace(provider, fontWeight);
 
     return pw.Stack(
       children: [
