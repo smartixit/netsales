@@ -36,10 +36,11 @@ class OperationalReportRemoteDataSourceImpl
       ApiConstants.operationalReports,
       queryParameters: query,
       fromJson: (data) {
-        if (data is! List) {
+        final rows = data is Map ? data['data'] : data;
+        if (rows is! List) {
           throw const FormatException('لم يُرجع الخادم قائمة سجلات صالحة.');
         }
-        return data.map((row) {
+        return rows.map((row) {
           if (row is! Map) {
             throw const FormatException('يوجد سجل تقرير بتنسيق غير صالح.');
           }
