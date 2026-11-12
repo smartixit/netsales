@@ -5,6 +5,7 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/reports/data/datasources/operational_report_remote_data_source.dart';
 import 'package:netsales/features/reports/data/models/operational_report_export_model.dart';
+import 'package:netsales/features/reports/data/models/operational_report_summary_model.dart';
 
 class OperationalReportRemoteDataSourceImpl
     implements OperationalReportRemoteDataSource {
@@ -28,6 +29,17 @@ class OperationalReportRemoteDataSourceImpl
           return Map<String, dynamic>.from(row);
         }).toList(growable: false);
       },
+    );
+  }
+
+  @override
+  Future<ApiResponse<OperationalReportSummaryModel>> getSummary({
+    required Map<String, dynamic> query,
+  }) {
+    return ApiService.instance.get<OperationalReportSummaryModel>(
+      ApiConstants.operationalReportSummary,
+      queryParameters: query,
+      fromJson: OperationalReportSummaryModel.fromJson,
     );
   }
 
