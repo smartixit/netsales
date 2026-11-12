@@ -115,44 +115,20 @@ class DocumentEngineImagePdfService {
   }
 
   Future<Uint8List> _normalizeImage(Uint8List sourceBytes) async {
-    final sourceCodec = await ui.instantiateImageCodec(sourceBytes);
-    late final int sourceWidth;
-    late final int sourceHeight;
-
-    try {
-      final frame = await sourceCodec.getNextFrame();
-      sourceWidth = frame.image.width;
-      sourceHeight = frame.image.height;
-      frame.image.dispose();
-    } finally {
-      sourceCodec.dispose();
-    }
-
     for (final maximumDimension in [1600, 1400, 1200, 1000, 800]) {
-      final scale = math.min(
-        1.0,
-        maximumDimension /
-            math.max(sourceWidth, sourceHeight).toDouble(),
-      );
-      final targetWidth = (sourceWidth * scale)
-          .round()
-          .clamp(1, maximumDimension)
-          .toInt();
-      final targetHeight = (sourceHeight * scale)
-          .round()
-          .clamp(1, maximumDimension)
-          .toInt();
-
-      if (scale == 1.0 &&
-          sourceBytes.length <= _maxImageBytes &&
-          _isPngOrJpeg(sourceBytes)) {
-        return Uint8List.fromList(sourceBytes);
-      }
-
-      final codec = await ui.instantiateImageCodec(
+      final codec = await ui.instantiateImageCodecWithSize(
         sourceBytes,
-        targetWidth: targetWidth,
-        targetHeight: targetHeight,
+        getTargetSize: (sourceWidth, sourceHeight) {
+          final scale = math.min(
+            1.0,
+            maximumDimension /
+                math.max(sourceWidth, sourceHeight).toDouble(),
+          );
+          return ui.TargetImageSize(
+            width: (sourceWidth * scale).round().clamp(1, maximumDimension),
+            height: (sourceHeight * scale).round().clamp(1, maximumDimension),
+          );
+        },
       );
       try {
         final frame = await codec.getNextFrame();
@@ -180,23 +156,6 @@ class DocumentEngineImagePdfService {
     throw StateError(
       'تعذر ضغط الصورة إلى الحد الأقصى المسموح به لمستند PDF.',
     );
-  }
-
-  static bool _isPngOrJpeg(List<int> bytes) {
-    final isPng = bytes.length >= 8 &&
-        bytes[0] == 0x89 &&
-        bytes[1] == 0x50 &&
-        bytes[2] == 0x4E &&
-        bytes[3] == 0x47 &&
-        bytes[4] == 0x0D &&
-        bytes[5] == 0x0A &&
-        bytes[6] == 0x1A &&
-        bytes[7] == 0x0A;
-    final isJpeg = bytes.length >= 3 &&
-        bytes[0] == 0xFF &&
-        bytes[1] == 0xD8 &&
-        bytes[2] == 0xFF;
-    return isPng || isJpeg;
   }
 
   static String _normalizeTitle(String value) {
