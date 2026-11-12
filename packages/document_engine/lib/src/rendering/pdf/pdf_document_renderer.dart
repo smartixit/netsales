@@ -438,6 +438,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                 textAlign: layout == DocumentTemplateLayout.receipt
                     ? pw.TextAlign.center
                     : pw.TextAlign.left,
+                fontWeight: DocumentFontWeight.medium,
               ),
               if (branding.tagline case final tagline?)
                 pw.Padding(
@@ -515,6 +516,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                     ? primary
                     : null,
               ),
+              fontWeight: DocumentFontWeight.semiBold,
             ),
           ),
         );
@@ -527,7 +529,11 @@ final class PdfDocumentRenderer implements DocumentRenderer {
             widgets.add(
               pw.Header(
                 level: level > 5 ? 5 : level,
-                child: _text(text, direction: direction),
+                child: _text(
+                  text,
+                  direction: direction,
+                  fontWeight: DocumentFontWeight.semiBold,
+                ),
               ),
             );
           case DocumentMetric(:final label, :final value, :final caption):
@@ -601,6 +607,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                           fontSize: node.compact ? 7 : 8,
                           color: muted,
                         ),
+                        fontWeight: DocumentFontWeight.medium,
                       ),
                       pw.SizedBox(height: node.compact ? 3 : 5),
                       _text(
@@ -611,6 +618,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                           fontWeight: pw.FontWeight.bold,
                           color: textColor,
                         ),
+                        fontWeight: DocumentFontWeight.semiBold,
                       ),
                     ],
                   ),
@@ -663,6 +671,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                     fontSize: 9,
                     fontWeight: pw.FontWeight.bold,
                   ),
+                  fontWeight: DocumentFontWeight.semiBold,
                 ),
                 if (node.detail != null)
                   pw.Padding(
@@ -731,6 +740,9 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                             ? pw.FontWeight.bold
                             : pw.FontWeight.normal,
                       ),
+                      fontWeight: isTotal
+                          ? DocumentFontWeight.semiBold
+                          : DocumentFontWeight.medium,
                     ),
                     if (line.note != null)
                       pw.Padding(
@@ -754,6 +766,9 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                       ? pw.FontWeight.bold
                       : pw.FontWeight.normal,
                 ),
+                fontWeight: isTotal || isOutstanding
+                    ? DocumentFontWeight.bold
+                    : DocumentFontWeight.medium,
               ),
             ],
           ),
@@ -824,6 +839,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
               fontSize: 9,
               fontWeight: pw.FontWeight.bold,
             ),
+            fontWeight: DocumentFontWeight.semiBold,
           ),
           pw.SizedBox(height: 4),
           _text(
@@ -1098,6 +1114,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     child: _text(
       text,
       style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+      fontWeight: DocumentFontWeight.medium,
     ),
   );
 
@@ -1151,7 +1168,11 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          _text(label, style: pw.TextStyle(fontSize: 9, color: muted)),
+          _text(
+            label,
+            style: pw.TextStyle(fontSize: 9, color: muted),
+            fontWeight: DocumentFontWeight.medium,
+          ),
           pw.SizedBox(height: 4),
           _text(
             _valueText(value),
@@ -1300,6 +1321,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
         child: _text(
           chart.title,
           style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+          fontWeight: DocumentFontWeight.semiBold,
         ),
       ),
       if (chart.subtitle != null)
@@ -1619,7 +1641,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
               fontWeight: resolvedFontWeight,
             ).advance *
             fontSize /
-            provider.font.unitsPerEm;
+            provider.fontFor(resolvedFontWeight).unitsPerEm;
         final width = availableWidth != null &&
                 availableWidth.isFinite &&
                 availableWidth > 0
