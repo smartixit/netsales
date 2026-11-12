@@ -37,6 +37,8 @@ import 'package:netsales/features/commercial/presentation/bindings/commercial_bi
 import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/pos_linked_networks_screen.dart';
 import 'package:netsales/features/invoices/presentation/bindings/invoice_binding.dart';
+import 'package:netsales/features/reports/presentation/bindings/reports_binding.dart';
+import 'package:netsales/features/reports/presentation/screens/reports_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoice_details_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/network_wholesale_invoices_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/network_direct_invoice_screen.dart';
@@ -454,6 +456,16 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+
+    GetPage(
+      name: AppRoutes.operationalReports,
+      page: () => const ReportsScreen(),
+      binding: ReportsBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(),
       ],
     ),
 

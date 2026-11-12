@@ -84,6 +84,7 @@ abstract final class AppRoutes {
   // مسار مركز الإشعارات والتنبيهات الموجهة (Notifications Center)
   // ----------------------------------------------------------------------------
   static const String notifications = '/notifications';
+  static const String operationalReports = '/reports';
 
   // ----------------------------------------------------------------------------
   // مسارات الأمان الموحدة لكافة البيئات (Security Routes)
