@@ -77,7 +77,7 @@ class InvoiceDetailsController extends GetxController {
       } else {
         CustomSnackbar.show(
           title: 'فشل التصدير',
-          message: result.errorMessage ?? 'تعذر حفظ ملف الفاتورة.',
+          message: 'تعذر حفظ ملف الفاتورة.',
           type: SnackType.error,
         );
       }
