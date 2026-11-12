@@ -52,6 +52,9 @@ abstract interface class OperationalReportRepository {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   });
 
   Future<bool> shareSummaryPdf({
@@ -62,6 +65,9 @@ abstract interface class OperationalReportRepository {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   });
 
   Future<bool> printSummaryPdf({
@@ -72,6 +78,9 @@ abstract interface class OperationalReportRepository {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   });
 
   Future<Uint8List?> downloadExport(String url);
