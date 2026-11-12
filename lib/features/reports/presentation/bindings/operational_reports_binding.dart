@@ -32,6 +32,14 @@ class OperationalReportsBinding extends Bindings {
         fenix: true,
       );
     }
+    if (!Get.isRegistered<GetOperationalReportSummaryUseCase>()) {
+      Get.lazyPut<GetOperationalReportSummaryUseCase>(
+        () => GetOperationalReportSummaryUseCase(
+          Get.find<OperationalReportRepository>(),
+        ),
+        fenix: true,
+      );
+    }
     if (!Get.isRegistered<RequestOperationalReportExportUseCase>()) {
       Get.lazyPut<RequestOperationalReportExportUseCase>(
         () => RequestOperationalReportExportUseCase(
@@ -60,6 +68,7 @@ class OperationalReportsBinding extends Bindings {
       Get.lazyPut<OperationalReportsController>(
         () => OperationalReportsController(
           getReportUseCase: Get.find<GetOperationalReportUseCase>(),
+          getSummaryUseCase: Get.find<GetOperationalReportSummaryUseCase>(),
           requestExportUseCase:
               Get.find<RequestOperationalReportExportUseCase>(),
           getExportStatusUseCase:
