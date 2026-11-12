@@ -298,6 +298,8 @@ class OperationalReportsController extends GetxController {
     if (refresh) {
       _searchDebounce?.cancel();
       _searchDebounce = null;
+      summary.value = null;
+      summaryError.value = null;
     }
     final networkId = _networkId;
     final type = selectedType.value;
@@ -335,8 +337,6 @@ class OperationalReportsController extends GetxController {
       isLoading.value = true;
       isLoadingMore.value = false;
       errorMessage.value = null;
-      summary.value = null;
-      summaryError.value = null;
       loadMoreError.value = null;
       nextCursor.value = null;
     } else {
