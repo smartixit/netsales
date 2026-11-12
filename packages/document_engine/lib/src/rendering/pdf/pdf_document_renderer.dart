@@ -18,9 +18,7 @@ import '../document_renderer.dart';
 import 'payv_text_shaping_provider.dart';
 import 'document_font_weight.dart';
 import 'shaped_pdf_paragraph.dart';
-
-final Expando<Map<DocumentFontWeight, pw.Font>> _rendererPdfFontCache =
-    Expando<Map<DocumentFontWeight, pw.Font>>('document-engine-pdf-font-faces');
+import 'pdf_font_face_cache.dart';
 
 /// PDF backend for bounded, non-official client-side documents.
 ///
@@ -1631,7 +1629,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       final effectiveStyle = provider == null
           ? style
           : (style ?? pw.TextStyle()).copyWith(
-              font: _fontFor(provider, resolvedFontWeight),
+              font: pdfFontFace(provider, resolvedFontWeight),
               // The selected OpenType face already carries its actual weight.
               // Prevent pdf/widgets from substituting a synthetic theme bold.
               fontWeight: pw.FontWeight.normal,
@@ -1684,20 +1682,6 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           alignment: alignment,
         );
       },
-    );
-  }
-
-  pw.Font _fontFor(
-    PayvTextShapingProvider provider,
-    DocumentFontWeight weight,
-  ) {
-    final fonts = _rendererPdfFontCache[provider] ??=
-        <DocumentFontWeight, pw.Font>{};
-    return fonts.putIfAbsent(
-      weight,
-      () => pw.Font.ttf(
-        ByteData.sublistView(provider.fontBytesFor(weight)),
-      ),
     );
   }
 
