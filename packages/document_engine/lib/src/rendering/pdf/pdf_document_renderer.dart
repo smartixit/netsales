@@ -524,16 +524,31 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       }
       for (final node in section.nodes) {
         switch (node) {
-          case DocumentParagraph(:final text, :final direction):
-            widgets.add(_paragraph(text, direction: direction));
-          case DocumentHeading(:final text, :final level, :final direction):
+          case DocumentParagraph(
+            :final text,
+            :final direction,
+            :final weight,
+          ):
+            widgets.add(
+              _paragraph(
+                text,
+                direction: direction,
+                fontWeight: _pdfFontWeight(weight),
+              ),
+            );
+          case DocumentHeading(
+            :final text,
+            :final level,
+            :final direction,
+            :final weight,
+          ):
             widgets.add(
               pw.Header(
                 level: level > 5 ? 5 : level,
                 child: _text(
                   text,
                   direction: direction,
-                  fontWeight: DocumentFontWeight.semiBold,
+                  fontWeight: _pdfFontWeight(weight),
                 ),
               ),
             );
@@ -1644,6 +1659,17 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     );
   }
 
+
+  DocumentFontWeight _pdfFontWeight(DocumentTextWeight weight) =>
+      switch (weight) {
+        DocumentTextWeight.thin => DocumentFontWeight.thin,
+        DocumentTextWeight.extraLight => DocumentFontWeight.extraLight,
+        DocumentTextWeight.light => DocumentFontWeight.light,
+        DocumentTextWeight.regular => DocumentFontWeight.regular,
+        DocumentTextWeight.medium => DocumentFontWeight.medium,
+        DocumentTextWeight.semiBold => DocumentFontWeight.semiBold,
+        DocumentTextWeight.bold => DocumentFontWeight.bold,
+      };
 
   /// Central text gateway: all RTL and mixed-direction strings use the same
   /// Payv shaping pipeline, including table cells, metadata, headers, footers,
