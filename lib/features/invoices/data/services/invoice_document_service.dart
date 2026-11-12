@@ -234,7 +234,7 @@ class InvoiceDocumentService {
           id: 'invoice-overview',
           title: 'البيانات الأساسية',
           nodes: [
-            DocumentHeading(text: 'فاتورة مبيعات تجارية', level: 1, direction: DocumentTextDirection.rightToLeft),
+            DocumentHeading(text: 'فاتورة مبيعات تجارية', level: 1, direction: DocumentTextDirection.rightToLeft, weight: DocumentTextWeight.bold),
             DocumentStatusBanner(
               label: paymentLabel,
               tone: invoice.isPaid
@@ -275,6 +275,7 @@ class InvoiceDocumentService {
             DocumentParagraph(
               text: 'تم نقل المبالغ كما وردت من الخادم دون إعادة احتساب أو تعديل داخل التطبيق.',
               direction: DocumentTextDirection.rightToLeft,
+              weight: DocumentTextWeight.light,
             ),
           ],
         ),
