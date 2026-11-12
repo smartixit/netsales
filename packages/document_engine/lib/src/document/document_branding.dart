@@ -5,7 +5,7 @@ import 'dart:typed_data';
 /// The engine never downloads fonts or relies on fonts installed on the
 /// recipient's device. A host may inject licensed font bytes for the roles
 /// that its documents require.
-enum DocumentFontRole { body, medium, semiBold, bold, heading, display, numeric }
+enum DocumentFontRole { thin, extraLight, light, body, medium, semiBold, bold, heading, display, numeric }
 
 /// Immutable, framework-neutral brand and typography inputs for PDF rendering.
 ///
