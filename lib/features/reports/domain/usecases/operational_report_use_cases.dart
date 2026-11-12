@@ -103,6 +103,9 @@ class SaveOperationalReportSummaryPdfUseCase {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) => repository.saveSummaryPdf(
     type: type,
     summary: summary,
@@ -111,6 +114,9 @@ class SaveOperationalReportSummaryPdfUseCase {
     fromDate: fromDate,
     toDate: toDate,
     scopeLabel: scopeLabel,
+    search: search,
+    status: status,
+    saleType: saleType,
   );
 }
 
@@ -126,6 +132,9 @@ class ShareOperationalReportSummaryPdfUseCase {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) => repository.shareSummaryPdf(
     type: type,
     summary: summary,
@@ -134,6 +143,9 @@ class ShareOperationalReportSummaryPdfUseCase {
     fromDate: fromDate,
     toDate: toDate,
     scopeLabel: scopeLabel,
+    search: search,
+    status: status,
+    saleType: saleType,
   );
 }
 
@@ -149,6 +161,9 @@ class PrintOperationalReportSummaryPdfUseCase {
     String? fromDate,
     String? toDate,
     String? scopeLabel,
+    String? search,
+    String? status,
+    String? saleType,
   }) => repository.printSummaryPdf(
     type: type,
     summary: summary,
@@ -157,6 +172,9 @@ class PrintOperationalReportSummaryPdfUseCase {
     fromDate: fromDate,
     toDate: toDate,
     scopeLabel: scopeLabel,
+    search: search,
+    status: status,
+    saleType: saleType,
   );
 }
 
