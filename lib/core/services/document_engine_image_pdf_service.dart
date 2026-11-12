@@ -125,8 +125,14 @@ class DocumentEngineImagePdfService {
                 math.max(sourceWidth, sourceHeight).toDouble(),
           );
           return ui.TargetImageSize(
-            width: (sourceWidth * scale).round().clamp(1, maximumDimension),
-            height: (sourceHeight * scale).round().clamp(1, maximumDimension),
+            width: (sourceWidth * scale)
+                .round()
+                .clamp(1, maximumDimension)
+                .toInt(),
+            height: (sourceHeight * scale)
+                .round()
+                .clamp(1, maximumDimension)
+                .toInt(),
           );
         },
       );
