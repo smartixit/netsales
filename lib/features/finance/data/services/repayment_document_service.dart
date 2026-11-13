@@ -78,7 +78,7 @@ class RepaymentDocumentService {
 
     if (result is DocumentRenderSuccess) {
       final bytes = result.artifact.bytes;
-      await OfficialDocumentArtifactService.instance.issueAndUpload(
+      return OfficialDocumentArtifactService.instance.issueAndUpload(
       documentType: 'pos_repayment',
       documentId: repayment.repaymentId,
       networkId: repayment.networkId,
@@ -88,7 +88,6 @@ class RepaymentDocumentService {
         pdfBytes: bytes,
         fileName: _fileName(repayment),
       );
-      return bytes;
     }
     if (result is DocumentRenderFailure) throw StateError(result.message);
     throw StateError('تعذر إنشاء سند السداد.');
