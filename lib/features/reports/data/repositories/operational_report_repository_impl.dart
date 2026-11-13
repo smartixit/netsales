@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:document_engine/document_engine.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/reports/data/datasources/operational_report_remote_data_source.dart';
 import 'package:netsales/features/reports/data/models/operational_report_record_model.dart';
@@ -45,40 +46,51 @@ class OperationalReportRepositoryImpl
     return catalog;
   }
 
-  Map<String, dynamic> _filters({
-    String? fromDate,
-    String? toDate,
-    String? search,
-    String? status,
-    String? saleType,
-  }) => {
-    if (fromDate != null && fromDate.isNotEmpty) 'from_date': fromDate,
-    if (toDate != null && toDate.isNotEmpty) 'to_date': toDate,
-    if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
-    if (status != null && status.isNotEmpty) 'status': status,
-    if (saleType != null && saleType.isNotEmpty) 'sale_type': saleType,
-  };
+  Map<String, dynamic> _filters(ReportCriteria criteria) {
+    final result = <String, dynamic>{};
+    String dateValue(DateTime value) {
+      final date = value.toLocal();
+      return '${date.year.toString().padLeft(4, '0')}-'
+          '${date.month.toString().padLeft(2, '0')}-'
+          '${date.day.toString().padLeft(2, '0')}';
+    }
+    for (final entry in criteria.filters.entries) {
+      final value = entry.value;
+      switch (value) {
+        case ReportTextFilterValue():
+          if (value.value.trim().isNotEmpty) result[entry.key] = value.value.trim();
+        case ReportIntegerFilterValue():
+          result[entry.key] = value.value;
+        case ReportDecimalFilterValue():
+          result[entry.key] = value.value;
+        case ReportDateFilterValue():
+          result[entry.key] = dateValue(value.value);
+        case ReportDateRangeFilterValue():
+          result[entry.key] = <String, Object?>{
+            'from': value.start == null ? null : dateValue(value.start!),
+            'to': value.end == null ? null : dateValue(value.end!),
+          };
+        case ReportBooleanFilterValue():
+          result[entry.key] = value.value;
+        case ReportChoiceFilterValue():
+          result[entry.key] = value.value;
+        case ReportChoicesFilterValue():
+          result[entry.key] = value.values;
+      }
+    }
+    return result;
+  }
 
   @override
   Future<PaginatedList<OperationalReportRecord>> getReport({
     required OperationalReportType type,
     required int networkId,
     int? posId,
-    String? fromDate,
-    String? toDate,
-    String? search,
-    String? status,
-    String? saleType,
+    required ReportCriteria criteria,
     String? cursor,
     int perPage = 25,
   }) async {
-    final filters = _filters(
-      fromDate: fromDate,
-      toDate: toDate,
-      search: search,
-      status: status,
-      saleType: saleType,
-    );
+    final filters = _filters(criteria);
     final query = <String, dynamic>{
       'report_type': type.wireValue,
       'network_id': networkId,
@@ -113,19 +125,9 @@ class OperationalReportRepositoryImpl
     required OperationalReportType type,
     required int networkId,
     int? posId,
-    String? fromDate,
-    String? toDate,
-    String? search,
-    String? status,
-    String? saleType,
+    required ReportCriteria criteria,
   }) async {
-    final filters = _filters(
-      fromDate: fromDate,
-      toDate: toDate,
-      search: search,
-      status: status,
-      saleType: saleType,
-    );
+    final filters = _filters(criteria);
     final query = <String, dynamic>{
       'report_type': type.wireValue,
       'network_id': networkId,
@@ -260,19 +262,9 @@ class OperationalReportRepositoryImpl
     required OperationalReportType type,
     required int networkId,
     int? posId,
-    String? fromDate,
-    String? toDate,
-    String? search,
-    String? status,
-    String? saleType,
+    required ReportCriteria criteria,
   }) async {
-    final filters = _filters(
-      fromDate: fromDate,
-      toDate: toDate,
-      search: search,
-      status: status,
-      saleType: saleType,
-    );
+    final filters = _filters(criteria);
     final response = await remoteDataSource.requestExport(
       payload: {
         'report_type': type.wireValue,
