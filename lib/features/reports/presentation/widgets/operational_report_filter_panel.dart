@@ -102,7 +102,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
                 ),
                 ...controller.selectedStatusOptions.map(
                   (value) => _filterButton(
-                    label: _statusLabel(value),
+                    label: controller.reportChoiceLabel('status', value, value),
                     selected: controller.selectedStatus.value == value,
                     onPressed: () => controller.selectStatus(value),
                   ),
@@ -130,7 +130,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
                   onPressed: () => controller.selectSaleType(null),
                 ),
                 ...controller.selectedSaleTypeOptions.map((value) => _filterButton(
-                  label: value == 'CASH' ? 'نقدي' : value == 'CREDIT' ? 'آجل' : value,
+                  label: controller.reportChoiceLabel('sale_type', value, value),
                   selected: controller.selectedSaleType.value == value,
                   onPressed: () => controller.selectSaleType(value),
                 )),
