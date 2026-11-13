@@ -24,6 +24,7 @@ class BillingReportDocumentService {
     required String? toDate,
     required String? status,
     required String? search,
+    required bool Function() isCurrent,
   }) async {
     final generatedAt=DateTime.now();
     final isArabic=localeTag.toLowerCase().startsWith('ar');
@@ -159,6 +160,9 @@ class BillingReportDocumentService {
     );
     if(result is DocumentRenderFailure)throw StateError(result.message);
     if(result is! DocumentRenderSuccess)throw StateError('تعذر إنشاء PDF لتقرير الفوترة.');
+    if (!isCurrent()) {
+      throw StateError('تغير نطاق التقرير أثناء تجهيز PDF؛ لم يتم حفظ المستند القديم.');
+    }
     return FileExportService.instance.saveFile(
       bytes:result.artifact.bytes,
       fileName:'Billing-'+reportType+'-Summary',
