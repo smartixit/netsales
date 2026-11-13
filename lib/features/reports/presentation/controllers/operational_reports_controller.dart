@@ -615,11 +615,7 @@ class OperationalReportsController extends GetxController {
             type: type,
             networkId: networkId,
             posId: requestedPosId,
-            fromDate: fromDate.value,
-            toDate: toDate.value,
-            search: searchTextController.text,
-            status: selectedStatus.value,
-            saleType: selectedSaleType.value,
+            criteria: _effectiveCriteria(),
           );
           if (revision == _requestRevision) {
             summary.value = reportSummary;
