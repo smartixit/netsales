@@ -8,9 +8,16 @@ import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/features/billing/data/services/billing_report_document_service.dart';
 
 class BillingReportsController extends GetxController {
-  BillingReportsController({required this.useCases, required this.networkId});
+  BillingReportsController({
+    required this.useCases,
+    required this.networkId,
+    this.networkIdSignal,
+  });
   final BillingUseCases useCases;
   final int? Function() networkId;
+  final RxnInt? networkIdSignal;
+  Worker? _networkWorker;
+  int? _loadedNetworkId;
   final catalog=<Map<String,dynamic>>[].obs;
   ReportDefinitionRegistry _definitionRegistry=ReportDefinitionRegistry();
   final criteria=ReportCriteria().obs;
@@ -182,23 +189,85 @@ class BillingReportsController extends GetxController {
 
   @override void onInit(){
     super.onInit();
-    _searchWorker=debounce(searchQuery,(_){if(!_suppressSearchWorker)loadReport();},time:const Duration(milliseconds:400));
+    _searchWorker=debounce(
+      searchQuery,
+      (_) {
+        if (!_suppressSearchWorker) unawaited(loadReport());
+      },
+      time: const Duration(milliseconds:400),
+    );
+    final signal = networkIdSignal;
+    if (signal != null) {
+      _networkWorker = ever<int?>(signal, (_) => unawaited(loadCatalog()));
+    }
     unawaited(loadCatalog());
   }
   @override void onClose(){
-    _searchWorker?.dispose();searchController.dispose();statusController.dispose();super.onClose();
+    _searchWorker?.dispose();
+    _networkWorker?.dispose();
+    searchController.dispose();
+    statusController.dispose();
+    super.onClose();
   }
 
-  Future<void> loadCatalog()async{
-    final n=networkId();if(n==null){errorMessage.value='حدد الشبكة أولاً.';return;}
-    final rev=++_revision;isLoading.value=true;errorMessage.value=null;
-    try{
-      final result=_map(await useCases.reportsCatalog(n));
-      catalog.assignAll(_list(result['reports']));
-      _definitionRegistry=ReportDefinitionRegistry();
-      for(final schema in catalog){_definitionRegistry.register(_parseDefinition(schema));}
-      if(rev!=_revision)return;
-      if(catalog.isEmpty){selectedType.value=null;rows.clear();summary.value=null;charts.clear();return;}
+  Future<void> loadCatalog() async {
+    final rev = ++_revision;
+    final n = networkId();
+    if (n == null) {
+      _loadedNetworkId = null;
+      catalog.clear();
+      _definitionRegistry = ReportDefinitionRegistry();
+      selectedType.value = null;
+      rows.clear();
+      charts.clear();
+      summary.value = null;
+      _nextCursor = null;
+      _seenCursors.clear();
+      isLoading.value = false;
+      errorMessage.value = 'حدد الشبكة أولاً.';
+      return;
+    }
+
+    if (_loadedNetworkId != n) {
+      catalog.clear();
+      _definitionRegistry = ReportDefinitionRegistry();
+      selectedType.value = null;
+      criteria.value = ReportCriteria();
+      presentation.value = ReportPresentationOptions();
+      searchController.clear();
+      statusController.clear();
+      searchQuery.value = '';
+      selectedStatus.value = null;
+      fromDate.value = null;
+      toDate.value = null;
+      rows.clear();
+      charts.clear();
+      summary.value = null;
+      _nextCursor = null;
+      _seenCursors.clear();
+      _loadedNetworkId = n;
+    }
+
+    isLoading.value = true;
+    errorMessage.value = null;
+    try {
+      final result = _map(await useCases.reportsCatalog(n));
+      if (rev != _revision || n != networkId()) return;
+
+      final nextCatalog = _list(result['reports']);
+      final nextRegistry = ReportDefinitionRegistry();
+      for (final schema in nextCatalog) {
+        nextRegistry.register(_parseDefinition(schema));
+      }
+      catalog.assignAll(nextCatalog);
+      _definitionRegistry = nextRegistry;
+      if (catalog.isEmpty) {
+        selectedType.value = null;
+        rows.clear();
+        summary.value = null;
+        charts.clear();
+        return;
+      }
       final chosen=catalog.firstWhereOrNull((e)=>e['id']==selectedType.value)??catalog.first;
       selectedType.value=chosen['id']?.toString();
       final definition=currentDefinition;if(definition!=null)_resetStudio(definition);
