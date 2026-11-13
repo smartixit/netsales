@@ -137,6 +137,9 @@ class BillingReportsContent extends StatelessWidget {
             BillingReportSummarySection(
               summary: reportSummary,
               charts: controller.charts,
+              title: controller.selectedLocale.value == 'en'
+                  ? 'Report summary'
+                  : 'ملخص التقرير',
               arabicLabel: (key) => BillingReportLabels.field(
                 key,
                 english: controller.selectedLocale.value == 'en',
@@ -148,7 +151,11 @@ class BillingReportsContent extends StatelessWidget {
               key,
               english: controller.selectedLocale.value == 'en',
             ),
-            displayValue: BillingReportLabels.displayValue,
+            displayValue: (key, value) => BillingReportLabels.displayValue(
+              key,
+              value,
+              english: controller.selectedLocale.value == 'en',
+            ),
           ),
         ],
       );
