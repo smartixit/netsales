@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_dialogs.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_status_badge.dart';
@@ -18,8 +19,7 @@ class BillingWorkspaceContent extends StatelessWidget {
   final BillingController controller;
 
   @override
-  Widget build(BuildContext context) {
-
+  Widget build(BuildContext context) => Obx(() {
     if (controller.isLoading.value && controller.account.value == null) {
       return const CustomSkeletonFeed(itemCount: 4, shrinkWrap: true);
     }
@@ -197,7 +197,7 @@ class BillingWorkspaceContent extends StatelessWidget {
         ],
       ),
     );
-  }
+  });
 
   Widget _contactTile(Map<String, dynamic> contact) {
     final id = (contact['contact_id'] as num?)?.toInt();
