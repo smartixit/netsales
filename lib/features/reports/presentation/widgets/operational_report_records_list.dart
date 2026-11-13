@@ -3,11 +3,10 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_record_card.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 class OperationalReportRecordsList extends StatelessWidget {
   const OperationalReportRecordsList({
@@ -75,22 +74,12 @@ class OperationalReportRecordsList extends StatelessWidget {
             separatorBuilder: (_, _) => AppSpacing.vSm,
             itemBuilder: (context, index) {
               if (index == controller.reports.length) {
-                if (controller.loadMoreError.value != null) {
-                  return CustomErrorState.compact(
-                    title: 'تعذر تحميل بقية السجلات',
-                    subtitle: controller.loadMoreError.value,
-                    onRetry: () => controller.loadReport(),
-                  );
-                }
-                if (controller.isLoadingMore.value) {
-                  return const CustomSkeletonCard(height: 104);
-                }
-                return Center(
-                  child: CustomButton.outline(
-                    text: 'تحميل المزيد من السجلات',
-                    suffix: Icons.expand_more_rounded,
-                    onPressed: () => controller.loadReport(),
-                  ),
+                return CustomCursorLoadMore(
+                  hasMore: controller.hasMore,
+                  isLoading: controller.isLoadingMore.value,
+                  error: controller.loadMoreError.value,
+                  onPressed: () => controller.loadReport(),
+                  label: 'تحميل المزيد من السجلات',
                 );
               }
 
