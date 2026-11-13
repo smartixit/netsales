@@ -10,6 +10,7 @@ class BillingCursorPageState {
   final RxnString loadMoreError = RxnString();
   String? nextCursor;
   int _revision = 0;
+  final Set<String> _seenCursors = <String>{};
 
   bool get hasMore => nextCursor != null && nextCursor!.isNotEmpty;
 
@@ -17,6 +18,7 @@ class BillingCursorPageState {
     _revision++;
     if (clearItems) items.clear();
     nextCursor = null;
+    _seenCursors.clear();
     isLoadingMore.value = false;
     loadMoreError.value = null;
     return _revision;
@@ -29,11 +31,21 @@ class BillingCursorPageState {
     final rows = _extractRows(page);
     items.assignAll(_deduplicate(rows));
     nextCursor = _extractNextCursor(page);
+    if (nextCursor != null) _seenCursors.add(nextCursor!);
     return revision;
   }
 
-  void append(Map<String, dynamic> page, {required int revision}) {
+  void append(
+    Map<String, dynamic> page, {
+    required int revision,
+    required String requestedCursor,
+  }) {
     if (revision != _revision) return;
+    final next = _extractNextCursor(page);
+    if (next != null &&
+        (next == requestedCursor || !_seenCursors.add(next))) {
+      throw StateError('The billing API returned a repeated cursor.');
+    }
     final known = items
         .map((row) => row[identityKey]?.toString())
         .whereType<String>()
@@ -44,7 +56,7 @@ class BillingCursorPageState {
         items.add(row);
       }
     }
-    nextCursor = _extractNextCursor(page);
+    nextCursor = next;
     loadMoreError.value = null;
   }
 
