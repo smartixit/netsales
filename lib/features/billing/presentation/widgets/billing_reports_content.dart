@@ -33,7 +33,7 @@ class BillingReportsContent extends StatelessWidget {
   final definition=controller.currentDefinition;
   return ListView(padding:const EdgeInsets.all(20),children:[
    Row(children:[
-    const Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+    Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
       Text('تقارير الاشتراكات',style:AppTypography.titleLarge),
       Text('تقارير Billing مستقلة عن تقارير المبيعات والتشغيل.'),
     ])),
