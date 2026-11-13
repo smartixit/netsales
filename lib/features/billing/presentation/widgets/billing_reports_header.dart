@@ -5,6 +5,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 class BillingReportsHeader extends StatelessWidget {
   const BillingReportsHeader({
     required this.isExportingPdf,
+    required this.isExportingCsv,
     required this.isLoading,
     required this.onExportPdf,
     required this.onExportCsv,
@@ -13,6 +14,7 @@ class BillingReportsHeader extends StatelessWidget {
   });
 
   final bool isExportingPdf;
+  final bool isExportingCsv;
   final bool isLoading;
   final VoidCallback onExportPdf;
   final VoidCallback onExportCsv;
@@ -43,7 +45,8 @@ class BillingReportsHeader extends StatelessWidget {
         CustomButton.outline(
           text: 'تصدير CSV',
           prefix: Icons.download_rounded,
-          onPressed: isLoading ? null : onExportCsv,
+          loading: isExportingCsv,
+          onPressed: isLoading || isExportingCsv ? null : onExportCsv,
         ),
         CustomButton.outline(
           text: 'تحديث',
