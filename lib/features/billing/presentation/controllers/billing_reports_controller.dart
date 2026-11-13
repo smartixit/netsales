@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
+import 'package:netsales/core/services/file_export_service.dart';
 
 class BillingReportsController extends GetxController {
   BillingReportsController({required this.useCases, required this.networkId});
@@ -86,6 +87,21 @@ class BillingReportsController extends GetxController {
     if(url is! String||url.isEmpty)return null;
     try{return Uri.parse(url).queryParameters['cursor'];}catch(_){return null;}
   }
+  Future<void> exportCsv() async {
+    final n=networkId(),type=selectedType.value;
+    if(n==null||type==null||isLoading.value)return;
+    try {
+      final bytes=await useCases.exportBillingReport(n,type,_filters);
+      final result=await FileExportService.instance.saveFile(
+        bytes:bytes,fileName:'Billing-$type',extension:'csv',
+        namingStrategy:FileNamingStrategy.report,autoOpen:false,
+      );
+      if(!result.isSuccess)errorMessage.value=result.errorMessage??'تعذر حفظ ملف التقرير.';
+    } catch(error) {
+      errorMessage.value=AppException.sanitizeMessage(error,fallback:'تعذر تصدير تقرير الاشتراكات.');
+    }
+  }
+
   Future<void> loadMore()async{
     final n=networkId(),type=selectedType.value,cursor=_nextCursor;
     if(n==null||type==null||cursor==null||isLoadingMore.value)return;
