@@ -45,6 +45,7 @@ class OperationalReportsController extends GetxController {
   final DownloadOperationalReportExportUseCase downloadExportUseCase;
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
   final SaveOperationalReportSummaryPdfUseCase saveSummaryPdfUseCase;
+  final SaveOperationalReportDetailedPdfUseCase saveDetailedPdfUseCase;
   final ShareOperationalReportSummaryPdfUseCase shareSummaryPdfUseCase;
   final PrintOperationalReportSummaryPdfUseCase printSummaryPdfUseCase;
 

@@ -140,11 +140,17 @@ class DetailedOperationalReportDocumentService {
       direction: DocumentTextDirection.rightToLeft,
     ));
 
-    final templateSelection = presentation.template ??
-        (definition.templates.isEmpty ? null : definition.templates.first);
+    final templateId = presentation.template?.id ??
+        (definition.templates.isEmpty
+            ? const TemplateId('netsales.operational-report.executive')
+            : definition.templates.first.id);
+    final templateVersion = presentation.template?.version ??
+        (definition.templates.isEmpty
+            ? const TemplateVersion(major: 1, minor: 0, patch: 0)
+            : definition.templates.first.version);
     final template = DocumentTemplateDefinition(
-      id: templateSelection?.id ?? const TemplateId('netsales.operational-report.executive'),
-      version: templateSelection?.version ?? const TemplateVersion(major: 1, minor: 0, patch: 0),
+      id: templateId,
+      version: templateVersion,
       documentTypeId: const DocumentTypeId('netsales.operational-report'),
       displayName: 'NetSales ${entry.label} Detailed Report',
       description: 'Detailed Arabic operational report',
@@ -332,8 +338,11 @@ class DetailedOperationalReportDocumentService {
     final indexed = records.asMap().entries.toList(growable: false);
     indexed.sort((left, right) {
       for (final sort in sorts) {
-        final comparison = _compareValues(left.value.valueAt(sort.fieldId), right.value.valueAt(sort.fieldId));
+        final leftValue = left.value.valueAt(sort.fieldId);
+        final rightValue = right.value.valueAt(sort.fieldId);
+        final comparison = _compareValues(leftValue, rightValue);
         if (comparison != 0) {
+          if (leftValue == null || rightValue == null) return comparison;
           return sort.direction == ReportSortDirection.ascending ? comparison : -comparison;
         }
       }
