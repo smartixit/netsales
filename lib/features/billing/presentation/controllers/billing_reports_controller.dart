@@ -529,7 +529,8 @@ class BillingReportsController extends GetxController {
     final fromDateSnapshot = fromDate.value;
     final toDateSnapshot = toDate.value;
     final searchSnapshot = searchQuery.value.trim();
-    final statusSnapshot = statusController.text.trim();
+    final statusSnapshot =
+        (selectedStatus.value ?? statusController.text).trim();
 
     if (type == null ||
         metrics == null ||
@@ -612,11 +613,11 @@ class BillingReportsController extends GetxController {
         cursor = nextCursor;
       } while (cursor != null);
 
-      if (searchSnapshot.isEmpty &&
-          total > 0 &&
-          allRows.length < total) {
+      if (metrics.containsKey('record_count') &&
+          metrics['record_count'] is num &&
+          allRows.length != total) {
         throw StateError(
-          'لم تكتمل قراءة جميع صفحات التقرير؛ أُوقف إنشاء PDF الجزئي.',
+          'عدد سجلات PDF لا يطابق العدد المعتمد في ملخص الخادم؛ أُوقف حفظ مستند قد يكون مقتطعاً أو غير متسق.',
         );
       }
 
@@ -639,6 +640,13 @@ class BillingReportsController extends GetxController {
         );
       }
 
+      bool isCurrentExport() =>
+          revision == _revision &&
+          network == networkId() &&
+          type == selectedType.value &&
+          identical(criteria.value, criteriaStateSnapshot) &&
+          identical(presentation.value, presentationSnapshot);
+
       final result = await BillingReportDocumentService.instance.exportSummary(
         reportType: type,
         reportLabel: label,
@@ -651,18 +659,24 @@ class BillingReportsController extends GetxController {
         toDate: toDateSnapshot == null ? null : _date(toDateSnapshot),
         status: statusSnapshot.isEmpty ? null : statusSnapshot,
         search: searchSnapshot.isEmpty ? null : searchSnapshot,
+        isCurrent: isCurrentExport,
       );
+      if (!isCurrentExport()) return;
       if (!result.isSuccess) {
         errorMessage.value =
             result.errorMessage ?? 'تعذر حفظ ملف PDF.';
       }
     } catch (error) {
-      errorMessage.value = AppException.sanitizeMessage(
-        error,
-        fallback: 'تعذر إنشاء ملخص PDF.',
-      );
+      if (revision == _revision &&
+          network == networkId() &&
+          type == selectedType.value) {
+        errorMessage.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر إنشاء ملخص PDF.',
+        );
+      }
     } finally {
-      isExportingPdf.value = false;
+      if (revision == _revision) isExportingPdf.value = false;
     }
   }
 
