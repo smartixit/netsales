@@ -34,14 +34,21 @@ class BillingFinancialSection extends StatelessWidget {
       title: title,
       emptyTitle: emptyTitle,
       page: page,
-      itemBuilder: (row) => _tile(row),
+      itemBuilder: _tile,
       onLoadMore: onLoadMore,
       loadMoreLabel: loadMoreLabel,
     );
   }
 
   Widget _tile(Map<String, dynamic> row) {
-    final currencyCode = row['currency_code']?.toString();
+    final rawCurrency = row['currency'];
+    final currency = rawCurrency is Map
+        ? Map<String, dynamic>.from(rawCurrency)
+        : const <String, dynamic>{};
+    final currencyCode = currency['code']?.toString();
+    final decimalPlaces =
+        (currency['decimal_places'] as num?)?.toInt() ?? 2;
+
     return CustomSurfaceCard(
       margin: const EdgeInsets.all(4),
       padding: EdgeInsets.zero,
@@ -51,10 +58,9 @@ class BillingFinancialSection extends StatelessWidget {
         trailing: CustomInteractiveAmountText(
           amount: row[amountKey] ?? '—',
           currencyCode: currencyCode,
+          decimalPlaces: decimalPlaces,
           enableTooltip: false,
-          trailingText: currencyCode == null
-              ? 'وحدة صغرى'
-              : '$currencyCode · وحدة صغرى',
+          trailingText: currencyCode,
         ),
       ),
     );
