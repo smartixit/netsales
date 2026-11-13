@@ -225,6 +225,10 @@ class BillingReportsController extends GetxController {
 
   Future<void> loadCatalog() async {
     final rev = ++_revision;
+    isExportingCsv.value = false;
+    isExportingPdf.value = false;
+    isLoadingMore.value = false;
+    loadMoreError.value = null;
     final n = networkId();
     if (n == null) {
       _loadedNetworkId = null;
