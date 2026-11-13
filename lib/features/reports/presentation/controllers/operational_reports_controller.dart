@@ -69,6 +69,7 @@ class OperationalReportsController extends GetxController {
 
   Timer? _criteriaDebounce;
   final Map<String, TextEditingController> _criteriaTextControllers = {};
+  final Map<String, RxnString> _choiceValues = {};
   int _requestRevision = 0;
   int _posRevision = 0;
   final Set<String> _seenReportCursors = <String>{};
@@ -140,12 +141,37 @@ class OperationalReportsController extends GetxController {
     });
   }
 
+  RxnString choiceValueFor(String filterId) {
+    return _choiceValues.putIfAbsent(filterId, () {
+      final value = criteria.value.filters[filterId];
+      return RxnString(
+        value is ReportChoiceFilterValue ? value.value : null,
+      );
+    });
+  }
+
+  void setFilterValue(String filterId, ReportFilterValue? value) {
+    final filters = Map<String, ReportFilterValue>.of(criteria.value.filters);
+    if (value == null) {
+      filters.remove(filterId);
+    } else {
+      filters[filterId] = value;
+    }
+    updateCriteria(ReportCriteria(filters: filters));
+  }
+
   void updateCriteria(ReportCriteria value) {
     final definition = selectedReportEntry?.definition;
     if (definition == null) return;
 
     final issues = value.validateAgainst(definition);
     criteria.value = value;
+    for (final entry in _choiceValues.entries) {
+      final selected = value.filters[entry.key];
+      entry.value.value = selected is ReportChoiceFilterValue
+          ? selected.value
+          : null;
+    }
     summary.value = null;
     summaryError.value = null;
     reports.clear();
@@ -285,6 +311,9 @@ class OperationalReportsController extends GetxController {
     errorMessage.value = null;
     loadMoreError.value = null;
     criteria.value = ReportCriteria();
+    for (final selection in _choiceValues.values) {
+      selection.value = null;
+    }
     presentation.value = ReportPresentationOptions();
     for (final controller in _criteriaTextControllers.values) {
       controller.clear();
@@ -334,6 +363,7 @@ class OperationalReportsController extends GetxController {
       controller.dispose();
     }
     _criteriaTextControllers.clear();
+    _choiceValues.clear();
     ++_requestRevision;
     ++_posRevision;
     super.onClose();
@@ -344,6 +374,9 @@ class OperationalReportsController extends GetxController {
     selectedType.value = type;
     _criteriaDebounce?.cancel();
     criteria.value = ReportCriteria();
+    for (final selection in _choiceValues.values) {
+      selection.value = null;
+    }
     presentation.value = ReportPresentationOptions();
     for (final controller in _criteriaTextControllers.values) {
       controller.clear();
