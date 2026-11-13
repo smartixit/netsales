@@ -117,6 +117,9 @@ class OperationalReportsController extends GetxController {
   String reportLabel(OperationalReportType type) =>
       catalog.value?.entryFor(type)?.label ?? type.wireValue;
 
+  String reportFilterLabel(String filterId, [String fallback = '']) =>
+      selectedReportEntry?.filterLabels[filterId] ?? fallback;
+
   List<String> _choicesForFilter(String filterId) {
     final filter = selectedReportEntry?.definition.filter(filterId);
     if (filter == null) return const [];
