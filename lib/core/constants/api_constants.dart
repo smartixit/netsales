@@ -480,6 +480,7 @@ abstract final class ApiConstants {
   static String billingNetworkAccounts(int networkId) => '/networks/$networkId/billing/accounts';
   static String billingAccount(int accountId) => '/billing/accounts/$accountId';
   static String billingAccountPlans(int accountId) => '/billing/accounts/$accountId/plans';
+  static String billingAccountEntitlements(int accountId) => '/billing/accounts/$accountId/entitlements';
   static String billingAccountSubscriptions(int accountId) => '/billing/accounts/$accountId/subscriptions';
   static String billingAccountInvoices(int accountId) => '/billing/accounts/$accountId/invoices';
   static String billingAccountPayments(int accountId) => '/billing/accounts/$accountId/payments';
