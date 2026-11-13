@@ -5,6 +5,8 @@ class OperationalReportSummaryModel extends OperationalReportSummary {
   const OperationalReportSummaryModel(
     super.values, {
     super.metricDefinitions,
+    super.metricLabels,
+    super.chartSlots,
     super.reportTitle,
   });
 
@@ -12,6 +14,7 @@ class OperationalReportSummaryModel extends OperationalReportSummary {
     dynamic json, {
     required List<ReportMetricSlotDefinition> metricDefinitions,
     required Map<String, String> metricLabels,
+    required List<OperationalReportChartSlot> chartSlots,
     required String reportTitle,
   }) {
     if (json is! Map) {
@@ -21,6 +24,7 @@ class OperationalReportSummaryModel extends OperationalReportSummary {
       Map<String, dynamic>.from(json),
       metricDefinitions: metricDefinitions,
       metricLabels: metricLabels,
+      chartSlots: chartSlots,
       reportTitle: reportTitle,
     );
   }
