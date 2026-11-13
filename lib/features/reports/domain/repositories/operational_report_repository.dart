@@ -1,3 +1,4 @@
+import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 import 'dart:typed_data';
 
 import 'package:netsales/core/models/paginated_list.dart';
@@ -45,12 +46,8 @@ abstract interface class OperationalReportRepository {
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   });
 
   Future<bool> shareSummaryPdf({
@@ -59,12 +56,8 @@ abstract interface class OperationalReportRepository {
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   });
 
   Future<bool> printSummaryPdf({
@@ -73,12 +66,8 @@ abstract interface class OperationalReportRepository {
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   });
 
   Future<Uint8List?> downloadExport(String url);
