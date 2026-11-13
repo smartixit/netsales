@@ -164,9 +164,9 @@ class BillingController extends GetxController {
     }
   }
 
-  Future<void> cancel(int id) async {
+  Future<void> cancel(int id, {required bool atPeriodEnd}) async {
     if(isMutating.value)return;isMutating.value=true;
-    try{await useCases.cancel(id,true);await loadAccountData();}
+    try{await useCases.cancel(id,atPeriodEnd);await loadAccountData();}
     catch(e){errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر جدولة الإلغاء.');}
     finally{isMutating.value=false;}
   }
