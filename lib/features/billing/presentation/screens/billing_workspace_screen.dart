@@ -67,6 +67,16 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
     const _Header('الاستحقاقات والمزايا'),
     if(controller.entitlements.value?['features'] is List)
       ...(controller.entitlements.value!['features'] as List<dynamic>).whereType<Map<String,dynamic>>().map((f)=>Card(child:ListTile(title:Text(f['name']?.toString()??f['feature_key']?.toString()??'ميزة'),subtitle:Text('القيمة: '+(f['configured_value']?.toString()??'—')),trailing:Icon(f['available']==true?Icons.check_circle_rounded:Icons.block_rounded,color:f['available']==true?Colors.green:Colors.red)))),
+    if(controller.entitlements.value?['trial'] is Map<String,dynamic>)...[
+      Card(child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+        const Text('حالة الفترة التجريبية',style:TextStyle(fontWeight:FontWeight.w700)),
+        Text((controller.entitlements.value!['trial']['awaiting_first_activation']==true)
+          ? 'التجربة معتمدة وتبدأ عند أول تفعيل تشغيلي؛ لم يبدأ عدادها بعد.'
+          : 'الحالة: '+(controller.entitlements.value!['trial']['status']?.toString()??'قيد المعالجة')),
+        Text('تاريخ البدء: '+(controller.entitlements.value!['trial']['start']?.toString()??'لم تبدأ')),
+        Text('تاريخ الانتهاء: '+(controller.entitlements.value!['trial']['end']?.toString()??'—')),
+      ]))),
+    ],
     const _Header('الفواتير'),
     ...controller.invoices.map((e)=>Card(child:ListTile(title:Text(e['invoice_number']?.toString()??'فاتورة'),subtitle:Text(e['status']?.toString()??'—'),trailing:Text(e['total']?.toString()??'—')))),
     const _Header('المدفوعات'),
@@ -142,7 +152,7 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
     Text('الحالة: '+(detail['status_label']?.toString()??detail['status']?.toString()??'—')),
     Text('بداية الفترة: '+(detail['current_period_start']?.toString()??'—')),
     Text('نهاية الفترة: '+(detail['current_period_end']?.toString()??'—')),
-    if(trial is Map<String,dynamic>)...[const SizedBox(height:8),const Text('الفترة التجريبية',style:TextStyle(fontWeight:FontWeight.w700)),Text('الحالة: '+(trial['status']?.toString()??'—')),Text('تاريخ البدء: '+(trial['started_at']?.toString()??'—'))],
+    if(trial is Map<String,dynamic>)...[const SizedBox(height:8),const Text('الفترة التجريبية',style:TextStyle(fontWeight:FontWeight.w700)),Text('الحالة: '+(trial['status']?.toString()??'—')),Text('تاريخ البدء: '+(trial['started_at']?.toString()??'—')),Text('تاريخ الانتهاء: '+(trial['completed_at']?.toString()??'—'))],
     const SizedBox(height:10),const Text('الاستخدام المسجل',style:TextStyle(fontWeight:FontWeight.w700)),
     ...controller.usageRows.map((row)=>Text((row['meter'] is Map<String,dynamic>?row['meter']['name']?.toString()??'عداد':'عداد')+': '+(row['quantity']?.toString()??'0'))),
     const SizedBox(height:10),const Text('سجل الأحداث',style:TextStyle(fontWeight:FontWeight.w700)),
