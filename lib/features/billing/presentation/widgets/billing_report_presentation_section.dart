@@ -13,6 +13,7 @@ class BillingReportPresentationSection extends StatelessWidget {
     required this.presentation,
     required this.resolveLabel,
     required this.onChanged,
+    this.english = false,
     super.key,
   });
 
@@ -21,6 +22,7 @@ class BillingReportPresentationSection extends StatelessWidget {
   final ReportPresentationOptions presentation;
   final ReportLabelResolver resolveLabel;
   final ValueChanged<ReportPresentationOptions> onChanged;
+  final bool english;
 
   ReportTemplateSelection? _templateFor(String? id) {
     final selected = definition.templates.firstWhereOrNull(
@@ -73,8 +75,8 @@ class BillingReportPresentationSection extends StatelessWidget {
                 onChanged(_copy(languageTag: value));
               }
             },
-            label: 'لغة المستند',
-            hint: 'اختر اللغة',
+            label: english ? 'Document language' : 'لغة المستند',
+            hint: english ? 'Select language' : 'اختر اللغة',
           ),
         if (definition.pageProfileIds.length > 1)
           CustomDropdown<String>(
@@ -82,7 +84,7 @@ class BillingReportPresentationSection extends StatelessWidget {
                 .map(
                   (id) => DropdownItem<String>(
                     value: id,
-                    child: Text(id == 'a4-landscape' ? 'A4 أفقي' : 'A4 عمودي'),
+                    child: Text(english ? (id == 'a4-landscape' ? 'A4 landscape' : 'A4 portrait') : (id == 'a4-landscape' ? 'A4 أفقي' : 'A4 عمودي')),
                   ),
                 )
                 .toList(growable: false),
@@ -92,8 +94,8 @@ class BillingReportPresentationSection extends StatelessWidget {
                 onChanged(_copy(pageProfileId: value));
               }
             },
-            label: 'حجم الصفحة',
-            hint: 'اختر حجم الصفحة',
+            label: english ? 'Page size' : 'حجم الصفحة',
+            hint: english ? 'Select page size' : 'اختر حجم الصفحة',
           ),
         if (definition.templates.length > 1)
           CustomDropdown<String>(
@@ -111,17 +113,17 @@ class BillingReportPresentationSection extends StatelessWidget {
                 onChanged(_copy(template: _templateFor(value)));
               }
             },
-            label: 'قالب المستند',
-            hint: 'اختر القالب',
+            label: english ? 'Document template' : 'قالب المستند',
+            hint: english ? 'Select template' : 'اختر القالب',
           ),
         if (definition.templates.length == 1)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text('القالب: ${definition.templates.first.id.value}'),
+            child: Text('${english ? 'Template: ' : 'القالب: '}${definition.templates.first.id.value}'),
           ),
         Row(
           children: [
-            const Expanded(child: Text('إظهار مؤشرات الملخص')),
+            Expanded(child: Text(english ? 'Include summary metrics' : 'إظهار مؤشرات الملخص')),
             CustomSwitch(
               value: presentation.includeMetrics,
               onChanged: (value) =>
@@ -133,7 +135,7 @@ class BillingReportPresentationSection extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Text(
-              'المخططات التفاعلية تظهر في شاشة التقرير؛ إدراج الرسوم داخل PDF سيُضاف ضمن مرحلة قوالب PDF المتقدمة.',
+              english ? 'Interactive charts are available in the report view. PDF chart layouts remain part of the advanced document-template stage.' : 'المخططات التفاعلية تظهر في شاشة التقرير؛ إدراج الرسوم داخل PDF سيُضاف ضمن مرحلة قوالب PDF المتقدمة.',
             ),
           ),
         const SizedBox(height: 8),
@@ -141,6 +143,7 @@ class BillingReportPresentationSection extends StatelessWidget {
           columns: definition.columns,
           presentation: presentation,
           resolveLabel: resolveLabel,
+          title: english ? 'Visible PDF columns' : 'الأعمدة الظاهرة في PDF',
           onChanged: (visibleColumnIds) => onChanged(
             _copy(visibleColumnIds: visibleColumnIds),
           ),
