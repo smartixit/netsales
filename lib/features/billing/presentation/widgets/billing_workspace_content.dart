@@ -14,7 +14,7 @@ import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
-import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
+import 'package:netsales/features/billing/presentation/widgets/billing_cursor_collection_section.dart';
 
 class BillingWorkspaceContent extends StatelessWidget {
   const BillingWorkspaceContent({super.key, required this.controller});
@@ -143,29 +143,21 @@ class BillingWorkspaceContent extends StatelessWidget {
                 ),
               ),
             ),
-            _sectionTitle('الخطط المتاحة'),
-            if (controller.plans.isEmpty)
-              const CustomEmptyState.compact(title: 'لا توجد خطط متاحة لهذا الحساب')
-            else
-              ...controller.plans.map((plan) => _planTile(context, plan)),
-            CustomCursorLoadMore(
-              hasMore: controller.plansPage.hasMore,
-              isLoading: controller.plansPage.isLoadingMore.value,
-              error: controller.plansPage.loadMoreError.value,
-              onPressed: controller.loadMorePlans,
-              label: 'تحميل المزيد من الخطط',
+            BillingCursorCollectionSection(
+              title: 'الخطط المتاحة',
+              emptyTitle: 'لا توجد خطط متاحة لهذا الحساب',
+              page: controller.plansPage,
+              itemBuilder: (row) => _planTile(context, row),
+              onLoadMore: controller.loadMorePlans,
+              loadMoreLabel: 'تحميل المزيد من الخطط',
             ),
-            _sectionTitle('الاشتراك الحالي'),
-            if (controller.subscriptions.isEmpty)
-              const CustomEmptyState.compact(title: 'لا يوجد اشتراك مسجل حالياً')
-            else
-              ...controller.subscriptions.map(_subscriptionTile),
-            CustomCursorLoadMore(
-              hasMore: controller.subscriptionsPage.hasMore,
-              isLoading: controller.subscriptionsPage.isLoadingMore.value,
-              error: controller.subscriptionsPage.loadMoreError.value,
-              onPressed: controller.loadMoreSubscriptions,
-              label: 'تحميل المزيد من الاشتراكات',
+            BillingCursorCollectionSection(
+              title: 'الاشتراك الحالي',
+              emptyTitle: 'لا يوجد اشتراك مسجل حالياً',
+              page: controller.subscriptionsPage,
+              itemBuilder: _subscriptionTile,
+              onLoadMore: controller.loadMoreSubscriptions,
+              loadMoreLabel: 'تحميل المزيد من الاشتراكات',
             ),
             _sectionTitle('الاستحقاقات والمزايا'),
             if (controller.entitlements.value?['features'] is List &&
@@ -177,68 +169,52 @@ class BillingWorkspaceContent extends StatelessWidget {
               const CustomEmptyState.compact(title: 'لا توجد استحقاقات متاحة للعرض'),
             if (controller.entitlements.value?['trial'] is Map<String, dynamic>)
               _trialCard(controller.entitlements.value!['trial'] as Map<String, dynamic>),
-            _sectionTitle('الفواتير'),
-            if (controller.invoices.isEmpty)
-              const CustomEmptyState.compact(title: 'لا توجد فواتير')
-            else
-              ...controller.invoices.map(_invoiceTile),
-            CustomCursorLoadMore(
-              hasMore: controller.invoicesPage.hasMore,
-              isLoading: controller.invoicesPage.isLoadingMore.value,
-              error: controller.invoicesPage.loadMoreError.value,
-              onPressed: controller.loadMoreInvoices,
-              label: 'تحميل المزيد من الفواتير',
+            BillingCursorCollectionSection(
+              title: 'الفواتير',
+              emptyTitle: 'لا توجد فواتير',
+              page: controller.invoicesPage,
+              itemBuilder: _invoiceTile,
+              onLoadMore: controller.loadMoreInvoices,
+              loadMoreLabel: 'تحميل المزيد من الفواتير',
             ),
-            _sectionTitle('الإشعارات الدائنة'),
-            if (controller.creditNotes.isEmpty)
-              const CustomEmptyState.compact(title: 'لا توجد إشعارات دائنة')
-            else
-              ...controller.creditNotes.map((item) => _financialTile(
+            BillingCursorCollectionSection(
+              title: 'الإشعارات الدائنة',
+              emptyTitle: 'لا توجد إشعارات دائنة',
+              page: controller.creditNotesPage,
+              itemBuilder: (item) => _financialTile(
                 title: item['credit_note_number']?.toString() ?? 'إشعار دائن',
                 status: item['status']?.toString(),
                 amount: item['total_minor'],
                 currencyCode: item['currency_code']?.toString(),
-              )),
-            CustomCursorLoadMore(
-              hasMore: controller.creditNotesPage.hasMore,
-              isLoading: controller.creditNotesPage.isLoadingMore.value,
-              error: controller.creditNotesPage.loadMoreError.value,
-              onPressed: controller.loadMoreCreditNotes,
-              label: 'تحميل المزيد من الإشعارات الدائنة',
+              ),
+              onLoadMore: controller.loadMoreCreditNotes,
+              loadMoreLabel: 'تحميل المزيد من الإشعارات الدائنة',
             ),
-            _sectionTitle('الاستردادات'),
-            if (controller.refunds.isEmpty)
-              const CustomEmptyState.compact(title: 'لا توجد استردادات')
-            else
-              ...controller.refunds.map((item) => _financialTile(
+            BillingCursorCollectionSection(
+              title: 'الاستردادات',
+              emptyTitle: 'لا توجد استردادات',
+              page: controller.refundsPage,
+              itemBuilder: (item) => _financialTile(
                 title: item['refund_reference']?.toString() ?? 'استرداد',
                 status: item['status']?.toString(),
                 amount: item['amount_minor'],
                 currencyCode: item['currency_code']?.toString(),
-              )),
-            CustomCursorLoadMore(
-              hasMore: controller.refundsPage.hasMore,
-              isLoading: controller.refundsPage.isLoadingMore.value,
-              error: controller.refundsPage.loadMoreError.value,
-              onPressed: controller.loadMoreRefunds,
-              label: 'تحميل المزيد من الاستردادات',
+              ),
+              onLoadMore: controller.loadMoreRefunds,
+              loadMoreLabel: 'تحميل المزيد من الاستردادات',
             ),
-            _sectionTitle('المدفوعات'),
-            if (controller.payments.isEmpty)
-              const CustomEmptyState.compact(title: 'لا توجد مدفوعات')
-            else
-              ...controller.payments.map((item) => _financialTile(
+            BillingCursorCollectionSection(
+              title: 'المدفوعات',
+              emptyTitle: 'لا توجد مدفوعات',
+              page: controller.paymentsPage,
+              itemBuilder: (item) => _financialTile(
                 title: item['payment_reference']?.toString() ?? 'دفعة',
                 status: item['status']?.toString(),
                 amount: item['amount_minor'] ?? item['amount'],
                 currencyCode: item['currency_code']?.toString(),
-              )),
-            CustomCursorLoadMore(
-              hasMore: controller.paymentsPage.hasMore,
-              isLoading: controller.paymentsPage.isLoadingMore.value,
-              error: controller.paymentsPage.loadMoreError.value,
-              onPressed: controller.loadMorePayments,
-              label: 'تحميل المزيد من المدفوعات',
+              ),
+              onLoadMore: controller.loadMorePayments,
+              loadMoreLabel: 'تحميل المزيد من المدفوعات',
             ),
           ],
         ],
@@ -508,8 +484,4 @@ class BillingWorkspaceContent extends StatelessWidget {
     ),
   );
 
-  Widget _sectionTitle(String title) => Padding(
-    padding: const EdgeInsets.only(top: 18, bottom: 8),
-    child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-  );
 }
