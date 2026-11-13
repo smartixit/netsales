@@ -79,12 +79,12 @@ class RepaymentDocumentService {
     if (result is DocumentRenderSuccess) {
       final bytes = result.artifact.bytes;
       return OfficialDocumentArtifactService.instance.issueAndUpload(
-      documentType: 'pos_repayment',
-      documentId: repayment.repaymentId,
-      networkId: repayment.networkId,
-      posId: repayment.posId,
-      templateId: 'netsales.repayment.receipt.executive',
-      templateVersion: '1.0.0',
+        documentType: 'pos_repayment',
+        documentId: repayment.repaymentId,
+        networkId: repayment.networkId,
+        posId: repayment.posId,
+        templateId: 'netsales.repayment.receipt.executive',
+        templateVersion: '1.0.0',
         pdfBytes: bytes,
         fileName: _fileName(repayment),
       );
