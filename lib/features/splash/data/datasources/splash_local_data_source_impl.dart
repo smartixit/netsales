@@ -8,6 +8,7 @@ import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
+import 'package:netsales/core/services/package_info_service.dart';
 import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/server_task_runner_service.dart';
@@ -23,6 +24,7 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
   Future<void> initializeInfrastructureServices() async {
     // تشغيل التهيئة المتوازية للخدمات الأساسية في طبقة البنية التحتية
     await Future.wait([
+      PackageInfoService.instance.init(),
       DeviceService.instance.init(),
       AppCryptoService.instance.init(),
       PushNotificationService.instance.init(),
