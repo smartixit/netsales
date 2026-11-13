@@ -283,7 +283,11 @@ class BillingController extends GetxController {
           (additionalGuard != null && !additionalGuard())) {
         return;
       }
-      state.append(_page(payload), revision: pageRevision);
+      state.append(
+        _page(payload),
+        revision: pageRevision,
+        requestedCursor: cursor,
+      );
     } catch (error) {
       if (controllerRevision == _revision &&
           accountId == selectedAccountId.value &&
