@@ -6,6 +6,8 @@ import 'package:netsales/features/billing/presentation/widgets/billing_status_ba
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_info_list_tile.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
+import 'package:netsales/widgets/lists/custom_collection_filter_state.dart';
+import 'package:netsales/features/billing/presentation/widgets/billing_collection_status_options.dart';
 
 class BillingSubscriptionSection extends StatelessWidget {
   const BillingSubscriptionSection({required this.controller, super.key});
@@ -21,6 +23,14 @@ class BillingSubscriptionSection extends StatelessWidget {
       itemBuilder: _tile,
       onLoadMore: controller.loadMoreSubscriptions,
       loadMoreLabel: 'تحميل المزيد من الاشتراكات',
+      filterState: controller.subscriptionsFilter,
+      statusOptions: BillingCollectionStatusOptions.build(
+        controller.subscriptionsFilter.statusValues,
+      ),
+      onSearchChanged: controller.searchSubscriptions,
+      onStatusChanged: controller.setSubscriptionStatus,
+      onRefresh: controller.refreshSubscriptions,
+      searchHint: 'ابحث باسم الخطة أو رقم الاشتراك',
     );
   }
 
