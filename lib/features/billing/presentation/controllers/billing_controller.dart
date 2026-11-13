@@ -302,46 +302,65 @@ class BillingController extends GetxController {
     }
   }
 
-  Future<void> loadMorePlans() => _loadMorePage(
-        state: plansPage,
-        fetchPage: (query) => useCases.plans(selectedAccountId.value!, query),
-        fallback: 'تعذر تحميل بقية الخطط.',
-      );
+  Future<void> loadMorePlans() {
+    final accountId = selectedAccountId.value;
+    if (accountId == null) return Future<void>.value();
+    return _loadMorePage(
+      state: plansPage,
+      fetchPage: (query) => useCases.plans(accountId, query),
+      fallback: 'تعذر تحميل بقية الخطط.',
+    );
+  }
 
-  Future<void> loadMoreSubscriptions() => _loadMorePage(
-        state: subscriptionsPage,
-        fetchPage: (query) =>
-            useCases.subscriptions(selectedAccountId.value!, query),
-        fallback: 'تعذر تحميل بقية الاشتراكات.',
-      );
+  Future<void> loadMoreSubscriptions() {
+    final accountId = selectedAccountId.value;
+    if (accountId == null) return Future<void>.value();
+    return _loadMorePage(
+      state: subscriptionsPage,
+      fetchPage: (query) => useCases.subscriptions(accountId, query),
+      fallback: 'تعذر تحميل بقية الاشتراكات.',
+    );
+  }
 
-  Future<void> loadMoreInvoices() => _loadMorePage(
-        state: invoicesPage,
-        fetchPage: (query) =>
-            useCases.invoices(selectedAccountId.value!, query),
-        fallback: 'تعذر تحميل بقية الفواتير.',
-      );
+  Future<void> loadMoreInvoices() {
+    final accountId = selectedAccountId.value;
+    if (accountId == null) return Future<void>.value();
+    return _loadMorePage(
+      state: invoicesPage,
+      fetchPage: (query) => useCases.invoices(accountId, query),
+      fallback: 'تعذر تحميل بقية الفواتير.',
+    );
+  }
 
-  Future<void> loadMorePayments() => _loadMorePage(
-        state: paymentsPage,
-        fetchPage: (query) =>
-            useCases.payments(selectedAccountId.value!, query),
-        fallback: 'تعذر تحميل بقية المدفوعات.',
-      );
+  Future<void> loadMorePayments() {
+    final accountId = selectedAccountId.value;
+    if (accountId == null) return Future<void>.value();
+    return _loadMorePage(
+      state: paymentsPage,
+      fetchPage: (query) => useCases.payments(accountId, query),
+      fallback: 'تعذر تحميل بقية المدفوعات.',
+    );
+  }
 
-  Future<void> loadMoreCreditNotes() => _loadMorePage(
-        state: creditNotesPage,
-        fetchPage: (query) =>
-            useCases.creditNotes(selectedAccountId.value!, query),
-        fallback: 'تعذر تحميل بقية الإشعارات الدائنة.',
-      );
+  Future<void> loadMoreCreditNotes() {
+    final accountId = selectedAccountId.value;
+    if (accountId == null) return Future<void>.value();
+    return _loadMorePage(
+      state: creditNotesPage,
+      fetchPage: (query) => useCases.creditNotes(accountId, query),
+      fallback: 'تعذر تحميل بقية الإشعارات الدائنة.',
+    );
+  }
 
-  Future<void> loadMoreRefunds() => _loadMorePage(
-        state: refundsPage,
-        fetchPage: (query) =>
-            useCases.refunds(selectedAccountId.value!, query),
-        fallback: 'تعذر تحميل بقية الاستردادات.',
-      );
+  Future<void> loadMoreRefunds() {
+    final accountId = selectedAccountId.value;
+    if (accountId == null) return Future<void>.value();
+    return _loadMorePage(
+      state: refundsPage,
+      fetchPage: (query) => useCases.refunds(accountId, query),
+      fallback: 'تعذر تحميل بقية الاستردادات.',
+    );
+  }
 
   Future<Map<String, dynamic>?> checkTrial(int priceId) async {
     final id = selectedAccountId.value;
