@@ -52,6 +52,7 @@ abstract interface class OperationalReportRepository {
 
   Future<bool> saveSummaryPdf({
     required OperationalReportType type,
+    required String pageProfileId,
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
@@ -65,6 +66,7 @@ abstract interface class OperationalReportRepository {
 
   Future<bool> shareSummaryPdf({
     required OperationalReportType type,
+    required String pageProfileId,
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
@@ -78,6 +80,7 @@ abstract interface class OperationalReportRepository {
 
   Future<bool> printSummaryPdf({
     required OperationalReportType type,
+    required String pageProfileId,
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
