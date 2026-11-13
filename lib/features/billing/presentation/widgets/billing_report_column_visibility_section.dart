@@ -8,6 +8,7 @@ class BillingReportColumnVisibilitySection extends StatelessWidget {
     required this.presentation,
     required this.resolveLabel,
     required this.onChanged,
+    this.title = title,
     super.key,
   });
 
@@ -15,6 +16,7 @@ class BillingReportColumnVisibilitySection extends StatelessWidget {
   final ReportPresentationOptions presentation;
   final ReportLabelResolver resolveLabel;
   final ValueChanged<List<String>> onChanged;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
