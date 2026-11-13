@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:document_engine/document_engine.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -10,6 +11,7 @@ import 'package:netsales/features/reports/presentation/widgets/operational_repor
 import 'package:netsales/features/reports/presentation/widgets/operational_report_records_list.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_summary_strip.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_type_selector.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
@@ -94,10 +96,34 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                       types: types,
                     ),
                     AppSpacing.vMd,
-                    OperationalReportFilterPanel(
-                      controller: controller,
-                      isNetworkWorkspace: isNetworkWorkspace,
-                    ),
+                    if (controller.selectedReportEntry case final entry?) 
+                      Obx(() => ReportConfigurationStudio(
+                        definition: entry.definition,
+                        criteria: controller.criteria.value,
+                        presentation: controller.presentation.value,
+                        resolveLabel: (context, key) {
+                          if (key == entry.definition.titleKey) return entry.label;
+                          if (key == entry.definition.descriptionKey) return entry.description;
+                          return entry.filterLabels[key] ??
+                              entry.columnLabels[key] ??
+                              entry.metricLabels[key] ??
+                              entry.choiceLabels.entries
+                                  .where((item) => item.value.containsKey(key.split('.').last))
+                                  .map((item) => item.value[key.split('.').last]!)
+                                  .firstOrNull ??
+                              key;
+                        },
+                        onCriteriaChanged: controller.updateCriteria,
+                        onPresentationChanged: controller.updatePresentation,
+                        onPreview: controller.summary.value == null
+                            ? null
+                            : controller.exportSummaryPdf,
+                        actionBuilder: (context, {required label, required icon, required onPressed, required secondary}) =>
+                            secondary
+                                ? CustomButton.outline(text: label, prefix: icon, onPressed: onPressed)
+                                : CustomButton.primary(text: label, prefix: icon, onPressed: onPressed),
+                        isBusy: controller.isLoading.value || controller.isPdfActionRunning.value,
+                      )),
                     Obx(() {
                       final summary = controller.summary.value;
                       final type = controller.selectedType.value;
