@@ -7,7 +7,6 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
-import 'package:netsales/features/reports/presentation/widgets/operational_report_filter_panel.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_records_list.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_summary_strip.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_type_selector.dart';
