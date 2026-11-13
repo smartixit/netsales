@@ -39,6 +39,12 @@ class BillingController extends GetxController {
     } catch(e){if(rev==_revision)errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل بيانات الفوترة.');}
     finally{if(rev==_revision)isLoading.value=false;}
   }
+  Future<void> selectAccount(int? id) async {
+    if (id == null || id == selectedAccountId.value) return;
+    selectedAccountId.value = id;
+    await loadAccountData();
+  }
+
   Future<void> loadAccountData({int? revision}) async {
     final id=selectedAccountId.value;if(id==null)return;final rev=revision??++_revision;isLoading.value=true;
     try{
