@@ -37,7 +37,10 @@ class InvoiceDocumentService {
 
     final source = Map<String, dynamic>.from(issued['source_snapshot'] as Map);
     final officialInvoice = InvoiceModel.fromJson(source);
-    final renderedBytes = await _renderInvoicePdf(officialInvoice);
+    final renderedBytes = await _renderInvoicePdf(
+      officialInvoice,
+      currencyCode: issued['currency_code']?.toString() ?? 'YER',
+    );
     return snapshots.uploadArtifact(
       snapshotUuid: issued['snapshot_uuid'].toString(),
       pdfBytes: renderedBytes,
@@ -45,7 +48,10 @@ class InvoiceDocumentService {
     );
   }
 
-  Future<Uint8List> _renderInvoicePdf(InvoiceEntity invoice) async {
+  Future<Uint8List> _renderInvoicePdf(
+    InvoiceEntity invoice, {
+    required String currencyCode,
+  }) async {
     final brand = _resolveBrandContext(invoice);
     final logoBytes = await DocumentEngineBrandAssetService.instance
         .resolveLogoBytes(brand.logoUrl);
@@ -68,7 +74,7 @@ class InvoiceDocumentService {
     final result = await PdfDocumentRenderer(
       textShapingProvider: shapingProvider,
     ).render(
-      snapshot: _buildSnapshot(invoice),
+      snapshot: _buildSnapshot(invoice, currencyCode),
       template: _invoiceTemplate,
       options: DocumentRenderOptions(
         pageProfile: DocumentPageProfile.a4Portrait(
@@ -129,7 +135,7 @@ class InvoiceDocumentService {
     );
   }
 
-  DocumentSnapshot _buildSnapshot(InvoiceEntity invoice) {
+  DocumentSnapshot _buildSnapshot(InvoiceEntity invoice, String currencyCode) {
     final reference = _fileReference(invoice);
     final paymentLabel = _paymentLabel(invoice);
     final info = <DocumentInfoItem>[
@@ -162,6 +168,11 @@ class InvoiceDocumentService {
         label: 'حالة السداد',
         value: DocumentTextValue(paymentLabel),
         direction: DocumentTextDirection.rightToLeft,
+      ),
+      DocumentInfoItem(
+        label: 'العملة',
+        value: DocumentTextValue(currencyCode),
+        direction: DocumentTextDirection.leftToRight,
       ),
       if (invoice.createdByName?.trim().isNotEmpty ?? false)
         DocumentInfoItem(
@@ -350,6 +361,9 @@ class InvoiceDocumentService {
       (color.toARGB32() & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase();
 
   static String _amount(double value) => AmountFormatter.format(value.toString());
+
+  static String _money(double value, String currencyCode) =>
+      _amount(value) + ' ' + currencyCode;
 
   static String _display(String? value, [String fallback = '—']) {
     final normalized = value?.trim();
