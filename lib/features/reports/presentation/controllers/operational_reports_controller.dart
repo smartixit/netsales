@@ -797,10 +797,12 @@ class OperationalReportsController extends GetxController {
       );
 
       if (selectedType.value != type ||
+          _networkId != networkId ||
+          _queryPosId != posId ||
           !identical(criteria.value, criteriaSnapshot) ||
           !identical(presentation.value, presentationSnapshot) ||
           !identical(summary.value, summaryBefore) ||
-          selectedReportEntry?.definition.version != entry.definition.version) {
+          selectedReportEntry?.definition.schemaVersion != entry.definition.schemaVersion) {
         throw StateError('تغيرت إعدادات التقرير أثناء التجهيز؛ لم يتم إنشاء مستند بإعدادات مختلطة.');
       }
 
@@ -857,7 +859,7 @@ class OperationalReportsController extends GetxController {
     required int? posId,
     required ReportCriteria criteria,
   }) async {
-    const maxRows = DetailedOperationalReportDocumentService.maxRows;
+    const maxRows = 1500;
     final records = <OperationalReportRecord>[];
     final seenIds = <String>{};
     final seenCursors = <String>{};
