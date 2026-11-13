@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/features/billing/presentation/controllers/billing_collection_filter_state.dart';
+import 'package:netsales/widgets/lists/custom_collection_filter_state.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
