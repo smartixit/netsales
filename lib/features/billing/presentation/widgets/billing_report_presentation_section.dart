@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/inputs/custom_switch.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_column_visibility_section.dart';
 
 class BillingReportPresentationSection extends StatelessWidget {
@@ -132,10 +133,12 @@ class BillingReportPresentationSection extends StatelessWidget {
           ],
         ),
         if (definition.chartsAvailable)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
-              english ? 'Interactive charts are available in the report view. PDF chart layouts remain part of the advanced document-template stage.' : 'المخططات التفاعلية تظهر في شاشة التقرير؛ إدراج الرسوم داخل PDF سيُضاف ضمن مرحلة قوالب PDF المتقدمة.',
+              english
+                  ? 'Interactive charts are available in the report view. PDF chart layouts remain part of the advanced document-template stage.'
+                  : 'المخططات التفاعلية تظهر في شاشة التقرير؛ إدراج الرسوم داخل PDF سيُضاف ضمن مرحلة قوالب PDF المتقدمة.',
             ),
           ),
         const SizedBox(height: 8),
