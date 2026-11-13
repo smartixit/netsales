@@ -4,32 +4,22 @@ import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/api_service.dart';
 
-/// Persists the authoritative server snapshot and returns its canonical PDF bytes.
+/// Coordinates immutable document snapshots and their canonical PDF artifacts.
 class OfficialDocumentArtifactService {
   OfficialDocumentArtifactService._();
 
   static final OfficialDocumentArtifactService instance =
       OfficialDocumentArtifactService._();
 
-  Future<Uint8List> issueAndUpload({
+  Future<Map<String, dynamic>> createSnapshot({
     required String documentType,
     required int documentId,
     required int networkId,
     int? posId,
     required String templateId,
     required String templateVersion,
-    required Uint8List pdfBytes,
-    required String fileName,
   }) async {
-    if (pdfBytes.isEmpty) {
-      throw const AppException(
-        'ملف PDF فارغ ولا يمكن تثبيته كنسخة رسمية.',
-        code: 'OFFICIAL_DOCUMENT_PDF_EMPTY',
-      );
-    }
-
-    final snapshotResponse =
-        await ApiService.instance.post<Map<String, dynamic>>(
+    final response = await ApiService.instance.post<Map<String, dynamic>>(
       ApiConstants.operationalDocumentSnapshots,
       data: {
         'document_type': documentType,
@@ -47,39 +37,58 @@ class OfficialDocumentArtifactService {
       },
     );
 
-    if (!snapshotResponse.success || snapshotResponse.data == null) {
+    if (!response.success || response.data == null) {
       throw AppException(
-        snapshotResponse.message.isNotEmpty
-            ? snapshotResponse.message
-            : 'تعذر تثبيت النسخة الرسمية للمستند.',
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر تثبيت لقطة المستند الرسمية.',
         code: 'OFFICIAL_DOCUMENT_SNAPSHOT_FAILED',
-        details: snapshotResponse.errors,
+        details: response.errors,
       );
     }
 
-    final snapshot = snapshotResponse.data!;
+    final snapshot = response.data!;
     final snapshotUuid = snapshot['snapshot_uuid']?.toString();
-    if (snapshotUuid == null || snapshotUuid.isEmpty) {
+    final source = snapshot['source_snapshot'];
+    if (snapshotUuid == null ||
+        snapshotUuid.isEmpty ||
+        source is! Map) {
       throw const AppException(
-        'لم يُرجع الخادم معرف النسخة الرسمية.',
+        'أعاد الخادم لقطة مستند غير مكتملة.',
         code: 'OFFICIAL_DOCUMENT_SNAPSHOT_INVALID',
       );
     }
 
-    if (snapshot['artifact_ready'] == true) {
-      final canonicalBytes = await ApiService.instance.downloadBytes(
-        ApiConstants.operationalDocumentSnapshotDownload(snapshotUuid),
+    return snapshot;
+  }
+
+  Future<Uint8List?> downloadIfReady(
+    Map<String, dynamic> snapshot,
+  ) async {
+    if (snapshot['artifact_ready'] != true) return null;
+    final snapshotUuid = snapshot['snapshot_uuid']?.toString();
+    if (snapshotUuid == null || snapshotUuid.isEmpty) {
+      throw const AppException(
+        'معرف النسخة الرسمية غير صالح.',
+        code: 'OFFICIAL_DOCUMENT_SNAPSHOT_INVALID',
       );
-      if (canonicalBytes == null || canonicalBytes.isEmpty) {
-        throw const AppException(
-          'تعذر استرجاع ملف PDF المثبت للنسخة الرسمية.',
-          code: 'OFFICIAL_DOCUMENT_CANONICAL_DOWNLOAD_FAILED',
-        );
-      }
-      return canonicalBytes;
+    }
+    return downloadCanonical(snapshotUuid);
+  }
+
+  Future<Uint8List> uploadArtifact({
+    required String snapshotUuid,
+    required Uint8List pdfBytes,
+    required String fileName,
+  }) async {
+    if (pdfBytes.isEmpty) {
+      throw const AppException(
+        'ملف PDF فارغ ولا يمكن تثبيته كنسخة رسمية.',
+        code: 'OFFICIAL_DOCUMENT_PDF_EMPTY',
+      );
     }
 
-    final artifactResponse =
+    final response =
         await ApiService.instance.uploadBytes<Map<String, dynamic>>(
       ApiConstants.operationalDocumentSnapshotArtifact(snapshotUuid),
       bytes: pdfBytes,
@@ -94,23 +103,33 @@ class OfficialDocumentArtifactService {
       },
     );
 
-    if (!artifactResponse.success || artifactResponse.data == null) {
+    if (!response.success ||
+        response.data == null ||
+        response.data!['artifact_ready'] != true) {
       throw AppException(
-        artifactResponse.message.isNotEmpty
-            ? artifactResponse.message
+        response.message.isNotEmpty
+            ? response.message
             : 'تعذر تثبيت ملف PDF الرسمي.',
         code: 'OFFICIAL_DOCUMENT_ARTIFACT_FAILED',
-        details: artifactResponse.errors,
+        details: response.errors,
       );
     }
 
-    if (artifactResponse.data!['artifact_ready'] != true) {
+    // Always return the server-stored bytes. Another request may have won the
+    // immutable first-write race, in which case local bytes are not canonical.
+    return downloadCanonical(snapshotUuid);
+  }
+
+  Future<Uint8List> downloadCanonical(String snapshotUuid) async {
+    final bytes = await ApiService.instance.downloadBytes(
+      ApiConstants.operationalDocumentSnapshotDownload(snapshotUuid),
+    );
+    if (bytes == null || bytes.isEmpty) {
       throw const AppException(
-        'لم يؤكد الخادم تثبيت ملف PDF للنسخة الرسمية.',
-        code: 'OFFICIAL_DOCUMENT_ARTIFACT_NOT_READY',
+        'تعذر استرجاع ملف PDF المثبت للنسخة الرسمية.',
+        code: 'OFFICIAL_DOCUMENT_CANONICAL_DOWNLOAD_FAILED',
       );
     }
-
-    return Uint8List.fromList(pdfBytes);
+    return bytes;
   }
 }
