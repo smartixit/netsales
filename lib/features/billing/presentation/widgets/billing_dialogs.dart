@@ -6,6 +6,7 @@ import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/pickers/custom_file_picker.dart';
+import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 /// تدفقات حوارات الفوترة المعتمدة. جميع النوافذ تمر عبر CustomDialog،
 /// ومدخلات الملفات تمر عبر CustomFilePicker وخدمة الملفات المركزية.
@@ -229,7 +230,7 @@ class BillingDialogs {
       title: 'تفاصيل الاشتراك',
       confirmLabel: 'إغلاق',
       maxWidth: 600,
-      content: SingleChildScrollView(
+      content: Obx(() => SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -249,14 +250,28 @@ class BillingDialogs {
             ...controller.usageRows.map((row) => Text(
               '${row['meter'] is Map<String, dynamic> ? row['meter']['name']?.toString() ?? 'عداد' : 'عداد'}: ${row['quantity']?.toString() ?? '0'}',
             )),
+            CustomCursorLoadMore(
+              hasMore: controller.usagePage.hasMore,
+              isLoading: controller.usagePage.isLoadingMore.value,
+              error: controller.usagePage.loadMoreError.value,
+              onPressed: controller.loadMoreUsage,
+              label: 'تحميل المزيد من سجلات الاستخدام',
+            ),
             const SizedBox(height: 10),
             const Text('سجل الأحداث', style: TextStyle(fontWeight: FontWeight.w700)),
             ...controller.eventRows.map((row) => Text(
               '${row['event_type']?.toString() ?? 'حدث'} — ${row['occurred_at']?.toString() ?? ''}',
             )),
+            CustomCursorLoadMore(
+              hasMore: controller.eventsPage.hasMore,
+              isLoading: controller.eventsPage.isLoadingMore.value,
+              error: controller.eventsPage.loadMoreError.value,
+              onPressed: controller.loadMoreEvents,
+              label: 'تحميل المزيد من الأحداث',
+            ),
           ],
         ),
-      ),
+      )),
     );
   }
 
