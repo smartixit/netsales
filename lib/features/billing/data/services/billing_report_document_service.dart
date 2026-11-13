@@ -193,7 +193,7 @@ class BillingReportDocumentService {
       'over_90_minor':'متأخر أكثر من 90 يوماً (وحدة صغرى)','currency_code':'رمز العملة',
       'currency_name':'اسم العملة','decimal_places':'المنازل العشرية','currency_id':'معرّف العملة',
       'invoice_count':'عدد الفواتير','status':'الحالة','event_type':'نوع الحدث',
-      'plan_name':'الخطة','plan_key':'رمز الخطة','active_subscriptions':'الاشتراكات النشطة',
+      'plan_name':'الخطة','plan_key':'رمز الخطة',
       'trial_redemption_id':'معرّف استرداد التجربة','billing_subscription_id':'معرّف الاشتراك',
       'invoice_number':'رقم الفاتورة','payment_reference':'مرجع الدفع','refund_reference':'مرجع الاسترداد',
       'amount_minor':'المبلغ (وحدة صغرى)','quantity':'الكمية','period_start':'بداية الفترة',
@@ -207,7 +207,7 @@ class BillingReportDocumentService {
 
   DocumentValue _documentValue(dynamic value){
     if(value is int)return DocumentIntegerValue(value);
-    if(value is double&&value.isFinite)return DocumentDecimalValue(value.toString());
+    if(value is double&&value.isFinite)return DocumentTextValue(value.toString());
     if(value is bool)return DocumentTextValue(value?'نعم':'لا');
     if(value is String){
       const statuses=<String,String>{
