@@ -342,17 +342,4 @@ class BillingReportsController extends GetxController {
     }finally{isExportingPdf.value=false;}
   }
 
-  Future<void> loadMore()async{
-    final n=networkId(),type=selectedType.value,cursor=_nextCursor;
-    if(n==null||type==null||cursor==null||isLoadingMore.value)return;
-    final rev=_revision;isLoadingMore.value=true;
-    try{
-      final query={..._filters,'cursor':cursor};
-      final data=_map(await useCases.billingReport(n,type,query));
-      if(rev!=_revision)return;
-      rows.addAll(_list(data['data']??data['items']));
-      _nextCursor=_cursorFrom(data['next_page_url']??(data['links'] is Map<String,dynamic>?data['links']['next']:null));
-    }catch(e){errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل بقية سجلات التقرير.');}
-    finally{isLoadingMore.value=false;}
-  }
 }
