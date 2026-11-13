@@ -142,29 +142,19 @@ class OperationalReportRepositoryImpl
     }
     final catalog = _catalogCache[_catalogKey(networkId, posId)] ??
         await getCatalog(networkId: networkId, posId: posId);
-    final definition = catalog.definitionFor(type);
-    if (definition == null) {
+    final entry = catalog.entryFor(type);
+    if (entry == null) {
       throw AppException(
         'تعريف التقرير غير موجود في كتالوج نطاق العمل الحالي.',
         code: 'OPERATIONAL_REPORT_DEFINITION_MISSING',
       );
     }
 
-    final rawMetrics = definition['metric_slots'];
-    if (rawMetrics is! List) {
-      throw AppException(
-        'لم يعرّف الخادم مؤشرات هذا التقرير.',
-        code: 'OPERATIONAL_REPORT_METRICS_MISSING',
-      );
-    }
-    final metricDefinitions = rawMetrics
-        .whereType<Map>()
-        .map(Map<String, dynamic>.from)
-        .toList(growable: false);
     return OperationalReportSummaryModel(
       response.data!,
-      metricDefinitions: metricDefinitions,
-      reportTitle: definition['label']?.toString() ?? type.wireValue,
+      metricDefinitions: entry.definition.metricSlots,
+      metricLabels: entry.metricLabels,
+      reportTitle: entry.label,
     );
   }
 
