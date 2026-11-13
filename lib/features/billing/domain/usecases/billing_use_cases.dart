@@ -9,6 +9,9 @@ class BillingUseCases {
   Future<BillingPayload> createAccount(int networkId, int currencyId) => repository.createNetworkAccount(networkId, currencyId);
   Future<BillingPayload> account(int id) => repository.getAccount(id);
   Future<BillingPayload> updateAccount(int id, Map<String, dynamic> data) => repository.updateAccount(id, data);
+  Future<BillingPayload> createContact(int id, Map<String, dynamic> data) => repository.createContact(id, data);
+  Future<BillingPayload> updateContact(int id, int contactId, Map<String, dynamic> data) => repository.updateContact(id, contactId, data);
+  Future<BillingPayload> deleteContact(int id, int contactId) => repository.deleteContact(id, contactId);
   Future<BillingPayload> plans(int id, Map<String, dynamic> query) => repository.getPlans(id, query);
   Future<BillingPayload> entitlements(int id) => repository.getEntitlements(id);
   Future<BillingPayload> reportsCatalog(int networkId) => repository.getReportsCatalog(networkId);
