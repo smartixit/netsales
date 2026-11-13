@@ -147,7 +147,7 @@ class BillingWorkspaceContent extends StatelessWidget {
             if (controller.plans.isEmpty)
               const CustomEmptyState.compact(title: 'لا توجد خطط متاحة لهذا الحساب')
             else
-              ...controller.plans.map(_planTile),
+              ...controller.plans.map((plan) => _planTile(context, plan)),
             CustomCursorLoadMore(
               hasMore: controller.plansPage.hasMore,
               isLoading: controller.plansPage.isLoadingMore.value,
@@ -286,7 +286,7 @@ class BillingWorkspaceContent extends StatelessWidget {
     );
   }
 
-  Widget _planTile(Map<String, dynamic> plan) {
+  Widget _planTile(BuildContext context, Map<String, dynamic> plan) {
     final version = plan['current_version'];
     final rawPrices =
         version is Map<String, dynamic> ? version['prices'] : null;
@@ -304,7 +304,7 @@ class BillingWorkspaceContent extends StatelessWidget {
             padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 14, 6),
             child: Text(
               plan['name']?.toString() ?? 'خطة اشتراك',
-              style: Theme.of(Get.context!).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
           if (prices.isEmpty)
@@ -316,7 +316,7 @@ class BillingWorkspaceContent extends StatelessWidget {
               if (index > 0)
                 Divider(
                   height: 1,
-                  color: Theme.of(Get.context!).colorScheme.outlineVariant,
+                  color: Theme.of(context).colorScheme.outlineVariant,
                 ),
               _planPriceTile(prices[index]),
             ],
