@@ -69,13 +69,13 @@ class BillingReportDocumentService {
       ]));
     }
     final info=<DocumentInfoItem>[
-      DocumentInfoItem(label:isArabic?'التقرير':'Report',value:DocumentTextValue(reportLabel),direction:DocumentTextDirection.rightToLeft),
-      DocumentInfoItem(label:isArabic?'النطاق':'Scope',value:DocumentTextValue(isArabic?'حساب فوترة الشبكة':'Network billing account'),direction:DocumentTextDirection.rightToLeft),
+      DocumentInfoItem(label:isArabic?'التقرير':'Report',value:DocumentTextValue(reportLabel),direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
+      DocumentInfoItem(label:isArabic?'النطاق':'Scope',value:DocumentTextValue(isArabic?'حساب فوترة الشبكة':'Network billing account'),direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
       DocumentInfoItem(label:isArabic?'تاريخ الإنشاء':'Generated at',value:DocumentTextValue(_date(generatedAt)),direction:DocumentTextDirection.leftToRight),
       if(fromDate!=null)DocumentInfoItem(label:isArabic?'من تاريخ':'From date',value:DocumentTextValue(fromDate),direction:DocumentTextDirection.leftToRight),
       if(toDate!=null)DocumentInfoItem(label:isArabic?'إلى تاريخ':'To date',value:DocumentTextValue(toDate),direction:DocumentTextDirection.leftToRight),
       if(status!=null&&status.isNotEmpty)DocumentInfoItem(label:isArabic?'الحالة':'Status',value:DocumentTextValue(status),direction:DocumentTextDirection.leftToRight),
-      if(search!=null&&search.isNotEmpty)DocumentInfoItem(label:isArabic?'بحث':'Search',value:DocumentTextValue(search),direction:DocumentTextDirection.rightToLeft),
+      if(search!=null&&search.isNotEmpty)DocumentInfoItem(label:isArabic?'بحث':'Search',value:DocumentTextValue(search),direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
     ];
     final snapshot=DocumentSnapshot(
       metadata:DocumentMetadata(
@@ -89,7 +89,7 @@ class BillingReportDocumentService {
       ),
       sections:[
         DocumentSection(id:'billing-report-summary',nodes:[
-          DocumentHeading(text:reportLabel,level:1,direction:DocumentTextDirection.rightToLeft,weight:DocumentTextWeight.bold),
+          DocumentHeading(text:reportLabel,level:1,direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight,weight:DocumentTextWeight.bold),
           DocumentStatusBanner(label:isArabic?'ملخص محسوب على الخادم':'Server-calculated summary',tone:DocumentStatusTone.success,detail:isArabic?'لم يُجرِ التطبيق أي إعادة احتساب للمؤشرات المالية أو الأرصدة.':'The client does not recalculate financial totals or balances.'),
           DocumentInfoGrid(items:info,columns:3,compact:true),
           if(includeMetrics)...[
