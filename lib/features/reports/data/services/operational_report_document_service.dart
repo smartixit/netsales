@@ -56,12 +56,8 @@ class OperationalReportDocumentService {
       type: type,
       summary: summary,
       organizationName: normalizedOrganization,
-      fromDate: fromDate,
-      toDate: toDate,
+      activeFilters: activeFilters,
       scopeLabel: scopeLabel,
-      search: search,
-      status: status,
-      saleType: saleType,
       generatedAt: generatedAt,
     );
 
@@ -111,12 +107,8 @@ class OperationalReportDocumentService {
       summary: summary,
       organizationName: organizationName,
       logoUrl: logoUrl,
-      fromDate: fromDate,
-      toDate: toDate,
+      activeFilters: activeFilters,
       scopeLabel: scopeLabel,
-      search: search,
-      status: status,
-      saleType: saleType,
     );
     return FileExportService.instance.saveFile(
       bytes: bytes,
@@ -144,12 +136,8 @@ class OperationalReportDocumentService {
       summary: summary,
       organizationName: organizationName,
       logoUrl: logoUrl,
-      fromDate: fromDate,
-      toDate: toDate,
+      activeFilters: activeFilters,
       scopeLabel: scopeLabel,
-      search: search,
-      status: status,
-      saleType: saleType,
     );
     return FileExportService.instance.shareBytes(
       bytes: bytes,
@@ -174,12 +162,8 @@ class OperationalReportDocumentService {
       summary: summary,
       organizationName: organizationName,
       logoUrl: logoUrl,
-      fromDate: fromDate,
-      toDate: toDate,
+      activeFilters: activeFilters,
       scopeLabel: scopeLabel,
-      search: search,
-      status: status,
-      saleType: saleType,
     );
     return Printing.layoutPdf(
       onLayout: (_) async => bytes,
