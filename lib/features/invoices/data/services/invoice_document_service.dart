@@ -2,13 +2,10 @@ import 'dart:typed_data';
 import 'dart:ui' show Color;
 
 import 'package:document_engine/document_engine.dart';
-import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/services/document_engine_font_service.dart';
 import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
 import 'package:netsales/core/services/official_document_artifact_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
-import 'package:netsales/core/services/session_service.dart';
-import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/invoices/data/models/invoice_model.dart';
@@ -389,6 +386,8 @@ class InvoiceDocumentService {
 
   static String _colorHex(Color color) =>
       (color.toARGB32() & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase();
+
+  static bool _hasText(String? value) => value?.trim().isNotEmpty ?? false;
 
   static String _amount(double value) => AmountFormatter.format(value.toString());
 
