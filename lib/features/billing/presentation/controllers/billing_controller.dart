@@ -7,6 +7,7 @@ import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/features/billing/domain/entities/billing_payload.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_cursor_page_state.dart';
+import 'package:netsales/widgets/lists/custom_collection_filter_state.dart';
 
 class BillingController extends GetxController {
   BillingController({
@@ -33,6 +34,41 @@ class BillingController extends GetxController {
   final creditNotesPage =
       BillingCursorPageState(identityKey: 'credit_note_id');
   final refundsPage = BillingCursorPageState(identityKey: 'refund_id');
+
+  final plansFilter = CustomCollectionFilterState();
+  final subscriptionsFilter = CustomCollectionFilterState(
+    statusValues: [
+      'INCOMPLETE', 'TRIALING', 'ACTIVE', 'PAST_DUE',
+      'PAUSED', 'SUSPENDED', 'CANCELED', 'EXPIRED',
+    ],
+  );
+  final invoicesFilter = CustomCollectionFilterState(
+    statusValues: [
+      'DRAFT', 'OPEN', 'PARTIALLY_PAID', 'PARTIALLY_CREDITED',
+      'PAID', 'CREDITED', 'UNCOLLECTIBLE', 'VOID',
+    ],
+  );
+  final paymentsFilter = CustomCollectionFilterState(
+    statusValues: [
+      'PENDING_REVIEW', 'VERIFIED', 'FAILED', 'REJECTED',
+      'REFUNDED', 'PARTIALLY_REFUNDED',
+    ],
+  );
+  final creditNotesFilter = CustomCollectionFilterState(
+    statusValues: ['ISSUED', 'PARTIALLY_REFUNDED', 'REFUNDED'],
+  );
+  final refundsFilter = CustomCollectionFilterState(
+    statusValues: ['PENDING', 'COMPLETED'],
+  );
+
+  List<CustomCollectionFilterState> get _collectionFilters => [
+        plansFilter,
+        subscriptionsFilter,
+        invoicesFilter,
+        paymentsFilter,
+        creditNotesFilter,
+        refundsFilter,
+      ];
 
   RxList<Map<String, dynamic>> get plans => plansPage.items;
   RxList<Map<String, dynamic>> get subscriptions => subscriptionsPage.items;
@@ -98,6 +134,115 @@ class BillingController extends GetxController {
     }
   }
 
+  void _resetCollectionFilters() {
+    for (final filter in _collectionFilters) {
+      filter.reset();
+    }
+  }
+
+  Map<String, dynamic> _firstPageQuery(
+    CustomCollectionFilterState filter,
+  ) =>
+      {
+        'per_page': 25,
+        ...filter.queryParameters,
+      };
+
+  Future<void> _refreshCollection({
+    required BillingCursorPageState page,
+    required CustomCollectionFilterState filter,
+    required Future<BillingPayload> Function(Map<String, dynamic>) fetchPage,
+    required String fallback,
+  }) async {
+    final accountId = selectedAccountId.value;
+    final requestNetworkId = networkId();
+    if (accountId == null || requestNetworkId == null) return;
+
+    final controllerRevision = _revision;
+    final pageRevision = page.beginRefresh();
+    try {
+      final payload = await fetchPage(_firstPageQuery(filter));
+      if (controllerRevision != _revision ||
+          accountId != selectedAccountId.value ||
+          requestNetworkId != networkId() ||
+          pageRevision != page.revision) {
+        return;
+      }
+      page.replace(_page(payload));
+    } catch (error) {
+      if (controllerRevision == _revision &&
+          accountId == selectedAccountId.value &&
+          requestNetworkId == networkId() &&
+          pageRevision == page.revision) {
+        page.failFirstPage(
+          AppException.sanitizeMessage(error, fallback: fallback),
+          revision: pageRevision,
+        );
+      }
+    }
+  }
+
+  void searchPlans(String value) =>
+      plansFilter.onSearchChanged(value, refreshPlans);
+  void searchSubscriptions(String value) =>
+      subscriptionsFilter.onSearchChanged(value, refreshSubscriptions);
+  void searchInvoices(String value) =>
+      invoicesFilter.onSearchChanged(value, refreshInvoices);
+  void searchPayments(String value) =>
+      paymentsFilter.onSearchChanged(value, refreshPayments);
+  void searchCreditNotes(String value) =>
+      creditNotesFilter.onSearchChanged(value, refreshCreditNotes);
+  void searchRefunds(String value) =>
+      refundsFilter.onSearchChanged(value, refreshRefunds);
+
+  void setSubscriptionStatus(String? value) =>
+      unawaited(subscriptionsFilter.onStatusChanged(value, refreshSubscriptions));
+  void setInvoiceStatus(String? value) =>
+      unawaited(invoicesFilter.onStatusChanged(value, refreshInvoices));
+  void setPaymentStatus(String? value) =>
+      unawaited(paymentsFilter.onStatusChanged(value, refreshPayments));
+  void setCreditNoteStatus(String? value) =>
+      unawaited(creditNotesFilter.onStatusChanged(value, refreshCreditNotes));
+  void setRefundStatus(String? value) =>
+      unawaited(refundsFilter.onStatusChanged(value, refreshRefunds));
+
+  Future<void> refreshPlans() => _refreshCollection(
+        page: plansPage,
+        filter: plansFilter,
+        fetchPage: (query) => useCases.plans(selectedAccountId.value!, query),
+        fallback: 'تعذر تحديث الخطط المطابقة.',
+      );
+  Future<void> refreshSubscriptions() => _refreshCollection(
+        page: subscriptionsPage,
+        filter: subscriptionsFilter,
+        fetchPage: (query) => useCases.subscriptions(selectedAccountId.value!, query),
+        fallback: 'تعذر تحديث الاشتراكات المطابقة.',
+      );
+  Future<void> refreshInvoices() => _refreshCollection(
+        page: invoicesPage,
+        filter: invoicesFilter,
+        fetchPage: (query) => useCases.invoices(selectedAccountId.value!, query),
+        fallback: 'تعذر تحديث الفواتير المطابقة.',
+      );
+  Future<void> refreshPayments() => _refreshCollection(
+        page: paymentsPage,
+        filter: paymentsFilter,
+        fetchPage: (query) => useCases.payments(selectedAccountId.value!, query),
+        fallback: 'تعذر تحديث المدفوعات المطابقة.',
+      );
+  Future<void> refreshCreditNotes() => _refreshCollection(
+        page: creditNotesPage,
+        filter: creditNotesFilter,
+        fetchPage: (query) => useCases.creditNotes(selectedAccountId.value!, query),
+        fallback: 'تعذر تحديث الإشعارات الدائنة المطابقة.',
+      );
+  Future<void> refreshRefunds() => _refreshCollection(
+        page: refundsPage,
+        filter: refundsFilter,
+        fetchPage: (query) => useCases.refunds(selectedAccountId.value!, query),
+        fallback: 'تعذر تحديث الاستردادات المطابقة.',
+      );
+
   void _clearSubscriptionDetails() {
     _detailsRevision++;
     _detailsSubscriptionId = null;
@@ -119,10 +264,14 @@ class BillingController extends GetxController {
   @override
   void onClose() {
     _networkWorker?.dispose();
+    for (final filter in _collectionFilters) {
+      filter.dispose();
+    }
     super.onClose();
   }
 
   void _clearWorkspaceData() {
+    _resetCollectionFilters();
     accounts.clear();
     selectedAccountId.value = null;
     account.value = null;
@@ -235,14 +384,14 @@ class BillingController extends GetxController {
     try {
       final results = await Future.wait([
         useCases.account(id),
-        useCases.plans(id, const {'per_page': 25}),
-        useCases.subscriptions(id, const {'per_page': 25}),
-        useCases.invoices(id, const {'per_page': 25}),
-        useCases.payments(id, const {'per_page': 25}),
+        useCases.plans(id, _firstPageQuery(plansFilter)),
+        useCases.subscriptions(id, _firstPageQuery(subscriptionsFilter)),
+        useCases.invoices(id, _firstPageQuery(invoicesFilter)),
+        useCases.payments(id, _firstPageQuery(paymentsFilter)),
         useCases.entitlements(id),
         useCases.paymentMethods(id),
-        useCases.creditNotes(id, const {'per_page': 25}),
-        useCases.refunds(id, const {'per_page': 25}),
+        useCases.creditNotes(id, _firstPageQuery(creditNotesFilter)),
+        useCases.refunds(id, _firstPageQuery(refundsFilter)),
       ]);
 
       if (currentRevision != _revision ||
@@ -350,7 +499,7 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: plansPage,
-      fetchPage: (query) => useCases.plans(accountId, query),
+      fetchPage: (query) => useCases.plans(accountId, {...plansFilter.queryParameters, ...query}),
       fallback: 'تعذر تحميل بقية الخطط.',
     );
   }
@@ -360,7 +509,7 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: subscriptionsPage,
-      fetchPage: (query) => useCases.subscriptions(accountId, query),
+      fetchPage: (query) => useCases.subscriptions(accountId, {...subscriptionsFilter.queryParameters, ...query}),
       fallback: 'تعذر تحميل بقية الاشتراكات.',
     );
   }
@@ -370,7 +519,7 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: invoicesPage,
-      fetchPage: (query) => useCases.invoices(accountId, query),
+      fetchPage: (query) => useCases.invoices(accountId, {...invoicesFilter.queryParameters, ...query}),
       fallback: 'تعذر تحميل بقية الفواتير.',
     );
   }
@@ -380,7 +529,7 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: paymentsPage,
-      fetchPage: (query) => useCases.payments(accountId, query),
+      fetchPage: (query) => useCases.payments(accountId, {...paymentsFilter.queryParameters, ...query}),
       fallback: 'تعذر تحميل بقية المدفوعات.',
     );
   }
@@ -390,7 +539,7 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: creditNotesPage,
-      fetchPage: (query) => useCases.creditNotes(accountId, query),
+      fetchPage: (query) => useCases.creditNotes(accountId, {...creditNotesFilter.queryParameters, ...query}),
       fallback: 'تعذر تحميل بقية الإشعارات الدائنة.',
     );
   }
@@ -400,7 +549,7 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: refundsPage,
-      fetchPage: (query) => useCases.refunds(accountId, query),
+      fetchPage: (query) => useCases.refunds(accountId, {...refundsFilter.queryParameters, ...query}),
       fallback: 'تعذر تحميل بقية الاستردادات.',
     );
   }
