@@ -131,7 +131,7 @@ class BillingWorkspaceContent extends StatelessWidget {
                         (account['contacts'] as List).isNotEmpty)
                       ...(account['contacts'] as List<dynamic>)
                           .whereType<Map<String, dynamic>>()
-                          .map(_contactTile)
+                          .map((contact) => _contactTile(context, contact))
                     else
                       const CustomEmptyState.compact(title: 'لا توجد جهات اتصال مسجلة'),
                   ],
@@ -199,7 +199,7 @@ class BillingWorkspaceContent extends StatelessWidget {
     );
   });
 
-  Widget _contactTile(Map<String, dynamic> contact) {
+  Widget _contactTile(BuildContext context, Map<String, dynamic> contact) {
     final id = (contact['contact_id'] as num?)?.toInt();
     final details = [
       contact['email'],
@@ -229,7 +229,7 @@ class BillingWorkspaceContent extends StatelessWidget {
           ),
           CustomButton.text(
             text: 'حذف',
-            foregroundColor: Colors.red,
+            foregroundColor: Theme.of(context).colorScheme.error,
             onPressed: id == null
                 ? null
                 : () => BillingDialogs.deleteContact(controller, id),
