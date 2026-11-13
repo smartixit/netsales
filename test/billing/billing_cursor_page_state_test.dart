@@ -21,6 +21,24 @@ void main() {
       expect(state.hasMore, isTrue);
     });
 
+    test('preserves the current cursor and rows when a refresh starts', () {
+      final state = BillingCursorPageState(identityKey: 'invoice_id');
+      state.replace({
+        'data': [
+          {'invoice_id': 1},
+        ],
+        'links': {'next': '/invoices?cursor=cursor-one'},
+      });
+
+      final revision = state.beginRefresh(clearItems: false);
+
+      expect(state.items.single['invoice_id'], 1);
+      expect(state.nextCursor, 'cursor-one');
+      expect(state.hasMore, isTrue);
+      expect(state.revision, revision);
+      expect(state.isLoadingMore.value, isFalse);
+    });
+
     test('appends unique rows and advances the cursor', () {
       final state = BillingCursorPageState(identityKey: 'invoice_id');
       state.replace({
