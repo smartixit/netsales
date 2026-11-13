@@ -15,6 +15,7 @@ enum BillingStatus {
   rejected('REJECTED'),
   revoked('REVOKED'),
   draft('DRAFT'),
+  issued('ISSUED'),
   open('OPEN'),
   partiallyPaid('PARTIALLY_PAID'),
   partiallyCredited('PARTIALLY_CREDITED'),
