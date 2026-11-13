@@ -343,6 +343,10 @@ class OperationalReportsController extends GetxController {
     _criteriaDebounce = null;
     ++_requestRevision;
     ++_posRevision;
+    savedPresets.clear();
+    isLoadingPresets.value = false;
+    isSavingPreset.value = false;
+    isDeletingPreset.value = false;
     isLoadingPos.value = false;
     isLoadingMorePos.value = false;
     reports.clear();
@@ -491,9 +495,26 @@ class OperationalReportsController extends GetxController {
   Future<void> savePreset(String name) async {
     final type = selectedType.value;
     final networkId = _networkId;
+    final posId = _queryPosId;
+    final scopeRevision = _scopeRevision;
     final definition = selectedReportEntry?.definition;
     final normalizedName = name.trim();
-    if (type == null || networkId == null || definition == null || normalizedName.isEmpty || isSavingPreset.value) return;
+    if (type == null ||
+        networkId == null ||
+        definition == null ||
+        normalizedName.isEmpty ||
+        isSavingPreset.value) {
+      return;
+    }
+
+    final criteriaSnapshot = criteria.value;
+    final presentationSnapshot = presentation.value;
+    bool isCurrentScope() =>
+        scopeRevision == _scopeRevision &&
+        networkId == _networkId &&
+        type == selectedType.value &&
+        posId == _queryPosId;
+
     isSavingPreset.value = true;
     try {
       final existing = savedPresets.firstWhereOrNull(
@@ -501,15 +522,26 @@ class OperationalReportsController extends GetxController {
       );
       final saved = existing == null
           ? await savePresetUseCase(
-              type: type, networkId: networkId, posId: _queryPosId,
-              name: normalizedName, reportSchemaVersion: definition.schemaVersion,
-              criteria: criteria.value, presentation: presentation.value,
+              type: type,
+              networkId: networkId,
+              posId: posId,
+              name: normalizedName,
+              reportSchemaVersion: definition.schemaVersion,
+              criteria: criteriaSnapshot,
+              presentation: presentationSnapshot,
             )
           : await updatePresetUseCase(
-              presetId: existing.id, type: type, networkId: networkId, posId: _queryPosId,
-              name: normalizedName, reportSchemaVersion: definition.schemaVersion,
-              criteria: criteria.value, presentation: presentation.value,
+              presetId: existing.id,
+              type: type,
+              networkId: networkId,
+              posId: posId,
+              name: normalizedName,
+              reportSchemaVersion: definition.schemaVersion,
+              criteria: criteriaSnapshot,
+              presentation: presentationSnapshot,
             );
+      if (!isCurrentScope()) return;
+
       savedPresets.removeWhere((item) => item.id == saved.id);
       savedPresets.insert(0, saved);
       CustomSnackbar.show(
@@ -518,13 +550,20 @@ class OperationalReportsController extends GetxController {
         type: SnackType.success,
       );
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذر حفظ الإعداد',
-        message: AppException.sanitizeMessage(error, fallback: 'رفض الخادم حفظ إعداد التقرير.'),
-        type: SnackType.error,
-      );
+      if (isCurrentScope()) {
+        CustomSnackbar.show(
+          title: 'تعذر حفظ الإعداد',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'رفض الخادم حفظ إعداد التقرير.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isSavingPreset.value = false;
+      if (scopeRevision == _scopeRevision) {
+        isSavingPreset.value = false;
+      }
     }
   }
 
@@ -546,21 +585,46 @@ class OperationalReportsController extends GetxController {
   Future<void> deletePreset(SavedReportPreset preset) async {
     final type = selectedType.value;
     final networkId = _networkId;
-    if (type == null || networkId == null || isDeletingPreset.value) return;
+    final posId = _queryPosId;
+    final scopeRevision = _scopeRevision;
+    if (type == null ||
+        networkId == null ||
+        isDeletingPreset.value) {
+      return;
+    }
+
+    bool isCurrentScope() =>
+        scopeRevision == _scopeRevision &&
+        networkId == _networkId &&
+        type == selectedType.value &&
+        posId == _queryPosId;
+
     isDeletingPreset.value = true;
     try {
       await deletePresetUseCase(
-        presetId: preset.id, type: type, networkId: networkId, posId: _queryPosId,
+        presetId: preset.id,
+        type: type,
+        networkId: networkId,
+        posId: posId,
       );
-      savedPresets.removeWhere((item) => item.id == preset.id);
+      if (isCurrentScope()) {
+        savedPresets.removeWhere((item) => item.id == preset.id);
+      }
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذر حذف الإعداد',
-        message: AppException.sanitizeMessage(error, fallback: 'تعذر حذف الإعداد المحفوظ.'),
-        type: SnackType.error,
-      );
+      if (isCurrentScope()) {
+        CustomSnackbar.show(
+          title: 'تعذر حذف الإعداد',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر حذف الإعداد المحفوظ.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isDeletingPreset.value = false;
+      if (scopeRevision == _scopeRevision) {
+        isDeletingPreset.value = false;
+      }
     }
   }
 
