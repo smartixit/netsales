@@ -1083,6 +1083,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+  payv:
+    dependency: transitive
+    description:
+      name: payv
+      sha256: "24c588ebe5d74d4ae0243e3cc77cd57f5c719c22f8059bd7fa104ceac156b6a0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   pdf:
     dependency: "direct main"
     description:

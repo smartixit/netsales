@@ -1,13 +1,15 @@
+import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:document_engine/document_engine.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
@@ -28,36 +30,47 @@ class OperationalReportsController extends GetxController {
     required this.downloadExportUseCase,
     required this.getNetworkPosListUseCase,
     required this.saveSummaryPdfUseCase,
+    required this.saveDetailedPdfUseCase,
     required this.shareSummaryPdfUseCase,
     required this.printSummaryPdfUseCase,
+    required this.getPresetsUseCase,
+    required this.savePresetUseCase,
+    required this.updatePresetUseCase,
+    required this.deletePresetUseCase,
   });
 
   final GetOperationalReportCatalogUseCase getReportCatalogUseCase;
   final GetOperationalReportUseCase getReportUseCase;
   final Rxn<OperationalReportCatalog> catalog = Rxn<OperationalReportCatalog>();
+  final Rx<ReportCriteria> criteria = ReportCriteria().obs;
+  final Rx<ReportPresentationOptions> presentation = ReportPresentationOptions().obs;
   final GetOperationalReportSummaryUseCase getSummaryUseCase;
   final RequestOperationalReportExportUseCase requestExportUseCase;
   final GetOperationalReportExportStatusUseCase getExportStatusUseCase;
   final DownloadOperationalReportExportUseCase downloadExportUseCase;
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
   final SaveOperationalReportSummaryPdfUseCase saveSummaryPdfUseCase;
+  final SaveOperationalReportDetailedPdfUseCase saveDetailedPdfUseCase;
   final ShareOperationalReportSummaryPdfUseCase shareSummaryPdfUseCase;
   final PrintOperationalReportSummaryPdfUseCase printSummaryPdfUseCase;
+  final GetOperationalReportPresetsUseCase getPresetsUseCase;
+  final SaveOperationalReportPresetUseCase savePresetUseCase;
+  final UpdateOperationalReportPresetUseCase updatePresetUseCase;
+  final DeleteOperationalReportPresetUseCase deletePresetUseCase;
 
   final reports = <OperationalReportRecord>[].obs;
+  final savedPresets = <SavedReportPreset>[].obs;
+  final isLoadingPresets = false.obs;
+  final isSavingPreset = false.obs;
+  final isDeletingPreset = false.obs;
+  int _presetRevision = 0;
   final Rxn<OperationalReportSummary> summary = Rxn<OperationalReportSummary>();
   final RxnString summaryError = RxnString();
   final selectedType = Rxn<OperationalReportType>();
-  final selectedStatus = RxnString();
-  final selectedSaleType = RxnString();
   final selectedPosId = RxnInt();
   final posOptions = <NetworkPosLinkEntity>[].obs;
   final nextCursor = RxnString();
   final posCursor = RxnString();
-  final fromDate = RxnString();
-  final toDate = RxnString();
-  final searchTextController = TextEditingController();
-  final RxString searchQuery = ''.obs;
 
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
@@ -71,7 +84,9 @@ class OperationalReportsController extends GetxController {
   final posError = RxnString();
   final exportJob = Rxn<OperationalReportExport>();
 
-  Timer? _searchDebounce;
+  Timer? _criteriaDebounce;
+  final Map<String, TextEditingController> _criteriaTextControllers = {};
+  final Map<String, RxnString> _choiceValues = {};
   int _requestRevision = 0;
   int _posRevision = 0;
   final Set<String> _seenReportCursors = <String>{};
@@ -95,10 +110,12 @@ class OperationalReportsController extends GetxController {
 
   String? get reportLogoUrl => _logoUrl;
 
+  String get reportCurrencyCode =>
+      summary.value?.values['currency_code']?.toString() ?? '';
+
   String get reportScopeLabel {
     if (!_isNetworkWorkspace) return 'نقطة البيع الحالية';
-    final type = selectedType.value;
-    if (selectedDefinition?['pos_selection'] == 'forbidden') {
+    if (selectedReportEntry?.access.posSelection == 'forbidden') {
       return 'نطاق الشبكة بالكامل';
     }
     final posId = selectedPosId.value;
@@ -110,37 +127,129 @@ class OperationalReportsController extends GetxController {
   List<OperationalReportType> get availableTypes =>
       catalog.value?.availableTypes ?? const <OperationalReportType>[];
 
-  Map<String, dynamic>? get selectedDefinition {
+  OperationalReportCatalogEntry? get selectedReportEntry {
     final type = selectedType.value;
-    return type == null ? null : catalog.value?.definitionFor(type);
+    return type == null ? null : catalog.value?.entryFor(type);
   }
 
-  List<String> get selectedStatusOptions {
-    final filters = selectedDefinition?['filters'];
-    if (filters is! List) return const [];
-    for (final filter in filters) {
-      if (filter is Map && filter['id'] == 'status') {
-        final choices = filter['choices'];
-        if (choices is List) return choices.map((value) => value.toString()).toList(growable: false);
-      }
+  String? get selectedPageProfileId {
+    final pageProfileIds = selectedReportEntry?.definition.pageProfileIds;
+    if (pageProfileIds == null || pageProfileIds.isEmpty) return null;
+    final selected = presentation.value.pageProfileId;
+    return selected != null && pageProfileIds.contains(selected)
+        ? selected
+        : pageProfileIds.first;
+  }
+
+  String reportLabel(OperationalReportType type) =>
+      catalog.value?.entryFor(type)?.label ?? type.wireValue;
+
+  List<OperationalReportFilterDisplay> get activeFilterDisplays {
+    final entry = selectedReportEntry;
+    if (entry == null) return const [];
+    return entry.definition.filters
+        .where((filter) => criteria.value.filters.containsKey(filter.id))
+        .map((filter) {
+          final value = criteria.value.filters[filter.id]!;
+          final displayValue = switch (value) {
+            ReportTextFilterValue() => value.value,
+            ReportIntegerFilterValue() => value.value.toString(),
+            ReportDecimalFilterValue() => value.value,
+            ReportDateFilterValue() => _dateText(value.value),
+            ReportDateRangeFilterValue() =>
+              '${value.start == null ? '—' : _dateText(value.start!)} — ${value.end == null ? '—' : _dateText(value.end!)}',
+            ReportBooleanFilterValue() => value.value ? 'نعم' : 'لا',
+            ReportChoiceFilterValue() =>
+              entry.choiceLabels[filter.id]?[value.value] ?? value.value,
+            ReportChoicesFilterValue() => value.values
+                .map((choice) => entry.choiceLabels[filter.id]?[choice] ?? choice)
+                .join('، '),
+          };
+          return OperationalReportFilterDisplay(
+            id: filter.id,
+            label: entry.filterLabels[filter.labelKey] ?? filter.id,
+            value: displayValue,
+          );
+        }).toList(growable: false);
+  }
+
+  TextEditingController textControllerFor(ReportFilterDefinition filter) {
+    return _criteriaTextControllers.putIfAbsent(filter.id, () {
+      final value = criteria.value.filters[filter.id];
+      final initial = switch (value) {
+        ReportTextFilterValue() => value.value,
+        ReportIntegerFilterValue() => value.value.toString(),
+        ReportDecimalFilterValue() => value.value,
+        ReportDateFilterValue() => _dateText(value.value),
+        _ => '',
+      };
+      return TextEditingController(text: initial);
+    });
+  }
+
+  RxnString choiceValueFor(String filterId) {
+    return _choiceValues.putIfAbsent(filterId, () {
+      final value = criteria.value.filters[filterId];
+      return RxnString(
+        value is ReportChoiceFilterValue ? value.value : null,
+      );
+    });
+  }
+
+  void setFilterValue(String filterId, ReportFilterValue? value) {
+    final filters = Map<String, ReportFilterValue>.of(criteria.value.filters);
+    if (value == null) {
+      filters.remove(filterId);
+    } else {
+      filters[filterId] = value;
     }
-    return const [];
+    updateCriteria(ReportCriteria(filters: filters));
   }
 
-  List<String> get selectedSaleTypeOptions {
-    final filters = selectedDefinition?['filters'];
-    if (filters is! List) return const [];
-    for (final filter in filters) {
-      if (filter is Map && filter['id'] == 'sale_type') {
-        final choices = filter['choices'];
-        if (choices is List) return choices.map((value) => value.toString()).toList(growable: false);
-      }
+  void updateCriteria(ReportCriteria value) {
+    final definition = selectedReportEntry?.definition;
+    if (definition == null) return;
+
+    final issues = value.validateAgainst(definition);
+    criteria.value = value;
+    for (final entry in _choiceValues.entries) {
+      final selected = value.filters[entry.key];
+      entry.value.value = selected is ReportChoiceFilterValue
+          ? selected.value
+          : null;
     }
-    return const [];
+    summary.value = null;
+    summaryError.value = null;
+    reports.clear();
+    nextCursor.value = null;
+    ++_requestRevision;
+    isLoading.value = false;
+    isLoadingMore.value = false;
+
+    _criteriaDebounce?.cancel();
+    if (issues.isNotEmpty) return;
+
+    _criteriaDebounce = Timer(const Duration(milliseconds: 350), () {
+      loadReport(refresh: true);
+    });
   }
 
-  bool get canFilterByPos =>
-      selectedDefinition?['pos_selection'] != 'forbidden';
+  void updatePresentation(ReportPresentationOptions value) {
+    final definition = selectedReportEntry?.definition;
+    if (definition == null || value.validateAgainst(definition).isNotEmpty) {
+      return;
+    }
+    presentation.value = value;
+  }
+
+  ReportCriteria _effectiveCriteria() => criteria.value;
+
+  String _dateText(DateTime value) {
+    final local = value.toLocal();
+    return '${local.year.toString().padLeft(4, '0')}-'
+        '${local.month.toString().padLeft(2, '0')}-'
+        '${local.day.toString().padLeft(2, '0')}';
+  }
 
   Future<void> _loadReportCatalog() async {
     final networkId = _networkId;
@@ -161,20 +270,20 @@ class OperationalReportsController extends GetxController {
 
   bool get canExport {
     final type = selectedType.value;
-    final permission = selectedDefinition?['permissions'];
-    final exportPermission = permission is Map ? permission['export'] : null;
-    return type != null && exportPermission is String && PermissionService.to.can(exportPermission);
+    final exportPermission = selectedReportEntry?.access.exportPermission;
+    return type != null &&
+        selectedReportEntry?.access.available == true &&
+        exportPermission != null &&
+        PermissionService.to.can(exportPermission);
   }
 
   bool get requiresPosSelection =>
-      selectedDefinition?['pos_selection'] == 'required' &&
+      selectedReportEntry?.access.posSelection == 'required' &&
       _isNetworkWorkspace &&
       selectedPosId.value == null;
 
   int? get _queryPosId {
-    final type = selectedType.value;
-    if (type == OperationalReportType.expenses ||
-        type == OperationalReportType.networkWallet) {
+    if (selectedReportEntry?.access.posSelection == 'forbidden') {
       return null;
     }
     return _isNetworkWorkspace ? selectedPosId.value : _workspacePosId;
@@ -217,8 +326,8 @@ class OperationalReportsController extends GetxController {
     _isNetworkWorkspace = isNetworkWorkspace;
     _organizationName = organizationName;
     _logoUrl = logoUrl;
-    _searchDebounce?.cancel();
-    _searchDebounce = null;
+    _criteriaDebounce?.cancel();
+    _criteriaDebounce = null;
     ++_requestRevision;
     ++_posRevision;
     isLoadingPos.value = false;
@@ -229,12 +338,14 @@ class OperationalReportsController extends GetxController {
     nextCursor.value = null;
     errorMessage.value = null;
     loadMoreError.value = null;
-    selectedStatus.value = null;
-    selectedSaleType.value = null;
-    searchTextController.clear();
-    searchQuery.value = '';
-    fromDate.value = null;
-    toDate.value = null;
+    criteria.value = ReportCriteria();
+    for (final selection in _choiceValues.values) {
+      selection.value = null;
+    }
+    presentation.value = ReportPresentationOptions();
+    for (final controller in _criteriaTextControllers.values) {
+      controller.clear();
+    }
     exportJob.value = null;
     _seenReportCursors.clear();
 
@@ -271,89 +382,168 @@ class OperationalReportsController extends GetxController {
       selectedType.value = types.first;
     }
     await loadReport(refresh: true);
+    await loadSavedPresets();
   }
 
   @override
   void onClose() {
-    _searchDebounce?.cancel();
-    searchTextController.dispose();
+    _criteriaDebounce?.cancel();
+    for (final controller in _criteriaTextControllers.values) {
+      controller.dispose();
+    }
+    _criteriaTextControllers.clear();
+    _choiceValues.clear();
     ++_requestRevision;
     ++_posRevision;
+    ++_presetRevision;
     super.onClose();
-  }
-
-  void onSearchChanged(String value) {
-    searchQuery.value = value;
-    summary.value = null;
-    summaryError.value = null;
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-      loadReport(refresh: true);
-    });
   }
 
   Future<void> selectType(OperationalReportType type) async {
     if (!availableTypes.contains(type) || selectedType.value == type) return;
     selectedType.value = type;
-    selectedStatus.value = null;
-    selectedSaleType.value = null;
+    _criteriaDebounce?.cancel();
+    criteria.value = ReportCriteria();
+    for (final selection in _choiceValues.values) {
+      selection.value = null;
+    }
+    presentation.value = ReportPresentationOptions();
+    for (final controller in _criteriaTextControllers.values) {
+      controller.clear();
+    }
     exportJob.value = null;
     await loadReport(refresh: true);
+    await loadSavedPresets();
   }
 
   Future<void> selectPos(int? posId) async {
     if (selectedPosId.value == posId) return;
     selectedPosId.value = posId;
     await loadReport(refresh: true);
+    await loadSavedPresets();
   }
 
-  Future<void> selectStatus(String? value) async {
-    selectedStatus.value = value;
-    await loadReport(refresh: true);
-  }
 
-  Future<void> selectSaleType(String? value) async {
-    selectedSaleType.value = value;
-    await loadReport(refresh: true);
-  }
-
-  Future<void> setDate({
-    required bool isFrom,
-    required DateTime? date,
-  }) async {
-    final value = date == null ? null : DateFormatter.iso(date);
-    if (isFrom) {
-      fromDate.value = value;
-      if (value != null &&
-          toDate.value != null &&
-          toDate.value!.compareTo(value) < 0) {
-        toDate.value = value;
-      }
-    } else {
-      toDate.value = value;
-      if (value != null &&
-          fromDate.value != null &&
-          fromDate.value!.compareTo(value) > 0) {
-        fromDate.value = value;
-      }
+  Future<void> loadSavedPresets() async {
+    final type = selectedType.value;
+    final networkId = _networkId;
+    if (type == null || networkId == null) {
+      savedPresets.clear();
+      return;
     }
-    await loadReport(refresh: true);
+    final revision = ++_presetRevision;
+    isLoadingPresets.value = true;
+    try {
+      final result = await getPresetsUseCase(type: type, networkId: networkId, posId: _queryPosId);
+      if (revision == _presetRevision && type == selectedType.value) {
+        savedPresets.assignAll(result);
+      }
+    } catch (error) {
+      if (revision == _presetRevision) {
+        savedPresets.clear();
+        CustomSnackbar.show(
+          title: 'تعذر تحميل الإعدادات المحفوظة',
+          message: AppException.sanitizeMessage(error, fallback: 'تعذر تحميل إعدادات التقرير.'),
+          type: SnackType.error,
+        );
+      }
+    } finally {
+      if (revision == _presetRevision) isLoadingPresets.value = false;
+    }
+  }
+
+  Future<void> savePreset(String name) async {
+    final type = selectedType.value;
+    final networkId = _networkId;
+    final definition = selectedReportEntry?.definition;
+    final normalizedName = name.trim();
+    if (type == null || networkId == null || definition == null || normalizedName.isEmpty || isSavingPreset.value) return;
+    isSavingPreset.value = true;
+    try {
+      final existing = savedPresets.firstWhereOrNull(
+        (item) => item.name.toLowerCase() == normalizedName.toLowerCase(),
+      );
+      final saved = existing == null
+          ? await savePresetUseCase(
+              type: type, networkId: networkId, posId: _queryPosId,
+              name: normalizedName, reportSchemaVersion: definition.schemaVersion,
+              criteria: criteria.value, presentation: presentation.value,
+            )
+          : await updatePresetUseCase(
+              presetId: existing.id, type: type, networkId: networkId, posId: _queryPosId,
+              name: normalizedName, reportSchemaVersion: definition.schemaVersion,
+              criteria: criteria.value, presentation: presentation.value,
+            );
+      savedPresets.removeWhere((item) => item.id == saved.id);
+      savedPresets.insert(0, saved);
+      CustomSnackbar.show(
+        title: existing == null ? 'تم حفظ الإعداد' : 'تم تحديث الإعداد',
+        message: 'تم حفظ تكوين التقرير ضمن نطاق العمل الحالي.',
+        type: SnackType.success,
+      );
+    } catch (error) {
+      CustomSnackbar.show(
+        title: 'تعذر حفظ الإعداد',
+        message: AppException.sanitizeMessage(error, fallback: 'رفض الخادم حفظ إعداد التقرير.'),
+        type: SnackType.error,
+      );
+    } finally {
+      isSavingPreset.value = false;
+    }
+  }
+
+  void applyPreset(SavedReportPreset preset) {
+    final definition = selectedReportEntry?.definition;
+    if (definition == null) return;
+    if (preset.assessAgainst(definition).requiresReview) {
+      CustomSnackbar.show(
+        title: 'الإعداد يحتاج إلى مراجعة',
+        message: 'تغير مخطط التقرير أو بعض خياراته؛ لم نطبق الإعداد القديم تلقائياً.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+    updateCriteria(preset.criteria);
+    updatePresentation(preset.presentation);
+  }
+
+  Future<void> deletePreset(SavedReportPreset preset) async {
+    final type = selectedType.value;
+    final networkId = _networkId;
+    if (type == null || networkId == null || isDeletingPreset.value) return;
+    isDeletingPreset.value = true;
+    try {
+      await deletePresetUseCase(
+        presetId: preset.id, type: type, networkId: networkId, posId: _queryPosId,
+      );
+      savedPresets.removeWhere((item) => item.id == preset.id);
+    } catch (error) {
+      CustomSnackbar.show(
+        title: 'تعذر حذف الإعداد',
+        message: AppException.sanitizeMessage(error, fallback: 'تعذر حذف الإعداد المحفوظ.'),
+        type: SnackType.error,
+      );
+    } finally {
+      isDeletingPreset.value = false;
+    }
   }
 
   Future<void> clearFilters() async {
-    _searchDebounce?.cancel();
-    searchTextController.clear();
-    searchQuery.value = '';
-    fromDate.value = null;
-    toDate.value = null;
-    selectedStatus.value = null;
-    selectedSaleType.value = null;
+    _criteriaDebounce?.cancel();
+    criteria.value = ReportCriteria();
+    for (final controller in _criteriaTextControllers.values) {
+      controller.clear();
+    }
+    for (final selection in _choiceValues.values) {
+      selection.value = null;
+    }
     if (_isNetworkWorkspace) {
       selectedPosId.value = null;
       _posSearchQuery = '';
       unawaited(loadPosOptions(refresh: true, search: ''));
     }
     await loadReport(refresh: true);
+    await loadSavedPresets();
   }
 
   Future<void> searchPosOptions(String query) async {
@@ -437,6 +627,13 @@ class OperationalReportsController extends GetxController {
         record.textAt('repayment_id', fallback: record.textAt('repayment_uuid', fallback: '')),
       OperationalReportType.requests =>
         record.textAt('request_id', fallback: record.textAt('request_uuid', fallback: '')),
+      _ => record.textAt(
+        'id',
+        fallback: record.textAt(
+          'uuid',
+          fallback: record.textAt('reference', fallback: ''),
+        ),
+      ),
     };
 
     return identity.isEmpty ? record.values.toString() : identity;
@@ -444,8 +641,8 @@ class OperationalReportsController extends GetxController {
 
   Future<void> loadReport({bool refresh = false}) async {
     if (refresh) {
-      _searchDebounce?.cancel();
-      _searchDebounce = null;
+      _criteriaDebounce?.cancel();
+      _criteriaDebounce = null;
       summary.value = null;
       summaryError.value = null;
     }
@@ -474,9 +671,10 @@ class OperationalReportsController extends GetxController {
       errorMessage.value = 'حدد نقطة بيع لعرض كشف حساب محفظتها.';
       return;
     }
-    final viewPermissions = selectedDefinition?['permissions'];
-    final viewPermission = viewPermissions is Map ? viewPermissions['view'] : null;
-    if (viewPermission is! String || !PermissionService.to.can(viewPermission)) {
+    final viewPermission = selectedReportEntry?.access.viewPermission;
+    if (selectedReportEntry?.access.available != true ||
+        viewPermission == null ||
+        !PermissionService.to.can(viewPermission)) {
       reports.clear();
       nextCursor.value = null;
       isLoading.value = false;
@@ -514,11 +712,7 @@ class OperationalReportsController extends GetxController {
         type: type,
         networkId: networkId,
         posId: requestedPosId,
-        fromDate: fromDate.value,
-        toDate: toDate.value,
-        search: searchTextController.text,
-        status: selectedStatus.value,
-        saleType: selectedSaleType.value,
+        criteria: _effectiveCriteria(),
         cursor: requestedCursor,
       );
       if (revision != _requestRevision ||
@@ -557,11 +751,7 @@ class OperationalReportsController extends GetxController {
             type: type,
             networkId: networkId,
             posId: requestedPosId,
-            fromDate: fromDate.value,
-            toDate: toDate.value,
-            search: searchTextController.text,
-            status: selectedStatus.value,
-            saleType: selectedSaleType.value,
+            criteria: _effectiveCriteria(),
           );
           if (revision == _requestRevision) {
             summary.value = reportSummary;
@@ -623,11 +813,7 @@ class OperationalReportsController extends GetxController {
         type: type,
         networkId: networkId,
         posId: _queryPosId,
-        fromDate: fromDate.value,
-        toDate: toDate.value,
-        search: searchTextController.text,
-        status: selectedStatus.value,
-        saleType: selectedSaleType.value,
+        criteria: _effectiveCriteria(),
       );
       exportJob.value = result;
       CustomSnackbar.show(
@@ -652,7 +838,12 @@ class OperationalReportsController extends GetxController {
   Future<void> exportSummaryPdf() async {
     final type = selectedType.value;
     final data = summary.value;
-    if (type == null || data == null || isPdfActionRunning.value || !canExport) {
+    final pageProfileId = selectedPageProfileId;
+    if (type == null ||
+        data == null ||
+        pageProfileId == null ||
+        isPdfActionRunning.value ||
+        !canExport) {
       return;
     }
 
@@ -660,15 +851,12 @@ class OperationalReportsController extends GetxController {
     try {
       await saveSummaryPdfUseCase(
         type: type,
+        pageProfileId: pageProfileId,
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
-        fromDate: fromDate.value,
-        toDate: toDate.value,
+        activeFilters: activeFilterDisplays,
         scopeLabel: reportScopeLabel,
-        search: searchTextController.text.trim(),
-        status: selectedStatus.value,
-        saleType: selectedSaleType.value,
       );
       CustomSnackbar.show(
         title: 'تم إنشاء ملخص PDF',
@@ -689,10 +877,178 @@ class OperationalReportsController extends GetxController {
     }
   }
 
+
+  Future<void> exportDetailedPdf() async {
+    final type = selectedType.value;
+    final entry = selectedReportEntry;
+    final summaryBefore = summary.value;
+    final networkId = _networkId;
+    final posId = _queryPosId;
+    final criteriaSnapshot = criteria.value;
+    final presentationSnapshot = presentation.value;
+    final pageProfileId = selectedPageProfileId;
+
+    if (type == null ||
+        entry == null ||
+        summaryBefore == null ||
+        networkId == null ||
+        pageProfileId == null ||
+        !canExport ||
+        isPdfActionRunning.value) {
+      return;
+    }
+
+    if (presentationSnapshot.validateAgainst(entry.definition).isNotEmpty) {
+      CustomSnackbar.show(
+        title: 'إعدادات التقرير غير صالحة',
+        message: 'راجع الأعمدة والترتيب والتجميع والقالب قبل إنشاء PDF.',
+        type: SnackType.error,
+      );
+      return;
+    }
+
+    final organizationName = reportOrganizationName;
+    final logoUrl = reportLogoUrl;
+    final filtersSnapshot = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final scopeSnapshot = reportScopeLabel;
+    isPdfActionRunning.value = true;
+
+    try {
+      final allRecords = await _loadAllRecordsForPdf(
+        type: type,
+        networkId: networkId,
+        posId: posId,
+        criteria: criteriaSnapshot,
+      );
+
+      if (selectedType.value != type ||
+          _networkId != networkId ||
+          _queryPosId != posId ||
+          !identical(criteria.value, criteriaSnapshot) ||
+          !identical(presentation.value, presentationSnapshot) ||
+          !identical(summary.value, summaryBefore) ||
+          selectedReportEntry?.definition.schemaVersion != entry.definition.schemaVersion) {
+        throw StateError('تغيرت إعدادات التقرير أثناء التجهيز؛ لم يتم إنشاء مستند بإعدادات مختلطة.');
+      }
+
+      final summaryAfter = await getSummaryUseCase(
+        type: type,
+        networkId: networkId,
+        posId: posId,
+        criteria: criteriaSnapshot,
+      );
+      if (jsonEncode(summaryBefore.values) != jsonEncode(summaryAfter.values)) {
+        throw StateError('تغيرت نتائج التقرير أثناء تحميل الصفحات؛ أُوقف التصدير لضمان اتساق المستند.');
+      }
+
+      final saved = await saveDetailedPdfUseCase(
+        type: type,
+        entry: entry,
+        records: allRecords,
+        presentation: presentationSnapshot,
+        summary: summaryBefore,
+        pageProfileId: pageProfileId,
+        organizationName: organizationName,
+        logoUrl: logoUrl,
+        activeFilters: filtersSnapshot,
+        scopeLabel: scopeSnapshot,
+      );
+
+      if (saved) {
+        CustomSnackbar.show(
+          title: 'تم إنشاء التقرير التفصيلي',
+          message: 'حُفظ ملف PDF شاملاً السجلات المطابقة وإعدادات العرض المحددة.',
+          type: SnackType.success,
+        );
+      }
+    } catch (error) {
+      final message = error is StateError
+          ? error.toString().replaceFirst('Bad state: ', '')
+          : AppException.sanitizeMessage(
+              error,
+              fallback: 'تعذر إنشاء التقرير التفصيلي بصيغة PDF.',
+            );
+      CustomSnackbar.show(
+        title: 'تعذر إنشاء التقرير التفصيلي',
+        message: message,
+        type: SnackType.error,
+      );
+    } finally {
+      isPdfActionRunning.value = false;
+    }
+  }
+
+  Future<List<OperationalReportRecord>> _loadAllRecordsForPdf({
+    required OperationalReportType type,
+    required int networkId,
+    required int? posId,
+    required ReportCriteria criteria,
+  }) async {
+    const maxRows = 1500;
+    final records = <OperationalReportRecord>[];
+    final seenIds = <String>{};
+    final seenCursors = <String>{};
+    String? cursor;
+
+    do {
+      final page = await getReportUseCase(
+        type: type,
+        networkId: networkId,
+        posId: posId,
+        criteria: criteria,
+        cursor: cursor,
+        perPage: 50,
+      );
+
+      for (final record in page.items) {
+        final identity = _reportRecordIdentity(record, type);
+        if (!seenIds.add(identity)) {
+          throw StateError('أعاد الخادم سجلاً مكرراً أثناء تصدير PDF؛ أُوقف إنشاء المستند.');
+        }
+        records.add(record);
+        if (records.length > maxRows) {
+          throw StateError('يتجاوز التقرير الحد الآمن البالغ 1500 سجل لملف PDF؛ لم يتم إنشاء مستند جزئي.');
+        }
+      }
+
+      cursor = page.nextCursor?.trim();
+      if (cursor != null && cursor.isEmpty) cursor = null;
+      if (cursor != null && !seenCursors.add(cursor)) {
+        throw StateError('أعاد الخادم مؤشر صفحة مكرراً؛ أُوقف إنشاء التقرير لتجنب التكرار أو فقد السجلات.');
+      }
+    } while (cursor != null);
+
+    final latestPage = await getReportUseCase(
+      type: type,
+      networkId: networkId,
+      posId: posId,
+      criteria: criteria,
+      perPage: 1,
+    );
+    final capturedLatest = records.isEmpty ? null : records.first;
+    final currentLatest = latestPage.items.isEmpty ? null : latestPage.items.first;
+    if (capturedLatest == null && currentLatest != null ||
+        capturedLatest != null && currentLatest == null ||
+        capturedLatest != null &&
+            currentLatest != null &&
+            (_reportRecordIdentity(capturedLatest, type) !=
+                    _reportRecordIdentity(currentLatest, type) ||
+                jsonEncode(capturedLatest.values) != jsonEncode(currentLatest.values))) {
+      throw StateError('تغيرت أحدث سجلات التقرير أثناء التجهيز؛ لم يتم إنشاء PDF غير متزامن.');
+    }
+
+    return records;
+  }
+
   Future<void> shareSummaryPdf() async {
     final type = selectedType.value;
     final data = summary.value;
-    if (type == null || data == null || isPdfActionRunning.value || !canExport) {
+    final pageProfileId = selectedPageProfileId;
+    if (type == null ||
+        data == null ||
+        pageProfileId == null ||
+        isPdfActionRunning.value ||
+        !canExport) {
       return;
     }
 
@@ -700,15 +1056,12 @@ class OperationalReportsController extends GetxController {
     try {
       final shared = await shareSummaryPdfUseCase(
         type: type,
+        pageProfileId: pageProfileId,
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
-        fromDate: fromDate.value,
-        toDate: toDate.value,
+        activeFilters: activeFilterDisplays,
         scopeLabel: reportScopeLabel,
-        search: searchTextController.text.trim(),
-        status: selectedStatus.value,
-        saleType: selectedSaleType.value,
       );
       if (shared) {
         CustomSnackbar.show(
@@ -734,7 +1087,12 @@ class OperationalReportsController extends GetxController {
   Future<void> printSummaryPdf() async {
     final type = selectedType.value;
     final data = summary.value;
-    if (type == null || data == null || isPdfActionRunning.value || !canExport) {
+    final pageProfileId = selectedPageProfileId;
+    if (type == null ||
+        data == null ||
+        pageProfileId == null ||
+        isPdfActionRunning.value ||
+        !canExport) {
       return;
     }
 
@@ -742,15 +1100,12 @@ class OperationalReportsController extends GetxController {
     try {
       final printed = await printSummaryPdfUseCase(
         type: type,
+        pageProfileId: pageProfileId,
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
-        fromDate: fromDate.value,
-        toDate: toDate.value,
+        activeFilters: activeFilterDisplays,
         scopeLabel: reportScopeLabel,
-        search: searchTextController.text.trim(),
-        status: selectedStatus.value,
-        saleType: selectedSaleType.value,
       );
       if (printed) {
         CustomSnackbar.show(

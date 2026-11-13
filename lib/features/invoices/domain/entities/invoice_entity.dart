@@ -20,9 +20,17 @@ class InvoiceEntity {
   final bool isFullyPaid;
   final String? invoiceDate;
   final int? createdBy;
+  final String? createdByName;
   final String? networkName;
+  final String? networkLogoUrl;
+  final String? networkPhoneNumber;
+  final String? networkEmail;
+  final String? networkAddress;
   final String? posName;
+  final String? posLogoUrl;
   final String? posPhoneNumber;
+  final String? posEmail;
+  final String? posAddress;
   final List<InvoiceItemEntity> items;
   final String? createdAt;
   final String? updatedAt;
@@ -44,9 +52,17 @@ class InvoiceEntity {
     this.isFullyPaid = false,
     this.invoiceDate,
     this.createdBy,
+    this.createdByName,
     this.networkName,
+    this.networkLogoUrl,
+    this.networkPhoneNumber,
+    this.networkEmail,
+    this.networkAddress,
     this.posName,
+    this.posLogoUrl,
     this.posPhoneNumber,
+    this.posEmail,
+    this.posAddress,
     this.items = const [],
     this.createdAt,
     this.updatedAt,

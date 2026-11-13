@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:document_engine/document_engine.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:netsales/core/services/document_engine_image_pdf_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/widgets/charts/src/models/chart_series.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
 /// NetSales integration for exporting reusable charts as PNG, PDF or CSV.
@@ -57,36 +57,26 @@ abstract final class NetSalesChartsExportAdapter {
     if (bytes == null || bytes.isEmpty) {
       return FileExportResult.failure('تعذر التقاط المخطط لإنشاء PDF.');
     }
-    final document = pw.Document();
-    document.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4.landscape,
-        margin: const pw.EdgeInsets.all(28),
-        build: (_) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-          children: [
-            pw.Text(
-              title,
-              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.SizedBox(height: 16),
-            pw.Expanded(
-              child: pw.Center(
-                child: pw.Image(pw.MemoryImage(bytes), fit: pw.BoxFit.contain),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    return FileExportService.instance.saveFile(
-      bytes: await document.save(),
-      fileName: title,
-      extension: 'pdf',
-      folderName: 'Charts',
-      namingStrategy: FileNamingStrategy.report,
-      autoOpen: false,
-    );
+    try {
+      final pdfBytes = await DocumentEngineImagePdfService.instance
+          .renderA4Image(
+            imageBytes: bytes,
+            title: title,
+            orientation: DocumentPageOrientation.landscape,
+          );
+      return FileExportService.instance.saveFile(
+        bytes: pdfBytes,
+        fileName: title,
+        extension: 'pdf',
+        folderName: 'Charts',
+        namingStrategy: FileNamingStrategy.report,
+        autoOpen: false,
+      );
+    } catch (error) {
+      return FileExportResult.failure(
+        'تعذر إنشاء ملف PDF للمخطط: $error',
+      );
+    }
   }
 
   static Uint8List buildCsvBytes(List<ChartSeries> series) {
@@ -180,20 +170,17 @@ abstract final class NetSalesChartsExportAdapter {
   }) async {
     final bytes = await capturePng(boundaryKey);
     if (bytes == null || bytes.isEmpty) return false;
-    final document = pw.Document();
-    document.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4.landscape,
-        build: (_) => pw.Center(
-          child: pw.Image(pw.MemoryImage(bytes), fit: pw.BoxFit.contain),
-        ),
-      ),
-    );
     try {
+      final pdfBytes = await DocumentEngineImagePdfService.instance
+          .renderA4Image(
+            imageBytes: bytes,
+            title: title,
+            orientation: DocumentPageOrientation.landscape,
+          );
       final result = await SharePlus.instance.share(
         ShareParams(
           files: [
-            XFile.fromData(await document.save(), mimeType: 'application/pdf'),
+            XFile.fromData(pdfBytes, mimeType: 'application/pdf'),
           ],
           fileNameOverrides: ['$title.pdf'],
           downloadFallbackEnabled: true,

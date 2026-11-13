@@ -319,10 +319,7 @@ class RepaymentCollectionController extends GetxController {
       _pendingCollectionKey = null;
       _pendingCollectionFingerprint = null;
 
-      // الانتقال المباشر إلى شاشة تفاصيل السند الرسمية لعرض نتائج وتوزيعات FIFO
-      await navigateToRepaymentDetails(repayment);
-
-      // الانتقال المباشر إلى شاشة تفاصيل السند الرسمية لعرض نتائج وتوزيعات FIFO
+      // Open the confirmed receipt once so the user can review and print it.
       await navigateToRepaymentDetails(repayment);
       return true;
     } on AppException catch (e) {

@@ -77,13 +77,17 @@ class PosRepaymentModel extends PosRepaymentEntity {
     super.repaymentDate,
     super.status,
     super.createdBy,
+    super.createdByName,
     super.reversedAt,
     super.reversedBy,
+    super.reversedByName,
     super.reversalReason,
     super.reversalRepaymentId,
     super.createdAt,
     super.networkName,
     super.posName,
+    super.networkLogoUrl,
+    super.posLogoUrl,
     super.remainingDebtAfter,
     super.posBalanceAfter,
     super.allocations = const [],
@@ -97,9 +101,28 @@ class PosRepaymentModel extends PosRepaymentEntity {
     }
 
     String? pName;
+    String? pLogoUrl;
     if (json['pos'] is Map<String, dynamic>) {
-      pName = (json['pos'] as Map<String, dynamic>)['pos_name'] as String?;
+      final pos = json['pos'] as Map<String, dynamic>;
+      pName = pos['pos_name'] as String?;
+      pLogoUrl = pos['pos_profile_logo'] as String?;
     }
+
+    String? networkLogoUrl;
+    if (json['network'] is Map<String, dynamic>) {
+      networkLogoUrl = (json['network'] as Map<String, dynamic>)[
+        'network_profile_logo'
+      ] as String?;
+    }
+
+    final creator = json['created_by_user'];
+    final reversalActor = json['reversed_by_user'];
+    final createdByName = creator is Map
+        ? creator['user_full_name']?.toString()
+        : null;
+    final reversedByName = reversalActor is Map
+        ? reversalActor['user_full_name']?.toString()
+        : null;
 
     final rawAllocations = json['allocations'];
     final parsedAllocations = <RepaymentAllocationModel>[];
@@ -123,13 +146,17 @@ class PosRepaymentModel extends PosRepaymentEntity {
       repaymentDate: json['repayment_date'] as String?,
       status: json['status'] as String?,
       createdBy: json['created_by'] as int?,
+      createdByName: createdByName,
       reversedAt: json['reversed_at'] as String?,
       reversedBy: json['reversed_by'] as int?,
+      reversedByName: reversedByName,
       reversalReason: json['reversal_reason'] as String?,
       reversalRepaymentId: json['reversal_repayment_id'] as int?,
       createdAt: json['created_at'] as String?,
       networkName: netName,
       posName: pName,
+      networkLogoUrl: networkLogoUrl,
+      posLogoUrl: pLogoUrl,
       remainingDebtAfter: (json['remaining_debt_after'] as num?)?.toDouble(),
       posBalanceAfter: (json['pos_balance_after'] as num?)?.toDouble(),
       allocations: parsedAllocations,

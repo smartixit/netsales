@@ -10,6 +10,14 @@ import 'package:netsales/features/commercial/domain/usecases/get_network_pos_lis
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source_impl.dart';
 import 'package:netsales/features/finance/data/repositories/finance_repository_impl.dart';
+import 'package:netsales/features/finance/data/repositories/repayment_document_repository_impl.dart';
+import 'package:netsales/features/finance/data/repositories/wallet_statement_document_repository_impl.dart';
+import 'package:netsales/features/finance/data/services/wallet_statement_document_service.dart';
+import 'package:netsales/features/finance/data/services/repayment_document_service.dart';
+import 'package:netsales/features/finance/domain/repositories/repayment_document_repository.dart';
+import 'package:netsales/features/finance/domain/repositories/wallet_statement_document_repository.dart';
+import 'package:netsales/features/finance/domain/usecases/repayment_document_use_case.dart';
+import 'package:netsales/features/finance/domain/usecases/export_wallet_statement_document_use_case.dart';
 import 'package:netsales/features/finance/domain/repositories/finance_repository.dart';
 import 'package:netsales/features/finance/domain/usecases/debt_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cases.dart';
@@ -107,6 +115,10 @@ class FinanceBinding extends Bindings {
       () => GetNetworkWalletLogsUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
+    Get.lazyPut<GetNetworkWalletByIdUseCase>(
+      () => GetNetworkWalletByIdUseCase(Get.find<FinanceRepository>()),
+      fenix: true,
+    );
     Get.lazyPut<TransferFromNetworkToPosUseCase>(
       () => TransferFromNetworkToPosUseCase(Get.find<FinanceRepository>()),
       fenix: true,
@@ -162,11 +174,48 @@ class FinanceBinding extends Bindings {
       fenix: true,
     );
 
+    if (!Get.isRegistered<RepaymentDocumentRepository>()) {
+      Get.lazyPut<RepaymentDocumentRepository>(
+        () => RepaymentDocumentRepositoryImpl(
+          documentService: RepaymentDocumentService.instance,
+        ),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<RepaymentDocumentUseCase>()) {
+      Get.lazyPut<RepaymentDocumentUseCase>(
+        () => RepaymentDocumentUseCase(
+          Get.find<RepaymentDocumentRepository>(),
+        ),
+        fenix: true,
+      );
+    }
+
+    if (!Get.isRegistered<WalletStatementDocumentRepository>()) {
+      Get.lazyPut<WalletStatementDocumentRepository>(
+        () => WalletStatementDocumentRepositoryImpl(
+          documentService: WalletStatementDocumentService.instance,
+        ),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<ExportWalletStatementDocumentUseCase>()) {
+      Get.lazyPut<ExportWalletStatementDocumentUseCase>(
+        () => ExportWalletStatementDocumentUseCase(
+          Get.find<WalletStatementDocumentRepository>(),
+        ),
+        fenix: true,
+      );
+    }
+
     // 5. Controllers
     Get.lazyPut<PosWalletDashboardController>(
       () => PosWalletDashboardController(
         getPosWalUseCase: Get.find<GetPosWalUseCase>(),
         getPosWalletLogsUseCase: Get.find<GetPosWalletLogsUseCase>(),
+        getPosWalletByNetworkAndPosUseCase:
+            Get.find<GetPosWalletByNetworkAndPosUseCase>(),
+        exportWalletStatementDocumentUseCase: Get.find<ExportWalletStatementDocumentUseCase>(),
       ),
       fenix: true,
     );
@@ -187,6 +236,7 @@ class FinanceBinding extends Bindings {
         getRepaymentsUseCase: Get.find<GetRepaymentsUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
         reverseRepaymentUseCase: Get.find<ReverseRepaymentUseCase>(),
+        repaymentDocumentUseCase: Get.find<RepaymentDocumentUseCase>(),
       ),
       fenix: true,
     );
@@ -204,6 +254,8 @@ class FinanceBinding extends Bindings {
       () => NetworkWalletDashboardController(
         getNetworkWalletsUseCase: Get.find<GetNetworkWalletsUseCase>(),
         getNetworkWalletLogsUseCase: Get.find<GetNetworkWalletLogsUseCase>(),
+        getNetworkWalletByIdUseCase: Get.find<GetNetworkWalletByIdUseCase>(),
+        exportWalletStatementDocumentUseCase: Get.find<ExportWalletStatementDocumentUseCase>(),
       ),
       fenix: true,
     );

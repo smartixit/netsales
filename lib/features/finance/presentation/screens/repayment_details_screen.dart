@@ -9,6 +9,7 @@ import 'package:netsales/features/finance/presentation/widgets/repayment_details
 import 'package:netsales/features/finance/presentation/widgets/repayment_reversal_action.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 
 class RepaymentDetailsScreen extends GetView<RepaymentHistoryController> {
   final PosRepaymentEntity? repayment;
@@ -45,7 +46,26 @@ class RepaymentDetailsScreen extends GetView<RepaymentHistoryController> {
     );
 
     return CustomAppScaffold(
-      appBar: AppBar(title: Text('سند سداد #${item.repaymentId}')),
+      appBar: AppBar(
+        title: Text('سند سداد #${item.repaymentId}'),
+        actions: [
+          CustomButton.icon(
+            icon: Icons.file_download_outlined,
+            tooltip: 'تصدير سند السداد PDF',
+            onPressed: () => controller.exportRepaymentPdf(item),
+          ),
+          CustomButton.icon(
+            icon: Icons.share_outlined,
+            tooltip: 'مشاركة سند السداد',
+            onPressed: () => controller.shareRepaymentPdf(item),
+          ),
+          CustomButton.icon(
+            icon: Icons.print_outlined,
+            tooltip: 'طباعة سند السداد',
+            onPressed: () => controller.printRepaymentPdf(item),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Center(

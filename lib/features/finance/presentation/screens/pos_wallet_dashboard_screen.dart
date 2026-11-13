@@ -51,6 +51,19 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                   ),
                 );
               }),
+              Obx(() {
+                if (controller.selectedWallet.value == null) return const SizedBox.shrink();
+                return Padding(
+                  padding: EdgeInsets.only(top: AppSpacing.sm),
+                  child: CustomButton.outline(
+                    text: 'تصدير كشف حساب PDF',
+                    prefix: Icons.picture_as_pdf_outlined,
+                    width: double.infinity,
+                    loading: controller.isExportingStatement.value,
+                    onPressed: controller.exportStatementPdf,
+                  ),
+                );
+              }),
               AppSpacing.vLg,
               Text(
                 'دفتر الأستاذ وحركات المحفظة المحددة',

@@ -11,14 +11,27 @@ abstract class DocumentNode {
   const DocumentNode();
 }
 
+/// Explicit semantic font weight for text-bearing document nodes.
+enum DocumentTextWeight {
+  thin,
+  extraLight,
+  light,
+  regular,
+  medium,
+  semiBold,
+  bold,
+}
+
 final class DocumentParagraph extends DocumentNode {
   const DocumentParagraph({
     required this.text,
     this.direction = DocumentTextDirection.auto,
+    this.weight = DocumentTextWeight.regular,
   });
 
   final String text;
   final DocumentTextDirection direction;
+  final DocumentTextWeight weight;
 }
 
 final class DocumentHeading extends DocumentNode {
@@ -26,6 +39,7 @@ final class DocumentHeading extends DocumentNode {
     required this.text,
     this.level = 1,
     this.direction = DocumentTextDirection.auto,
+    this.weight = DocumentTextWeight.semiBold,
   }) {
     if (level < 1 || level > 6) {
       throw ArgumentError.value(level, 'level', 'Must be between 1 and 6.');
@@ -35,6 +49,7 @@ final class DocumentHeading extends DocumentNode {
   final String text;
   final int level;
   final DocumentTextDirection direction;
+  final DocumentTextWeight weight;
 }
 
 /// A supplied display value. The engine does not derive or aggregate it.

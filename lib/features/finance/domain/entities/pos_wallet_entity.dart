@@ -7,6 +7,11 @@ class PosWalletEntity {
   final int posId;
   final String? walletUuid;
   final double walletBalance;
+  final double? openingBalance;
+  final String? openingBalanceSource;
+  final String? currencyCode;
+  final String? networkProfileLogo;
+  final String? posProfileLogo;
   final double? creditLimit;
   final double availableOverdraftCapacity;
   final bool status;
@@ -27,6 +32,11 @@ class PosWalletEntity {
     required this.posId,
     this.walletUuid,
     required this.walletBalance,
+    this.openingBalance,
+    this.openingBalanceSource,
+    this.currencyCode,
+    this.networkProfileLogo,
+    this.posProfileLogo,
     this.creditLimit,
     this.availableOverdraftCapacity = 0.0,
     this.status = true,
@@ -50,6 +60,10 @@ class PosWalletLogEntity {
   final String? logOperationType;
   final String? logOperationTypeLabel;
   final double logAmount;
+  final double? balanceBefore;
+  final double? balanceAfter;
+  final String? balanceSnapshotSource;
+  final String? currencyCode;
   final String? logStatement;
   final String? logDate;
   final int? createdBy;
@@ -62,6 +76,10 @@ class PosWalletLogEntity {
     this.logOperationType,
     this.logOperationTypeLabel,
     required this.logAmount,
+    this.balanceBefore,
+    this.balanceAfter,
+    this.balanceSnapshotSource,
+    this.currencyCode,
     this.logStatement,
     this.logDate,
     this.createdBy,

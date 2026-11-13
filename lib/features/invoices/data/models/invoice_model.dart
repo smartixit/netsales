@@ -20,9 +20,17 @@ class InvoiceModel extends InvoiceEntity {
     super.isFullyPaid = false,
     super.invoiceDate,
     super.createdBy,
+    super.createdByName,
     super.networkName,
+    super.networkLogoUrl,
+    super.networkPhoneNumber,
+    super.networkEmail,
+    super.networkAddress,
     super.posName,
+    super.posLogoUrl,
     super.posPhoneNumber,
+    super.posEmail,
+    super.posAddress,
     super.items = const [],
     super.createdAt,
     super.updatedAt,
@@ -35,13 +43,36 @@ class InvoiceModel extends InvoiceEntity {
           (json['network'] as Map<String, dynamic>)['network_name'] as String?;
     }
 
+    String? networkLogoUrl;
+    String? networkPhoneNumber;
+    String? networkEmail;
+    String? networkAddress;
+    if (json['network'] is Map) {
+      final networkObj = Map<String, dynamic>.from(json['network'] as Map);
+      networkLogoUrl = networkObj['network_profile_logo']?.toString();
+      networkPhoneNumber = networkObj['network_phone_number']?.toString();
+      networkEmail = networkObj['network_email']?.toString();
+      networkAddress = networkObj['network_address']?.toString();
+    }
+
     String? pName;
     String? pPhone;
+    String? posLogoUrl;
+    String? posEmail;
+    String? posAddress;
     if (json['pos'] is Map<String, dynamic>) {
       final posObj = json['pos'] as Map<String, dynamic>;
       pName = posObj['pos_name'] as String?;
       pPhone = posObj['pos_phone_number'] as String?;
+      posLogoUrl = posObj['pos_profile_logo']?.toString();
+      posEmail = posObj['pos_email']?.toString();
+      posAddress = posObj['pos_address']?.toString();
     }
+
+    final creator = json['created_by_user'];
+    final createdByName = creator is Map
+        ? creator['user_full_name']?.toString()
+        : null;
 
     final rawItems = json['items'];
     final parsedItems = <InvoiceItemModel>[];
@@ -71,9 +102,17 @@ class InvoiceModel extends InvoiceEntity {
       isFullyPaid: json['is_fully_paid'] as bool? ?? false,
       invoiceDate: json['invoice_date'] as String?,
       createdBy: json['created_by'] as int?,
+      createdByName: createdByName,
       networkName: netName,
+      networkLogoUrl: networkLogoUrl,
+      networkPhoneNumber: networkPhoneNumber,
+      networkEmail: networkEmail,
+      networkAddress: networkAddress,
       posName: pName,
+      posLogoUrl: posLogoUrl,
       posPhoneNumber: pPhone,
+      posEmail: posEmail,
+      posAddress: posAddress,
       items: parsedItems,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
@@ -98,6 +137,9 @@ class InvoiceModel extends InvoiceEntity {
       'is_fully_paid': isFullyPaid,
       'invoice_date': invoiceDate,
       'created_by': createdBy,
+      'created_by_user': createdByName == null
+          ? null
+          : {'user_full_name': createdByName},
       'created_at': createdAt,
       'updated_at': updatedAt,
     };

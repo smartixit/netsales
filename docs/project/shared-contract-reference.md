@@ -29,3 +29,41 @@ This document provides direct mapping from Flutter feature domains to their cano
    - Use `lib/core/themes/` and `lib/core/constants/` for tokens (`AppColors`, `AppTypography`, `AppRadius`, `AppSpacing`, `AppElevation`, `AppGradients`, `AppMotion`, `AppThemes`).
 3. **Use GetX exclusively:** Prohibit Provider, Riverpod, Bloc, or stateful widget state machines.
 4. **Adaptive Breakpoints:** Build all screens to adapt across `AppBreakpoints` (Mobile: <=600dp, Tablet: <=900dp, Desktop: <=1240dp).
+
+
+## 3. Operational Reports & Official Document Snapshots (2026-11-13)
+
+- Canonical API contract: `netsales_api/docs/project/API_CONTRACTS.md`, section **Operational Reports Provider Contract**.
+- `OperationalReportCatalogModel` parses the Laravel catalog into `document_engine` `ReportDefinition` schemas and registers exact schema versions with `ReportDefinitionRegistry`.
+- Localized labels and chart slots are catalog metadata; view/export permissions and supported workspace scopes are carried separately as access descriptors. They are not security grants. Laravel reauthorizes catalog availability, report execution, CSV export, document issue, and artifact download.
+- Operational report data and financial summaries are server-computed. Flutter may display returned metrics/chart series but must not derive balances, aging buckets, wallet totals, or accounting results.
+- Report execution, summary, and CSV export requests send provider-defined values only under the nested `filters` object. Laravel validates filter IDs, types, choices, and workspace authorization; the retired top-level flat filter contract is prohibited.
+- The Flutter integration currently exposes the seven known `OperationalReportType` values and fixed filter arguments through its existing GetX controller/use cases. The package-level schema studio is not yet hosted by the operational reports feature, so arbitrary provider-defined filter controls are not yet end-to-end dynamic.
+- `document_engine` includes a controlled `ReportConfigurationStudio` and versioned `SavedReportPreset` value object. NetSales has not yet integrated the studio into its reports navigation/controller or added server-side preset persistence endpoints/migrations.
+- Current report PDF output is an executive summary based on server metrics and charts; row-level report results are delivered through CSV. A detailed PDF wallet ledger statement remains outstanding.
+- Official invoice, repayment, and expense PDFs are rendered only from the server-issued immutable `source_snapshot`. The app uploads the rendered PDF artifact, retrieves the canonical protected artifact, and verifies its SHA-256 before save/share/print.
+- Currency shown in an official document comes from the snapshot's `currency_code`; snapshots with missing/invalid currency are rejected. No fixed currency symbol or client-side currency conversion is allowed.
+- Validation of migrations, typed contract parsing, platform PDF rendering, Arabic text extraction/order, and final CI remains pending for the final plan stage. Do not interpret source integration as verified platform readiness.
+
+
+## Wallet ledger statement export contract
+
+The Finance feature's detailed network/POS wallet statement PDF consumes these API resource fields:
+- Wallet resource: `currency_code`, `opening_balance`, `opening_balance_source`, `wallet_balance`, and the related network/POS profile logo path.
+- Wallet-log resource: `currency_code`, `balance_before`, `balance_after`, and `balance_snapshot_source`, in addition to log ID, operation label, amount, statement, date, and creator.
+- `opening_balance_source` is interpreted only as `INITIAL` or `BACKFILLED`; unknown values are displayed as unspecified. `balance_snapshot_source` is interpreted only as `LIVE` or `BACKFILLED`.
+- The PDF is generated from all cursor pages up to 1,500 rows, ordered by ledger ID, and is rejected if the wallet changes, a new ledger ID appears during retrieval, any row has missing balance snapshots, or any row currency differs from the wallet currency. The Flutter renderer does not calculate balances or totals.
+
+
+## Saved operational report presets
+
+Presets are persisted by the API under the authenticated user and current network/POS scope. Routes are `GET /reports/presets`, `POST /reports/presets`, `PUT /reports/presets/{presetUuid}`, and `DELETE /reports/presets/{presetUuid}`.
+The write payload includes `report_type`, `network_id`, optional `pos_id`, `name`, `report_schema_version`, `criteria` (`ReportCriteria.toJson()`), and `presentation` (`ReportPresentationOptions.toJson()`). The API returns `preset_schema_version`, `id` (opaque preset UUID), `name`, `report_id`, `report_schema_version`, `criteria`, and `presentation`.
+Preset schema version is currently 1. The API validates the saved report schema version, typed filter values and choices, required filters, visible/required columns, sort and grouping permissions, selected template/version, locale, page profile, and metric/chart availability against the current provider definition. A schema mismatch is rejected for re-review rather than silently migrated.
+
+
+## Document output integration status
+
+The Reports feature is embedded in both workspace shells and uses the shared Report Configuration Studio. User-owned saved presets are stored by the API with `ReportCriteria` and `ReportPresentationOptions` JSON; see the preset endpoint contract above.
+Detailed report PDF rendering consumes the current presentation options (columns, sorts, grouping, template/version, locale, page profile, metrics, charts). It rejects more than 1,500 rows and never recomputes financial values.
+Network/POS wallet statements use server-supplied opening/current balances and per-entry balance snapshots, reject mixed currencies or concurrent source changes, and render a branded landscape ledger PDF. Invoice/expense/repayment PDFs use the immutable API document snapshot and artifact workflow.

@@ -462,4 +462,23 @@ abstract final class ApiConstants {
   // 31. لوحة القيادة والمؤشرات التجميعية (Dashboard Overview)
   // ==========================================================================
   static const String dashboardOverview = '/dashboard/overview';
+
+  // Operational reports — Network / POS workspaces only.
+  static const String operationalReportCatalog = '/reports/catalog';
+  static const String operationalReports = '/reports';
+  static const String operationalReportSummary = '/reports/summary';
+  static const String operationalReportExports = '/reports/exports';
+  static const String operationalReportPresets = '/reports/presets';
+  static String operationalReportPreset(String presetId) => '/reports/presets/$presetId';
+  static String operationalReportExportStatus(String exportId) =>
+      '/reports/exports/$exportId';
+  static String operationalReportExportDownload(String exportId) =>
+      '/reports/exports/$exportId/download';
+
+  // Immutable operational document snapshots and official PDF artifacts.
+  static const String operationalDocumentSnapshots = '/documents/snapshots';
+  static String operationalDocumentSnapshotArtifact(String snapshotUuid) =>
+      '/documents/snapshots/$snapshotUuid/artifact';
+  static String operationalDocumentSnapshotDownload(String snapshotUuid) =>
+      '/documents/snapshots/$snapshotUuid/download';
 }

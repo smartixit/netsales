@@ -1,20 +1,20 @@
+import 'dart:typed_data';
+
 import '../document/document_branding.dart';
 import 'document_page_profile.dart';
 
-/// A visible presentation watermark; it does not alter document status.
+/// Image watermark supplied by the host application.
+///
+/// The engine never chooses a tenant logo or loads application assets. The
+/// host resolves the Network/POS logo and supplies the selected PNG/JPEG bytes.
 final class DocumentWatermark {
   DocumentWatermark({
-    required this.text,
-    this.color = '64748B',
+    required Uint8List imageBytes,
     this.opacity = 0.12,
     this.angleRadians = -0.7853981633974483,
-  }) {
-    if (text.trim().isEmpty || text.length > 80) {
-      throw ArgumentError.value(text, 'text', 'Must contain 1-80 chars.');
-    }
-    if (!RegExp(r'^[0-9A-Fa-f]{6}$').hasMatch(color)) {
-      throw ArgumentError.value(color, 'color', 'Use six-digit RGB hex.');
-    }
+    this.widthFactor = 0.72,
+    this.heightFactor = 0.62,
+  }) : _imageBytes = _copyImage(imageBytes) {
     if (!opacity.isFinite || opacity < 0.04 || opacity > 0.35) {
       throw ArgumentError.value(
         opacity,
@@ -29,12 +29,53 @@ final class DocumentWatermark {
         'Must be within ±2π.',
       );
     }
+    if (!widthFactor.isFinite || widthFactor < 0.1 || widthFactor > 0.95) {
+      throw ArgumentError.value(
+        widthFactor,
+        'widthFactor',
+        'Must be between 0.1 and 0.95.',
+      );
+    }
+    if (!heightFactor.isFinite || heightFactor < 0.1 || heightFactor > 0.95) {
+      throw ArgumentError.value(
+        heightFactor,
+        'heightFactor',
+        'Must be between 0.1 and 0.95.',
+      );
+    }
   }
 
-  final String text;
-  final String color;
+  final Uint8List _imageBytes;
   final double opacity;
   final double angleRadians;
+  final double widthFactor;
+  final double heightFactor;
+
+  /// Returns a defensive copy of the watermark image.
+  Uint8List get imageBytes => Uint8List.fromList(_imageBytes);
+
+  static Uint8List _copyImage(Uint8List bytes) {
+    if (bytes.isEmpty || bytes.length > 2 * 1024 * 1024) {
+      throw ArgumentError('Watermark image must be 1 byte to 2 MiB.');
+    }
+    final isPng = bytes.length >= 8 &&
+        bytes[0] == 0x89 &&
+        bytes[1] == 0x50 &&
+        bytes[2] == 0x4E &&
+        bytes[3] == 0x47 &&
+        bytes[4] == 0x0D &&
+        bytes[5] == 0x0A &&
+        bytes[6] == 0x1A &&
+        bytes[7] == 0x0A;
+    final isJpeg = bytes.length >= 3 &&
+        bytes[0] == 0xFF &&
+        bytes[1] == 0xD8 &&
+        bytes[2] == 0xFF;
+    if (!isPng && !isJpeg) {
+      throw ArgumentError('Watermark image must be PNG or JPEG.');
+    }
+    return Uint8List.fromList(bytes);
+  }
 }
 
 /// Presentation-only options for one PDF rendering operation.

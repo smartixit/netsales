@@ -7,14 +7,13 @@ import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/app_cache_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
+import 'package:netsales/core/services/document_engine_image_pdf_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/models/media_gallery_item_model.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_gallery_filmstrip.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_gallery_header_overlay.dart';
 import 'package:netsales/widgets/media_gallery/widgets/media_viewer_item.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 enum _ViewerActionState { none, downloading, sharing, printing }
@@ -227,23 +226,22 @@ class _MediaGalleryViewerState extends State<MediaGalleryViewer> {
 
       Uint8List printBytes = bytes;
 
-      if (!item.isPdf) {
-        // إذا كان العنصر صورة، يتم تضمينها في مستند PDF أحادي الصفحة للطباعة القياسية
-        final pdf = pw.Document();
-        final image = pw.MemoryImage(bytes);
-        pdf.addPage(
-          pw.Page(
-            pageFormat: PdfPageFormat.a4,
-            margin: const pw.EdgeInsets.all(16),
-            build: (pw.Context context) {
-              return pw.Center(child: pw.Image(image, fit: pw.BoxFit.contain));
-            },
-          ),
+      if (item.isImage) {
+        // Convert a single image through the shared bounded document engine.
+        printBytes = await DocumentEngineImagePdfService.instance.renderA4Image(
+          imageBytes: bytes,
+          title: item.title,
         );
-        printBytes = await pdf.save();
+      } else if (!item.isPdf) {
+        CustomSnackbar.show(
+          title: 'الطباعة غير مدعومة',
+          message: 'نزّل هذا النوع من الملفات وافتحه في التطبيق المناسب للطباعة.',
+          type: SnackType.warning,
+        );
+        return;
       }
 
-      await Printing.layoutPdf(onLayout: (_) => printBytes, name: item.title);
+      await Printing.layoutPdf(onLayout: (_) async => printBytes, name: item.title);
     } catch (_) {
       CustomSnackbar.show(
         title: 'خطأ',

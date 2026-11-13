@@ -5,8 +5,8 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/reports/data/datasources/operational_report_remote_data_source.dart';
 import 'package:netsales/features/reports/data/models/operational_report_export_model.dart';
-import 'package:netsales/features/reports/data/models/operational_report_summary_model.dart';
 import 'package:netsales/features/reports/data/models/operational_report_catalog_model.dart';
+import 'package:document_engine/document_engine.dart';
 
 class OperationalReportRemoteDataSourceImpl
     implements OperationalReportRemoteDataSource {
@@ -47,13 +47,18 @@ class OperationalReportRemoteDataSourceImpl
   }
 
   @override
-  Future<ApiResponse<OperationalReportSummaryModel>> getSummary({
+  Future<ApiResponse<Map<String, dynamic>>> getSummary({
     required Map<String, dynamic> query,
   }) {
-    return ApiService.instance.get<OperationalReportSummaryModel>(
+    return ApiService.instance.get<Map<String, dynamic>>(
       ApiConstants.operationalReportSummary,
       queryParameters: query,
-      fromJson: OperationalReportSummaryModel.fromJson,
+      fromJson: (json) {
+        if (json is! Map) {
+          throw const FormatException('تنسيق ملخص التقرير غير صالح.');
+        }
+        return Map<String, dynamic>.from(json);
+      },
     );
   }
 
@@ -77,6 +82,39 @@ class OperationalReportRemoteDataSourceImpl
       fromJson: OperationalReportExportModel.fromJson,
     );
   }
+
+
+  @override
+  Future<ApiResponse<List<SavedReportPreset>>> getPresets({required Map<String, dynamic> query}) =>
+      ApiService.instance.getList<SavedReportPreset>(
+        ApiConstants.operationalReportPresets,
+        queryParameters: query,
+        fromJson: (json) => SavedReportPreset.fromJson(Map<String, Object?>.from(json as Map)),
+      );
+
+  @override
+  Future<ApiResponse<SavedReportPreset>> savePreset({required Map<String, dynamic> payload}) =>
+      ApiService.instance.post<SavedReportPreset>(
+        ApiConstants.operationalReportPresets,
+        data: payload,
+        fromJson: (json) => SavedReportPreset.fromJson(Map<String, Object?>.from(json as Map)),
+      );
+
+  @override
+  Future<ApiResponse<SavedReportPreset>> updatePreset(String presetId, {required Map<String, dynamic> payload}) =>
+      ApiService.instance.put<SavedReportPreset>(
+        ApiConstants.operationalReportPreset(presetId),
+        data: payload,
+        fromJson: (json) => SavedReportPreset.fromJson(Map<String, Object?>.from(json as Map)),
+      );
+
+  @override
+  Future<ApiResponse<bool>> deletePreset(String presetId, {required Map<String, dynamic> query}) =>
+      ApiService.instance.delete<bool>(
+        ApiConstants.operationalReportPreset(presetId),
+        queryParameters: query,
+        fromJson: (_) => true,
+      );
 
   @override
   Future<Uint8List?> downloadExport(String url) {

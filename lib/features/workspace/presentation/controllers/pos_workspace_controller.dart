@@ -182,11 +182,16 @@ class PosWorkspaceController extends GetxController {
         final savedLink = networkLinks.firstWhereOrNull(
           (link) => link.networkId == savedNetworkId && link.status,
         );
-        final initialLink = savedLink ?? networkLinks.first;
-        await selectNetwork(
-          initialLink,
-          index: networkLinks.indexOf(initialLink),
-        );
+        // A saved selection is authoritative. Without one, auto-select only
+        // when exactly one active network exists; never guess across tenants.
+        final initialLink = savedLink ??
+            (networkLinks.length == 1 ? networkLinks.single : null);
+        if (initialLink != null) {
+          await selectNetwork(
+            initialLink,
+            index: networkLinks.indexOf(initialLink),
+          );
+        }
       }
     } catch (error) {
       if (generation == _networkGeneration) {

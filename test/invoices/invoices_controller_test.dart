@@ -4,12 +4,25 @@ import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
+import 'package:netsales/features/invoices/domain/repositories/invoice_document_repository.dart';
+import 'package:netsales/features/invoices/domain/usecases/invoice_document_use_case.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_invoice_details_use_case.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_network_invoices_use_case.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/invoices/presentation/controllers/invoice_details_controller.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_invoices_controller.dart';
 import 'package:netsales/features/invoices/presentation/controllers/pos_invoices_controller.dart';
+
+class MockInvoiceDocumentRepository implements InvoiceDocumentRepository {
+  @override
+  Future<bool> exportAndSaveInvoice(InvoiceEntity invoice) async => true;
+
+  @override
+  Future<bool> shareInvoice(InvoiceEntity invoice) async => true;
+
+  @override
+  Future<bool> printInvoice(InvoiceEntity invoice) async => true;
+}
 
 class MockInvoiceRepository implements InvoiceRepository {
   List<InvoiceEntity> mockList = [];
@@ -87,6 +100,7 @@ void main() {
   late GetNetworkInvoicesUseCase getNetworkInvoicesUseCase;
   late GetPosInvoicesUseCase getPosInvoicesUseCase;
   late GetInvoiceDetailsUseCase getInvoiceDetailsUseCase;
+  late InvoiceDocumentUseCase invoiceDocumentUseCase;
 
   final sampleInvoice1 = const InvoiceEntity(
     invoiceId: 1,
@@ -113,6 +127,7 @@ void main() {
     getNetworkInvoicesUseCase = GetNetworkInvoicesUseCase(mockRepo);
     getPosInvoicesUseCase = GetPosInvoicesUseCase(mockRepo);
     getInvoiceDetailsUseCase = GetInvoiceDetailsUseCase(mockRepo);
+    invoiceDocumentUseCase = InvoiceDocumentUseCase(MockInvoiceDocumentRepository());
   });
 
   group('NetworkInvoicesController Tests', () {
@@ -212,6 +227,7 @@ void main() {
 
       final controller = InvoiceDetailsController(
         getInvoiceDetailsUseCase: getInvoiceDetailsUseCase,
+        invoiceDocumentUseCase: invoiceDocumentUseCase,
       );
 
       await controller.loadInvoiceDetails(2);

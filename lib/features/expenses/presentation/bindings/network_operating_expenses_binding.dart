@@ -7,6 +7,10 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use
 import 'package:netsales/features/expenses/data/datasources/expense_remote_data_source.dart';
 import 'package:netsales/features/expenses/data/datasources/expense_remote_data_source_impl.dart';
 import 'package:netsales/features/expenses/data/repositories/expense_repository_impl.dart';
+import 'package:netsales/features/expenses/data/repositories/expense_document_repository_impl.dart';
+import 'package:netsales/features/expenses/data/services/expense_document_service.dart';
+import 'package:netsales/features/expenses/domain/repositories/expense_document_repository.dart';
+import 'package:netsales/features/expenses/domain/usecases/expense_document_use_case.dart';
 import 'package:netsales/features/expenses/domain/repositories/expense_repository.dart';
 import 'package:netsales/features/expenses/domain/usecases/create_expense_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/delete_expense_attachment_use_case.dart';
@@ -56,6 +60,19 @@ class NetworkOperatingExpensesBinding extends Bindings {
     );
     Get.lazyPut(() => DeleteExpenseUseCase(Get.find<ExpenseRepository>()));
 
+    Get.lazyPut<ExpenseDocumentRepository>(
+      () => ExpenseDocumentRepositoryImpl(
+        documentService: ExpenseDocumentService.instance,
+      ),
+      fenix: true,
+    );
+    Get.lazyPut<ExpenseDocumentUseCase>(
+      () => ExpenseDocumentUseCase(
+        Get.find<ExpenseDocumentRepository>(),
+      ),
+      fenix: true,
+    );
+
     Get.lazyPut(
       () => NetworkOperatingExpensesController(
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
@@ -66,6 +83,7 @@ class NetworkOperatingExpensesBinding extends Bindings {
         deleteExpenseAttachmentUseCase:
             Get.find<DeleteExpenseAttachmentUseCase>(),
         deleteExpenseUseCase: Get.find<DeleteExpenseUseCase>(),
+        expenseDocumentUseCase: Get.find<ExpenseDocumentUseCase>(),
       ),
     );
   }
