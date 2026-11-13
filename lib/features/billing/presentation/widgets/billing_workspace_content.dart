@@ -9,6 +9,7 @@ import 'package:netsales/features/billing/presentation/widgets/billing_financial
 import 'package:netsales/features/billing/presentation/widgets/billing_invoice_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_plan_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_subscription_section.dart';
+import 'package:netsales/features/billing/presentation/widgets/billing_collection_status_options.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
@@ -86,7 +87,15 @@ class BillingWorkspaceContent extends StatelessWidget {
                 loadMoreLabel: 'تحميل المزيد من الإشعارات الدائنة',
                 referenceKey: 'credit_note_number',
                 fallbackTitle: 'إشعار دائن',
-                amountKey: 'total',
+                amountKey: 'total_minor',
+                filterState: controller.creditNotesFilter,
+                statusOptions: BillingCollectionStatusOptions.build(
+                  controller.creditNotesFilter.statusValues,
+                ),
+                onSearchChanged: controller.searchCreditNotes,
+                onStatusChanged: controller.setCreditNoteStatus,
+                onRefresh: controller.refreshCreditNotes,
+                searchHint: 'ابحث برقم الإشعار أو سببه',
               ),
               BillingFinancialSection(
                 title: 'الاستردادات',
@@ -96,7 +105,15 @@ class BillingWorkspaceContent extends StatelessWidget {
                 loadMoreLabel: 'تحميل المزيد من الاستردادات',
                 referenceKey: 'refund_reference',
                 fallbackTitle: 'استرداد',
-                amountKey: 'amount',
+                amountKey: 'amount_minor',
+                filterState: controller.refundsFilter,
+                statusOptions: BillingCollectionStatusOptions.build(
+                  controller.refundsFilter.statusValues,
+                ),
+                onSearchChanged: controller.searchRefunds,
+                onStatusChanged: controller.setRefundStatus,
+                onRefresh: controller.refreshRefunds,
+                searchHint: 'ابحث بمرجع الاسترداد أو سببه',
               ),
               BillingFinancialSection(
                 title: 'المدفوعات',
@@ -107,6 +124,14 @@ class BillingWorkspaceContent extends StatelessWidget {
                 referenceKey: 'payment_reference',
                 fallbackTitle: 'دفعة',
                 amountKey: 'amount_minor',
+                filterState: controller.paymentsFilter,
+                statusOptions: BillingCollectionStatusOptions.build(
+                  controller.paymentsFilter.statusValues,
+                ),
+                onSearchChanged: controller.searchPayments,
+                onStatusChanged: controller.setPaymentStatus,
+                onRefresh: controller.refreshPayments,
+                searchHint: 'ابحث بمرجع الدفعة أو مرجع التحويل أو الفاتورة',
               ),
             ],
           ],
