@@ -46,6 +46,18 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
       ApiService.instance.get(ApiConstants.billingAccountEntitlements(accountId), fromJson: _map);
 
   @override
+  Future<ApiResponse<Map<String, dynamic>>> getReportsCatalog(int networkId) =>
+      ApiService.instance.get(ApiConstants.billingNetworkReportsCatalog(networkId), fromJson: _map);
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> getBillingReport(int networkId, String type, Map<String, dynamic> query) =>
+      ApiService.instance.get(ApiConstants.billingNetworkReport(networkId, type), queryParameters: query, fromJson: _map);
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> getBillingReportSummary(int networkId, String type, Map<String, dynamic> query) =>
+      ApiService.instance.get(ApiConstants.billingNetworkReportSummary(networkId, type), queryParameters: query, fromJson: _map);
+
+  @override
   Future<ApiResponse<Map<String, dynamic>>> getTrialEligibility(int accountId, int priceId) =>
       ApiService.instance.get(ApiConstants.billingTrialEligibility(accountId, priceId), fromJson: _map);
 
