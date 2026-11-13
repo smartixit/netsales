@@ -1,4 +1,5 @@
 import 'package:netsales/features/billing/data/datasources/billing_remote_data_source.dart';
+import 'dart:typed_data';
 import 'package:netsales/features/billing/domain/entities/billing_payload.dart';
 import 'package:netsales/features/billing/domain/repositories/billing_repository.dart';
 
@@ -39,6 +40,8 @@ class BillingRepositoryImpl implements BillingRepository {
   Future<BillingPayload> getBillingReport(int networkId, String type, Map<String, dynamic> query) async => _unwrap(await remote.getBillingReport(networkId, type, query));
   @override
   Future<BillingPayload> getBillingReportSummary(int networkId, String type, Map<String, dynamic> query) async => _unwrap(await remote.getBillingReportSummary(networkId, type, query));
+  @override
+  Future<Uint8List> exportBillingReport(int id, String type, Map<String, dynamic> query) => remote.exportBillingReport(id, type, query);
   @override
   Future<BillingPayload> getTrialEligibility(int id, int priceId) async => _unwrap(await remote.getTrialEligibility(id, priceId));
   @override
