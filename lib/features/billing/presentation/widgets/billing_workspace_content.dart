@@ -14,6 +14,7 @@ import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 class BillingWorkspaceContent extends StatelessWidget {
   const BillingWorkspaceContent({super.key, required this.controller});
@@ -147,11 +148,25 @@ class BillingWorkspaceContent extends StatelessWidget {
               const CustomEmptyState.compact(title: 'لا توجد خطط متاحة لهذا الحساب')
             else
               ...controller.plans.map(_planTile),
+            CustomCursorLoadMore(
+              hasMore: controller.plansPage.hasMore,
+              isLoading: controller.plansPage.isLoadingMore.value,
+              error: controller.plansPage.loadMoreError.value,
+              onPressed: controller.loadMorePlans,
+              label: 'تحميل المزيد من الخطط',
+            ),
             _sectionTitle('الاشتراك الحالي'),
             if (controller.subscriptions.isEmpty)
               const CustomEmptyState.compact(title: 'لا يوجد اشتراك مسجل حالياً')
             else
               ...controller.subscriptions.map(_subscriptionTile),
+            CustomCursorLoadMore(
+              hasMore: controller.subscriptionsPage.hasMore,
+              isLoading: controller.subscriptionsPage.isLoadingMore.value,
+              error: controller.subscriptionsPage.loadMoreError.value,
+              onPressed: controller.loadMoreSubscriptions,
+              label: 'تحميل المزيد من الاشتراكات',
+            ),
             _sectionTitle('الاستحقاقات والمزايا'),
             if (controller.entitlements.value?['features'] is List &&
                 (controller.entitlements.value!['features'] as List).isNotEmpty)
@@ -167,6 +182,13 @@ class BillingWorkspaceContent extends StatelessWidget {
               const CustomEmptyState.compact(title: 'لا توجد فواتير')
             else
               ...controller.invoices.map(_invoiceTile),
+            CustomCursorLoadMore(
+              hasMore: controller.invoicesPage.hasMore,
+              isLoading: controller.invoicesPage.isLoadingMore.value,
+              error: controller.invoicesPage.loadMoreError.value,
+              onPressed: controller.loadMoreInvoices,
+              label: 'تحميل المزيد من الفواتير',
+            ),
             _sectionTitle('الإشعارات الدائنة'),
             if (controller.creditNotes.isEmpty)
               const CustomEmptyState.compact(title: 'لا توجد إشعارات دائنة')
@@ -177,6 +199,13 @@ class BillingWorkspaceContent extends StatelessWidget {
                 amount: item['total_minor'],
                 currencyCode: item['currency_code']?.toString(),
               )),
+            CustomCursorLoadMore(
+              hasMore: controller.creditNotesPage.hasMore,
+              isLoading: controller.creditNotesPage.isLoadingMore.value,
+              error: controller.creditNotesPage.loadMoreError.value,
+              onPressed: controller.loadMoreCreditNotes,
+              label: 'تحميل المزيد من الإشعارات الدائنة',
+            ),
             _sectionTitle('الاستردادات'),
             if (controller.refunds.isEmpty)
               const CustomEmptyState.compact(title: 'لا توجد استردادات')
@@ -187,6 +216,13 @@ class BillingWorkspaceContent extends StatelessWidget {
                 amount: item['amount_minor'],
                 currencyCode: item['currency_code']?.toString(),
               )),
+            CustomCursorLoadMore(
+              hasMore: controller.refundsPage.hasMore,
+              isLoading: controller.refundsPage.isLoadingMore.value,
+              error: controller.refundsPage.loadMoreError.value,
+              onPressed: controller.loadMoreRefunds,
+              label: 'تحميل المزيد من الاستردادات',
+            ),
             _sectionTitle('المدفوعات'),
             if (controller.payments.isEmpty)
               const CustomEmptyState.compact(title: 'لا توجد مدفوعات')
@@ -197,6 +233,13 @@ class BillingWorkspaceContent extends StatelessWidget {
                 amount: item['amount_minor'] ?? item['amount'],
                 currencyCode: item['currency_code']?.toString(),
               )),
+            CustomCursorLoadMore(
+              hasMore: controller.paymentsPage.hasMore,
+              isLoading: controller.paymentsPage.isLoadingMore.value,
+              error: controller.paymentsPage.loadMoreError.value,
+              onPressed: controller.loadMorePayments,
+              label: 'تحميل المزيد من المدفوعات',
+            ),
           ],
         ],
       ),
