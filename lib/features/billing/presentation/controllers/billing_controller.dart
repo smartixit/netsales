@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/enums/billing_status.dart';
 import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/features/billing/domain/entities/billing_payload.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
@@ -38,27 +39,50 @@ class BillingController extends GetxController {
   final plansFilter = CustomCollectionFilterState();
   final subscriptionsFilter = CustomCollectionFilterState(
     statusValues: [
-      'INCOMPLETE', 'TRIALING', 'ACTIVE', 'PAST_DUE',
-      'PAUSED', 'SUSPENDED', 'CANCELED', 'EXPIRED',
+      BillingStatus.incomplete.wireValue,
+      BillingStatus.trialing.wireValue,
+      BillingStatus.active.wireValue,
+      BillingStatus.pastDue.wireValue,
+      BillingStatus.paused.wireValue,
+      BillingStatus.suspended.wireValue,
+      BillingStatus.canceled.wireValue,
+      BillingStatus.expired.wireValue,
     ],
   );
   final invoicesFilter = CustomCollectionFilterState(
     statusValues: [
-      'DRAFT', 'OPEN', 'PARTIALLY_PAID', 'PARTIALLY_CREDITED',
-      'PAID', 'CREDITED', 'UNCOLLECTIBLE', 'VOID',
+      BillingStatus.draft.wireValue,
+      BillingStatus.open.wireValue,
+      BillingStatus.partiallyPaid.wireValue,
+      BillingStatus.partiallyCredited.wireValue,
+      BillingStatus.paid.wireValue,
+      BillingStatus.credited.wireValue,
+      BillingStatus.uncollectible.wireValue,
+      BillingStatus.voided.wireValue,
     ],
   );
   final paymentsFilter = CustomCollectionFilterState(
     statusValues: [
-      'PENDING_REVIEW', 'VERIFIED', 'FAILED', 'REJECTED',
-      'REFUNDED', 'PARTIALLY_REFUNDED',
+      BillingStatus.pendingReview.wireValue,
+      BillingStatus.verified.wireValue,
+      BillingStatus.failed.wireValue,
+      BillingStatus.rejected.wireValue,
+      BillingStatus.refunded.wireValue,
+      BillingStatus.partiallyRefunded.wireValue,
     ],
   );
   final creditNotesFilter = CustomCollectionFilterState(
-    statusValues: ['ISSUED', 'PARTIALLY_REFUNDED', 'REFUNDED'],
+    statusValues: [
+      BillingStatus.issued.wireValue,
+      BillingStatus.partiallyRefunded.wireValue,
+      BillingStatus.refunded.wireValue,
+    ],
   );
   final refundsFilter = CustomCollectionFilterState(
-    statusValues: ['PENDING', 'COMPLETED'],
+    statusValues: [
+      BillingStatus.pending.wireValue,
+      BillingStatus.completed.wireValue,
+    ],
   );
 
   List<CustomCollectionFilterState> get _collectionFilters => [
