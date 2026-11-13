@@ -1,3 +1,4 @@
+import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 import 'dart:typed_data';
 import 'dart:ui' show Color;
 
@@ -25,12 +26,8 @@ class OperationalReportDocumentService {
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) async {
     final normalizedOrganization = _display(organizationName, 'NetSales');
     final logoBytes = await DocumentEngineBrandAssetService.instance
@@ -105,12 +102,8 @@ class OperationalReportDocumentService {
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) async {
     final bytes = await generateSummaryPdf(
       type: type,
@@ -142,12 +135,8 @@ class OperationalReportDocumentService {
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) async {
     final bytes = await generateSummaryPdf(
       type: type,
@@ -176,12 +165,8 @@ class OperationalReportDocumentService {
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) async {
     final bytes = await generateSummaryPdf(
       type: type,
@@ -227,12 +212,8 @@ class OperationalReportDocumentService {
     required OperationalReportSummary summary,
     required String organizationName,
     required DateTime generatedAt,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) {
     final metrics = summary.metrics;
     final rawCurrencyCode = summary.values['currency_code'];
