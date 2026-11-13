@@ -42,6 +42,7 @@ class BillingReportsContent extends StatelessWidget {
         children: [
           BillingReportsHeader(
             isExportingPdf: controller.isExportingPdf.value,
+            isExportingCsv: controller.isExportingCsv.value,
             isLoading: controller.isLoading.value,
             onExportPdf: controller.exportPdfSummary,
             onExportCsv: controller.exportCsv,
