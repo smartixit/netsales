@@ -5,7 +5,6 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/reports/data/datasources/operational_report_remote_data_source.dart';
 import 'package:netsales/features/reports/data/models/operational_report_export_model.dart';
-import 'package:netsales/features/reports/data/models/operational_report_summary_model.dart';
 import 'package:netsales/features/reports/data/models/operational_report_catalog_model.dart';
 
 class OperationalReportRemoteDataSourceImpl
@@ -47,13 +46,18 @@ class OperationalReportRemoteDataSourceImpl
   }
 
   @override
-  Future<ApiResponse<OperationalReportSummaryModel>> getSummary({
+  Future<ApiResponse<Map<String, dynamic>>> getSummary({
     required Map<String, dynamic> query,
   }) {
-    return ApiService.instance.get<OperationalReportSummaryModel>(
+    return ApiService.instance.get<Map<String, dynamic>>(
       ApiConstants.operationalReportSummary,
       queryParameters: query,
-      fromJson: OperationalReportSummaryModel.fromJson,
+      fromJson: (json) {
+        if (json is! Map) {
+          throw const FormatException('تنسيق ملخص التقرير غير صالح.');
+        }
+        return Map<String, dynamic>.from(json);
+      },
     );
   }
 
