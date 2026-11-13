@@ -2,10 +2,9 @@ import 'package:document_engine/document_engine.dart';
 import 'package:document_engine/document_engine_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/features/billing/presentation/widgets/billing_report_date_range_section.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
-import 'package:netsales/widgets/pickers/custom_date_picker_modal.dart';
 
 class BillingReportFilterSection extends StatelessWidget {
   const BillingReportFilterSection({
@@ -105,37 +104,11 @@ class BillingReportFilterSection extends StatelessWidget {
     if (fromFilter != null || toFilter != null) {
       widgets.add(const SizedBox(height: 10));
       widgets.add(
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            if (fromFilter != null)
-              CustomButton.outline(
-                text: _dateLabel('من تاريخ', criteria.filters['from_date']),
-                prefix: Icons.calendar_today,
-                onPressed: () => _pickCriteriaDate(
-                  context,
-                  'from_date',
-                  criteria,
-                  onChanged,
-                ),
-              ),
-            if (toFilter != null)
-              CustomButton.outline(
-                text: _dateLabel('إلى تاريخ', criteria.filters['to_date']),
-                prefix: Icons.event,
-                onPressed: () => _pickCriteriaDate(
-                  context,
-                  'to_date',
-                  criteria,
-                  onChanged,
-                ),
-              ),
-            CustomButton.text(
-              text: 'مسح الفلاتر',
-              onPressed: () => onChanged(ReportCriteria()),
-            ),
-          ],
+        BillingReportDateRangeSection(
+          criteria: criteria,
+          hasFromDate: fromFilter != null,
+          hasToDate: toFilter != null,
+          onChanged: onChanged,
         ),
       );
     }
@@ -146,47 +119,4 @@ class BillingReportFilterSection extends StatelessWidget {
     );
   }
 
-  Future<void> _pickCriteriaDate(
-    BuildContext context,
-    String id,
-    ReportCriteria currentCriteria,
-    ValueChanged<ReportCriteria> onChanged,
-  ) async {
-    final current = currentCriteria.filters[id];
-    final initial = current is ReportDateFilterValue
-        ? current.value
-        : DateTime.now();
-    final selected = await CustomDatePickerModal.showDialog(
-      context: context,
-      initialValue: [initial],
-      title: id == 'from_date' ? 'اختر تاريخ البداية' : 'اختر تاريخ النهاية',
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-    final value =
-        selected != null && selected.isNotEmpty ? selected.first : null;
-    if (value == null) return;
-
-    if (id == 'from_date') {
-      final end = currentCriteria.filters['to_date'];
-      if (end is ReportDateFilterValue && value.isAfter(end.value)) return;
-    } else {
-      final start = currentCriteria.filters['from_date'];
-      if (start is ReportDateFilterValue && value.isBefore(start.value)) {
-        return;
-      }
-    }
-
-    final next = Map<String, ReportFilterValue>.from(currentCriteria.filters)
-      ..[id] = ReportDateFilterValue(value);
-    onChanged(ReportCriteria(filters: next));
-  }
-
-  String _dateLabel(String label, ReportFilterValue? value) {
-    if (value is! ReportDateFilterValue) return label;
-    final date = value.value;
-    return '$label ${date.year.toString().padLeft(4, '0')}-'
-        '${date.month.toString().padLeft(2, '0')}-'
-        '${date.day.toString().padLeft(2, '0')}';
-  }
 }
