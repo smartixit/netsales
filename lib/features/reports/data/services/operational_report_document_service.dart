@@ -318,9 +318,7 @@ class OperationalReportDocumentService {
               detail: 'تشمل جميع السجلات المطابقة للفلاتر، وليس الصفحة الحالية فقط',
             ),
             DocumentInfoGrid(items: info, columns: 2, compact: true),
-            if ((type == OperationalReportType.networkWallet ||
-                    type == OperationalReportType.posWallet) &&
-                summary.values['opening_balance_source'] == 'BACKFILLED')
+            if (summary.values['opening_balance_source'] == 'BACKFILLED')
               const DocumentCallout(
                 title: 'رصيد افتتاحي معاد بناؤه',
                 body: 'تم اشتقاق الرصيد الافتتاحي عند ترحيل سجل المحفظة من الرصيد الحالي والحركات المتاحة آنذاك. هذه القيمة توثّق إعادة البناء ولا تعني وجود كشف تاريخي مستقل موثق قبل الترحيل.',
