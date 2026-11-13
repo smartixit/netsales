@@ -82,7 +82,7 @@ class InvoiceDocumentService {
         ),
         generatedAt: DateTime.now(),
         showPageNumbers: true,
-        headerText: brand.organizationName + ' · فاتورة مبيعات',
+        headerText: '${brand.organizationName} · فاتورة مبيعات',
         footerText: 'مستند إلكتروني صادر عن NetSales — القيم المالية من الخادم',
         watermark: DocumentWatermark(
           imageBytes: logoBytes,
@@ -128,7 +128,7 @@ class InvoiceDocumentService {
     final bytes = await generateInvoicePdf(invoice);
     return Printing.layoutPdf(
       onLayout: (_) async => bytes,
-      name: _fileName(invoice) + '.pdf',
+      name: '${_fileName(invoice)}.pdf',
     );
   }
 
@@ -138,12 +138,12 @@ class InvoiceDocumentService {
     final info = <DocumentInfoItem>[
       DocumentInfoItem(
         label: 'الشبكة المورّدة',
-        value: DocumentTextValue(_display(invoice.networkName, 'شبكة #' + invoice.networkId.toString())),
+        value: DocumentTextValue(_display(invoice.networkName, 'شبكة #${invoice.networkId}')),
         direction: DocumentTextDirection.rightToLeft,
       ),
       DocumentInfoItem(
         label: 'العميل / نقطة البيع',
-        value: DocumentTextValue(_display(invoice.posName, 'نقطة بيع #' + invoice.posId.toString())),
+        value: DocumentTextValue(_display(invoice.posName, 'نقطة بيع #${invoice.posId}')),
         direction: DocumentTextDirection.rightToLeft,
       ),
       DocumentInfoItem(
@@ -179,12 +179,12 @@ class InvoiceDocumentService {
         ),
       DocumentInfoItem(
         label: 'معرّف الشبكة',
-        value: DocumentTextValue('#' + invoice.networkId.toString()),
+        value: DocumentTextValue('#${invoice.networkId}'),
         direction: DocumentTextDirection.leftToRight,
       ),
       DocumentInfoItem(
         label: 'معرّف نقطة البيع',
-        value: DocumentTextValue('#' + invoice.posId.toString()),
+        value: DocumentTextValue('#${invoice.posId}'),
         direction: DocumentTextDirection.leftToRight,
       ),
       if (_hasText(invoice.networkPhoneNumber))
@@ -226,7 +226,7 @@ class InvoiceDocumentService {
       if (invoice.requestId != null)
         DocumentInfoItem(
           label: 'طلب التوريد المرتبط',
-          value: DocumentTextValue(_display(invoice.requestUuid, '#' + invoice.requestId.toString())),
+          value: DocumentTextValue(_display(invoice.requestUuid, '#${invoice.requestId}')),
           direction: DocumentTextDirection.leftToRight,
         ),
     ];
@@ -234,10 +234,10 @@ class InvoiceDocumentService {
     final rows = invoice.items.asMap().entries.map((entry) {
       final item = entry.value;
       return DocumentTableRow(
-        id: 'line-' + (entry.key + 1).toString(),
+        id: 'line-${entry.key + 1}',
         cells: [
           DocumentTableCell(
-            value: DocumentTextValue(_display(item.packageName, 'باقة #' + item.packageId.toString())),
+            value: DocumentTextValue(_display(item.packageName, 'باقة #${item.packageId}')),
             direction: DocumentTextDirection.rightToLeft,
           ),
           DocumentTableCell(
@@ -291,10 +291,10 @@ class InvoiceDocumentService {
 
     return DocumentSnapshot(
       metadata: DocumentMetadata(
-        id: DocumentId('netsales-invoice-' + invoice.invoiceId.toString()),
+        id: DocumentId('netsales-invoice-${invoice.invoiceId}'),
         documentTypeId: DocumentTypeId('netsales.sales-invoice'),
         title: 'فاتورة مبيعات رسمية',
-        subtitle: 'فاتورة رقم ' + reference,
+        subtitle: 'فاتورة رقم $reference',
         reference: reference,
         locale: DocumentLocale(languageTag: 'ar-YE', direction: DocumentTextDirection.rightToLeft),
         createdAt: _parseDate(invoice.invoiceDate) ?? _parseDate(invoice.createdAt),
@@ -312,7 +312,7 @@ class InvoiceDocumentService {
                   : invoice.isUnpaid
                       ? DocumentStatusTone.warning
                       : DocumentStatusTone.info,
-              detail: 'المرجع: ' + reference,
+              detail: 'المرجع: $reference',
             ),
             DocumentInfoGrid(items: info, columns: 3, compact: true),
           ],
@@ -378,7 +378,7 @@ class InvoiceDocumentService {
     return _InvoiceBrandContext(
       organizationName: _display(
         invoice.networkName,
-        'شبكة #' + invoice.networkId.toString(),
+        'شبكة #${invoice.networkId}',
       ),
       logoUrl: invoice.networkLogoUrl,
     );
@@ -392,7 +392,7 @@ class InvoiceDocumentService {
   static String _amount(double value) => AmountFormatter.format(value.toString());
 
   static String _money(double value, String currencyCode) =>
-      _amount(value) + ' ' + currencyCode;
+      '${_amount(value)} $currencyCode';
 
   static String _display(String? value, [String fallback = '—']) {
     final normalized = value?.trim();
@@ -400,9 +400,9 @@ class InvoiceDocumentService {
   }
 
   static String _fileReference(InvoiceEntity invoice) =>
-      _display(invoice.invoiceUuid, '#' + invoice.invoiceId.toString());
+      _display(invoice.invoiceUuid, '#${invoice.invoiceId}');
 
-  static String _fileName(InvoiceEntity invoice) => 'فاتورة_' + _fileReference(invoice);
+  static String _fileName(InvoiceEntity invoice) => 'فاتورة_${_fileReference(invoice)}';
 
   static DateTime? _parseDate(String? value) {
     final normalized = value?.trim();

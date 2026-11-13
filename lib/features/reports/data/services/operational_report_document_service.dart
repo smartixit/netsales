@@ -69,7 +69,7 @@ class OperationalReportDocumentService {
         pageProfile: pageProfile,
         generatedAt: generatedAt,
         showPageNumbers: true,
-        headerText: normalizedOrganization + ' · ' + _reportTitle(summary, type),
+        headerText: '$normalizedOrganization · ${_reportTitle(summary, type)}',
         footerText:
             'ملخص تنفيذي محسوب على كامل النتائج المطابقة للفلاتر المحددة',
         watermark: DocumentWatermark(
@@ -111,7 +111,7 @@ class OperationalReportDocumentService {
     );
     return FileExportService.instance.saveFile(
       bytes: bytes,
-      fileName: 'ملخص_' + type.wireValue,
+      fileName: 'ملخص_${type.wireValue}',
       extension: 'pdf',
       folderName: 'Reports',
       namingStrategy: const FileNamingStrategy(appPrefix: 'NetSales_REP'),
@@ -140,7 +140,7 @@ class OperationalReportDocumentService {
     );
     return FileExportService.instance.shareBytes(
       bytes: bytes,
-      fileName: 'ملخص_' + type.wireValue,
+      fileName: 'ملخص_${type.wireValue}',
       extension: 'pdf',
       namingStrategy: const FileNamingStrategy(appPrefix: 'NetSales_REP'),
     );
@@ -166,7 +166,7 @@ class OperationalReportDocumentService {
     );
     return Printing.layoutPdf(
       onLayout: (_) async => bytes,
-      name: 'ملخص_' + type.wireValue + '.pdf',
+      name: 'ملخص_${type.wireValue}.pdf',
     );
   }
 
@@ -268,7 +268,7 @@ class OperationalReportDocumentService {
           'netsales-operational-report-${type.wireValue}-${generatedAt.millisecondsSinceEpoch}',
         ),
         documentTypeId: DocumentTypeId('netsales.operational-report'),
-        title: 'ملخص ' + _reportTitle(summary, type),
+        title: 'ملخص ${_reportTitle(summary, type)}',
         subtitle: 'تقرير تنفيذي صادر عن NetSales',
         reference: type.wireValue,
         locale: DocumentLocale(
@@ -283,7 +283,7 @@ class OperationalReportDocumentService {
           title: 'ملخص التقرير',
           nodes: [
             DocumentHeading(
-              text: 'ملخص تنفيذي — ' + _reportTitle(summary, type),
+              text: 'ملخص تنفيذي — ${_reportTitle(summary, type)}',
               level: 1,
               direction: DocumentTextDirection.rightToLeft,
             ),

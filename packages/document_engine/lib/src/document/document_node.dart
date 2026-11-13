@@ -513,7 +513,7 @@ final class DocumentSignatureArea extends DocumentNode {
       }
     }
     if (_visualSignatureBytes != null) {
-      final bytes = _visualSignatureBytes!;
+      final bytes = _visualSignatureBytes;
       final isPng =
           bytes.length >= 8 &&
           bytes[0] == 0x89 &&

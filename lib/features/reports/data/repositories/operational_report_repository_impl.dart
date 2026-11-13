@@ -34,7 +34,7 @@ class OperationalReportRepositoryImpl
   }) async {
     final response = await remoteDataSource.getCatalog(query: {
       'network_id': networkId,
-      if (posId != null) 'pos_id': posId,
+      'pos_id': ?posId,
     });
     if (!response.success || response.data == null) {
       throw AppException(
@@ -96,7 +96,7 @@ class OperationalReportRepositoryImpl
     final query = <String, dynamic>{
       'report_type': type.wireValue,
       'network_id': networkId,
-      if (posId != null) 'pos_id': posId,
+      'pos_id': ?posId,
       'per_page': perPage,
       if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
       if (filters.isNotEmpty) 'filters': filters,
@@ -133,7 +133,7 @@ class OperationalReportRepositoryImpl
     final query = <String, dynamic>{
       'report_type': type.wireValue,
       'network_id': networkId,
-      if (posId != null) 'pos_id': posId,
+      'pos_id': ?posId,
       if (filters.isNotEmpty) 'filters': filters,
     };
     final response = await remoteDataSource.getSummary(query: query);
@@ -283,7 +283,7 @@ class OperationalReportRepositoryImpl
       payload: {
         'report_type': type.wireValue,
         'network_id': networkId,
-        if (posId != null) 'pos_id': posId,
+        'pos_id': ?posId,
         if (filters.isNotEmpty) 'filters': filters,
       },
     );
@@ -316,7 +316,7 @@ class OperationalReportRepositoryImpl
 
 
   Map<String, dynamic> _presetScope(OperationalReportType type, int networkId, int? posId) =>
-      {'report_type': type.wireValue, 'network_id': networkId, if (posId != null) 'pos_id': posId};
+      {'report_type': type.wireValue, 'network_id': networkId, 'pos_id': ?posId};
 
   Map<String, dynamic> _presetPayload({
     required OperationalReportType type, required int networkId, int? posId,

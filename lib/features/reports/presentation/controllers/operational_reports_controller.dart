@@ -121,7 +121,7 @@ class OperationalReportsController extends GetxController {
     final posId = selectedPosId.value;
     if (posId == null) return 'جميع نقاط البيع';
     final link = posOptions.firstWhereOrNull((item) => item.posId == posId);
-    return link?.pos?.posName ?? 'نقطة بيع #' + posId.toString();
+    return link?.pos?.posName ?? 'نقطة بيع #$posId';
   }
 
   List<OperationalReportType> get availableTypes =>
@@ -1147,10 +1147,7 @@ class OperationalReportsController extends GetxController {
           throw const AppException('التصدير جاهز لكن تعذر تنزيل الملف.');
         }
         final type = selectedType.value;
-        final fileName = 'تقرير_' +
-            (type?.wireValue ?? 'تشغيلي') +
-            '_' +
-            DateTime.now().millisecondsSinceEpoch.toString();
+        final fileName = 'تقرير_${type?.wireValue ?? 'تشغيلي'}_${DateTime.now().millisecondsSinceEpoch}';
         final result = await FileExportService.instance.saveFile(
           bytes: bytes,
           fileName: fileName,

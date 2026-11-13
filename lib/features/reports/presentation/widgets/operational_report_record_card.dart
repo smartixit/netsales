@@ -112,10 +112,7 @@ class OperationalReportRecordCard extends StatelessWidget {
         date: _date('invoice_date'),
         amount: _amount('invoice_total_amount'),
         status: _first(['payment_status']),
-        detail: 'المسدّد: ' +
-            _amount('paid_amount') +
-            '  •  المتبقي: ' +
-            _amount('remaining_amount'),
+        detail: 'المسدّد: ${_amount('paid_amount')}  •  المتبقي: ${_amount('remaining_amount')}',
       ),
       OperationalReportType.expenses => (
         reference: _first(['expense_uuid', 'expense_id']),
@@ -155,11 +152,7 @@ class OperationalReportRecordCard extends StatelessWidget {
         date: _date('invoice_date'),
         amount: _amount('remaining_amount'),
         status: _first(['aging_bucket', 'payment_status']),
-        detail: 'إجمالي الفاتورة: ' +
-            _amount('invoice_total_amount') +
-            '  •  عمر الدين: ' +
-            _first(['age_days']) +
-            ' يوم',
+        detail: 'إجمالي الفاتورة: ${_amount('invoice_total_amount')}  •  عمر الدين: ${_first(['age_days'])} يوم',
       ),
       OperationalReportType.requests => (
         reference: _first(['request_uuid', 'request_id']),

@@ -64,9 +64,8 @@ final class PayvTextShapingProvider {
 
   PayvTextShapingProvider._({
     required Map<DocumentFontWeight, _PayvFontFace> faces,
-    required int language,
-  }) : _faces = Map<DocumentFontWeight, _PayvFontFace>.unmodifiable(faces),
-       _language = language;
+    required this._language,
+  }) : _faces = Map<DocumentFontWeight, _PayvFontFace>.unmodifiable(faces);
 
   final Map<DocumentFontWeight, _PayvFontFace> _faces;
   final int _language;

@@ -64,7 +64,7 @@ abstract final class NetSalesChartsExportAdapter {
             title: title,
             orientation: DocumentPageOrientation.landscape,
           );
-      return FileExportService.instance.saveFile(
+      return await FileExportService.instance.saveFile(
         bytes: pdfBytes,
         fileName: title,
         extension: 'pdf',
