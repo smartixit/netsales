@@ -645,6 +645,7 @@ class EnumPresentationRegistry {
       BillingStatus.rejected: 'مرفوض',
       BillingStatus.revoked: 'مسحوب',
       BillingStatus.draft: 'مسودة',
+      BillingStatus.issued: 'صادر',
       BillingStatus.open: 'مفتوح',
       BillingStatus.partiallyPaid: 'مدفوع جزئياً',
       BillingStatus.partiallyCredited: 'عليه إشعار دائن جزئي',
@@ -678,6 +679,7 @@ class EnumPresentationRegistry {
       BillingStatus.rejected: 'Rejected',
       BillingStatus.revoked: 'Revoked',
       BillingStatus.draft: 'Draft',
+      BillingStatus.issued: 'Issued',
       BillingStatus.open: 'Open',
       BillingStatus.partiallyPaid: 'Partially paid',
       BillingStatus.partiallyCredited: 'Partially credited',
@@ -707,6 +709,7 @@ class EnumPresentationRegistry {
       BillingStatus.active ||
       BillingStatus.completed ||
       BillingStatus.paid ||
+      BillingStatus.issued ||
       BillingStatus.credited ||
       BillingStatus.verified => SemanticTone.success,
       BillingStatus.pastDue ||
