@@ -32,7 +32,7 @@ class BillingReportRecordsSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
     if (controller.rows.isEmpty) {
-      return const CustomEmptyState.boxed(
+      return CustomEmptyState.boxed(
         title: emptyTitle,
         subtitle: emptySubtitle,
       );
