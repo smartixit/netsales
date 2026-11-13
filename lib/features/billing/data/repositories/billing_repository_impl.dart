@@ -26,6 +26,8 @@ class BillingRepositoryImpl implements BillingRepository {
   @override
   Future<BillingPayload> getPlans(int id, Map<String, dynamic> query) async => _unwrap(await remote.getPlans(id, query));
   @override
+  Future<BillingPayload> getEntitlements(int id) async => _unwrap(await remote.getEntitlements(id));
+  @override
   Future<BillingPayload> getTrialEligibility(int id, int priceId) async => _unwrap(await remote.getTrialEligibility(id, priceId));
   @override
   Future<BillingPayload> purchase(int id, int priceId) async => _unwrap(await remote.purchase(id, priceId));
