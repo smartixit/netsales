@@ -10,11 +10,11 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/core/enums/billing_status.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
-import 'package:netsales/widgets/charts/charting.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_list_tile.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 import 'package:netsales/widgets/pickers/custom_date_picker_modal.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_chart.dart';
 class BillingReportsContent extends StatelessWidget {
@@ -66,6 +66,17 @@ class BillingReportsContent extends StatelessWidget {
     onRetry:controller.applyFilters,
    ),
    if(controller.isLoading.value&&controller.rows.isEmpty)const CustomSkeletonFeed(itemCount:3,shrinkWrap:true),
+   if(summary!=null&&summary['record_count'] is num)
+    CustomResultsCounterBar(
+     count:controller.rows.length,
+     totalCount:(summary['record_count'] as num).toInt(),
+     recordLabel:'سجل',
+     isFiltered:controller.criteria.value.filters.isNotEmpty,
+     isLoading:controller.isLoading.value,
+     onClear:controller.criteria.value.filters.isEmpty
+      ?null
+      :()=>controller.setCriteria(ReportCriteria()),
+    ),
    if(summary!=null)Card(child:Padding(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
     const Text('ملخص التقرير',style:TextStyle(fontWeight:FontWeight.w700)),
     ..._summaryWidgets(summary),
