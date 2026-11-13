@@ -33,6 +33,7 @@ class BillingReportsController extends GetxController {
   final isLoadingMore=false.obs;
   final loadMoreError=RxnString();
   final isExportingPdf=false.obs;
+  final isExportingCsv=false.obs;
   final errorMessage=RxnString();
   final searchController=TextEditingController();
   final statusController=TextEditingController();
@@ -443,17 +444,57 @@ class BillingReportsController extends GetxController {
   }
 
   Future<void> exportCsv() async {
-    final n=networkId(),type=selectedType.value;
-    if(n==null||type==null||isLoading.value)return;
+    final network = networkId();
+    final type = selectedType.value;
+    if (network == null ||
+        type == null ||
+        isLoading.value ||
+        isExportingCsv.value) {
+      return;
+    }
+
+    final revision = _revision;
+    final filterSnapshot = Map<String, dynamic>.from(_filters);
+    isExportingCsv.value = true;
     try {
-      final bytes=await useCases.exportBillingReport(n,type,_filters);
-      final result=await FileExportService.instance.saveFile(
-        bytes:bytes,fileName:'Billing-$type',extension:'csv',
-        namingStrategy:FileNamingStrategy.report,autoOpen:false,
+      final bytes = await useCases.exportBillingReport(
+        network,
+        type,
+        filterSnapshot,
       );
-      if(!result.isSuccess)errorMessage.value=result.errorMessage??'تعذر حفظ ملف التقرير.';
-    } catch(error) {
-      errorMessage.value=AppException.sanitizeMessage(error,fallback:'تعذر تصدير تقرير الاشتراكات.');
+      if (revision != _revision ||
+          network != networkId() ||
+          type != selectedType.value) {
+        return;
+      }
+
+      final result = await FileExportService.instance.saveFile(
+        bytes: bytes,
+        fileName: 'Billing-$type',
+        extension: 'csv',
+        namingStrategy: FileNamingStrategy.report,
+        autoOpen: false,
+      );
+      if (revision != _revision ||
+          network != networkId() ||
+          type != selectedType.value) {
+        return;
+      }
+      if (!result.isSuccess) {
+        errorMessage.value =
+            result.errorMessage ?? 'تعذر حفظ ملف التقرير.';
+      }
+    } catch (error) {
+      if (revision == _revision &&
+          network == networkId() &&
+          type == selectedType.value) {
+        errorMessage.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تصدير تقرير الاشتراكات.',
+        );
+      }
+    } finally {
+      if (revision == _revision) isExportingCsv.value = false;
     }
   }
 
