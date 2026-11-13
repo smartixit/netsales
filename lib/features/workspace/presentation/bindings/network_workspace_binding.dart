@@ -24,17 +24,27 @@ import 'package:netsales/features/workspace/presentation/controllers/network_wor
 class NetworkWorkspaceBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<BillingRemoteDataSource>(() => const BillingRemoteDataSourceImpl(), fenix: true);
-    Get.lazyPut<BillingRepository>(() => BillingRepositoryImpl(Get.find<BillingRemoteDataSource>()), fenix: true);
-    Get.lazyPut<BillingUseCases>(() => BillingUseCases(Get.find<BillingRepository>()), fenix: true);
-    Get.lazyPut<BillingReportsController>(() => BillingReportsController(
-      useCases: Get.find<BillingUseCases>(),
-      networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
-    ), fenix: true);
-    Get.lazyPut<BillingController>(() => BillingController(
-      useCases: Get.find<BillingUseCases>(),
-      networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
-    ), fenix: true);
+    if (!Get.isRegistered<BillingRemoteDataSource>()) {
+      Get.lazyPut<BillingRemoteDataSource>(() => const BillingRemoteDataSourceImpl(), fenix: true);
+    }
+    if (!Get.isRegistered<BillingRepository>()) {
+      Get.lazyPut<BillingRepository>(() => BillingRepositoryImpl(Get.find<BillingRemoteDataSource>()), fenix: true);
+    }
+    if (!Get.isRegistered<BillingUseCases>()) {
+      Get.lazyPut<BillingUseCases>(() => BillingUseCases(Get.find<BillingRepository>()), fenix: true);
+    }
+    if (!Get.isRegistered<BillingReportsController>()) {
+      Get.lazyPut<BillingReportsController>(() => BillingReportsController(
+        useCases: Get.find<BillingUseCases>(),
+        networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
+      ), fenix: true);
+    }
+    if (!Get.isRegistered<BillingController>()) {
+      Get.lazyPut<BillingController>(() => BillingController(
+        useCases: Get.find<BillingUseCases>(),
+        networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
+      ), fenix: true);
+    }
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();
     OperationalReportsBinding().dependencies();
