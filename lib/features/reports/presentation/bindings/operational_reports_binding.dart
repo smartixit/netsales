@@ -104,6 +104,18 @@ class OperationalReportsBinding extends Bindings {
         fenix: true,
       );
     }
+    if (!Get.isRegistered<GetOperationalReportPresetsUseCase>()) {
+      Get.lazyPut<GetOperationalReportPresetsUseCase>(() => GetOperationalReportPresetsUseCase(Get.find<OperationalReportRepository>()), fenix: true);
+    }
+    if (!Get.isRegistered<SaveOperationalReportPresetUseCase>()) {
+      Get.lazyPut<SaveOperationalReportPresetUseCase>(() => SaveOperationalReportPresetUseCase(Get.find<OperationalReportRepository>()), fenix: true);
+    }
+    if (!Get.isRegistered<UpdateOperationalReportPresetUseCase>()) {
+      Get.lazyPut<UpdateOperationalReportPresetUseCase>(() => UpdateOperationalReportPresetUseCase(Get.find<OperationalReportRepository>()), fenix: true);
+    }
+    if (!Get.isRegistered<DeleteOperationalReportPresetUseCase>()) {
+      Get.lazyPut<DeleteOperationalReportPresetUseCase>(() => DeleteOperationalReportPresetUseCase(Get.find<OperationalReportRepository>()), fenix: true);
+    }
     if (!Get.isRegistered<OperationalReportsController>()) {
       Get.lazyPut<OperationalReportsController>(
         () => OperationalReportsController(
@@ -125,6 +137,11 @@ class OperationalReportsBinding extends Bindings {
               Get.find<ShareOperationalReportSummaryPdfUseCase>(),
           printSummaryPdfUseCase:
               Get.find<PrintOperationalReportSummaryPdfUseCase>(),
+          getPresetsUseCase: Get.find<GetOperationalReportPresetsUseCase>(),
+          savePresetUseCase: Get.find<SaveOperationalReportPresetUseCase>(),
+          updatePresetUseCase: Get.find<UpdateOperationalReportPresetUseCase>(),
+          deletePresetUseCase: Get.find<DeleteOperationalReportPresetUseCase>(),
+
         ),
       );
     }
