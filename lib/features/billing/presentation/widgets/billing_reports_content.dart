@@ -80,7 +80,7 @@ class BillingReportsContent extends StatelessWidget {
       :()=>controller.setCriteria(ReportCriteria()),
     ),
    if(summary!=null)CustomSurfaceCard(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-    const Text('ملخص التقرير',style:AppTypography.titleSmall),
+    Text('ملخص التقرير',style:AppTypography.titleSmall),
     ..._summaryWidgets(summary),
    ])),
    ...controller.charts.map((chart)=>BillingReportChart(payload:chart)),
