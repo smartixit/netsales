@@ -51,6 +51,7 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
     final rawFilters = _requiredList(raw['filters'], 'filters');
     final filterDefinitions = <ReportFilterDefinition>[];
     final filterLabels = <String, String>{};
+    final choiceLabels = <String, Map<String, String>>{};
     for (final rawFilter in rawFilters) {
       if (rawFilter is! Map) {
         throw const FormatException('تعريف مرشح التقرير غير صالح.');
@@ -58,7 +59,37 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
       final filter = Map<String, dynamic>.from(rawFilter);
       final filterId = _requiredText(filter['id'], 'filter.id');
       final kind = _filterKind(_requiredText(filter['kind'], 'filter.kind'));
-      final choices = _stringList(filter['choices'], 'filter.choices');
+      final rawChoices = filter['choices'];
+      final choices = <ReportChoiceOption>[];
+      final labelsForFilter = <String, String>{};
+      if (rawChoices != null) {
+        if (rawChoices is! List) {
+          throw FormatException('قائمة اختيارات المرشح $filterId غير صالحة.');
+        }
+        for (final rawChoice in rawChoices) {
+          if (rawChoice is! Map) {
+            throw FormatException('خيار المرشح $filterId غير صالح.');
+          }
+          final choice = Map<String, dynamic>.from(rawChoice);
+          final value = _requiredText(choice['value'], 'choice.value');
+          final label = _requiredText(choice['label'], 'choice.label');
+          if (labelsForFilter.containsKey(value)) {
+            throw FormatException('خيار مكرر في المرشح $filterId: $value');
+          }
+          labelsForFilter[value] = label;
+          choices.add(
+            ReportChoiceOption(
+              value: value,
+              labelKey: '$filterId.$value',
+            ),
+          );
+        }
+      }
+      if ((kind == ReportFilterKind.singleChoice ||
+              kind == ReportFilterKind.multiChoice) &&
+          choices.isEmpty) {
+        throw FormatException('المرشح $filterId يحتاج إلى خيارات معرفة.');
+      }
       filterDefinitions.add(
         ReportFilterDefinition(
           id: filterId,
@@ -66,18 +97,16 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
           kind: kind,
           required: filter['required'] == true,
           maxLength: (filter['max_length'] as num?)?.toInt(),
-          choices: choices.map(
-            (value) => ReportChoiceOption(
-              value: value,
-              labelKey: '$filterId.$value',
-            ),
-          ),
+          choices: choices,
         ),
       );
       filterLabels[filterId] = _requiredText(
         filter['label'],
         'filter.label',
       );
+      if (labelsForFilter.isNotEmpty) {
+        choiceLabels[filterId] = Map<String, String>.unmodifiable(labelsForFilter);
+      }
     }
 
     final rawColumns = _requiredList(raw['columns'], 'columns');
@@ -218,6 +247,7 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
       access: access,
       chartSlots: List<OperationalReportChartSlot>.unmodifiable(charts),
       filterLabels: Map<String, String>.unmodifiable(filterLabels),
+      choiceLabels: Map<String, Map<String, String>>.unmodifiable(choiceLabels),
       columnLabels: Map<String, String>.unmodifiable(columnLabels),
       metricLabels: Map<String, String>.unmodifiable(metricLabels),
     );
