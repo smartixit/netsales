@@ -247,7 +247,7 @@ class BillingDialogs {
               Text('تاريخ الانتهاء: ${trial['completed_at']?.toString() ?? '—'}'),
             ],
             const SizedBox(height: 10),
-            const Text('الاستخدام المسجل', style: TextStyle(fontWeight: FontWeight.w700)),
+            Text('الاستخدام المسجل', style: AppTypography.titleSmall),
             ...controller.usageRows.map((row) => Text(
               '${row['meter'] is Map<String, dynamic> ? row['meter']['name']?.toString() ?? 'عداد' : 'عداد'}: ${row['quantity']?.toString() ?? '0'}',
             )),
@@ -259,7 +259,7 @@ class BillingDialogs {
               label: 'تحميل المزيد من سجلات الاستخدام',
             ),
             const SizedBox(height: 10),
-            const Text('سجل الأحداث', style: TextStyle(fontWeight: FontWeight.w700)),
+            Text('سجل الأحداث', style: AppTypography.titleSmall),
             ...controller.eventRows.map((row) => Text(
               '${row['event_type']?.toString() ?? 'حدث'} — ${row['occurred_at']?.toString() ?? ''}',
             )),
