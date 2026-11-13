@@ -181,12 +181,8 @@ class OperationalReportRepositoryImpl
           summary: summary,
           organizationName: organizationName,
           logoUrl: logoUrl,
-          fromDate: fromDate,
-          toDate: toDate,
+          activeFilters: activeFilters,
           scopeLabel: scopeLabel,
-          search: search,
-          status: status,
-          saleType: saleType,
         );
     if (!result.isSuccess) {
       throw AppException(
@@ -213,12 +209,8 @@ class OperationalReportRepositoryImpl
       summary: summary,
       organizationName: organizationName,
       logoUrl: logoUrl,
-      fromDate: fromDate,
-      toDate: toDate,
+      activeFilters: activeFilters,
       scopeLabel: scopeLabel,
-      search: search,
-      status: status,
-      saleType: saleType,
     );
   }
 
@@ -238,12 +230,8 @@ class OperationalReportRepositoryImpl
       summary: summary,
       organizationName: organizationName,
       logoUrl: logoUrl,
-      fromDate: fromDate,
-      toDate: toDate,
+      activeFilters: activeFilters,
       scopeLabel: scopeLabel,
-      search: search,
-      status: status,
-      saleType: saleType,
     );
   }
 
