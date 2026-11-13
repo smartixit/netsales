@@ -211,14 +211,14 @@ class RepaymentDocumentService {
         DocumentInfoItem(
           label: 'المديونية بعد السداد',
           value: DocumentTextValue(
-            _amount(repayment.remainingDebtAfter!),
+            _money(repayment.remainingDebtAfter!, currencyCode),
           ),
           direction: DocumentTextDirection.leftToRight,
         ),
       if (repayment.posBalanceAfter != null)
         DocumentInfoItem(
           label: 'رصيد نقطة البيع بعد السداد',
-          value: DocumentTextValue(_amount(repayment.posBalanceAfter!)),
+          value: DocumentTextValue(_money(repayment.posBalanceAfter!, currencyCode)),
           direction: DocumentTextDirection.leftToRight,
         ),
     ];
@@ -233,7 +233,7 @@ class RepaymentDocumentService {
             direction: DocumentTextDirection.leftToRight,
           ),
           DocumentTableCell(
-            value: DocumentTextValue(_amount(allocation.allocatedAmount)),
+            value: DocumentTextValue(_money(allocation.allocatedAmount, currencyCode)),
             direction: DocumentTextDirection.leftToRight,
           ),
           DocumentTableCell(
@@ -266,7 +266,7 @@ class RepaymentDocumentService {
         lines: [
           DocumentFinancialLine(
             label: 'مبلغ السداد',
-            value: DocumentTextValue(_amount(repayment.amount)),
+            value: DocumentTextValue(_money(repayment.amount, currencyCode)),
             emphasis: DocumentFinancialEmphasis.total,
           ),
         ],
