@@ -12,34 +12,4 @@ enum OperationalReportType {
   final String wireValue;
   final String label;
   final String iconName;
-
-  String get requiredPermission => switch (this) {
-    sales || debtAging => 'sales.report',
-    expenses => 'expenses.report',
-    networkWallet => 'network_wallets.report',
-    posWallet || repayments => 'pos_wallets.report',
-    requests => 'requests.report',
-  };
-
-  String get exportPermission => switch (this) {
-    sales || debtAging => 'sales.export',
-    expenses => 'expenses.export',
-    networkWallet => 'network_wallets.export',
-    posWallet || repayments => 'pos_wallets.export',
-    requests => 'requests.export',
-  };
-
-  bool get availableForPos => switch (this) {
-    sales || posWallet || repayments || debtAging || requests => true,
-    expenses || networkWallet => false,
-  };
-
-  List<String> get statusOptions => switch (this) {
-    sales => const ['PAID', 'PARTIALLY_PAID', 'UNPAID'],
-    debtAging => const ['PARTIALLY_PAID', 'UNPAID'],
-    networkWallet || posWallet => const ['DEPOSIT', 'WITHDRAW'],
-    repayments => const ['COMPLETED', 'REVERSED'],
-    requests => const ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'],
-    expenses => const [],
-  };
 }
