@@ -40,8 +40,10 @@ class PosRepaymentEntity {
   final String? repaymentDate;
   final String? status;
   final int? createdBy;
+  final String? createdByName;
   final String? reversedAt;
   final int? reversedBy;
+  final String? reversedByName;
   final String? reversalReason;
   final int? reversalRepaymentId;
   final String? createdAt;
@@ -65,8 +67,10 @@ class PosRepaymentEntity {
     this.repaymentDate,
     this.status,
     this.createdBy,
+    this.createdByName,
     this.reversedAt,
     this.reversedBy,
+    this.reversedByName,
     this.reversalReason,
     this.reversalRepaymentId,
     this.createdAt,
