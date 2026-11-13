@@ -96,12 +96,8 @@ class SaveOperationalReportSummaryPdfUseCase {
     summary: summary,
     organizationName: organizationName,
     logoUrl: logoUrl,
-    fromDate: fromDate,
-    toDate: toDate,
+    activeFilters: activeFilters,
     scopeLabel: scopeLabel,
-    search: search,
-    status: status,
-    saleType: saleType,
   );
 }
 
@@ -123,12 +119,8 @@ class ShareOperationalReportSummaryPdfUseCase {
     summary: summary,
     organizationName: organizationName,
     logoUrl: logoUrl,
-    fromDate: fromDate,
-    toDate: toDate,
+    activeFilters: activeFilters,
     scopeLabel: scopeLabel,
-    search: search,
-    status: status,
-    saleType: saleType,
   );
 }
 
@@ -150,12 +142,8 @@ class PrintOperationalReportSummaryPdfUseCase {
     summary: summary,
     organizationName: organizationName,
     logoUrl: logoUrl,
-    fromDate: fromDate,
-    toDate: toDate,
+    activeFilters: activeFilters,
     scopeLabel: scopeLabel,
-    search: search,
-    status: status,
-    saleType: saleType,
   );
 }
 
