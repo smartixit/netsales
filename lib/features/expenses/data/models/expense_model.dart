@@ -34,7 +34,7 @@ class ExpenseModel extends ExpenseEntity {
           ? network['network_profile_logo'] as String?
           : null,
       createdByName: creator is Map<dynamic, dynamic>
-          ? creator['name'] as String?
+          ? (creator['user_full_name'] ?? creator['name']) as String?
           : null,
       items: rawItems is List
           ? rawItems
