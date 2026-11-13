@@ -14,7 +14,7 @@ enum ReportFilterKind {
   multiChoice,
 }
 
-enum ReportDataType { text, integer, decimal, date, boolean }
+enum ReportDataType { text, integer, decimal, date, dateTime, boolean }
 
 enum ReportExecutionPolicy { client, server, either }
 
