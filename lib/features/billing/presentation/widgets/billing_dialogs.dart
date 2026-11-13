@@ -224,7 +224,16 @@ class BillingDialogs {
   ) async {
     await controller.loadSubscriptionDetails(id);
     final detail = controller.subscriptionDetails.value;
-    if (detail == null) return;
+    if (detail == null) {
+      await CustomDialog.show(
+        type: DialogType.error,
+        title: 'تعذر تحميل تفاصيل الاشتراك',
+        message: controller.errorMessage.value ??
+            'لم يتمكن الخادم من إرجاع تفاصيل الاشتراك.',
+        confirmLabel: 'حسناً',
+      );
+      return;
+    }
     final trial = detail['trial_redemption'];
     await CustomDialog.show(
       type: DialogType.info,
