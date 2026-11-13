@@ -9,6 +9,7 @@ class BillingReportDateRangeSection extends StatelessWidget {
     required this.hasFromDate,
     required this.hasToDate,
     required this.onChanged,
+    this.english = false,
     super.key,
   });
 
@@ -16,6 +17,7 @@ class BillingReportDateRangeSection extends StatelessWidget {
   final bool hasFromDate;
   final bool hasToDate;
   final ValueChanged<ReportCriteria> onChanged;
+  final bool english;
 
   @override
   Widget build(BuildContext context) {
@@ -27,19 +29,19 @@ class BillingReportDateRangeSection extends StatelessWidget {
       children: [
         if (hasFromDate)
           CustomButton.outline(
-            text: _dateLabel('من تاريخ', criteria.filters['from_date']),
+            text: _dateLabel(english ? 'From date' : 'من تاريخ', criteria.filters['from_date']),
             prefix: Icons.calendar_today,
             onPressed: () =>
                 _pickCriteriaDate(context, 'from_date'),
           ),
         if (hasToDate)
           CustomButton.outline(
-            text: _dateLabel('إلى تاريخ', criteria.filters['to_date']),
+            text: _dateLabel(english ? 'To date' : 'إلى تاريخ', criteria.filters['to_date']),
             prefix: Icons.event,
             onPressed: () => _pickCriteriaDate(context, 'to_date'),
           ),
         CustomButton.text(
-          text: 'مسح الفلاتر',
+          text: english ? 'Clear filters' : 'مسح الفلاتر',
           onPressed: () => onChanged(ReportCriteria()),
         ),
       ],
@@ -54,7 +56,9 @@ class BillingReportDateRangeSection extends StatelessWidget {
     final selected = await CustomDatePickerModal.showDialog(
       context: context,
       initialValue: [initial],
-      title: id == 'from_date' ? 'اختر تاريخ البداية' : 'اختر تاريخ النهاية',
+      title: english
+          ? (id == 'from_date' ? 'Select start date' : 'Select end date')
+          : (id == 'from_date' ? 'اختر تاريخ البداية' : 'اختر تاريخ النهاية'),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
