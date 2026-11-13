@@ -241,7 +241,7 @@ class BillingDialogs {
             Text('نهاية الفترة: ${detail['current_period_end']?.toString() ?? '—'}'),
             if (trial is Map<String, dynamic>) ...[
               const SizedBox(height: 8),
-              const Text('الفترة التجريبية', style: AppTypography.titleSmall),
+              Text('الفترة التجريبية', style: AppTypography.titleSmall),
               Text('الحالة: ${trial['status']?.toString() ?? '—'}'),
               Text('تاريخ البدء: ${trial['started_at']?.toString() ?? '—'}'),
               Text('تاريخ الانتهاء: ${trial['completed_at']?.toString() ?? '—'}'),
