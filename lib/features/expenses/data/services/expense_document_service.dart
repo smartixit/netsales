@@ -8,6 +8,7 @@ import 'package:netsales/core/services/official_document_artifact_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/features/expenses/data/models/expense_model.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:printing/printing.dart';
 
@@ -18,6 +19,29 @@ class ExpenseDocumentService {
   static final ExpenseDocumentService instance = ExpenseDocumentService._();
 
   Future<Uint8List> generatePdf(ExpenseEntity expense) async {
+    final snapshots = OfficialDocumentArtifactService.instance;
+    final issued = await snapshots.createSnapshot(
+      documentType: 'expense',
+      documentId: expense.expenseId,
+      networkId: expense.networkId,
+      templateId: 'netsales.expense.voucher.executive',
+      templateVersion: '1.0.0',
+    );
+
+    final existingArtifact = await snapshots.downloadIfReady(issued);
+    if (existingArtifact != null) return existingArtifact;
+
+    final source = Map<String, dynamic>.from(issued['source_snapshot'] as Map);
+    final officialExpense = ExpenseModel.fromJson(source);
+    final renderedBytes = await _renderPdf(officialExpense);
+    return snapshots.uploadArtifact(
+      snapshotUuid: issued['snapshot_uuid'].toString(),
+      pdfBytes: renderedBytes,
+      fileName: _fileName(officialExpense),
+    );
+  }
+
+  Future<Uint8List> _renderPdf(ExpenseEntity expense) async {
     final reference = _reference(expense);
     final organizationName = _display(
       expense.networkName,
@@ -68,18 +92,7 @@ class ExpenseDocumentService {
       ),
     );
 
-    if (result is DocumentRenderSuccess) {
-      final bytes = result.artifact.bytes;
-      return OfficialDocumentArtifactService.instance.issueAndUpload(
-        documentType: 'expense',
-        documentId: expense.expenseId,
-        networkId: expense.networkId,
-        templateId: 'netsales.expense.voucher.executive',
-        templateVersion: '1.0.0',
-        pdfBytes: bytes,
-        fileName: _fileName(expense),
-      );
-    }
+    if (result is DocumentRenderSuccess) return result.artifact.bytes;
     if (result is DocumentRenderFailure) throw StateError(result.message);
     throw StateError('تعذر إنشاء سند المصروف.');
   }
