@@ -17,7 +17,7 @@ class OperationalReportRemoteDataSourceImpl
   Future<ApiResponse<OperationalReportCatalogModel>> getCatalog({
     required Map<String, dynamic> query,
   }) {
-    return ApiService.instance.get<Map<String, dynamic>>(
+    return ApiService.instance.get<OperationalReportCatalogModel>(
       ApiConstants.operationalReportCatalog,
       queryParameters: query,
       fromJson: OperationalReportCatalogModel.fromJson,
