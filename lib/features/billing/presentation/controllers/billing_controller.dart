@@ -13,6 +13,8 @@ class BillingController extends GetxController {
   final plans = <Map<String,dynamic>>[].obs;
   final subscriptions = <Map<String,dynamic>>[].obs;
   final invoices = <Map<String,dynamic>>[].obs;
+  final creditNotes = <Map<String,dynamic>>[].obs;
+  final refunds = <Map<String,dynamic>>[].obs;
   final payments = <Map<String,dynamic>>[].obs;
   final paymentMethods = <Map<String,dynamic>>[].obs;
   final selectedPaymentMethodId = RxnInt();
@@ -67,9 +69,9 @@ class BillingController extends GetxController {
   Future<void> loadAccountData({int? revision}) async {
     final id=selectedAccountId.value;if(id==null)return;final rev=revision??++_revision;isLoading.value=true;
     try{
-      final r=await Future.wait([useCases.account(id),useCases.plans(id,const {'per_page':50}),useCases.subscriptions(id,const {'per_page':25}),useCases.invoices(id,const {'per_page':25}),useCases.payments(id,const {'per_page':25}),useCases.entitlements(id),useCases.paymentMethods(id)]);
+      final r=await Future.wait([useCases.account(id),useCases.plans(id,const {'per_page':50}),useCases.subscriptions(id,const {'per_page':25}),useCases.invoices(id,const {'per_page':25}),useCases.payments(id,const {'per_page':25}),useCases.entitlements(id),useCases.paymentMethods(id),useCases.creditNotes(id,const {'per_page':25}),useCases.refunds(id,const {'per_page':25})]);
       if(rev!=_revision||id!=selectedAccountId.value)return;
-      account.value=_object(r[0]);plans.assignAll(_rows(r[1]));subscriptions.assignAll(_rows(r[2]));invoices.assignAll(_rows(r[3]));payments.assignAll(_rows(r[4]));entitlements.value=_object(r[5]);paymentMethods.assignAll(_rows(r[6]));
+      account.value=_object(r[0]);plans.assignAll(_rows(r[1]));subscriptions.assignAll(_rows(r[2]));invoices.assignAll(_rows(r[3]));payments.assignAll(_rows(r[4]));entitlements.value=_object(r[5]);paymentMethods.assignAll(_rows(r[6]));creditNotes.assignAll(_rows(r[7]));refunds.assignAll(_rows(r[8]));
       if (selectedPaymentMethodId.value == null && paymentMethods.isNotEmpty) selectedPaymentMethodId.value = (paymentMethods.first['payment_method_id'] as num).toInt();
     }catch(e){if(rev==_revision)errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل تفاصيل حساب الفوترة.');}
     finally{if(rev==_revision)isLoading.value=false;}
