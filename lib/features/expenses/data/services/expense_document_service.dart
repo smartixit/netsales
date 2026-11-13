@@ -71,11 +71,11 @@ class ExpenseDocumentService {
     if (result is DocumentRenderSuccess) {
       final bytes = result.artifact.bytes;
       return OfficialDocumentArtifactService.instance.issueAndUpload(
-      documentType: 'expense',
-      documentId: expense.expenseId,
-      networkId: expense.networkId,
-      templateId: 'netsales.expense.voucher.executive',
-      templateVersion: '1.0.0',
+        documentType: 'expense',
+        documentId: expense.expenseId,
+        networkId: expense.networkId,
+        templateId: 'netsales.expense.voucher.executive',
+        templateVersion: '1.0.0',
         pdfBytes: bytes,
         fileName: _fileName(expense),
       );
