@@ -253,7 +253,6 @@ class BillingReportsController extends GetxController {
                 ? data['links']['next']
                 : null),
       );
-      if (_nextCursor != null) _seenCursors.add(_nextCursor!);
 
       final summaryEnvelope = _map(values[1]);
       final rawSummary = summaryEnvelope['summary'];
@@ -288,8 +287,7 @@ class BillingReportsController extends GetxController {
         cursor == null ||
         cursor.isEmpty ||
         isLoading.value ||
-        isLoadingMore.value ||
-        loadMoreError.value != null) {
+        isLoadingMore.value) {
       return;
     }
 
@@ -300,6 +298,7 @@ class BillingReportsController extends GetxController {
     }
 
     final revision = _revision;
+    loadMoreError.value = null;
     isLoadingMore.value = true;
     try {
       final query = <String, dynamic>{..._filters, 'cursor': cursor};
@@ -323,7 +322,6 @@ class BillingReportsController extends GetxController {
 
       rows.addAll(_list(page['data'] ?? page['items']));
       _nextCursor = nextCursor;
-      if (nextCursor != null) _seenCursors.add(nextCursor);
       loadMoreError.value = null;
     } catch (error) {
       if (revision == _revision &&
