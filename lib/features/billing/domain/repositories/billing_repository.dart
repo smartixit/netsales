@@ -3,6 +3,7 @@ import 'package:netsales/features/billing/domain/entities/billing_payload.dart';
 abstract interface class BillingRepository {
   Future<BillingPayload> getCurrencies();
   Future<BillingPayload> getNetworkAccounts(int networkId);
+  Future<BillingPayload> createNetworkAccount(int networkId, int currencyId);
   Future<BillingPayload> getAccount(int accountId);
   Future<BillingPayload> updateAccount(int accountId, Map<String, dynamic> data);
   Future<BillingPayload> getPlans(int accountId, Map<String, dynamic> query);
