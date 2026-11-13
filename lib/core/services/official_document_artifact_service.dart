@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
+
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/api_service.dart';
@@ -73,7 +75,10 @@ class OfficialDocumentArtifactService {
         code: 'OFFICIAL_DOCUMENT_SNAPSHOT_INVALID',
       );
     }
-    return downloadCanonical(snapshotUuid);
+    return downloadCanonical(
+      snapshotUuid,
+      expectedSha256: snapshot['artifact_sha256']?.toString(),
+    );
   }
 
   Future<Uint8List> uploadArtifact({
@@ -117,10 +122,16 @@ class OfficialDocumentArtifactService {
 
     // Always return the server-stored bytes. Another request may have won the
     // immutable first-write race, in which case local bytes are not canonical.
-    return downloadCanonical(snapshotUuid);
+    return downloadCanonical(
+      snapshotUuid,
+      expectedSha256: response.data!['artifact_sha256']?.toString(),
+    );
   }
 
-  Future<Uint8List> downloadCanonical(String snapshotUuid) async {
+  Future<Uint8List> downloadCanonical(
+    String snapshotUuid, {
+    String? expectedSha256,
+  }) async {
     final bytes = await ApiService.instance.downloadBytes(
       ApiConstants.operationalDocumentSnapshotDownload(snapshotUuid),
     );
@@ -130,6 +141,18 @@ class OfficialDocumentArtifactService {
         code: 'OFFICIAL_DOCUMENT_CANONICAL_DOWNLOAD_FAILED',
       );
     }
+
+    final normalizedHash = expectedSha256?.trim().toLowerCase();
+    if (normalizedHash != null && normalizedHash.isNotEmpty) {
+      final actualHash = sha256.convert(bytes).toString();
+      if (actualHash != normalizedHash) {
+        throw const AppException(
+          'فشل التحقق من سلامة ملف PDF الرسمي بعد تنزيله.',
+          code: 'OFFICIAL_DOCUMENT_ARTIFACT_HASH_MISMATCH',
+        );
+      }
+    }
+
     return bytes;
   }
 }
