@@ -1,26 +1,25 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:document_engine/document_engine.dart';
 import 'package:document_engine/document_engine_flutter.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';\nimport 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
-import 'package:netsales/features/reports/presentation/widgets/operational_report_records_list.dart';
+import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
+import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_charts_section.dart';
+import 'package:netsales/features/reports/presentation/widgets/operational_report_preset_dialog.dart';
+import 'package:netsales/features/reports/presentation/widgets/operational_report_records_list.dart';
+import 'package:netsales/features/reports/presentation/widgets/operational_report_studio_filters.dart';
+import 'package:netsales/features/reports/presentation/widgets/operational_report_studio_presentation.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_summary_strip.dart';
-import 'package:netsales/features/reports/presentation/widgets/operational_report_type_selector.dart';\nimport 'package:netsales/features/reports/presentation/widgets/operational_report_studio_filters.dart';\nimport 'package:netsales/features/reports/presentation/widgets/operational_report_studio_presentation.dart';\nimport 'package:netsales/features/reports/presentation/widgets/operational_report_preset_dialog.dart';
+import 'package:netsales/features/reports/presentation/widgets/operational_report_type_selector.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/dialogs/custom_dialog.dart';
-import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
-import 'package:netsales/widgets/inputs/custom_dropdown.dart';
-import 'package:netsales/widgets/pickers/custom_date_picker_field.dart';
 
 class OperationalReportsScreen extends GetView<OperationalReportsController> {
   const OperationalReportsScreen({
