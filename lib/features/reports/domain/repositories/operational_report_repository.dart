@@ -6,6 +6,7 @@ import 'package:netsales/features/reports/domain/entities/operational_report_cat
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
+import 'package:document_engine/document_engine.dart';
 
 abstract interface class OperationalReportRepository {
   Future<OperationalReportCatalog> getCatalog({
@@ -17,11 +18,7 @@ abstract interface class OperationalReportRepository {
     required OperationalReportType type,
     required int networkId,
     int? posId,
-    String? fromDate,
-    String? toDate,
-    String? search,
-    String? status,
-    String? saleType,
+    required ReportCriteria criteria,
     String? cursor,
     int perPage = 25,
   });
@@ -30,22 +27,14 @@ abstract interface class OperationalReportRepository {
     required OperationalReportType type,
     required int networkId,
     int? posId,
-    String? fromDate,
-    String? toDate,
-    String? search,
-    String? status,
-    String? saleType,
+    required ReportCriteria criteria,
   });
 
   Future<OperationalReportExport> requestExport({
     required OperationalReportType type,
     required int networkId,
     int? posId,
-    String? fromDate,
-    String? toDate,
-    String? search,
-    String? status,
-    String? saleType,
+    required ReportCriteria criteria,
   });
 
   Future<OperationalReportExport> getExportStatus(String exportId);
