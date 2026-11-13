@@ -279,7 +279,7 @@ class BillingReportsController extends GetxController {
         cursor=_cursorFrom(page['next_page_url']??(page['links'] is Map<String,dynamic>?page['links']['next']:null));
         if(allRows.length>1500)throw StateError('يتجاوز عدد السجلات الحد الآمن لملف PDF.');
       }while(cursor!=null);
-      if(allRows.length<total)throw StateError('لم تكتمل قراءة جميع صفحات التقرير؛ أُوقف إنشاء PDF الجزئي.');
+      if((searchQuery.value.trim().isEmpty)&&total>0&&allRows.length<total)throw StateError('لم تكتمل قراءة جميع صفحات التقرير؛ أُوقف إنشاء PDF الجزئي.');
       final rawColumns=definition?['columns'];
       final allColumns=rawColumns is List<dynamic>?rawColumns.whereType<Map<String,dynamic>>().toList():<Map<String,dynamic>>[];
       final visibleIds=presentation.value.visibleColumnIds.toSet();
