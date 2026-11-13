@@ -33,7 +33,10 @@ class ExpenseDocumentService {
 
     final source = Map<String, dynamic>.from(issued['source_snapshot'] as Map);
     final officialExpense = ExpenseModel.fromJson(source);
-    final renderedBytes = await _renderPdf(officialExpense);
+    final renderedBytes = await _renderPdf(
+      officialExpense,
+      currencyCode: issued['currency_code']?.toString() ?? 'YER',
+    );
     return snapshots.uploadArtifact(
       snapshotUuid: issued['snapshot_uuid'].toString(),
       pdfBytes: renderedBytes,
@@ -41,7 +44,10 @@ class ExpenseDocumentService {
     );
   }
 
-  Future<Uint8List> _renderPdf(ExpenseEntity expense) async {
+  Future<Uint8List> _renderPdf(
+    ExpenseEntity expense, {
+    required String currencyCode,
+  }) async {
     final reference = _reference(expense);
     final organizationName = _display(
       expense.networkName,
@@ -67,7 +73,7 @@ class ExpenseDocumentService {
     final result = await PdfDocumentRenderer(
       textShapingProvider: await fontService.arabicTextShapingProvider(),
     ).render(
-      snapshot: _buildSnapshot(expense, reference),
+      snapshot: _buildSnapshot(expense, reference, currencyCode),
       template: _template,
       options: DocumentRenderOptions(
         pageProfile: DocumentPageProfile.a4Portrait(
@@ -128,7 +134,11 @@ class ExpenseDocumentService {
     );
   }
 
-  DocumentSnapshot _buildSnapshot(ExpenseEntity expense, String reference) {
+  DocumentSnapshot _buildSnapshot(
+    ExpenseEntity expense,
+    String reference,
+    String currencyCode,
+  ) {
     final info = <DocumentInfoItem>[
       DocumentInfoItem(
         label: 'رقم سند المصروف',
@@ -146,6 +156,11 @@ class ExpenseDocumentService {
           _display(expense.networkName, 'شبكة #${expense.networkId}'),
         ),
         direction: DocumentTextDirection.rightToLeft,
+      ),
+      DocumentInfoItem(
+        label: 'العملة',
+        value: DocumentTextValue(currencyCode),
+        direction: DocumentTextDirection.leftToRight,
       ),
       if (_hasText(expense.createdByName))
         DocumentInfoItem(
@@ -296,6 +311,9 @@ class ExpenseDocumentService {
       'سند_صرف_${_reference(expense)}';
 
   static String _amount(double value) => AmountFormatter.format(value.toString());
+
+  static String _money(double value, String currencyCode) =>
+      _amount(value) + ' ' + currencyCode;
 
   static bool _hasText(String? value) => value?.trim().isNotEmpty ?? false;
 
