@@ -162,7 +162,7 @@ class OperationalReportRepositoryImpl
         .map(Map<String, dynamic>.from)
         .toList(growable: false);
     return OperationalReportSummaryModel(
-      response.data!.values,
+      response.data!,
       metricDefinitions: metricDefinitions,
       reportTitle: definition['label']?.toString() ?? type.wireValue,
     );
