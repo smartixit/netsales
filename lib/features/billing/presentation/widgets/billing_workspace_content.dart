@@ -43,7 +43,7 @@ class BillingWorkspaceContent extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'الاشتراك والفوترة',
                   style: AppTypography.titleLarge,
