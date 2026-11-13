@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_switch.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -77,13 +78,13 @@ class BillingReportsContent extends StatelessWidget {
       ?null
       :()=>controller.setCriteria(ReportCriteria()),
     ),
-   if(summary!=null)Card(child:Padding(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+   if(summary!=null)CustomSurfaceCard(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
     const Text('ملخص التقرير',style:TextStyle(fontWeight:FontWeight.w700)),
     ..._summaryWidgets(summary),
    ]))),
    ...controller.charts.map((chart)=>BillingReportChart(payload:chart)),
    if(controller.rows.isEmpty&&!controller.isLoading.value)const CustomEmptyState.boxed(title:'لا توجد سجلات مطابقة',subtitle:'غيّر معايير البحث أو الفلاتر ثم أعد تحميل التقرير.'),
-   ...controller.rows.map((row)=>Card(child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(_arabicLabel(e.key)+': '+_displayValue(e.key,e.value))).toList())))),
+   ...controller.rows.map((row)=>CustomSurfaceCard(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(_arabicLabel(e.key)+': '+_displayValue(e.key,e.value))).toList()))),
    if(controller.isLoadingMore.value)const CustomSkeletonListTile(hasLeading:false),
    if(controller.hasMore)
     CustomButton.outline(text:'تحميل المزيد',loading:controller.isLoadingMore.value,onPressed:controller.isLoadingMore.value?null:controller.loadMore),
