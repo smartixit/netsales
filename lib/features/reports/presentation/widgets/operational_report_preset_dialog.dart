@@ -33,7 +33,6 @@ class OperationalReportPresetDialog {
         onConfirm: () {
           final name = nameController.text.trim();
           if (name.isEmpty) return;
-          Get.back();
           unawaited(onSave(name));
         },
       );
