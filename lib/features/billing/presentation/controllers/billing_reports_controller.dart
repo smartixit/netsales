@@ -32,6 +32,7 @@ class BillingReportsController extends GetxController {
   final searchQuery=''.obs;
   final selectedStatus=RxnString();
   Worker? _searchWorker;
+  bool _suppressSearchWorker=false;
   int _revision=0;
   String? _nextCursor;
 
@@ -117,6 +118,7 @@ class BillingReportsController extends GetxController {
     );
   }
   void _resetStudio(ReportDefinition definition){
+    _suppressSearchWorker=true;
     final template=definition.templates.isEmpty?null:definition.templates.first;
     final page=definition.pageProfileIds.isEmpty?null:definition.pageProfileIds.first;
     criteria.value=ReportCriteria();
@@ -132,6 +134,7 @@ class BillingReportsController extends GetxController {
     selectedPageProfile.value=page;
     selectedTemplateId.value=template?.id.value;
     searchController.clear();statusController.clear();searchQuery.value='';selectedStatus.value=null;fromDate.value=null;toDate.value=null;
+    _suppressSearchWorker=false;
   }
   void setCriteria(ReportCriteria value){
     criteria.value=value;
@@ -176,7 +179,7 @@ class BillingReportsController extends GetxController {
 
   @override void onInit(){
     super.onInit();
-    _searchWorker=debounce(searchQuery,(_)=>loadReport(),time:const Duration(milliseconds:400));
+    _searchWorker=debounce(searchQuery,(_){if(!_suppressSearchWorker)loadReport();},time:const Duration(milliseconds:400));
     unawaited(loadCatalog());
   }
   @override void onClose(){
@@ -267,7 +270,9 @@ class BillingReportsController extends GetxController {
       }while(cursor!=null);
       if(allRows.length<total)throw StateError('لم تكتمل قراءة جميع صفحات التقرير؛ أُوقف إنشاء PDF الجزئي.');
       final rawColumns=definition?['columns'];
-      final columns=rawColumns is List<dynamic>?rawColumns.whereType<Map<String,dynamic>>().toList():<Map<String,dynamic>>[];
+      final allColumns=rawColumns is List<dynamic>?rawColumns.whereType<Map<String,dynamic>>().toList():<Map<String,dynamic>>[];
+      final visibleIds=presentation.value.visibleColumnIds.toSet();
+      final columns=allColumns.where((column)=>visibleIds.contains(column['id']?.toString()??column['key']?.toString())).toList();
       if(columns.isEmpty)throw StateError('تعريف أعمدة التقرير غير متاح لإنشاء PDF.');
       final result=await BillingReportDocumentService.instance.exportSummary(
         reportType:type,
@@ -275,7 +280,7 @@ class BillingReportsController extends GetxController {
         summary:metrics,
         rows:allRows,
         columns:columns,
-        localeTag:'ar-YE',
+        localeTag:presentation.value.languageTag??'ar-YE',
         fromDate:fromDate.value==null?null:_date(fromDate.value),
         toDate:toDate.value==null?null:_date(toDate.value),
         status:statusController.text.trim().isEmpty?null:statusController.text.trim(),
