@@ -33,6 +33,10 @@ class OperationalReportsController extends GetxController {
     required this.saveDetailedPdfUseCase,
     required this.shareSummaryPdfUseCase,
     required this.printSummaryPdfUseCase,
+    required this.getPresetsUseCase,
+    required this.savePresetUseCase,
+    required this.updatePresetUseCase,
+    required this.deletePresetUseCase,
   });
 
   final GetOperationalReportCatalogUseCase getReportCatalogUseCase;
@@ -49,8 +53,17 @@ class OperationalReportsController extends GetxController {
   final SaveOperationalReportDetailedPdfUseCase saveDetailedPdfUseCase;
   final ShareOperationalReportSummaryPdfUseCase shareSummaryPdfUseCase;
   final PrintOperationalReportSummaryPdfUseCase printSummaryPdfUseCase;
+  final GetOperationalReportPresetsUseCase getPresetsUseCase;
+  final SaveOperationalReportPresetUseCase savePresetUseCase;
+  final UpdateOperationalReportPresetUseCase updatePresetUseCase;
+  final DeleteOperationalReportPresetUseCase deletePresetUseCase;
 
   final reports = <OperationalReportRecord>[].obs;
+  final savedPresets = <SavedReportPreset>[].obs;
+  final isLoadingPresets = false.obs;
+  final isSavingPreset = false.obs;
+  final isDeletingPreset = false.obs;
+  int _presetRevision = 0;
   final Rxn<OperationalReportSummary> summary = Rxn<OperationalReportSummary>();
   final RxnString summaryError = RxnString();
   final selectedType = Rxn<OperationalReportType>();
@@ -381,6 +394,7 @@ class OperationalReportsController extends GetxController {
     _choiceValues.clear();
     ++_requestRevision;
     ++_posRevision;
+    ++_presetRevision;
     super.onClose();
   }
 
@@ -398,12 +412,119 @@ class OperationalReportsController extends GetxController {
     }
     exportJob.value = null;
     await loadReport(refresh: true);
+    await loadSavedPresets();
   }
 
   Future<void> selectPos(int? posId) async {
     if (selectedPosId.value == posId) return;
     selectedPosId.value = posId;
     await loadReport(refresh: true);
+    await loadSavedPresets();
+  }
+
+
+  Future<void> loadSavedPresets() async {
+    final type = selectedType.value;
+    final networkId = _networkId;
+    if (type == null || networkId == null) {
+      savedPresets.clear();
+      return;
+    }
+    final revision = ++_presetRevision;
+    isLoadingPresets.value = true;
+    try {
+      final result = await getPresetsUseCase(type: type, networkId: networkId, posId: _queryPosId);
+      if (revision == _presetRevision && type == selectedType.value) {
+        savedPresets.assignAll(result);
+      }
+    } catch (error) {
+      if (revision == _presetRevision) {
+        savedPresets.clear();
+        CustomSnackbar.show(
+          title: 'تعذر تحميل الإعدادات المحفوظة',
+          message: AppException.sanitizeMessage(error, fallback: 'تعذر تحميل إعدادات التقرير.'),
+          type: SnackType.error,
+        );
+      }
+    } finally {
+      if (revision == _presetRevision) isLoadingPresets.value = false;
+    }
+  }
+
+  Future<void> savePreset(String name) async {
+    final type = selectedType.value;
+    final networkId = _networkId;
+    final definition = selectedReportEntry?.definition;
+    final normalizedName = name.trim();
+    if (type == null || networkId == null || definition == null || normalizedName.isEmpty || isSavingPreset.value) return;
+    isSavingPreset.value = true;
+    try {
+      final existing = savedPresets.firstWhereOrNull(
+        (item) => item.name.toLowerCase() == normalizedName.toLowerCase(),
+      );
+      final saved = existing == null
+          ? await savePresetUseCase(
+              type: type, networkId: networkId, posId: _queryPosId,
+              name: normalizedName, reportSchemaVersion: definition.schemaVersion,
+              criteria: criteria.value, presentation: presentation.value,
+            )
+          : await updatePresetUseCase(
+              presetId: existing.id, type: type, networkId: networkId, posId: _queryPosId,
+              name: normalizedName, reportSchemaVersion: definition.schemaVersion,
+              criteria: criteria.value, presentation: presentation.value,
+            );
+      savedPresets.removeWhere((item) => item.id == saved.id);
+      savedPresets.insert(0, saved);
+      CustomSnackbar.show(
+        title: existing == null ? 'تم حفظ الإعداد' : 'تم تحديث الإعداد',
+        message: 'تم حفظ تكوين التقرير ضمن نطاق العمل الحالي.',
+        type: SnackType.success,
+      );
+    } catch (error) {
+      CustomSnackbar.show(
+        title: 'تعذر حفظ الإعداد',
+        message: AppException.sanitizeMessage(error, fallback: 'رفض الخادم حفظ إعداد التقرير.'),
+        type: SnackType.error,
+      );
+    } finally {
+      isSavingPreset.value = false;
+    }
+  }
+
+  void applyPreset(SavedReportPreset preset) {
+    final definition = selectedReportEntry?.definition;
+    if (definition == null) return;
+    if (preset.assessAgainst(definition).requiresReview) {
+      CustomSnackbar.show(
+        title: 'الإعداد يحتاج إلى مراجعة',
+        message: 'تغير مخطط التقرير أو بعض خياراته؛ لم نطبق الإعداد القديم تلقائياً.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+    updateCriteria(preset.criteria);
+    updatePresentation(preset.presentation);
+  }
+
+  Future<void> deletePreset(SavedReportPreset preset) async {
+    final type = selectedType.value;
+    final networkId = _networkId;
+    if (type == null || networkId == null || isDeletingPreset.value) return;
+    isDeletingPreset.value = true;
+    try {
+      await deletePresetUseCase(
+        presetId: preset.id, type: type, networkId: networkId, posId: _queryPosId,
+      );
+      savedPresets.removeWhere((item) => item.id == preset.id);
+    } catch (error) {
+      CustomSnackbar.show(
+        title: 'تعذر حذف الإعداد',
+        message: AppException.sanitizeMessage(error, fallback: 'تعذر حذف الإعداد المحفوظ.'),
+        type: SnackType.error,
+      );
+    } finally {
+      isDeletingPreset.value = false;
+    }
   }
 
   Future<void> clearFilters() async {
