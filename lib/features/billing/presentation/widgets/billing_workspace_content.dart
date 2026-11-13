@@ -87,7 +87,7 @@ class BillingWorkspaceContent extends StatelessWidget {
                 loadMoreLabel: 'تحميل المزيد من الإشعارات الدائنة',
                 referenceKey: 'credit_note_number',
                 fallbackTitle: 'إشعار دائن',
-                amountKey: 'total_minor',
+                amountKey: 'total',
                 filterState: controller.creditNotesFilter,
                 statusOptions: BillingCollectionStatusOptions.build(
                   controller.creditNotesFilter.statusValues,
@@ -105,7 +105,7 @@ class BillingWorkspaceContent extends StatelessWidget {
                 loadMoreLabel: 'تحميل المزيد من الاستردادات',
                 referenceKey: 'refund_reference',
                 fallbackTitle: 'استرداد',
-                amountKey: 'amount_minor',
+                amountKey: 'amount',
                 filterState: controller.refundsFilter,
                 statusOptions: BillingCollectionStatusOptions.build(
                   controller.refundsFilter.statusValues,
