@@ -2,17 +2,16 @@ import 'package:document_engine/document_engine.dart';
 import 'package:document_engine/document_engine_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_filter_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_labels.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_presentation_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_records_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_summary_section.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/features/billing/presentation/widgets/billing_reports_header.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
-import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 /// Composition-only content for Billing subscription reports.
 class BillingReportsContent extends StatelessWidget {
@@ -40,7 +39,13 @@ class BillingReportsContent extends StatelessWidget {
       return ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          _header(context),
+          BillingReportsHeader(
+            isExportingPdf: controller.isExportingPdf.value,
+            isLoading: controller.isLoading.value,
+            onExportPdf: controller.exportPdfSummary,
+            onExportCsv: controller.exportCsv,
+            onRefresh: controller.loadCatalog,
+          ),
           const SizedBox(height: 16),
           if (catalogItems.isNotEmpty)
             CustomDropdown<String>(
@@ -145,41 +150,4 @@ class BillingReportsContent extends StatelessWidget {
     });
   }
 
-  Widget _header(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('تقارير الاشتراكات', style: AppTypography.titleLarge),
-              Text(
-                'تقارير Billing مستقلة عن تقارير المبيعات والتشغيل.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ),
-        CustomButton.outline(
-          text: 'PDF تفصيلي',
-          prefix: Icons.picture_as_pdf_outlined,
-          loading: controller.isExportingPdf.value,
-          onPressed: controller.isExportingPdf.value
-              ? null
-              : controller.exportPdfSummary,
-        ),
-        CustomButton.outline(
-          text: 'تصدير CSV',
-          prefix: Icons.download_rounded,
-          onPressed: controller.isLoading.value ? null : controller.exportCsv,
-        ),
-        CustomButton.outline(
-          text: 'تحديث',
-          prefix: Icons.refresh_rounded,
-          onPressed:
-              controller.isLoading.value ? null : controller.loadCatalog,
-        ),
-      ],
-    );
-  }
 }
