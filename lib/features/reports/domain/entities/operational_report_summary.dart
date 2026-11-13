@@ -36,6 +36,6 @@ class OperationalReportSummary {
         value: rawValue?.toString() ?? '—',
         isCurrency: dataType == 'decimal' || dataType == 'currency',
       );
-    }).where((metric) => metric.id.isNotEmpty).toList(growable: false);
+    }).whereType<OperationalReportMetric>().where((metric) => metric.id.isNotEmpty).toList(growable: false);
   }
 }
