@@ -5,6 +5,8 @@ import 'package:netsales/features/billing/presentation/widgets/billing_dialogs.d
 import 'package:netsales/features/billing/presentation/widgets/billing_status_badge.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/dividers/custom_divider.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
@@ -44,7 +46,7 @@ class BillingWorkspaceContent extends StatelessWidget {
               const Expanded(
                 child: Text(
                   'الاشتراك والفوترة',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                  style: AppTypography.titleLarge,
                 ),
               ),
               CustomButton.outline(
@@ -131,7 +133,7 @@ class BillingWorkspaceContent extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text('جهات الاتصال', style: TextStyle(fontWeight: FontWeight.w700)),
+                    const Text('جهات الاتصال', style: AppTypography.titleSmall),
                     if (account['contacts'] is List &&
                         (account['contacts'] as List).isNotEmpty)
                       ...(account['contacts'] as List<dynamic>)
@@ -290,10 +292,7 @@ class BillingWorkspaceContent extends StatelessWidget {
           else
             for (var index = 0; index < prices.length; index++) ...[
               if (index > 0)
-                Divider(
-                  height: 1,
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
+                const CustomDivider(extent: 1),
               _planPriceTile(prices[index]),
             ],
         ],
@@ -405,7 +404,7 @@ class BillingWorkspaceContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('حالة الفترة التجريبية', style: TextStyle(fontWeight: FontWeight.w700)),
+          const Text('حالة الفترة التجريبية', style: AppTypography.titleSmall),
           BillingStatusBadge(status: trial['status']?.toString()),
           Text(trial['awaiting_first_activation'] == true
               ? 'التجربة معتمدة وتبدأ عند أول تفعيل تشغيلي؛ لم يبدأ عدادها بعد.'
