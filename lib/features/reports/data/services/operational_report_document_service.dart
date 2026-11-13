@@ -211,10 +211,11 @@ class OperationalReportDocumentService {
     String? saleType,
   }) {
     final metrics = summary.metricsFor(type);
+    final currencyCode = _display(summary.values['currency_code']?.toString(), 'YER');
     final rows = metrics.indexed.map((entry) {
       final metric = entry.$2;
       final value = metric.isCurrency
-          ? AmountFormatter.format(metric.value) + ' ر.ي'
+          ? AmountFormatter.format(metric.value) + ' ' + currencyCode
           : metric.value;
       return DocumentTableRow(
         id: 'report-metric-' + entry.$1.toString(),
@@ -317,6 +318,14 @@ class OperationalReportDocumentService {
               detail: 'تشمل جميع السجلات المطابقة للفلاتر، وليس الصفحة الحالية فقط',
             ),
             DocumentInfoGrid(items: info, columns: 2, compact: true),
+            if ((type == OperationalReportType.networkWallet ||
+                    type == OperationalReportType.posWallet) &&
+                summary.values['opening_balance_source'] == 'BACKFILLED')
+              const DocumentCallout(
+                title: 'رصيد افتتاحي معاد بناؤه',
+                body: 'تم اشتقاق الرصيد الافتتاحي عند ترحيل سجل المحفظة من الرصيد الحالي والحركات المتاحة آنذاك. هذه القيمة توثّق إعادة البناء ولا تعني وجود كشف تاريخي مستقل موثق قبل الترحيل.',
+                tone: DocumentStatusTone.warning,
+              ),
             DocumentHeading(
               text: 'المؤشرات والإجماليات',
               level: 2,
