@@ -7,6 +7,8 @@ import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_surface_card.dart';
+import 'package:netsales/widgets/cards/custom_info_list_tile.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
@@ -83,7 +85,7 @@ class BillingWorkspaceContent extends StatelessWidget {
             ),
           ] else ...[
             _sectionTitle('حساب الفوترة'),
-            Card(
+            CustomSurfaceCard(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -207,8 +209,8 @@ class BillingWorkspaceContent extends StatelessWidget {
       if (contact['is_primary'] == true) 'أساسية',
       if (contact['receives_invoices'] == true) 'تستقبل الفواتير',
     ].where((value) => value != null && value.toString().isNotEmpty).join(' • ');
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
+    return CustomInfoListTile(
+      padding: EdgeInsets.zero,
       title: Text(contact['name']?.toString() ?? 'جهة اتصال'),
       subtitle: Text(details),
       trailing: Wrap(
@@ -248,8 +250,8 @@ class BillingWorkspaceContent extends StatelessWidget {
         ? prices.first as Map<String, dynamic>
         : const <String, dynamic>{};
     final id = (price['price_id'] as num?)?.toInt();
-    return Card(
-      child: ListTile(
+    return CustomSurfaceCard(
+      child: CustomInfoListTile(
         title: Text(plan['name']?.toString() ?? 'خطة اشتراك'),
         subtitle: Row(
           mainAxisSize: MainAxisSize.min,
@@ -276,8 +278,8 @@ class BillingWorkspaceContent extends StatelessWidget {
 
   Widget _subscriptionTile(Map<String, dynamic> subscription) {
     final id = (subscription['billing_subscription_id'] as num?)?.toInt();
-    return Card(
-      child: ListTile(
+    return CustomSurfaceCard(
+      child: CustomInfoListTile(
         title: Text(
           subscription['plan'] is Map<String, dynamic>
               ? subscription['plan']['name']?.toString() ?? 'اشتراك'
@@ -293,7 +295,6 @@ class BillingWorkspaceContent extends StatelessWidget {
             Text('نهاية الفترة: ${subscription['current_period_end']?.toString() ?? '—'}'),
           ],
         ),
-        isThreeLine: true,
         trailing: Wrap(
           spacing: 6,
           children: [
@@ -311,8 +312,8 @@ class BillingWorkspaceContent extends StatelessWidget {
     );
   }
 
-  Widget _entitlementTile(Map<String, dynamic> feature) => Card(
-    child: ListTile(
+  Widget _entitlementTile(Map<String, dynamic> feature) => CustomSurfaceCard(
+    child: CustomInfoListTile(
       title: Text(feature['name']?.toString() ?? feature['feature_key']?.toString() ?? 'ميزة'),
       subtitle: Text('القيمة: ${feature['configured_value']?.toString() ?? '—'}'),
       trailing: CustomStatusBadge(
@@ -325,7 +326,7 @@ class BillingWorkspaceContent extends StatelessWidget {
     ),
   );
 
-  Widget _trialCard(Map<String, dynamic> trial) => Card(
+  Widget _trialCard(Map<String, dynamic> trial) => CustomSurfaceCard(
     child: Padding(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -350,8 +351,8 @@ class BillingWorkspaceContent extends StatelessWidget {
         invoice['status'] != 'PAID' &&
         invoice['status'] != 'VOID' &&
         invoiceId != null;
-    return Card(
-      child: ListTile(
+    return CustomSurfaceCard(
+      child: CustomInfoListTile(
         title: Text(invoice['invoice_number']?.toString() ?? 'فاتورة'),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -363,8 +364,7 @@ class BillingWorkspaceContent extends StatelessWidget {
             Text('المتبقي: ${AmountFormatter.format(remaining.toString())} وحدة صغرى'),
           ],
         ),
-        isThreeLine: true,
-        trailing: Wrap(
+          trailing: Wrap(
           spacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
@@ -392,8 +392,8 @@ class BillingWorkspaceContent extends StatelessWidget {
     required String? status,
     required dynamic amount,
     String? currencyCode,
-  }) => Card(
-    child: ListTile(
+  }) => CustomSurfaceCard(
+    child: CustomInfoListTile(
       title: Text(title),
       subtitle: BillingStatusBadge(status: status),
       trailing: CustomInteractiveAmountText(
