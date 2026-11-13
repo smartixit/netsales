@@ -157,7 +157,7 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
   final ready=eligibility['purchase_ready']==true;
   final trial=eligibility['trial'];
   final trialEligible=trial is Map<String,dynamic>&&trial['eligible']==true;
-  final blockers=(eligibility['purchase_blockers'] as List? ?? const []).join('، ');
+  final blockers=(eligibility['purchase_blockers'] as List<dynamic>? ?? const <dynamic>[]).join('، ');
   final ok=await showDialog<bool>(context:c,builder:(d)=>AlertDialog(
    title:const Text('تأكيد الاشتراك'),
    content:Text(!ready?'لا يمكن الشراء حالياً: '+blockers:(trialEligible?'السعر مؤهل لفترة تجريبية وفق سياسة المنصة.':'سيُنشأ طلب الاشتراك والفاتورة وفق شروط الخطة.')+' لن تُفعّل الاستحقاقات قبل اعتماد الدفع.'),
