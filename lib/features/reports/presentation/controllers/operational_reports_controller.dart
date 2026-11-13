@@ -97,9 +97,7 @@ class OperationalReportsController extends GetxController {
 
   String get reportScopeLabel {
     if (!_isNetworkWorkspace) return 'نقطة البيع الحالية';
-    final type = selectedType.value;
-    if (type == OperationalReportType.expenses ||
-        type == OperationalReportType.networkWallet) {
+    if (selectedDefinition?['pos_selection'] == 'forbidden') {
       return 'نطاق الشبكة بالكامل';
     }
     final posId = selectedPosId.value;
@@ -168,14 +166,12 @@ class OperationalReportsController extends GetxController {
   }
 
   bool get requiresPosSelection =>
-      selectedType.value == OperationalReportType.posWallet &&
+      selectedDefinition?['pos_selection'] == 'required' &&
       _isNetworkWorkspace &&
       selectedPosId.value == null;
 
   int? get _queryPosId {
-    final type = selectedType.value;
-    if (type == OperationalReportType.expenses ||
-        type == OperationalReportType.networkWallet) {
+    if (selectedDefinition?['pos_selection'] == 'forbidden') {
       return null;
     }
     return _isNetworkWorkspace ? selectedPosId.value : _workspacePosId;
@@ -475,7 +471,12 @@ class OperationalReportsController extends GetxController {
       errorMessage.value = 'حدد نقطة بيع لعرض كشف حساب محفظتها.';
       return;
     }
-    if (!PermissionService.to.can(type.requiredPermission)) {
+    final viewPermissions = selectedDefinition?['permissions'];
+    final viewPermission = viewPermissions is Map
+        ? viewPermissions['view']
+        : null;
+    if (viewPermission is! String ||
+        !PermissionService.to.can(viewPermission)) {
       reports.clear();
       nextCursor.value = null;
       isLoading.value = false;
