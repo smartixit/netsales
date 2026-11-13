@@ -170,6 +170,18 @@ class RepaymentDocumentService {
         value: DocumentTextValue(repayment.typedPaymentMethod.label),
         direction: DocumentTextDirection.rightToLeft,
       ),
+      if (_hasText(repayment.createdByName))
+        DocumentInfoItem(
+          label: 'استلم بواسطة',
+          value: DocumentTextValue(repayment.createdByName!.trim()),
+          direction: DocumentTextDirection.rightToLeft,
+        ),
+      if (status == RepaymentStatus.reversed && _hasText(repayment.reversedByName))
+        DocumentInfoItem(
+          label: 'عكس السند بواسطة',
+          value: DocumentTextValue(repayment.reversedByName!.trim()),
+          direction: DocumentTextDirection.rightToLeft,
+        ),
       DocumentInfoItem(
         label: 'الشبكة',
         value: DocumentTextValue(
@@ -189,12 +201,6 @@ class RepaymentDocumentService {
         value: DocumentTextValue(currencyCode),
         direction: DocumentTextDirection.leftToRight,
       ),
-      if (status == RepaymentStatus.reversed && repayment.reversedBy != null)
-        DocumentInfoItem(
-          label: 'عكس السند بواسطة',
-          value: DocumentTextValue('#${repayment.reversedBy}'),
-          direction: DocumentTextDirection.leftToRight,
-        ),
       if (status == RepaymentStatus.reversed && repayment.reversalRepaymentId != null)
         DocumentInfoItem(
           label: 'مرجع قيد العكس',
