@@ -10,6 +10,7 @@ class BillingUseCases {
   Future<BillingPayload> account(int id) => repository.getAccount(id);
   Future<BillingPayload> updateAccount(int id, Map<String, dynamic> data) => repository.updateAccount(id, data);
   Future<BillingPayload> plans(int id, Map<String, dynamic> query) => repository.getPlans(id, query);
+  Future<BillingPayload> entitlements(int id) => repository.getEntitlements(id);
   Future<BillingPayload> trialEligibility(int id, int priceId) => repository.getTrialEligibility(id, priceId);
   Future<BillingPayload> purchase(int id, int priceId) => repository.purchase(id, priceId);
   Future<BillingPayload> subscriptions(int id, Map<String, dynamic> query) => repository.getSubscriptions(id, query);
