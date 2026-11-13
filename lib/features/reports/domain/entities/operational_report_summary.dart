@@ -19,13 +19,31 @@ class OperationalReportSummary {
     this.values, {
     this.metricDefinitions = const <ReportMetricSlotDefinition>[],
     this.metricLabels = const <String, String>{},
+    this.chartSlots = const <OperationalReportChartSlot>[],
     this.reportTitle = '',
   });
 
   final Map<String, dynamic> values;
   final List<ReportMetricSlotDefinition> metricDefinitions;
   final Map<String, String> metricLabels;
+  final List<OperationalReportChartSlot> chartSlots;
   final String reportTitle;
+
+  Map<String, List<Map<String, dynamic>>> get charts {
+    final raw = values['charts'];
+    if (raw is! Map) return const {};
+    final result = <String, List<Map<String, dynamic>>>{};
+    for (final slot in chartSlots) {
+      final points = raw[slot.id];
+      if (points is List) {
+        result[slot.id] = points
+            .whereType<Map>()
+            .map((point) => Map<String, dynamic>.from(point))
+            .toList(growable: false);
+      }
+    }
+    return result;
+  }
 
   List<OperationalReportMetric> get metrics => metricDefinitions
       .map((definition) {
