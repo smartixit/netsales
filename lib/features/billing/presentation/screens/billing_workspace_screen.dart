@@ -24,7 +24,20 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
    ]
   ]));
  });
- Future<void> _purchase(BuildContext c,int id)async{final ok=await showDialog<bool>(context:c,builder:(d)=>AlertDialog(title:const Text('تأكيد الاشتراك'),content:const Text('سيُنشأ طلب الاشتراك والفاتورة. لن تُفعّل الاستحقاقات قبل اعتماد الدفع.'),actions:[CustomButton.text(text:'رجوع',onPressed:()=>Navigator.pop(d,false)),CustomButton.primary(text:'متابعة',onPressed:()=>Navigator.pop(d,true))]));if(ok==true)await controller.purchase(id);}
+ Future<void> _purchase(BuildContext c,int id)async{
+  final eligibility=await controller.checkTrial(id);
+  if(eligibility==null||!c.mounted)return;
+  final ready=eligibility['purchase_ready']==true;
+  final trial=eligibility['trial'];
+  final trialEligible=trial is Map&&trial['eligible']==true;
+  final blockers=(eligibility['purchase_blockers'] as List? ?? const []).join('، ');
+  final ok=await showDialog<bool>(context:c,builder:(d)=>AlertDialog(
+   title:const Text('تأكيد الاشتراك'),
+   content:Text(!ready?'لا يمكن الشراء حالياً: '+blockers:(trialEligible?'السعر مؤهل لفترة تجريبية وفق سياسة المنصة.':'سيُنشأ طلب الاشتراك والفاتورة وفق شروط الخطة.')+' لن تُفعّل الاستحقاقات قبل اعتماد الدفع.'),
+   actions:[CustomButton.text(text:'رجوع',onPressed:()=>Navigator.pop(d,false)),if(ready)CustomButton.primary(text:'متابعة',onPressed:()=>Navigator.pop(d,true))]
+  ));
+  if(ok==true)await controller.purchase(id);
+ }
  Future<void> _cancel(BuildContext c,int id)async{final ok=await showDialog<bool>(context:c,builder:(d)=>AlertDialog(title:const Text('جدولة الإلغاء'),content:const Text('سيتم الإلغاء في نهاية فترة الخدمة الحالية.'),actions:[CustomButton.text(text:'رجوع',onPressed:()=>Navigator.pop(d,false)),CustomButton.danger(text:'تأكيد',onPressed:()=>Navigator.pop(d,true))]));if(ok==true)await controller.cancel(id);}
 }
 class _Header extends StatelessWidget{const _Header(this.value);final String value;@override Widget build(BuildContext c)=>Padding(padding:const EdgeInsets.only(top:18,bottom:8),child:Text(value,style:const TextStyle(fontSize:18,fontWeight:FontWeight.w700)));}
