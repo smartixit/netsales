@@ -236,6 +236,10 @@ class BillingReportsController extends GetxController {
       summary.value = null;
       _nextCursor = null;
       _seenCursors.clear();
+      isExportingCsv.value = false;
+      isExportingPdf.value = false;
+      isLoadingMore.value = false;
+      loadMoreError.value = null;
       isLoading.value = false;
       errorMessage.value = 'حدد الشبكة أولاً.';
       return;
@@ -258,6 +262,10 @@ class BillingReportsController extends GetxController {
       summary.value = null;
       _nextCursor = null;
       _seenCursors.clear();
+      isExportingCsv.value = false;
+      isExportingPdf.value = false;
+      isLoadingMore.value = false;
+      loadMoreError.value = null;
       _loadedNetworkId = n;
     }
 
