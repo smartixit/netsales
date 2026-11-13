@@ -382,6 +382,7 @@ class OperationalReportsController extends GetxController {
       selectedType.value = types.first;
     }
     await loadReport(refresh: true);
+    await loadSavedPresets();
   }
 
   @override
@@ -542,6 +543,7 @@ class OperationalReportsController extends GetxController {
       unawaited(loadPosOptions(refresh: true, search: ''));
     }
     await loadReport(refresh: true);
+    await loadSavedPresets();
   }
 
   Future<void> searchPosOptions(String query) async {
