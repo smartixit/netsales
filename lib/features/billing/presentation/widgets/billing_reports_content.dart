@@ -1,5 +1,6 @@
 import 'package:document_engine/document_engine.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
@@ -21,7 +22,7 @@ class BillingReportsContent extends StatelessWidget {
  final BillingReportsController controller;
 
  @override
- Widget build(BuildContext context){
+ Widget build(BuildContext context)=>Obx((){
   final items=controller.catalog.map((e)=>DropdownItem<String>(
     value:e['id'].toString(),
     child:Text(e['label']?.toString()??e['id'].toString()),
@@ -76,7 +77,7 @@ class BillingReportsContent extends StatelessWidget {
    if(controller.hasMore)
     CustomButton.outline(text:'تحميل المزيد',loading:controller.isLoadingMore.value,onPressed:controller.isLoadingMore.value?null:controller.loadMore),
   ]);
- }
+ });
 
 
  Widget _filterSection(BuildContext context,{
