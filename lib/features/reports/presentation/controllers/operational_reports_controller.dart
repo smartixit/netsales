@@ -228,24 +228,6 @@ class OperationalReportsController extends GetxController {
 
   ReportCriteria _effectiveCriteria() => criteria.value;
 
-  String? _textCriteria(String id) {
-    final value = criteria.value.filters[id];
-    if (value is ReportTextFilterValue) return value.value;
-    return null;
-  }
-
-  String? _choiceCriteria(String id) {
-    final value = criteria.value.filters[id];
-    if (value is ReportChoiceFilterValue) return value.value;
-    return null;
-  }
-
-  String? _dateCriteria(String id) {
-    final value = criteria.value.filters[id];
-    if (value is! ReportDateFilterValue) return null;
-    return _dateText(value.value);
-  }
-
   String _dateText(DateTime value) {
     final local = value.toLocal();
     return '${local.year.toString().padLeft(4, '0')}-'
@@ -426,6 +408,9 @@ class OperationalReportsController extends GetxController {
     criteria.value = ReportCriteria();
     for (final controller in _criteriaTextControllers.values) {
       controller.clear();
+    }
+    for (final selection in _choiceValues.values) {
+      selection.value = null;
     }
     if (_isNetworkWorkspace) {
       selectedPosId.value = null;

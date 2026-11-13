@@ -101,7 +101,9 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                     ),
                     AppSpacing.vMd,
                     if (controller.selectedReportEntry case final entry?)
-                      Obx(() => ReportConfigurationStudio(
+                      Expanded(
+                        flex: 3,
+                        child: Obx(() => ReportConfigurationStudio(
                         definition: entry.definition,
                         criteria: controller.criteria.value,
                         presentation: controller.presentation.value,
@@ -164,6 +166,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                                 : CustomButton.primary(text: label, prefix: icon, onPressed: onPressed),
                         isBusy: controller.isLoading.value || controller.isPdfActionRunning.value,
                       )),
+                      ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8, bottom: 8),
                       child: Wrap(
@@ -253,6 +256,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                     }),
                     AppSpacing.vSm,
                     Expanded(
+                      flex: 2,
                       child: OperationalReportRecordsList(
                         controller: controller,
                       ),
@@ -395,6 +399,26 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
             ],
           ));
       }
+    }
+    final criteriaIssues = criteria.validateAgainst(definition);
+    if (criteriaIssues.isNotEmpty) {
+      filters.add(_validationNotice(
+        context,
+        title: 'راجع معايير التقرير',
+        messages: criteriaIssues.map((issue) {
+          final field = definition.filter(issue.fieldId);
+          final label = field == null ? issue.fieldId : resolveLabel(context, field.labelKey);
+          return switch (issue.code) {
+            'required_filter_missing' => 'الحقل «$label» مطلوب.',
+            'unknown_filter' => 'المرشح «$label» غير موجود في تعريف التقرير الحالي.',
+            'filter_type_mismatch' => 'نوع القيمة المحددة للحقل «$label» غير متوافق.',
+            'text_too_short' => 'النص في الحقل «$label» أقصر من الحد المسموح.',
+            'text_too_long' => 'النص في الحقل «$label» يتجاوز الحد المسموح.',
+            'choice_not_allowed' => 'القيمة المختارة للحقل «$label» غير متاحة.',
+            _ => 'تعذر التحقق من الحقل «$label».',
+          };
+        }).toList(growable: false),
+      ));
     }
     return _studioSection(
       context,
@@ -614,11 +638,71 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
         )) : null,
       ),
     ]));
+    final presentationIssues = presentation.validateAgainst(definition);
+    if (presentationIssues.isNotEmpty) {
+      children.add(_validationNotice(
+        context,
+        title: 'راجع تصميم المخرجات',
+        messages: presentationIssues.map((issue) {
+          return switch (issue.code) {
+            'unknown_column' => 'العمود «${issue.fieldId}» غير موجود.',
+            'required_column_hidden' => 'يجب إبقاء العمود «${issue.fieldId}» ظاهراً.',
+            'unknown_sort_column' || 'sorting_not_allowed' => 'الترتيب حسب «${issue.fieldId}» غير مدعوم.',
+            'unknown_group_column' || 'grouping_not_allowed' => 'التجميع حسب «${issue.fieldId}» غير مدعوم.',
+            'template_not_allowed' => 'قالب التقرير المحدد غير متاح.',
+            'locale_not_allowed' => 'لغة المستند المحددة غير مدعومة.',
+            'page_profile_not_allowed' => 'حجم الصفحة المحدد غير متاح.',
+            'metrics_not_available' => 'هذا التقرير لا يوفّر مؤشرات.',
+            'charts_not_available' => 'هذا التقرير لا يوفّر رسوماً بيانية.',
+            _ => 'إعداد «${issue.fieldId}» غير صالح.',
+          };
+        }).toList(growable: false),
+      ));
+    }
     return _studioSection(
       context,
       title: 'تصميم المخرجات',
       icon: Icons.tune_rounded,
       children: children,
+    );
+  }
+
+  Widget _validationNotice(
+    BuildContext context, {
+    required String title,
+    required List<String> messages,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.errorContainer.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colors.error.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: colors.error,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (final message in messages)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 3),
+              child: Text(
+                '• $message',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colors.onErrorContainer,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
