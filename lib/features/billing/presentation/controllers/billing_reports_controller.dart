@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:document_engine/document_engine.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
 import 'package:netsales/core/services/file_export_service.dart';
@@ -11,6 +12,12 @@ class BillingReportsController extends GetxController {
   final BillingUseCases useCases;
   final int? Function() networkId;
   final catalog=<Map<String,dynamic>>[].obs;
+  ReportDefinitionRegistry _definitionRegistry=ReportDefinitionRegistry();
+  final criteria=ReportCriteria().obs;
+  final presentation=ReportPresentationOptions().obs;
+  final selectedLocale=RxnString('ar-YE');
+  final selectedPageProfile=RxnString();
+  final selectedTemplateId=RxnString();
   final rows=<Map<String,dynamic>>[].obs;
   final selectedType=RxnString();
   final summary=Rxn<Map<String,dynamic>>();
@@ -28,22 +35,134 @@ class BillingReportsController extends GetxController {
   int _revision=0;
   String? _nextCursor;
 
+  ReportDataType _parseDataType(String? value){
+    return switch(value){
+      'integer' || 'number' => ReportDataType.integer,
+      'decimal' => ReportDataType.decimal,
+      'date' => ReportDataType.date,
+      'date_time' => ReportDataType.dateTime,
+      'boolean' => ReportDataType.boolean,
+      _ => ReportDataType.text,
+    };
+  }
+  ReportFilterKind _parseFilterKind(String? value){
+    return switch(value){
+      'integer' => ReportFilterKind.integer,
+      'decimal' => ReportFilterKind.decimal,
+      'date' => ReportFilterKind.date,
+      'date_range' => ReportFilterKind.dateRange,
+      'boolean' => ReportFilterKind.boolean,
+      'single_choice' => ReportFilterKind.singleChoice,
+      'multi_choice' => ReportFilterKind.multiChoice,
+      _ => ReportFilterKind.text,
+    };
+  }
+  ReportDefinition _parseDefinition(Map<String,dynamic> raw){
+    final filters=_list(raw['filters']).map((item)=>ReportFilterDefinition(
+      id:item['id'].toString(),
+      labelKey:item['label']?.toString()??item['id'].toString(),
+      kind:_parseFilterKind(item['kind']?.toString()),
+      required:item['required']==true,
+      choices:_list(item['choices']).map((choice)=>ReportChoiceOption(
+        value:choice['value'].toString(),
+        labelKey:choice['label_key']?.toString()??choice['value'].toString(),
+      )),
+    ));
+    final columns=_list(raw['columns']).map((item)=>ReportColumnDefinition(
+      id:item['id']?.toString()??item['key'].toString(),
+      labelKey:item['label_key']?.toString()??item['label']?.toString()??item['id'].toString(),
+      dataType:_parseDataType(item['data_type']?.toString()),
+      visibleByDefault:item['visible_by_default']!=false,
+      hideable:item['hideable']!=false,
+      sortable:item['sortable']==true,
+      groupable:item['groupable']==true,
+    ));
+    final metrics=_list(raw['metric_slots']).map((item)=>ReportMetricSlotDefinition(
+      id:item['id'].toString(),
+      labelKey:item['label_key']?.toString()??item['id'].toString(),
+      dataType:_parseDataType(item['data_type']?.toString()),
+    ));
+    final templates=_list(raw['templates']).map((item){
+      final version=item['version'] is Map<String,dynamic>?item['version'] as Map<String,dynamic>:<String,dynamic>{};
+      return ReportTemplateReference(
+        id:TemplateId(item['id'].toString()),
+        version:TemplateVersion(
+          major:(version['major'] as num?)?.toInt()??1,
+          minor:(version['minor'] as num?)?.toInt()??0,
+          patch:(version['patch'] as num?)?.toInt()??0,
+        ),
+      );
+    });
+    return ReportDefinition(
+      id:ReportId(raw['id'].toString()),
+      schemaVersion:(raw['schema_version'] as num?)?.toInt()??1,
+      titleKey:raw['label']?.toString()??raw['id'].toString(),
+      descriptionKey:raw['description']?.toString(),
+      supportedLocaleTags:(raw['supported_locale_tags'] as List<dynamic>? ?? const ['ar-YE','en']).map((e)=>e.toString()),
+      filters:filters,
+      columns:columns,
+      metricSlots:metrics,
+      templates:templates,
+      pageProfileIds:(raw['page_profile_ids'] as List<dynamic>? ?? const ['a4-portrait']).map((e)=>e.toString()),
+      executionPolicy:ReportExecutionPolicy.server,
+      chartsAvailable:(raw['chart_slots'] is List<dynamic>)&&(raw['chart_slots'] as List<dynamic>).isNotEmpty,
+    );
+  }
+  ReportDefinition? get currentDefinition{
+    final raw=selectedDefinition;
+    if(raw==null)return null;
+    return _definitionRegistry.find(
+      id:ReportId(raw['id'].toString()),
+      schemaVersion:(raw['schema_version'] as num?)?.toInt()??1,
+    );
+  }
+  void _resetStudio(ReportDefinition definition){
+    final template=definition.templates.isEmpty?null:definition.templates.first;
+    final page=definition.pageProfileIds.isEmpty?null:definition.pageProfileIds.first;
+    criteria.value=ReportCriteria();
+    presentation.value=ReportPresentationOptions(
+      visibleColumnIds:definition.columns.map((e)=>e.id),
+      template:template==null?null:ReportTemplateSelection(id:template.id,version:template.version),
+      languageTag:definition.supportedLocaleTags.contains('ar-YE')?'ar-YE':definition.supportedLocaleTags.first,
+      pageProfileId:page,
+      includeMetrics:definition.metricSlots.isNotEmpty,
+      includeCharts:false,
+    );
+    selectedLocale.value=presentation.value.languageTag;
+    selectedPageProfile.value=page;
+    selectedTemplateId.value=template?.id.value;
+    searchController.clear();statusController.clear();searchQuery.value='';selectedStatus.value=null;fromDate.value=null;toDate.value=null;
+  }
+  void setCriteria(ReportCriteria value){
+    criteria.value=value;
+    final from=value.filters['from_date'];
+    final to=value.filters['to_date'];
+    final status=value.filters['status'];
+    final search=value.filters['search'];
+    fromDate.value=from is ReportDateFilterValue?from.value:null;
+    toDate.value=to is ReportDateFilterValue?to.value:null;
+    selectedStatus.value=status is ReportChoiceFilterValue?status.value:null;
+    statusController.text=status is ReportTextFilterValue?status.value:'';
+    searchController.text=search is ReportTextFilterValue?search.value:'';
+    searchQuery.value=searchController.text;
+  }
+  void setPresentation(ReportPresentationOptions value){
+    presentation.value=value;
+    selectedLocale.value=value.languageTag;
+    selectedPageProfile.value=value.pageProfileId;
+    selectedTemplateId.value=value.template?.id.value;
+  }
   List<Map<String,dynamic>> _list(dynamic value)=>value is List?value.whereType<Map<String,dynamic>>().map((e)=>Map<String,dynamic>.from(e)).toList():const [];
   Map<String,dynamic> _map(BillingPayload p){final d=p.data['data']??p.data;return d is Map?Map<String,dynamic>.from(d):p.data;}
   String _date(DateTime? value)=>value==null?'':value.toIso8601String().substring(0,10);
   Map<String,dynamic>? get selectedDefinition => catalog.firstWhereOrNull((e)=>e['id']==selectedType.value);
-  List<String> get _filterIds => (selectedDefinition?['filters'] is List<dynamic>)
-      ? (selectedDefinition!['filters'] as List<dynamic>).whereType<Map<String,dynamic>>().map((e)=>e['id']?.toString()??'').toList()
-      : const ['from_date','to_date','status','search'];
+  List<String> get _filterIds => currentDefinition?.filters.map((e)=>e.id).toList() ?? const ['from_date','to_date','status','search'];
   bool get hasDateFilters => _filterIds.contains('from_date') || _filterIds.contains('to_date');
   bool get hasStatusFilter => _filterIds.contains('status');
   bool get hasSearchFilter => _filterIds.contains('search');
   List<Map<String,dynamic>> get statusChoices {
-    final filters=selectedDefinition?['filters'];
-    if(filters is! List<dynamic>)return const [];
-    final filter=filters.whereType<Map<String,dynamic>>().firstWhereOrNull((e)=>e['id']=='status');
-    final choices=filter?['choices'];
-    return choices is List<dynamic>?choices.whereType<Map<String,dynamic>>().toList():const [];
+    final filter=currentDefinition?.filter('status');
+    return filter?.choices.map((choice)=>{'value':choice.value,'label_key':choice.labelKey}).toList() ?? const [];
   }
 
   Map<String,dynamic> get _filters=>{
@@ -70,10 +189,13 @@ class BillingReportsController extends GetxController {
     try{
       final result=_map(await useCases.reportsCatalog(n));
       catalog.assignAll(_list(result['reports']));
+      _definitionRegistry=ReportDefinitionRegistry();
+      for(final schema in catalog){_definitionRegistry.register(_parseDefinition(schema));}
       if(rev!=_revision)return;
       if(catalog.isEmpty){selectedType.value=null;rows.clear();return;}
       final chosen=catalog.firstWhereOrNull((e)=>e['id']==selectedType.value)??catalog.first;
       selectedType.value=chosen['id']?.toString();
+      final definition=currentDefinition;if(definition!=null)_resetStudio(definition);
       await loadReport(revision:rev);
     }catch(e){if(rev==_revision)errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل كتالوج تقارير الاشتراكات.');}
     finally{if(rev==_revision)isLoading.value=false;}
@@ -82,7 +204,7 @@ class BillingReportsController extends GetxController {
     if(type==null||type==selectedType.value)return;selectedType.value=type;await loadReport();
   }
   Future<void> applyFilters()=>loadReport();
-  Future<void> setStatus(String? value)async{selectedStatus.value=value;await loadReport();}
+  Future<void> setStatus(String? value)async{selectedStatus.value=value;final next=Map<String,ReportFilterValue>.from(criteria.value.filters);if(value==null||value.isEmpty){next.remove('status');}else{next['status']=ReportChoiceFilterValue(value);}setCriteria(ReportCriteria(filters:next));await loadReport();}
   Future<void> setFromDate(DateTime? value)async{fromDate.value=value;await loadReport();}
   Future<void> setToDate(DateTime? value)async{toDate.value=value;await loadReport();}
   Future<void> clearFilters()async{
