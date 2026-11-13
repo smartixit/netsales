@@ -178,13 +178,16 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
       id: ReportId(id),
       schemaVersion: schemaVersion,
       titleKey: titleKey,
-      descriptionKey: '$id.description',
-      supportedLocaleTags: const ['ar'],
+      descriptionKey: _requiredText(raw['description_key'], 'description_key'),
+      supportedLocaleTags: _nonEmptyStringList(
+        raw['supported_locale_tags'],
+        'supported_locale_tags',
+      ),
       filters: filterDefinitions,
       columns: columnDefinitions,
       metricSlots: metricDefinitions,
       templates: templates,
-      pageProfileIds: _stringList(
+      pageProfileIds: _nonEmptyStringList(
         raw['page_profile_ids'],
         'page_profile_ids',
       ),
@@ -275,6 +278,14 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
       throw FormatException('قائمة $field غير صالحة.');
     }
     return value.cast<String>();
+  }
+
+  static List<String> _nonEmptyStringList(dynamic value, String field) {
+    final values = _stringList(value, field);
+    if (values.isEmpty) {
+      throw FormatException('قائمة $field يجب أن تحتوي عنصراً واحداً على الأقل.');
+    }
+    return values;
   }
 
   static String _requiredText(dynamic value, String field) {
