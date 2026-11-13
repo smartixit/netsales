@@ -4,6 +4,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/reports/data/datasources/operational_report_remote_data_source.dart';
 import 'package:netsales/features/reports/data/models/operational_report_record_model.dart';
+import 'package:netsales/features/reports/data/models/operational_report_summary_model.dart';
 import 'package:netsales/features/reports/data/services/operational_report_document_service.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
@@ -14,9 +15,14 @@ import 'package:netsales/features/reports/domain/repositories/operational_report
 
 class OperationalReportRepositoryImpl
     implements OperationalReportRepository {
-  const OperationalReportRepositoryImpl(this.remoteDataSource);
+  OperationalReportRepositoryImpl(this.remoteDataSource);
 
   final OperationalReportRemoteDataSource remoteDataSource;
+  final Map<String, OperationalReportCatalog> _catalogCache =
+      <String, OperationalReportCatalog>{};
+
+  String _catalogKey(int networkId, int? posId) =>
+      '$networkId:${posId ?? 'network'}';
 
   @override
   Future<OperationalReportCatalog> getCatalog({
@@ -34,7 +40,9 @@ class OperationalReportRepositoryImpl
         details: response.errors,
       );
     }
-    return response.data!;
+    final catalog = response.data!;
+    _catalogCache[_catalogKey(networkId, posId)] = catalog;
+    return catalog;
   }
 
   Map<String, dynamic> _filters({
@@ -132,7 +140,32 @@ class OperationalReportRepositoryImpl
         details: response.errors,
       );
     }
-    return response.data!;
+    final catalog = _catalogCache[_catalogKey(networkId, posId)] ??
+        await getCatalog(networkId: networkId, posId: posId);
+    final definition = catalog.definitionFor(type);
+    if (definition == null) {
+      throw AppException(
+        'تعريف التقرير غير موجود في كتالوج نطاق العمل الحالي.',
+        code: 'OPERATIONAL_REPORT_DEFINITION_MISSING',
+      );
+    }
+
+    final rawMetrics = definition['metric_slots'];
+    if (rawMetrics is! List) {
+      throw AppException(
+        'لم يعرّف الخادم مؤشرات هذا التقرير.',
+        code: 'OPERATIONAL_REPORT_METRICS_MISSING',
+      );
+    }
+    final metricDefinitions = rawMetrics
+        .whereType<Map>()
+        .map(Map<String, dynamic>.from)
+        .toList(growable: false);
+    return OperationalReportSummaryModel(
+      response.data!.values,
+      metricDefinitions: metricDefinitions,
+      reportTitle: definition['label']?.toString() ?? type.wireValue,
+    );
   }
 
   @override
