@@ -64,7 +64,7 @@ class OperationalReportDocumentService {
       textShapingProvider: shapingProvider,
     ).render(
       snapshot: snapshot,
-      template: _template,
+      template: _template(type),
       options: DocumentRenderOptions(
         pageProfile: pageProfile,
         generatedAt: generatedAt,
@@ -267,7 +267,7 @@ class OperationalReportDocumentService {
         id: DocumentId(
           'netsales-operational-report-${type.wireValue}-${generatedAt.millisecondsSinceEpoch}',
         ),
-        documentTypeId: DocumentTypeId('netsales.operational-report'),
+        documentTypeId: DocumentTypeId('netsales.operational-report.${type.wireValue}'),
         title: 'ملخص ' + _reportTitle(summary, type),
         subtitle: 'تقرير تنفيذي صادر عن NetSales',
         reference: type.wireValue,
@@ -349,25 +349,27 @@ class OperationalReportDocumentService {
     );
   }
 
-  DocumentTemplateDefinition get _template => DocumentTemplateDefinition(
-    id: TemplateId('netsales.operational-report.executive'),
-    version: TemplateVersion(major: 1, minor: 0, patch: 0),
-    documentTypeId: DocumentTypeId('netsales.operational-report'),
-    displayName: 'NetSales Executive Operational Report',
-    description: 'Official Arabic executive report summary',
-    supportedLocaleTags: const ['ar'],
-    capabilities: TemplateCapabilities([
-      TemplateCapability.pageNumbering,
-      TemplateCapability.repeatingHeader,
-      TemplateCapability.repeatingFooter,
-      TemplateCapability.tables,
-      TemplateCapability.watermark,
-      TemplateCapability.portraitPage,
-      TemplateCapability.landscapePage,
-    ]),
-    isDefault: true,
-    layout: DocumentTemplateLayout.executive,
-  );
+  DocumentTemplateDefinition _template(OperationalReportType type) =>
+      DocumentTemplateDefinition(
+        id: TemplateId('netsales.operational-report.${type.wireValue}.executive'),
+        version: TemplateVersion(major: 1, minor: 0, patch: 0),
+        documentTypeId:
+            DocumentTypeId('netsales.operational-report.${type.wireValue}'),
+        displayName: 'NetSales ${type.wireValue} Executive Summary',
+        description: 'Official Arabic executive summary for ${type.wireValue}',
+        supportedLocaleTags: const ['ar'],
+        capabilities: TemplateCapabilities([
+          TemplateCapability.pageNumbering,
+          TemplateCapability.repeatingHeader,
+          TemplateCapability.repeatingFooter,
+          TemplateCapability.tables,
+          TemplateCapability.watermark,
+          TemplateCapability.portraitPage,
+          TemplateCapability.landscapePage,
+        ]),
+        isDefault: true,
+        layout: DocumentTemplateLayout.executive,
+      );
 
   static String _reportTitle(
     OperationalReportSummary summary,
