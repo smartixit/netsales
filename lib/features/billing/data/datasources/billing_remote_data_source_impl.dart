@@ -38,6 +38,18 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
       ApiService.instance.put(ApiConstants.billingAccount(accountId), data: data, fromJson: _map);
 
   @override
+  Future<ApiResponse<Map<String, dynamic>>> createContact(int accountId, Map<String, dynamic> data) =>
+      ApiService.instance.post('/billing/accounts/$accountId/contacts', data: data, fromJson: _map);
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> updateContact(int accountId, int contactId, Map<String, dynamic> data) =>
+      ApiService.instance.put('/billing/accounts/$accountId/contacts/$contactId', data: data, fromJson: _map);
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> deleteContact(int accountId, int contactId) =>
+      ApiService.instance.delete('/billing/accounts/$accountId/contacts/$contactId', fromJson: _map);
+
+  @override
   Future<ApiResponse<Map<String, dynamic>>> getPlans(int accountId, Map<String, dynamic> query) =>
       ApiService.instance.get(ApiConstants.billingAccountPlans(accountId), queryParameters: query, fromJson: _map);
 
