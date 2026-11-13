@@ -11,9 +11,13 @@ import 'package:netsales/features/finance/data/datasources/finance_remote_data_s
 import 'package:netsales/features/finance/data/datasources/finance_remote_data_source_impl.dart';
 import 'package:netsales/features/finance/data/repositories/finance_repository_impl.dart';
 import 'package:netsales/features/finance/data/repositories/repayment_document_repository_impl.dart';
+import 'package:netsales/features/finance/data/repositories/wallet_statement_document_repository_impl.dart';
+import 'package:netsales/features/finance/data/services/wallet_statement_document_service.dart';
 import 'package:netsales/features/finance/data/services/repayment_document_service.dart';
 import 'package:netsales/features/finance/domain/repositories/repayment_document_repository.dart';
+import 'package:netsales/features/finance/domain/repositories/wallet_statement_document_repository.dart';
 import 'package:netsales/features/finance/domain/usecases/repayment_document_use_case.dart';
+import 'package:netsales/features/finance/domain/usecases/export_wallet_statement_document_use_case.dart';
 import 'package:netsales/features/finance/domain/repositories/finance_repository.dart';
 import 'package:netsales/features/finance/domain/usecases/debt_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cases.dart';
@@ -183,11 +187,29 @@ class FinanceBinding extends Bindings {
       );
     }
 
+    if (!Get.isRegistered<WalletStatementDocumentRepository>()) {
+      Get.lazyPut<WalletStatementDocumentRepository>(
+        () => WalletStatementDocumentRepositoryImpl(
+          documentService: WalletStatementDocumentService.instance,
+        ),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<ExportWalletStatementDocumentUseCase>()) {
+      Get.lazyPut<ExportWalletStatementDocumentUseCase>(
+        () => ExportWalletStatementDocumentUseCase(
+          Get.find<WalletStatementDocumentRepository>(),
+        ),
+        fenix: true,
+      );
+    }
+
     // 5. Controllers
     Get.lazyPut<PosWalletDashboardController>(
       () => PosWalletDashboardController(
         getPosWalUseCase: Get.find<GetPosWalUseCase>(),
         getPosWalletLogsUseCase: Get.find<GetPosWalletLogsUseCase>(),
+        exportWalletStatementDocumentUseCase: Get.find<ExportWalletStatementDocumentUseCase>(),
       ),
       fenix: true,
     );
@@ -226,6 +248,7 @@ class FinanceBinding extends Bindings {
       () => NetworkWalletDashboardController(
         getNetworkWalletsUseCase: Get.find<GetNetworkWalletsUseCase>(),
         getNetworkWalletLogsUseCase: Get.find<GetNetworkWalletLogsUseCase>(),
+        exportWalletStatementDocumentUseCase: Get.find<ExportWalletStatementDocumentUseCase>(),
       ),
       fenix: true,
     );

@@ -6,6 +6,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/finance/domain/entities/network_wallet_entity.dart';
 import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cases.dart';
+import 'package:netsales/features/finance/domain/usecases/export_wallet_statement_document_use_case.dart';
 import 'package:netsales/features/finance/presentation/widgets/manual_wallet_transaction_sheet.dart';
 import 'package:netsales/features/finance/presentation/widgets/network_wallet_transfer_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -13,10 +14,12 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class NetworkWalletDashboardController extends GetxController {
   final GetNetworkWalletsUseCase getNetworkWalletsUseCase;
   final GetNetworkWalletLogsUseCase getNetworkWalletLogsUseCase;
+  final ExportWalletStatementDocumentUseCase exportWalletStatementDocumentUseCase;
 
   NetworkWalletDashboardController({
     required this.getNetworkWalletsUseCase,
     required this.getNetworkWalletLogsUseCase,
+    required this.exportWalletStatementDocumentUseCase,
   });
 
   final wallets = <NetworkWalletEntity>[].obs;
@@ -32,6 +35,9 @@ class NetworkWalletDashboardController extends GetxController {
   final walletsNextCursor = RxnString();
   final isLoadingMoreWallets = false.obs;
   final logsErrorMessage = RxnString();
+  final isExportingStatement = false.obs;
+
+  static const int _maxStatementRows = 2000;
 
   int _logsRequestVersion = 0;
   int _walletsRequestVersion = 0;
@@ -291,6 +297,51 @@ class NetworkWalletDashboardController extends GetxController {
         isLoadingMoreLogs.value = false;
       }
     }
+  }
+
+  Future<void> exportStatementPdf() async {
+    final wallet = selectedWallet.value;
+    if (wallet == null || isExportingStatement.value) return;
+    isExportingStatement.value = true;
+    try {
+      final statementLogs = await _loadAllStatementLogs(wallet.walletId);
+      if (selectedWallet.value?.walletId != wallet.walletId) return;
+      final success = await exportWalletStatementDocumentUseCase.exportNetwork(wallet, statementLogs);
+      CustomSnackbar.show(
+        title: success ? 'تم إنشاء كشف الحساب' : 'تعذر حفظ كشف الحساب',
+        message: success ? 'تم تجهيز كشف حساب محفظة الشبكة وحفظ ملف PDF.' : 'لم تكتمل عملية حفظ ملف كشف الحساب.',
+        type: success ? SnackType.success : SnackType.error,
+      );
+    } catch (error) {
+      final message = error is StateError
+          ? error.toString().replaceFirst('Bad state: ', '')
+          : AppException.sanitizeMessage(error, fallback: 'تعذر إنشاء كشف حساب محفظة الشبكة.');
+      CustomSnackbar.show(title: 'تعذر إنشاء كشف الحساب', message: message, type: SnackType.error);
+    } finally {
+      isExportingStatement.value = false;
+    }
+  }
+
+  Future<List<NetworkWalletLogEntity>> _loadAllStatementLogs(int walletId) async {
+    final result = <NetworkWalletLogEntity>[];
+    final seenCursors = <String>{};
+    String? cursor;
+    do {
+      if (selectedWallet.value?.walletId != walletId) {
+        throw StateError('تم تغيير المحفظة أثناء تجهيز الكشف؛ أعد المحاولة.');
+      }
+      final page = await getNetworkWalletLogsUseCase(walletId, cursor: cursor, perPage: 50);
+      result.addAll(page.items);
+      if (result.length > _maxStatementRows) {
+        throw StateError('يتجاوز عدد الحركات الحد الآمن لتوليد PDF. استخدم تصدير CSV للتفاصيل الكاملة.');
+      }
+      cursor = page.nextCursor?.trim();
+      if (cursor != null && cursor.isEmpty) cursor = null;
+      if (cursor != null && !seenCursors.add(cursor)) {
+        throw StateError('توقف ترقيم الحركات عند مؤشر متكرر؛ لم يتم إنشاء كشف ناقص.');
+      }
+    } while (cursor != null);
+    return result;
   }
 
   Future<void> loadMoreLogs() async {

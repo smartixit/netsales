@@ -1,5 +1,11 @@
 import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
 
+double? _readWalletDecimal(dynamic value) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
 class PosWalletModel extends PosWalletEntity {
   const PosWalletModel({
     required super.walletId,
@@ -7,6 +13,11 @@ class PosWalletModel extends PosWalletEntity {
     required super.posId,
     super.walletUuid,
     required super.walletBalance,
+    super.openingBalance,
+    super.openingBalanceSource,
+    super.currencyCode,
+    super.networkProfileLogo,
+    super.posProfileLogo,
     super.creditLimit,
     super.availableOverdraftCapacity = 0.0,
     super.status = true,
@@ -39,18 +50,27 @@ class PosWalletModel extends PosWalletEntity {
       networkId: json['network_id'] as int? ?? 0,
       posId: json['pos_id'] as int? ?? 0,
       walletUuid: json['wallet_uuid'] as String?,
-      walletBalance: (json['wallet_balance'] as num?)?.toDouble() ?? 0.0,
-      creditLimit: (json['credit_limit'] as num?)?.toDouble(),
+      walletBalance: _readWalletDecimal(json['wallet_balance']) ?? 0.0,
+      openingBalance: _readWalletDecimal(json['opening_balance']),
+      openingBalanceSource: json['opening_balance_source'] as String?,
+      currencyCode: json['currency_code'] as String?,
+      networkProfileLogo: json['network'] is Map<String, dynamic>
+          ? (json['network'] as Map<String, dynamic>)['network_profile_logo'] as String?
+          : null,
+      posProfileLogo: json['pos'] is Map<String, dynamic>
+          ? (json['pos'] as Map<String, dynamic>)['pos_profile_logo'] as String?
+          : null,
+      creditLimit: _readWalletDecimal(json['credit_limit']),
       availableOverdraftCapacity:
-          (json['available_overdraft_capacity'] as num?)?.toDouble() ?? 0.0,
+          _readWalletDecimal(json['available_overdraft_capacity']) ?? 0.0,
       status: json['status'] as bool? ?? true,
       accountingStatus: json['accounting_status'] as String?,
       accountingStatusLabel: json['accounting_status_label'] as String?,
       isOverdrawn: json['is_overdrawn'] as bool? ?? false,
-      debitAmount: (json['debit_amount'] as num?)?.toDouble() ?? 0.0,
-      creditAmount: (json['credit_amount'] as num?)?.toDouble() ?? 0.0,
+      debitAmount: _readWalletDecimal(json['debit_amount']) ?? 0.0,
+      creditAmount: _readWalletDecimal(json['credit_amount']) ?? 0.0,
       totalPurchasingPower:
-          (json['total_purchasing_power'] as num?)?.toDouble(),
+          _readWalletDecimal(json['total_purchasing_power']),
       networkName: netName,
       posName: pName,
       createdAt: json['created_at'] as String?,
@@ -86,7 +106,11 @@ class PosWalletLogModel extends PosWalletLogEntity {
       walletId: json['wallet_id'] as int? ?? 0,
       logOperationType: json['log_operation_type'] as String?,
       logOperationTypeLabel: json['log_operation_type_label'] as String?,
-      logAmount: (json['log_amount'] as num?)?.toDouble() ?? 0.0,
+      logAmount: _readWalletDecimal(json['log_amount']) ?? 0.0,
+      balanceBefore: _readWalletDecimal(json['balance_before']),
+      balanceAfter: _readWalletDecimal(json['balance_after']),
+      balanceSnapshotSource: json['balance_snapshot_source'] as String?,
+      currencyCode: json['currency_code'] as String?,
       logStatement: json['log_statement'] as String?,
       logDate: json['log_date'] as String?,
       createdBy: json['created_by'] as int?,
