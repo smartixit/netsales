@@ -8,7 +8,6 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
@@ -51,16 +50,10 @@ class OperationalReportsController extends GetxController {
   final Rxn<OperationalReportSummary> summary = Rxn<OperationalReportSummary>();
   final RxnString summaryError = RxnString();
   final selectedType = Rxn<OperationalReportType>();
-  final selectedStatus = RxnString();
-  final selectedSaleType = RxnString();
   final selectedPosId = RxnInt();
   final posOptions = <NetworkPosLinkEntity>[].obs;
   final nextCursor = RxnString();
   final posCursor = RxnString();
-  final fromDate = RxnString();
-  final toDate = RxnString();
-  final searchTextController = TextEditingController();
-  final RxString searchQuery = ''.obs;
 
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
@@ -74,7 +67,8 @@ class OperationalReportsController extends GetxController {
   final posError = RxnString();
   final exportJob = Rxn<OperationalReportExport>();
 
-  Timer? _searchDebounce;
+  Timer? _criteriaDebounce;
+  final Map<String, TextEditingController> _criteriaTextControllers = {};
   int _requestRevision = 0;
   int _posRevision = 0;
   final Set<String> _seenReportCursors = <String>{};
@@ -122,77 +116,86 @@ class OperationalReportsController extends GetxController {
 
   String? get selectedPageProfileId {
     final pageProfileIds = selectedReportEntry?.definition.pageProfileIds;
-    return pageProfileIds == null || pageProfileIds.isEmpty
-        ? null
+    if (pageProfileIds == null || pageProfileIds.isEmpty) return null;
+    final selected = presentation.value.pageProfileId;
+    return selected != null && pageProfileIds.contains(selected)
+        ? selected
         : pageProfileIds.first;
   }
 
   String reportLabel(OperationalReportType type) =>
       catalog.value?.entryFor(type)?.label ?? type.wireValue;
 
-  String reportFilterLabel(String filterId, [String fallback = '']) =>
-      selectedReportEntry?.filterLabels[filterId] ?? fallback;
-
-  String reportChoiceLabel(
-    String filterId,
-    String value, [
-    String fallback = '',
-  ]) =>
-      selectedReportEntry?.choiceLabels[filterId]?[value] ?? fallback;
+  TextEditingController textControllerFor(ReportFilterDefinition filter) {
+    return _criteriaTextControllers.putIfAbsent(filter.id, () {
+      final value = criteria.value.filters[filter.id];
+      final initial = switch (value) {
+        ReportTextFilterValue() => value.value,
+        ReportIntegerFilterValue() => value.value.toString(),
+        ReportDecimalFilterValue() => value.value,
+        ReportDateFilterValue() => _dateText(value.value),
+        _ => '',
+      };
+      return TextEditingController(text: initial);
+    });
+  }
 
   void updateCriteria(ReportCriteria value) {
     final definition = selectedReportEntry?.definition;
-    if (definition == null || value.validateAgainst(definition).isNotEmpty) return;
+    if (definition == null) return;
+
+    final issues = value.validateAgainst(definition);
     criteria.value = value;
     summary.value = null;
     summaryError.value = null;
-    loadReport(refresh: true);
+    reports.clear();
+    nextCursor.value = null;
+    ++_requestRevision;
+    isLoading.value = false;
+    isLoadingMore.value = false;
+
+    _criteriaDebounce?.cancel();
+    if (issues.isNotEmpty) return;
+
+    _criteriaDebounce = Timer(const Duration(milliseconds: 350), () {
+      loadReport(refresh: true);
+    });
   }
 
   void updatePresentation(ReportPresentationOptions value) {
     final definition = selectedReportEntry?.definition;
-    if (definition == null || value.validateAgainst(definition).isNotEmpty) return;
+    if (definition == null || value.validateAgainst(definition).isNotEmpty) {
+      return;
+    }
     presentation.value = value;
   }
 
-  ReportCriteria _effectiveCriteria() {
-    final filters = Map<String, ReportFilterValue>.of(criteria.value.filters);
-    void setText(String id, String? value) {
-      final normalized = value?.trim() ?? '';
-      if (normalized.isEmpty) {
-        filters.remove(id);
-      } else {
-        filters[id] = ReportTextFilterValue(normalized);
-      }
-    }
-    setText('from_date', fromDate.value);
-    setText('to_date', toDate.value);
-    setText('search', searchTextController.text);
-    setText('status', selectedStatus.value);
-    setText('sale_type', selectedSaleType.value);
-    return ReportCriteria(filters: filters);
-  }
+  ReportCriteria _effectiveCriteria() => criteria.value;
 
   String? _textCriteria(String id) {
-    final value = _effectiveCriteria().filters[id];
-    return value is ReportTextFilterValue ? value.value : null;
+    final value = criteria.value.filters[id];
+    if (value is ReportTextFilterValue) return value.value;
+    return null;
   }
 
-  List<String> _choicesForFilter(String filterId) {
-    final filter = selectedReportEntry?.definition.filter(filterId);
-    if (filter == null) return const [];
-    return filter.choices
-        .map((choice) => choice.value)
-        .toList(growable: false);
+  String? _choiceCriteria(String id) {
+    final value = criteria.value.filters[id];
+    if (value is ReportChoiceFilterValue) return value.value;
+    return null;
   }
 
-  List<String> get selectedStatusOptions => _choicesForFilter('status');
+  String? _dateCriteria(String id) {
+    final value = criteria.value.filters[id];
+    if (value is! ReportDateFilterValue) return null;
+    return _dateText(value.value);
+  }
 
-  List<String> get selectedSaleTypeOptions =>
-      _choicesForFilter('sale_type');
-
-  bool get canFilterByPos =>
-      selectedReportEntry?.access.posSelection != 'forbidden';
+  String _dateText(DateTime value) {
+    final local = value.toLocal();
+    return '${local.year.toString().padLeft(4, '0')}-'
+        '${local.month.toString().padLeft(2, '0')}-'
+        '${local.day.toString().padLeft(2, '0')}';
+  }
 
   Future<void> _loadReportCatalog() async {
     final networkId = _networkId;
@@ -269,8 +272,8 @@ class OperationalReportsController extends GetxController {
     _isNetworkWorkspace = isNetworkWorkspace;
     _organizationName = organizationName;
     _logoUrl = logoUrl;
-    _searchDebounce?.cancel();
-    _searchDebounce = null;
+    _criteriaDebounce?.cancel();
+    _criteriaDebounce = null;
     ++_requestRevision;
     ++_posRevision;
     isLoadingPos.value = false;
@@ -281,18 +284,13 @@ class OperationalReportsController extends GetxController {
     nextCursor.value = null;
     errorMessage.value = null;
     loadMoreError.value = null;
-    selectedStatus.value = null;
-    selectedSaleType.value = null;
-    searchTextController.clear();
-    searchQuery.value = '';
     criteria.value = ReportCriteria();
     presentation.value = ReportPresentationOptions();
-    fromDate.value = null;
-    toDate.value = null;
+    for (final controller in _criteriaTextControllers.values) {
+      controller.clear();
+    }
     exportJob.value = null;
     _seenReportCursors.clear();
-    criteria.value = ReportCriteria();
-    presentation.value = ReportPresentationOptions();
 
     _posSearchQuery = '';
     if (!isNetworkWorkspace) {
@@ -331,30 +329,25 @@ class OperationalReportsController extends GetxController {
 
   @override
   void onClose() {
-    _searchDebounce?.cancel();
-    searchTextController.dispose();
+    _criteriaDebounce?.cancel();
+    for (final controller in _criteriaTextControllers.values) {
+      controller.dispose();
+    }
+    _criteriaTextControllers.clear();
     ++_requestRevision;
     ++_posRevision;
     super.onClose();
   }
 
-  void onSearchChanged(String value) {
-    searchQuery.value = value;
-    summary.value = null;
-    summaryError.value = null;
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-      loadReport(refresh: true);
-    });
-  }
-
   Future<void> selectType(OperationalReportType type) async {
     if (!availableTypes.contains(type) || selectedType.value == type) return;
     selectedType.value = type;
+    _criteriaDebounce?.cancel();
     criteria.value = ReportCriteria();
     presentation.value = ReportPresentationOptions();
-    selectedStatus.value = null;
-    selectedSaleType.value = null;
+    for (final controller in _criteriaTextControllers.values) {
+      controller.clear();
+    }
     exportJob.value = null;
     await loadReport(refresh: true);
   }
@@ -365,47 +358,12 @@ class OperationalReportsController extends GetxController {
     await loadReport(refresh: true);
   }
 
-  Future<void> selectStatus(String? value) async {
-    selectedStatus.value = value;
-    await loadReport(refresh: true);
-  }
-
-  Future<void> selectSaleType(String? value) async {
-    selectedSaleType.value = value;
-    await loadReport(refresh: true);
-  }
-
-  Future<void> setDate({
-    required bool isFrom,
-    required DateTime? date,
-  }) async {
-    final value = date == null ? null : DateFormatter.iso(date);
-    if (isFrom) {
-      fromDate.value = value;
-      if (value != null &&
-          toDate.value != null &&
-          toDate.value!.compareTo(value) < 0) {
-        toDate.value = value;
-      }
-    } else {
-      toDate.value = value;
-      if (value != null &&
-          fromDate.value != null &&
-          fromDate.value!.compareTo(value) > 0) {
-        fromDate.value = value;
-      }
-    }
-    await loadReport(refresh: true);
-  }
-
   Future<void> clearFilters() async {
-    _searchDebounce?.cancel();
-    searchTextController.clear();
-    searchQuery.value = '';
-    fromDate.value = null;
-    toDate.value = null;
-    selectedStatus.value = null;
-    selectedSaleType.value = null;
+    _criteriaDebounce?.cancel();
+    criteria.value = ReportCriteria();
+    for (final controller in _criteriaTextControllers.values) {
+      controller.clear();
+    }
     if (_isNetworkWorkspace) {
       selectedPosId.value = null;
       _posSearchQuery = '';
@@ -509,8 +467,8 @@ class OperationalReportsController extends GetxController {
 
   Future<void> loadReport({bool refresh = false}) async {
     if (refresh) {
-      _searchDebounce?.cancel();
-      _searchDebounce = null;
+      _criteriaDebounce?.cancel();
+      _criteriaDebounce = null;
       summary.value = null;
       summaryError.value = null;
     }
@@ -723,12 +681,12 @@ class OperationalReportsController extends GetxController {
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
-        fromDate: fromDate.value,
-        toDate: toDate.value,
+        fromDate: _dateCriteria('from_date'),
+        toDate: _dateCriteria('to_date'),
         scopeLabel: reportScopeLabel,
-        search: searchTextController.text.trim(),
-        status: selectedStatus.value,
-        saleType: selectedSaleType.value,
+        search: _textCriteria('search'),
+        status: _choiceCriteria('status'),
+        saleType: _choiceCriteria('sale_type'),
       );
       CustomSnackbar.show(
         title: 'تم إنشاء ملخص PDF',
@@ -769,12 +727,12 @@ class OperationalReportsController extends GetxController {
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
-        fromDate: fromDate.value,
-        toDate: toDate.value,
+        fromDate: _dateCriteria('from_date'),
+        toDate: _dateCriteria('to_date'),
         scopeLabel: reportScopeLabel,
-        search: searchTextController.text.trim(),
-        status: selectedStatus.value,
-        saleType: selectedSaleType.value,
+        search: _textCriteria('search'),
+        status: _choiceCriteria('status'),
+        saleType: _choiceCriteria('sale_type'),
       );
       if (shared) {
         CustomSnackbar.show(
@@ -817,12 +775,12 @@ class OperationalReportsController extends GetxController {
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
-        fromDate: fromDate.value,
-        toDate: toDate.value,
+        fromDate: _dateCriteria('from_date'),
+        toDate: _dateCriteria('to_date'),
         scopeLabel: reportScopeLabel,
-        search: searchTextController.text.trim(),
-        status: selectedStatus.value,
-        saleType: selectedSaleType.value,
+        search: _textCriteria('search'),
+        status: _choiceCriteria('status'),
+        saleType: _choiceCriteria('sale_type'),
       );
       if (printed) {
         CustomSnackbar.show(
