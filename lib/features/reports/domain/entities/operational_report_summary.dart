@@ -56,6 +56,11 @@ class OperationalReportSummary {
       OperationalReportType.posWallet => [
         count,
         OperationalReportMetric(
+          label: 'الرصيد الافتتاحي للفترة',
+          value: _value('opening_balance'),
+          isCurrency: true,
+        ),
+        OperationalReportMetric(
           label: 'إجمالي الإيداعات',
           value: _value('deposits'),
           isCurrency: true,
@@ -65,11 +70,22 @@ class OperationalReportSummary {
           value: _value('withdrawals'),
           isCurrency: true,
         ),
+        OperationalReportMetric(
+          label: 'الرصيد الختامي للفترة',
+          value: _value('closing_balance'),
+          isCurrency: true,
+        ),
+        if (values['credit_limit'] != null)
+          OperationalReportMetric(
+            label: 'السقف الائتماني',
+            value: _value('credit_limit'),
+            isCurrency: true,
+          ),
       ],
       OperationalReportType.repayments => [
         count,
         OperationalReportMetric(
-          label: 'إجمالي السداد',
+          label: 'إجمالي السداد المكتمل',
           value: _value('total_amount'),
           isCurrency: true,
         ),
