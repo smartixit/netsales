@@ -7,27 +7,15 @@ class RepaymentDocumentUseCase {
 
   final RepaymentDocumentRepository repository;
 
-  Future<bool> exportAndSave(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) {
-    return repository.exportAndSave(
-      repayment,
-      isNetworkView: isNetworkView,
-    );
+  Future<bool> exportAndSave(PosRepaymentEntity repayment) {
+    return repository.exportAndSave(repayment);
   }
 
-  Future<bool> share(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) {
-    return repository.share(repayment, isNetworkView: isNetworkView);
+  Future<bool> share(PosRepaymentEntity repayment) {
+    return repository.share(repayment);
   }
 
-  Future<bool> print(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) {
-    return repository.print(repayment, isNetworkView: isNetworkView);
+  Future<bool> print(PosRepaymentEntity repayment) {
+    return repository.print(repayment);
   }
 }
