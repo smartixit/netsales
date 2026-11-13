@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
 import 'package:netsales/core/services/file_export_service.dart';
+import 'package:netsales/features/billing/data/services/billing_report_document_service.dart';
 
 class BillingReportsController extends GetxController {
   BillingReportsController({required this.useCases, required this.networkId});
@@ -15,6 +16,7 @@ class BillingReportsController extends GetxController {
   final summary=Rxn<Map<String,dynamic>>();
   final isLoading=false.obs;
   final isLoadingMore=false.obs;
+  final isExportingPdf=false.obs;
   final errorMessage=RxnString();
   final searchController=TextEditingController();
   final statusController=TextEditingController();
@@ -100,6 +102,30 @@ class BillingReportsController extends GetxController {
     } catch(error) {
       errorMessage.value=AppException.sanitizeMessage(error,fallback:'تعذر تصدير تقرير الاشتراكات.');
     }
+  }
+
+  Future<void> exportPdfSummary() async {
+    final type=selectedType.value;
+    final metrics=summary.value;
+    if(type==null||metrics==null||isExportingPdf.value)return;
+    final definition=catalog.firstWhereOrNull((e)=>e['id']==type);
+    final label=definition?['label']?.toString()??type;
+    isExportingPdf.value=true;
+    try {
+      final result=await BillingReportDocumentService.instance.exportSummary(
+        reportType:type,
+        reportLabel:label,
+        summary:metrics,
+        localeTag:'ar-YE',
+        fromDate:fromDate.value==null?null:_date(fromDate.value),
+        toDate:toDate.value==null?null:_date(toDate.value),
+        status:statusController.text.trim().isEmpty?null:statusController.text.trim(),
+        search:searchQuery.value.trim().isEmpty?null:searchQuery.value.trim(),
+      );
+      if(!result.isSuccess)errorMessage.value=result.errorMessage??'تعذر حفظ ملف PDF.';
+    }catch(error){
+      errorMessage.value=AppException.sanitizeMessage(error,fallback:'تعذر إنشاء ملخص PDF.');
+    }finally{isExportingPdf.value=false;}
   }
 
   Future<void> loadMore()async{
