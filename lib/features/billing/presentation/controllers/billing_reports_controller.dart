@@ -361,49 +361,154 @@ class BillingReportsController extends GetxController {
   }[type]??type.replaceAll('_',' ');
 
   Future<void> exportPdfSummary() async {
-    final type=selectedType.value;
-    final metrics=summary.value;
-    if(type==null||metrics==null||isExportingPdf.value)return;
-    final definition=catalog.firstWhereOrNull((e)=>e['id']==type);
-    final label=(presentation.value.languageTag=='en'?_englishReportLabel(type):definition?['label']?.toString())??type;
-    isExportingPdf.value=true;
+    final type = selectedType.value;
+    final metrics = summary.value;
+    final definition = catalog.firstWhereOrNull((item) => item['id'] == type);
+    final network = networkId();
+    final revision = _revision;
+    final criteriaSnapshot = Map<String, ReportFilterValue>.from(
+      criteria.value.filters,
+    );
+    final filtersSnapshot = Map<String, dynamic>.from(_filters);
+    final presentationSnapshot = presentation.value;
+    final fromDateSnapshot = fromDate.value;
+    final toDateSnapshot = toDate.value;
+    final searchSnapshot = searchQuery.value.trim();
+    final statusSnapshot = statusController.text.trim();
+
+    if (type == null ||
+        metrics == null ||
+        definition == null ||
+        network == null ||
+        isExportingPdf.value) {
+      return;
+    }
+
+    final label = presentationSnapshot.languageTag == 'en'
+        ? _englishReportLabel(type)
+        : definition['label']?.toString() ?? type;
+
+    isExportingPdf.value = true;
     try {
-      final network=networkId();
-      if(network==null)throw StateError('حدد الشبكة أولاً.');
-      final total=int.tryParse(metrics['record_count']?.toString()??'')??0;
-      if(total>1500)throw StateError('يتجاوز عدد السجلات 1500؛ استخدم تصدير CSV للحصول على الملف الكامل دون اقتطاع.');
-      final allRows=<Map<String,dynamic>>[];
+      final total =
+          int.tryParse(metrics['record_count']?.toString() ?? '') ?? 0;
+      if (total > 1500) {
+        throw StateError(
+          'يتجاوز عدد السجلات 1500؛ استخدم تصدير CSV للحصول على الملف الكامل دون اقتطاع.',
+        );
+      }
+
+      final allRows = <Map<String, dynamic>>[];
+      final seenCursors = <String>{};
       String? cursor;
-      do{
-        final query=<String,dynamic>{..._filters,'per_page':100,if(cursor!=null)'cursor':cursor};
-        final page=_map(await useCases.billingReport(network,type,query));
-        allRows.addAll(_list(page['data']??page['items']));
-        cursor=_cursorFrom(page['next_page_url']??(page['links'] is Map<String,dynamic>?page['links']['next']:null));
-        if(allRows.length>1500)throw StateError('يتجاوز عدد السجلات الحد الآمن لملف PDF.');
-      }while(cursor!=null);
-      if((searchQuery.value.trim().isEmpty)&&total>0&&allRows.length<total)throw StateError('لم تكتمل قراءة جميع صفحات التقرير؛ أُوقف إنشاء PDF الجزئي.');
-      final rawColumns=definition?['columns'];
-      final allColumns=rawColumns is List<dynamic>?rawColumns.whereType<Map<String,dynamic>>().toList():<Map<String,dynamic>>[];
-      final visibleIds=presentation.value.visibleColumnIds.toSet();
-      final columns=allColumns.where((column)=>visibleIds.contains(column['id']?.toString()??column['key']?.toString())).toList();
-      if(columns.isEmpty)throw StateError('تعريف أعمدة التقرير غير متاح لإنشاء PDF.');
-      final result=await BillingReportDocumentService.instance.exportSummary(
-        reportType:type,
-        reportLabel:label,
-        summary:metrics,
-        includeMetrics:presentation.value.includeMetrics,
-        rows:allRows,
-        columns:columns,
-        localeTag:presentation.value.languageTag??'ar-YE',
-        fromDate:fromDate.value==null?null:_date(fromDate.value),
-        toDate:toDate.value==null?null:_date(toDate.value),
-        status:statusController.text.trim().isEmpty?null:statusController.text.trim(),
-        search:searchQuery.value.trim().isEmpty?null:searchQuery.value.trim(),
+
+      do {
+        if (_revision != revision ||
+            networkId() != network ||
+            selectedType.value != type ||
+            criteria.value.filters.length != criteriaSnapshot.length ||
+            presentation.value != presentationSnapshot) {
+          throw StateError(
+            'تغيرت معايير التقرير أثناء تجهيز PDF؛ أُوقف التصدير لمنع إنشاء مستند ببيانات مختلطة.',
+          );
+        }
+
+        if (cursor != null && !seenCursors.add(cursor)) {
+          throw StateError(
+            'توقف إنشاء PDF لأن الخادم أعاد مؤشر صفحة سبق استخدامه.',
+          );
+        }
+
+        final query = <String, dynamic>{
+          ...filtersSnapshot,
+          'per_page': 100,
+          if (cursor != null) 'cursor': cursor,
+        };
+        final page = _map(
+          await useCases.billingReport(network, type, query),
+        );
+        if (_revision != revision ||
+            networkId() != network ||
+            selectedType.value != type) {
+          throw StateError(
+            'تغير نطاق التقرير أثناء تجهيز PDF؛ أُوقف التصدير.',
+          );
+        }
+
+        allRows.addAll(_list(page['data'] ?? page['items']));
+        if (allRows.length > 1500) {
+          throw StateError(
+            'يتجاوز عدد السجلات الحد الآمن لملف PDF.',
+          );
+        }
+
+        final nextCursor = _cursorFrom(
+          page['next_page_url'] ??
+              (page['links'] is Map<String, dynamic>
+                  ? page['links']['next']
+                  : null),
+        );
+        if (nextCursor != null &&
+            (nextCursor == cursor || seenCursors.contains(nextCursor))) {
+          throw StateError(
+            'توقف إنشاء PDF لأن الخادم أعاد مؤشراً مكرراً.',
+          );
+        }
+        cursor = nextCursor;
+      } while (cursor != null);
+
+      if (searchSnapshot.isEmpty &&
+          total > 0 &&
+          allRows.length < total) {
+        throw StateError(
+          'لم تكتمل قراءة جميع صفحات التقرير؛ أُوقف إنشاء PDF الجزئي.',
+        );
+      }
+
+      final rawColumns = definition['columns'];
+      final allColumns = rawColumns is List<dynamic>
+          ? rawColumns.whereType<Map<String, dynamic>>().toList()
+          : <Map<String, dynamic>>[];
+      final visibleIds = presentationSnapshot.visibleColumnIds.toSet();
+      final columns = allColumns
+          .where(
+            (column) => visibleIds.contains(
+              column['id']?.toString() ?? column['key']?.toString(),
+            ),
+          )
+          .toList(growable: false);
+
+      if (columns.isEmpty) {
+        throw StateError(
+          'تعريف أعمدة التقرير غير متاح لإنشاء PDF.',
+        );
+      }
+
+      final result = await BillingReportDocumentService.instance.exportSummary(
+        reportType: type,
+        reportLabel: label,
+        summary: metrics,
+        includeMetrics: presentationSnapshot.includeMetrics,
+        rows: allRows,
+        columns: columns,
+        localeTag: presentationSnapshot.languageTag ?? 'ar-YE',
+        fromDate: fromDateSnapshot == null ? null : _date(fromDateSnapshot),
+        toDate: toDateSnapshot == null ? null : _date(toDateSnapshot),
+        status: statusSnapshot.isEmpty ? null : statusSnapshot,
+        search: searchSnapshot.isEmpty ? null : searchSnapshot,
       );
-      if(!result.isSuccess)errorMessage.value=result.errorMessage??'تعذر حفظ ملف PDF.';
-    }catch(error){
-      errorMessage.value=AppException.sanitizeMessage(error,fallback:'تعذر إنشاء ملخص PDF.');
-    }finally{isExportingPdf.value=false;}
+      if (!result.isSuccess) {
+        errorMessage.value =
+            result.errorMessage ?? 'تعذر حفظ ملف PDF.';
+      }
+    } catch (error) {
+      errorMessage.value = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر إنشاء ملخص PDF.',
+      );
+    } finally {
+      isExportingPdf.value = false;
+    }
   }
 
 }
