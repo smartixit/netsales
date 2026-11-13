@@ -193,7 +193,7 @@ class ApiService {
   }) async {
     try {
       final effectiveOptions = (options ?? Options()).copyWith(
-        extra: {...?options?.extra, 'idempotency_key': ?idempotencyKey},
+        extra: {...?options?.extra, 'idempotency_key': idempotencyKey},
       );
 
       final response = await _dio.post<dynamic>(
@@ -229,7 +229,7 @@ class ApiService {
   }) async {
     try {
       final effectiveOptions = (options ?? Options()).copyWith(
-        extra: {...?options?.extra, 'idempotency_key': ?idempotencyKey},
+        extra: {...?options?.extra, 'idempotency_key': idempotencyKey},
       );
 
       final response = await _dio.put<dynamic>(
@@ -264,7 +264,7 @@ class ApiService {
   }) async {
     try {
       final effectiveOptions = (options ?? Options()).copyWith(
-        extra: {...?options?.extra, 'idempotency_key': ?idempotencyKey},
+        extra: {...?options?.extra, 'idempotency_key': idempotencyKey},
       );
 
       final response = await _dio.patch<dynamic>(
@@ -299,7 +299,7 @@ class ApiService {
   }) async {
     try {
       final effectiveOptions = (options ?? Options()).copyWith(
-        extra: {...?options?.extra, 'idempotency_key': ?idempotencyKey},
+        extra: {...?options?.extra, 'idempotency_key': idempotencyKey},
       );
 
       final response = await _dio.delete<dynamic>(
@@ -354,7 +354,7 @@ class ApiService {
       });
 
       final effectiveOptions = Options(
-        extra: {'idempotency_key': ?idempotencyKey},
+        extra: {'idempotency_key': idempotencyKey},
       );
 
       final response = await _dio.post<T>(
@@ -404,7 +404,7 @@ class ApiService {
       final response = await _dio.post<dynamic>(
         endpoint,
         data: formData,
-        options: Options(extra: {'idempotency_key': ?idempotencyKey}),
+        options: Options(extra: {'idempotency_key': idempotencyKey}),
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
       );
