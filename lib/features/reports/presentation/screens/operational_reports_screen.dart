@@ -13,6 +13,8 @@ import 'package:netsales/features/reports/presentation/widgets/operational_repor
 import 'package:netsales/features/reports/presentation/widgets/operational_report_summary_strip.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_type_selector.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/dialogs/custom_dialog.dart';
+import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
@@ -40,39 +42,28 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
   Future<void> _showSavePresetDialog(BuildContext context) async {
     final nameController = TextEditingController();
     try {
-      await Get.dialog<void>(
-        Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('حفظ إعداد التقرير', style: AppTypography.titleLarge),
-                  AppSpacing.vMd,
-                  CustomTextField(controller: nameController, label: 'اسم الإعداد', hint: 'مثال: تقرير المبيعات الشهري', maxLength: 120, isRequired: true),
-                  AppSpacing.vMd,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      CustomButton.outline(text: 'إلغاء', onPressed: Get.back),
-                      AppSpacing.hSm,
-                      CustomButton.primary(text: 'حفظ', onPressed: () {
-                        final name = nameController.text.trim();
-                        if (name.isEmpty) return;
-                        Get.back();
-                        unawaited(controller.savePreset(name));
-                      }),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+      await CustomDialog.show(
+        type: DialogType.custom,
+        title: 'حفظ إعداد التقرير',
+        maxWidth: 420,
+        content: Padding(
+          padding: const EdgeInsets.all(8),
+          child: CustomTextField(
+            controller: nameController,
+            label: 'اسم الإعداد',
+            hint: 'مثال: تقرير المبيعات الشهري',
+            maxLength: 120,
+            isRequired: true,
           ),
         ),
-        barrierDismissible: true,
+        confirmLabel: 'حفظ',
+        cancelLabel: 'إلغاء',
+        onConfirm: () {
+          final name = nameController.text.trim();
+          if (name.isEmpty) return;
+          Get.back();
+          unawaited(controller.savePreset(name));
+        },
       );
     } finally {
       nameController.dispose();
@@ -744,13 +735,11 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
     required List<String> messages,
   }) {
     final colors = Theme.of(context).colorScheme;
-    return Container(
+    return CustomSurfaceCard(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colors.errorContainer.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colors.error.withValues(alpha: 0.35)),
-      ),
+      backgroundColor: colors.errorContainer.withValues(alpha: 0.45),
+      borderColor: colors.error.withValues(alpha: 0.35),
+      radius: 12,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -782,13 +771,11 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
     required String title,
     required IconData icon,
     required List<Widget> children,
-  }) => Container(
+  }) => CustomSurfaceCard(
     padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: context.colors.surface,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: context.colors.outlineVariant),
-    ),
+    backgroundColor: context.colors.surface,
+    borderColor: context.colors.outlineVariant,
+    radius: 16,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
