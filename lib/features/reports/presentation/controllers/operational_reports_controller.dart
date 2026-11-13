@@ -30,6 +30,7 @@ class OperationalReportsController extends GetxController {
     required this.downloadExportUseCase,
     required this.getNetworkPosListUseCase,
     required this.saveSummaryPdfUseCase,
+    required this.saveDetailedPdfUseCase,
     required this.shareSummaryPdfUseCase,
     required this.printSummaryPdfUseCase,
   });
