@@ -97,7 +97,7 @@ class OperationalReportsController extends GetxController {
 
   String get reportScopeLabel {
     if (!_isNetworkWorkspace) return 'نقطة البيع الحالية';
-    if (selectedDefinition?['pos_selection'] == 'forbidden') {
+    if (selectedReportEntry?.access.posSelection == 'forbidden') {
       return 'نطاق الشبكة بالكامل';
     }
     final posId = selectedPosId.value;
@@ -109,41 +109,29 @@ class OperationalReportsController extends GetxController {
   List<OperationalReportType> get availableTypes =>
       catalog.value?.availableTypes ?? const <OperationalReportType>[];
 
-  Map<String, dynamic>? get selectedDefinition {
+  OperationalReportCatalogEntry? get selectedReportEntry {
     final type = selectedType.value;
-    return type == null ? null : catalog.value?.definitionFor(type);
+    return type == null ? null : catalog.value?.entryFor(type);
   }
 
   String reportLabel(OperationalReportType type) =>
-      catalog.value?.definitionFor(type)?['label']?.toString() ??
-      type.wireValue;
+      catalog.value?.entryFor(type)?.label ?? type.wireValue;
 
-  List<String> get selectedStatusOptions {
-    final filters = selectedDefinition?['filters'];
-    if (filters is! List) return const [];
-    for (final filter in filters) {
-      if (filter is Map && filter['id'] == 'status') {
-        final choices = filter['choices'];
-        if (choices is List) return choices.map((value) => value.toString()).toList(growable: false);
-      }
-    }
-    return const [];
+  List<String> _choicesForFilter(String filterId) {
+    final filter = selectedReportEntry?.definition.filter(filterId);
+    if (filter == null) return const [];
+    return filter.choices
+        .map((choice) => choice.value)
+        .toList(growable: false);
   }
 
-  List<String> get selectedSaleTypeOptions {
-    final filters = selectedDefinition?['filters'];
-    if (filters is! List) return const [];
-    for (final filter in filters) {
-      if (filter is Map && filter['id'] == 'sale_type') {
-        final choices = filter['choices'];
-        if (choices is List) return choices.map((value) => value.toString()).toList(growable: false);
-      }
-    }
-    return const [];
-  }
+  List<String> get selectedStatusOptions => _choicesForFilter('status');
+
+  List<String> get selectedSaleTypeOptions =>
+      _choicesForFilter('sale_type');
 
   bool get canFilterByPos =>
-      selectedDefinition?['pos_selection'] != 'forbidden';
+      selectedReportEntry?.access.posSelection != 'forbidden';
 
   Future<void> _loadReportCatalog() async {
     final networkId = _networkId;
@@ -164,18 +152,20 @@ class OperationalReportsController extends GetxController {
 
   bool get canExport {
     final type = selectedType.value;
-    final permission = selectedDefinition?['permissions'];
-    final exportPermission = permission is Map ? permission['export'] : null;
-    return type != null && exportPermission is String && PermissionService.to.can(exportPermission);
+    final exportPermission = selectedReportEntry?.access.exportPermission;
+    return type != null &&
+        selectedReportEntry?.access.available == true &&
+        exportPermission != null &&
+        PermissionService.to.can(exportPermission);
   }
 
   bool get requiresPosSelection =>
-      selectedDefinition?['pos_selection'] == 'required' &&
+      selectedReportEntry?.access.posSelection == 'required' &&
       _isNetworkWorkspace &&
       selectedPosId.value == null;
 
   int? get _queryPosId {
-    if (selectedDefinition?['pos_selection'] == 'forbidden') {
+    if (selectedReportEntry?.access.posSelection == 'forbidden') {
       return null;
     }
     return _isNetworkWorkspace ? selectedPosId.value : _workspacePosId;
@@ -475,11 +465,9 @@ class OperationalReportsController extends GetxController {
       errorMessage.value = 'حدد نقطة بيع لعرض كشف حساب محفظتها.';
       return;
     }
-    final viewPermissions = selectedDefinition?['permissions'];
-    final viewPermission = viewPermissions is Map
-        ? viewPermissions['view']
-        : null;
-    if (viewPermission is! String ||
+    final viewPermission = selectedReportEntry?.access.viewPermission;
+    if (selectedReportEntry?.access.available != true ||
+        viewPermission == null ||
         !PermissionService.to.can(viewPermission)) {
       reports.clear();
       nextCursor.value = null;
