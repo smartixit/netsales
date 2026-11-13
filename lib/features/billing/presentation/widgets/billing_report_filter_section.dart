@@ -13,6 +13,7 @@ class BillingReportFilterSection extends StatelessWidget {
     required this.criteria,
     required this.onChanged,
     required this.resolveLabel,
+    this.english = false,
     super.key,
   });
 
@@ -21,6 +22,7 @@ class BillingReportFilterSection extends StatelessWidget {
   final ReportCriteria criteria;
   final ValueChanged<ReportCriteria> onChanged;
   final ReportLabelResolver resolveLabel;
+  final bool english;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,7 @@ class BillingReportFilterSection extends StatelessWidget {
         CustomTextField(
           controller: controller.searchController,
           label: resolveLabel(context, searchFilter.labelKey),
-          hint: 'ابحث في سجلات التقرير',
+          hint: english ? 'Search report records' : 'ابحث في سجلات التقرير',
           prefixIcon: const Icon(Icons.search),
           isRequired: searchFilter.required,
           onChanged: (value) {
@@ -74,7 +76,7 @@ class BillingReportFilterSection extends StatelessWidget {
               onChanged(ReportCriteria(filters: next));
             },
             label: resolveLabel(context, statusFilter.labelKey),
-            hint: 'كل الحالات',
+            hint: english ? 'All statuses' : 'كل الحالات',
           ),
         );
       } else {
@@ -82,7 +84,7 @@ class BillingReportFilterSection extends StatelessWidget {
           CustomTextField(
             controller: controller.statusController,
             label: resolveLabel(context, statusFilter.labelKey),
-            hint: 'أدخل الحالة',
+            hint: english ? 'Enter status' : 'أدخل الحالة',
             isRequired: statusFilter.required,
             onChanged: (value) {
               final next =
@@ -109,6 +111,7 @@ class BillingReportFilterSection extends StatelessWidget {
           hasFromDate: fromFilter != null,
           hasToDate: toFilter != null,
           onChanged: onChanged,
+          english: english,
         ),
       );
     }
