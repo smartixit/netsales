@@ -133,7 +133,7 @@ class BillingWorkspaceContent extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text('جهات الاتصال', style: AppTypography.titleSmall),
+                    Text('جهات الاتصال', style: AppTypography.titleSmall),
                     if (account['contacts'] is List &&
                         (account['contacts'] as List).isNotEmpty)
                       ...(account['contacts'] as List<dynamic>)
@@ -404,7 +404,7 @@ class BillingWorkspaceContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('حالة الفترة التجريبية', style: AppTypography.titleSmall),
+          Text('حالة الفترة التجريبية', style: AppTypography.titleSmall),
           BillingStatusBadge(status: trial['status']?.toString()),
           Text(trial['awaiting_first_activation'] == true
               ? 'التجربة معتمدة وتبدأ عند أول تفعيل تشغيلي؛ لم يبدأ عدادها بعد.'
