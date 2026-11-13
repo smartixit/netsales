@@ -58,6 +58,9 @@ class BillingReportLabels {
       }[type] ??
       type;
 
+  static String field(String key, {required bool english}) =>
+      english ? englishField(key) : arabic(key);
+
   static String englishField(String key) => const {
         'record_count': 'Record count',
         'active_subscriptions': 'Active subscriptions',
