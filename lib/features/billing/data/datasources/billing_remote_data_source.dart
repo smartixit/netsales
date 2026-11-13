@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:netsales/core/models/api_response.dart';
 
 abstract interface class BillingRemoteDataSource {
