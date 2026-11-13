@@ -24,6 +24,7 @@ class BillingReportsController extends GetxController {
   final summary=Rxn<Map<String,dynamic>>();
   final isLoading=false.obs;
   final isLoadingMore=false.obs;
+  final loadMoreError=RxnString();
   final isExportingPdf=false.obs;
   final errorMessage=RxnString();
   final searchController=TextEditingController();
@@ -36,6 +37,7 @@ class BillingReportsController extends GetxController {
   bool _suppressSearchWorker=false;
   int _revision=0;
   String? _nextCursor;
+  final Set<String> _seenCursors = <String>{};
 
   ReportDataType _parseDataType(String? value){
     return switch(value){
@@ -215,22 +217,60 @@ class BillingReportsController extends GetxController {
     criteria.value=ReportCriteria();searchController.clear();statusController.clear();searchQuery.value='';selectedStatus.value=null;fromDate.value=null;toDate.value=null;await loadReport();
   }
 
-  Future<void> loadReport({int? revision})async{
-    final n=networkId(),type=selectedType.value;if(n==null||type==null)return;
-    final rev=revision??++_revision;isLoading.value=true;isLoadingMore.value=false;errorMessage.value=null;_nextCursor=null;
-    try{
-      final query=_filters;
-      final values=await Future.wait([useCases.billingReport(n,type,query),useCases.billingReportSummary(n,type,query)]);
-      if(rev!=_revision)return;
-      final data=_map(values[0]);
-      rows.assignAll(_list(data['data']??data['items']));
-      _nextCursor=_cursorFrom(data['next_page_url']??(data['links'] is Map<String,dynamic>?data['links']['next']:null));
-      final summaryEnvelope=_map(values[1]);
-      final rawSummary=summaryEnvelope['summary'];
-      summary.value=rawSummary is Map<String,dynamic>?rawSummary:summaryEnvelope;
+  Future<void> loadReport({int? revision}) async {
+    final network = networkId();
+    final type = selectedType.value;
+    if (network == null || type == null) return;
+
+    final currentRevision = revision ?? ++_revision;
+    isLoading.value = true;
+    isLoadingMore.value = false;
+    errorMessage.value = null;
+    loadMoreError.value = null;
+    _nextCursor = null;
+    _seenCursors.clear();
+    rows.clear();
+    charts.clear();
+    summary.value = null;
+
+    try {
+      final query = _filters;
+      final values = await Future.wait([
+        useCases.billingReport(network, type, query),
+        useCases.billingReportSummary(network, type, query),
+      ]);
+      if (currentRevision != _revision ||
+          network != networkId() ||
+          type != selectedType.value) {
+        return;
+      }
+
+      final data = _map(values[0]);
+      rows.assignAll(_list(data['data'] ?? data['items']));
+      _nextCursor = _cursorFrom(
+        data['next_page_url'] ??
+            (data['links'] is Map<String, dynamic>
+                ? data['links']['next']
+                : null),
+      );
+      if (_nextCursor != null) _seenCursors.add(_nextCursor!);
+
+      final summaryEnvelope = _map(values[1]);
+      final rawSummary = summaryEnvelope['summary'];
+      summary.value = rawSummary is Map<String, dynamic>
+          ? rawSummary
+          : summaryEnvelope;
       charts.assignAll(_list(summaryEnvelope['charts']));
-    }catch(e){if(rev==_revision)errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل تقرير الاشتراكات.');}
-    finally{if(rev==_revision)isLoading.value=false;}
+    } catch (error) {
+      if (currentRevision == _revision) {
+        errorMessage.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تحميل تقرير الاشتراكات.',
+        );
+      }
+    } finally {
+      if (currentRevision == _revision) isLoading.value = false;
+    }
   }
   bool get hasMore => _nextCursor != null && _nextCursor!.isNotEmpty;
 
@@ -243,8 +283,19 @@ class BillingReportsController extends GetxController {
     final network = networkId();
     final type = selectedType.value;
     final cursor = _nextCursor;
-    if (network == null || type == null || cursor == null ||
-        cursor.isEmpty || isLoading.value || isLoadingMore.value) {
+    if (network == null ||
+        type == null ||
+        cursor == null ||
+        cursor.isEmpty ||
+        isLoading.value ||
+        isLoadingMore.value ||
+        loadMoreError.value != null) {
+      return;
+    }
+
+    if (!_seenCursors.add(cursor)) {
+      loadMoreError.value =
+          'توقف تحميل التقرير لأن الخادم أعاد مؤشر صفحة سبق استخدامه.';
       return;
     }
 
@@ -253,19 +304,33 @@ class BillingReportsController extends GetxController {
     try {
       final query = <String, dynamic>{..._filters, 'cursor': cursor};
       final page = _map(await useCases.billingReport(network, type, query));
-      if (revision != _revision || type != selectedType.value) return;
+      if (revision != _revision ||
+          network != networkId() ||
+          type != selectedType.value) {
+        return;
+      }
 
-      final nextRows = _list(page['data'] ?? page['items']);
-      rows.addAll(nextRows);
-      _nextCursor = _cursorFrom(
+      final nextCursor = _cursorFrom(
         page['next_page_url'] ??
             (page['links'] is Map<String, dynamic>
                 ? page['links']['next']
                 : null),
       );
+      if (nextCursor != null &&
+          (nextCursor == cursor || _seenCursors.contains(nextCursor))) {
+        throw StateError('The billing report API returned a repeated cursor.');
+      }
+
+      rows.addAll(_list(page['data'] ?? page['items']));
+      _nextCursor = nextCursor;
+      if (nextCursor != null) _seenCursors.add(nextCursor);
+      loadMoreError.value = null;
     } catch (error) {
-      if (revision == _revision) {
-        errorMessage.value = AppException.sanitizeMessage(
+      if (revision == _revision &&
+          network == networkId() &&
+          type == selectedType.value) {
+        _seenCursors.remove(cursor);
+        loadMoreError.value = AppException.sanitizeMessage(
           error,
           fallback: 'تعذر تحميل بقية سجلات التقرير.',
         );
@@ -274,6 +339,7 @@ class BillingReportsController extends GetxController {
       if (revision == _revision) isLoadingMore.value = false;
     }
   }
+
   Future<void> exportCsv() async {
     final n=networkId(),type=selectedType.value;
     if(n==null||type==null||isLoading.value)return;
