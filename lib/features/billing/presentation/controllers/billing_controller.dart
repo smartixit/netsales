@@ -385,6 +385,7 @@ class BillingController extends GetxController {
   Future<void> loadSubscriptionDetails(int id) async {
     final detailsRevision = ++_detailsRevision;
     _detailsSubscriptionId = id;
+    errorMessage.value = null;
     subscriptionDetails.value = null;
     eventsPage.reset();
     usagePage.reset();
