@@ -4,22 +4,20 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
-import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 
 class OperationalReportSummaryStrip extends StatelessWidget {
   const OperationalReportSummaryStrip({
     required this.summary,
-    required this.type,
     super.key,
   });
 
   final OperationalReportSummary summary;
-  final OperationalReportType type;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final metrics = summary.metricsFor(type);
+    final metrics = summary.metrics;
+    final currencyCode = summary.values['currency_code']?.toString() ?? 'YER';
     if (metrics.isEmpty) return const SizedBox.shrink();
 
     return SizedBox(
@@ -33,8 +31,8 @@ class OperationalReportSummaryStrip extends StatelessWidget {
           final displayValue = metric.isCurrency
               ? CustomInteractiveAmountText(
                   amount: metric.value,
-                  currencyCode: 'YER',
-                  trailingText: 'ر.ي',
+                  currencyCode: currencyCode,
+                  trailingText: currencyCode,
                   enableTooltip: true,
                   style: AppTypography.titleMedium.copyWith(
                     color: colors.primary,
