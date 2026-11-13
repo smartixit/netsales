@@ -21,6 +21,41 @@ void main() {
       expect(state.hasMore, isTrue);
     });
 
+    test('tracks first-page errors without discarding the prior rows', () {
+      final state = BillingCursorPageState(identityKey: 'invoice_id');
+      state.replace({
+        'data': [
+          {'invoice_id': 11},
+        ],
+        'links': {'next': '/invoices?cursor=cursor-old'},
+      });
+
+      final revision = state.beginRefresh();
+      state.failFirstPage('تعذر التحديث', revision: revision);
+
+      expect(state.items.single['invoice_id'], 11);
+      expect(state.nextCursor, 'cursor-old');
+      expect(state.hasMore, isTrue);
+      expect(state.isLoadingFirstPage.value, isFalse);
+      expect(state.firstPageError.value, 'تعذر التحديث');
+    });
+
+    test('clears first-page errors after a successful replacement', () {
+      final state = BillingCursorPageState(identityKey: 'invoice_id');
+      final revision = state.beginRefresh();
+      state.failFirstPage('تعذر التحديث', revision: revision);
+
+      state.replace({
+        'data': [
+          {'invoice_id': 12},
+        ],
+      });
+
+      expect(state.items.single['invoice_id'], 12);
+      expect(state.firstPageError.value, isNull);
+      expect(state.isLoadingFirstPage.value, isFalse);
+    });
+
     test('preserves the current cursor and rows when a refresh starts', () {
       final state = BillingCursorPageState(identityKey: 'invoice_id');
       state.replace({
