@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 /// Cursor-backed state for one independently pageable billing collection.
@@ -89,10 +88,4 @@ class BillingCursorPageState {
     return Uri.tryParse(next)?.queryParameters['cursor'];
   }
 
-  @visibleForTesting
-  void dispose() {
-    items.close();
-    isLoadingMore.close();
-    loadMoreError.close();
-  }
 }
