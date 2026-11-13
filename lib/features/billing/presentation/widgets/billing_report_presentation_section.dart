@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
-import 'package:netsales/widgets/inputs/custom_switch.dart';
+import 'package:netsales/features/billing/presentation/widgets/billing_report_column_visibility_section.dart';
 
 class BillingReportPresentationSection extends StatelessWidget {
   const BillingReportPresentationSection({
@@ -137,29 +137,12 @@ class BillingReportPresentationSection extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 8),
-        Text('الأعمدة الظاهرة في PDF', style: Theme.of(context).textTheme.titleSmall),
-        ...definition.columns.map(
-          (column) => Row(
-            children: [
-              Expanded(
-                child: Text(resolveLabel(context, column.labelKey)),
-              ),
-              CustomSwitch(
-                value: presentation.visibleColumnIds.contains(column.id),
-                enabled: column.hideable,
-                onChanged: (value) {
-                  final selected =
-                      List<String>.from(presentation.visibleColumnIds);
-                  if (value && !selected.contains(column.id)) {
-                    selected.add(column.id);
-                  }
-                  if (!value && selected.length > 1) {
-                    selected.remove(column.id);
-                  }
-                  onChanged(_copy(visibleColumnIds: selected));
-                },
-              ),
-            ],
+        BillingReportColumnVisibilitySection(
+          columns: definition.columns,
+          presentation: presentation,
+          resolveLabel: resolveLabel,
+          onChanged: (visibleColumnIds) => onChanged(
+            _copy(visibleColumnIds: visibleColumnIds),
           ),
         ),
       ],
