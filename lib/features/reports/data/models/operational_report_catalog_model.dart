@@ -23,10 +23,9 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
         throw const FormatException('يوجد تعريف تقرير غير صالح.');
       }
       final rawDefinition = Map<String, dynamic>.from(raw);
-      final type = _reportType(rawDefinition['id']?.toString() ?? '');
-      if (type == null) {
-        throw FormatException('نوع تقرير غير معروف في كتالوج الخادم: ${rawDefinition['id']}');
-      }
+      final type = OperationalReportType.fromWire(
+        _requiredText(rawDefinition['id'], 'report.id'),
+      );
       entries.add(_parseEntry(type, rawDefinition));
     }
 
@@ -219,13 +218,6 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
       columnLabels: Map<String, String>.unmodifiable(columnLabels),
       metricLabels: Map<String, String>.unmodifiable(metricLabels),
     );
-  }
-
-  static OperationalReportType? _reportType(String wireValue) {
-    for (final type in OperationalReportType.values) {
-      if (type.wireValue == wireValue) return type;
-    }
-    return null;
   }
 
   static ReportFilterKind _filterKind(String value) => switch (value) {
