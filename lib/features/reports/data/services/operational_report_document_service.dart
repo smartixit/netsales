@@ -267,7 +267,7 @@ class OperationalReportDocumentService {
         id: DocumentId(
           'netsales-operational-report-${type.wireValue}-${generatedAt.millisecondsSinceEpoch}',
         ),
-        documentTypeId: DocumentTypeId('netsales.operational-report.${type.wireValue}'),
+        documentTypeId: DocumentTypeId('netsales.operational-report'),
         title: 'ملخص ' + _reportTitle(summary, type),
         subtitle: 'تقرير تنفيذي صادر عن NetSales',
         reference: type.wireValue,
@@ -351,12 +351,11 @@ class OperationalReportDocumentService {
 
   DocumentTemplateDefinition _template(OperationalReportType type) =>
       DocumentTemplateDefinition(
-        id: TemplateId('netsales.operational-report.${type.wireValue}.executive'),
+        id: TemplateId('netsales.operational-report.executive'),
         version: TemplateVersion(major: 1, minor: 0, patch: 0),
-        documentTypeId:
-            DocumentTypeId('netsales.operational-report.${type.wireValue}'),
-        displayName: 'NetSales ${type.wireValue} Executive Summary',
-        description: 'Official Arabic executive summary for ${type.wireValue}',
+        documentTypeId: DocumentTypeId('netsales.operational-report'),
+        displayName: 'NetSales Executive Operational Report',
+        description: 'Official Arabic executive report summary',
         supportedLocaleTags: const ['ar'],
         capabilities: TemplateCapabilities([
           TemplateCapability.pageNumbering,
