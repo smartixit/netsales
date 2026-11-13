@@ -12,10 +12,14 @@ class BillingController extends GetxController {
   BillingController({
     required this.useCases,
     required this.networkId,
+    this.networkIdSignal,
   });
 
   final BillingUseCases useCases;
   final int? Function() networkId;
+  final RxnInt? networkIdSignal;
+  Worker? _networkWorker;
+  int? _loadedNetworkId;
 
   final accounts = <Map<String, dynamic>>[].obs;
   final currencies = <Map<String, dynamic>>[].obs;
@@ -105,17 +109,45 @@ class BillingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final signal = networkIdSignal;
+    if (signal != null) {
+      _networkWorker = ever<int?>(signal, (_) => unawaited(load()));
+    }
     unawaited(load());
   }
 
+  @override
+  void onClose() {
+    _networkWorker?.dispose();
+    super.onClose();
+  }
+
+  void _clearWorkspaceData() {
+    accounts.clear();
+    selectedAccountId.value = null;
+    account.value = null;
+    entitlements.value = null;
+    paymentMethods.clear();
+    selectedPaymentMethodId.value = null;
+    paymentProof.value = null;
+    _invalidateAccountPages(clearItems: true);
+    _clearSubscriptionDetails();
+  }
+
   Future<void> load() async {
+    final revision = ++_revision;
     final network = networkId();
     if (network == null) {
+      _loadedNetworkId = null;
+      _clearWorkspaceData();
+      isLoading.value = false;
       errorMessage.value = 'حدد الشبكة أولاً.';
       return;
     }
-
-    final revision = ++_revision;
+    if (_loadedNetworkId != network) {
+      _clearWorkspaceData();
+      _loadedNetworkId = network;
+    }
     isLoading.value = true;
     errorMessage.value = null;
     try {
@@ -257,8 +289,10 @@ class BillingController extends GetxController {
     bool Function()? additionalGuard,
   }) async {
     final accountId = selectedAccountId.value;
+    final requestNetworkId = networkId();
     final cursor = state.nextCursor;
     if (accountId == null ||
+        requestNetworkId == null ||
         cursor == null ||
         cursor.isEmpty ||
         !state.hasMore ||
@@ -279,6 +313,7 @@ class BillingController extends GetxController {
       });
       if (controllerRevision != _revision ||
           accountId != selectedAccountId.value ||
+          requestNetworkId != networkId() ||
           pageRevision != state.revision ||
           (additionalGuard != null && !additionalGuard())) {
         return;
@@ -291,6 +326,7 @@ class BillingController extends GetxController {
     } catch (error) {
       if (controllerRevision == _revision &&
           accountId == selectedAccountId.value &&
+          requestNetworkId == networkId() &&
           pageRevision == state.revision &&
           (additionalGuard == null || additionalGuard())) {
         state.loadMoreError.value = AppException.sanitizeMessage(
@@ -368,9 +404,16 @@ class BillingController extends GetxController {
 
   Future<Map<String, dynamic>?> checkTrial(int priceId) async {
     final id = selectedAccountId.value;
-    if (id == null) return null;
+    final revision = _revision;
+    final network = networkId();
+    if (id == null || network == null) return null;
     try {
       final payload = await useCases.trialEligibility(id, priceId);
+      if (revision != _revision ||
+          id != selectedAccountId.value ||
+          network != networkId()) {
+        return null;
+      }
       final value = payload.data['data'] ?? payload.data;
       return value is Map ? Map<String, dynamic>.from(value) : null;
     } catch (error) {
