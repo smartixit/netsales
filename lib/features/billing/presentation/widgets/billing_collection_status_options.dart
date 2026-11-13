@@ -7,7 +7,12 @@ class BillingCollectionStatusOptions {
   BillingCollectionStatusOptions._();
 
   static List<DropdownItem<String>> build(Iterable<String> values) {
-    return values.map((value) {
+    return [
+      const DropdownItem<String>(
+        value: '',
+        child: Text('كل الحالات'),
+      ),
+      ...values.map((value) {
       final presentation = EnumPresentationRegistry.resolveBillingStatus(
         BillingStatus.fromWire(value),
       );
@@ -15,6 +20,7 @@ class BillingCollectionStatusOptions {
         value: value,
         child: Text(presentation.label),
       );
-    }).toList(growable: false);
+      }).toList(growable: false),
+    ];
   }
 }
