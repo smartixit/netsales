@@ -258,6 +258,9 @@ class BillingWorkspaceContent extends StatelessWidget {
             CustomInteractiveAmountText(
               amount: price['unit_amount'] ?? price['unit_amount_minor'] ?? '—',
               currencyCode: price['currency_code']?.toString(),
+              trailingText: price['unit_amount'] != null
+                  ? price['currency_code']?.toString()
+                  : 'وحدة صغرى',
               enableTooltip: false,
             ),
           ],
@@ -367,8 +370,11 @@ class BillingWorkspaceContent extends StatelessWidget {
           children: [
             CustomInteractiveAmountText(
               amount: invoice['total_minor'] ?? '—',
+              currencyCode: invoice['currency_code']?.toString(),
               enableTooltip: false,
-              trailingText: 'وحدة صغرى',
+              trailingText: invoice['currency_code'] == null
+                  ? 'وحدة صغرى'
+                  : '${invoice['currency_code']} · وحدة صغرى',
             ),
             if (canPay)
               CustomButton.primary(
@@ -394,6 +400,9 @@ class BillingWorkspaceContent extends StatelessWidget {
         amount: amount ?? '—',
         currencyCode: currencyCode,
         enableTooltip: false,
+        trailingText: currencyCode == null
+            ? 'وحدة صغرى'
+            : '$currencyCode · وحدة صغرى',
       ),
     ),
   );
