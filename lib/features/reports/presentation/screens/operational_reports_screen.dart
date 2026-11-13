@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:document_engine/document_engine.dart';
+import 'package:document_engine/document_engine_flutter.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -14,6 +15,9 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/pickers/custom_date_picker_field.dart';
 
 class OperationalReportsScreen extends GetView<OperationalReportsController> {
   const OperationalReportsScreen({
@@ -95,7 +99,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                       types: types,
                     ),
                     AppSpacing.vMd,
-                    if (controller.selectedReportEntry case final entry?) 
+                    if (controller.selectedReportEntry case final entry?)
                       Obx(() => ReportConfigurationStudio(
                         definition: entry.definition,
                         criteria: controller.criteria.value,
@@ -114,6 +118,10 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                         },
                         onCriteriaChanged: controller.updateCriteria,
                         onPresentationChanged: controller.updatePresentation,
+                        filterSectionBuilder: (context, {required definition, required criteria, required resolveLabel, required onChanged}) =>
+                            _buildStudioFilters(context, definition, criteria, resolveLabel),
+                        presentationSectionBuilder: (context, {required definition, required presentation, required resolveLabel, required onChanged}) =>
+                            _buildStudioPresentation(context, definition, presentation, resolveLabel),
                         onPreview: controller.summary.value == null
                             ? null
                             : controller.exportSummaryPdf,
@@ -212,4 +220,332 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
       ),
     );
   }
+
+  Widget _buildStudioFilters(
+    BuildContext context,
+    ReportDefinition definition,
+    ReportCriteria criteria,
+    ReportLabelResolver resolveLabel,
+  ) {
+    final filters = <Widget>[];
+    for (final filter in definition.filters) {
+      final label = resolveLabel(context, filter.labelKey);
+      final value = criteria.filters[filter.id];
+      final required = filter.required;
+      switch (filter.kind) {
+        case ReportFilterKind.text:
+        case ReportFilterKind.integer:
+        case ReportFilterKind.decimal:
+          filters.add(CustomTextField(
+            controller: controller.textControllerFor(filter),
+            label: label,
+            isRequired: required,
+            keyboardType: filter.kind == ReportFilterKind.text
+                ? TextInputType.text
+                : filter.kind == ReportFilterKind.integer
+                    ? TextInputType.number
+                    : const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (text) {
+              ReportFilterValue? next;
+              final normalized = text.trim();
+              if (normalized.isNotEmpty) {
+                if (filter.kind == ReportFilterKind.text) {
+                  next = ReportTextFilterValue(normalized);
+                } else if (filter.kind == ReportFilterKind.integer) {
+                  final parsed = int.tryParse(normalized);
+                  if (parsed != null) next = ReportIntegerFilterValue(parsed);
+                } else {
+                  try { next = ReportDecimalFilterValue(normalized); } on ArgumentError { next = null; }
+                }
+              }
+              controller.setFilterValue(filter.id, next);
+            },
+          ));
+        case ReportFilterKind.date:
+          final selected = value is ReportDateFilterValue ? value.value : null;
+          filters.add(CustomDatePickerField.single(
+            label: label,
+            value: selected,
+            isRequired: required,
+            onChanged: (date) => controller.setFilterValue(
+              filter.id,
+              date == null ? null : ReportDateFilterValue(date),
+            ),
+          ));
+        case ReportFilterKind.dateRange:
+          final range = value is ReportDateRangeFilterValue ? value : null;
+          filters.add(CustomDatePickerField.range(
+            label: label,
+            value: range?.start != null && range?.end != null
+                ? DateTimeRange(start: range!.start!, end: range.end!)
+                : null,
+            isRequired: required,
+            onChanged: (selected) => controller.setFilterValue(
+              filter.id,
+              selected == null
+                  ? null
+                  : ReportDateRangeFilterValue(start: selected.start, end: selected.end),
+            ),
+          ));
+        case ReportFilterKind.boolean:
+          final enabled = value is ReportBooleanFilterValue && value.value;
+          filters.add(Row(children: [
+            Expanded(child: Text(label)),
+            CustomButton.outline(
+              text: enabled ? 'مفعّل' : 'غير مفعّل',
+              prefix: enabled ? Icons.check_circle_outline : Icons.circle_outlined,
+              onPressed: () => controller.setFilterValue(
+                filter.id,
+                ReportBooleanFilterValue(!enabled),
+              ),
+            ),
+          ]));
+        case ReportFilterKind.singleChoice:
+          final rx = controller.choiceValueFor(filter.id);
+          filters.add(CustomDropdown<String>(
+            label: label,
+            hint: 'اختر $label',
+            isRequired: required,
+            rxValue: rx,
+            items: [
+              DropdownItem<String>(value: '', child: const Text('الكل')),
+              ...filter.choices.map((choice) => DropdownItem<String>(
+                value: choice.value,
+                child: Text(resolveLabel(context, choice.labelKey)),
+              )),
+            ],
+            onChanged: (selected) => controller.setFilterValue(
+              filter.id,
+              selected == null || selected.isEmpty
+                  ? null
+                  : ReportChoiceFilterValue(selected),
+            ),
+          ));
+        case ReportFilterKind.multiChoice:
+          final selected = value is ReportChoicesFilterValue ? value.values.toSet() : <String>{};
+          filters.add(Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: Theme.of(context).textTheme.labelLarge),
+              const SizedBox(height: 8),
+              Wrap(spacing: 8, runSpacing: 8, children: filter.choices.map((choice) {
+                final active = selected.contains(choice.value);
+                return active
+                    ? CustomButton.secondary(
+                        text: resolveLabel(context, choice.labelKey),
+                        onPressed: () {
+                          final next = {...selected}..remove(choice.value);
+                          controller.setFilterValue(filter.id, next.isEmpty ? null : ReportChoicesFilterValue(next.toList()));
+                        },
+                      )
+                    : CustomButton.outline(
+                        text: resolveLabel(context, choice.labelKey),
+                        onPressed: () {
+                          final next = {...selected, choice.value};
+                          controller.setFilterValue(filter.id, ReportChoicesFilterValue(next.toList()..sort()));
+                        },
+                      );
+              }).toList()),
+            ],
+          ));
+      }
+    }
+    return _studioSection(
+      context,
+      title: 'معايير البيانات',
+      icon: Icons.filter_alt_outlined,
+      children: filters,
+    );
+  }
+
+  Widget _buildStudioPresentation(
+    BuildContext context,
+    ReportDefinition definition,
+    ReportPresentationOptions presentation,
+    ReportLabelResolver resolveLabel,
+  ) {
+    final visible = presentation.visibleColumnIds.isEmpty
+        ? definition.columns.where((column) => column.visibleByDefault).map((column) => column.id).toSet()
+        : presentation.visibleColumnIds.toSet();
+    final children = <Widget>[];
+    children.add(Text('الأعمدة الظاهرة', style: Theme.of(context).textTheme.titleSmall));
+    for (final column in definition.columns) {
+      final shown = visible.contains(column.id);
+      children.add(Row(children: [
+        Expanded(child: Text(resolveLabel(context, column.labelKey))),
+        CustomButton.icon(
+          icon: shown ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+          tooltip: shown ? 'إخفاء العمود' : 'إظهار العمود',
+          onPressed: !column.hideable ? null : () {
+            final next = {...visible};
+            if (shown) {
+              if (next.length > 1) next.remove(column.id);
+            } else {
+              next.add(column.id);
+            }
+            controller.updatePresentation(ReportPresentationOptions(
+              visibleColumnIds: next.toList(),
+              sorts: presentation.sorts,
+              groupByFieldId: presentation.groupByFieldId,
+              template: presentation.template,
+              languageTag: presentation.languageTag,
+              pageProfileId: presentation.pageProfileId,
+              includeMetrics: presentation.includeMetrics,
+              includeCharts: presentation.includeCharts,
+            ));
+          },
+        ),
+      ]));
+    }
+    final sortable = definition.columns.where((column) => column.sortable).toList();
+    if (sortable.isNotEmpty) {
+      children.add(CustomDropdown<String>(
+        label: 'ترتيب حسب',
+        hint: 'بدون ترتيب',
+        items: [
+          DropdownItem<String>(value: '', child: const Text('بدون ترتيب')),
+          ...sortable.map((column) => DropdownItem<String>(
+            value: column.id,
+            child: Text(resolveLabel(context, column.labelKey)),
+          )),
+        ],
+        rxValue: RxnString(presentation.sorts.isEmpty ? '' : presentation.sorts.first.fieldId),
+        onChanged: (id) => controller.updatePresentation(ReportPresentationOptions(
+          visibleColumnIds: presentation.visibleColumnIds,
+          sorts: id == null || id.isEmpty ? const [] : [ReportSortOption(
+            fieldId: id,
+            direction: presentation.sorts.isEmpty ? ReportSortDirection.ascending : presentation.sorts.first.direction,
+          )],
+          groupByFieldId: presentation.groupByFieldId,
+          template: presentation.template,
+          languageTag: presentation.languageTag,
+          pageProfileId: presentation.pageProfileId,
+          includeMetrics: presentation.includeMetrics,
+          includeCharts: presentation.includeCharts,
+        )),
+      ));
+    }
+    if (definition.supportedLocaleTags.isNotEmpty) {
+      children.add(CustomDropdown<String>(
+        label: 'لغة المستند',
+        rxValue: RxnString(presentation.languageTag ?? definition.supportedLocaleTags.first),
+        items: definition.supportedLocaleTags.map((tag) => DropdownItem<String>(value: tag, child: Text(tag))).toList(),
+        onChanged: (tag) => controller.updatePresentation(ReportPresentationOptions(
+          visibleColumnIds: presentation.visibleColumnIds,
+          sorts: presentation.sorts,
+          groupByFieldId: presentation.groupByFieldId,
+          template: presentation.template,
+          languageTag: tag,
+          pageProfileId: presentation.pageProfileId,
+          includeMetrics: presentation.includeMetrics,
+          includeCharts: presentation.includeCharts,
+        )),
+      ));
+    }
+    if (definition.pageProfileIds.isNotEmpty) {
+      children.add(CustomDropdown<String>(
+        label: 'حجم الصفحة',
+        rxValue: RxnString(presentation.pageProfileId ?? definition.pageProfileIds.first),
+        items: definition.pageProfileIds.map((id) => DropdownItem<String>(value: id, child: Text(id))).toList(),
+        onChanged: (id) => controller.updatePresentation(ReportPresentationOptions(
+          visibleColumnIds: presentation.visibleColumnIds,
+          sorts: presentation.sorts,
+          groupByFieldId: presentation.groupByFieldId,
+          template: presentation.template,
+          languageTag: presentation.languageTag,
+          pageProfileId: id,
+          includeMetrics: presentation.includeMetrics,
+          includeCharts: presentation.includeCharts,
+        )),
+      ));
+    }
+    if (definition.templates.isNotEmpty) {
+      children.add(CustomDropdown<String>(
+        label: 'قالب التقرير',
+        rxValue: RxnString(presentation.template?.reference.key ?? ''),
+        items: [
+          DropdownItem<String>(value: '', child: const Text('القالب الافتراضي')),
+          ...definition.templates.map((item) => DropdownItem<String>(value: item.key, child: Text(item.key))),
+        ],
+        onChanged: (key) {
+          final template = definition.templates.where((item) => item.key == key).firstOrNull;
+          controller.updatePresentation(ReportPresentationOptions(
+            visibleColumnIds: presentation.visibleColumnIds,
+            sorts: presentation.sorts,
+            groupByFieldId: presentation.groupByFieldId,
+            template: template == null ? null : ReportTemplateSelection(id: template.id, version: template.version),
+            languageTag: presentation.languageTag,
+            pageProfileId: presentation.pageProfileId,
+            includeMetrics: presentation.includeMetrics,
+            includeCharts: presentation.includeCharts,
+          ));
+        },
+      ));
+    }
+    children.add(Row(children: [
+      Expanded(child: const Text('إظهار المؤشرات')),
+      CustomButton.outline(
+        text: presentation.includeMetrics ? 'نعم' : 'لا',
+        onPressed: () => controller.updatePresentation(ReportPresentationOptions(
+          visibleColumnIds: presentation.visibleColumnIds,
+          sorts: presentation.sorts,
+          groupByFieldId: presentation.groupByFieldId,
+          template: presentation.template,
+          languageTag: presentation.languageTag,
+          pageProfileId: presentation.pageProfileId,
+          includeMetrics: !presentation.includeMetrics,
+          includeCharts: presentation.includeCharts,
+        )),
+      ),
+    ]));
+    children.add(Row(children: [
+      Expanded(child: const Text('إظهار الرسوم البيانية')),
+      CustomButton.outline(
+        text: presentation.includeCharts ? 'نعم' : 'لا',
+        onPressed: definition.chartsAvailable ? () => controller.updatePresentation(ReportPresentationOptions(
+          visibleColumnIds: presentation.visibleColumnIds,
+          sorts: presentation.sorts,
+          groupByFieldId: presentation.groupByFieldId,
+          template: presentation.template,
+          languageTag: presentation.languageTag,
+          pageProfileId: presentation.pageProfileId,
+          includeMetrics: presentation.includeMetrics,
+          includeCharts: !presentation.includeCharts,
+        )) : null,
+      ),
+    ]));
+    return _studioSection(
+      context,
+      title: 'تصميم المخرجات',
+      icon: Icons.tune_rounded,
+      children: children,
+    );
+  }
+
+  Widget _studioSection(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: context.colors.surface,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: context.colors.outlineVariant),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(children: [Icon(icon), const SizedBox(width: 8), Text(title, style: AppTypography.titleMedium)]),
+        AppSpacing.vSm,
+        ...children.map((child) => Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: child,
+        )),
+      ],
+    ),
+  );
+
+
 }
