@@ -130,7 +130,10 @@ class BillingReportsContent extends StatelessWidget {
             BillingReportSummarySection(
               summary: reportSummary,
               charts: controller.charts,
-              arabicLabel: BillingReportLabels.arabic,
+              arabicLabel: (key) => BillingReportLabels.field(
+                key,
+                english: controller.selectedLocale.value == 'en',
+              ),
             ),
           BillingReportRecordsSection(
             controller: controller,
