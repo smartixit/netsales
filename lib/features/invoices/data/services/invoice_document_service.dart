@@ -190,11 +190,41 @@ class InvoiceDocumentService {
         value: DocumentTextValue('#' + invoice.posId.toString()),
         direction: DocumentTextDirection.leftToRight,
       ),
-      if (invoice.posPhoneNumber?.trim().isNotEmpty ?? false)
+      if (_hasText(invoice.networkPhoneNumber))
+        DocumentInfoItem(
+          label: 'هاتف الشبكة المورّدة',
+          value: DocumentTextValue(invoice.networkPhoneNumber!.trim()),
+          direction: DocumentTextDirection.leftToRight,
+        ),
+      if (_hasText(invoice.networkEmail))
+        DocumentInfoItem(
+          label: 'البريد الإلكتروني للشبكة',
+          value: DocumentTextValue(invoice.networkEmail!.trim()),
+          direction: DocumentTextDirection.leftToRight,
+        ),
+      if (_hasText(invoice.networkAddress))
+        DocumentInfoItem(
+          label: 'عنوان الشبكة المورّدة',
+          value: DocumentTextValue(invoice.networkAddress!.trim()),
+          direction: DocumentTextDirection.rightToLeft,
+        ),
+      if (_hasText(invoice.posPhoneNumber))
         DocumentInfoItem(
           label: 'هاتف نقطة البيع',
           value: DocumentTextValue(invoice.posPhoneNumber!.trim()),
           direction: DocumentTextDirection.leftToRight,
+        ),
+      if (_hasText(invoice.posEmail))
+        DocumentInfoItem(
+          label: 'البريد الإلكتروني لنقطة البيع',
+          value: DocumentTextValue(invoice.posEmail!.trim()),
+          direction: DocumentTextDirection.leftToRight,
+        ),
+      if (_hasText(invoice.posAddress))
+        DocumentInfoItem(
+          label: 'عنوان نقطة البيع',
+          value: DocumentTextValue(invoice.posAddress!.trim()),
+          direction: DocumentTextDirection.rightToLeft,
         ),
       if (invoice.requestId != null)
         DocumentInfoItem(
