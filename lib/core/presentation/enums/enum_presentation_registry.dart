@@ -13,6 +13,7 @@ import 'package:netsales/core/enums/user_status.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/enums/billing_status.dart';
 import 'package:netsales/core/enums/network_status.dart';
 import 'package:netsales/core/enums/pos_status.dart';
 
@@ -562,6 +563,130 @@ class EnumPresentationRegistry {
         fallbackLabel: label,
       ),
     };
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // حالات الاشتراكات والتجارب والفواتير والمدفوعات (BillingStatus)
+  // ──────────────────────────────────────────────────────────────────────────
+  static EnumPresentation resolveBillingStatus(
+    BillingStatus status, {
+    String? serverLabel,
+    bool english = false,
+  }) {
+    const arabicLabels = <BillingStatus, String>{
+      BillingStatus.incomplete: 'غير مكتمل',
+      BillingStatus.trialing: 'تجريبي',
+      BillingStatus.active: 'نشط',
+      BillingStatus.pastDue: 'متأخر السداد',
+      BillingStatus.paused: 'متوقف مؤقتاً',
+      BillingStatus.suspended: 'معلق',
+      BillingStatus.canceled: 'ملغي',
+      BillingStatus.ended: 'منتهي',
+      BillingStatus.reserved: 'محجوز',
+      BillingStatus.pendingApproval: 'بانتظار الموافقة',
+      BillingStatus.completed: 'مكتمل',
+      BillingStatus.expired: 'منتهي',
+      BillingStatus.rejected: 'مرفوض',
+      BillingStatus.revoked: 'مسحوب',
+      BillingStatus.draft: 'مسودة',
+      BillingStatus.open: 'مفتوح',
+      BillingStatus.partiallyPaid: 'مدفوع جزئياً',
+      BillingStatus.partiallyCredited: 'عليه إشعار دائن جزئي',
+      BillingStatus.paid: 'مدفوع',
+      BillingStatus.credited: 'مغطى بإشعار دائن',
+      BillingStatus.uncollectible: 'متعذر التحصيل',
+      BillingStatus.voided: 'ملغى',
+      BillingStatus.pendingReview: 'بانتظار المراجعة',
+      BillingStatus.verified: 'معتمد',
+      BillingStatus.failed: 'فاشل',
+      BillingStatus.refunded: 'مسترد',
+      BillingStatus.partiallyRefunded: 'مسترد جزئياً',
+      BillingStatus.pending: 'قيد الانتظار',
+      BillingStatus.queued: 'في قائمة الانتظار',
+      BillingStatus.cancelled: 'ملغي',
+      BillingStatus.unknown: 'حالة غير معروفة',
+    };
+    const englishLabels = <BillingStatus, String>{
+      BillingStatus.incomplete: 'Incomplete',
+      BillingStatus.trialing: 'Trial',
+      BillingStatus.active: 'Active',
+      BillingStatus.pastDue: 'Past due',
+      BillingStatus.paused: 'Paused',
+      BillingStatus.suspended: 'Suspended',
+      BillingStatus.canceled: 'Canceled',
+      BillingStatus.ended: 'Ended',
+      BillingStatus.reserved: 'Reserved',
+      BillingStatus.pendingApproval: 'Pending approval',
+      BillingStatus.completed: 'Completed',
+      BillingStatus.expired: 'Expired',
+      BillingStatus.rejected: 'Rejected',
+      BillingStatus.revoked: 'Revoked',
+      BillingStatus.draft: 'Draft',
+      BillingStatus.open: 'Open',
+      BillingStatus.partiallyPaid: 'Partially paid',
+      BillingStatus.partiallyCredited: 'Partially credited',
+      BillingStatus.paid: 'Paid',
+      BillingStatus.credited: 'Credited',
+      BillingStatus.uncollectible: 'Uncollectible',
+      BillingStatus.voided: 'Void',
+      BillingStatus.pendingReview: 'Pending review',
+      BillingStatus.verified: 'Verified',
+      BillingStatus.failed: 'Failed',
+      BillingStatus.refunded: 'Refunded',
+      BillingStatus.partiallyRefunded: 'Partially refunded',
+      BillingStatus.pending: 'Pending',
+      BillingStatus.queued: 'Queued',
+      BillingStatus.cancelled: 'Canceled',
+      BillingStatus.unknown: 'Unknown status',
+    };
+    final label = _effectiveLabel(
+      serverLabel,
+      (english ? englishLabels : arabicLabels)[status] ?? status.wireValue,
+    );
+    if (!status.isKnown) {
+      return EnumPresentation.unknown(fallbackLabel: label);
+    }
+
+    final tone = switch (status) {
+      BillingStatus.active ||
+      BillingStatus.completed ||
+      BillingStatus.paid ||
+      BillingStatus.credited ||
+      BillingStatus.verified => SemanticTone.success,
+      BillingStatus.pastDue ||
+      BillingStatus.paused ||
+      BillingStatus.suspended ||
+      BillingStatus.pendingApproval ||
+      BillingStatus.partiallyPaid ||
+      BillingStatus.partiallyCredited ||
+      BillingStatus.open ||
+      BillingStatus.pendingReview ||
+      BillingStatus.partiallyRefunded => SemanticTone.warning,
+      BillingStatus.rejected ||
+      BillingStatus.uncollectible ||
+      BillingStatus.failed => SemanticTone.danger,
+      BillingStatus.trialing ||
+      BillingStatus.reserved ||
+      BillingStatus.pending ||
+      BillingStatus.queued ||
+      BillingStatus.refunded => SemanticTone.info,
+      _ => SemanticTone.neutral,
+    };
+    final icon = switch (tone) {
+      SemanticTone.success => Icons.check_circle_rounded,
+      SemanticTone.warning => Icons.schedule_rounded,
+      SemanticTone.danger => Icons.error_outline_rounded,
+      SemanticTone.info => Icons.info_outline_rounded,
+      SemanticTone.primary => Icons.circle_outlined,
+      SemanticTone.neutral => Icons.circle_outlined,
+    };
+
+    return EnumPresentation(
+      label: label,
+      tone: tone,
+      icon: icon,
+      isKnown: true,
+    );
   }
 
   // ──────────────────────────────────────────────────────────────────────────
