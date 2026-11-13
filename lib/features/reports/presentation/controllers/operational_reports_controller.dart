@@ -285,6 +285,8 @@ class OperationalReportsController extends GetxController {
     selectedSaleType.value = null;
     searchTextController.clear();
     searchQuery.value = '';
+    criteria.value = ReportCriteria();
+    presentation.value = ReportPresentationOptions();
     fromDate.value = null;
     toDate.value = null;
     exportJob.value = null;
@@ -349,6 +351,8 @@ class OperationalReportsController extends GetxController {
   Future<void> selectType(OperationalReportType type) async {
     if (!availableTypes.contains(type) || selectedType.value == type) return;
     selectedType.value = type;
+    criteria.value = ReportCriteria();
+    presentation.value = ReportPresentationOptions();
     selectedStatus.value = null;
     selectedSaleType.value = null;
     exportJob.value = null;
