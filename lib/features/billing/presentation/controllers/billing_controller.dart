@@ -90,7 +90,7 @@ class BillingController extends GetxController {
 
   void _invalidateAccountPages({required bool clearItems}) {
     for (final page in _accountPages) {
-      page.beginRefresh(clearItems: clearItems);
+      page.beginRefresh(clearItems: clearItems, clearCursor: clearItems);
     }
   }
 
