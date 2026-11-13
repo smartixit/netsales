@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/models/api_response.dart';
@@ -69,6 +70,18 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
   @override
   Future<ApiResponse<Map<String, dynamic>>> getBillingReportSummary(int networkId, String type, Map<String, dynamic> query) =>
       ApiService.instance.get(ApiConstants.billingNetworkReportSummary(networkId, type), queryParameters: query, fromJson: _map);
+
+  @override
+  Future<Uint8List> exportBillingReport(int networkId, String type, Map<String, dynamic> query) async {
+    final response = await ApiService.instance.dio.get<List<int>>(
+      ApiConstants.billingNetworkReportExport(networkId, type),
+      queryParameters: query,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    final bytes = response.data;
+    if (bytes == null || bytes.isEmpty) throw const FormatException('ملف التقرير فارغ.');
+    return Uint8List.fromList(bytes);
+  }
 
   @override
   Future<ApiResponse<Map<String, dynamic>>> getTrialEligibility(int accountId, int priceId) =>
