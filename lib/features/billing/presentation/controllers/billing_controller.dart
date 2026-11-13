@@ -13,6 +13,7 @@ class BillingController extends GetxController {
   final subscriptions = <Map<String,dynamic>>[].obs;
   final invoices = <Map<String,dynamic>>[].obs;
   final payments = <Map<String,dynamic>>[].obs;
+  final entitlements = Rxn<Map<String,dynamic>>();
   final account = Rxn<Map<String,dynamic>>();
   final errorMessage = RxnString();
   final isLoading = false.obs;
@@ -63,9 +64,9 @@ class BillingController extends GetxController {
   Future<void> loadAccountData({int? revision}) async {
     final id=selectedAccountId.value;if(id==null)return;final rev=revision??++_revision;isLoading.value=true;
     try{
-      final r=await Future.wait([useCases.account(id),useCases.plans(id,const {'per_page':50}),useCases.subscriptions(id,const {'per_page':25}),useCases.invoices(id,const {'per_page':25}),useCases.payments(id,const {'per_page':25})]);
+      final r=await Future.wait([useCases.account(id),useCases.plans(id,const {'per_page':50}),useCases.subscriptions(id,const {'per_page':25}),useCases.invoices(id,const {'per_page':25}),useCases.payments(id,const {'per_page':25}),useCases.entitlements(id)]);
       if(rev!=_revision||id!=selectedAccountId.value)return;
-      account.value=_object(r[0]);plans.assignAll(_rows(r[1]));subscriptions.assignAll(_rows(r[2]));invoices.assignAll(_rows(r[3]));payments.assignAll(_rows(r[4]));
+      account.value=_object(r[0]);plans.assignAll(_rows(r[1]));subscriptions.assignAll(_rows(r[2]));invoices.assignAll(_rows(r[3]));payments.assignAll(_rows(r[4]));entitlements.value=_object(r[5]);
     }catch(e){if(rev==_revision)errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل تفاصيل حساب الفوترة.');}
     finally{if(rev==_revision)isLoading.value=false;}
   }
