@@ -111,7 +111,7 @@ class BillingReportsContent extends StatelessWidget {
             CustomErrorState.compact(
               title: 'تعذر تحميل بيانات التقرير',
               subtitle: controller.errorMessage.value,
-              onRetry: controller.applyFilters,
+              onRetry: controller.loadCatalog,
             ),
           if (reportSummary != null &&
               reportSummary['record_count'] is num)
