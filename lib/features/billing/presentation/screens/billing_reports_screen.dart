@@ -3,28 +3,46 @@ import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 class BillingReportsScreen extends GetView<BillingReportsController>{
  const BillingReportsScreen({super.key});
  @override Widget build(BuildContext context)=>Obx((){
-  final selected=controller.selectedType.value;
   final items=controller.catalog.map((e)=>DropdownItem<String>(value:e['id'].toString(),child:Text(e['label']?.toString()??e['id'].toString()))).toList();
+  final summary=controller.summary.value;
   return ListView(padding:const EdgeInsets.all(20),children:[
    Row(children:[const Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('تقارير الاشتراكات',style:TextStyle(fontSize:24,fontWeight:FontWeight.w700)),Text('تقارير Billing مستقلة عن تقارير المبيعات والتشغيل.') ])),CustomButton.outline(text:'تحديث',prefix:Icons.refresh_rounded,onPressed:controller.isLoading.value?null:controller.loadCatalog)]),
    const SizedBox(height:16),
    if(items.isNotEmpty)CustomDropdown<String>(items:items,rxValue:controller.selectedType,onChanged:controller.selectReport,label:'نوع التقرير',hint:'اختر تقريراً'),
+   const SizedBox(height:12),
+   CustomTextField(controller:controller.searchController,label:'بحث',hint:'ابحث في سجلات التقرير',prefixIcon:const Icon(Icons.search),isRequired:false,onChanged:(v)=>controller.searchQuery.value=v),
+   const SizedBox(height:10),
+   CustomTextField(controller:controller.statusController,label:'الحالة',hint:'مثال: ACTIVE أو PAID',isRequired:false,onFieldSubmitted:(_)=>controller.applyFilters()),
+   const SizedBox(height:10),
+   Wrap(spacing:8,runSpacing:8,children:[
+    CustomButton.outline(text:controller.fromDate.value==null?'من تاريخ':'من '+controller.fromDate.value!.toIso8601String().substring(0,10),prefix:Icons.calendar_today,onPressed:()=>_pickDate(context,true)),
+    CustomButton.outline(text:controller.toDate.value==null?'إلى تاريخ':'إلى '+controller.toDate.value!.toIso8601String().substring(0,10),prefix:Icons.event,onPressed:()=>_pickDate(context,false)),
+    CustomButton.text(text:'مسح الفلاتر',onPressed:controller.clearFilters),
+   ]),
    if(controller.errorMessage.value!=null)Card(child:Padding(padding:const EdgeInsets.all(14),child:Text(controller.errorMessage.value!))),
    if(controller.isLoading.value)const Padding(padding:EdgeInsets.all(24),child:Center(child:CircularProgressIndicator())),
-   if(controller.summary.value!=null)...[
-    Card(child:Padding(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-      const Text('ملخص التقرير',style:TextStyle(fontWeight:FontWeight.w700)),
-      Text('عدد السجلات: '+(controller.summary.value!['record_count']?.toString()??'0')),
-      if(controller.summary.value!['amounts_by_currency'] is List)
-        ...(controller.summary.value!['amounts_by_currency'] as List).whereType<Map>().map((e)=>Text('إجمالي العملة #'+(e['currency_id']?.toString()??'')+': '+(e['amount_minor']?.toString()??'0')+' وحدة صغرى')),
-    ]))),
-   ],
+   if(summary!=null)Card(child:Padding(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+    const Text('ملخص التقرير',style:TextStyle(fontWeight:FontWeight.w700)),
+    Text('عدد السجلات: '+(summary['record_count']?.toString()??'0')),
+    if(summary['amounts_by_currency'] is List)
+     ...(summary['amounts_by_currency'] as List).whereType<Map>().map((e)=>Text('إجمالي العملة #'+(e['currency_id']?.toString()??'')+': '+(e['amount_minor']?.toString()??'0')+' وحدة صغرى')),
+   ]))),
    if(controller.rows.isEmpty&&!controller.isLoading.value)const Card(child:Padding(padding:EdgeInsets.all(16),child:Text('لا توجد سجلات مطابقة للفلاتر الحالية.'))),
    ...controller.rows.map((row)=>Card(child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(e.key.replaceAll('_',' ')+': '+(e.value?.toString()??'—'))).toList())))),
+   if(controller.isLoadingMore.value)const Padding(padding:EdgeInsets.all(12),child:Center(child:CircularProgressIndicator())),
+   if(controller.report.value?['next_page_url']!=null||controller.report.value?['links'] is Map&&controller.report.value?['links']['next']!=null)
+    CustomButton.outline(text:'تحميل المزيد',loading:controller.isLoadingMore.value,onPressed:controller.isLoadingMore.value?null:controller.loadMore),
   ]);
  });
+ Future<void> _pickDate(BuildContext context,bool isFrom)async{
+  final current=isFrom?controller.fromDate.value:controller.toDate.value;
+  final value=await showDatePicker(context:context,initialDate:current??DateTime.now(),firstDate:DateTime(2020),lastDate:DateTime(2100));
+  if(value==null)return;
+  if(isFrom)await controller.setFromDate(value);else await controller.setToDate(value);
+ }
 }
