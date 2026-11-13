@@ -3,6 +3,7 @@ import 'package:netsales/core/models/api_response.dart';
 abstract interface class BillingRemoteDataSource {
   Future<ApiResponse<Map<String, dynamic>>> getCurrencies();
   Future<ApiResponse<Map<String, dynamic>>> getNetworkAccounts(int networkId);
+  Future<ApiResponse<Map<String, dynamic>>> createNetworkAccount(int networkId, int currencyId);
   Future<ApiResponse<Map<String, dynamic>>> getAccount(int accountId);
   Future<ApiResponse<Map<String, dynamic>>> updateAccount(int accountId, Map<String, dynamic> data);
   Future<ApiResponse<Map<String, dynamic>>> getPlans(int accountId, Map<String, dynamic> query);
