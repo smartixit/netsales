@@ -1,3 +1,4 @@
+import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 import 'dart:typed_data';
 
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -170,12 +171,8 @@ class OperationalReportRepositoryImpl
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) async {
     final result = await OperationalReportDocumentService.instance
         .exportAndSaveSummary(
@@ -207,12 +204,8 @@ class OperationalReportRepositoryImpl
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) {
     return OperationalReportDocumentService.instance.shareSummary(
       type: type,
@@ -236,12 +229,8 @@ class OperationalReportRepositoryImpl
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) {
     return OperationalReportDocumentService.instance.printSummary(
       type: type,
