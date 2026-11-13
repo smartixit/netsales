@@ -81,7 +81,7 @@ class BillingReportsContent extends StatelessWidget {
    if(summary!=null)CustomSurfaceCard(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
     const Text('ملخص التقرير',style:TextStyle(fontWeight:FontWeight.w700)),
     ..._summaryWidgets(summary),
-   ]))),
+   ])),
    ...controller.charts.map((chart)=>BillingReportChart(payload:chart)),
    if(controller.rows.isEmpty&&!controller.isLoading.value)const CustomEmptyState.boxed(title:'لا توجد سجلات مطابقة',subtitle:'غيّر معايير البحث أو الفلاتر ثم أعد تحميل التقرير.'),
    ...controller.rows.map((row)=>CustomSurfaceCard(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(_arabicLabel(e.key)+': '+_displayValue(e.key,e.value))).toList()))),
