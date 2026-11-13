@@ -8,7 +8,7 @@ class BillingReportColumnVisibilitySection extends StatelessWidget {
     required this.presentation,
     required this.resolveLabel,
     required this.onChanged,
-    this.title = title,
+    this.title = 'الأعمدة الظاهرة في PDF',
     super.key,
   });
 
@@ -24,7 +24,7 @@ class BillingReportColumnVisibilitySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'الأعمدة الظاهرة في PDF',
+          title,
           style: Theme.of(context).textTheme.titleSmall,
         ),
         ...columns.map(
