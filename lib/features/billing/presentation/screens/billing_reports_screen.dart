@@ -234,7 +234,7 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
     const Expanded(child:Text('إظهار مؤشرات الملخص')),
     CustomSwitch(value:presentation.includeMetrics,onChanged:(value)=>onChanged(copy(includeMetrics:value))),
    ]),
-   if(definition.chartsAvailable)const Padding(padding:EdgeInsets.symmetric(vertical:8),child:Text('تُعرض بيانات المخططات بعد استكمال عقد بيانات الرسوم لهذا التقرير.')),
+   if(definition.chartsAvailable)const Padding(padding:EdgeInsets.symmetric(vertical:8),child:Text('المخططات التفاعلية تظهر في شاشة التقرير؛ إدراج الرسوم داخل PDF سيُضاف ضمن مرحلة قوالب PDF المتقدمة.')),
    const SizedBox(height:8),
    const Text('الأعمدة الظاهرة في PDF',style:TextStyle(fontWeight:FontWeight.w700)),
    ...definition.columns.map((column)=>Row(children:[
