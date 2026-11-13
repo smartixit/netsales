@@ -1,3 +1,4 @@
+import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 import 'dart:typed_data';
 
 import 'package:netsales/core/models/paginated_list.dart';
@@ -87,12 +88,8 @@ class SaveOperationalReportSummaryPdfUseCase {
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) => repository.saveSummaryPdf(
     type: type,
     pageProfileId: pageProfileId,
@@ -118,12 +115,8 @@ class ShareOperationalReportSummaryPdfUseCase {
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) => repository.shareSummaryPdf(
     type: type,
     pageProfileId: pageProfileId,
@@ -149,12 +142,8 @@ class PrintOperationalReportSummaryPdfUseCase {
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
-    String? fromDate,
-    String? toDate,
+    required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
-    String? search,
-    String? status,
-    String? saleType,
   }) => repository.printSummaryPdf(
     type: type,
     pageProfileId: pageProfileId,
