@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:document_engine/document_engine.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
@@ -24,21 +25,13 @@ class GetOperationalReportUseCase {
     required OperationalReportType type,
     required int networkId,
     int? posId,
-    String? fromDate,
-    String? toDate,
-    String? search,
-    String? status,
-    String? saleType,
+    required ReportCriteria criteria,
     String? cursor,
   }) => repository.getReport(
     type: type,
     networkId: networkId,
     posId: posId,
-    fromDate: fromDate,
-    toDate: toDate,
-    search: search,
-    status: status,
-    saleType: saleType,
+    criteria: criteria,
     cursor: cursor,
   );
 }
@@ -51,20 +44,12 @@ class GetOperationalReportSummaryUseCase {
     required OperationalReportType type,
     required int networkId,
     int? posId,
-    String? fromDate,
-    String? toDate,
-    String? search,
-    String? status,
-    String? saleType,
+    required ReportCriteria criteria,
   }) => repository.getSummary(
     type: type,
     networkId: networkId,
     posId: posId,
-    fromDate: fromDate,
-    toDate: toDate,
-    search: search,
-    status: status,
-    saleType: saleType,
+    criteria: criteria,
   );
 }
 
@@ -76,20 +61,12 @@ class RequestOperationalReportExportUseCase {
     required OperationalReportType type,
     required int networkId,
     int? posId,
-    String? fromDate,
-    String? toDate,
-    String? search,
-    String? status,
-    String? saleType,
+    required ReportCriteria criteria,
   }) => repository.requestExport(
     type: type,
     networkId: networkId,
     posId: posId,
-    fromDate: fromDate,
-    toDate: toDate,
-    search: search,
-    status: status,
-    saleType: saleType,
+    criteria: criteria,
   );
 }
 
