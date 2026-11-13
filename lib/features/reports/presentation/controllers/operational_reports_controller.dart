@@ -1,3 +1,4 @@
+import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -126,6 +127,35 @@ class OperationalReportsController extends GetxController {
 
   String reportLabel(OperationalReportType type) =>
       catalog.value?.entryFor(type)?.label ?? type.wireValue;
+
+  List<OperationalReportFilterDisplay> get activeFilterDisplays {
+    final entry = selectedReportEntry;
+    if (entry == null) return const [];
+    return entry.definition.filters
+        .where((filter) => criteria.value.filters.containsKey(filter.id))
+        .map((filter) {
+          final value = criteria.value.filters[filter.id]!;
+          final displayValue = switch (value) {
+            ReportTextFilterValue() => value.value,
+            ReportIntegerFilterValue() => value.value.toString(),
+            ReportDecimalFilterValue() => value.value,
+            ReportDateFilterValue() => _dateText(value.value),
+            ReportDateRangeFilterValue() =>
+              '${value.start == null ? '—' : _dateText(value.start!)} — ${value.end == null ? '—' : _dateText(value.end!)}',
+            ReportBooleanFilterValue() => value.value ? 'نعم' : 'لا',
+            ReportChoiceFilterValue() =>
+              entry.choiceLabels[filter.id]?[value.value] ?? value.value,
+            ReportChoicesFilterValue() => value.values
+                .map((choice) => entry.choiceLabels[filter.id]?[choice] ?? choice)
+                .join('، '),
+          };
+          return OperationalReportFilterDisplay(
+            id: filter.id,
+            label: entry.filterLabels[filter.labelKey] ?? filter.id,
+            value: displayValue,
+          );
+        }).toList(growable: false);
+  }
 
   TextEditingController textControllerFor(ReportFilterDefinition filter) {
     return _criteriaTextControllers.putIfAbsent(filter.id, () {
@@ -714,12 +744,8 @@ class OperationalReportsController extends GetxController {
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
-        fromDate: _dateCriteria('from_date'),
-        toDate: _dateCriteria('to_date'),
+        activeFilters: activeFilterDisplays,
         scopeLabel: reportScopeLabel,
-        search: _textCriteria('search'),
-        status: _choiceCriteria('status'),
-        saleType: _choiceCriteria('sale_type'),
       );
       CustomSnackbar.show(
         title: 'تم إنشاء ملخص PDF',
@@ -760,12 +786,8 @@ class OperationalReportsController extends GetxController {
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
-        fromDate: _dateCriteria('from_date'),
-        toDate: _dateCriteria('to_date'),
+        activeFilters: activeFilterDisplays,
         scopeLabel: reportScopeLabel,
-        search: _textCriteria('search'),
-        status: _choiceCriteria('status'),
-        saleType: _choiceCriteria('sale_type'),
       );
       if (shared) {
         CustomSnackbar.show(
@@ -808,12 +830,8 @@ class OperationalReportsController extends GetxController {
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
-        fromDate: _dateCriteria('from_date'),
-        toDate: _dateCriteria('to_date'),
+        activeFilters: activeFilterDisplays,
         scopeLabel: reportScopeLabel,
-        search: _textCriteria('search'),
-        status: _choiceCriteria('status'),
-        saleType: _choiceCriteria('sale_type'),
       );
       if (printed) {
         CustomSnackbar.show(
