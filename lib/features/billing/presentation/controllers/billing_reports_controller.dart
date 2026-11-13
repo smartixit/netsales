@@ -112,10 +112,29 @@ class BillingReportsController extends GetxController {
     final label=definition?['label']?.toString()??type;
     isExportingPdf.value=true;
     try {
+      final network=networkId();
+      if(network==null)throw StateError('حدد الشبكة أولاً.');
+      final total=int.tryParse(metrics['record_count']?.toString()??'')??0;
+      if(total>1500)throw StateError('يتجاوز عدد السجلات 1500؛ استخدم تصدير CSV للحصول على الملف الكامل دون اقتطاع.');
+      final allRows=<Map<String,dynamic>>[];
+      String? cursor;
+      do{
+        final query=<String,dynamic>{..._filters,'per_page':100,if(cursor!=null)'cursor':cursor};
+        final page=_map(await useCases.billingReport(network,type,query));
+        allRows.addAll(_list(page['data']??page['items']));
+        cursor=_cursorFrom(page['next_page_url']??(page['links'] is Map<String,dynamic>?page['links']['next']:null));
+        if(allRows.length>1500)throw StateError('يتجاوز عدد السجلات الحد الآمن لملف PDF.');
+      }while(cursor!=null);
+      if(allRows.length<total)throw StateError('لم تكتمل قراءة جميع صفحات التقرير؛ أُوقف إنشاء PDF الجزئي.');
+      final rawColumns=definition?['columns'];
+      final columns=rawColumns is List<dynamic>?rawColumns.whereType<Map<String,dynamic>>().toList():<Map<String,dynamic>>[];
+      if(columns.isEmpty)throw StateError('تعريف أعمدة التقرير غير متاح لإنشاء PDF.');
       final result=await BillingReportDocumentService.instance.exportSummary(
         reportType:type,
         reportLabel:label,
         summary:metrics,
+        rows:allRows,
+        columns:columns,
         localeTag:'ar-YE',
         fromDate:fromDate.value==null?null:_date(fromDate.value),
         toDate:toDate.value==null?null:_date(toDate.value),
