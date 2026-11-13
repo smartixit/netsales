@@ -7,7 +7,6 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_info_list_tile.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
-import 'package:netsales/widgets/lists/custom_collection_filter_state.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_collection_status_options.dart';
 
 class BillingInvoiceSection extends StatelessWidget {
