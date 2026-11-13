@@ -220,7 +220,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
         );
       }
 
-      final requiresOne = controller.selectedDefinition?['pos_selection'] == 'required';
+      final requiresOne = controller.selectedReportEntry?.access.posSelection == 'required';
       final options = <DropdownItem<int>>[
         if (!requiresOne)
           DropdownItem<int>(
