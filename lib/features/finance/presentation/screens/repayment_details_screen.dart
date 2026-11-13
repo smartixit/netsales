@@ -52,26 +52,17 @@ class RepaymentDetailsScreen extends GetView<RepaymentHistoryController> {
           CustomButton.icon(
             icon: Icons.file_download_outlined,
             tooltip: 'تصدير سند السداد PDF',
-            onPressed: () => controller.exportRepaymentPdf(
-              item,
-              isNetworkView: isNetworkView,
-            ),
+            onPressed: () => controller.exportRepaymentPdf(item),
           ),
           CustomButton.icon(
             icon: Icons.share_outlined,
             tooltip: 'مشاركة سند السداد',
-            onPressed: () => controller.shareRepaymentPdf(
-              item,
-              isNetworkView: isNetworkView,
-            ),
+            onPressed: () => controller.shareRepaymentPdf(item),
           ),
           CustomButton.icon(
             icon: Icons.print_outlined,
             tooltip: 'طباعة سند السداد',
-            onPressed: () => controller.printRepaymentPdf(
-              item,
-              isNetworkView: isNetworkView,
-            ),
+            onPressed: () => controller.printRepaymentPdf(item),
           ),
         ],
       ),
