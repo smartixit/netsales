@@ -20,10 +20,7 @@ class RepaymentDocumentService {
   static final RepaymentDocumentService instance =
       RepaymentDocumentService._();
 
-  Future<Uint8List> generatePdf(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) async {
+  Future<Uint8List> generatePdf(PosRepaymentEntity repayment) async {
     final snapshots = OfficialDocumentArtifactService.instance;
     final issued = await snapshots.createSnapshot(
       documentType: 'pos_repayment',
@@ -39,10 +36,7 @@ class RepaymentDocumentService {
 
     final source = Map<String, dynamic>.from(issued['source_snapshot'] as Map);
     final officialRepayment = PosRepaymentModel.fromJson(source);
-    final renderedBytes = await _renderPdf(
-      officialRepayment,
-      isNetworkView: true,
-    );
+    final renderedBytes = await _renderPdf(officialRepayment);
     return snapshots.uploadArtifact(
       snapshotUuid: issued['snapshot_uuid'].toString(),
       pdfBytes: renderedBytes,
@@ -50,10 +44,7 @@ class RepaymentDocumentService {
     );
   }
 
-  Future<Uint8List> _renderPdf(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) async {
+  Future<Uint8List> _renderPdf(PosRepaymentEntity repayment) async {
     final reference = _reference(repayment);
     final organizationName = _display(
       repayment.networkName,
@@ -84,7 +75,7 @@ class RepaymentDocumentService {
       snapshot: snapshot,
       template: _template,
       options: DocumentRenderOptions(
-        pageProfile: DocumentPageProfile.a4Portrait(
+        pageProfile: DocumentPageProfile.a5Portrait(
           marginTop: 38,
           marginRight: 36,
           marginBottom: 42,
