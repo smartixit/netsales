@@ -29,3 +29,14 @@ This document provides direct mapping from Flutter feature domains to their cano
    - Use `lib/core/themes/` and `lib/core/constants/` for tokens (`AppColors`, `AppTypography`, `AppRadius`, `AppSpacing`, `AppElevation`, `AppGradients`, `AppMotion`, `AppThemes`).
 3. **Use GetX exclusively:** Prohibit Provider, Riverpod, Bloc, or stateful widget state machines.
 4. **Adaptive Breakpoints:** Build all screens to adapt across `AppBreakpoints` (Mobile: <=600dp, Tablet: <=900dp, Desktop: <=1240dp).
+
+
+## 3. Operational Reports & Official Document Snapshots (2026-11-13)
+
+- Canonical API contract: `netsales_api/docs/project/API_CONTRACTS.md`, section **Operational Reports Provider Contract**.
+- `OperationalReportCatalogModel` parses the Laravel catalog into `document_engine` `ReportDefinition` schemas and registers exact schema versions with `ReportDefinitionRegistry`.
+- Localized labels and chart slots are catalog metadata; view/export permissions and supported workspace scopes are carried separately as access descriptors. They are not security grants. Laravel reauthorizes catalog availability, report execution, CSV export, document issue, and artifact download.
+- Operational report data and financial summaries are server-computed. Flutter may display returned metrics/chart series but must not derive balances, aging buckets, wallet totals, or accounting results.
+- Official invoice, repayment, and expense PDFs are rendered only from the server-issued immutable `source_snapshot`. The app uploads the rendered PDF artifact, retrieves the canonical protected artifact, and verifies its SHA-256 before save/share/print.
+- Currency shown in an official document comes from the snapshot's `currency_code`; no fixed currency symbol or client-side currency conversion is allowed.
+- Validation of migrations, typed contract parsing, platform PDF rendering, Arabic text extraction/order, and final CI remains pending for the final plan stage. Do not interpret source integration as verified platform readiness.
