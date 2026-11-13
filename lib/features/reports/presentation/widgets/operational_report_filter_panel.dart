@@ -79,7 +79,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
           ),
           if (canFilterByPos) ...[
             AppSpacing.vSm,
-            _buildPosSelector(context, type),
+            _buildPosSelector(context),
           ],
           if (controller.selectedStatusOptions.isNotEmpty) ...[
             AppSpacing.vSm,
@@ -197,10 +197,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
     });
   }
 
-  Widget _buildPosSelector(
-    BuildContext context,
-    OperationalReportType type,
-  ) {
+  Widget _buildPosSelector(BuildContext context) {
     return Obx(() {
       if (controller.isLoadingPos.value) {
         return const CustomSkeletonCard(height: 70);
@@ -223,7 +220,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
         );
       }
 
-      final requiresOne = type == OperationalReportType.posWallet;
+      final requiresOne = controller.selectedDefinition?['pos_selection'] == 'required';
       final options = <DropdownItem<int>>[
         if (!requiresOne)
           DropdownItem<int>(
