@@ -16,6 +16,7 @@ class BillingReportDocumentService {
     required String reportType,
     required String reportLabel,
     required Map<String,dynamic> summary,
+    required bool includeMetrics,
     required List<Map<String,dynamic>> rows,
     required List<Map<String,dynamic>> columns,
     required String localeTag,
@@ -90,15 +91,17 @@ class BillingReportDocumentService {
           DocumentHeading(text:reportLabel,level:1,direction:DocumentTextDirection.rightToLeft,weight:DocumentTextWeight.bold),
           const DocumentStatusBanner(label:'ملخص محسوب على الخادم',tone:DocumentStatusTone.success,detail:'لم يُجرِ التطبيق أي إعادة احتساب للمؤشرات المالية أو الأرصدة.'),
           DocumentInfoGrid(items:info,columns:3,compact:true),
-          DocumentHeading(text:'المؤشرات والنتائج',level:2,direction:DocumentTextDirection.rightToLeft),
-          DocumentTable(
-            columns:[
-              DocumentTableColumn(id:'metric',label:'المؤشر',alignment:DocumentCellAlignment.leading),
-              DocumentTableColumn(id:'value',label:'القيمة',alignment:DocumentCellAlignment.trailing),
-            ],
-            rows:metricRows,
-            style:DocumentTableStyle(stripedRows:true,compact:true),
-          ),
+          if(includeMetrics)...[
+            DocumentHeading(text:'المؤشرات والنتائج',level:2,direction:DocumentTextDirection.rightToLeft),
+            DocumentTable(
+              columns:[
+                DocumentTableColumn(id:'metric',label:'المؤشر',alignment:DocumentCellAlignment.leading),
+                DocumentTableColumn(id:'value',label:'القيمة',alignment:DocumentCellAlignment.trailing),
+              ],
+              rows:metricRows,
+              style:DocumentTableStyle(stripedRows:true,compact:true),
+            ),
+          ],
           if(rows.isNotEmpty)...[
             DocumentHeading(text:'تفاصيل السجلات',level:2,direction:DocumentTextDirection.rightToLeft),
             DocumentTable(
