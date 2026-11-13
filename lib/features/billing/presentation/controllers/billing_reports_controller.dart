@@ -342,6 +342,8 @@ class BillingReportsController extends GetxController {
     final currentRevision = revision ?? ++_revision;
     isLoading.value = true;
     isLoadingMore.value = false;
+    isExportingCsv.value = false;
+    isExportingPdf.value = false;
     errorMessage.value = null;
     loadMoreError.value = null;
     _nextCursor = null;
