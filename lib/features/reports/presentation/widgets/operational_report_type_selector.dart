@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/badges/custom_filter_chip.dart';
 
 class OperationalReportTypeSelector extends StatelessWidget {
   const OperationalReportTypeSelector({
@@ -28,31 +27,11 @@ class OperationalReportTypeSelector extends StatelessWidget {
             final type = types[index];
             final selected = controller.selectedType.value == type;
 
-            if (selected) {
-              final colors = Theme.of(context).colorScheme;
-              return Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: colors.primaryContainer,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: colors.primary.withValues(alpha: 0.28),
-                  ),
-                ),
-                child: Text(
-                  controller.reportLabel(type),
-                  style: AppTypography.labelMedium.copyWith(
-                    color: colors.onPrimaryContainer,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              );
-            }
-
-            return CustomButton.outline(
-              text: controller.reportLabel(type),
-              onPressed: () => controller.selectType(type),
+            return CustomFilterChip(
+              label: controller.reportLabel(type),
+              isSelected: selected,
+              onSelected: () => controller.selectType(type),
+              isCompact: false,
             );
           },
         ),
