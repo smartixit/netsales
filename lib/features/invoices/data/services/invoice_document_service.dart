@@ -70,7 +70,7 @@ class InvoiceDocumentService {
 
     if (result is DocumentRenderSuccess) {
       final bytes = result.artifact.bytes;
-      await OfficialDocumentArtifactService.instance.issueAndUpload(
+      return OfficialDocumentArtifactService.instance.issueAndUpload(
         documentType: 'sale_invoice',
         documentId: invoice.invoiceId,
         networkId: invoice.networkId,
@@ -80,7 +80,6 @@ class InvoiceDocumentService {
         pdfBytes: bytes,
         fileName: _fileName(invoice),
       );
-      return bytes;
     }
     if (result is DocumentRenderFailure) throw StateError(result.message);
     throw StateError('تعذر إنشاء مستند الفاتورة.');
