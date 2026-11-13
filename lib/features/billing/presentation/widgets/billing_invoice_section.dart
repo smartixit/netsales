@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_cursor_collection_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_dialogs.dart';
@@ -28,9 +27,16 @@ class BillingInvoiceSection extends StatelessWidget {
 
   Widget _tile(Map<String, dynamic> invoice) {
     final invoiceId = (invoice['invoice_id'] as num?)?.toInt();
-    final remaining =
+    final remainingMinor =
         int.tryParse(invoice['remaining_minor']?.toString() ?? '0') ?? 0;
-    final canPay = remaining > 0 &&
+    final rawCurrency = invoice['currency'];
+    final currency = rawCurrency is Map
+        ? Map<String, dynamic>.from(rawCurrency)
+        : const <String, dynamic>{};
+    final currencyCode = currency['code']?.toString();
+    final decimalPlaces =
+        (currency['decimal_places'] as num?)?.toInt() ?? 2;
+    final canPay = remainingMinor > 0 &&
         invoice['status'] != 'PAID' &&
         invoice['status'] != 'VOID' &&
         invoiceId != null;
@@ -47,8 +53,18 @@ class BillingInvoiceSection extends StatelessWidget {
               status: invoice['status']?.toString(),
               serverLabel: invoice['status_label']?.toString(),
             ),
-            Text(
-              'المتبقي: ${AmountFormatter.format(remaining.toString())} وحدة صغرى',
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('المتبقي: '),
+                CustomInteractiveAmountText(
+                  amount: invoice['remaining'] ?? '—',
+                  currencyCode: currencyCode,
+                  decimalPlaces: decimalPlaces,
+                  enableTooltip: false,
+                  trailingText: currencyCode,
+                ),
+              ],
             ),
           ],
         ),
@@ -57,12 +73,11 @@ class BillingInvoiceSection extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             CustomInteractiveAmountText(
-              amount: invoice['total_minor'] ?? '—',
-              currencyCode: invoice['currency_code']?.toString(),
+              amount: invoice['total'] ?? '—',
+              currencyCode: currencyCode,
+              decimalPlaces: decimalPlaces,
               enableTooltip: false,
-              trailingText: invoice['currency_code'] == null
-                  ? 'وحدة صغرى'
-                  : '${invoice['currency_code']} · وحدة صغرى',
+              trailingText: currencyCode,
             ),
             if (canPay)
               CustomButton.primary(
