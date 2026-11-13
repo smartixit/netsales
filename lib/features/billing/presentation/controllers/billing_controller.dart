@@ -111,6 +111,31 @@ class BillingController extends GetxController {
     }
   }
 
+  Future<void> updateAccount(Map<String, dynamic> data) async {
+    final id=selectedAccountId.value;if(id==null||isMutating.value)return;isMutating.value=true;
+    try{await useCases.updateAccount(id,data);await loadAccountData();}
+    catch(e){errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحديث حساب الفوترة.');}
+    finally{isMutating.value=false;}
+  }
+  Future<void> createContact(Map<String,dynamic> data) async {
+    final id=selectedAccountId.value;if(id==null||isMutating.value)return;isMutating.value=true;
+    try{await useCases.createContact(id,data);await loadAccountData();}
+    catch(e){errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر إضافة جهة الاتصال.');}
+    finally{isMutating.value=false;}
+  }
+  Future<void> updateContact(int contactId,Map<String,dynamic> data) async {
+    final id=selectedAccountId.value;if(id==null||isMutating.value)return;isMutating.value=true;
+    try{await useCases.updateContact(id,contactId,data);await loadAccountData();}
+    catch(e){errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحديث جهة الاتصال.');}
+    finally{isMutating.value=false;}
+  }
+  Future<void> deleteContact(int contactId) async {
+    final id=selectedAccountId.value;if(id==null||isMutating.value)return;isMutating.value=true;
+    try{await useCases.deleteContact(id,contactId);await loadAccountData();}
+    catch(e){errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر حذف جهة الاتصال.');}
+    finally{isMutating.value=false;}
+  }
+
   Future<void> purchase(int priceId) async {
     final id=selectedAccountId.value;if(id==null||isMutating.value)return;isMutating.value=true;
     try{await useCases.purchase(id,priceId);await loadAccountData();}
