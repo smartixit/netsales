@@ -11,7 +11,23 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
    Row(children:[const Expanded(child:Text('الاشتراك والفوترة',style:TextStyle(fontSize:24,fontWeight:FontWeight.w700))),CustomButton.outline(text:'تحديث',prefix:Icons.refresh_rounded,onPressed:controller.isLoading.value?null:controller.load)]),
    if(controller.errorMessage.value!=null)Card(child:Padding(padding:const EdgeInsets.all(14),child:Text(controller.errorMessage.value!))),
    if(controller.isLoading.value&&a==null)const Center(child:CircularProgressIndicator()),
-   if(!controller.isLoading.value&&controller.accounts.isEmpty)const Card(child:Padding(padding:EdgeInsets.all(16),child:Text('لا يوجد حساب فوترة لهذه الشبكة بعد.'))),
+   if(!controller.isLoading.value&&controller.accounts.isEmpty) Card(child:Padding(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+      const Text('إنشاء حساب فوترة',style:TextStyle(fontWeight:FontWeight.w700)),
+      const Text('اختر العملة التعاقدية لحساب الشبكة. لا يمكن تغييرها بعد تسجيل أول اشتراك أو فاتورة.'),
+      const SizedBox(height:12),
+      CustomDropdown<int>(
+        items: controller.currencies.map((e)=>DropdownItem<int>(
+          value:(e['currency_id'] as num).toInt(),
+          child:Text((e['code']?.toString()??'')+' — '+(e['name']?.toString()??'')),
+        )).toList(),
+        rxValue:controller.selectedCurrencyId,
+        onChanged:(id)=>controller.selectedCurrencyId.value=id,
+        label:'العملة',
+        hint:'اختر عملة الحساب',
+      ),
+      const SizedBox(height:12),
+      CustomButton.primary(text:'إنشاء حساب الفوترة',loading:controller.isMutating.value,onPressed:controller.selectedCurrencyId.value==null?null:controller.createAccount),
+    ]))),
    if(a!=null)...[
     Card(child:Padding(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('حساب الفوترة',style:TextStyle(fontWeight:FontWeight.w700)),if(controller.accounts.length>1) CustomDropdown<int>(
       items: controller.accounts.map((e)=>DropdownItem<int>(
