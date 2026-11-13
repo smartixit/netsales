@@ -226,7 +226,8 @@ class BillingController extends GetxController {
 
   Future<void> loadAccountData({int? revision}) async {
     final id = selectedAccountId.value;
-    if (id == null) return;
+    final requestNetworkId = networkId();
+    if (id == null || requestNetworkId == null) return;
     final currentRevision = revision ?? ++_revision;
     isLoading.value = true;
     errorMessage.value = null;
@@ -244,7 +245,9 @@ class BillingController extends GetxController {
         useCases.refunds(id, const {'per_page': 25}),
       ]);
 
-      if (currentRevision != _revision || id != selectedAccountId.value) {
+      if (currentRevision != _revision ||
+          id != selectedAccountId.value ||
+          requestNetworkId != networkId()) {
         return;
       }
 
