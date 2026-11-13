@@ -156,8 +156,8 @@ class BillingReportsController extends GetxController {
     selectedPageProfile.value=value.pageProfileId;
     selectedTemplateId.value=value.template?.id.value;
   }
-  List<Map<String,dynamic>> _list(dynamic value)=>value is List?value.whereType<Map<String,dynamic>>().map((e)=>Map<String,dynamic>.from(e)).toList():const [];
-  Map<String,dynamic> _map(BillingPayload p){final d=p.data['data']??p.data;return d is Map?Map<String,dynamic>.from(d):p.data;}
+  List<Map<String,dynamic>> _list(dynamic value)=>value is List<dynamic>?value.whereType<Map<String,dynamic>>().map((e)=>Map<String,dynamic>.from(e)).toList():const [];
+  Map<String,dynamic> _map(BillingPayload p){final d=p.data['data']??p.data;return d is Map<String,dynamic>?d:p.data;}
   String _date(DateTime? value)=>value==null?'':value.toIso8601String().substring(0,10);
   Map<String,dynamic>? get selectedDefinition => catalog.firstWhereOrNull((e)=>e['id']==selectedType.value);
   List<String> get _filterIds => currentDefinition?.filters.map((e)=>e.id).toList() ?? const ['from_date','to_date','status','search'];
@@ -196,7 +196,7 @@ class BillingReportsController extends GetxController {
       _definitionRegistry=ReportDefinitionRegistry();
       for(final schema in catalog){_definitionRegistry.register(_parseDefinition(schema));}
       if(rev!=_revision)return;
-      if(catalog.isEmpty){selectedType.value=null;rows.clear();return;}
+      if(catalog.isEmpty){selectedType.value=null;rows.clear();summary.value=null;charts.clear();return;}
       final chosen=catalog.firstWhereOrNull((e)=>e['id']==selectedType.value)??catalog.first;
       selectedType.value=chosen['id']?.toString();
       final definition=currentDefinition;if(definition!=null)_resetStudio(definition);
@@ -205,14 +205,14 @@ class BillingReportsController extends GetxController {
     finally{if(rev==_revision)isLoading.value=false;}
   }
   Future<void> selectReport(String? type)async{
-    if(type==null||type==selectedType.value)return;selectedType.value=type;await loadReport();
+    if(type==null||type==selectedType.value)return;selectedType.value=type;final definition=currentDefinition;if(definition!=null)_resetStudio(definition);await loadReport();
   }
   Future<void> applyFilters()=>loadReport();
   Future<void> setStatus(String? value)async{selectedStatus.value=value;final next=Map<String,ReportFilterValue>.from(criteria.value.filters);if(value==null||value.isEmpty){next.remove('status');}else{next['status']=ReportChoiceFilterValue(value);}setCriteria(ReportCriteria(filters:next));await loadReport();}
   Future<void> setFromDate(DateTime? value)async{fromDate.value=value;await loadReport();}
   Future<void> setToDate(DateTime? value)async{toDate.value=value;await loadReport();}
   Future<void> clearFilters()async{
-    searchController.clear();statusController.clear();searchQuery.value='';selectedStatus.value=null;fromDate.value=null;toDate.value=null;await loadReport();
+    criteria.value=ReportCriteria();searchController.clear();statusController.clear();searchQuery.value='';selectedStatus.value=null;fromDate.value=null;toDate.value=null;await loadReport();
   }
 
   Future<void> loadReport({int? revision})async{
