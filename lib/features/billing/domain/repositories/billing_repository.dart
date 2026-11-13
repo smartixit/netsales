@@ -6,6 +6,9 @@ abstract interface class BillingRepository {
   Future<BillingPayload> createNetworkAccount(int networkId, int currencyId);
   Future<BillingPayload> getAccount(int accountId);
   Future<BillingPayload> updateAccount(int accountId, Map<String, dynamic> data);
+  Future<BillingPayload> createContact(int accountId, Map<String, dynamic> data);
+  Future<BillingPayload> updateContact(int accountId, int contactId, Map<String, dynamic> data);
+  Future<BillingPayload> deleteContact(int accountId, int contactId);
   Future<BillingPayload> getPlans(int accountId, Map<String, dynamic> query);
   Future<BillingPayload> getEntitlements(int accountId);
   Future<BillingPayload> getReportsCatalog(int networkId);
