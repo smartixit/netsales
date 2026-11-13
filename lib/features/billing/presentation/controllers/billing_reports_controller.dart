@@ -95,7 +95,7 @@ class BillingReportsController extends GetxController {
       final data=_map(await useCases.billingReport(n,type,query));
       if(rev!=_revision)return;
       rows.addAll(_list(data['data']??data['items']));
-      _nextCursor=_cursorFrom(data['next_page_url']??(data['links'] is Map?data['links']['next']:null));
+      _nextCursor=_cursorFrom(data['next_page_url']??(data['links'] is Map<String,dynamic>?data['links']['next']:null));
     }catch(e){errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل بقية سجلات التقرير.');}
     finally{isLoadingMore.value=false;}
   }
