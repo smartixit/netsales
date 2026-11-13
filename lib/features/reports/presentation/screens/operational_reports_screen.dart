@@ -107,6 +107,38 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                         resolveLabel: (context, key) {
                           if (key == entry.definition.titleKey) return entry.label;
                           if (key == entry.definition.descriptionKey) return entry.description;
+                          final localized = switch (key) {
+                            'report_configuration.authorization_notice' => 'تُحدد الصلاحيات ونطاق الوصول من الخادم',
+                            'report_configuration.schema_version' => 'إصدار تعريف التقرير',
+                            'report_configuration.client_execution' => 'تنفيذ محلي',
+                            'report_configuration.server_execution' => 'تنفيذ على الخادم',
+                            'report_configuration.either_execution' => 'تنفيذ مرن',
+                            'report_configuration.client_limit' => 'الحد الأقصى للسجلات المحلية',
+                            'report_configuration.data_criteria' => 'معايير البيانات',
+                            'report_configuration.data_criteria_hint' => 'حدد القيم التي سيستخدمها الخادم لاستخراج النتائج',
+                            'report_configuration.no_filters' => 'لا توجد مرشحات لهذا التقرير',
+                            'common.required' => 'مطلوب',
+                            'report_configuration.from_date' => 'من تاريخ',
+                            'report_configuration.to_date' => 'إلى تاريخ',
+                            'report_configuration.output_design' => 'تصميم المخرجات',
+                            'report_configuration.output_design_hint' => 'خصص الأعمدة وترتيب العرض والقالب',
+                            'report_configuration.output_columns' => 'الأعمدة الظاهرة',
+                            'report_configuration.include_metrics' => 'إظهار المؤشرات',
+                            'report_configuration.include_charts' => 'إظهار الرسوم البيانية',
+                            'report_configuration.sort_by' => 'ترتيب حسب',
+                            'report_configuration.sort_direction' => 'اتجاه الترتيب',
+                            'report_configuration.ascending' => 'تصاعدي',
+                            'report_configuration.descending' => 'تنازلي',
+                            'report_configuration.group_by' => 'تجميع حسب',
+                            'report_configuration.no_grouping' => 'بدون تجميع',
+                            'report_configuration.template' => 'قالب التقرير',
+                            'report_configuration.language' => 'لغة المستند',
+                            'report_configuration.page_profile' => 'حجم الصفحة',
+                            'report_configuration.save_preset' => 'حفظ الإعدادات',
+                            'report_configuration.preview' => 'معاينة',
+                            _ => null,
+                          };
+                          if (localized != null) return localized;
                           return entry.filterLabels[key] ??
                               entry.columnLabels[key] ??
                               entry.metricLabels[key] ??
