@@ -79,7 +79,6 @@ class BillingWorkspaceContent extends StatelessWidget {
               BillingEntitlementsSection(controller: controller),
               BillingInvoiceSection(controller: controller),
               BillingFinancialSection(
-                controller: controller,
                 title: 'الإشعارات الدائنة',
                 emptyTitle: 'لا توجد إشعارات دائنة',
                 page: controller.creditNotesPage,
@@ -90,7 +89,6 @@ class BillingWorkspaceContent extends StatelessWidget {
                 amountKey: 'total_minor',
               ),
               BillingFinancialSection(
-                controller: controller,
                 title: 'الاستردادات',
                 emptyTitle: 'لا توجد استردادات',
                 page: controller.refundsPage,
@@ -101,7 +99,6 @@ class BillingWorkspaceContent extends StatelessWidget {
                 amountKey: 'amount_minor',
               ),
               BillingFinancialSection(
-                controller: controller,
                 title: 'المدفوعات',
                 emptyTitle: 'لا توجد مدفوعات',
                 page: controller.paymentsPage,
