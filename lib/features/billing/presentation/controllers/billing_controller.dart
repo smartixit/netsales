@@ -318,6 +318,7 @@ class BillingController extends GetxController {
       }
 
       if (accounts.isEmpty) {
+        _resetCollectionFilters();
         selectedAccountId.value = null;
         account.value = null;
         _invalidateAccountPages(clearItems: true);
