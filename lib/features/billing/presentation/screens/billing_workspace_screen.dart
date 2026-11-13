@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 class BillingWorkspaceScreen extends GetView<BillingController>{
  const BillingWorkspaceScreen({super.key});
  @override Widget build(BuildContext context)=>Obx((){
@@ -12,7 +13,17 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
    if(controller.isLoading.value&&a==null)const Center(child:CircularProgressIndicator()),
    if(!controller.isLoading.value&&controller.accounts.isEmpty)const Card(child:Padding(padding:EdgeInsets.all(16),child:Text('لا يوجد حساب فوترة لهذه الشبكة بعد.'))),
    if(a!=null)...[
-    Card(child:Padding(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('حساب الفوترة',style:TextStyle(fontWeight:FontWeight.w700)),Text(a['legal_name']?.toString()??'حساب الشبكة'),Text('رقم الحساب: '+(a['account_number']?.toString()??'—')),Text('البريد: '+(a['billing_email']?.toString()??'—'))]))),
+    Card(child:Padding(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('حساب الفوترة',style:TextStyle(fontWeight:FontWeight.w700)),if(controller.accounts.length>1) CustomDropdown<int>(
+      items: controller.accounts.map((e)=>DropdownItem<int>(
+        value: (e['billing_account_id'] as num).toInt(),
+        child: Text((e['default_currency'] is Map ? e['default_currency']['code']?.toString() : null) ?? e['legal_name']?.toString() ?? 'حساب فوترة'),
+      )).toList(),
+      rxValue: controller.selectedAccountId,
+      onChanged: controller.selectAccount,
+      label: 'حساب الفوترة',
+      hint: 'اختر حساب الفوترة',
+    ),
+    Text(a['legal_name']?.toString()??'حساب الشبكة'),Text('رقم الحساب: '+(a['account_number']?.toString()??'—')),Text('البريد: '+(a['billing_email']?.toString()??'—'))]))),
     const _Header('الخطط المتاحة'),
     ...controller.plans.map((p){final v=p['current_version'];final ps=v is Map&&v['prices'] is List?v['prices'] as List:const [];final price=ps.isNotEmpty&&ps.first is Map?ps.first as Map:const {};final id=(price['price_id'] as num?)?.toInt();return Card(child:ListTile(title:Text(p['name']?.toString()??'خطة اشتراك'),subtitle:Text('السعر: '+(price['unit_amount']?.toString()??price['unit_amount_minor']?.toString()??'—')),trailing:CustomButton.primary(text:'اختيار',loading:controller.isMutating.value,onPressed:id==null?null:()=>_purchase(context,id))));}),
     const _Header('الاشتراك الحالي'),
