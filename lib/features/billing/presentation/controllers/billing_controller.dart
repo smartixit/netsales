@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
 class BillingController extends GetxController {
   BillingController({required this.useCases, required this.networkId});
@@ -18,6 +19,7 @@ class BillingController extends GetxController {
   final payments = <Map<String,dynamic>>[].obs;
   final paymentMethods = <Map<String,dynamic>>[].obs;
   final selectedPaymentMethodId = RxnInt();
+  final paymentProof = Rxn<AppPickedFileModel>();
   final entitlements = Rxn<Map<String,dynamic>>();
   final account = Rxn<Map<String,dynamic>>();
   final errorMessage = RxnString();
