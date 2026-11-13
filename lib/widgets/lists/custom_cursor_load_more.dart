@@ -33,6 +33,7 @@ class CustomCursorLoadMore extends StatelessWidget {
       return CustomErrorState.compact(
         title: errorTitle,
         subtitle: error,
+        retryLabel: retryLabel,
         onRetry: onPressed,
       );
     }
