@@ -86,6 +86,8 @@ class BillingWorkspaceContent extends StatelessWidget {
           ] else ...[
             _sectionTitle('حساب الفوترة'),
             CustomSurfaceCard(
+      margin: const EdgeInsets.all(4),
+      padding: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -251,6 +253,8 @@ class BillingWorkspaceContent extends StatelessWidget {
         : const <String, dynamic>{};
     final id = (price['price_id'] as num?)?.toInt();
     return CustomSurfaceCard(
+      margin: const EdgeInsets.all(4),
+      padding: EdgeInsets.zero,
       child: CustomInfoListTile(
         title: Text(plan['name']?.toString() ?? 'خطة اشتراك'),
         subtitle: Row(
@@ -279,6 +283,8 @@ class BillingWorkspaceContent extends StatelessWidget {
   Widget _subscriptionTile(Map<String, dynamic> subscription) {
     final id = (subscription['billing_subscription_id'] as num?)?.toInt();
     return CustomSurfaceCard(
+      margin: const EdgeInsets.all(4),
+      padding: EdgeInsets.zero,
       child: CustomInfoListTile(
         title: Text(
           subscription['plan'] is Map<String, dynamic>
@@ -313,6 +319,8 @@ class BillingWorkspaceContent extends StatelessWidget {
   }
 
   Widget _entitlementTile(Map<String, dynamic> feature) => CustomSurfaceCard(
+      margin: const EdgeInsets.all(4),
+      padding: EdgeInsets.zero,
     child: CustomInfoListTile(
       title: Text(feature['name']?.toString() ?? feature['feature_key']?.toString() ?? 'ميزة'),
       subtitle: Text('القيمة: ${feature['configured_value']?.toString() ?? '—'}'),
@@ -327,6 +335,8 @@ class BillingWorkspaceContent extends StatelessWidget {
   );
 
   Widget _trialCard(Map<String, dynamic> trial) => CustomSurfaceCard(
+      margin: const EdgeInsets.all(4),
+      padding: EdgeInsets.zero,
     child: Padding(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -352,6 +362,8 @@ class BillingWorkspaceContent extends StatelessWidget {
         invoice['status'] != 'VOID' &&
         invoiceId != null;
     return CustomSurfaceCard(
+      margin: const EdgeInsets.all(4),
+      padding: EdgeInsets.zero,
       child: CustomInfoListTile(
         title: Text(invoice['invoice_number']?.toString() ?? 'فاتورة'),
         subtitle: Column(
@@ -393,6 +405,8 @@ class BillingWorkspaceContent extends StatelessWidget {
     required dynamic amount,
     String? currencyCode,
   }) => CustomSurfaceCard(
+      margin: const EdgeInsets.all(4),
+      padding: EdgeInsets.zero,
     child: CustomInfoListTile(
       title: Text(title),
       subtitle: BillingStatusBadge(status: status),
