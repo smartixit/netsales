@@ -30,12 +30,12 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
     const Text('ملخص التقرير',style:TextStyle(fontWeight:FontWeight.w700)),
     Text('عدد السجلات: '+(summary['record_count']?.toString()??'0')),
     if(summary['amounts_by_currency'] is List)
-     ...(summary['amounts_by_currency'] as List).whereType<Map>().map((e)=>Text('إجمالي العملة #'+(e['currency_id']?.toString()??'')+': '+(e['amount_minor']?.toString()??'0')+' وحدة صغرى')),
+     ...(summary['amounts_by_currency'] as List<dynamic>).whereType<Map<String,dynamic>>().map((e)=>Text('إجمالي العملة #'+(e['currency_id']?.toString()??'')+': '+(e['amount_minor']?.toString()??'0')+' وحدة صغرى')),
    ]))),
    if(controller.rows.isEmpty&&!controller.isLoading.value)const Card(child:Padding(padding:EdgeInsets.all(16),child:Text('لا توجد سجلات مطابقة للفلاتر الحالية.'))),
    ...controller.rows.map((row)=>Card(child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(e.key.replaceAll('_',' ')+': '+(e.value?.toString()??'—'))).toList())))),
    if(controller.isLoadingMore.value)const Padding(padding:EdgeInsets.all(12),child:Center(child:CircularProgressIndicator())),
-   if(controller.report.value?['next_page_url']!=null||controller.report.value?['links'] is Map&&controller.report.value?['links']['next']!=null)
+   if(controller.report.value?['next_page_url']!=null||controller.report.value?['links'] is Map<String,dynamic>&&controller.report.value?['links']['next']!=null)
     CustomButton.outline(text:'تحميل المزيد',loading:controller.isLoadingMore.value,onPressed:controller.isLoadingMore.value?null:controller.loadMore),
   ]);
  });
