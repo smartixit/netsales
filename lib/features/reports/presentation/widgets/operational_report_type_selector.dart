@@ -41,7 +41,7 @@ class OperationalReportTypeSelector extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  type.label,
+                  controller.reportLabel(type),
                   style: AppTypography.labelMedium.copyWith(
                     color: colors.onPrimaryContainer,
                     fontWeight: FontWeight.w700,
