@@ -27,7 +27,6 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
     onChanged:controller.setStatus,
     label:'الحالة',
     hint:'كل الحالات',
-    clearable:true,
    ),
    if(controller.hasStatusFilter&&statusChoices.isEmpty)CustomTextField(controller:controller.statusController,label:'الحالة',hint:'أدخل الحالة',isRequired:false,onFieldSubmitted:(_)=>controller.applyFilters()),
    if(controller.hasDateFilters)const SizedBox(height:10),
