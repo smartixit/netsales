@@ -158,6 +158,7 @@ class OperationalReportRepositoryImpl
       response.data!,
       metricDefinitions: entry.definition.metricSlots,
       metricLabels: entry.metricLabels,
+      chartSlots: entry.chartSlots,
       reportTitle: entry.label,
     );
   }
