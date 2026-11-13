@@ -9,12 +9,14 @@ class BillingReportSummarySection extends StatelessWidget {
     required this.summary,
     required this.charts,
     required this.arabicLabel,
+    this.title = 'ملخص التقرير',
     super.key,
   });
 
   final Map<String, dynamic> summary;
   final List<Map<String, dynamic>> charts;
   final String Function(String key) arabicLabel;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,7 @@ class BillingReportSummarySection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('ملخص التقرير', style: AppTypography.titleSmall),
+              Text(title, style: AppTypography.titleSmall),
               ..._summaryWidgets(summary),
             ],
           ),
