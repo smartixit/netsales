@@ -35,7 +35,7 @@ class ExpenseDocumentService {
     final officialExpense = ExpenseModel.fromJson(source);
     final renderedBytes = await _renderPdf(
       officialExpense,
-      currencyCode: issued['currency_code']?.toString() ?? 'YER',
+      currencyCode: snapshots.requireCurrencyCode(issued),
     );
     return snapshots.uploadArtifact(
       snapshotUuid: issued['snapshot_uuid'].toString(),
