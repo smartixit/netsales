@@ -8,19 +8,19 @@ class BillingCollectionStatusOptions {
 
   static List<DropdownItem<String>> build(Iterable<String> values) {
     return [
-      const DropdownItem<String>(
+      DropdownItem<String>(
         value: '',
         child: Text('كل الحالات'),
       ),
       ...values.map((value) {
-      final presentation = EnumPresentationRegistry.resolveBillingStatus(
-        BillingStatus.fromWire(value),
-      );
-      return DropdownItem<String>(
-        value: value,
-        child: Text(presentation.label),
-      );
-      }).toList(growable: false),
+        final presentation = EnumPresentationRegistry.resolveBillingStatus(
+          BillingStatus.fromWire(value),
+        );
+        return DropdownItem<String>(
+          value: value,
+          child: Text(presentation.label),
+        );
+      }),
     ];
   }
 }
