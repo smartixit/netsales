@@ -268,13 +268,23 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
  }
 
  String _resolveLabel(BuildContext context,String key){
-  if(key.startsWith('billing.status.'))return _statusLabel(key.substring('billing.status.'.length));
-  if(key.startsWith('billing.report.column.'))return _arabicLabel(key.substring('billing.report.column.'.length));
-  if(key.startsWith('billing.report.metric.'))return _arabicLabel(key.substring('billing.report.metric.'.length));
+  final english=controller.selectedLocale.value=='en';
+  if(key.startsWith('billing.status.'))return _statusLabel(key.substring('billing.status.'.length),english:english);
+  if(key.startsWith('billing.report.column.')||key.startsWith('billing.report.metric.')){
+    final id=key.substring(key.lastIndexOf('.')+1);
+    return english?_englishLabel(id):_arabicLabel(id);
+  }
+  if(key==controller.selectedDefinition?['label']&&english)return _englishReportLabel(controller.selectedType.value??'');
+  if(key=='من تاريخ'&&english)return 'From date';
+  if(key=='إلى تاريخ'&&english)return 'To date';
+  if(key=='الحالة'&&english)return 'Status';
+  if(key=='بحث'&&english)return 'Search';
   return key;
  }
 
- String _statusLabel(String value)=>const {
+ String _statusLabel(String value,{bool english=false}){
+  if(english)return _englishStatusLabel(value);
+  return const {
   'INCOMPLETE':'غير مكتمل','TRIALING':'تجريبي','ACTIVE':'نشط','PAST_DUE':'متأخر السداد',
   'PAUSED':'متوقف مؤقتاً','SUSPENDED':'معلق','CANCELED':'ملغي','ENDED':'منتهي',
   'RESERVED':'محجوز','PENDING_APPROVAL':'بانتظار الموافقة','COMPLETED':'مكتمل',
@@ -285,7 +295,11 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
   'REFUNDED':'مسترد','PARTIALLY_REFUNDED':'مسترد جزئياً','PENDING':'معلق','QUEUED':'في قائمة الانتظار',
   'CANCELLED':'ملغي',
  }[value]??value;
+ }
+ String _englishStatusLabel(String value)=>const {'INCOMPLETE':'Incomplete','TRIALING':'Trial','ACTIVE':'Active','PAST_DUE':'Past due','PAUSED':'Paused','SUSPENDED':'Suspended','CANCELED':'Canceled','ENDED':'Ended','RESERVED':'Reserved','PENDING_APPROVAL':'Pending approval','COMPLETED':'Completed','EXPIRED':'Expired','REJECTED':'Rejected','REVOKED':'Revoked','DRAFT':'Draft','OPEN':'Open','PARTIALLY_PAID':'Partially paid','PARTIALLY_CREDITED':'Partially credited','PAID':'Paid','CREDITED':'Credited','UNCOLLECTIBLE':'Uncollectible','VOID':'Void','PENDING_REVIEW':'Pending review','VERIFIED':'Verified','FAILED':'Failed','REFUNDED':'Refunded','PARTIALLY_REFUNDED':'Partially refunded','PENDING':'Pending','QUEUED':'Queued','CANCELLED':'Canceled'}[value]??value;
 
+ String _englishReportLabel(String type)=>const {'subscriptions':'Subscriptions','trials':'Trial usage','trial_conversion':'Trial conversion funnel','renewals':'Renewals','plan_performance':'Plan performance','invoices':'Invoices','collections':'Collections','receivables':'Accounts receivable','usage':'Usage','dunning':'Dunning','refunds':'Refunds','revenue_recognition':'Revenue recognition'}[type]??type;
+ String _englishLabel(String key)=>const {'record_count':'Record count','active_subscriptions':'Active subscriptions','trialing_subscriptions':'Trial subscriptions','past_due_subscriptions':'Past-due subscriptions','canceled_subscriptions':'Canceled subscriptions','currency_code':'Currency code','invoice_number':'Invoice number','status':'Status','amount_minor':'Amount (minor units)','mrr_minor':'Monthly recurring revenue','arr_minor':'Annual recurring revenue','trial_eligible':'Eligible trials','trial_reserved':'Reserved trials','trial_started':'Started trials','trial_completed':'Completed trials','conversion_invoice_issued':'Conversion invoices issued','paid_conversion':'Paid conversions'}[key]??key.replaceAll('_',' ');
  String _arabicLabel(String key)=>const {
   'record_count':'عدد السجلات','active_subscriptions':'الاشتراكات النشطة',
   'trialing_subscriptions':'الاشتراكات التجريبية','past_due_subscriptions':'اشتراكات متأخرة السداد',
