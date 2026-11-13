@@ -8,6 +8,7 @@ import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/widgets/cards/custom_surface_card.dart';
 
 class OperationalReportRecordCard extends StatelessWidget {
   const OperationalReportRecordCard({
@@ -190,17 +191,12 @@ class OperationalReportRecordCard extends StatelessWidget {
       ),
     };
 
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: colors.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.65)),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(AppSpacing.cardPadding),
-        child: Column(
+    return CustomSurfaceCard(
+      padding: EdgeInsets.all(AppSpacing.cardPadding),
+      backgroundColor: colors.surfaceContainerLow,
+      borderColor: colors.outlineVariant.withValues(alpha: 0.65),
+      radius: 18,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -277,7 +273,6 @@ class OperationalReportRecordCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }
