@@ -114,6 +114,10 @@ class OperationalReportsController extends GetxController {
     return type == null ? null : catalog.value?.definitionFor(type);
   }
 
+  String reportLabel(OperationalReportType type) =>
+      catalog.value?.definitionFor(type)?['label']?.toString() ??
+      type.wireValue;
+
   List<String> get selectedStatusOptions {
     final filters = selectedDefinition?['filters'];
     if (filters is! List) return const [];
