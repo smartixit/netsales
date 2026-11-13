@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
@@ -240,7 +241,7 @@ class BillingDialogs {
             Text('نهاية الفترة: ${detail['current_period_end']?.toString() ?? '—'}'),
             if (trial is Map<String, dynamic>) ...[
               const SizedBox(height: 8),
-              const Text('الفترة التجريبية', style: TextStyle(fontWeight: FontWeight.w700)),
+              const Text('الفترة التجريبية', style: AppTypography.titleSmall),
               Text('الحالة: ${trial['status']?.toString() ?? '—'}'),
               Text('تاريخ البدء: ${trial['started_at']?.toString() ?? '—'}'),
               Text('تاريخ الانتهاء: ${trial['completed_at']?.toString() ?? '—'}'),
