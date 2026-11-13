@@ -980,36 +980,54 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final actionRevision = ++_documentActionRevision;
+    final scopeRevision = _scopeRevision;
+    final criteriaSnapshot = criteria.value;
+    final presentationSnapshot = presentation.value;
+    final organizationName = reportOrganizationName;
+    final logoUrl = reportLogoUrl;
+    final filters = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final scopeLabel = reportScopeLabel;
+    bool isCurrentAction() =>
+        actionRevision == _documentActionRevision &&
+        scopeRevision == _scopeRevision &&
+        type == selectedType.value &&
+        identical(criteriaSnapshot, criteria.value) &&
+        identical(presentationSnapshot, presentation.value);
+
     isPdfActionRunning.value = true;
     try {
       await saveSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
         summary: data,
-        organizationName: reportOrganizationName,
-        logoUrl: reportLogoUrl,
-        activeFilters: activeFilterDisplays,
-        scopeLabel: reportScopeLabel,
+        organizationName: organizationName,
+        logoUrl: logoUrl,
+        activeFilters: filters,
+        scopeLabel: scopeLabel,
       );
-      CustomSnackbar.show(
-        title: 'تم إنشاء ملخص PDF',
-        message: 'حُفظ الملخص التنفيذي في مجلد Reports.',
-        type: SnackType.success,
-      );
+      if (isCurrentAction()) {
+        CustomSnackbar.show(
+          title: 'تم إنشاء ملخص PDF',
+          message: 'حُفظ الملخص التنفيذي في مجلد Reports.',
+          type: SnackType.success,
+        );
+      }
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذر إنشاء ملخص PDF',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر إنشاء مستند ملخص التقرير.',
-        ),
-        type: SnackType.error,
-      );
+      if (isCurrentAction()) {
+        CustomSnackbar.show(
+          title: 'تعذر إنشاء ملخص PDF',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر إنشاء مستند ملخص التقرير.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isPdfActionRunning.value = false;
+      if (isCurrentAction()) isPdfActionRunning.value = false;
     }
   }
-
 
   Future<void> exportDetailedPdf() async {
     final type = selectedType.value;
@@ -1020,6 +1038,8 @@ class OperationalReportsController extends GetxController {
     final criteriaSnapshot = criteria.value;
     final presentationSnapshot = presentation.value;
     final pageProfileId = selectedPageProfileId;
+    final documentRevision = ++_documentActionRevision;
+    final scopeRevision = _scopeRevision;
 
     if (type == null ||
         entry == null ||
@@ -1052,9 +1072,12 @@ class OperationalReportsController extends GetxController {
         networkId: networkId,
         posId: posId,
         criteria: criteriaSnapshot,
+        documentRevision: documentRevision,
       );
 
-      if (selectedType.value != type ||
+      if (documentRevision != _documentActionRevision ||
+          scopeRevision != _scopeRevision ||
+          selectedType.value != type ||
           _networkId != networkId ||
           _queryPosId != posId ||
           !identical(criteria.value, criteriaSnapshot) ||
@@ -1087,7 +1110,8 @@ class OperationalReportsController extends GetxController {
         scopeLabel: scopeSnapshot,
       );
 
-      if (saved) {
+      if (saved && documentRevision == _documentActionRevision &&
+          scopeRevision == _scopeRevision && selectedType.value == type) {
         CustomSnackbar.show(
           title: 'تم إنشاء التقرير التفصيلي',
           message: 'حُفظ ملف PDF شاملاً السجلات المطابقة وإعدادات العرض المحددة.',
@@ -1095,6 +1119,10 @@ class OperationalReportsController extends GetxController {
         );
       }
     } catch (error) {
+      if (documentRevision != _documentActionRevision ||
+          scopeRevision != _scopeRevision) {
+        return;
+      }
       final message = error is StateError
           ? error.toString().replaceFirst('Bad state: ', '')
           : AppException.sanitizeMessage(
@@ -1107,7 +1135,10 @@ class OperationalReportsController extends GetxController {
         type: SnackType.error,
       );
     } finally {
-      isPdfActionRunning.value = false;
+      if (documentRevision == _documentActionRevision &&
+          scopeRevision == _scopeRevision) {
+        isPdfActionRunning.value = false;
+      }
     }
   }
 
@@ -1116,6 +1147,7 @@ class OperationalReportsController extends GetxController {
     required int networkId,
     required int? posId,
     required ReportCriteria criteria,
+    required int documentRevision,
   }) async {
     const maxRows = 1500;
     final records = <OperationalReportRecord>[];
@@ -1124,6 +1156,9 @@ class OperationalReportsController extends GetxController {
     String? cursor;
 
     do {
+      if (documentRevision != _documentActionRevision) {
+        throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+      }
       final page = await getReportUseCase(
         type: type,
         networkId: networkId,
@@ -1132,6 +1167,9 @@ class OperationalReportsController extends GetxController {
         cursor: cursor,
         perPage: 50,
       );
+      if (documentRevision != _documentActionRevision) {
+        throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+      }
 
       for (final record in page.items) {
         final identity = _reportRecordIdentity(record, type);
@@ -1151,6 +1189,9 @@ class OperationalReportsController extends GetxController {
       }
     } while (cursor != null);
 
+    if (documentRevision != _documentActionRevision) {
+      throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+    }
     final latestPage = await getReportUseCase(
       type: type,
       networkId: networkId,
@@ -1158,6 +1199,9 @@ class OperationalReportsController extends GetxController {
       criteria: criteria,
       perPage: 1,
     );
+    if (documentRevision != _documentActionRevision) {
+      throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+    }
     final capturedLatest = records.isEmpty ? null : records.first;
     final currentLatest = latestPage.items.isEmpty ? null : latestPage.items.first;
     if (capturedLatest == null && currentLatest != null ||
@@ -1185,18 +1229,33 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final actionRevision = ++_documentActionRevision;
+    final scopeRevision = _scopeRevision;
+    final criteriaSnapshot = criteria.value;
+    final presentationSnapshot = presentation.value;
+    final organizationName = reportOrganizationName;
+    final logoUrl = reportLogoUrl;
+    final filters = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final scopeLabel = reportScopeLabel;
+    bool isCurrentAction() =>
+        actionRevision == _documentActionRevision &&
+        scopeRevision == _scopeRevision &&
+        type == selectedType.value &&
+        identical(criteriaSnapshot, criteria.value) &&
+        identical(presentationSnapshot, presentation.value);
+
     isPdfActionRunning.value = true;
     try {
       final shared = await shareSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
         summary: data,
-        organizationName: reportOrganizationName,
-        logoUrl: reportLogoUrl,
-        activeFilters: activeFilterDisplays,
-        scopeLabel: reportScopeLabel,
+        organizationName: organizationName,
+        logoUrl: logoUrl,
+        activeFilters: filters,
+        scopeLabel: scopeLabel,
       );
-      if (shared) {
+      if (shared && isCurrentAction()) {
         CustomSnackbar.show(
           title: 'تم تجهيز المستند للمشاركة',
           message: 'تم إنشاء ملخص PDF وفتح نافذة المشاركة.',
@@ -1204,16 +1263,18 @@ class OperationalReportsController extends GetxController {
         );
       }
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذرت مشاركة الملخص',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر إنشاء أو مشاركة مستند التقرير.',
-        ),
-        type: SnackType.error,
-      );
+      if (isCurrentAction()) {
+        CustomSnackbar.show(
+          title: 'تعذرت مشاركة الملخص',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر إنشاء أو مشاركة مستند التقرير.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isPdfActionRunning.value = false;
+      if (isCurrentAction()) isPdfActionRunning.value = false;
     }
   }
 
@@ -1229,18 +1290,33 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final actionRevision = ++_documentActionRevision;
+    final scopeRevision = _scopeRevision;
+    final criteriaSnapshot = criteria.value;
+    final presentationSnapshot = presentation.value;
+    final organizationName = reportOrganizationName;
+    final logoUrl = reportLogoUrl;
+    final filters = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final scopeLabel = reportScopeLabel;
+    bool isCurrentAction() =>
+        actionRevision == _documentActionRevision &&
+        scopeRevision == _scopeRevision &&
+        type == selectedType.value &&
+        identical(criteriaSnapshot, criteria.value) &&
+        identical(presentationSnapshot, presentation.value);
+
     isPdfActionRunning.value = true;
     try {
       final printed = await printSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
         summary: data,
-        organizationName: reportOrganizationName,
-        logoUrl: reportLogoUrl,
-        activeFilters: activeFilterDisplays,
-        scopeLabel: reportScopeLabel,
+        organizationName: organizationName,
+        logoUrl: logoUrl,
+        activeFilters: filters,
+        scopeLabel: scopeLabel,
       );
-      if (printed) {
+      if (printed && isCurrentAction()) {
         CustomSnackbar.show(
           title: 'تم فتح نافذة الطباعة',
           message: 'أُرسل ملخص التقرير إلى خدمة الطباعة.',
@@ -1248,26 +1324,38 @@ class OperationalReportsController extends GetxController {
         );
       }
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذرت طباعة الملخص',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر إنشاء مستند التقرير للطباعة.',
-        ),
-        type: SnackType.error,
-      );
+      if (isCurrentAction()) {
+        CustomSnackbar.show(
+          title: 'تعذرت طباعة الملخص',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر إنشاء مستند التقرير للطباعة.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isPdfActionRunning.value = false;
+      if (isCurrentAction()) isPdfActionRunning.value = false;
     }
   }
 
   Future<void> refreshExportStatus() async {
     final job = exportJob.value;
     if (job == null || isCheckingExport.value) return;
+
+    final actionRevision = _exportActionRevision;
+    final scopeRevision = _scopeRevision;
+    bool isCurrentJob() =>
+        actionRevision == _exportActionRevision &&
+        scopeRevision == _scopeRevision &&
+        exportJob.value?.exportId == job.exportId;
     isCheckingExport.value = true;
+
     try {
       final status = await getExportStatusUseCase(job.exportId);
+      if (!isCurrentJob()) return;
       exportJob.value = status;
+
       if (status.isReady) {
         // Never pass a server-supplied absolute URL to the authenticated
         // Dio client. Build the download path from the trusted API route and
@@ -1276,9 +1364,11 @@ class OperationalReportsController extends GetxController {
           status.exportId,
         );
         final bytes = await downloadExportUseCase(url);
+        if (!isCurrentJob()) return;
         if (bytes == null || bytes.isEmpty) {
           throw const AppException('التصدير جاهز لكن تعذر تنزيل الملف.');
         }
+
         final type = selectedType.value;
         final fileName = 'تقرير_' +
             (type?.wireValue ?? 'تشغيلي') +
@@ -1293,6 +1383,7 @@ class OperationalReportsController extends GetxController {
           autoOpen: false,
           showFeedback: false,
         );
+        if (!isCurrentJob()) return;
         if (!result.isSuccess) {
           throw AppException(
             result.errorMessage ?? 'تعذر حفظ ملف التقرير.',
@@ -1317,16 +1408,18 @@ class OperationalReportsController extends GetxController {
         );
       }
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذر تحديث حالة التصدير',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر التحقق من حالة ملف التقرير.',
-        ),
-        type: SnackType.error,
-      );
+      if (isCurrentJob()) {
+        CustomSnackbar.show(
+          title: 'تعذر تحديث حالة التصدير',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر التحقق من حالة ملف التقرير.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isCheckingExport.value = false;
+      if (isCurrentJob()) isCheckingExport.value = false;
     }
   }
 }
