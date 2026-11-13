@@ -51,6 +51,22 @@ class OperationalReportDocumentService {
       fonts: brandingFonts,
     );
 
+    final pageProfile =
+        type == OperationalReportType.networkWallet ||
+                type == OperationalReportType.posWallet
+            ? DocumentPageProfile.a4Landscape(
+                marginTop: 34,
+                marginRight: 34,
+                marginBottom: 38,
+                marginLeft: 34,
+              )
+            : DocumentPageProfile.a4Portrait(
+                marginTop: 38,
+                marginRight: 36,
+                marginBottom: 42,
+                marginLeft: 36,
+              );
+
     final generatedAt = DateTime.now();
     final snapshot = _buildSnapshot(
       type: type,
@@ -71,12 +87,7 @@ class OperationalReportDocumentService {
       snapshot: snapshot,
       template: _template,
       options: DocumentRenderOptions(
-        pageProfile: DocumentPageProfile.a4Portrait(
-          marginTop: 38,
-          marginRight: 36,
-          marginBottom: 42,
-          marginLeft: 36,
-        ),
+        pageProfile: pageProfile,
         generatedAt: generatedAt,
         showPageNumbers: true,
         headerText: normalizedOrganization + ' · ' + _reportTitle(summary, type),
