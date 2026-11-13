@@ -185,7 +185,7 @@ class ExpenseDocumentService {
             direction: DocumentTextDirection.rightToLeft,
           ),
           DocumentTableCell(
-            value: DocumentTextValue(_amount(item.amount)),
+            value: DocumentTextValue(_money(item.amount, currencyCode)),
             direction: DocumentTextDirection.leftToRight,
           ),
         ],
@@ -236,7 +236,7 @@ class ExpenseDocumentService {
         lines: [
           DocumentFinancialLine(
             label: 'إجمالي المصروف',
-            value: DocumentTextValue(_amount(expense.totalAmount)),
+            value: DocumentTextValue(_money(expense.totalAmount, currencyCode)),
             emphasis: DocumentFinancialEmphasis.total,
           ),
         ],
