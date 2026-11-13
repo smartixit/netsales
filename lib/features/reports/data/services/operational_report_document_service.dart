@@ -79,7 +79,7 @@ class OperationalReportDocumentService {
         ),
         generatedAt: generatedAt,
         showPageNumbers: true,
-        headerText: normalizedOrganization + ' · ' + type.label,
+        headerText: normalizedOrganization + ' · ' + _reportTitle(summary, type),
         footerText:
             'ملخص تنفيذي محسوب على كامل النتائج المطابقة للفلاتر المحددة',
         watermark: DocumentWatermark(
@@ -210,7 +210,7 @@ class OperationalReportDocumentService {
     String? status,
     String? saleType,
   }) {
-    final metrics = summary.metricsFor(type);
+    final metrics = summary.metrics;
     final currencyCode = _display(summary.values['currency_code']?.toString(), 'YER');
     final rows = metrics.indexed.map((entry) {
       final metric = entry.$2;
@@ -240,7 +240,7 @@ class OperationalReportDocumentService {
       ),
       DocumentInfoItem(
         label: 'نوع التقرير',
-        value: DocumentTextValue(type.label),
+        value: DocumentTextValue(_reportTitle(summary, type)),
         direction: DocumentTextDirection.rightToLeft,
       ),
       if (_hasText(scopeLabel))
@@ -293,7 +293,7 @@ class OperationalReportDocumentService {
               generatedAt.millisecondsSinceEpoch.toString(),
         ),
         documentTypeId: DocumentTypeId('netsales.operational-report'),
-        title: 'ملخص ' + type.label,
+        title: 'ملخص ' + _reportTitle(summary, type),
         subtitle: 'تقرير تنفيذي صادر عن NetSales',
         reference: type.wireValue,
         locale: DocumentLocale(
@@ -308,7 +308,7 @@ class OperationalReportDocumentService {
           title: 'ملخص التقرير',
           nodes: [
             DocumentHeading(
-              text: 'ملخص تنفيذي — ' + type.label,
+              text: 'ملخص تنفيذي — ' + _reportTitle(summary, type),
               level: 1,
               direction: DocumentTextDirection.rightToLeft,
             ),
@@ -385,6 +385,14 @@ class OperationalReportDocumentService {
     isDefault: true,
     layout: DocumentTemplateLayout.executive,
   );
+
+  static String _reportTitle(
+    OperationalReportSummary summary,
+    OperationalReportType type,
+  ) {
+    final value = summary.reportTitle.trim();
+    return value.isEmpty ? type.wireValue : value;
+  }
 
   static String _colorHex(Color color) =>
       (color.toARGB32() & 0x00FFFFFF)
