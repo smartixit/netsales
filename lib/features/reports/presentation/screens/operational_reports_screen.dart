@@ -9,6 +9,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_records_list.dart';
+import 'package:netsales/features/reports/presentation/widgets/operational_report_charts_section.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_summary_strip.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_type_selector.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -235,6 +236,16 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                         child: OperationalReportSummaryStrip(
                           summary: summary,
                         ),
+                      );
+                    }),
+                    Obx(() {
+                      final summary = controller.summary.value;
+                      if (summary == null || !controller.presentation.value.includeCharts) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: OperationalReportChartsSection(summary: summary),
                       );
                     }),
                     AppSpacing.vSm,
