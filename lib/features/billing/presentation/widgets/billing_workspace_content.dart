@@ -86,7 +86,7 @@ class BillingWorkspaceContent extends StatelessWidget {
                 loadMoreLabel: 'تحميل المزيد من الإشعارات الدائنة',
                 referenceKey: 'credit_note_number',
                 fallbackTitle: 'إشعار دائن',
-                amountKey: 'total_minor',
+                amountKey: 'total',
               ),
               BillingFinancialSection(
                 title: 'الاستردادات',
@@ -96,7 +96,7 @@ class BillingWorkspaceContent extends StatelessWidget {
                 loadMoreLabel: 'تحميل المزيد من الاستردادات',
                 referenceKey: 'refund_reference',
                 fallbackTitle: 'استرداد',
-                amountKey: 'amount_minor',
+                amountKey: 'amount',
               ),
               BillingFinancialSection(
                 title: 'المدفوعات',
