@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:document_engine/document_engine.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -35,6 +36,8 @@ class OperationalReportsController extends GetxController {
   final GetOperationalReportCatalogUseCase getReportCatalogUseCase;
   final GetOperationalReportUseCase getReportUseCase;
   final Rxn<OperationalReportCatalog> catalog = Rxn<OperationalReportCatalog>();
+  final Rx<ReportCriteria> criteria = ReportCriteria().obs;
+  final Rx<ReportPresentationOptions> presentation = ReportPresentationOptions().obs;
   final GetOperationalReportSummaryUseCase getSummaryUseCase;
   final RequestOperationalReportExportUseCase requestExportUseCase;
   final GetOperationalReportExportStatusUseCase getExportStatusUseCase;
@@ -136,6 +139,44 @@ class OperationalReportsController extends GetxController {
     String fallback = '',
   ]) =>
       selectedReportEntry?.choiceLabels[filterId]?[value] ?? fallback;
+
+  void updateCriteria(ReportCriteria value) {
+    final definition = selectedReportEntry?.definition;
+    if (definition == null || value.validateAgainst(definition).isNotEmpty) return;
+    criteria.value = value;
+    summary.value = null;
+    summaryError.value = null;
+    loadReport(refresh: true);
+  }
+
+  void updatePresentation(ReportPresentationOptions value) {
+    final definition = selectedReportEntry?.definition;
+    if (definition == null || value.validateAgainst(definition).isNotEmpty) return;
+    presentation.value = value;
+  }
+
+  ReportCriteria _effectiveCriteria() {
+    final filters = Map<String, ReportFilterValue>.of(criteria.value.filters);
+    void setText(String id, String? value) {
+      final normalized = value?.trim() ?? '';
+      if (normalized.isEmpty) {
+        filters.remove(id);
+      } else {
+        filters[id] = ReportTextFilterValue(normalized);
+      }
+    }
+    setText('from_date', fromDate.value);
+    setText('to_date', toDate.value);
+    setText('search', searchTextController.text);
+    setText('status', selectedStatus.value);
+    setText('sale_type', selectedSaleType.value);
+    return ReportCriteria(filters: filters);
+  }
+
+  String? _textCriteria(String id) {
+    final value = _effectiveCriteria().filters[id];
+    return value is ReportTextFilterValue ? value.value : null;
+  }
 
   List<String> _choicesForFilter(String filterId) {
     final filter = selectedReportEntry?.definition.filter(filterId);
@@ -248,6 +289,8 @@ class OperationalReportsController extends GetxController {
     toDate.value = null;
     exportJob.value = null;
     _seenReportCursors.clear();
+    criteria.value = ReportCriteria();
+    presentation.value = ReportPresentationOptions();
 
     _posSearchQuery = '';
     if (!isNetworkWorkspace) {
@@ -533,11 +576,7 @@ class OperationalReportsController extends GetxController {
         type: type,
         networkId: networkId,
         posId: requestedPosId,
-        fromDate: fromDate.value,
-        toDate: toDate.value,
-        search: searchTextController.text,
-        status: selectedStatus.value,
-        saleType: selectedSaleType.value,
+        criteria: _effectiveCriteria(),
         cursor: requestedCursor,
       );
       if (revision != _requestRevision ||
@@ -642,11 +681,7 @@ class OperationalReportsController extends GetxController {
         type: type,
         networkId: networkId,
         posId: _queryPosId,
-        fromDate: fromDate.value,
-        toDate: toDate.value,
-        search: searchTextController.text,
-        status: selectedStatus.value,
-        saleType: selectedSaleType.value,
+        criteria: _effectiveCriteria(),
       );
       exportJob.value = result;
       CustomSnackbar.show(
