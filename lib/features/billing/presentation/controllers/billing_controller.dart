@@ -332,6 +332,7 @@ class BillingController extends GetxController {
           accounts.first;
       final chosenId = (chosen['billing_account_id'] as num).toInt();
       if (previousAccountId != chosenId) {
+        _resetCollectionFilters();
         _invalidateAccountPages(clearItems: true);
         _clearSubscriptionDetails();
       }
