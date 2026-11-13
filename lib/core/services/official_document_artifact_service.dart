@@ -4,14 +4,14 @@ import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/api_service.dart';
 
-/// Persists the authoritative server snapshot and binds its immutable PDF artifact.
+/// Persists the authoritative server snapshot and returns its canonical PDF bytes.
 class OfficialDocumentArtifactService {
   OfficialDocumentArtifactService._();
 
   static final OfficialDocumentArtifactService instance =
       OfficialDocumentArtifactService._();
 
-  Future<String> issueAndUpload({
+  Future<Uint8List> issueAndUpload({
     required String documentType,
     required int documentId,
     required int networkId,
@@ -21,7 +21,15 @@ class OfficialDocumentArtifactService {
     required Uint8List pdfBytes,
     required String fileName,
   }) async {
-    final snapshotResponse = await ApiService.instance.post<Map<String, dynamic>>(
+    if (pdfBytes.isEmpty) {
+      throw const AppException(
+        'ملف PDF فارغ ولا يمكن تثبيته كنسخة رسمية.',
+        code: 'OFFICIAL_DOCUMENT_PDF_EMPTY',
+      );
+    }
+
+    final snapshotResponse =
+        await ApiService.instance.post<Map<String, dynamic>>(
       ApiConstants.operationalDocumentSnapshots,
       data: {
         'document_type': documentType,
@@ -58,9 +66,21 @@ class OfficialDocumentArtifactService {
       );
     }
 
-    if (snapshot['artifact_ready'] == true) return snapshotUuid;
+    if (snapshot['artifact_ready'] == true) {
+      final canonicalBytes = await ApiService.instance.downloadBytes(
+        ApiConstants.operationalDocumentSnapshotDownload(snapshotUuid),
+      );
+      if (canonicalBytes == null || canonicalBytes.isEmpty) {
+        throw const AppException(
+          'تعذر استرجاع ملف PDF المثبت للنسخة الرسمية.',
+          code: 'OFFICIAL_DOCUMENT_CANONICAL_DOWNLOAD_FAILED',
+        );
+      }
+      return canonicalBytes;
+    }
 
-    final artifactResponse = await ApiService.instance.uploadBytes<Map<String, dynamic>>(
+    final artifactResponse =
+        await ApiService.instance.uploadBytes<Map<String, dynamic>>(
       ApiConstants.operationalDocumentSnapshotArtifact(snapshotUuid),
       bytes: pdfBytes,
       fileName: fileName.endsWith('.pdf') ? fileName : '$fileName.pdf',
@@ -84,6 +104,13 @@ class OfficialDocumentArtifactService {
       );
     }
 
-    return snapshotUuid;
+    if (artifactResponse.data!['artifact_ready'] != true) {
+      throw const AppException(
+        'لم يؤكد الخادم تثبيت ملف PDF للنسخة الرسمية.',
+        code: 'OFFICIAL_DOCUMENT_ARTIFACT_NOT_READY',
+      );
+    }
+
+    return Uint8List.fromList(pdfBytes);
   }
 }
