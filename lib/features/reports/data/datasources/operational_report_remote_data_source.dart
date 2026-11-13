@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/reports/data/models/operational_report_export_model.dart';
 import 'package:netsales/features/reports/data/models/operational_report_catalog_model.dart';
+import 'package:document_engine/document_engine.dart';
 
 abstract interface class OperationalReportRemoteDataSource {
   Future<ApiResponse<OperationalReportCatalogModel>> getCatalog({
@@ -25,5 +26,9 @@ abstract interface class OperationalReportRemoteDataSource {
     String exportId,
   );
 
+  Future<ApiResponse<List<SavedReportPreset>>> getPresets({required Map<String, dynamic> query});
+  Future<ApiResponse<SavedReportPreset>> savePreset({required Map<String, dynamic> payload});
+  Future<ApiResponse<SavedReportPreset>> updatePreset(String presetId, {required Map<String, dynamic> payload});
+  Future<ApiResponse<bool>> deletePreset(String presetId, {required Map<String, dynamic> query});
   Future<Uint8List?> downloadExport(String url);
 }

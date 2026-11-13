@@ -314,6 +314,55 @@ class OperationalReportRepositoryImpl
     return response.data!;
   }
 
+
+  Map<String, dynamic> _presetScope(OperationalReportType type, int networkId, int? posId) =>
+      {'report_type': type.wireValue, 'network_id': networkId, if (posId != null) 'pos_id': posId};
+
+  Map<String, dynamic> _presetPayload({
+    required OperationalReportType type, required int networkId, int? posId,
+    required String name, required int reportSchemaVersion,
+    required ReportCriteria criteria, required ReportPresentationOptions presentation,
+  }) => {
+    ..._presetScope(type, networkId, posId), 'name': name.trim(),
+    'report_schema_version': reportSchemaVersion, 'criteria': criteria.toJson(),
+    'presentation': presentation.toJson(),
+  };
+
+  @override
+  Future<List<SavedReportPreset>> getPresets({required OperationalReportType type, required int networkId, int? posId}) async {
+    final response = await remoteDataSource.getPresets(query: _presetScope(type, networkId, posId));
+    if (!response.success || response.data == null) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر تحميل الإعدادات المحفوظة.', code: 'OPERATIONAL_REPORT_PRESETS_LOAD_FAILED', details: response.errors);
+    }
+    return response.data!;
+  }
+
+  @override
+  Future<SavedReportPreset> savePreset({required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation}) async {
+    final response = await remoteDataSource.savePreset(payload: _presetPayload(type: type, networkId: networkId, posId: posId, name: name, reportSchemaVersion: reportSchemaVersion, criteria: criteria, presentation: presentation));
+    if (!response.success || response.data == null) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر حفظ إعداد التقرير.', code: 'OPERATIONAL_REPORT_PRESET_SAVE_FAILED', details: response.errors);
+    }
+    return response.data!;
+  }
+
+  @override
+  Future<SavedReportPreset> updatePreset({required String presetId, required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation}) async {
+    final response = await remoteDataSource.updatePreset(presetId, payload: _presetPayload(type: type, networkId: networkId, posId: posId, name: name, reportSchemaVersion: reportSchemaVersion, criteria: criteria, presentation: presentation));
+    if (!response.success || response.data == null) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر تحديث إعداد التقرير.', code: 'OPERATIONAL_REPORT_PRESET_UPDATE_FAILED', details: response.errors);
+    }
+    return response.data!;
+  }
+
+  @override
+  Future<void> deletePreset({required String presetId, required OperationalReportType type, required int networkId, int? posId}) async {
+    final response = await remoteDataSource.deletePreset(presetId, query: _presetScope(type, networkId, posId));
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر حذف إعداد التقرير.', code: 'OPERATIONAL_REPORT_PRESET_DELETE_FAILED', details: response.errors);
+    }
+  }
+
   @override
   Future<Uint8List?> downloadExport(String url) {
     return remoteDataSource.downloadExport(url);

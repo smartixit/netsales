@@ -468,6 +468,8 @@ abstract final class ApiConstants {
   static const String operationalReports = '/reports';
   static const String operationalReportSummary = '/reports/summary';
   static const String operationalReportExports = '/reports/exports';
+  static const String operationalReportPresets = '/reports/presets';
+  static String operationalReportPreset(String presetId) => '/reports/presets/$presetId';
   static String operationalReportExportStatus(String exportId) =>
       '/reports/exports/$exportId';
   static String operationalReportExportDownload(String exportId) =>

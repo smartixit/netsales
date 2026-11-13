@@ -184,3 +184,24 @@ class DownloadOperationalReportExportUseCase {
   final OperationalReportRepository repository;
   Future<Uint8List?> call(String url) => repository.downloadExport(url);
 }
+
+class GetOperationalReportPresetsUseCase {
+  const GetOperationalReportPresetsUseCase(this.repository);
+  final OperationalReportRepository repository;
+  Future<List<SavedReportPreset>> call({required OperationalReportType type, required int networkId, int? posId}) => repository.getPresets(type: type, networkId: networkId, posId: posId);
+}
+class SaveOperationalReportPresetUseCase {
+  const SaveOperationalReportPresetUseCase(this.repository);
+  final OperationalReportRepository repository;
+  Future<SavedReportPreset> call({required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation}) => repository.savePreset(type: type, networkId: networkId, posId: posId, name: name, reportSchemaVersion: reportSchemaVersion, criteria: criteria, presentation: presentation);
+}
+class UpdateOperationalReportPresetUseCase {
+  const UpdateOperationalReportPresetUseCase(this.repository);
+  final OperationalReportRepository repository;
+  Future<SavedReportPreset> call({required String presetId, required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation}) => repository.updatePreset(presetId: presetId, type: type, networkId: networkId, posId: posId, name: name, reportSchemaVersion: reportSchemaVersion, criteria: criteria, presentation: presentation);
+}
+class DeleteOperationalReportPresetUseCase {
+  const DeleteOperationalReportPresetUseCase(this.repository);
+  final OperationalReportRepository repository;
+  Future<void> call({required String presetId, required OperationalReportType type, required int networkId, int? posId}) => repository.deletePreset(presetId: presetId, type: type, networkId: networkId, posId: posId);
+}

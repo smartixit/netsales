@@ -84,5 +84,11 @@ abstract interface class OperationalReportRepository {
     String? scopeLabel,
   });
 
+
+  Future<List<SavedReportPreset>> getPresets({required OperationalReportType type, required int networkId, int? posId});
+  Future<SavedReportPreset> savePreset({required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation});
+  Future<SavedReportPreset> updatePreset({required String presetId, required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation});
+  Future<void> deletePreset({required String presetId, required OperationalReportType type, required int networkId, int? posId});
+
   Future<Uint8List?> downloadExport(String url);
 }
