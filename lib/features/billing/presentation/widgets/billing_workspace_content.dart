@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_dialogs.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_status_badge.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
@@ -248,8 +251,16 @@ class BillingWorkspaceContent extends StatelessWidget {
     return Card(
       child: ListTile(
         title: Text(plan['name']?.toString() ?? 'خطة اشتراك'),
-        subtitle: Text(
-          'السعر: ${price['unit_amount']?.toString() ?? price['unit_amount_minor']?.toString() ?? '—'}',
+        subtitle: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('السعر: '),
+            CustomInteractiveAmountText(
+              amount: price['unit_amount'] ?? price['unit_amount_minor'] ?? '—',
+              currencyCode: price['currency_code']?.toString(),
+              enableTooltip: false,
+            ),
+          ],
         ),
         trailing: CustomButton.primary(
           text: 'اختيار',
@@ -301,9 +312,12 @@ class BillingWorkspaceContent extends StatelessWidget {
     child: ListTile(
       title: Text(feature['name']?.toString() ?? feature['feature_key']?.toString() ?? 'ميزة'),
       subtitle: Text('القيمة: ${feature['configured_value']?.toString() ?? '—'}'),
-      trailing: Icon(
-        feature['available'] == true ? Icons.check_circle_rounded : Icons.block_rounded,
-        color: feature['available'] == true ? Colors.green : Colors.red,
+      trailing: CustomStatusBadge(
+        label: feature['available'] == true ? 'متاح' : 'غير متاح',
+        tone: feature['available'] == true ? SemanticTone.success : SemanticTone.neutral,
+        icon: feature['available'] == true
+            ? Icons.check_circle_rounded
+            : Icons.block_rounded,
       ),
     ),
   );
@@ -343,7 +357,7 @@ class BillingWorkspaceContent extends StatelessWidget {
               status: invoice['status']?.toString(),
               serverLabel: invoice['status_label']?.toString(),
             ),
-            Text('المتبقي: $remaining وحدة صغرى'),
+            Text('المتبقي: ${AmountFormatter.format(remaining.toString())} وحدة صغرى'),
           ],
         ),
         isThreeLine: true,
