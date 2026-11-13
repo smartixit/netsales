@@ -6,6 +6,7 @@ class BillingUseCases {
   final BillingRepository repository;
   Future<BillingPayload> currencies() => repository.getCurrencies();
   Future<BillingPayload> accounts(int networkId) => repository.getNetworkAccounts(networkId);
+  Future<BillingPayload> createAccount(int networkId, int currencyId) => repository.createNetworkAccount(networkId, currencyId);
   Future<BillingPayload> account(int id) => repository.getAccount(id);
   Future<BillingPayload> updateAccount(int id, Map<String, dynamic> data) => repository.updateAccount(id, data);
   Future<BillingPayload> plans(int id, Map<String, dynamic> query) => repository.getPlans(id, query);
