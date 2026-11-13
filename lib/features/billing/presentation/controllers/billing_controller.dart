@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
@@ -13,6 +14,7 @@ class BillingController extends GetxController {
   final subscriptions = <Map<String,dynamic>>[].obs;
   final invoices = <Map<String,dynamic>>[].obs;
   final payments = <Map<String,dynamic>>[].obs;
+  final paymentMethods = <Map<String,dynamic>>[].obs;
   final entitlements = Rxn<Map<String,dynamic>>();
   final account = Rxn<Map<String,dynamic>>();
   final errorMessage = RxnString();
@@ -64,9 +66,9 @@ class BillingController extends GetxController {
   Future<void> loadAccountData({int? revision}) async {
     final id=selectedAccountId.value;if(id==null)return;final rev=revision??++_revision;isLoading.value=true;
     try{
-      final r=await Future.wait([useCases.account(id),useCases.plans(id,const {'per_page':50}),useCases.subscriptions(id,const {'per_page':25}),useCases.invoices(id,const {'per_page':25}),useCases.payments(id,const {'per_page':25}),useCases.entitlements(id)]);
+      final r=await Future.wait([useCases.account(id),useCases.plans(id,const {'per_page':50}),useCases.subscriptions(id,const {'per_page':25}),useCases.invoices(id,const {'per_page':25}),useCases.payments(id,const {'per_page':25}),useCases.entitlements(id),useCases.paymentMethods(id)]);
       if(rev!=_revision||id!=selectedAccountId.value)return;
-      account.value=_object(r[0]);plans.assignAll(_rows(r[1]));subscriptions.assignAll(_rows(r[2]));invoices.assignAll(_rows(r[3]));payments.assignAll(_rows(r[4]));entitlements.value=_object(r[5]);
+      account.value=_object(r[0]);plans.assignAll(_rows(r[1]));subscriptions.assignAll(_rows(r[2]));invoices.assignAll(_rows(r[3]));payments.assignAll(_rows(r[4]));entitlements.value=_object(r[5]);paymentMethods.assignAll(_rows(r[6]));
     }catch(e){if(rev==_revision)errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل تفاصيل حساب الفوترة.');}
     finally{if(rev==_revision)isLoading.value=false;}
   }
@@ -142,6 +144,22 @@ class BillingController extends GetxController {
     catch(e){errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر إنشاء الاشتراك.');}
     finally{isMutating.value=false;}
   }
+  Future<void> recordPayment(int invoiceId, int paymentMethodId, int amountMinor, String? externalReference, String? proofPath) async {
+    if (isMutating.value) return;
+    isMutating.value = true;
+    try {
+      final random = Random.secure();
+      final key = List<int>.generate(16, (_) => random.nextInt(256))
+          .map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+      await useCases.recordPayment(invoiceId, paymentMethodId, amountMinor, key, externalReference, proofPath);
+      await loadAccountData();
+    } catch (error) {
+      errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر تسجيل طلب الدفع.');
+    } finally {
+      isMutating.value = false;
+    }
+  }
+
   Future<void> cancel(int id) async {
     if(isMutating.value)return;isMutating.value=true;
     try{await useCases.cancel(id,true);await loadAccountData();}
