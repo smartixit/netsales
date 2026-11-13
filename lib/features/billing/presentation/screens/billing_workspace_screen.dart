@@ -56,6 +56,7 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
         title:Text(contact['name']?.toString()??'جهة اتصال'),
         subtitle:Text([contact['email'],contact['phone'],if(contact['is_primary']==true)'أساسية',if(contact['receives_invoices']==true)'تستقبل الفواتير'].where((v)=>v!=null&&v.toString().isNotEmpty).join(' • ')),
         trailing:Wrap(mainAxisSize:MainAxisSize.min,children:[
+          if(contact['is_primary']!=true)CustomButton.text(text:'تعيين أساسية',onPressed:contactId==null?null:()=>controller.updateContact(contactId,{'is_primary':true})),
           CustomButton.text(text:'تعديل',onPressed:contactId==null?null:()=>_editContact(context,contact)),
           CustomButton.text(text:'حذف',foregroundColor:Theme.of(context).colorScheme.error,onPressed:contactId==null?null:()=>_deleteContact(context,contactId)),
         ]),
