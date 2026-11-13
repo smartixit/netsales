@@ -8,6 +8,7 @@ import 'package:netsales/features/billing/presentation/widgets/billing_report_la
 import 'package:netsales/features/billing/presentation/widgets/billing_report_presentation_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_records_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_summary_section.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_reports_header.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
@@ -142,7 +143,10 @@ class BillingReportsContent extends StatelessWidget {
             ),
           BillingReportRecordsSection(
             controller: controller,
-            arabicLabel: BillingReportLabels.arabic,
+            arabicLabel: (key) => BillingReportLabels.field(
+              key,
+              english: controller.selectedLocale.value == 'en',
+            ),
             displayValue: BillingReportLabels.displayValue,
           ),
         ],
