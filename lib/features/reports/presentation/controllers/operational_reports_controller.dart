@@ -431,6 +431,13 @@ class OperationalReportsController extends GetxController {
         record.textAt('repayment_id', fallback: record.textAt('repayment_uuid', fallback: '')),
       OperationalReportType.requests =>
         record.textAt('request_id', fallback: record.textAt('request_uuid', fallback: '')),
+      _ => record.textAt(
+        'id',
+        fallback: record.textAt(
+          'uuid',
+          fallback: record.textAt('reference', fallback: ''),
+        ),
+      ),
     };
 
     return identity.isEmpty ? record.values.toString() : identity;
