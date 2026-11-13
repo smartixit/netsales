@@ -37,12 +37,14 @@ class NetworkWorkspaceBinding extends Bindings {
       Get.lazyPut<BillingReportsController>(() => BillingReportsController(
         useCases: Get.find<BillingUseCases>(),
         networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
+        networkIdSignal: Get.find<NetworkWorkspaceController>().selectedNetworkId,
       ), fenix: true);
     }
     if (!Get.isRegistered<BillingController>()) {
       Get.lazyPut<BillingController>(() => BillingController(
         useCases: Get.find<BillingUseCases>(),
         networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
+        networkIdSignal: Get.find<NetworkWorkspaceController>().selectedNetworkId,
       ), fenix: true);
     }
     WorkspaceCoordinatorBinding().dependencies();
