@@ -333,7 +333,7 @@ class NetworkWalletDashboardController extends GetxController {
       final page = await getNetworkWalletLogsUseCase(walletId, cursor: cursor, perPage: 50);
       result.addAll(page.items);
       if (result.length > _maxStatementRows) {
-        throw StateError('يتجاوز عدد الحركات الحد الآمن لتوليد PDF. استخدم تصدير CSV للتفاصيل الكاملة.');
+        throw StateError('يتجاوز عدد الحركات الحد الآمن لتوليد PDF؛ لم يتم إنشاء كشف جزئي.');
       }
       cursor = page.nextCursor?.trim();
       if (cursor != null && cursor.isEmpty) cursor = null;
