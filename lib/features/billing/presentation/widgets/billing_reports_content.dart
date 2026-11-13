@@ -14,7 +14,7 @@ import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_list_tile.dart';
+import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 import 'package:netsales/widgets/pickers/custom_date_picker_modal.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_chart.dart';
@@ -85,9 +85,13 @@ class BillingReportsContent extends StatelessWidget {
    ...controller.charts.map((chart)=>BillingReportChart(payload:chart)),
    if(controller.rows.isEmpty&&!controller.isLoading.value)const CustomEmptyState.boxed(title:'لا توجد سجلات مطابقة',subtitle:'غيّر معايير البحث أو الفلاتر ثم أعد تحميل التقرير.'),
    ...controller.rows.map((row)=>CustomSurfaceCard(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(_arabicLabel(e.key)+': '+_displayValue(e.key,e.value))).toList()))),
-   if(controller.isLoadingMore.value)const CustomSkeletonListTile(hasLeading:false),
-   if(controller.hasMore)
-    CustomButton.outline(text:'تحميل المزيد',loading:controller.isLoadingMore.value,onPressed:controller.isLoadingMore.value?null:controller.loadMore),
+   CustomCursorLoadMore(
+    hasMore:controller.hasMore,
+    isLoading:controller.isLoadingMore.value,
+    error:controller.loadMoreError.value,
+    onPressed:controller.loadMore,
+    label:'تحميل المزيد من سجلات التقرير',
+   ),
   ]);
  });
 
