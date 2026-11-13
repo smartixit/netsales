@@ -55,8 +55,8 @@ class BillingReportDocumentService {
         metricRows.add(DocumentTableRow(
           id:'billing-summary-'+(metricRows.length+1).toString(),
           cells:[
-            DocumentTableCell(value:DocumentTextValue(label),direction:DocumentTextDirection.rightToLeft),
-            DocumentTableCell(value:_documentValue(value,localeTag),direction:DocumentTextDirection.leftToRight),
+            DocumentTableCell(value:DocumentTextValue(label),direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
+            DocumentTableCell(value:_documentValue(value,localeTag),direction:_valueDirection(value,isArabic)),
           ],
         ));
       }
@@ -64,8 +64,8 @@ class BillingReportDocumentService {
     for(final entry in summary.entries){addValue(_label(entry.key,localeTag),entry.value);}
     if(metricRows.isEmpty){
       metricRows.add(DocumentTableRow(id:'billing-summary-empty',cells:[
-        const DocumentTableCell(value:DocumentTextValue('النتيجة')),
-        const DocumentTableCell(value:DocumentTextValue('لا توجد مؤشرات متاحة')),
+        const DocumentTableCell(value:DocumentTextValue(isArabic?'النتيجة':'Result'),direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
+        DocumentTableCell(value:DocumentTextValue(isArabic?'لا توجد مؤشرات متاحة':'No metrics available')),
       ]));
     }
     final info=<DocumentInfoItem>[
@@ -93,7 +93,7 @@ class BillingReportDocumentService {
           DocumentStatusBanner(label:isArabic?'ملخص محسوب على الخادم':'Server-calculated summary',tone:DocumentStatusTone.success,detail:isArabic?'لم يُجرِ التطبيق أي إعادة احتساب للمؤشرات المالية أو الأرصدة.':'The client does not recalculate financial totals or balances.'),
           DocumentInfoGrid(items:info,columns:3,compact:true),
           if(includeMetrics)...[
-            DocumentHeading(text:isArabic?'المؤشرات والنتائج':'Summary metrics',level:2,direction:DocumentTextDirection.rightToLeft),
+            DocumentHeading(text:isArabic?'المؤشرات والنتائج':'Summary metrics',level:2,direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
             DocumentTable(
               columns:[
                 DocumentTableColumn(id:'metric',label:isArabic?'المؤشر':'Metric',alignment:DocumentCellAlignment.leading),
@@ -104,7 +104,7 @@ class BillingReportDocumentService {
             ),
           ],
           if(rows.isNotEmpty)...[
-            DocumentHeading(text:isArabic?'تفاصيل السجلات':'Detailed records',level:2,direction:DocumentTextDirection.rightToLeft),
+            DocumentHeading(text:isArabic?'تفاصيل السجلات':'Detailed records',level:2,direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
             DocumentTable(
               columns:columns.take(10).map((column)=>DocumentTableColumn(
                 id:(column['id']??column['key']??'column').toString().replaceAll(RegExp(r'[^A-Za-z0-9_-]'),'_'),
@@ -116,7 +116,7 @@ class BillingReportDocumentService {
                   final key=(column['key']??column['id']??'').toString();
                   return DocumentTableCell(
                     value:_documentValue(entry.value[key],localeTag),
-                    direction:DocumentTextDirection.leftToRight,
+                    direction:_valueDirection(entry.value[key],isArabic),
                   );
                 }).toList(),
               )).toList(),
@@ -213,7 +213,7 @@ class BillingReportDocumentService {
   DocumentValue _documentValue(dynamic value,String localeTag){
     if(value is int)return DocumentIntegerValue(value);
     if(value is double&&value.isFinite)return DocumentTextValue(value.toString());
-    if(value is bool)return DocumentTextValue(value?'نعم':'لا');
+    if(value is bool)return DocumentTextValue(localeTag.toLowerCase().startsWith('ar')?(value?'نعم':'لا'):(value?'Yes':'No'));
     if(value is String){
       final isArabic=localeTag.toLowerCase().startsWith('ar');
       final statuses=<String,String>{
@@ -250,6 +250,7 @@ class BillingReportDocumentService {
     'issued_on':'Issue date','created_at':'Created at','occurred_at':'Occurred at','reserved_at':'Reserved at',
     'started_at':'Started at','completed_at':'Completed at','name':'Name','email':'Email',
   }[key]??key.replaceAll('_',' ');
+  DocumentTextDirection _valueDirection(dynamic value,bool isArabic)=>value is num?DocumentTextDirection.leftToRight:(isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight);
   String _date(DateTime value)=>value.year.toString().padLeft(4,'0')+'-'+value.month.toString().padLeft(2,'0')+'-'+value.day.toString().padLeft(2,'0');
   String _hex(Color color)=>color.value.toRadixString(16).substring(2).toUpperCase();
 }
