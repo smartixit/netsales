@@ -11,7 +11,7 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
   final items=controller.catalog.map((e)=>DropdownItem<String>(value:e['id'].toString(),child:Text(e['label']?.toString()??e['id'].toString()))).toList();
   final summary=controller.summary.value;
   return ListView(padding:const EdgeInsets.all(20),children:[
-   Row(children:[const Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('تقارير الاشتراكات',style:TextStyle(fontSize:24,fontWeight:FontWeight.w700)),Text('تقارير Billing مستقلة عن تقارير المبيعات والتشغيل.') ])),CustomButton.outline(text:'تصدير CSV',prefix:Icons.download_rounded,onPressed:controller.isLoading.value?null:controller.exportCsv),CustomButton.outline(text:'تحديث',prefix:Icons.refresh_rounded,onPressed:controller.isLoading.value?null:controller.loadCatalog)]),
+   Row(children:[const Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('تقارير الاشتراكات',style:TextStyle(fontSize:24,fontWeight:FontWeight.w700)),Text('تقارير Billing مستقلة عن تقارير المبيعات والتشغيل.') ])),CustomButton.outline(text:'PDF تنفيذي',prefix:Icons.picture_as_pdf_outlined,loading:controller.isExportingPdf.value,onPressed:controller.isExportingPdf.value?null:controller.exportPdfSummary),CustomButton.outline(text:'تصدير CSV',prefix:Icons.download_rounded,onPressed:controller.isLoading.value?null:controller.exportCsv),CustomButton.outline(text:'تحديث',prefix:Icons.refresh_rounded,onPressed:controller.isLoading.value?null:controller.loadCatalog)]),
    const SizedBox(height:16),
    if(items.isNotEmpty)CustomDropdown<String>(items:items,rxValue:controller.selectedType,onChanged:controller.selectReport,label:'نوع التقرير',hint:'اختر تقريراً'),
    const SizedBox(height:12),
