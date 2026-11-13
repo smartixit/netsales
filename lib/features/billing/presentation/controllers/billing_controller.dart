@@ -66,6 +66,7 @@ class BillingController extends GetxController {
 
   final subscriptionDetails = Rxn<Map<String, dynamic>>();
   final usageRows = <Map<String, dynamic>>[].obs;
+  final eventRows = <Map<String, dynamic>>[].obs;
 
   Future<void> loadSubscriptionDetails(int id) async {
     try {
@@ -81,10 +82,8 @@ class BillingController extends GetxController {
           : detail;
       final events = values[1].data['data'] ?? values[1].data['items'] ?? values[1].data;
       final usage = values[2].data['data'] ?? values[2].data['items'] ?? values[2].data;
-      usageRows.assignAll(events is List ? events.whereType<Map>().map((e) => Map<String,dynamic>.from(e)).toList() : const []);
-      if (usage is List) {
-        usageRows.assignAll(usage.whereType<Map>().map((e) => Map<String,dynamic>.from(e)).toList());
-      }
+      eventRows.assignAll(events is List ? events.whereType<Map>().map((e) => Map<String,dynamic>.from(e)).toList() : const []);
+      usageRows.assignAll(usage is List ? usage.whereType<Map>().map((e) => Map<String,dynamic>.from(e)).toList() : const []);
     } catch (error) {
       errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر تحميل تفاصيل الاشتراك والاستخدام.');
     }
