@@ -123,6 +123,57 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                                 : CustomButton.primary(text: label, prefix: icon, onPressed: onPressed),
                         isBusy: controller.isLoading.value || controller.isPdfActionRunning.value,
                       )),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 8),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          CustomButton.outline(
+                            text: 'مسح عوامل التصفية',
+                            prefix: Icons.filter_alt_off_outlined,
+                            onPressed: controller.clearFilters,
+                          ),
+                          Obx(() => CustomButton.primary(
+                            text: 'تصدير CSV',
+                            prefix: Icons.table_view_outlined,
+                            onPressed: controller.canExport &&
+                                    !controller.isExportActionRunning.value
+                                ? controller.requestExport
+                                : null,
+                            loading: controller.isExportActionRunning.value,
+                          )),
+                          Obx(() => CustomButton.outline(
+                            text: 'حفظ ملخص PDF',
+                            prefix: Icons.picture_as_pdf_outlined,
+                            onPressed: controller.canExport &&
+                                    controller.summary.value != null &&
+                                    !controller.isPdfActionRunning.value
+                                ? controller.exportSummaryPdf
+                                : null,
+                            loading: controller.isPdfActionRunning.value,
+                          )),
+                          Obx(() => CustomButton.outline(
+                            text: 'مشاركة PDF',
+                            prefix: Icons.share_outlined,
+                            onPressed: controller.canExport &&
+                                    controller.summary.value != null &&
+                                    !controller.isPdfActionRunning.value
+                                ? controller.shareSummaryPdf
+                                : null,
+                          )),
+                          Obx(() => CustomButton.outline(
+                            text: 'طباعة PDF',
+                            prefix: Icons.print_outlined,
+                            onPressed: controller.canExport &&
+                                    controller.summary.value != null &&
+                                    !controller.isPdfActionRunning.value
+                                ? controller.printSummaryPdf
+                                : null,
+                          )),
+                        ],
+                      ),
+                    ),
                     Obx(() {
                       final summary = controller.summary.value;
                       final type = controller.selectedType.value;
