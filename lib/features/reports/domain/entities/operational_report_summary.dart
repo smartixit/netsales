@@ -29,6 +29,7 @@ class OperationalReportSummary {
       final label = definition['label']?.toString() ?? id;
       final dataType = definition['data_type']?.toString();
       final rawValue = values[id];
+      if (rawValue == null) return null;
       return OperationalReportMetric(
         id: id,
         label: label,
