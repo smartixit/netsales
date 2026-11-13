@@ -60,7 +60,7 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
    if(controller.rows.isEmpty&&!controller.isLoading.value)const Card(child:Padding(padding:EdgeInsets.all(16),child:Text('لا توجد سجلات مطابقة للفلاتر الحالية.'))),
    ...controller.rows.map((row)=>Card(child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(_arabicLabel(e.key)+': '+(e.value?.toString()??'—'))).toList())))),
    if(controller.isLoadingMore.value)const Padding(padding:EdgeInsets.all(12),child:Center(child:CircularProgressIndicator())),
-   if(controller.report.value?['next_page_url']!=null||controller.report.value?['links'] is Map<String,dynamic>&&controller.report.value?['links']['next']!=null)
+   if(controller.hasMore)
     CustomButton.outline(text:'تحميل المزيد',loading:controller.isLoadingMore.value,onPressed:controller.isLoadingMore.value?null:controller.loadMore),
   ]);
  });
