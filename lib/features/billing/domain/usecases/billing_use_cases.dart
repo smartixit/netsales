@@ -26,4 +26,7 @@ class BillingUseCases {
   Future<BillingPayload> cancel(int id, bool atPeriodEnd) => repository.cancelSubscription(id, atPeriodEnd);
   Future<BillingPayload> invoices(int id, Map<String, dynamic> query) => repository.getInvoices(id, query);
   Future<BillingPayload> payments(int id, Map<String, dynamic> query) => repository.getPayments(id, query);
+  Future<BillingPayload> paymentMethods(int id) => repository.getPaymentMethods(id);
+  Future<BillingPayload> recordPayment(int invoiceId, int methodId, int amountMinor, String key, String? reference, String? proofPath) =>
+      repository.recordPayment(invoiceId, methodId, amountMinor, key, reference, proofPath);
 }
