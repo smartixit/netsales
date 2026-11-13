@@ -19,6 +19,7 @@ class BillingReportsController extends GetxController {
   final selectedPageProfile=RxnString();
   final selectedTemplateId=RxnString();
   final rows=<Map<String,dynamic>>[].obs;
+  final charts=<Map<String,dynamic>>[].obs;
   final selectedType=RxnString();
   final summary=Rxn<Map<String,dynamic>>();
   final isLoading=false.obs;
@@ -224,7 +225,10 @@ class BillingReportsController extends GetxController {
       final data=_map(values[0]);
       rows.assignAll(_list(data['data']??data['items']));
       _nextCursor=_cursorFrom(data['next_page_url']??(data['links'] is Map<String,dynamic>?data['links']['next']:null));
-      summary.value=_map(values[1]);
+      final summaryEnvelope=_map(values[1]);
+      final rawSummary=summaryEnvelope['summary'];
+      summary.value=rawSummary is Map<String,dynamic>?rawSummary:summaryEnvelope;
+      charts.assignAll(_list(summaryEnvelope['charts']));
     }catch(e){if(rev==_revision)errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل تقرير الاشتراكات.');}
     finally{if(rev==_revision)isLoading.value=false;}
   }
