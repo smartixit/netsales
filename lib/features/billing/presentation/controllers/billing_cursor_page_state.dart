@@ -14,17 +14,19 @@ class BillingCursorPageState {
 
   bool get hasMore => nextCursor != null && nextCursor!.isNotEmpty;
 
-  int reset() {
+  int beginRefresh({bool clearItems = false}) {
     _revision++;
-    items.clear();
+    if (clearItems) items.clear();
     nextCursor = null;
     isLoadingMore.value = false;
     loadMoreError.value = null;
     return _revision;
   }
 
+  int reset() => beginRefresh(clearItems: true);
+
   int replace(Map<String, dynamic> page) {
-    final revision = reset();
+    final revision = beginRefresh(clearItems: true);
     final rows = _extractRows(page);
     items.assignAll(_deduplicate(rows));
     nextCursor = _extractNextCursor(page);
