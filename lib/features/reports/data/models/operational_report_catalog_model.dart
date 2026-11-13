@@ -3,7 +3,7 @@ import 'package:netsales/features/reports/domain/entities/operational_report_cat
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 
 class OperationalReportCatalogModel extends OperationalReportCatalog {
-  const OperationalReportCatalogModel({
+  OperationalReportCatalogModel({
     required super.schemaVersion,
     required super.entries,
   });
@@ -24,7 +24,9 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
       }
       final rawDefinition = Map<String, dynamic>.from(raw);
       final type = _reportType(rawDefinition['id']?.toString() ?? '');
-      if (type == null) continue;
+      if (type == null) {
+        throw FormatException('نوع تقرير غير معروف في كتالوج الخادم: ${rawDefinition['id']}');
+      }
       entries.add(_parseEntry(type, rawDefinition));
     }
 
