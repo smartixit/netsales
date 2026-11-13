@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/reports/data/models/operational_report_export_model.dart';
-import 'package:netsales/features/reports/data/models/operational_report_summary_model.dart';
 import 'package:netsales/features/reports/data/models/operational_report_catalog_model.dart';
 
 abstract interface class OperationalReportRemoteDataSource {
@@ -14,7 +13,7 @@ abstract interface class OperationalReportRemoteDataSource {
     required Map<String, dynamic> query,
   });
 
-  Future<ApiResponse<OperationalReportSummaryModel>> getSummary({
+  Future<ApiResponse<Map<String, dynamic>>> getSummary({
     required Map<String, dynamic> query,
   });
 
