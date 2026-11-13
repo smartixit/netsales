@@ -18,7 +18,7 @@ class CustomCollectionFilterBar extends StatelessWidget {
     super.key,
   });
 
-  final BillingCollectionFilterState state;
+  final CustomCollectionFilterState state;
   final String searchLabel;
   final String searchHint;
   final ValueChanged<String> onSearchChanged;
