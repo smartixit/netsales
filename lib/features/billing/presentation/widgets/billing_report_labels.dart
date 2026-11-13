@@ -58,8 +58,13 @@ class BillingReportLabels {
       }[type] ??
       type;
 
-  static String field(String key, {required bool english}) =>
-      english ? englishField(key) : arabic(key);
+  static String field(String key, {required bool english}) {
+    final statusValue = BillingStatus.fromWire(key);
+    if (statusValue.isKnown) {
+      return status(key, english: english);
+    }
+    return english ? englishField(key) : arabic(key);
+  }
 
   static String englishField(String key) => const {
         'record_count': 'Record count',
@@ -103,8 +108,19 @@ class BillingReportLabels {
       }[key] ??
       key.replaceAll('_', ' ');
 
-  static String displayValue(String key, dynamic value) {
+  static String displayValue(
+    String key,
+    dynamic value, {
+    bool english = false,
+  }) {
     if (value == null) return '—';
+    if (key == 'status' && value is String) {
+      final statusValue = BillingStatus.fromWire(value);
+      if (statusValue.isKnown) {
+        return status(value, english: english);
+      }
+      return value;
+    }
     final isAmount = key.endsWith('_minor') ||
         key == 'amount' ||
         key == 'mrr' ||
