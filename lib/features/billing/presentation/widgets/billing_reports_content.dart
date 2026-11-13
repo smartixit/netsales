@@ -131,7 +131,7 @@ class BillingReportsContent extends StatelessWidget {
               isLoading: controller.isLoading.value,
               onClear: controller.criteria.value.filters.isEmpty
                   ? null
-                  : () => controller.setCriteria(ReportCriteria()),
+                  : controller.clearFilters,
             ),
           if (reportSummary != null)
             BillingReportSummarySection(
