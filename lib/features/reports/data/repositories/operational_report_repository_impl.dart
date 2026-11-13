@@ -161,6 +161,7 @@ class OperationalReportRepositoryImpl
   @override
   Future<bool> saveSummaryPdf({
     required OperationalReportType type,
+    required String pageProfileId,
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
@@ -174,6 +175,7 @@ class OperationalReportRepositoryImpl
     final result = await OperationalReportDocumentService.instance
         .exportAndSaveSummary(
           type: type,
+          pageProfileId: pageProfileId,
           summary: summary,
           organizationName: organizationName,
           logoUrl: logoUrl,
@@ -196,6 +198,7 @@ class OperationalReportRepositoryImpl
   @override
   Future<bool> shareSummaryPdf({
     required OperationalReportType type,
+    required String pageProfileId,
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
@@ -208,6 +211,7 @@ class OperationalReportRepositoryImpl
   }) {
     return OperationalReportDocumentService.instance.shareSummary(
       type: type,
+      pageProfileId: pageProfileId,
       summary: summary,
       organizationName: organizationName,
       logoUrl: logoUrl,
@@ -223,6 +227,7 @@ class OperationalReportRepositoryImpl
   @override
   Future<bool> printSummaryPdf({
     required OperationalReportType type,
+    required String pageProfileId,
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
@@ -235,6 +240,7 @@ class OperationalReportRepositoryImpl
   }) {
     return OperationalReportDocumentService.instance.printSummary(
       type: type,
+      pageProfileId: pageProfileId,
       summary: summary,
       organizationName: organizationName,
       logoUrl: logoUrl,
