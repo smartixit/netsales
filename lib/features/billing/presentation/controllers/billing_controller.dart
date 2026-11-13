@@ -7,6 +7,8 @@ class BillingController extends GetxController {
   final BillingUseCases useCases;
   final int? Function() networkId;
   final accounts = <Map<String,dynamic>>[].obs;
+  final currencies = <Map<String,dynamic>>[].obs;
+  final selectedCurrencyId = RxnInt();
   final plans = <Map<String,dynamic>>[].obs;
   final subscriptions = <Map<String,dynamic>>[].obs;
   final invoices = <Map<String,dynamic>>[].obs;
@@ -30,7 +32,10 @@ class BillingController extends GetxController {
     final n=networkId(); if(n==null){errorMessage.value='حدد الشبكة أولاً.';return;}
     final rev=++_revision; isLoading.value=true; errorMessage.value=null;
     try {
-      accounts.assignAll(_rows(await useCases.accounts(n)));
+      final results = await Future.wait([useCases.accounts(n), useCases.currencies()]);
+      accounts.assignAll(_rows(results[0]));
+      currencies.assignAll(_rows(results[1]));
+      if (selectedCurrencyId.value == null && currencies.isNotEmpty) selectedCurrencyId.value = (currencies.first['currency_id'] as num).toInt();
       if(rev!=_revision)return;
       if(accounts.isEmpty){account.value=null;selectedAccountId.value=null;return;}
       final chosen=accounts.firstWhereOrNull((e)=>e['billing_account_id']==selectedAccountId.value)??accounts.first;
@@ -39,6 +44,16 @@ class BillingController extends GetxController {
     } catch(e){if(rev==_revision)errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل بيانات الفوترة.');}
     finally{if(rev==_revision)isLoading.value=false;}
   }
+  Future<void> createAccount() async {
+    final n = networkId();
+    final currencyId = selectedCurrencyId.value;
+    if (n == null || currencyId == null || isMutating.value) return;
+    isMutating.value = true;
+    try { await useCases.createAccount(n, currencyId); await load(); }
+    catch (error) { errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر إنشاء حساب الفوترة.'); }
+    finally { isMutating.value = false; }
+  }
+
   Future<void> selectAccount(int? id) async {
     if (id == null || id == selectedAccountId.value) return;
     selectedAccountId.value = id;
