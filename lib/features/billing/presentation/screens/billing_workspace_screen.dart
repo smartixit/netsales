@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
@@ -78,7 +79,19 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
       ]))),
     ],
     const _Header('الفواتير'),
-    ...controller.invoices.map((e)=>Card(child:ListTile(title:Text(e['invoice_number']?.toString()??'فاتورة'),subtitle:Text(e['status']?.toString()??'—'),trailing:Text(e['total']?.toString()??'—')))),
+    ...controller.invoices.map((e){
+      final invoiceId=(e['invoice_id'] as num?)?.toInt();
+      final remaining=int.tryParse(e['remaining_minor']?.toString()??'0')??0;
+      final canPay=remaining>0&&e['status']!='PAID'&&e['status']!='VOID'&&invoiceId!=null;
+      return Card(child:ListTile(
+        title:Text(e['invoice_number']?.toString()??'فاتورة'),
+        subtitle:Text('الحالة: '+(e['status']?.toString()??'—')+' • المتبقي: '+remaining.toString()),
+        trailing:Wrap(mainAxisSize:MainAxisSize.min,spacing:8,children:[
+          Text(e['total_minor']?.toString()??'—'),
+          if(canPay)CustomButton.primary(text:'تسجيل دفعة',onPressed:()=>_payInvoice(context,e)),
+        ]),
+      ));
+    }),
     const _Header('المدفوعات'),
     ...controller.payments.map((e)=>Card(child:ListTile(title:Text(e['payment_reference']?.toString()??'دفعة'),subtitle:Text(e['status']?.toString()??'—'),trailing:Text(e['amount']?.toString()??'—')))),
    ]
@@ -139,6 +152,49 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
  Future<void> _deleteContact(BuildContext context,int id)async{
   final ok=await showDialog<bool>(context:context,builder:(d)=>AlertDialog(title:const Text('حذف جهة الاتصال'),content:const Text('هل تريد حذف جهة الاتصال المحددة؟'),actions:[CustomButton.text(text:'إلغاء',onPressed:()=>Navigator.pop(d,false)),CustomButton.danger(text:'حذف',onPressed:()=>Navigator.pop(d,true))]));
   if(ok==true)await controller.deleteContact(id);
+ }
+ Future<void> _payInvoice(BuildContext context,Map<String,dynamic> invoice)async{
+  final invoiceId=(invoice['invoice_id'] as num?)?.toInt();
+  final remaining=int.tryParse(invoice['remaining_minor']?.toString()??'0')??0;
+  if(invoiceId==null||remaining<=0)return;
+  final amount=TextEditingController(text:remaining.toString());
+  final reference=TextEditingController();
+  String? proofPath;
+  try{
+   final accepted=await showDialog<bool>(context:context,builder:(dialogContext)=>StatefulBuilder(builder:(dialogContext,setDialogState)=>AlertDialog(
+    title:const Text('تسجيل دفعة على الفاتورة'),
+    content:SingleChildScrollView(child:Column(mainAxisSize:MainAxisSize.min,children:[
+      Text('المبلغ المتبقي: '+remaining.toString()+' وحدة صغرى'),
+      if(controller.paymentMethods.isNotEmpty)CustomDropdown<int>(
+        items:controller.paymentMethods.map((m)=>DropdownItem<int>(
+          value:(m['payment_method_id'] as num).toInt(),
+          child:Text(m['name']?.toString()??m['code']?.toString()??'وسيلة دفع'),
+        )).toList(),
+        rxValue:controller.selectedPaymentMethodId,
+        onChanged:(id)=>controller.selectedPaymentMethodId.value=id,
+        label:'وسيلة الدفع',
+        hint:'اختر وسيلة الدفع',
+      ) else const Text('لا توجد وسيلة دفع مفعلة بهذه العملة.'),
+      CustomTextField(controller:amount,label:'المبلغ بالوحدة الصغرى',keyboardType:TextInputType.number),
+      CustomTextField(controller:reference,label:'مرجع التحويل',isRequired:false),
+      const SizedBox(height:8),
+      CustomButton.outline(text:proofPath==null?'إرفاق إثبات الدفع':proofPath!.split('/').last,prefix:Icons.attach_file,onPressed:()async{
+        final result=await FilePicker.platform.pickFiles(type:FileType.custom,allowedExtensions:['pdf','jpg','jpeg','png'],withData:false);
+        if(result!=null&&result.files.single.path!=null)setDialogState(()=>proofPath=result.files.single.path);
+      }),
+      const SizedBox(height:8),
+      const Text('سيُسجل الطلب بانتظار مراجعة المنصة. لن يتفعل الاشتراك قبل اعتماد الدفع.'),
+    ])),
+    actions:[
+      CustomButton.text(text:'إلغاء',onPressed:()=>Navigator.pop(dialogContext,false)),
+      CustomButton.primary(text:'إرسال طلب الدفع',loading:controller.isMutating.value,onPressed:controller.selectedPaymentMethodId.value==null?null:()=>Navigator.pop(dialogContext,true)),
+    ],
+   )));
+   final amountMinor=int.tryParse(amount.text.trim());
+   if(accepted==true&&amountMinor!=null&&amountMinor>0&&amountMinor<=remaining&&controller.selectedPaymentMethodId.value!=null){
+     await controller.recordPayment(invoiceId,controller.selectedPaymentMethodId.value!,amountMinor,reference.text.trim().isEmpty?null:reference.text.trim(),proofPath);
+   }
+  }finally{amount.dispose();reference.dispose();}
  }
  Future<void> _details(BuildContext c,int id)async{
   await controller.loadSubscriptionDetails(id);
