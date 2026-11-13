@@ -383,21 +383,27 @@ class BillingController extends GetxController {
     final id = selectedAccountId.value;
     final requestNetworkId = networkId();
     if (id == null || requestNetworkId == null) return;
+
     final currentRevision = revision ?? ++_revision;
     isLoading.value = true;
     errorMessage.value = null;
-    _invalidateAccountPages(clearItems: false);
+
+    // Each growing collection owns its first-page request and error state.
+    // A failure in one list must not discard successful data from another.
+    final collectionLoads = <Future<void>>[
+      refreshPlans(),
+      refreshSubscriptions(),
+      refreshInvoices(),
+      refreshPayments(),
+      refreshCreditNotes(),
+      refreshRefunds(),
+    ];
+
     try {
       final results = await Future.wait([
         useCases.account(id),
-        useCases.plans(id, _firstPageQuery(plansFilter)),
-        useCases.subscriptions(id, _firstPageQuery(subscriptionsFilter)),
-        useCases.invoices(id, _firstPageQuery(invoicesFilter)),
-        useCases.payments(id, _firstPageQuery(paymentsFilter)),
         useCases.entitlements(id),
         useCases.paymentMethods(id),
-        useCases.creditNotes(id, _firstPageQuery(creditNotesFilter)),
-        useCases.refunds(id, _firstPageQuery(refundsFilter)),
       ]);
 
       if (currentRevision != _revision ||
@@ -407,14 +413,8 @@ class BillingController extends GetxController {
       }
 
       account.value = _object(results[0]);
-      plansPage.replace(_page(results[1]));
-      subscriptionsPage.replace(_page(results[2]));
-      invoicesPage.replace(_page(results[3]));
-      paymentsPage.replace(_page(results[4]));
-      entitlements.value = _object(results[5]);
-      paymentMethods.assignAll(_rows(results[6]));
-      creditNotesPage.replace(_page(results[7]));
-      refundsPage.replace(_page(results[8]));
+      entitlements.value = _object(results[1]);
+      paymentMethods.assignAll(_rows(results[2]));
 
       if (selectedPaymentMethodId.value == null ||
           !paymentMethods.any(
@@ -426,17 +426,18 @@ class BillingController extends GetxController {
             ? null
             : (paymentMethods.first['payment_method_id'] as num).toInt();
       }
+
+      await Future.wait(collectionLoads);
     } catch (error) {
-      if (currentRevision == _revision) {
-        final message = AppException.sanitizeMessage(
+      if (currentRevision == _revision &&
+          id == selectedAccountId.value &&
+          requestNetworkId == networkId()) {
+        errorMessage.value = AppException.sanitizeMessage(
           error,
-          fallback: 'تعذر تحميل تفاصيل حساب الفوترة.',
+          fallback: 'تعذر تحميل بيانات حساب الفوترة.',
         );
-        for (final page in _accountPages) {
-          page.failFirstPage(message, revision: page.revision);
-        }
-        errorMessage.value = message;
       }
+      await Future.wait(collectionLoads);
     } finally {
       if (currentRevision == _revision) isLoading.value = false;
     }
