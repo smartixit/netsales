@@ -231,6 +231,9 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                         );
                       }
 
+                      if (!controller.presentation.value.includeMetrics) {
+                        return const SizedBox.shrink();
+                      }
                       return Padding(
                         padding: const EdgeInsets.only(top: 12),
                         child: OperationalReportSummaryStrip(
