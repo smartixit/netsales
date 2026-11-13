@@ -89,6 +89,8 @@ class OperationalReportsController extends GetxController {
   final Map<String, RxnString> _choiceValues = {};
   int _requestRevision = 0;
   int _scopeRevision = 0;
+  int _exportActionRevision = 0;
+  int _documentActionRevision = 0;
   int _posRevision = 0;
   final Set<String> _seenReportCursors = <String>{};
   String _posSearchQuery = '';
@@ -213,6 +215,7 @@ class OperationalReportsController extends GetxController {
 
     final issues = value.validateAgainst(definition);
     criteria.value = value;
+    _invalidateExportActions();
     for (final entry in _choiceValues.entries) {
       final selected = value.filters[entry.key];
       entry.value.value = selected is ReportChoiceFilterValue
@@ -241,6 +244,8 @@ class OperationalReportsController extends GetxController {
       return;
     }
     presentation.value = value;
+    ++_documentActionRevision;
+    isPdfActionRunning.value = false;
   }
 
   ReportCriteria _effectiveCriteria() => criteria.value;
@@ -277,6 +282,15 @@ class OperationalReportsController extends GetxController {
       }
       rethrow;
     }
+  }
+
+  void _invalidateExportActions() {
+    ++_exportActionRevision;
+    ++_documentActionRevision;
+    exportJob.value = null;
+    isExportActionRunning.value = false;
+    isCheckingExport.value = false;
+    isPdfActionRunning.value = false;
   }
 
   bool get canExport {
@@ -343,6 +357,7 @@ class OperationalReportsController extends GetxController {
     _criteriaDebounce = null;
     ++_requestRevision;
     ++_posRevision;
+    _invalidateExportActions();
     savedPresets.clear();
     isLoadingPresets.value = false;
     isSavingPreset.value = false;
@@ -363,7 +378,6 @@ class OperationalReportsController extends GetxController {
     for (final controller in _criteriaTextControllers.values) {
       controller.clear();
     }
-    exportJob.value = null;
     _seenReportCursors.clear();
 
     _posSearchQuery = '';
@@ -427,6 +441,7 @@ class OperationalReportsController extends GetxController {
   Future<void> selectType(OperationalReportType type) async {
     if (!availableTypes.contains(type) || selectedType.value == type) return;
     selectedType.value = type;
+    _invalidateExportActions();
     _criteriaDebounce?.cancel();
     criteria.value = ReportCriteria();
     for (final selection in _choiceValues.values) {
@@ -444,6 +459,7 @@ class OperationalReportsController extends GetxController {
   Future<void> selectPos(int? posId) async {
     if (selectedPosId.value == posId) return;
     selectedPosId.value = posId;
+    _invalidateExportActions();
     await loadReport(refresh: true);
     await loadSavedPresets();
   }
@@ -629,6 +645,7 @@ class OperationalReportsController extends GetxController {
   }
 
   Future<void> clearFilters() async {
+    _invalidateExportActions();
     _criteriaDebounce?.cancel();
     criteria.value = ReportCriteria();
     for (final controller in _criteriaTextControllers.values) {
@@ -892,6 +909,8 @@ class OperationalReportsController extends GetxController {
   Future<void> requestExport() async {
     final type = selectedType.value;
     final networkId = _networkId;
+    final posId = _queryPosId;
+    final scopeRevision = _scopeRevision;
     if (type == null ||
         networkId == null ||
         isExportActionRunning.value ||
@@ -907,14 +926,26 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final actionRevision = ++_exportActionRevision;
+    final criteriaSnapshot = criteria.value;
+    bool isCurrentRequest() =>
+        actionRevision == _exportActionRevision &&
+        scopeRevision == _scopeRevision &&
+        type == selectedType.value &&
+        networkId == _networkId &&
+        posId == _queryPosId &&
+        identical(criteriaSnapshot, criteria.value);
+
     isExportActionRunning.value = true;
     try {
       final result = await requestExportUseCase(
         type: type,
         networkId: networkId,
-        posId: _queryPosId,
-        criteria: _effectiveCriteria(),
+        posId: posId,
+        criteria: criteriaSnapshot,
       );
+      if (!isCurrentRequest()) return;
+
       exportJob.value = result;
       CustomSnackbar.show(
         title: 'تم استلام طلب التصدير',
@@ -922,16 +953,18 @@ class OperationalReportsController extends GetxController {
         type: SnackType.success,
       );
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذر طلب التصدير',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر إرسال طلب تجهيز التقرير.',
-        ),
-        type: SnackType.error,
-      );
+      if (isCurrentRequest()) {
+        CustomSnackbar.show(
+          title: 'تعذر طلب التصدير',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر إرسال طلب تجهيز التقرير.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isExportActionRunning.value = false;
+      if (isCurrentRequest()) isExportActionRunning.value = false;
     }
   }
 
