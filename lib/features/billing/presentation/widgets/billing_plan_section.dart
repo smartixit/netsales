@@ -65,7 +65,13 @@ class BillingPlanSection extends StatelessWidget {
     final id = (price['price_id'] as num?)?.toInt();
     final amount =
         price['unit_amount'] ?? price['unit_amount_minor'] ?? '—';
-    final currencyCode = price['currency_code']?.toString();
+    final rawCurrency = price['currency'];
+    final currency = rawCurrency is Map
+        ? Map<String, dynamic>.from(rawCurrency)
+        : const <String, dynamic>{};
+    final currencyCode = currency['code']?.toString();
+    final decimalPlaces =
+        (currency['decimal_places'] as num?)?.toInt() ?? 2;
 
     return CustomInfoListTile(
       padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 14, 10),
@@ -74,6 +80,7 @@ class BillingPlanSection extends StatelessWidget {
       subtitle: CustomInteractiveAmountText(
         amount: amount,
         currencyCode: currencyCode,
+        decimalPlaces: decimalPlaces,
         trailingText:
             price['unit_amount'] != null ? currencyCode : 'وحدة صغرى',
         enableTooltip: false,
