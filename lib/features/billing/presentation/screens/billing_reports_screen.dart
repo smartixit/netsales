@@ -1,6 +1,7 @@
 import 'package:document_engine/document_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
@@ -55,6 +56,7 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
     const Text('ملخص التقرير',style:TextStyle(fontWeight:FontWeight.w700)),
     ..._summaryWidgets(summary),
    ]))),
+   ...controller.charts.map((chart)=>_buildChart(context,chart)),
    if(controller.rows.isEmpty&&!controller.isLoading.value)const Card(child:Padding(padding:EdgeInsets.all(16),child:Text('لا توجد سجلات مطابقة للفلاتر الحالية.'))),
    ...controller.rows.map((row)=>Card(child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(_arabicLabel(e.key)+': '+(e.value?.toString()??'—'))).toList())))),
    if(controller.isLoadingMore.value)const Padding(padding:EdgeInsets.all(12),child:Center(child:CircularProgressIndicator())),
@@ -63,6 +65,44 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
   ]);
  });
 
+
+ Widget _buildChart(BuildContext context,Map<String,dynamic> chart){
+  final data=(chart['data'] is List<dynamic>?chart['data'] as List<dynamic>:const <dynamic>[])
+    .whereType<Map<String,dynamic>>().toList();
+  if(data.isEmpty)return const SizedBox.shrink();
+  final title=chart['title']?.toString()??'مخطط التقرير';
+  if(chart['type']=='pie'){
+   return Card(child:Padding(padding:const EdgeInsets.all(12),child:SizedBox(height:300,child:SfCircularChart(
+    title:ChartTitle(text:title),
+    legend:const Legend(isVisible:true,overflowMode:LegendItemOverflowMode.wrap),
+    series:<CircularSeries<Map<String,dynamic>,String>>[
+     PieSeries<Map<String,dynamic>,String>(
+      dataSource:data,
+      xValueMapper:(item,_)=>_statusLabel(item['label']?.toString()??'—'),
+      yValueMapper:(item,_)=>((item['value'] as num?)??0).toDouble(),
+      dataLabelMapper:(item,_)=>_statusLabel(item['label']?.toString()??'—'),
+      dataLabelSettings:const DataLabelSettings(isVisible:true),
+    )],
+   ))));
+  }
+  final series=(chart['series'] is List<dynamic>?chart['series'] as List<dynamic>:const <dynamic>[])
+    .whereType<Map<String,dynamic>>().toList();
+  if(series.isEmpty)return const SizedBox.shrink();
+  return Card(child:Padding(padding:const EdgeInsets.all(12),child:SizedBox(height:320,child:SfCartesianChart(
+   title:ChartTitle(text:title),
+   primaryXAxis:const CategoryAxis(labelRotation:0),
+   primaryYAxis:const NumericAxis(),
+   legend:const Legend(isVisible:true,overflowMode:LegendItemOverflowMode.wrap),
+   tooltipBehavior:TooltipBehavior(enable:true),
+   series:series.map<CartesianSeries<Map<String,dynamic>,String>>((item)=>ColumnSeries<Map<String,dynamic>,String>(
+    dataSource:data,
+    name:item['label']?.toString()??item['key']?.toString()??'قيمة',
+    xValueMapper:(row,_)=>row['label']?.toString()??'—',
+    yValueMapper:(row,_)=>((row[item['key']?.toString()] as num?)??0).toDouble(),
+    dataLabelSettings:const DataLabelSettings(isVisible:false),
+   )).toList(),
+  ))));
+ }
  Widget _filterSection(BuildContext context,{
   required ReportDefinition definition,
   required ReportCriteria criteria,
