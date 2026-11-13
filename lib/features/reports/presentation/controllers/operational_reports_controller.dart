@@ -117,6 +117,13 @@ class OperationalReportsController extends GetxController {
     return type == null ? null : catalog.value?.entryFor(type);
   }
 
+  String? get selectedPageProfileId {
+    final pageProfileIds = selectedReportEntry?.definition.pageProfileIds;
+    return pageProfileIds == null || pageProfileIds.isEmpty
+        ? null
+        : pageProfileIds.first;
+  }
+
   String reportLabel(OperationalReportType type) =>
       catalog.value?.entryFor(type)?.label ?? type.wireValue;
 
@@ -664,7 +671,12 @@ class OperationalReportsController extends GetxController {
   Future<void> exportSummaryPdf() async {
     final type = selectedType.value;
     final data = summary.value;
-    if (type == null || data == null || isPdfActionRunning.value || !canExport) {
+    final pageProfileId = selectedPageProfileId;
+    if (type == null ||
+        data == null ||
+        pageProfileId == null ||
+        isPdfActionRunning.value ||
+        !canExport) {
       return;
     }
 
@@ -672,6 +684,7 @@ class OperationalReportsController extends GetxController {
     try {
       await saveSummaryPdfUseCase(
         type: type,
+        pageProfileId: pageProfileId,
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
@@ -704,7 +717,12 @@ class OperationalReportsController extends GetxController {
   Future<void> shareSummaryPdf() async {
     final type = selectedType.value;
     final data = summary.value;
-    if (type == null || data == null || isPdfActionRunning.value || !canExport) {
+    final pageProfileId = selectedPageProfileId;
+    if (type == null ||
+        data == null ||
+        pageProfileId == null ||
+        isPdfActionRunning.value ||
+        !canExport) {
       return;
     }
 
@@ -712,6 +730,7 @@ class OperationalReportsController extends GetxController {
     try {
       final shared = await shareSummaryPdfUseCase(
         type: type,
+        pageProfileId: pageProfileId,
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
@@ -746,7 +765,12 @@ class OperationalReportsController extends GetxController {
   Future<void> printSummaryPdf() async {
     final type = selectedType.value;
     final data = summary.value;
-    if (type == null || data == null || isPdfActionRunning.value || !canExport) {
+    final pageProfileId = selectedPageProfileId;
+    if (type == null ||
+        data == null ||
+        pageProfileId == null ||
+        isPdfActionRunning.value ||
+        !canExport) {
       return;
     }
 
@@ -754,6 +778,7 @@ class OperationalReportsController extends GetxController {
     try {
       final printed = await printSummaryPdfUseCase(
         type: type,
+        pageProfileId: pageProfileId,
         summary: data,
         organizationName: reportOrganizationName,
         logoUrl: reportLogoUrl,
