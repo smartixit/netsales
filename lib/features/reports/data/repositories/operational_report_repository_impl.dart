@@ -72,19 +72,20 @@ class OperationalReportRepositoryImpl
     String? cursor,
     int perPage = 25,
   }) async {
+    final filters = _filters(
+      fromDate: fromDate,
+      toDate: toDate,
+      search: search,
+      status: status,
+      saleType: saleType,
+    );
     final query = <String, dynamic>{
       'report_type': type.wireValue,
       'network_id': networkId,
       if (posId != null) 'pos_id': posId,
       'per_page': perPage,
       if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
-      ..._filters(
-        fromDate: fromDate,
-        toDate: toDate,
-        search: search,
-        status: status,
-        saleType: saleType,
-      ),
+      if (filters.isNotEmpty) 'filters': filters,
     };
     final response = await remoteDataSource.getReport(query: query);
     if (!response.success || response.data == null) {
@@ -118,17 +119,18 @@ class OperationalReportRepositoryImpl
     String? status,
     String? saleType,
   }) async {
+    final filters = _filters(
+      fromDate: fromDate,
+      toDate: toDate,
+      search: search,
+      status: status,
+      saleType: saleType,
+    );
     final query = <String, dynamic>{
       'report_type': type.wireValue,
       'network_id': networkId,
       if (posId != null) 'pos_id': posId,
-      ..._filters(
-        fromDate: fromDate,
-        toDate: toDate,
-        search: search,
-        status: status,
-        saleType: saleType,
-      ),
+      if (filters.isNotEmpty) 'filters': filters,
     };
     final response = await remoteDataSource.getSummary(query: query);
     if (!response.success || response.data == null) {
@@ -269,13 +271,20 @@ class OperationalReportRepositoryImpl
         'report_type': type.wireValue,
         'network_id': networkId,
         if (posId != null) 'pos_id': posId,
-        ..._filters(
+        if (_filters(
           fromDate: fromDate,
           toDate: toDate,
           search: search,
           status: status,
           saleType: saleType,
-        ),
+        ).isNotEmpty)
+          'filters': _filters(
+            fromDate: fromDate,
+            toDate: toDate,
+            search: search,
+            status: status,
+            saleType: saleType,
+          ),
       },
     );
     if (!response.success || response.data == null) {
