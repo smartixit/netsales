@@ -51,4 +51,10 @@ abstract final class StorageKeys {
 
   /// بادئة تخزين الشبكة المختارة لكل مستخدم ونقطة بيع.
   static const String activePosNetworkPrefix = 'active_pos_network';
+
+  /// آخر توقيت تم فيه تشغيل محرك استدراك مهام السيرفر بالملي ثانية
+  static const String lastServerCatchupRun = 'last_server_catchup_run_ms';
+
+  /// عدد مرات الفشل المتتالية لاستدعاء مهام السيرفر لحساب التراجع الأسي (Circuit Breaker)
+  static const String serverCatchupFailuresCount = 'server_catchup_failures_count';
 }

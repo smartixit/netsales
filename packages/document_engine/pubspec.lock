@@ -50,7 +50,7 @@ packages:
     source: hosted
     version: "2.1.2"
   characters:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: characters
       sha256: faf38497bda5ead2a8c7615f4f7939df04333478bf32e4173fcb06d428b5716b
@@ -216,6 +216,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  payv:
+    dependency: "direct main"
+    description:
+      name: payv
+      sha256: "24c588ebe5d74d4ae0243e3cc77cd57f5c719c22f8059bd7fa104ceac156b6a0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   pdf:
     dependency: "direct main"
     description:
