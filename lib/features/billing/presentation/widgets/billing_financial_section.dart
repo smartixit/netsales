@@ -9,7 +9,6 @@ import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart'
 
 class BillingFinancialSection extends StatelessWidget {
   const BillingFinancialSection({
-    required this.controller,
     required this.title,
     required this.emptyTitle,
     required this.page,
@@ -21,7 +20,6 @@ class BillingFinancialSection extends StatelessWidget {
     super.key,
   });
 
-  final BillingController controller;
   final String title;
   final String emptyTitle;
   final BillingCursorPageState page;
