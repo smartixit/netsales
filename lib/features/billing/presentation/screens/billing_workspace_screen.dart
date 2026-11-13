@@ -92,6 +92,10 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
         ]),
       ));
     }),
+    const _Header('الإشعارات الدائنة'),
+    ...controller.creditNotes.map((e)=>Card(child:ListTile(title:Text(e['credit_note_number']?.toString()??'إشعار دائن'),subtitle:Text(e['status']?.toString()??'—'),trailing:Text(e['total_minor']?.toString()??'—')))),
+    const _Header('الاستردادات'),
+    ...controller.refunds.map((e)=>Card(child:ListTile(title:Text(e['refund_reference']?.toString()??'استرداد'),subtitle:Text(e['status']?.toString()??'—'),trailing:Text(e['amount_minor']?.toString()??'—')))),
     const _Header('المدفوعات'),
     ...controller.payments.map((e)=>Card(child:ListTile(title:Text(e['payment_reference']?.toString()??'دفعة'),subtitle:Text(e['status']?.toString()??'—'),trailing:Text(e['amount']?.toString()??'—')))),
    ]
