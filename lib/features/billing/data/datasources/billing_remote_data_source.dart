@@ -14,6 +14,7 @@ abstract interface class BillingRemoteDataSource {
   Future<ApiResponse<Map<String, dynamic>>> getReportsCatalog(int networkId);
   Future<ApiResponse<Map<String, dynamic>>> getBillingReport(int networkId, String type, Map<String, dynamic> query);
   Future<ApiResponse<Map<String, dynamic>>> getBillingReportSummary(int networkId, String type, Map<String, dynamic> query);
+  Future<Uint8List> exportBillingReport(int networkId, String type, Map<String, dynamic> query);
   Future<ApiResponse<Map<String, dynamic>>> getTrialEligibility(int accountId, int priceId);
   Future<ApiResponse<Map<String, dynamic>>> purchase(int accountId, int priceId);
   Future<ApiResponse<Map<String, dynamic>>> getSubscriptions(int accountId, Map<String, dynamic> query);
