@@ -44,6 +44,7 @@ class OperationalReportCatalogEntry {
     required this.access,
     required this.chartSlots,
     required this.filterLabels,
+    required this.choiceLabels,
     required this.columnLabels,
     required this.metricLabels,
   });
@@ -55,6 +56,7 @@ class OperationalReportCatalogEntry {
   final OperationalReportAccess access;
   final List<OperationalReportChartSlot> chartSlots;
   final Map<String, String> filterLabels;
+  final Map<String, Map<String, String>> choiceLabels;
   final Map<String, String> columnLabels;
   final Map<String, String> metricLabels;
 }
