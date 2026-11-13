@@ -241,7 +241,7 @@ class InvoiceDocumentService {
             direction: DocumentTextDirection.rightToLeft,
           ),
           DocumentTableCell(
-            value: DocumentTextValue(_amount(item.voucherPrice)),
+            value: DocumentTextValue(_money(item.voucherPrice, currencyCode)),
             direction: DocumentTextDirection.leftToRight,
           ),
           DocumentTableCell(
@@ -249,11 +249,11 @@ class InvoiceDocumentService {
             direction: DocumentTextDirection.leftToRight,
           ),
           DocumentTableCell(
-            value: DocumentTextValue(_amount(item.itemDiscount)),
+            value: DocumentTextValue(_money(item.itemDiscount, currencyCode)),
             direction: DocumentTextDirection.leftToRight,
           ),
           DocumentTableCell(
-            value: DocumentTextValue(_amount(item.itemTotalAmount)),
+            value: DocumentTextValue(_money(item.itemTotalAmount, currencyCode)),
             direction: DocumentTextDirection.leftToRight,
           ),
         ],
@@ -327,17 +327,17 @@ class InvoiceDocumentService {
               lines: [
                 DocumentFinancialLine(
                   label: 'إجمالي الفاتورة',
-                  value: DocumentTextValue(_amount(invoice.invoiceTotalAmount)),
+                  value: DocumentTextValue(_money(invoice.invoiceTotalAmount, currencyCode)),
                   emphasis: DocumentFinancialEmphasis.total,
                 ),
                 DocumentFinancialLine(
                   label: 'المبلغ المسدد',
-                  value: DocumentTextValue(_amount(invoice.paidAmount)),
+                  value: DocumentTextValue(_money(invoice.paidAmount, currencyCode)),
                   emphasis: DocumentFinancialEmphasis.secondary,
                 ),
                 DocumentFinancialLine(
                   label: 'المبلغ المتبقي',
-                  value: DocumentTextValue(_amount(invoice.remainingAmount)),
+                  value: DocumentTextValue(_money(invoice.remainingAmount, currencyCode)),
                   emphasis: DocumentFinancialEmphasis.outstanding,
                 ),
               ],
