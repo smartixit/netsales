@@ -60,3 +60,10 @@ The Finance feature's detailed network/POS wallet statement PDF consumes these A
 Presets are persisted by the API under the authenticated user and current network/POS scope. Routes are `GET /reports/presets`, `POST /reports/presets`, `PUT /reports/presets/{presetUuid}`, and `DELETE /reports/presets/{presetUuid}`.
 The write payload includes `report_type`, `network_id`, optional `pos_id`, `name`, `report_schema_version`, `criteria` (`ReportCriteria.toJson()`), and `presentation` (`ReportPresentationOptions.toJson()`). The API returns `preset_schema_version`, `id` (opaque preset UUID), `name`, `report_id`, `report_schema_version`, `criteria`, and `presentation`.
 Preset schema version is currently 1. The API validates the saved report schema version, typed filter values and choices, required filters, visible/required columns, sort and grouping permissions, selected template/version, locale, page profile, and metric/chart availability against the current provider definition. A schema mismatch is rejected for re-review rather than silently migrated.
+
+
+## Document output integration status
+
+The Reports feature is embedded in both workspace shells and uses the shared Report Configuration Studio. User-owned saved presets are stored by the API with `ReportCriteria` and `ReportPresentationOptions` JSON; see the preset endpoint contract above.
+Detailed report PDF rendering consumes the current presentation options (columns, sorts, grouping, template/version, locale, page profile, metrics, charts). It rejects more than 1,500 rows and never recomputes financial values.
+Network/POS wallet statements use server-supplied opening/current balances and per-entry balance snapshots, reject mixed currencies or concurrent source changes, and render a branded landscape ledger PDF. Invoice/expense/repayment PDFs use the immutable API document snapshot and artifact workflow.
