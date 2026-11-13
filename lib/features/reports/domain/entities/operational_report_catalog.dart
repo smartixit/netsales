@@ -60,10 +60,22 @@ class OperationalReportCatalogEntry {
 }
 
 class OperationalReportCatalog {
-  const OperationalReportCatalog({
+  OperationalReportCatalog({
     required this.schemaVersion,
     required this.entries,
-  });
+  }) : definitionRegistry = _buildRegistry(entries);
+
+  final ReportDefinitionRegistry definitionRegistry;
+
+  static ReportDefinitionRegistry _buildRegistry(
+    List<OperationalReportCatalogEntry> entries,
+  ) {
+    final registry = ReportDefinitionRegistry();
+    for (final entry in entries) {
+      registry.register(entry.definition);
+    }
+    return registry;
+  }
 
   final int schemaVersion;
   final List<OperationalReportCatalogEntry> entries;
@@ -75,8 +87,14 @@ class OperationalReportCatalog {
     return null;
   }
 
-  ReportDefinition? definitionFor(OperationalReportType type) =>
-      entryFor(type)?.definition;
+  ReportDefinition? definitionFor(OperationalReportType type) {
+    final entry = entryFor(type);
+    if (entry == null) return null;
+    return definitionRegistry.find(
+      id: entry.definition.id,
+      schemaVersion: entry.definition.schemaVersion,
+    );
+  }
 
   List<OperationalReportType> get availableTypes => entries
       .where((entry) => entry.access.available)
