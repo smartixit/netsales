@@ -391,7 +391,6 @@ class BillingController extends GetxController {
     try {
       final values = await Future.wait([
         useCases.subscription(id),
-        useCases.events(id, const {'per_page': 30}),
         useCases.usage(id, const {'per_page': 30}),
       ]);
       if (detailsRevision != _detailsRevision ||
@@ -404,8 +403,13 @@ class BillingController extends GetxController {
       subscriptionDetails.value = rawSubscription is Map
           ? Map<String, dynamic>.from(rawSubscription)
           : detail;
-      eventsPage.replace(_page(values[1]));
-      usagePage.replace(_page(values[2]));
+      final rawEvents = detail['events'];
+      if (rawEvents is Map) {
+        eventsPage.replace(Map<String, dynamic>.from(rawEvents));
+      } else {
+        eventsPage.reset();
+      }
+      usagePage.replace(_page(values[1]));
     } catch (error) {
       if (detailsRevision == _detailsRevision) {
         errorMessage.value = AppException.sanitizeMessage(
