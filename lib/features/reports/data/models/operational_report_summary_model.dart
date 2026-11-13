@@ -1,3 +1,4 @@
+import 'package:document_engine/document_engine.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 
 class OperationalReportSummaryModel extends OperationalReportSummary {
@@ -9,7 +10,8 @@ class OperationalReportSummaryModel extends OperationalReportSummary {
 
   factory OperationalReportSummaryModel.fromJson(
     dynamic json, {
-    required List<Map<String, dynamic>> metricDefinitions,
+    required List<ReportMetricSlotDefinition> metricDefinitions,
+    required Map<String, String> metricLabels,
     required String reportTitle,
   }) {
     if (json is! Map) {
@@ -18,6 +20,7 @@ class OperationalReportSummaryModel extends OperationalReportSummary {
     return OperationalReportSummaryModel(
       Map<String, dynamic>.from(json),
       metricDefinitions: metricDefinitions,
+      metricLabels: metricLabels,
       reportTitle: reportTitle,
     );
   }
