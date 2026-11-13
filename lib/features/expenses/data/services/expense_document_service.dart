@@ -70,7 +70,7 @@ class ExpenseDocumentService {
 
     if (result is DocumentRenderSuccess) {
       final bytes = result.artifact.bytes;
-      await OfficialDocumentArtifactService.instance.issueAndUpload(
+      return OfficialDocumentArtifactService.instance.issueAndUpload(
       documentType: 'expense',
       documentId: expense.expenseId,
       networkId: expense.networkId,
@@ -79,7 +79,6 @@ class ExpenseDocumentService {
         pdfBytes: bytes,
         fileName: _fileName(expense),
       );
-      return bytes;
     }
     if (result is DocumentRenderFailure) throw StateError(result.message);
     throw StateError('تعذر إنشاء سند المصروف.');
