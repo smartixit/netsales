@@ -366,9 +366,7 @@ class BillingReportsController extends GetxController {
     final definition = catalog.firstWhereOrNull((item) => item['id'] == type);
     final network = networkId();
     final revision = _revision;
-    final criteriaSnapshot = Map<String, ReportFilterValue>.from(
-      criteria.value.filters,
-    );
+    final criteriaStateSnapshot = criteria.value;
     final filtersSnapshot = Map<String, dynamic>.from(_filters);
     final presentationSnapshot = presentation.value;
     final fromDateSnapshot = fromDate.value;
@@ -406,8 +404,8 @@ class BillingReportsController extends GetxController {
         if (_revision != revision ||
             networkId() != network ||
             selectedType.value != type ||
-            criteria.value.filters.length != criteriaSnapshot.length ||
-            presentation.value != presentationSnapshot) {
+            !identical(criteria.value, criteriaStateSnapshot) ||
+            !identical(presentation.value, presentationSnapshot)) {
           throw StateError(
             'تغيرت معايير التقرير أثناء تجهيز PDF؛ أُوقف التصدير لمنع إنشاء مستند ببيانات مختلطة.',
           );
