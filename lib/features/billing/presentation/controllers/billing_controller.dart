@@ -130,7 +130,11 @@ class BillingController extends GetxController {
 
   void _invalidateAccountPages({required bool clearItems}) {
     for (final page in _accountPages) {
-      page.beginRefresh(clearItems: clearItems, clearCursor: clearItems);
+      if (clearItems) {
+        page.reset();
+      } else {
+        page.beginRefresh();
+      }
     }
   }
 
@@ -366,6 +370,7 @@ class BillingController extends GetxController {
 
   Future<void> selectAccount(int? id) async {
     if (id == null || id == selectedAccountId.value) return;
+    _resetCollectionFilters();
     selectedAccountId.value = id;
     account.value = null;
     _invalidateAccountPages(clearItems: true);
@@ -422,10 +427,14 @@ class BillingController extends GetxController {
       }
     } catch (error) {
       if (currentRevision == _revision) {
-        errorMessage.value = AppException.sanitizeMessage(
+        final message = AppException.sanitizeMessage(
           error,
           fallback: 'تعذر تحميل تفاصيل حساب الفوترة.',
         );
+        for (final page in _accountPages) {
+          page.failFirstPage(message, revision: page.revision);
+        }
+        errorMessage.value = message;
       }
     } finally {
       if (currentRevision == _revision) isLoading.value = false;
