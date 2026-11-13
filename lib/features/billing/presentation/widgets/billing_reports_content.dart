@@ -237,7 +237,7 @@ class BillingReportsContent extends StatelessWidget {
    firstDate:DateTime(2020),
    lastDate:DateTime(2100),
   );
-  final value=selected?.firstOrNull;
+  final value=selected != null && selected.isNotEmpty ? selected.first : null;
   if(value==null)return;
   final next=Map<String,ReportFilterValue>.from(criteria.filters)..[id]=ReportDateFilterValue(value);
   onChanged(ReportCriteria(filters:next));
