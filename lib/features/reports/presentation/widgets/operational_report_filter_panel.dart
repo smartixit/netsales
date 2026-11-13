@@ -38,7 +38,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
         children: [
           CustomTextField(
             controller: controller.searchTextController,
-            label: 'البحث في سجلات التقرير',
+            label: controller.reportFilterLabel('search', 'البحث في سجلات التقرير'),
             hint: 'ابحث بالرقم المرجعي أو الوصف أو نقطة البيع',
             prefixIcon: const Icon(Icons.search_rounded),
             isRequired: false,
@@ -50,7 +50,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
             children: [
               Expanded(
                 child: CustomDatePickerField.single(
-                  label: 'من تاريخ',
+                  label: controller.reportFilterLabel('from_date', 'من تاريخ'),
                   hint: 'بداية الفترة',
                   value: DateTime.tryParse(controller.fromDate.value ?? ''),
                   firstDate: DateTime(2010),
@@ -64,7 +64,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
               AppSpacing.hSm,
               Expanded(
                 child: CustomDatePickerField.single(
-                  label: 'إلى تاريخ',
+                  label: controller.reportFilterLabel('to_date', 'إلى تاريخ'),
                   hint: 'نهاية الفترة',
                   value: DateTime.tryParse(controller.toDate.value ?? ''),
                   firstDate: DateTime(2010),
@@ -84,7 +84,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
           if (controller.selectedStatusOptions.isNotEmpty) ...[
             AppSpacing.vSm,
             Text(
-              'الحالة',
+              controller.reportFilterLabel('status', 'الحالة'),
               style: AppTypography.labelMedium.copyWith(
                 color: colors.onSurfaceVariant,
                 fontWeight: FontWeight.w700,
@@ -113,7 +113,7 @@ class OperationalReportFilterPanel extends StatelessWidget {
           if (controller.selectedSaleTypeOptions.isNotEmpty) ...[
             AppSpacing.vSm,
             Text(
-              'نوع البيع / الطلب',
+              controller.reportFilterLabel('sale_type', 'نوع البيع / الطلب'),
               style: AppTypography.labelMedium.copyWith(
                 color: colors.onSurfaceVariant,
                 fontWeight: FontWeight.w700,
