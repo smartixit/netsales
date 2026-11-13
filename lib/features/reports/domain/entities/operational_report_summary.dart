@@ -1,4 +1,5 @@
 import 'package:document_engine/document_engine.dart';
+import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
 
 class OperationalReportMetric {
   const OperationalReportMetric({
