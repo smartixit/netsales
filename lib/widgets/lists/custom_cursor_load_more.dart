@@ -13,7 +13,6 @@ class CustomCursorLoadMore extends StatelessWidget {
     this.label = 'تحميل المزيد',
     this.retryLabel = 'إعادة المحاولة',
     this.errorTitle = 'تعذر تحميل بقية السجلات',
-    this.skeletonHeight,
     super.key,
   });
 
@@ -24,7 +23,6 @@ class CustomCursorLoadMore extends StatelessWidget {
   final String label;
   final String retryLabel;
   final String errorTitle;
-  final double? skeletonHeight;
 
   @override
   Widget build(BuildContext context) {
