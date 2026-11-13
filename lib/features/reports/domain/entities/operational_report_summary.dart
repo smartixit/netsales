@@ -1,3 +1,5 @@
+import 'package:document_engine/document_engine.dart';
+
 class OperationalReportMetric {
   const OperationalReportMetric({
     required this.id,
@@ -15,27 +17,27 @@ class OperationalReportMetric {
 class OperationalReportSummary {
   const OperationalReportSummary(
     this.values, {
-    this.metricDefinitions = const <Map<String, dynamic>>[],
+    this.metricDefinitions = const <ReportMetricSlotDefinition>[],
+    this.metricLabels = const <String, String>{},
     this.reportTitle = '',
   });
 
   final Map<String, dynamic> values;
-  final List<Map<String, dynamic>> metricDefinitions;
+  final List<ReportMetricSlotDefinition> metricDefinitions;
+  final Map<String, String> metricLabels;
   final String reportTitle;
 
-  List<OperationalReportMetric> get metrics {
-    return metricDefinitions.map((definition) {
-      final id = definition['id']?.toString() ?? '';
-      final label = definition['label']?.toString() ?? id;
-      final dataType = definition['data_type']?.toString();
-      final rawValue = values[id];
-      if (rawValue == null) return null;
-      return OperationalReportMetric(
-        id: id,
-        label: label,
-        value: rawValue?.toString() ?? '—',
-        isCurrency: dataType == 'decimal' || dataType == 'currency',
-      );
-    }).whereType<OperationalReportMetric>().where((metric) => metric.id.isNotEmpty).toList(growable: false);
-  }
+  List<OperationalReportMetric> get metrics => metricDefinitions
+      .map((definition) {
+        final rawValue = values[definition.id];
+        if (rawValue == null) return null;
+        return OperationalReportMetric(
+          id: definition.id,
+          label: metricLabels[definition.id] ?? definition.labelKey,
+          value: rawValue.toString(),
+          isCurrency: definition.dataType == ReportDataType.decimal,
+        );
+      })
+      .whereType<OperationalReportMetric>()
+      .toList(growable: false);
 }
