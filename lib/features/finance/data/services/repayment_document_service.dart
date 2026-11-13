@@ -9,6 +9,7 @@ import 'package:netsales/core/services/official_document_artifact_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/features/finance/data/models/pos_repayment_models.dart';
 import 'package:netsales/features/finance/domain/entities/pos_repayment_entity.dart';
 import 'package:printing/printing.dart';
 
@@ -23,13 +24,42 @@ class RepaymentDocumentService {
     PosRepaymentEntity repayment, {
     required bool isNetworkView,
   }) async {
+    final snapshots = OfficialDocumentArtifactService.instance;
+    final issued = await snapshots.createSnapshot(
+      documentType: 'pos_repayment',
+      documentId: repayment.repaymentId,
+      networkId: repayment.networkId,
+      posId: repayment.posId,
+      templateId: 'netsales.repayment.receipt.executive',
+      templateVersion: '1.0.0',
+    );
+
+    final existingArtifact = await snapshots.downloadIfReady(issued);
+    if (existingArtifact != null) return existingArtifact;
+
+    final source = Map<String, dynamic>.from(issued['source_snapshot'] as Map);
+    final officialRepayment = PosRepaymentModel.fromJson(source);
+    final renderedBytes = await _renderPdf(
+      officialRepayment,
+      isNetworkView: true,
+    );
+    return snapshots.uploadArtifact(
+      snapshotUuid: issued['snapshot_uuid'].toString(),
+      pdfBytes: renderedBytes,
+      fileName: _fileName(officialRepayment),
+    );
+  }
+
+  Future<Uint8List> _renderPdf(
+    PosRepaymentEntity repayment, {
+    required bool isNetworkView,
+  }) async {
     final reference = _reference(repayment);
-    final organizationName = isNetworkView
-        ? _display(repayment.networkName, 'شبكة #${repayment.networkId}')
-        : _display(repayment.posName, 'نقطة بيع #${repayment.posId}');
-    final logoUrl = isNetworkView
-        ? repayment.networkLogoUrl
-        : repayment.posLogoUrl;
+    final organizationName = _display(
+      repayment.networkName,
+      'شبكة #${repayment.networkId}',
+    );
+    final logoUrl = repayment.networkLogoUrl;
     final logoBytes = await DocumentEngineBrandAssetService.instance
         .resolveLogoBytes(logoUrl);
     final fontService = DocumentEngineFontService.instance;
@@ -76,19 +106,7 @@ class RepaymentDocumentService {
       ),
     );
 
-    if (result is DocumentRenderSuccess) {
-      final bytes = result.artifact.bytes;
-      return OfficialDocumentArtifactService.instance.issueAndUpload(
-        documentType: 'pos_repayment',
-        documentId: repayment.repaymentId,
-        networkId: repayment.networkId,
-        posId: repayment.posId,
-        templateId: 'netsales.repayment.receipt.executive',
-        templateVersion: '1.0.0',
-        pdfBytes: bytes,
-        fileName: _fileName(repayment),
-      );
-    }
+    if (result is DocumentRenderSuccess) return result.artifact.bytes;
     if (result is DocumentRenderFailure) throw StateError(result.message);
     throw StateError('تعذر إنشاء سند السداد.');
   }
