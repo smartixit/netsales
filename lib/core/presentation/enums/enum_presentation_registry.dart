@@ -16,6 +16,8 @@ import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/enums/billing_status.dart';
 import 'package:netsales/core/enums/network_status.dart';
 import 'package:netsales/core/enums/pos_status.dart';
+import 'package:netsales/core/enums/repayment_status.dart';
+import 'package:netsales/core/enums/receivable_aging_bucket.dart';
 
 /// السجل المركزي الموحد لتمثيل الـ Enums بصرياً (Centralized Enum Presentation Registry)
 /// هو المرجع المعتمد والوحيد لكافة واجهات التطبيق في ترجمة حالات الـ Enums إلى معانٍ بصرية
@@ -379,6 +381,60 @@ class EnumPresentationRegistry {
       WalletOperationType.unknown => EnumPresentation.unknown(
         fallbackLabel: label,
       ),
+    };
+  }
+
+  /// Centralized presentation for debt repayment statement states.
+  static EnumPresentation resolveRepaymentStatus(
+    RepaymentStatus status, {
+    String? serverLabel,
+  }) {
+    final label = _effectiveLabel(serverLabel, status.label);
+    return switch (status) {
+      RepaymentStatus.completed => EnumPresentation(
+          label: label,
+          tone: SemanticTone.success,
+          icon: Icons.check_circle_rounded,
+        ),
+      RepaymentStatus.reversed => EnumPresentation(
+          label: label,
+          tone: SemanticTone.danger,
+          icon: Icons.undo_rounded,
+        ),
+      RepaymentStatus.unknown =>
+        EnumPresentation.unknown(fallbackLabel: label),
+    };
+  }
+
+  /// Centralized presentation for receivable aging range identifiers.
+  static EnumPresentation resolveReceivableAgingBucket(
+    ReceivableAgingBucket bucket, {
+    String? serverLabel,
+  }) {
+    final label = _effectiveLabel(serverLabel, bucket.label);
+    return switch (bucket) {
+      ReceivableAgingBucket.days0To30 => EnumPresentation(
+          label: label,
+          tone: SemanticTone.neutral,
+          icon: Icons.schedule_rounded,
+        ),
+      ReceivableAgingBucket.days31To60 => EnumPresentation(
+          label: label,
+          tone: SemanticTone.warning,
+          icon: Icons.timelapse_rounded,
+        ),
+      ReceivableAgingBucket.days61To90 => EnumPresentation(
+          label: label,
+          tone: SemanticTone.warning,
+          icon: Icons.warning_amber_rounded,
+        ),
+      ReceivableAgingBucket.over90 => EnumPresentation(
+          label: label,
+          tone: SemanticTone.danger,
+          icon: Icons.error_outline_rounded,
+        ),
+      ReceivableAgingBucket.unknown =>
+        EnumPresentation.unknown(fallbackLabel: label),
     };
   }
 
