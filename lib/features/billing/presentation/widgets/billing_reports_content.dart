@@ -7,6 +7,7 @@ import 'package:netsales/widgets/inputs/custom_switch.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 import 'package:netsales/core/enums/billing_status.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/widgets/charts/charting.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -70,7 +71,7 @@ class BillingReportsContent extends StatelessWidget {
    ]))),
    ...controller.charts.map((chart)=>BillingReportChart(payload:chart)),
    if(controller.rows.isEmpty&&!controller.isLoading.value)const CustomEmptyState.boxed(title:'لا توجد سجلات مطابقة',subtitle:'غيّر معايير البحث أو الفلاتر ثم أعد تحميل التقرير.'),
-   ...controller.rows.map((row)=>Card(child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(_arabicLabel(e.key)+': '+(e.value?.toString()??'—'))).toList())))),
+   ...controller.rows.map((row)=>Card(child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(_arabicLabel(e.key)+': '+_displayValue(e.key,e.value))).toList())))),
    if(controller.isLoadingMore.value)const CustomSkeletonListTile(hasLeading:false),
    if(controller.hasMore)
     CustomButton.outline(text:'تحميل المزيد',loading:controller.isLoadingMore.value,onPressed:controller.isLoadingMore.value?null:controller.loadMore),
@@ -283,6 +284,19 @@ class BillingReportsContent extends StatelessWidget {
   'conversion_invoice_issued':'فواتير التحويل الصادرة','paid_conversion':'التحويلات المدفوعة',
  }[key]??key.replaceAll('_',' ');
 
+ String _displayValue(String key, dynamic value) {
+  if (value == null) return '—';
+  final isAmount = key.endsWith('_minor') ||
+      key == 'amount' ||
+      key == 'mrr' ||
+      key == 'arr' ||
+      key.contains('revenue');
+  if (isAmount && (value is num || num.tryParse(value.toString()) != null)) {
+   return AmountFormatter.format(value.toString());
+  }
+  return value.toString();
+ }
+
  List<Widget> _summaryWidgets(Map<String,dynamic> summary){
   final widgets=<Widget>[];
   for(final entry in summary.entries){
@@ -290,14 +304,14 @@ class BillingReportsContent extends StatelessWidget {
    final label=_arabicLabel(entry.key);
    if(value is Map<String,dynamic>){
     widgets.add(Padding(padding:const EdgeInsets.only(top:8),child:Text(label,style:const TextStyle(fontWeight:FontWeight.w700))));
-    for(final nested in value.entries){widgets.add(Text(_arabicLabel(nested.key)+': '+(nested.value?.toString()??'—')));}
+    for(final nested in value.entries){widgets.add(Text(_arabicLabel(nested.key)+': '+_displayValue(nested.key,nested.value)));}
    }else if(value is List<dynamic>){
     widgets.add(Padding(padding:const EdgeInsets.only(top:8),child:Text(label,style:const TextStyle(fontWeight:FontWeight.w700))));
     for(final item in value.whereType<Map<String,dynamic>>()){
-      widgets.add(Text(item.entries.map((e)=>_arabicLabel(e.key)+': '+(e.value?.toString()??'—')).join(' • ')));
+      widgets.add(Text(item.entries.map((e)=>_arabicLabel(e.key)+': '+_displayValue(e.key,e.value)).join(' • ')));
     }
    }else{
-    widgets.add(Text(label+': '+(value?.toString()??'—')));
+    widgets.add(Text(label+': '+_displayValue(entry.key,value)));
    }
   }
   return widgets;
