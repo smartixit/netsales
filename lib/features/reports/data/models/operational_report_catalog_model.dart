@@ -96,6 +96,7 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
           labelKey: filterId,
           kind: kind,
           required: filter['required'] == true,
+          minLength: (filter['min_length'] as num?)?.toInt(),
           maxLength: (filter['max_length'] as num?)?.toInt(),
           choices: choices,
         ),
@@ -269,7 +270,8 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
     'text' => ReportDataType.text,
     'integer' => ReportDataType.integer,
     'decimal' || 'currency' => ReportDataType.decimal,
-    'date' || 'datetime' => ReportDataType.date,
+    'date' => ReportDataType.date,
+    'datetime' => ReportDataType.dateTime,
     'boolean' => ReportDataType.boolean,
     _ => throw FormatException('نوع عمود غير مدعوم: $value'),
   };
