@@ -288,39 +288,83 @@ class BillingWorkspaceContent extends StatelessWidget {
 
   Widget _planTile(Map<String, dynamic> plan) {
     final version = plan['current_version'];
-    final prices = version is Map<String, dynamic> && version['prices'] is List
-        ? version['prices'] as List<dynamic>
-        : const <dynamic>[];
-    final price = prices.isNotEmpty && prices.first is Map<String, dynamic>
-        ? prices.first as Map<String, dynamic>
-        : const <String, dynamic>{};
-    final id = (price['price_id'] as num?)?.toInt();
+    final rawPrices =
+        version is Map<String, dynamic> ? version['prices'] : null;
+    final prices = rawPrices is List
+        ? rawPrices.whereType<Map<String, dynamic>>().toList(growable: false)
+        : const <Map<String, dynamic>>[];
+
     return CustomSurfaceCard(
       margin: const EdgeInsets.all(4),
       padding: EdgeInsets.zero,
-      child: CustomInfoListTile(
-        title: Text(plan['name']?.toString() ?? 'خطة اشتراك'),
-        subtitle: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('السعر: '),
-            CustomInteractiveAmountText(
-              amount: price['unit_amount'] ?? price['unit_amount_minor'] ?? '—',
-              currencyCode: price['currency_code']?.toString(),
-              trailingText: price['unit_amount'] != null
-                  ? price['currency_code']?.toString()
-                  : 'وحدة صغرى',
-              enableTooltip: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 14, 6),
+            child: Text(
+              plan['name']?.toString() ?? 'خطة اشتراك',
+              style: Theme.of(Get.context!).textTheme.titleMedium,
             ),
-          ],
-        ),
-        trailing: CustomButton.primary(
-          text: 'اختيار',
-          loading: controller.isMutating.value,
-          onPressed: id == null ? null : () => BillingDialogs.purchase(controller, id),
-        ),
+          ),
+          if (prices.isEmpty)
+            const CustomEmptyState.compact(
+              title: 'لا توجد أسعار نشطة بهذه العملة',
+            )
+          else
+            for (var index = 0; index < prices.length; index++) ...[
+              if (index > 0)
+                Divider(
+                  height: 1,
+                  color: Theme.of(Get.context!).colorScheme.outlineVariant,
+                ),
+              _planPriceTile(prices[index]),
+            ],
+        ],
       ),
     );
+  }
+
+  Widget _planPriceTile(Map<String, dynamic> price) {
+    final id = (price['price_id'] as num?)?.toInt();
+    final amount =
+        price['unit_amount'] ?? price['unit_amount_minor'] ?? '—';
+    final currencyCode = price['currency_code']?.toString();
+
+    return CustomInfoListTile(
+      padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 14, 10),
+      minHeight: 64,
+      title: Text(_billingIntervalLabel(price)),
+      subtitle: CustomInteractiveAmountText(
+        amount: amount,
+        currencyCode: currencyCode,
+        trailingText: price['unit_amount'] != null
+            ? currencyCode
+            : 'وحدة صغرى',
+        enableTooltip: false,
+      ),
+      trailing: CustomButton.primary(
+        text: 'اختيار',
+        loading: controller.isMutating.value,
+        onPressed: id == null
+            ? null
+            : () => BillingDialogs.purchase(controller, id),
+      ),
+    );
+  }
+
+  String _billingIntervalLabel(Map<String, dynamic> price) {
+    final interval = price['billing_interval']?.toString().toUpperCase();
+    final count = (price['interval_count'] as num?)?.toInt() ?? 1;
+    const units = {
+      'DAY': 'يوم',
+      'WEEK': 'أسبوع',
+      'MONTH': 'شهر',
+      'YEAR': 'سنة',
+    };
+    if (interval == 'ONE_TIME') return 'دفعة واحدة';
+    final unit = units[interval] ?? 'فترة';
+    return count == 1 ? 'كل $unit' : 'كل $count $unit';
   }
 
   Widget _subscriptionTile(Map<String, dynamic> subscription) {
