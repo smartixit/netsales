@@ -22,7 +22,7 @@ class BillingController extends GetxController {
   int _revision = 0;
   List<Map<String,dynamic>> _rows(BillingPayload p) {
     final v=p.data['data']??p.data['items']??p.data;
-    return v is List ? v.whereType<Map>().map((e)=>Map<String,dynamic>.from(e)).toList() : const [];
+    return v is List ? v.whereType<Map<String,dynamic>>().map((e)=>Map<String,dynamic>.from(e)).toList() : const [];
   }
   Map<String,dynamic> _object(BillingPayload p) {
     final v=p.data['data']??p.data;
@@ -99,13 +99,13 @@ class BillingController extends GetxController {
       ]);
       final detail = _object(values[0]);
       final rawSubscription = detail['subscription'];
-      subscriptionDetails.value = rawSubscription is Map
+      subscriptionDetails.value = rawSubscription is Map<String,dynamic>
           ? Map<String, dynamic>.from(rawSubscription)
           : detail;
       final events = values[1].data['data'] ?? values[1].data['items'] ?? values[1].data;
       final usage = values[2].data['data'] ?? values[2].data['items'] ?? values[2].data;
-      eventRows.assignAll(events is List ? events.whereType<Map>().map((e) => Map<String,dynamic>.from(e)).toList() : const []);
-      usageRows.assignAll(usage is List ? usage.whereType<Map>().map((e) => Map<String,dynamic>.from(e)).toList() : const []);
+      eventRows.assignAll(events is List ? events.whereType<Map<String,dynamic>>().map((e) => Map<String,dynamic>.from(e)).toList() : const []);
+      usageRows.assignAll(usage is List ? usage.whereType<Map<String,dynamic>>().map((e) => Map<String,dynamic>.from(e)).toList() : const []);
     } catch (error) {
       errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر تحميل تفاصيل الاشتراك والاستخدام.');
     }
