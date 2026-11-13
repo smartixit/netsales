@@ -95,6 +95,8 @@ class BillingPlanSection extends StatelessWidget {
   }
 
   String _intervalLabel(Map<String, dynamic> price) {
+    final serverLabel = price['billing_interval_label']?.toString().trim();
+    if (serverLabel != null && serverLabel.isNotEmpty) return serverLabel;
     final interval = price['billing_interval']?.toString().toUpperCase();
     final count = (price['interval_count'] as num?)?.toInt() ?? 1;
     const units = {
