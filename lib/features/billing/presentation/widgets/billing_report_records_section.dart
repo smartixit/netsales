@@ -22,6 +22,9 @@ class BillingReportRecordsSection extends StatelessWidget {
     if (controller.isLoading.value && controller.rows.isEmpty) {
       return const CustomSkeletonFeed(itemCount: 3, shrinkWrap: true);
     }
+    if (controller.rows.isEmpty && controller.errorMessage.value != null) {
+      return const SizedBox.shrink();
+    }
     if (controller.rows.isEmpty) {
       return const CustomEmptyState.boxed(
         title: 'لا توجد سجلات مطابقة',
