@@ -23,6 +23,8 @@ abstract interface class BillingRepository {
   Future<BillingPayload> cancelSubscription(int subscriptionId, bool atPeriodEnd);
   Future<BillingPayload> getInvoices(int accountId, Map<String, dynamic> query);
   Future<BillingPayload> getPayments(int accountId, Map<String, dynamic> query);
+  Future<BillingPayload> getCreditNotes(int accountId, Map<String, dynamic> query);
+  Future<BillingPayload> getRefunds(int accountId, Map<String, dynamic> query);
   Future<BillingPayload> getPaymentMethods(int accountId);
   Future<BillingPayload> recordPayment(int invoiceId, int paymentMethodId, int amountMinor, String idempotencyKey, String? externalReference, String? proofPath);
 }
