@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_workspace_screen.dart';
+import 'package:netsales/features/billing/presentation/screens/billing_reports_screen.dart';
 import 'package:netsales/features/finance/presentation/widgets/network_finance_workspace_hub.dart';
 import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/network_supply_requests_review_screen.dart';
@@ -46,6 +47,12 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           icon: Icons.workspace_premium_outlined,
           activeIcon: Icons.workspace_premium_rounded,
           content: BillingWorkspaceScreen(),
+        ),
+        const WorkspaceNavItem(
+          label: 'تقارير الاشتراكات',
+          icon: Icons.query_stats_outlined,
+          activeIcon: Icons.query_stats_rounded,
+          content: BillingReportsScreen(),
         ),
         const WorkspaceNavItem(
           label: 'فريق العمل',

@@ -6,6 +6,7 @@ import 'package:netsales/features/billing/data/repositories/billing_repository_i
 import 'package:netsales/features/billing/domain/repositories/billing_repository.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
+import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
@@ -26,6 +27,10 @@ class NetworkWorkspaceBinding extends Bindings {
     Get.lazyPut<BillingRemoteDataSource>(() => const BillingRemoteDataSourceImpl(), fenix: true);
     Get.lazyPut<BillingRepository>(() => BillingRepositoryImpl(Get.find<BillingRemoteDataSource>()), fenix: true);
     Get.lazyPut<BillingUseCases>(() => BillingUseCases(Get.find<BillingRepository>()), fenix: true);
+    Get.lazyPut<BillingReportsController>(() => BillingReportsController(
+      useCases: Get.find<BillingUseCases>(),
+      networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
+    ), fenix: true);
     Get.lazyPut<BillingController>(() => BillingController(
       useCases: Get.find<BillingUseCases>(),
       networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
