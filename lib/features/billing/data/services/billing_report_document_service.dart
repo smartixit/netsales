@@ -16,6 +16,8 @@ class BillingReportDocumentService {
     required String reportType,
     required String reportLabel,
     required Map<String,dynamic> summary,
+    required List<Map<String,dynamic>> rows,
+    required List<Map<String,dynamic>> columns,
     required String localeTag,
     required String? fromDate,
     required String? toDate,
@@ -37,7 +39,8 @@ class BillingReportDocumentService {
       logoBytes:logo,
       fonts:await fonts.loadArabicBrandingFonts(),
     );
-    final rows=<DocumentTableRow>[];
+    if(rows.length>1500)throw StateError('يتجاوز التقرير الحد الآمن لملف PDF؛ استخدم تصدير CSV الكامل.');
+    final metricRows=<DocumentTableRow>[];
     void addValue(String label,dynamic value){
       if(value is Map<String,dynamic>){
         for(final entry in value.entries){addValue(label+' / '+entry.key.replaceAll('_',' '),entry.value);}
@@ -46,9 +49,9 @@ class BillingReportDocumentService {
           addValue(label+' '+(index+1).toString(),value[index]);
         }
       }else{
-        if(rows.length>=300)throw StateError('يتجاوز ملخص التقرير الحد الآمن لعناصر PDF.');
-        rows.add(DocumentTableRow(
-          id:'billing-summary-'+(rows.length+1).toString(),
+        if(metricRows.length>=300)throw StateError('يتجاوز ملخص التقرير الحد الآمن لعناصر PDF.');
+        metricRows.add(DocumentTableRow(
+          id:'billing-summary-'+(metricRows.length+1).toString(),
           cells:[
             DocumentTableCell(value:DocumentTextValue(label),direction:DocumentTextDirection.rightToLeft),
             DocumentTableCell(value:_documentValue(value),direction:DocumentTextDirection.leftToRight),
@@ -57,8 +60,8 @@ class BillingReportDocumentService {
       }
     }
     for(final entry in summary.entries){addValue(entry.key.replaceAll('_',' '),entry.value);}
-    if(rows.isEmpty){
-      rows.add(DocumentTableRow(id:'billing-summary-empty',cells:[
+    if(metricRows.isEmpty){
+      metricRows.add(DocumentTableRow(id:'billing-summary-empty',cells:[
         const DocumentTableCell(value:DocumentTextValue('النتيجة')),
         const DocumentTableCell(value:DocumentTextValue('لا توجد مؤشرات متاحة')),
       ]));
@@ -93,9 +96,29 @@ class BillingReportDocumentService {
               DocumentTableColumn(id:'metric',label:'المؤشر',alignment:DocumentCellAlignment.leading),
               DocumentTableColumn(id:'value',label:'القيمة',alignment:DocumentCellAlignment.trailing),
             ],
-            rows:rows,
+            rows:metricRows,
             style:DocumentTableStyle(stripedRows:true,compact:true),
           ),
+          if(rows.isNotEmpty)...[
+            DocumentHeading(text:'تفاصيل السجلات',level:2,direction:DocumentTextDirection.rightToLeft),
+            DocumentTable(
+              columns:columns.take(10).map((column)=>DocumentTableColumn(
+                id:(column['id']??column['key']??'column').toString().replaceAll(RegExp(r'[^A-Za-z0-9_-]'),'_'),
+                label:(column['label']??column['id']??column['key']??'').toString(),
+              )).toList(),
+              rows:rows.asMap().entries.map((entry)=>DocumentTableRow(
+                id:'billing-detail-'+entry.key.toString(),
+                cells:columns.take(10).map((column){
+                  final key=(column['key']??column['id']??'').toString();
+                  return DocumentTableCell(
+                    value:_documentValue(entry.value[key]),
+                    direction:DocumentTextDirection.leftToRight,
+                  );
+                }).toList(),
+              )).toList(),
+              style:DocumentTableStyle(stripedRows:true,compact:true),
+            ),
+          ],
           const DocumentParagraph(text:'المبالغ محفوظة كما وردت من الخادم وبوحداتها الأصلية. لا تجمع القيم بين عملات مختلفة.',direction:DocumentTextDirection.rightToLeft),
         ]),
       ],
@@ -127,7 +150,7 @@ class BillingReportDocumentService {
         footerText:'تقرير فوترة — بيانات معتمدة من الخادم',
         watermark:DocumentWatermark(imageBytes:logo,opacity:0.075,angleRadians:-0.6108652381980153,widthFactor:0.58,heightFactor:0.46),
         branding:branding,
-        maxPages:20,
+        maxPages:100,
       ),
     );
     if(result is DocumentRenderFailure)throw StateError(result.message);
