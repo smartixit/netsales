@@ -308,48 +308,30 @@ class RepaymentHistoryController extends GetxController {
     }
   }
 
-  Future<void> exportRepaymentPdf(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) {
+  Future<void> exportRepaymentPdf(PosRepaymentEntity repayment) {
     return _runDocumentAction(
       title: 'تصدير سند السداد',
       successMessage: 'تم حفظ سند السداد في مجلد Receipts.',
       failureMessage: 'تعذر حفظ سند السداد.',
-      action: (useCase) => useCase.exportAndSave(
-        repayment,
-        isNetworkView: isNetworkView,
-      ),
+      action: (useCase) => useCase.exportAndSave(repayment),
     );
   }
 
-  Future<void> shareRepaymentPdf(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) {
+  Future<void> shareRepaymentPdf(PosRepaymentEntity repayment) {
     return _runDocumentAction(
       title: 'مشاركة سند السداد',
       successMessage: 'تم تجهيز سند السداد للمشاركة.',
       failureMessage: 'تعذرت مشاركة سند السداد.',
-      action: (useCase) => useCase.share(
-        repayment,
-        isNetworkView: isNetworkView,
-      ),
+      action: (useCase) => useCase.share(repayment),
     );
   }
 
-  Future<void> printRepaymentPdf(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) {
+  Future<void> printRepaymentPdf(PosRepaymentEntity repayment) {
     return _runDocumentAction(
       title: 'طباعة سند السداد',
       successMessage: 'تم إرسال سند السداد إلى خدمة الطباعة.',
       failureMessage: 'تعذر إرسال سند السداد للطباعة.',
-      action: (useCase) => useCase.print(
-        repayment,
-        isNetworkView: isNetworkView,
-      ),
+      action: (useCase) => useCase.print(repayment),
     );
   }
 
