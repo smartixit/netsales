@@ -36,7 +36,10 @@ class RepaymentDocumentService {
 
     final source = Map<String, dynamic>.from(issued['source_snapshot'] as Map);
     final officialRepayment = PosRepaymentModel.fromJson(source);
-    final renderedBytes = await _renderPdf(officialRepayment);
+    final renderedBytes = await _renderPdf(
+      officialRepayment,
+      currencyCode: issued['currency_code']?.toString() ?? 'YER',
+    );
     return snapshots.uploadArtifact(
       snapshotUuid: issued['snapshot_uuid'].toString(),
       pdfBytes: renderedBytes,
@@ -44,7 +47,10 @@ class RepaymentDocumentService {
     );
   }
 
-  Future<Uint8List> _renderPdf(PosRepaymentEntity repayment) async {
+  Future<Uint8List> _renderPdf(
+    PosRepaymentEntity repayment, {
+    required String currencyCode,
+  }) async {
     final reference = _reference(repayment);
     final organizationName = _display(
       repayment.networkName,
@@ -67,7 +73,7 @@ class RepaymentDocumentService {
       fonts: await fontService.loadArabicBrandingFonts(),
     );
 
-    final snapshot = _buildSnapshot(repayment, reference);
+    final snapshot = _buildSnapshot(repayment, reference, currencyCode);
     final generatedAt = DateTime.now();
     final result = await PdfDocumentRenderer(
       textShapingProvider: await fontService.arabicTextShapingProvider(),
@@ -76,10 +82,10 @@ class RepaymentDocumentService {
       template: _template,
       options: DocumentRenderOptions(
         pageProfile: DocumentPageProfile.a5Portrait(
-          marginTop: 38,
-          marginRight: 36,
-          marginBottom: 42,
-          marginLeft: 36,
+          marginTop: 28,
+          marginRight: 26,
+          marginBottom: 30,
+          marginLeft: 26,
         ),
         generatedAt: generatedAt,
         showPageNumbers: true,
@@ -138,6 +144,7 @@ class RepaymentDocumentService {
   DocumentSnapshot _buildSnapshot(
     PosRepaymentEntity repayment,
     String reference,
+    String currencyCode,
   ) {
     final status = repayment.typedStatus;
     final statusTone = switch (status) {
@@ -177,6 +184,23 @@ class RepaymentDocumentService {
         ),
         direction: DocumentTextDirection.rightToLeft,
       ),
+      DocumentInfoItem(
+        label: 'العملة',
+        value: DocumentTextValue(currencyCode),
+        direction: DocumentTextDirection.leftToRight,
+      ),
+      if (status == RepaymentStatus.reversed && repayment.reversedBy != null)
+        DocumentInfoItem(
+          label: 'عكس السند بواسطة',
+          value: DocumentTextValue('#${repayment.reversedBy}'),
+          direction: DocumentTextDirection.leftToRight,
+        ),
+      if (status == RepaymentStatus.reversed && repayment.reversalRepaymentId != null)
+        DocumentInfoItem(
+          label: 'مرجع قيد العكس',
+          value: DocumentTextValue('#${repayment.reversalRepaymentId}'),
+          direction: DocumentTextDirection.leftToRight,
+        ),
       if (_hasText(repayment.referenceNumber))
         DocumentInfoItem(
           label: 'رقم المرجع',
@@ -358,6 +382,9 @@ class RepaymentDocumentService {
       'سند_سداد_${_reference(repayment)}';
 
   static String _amount(double value) => AmountFormatter.format(value.toString());
+
+  static String _money(double value, String currencyCode) =>
+      _amount(value) + ' ' + currencyCode;
 
   static bool _hasText(String? value) => value?.trim().isNotEmpty ?? false;
 
