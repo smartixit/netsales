@@ -44,3 +44,12 @@ This document provides direct mapping from Flutter feature domains to their cano
 - Official invoice, repayment, and expense PDFs are rendered only from the server-issued immutable `source_snapshot`. The app uploads the rendered PDF artifact, retrieves the canonical protected artifact, and verifies its SHA-256 before save/share/print.
 - Currency shown in an official document comes from the snapshot's `currency_code`; snapshots with missing/invalid currency are rejected. No fixed currency symbol or client-side currency conversion is allowed.
 - Validation of migrations, typed contract parsing, platform PDF rendering, Arabic text extraction/order, and final CI remains pending for the final plan stage. Do not interpret source integration as verified platform readiness.
+
+
+## Wallet ledger statement export contract
+
+The Finance feature's detailed network/POS wallet statement PDF consumes these API resource fields:
+- Wallet resource: `currency_code`, `opening_balance`, `opening_balance_source`, `wallet_balance`, and the related network/POS profile logo path.
+- Wallet-log resource: `currency_code`, `balance_before`, `balance_after`, and `balance_snapshot_source`, in addition to log ID, operation label, amount, statement, date, and creator.
+- `opening_balance_source` is interpreted only as `INITIAL` or `BACKFILLED`; unknown values are displayed as unspecified. `balance_snapshot_source` is interpreted only as `LIVE` or `BACKFILLED`.
+- The PDF is generated from all cursor pages up to 1,500 rows, ordered by ledger ID, and is rejected if the wallet changes, a new ledger ID appears during retrieval, any row has missing balance snapshots, or any row currency differs from the wallet currency. The Flutter renderer does not calculate balances or totals.
