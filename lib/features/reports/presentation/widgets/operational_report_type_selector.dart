@@ -51,7 +51,7 @@ class OperationalReportTypeSelector extends StatelessWidget {
             }
 
             return CustomButton.outline(
-              text: type.label,
+              text: controller.reportLabel(type),
               onPressed: () => controller.selectType(type),
             );
           },
