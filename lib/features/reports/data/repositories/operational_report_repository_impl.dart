@@ -266,25 +266,19 @@ class OperationalReportRepositoryImpl
     String? status,
     String? saleType,
   }) async {
+    final filters = _filters(
+      fromDate: fromDate,
+      toDate: toDate,
+      search: search,
+      status: status,
+      saleType: saleType,
+    );
     final response = await remoteDataSource.requestExport(
       payload: {
         'report_type': type.wireValue,
         'network_id': networkId,
         if (posId != null) 'pos_id': posId,
-        if (_filters(
-          fromDate: fromDate,
-          toDate: toDate,
-          search: search,
-          status: status,
-          saleType: saleType,
-        ).isNotEmpty)
-          'filters': _filters(
-            fromDate: fromDate,
-            toDate: toDate,
-            search: search,
-            status: status,
-            saleType: saleType,
-          ),
+        if (filters.isNotEmpty) 'filters': filters,
       },
     );
     if (!response.success || response.data == null) {
