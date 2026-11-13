@@ -11,8 +11,9 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
-import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
+import 'package:netsales/core/services/internet_connection_service.dart';
+import 'package:netsales/core/services/package_info_service.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/utils/connection_failure.dart';
@@ -690,6 +691,9 @@ class _SessionAuthInterceptor extends Interceptor {
     if (deviceUuid.isNotEmpty) {
       options.headers['X-Device-Uuid'] = deviceUuid;
     }
+
+    // حقن ترويسات إصدار وبيانات حزمة التطبيق لتعريف الخادم بنسخة العميل بدقة
+    options.headers.addAll(PackageInfoService.instance.apiHeaders);
 
     // حقن مفتاح عدم التكرار إن وُجد
     final idempotencyKey = options.extra['idempotency_key'];
