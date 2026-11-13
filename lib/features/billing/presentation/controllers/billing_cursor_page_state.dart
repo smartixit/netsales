@@ -8,6 +8,8 @@ class BillingCursorPageState {
   final RxList<Map<String, dynamic>> items = <Map<String, dynamic>>[].obs;
   final RxBool isLoadingMore = false.obs;
   final RxnString loadMoreError = RxnString();
+  final RxBool isLoadingFirstPage = false.obs;
+  final RxnString firstPageError = RxnString();
   String? nextCursor;
   int _revision = 0;
   final Set<String> _seenCursors = <String>{};
@@ -23,10 +25,22 @@ class BillingCursorPageState {
     }
     isLoadingMore.value = false;
     loadMoreError.value = null;
+    isLoadingFirstPage.value = true;
+    firstPageError.value = null;
     return _revision;
   }
 
-  int reset() => beginRefresh(clearItems: true, clearCursor: true);
+  int reset() {
+    final revision = beginRefresh(clearItems: true, clearCursor: true);
+    isLoadingFirstPage.value = false;
+    return revision;
+  }
+
+  void failFirstPage(String message, {required int revision}) {
+    if (revision != _revision) return;
+    firstPageError.value = message;
+    isLoadingFirstPage.value = false;
+  }
 
   int replace(Map<String, dynamic> page) {
     final revision = beginRefresh(clearItems: true, clearCursor: true);
@@ -34,6 +48,8 @@ class BillingCursorPageState {
     items.assignAll(_deduplicate(rows));
     nextCursor = _extractNextCursor(page);
     if (nextCursor != null) _seenCursors.add(nextCursor!);
+    isLoadingFirstPage.value = false;
+    firstPageError.value = null;
     return revision;
   }
 
