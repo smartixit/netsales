@@ -235,6 +235,17 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
   ));
   if(ok==true)await controller.purchase(id);
  }
- Future<void> _cancel(BuildContext c,int id)async{final ok=await showDialog<bool>(context:c,builder:(d)=>AlertDialog(title:const Text('جدولة الإلغاء'),content:const Text('سيتم الإلغاء في نهاية فترة الخدمة الحالية.'),actions:[CustomButton.text(text:'رجوع',onPressed:()=>Navigator.pop(d,false)),CustomButton.danger(text:'تأكيد',onPressed:()=>Navigator.pop(d,true))]));if(ok==true)await controller.cancel(id);}
+ Future<void> _cancel(BuildContext c,int id)async{
+  final choice=await showDialog<bool?>(context:c,builder:(d)=>AlertDialog(
+   title:const Text('إلغاء الاشتراك'),
+   content:const Text('اختر توقيت الإلغاء. الإلغاء الفوري ينهي الاستحقاقات وفق سياسة الخادم ولا يمكن التراجع عنه من هذه الشاشة.'),
+   actions:[
+    CustomButton.text(text:'رجوع',onPressed:()=>Navigator.pop(d,null)),
+    CustomButton.outline(text:'نهاية الفترة',onPressed:()=>Navigator.pop(d,true)),
+    CustomButton.danger(text:'إلغاء فوري',onPressed:()=>Navigator.pop(d,false)),
+   ],
+  ));
+  if(choice!=null)await controller.cancel(id,atPeriodEnd:choice);
+ }
 }
 class _Header extends StatelessWidget{const _Header(this.value);final String value;@override Widget build(BuildContext c)=>Padding(padding:const EdgeInsets.only(top:18,bottom:8),child:Text(value,style:const TextStyle(fontSize:18,fontWeight:FontWeight.w700)));}
