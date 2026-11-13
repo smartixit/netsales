@@ -18,6 +18,8 @@ class BillingRepositoryImpl implements BillingRepository {
   @override
   Future<BillingPayload> getNetworkAccounts(int id) async => _unwrap(await remote.getNetworkAccounts(id));
   @override
+  Future<BillingPayload> createNetworkAccount(int networkId, int currencyId) async => _unwrap(await remote.createNetworkAccount(networkId, currencyId));
+  @override
   Future<BillingPayload> getAccount(int id) async => _unwrap(await remote.getAccount(id));
   @override
   Future<BillingPayload> updateAccount(int id, Map<String, dynamic> data) async => _unwrap(await remote.updateAccount(id, data));
