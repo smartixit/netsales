@@ -39,7 +39,7 @@ class PosWalletDashboardController extends GetxController {
   final logsErrorMessage = RxnString();
   final isExportingStatement = false.obs;
 
-  static const int _maxStatementRows = 2000;
+  static const int _maxStatementRows = 1500;
 
   int _logsRequestVersion = 0;
   int _walletsRequestVersion = 0;
