@@ -8,7 +8,5 @@ class BillingReportsScreen extends GetView<BillingReportsController> {
  const BillingReportsScreen({super.key});
 
  @override
- Widget build(BuildContext context) => Obx(
-  () => BillingReportsContent(controller:controller),
- );
+ Widget build(BuildContext context) => BillingReportsContent(controller:controller);
 }
