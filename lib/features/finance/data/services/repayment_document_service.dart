@@ -103,10 +103,9 @@ class RepaymentDocumentService {
   }
 
   Future<FileExportResult> exportAndSave(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) async {
-    final bytes = await generatePdf(repayment, isNetworkView: isNetworkView);
+    PosRepaymentEntity repayment,
+  ) async {
+    final bytes = await generatePdf(repayment);
     return FileExportService.instance.saveFile(
       bytes: bytes,
       fileName: _fileName(repayment),
@@ -118,11 +117,8 @@ class RepaymentDocumentService {
     );
   }
 
-  Future<bool> share(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) async {
-    final bytes = await generatePdf(repayment, isNetworkView: isNetworkView);
+  Future<bool> share(PosRepaymentEntity repayment) async {
+    final bytes = await generatePdf(repayment);
     return FileExportService.instance.shareBytes(
       bytes: bytes,
       fileName: _fileName(repayment),
@@ -131,11 +127,8 @@ class RepaymentDocumentService {
     );
   }
 
-  Future<bool> print(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) async {
-    final bytes = await generatePdf(repayment, isNetworkView: isNetworkView);
+  Future<bool> print(PosRepaymentEntity repayment) async {
+    final bytes = await generatePdf(repayment);
     return Printing.layoutPdf(
       onLayout: (_) async => bytes,
       name: '${_fileName(repayment)}.pdf',
