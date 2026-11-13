@@ -7,7 +7,6 @@ import 'package:netsales/core/services/document_engine_brand_asset_service.dart'
 import 'package:netsales/core/services/document_engine_font_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:printing/printing.dart';
@@ -200,16 +199,26 @@ class OperationalReportDocumentService {
     String? scopeLabel,
   }) {
     final metrics = summary.metrics;
+    final hasCurrencyMetrics = metrics.any((metric) => metric.isCurrency);
     final rawCurrencyCode = summary.values['currency_code'];
-    if (rawCurrencyCode is! String ||
-        !RegExp(r'^[A-Z]{3}
-    final rows = metrics.indexed.map((entry) {
-      final metric = entry.$2;
+    String? currencyCode;
+
+    if (hasCurrencyMetrics) {
+      if (rawCurrencyCode is! String ||
+          !RegExp(r'^[A-Z]{3}$').hasMatch(rawCurrencyCode.trim())) {
+        throw StateError(
+          'رمز العملة غير موجود أو غير صالح في استجابة التقرير.',
+        );
+      }
+      currencyCode = rawCurrencyCode.trim();
+    }
+
+    final rows = metrics.map((metric) {
       final value = metric.isCurrency
-          ? AmountFormatter.format(metric.value) + ' ' + currencyCode
+          ? '${metric.value} $currencyCode'
           : metric.value;
       return DocumentTableRow(
-        id: 'report-metric-' + entry.$1.toString(),
+        id: 'report-metric-${metric.id}',
         cells: [
           DocumentTableCell(
             value: DocumentTextValue(metric.label),
@@ -241,36 +250,14 @@ class OperationalReportDocumentService {
           direction: DocumentTextDirection.rightToLeft,
         ),
       DocumentInfoItem(
-        label: 'من تاريخ',
-        value: DocumentTextValue(_display(fromDate, 'بلا حد أدنى')),
-        direction: DocumentTextDirection.leftToRight,
-      ),
-      DocumentInfoItem(
-        label: 'إلى تاريخ',
-        value: DocumentTextValue(_display(toDate, 'حتى تاريخ التصدير')),
-        direction: DocumentTextDirection.leftToRight,
-      ),
-      DocumentInfoItem(
         label: 'تاريخ الإنشاء',
         value: DocumentTextValue(_date(generatedAt)),
         direction: DocumentTextDirection.leftToRight,
       ),
-      if (_hasText(status))
+      for (final filter in activeFilters)
         DocumentInfoItem(
-          label: 'الحالة المحددة',
-          value: DocumentTextValue(_statusLabel(status!.trim())),
-          direction: DocumentTextDirection.rightToLeft,
-        ),
-      if (_hasText(saleType))
-        DocumentInfoItem(
-          label: type == OperationalReportType.requests ? 'نوع الطلب' : 'نوع البيع',
-          value: DocumentTextValue(_saleTypeLabel(saleType!.trim())),
-          direction: DocumentTextDirection.rightToLeft,
-        ),
-      if (_hasText(search))
-        DocumentInfoItem(
-          label: 'عبارة البحث',
-          value: DocumentTextValue(search!.trim()),
+          label: filter.label,
+          value: DocumentTextValue(filter.value),
           direction: DocumentTextDirection.rightToLeft,
         ),
     ];
@@ -278,10 +265,7 @@ class OperationalReportDocumentService {
     return DocumentSnapshot(
       metadata: DocumentMetadata(
         id: DocumentId(
-          'netsales-operational-report-' +
-              type.wireValue +
-              '-' +
-              generatedAt.millisecondsSinceEpoch.toString(),
+          'netsales-operational-report-${type.wireValue}-${generatedAt.millisecondsSinceEpoch}',
         ),
         documentTypeId: DocumentTypeId('netsales.operational-report'),
         title: 'ملخص ' + _reportTitle(summary, type),
@@ -306,13 +290,15 @@ class OperationalReportDocumentService {
             DocumentStatusBanner(
               label: 'إجماليات معتمدة من الخادم',
               tone: DocumentStatusTone.success,
-              detail: 'تشمل جميع السجلات المطابقة للفلاتر، وليس الصفحة الحالية فقط',
+              detail:
+                  'تشمل جميع السجلات المطابقة للفلاتر، وليس الصفحة الحالية فقط',
             ),
             DocumentInfoGrid(items: info, columns: 2, compact: true),
             if (summary.values['opening_balance_source'] == 'BACKFILLED')
               const DocumentCallout(
                 title: 'رصيد افتتاحي معاد بناؤه',
-                body: 'تم اشتقاق الرصيد الافتتاحي عند ترحيل سجل المحفظة من الرصيد الحالي والحركات المتاحة آنذاك. هذه القيمة توثّق إعادة البناء ولا تعني وجود كشف تاريخي مستقل موثق قبل الترحيل.',
+                body:
+                    'تم اشتقاق الرصيد الافتتاحي عند ترحيل سجل المحفظة من الرصيد الحالي والحركات المتاحة آنذاك. هذه القيمة توثّق إعادة البناء ولا تعني وجود كشف تاريخي مستقل موثق قبل الترحيل.',
                 tone: DocumentStatusTone.warning,
               ),
             DocumentHeading(
@@ -320,26 +306,33 @@ class OperationalReportDocumentService {
               level: 2,
               direction: DocumentTextDirection.rightToLeft,
             ),
-            DocumentTable(
-              columns: [
-                DocumentTableColumn(id: 'metric', label: 'المؤشر'),
-                DocumentTableColumn(
-                  id: 'value',
-                  label: 'القيمة',
-                  alignment: DocumentCellAlignment.decimal,
+            if (rows.isEmpty)
+              const DocumentCallout(
+                title: 'لا توجد مؤشرات',
+                body: 'لم يرسل الخادم مؤشرات قابلة للعرض لهذا التقرير.',
+                tone: DocumentStatusTone.neutral,
+              )
+            else
+              DocumentTable(
+                columns: const [
+                  DocumentTableColumn(id: 'metric', label: 'المؤشر'),
+                  DocumentTableColumn(
+                    id: 'value',
+                    label: 'القيمة',
+                    alignment: DocumentCellAlignment.decimal,
+                  ),
+                ],
+                rows: rows,
+                style: DocumentTableStyle(
+                  stripedRows: true,
+                  compact: true,
+                  showBorders: true,
+                  headerColor: 'E8F3EF',
+                  alternateRowColor: 'F7FAF9',
+                  columnWeights: const [2.4, 1.1],
                 ),
-              ],
-              rows: rows,
-              style: DocumentTableStyle(
-                stripedRows: true,
-                compact: true,
-                showBorders: true,
-                headerColor: 'E8F3EF',
-                alternateRowColor: 'F7FAF9',
-                columnWeights: const [2.4, 1.1],
               ),
-            ),
-            DocumentCallout(
+            const DocumentCallout(
               title: 'نطاق هذا المستند',
               body:
                   'يعرض هذا المستند ملخصاً مجمعاً محسوباً على كامل النتائج المطابقة. لتصدير التفاصيل الكاملة لكل سجل استخدم ملف CSV من شاشة التقارير.',
@@ -392,27 +385,6 @@ class OperationalReportDocumentService {
 
   static bool _hasText(String? value) =>
       value != null && value.trim().isNotEmpty;
-
-  static String _statusLabel(String status) => switch (status) {
-    'PAID' => 'مسددة',
-    'PARTIALLY_PAID' => 'مسددة جزئياً',
-    'UNPAID' => 'غير مسددة',
-    'DEPOSIT' => 'إيداع',
-    'WITHDRAW' => 'سحب',
-    'COMPLETED' => 'مكتمل',
-    'REVERSED' => 'معكوس',
-    'PENDING' => 'قيد الانتظار',
-    'APPROVED' => 'معتمد',
-    'REJECTED' => 'مرفوض',
-    'CANCELLED' => 'ملغى',
-    _ => status,
-  };
-
-  static String _saleTypeLabel(String value) => switch (value) {
-    'CASH' => 'نقدي',
-    'CREDIT' => 'آجل',
-    _ => value,
-  };
 
   static String _display(String? value, [String fallback = '—']) {
     final normalized = value?.trim();
