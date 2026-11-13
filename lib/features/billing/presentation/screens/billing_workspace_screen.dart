@@ -39,6 +39,8 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
     if(trial is Map)...[const SizedBox(height:8),const Text('الفترة التجريبية',style:TextStyle(fontWeight:FontWeight.w700)),Text('الحالة: '+(trial['status']?.toString()??'—')),Text('تاريخ البدء: '+(trial['started_at']?.toString()??'—'))],
     const SizedBox(height:10),const Text('الاستخدام المسجل',style:TextStyle(fontWeight:FontWeight.w700)),
     ...controller.usageRows.map((row)=>Text((row['meter'] is Map?row['meter']['name']?.toString()??'عداد':'عداد')+': '+(row['quantity']?.toString()??'0'))),
+    const SizedBox(height:10),const Text('سجل الأحداث',style:TextStyle(fontWeight:FontWeight.w700)),
+    ...controller.eventRows.map((row)=>Text((row['event_type']?.toString()??'حدث')+' — '+(row['occurred_at']?.toString()??''))),
    ])),
    actions:[CustomButton.primary(text:'إغلاق',onPressed:()=>Navigator.pop(d))]
   ));
