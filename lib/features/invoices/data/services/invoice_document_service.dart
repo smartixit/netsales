@@ -36,7 +36,7 @@ class InvoiceDocumentService {
     final officialInvoice = InvoiceModel.fromJson(source);
     final renderedBytes = await _renderInvoicePdf(
       officialInvoice,
-      currencyCode: issued['currency_code']?.toString() ?? 'YER',
+      currencyCode: snapshots.requireCurrencyCode(issued),
     );
     return snapshots.uploadArtifact(
       snapshotUuid: issued['snapshot_uuid'].toString(),
