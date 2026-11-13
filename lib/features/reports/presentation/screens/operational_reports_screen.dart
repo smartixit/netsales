@@ -320,7 +320,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
           filters.add(CustomDatePickerField.range(
             label: label,
             value: range?.start != null && range?.end != null
-                ? DateTimeRange(start: range!.start!, end: range.end!)
+                ? DateTimeRange(start: range!.start!, end: range!.end!)
                 : null,
             isRequired: required,
             onChanged: (selected) => controller.setFilterValue(
