@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_service.dart';
@@ -100,6 +101,34 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
   @override
   Future<ApiResponse<Map<String, dynamic>>> getInvoices(int accountId, Map<String, dynamic> query) =>
       ApiService.instance.get(ApiConstants.billingAccountInvoices(accountId), queryParameters: query, fromJson: _map);
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> getPaymentMethods(int accountId) =>
+      ApiService.instance.get(ApiConstants.billingAccountPaymentMethods(accountId), fromJson: _map);
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> recordPayment(
+    int invoiceId,
+    int paymentMethodId,
+    int amountMinor,
+    String idempotencyKey,
+    String? externalReference,
+    String? proofPath,
+  ) async {
+    final data = FormData.fromMap({
+      'payment_method_id': paymentMethodId,
+      'amount_minor': amountMinor,
+      'idempotency_key': idempotencyKey,
+      if (externalReference != null && externalReference.trim().isNotEmpty) 'external_reference': externalReference.trim(),
+      if (proofPath != null) 'proof': await MultipartFile.fromFile(proofPath),
+    });
+    return ApiService.instance.post(
+      ApiConstants.billingInvoicePayments(invoiceId),
+      data: data,
+      fromJson: _map,
+      idempotencyKey: idempotencyKey,
+    );
+  }
 
   @override
   Future<ApiResponse<Map<String, dynamic>>> getPayments(int accountId, Map<String, dynamic> query) =>
