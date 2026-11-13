@@ -425,6 +425,60 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
         )),
       ));
     }
+    final groupable = definition.columns.where((column) => column.groupable).toList();
+    if (groupable.isNotEmpty) {
+      children.add(CustomDropdown<String>(
+        label: 'تجميع حسب',
+        rxValue: RxnString(presentation.groupByFieldId ?? ''),
+        items: [
+          DropdownItem<String>(value: '', child: const Text('بدون تجميع')),
+          ...groupable.map((column) => DropdownItem<String>(
+            value: column.id,
+            child: Text(resolveLabel(context, column.labelKey)),
+          )),
+        ],
+        onChanged: (id) => controller.updatePresentation(ReportPresentationOptions(
+          visibleColumnIds: presentation.visibleColumnIds,
+          sorts: presentation.sorts,
+          groupByFieldId: id == null || id.isEmpty ? null : id,
+          template: presentation.template,
+          languageTag: presentation.languageTag,
+          pageProfileId: presentation.pageProfileId,
+          includeMetrics: presentation.includeMetrics,
+          includeCharts: presentation.includeCharts,
+        )),
+      ));
+    }
+    if (presentation.sorts.isNotEmpty) {
+      children.add(CustomDropdown<ReportSortDirection>(
+        label: 'اتجاه الترتيب',
+        rxValue: Rxn<ReportSortDirection>(presentation.sorts.first.direction),
+        items: const [
+          DropdownItem<ReportSortDirection>(
+            value: ReportSortDirection.ascending,
+            child: Text('تصاعدي'),
+          ),
+          DropdownItem<ReportSortDirection>(
+            value: ReportSortDirection.descending,
+            child: Text('تنازلي'),
+          ),
+        ],
+        onChanged: (direction) {
+          if (direction == null) return;
+          final current = presentation.sorts.first;
+          controller.updatePresentation(ReportPresentationOptions(
+            visibleColumnIds: presentation.visibleColumnIds,
+            sorts: [ReportSortOption(fieldId: current.fieldId, direction: direction)],
+            groupByFieldId: presentation.groupByFieldId,
+            template: presentation.template,
+            languageTag: presentation.languageTag,
+            pageProfileId: presentation.pageProfileId,
+            includeMetrics: presentation.includeMetrics,
+            includeCharts: presentation.includeCharts,
+          ));
+        },
+      ));
+    }
     if (definition.supportedLocaleTags.isNotEmpty) {
       children.add(CustomDropdown<String>(
         label: 'لغة المستند',
