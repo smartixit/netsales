@@ -3,12 +3,10 @@ import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_workspace_content.dart';
 
-/// Composition-only route screen; all billing UI lives in feature widgets.
+/// Composition-only route screen for the billing workspace.
 class BillingWorkspaceScreen extends GetView<BillingController> {
   const BillingWorkspaceScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => Obx(
-    () => BillingWorkspaceContent(controller: controller),
-  );
+  Widget build(BuildContext context) => BillingWorkspaceContent(controller: controller);
 }
