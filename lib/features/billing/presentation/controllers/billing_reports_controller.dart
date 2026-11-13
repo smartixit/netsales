@@ -290,10 +290,33 @@ class BillingReportsController extends GetxController {
   Future<void> selectReport(String? type)async{
     if(type==null||type==selectedType.value)return;selectedType.value=type;final definition=currentDefinition;if(definition!=null)_resetStudio(definition);await loadReport();
   }
-  Future<void> applyFilters()=>loadReport();
-  Future<void> setStatus(String? value)async{selectedStatus.value=value;final next=Map<String,ReportFilterValue>.from(criteria.value.filters);if(value==null||value.isEmpty){next.remove('status');}else{next['status']=ReportChoiceFilterValue(value);}setCriteria(ReportCriteria(filters:next));await loadReport();}
-  Future<void> setFromDate(DateTime? value)async{fromDate.value=value;await loadReport();}
-  Future<void> setToDate(DateTime? value)async{toDate.value=value;await loadReport();}
+  Future<void> applyFilters() {
+    _searchWorker?.dispose();
+    _bindSearchWorker();
+    return loadReport();
+  }
+
+  Future<void> setStatus(String? value) async {
+    selectedStatus.value = value;
+    final next = Map<String, ReportFilterValue>.from(criteria.value.filters);
+    if (value == null || value.isEmpty) {
+      next.remove('status');
+    } else {
+      next['status'] = ReportChoiceFilterValue(value);
+    }
+    setCriteria(ReportCriteria(filters: next));
+    await applyFilters();
+  }
+
+  Future<void> setFromDate(DateTime? value) async {
+    fromDate.value = value;
+    await applyFilters();
+  }
+
+  Future<void> setToDate(DateTime? value) async {
+    toDate.value = value;
+    await applyFilters();
+  }
   Future<void> clearFilters()async{
     criteria.value=ReportCriteria();searchController.clear();statusController.clear();_resetSearchQuery();selectedStatus.value=null;fromDate.value=null;toDate.value=null;await loadReport();
   }
