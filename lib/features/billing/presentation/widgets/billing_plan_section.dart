@@ -8,7 +8,6 @@ import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/dividers/custom_divider.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
-import 'package:netsales/widgets/lists/custom_collection_filter_state.dart';
 
 class BillingPlanSection extends StatelessWidget {
   const BillingPlanSection({required this.controller, super.key});
