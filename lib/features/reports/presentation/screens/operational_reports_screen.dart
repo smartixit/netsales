@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_filter_panel.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_records_list.dart';
@@ -119,7 +118,6 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                         padding: const EdgeInsets.only(top: 12),
                         child: OperationalReportSummaryStrip(
                           summary: summary,
-                          type: type,
                         ),
                       );
                     }),
