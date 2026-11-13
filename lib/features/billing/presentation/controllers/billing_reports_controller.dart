@@ -278,6 +278,7 @@ class BillingReportsController extends GetxController {
         reportType:type,
         reportLabel:label,
         summary:metrics,
+        includeMetrics:presentation.value.includeMetrics,
         rows:allRows,
         columns:columns,
         localeTag:presentation.value.languageTag??'ar-YE',
