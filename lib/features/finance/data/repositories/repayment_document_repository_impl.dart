@@ -10,29 +10,19 @@ class RepaymentDocumentRepositoryImpl implements RepaymentDocumentRepository {
 
   @override
   Future<bool> exportAndSave(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) async {
-    final result = await documentService.exportAndSave(
-      repayment,
-      isNetworkView: isNetworkView,
-    );
+    PosRepaymentEntity repayment,
+  ) async {
+    final result = await documentService.exportAndSave(repayment);
     return result.isSuccess;
   }
 
   @override
-  Future<bool> share(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) {
-    return documentService.share(repayment, isNetworkView: isNetworkView);
+  Future<bool> share(PosRepaymentEntity repayment) {
+    return documentService.share(repayment);
   }
 
   @override
-  Future<bool> print(
-    PosRepaymentEntity repayment, {
-    required bool isNetworkView,
-  }) {
-    return documentService.print(repayment, isNetworkView: isNetworkView);
+  Future<bool> print(PosRepaymentEntity repayment) {
+    return documentService.print(repayment);
   }
 }
