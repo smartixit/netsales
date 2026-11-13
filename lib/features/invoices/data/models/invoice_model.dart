@@ -23,9 +23,14 @@ class InvoiceModel extends InvoiceEntity {
     super.createdByName,
     super.networkName,
     super.networkLogoUrl,
+    super.networkPhoneNumber,
+    super.networkEmail,
+    super.networkAddress,
     super.posName,
     super.posLogoUrl,
     super.posPhoneNumber,
+    super.posEmail,
+    super.posAddress,
     super.items = const [],
     super.createdAt,
     super.updatedAt,
@@ -39,19 +44,29 @@ class InvoiceModel extends InvoiceEntity {
     }
 
     String? networkLogoUrl;
+    String? networkPhoneNumber;
+    String? networkEmail;
+    String? networkAddress;
     if (json['network'] is Map) {
       final networkObj = Map<String, dynamic>.from(json['network'] as Map);
       networkLogoUrl = networkObj['network_profile_logo']?.toString();
+      networkPhoneNumber = networkObj['network_phone_number']?.toString();
+      networkEmail = networkObj['network_email']?.toString();
+      networkAddress = networkObj['network_address']?.toString();
     }
 
     String? pName;
     String? pPhone;
     String? posLogoUrl;
+    String? posEmail;
+    String? posAddress;
     if (json['pos'] is Map<String, dynamic>) {
       final posObj = json['pos'] as Map<String, dynamic>;
       pName = posObj['pos_name'] as String?;
       pPhone = posObj['pos_phone_number'] as String?;
       posLogoUrl = posObj['pos_profile_logo']?.toString();
+      posEmail = posObj['pos_email']?.toString();
+      posAddress = posObj['pos_address']?.toString();
     }
 
     final creator = json['created_by_user'];
@@ -90,9 +105,14 @@ class InvoiceModel extends InvoiceEntity {
       createdByName: createdByName,
       networkName: netName,
       networkLogoUrl: networkLogoUrl,
+      networkPhoneNumber: networkPhoneNumber,
+      networkEmail: networkEmail,
+      networkAddress: networkAddress,
       posName: pName,
       posLogoUrl: posLogoUrl,
       posPhoneNumber: pPhone,
+      posEmail: posEmail,
+      posAddress: posAddress,
       items: parsedItems,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
