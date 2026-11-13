@@ -48,6 +48,22 @@ class BillingController extends GetxController {
     }catch(e){if(rev==_revision)errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل تفاصيل حساب الفوترة.');}
     finally{if(rev==_revision)isLoading.value=false;}
   }
+  Future<Map<String, dynamic>?> checkTrial(int priceId) async {
+    final id = selectedAccountId.value;
+    if (id == null) return null;
+    try {
+      final payload = await useCases.trialEligibility(id, priceId);
+      final value = payload.data['data'] ?? payload.data;
+      return value is Map ? Map<String, dynamic>.from(value) : null;
+    } catch (error) {
+      errorMessage.value = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر التحقق من أهلية الفترة التجريبية.',
+      );
+      return null;
+    }
+  }
+
   Future<void> purchase(int priceId) async {
     final id=selectedAccountId.value;if(id==null||isMutating.value)return;isMutating.value=true;
     try{await useCases.purchase(id,priceId);await loadAccountData();}
