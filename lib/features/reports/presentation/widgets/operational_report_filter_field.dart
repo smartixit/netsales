@@ -181,6 +181,9 @@ class OperationalReportFilterField extends StatelessWidget {
       onChanged(null);
       return;
     }
+    // The date range contract rejects inverted bounds. Ignore an invalid
+    // intermediate selection instead of throwing from a UI callback.
+    if (start != null && end != null && end.isBefore(start)) return;
     onChanged(ReportDateRangeFilterValue(start: start, end: end));
   }
 }
