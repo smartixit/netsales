@@ -38,7 +38,7 @@ class RepaymentDocumentService {
     final officialRepayment = PosRepaymentModel.fromJson(source);
     final renderedBytes = await _renderPdf(
       officialRepayment,
-      currencyCode: issued['currency_code']?.toString() ?? 'YER',
+      currencyCode: snapshots.requireCurrencyCode(issued),
     );
     return snapshots.uploadArtifact(
       snapshotUuid: issued['snapshot_uuid'].toString(),
