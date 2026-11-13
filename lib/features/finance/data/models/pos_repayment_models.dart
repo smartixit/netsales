@@ -77,8 +77,10 @@ class PosRepaymentModel extends PosRepaymentEntity {
     super.repaymentDate,
     super.status,
     super.createdBy,
+    super.createdByName,
     super.reversedAt,
     super.reversedBy,
+    super.reversedByName,
     super.reversalReason,
     super.reversalRepaymentId,
     super.createdAt,
@@ -113,6 +115,15 @@ class PosRepaymentModel extends PosRepaymentEntity {
       ] as String?;
     }
 
+    final creator = json['created_by_user'];
+    final reversalActor = json['reversed_by_user'];
+    final createdByName = creator is Map
+        ? creator['user_full_name']?.toString()
+        : null;
+    final reversedByName = reversalActor is Map
+        ? reversalActor['user_full_name']?.toString()
+        : null;
+
     final rawAllocations = json['allocations'];
     final parsedAllocations = <RepaymentAllocationModel>[];
     if (rawAllocations is List) {
@@ -135,8 +146,10 @@ class PosRepaymentModel extends PosRepaymentEntity {
       repaymentDate: json['repayment_date'] as String?,
       status: json['status'] as String?,
       createdBy: json['created_by'] as int?,
+      createdByName: createdByName,
       reversedAt: json['reversed_at'] as String?,
       reversedBy: json['reversed_by'] as int?,
+      reversedByName: reversedByName,
       reversalReason: json['reversal_reason'] as String?,
       reversalRepaymentId: json['reversal_repayment_id'] as int?,
       createdAt: json['created_at'] as String?,
