@@ -15,11 +15,11 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
    const SizedBox(height:16),
    if(items.isNotEmpty)CustomDropdown<String>(items:items,rxValue:controller.selectedType,onChanged:controller.selectReport,label:'نوع التقرير',hint:'اختر تقريراً'),
    const SizedBox(height:12),
-   CustomTextField(controller:controller.searchController,label:'بحث',hint:'ابحث في سجلات التقرير',prefixIcon:const Icon(Icons.search),isRequired:false,onChanged:(v)=>controller.searchQuery.value=v),
-   const SizedBox(height:10),
-   CustomTextField(controller:controller.statusController,label:'الحالة',hint:'مثال: ACTIVE أو PAID',isRequired:false,onFieldSubmitted:(_)=>controller.applyFilters()),
-   const SizedBox(height:10),
-   Wrap(spacing:8,runSpacing:8,children:[
+   if(controller.hasSearchFilter)CustomTextField(controller:controller.searchController,label:'بحث',hint:'ابحث في سجلات التقرير',prefixIcon:const Icon(Icons.search),isRequired:false,onChanged:(v)=>controller.searchQuery.value=v),
+   if(controller.hasStatusFilter)const SizedBox(height:10),
+   if(controller.hasStatusFilter)CustomTextField(controller:controller.statusController,label:'الحالة',hint:'مثال: ACTIVE أو PAID',isRequired:false,onFieldSubmitted:(_)=>controller.applyFilters()),
+   if(controller.hasDateFilters)const SizedBox(height:10),
+   if(controller.hasDateFilters)Wrap(spacing:8,runSpacing:8,children:[
     CustomButton.outline(text:controller.fromDate.value==null?'من تاريخ':'من '+controller.fromDate.value!.toIso8601String().substring(0,10),prefix:Icons.calendar_today,onPressed:()=>_pickDate(context,true)),
     CustomButton.outline(text:controller.toDate.value==null?'إلى تاريخ':'إلى '+controller.toDate.value!.toIso8601String().substring(0,10),prefix:Icons.event,onPressed:()=>_pickDate(context,false)),
     CustomButton.text(text:'مسح الفلاتر',onPressed:controller.clearFilters),
