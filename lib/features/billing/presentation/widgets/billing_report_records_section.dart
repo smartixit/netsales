@@ -10,12 +10,18 @@ class BillingReportRecordsSection extends StatelessWidget {
     required this.controller,
     required this.arabicLabel,
     required this.displayValue,
+    this.emptyTitle = 'لا توجد سجلات مطابقة',
+    this.emptySubtitle = 'غيّر معايير البحث أو الفلاتر ثم أعد تحميل التقرير.',
+    this.loadMoreLabel = 'تحميل المزيد من سجلات التقرير',
     super.key,
   });
 
   final BillingReportsController controller;
   final String Function(String key) arabicLabel;
   final String Function(String key, dynamic value) displayValue;
+  final String emptyTitle;
+  final String emptySubtitle;
+  final String loadMoreLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +33,8 @@ class BillingReportRecordsSection extends StatelessWidget {
     }
     if (controller.rows.isEmpty) {
       return const CustomEmptyState.boxed(
-        title: 'لا توجد سجلات مطابقة',
-        subtitle: 'غيّر معايير البحث أو الفلاتر ثم أعد تحميل التقرير.',
+        title: emptyTitle,
+        subtitle: emptySubtitle,
       );
     }
 
@@ -60,7 +66,7 @@ class BillingReportRecordsSection extends StatelessWidget {
           isLoading: controller.isLoadingMore.value,
           error: controller.loadMoreError.value,
           onPressed: controller.loadMore,
-          label: 'تحميل المزيد من سجلات التقرير',
+          label: loadMoreLabel,
         ),
       ],
     );
