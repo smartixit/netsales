@@ -1,12 +1,10 @@
 import 'package:document_engine/document_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/enums/billing_status.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_filter_section.dart';
+import 'package:netsales/features/billing/presentation/widgets/billing_report_labels.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_presentation_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_records_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_summary_section.dart';
@@ -15,6 +13,7 @@ import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
+/// Composition-only content for Billing subscription reports.
 class BillingReportsContent extends StatelessWidget {
   const BillingReportsContent({
     super.key,
@@ -26,7 +25,7 @@ class BillingReportsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final items = controller.catalog
+      final catalogItems = controller.catalog
           .map(
             (item) => DropdownItem<String>(
               value: item['id'].toString(),
@@ -34,7 +33,7 @@ class BillingReportsContent extends StatelessWidget {
             ),
           )
           .toList(growable: false);
-      final summary = controller.summary.value;
+      final reportSummary = controller.summary.value;
       final definition = controller.currentDefinition;
 
       return ListView(
@@ -42,9 +41,9 @@ class BillingReportsContent extends StatelessWidget {
         children: [
           _header(context),
           const SizedBox(height: 16),
-          if (items.isNotEmpty)
+          if (catalogItems.isNotEmpty)
             CustomDropdown<String>(
-              items: items,
+              items: catalogItems,
               rxValue: controller.selectedType,
               onChanged: controller.selectReport,
               label: 'نوع التقرير',
@@ -55,7 +54,8 @@ class BillingReportsContent extends StatelessWidget {
               definition: definition,
               criteria: controller.criteria.value,
               presentation: controller.presentation.value,
-              resolveLabel: _resolveLabel,
+              resolveLabel: (context, key) =>
+                  BillingReportLabels.resolve(context, controller, key),
               onCriteriaChanged: controller.setCriteria,
               onPresentationChanged: controller.setPresentation,
               onPreview: controller.applyFilters,
@@ -113,10 +113,11 @@ class BillingReportsContent extends StatelessWidget {
               subtitle: controller.errorMessage.value,
               onRetry: controller.applyFilters,
             ),
-          if (summary != null && summary['record_count'] is num)
+          if (reportSummary != null &&
+              reportSummary['record_count'] is num)
             CustomResultsCounterBar(
               count: controller.rows.length,
-              totalCount: (summary['record_count'] as num).toInt(),
+              totalCount: (reportSummary['record_count'] as num).toInt(),
               recordLabel: 'سجل',
               isFiltered: controller.criteria.value.filters.isNotEmpty,
               isLoading: controller.isLoading.value,
@@ -124,16 +125,16 @@ class BillingReportsContent extends StatelessWidget {
                   ? null
                   : () => controller.setCriteria(ReportCriteria()),
             ),
-          if (summary != null)
+          if (reportSummary != null)
             BillingReportSummarySection(
-              summary: summary,
+              summary: reportSummary,
               charts: controller.charts,
-              arabicLabel: _arabicLabel,
+              arabicLabel: BillingReportLabels.arabic,
             ),
           BillingReportRecordsSection(
             controller: controller,
-            arabicLabel: _arabicLabel,
-            displayValue: _displayValue,
+            arabicLabel: BillingReportLabels.arabic,
+            displayValue: BillingReportLabels.displayValue,
           ),
         ],
       );
@@ -166,8 +167,7 @@ class BillingReportsContent extends StatelessWidget {
         CustomButton.outline(
           text: 'تصدير CSV',
           prefix: Icons.download_rounded,
-          onPressed:
-              controller.isLoading.value ? null : controller.exportCsv,
+          onPressed: controller.isLoading.value ? null : controller.exportCsv,
         ),
         CustomButton.outline(
           text: 'تحديث',
@@ -177,107 +177,5 @@ class BillingReportsContent extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  String _resolveLabel(BuildContext context, String key) {
-    final english = controller.selectedLocale.value == 'en';
-    if (key.startsWith('billing.status.')) {
-      return _statusLabel(
-        key.substring('billing.status.'.length),
-        english: english,
-      );
-    }
-    if (key.startsWith('billing.report.column.') ||
-        key.startsWith('billing.report.metric.')) {
-      final id = key.substring(key.lastIndexOf('.') + 1);
-      return english ? _englishLabel(id) : _arabicLabel(id);
-    }
-    if (key == controller.selectedDefinition?['label'] && english) {
-      return _englishReportLabel(controller.selectedType.value ?? '');
-    }
-    if (key == 'من تاريخ' && english) return 'From date';
-    if (key == 'إلى تاريخ' && english) return 'To date';
-    if (key == 'الحالة' && english) return 'Status';
-    if (key == 'بحث' && english) return 'Search';
-    return key;
-  }
-
-  String _statusLabel(String value, {bool english = false}) {
-    return EnumPresentationRegistry.resolveBillingStatus(
-      BillingStatus.fromWire(value),
-      english: english,
-    ).label;
-  }
-
-  String _englishReportLabel(String type) => const {
-        'subscriptions': 'Subscriptions',
-        'trials': 'Trial usage',
-        'trial_conversion': 'Trial conversion funnel',
-        'renewals': 'Renewals',
-        'plan_performance': 'Plan performance',
-        'invoices': 'Invoices',
-        'collections': 'Collections',
-        'receivables': 'Accounts receivable',
-        'usage': 'Usage',
-        'dunning': 'Dunning',
-        'refunds': 'Refunds',
-        'revenue_recognition': 'Revenue recognition',
-      }[type] ??
-      type;
-
-  String _englishLabel(String key) => const {
-        'record_count': 'Record count',
-        'active_subscriptions': 'Active subscriptions',
-        'trialing_subscriptions': 'Trial subscriptions',
-        'past_due_subscriptions': 'Past-due subscriptions',
-        'canceled_subscriptions': 'Canceled subscriptions',
-        'currency_code': 'Currency code',
-        'invoice_number': 'Invoice number',
-        'status': 'Status',
-        'amount_minor': 'Amount (minor units)',
-        'mrr_minor': 'Monthly recurring revenue',
-        'arr_minor': 'Annual recurring revenue',
-        'trial_eligible': 'Eligible trials',
-        'trial_reserved': 'Reserved trials',
-        'trial_started': 'Started trials',
-        'trial_completed': 'Completed trials',
-        'conversion_invoice_issued': 'Conversion invoices issued',
-        'paid_conversion': 'Paid conversions',
-      }[key] ??
-      key.replaceAll('_', ' ');
-
-  String _arabicLabel(String key) => const {
-        'record_count': 'عدد السجلات',
-        'active_subscriptions': 'الاشتراكات النشطة',
-        'trialing_subscriptions': 'الاشتراكات التجريبية',
-        'past_due_subscriptions': 'اشتراكات متأخرة السداد',
-        'canceled_subscriptions': 'الاشتراكات الملغاة',
-        'currency_code': 'رمز العملة',
-        'invoice_number': 'رقم الفاتورة',
-        'status': 'الحالة',
-        'amount_minor': 'المبلغ (وحدة صغرى)',
-        'mrr_minor': 'الإيراد الشهري المتكرر',
-        'arr_minor': 'الإيراد السنوي المتكرر',
-        'trial_eligible': 'التجارب المؤهلة',
-        'trial_reserved': 'التجارب المحجوزة',
-        'trial_started': 'التجارب التي بدأت',
-        'trial_completed': 'التجارب المكتملة',
-        'conversion_invoice_issued': 'فواتير التحويل الصادرة',
-        'paid_conversion': 'التحويلات المدفوعة',
-      }[key] ??
-      key.replaceAll('_', ' ');
-
-  String _displayValue(String key, dynamic value) {
-    if (value == null) return '—';
-    final isAmount = key.endsWith('_minor') ||
-        key == 'amount' ||
-        key == 'mrr' ||
-        key == 'arr' ||
-        key.contains('revenue');
-    if (isAmount &&
-        (value is num || num.tryParse(value.toString()) != null)) {
-      return AmountFormatter.format(value.toString());
-    }
-    return value.toString();
   }
 }
