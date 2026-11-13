@@ -120,6 +120,13 @@ class OperationalReportsController extends GetxController {
   String reportFilterLabel(String filterId, [String fallback = '']) =>
       selectedReportEntry?.filterLabels[filterId] ?? fallback;
 
+  String reportChoiceLabel(
+    String filterId,
+    String value, [
+    String fallback = '',
+  ]) =>
+      selectedReportEntry?.choiceLabels[filterId]?[value] ?? fallback;
+
   List<String> _choicesForFilter(String filterId) {
     final filter = selectedReportEntry?.definition.filter(filterId);
     if (filter == null) return const [];
