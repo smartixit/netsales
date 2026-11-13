@@ -97,6 +97,7 @@ class OperationalReportRecordsList extends StatelessWidget {
               return OperationalReportRecordCard(
                 record: controller.reports[index],
                 type: type,
+                currencyCode: controller.reportCurrencyCode,
               );
             },
           ),
