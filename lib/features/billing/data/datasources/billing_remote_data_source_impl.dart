@@ -7,6 +7,12 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
   const BillingRemoteDataSourceImpl();
 
   Map<String, dynamic> _map(dynamic value) {
+    if (value is List) {
+      return {'data': value.map((row) {
+        if (row is! Map) throw const FormatException('سجل الفوترة غير صالح.');
+        return Map<String, dynamic>.from(row);
+      }).toList(growable: false)};
+    }
     if (value is! Map) throw const FormatException('استجابة الفوترة غير صالحة.');
     return Map<String, dynamic>.from(value);
   }
