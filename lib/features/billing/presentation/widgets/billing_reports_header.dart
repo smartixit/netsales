@@ -7,6 +7,8 @@ class BillingReportsHeader extends StatelessWidget {
     required this.isExportingPdf,
     required this.isExportingCsv,
     required this.isLoading,
+    required this.title,
+    required this.subtitle,
     required this.onExportPdf,
     required this.onExportCsv,
     required this.onRefresh,
@@ -16,6 +18,8 @@ class BillingReportsHeader extends StatelessWidget {
   final bool isExportingPdf;
   final bool isExportingCsv;
   final bool isLoading;
+  final String title;
+  final String subtitle;
   final VoidCallback onExportPdf;
   final VoidCallback onExportCsv;
   final VoidCallback onRefresh;
@@ -28,28 +32,28 @@ class BillingReportsHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('تقارير الاشتراكات', style: AppTypography.titleLarge),
+              Text(title, style: AppTypography.titleLarge),
               Text(
-                'تقارير Billing مستقلة عن تقارير المبيعات والتشغيل.',
+                subtitle,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ),
         ),
         CustomButton.outline(
-          text: 'PDF تفصيلي',
+          text: title == 'Subscription reports' ? 'Detailed PDF' : 'PDF تفصيلي',
           prefix: Icons.picture_as_pdf_outlined,
           loading: isExportingPdf,
           onPressed: isExportingPdf ? null : onExportPdf,
         ),
         CustomButton.outline(
-          text: 'تصدير CSV',
+          text: title == 'Subscription reports' ? 'Export CSV' : 'تصدير CSV',
           prefix: Icons.download_rounded,
           loading: isExportingCsv,
           onPressed: isLoading || isExportingCsv ? null : onExportCsv,
         ),
         CustomButton.outline(
-          text: 'تحديث',
+          text: title == 'Subscription reports' ? 'Refresh' : 'تحديث',
           prefix: Icons.refresh_rounded,
           onPressed: isLoading ? null : onRefresh,
         ),
