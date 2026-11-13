@@ -24,7 +24,7 @@ class BillingReportsController extends GetxController {
   int _revision=0;
   String? _nextCursor;
 
-  List<Map<String,dynamic>> _list(dynamic value)=>value is List?value.whereType<Map>().map((e)=>Map<String,dynamic>.from(e)).toList():const [];
+  List<Map<String,dynamic>> _list(dynamic value)=>value is List?value.whereType<Map<String,dynamic>>().map((e)=>Map<String,dynamic>.from(e)).toList():const [];
   Map<String,dynamic> _map(BillingPayload p){final d=p.data['data']??p.data;return d is Map?Map<String,dynamic>.from(d):p.data;}
   String _date(DateTime? value)=>value==null?'':value.toIso8601String().substring(0,10);
   Map<String,dynamic> get _filters=>{
@@ -77,7 +77,7 @@ class BillingReportsController extends GetxController {
       if(rev!=_revision)return;
       final data=_map(values[0]);
       rows.assignAll(_list(data['data']??data['items']));
-      _nextCursor=_cursorFrom(data['next_page_url']??(data['links'] is Map?data['links']['next']:null));
+      _nextCursor=_cursorFrom(data['next_page_url']??(data['links'] is Map<String,dynamic>?data['links']['next']:null));
       summary.value=_map(values[1]);
     }catch(e){if(rev==_revision)errorMessage.value=AppException.sanitizeMessage(e,fallback:'تعذر تحميل تقرير الاشتراكات.');}
     finally{if(rev==_revision)isLoading.value=false;}
