@@ -426,6 +426,8 @@ class OperationalReportsController extends GetxController {
   void onClose() {
     ++_scopeRevision;
     ++_presetRevision;
+    ++_exportActionRevision;
+    ++_documentActionRevision;
     _criteriaDebounce?.cancel();
     for (final controller in _criteriaTextControllers.values) {
       controller.dispose();
@@ -1038,8 +1040,6 @@ class OperationalReportsController extends GetxController {
     final criteriaSnapshot = criteria.value;
     final presentationSnapshot = presentation.value;
     final pageProfileId = selectedPageProfileId;
-    final documentRevision = ++_documentActionRevision;
-    final scopeRevision = _scopeRevision;
 
     if (type == null ||
         entry == null ||
@@ -1060,6 +1060,8 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final documentRevision = ++_documentActionRevision;
+    final scopeRevision = _scopeRevision;
     final organizationName = reportOrganizationName;
     final logoUrl = reportLogoUrl;
     final filtersSnapshot = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
@@ -1093,6 +1095,15 @@ class OperationalReportsController extends GetxController {
         posId: posId,
         criteria: criteriaSnapshot,
       );
+      if (documentRevision != _documentActionRevision ||
+          scopeRevision != _scopeRevision ||
+          selectedType.value != type ||
+          _networkId != networkId ||
+          _queryPosId != posId ||
+          !identical(criteria.value, criteriaSnapshot) ||
+          !identical(presentation.value, presentationSnapshot)) {
+        throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+      }
       if (jsonEncode(summaryBefore.values) != jsonEncode(summaryAfter.values)) {
         throw StateError('تغيرت نتائج التقرير أثناء تحميل الصفحات؛ أُوقف التصدير لضمان اتساق المستند.');
       }
