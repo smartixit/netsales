@@ -53,3 +53,10 @@ The Finance feature's detailed network/POS wallet statement PDF consumes these A
 - Wallet-log resource: `currency_code`, `balance_before`, `balance_after`, and `balance_snapshot_source`, in addition to log ID, operation label, amount, statement, date, and creator.
 - `opening_balance_source` is interpreted only as `INITIAL` or `BACKFILLED`; unknown values are displayed as unspecified. `balance_snapshot_source` is interpreted only as `LIVE` or `BACKFILLED`.
 - The PDF is generated from all cursor pages up to 1,500 rows, ordered by ledger ID, and is rejected if the wallet changes, a new ledger ID appears during retrieval, any row has missing balance snapshots, or any row currency differs from the wallet currency. The Flutter renderer does not calculate balances or totals.
+
+
+## Saved operational report presets
+
+Presets are persisted by the API under the authenticated user and current network/POS scope. Routes are `GET /reports/presets`, `POST /reports/presets`, `PUT /reports/presets/{presetUuid}`, and `DELETE /reports/presets/{presetUuid}`.
+The write payload includes `report_type`, `network_id`, optional `pos_id`, `name`, `report_schema_version`, `criteria` (`ReportCriteria.toJson()`), and `presentation` (`ReportPresentationOptions.toJson()`). The API returns `preset_schema_version`, `id` (opaque preset UUID), `name`, `report_id`, `report_schema_version`, `criteria`, and `presentation`.
+Preset schema version is currently 1. The API validates the saved report schema version, typed filter values and choices, required filters, visible/required columns, sort and grouping permissions, selected template/version, locale, page profile, and metric/chart availability against the current provider definition. A schema mismatch is rejected for re-review rather than silently migrated.
