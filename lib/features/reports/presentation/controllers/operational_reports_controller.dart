@@ -95,6 +95,9 @@ class OperationalReportsController extends GetxController {
 
   String? get reportLogoUrl => _logoUrl;
 
+  String get reportCurrencyCode =>
+      summary.value?.values['currency_code']?.toString() ?? '';
+
   String get reportScopeLabel {
     if (!_isNetworkWorkspace) return 'نقطة البيع الحالية';
     if (selectedReportEntry?.access.posSelection == 'forbidden') {
