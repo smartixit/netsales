@@ -28,9 +28,7 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
    if(controller.isLoading.value)const Padding(padding:EdgeInsets.all(24),child:Center(child:CircularProgressIndicator())),
    if(summary!=null)Card(child:Padding(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
     const Text('ملخص التقرير',style:TextStyle(fontWeight:FontWeight.w700)),
-    Text('عدد السجلات: '+(summary['record_count']?.toString()??'0')),
-    if(summary['amounts_by_currency'] is List)
-     ...(summary['amounts_by_currency'] as List<dynamic>).whereType<Map<String,dynamic>>().map((e)=>Text('إجمالي العملة #'+(e['currency_id']?.toString()??'')+': '+(e['amount_minor']?.toString()??'0')+' وحدة صغرى')),
+    ..._summaryWidgets(summary),
    ]))),
    if(controller.rows.isEmpty&&!controller.isLoading.value)const Card(child:Padding(padding:EdgeInsets.all(16),child:Text('لا توجد سجلات مطابقة للفلاتر الحالية.'))),
    ...controller.rows.map((row)=>Card(child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:row.entries.take(8).map((e)=>Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Text(e.key.replaceAll('_',' ')+': '+(e.value?.toString()??'—'))).toList())))),
@@ -39,6 +37,26 @@ class BillingReportsScreen extends GetView<BillingReportsController>{
     CustomButton.outline(text:'تحميل المزيد',loading:controller.isLoadingMore.value,onPressed:controller.isLoadingMore.value?null:controller.loadMore),
   ]);
  });
+
+ List<Widget> _summaryWidgets(Map<String,dynamic> summary){
+  final widgets=<Widget>[];
+  for(final entry in summary.entries){
+   final value=entry.value;
+   final label=entry.key.replaceAll('_',' ');
+   if(value is Map<String,dynamic>){
+    widgets.add(Padding(padding:const EdgeInsets.only(top:8),child:Text(label,style:const TextStyle(fontWeight:FontWeight.w700))));
+    for(final nested in value.entries){widgets.add(Text(nested.key.replaceAll('_',' ')+': '+(nested.value?.toString()??'—')));}
+   }else if(value is List<dynamic>){
+    widgets.add(Padding(padding:const EdgeInsets.only(top:8),child:Text(label,style:const TextStyle(fontWeight:FontWeight.w700))));
+    for(final item in value.whereType<Map<String,dynamic>>()){
+      widgets.add(Text(item.entries.map((e)=>e.key.replaceAll('_',' ')+': '+(e.value?.toString()??'—')).join(' • ')));
+    }
+   }else{
+    widgets.add(Text(label+': '+(value?.toString()??'—')));
+   }
+  }
+  return widgets;
+ }
  Future<void> _pickDate(BuildContext context,bool isFrom)async{
   final current=isFrom?controller.fromDate.value:controller.toDate.value;
   final value=await showDatePicker(context:context,initialDate:current??DateTime.now(),firstDate:DateTime(2020),lastDate:DateTime(2100));
