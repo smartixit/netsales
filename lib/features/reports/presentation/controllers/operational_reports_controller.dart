@@ -88,6 +88,7 @@ class OperationalReportsController extends GetxController {
   final Map<String, TextEditingController> _criteriaTextControllers = {};
   final Map<String, RxnString> _choiceValues = {};
   int _requestRevision = 0;
+  int _scopeRevision = 0;
   int _posRevision = 0;
   final Set<String> _seenReportCursors = <String>{};
   String _posSearchQuery = '';
@@ -251,19 +252,29 @@ class OperationalReportsController extends GetxController {
         '${local.day.toString().padLeft(2, '0')}';
   }
 
-  Future<void> _loadReportCatalog() async {
+  Future<bool> _loadReportCatalog({
+    required int scopeRevision,
+  }) async {
     final networkId = _networkId;
     if (networkId == null) {
-      catalog.value = null;
-      return;
+      if (scopeRevision == _scopeRevision) catalog.value = null;
+      return false;
     }
+
     try {
-      catalog.value = await getReportCatalogUseCase(
+      final result = await getReportCatalogUseCase(
         networkId: networkId,
         posId: _isNetworkWorkspace ? null : _workspacePosId,
       );
+      if (scopeRevision != _scopeRevision || networkId != _networkId) {
+        return false;
+      }
+      catalog.value = result;
+      return true;
     } catch (_) {
-      catalog.value = null;
+      if (scopeRevision == _scopeRevision && networkId == _networkId) {
+        catalog.value = null;
+      }
       rethrow;
     }
   }
@@ -320,6 +331,8 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final scopeRevision = ++_scopeRevision;
+    ++_presetRevision;
     _scopeConfigured = true;
     _networkId = networkId;
     _workspacePosId = posId;
@@ -365,13 +378,18 @@ class OperationalReportsController extends GetxController {
     }
 
     try {
-      await _loadReportCatalog();
+      final loaded = await _loadReportCatalog(
+        scopeRevision: scopeRevision,
+      );
+      if (!loaded || scopeRevision != _scopeRevision) return;
     } catch (error) {
+      if (scopeRevision != _scopeRevision) return;
       errorMessage.value = _friendlyMessage(error);
       isLoading.value = false;
       return;
     }
 
+    if (scopeRevision != _scopeRevision) return;
     final types = availableTypes;
     if (types.isEmpty) {
       selectedType.value = null;
@@ -382,11 +400,14 @@ class OperationalReportsController extends GetxController {
       selectedType.value = types.first;
     }
     await loadReport(refresh: true);
+    if (scopeRevision != _scopeRevision) return;
     await loadSavedPresets();
   }
 
   @override
   void onClose() {
+    ++_scopeRevision;
+    ++_presetRevision;
     _criteriaDebounce?.cancel();
     for (final controller in _criteriaTextControllers.values) {
       controller.dispose();
@@ -427,28 +448,43 @@ class OperationalReportsController extends GetxController {
   Future<void> loadSavedPresets() async {
     final type = selectedType.value;
     final networkId = _networkId;
+    final posId = _queryPosId;
+    final scopeRevision = _scopeRevision;
     if (type == null || networkId == null) {
       savedPresets.clear();
       return;
     }
+
     final revision = ++_presetRevision;
     isLoadingPresets.value = true;
+    bool isCurrentRequest() =>
+        revision == _presetRevision &&
+        scopeRevision == _scopeRevision &&
+        networkId == _networkId &&
+        type == selectedType.value &&
+        posId == _queryPosId;
+
     try {
-      final result = await getPresetsUseCase(type: type, networkId: networkId, posId: _queryPosId);
-      if (revision == _presetRevision && type == selectedType.value) {
-        savedPresets.assignAll(result);
-      }
+      final result = await getPresetsUseCase(
+        type: type,
+        networkId: networkId,
+        posId: posId,
+      );
+      if (isCurrentRequest()) savedPresets.assignAll(result);
     } catch (error) {
-      if (revision == _presetRevision) {
+      if (isCurrentRequest()) {
         savedPresets.clear();
         CustomSnackbar.show(
           title: 'تعذر تحميل الإعدادات المحفوظة',
-          message: AppException.sanitizeMessage(error, fallback: 'تعذر تحميل إعدادات التقرير.'),
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر تحميل إعدادات التقرير.',
+          ),
           type: SnackType.error,
         );
       }
     } finally {
-      if (revision == _presetRevision) isLoadingPresets.value = false;
+      if (isCurrentRequest()) isLoadingPresets.value = false;
     }
   }
 
