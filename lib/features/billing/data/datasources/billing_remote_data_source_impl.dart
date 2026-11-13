@@ -26,6 +26,10 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
       ApiService.instance.get(ApiConstants.billingNetworkAccounts(networkId), fromJson: _map);
 
   @override
+  Future<ApiResponse<Map<String, dynamic>>> createNetworkAccount(int networkId, int currencyId) =>
+      ApiService.instance.post(ApiConstants.billingNetworkAccounts(networkId), data: {'currency_id': currencyId}, fromJson: _map);
+
+  @override
   Future<ApiResponse<Map<String, dynamic>>> getAccount(int accountId) =>
       ApiService.instance.get(ApiConstants.billingAccount(accountId), fromJson: _map);
 
