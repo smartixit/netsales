@@ -142,7 +142,7 @@ class InvoiceDocumentService {
         direction: DocumentTextDirection.rightToLeft,
       ),
       DocumentInfoItem(
-        label: 'نقطة البيع',
+        label: 'العميل / نقطة البيع',
         value: DocumentTextValue(_display(invoice.posName, 'نقطة بيع #' + invoice.posId.toString())),
         direction: DocumentTextDirection.rightToLeft,
       ),
@@ -226,7 +226,7 @@ class InvoiceDocumentService {
       if (invoice.requestId != null)
         DocumentInfoItem(
           label: 'طلب التوريد المرتبط',
-          value: DocumentTextValue('#' + invoice.requestId.toString()),
+          value: DocumentTextValue(_display(invoice.requestUuid, '#' + invoice.requestId.toString())),
           direction: DocumentTextDirection.leftToRight,
         ),
     ];
