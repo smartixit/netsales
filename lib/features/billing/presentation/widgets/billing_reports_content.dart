@@ -1,4 +1,5 @@
 import 'package:document_engine/document_engine.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
@@ -33,7 +34,7 @@ class BillingReportsContent extends StatelessWidget {
   return ListView(padding:const EdgeInsets.all(20),children:[
    Row(children:[
     const Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-      Text('تقارير الاشتراكات',style:TextStyle(fontSize:24,fontWeight:FontWeight.w700)),
+      Text('تقارير الاشتراكات',style:AppTypography.titleLarge),
       Text('تقارير Billing مستقلة عن تقارير المبيعات والتشغيل.'),
     ])),
     CustomButton.outline(text:'PDF تفصيلي',prefix:Icons.picture_as_pdf_outlined,loading:controller.isExportingPdf.value,onPressed:controller.isExportingPdf.value?null:controller.exportPdfSummary),
@@ -79,7 +80,7 @@ class BillingReportsContent extends StatelessWidget {
       :()=>controller.setCriteria(ReportCriteria()),
     ),
    if(summary!=null)CustomSurfaceCard(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-    const Text('ملخص التقرير',style:TextStyle(fontWeight:FontWeight.w700)),
+    const Text('ملخص التقرير',style:AppTypography.titleSmall),
     ..._summaryWidgets(summary),
    ])),
    ...controller.charts.map((chart)=>BillingReportChart(payload:chart)),
@@ -320,7 +321,7 @@ class BillingReportsContent extends StatelessWidget {
    final value=entry.value;
    final label=_arabicLabel(entry.key);
    if(value is Map<String,dynamic>){
-    widgets.add(Padding(padding:const EdgeInsets.only(top:8),child:Text(label,style:const TextStyle(fontWeight:FontWeight.w700))));
+    widgets.add(Padding(padding:const EdgeInsets.only(top:8),child:Text(label,style:AppTypography.titleSmall)));
     for(final nested in value.entries){widgets.add(Text(_arabicLabel(nested.key)+': '+_displayValue(nested.key,nested.value)));}
    }else if(value is List<dynamic>){
     widgets.add(Padding(padding:const EdgeInsets.only(top:8),child:Text(label,style:const TextStyle(fontWeight:FontWeight.w700))));
