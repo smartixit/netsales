@@ -8,6 +8,7 @@ import 'package:netsales/features/reports/data/datasources/operational_report_re
 import 'package:netsales/features/reports/data/models/operational_report_record_model.dart';
 import 'package:netsales/features/reports/data/models/operational_report_summary_model.dart';
 import 'package:netsales/features/reports/data/services/operational_report_document_service.dart';
+import 'package:netsales/features/reports/data/services/detailed_operational_report_document_service.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_export.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
@@ -233,6 +234,41 @@ class OperationalReportRepositoryImpl
       activeFilters: activeFilters,
       scopeLabel: scopeLabel,
     );
+  }
+
+
+  @override
+  Future<bool> saveDetailedPdf({
+    required OperationalReportType type,
+    required OperationalReportCatalogEntry entry,
+    required List<OperationalReportRecord> records,
+    required ReportPresentationOptions presentation,
+    required OperationalReportSummary summary,
+    required String pageProfileId,
+    required String organizationName,
+    String? logoUrl,
+    required List<OperationalReportFilterDisplay> activeFilters,
+    String? scopeLabel,
+  }) async {
+    final result = await DetailedOperationalReportDocumentService.instance.exportAndSave(
+      type: type,
+      entry: entry,
+      records: records,
+      presentation: presentation,
+      summary: summary,
+      pageProfileId: pageProfileId,
+      organizationName: organizationName,
+      logoUrl: logoUrl,
+      activeFilters: activeFilters,
+      scopeLabel: scopeLabel,
+    );
+    if (!result.isSuccess) {
+      throw AppException(
+        result.errorMessage ?? 'تعذر حفظ التقرير التفصيلي بصيغة PDF.',
+        code: 'OPERATIONAL_REPORT_DETAILED_PDF_FAILED',
+      );
+    }
+    return true;
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:document_engine/document_engine.dart';
@@ -749,6 +750,167 @@ class OperationalReportsController extends GetxController {
     } finally {
       isPdfActionRunning.value = false;
     }
+  }
+
+
+  Future<void> exportDetailedPdf() async {
+    final type = selectedType.value;
+    final entry = selectedReportEntry;
+    final summaryBefore = summary.value;
+    final networkId = _networkId;
+    final posId = _queryPosId;
+    final criteriaSnapshot = criteria.value;
+    final presentationSnapshot = presentation.value;
+    final pageProfileId = selectedPageProfileId;
+
+    if (type == null ||
+        entry == null ||
+        summaryBefore == null ||
+        networkId == null ||
+        pageProfileId == null ||
+        !canExport ||
+        isPdfActionRunning.value) {
+      return;
+    }
+
+    if (presentationSnapshot.validateAgainst(entry.definition).isNotEmpty) {
+      CustomSnackbar.show(
+        title: 'إعدادات التقرير غير صالحة',
+        message: 'راجع الأعمدة والترتيب والتجميع والقالب قبل إنشاء PDF.',
+        type: SnackType.error,
+      );
+      return;
+    }
+
+    final organizationName = reportOrganizationName;
+    final logoUrl = reportLogoUrl;
+    final filtersSnapshot = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final scopeSnapshot = reportScopeLabel;
+    isPdfActionRunning.value = true;
+
+    try {
+      final allRecords = await _loadAllRecordsForPdf(
+        type: type,
+        networkId: networkId,
+        posId: posId,
+        criteria: criteriaSnapshot,
+      );
+
+      if (selectedType.value != type ||
+          !identical(criteria.value, criteriaSnapshot) ||
+          !identical(presentation.value, presentationSnapshot) ||
+          !identical(summary.value, summaryBefore) ||
+          selectedReportEntry?.definition.version != entry.definition.version) {
+        throw StateError('تغيرت إعدادات التقرير أثناء التجهيز؛ لم يتم إنشاء مستند بإعدادات مختلطة.');
+      }
+
+      final summaryAfter = await getSummaryUseCase(
+        type: type,
+        networkId: networkId,
+        posId: posId,
+        criteria: criteriaSnapshot,
+      );
+      if (jsonEncode(summaryBefore.values) != jsonEncode(summaryAfter.values)) {
+        throw StateError('تغيرت نتائج التقرير أثناء تحميل الصفحات؛ أُوقف التصدير لضمان اتساق المستند.');
+      }
+
+      final saved = await saveDetailedPdfUseCase(
+        type: type,
+        entry: entry,
+        records: allRecords,
+        presentation: presentationSnapshot,
+        summary: summaryBefore,
+        pageProfileId: pageProfileId,
+        organizationName: organizationName,
+        logoUrl: logoUrl,
+        activeFilters: filtersSnapshot,
+        scopeLabel: scopeSnapshot,
+      );
+
+      if (saved) {
+        CustomSnackbar.show(
+          title: 'تم إنشاء التقرير التفصيلي',
+          message: 'حُفظ ملف PDF شاملاً السجلات المطابقة وإعدادات العرض المحددة.',
+          type: SnackType.success,
+        );
+      }
+    } catch (error) {
+      final message = error is StateError
+          ? error.toString().replaceFirst('Bad state: ', '')
+          : AppException.sanitizeMessage(
+              error,
+              fallback: 'تعذر إنشاء التقرير التفصيلي بصيغة PDF.',
+            );
+      CustomSnackbar.show(
+        title: 'تعذر إنشاء التقرير التفصيلي',
+        message: message,
+        type: SnackType.error,
+      );
+    } finally {
+      isPdfActionRunning.value = false;
+    }
+  }
+
+  Future<List<OperationalReportRecord>> _loadAllRecordsForPdf({
+    required OperationalReportType type,
+    required int networkId,
+    required int? posId,
+    required ReportCriteria criteria,
+  }) async {
+    const maxRows = DetailedOperationalReportDocumentService.maxRows;
+    final records = <OperationalReportRecord>[];
+    final seenIds = <String>{};
+    final seenCursors = <String>{};
+    String? cursor;
+
+    do {
+      final page = await getReportUseCase(
+        type: type,
+        networkId: networkId,
+        posId: posId,
+        criteria: criteria,
+        cursor: cursor,
+        perPage: 50,
+      );
+
+      for (final record in page.items) {
+        final identity = _reportRecordIdentity(record, type);
+        if (!seenIds.add(identity)) {
+          throw StateError('أعاد الخادم سجلاً مكرراً أثناء تصدير PDF؛ أُوقف إنشاء المستند.');
+        }
+        records.add(record);
+        if (records.length > maxRows) {
+          throw StateError('يتجاوز التقرير الحد الآمن البالغ 1500 سجل لملف PDF؛ لم يتم إنشاء مستند جزئي.');
+        }
+      }
+
+      cursor = page.nextCursor?.trim();
+      if (cursor != null && cursor.isEmpty) cursor = null;
+      if (cursor != null && !seenCursors.add(cursor)) {
+        throw StateError('أعاد الخادم مؤشر صفحة مكرراً؛ أُوقف إنشاء التقرير لتجنب التكرار أو فقد السجلات.');
+      }
+    } while (cursor != null);
+
+    final latestPage = await getReportUseCase(
+      type: type,
+      networkId: networkId,
+      posId: posId,
+      criteria: criteria,
+      perPage: 1,
+    );
+    final capturedLatest = records.isEmpty ? null : records.first;
+    final currentLatest = latestPage.items.isEmpty ? null : latestPage.items.first;
+    if (capturedLatest == null && currentLatest != null ||
+        capturedLatest != null && currentLatest == null ||
+        capturedLatest != null &&
+            currentLatest != null &&
+            (_reportRecordIdentity(capturedLatest, type) !=
+                    _reportRecordIdentity(currentLatest, type) ||
+                jsonEncode(capturedLatest.values) != jsonEncode(currentLatest.values))) {
+      throw StateError('تغيرت أحدث سجلات التقرير أثناء التجهيز؛ لم يتم إنشاء PDF غير متزامن.');
+    }
+
+    return records;
   }
 
   Future<void> shareSummaryPdf() async {

@@ -80,6 +80,14 @@ class OperationalReportsBinding extends Bindings {
         fenix: true,
       );
     }
+    if (!Get.isRegistered<SaveOperationalReportDetailedPdfUseCase>()) {
+      Get.lazyPut<SaveOperationalReportDetailedPdfUseCase>(
+        () => SaveOperationalReportDetailedPdfUseCase(
+          Get.find<OperationalReportRepository>(),
+        ),
+        fenix: true,
+      );
+    }
     if (!Get.isRegistered<ShareOperationalReportSummaryPdfUseCase>()) {
       Get.lazyPut<ShareOperationalReportSummaryPdfUseCase>(
         () => ShareOperationalReportSummaryPdfUseCase(
@@ -111,6 +119,8 @@ class OperationalReportsBinding extends Bindings {
           getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
           saveSummaryPdfUseCase:
               Get.find<SaveOperationalReportSummaryPdfUseCase>(),
+          saveDetailedPdfUseCase:
+              Get.find<SaveOperationalReportDetailedPdfUseCase>(),
           shareSummaryPdfUseCase:
               Get.find<ShareOperationalReportSummaryPdfUseCase>(),
           printSummaryPdfUseCase:

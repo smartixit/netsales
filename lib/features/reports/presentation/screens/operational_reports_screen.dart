@@ -159,7 +159,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                             _buildStudioPresentation(context, definition, presentation, resolveLabel),
                         onPreview: controller.summary.value == null
                             ? null
-                            : controller.exportSummaryPdf,
+                            : controller.exportDetailedPdf,
                         actionBuilder: (context, {required label, required icon, required onPressed, required secondary}) =>
                             secondary
                                 ? CustomButton.outline(text: label, prefix: icon, onPressed: onPressed)
@@ -186,6 +186,16 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                                 ? controller.requestExport
                                 : null,
                             loading: controller.isExportActionRunning.value,
+                          )),
+                          Obx(() => CustomButton.outline(
+                            text: 'تصدير PDF تفصيلي',
+                            prefix: Icons.picture_as_pdf_outlined,
+                            onPressed: controller.canExport &&
+                                    controller.summary.value != null &&
+                                    !controller.isPdfActionRunning.value
+                                ? controller.exportDetailedPdf
+                                : null,
+                            loading: controller.isPdfActionRunning.value,
                           )),
                           Obx(() => CustomButton.outline(
                             text: 'حفظ ملخص PDF',

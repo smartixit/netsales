@@ -28,12 +28,14 @@ class GetOperationalReportUseCase {
     int? posId,
     required ReportCriteria criteria,
     String? cursor,
+    int perPage = 25,
   }) => repository.getReport(
     type: type,
     networkId: networkId,
     posId: posId,
     criteria: criteria,
     cursor: cursor,
+    perPage: perPage,
   );
 }
 
@@ -94,6 +96,36 @@ class SaveOperationalReportSummaryPdfUseCase {
     type: type,
     pageProfileId: pageProfileId,
     summary: summary,
+    organizationName: organizationName,
+    logoUrl: logoUrl,
+    activeFilters: activeFilters,
+    scopeLabel: scopeLabel,
+  );
+}
+
+
+class SaveOperationalReportDetailedPdfUseCase {
+  const SaveOperationalReportDetailedPdfUseCase(this.repository);
+  final OperationalReportRepository repository;
+
+  Future<bool> call({
+    required OperationalReportType type,
+    required OperationalReportCatalogEntry entry,
+    required List<OperationalReportRecord> records,
+    required ReportPresentationOptions presentation,
+    required OperationalReportSummary summary,
+    required String pageProfileId,
+    required String organizationName,
+    String? logoUrl,
+    required List<OperationalReportFilterDisplay> activeFilters,
+    String? scopeLabel,
+  }) => repository.saveDetailedPdf(
+    type: type,
+    entry: entry,
+    records: records,
+    presentation: presentation,
+    summary: summary,
+    pageProfileId: pageProfileId,
     organizationName: organizationName,
     logoUrl: logoUrl,
     activeFilters: activeFilters,

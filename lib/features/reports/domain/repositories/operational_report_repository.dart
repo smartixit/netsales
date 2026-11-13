@@ -70,5 +70,19 @@ abstract interface class OperationalReportRepository {
     String? scopeLabel,
   });
 
+
+  Future<bool> saveDetailedPdf({
+    required OperationalReportType type,
+    required OperationalReportCatalogEntry entry,
+    required List<OperationalReportRecord> records,
+    required ReportPresentationOptions presentation,
+    required OperationalReportSummary summary,
+    required String pageProfileId,
+    required String organizationName,
+    String? logoUrl,
+    required List<OperationalReportFilterDisplay> activeFilters,
+    String? scopeLabel,
+  });
+
   Future<Uint8List?> downloadExport(String url);
 }
