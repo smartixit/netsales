@@ -106,6 +106,7 @@ class SaveOperationalReportSummaryPdfUseCase {
 
   Future<bool> call({
     required OperationalReportType type,
+    required String pageProfileId,
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
@@ -117,6 +118,7 @@ class SaveOperationalReportSummaryPdfUseCase {
     String? saleType,
   }) => repository.saveSummaryPdf(
     type: type,
+    pageProfileId: pageProfileId,
     summary: summary,
     organizationName: organizationName,
     logoUrl: logoUrl,
@@ -135,6 +137,7 @@ class ShareOperationalReportSummaryPdfUseCase {
 
   Future<bool> call({
     required OperationalReportType type,
+    required String pageProfileId,
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
@@ -146,6 +149,7 @@ class ShareOperationalReportSummaryPdfUseCase {
     String? saleType,
   }) => repository.shareSummaryPdf(
     type: type,
+    pageProfileId: pageProfileId,
     summary: summary,
     organizationName: organizationName,
     logoUrl: logoUrl,
@@ -164,6 +168,7 @@ class PrintOperationalReportSummaryPdfUseCase {
 
   Future<bool> call({
     required OperationalReportType type,
+    required String pageProfileId,
     required OperationalReportSummary summary,
     required String organizationName,
     String? logoUrl,
@@ -175,6 +180,7 @@ class PrintOperationalReportSummaryPdfUseCase {
     String? saleType,
   }) => repository.printSummaryPdf(
     type: type,
+    pageProfileId: pageProfileId,
     summary: summary,
     organizationName: organizationName,
     logoUrl: logoUrl,
