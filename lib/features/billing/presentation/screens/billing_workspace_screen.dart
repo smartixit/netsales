@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 class BillingWorkspaceScreen extends GetView<BillingController>{
  const BillingWorkspaceScreen({super.key});
  @override Widget build(BuildContext context)=>Obx((){
@@ -39,7 +40,26 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
       label: 'حساب الفوترة',
       hint: 'اختر حساب الفوترة',
     ),
-    Text(a['legal_name']?.toString()??'حساب الشبكة'),Text('رقم الحساب: '+(a['account_number']?.toString()??'—')),Text('البريد: '+(a['billing_email']?.toString()??'—'))]))),
+    Text(a['legal_name']?.toString()??'حساب الشبكة'),Text('رقم الحساب: '+(a['account_number']?.toString()??'—')),Text('البريد: '+(a['billing_email']?.toString()??'—')),
+    const SizedBox(height:10),
+    Wrap(spacing:8,children:[
+      CustomButton.outline(text:'تعديل البيانات',prefix:Icons.edit_outlined,onPressed:()=>_editAccount(context,a)),
+      CustomButton.primary(text:'إضافة جهة اتصال',prefix:Icons.person_add_alt_1,onPressed:()=>_addContact(context)),
+    ]),
+    const SizedBox(height:8),
+    const Text('جهات الاتصال',style:TextStyle(fontWeight:FontWeight.w700)),
+    if(a['contacts'] is List)...(a['contacts'] as List).whereType<Map>().map((contact){
+      final contactId=(contact['contact_id'] as num?)?.toInt();
+      return ListTile(
+        contentPadding:EdgeInsets.zero,
+        title:Text(contact['name']?.toString()??'جهة اتصال'),
+        subtitle:Text([contact['email'],contact['phone'],if(contact['is_primary']==true)'أساسية',if(contact['receives_invoices']==true)'تستقبل الفواتير'].where((v)=>v!=null&&v.toString().isNotEmpty).join(' • ')),
+        trailing:Wrap(mainAxisSize:MainAxisSize.min,children:[
+          CustomButton.text(text:'تعديل',onPressed:contactId==null?null:()=>_editContact(context,contact)),
+          CustomButton.text(text:'حذف',foregroundColor:Theme.of(context).colorScheme.error,onPressed:contactId==null?null:()=>_deleteContact(context,contactId)),
+        ]),
+      );
+    })]))),
     const _Header('الخطط المتاحة'),
     ...controller.plans.map((p){final v=p['current_version'];final ps=v is Map&&v['prices'] is List?v['prices'] as List:const [];final price=ps.isNotEmpty&&ps.first is Map?ps.first as Map:const {};final id=(price['price_id'] as num?)?.toInt();return Card(child:ListTile(title:Text(p['name']?.toString()??'خطة اشتراك'),subtitle:Text('السعر: '+(price['unit_amount']?.toString()??price['unit_amount_minor']?.toString()??'—')),trailing:CustomButton.primary(text:'اختيار',loading:controller.isMutating.value,onPressed:id==null?null:()=>_purchase(context,id))));}),
     const _Header('الاشتراك الحالي'),
@@ -54,6 +74,62 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
    ]
   ]));
  });
+ Future<void> _editAccount(BuildContext context,Map<String,dynamic> account)async{
+  final legal=TextEditingController(text:account['legal_name']?.toString()??'');
+  final email=TextEditingController(text:account['billing_email']?.toString()??'');
+  final tax=TextEditingController(text:account['tax_number']?.toString()??'');
+  final address=TextEditingController(text:account['billing_address']?.toString()??'');
+  final terms=TextEditingController(text:account['payment_terms_days']?.toString()??'0');
+  try{
+   final ok=await showDialog<bool>(context:context,builder:(d)=>AlertDialog(
+    title:const Text('تعديل حساب الفوترة'),
+    content:SingleChildScrollView(child:Column(mainAxisSize:MainAxisSize.min,children:[
+      CustomTextField(controller:legal,label:'الاسم القانوني',isRequired:true),
+      CustomTextField(controller:email,label:'البريد المحاسبي',keyboardType:TextInputType.emailAddress,isRequired:false),
+      CustomTextField(controller:tax,label:'الرقم الضريبي',isRequired:false),
+      CustomTextField(controller:address,label:'عنوان الفوترة',maxLines:2,isRequired:false),
+      CustomTextField(controller:terms,label:'أيام السداد',keyboardType:TextInputType.number,isRequired:true),
+    ])),
+    actions:[CustomButton.text(text:'إلغاء',onPressed:()=>Navigator.pop(d,false)),CustomButton.primary(text:'حفظ',onPressed:()=>Navigator.pop(d,true))]
+   ));
+   if(ok==true)await controller.updateAccount({'legal_name':legal.text.trim(),'billing_email':email.text.trim().isEmpty?null:email.text.trim(),'tax_number':tax.text.trim().isEmpty?null:tax.text.trim(),'billing_address':address.text.trim().isEmpty?null:address.text.trim(),'payment_terms_days':int.tryParse(terms.text.trim())??0});
+  }finally{legal.dispose();email.dispose();tax.dispose();address.dispose();terms.dispose();}
+ }
+ Future<void> _addContact(BuildContext context)async{
+  final name=TextEditingController(),email=TextEditingController(),phone=TextEditingController();
+  try{
+   final ok=await showDialog<bool>(context:context,builder:(d)=>AlertDialog(
+    title:const Text('إضافة جهة اتصال'),
+    content:Column(mainAxisSize:MainAxisSize.min,children:[
+      CustomTextField(controller:name,label:'الاسم',isRequired:true),
+      CustomTextField(controller:email,label:'البريد الإلكتروني',keyboardType:TextInputType.emailAddress,isRequired:false),
+      CustomTextField(controller:phone,label:'رقم الهاتف',keyboardType:TextInputType.phone,isRequired:false),
+    ]),
+    actions:[CustomButton.text(text:'إلغاء',onPressed:()=>Navigator.pop(d,false)),CustomButton.primary(text:'إضافة',onPressed:()=>Navigator.pop(d,true))]
+   ));
+   if(ok==true&&name.text.trim().isNotEmpty)await controller.createContact({'name':name.text.trim(),'email':email.text.trim().isEmpty?null:email.text.trim(),'phone':phone.text.trim().isEmpty?null:phone.text.trim(),'is_primary':false,'receives_invoices':true});
+  }finally{name.dispose();email.dispose();phone.dispose();}
+ }
+ Future<void> _editContact(BuildContext context,Map contact)async{
+  final name=TextEditingController(text:contact['name']?.toString()??''),email=TextEditingController(text:contact['email']?.toString()??''),phone=TextEditingController(text:contact['phone']?.toString()??'');
+  try{
+   final ok=await showDialog<bool>(context:context,builder:(d)=>AlertDialog(
+    title:const Text('تعديل جهة الاتصال'),
+    content:Column(mainAxisSize:MainAxisSize.min,children:[
+      CustomTextField(controller:name,label:'الاسم',isRequired:true),
+      CustomTextField(controller:email,label:'البريد الإلكتروني',isRequired:false),
+      CustomTextField(controller:phone,label:'رقم الهاتف',isRequired:false),
+    ]),
+    actions:[CustomButton.text(text:'إلغاء',onPressed:()=>Navigator.pop(d,false)),CustomButton.primary(text:'حفظ',onPressed:()=>Navigator.pop(d,true))]
+   ));
+   final id=(contact['contact_id'] as num?)?.toInt();
+   if(ok==true&&id!=null)await controller.updateContact(id,{'name':name.text.trim(),'email':email.text.trim().isEmpty?null:email.text.trim(),'phone':phone.text.trim().isEmpty?null:phone.text.trim()});
+  }finally{name.dispose();email.dispose();phone.dispose();}
+ }
+ Future<void> _deleteContact(BuildContext context,int id)async{
+  final ok=await showDialog<bool>(context:context,builder:(d)=>AlertDialog(title:const Text('حذف جهة الاتصال'),content:const Text('هل تريد حذف جهة الاتصال المحددة؟'),actions:[CustomButton.text(text:'إلغاء',onPressed:()=>Navigator.pop(d,false)),CustomButton.danger(text:'حذف',onPressed:()=>Navigator.pop(d,true))]));
+  if(ok==true)await controller.deleteContact(id);
+ }
  Future<void> _details(BuildContext c,int id)async{
   await controller.loadSubscriptionDetails(id);
   if(!c.mounted)return;
