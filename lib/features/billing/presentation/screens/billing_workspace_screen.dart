@@ -33,7 +33,7 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
     Card(child:Padding(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('حساب الفوترة',style:TextStyle(fontWeight:FontWeight.w700)),if(controller.accounts.length>1) CustomDropdown<int>(
       items: controller.accounts.map((e)=>DropdownItem<int>(
         value: (e['billing_account_id'] as num).toInt(),
-        child: Text((e['default_currency'] is Map ? e['default_currency']['code']?.toString() : null) ?? e['legal_name']?.toString() ?? 'حساب فوترة'),
+        child: Text((e['default_currency'] is Map<String,dynamic> ? e['default_currency']['code']?.toString() : null) ?? e['legal_name']?.toString() ?? 'حساب فوترة'),
       )).toList(),
       rxValue: controller.selectedAccountId,
       onChanged: controller.selectAccount,
@@ -48,7 +48,7 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
     ]),
     const SizedBox(height:8),
     const Text('جهات الاتصال',style:TextStyle(fontWeight:FontWeight.w700)),
-    if(a['contacts'] is List)...(a['contacts'] as List).whereType<Map>().map((contact){
+    if(a['contacts'] is List)...(a['contacts'] as List<dynamic>).whereType<Map<String,dynamic>>().map((contact){
       final contactId=(contact['contact_id'] as num?)?.toInt();
       return ListTile(
         contentPadding:EdgeInsets.zero,
@@ -61,12 +61,12 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
       );
     })]))),
     const _Header('الخطط المتاحة'),
-    ...controller.plans.map((p){final v=p['current_version'];final ps=v is Map&&v['prices'] is List?v['prices'] as List:const [];final price=ps.isNotEmpty&&ps.first is Map?ps.first as Map:const {};final id=(price['price_id'] as num?)?.toInt();return Card(child:ListTile(title:Text(p['name']?.toString()??'خطة اشتراك'),subtitle:Text('السعر: '+(price['unit_amount']?.toString()??price['unit_amount_minor']?.toString()??'—')),trailing:CustomButton.primary(text:'اختيار',loading:controller.isMutating.value,onPressed:id==null?null:()=>_purchase(context,id))));}),
+    ...controller.plans.map((p){final v=p['current_version'];final ps=v is Map<String,dynamic>&&v['prices'] is List?v['prices'] as List<dynamic>:const <dynamic>[];final price=ps.isNotEmpty&&ps.first is Map<String,dynamic>?ps.first as Map<String,dynamic>:const <String,dynamic>{};final id=(price['price_id'] as num?)?.toInt();return Card(child:ListTile(title:Text(p['name']?.toString()??'خطة اشتراك'),subtitle:Text('السعر: '+(price['unit_amount']?.toString()??price['unit_amount_minor']?.toString()??'—')),trailing:CustomButton.primary(text:'اختيار',loading:controller.isMutating.value,onPressed:id==null?null:()=>_purchase(context,id))));}),
     const _Header('الاشتراك الحالي'),
-    ...controller.subscriptions.map((s){final id=(s['billing_subscription_id'] as num?)?.toInt();return Card(child:ListTile(title:Text(s['plan'] is Map?s['plan']['name']?.toString()??'اشتراك':'اشتراك'),subtitle:Text('الحالة: '+(s['status_label']?.toString()??s['status']?.toString()??'—')+'\nنهاية الفترة: '+(s['current_period_end']?.toString()??'—')),isThreeLine:true,trailing:Wrap(spacing:6,children:[CustomButton.text(text:'التفاصيل',onPressed:id==null?null:()=>_details(context,id)),CustomButton.outline(text:'إلغاء',onPressed:id==null?null:()=>_cancel(context,id))])));}),
+    ...controller.subscriptions.map((s){final id=(s['billing_subscription_id'] as num?)?.toInt();return Card(child:ListTile(title:Text(s['plan'] is Map<String,dynamic>?s['plan']['name']?.toString()??'اشتراك':'اشتراك'),subtitle:Text('الحالة: '+(s['status_label']?.toString()??s['status']?.toString()??'—')+'\nنهاية الفترة: '+(s['current_period_end']?.toString()??'—')),isThreeLine:true,trailing:Wrap(spacing:6,children:[CustomButton.text(text:'التفاصيل',onPressed:id==null?null:()=>_details(context,id)),CustomButton.outline(text:'إلغاء',onPressed:id==null?null:()=>_cancel(context,id))])));}),
     const _Header('الاستحقاقات والمزايا'),
     if(controller.entitlements.value?['features'] is List)
-      ...(controller.entitlements.value!['features'] as List).whereType<Map>().map((f)=>Card(child:ListTile(title:Text(f['name']?.toString()??f['feature_key']?.toString()??'ميزة'),subtitle:Text('القيمة: '+(f['configured_value']?.toString()??'—')),trailing:Icon(f['available']==true?Icons.check_circle_rounded:Icons.block_rounded,color:f['available']==true?Colors.green:Colors.red)))),
+      ...(controller.entitlements.value!['features'] as List<dynamic>).whereType<Map<String,dynamic>>().map((f)=>Card(child:ListTile(title:Text(f['name']?.toString()??f['feature_key']?.toString()??'ميزة'),subtitle:Text('القيمة: '+(f['configured_value']?.toString()??'—')),trailing:Icon(f['available']==true?Icons.check_circle_rounded:Icons.block_rounded,color:f['available']==true?Colors.green:Colors.red)))),
     const _Header('الفواتير'),
     ...controller.invoices.map((e)=>Card(child:ListTile(title:Text(e['invoice_number']?.toString()??'فاتورة'),subtitle:Text(e['status']?.toString()??'—'),trailing:Text(e['total']?.toString()??'—')))),
     const _Header('المدفوعات'),
@@ -110,7 +110,7 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
    if(ok==true&&name.text.trim().isNotEmpty)await controller.createContact({'name':name.text.trim(),'email':email.text.trim().isEmpty?null:email.text.trim(),'phone':phone.text.trim().isEmpty?null:phone.text.trim(),'is_primary':false,'receives_invoices':true});
   }finally{name.dispose();email.dispose();phone.dispose();}
  }
- Future<void> _editContact(BuildContext context,Map contact)async{
+ Future<void> _editContact(BuildContext context,Map<String,dynamic> contact)async{
   final name=TextEditingController(text:contact['name']?.toString()??''),email=TextEditingController(text:contact['email']?.toString()??''),phone=TextEditingController(text:contact['phone']?.toString()??'');
   try{
    final ok=await showDialog<bool>(context:context,builder:(d)=>AlertDialog(
@@ -142,9 +142,9 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
     Text('الحالة: '+(detail['status_label']?.toString()??detail['status']?.toString()??'—')),
     Text('بداية الفترة: '+(detail['current_period_start']?.toString()??'—')),
     Text('نهاية الفترة: '+(detail['current_period_end']?.toString()??'—')),
-    if(trial is Map)...[const SizedBox(height:8),const Text('الفترة التجريبية',style:TextStyle(fontWeight:FontWeight.w700)),Text('الحالة: '+(trial['status']?.toString()??'—')),Text('تاريخ البدء: '+(trial['started_at']?.toString()??'—'))],
+    if(trial is Map<String,dynamic>)...[const SizedBox(height:8),const Text('الفترة التجريبية',style:TextStyle(fontWeight:FontWeight.w700)),Text('الحالة: '+(trial['status']?.toString()??'—')),Text('تاريخ البدء: '+(trial['started_at']?.toString()??'—'))],
     const SizedBox(height:10),const Text('الاستخدام المسجل',style:TextStyle(fontWeight:FontWeight.w700)),
-    ...controller.usageRows.map((row)=>Text((row['meter'] is Map?row['meter']['name']?.toString()??'عداد':'عداد')+': '+(row['quantity']?.toString()??'0'))),
+    ...controller.usageRows.map((row)=>Text((row['meter'] is Map<String,dynamic>?row['meter']['name']?.toString()??'عداد':'عداد')+': '+(row['quantity']?.toString()??'0'))),
     const SizedBox(height:10),const Text('سجل الأحداث',style:TextStyle(fontWeight:FontWeight.w700)),
     ...controller.eventRows.map((row)=>Text((row['event_type']?.toString()??'حدث')+' — '+(row['occurred_at']?.toString()??''))),
    ])),
@@ -156,7 +156,7 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
   if(eligibility==null||!c.mounted)return;
   final ready=eligibility['purchase_ready']==true;
   final trial=eligibility['trial'];
-  final trialEligible=trial is Map&&trial['eligible']==true;
+  final trialEligible=trial is Map<String,dynamic>&&trial['eligible']==true;
   final blockers=(eligibility['purchase_blockers'] as List? ?? const []).join('، ');
   final ok=await showDialog<bool>(context:c,builder:(d)=>AlertDialog(
    title:const Text('تأكيد الاشتراك'),
