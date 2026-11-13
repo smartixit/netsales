@@ -23,4 +23,6 @@ abstract interface class BillingRemoteDataSource {
   Future<ApiResponse<Map<String, dynamic>>> cancelSubscription(int subscriptionId, bool atPeriodEnd);
   Future<ApiResponse<Map<String, dynamic>>> getInvoices(int accountId, Map<String, dynamic> query);
   Future<ApiResponse<Map<String, dynamic>>> getPayments(int accountId, Map<String, dynamic> query);
+  Future<ApiResponse<Map<String, dynamic>>> getPaymentMethods(int accountId);
+  Future<ApiResponse<Map<String, dynamic>>> recordPayment(int invoiceId, int paymentMethodId, int amountMinor, String idempotencyKey, String? externalReference, String? proofPath);
 }
