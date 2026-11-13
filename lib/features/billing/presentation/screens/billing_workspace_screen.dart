@@ -16,7 +16,7 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
     const _Header('الخطط المتاحة'),
     ...controller.plans.map((p){final v=p['current_version'];final ps=v is Map&&v['prices'] is List?v['prices'] as List:const [];final price=ps.isNotEmpty&&ps.first is Map?ps.first as Map:const {};final id=(price['price_id'] as num?)?.toInt();return Card(child:ListTile(title:Text(p['name']?.toString()??'خطة اشتراك'),subtitle:Text('السعر: '+(price['unit_amount']?.toString()??price['unit_amount_minor']?.toString()??'—')),trailing:CustomButton.primary(text:'اختيار',loading:controller.isMutating.value,onPressed:id==null?null:()=>_purchase(context,id))));}),
     const _Header('الاشتراك الحالي'),
-    ...controller.subscriptions.map((s){final id=(s['billing_subscription_id'] as num?)?.toInt();return Card(child:ListTile(title:Text(s['plan'] is Map?s['plan']['name']?.toString()??'اشتراك':'اشتراك'),subtitle:Text('الحالة: '+(s['status_label']?.toString()??s['status']?.toString()??'—')+'\nنهاية الفترة: '+(s['current_period_end']?.toString()??'—')),isThreeLine:true,trailing:CustomButton.outline(text:'إلغاء',onPressed:id==null?null:()=>_cancel(context,id))));}),
+    ...controller.subscriptions.map((s){final id=(s['billing_subscription_id'] as num?)?.toInt();return Card(child:ListTile(title:Text(s['plan'] is Map?s['plan']['name']?.toString()??'اشتراك':'اشتراك'),subtitle:Text('الحالة: '+(s['status_label']?.toString()??s['status']?.toString()??'—')+'\nنهاية الفترة: '+(s['current_period_end']?.toString()??'—')),isThreeLine:true,trailing:Wrap(spacing:6,children:[CustomButton.text(text:'التفاصيل',onPressed:id==null?null:()=>_details(context,id)),CustomButton.outline(text:'إلغاء',onPressed:id==null?null:()=>_cancel(context,id))])));}),
     const _Header('الفواتير'),
     ...controller.invoices.map((e)=>Card(child:ListTile(title:Text(e['invoice_number']?.toString()??'فاتورة'),subtitle:Text(e['status']?.toString()??'—'),trailing:Text(e['total']?.toString()??'—')))),
     const _Header('المدفوعات'),
@@ -24,6 +24,25 @@ class BillingWorkspaceScreen extends GetView<BillingController>{
    ]
   ]));
  });
+ Future<void> _details(BuildContext c,int id)async{
+  await controller.loadSubscriptionDetails(id);
+  if(!c.mounted)return;
+  final detail=controller.subscriptionDetails.value;
+  if(detail==null)return;
+  final trial=detail['trial_redemption'];
+  await showDialog<void>(context:c,builder:(d)=>AlertDialog(
+   title:const Text('تفاصيل الاشتراك'),
+   content:SingleChildScrollView(child:Column(crossAxisAlignment:CrossAxisAlignment.start,mainAxisSize:MainAxisSize.min,children:[
+    Text('الحالة: '+(detail['status_label']?.toString()??detail['status']?.toString()??'—')),
+    Text('بداية الفترة: '+(detail['current_period_start']?.toString()??'—')),
+    Text('نهاية الفترة: '+(detail['current_period_end']?.toString()??'—')),
+    if(trial is Map)...[const SizedBox(height:8),const Text('الفترة التجريبية',style:TextStyle(fontWeight:FontWeight.w700)),Text('الحالة: '+(trial['status']?.toString()??'—')),Text('تاريخ البدء: '+(trial['started_at']?.toString()??'—'))],
+    const SizedBox(height:10),const Text('الاستخدام المسجل',style:TextStyle(fontWeight:FontWeight.w700)),
+    ...controller.usageRows.map((row)=>Text((row['meter'] is Map?row['meter']['name']?.toString()??'عداد':'عداد')+': '+(row['quantity']?.toString()??'0'))),
+   ])),
+   actions:[CustomButton.primary(text:'إغلاق',onPressed:()=>Navigator.pop(d))]
+  ));
+ }
  Future<void> _purchase(BuildContext c,int id)async{
   final eligibility=await controller.checkTrial(id);
   if(eligibility==null||!c.mounted)return;
