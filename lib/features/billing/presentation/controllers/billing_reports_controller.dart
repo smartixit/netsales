@@ -23,6 +23,7 @@ class BillingReportsController extends GetxController {
   final fromDate=Rxn<DateTime>();
   final toDate=Rxn<DateTime>();
   final searchQuery=''.obs;
+  final selectedStatus=RxnString();
   Worker? _searchWorker;
   int _revision=0;
   String? _nextCursor;
@@ -37,12 +38,20 @@ class BillingReportsController extends GetxController {
   bool get hasDateFilters => _filterIds.contains('from_date') || _filterIds.contains('to_date');
   bool get hasStatusFilter => _filterIds.contains('status');
   bool get hasSearchFilter => _filterIds.contains('search');
+  List<Map<String,dynamic>> get statusChoices {
+    final filters=selectedDefinition?['filters'];
+    if(filters is! List<dynamic>)return const [];
+    final filter=filters.whereType<Map<String,dynamic>>().firstWhereOrNull((e)=>e['id']=='status');
+    final choices=filter?['choices'];
+    return choices is List<dynamic>?choices.whereType<Map<String,dynamic>>().toList():const [];
+  }
 
   Map<String,dynamic> get _filters=>{
     'per_page':25,
     if(hasDateFilters&&fromDate.value!=null)'from_date':_date(fromDate.value),
     if(hasDateFilters&&toDate.value!=null)'to_date':_date(toDate.value),
-    if(hasStatusFilter&&statusController.text.trim().isNotEmpty)'status':statusController.text.trim(),
+    if(hasStatusFilter&&(selectedStatus.value?.isNotEmpty??false))'status':selectedStatus.value,
+    if(hasStatusFilter&&statusChoices.isEmpty&&statusController.text.trim().isNotEmpty)'status':statusController.text.trim(),
     if(hasSearchFilter&&searchQuery.value.trim().isNotEmpty)'search':searchQuery.value.trim(),
   };
 
@@ -73,10 +82,11 @@ class BillingReportsController extends GetxController {
     if(type==null||type==selectedType.value)return;selectedType.value=type;await loadReport();
   }
   Future<void> applyFilters()=>loadReport();
+  Future<void> setStatus(String? value)async{selectedStatus.value=value;await loadReport();}
   Future<void> setFromDate(DateTime? value)async{fromDate.value=value;await loadReport();}
   Future<void> setToDate(DateTime? value)async{toDate.value=value;await loadReport();}
   Future<void> clearFilters()async{
-    searchController.clear();statusController.clear();searchQuery.value='';fromDate.value=null;toDate.value=null;await loadReport();
+    searchController.clear();statusController.clear();searchQuery.value='';selectedStatus.value=null;fromDate.value=null;toDate.value=null;await loadReport();
   }
 
   Future<void> loadReport({int? revision})async{
