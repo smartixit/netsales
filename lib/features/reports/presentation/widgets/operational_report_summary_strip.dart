@@ -3,6 +3,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
+import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 
 class OperationalReportSummaryStrip extends StatelessWidget {
@@ -50,17 +51,14 @@ class OperationalReportSummaryStrip extends StatelessWidget {
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 );
-          return Container(
+          return SizedBox(
             width: 176,
-            padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 14, 12),
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: colors.outlineVariant.withValues(alpha: 0.65),
-              ),
-            ),
-            child: Column(
+            child: CustomSurfaceCard(
+              padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 14, 12),
+              backgroundColor: colors.surfaceContainerLow,
+              borderColor: colors.outlineVariant.withValues(alpha: 0.65),
+              radius: 16,
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -76,7 +74,7 @@ class OperationalReportSummaryStrip extends StatelessWidget {
                 displayValue,
               ],
             ),
-          );
+          ));
         },
       ),
     );
