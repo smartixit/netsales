@@ -30,12 +30,20 @@ class BillingReportsController extends GetxController {
   List<Map<String,dynamic>> _list(dynamic value)=>value is List?value.whereType<Map<String,dynamic>>().map((e)=>Map<String,dynamic>.from(e)).toList():const [];
   Map<String,dynamic> _map(BillingPayload p){final d=p.data['data']??p.data;return d is Map?Map<String,dynamic>.from(d):p.data;}
   String _date(DateTime? value)=>value==null?'':value.toIso8601String().substring(0,10);
+  Map<String,dynamic>? get selectedDefinition => catalog.firstWhereOrNull((e)=>e['id']==selectedType.value);
+  List<String> get _filterIds => (selectedDefinition?['filters'] is List<dynamic>)
+      ? (selectedDefinition!['filters'] as List<dynamic>).whereType<Map<String,dynamic>>().map((e)=>e['id']?.toString()??'').toList()
+      : const ['from_date','to_date','status','search'];
+  bool get hasDateFilters => _filterIds.contains('from_date') || _filterIds.contains('to_date');
+  bool get hasStatusFilter => _filterIds.contains('status');
+  bool get hasSearchFilter => _filterIds.contains('search');
+
   Map<String,dynamic> get _filters=>{
     'per_page':25,
-    if(fromDate.value!=null)'from_date':_date(fromDate.value),
-    if(toDate.value!=null)'to_date':_date(toDate.value),
-    if(statusController.text.trim().isNotEmpty)'status':statusController.text.trim(),
-    if(searchQuery.value.trim().isNotEmpty)'search':searchQuery.value.trim(),
+    if(hasDateFilters&&fromDate.value!=null)'from_date':_date(fromDate.value),
+    if(hasDateFilters&&toDate.value!=null)'to_date':_date(toDate.value),
+    if(hasStatusFilter&&statusController.text.trim().isNotEmpty)'status':statusController.text.trim(),
+    if(hasSearchFilter&&searchQuery.value.trim().isNotEmpty)'search':searchQuery.value.trim(),
   };
 
   @override void onInit(){
