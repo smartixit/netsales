@@ -36,6 +36,49 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
   final String? logoUrl;
   final bool isNetworkWorkspace;
 
+
+  Future<void> _showSavePresetDialog(BuildContext context) async {
+    final nameController = TextEditingController();
+    try {
+      await Get.dialog<void>(
+        Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('حفظ إعداد التقرير', style: AppTypography.titleLarge),
+                  AppSpacing.vMd,
+                  CustomTextField(controller: nameController, label: 'اسم الإعداد', hint: 'مثال: تقرير المبيعات الشهري', maxLength: 120, isRequired: true),
+                  AppSpacing.vMd,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      CustomButton.outline(text: 'إلغاء', onPressed: Get.back),
+                      AppSpacing.hSm,
+                      CustomButton.primary(text: 'حفظ', onPressed: () {
+                        final name = nameController.text.trim();
+                        if (name.isEmpty) return;
+                        Get.back();
+                        unawaited(controller.savePreset(name));
+                      }),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        barrierDismissible: true,
+      );
+    } finally {
+      nameController.dispose();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -157,6 +200,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                             _buildStudioFilters(context, definition, criteria, resolveLabel),
                         presentationSectionBuilder: (context, {required definition, required presentation, required resolveLabel, required onChanged}) =>
                             _buildStudioPresentation(context, definition, presentation, resolveLabel),
+                        onSavePreset: () => _showSavePresetDialog(context),
                         onPreview: controller.summary.value == null
                             ? null
                             : controller.exportDetailedPdf,
@@ -167,6 +211,23 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                         isBusy: controller.isLoading.value || controller.isPdfActionRunning.value,
                       )),
                       ),
+                    Obx(() {
+                      if (controller.savedPresets.isEmpty) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: controller.savedPresets.map((preset) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CustomButton.outline(text: preset.name, onPressed: () => controller.applyPreset(preset)),
+                              CustomButton.icon(icon: Icons.delete_outline, tooltip: 'حذف الإعداد', onPressed: controller.isDeletingPreset.value ? null : () => controller.deletePreset(preset)),
+                            ],
+                          )).toList(growable: false),
+                        ),
+                      );
+                    }),
                     Padding(
                       padding: const EdgeInsets.only(top: 8, bottom: 8),
                       child: Wrap(
