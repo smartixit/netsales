@@ -251,12 +251,19 @@ class BillingReportsController extends GetxController {
     }
   }
 
+  String _englishReportLabel(String type)=>const {
+    'subscriptions':'Subscriptions','trials':'Trial usage','trial_conversion':'Trial conversion funnel',
+    'renewals':'Renewals','plan_performance':'Plan performance','invoices':'Invoices',
+    'collections':'Collections','receivables':'Accounts receivable','usage':'Usage',
+    'dunning':'Dunning','refunds':'Refunds','revenue_recognition':'Revenue recognition',
+  }[type]??type.replaceAll('_',' ');
+
   Future<void> exportPdfSummary() async {
     final type=selectedType.value;
     final metrics=summary.value;
     if(type==null||metrics==null||isExportingPdf.value)return;
     final definition=catalog.firstWhereOrNull((e)=>e['id']==type);
-    final label=definition?['label']?.toString()??type;
+    final label=(presentation.value.languageTag=='en'?_englishReportLabel(type):definition?['label']?.toString())??type;
     isExportingPdf.value=true;
     try {
       final network=networkId();
