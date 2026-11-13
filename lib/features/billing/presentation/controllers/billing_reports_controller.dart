@@ -143,7 +143,7 @@ class BillingReportsController extends GetxController {
     selectedLocale.value=presentation.value.languageTag;
     selectedPageProfile.value=page;
     selectedTemplateId.value=template?.id.value;
-    searchController.clear();statusController.clear();searchQuery.value='';selectedStatus.value=null;fromDate.value=null;toDate.value=null;
+    searchController.clear();statusController.clear();_resetSearchQuery();selectedStatus.value=null;fromDate.value=null;toDate.value=null;
     _suppressSearchWorker=false;
   }
   void setCriteria(ReportCriteria value){
@@ -187,15 +187,27 @@ class BillingReportsController extends GetxController {
     if(hasSearchFilter&&searchQuery.value.trim().isNotEmpty)'search':searchQuery.value.trim(),
   };
 
-  @override void onInit(){
-    super.onInit();
-    _searchWorker=debounce(
+  void _bindSearchWorker() {
+    _searchWorker?.dispose();
+    _searchWorker = debounce(
       searchQuery,
       (_) {
         if (!_suppressSearchWorker) unawaited(loadReport());
       },
-      time: const Duration(milliseconds:400),
+      time: const Duration(milliseconds: 400),
     );
+  }
+
+  void _resetSearchQuery() {
+    _searchWorker?.dispose();
+    searchQuery.value = '';
+    _bindSearchWorker();
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    _bindSearchWorker();
     final signal = networkIdSignal;
     if (signal != null) {
       _networkWorker = ever<int?>(signal, (_) => unawaited(loadCatalog()));
@@ -236,7 +248,7 @@ class BillingReportsController extends GetxController {
       presentation.value = ReportPresentationOptions();
       searchController.clear();
       statusController.clear();
-      searchQuery.value = '';
+      _resetSearchQuery();
       selectedStatus.value = null;
       fromDate.value = null;
       toDate.value = null;
@@ -283,7 +295,7 @@ class BillingReportsController extends GetxController {
   Future<void> setFromDate(DateTime? value)async{fromDate.value=value;await loadReport();}
   Future<void> setToDate(DateTime? value)async{toDate.value=value;await loadReport();}
   Future<void> clearFilters()async{
-    criteria.value=ReportCriteria();searchController.clear();statusController.clear();searchQuery.value='';selectedStatus.value=null;fromDate.value=null;toDate.value=null;await loadReport();
+    criteria.value=ReportCriteria();searchController.clear();statusController.clear();_resetSearchQuery();selectedStatus.value=null;fromDate.value=null;toDate.value=null;await loadReport();
   }
 
   Future<void> loadReport({int? revision}) async {
