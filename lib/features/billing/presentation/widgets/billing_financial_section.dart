@@ -5,6 +5,8 @@ import 'package:netsales/features/billing/presentation/widgets/billing_status_ba
 import 'package:netsales/widgets/cards/custom_info_list_tile.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/lists/custom_collection_filter_state.dart';
 
 class BillingFinancialSection extends StatelessWidget {
   const BillingFinancialSection({
@@ -16,6 +18,12 @@ class BillingFinancialSection extends StatelessWidget {
     required this.referenceKey,
     required this.fallbackTitle,
     required this.amountKey,
+    required this.filterState,
+    this.statusOptions = const [],
+    required this.onSearchChanged,
+    this.onStatusChanged,
+    required this.onRefresh,
+    this.searchHint,
     super.key,
   });
 
@@ -27,6 +35,12 @@ class BillingFinancialSection extends StatelessWidget {
   final String referenceKey;
   final String fallbackTitle;
   final String amountKey;
+  final CustomCollectionFilterState filterState;
+  final List<DropdownItem<String>> statusOptions;
+  final ValueChanged<String> onSearchChanged;
+  final ValueChanged<String?>? onStatusChanged;
+  final VoidCallback onRefresh;
+  final String? searchHint;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +51,12 @@ class BillingFinancialSection extends StatelessWidget {
       itemBuilder: _tile,
       onLoadMore: onLoadMore,
       loadMoreLabel: loadMoreLabel,
+      filterState: filterState,
+      statusOptions: statusOptions,
+      onSearchChanged: onSearchChanged,
+      onStatusChanged: onStatusChanged,
+      onRefresh: onRefresh,
+      searchHint: searchHint,
     );
   }
 
