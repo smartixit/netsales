@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
+import 'package:netsales/features/billing/presentation/controllers/billing_cursor_page_state.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_cursor_collection_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_status_badge.dart';
 import 'package:netsales/widgets/cards/custom_info_list_tile.dart';
@@ -23,7 +24,7 @@ class BillingFinancialSection extends StatelessWidget {
   final BillingController controller;
   final String title;
   final String emptyTitle;
-  final dynamic page;
+  final BillingCursorPageState page;
   final VoidCallback onLoadMore;
   final String loadMoreLabel;
   final String referenceKey;
