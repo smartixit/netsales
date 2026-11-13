@@ -19,6 +19,22 @@ class OperationalReportAccess {
   final String? unavailableReason;
 }
 
+class OperationalReportChartSlot {
+  const OperationalReportChartSlot({
+    required this.id,
+    required this.label,
+    required this.chartType,
+    required this.valueKey,
+    required this.labelKey,
+  });
+
+  final String id;
+  final String label;
+  final String chartType;
+  final String valueKey;
+  final String labelKey;
+}
+
 class OperationalReportCatalogEntry {
   const OperationalReportCatalogEntry({
     required this.type,
@@ -27,6 +43,9 @@ class OperationalReportCatalogEntry {
     required this.definition,
     required this.access,
     required this.chartSlots,
+    required this.filterLabels,
+    required this.columnLabels,
+    required this.metricLabels,
   });
 
   final OperationalReportType type;
@@ -34,7 +53,10 @@ class OperationalReportCatalogEntry {
   final String description;
   final ReportDefinition definition;
   final OperationalReportAccess access;
-  final List<Map<String, dynamic>> chartSlots;
+  final List<OperationalReportChartSlot> chartSlots;
+  final Map<String, String> filterLabels;
+  final Map<String, String> columnLabels;
+  final Map<String, String> metricLabels;
 }
 
 class OperationalReportCatalog {
