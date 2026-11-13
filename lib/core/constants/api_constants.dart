@@ -486,6 +486,7 @@ abstract final class ApiConstants {
   static String billingNetworkReportSummary(int networkId, String type) => '/networks/$networkId/billing/reports/$type/summary';
   static String billingAccountSubscriptions(int accountId) => '/billing/accounts/$accountId/subscriptions';
   static String billingAccountInvoices(int accountId) => '/billing/accounts/$accountId/invoices';
+  static String billingAccountPaymentMethods(int accountId) => '/billing/accounts/$accountId/payment-methods';
   static String billingAccountPayments(int accountId) => '/billing/accounts/$accountId/payments';
   static String billingTrialEligibility(int accountId, int priceId) => '/billing/accounts/$accountId/prices/$priceId/trial-eligibility';
   static String billingPurchase(int accountId) => '/billing/accounts/$accountId/subscriptions';
