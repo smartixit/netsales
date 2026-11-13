@@ -10,6 +10,7 @@ import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
+import 'package:netsales/core/services/server_task_runner_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/features/splash/data/datasources/splash_local_data_source.dart';
@@ -38,6 +39,12 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
         dio: ApiService.instance.dio,
       ),
     );
+
+    // ── تشغيل النبض واستدراك مهام السيرفر في الخلفية عند وجود جلسة سارية ──
+    if (SessionService.to.isAuthenticated) {
+      unawaited(ServerTaskRunnerService.to.runCatchupTasks());
+      ServerTaskRunnerService.to.startForegroundHeartbeat();
+    }
 
     // تفعيل مراقبة الاتصال الشبكي بعد اكتمال واجهات التطبيق بأمان
     InternetConnectionService.instance.showInternetConnectionState();

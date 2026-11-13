@@ -3,6 +3,7 @@ import 'package:netsales/core/services/app_exit_service.dart';
 import 'package:netsales/core/services/credential_service.dart';
 import 'package:netsales/core/services/date_picker_service.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
+import 'package:netsales/core/services/server_task_runner_service.dart';
 import 'package:netsales/features/notifications/presentation/bindings/notification_binding.dart';
 
 /// ============================================================================
@@ -36,5 +37,11 @@ class InitialBinding extends Bindings {
 
     // 5. مركز الإشعارات والتنبيهات الموجهة
     NotificationBinding().dependencies();
+
+    // 6. خدمة مشغل مهام السيرفر ومحرك الاستدراك الذكي
+    Get.lazyPut<ServerTaskRunnerService>(
+      () => ServerTaskRunnerService.instance,
+      fenix: true,
+    );
   }
 }

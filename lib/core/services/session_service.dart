@@ -9,6 +9,7 @@ import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
+import 'package:netsales/core/services/server_task_runner_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/notifications/presentation/controllers/notification_controller.dart';
@@ -140,6 +141,10 @@ class SessionService extends GetxService {
       await WorkspaceService.to.syncWithUserMemberships(user);
     }
 
+    if (Get.isRegistered<ServerTaskRunnerService>()) {
+      ServerTaskRunnerService.to.startForegroundHeartbeat();
+    }
+
     log(
       '✅ [SessionService] Session started successfully for user #${user.userId}',
     );
@@ -244,6 +249,10 @@ class SessionService extends GetxService {
     if (Get.isRegistered<NotificationController>()) {
       NotificationController.to.unreadCount.value = 0;
       NotificationController.to.notifications.clear();
+    }
+
+    if (Get.isRegistered<ServerTaskRunnerService>()) {
+      await ServerTaskRunnerService.to.reset();
     }
 
     // if (Get.isRegistered<WorkspaceService>()) {
