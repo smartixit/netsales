@@ -115,6 +115,10 @@ class FinanceBinding extends Bindings {
       () => GetNetworkWalletLogsUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
+    Get.lazyPut<GetNetworkWalletByIdUseCase>(
+      () => GetNetworkWalletByIdUseCase(Get.find<FinanceRepository>()),
+      fenix: true,
+    );
     Get.lazyPut<TransferFromNetworkToPosUseCase>(
       () => TransferFromNetworkToPosUseCase(Get.find<FinanceRepository>()),
       fenix: true,
@@ -209,6 +213,8 @@ class FinanceBinding extends Bindings {
       () => PosWalletDashboardController(
         getPosWalUseCase: Get.find<GetPosWalUseCase>(),
         getPosWalletLogsUseCase: Get.find<GetPosWalletLogsUseCase>(),
+        getPosWalletByNetworkAndPosUseCase:
+            Get.find<GetPosWalletByNetworkAndPosUseCase>(),
         exportWalletStatementDocumentUseCase: Get.find<ExportWalletStatementDocumentUseCase>(),
       ),
       fenix: true,
@@ -248,6 +254,7 @@ class FinanceBinding extends Bindings {
       () => NetworkWalletDashboardController(
         getNetworkWalletsUseCase: Get.find<GetNetworkWalletsUseCase>(),
         getNetworkWalletLogsUseCase: Get.find<GetNetworkWalletLogsUseCase>(),
+        getNetworkWalletByIdUseCase: Get.find<GetNetworkWalletByIdUseCase>(),
         exportWalletStatementDocumentUseCase: Get.find<ExportWalletStatementDocumentUseCase>(),
       ),
       fenix: true,

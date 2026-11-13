@@ -14,11 +14,13 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class NetworkWalletDashboardController extends GetxController {
   final GetNetworkWalletsUseCase getNetworkWalletsUseCase;
   final GetNetworkWalletLogsUseCase getNetworkWalletLogsUseCase;
+  final GetNetworkWalletByIdUseCase getNetworkWalletByIdUseCase;
   final ExportWalletStatementDocumentUseCase exportWalletStatementDocumentUseCase;
 
   NetworkWalletDashboardController({
     required this.getNetworkWalletsUseCase,
     required this.getNetworkWalletLogsUseCase,
+    required this.getNetworkWalletByIdUseCase,
     required this.exportWalletStatementDocumentUseCase,
   });
 
@@ -304,9 +306,17 @@ class NetworkWalletDashboardController extends GetxController {
     if (wallet == null || isExportingStatement.value) return;
     isExportingStatement.value = true;
     try {
+      final walletBefore = await getNetworkWalletByIdUseCase(wallet.walletId);
       final statementLogs = await _loadAllStatementLogs(wallet.walletId);
+      final walletAfter = await getNetworkWalletByIdUseCase(wallet.walletId);
       if (selectedWallet.value?.walletId != wallet.walletId) return;
-      final success = await exportWalletStatementDocumentUseCase.exportNetwork(wallet, statementLogs);
+      if (walletBefore.updatedAt != walletAfter.updatedAt ||
+          walletBefore.walletBalance != walletAfter.walletBalance ||
+          walletBefore.currencyCode != walletAfter.currencyCode ||
+          walletBefore.openingBalance != walletAfter.openingBalance) {
+        throw StateError('تغيرت بيانات المحفظة أثناء إعداد الكشف؛ لم يتم إنشاء مستند ببيانات مختلطة. أعد المحاولة.');
+      }
+      final success = await exportWalletStatementDocumentUseCase.exportNetwork(walletBefore, statementLogs);
       CustomSnackbar.show(
         title: success ? 'تم إنشاء كشف الحساب' : 'تعذر حفظ كشف الحساب',
         message: success ? 'تم تجهيز كشف حساب محفظة الشبكة وحفظ ملف PDF.' : 'لم تكتمل عملية حفظ ملف كشف الحساب.',
@@ -341,6 +351,13 @@ class NetworkWalletDashboardController extends GetxController {
         throw StateError('توقف ترقيم الحركات عند مؤشر متكرر؛ لم يتم إنشاء كشف ناقص.');
       }
     } while (cursor != null);
+
+    final latestPage = await getNetworkWalletLogsUseCase(walletId, perPage: 1);
+    final capturedLatestId = result.isEmpty ? null : result.first.logId;
+    final currentLatestId = latestPage.items.isEmpty ? null : latestPage.items.first.logId;
+    if (capturedLatestId != currentLatestId) {
+      throw StateError('سُجلت حركة جديدة أثناء إعداد الكشف؛ لم يتم إنشاء كشف غير متزامن. أعد المحاولة.');
+    }
     return result;
   }
 
