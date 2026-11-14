@@ -1,7 +1,5 @@
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:payv/payv.dart' as payv;
-import 'package:payv/src/font/glyph_path.dart' as payv_path;
 
 import '../../document/document_locale.dart';
 import 'document_font_weight.dart';
@@ -95,33 +93,34 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
             canvas.setFillColor(color);
 
             for (final command in glyph.outline.cubicCommands) {
-              switch (command) {
-                case payv_path.MoveTo():
+              final dynamic pathCommand = command;
+              switch (command.runtimeType.toString()) {
+                case 'MoveTo':
                   canvas.moveTo(
-                    originX + command.x * scale,
-                    originY + command.y * scale,
+                    originX + pathCommand.x * scale,
+                    originY + pathCommand.y * scale,
                   );
-                case payv_path.LineTo():
+                case 'LineTo':
                   canvas.lineTo(
                     originX + command.x * scale,
                     originY + command.y * scale,
                   );
-                case payv_path.CubicTo():
+                case 'CubicTo':
                   canvas.curveTo(
-                    originX + command.c1x * scale,
-                    originY + command.c1y * scale,
-                    originX + command.c2x * scale,
-                    originY + command.c2y * scale,
+                    originX + pathCommand.c1x * scale,
+                    originY + pathCommand.c1y * scale,
+                    originX + pathCommand.c2x * scale,
+                    originY + pathCommand.c2y * scale,
                     originX + command.x * scale,
                     originY + command.y * scale,
                   );
-                case payv_path.QuadTo():
+                case 'QuadTo':
                   // cubicCommands converts every quadratic exactly. Keep this
                   // defensive branch so a future Payv API change fails loudly.
                   throw StateError(
                     'Payv cubicCommands returned an unconverted quadratic.',
                   );
-                case payv_path.ClosePath():
+                case 'ClosePath':
                   canvas.closePath();
               }
             }
