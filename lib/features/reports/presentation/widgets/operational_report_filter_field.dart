@@ -65,7 +65,10 @@ class OperationalReportFilterField extends StatelessWidget {
         );
 
       case ReportFilterKind.date:
-        final selected = value is ReportDateFilterValue ? value.value : null;
+        final currentValue = value;
+        final selected = currentValue is ReportDateFilterValue
+            ? currentValue.value
+            : null;
         return CustomDatePickerField.single(
           label: label,
           value: selected,
@@ -76,7 +79,10 @@ class OperationalReportFilterField extends StatelessWidget {
         );
 
       case ReportFilterKind.dateRange:
-        final range = value is ReportDateRangeFilterValue ? value : null;
+        final currentValue = value;
+        final range = currentValue is ReportDateRangeFilterValue
+            ? currentValue
+            : null;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -102,7 +108,9 @@ class OperationalReportFilterField extends StatelessWidget {
         );
 
       case ReportFilterKind.boolean:
-        final enabled = value is ReportBooleanFilterValue && value.value;
+        final currentValue = value;
+        final enabled = currentValue is ReportBooleanFilterValue &&
+            currentValue.value;
         return Row(
           children: [
             Expanded(child: Text(label)),
@@ -139,8 +147,9 @@ class OperationalReportFilterField extends StatelessWidget {
         );
 
       case ReportFilterKind.multiChoice:
-        final selected = value is ReportChoicesFilterValue
-            ? value.values.toSet()
+        final currentValue = value;
+        final selected = currentValue is ReportChoicesFilterValue
+            ? <String>{...currentValue.values}
             : <String>{};
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +165,7 @@ class OperationalReportFilterField extends StatelessWidget {
                   label: resolveLabel(context, choice.labelKey),
                   isSelected: active,
                   onSelected: () {
-                    final next = {...selected};
+                    final next = <String>{...selected};
                     if (active) {
                       next.remove(choice.value);
                     } else {
