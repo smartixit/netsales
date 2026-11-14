@@ -31,7 +31,6 @@ class BillingContactTile extends StatelessWidget {
       title: Text(contact['name']?.toString() ?? 'جهة اتصال'),
       subtitle: Text(details),
       trailing: Wrap(
-        mainAxisSize: MainAxisSize.min,
         children: [
           if (contact['is_primary'] != true)
             CustomButton.text(
