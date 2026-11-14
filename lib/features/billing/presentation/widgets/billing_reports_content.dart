@@ -158,7 +158,7 @@ class BillingReportsContent extends StatelessWidget {
             controller: controller,
             arabicLabel: (key) => BillingReportLabels.field(
               key,
-              english: controller.selectedLocale.value == 'en',
+              english: english,
             ),
             displayValue: (key, value) => BillingReportLabels.displayValue(
               key,
