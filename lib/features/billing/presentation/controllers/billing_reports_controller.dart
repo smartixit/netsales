@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:document_engine/document_engine.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
+import 'package:netsales/features/billing/domain/entities/billing_payload.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/features/billing/data/services/billing_report_document_service.dart';
 
