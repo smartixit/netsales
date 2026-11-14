@@ -402,7 +402,7 @@ class OperationalReportsController extends GetxController {
       if (!loaded || scopeRevision != _scopeRevision) return;
     } catch (error) {
       if (scopeRevision != _scopeRevision) return;
-      errorMessage.value = _friendlyMessage(error);
+      errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر تحميل كتالوج التقارير. يرجى المحاولة مجدداً.');
       isLoading.value = false;
       return;
     }
