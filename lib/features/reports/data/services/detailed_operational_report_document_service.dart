@@ -288,7 +288,7 @@ class DetailedOperationalReportDocumentService {
       ));
     }
     if (omitted > 0) {
-      nodes.add(const DocumentCallout(
+      nodes.add(DocumentCallout(
         title: 'بعض الرسوم لم تُدرج',
         body: 'تجاوزت بعض السلاسل حدود النقاط أو احتوت قيماً لا يدعمها نوع الرسم. بقيت بيانات السجلات التفصيلية دون حذف.',
         tone: DocumentStatusTone.warning,
