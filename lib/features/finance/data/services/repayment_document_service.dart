@@ -390,7 +390,7 @@ class RepaymentDocumentService {
   static String _amount(double value) => AmountFormatter.format(value.toString());
 
   static String _money(double value, String currencyCode) =>
-      _amount(value) + ' ' + currencyCode;
+      '${_amount(value)} $currencyCode';
 
   static bool _hasText(String? value) => value?.trim().isNotEmpty ?? false;
 
