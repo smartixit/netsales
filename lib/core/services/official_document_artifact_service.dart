@@ -27,7 +27,7 @@ class OfficialDocumentArtifactService {
         'document_type': documentType,
         'document_id': documentId,
         'network_id': networkId,
-        if (posId != null) 'pos_id': posId,
+        ...? (posId == null ? null : {'pos_id': posId}),
         'template_id': templateId,
         'template_version': templateVersion,
       },
