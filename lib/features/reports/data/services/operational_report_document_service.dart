@@ -295,7 +295,7 @@ class OperationalReportDocumentService {
             ),
             DocumentInfoGrid(items: info, columns: 2, compact: true),
             if (summary.values['opening_balance_source'] == 'BACKFILLED')
-              const DocumentCallout(
+              DocumentCallout(
                 title: 'رصيد افتتاحي معاد بناؤه',
                 body:
                     'تم اشتقاق الرصيد الافتتاحي عند ترحيل سجل المحفظة من الرصيد الحالي والحركات المتاحة آنذاك. هذه القيمة توثّق إعادة البناء ولا تعني وجود كشف تاريخي مستقل موثق قبل الترحيل.',
@@ -307,14 +307,14 @@ class OperationalReportDocumentService {
               direction: DocumentTextDirection.rightToLeft,
             ),
             if (rows.isEmpty)
-              const DocumentCallout(
+              DocumentCallout(
                 title: 'لا توجد مؤشرات',
                 body: 'لم يرسل الخادم مؤشرات قابلة للعرض لهذا التقرير.',
                 tone: DocumentStatusTone.neutral,
               )
             else
               DocumentTable(
-                columns: const [
+                columns: [
                   DocumentTableColumn(id: 'metric', label: 'المؤشر'),
                   DocumentTableColumn(
                     id: 'value',
@@ -332,7 +332,7 @@ class OperationalReportDocumentService {
                   columnWeights: const [2.4, 1.1],
                 ),
               ),
-            const DocumentCallout(
+            DocumentCallout(
               title: 'نطاق هذا المستند',
               body:
                   'يعرض هذا المستند ملخصاً مجمعاً محسوباً على كامل النتائج المطابقة. لتصدير التفاصيل الكاملة لكل سجل استخدم ملف CSV من شاشة التقارير.',

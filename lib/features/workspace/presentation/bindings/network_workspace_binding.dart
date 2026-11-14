@@ -1,5 +1,12 @@
 import 'package:get/get.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
+import 'package:netsales/features/billing/data/datasources/billing_remote_data_source.dart';
+import 'package:netsales/features/billing/data/datasources/billing_remote_data_source_impl.dart';
+import 'package:netsales/features/billing/data/repositories/billing_repository_impl.dart';
+import 'package:netsales/features/billing/domain/repositories/billing_repository.dart';
+import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
+import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
+import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
@@ -17,6 +24,29 @@ import 'package:netsales/features/workspace/presentation/controllers/network_wor
 class NetworkWorkspaceBinding extends Bindings {
   @override
   void dependencies() {
+    if (!Get.isRegistered<BillingRemoteDataSource>()) {
+      Get.lazyPut<BillingRemoteDataSource>(() => const BillingRemoteDataSourceImpl(), fenix: true);
+    }
+    if (!Get.isRegistered<BillingRepository>()) {
+      Get.lazyPut<BillingRepository>(() => BillingRepositoryImpl(Get.find<BillingRemoteDataSource>()), fenix: true);
+    }
+    if (!Get.isRegistered<BillingUseCases>()) {
+      Get.lazyPut<BillingUseCases>(() => BillingUseCases(Get.find<BillingRepository>()), fenix: true);
+    }
+    if (!Get.isRegistered<BillingReportsController>()) {
+      Get.lazyPut<BillingReportsController>(() => BillingReportsController(
+        useCases: Get.find<BillingUseCases>(),
+        networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
+        networkIdSignal: Get.find<NetworkWorkspaceController>().selectedNetworkId,
+      ), fenix: true);
+    }
+    if (!Get.isRegistered<BillingController>()) {
+      Get.lazyPut<BillingController>(() => BillingController(
+        useCases: Get.find<BillingUseCases>(),
+        networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
+        networkIdSignal: Get.find<NetworkWorkspaceController>().selectedNetworkId,
+      ), fenix: true);
+    }
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();
     OperationalReportsBinding().dependencies();

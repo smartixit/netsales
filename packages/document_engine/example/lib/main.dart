@@ -109,7 +109,6 @@ class _ExampleDocumentHost extends StatelessWidget {
         TemplateCapability.metrics,
         TemplateCapability.charts,
         TemplateCapability.signatureArea,
-        TemplateCapability.watermark,
         TemplateCapability.pageNumbering,
         TemplateCapability.portraitPage,
       ]),
@@ -122,12 +121,7 @@ class _ExampleDocumentHost extends StatelessWidget {
       options: DocumentRenderOptions(
         pageProfile: DocumentPageProfile.a4Portrait(),
         generatedAt: generatedAt,
-        watermark: DocumentWatermark(
-          text: 'NORTHSTAR INTERNAL',
-          color: '0F766E',
-          opacity: 0.08,
-        ),
-      ),
+     ),
     );
     return result is DocumentRenderSuccess ? result.artifact : null;
   }

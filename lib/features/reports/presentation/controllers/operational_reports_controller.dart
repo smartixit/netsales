@@ -88,6 +88,9 @@ class OperationalReportsController extends GetxController {
   final Map<String, TextEditingController> _criteriaTextControllers = {};
   final Map<String, RxnString> _choiceValues = {};
   int _requestRevision = 0;
+  int _scopeRevision = 0;
+  int _exportActionRevision = 0;
+  int _documentActionRevision = 0;
   int _posRevision = 0;
   final Set<String> _seenReportCursors = <String>{};
   String _posSearchQuery = '';
@@ -212,6 +215,7 @@ class OperationalReportsController extends GetxController {
 
     final issues = value.validateAgainst(definition);
     criteria.value = value;
+    _invalidateExportActions();
     for (final entry in _choiceValues.entries) {
       final selected = value.filters[entry.key];
       entry.value.value = selected is ReportChoiceFilterValue
@@ -240,6 +244,8 @@ class OperationalReportsController extends GetxController {
       return;
     }
     presentation.value = value;
+    ++_documentActionRevision;
+    isPdfActionRunning.value = false;
   }
 
   ReportCriteria _effectiveCriteria() => criteria.value;
@@ -251,21 +257,40 @@ class OperationalReportsController extends GetxController {
         '${local.day.toString().padLeft(2, '0')}';
   }
 
-  Future<void> _loadReportCatalog() async {
+  Future<bool> _loadReportCatalog({
+    required int scopeRevision,
+  }) async {
     final networkId = _networkId;
     if (networkId == null) {
-      catalog.value = null;
-      return;
+      if (scopeRevision == _scopeRevision) catalog.value = null;
+      return false;
     }
+
     try {
-      catalog.value = await getReportCatalogUseCase(
+      final result = await getReportCatalogUseCase(
         networkId: networkId,
         posId: _isNetworkWorkspace ? null : _workspacePosId,
       );
+      if (scopeRevision != _scopeRevision || networkId != _networkId) {
+        return false;
+      }
+      catalog.value = result;
+      return true;
     } catch (_) {
-      catalog.value = null;
+      if (scopeRevision == _scopeRevision && networkId == _networkId) {
+        catalog.value = null;
+      }
       rethrow;
     }
+  }
+
+  void _invalidateExportActions() {
+    ++_exportActionRevision;
+    ++_documentActionRevision;
+    exportJob.value = null;
+    isExportActionRunning.value = false;
+    isCheckingExport.value = false;
+    isPdfActionRunning.value = false;
   }
 
   bool get canExport {
@@ -320,6 +345,8 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final scopeRevision = ++_scopeRevision;
+    ++_presetRevision;
     _scopeConfigured = true;
     _networkId = networkId;
     _workspacePosId = posId;
@@ -330,6 +357,11 @@ class OperationalReportsController extends GetxController {
     _criteriaDebounce = null;
     ++_requestRevision;
     ++_posRevision;
+    _invalidateExportActions();
+    savedPresets.clear();
+    isLoadingPresets.value = false;
+    isSavingPreset.value = false;
+    isDeletingPreset.value = false;
     isLoadingPos.value = false;
     isLoadingMorePos.value = false;
     reports.clear();
@@ -346,7 +378,6 @@ class OperationalReportsController extends GetxController {
     for (final controller in _criteriaTextControllers.values) {
       controller.clear();
     }
-    exportJob.value = null;
     _seenReportCursors.clear();
 
     _posSearchQuery = '';
@@ -365,13 +396,18 @@ class OperationalReportsController extends GetxController {
     }
 
     try {
-      await _loadReportCatalog();
+      final loaded = await _loadReportCatalog(
+        scopeRevision: scopeRevision,
+      );
+      if (!loaded || scopeRevision != _scopeRevision) return;
     } catch (error) {
-      errorMessage.value = _friendlyMessage(error);
+      if (scopeRevision != _scopeRevision) return;
+      errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر تحميل كتالوج التقارير. يرجى المحاولة مجدداً.');
       isLoading.value = false;
       return;
     }
 
+    if (scopeRevision != _scopeRevision) return;
     final types = availableTypes;
     if (types.isEmpty) {
       selectedType.value = null;
@@ -382,11 +418,16 @@ class OperationalReportsController extends GetxController {
       selectedType.value = types.first;
     }
     await loadReport(refresh: true);
+    if (scopeRevision != _scopeRevision) return;
     await loadSavedPresets();
   }
 
   @override
   void onClose() {
+    ++_scopeRevision;
+    ++_presetRevision;
+    ++_exportActionRevision;
+    ++_documentActionRevision;
     _criteriaDebounce?.cancel();
     for (final controller in _criteriaTextControllers.values) {
       controller.dispose();
@@ -402,6 +443,7 @@ class OperationalReportsController extends GetxController {
   Future<void> selectType(OperationalReportType type) async {
     if (!availableTypes.contains(type) || selectedType.value == type) return;
     selectedType.value = type;
+    _invalidateExportActions();
     _criteriaDebounce?.cancel();
     criteria.value = ReportCriteria();
     for (final selection in _choiceValues.values) {
@@ -419,6 +461,7 @@ class OperationalReportsController extends GetxController {
   Future<void> selectPos(int? posId) async {
     if (selectedPosId.value == posId) return;
     selectedPosId.value = posId;
+    _invalidateExportActions();
     await loadReport(refresh: true);
     await loadSavedPresets();
   }
@@ -427,37 +470,69 @@ class OperationalReportsController extends GetxController {
   Future<void> loadSavedPresets() async {
     final type = selectedType.value;
     final networkId = _networkId;
+    final posId = _queryPosId;
+    final scopeRevision = _scopeRevision;
     if (type == null || networkId == null) {
       savedPresets.clear();
       return;
     }
+
     final revision = ++_presetRevision;
     isLoadingPresets.value = true;
+    bool isCurrentRequest() =>
+        revision == _presetRevision &&
+        scopeRevision == _scopeRevision &&
+        networkId == _networkId &&
+        type == selectedType.value &&
+        posId == _queryPosId;
+
     try {
-      final result = await getPresetsUseCase(type: type, networkId: networkId, posId: _queryPosId);
-      if (revision == _presetRevision && type == selectedType.value) {
-        savedPresets.assignAll(result);
-      }
+      final result = await getPresetsUseCase(
+        type: type,
+        networkId: networkId,
+        posId: posId,
+      );
+      if (isCurrentRequest()) savedPresets.assignAll(result);
     } catch (error) {
-      if (revision == _presetRevision) {
+      if (isCurrentRequest()) {
         savedPresets.clear();
         CustomSnackbar.show(
           title: 'تعذر تحميل الإعدادات المحفوظة',
-          message: AppException.sanitizeMessage(error, fallback: 'تعذر تحميل إعدادات التقرير.'),
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر تحميل إعدادات التقرير.',
+          ),
           type: SnackType.error,
         );
       }
     } finally {
-      if (revision == _presetRevision) isLoadingPresets.value = false;
+      if (isCurrentRequest()) isLoadingPresets.value = false;
     }
   }
 
   Future<void> savePreset(String name) async {
     final type = selectedType.value;
     final networkId = _networkId;
+    final posId = _queryPosId;
+    final scopeRevision = _scopeRevision;
     final definition = selectedReportEntry?.definition;
     final normalizedName = name.trim();
-    if (type == null || networkId == null || definition == null || normalizedName.isEmpty || isSavingPreset.value) return;
+    if (type == null ||
+        networkId == null ||
+        definition == null ||
+        normalizedName.isEmpty ||
+        isSavingPreset.value) {
+      return;
+    }
+
+    final criteriaSnapshot = criteria.value;
+    final presentationSnapshot = presentation.value;
+    bool isCurrentScope() =>
+        scopeRevision == _scopeRevision &&
+        networkId == _networkId &&
+        type == selectedType.value &&
+        posId == _queryPosId;
+
     isSavingPreset.value = true;
     try {
       final existing = savedPresets.firstWhereOrNull(
@@ -465,15 +540,26 @@ class OperationalReportsController extends GetxController {
       );
       final saved = existing == null
           ? await savePresetUseCase(
-              type: type, networkId: networkId, posId: _queryPosId,
-              name: normalizedName, reportSchemaVersion: definition.schemaVersion,
-              criteria: criteria.value, presentation: presentation.value,
+              type: type,
+              networkId: networkId,
+              posId: posId,
+              name: normalizedName,
+              reportSchemaVersion: definition.schemaVersion,
+              criteria: criteriaSnapshot,
+              presentation: presentationSnapshot,
             )
           : await updatePresetUseCase(
-              presetId: existing.id, type: type, networkId: networkId, posId: _queryPosId,
-              name: normalizedName, reportSchemaVersion: definition.schemaVersion,
-              criteria: criteria.value, presentation: presentation.value,
+              presetId: existing.id,
+              type: type,
+              networkId: networkId,
+              posId: posId,
+              name: normalizedName,
+              reportSchemaVersion: definition.schemaVersion,
+              criteria: criteriaSnapshot,
+              presentation: presentationSnapshot,
             );
+      if (!isCurrentScope()) return;
+
       savedPresets.removeWhere((item) => item.id == saved.id);
       savedPresets.insert(0, saved);
       CustomSnackbar.show(
@@ -482,13 +568,20 @@ class OperationalReportsController extends GetxController {
         type: SnackType.success,
       );
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذر حفظ الإعداد',
-        message: AppException.sanitizeMessage(error, fallback: 'رفض الخادم حفظ إعداد التقرير.'),
-        type: SnackType.error,
-      );
+      if (isCurrentScope()) {
+        CustomSnackbar.show(
+          title: 'تعذر حفظ الإعداد',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'رفض الخادم حفظ إعداد التقرير.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isSavingPreset.value = false;
+      if (scopeRevision == _scopeRevision) {
+        isSavingPreset.value = false;
+      }
     }
   }
 
@@ -510,25 +603,51 @@ class OperationalReportsController extends GetxController {
   Future<void> deletePreset(SavedReportPreset preset) async {
     final type = selectedType.value;
     final networkId = _networkId;
-    if (type == null || networkId == null || isDeletingPreset.value) return;
+    final posId = _queryPosId;
+    final scopeRevision = _scopeRevision;
+    if (type == null ||
+        networkId == null ||
+        isDeletingPreset.value) {
+      return;
+    }
+
+    bool isCurrentScope() =>
+        scopeRevision == _scopeRevision &&
+        networkId == _networkId &&
+        type == selectedType.value &&
+        posId == _queryPosId;
+
     isDeletingPreset.value = true;
     try {
       await deletePresetUseCase(
-        presetId: preset.id, type: type, networkId: networkId, posId: _queryPosId,
+        presetId: preset.id,
+        type: type,
+        networkId: networkId,
+        posId: posId,
       );
-      savedPresets.removeWhere((item) => item.id == preset.id);
+      if (isCurrentScope()) {
+        savedPresets.removeWhere((item) => item.id == preset.id);
+      }
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذر حذف الإعداد',
-        message: AppException.sanitizeMessage(error, fallback: 'تعذر حذف الإعداد المحفوظ.'),
-        type: SnackType.error,
-      );
+      if (isCurrentScope()) {
+        CustomSnackbar.show(
+          title: 'تعذر حذف الإعداد',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر حذف الإعداد المحفوظ.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isDeletingPreset.value = false;
+      if (scopeRevision == _scopeRevision) {
+        isDeletingPreset.value = false;
+      }
     }
   }
 
   Future<void> clearFilters() async {
+    _invalidateExportActions();
     _criteriaDebounce?.cancel();
     criteria.value = ReportCriteria();
     for (final controller in _criteriaTextControllers.values) {
@@ -792,6 +911,8 @@ class OperationalReportsController extends GetxController {
   Future<void> requestExport() async {
     final type = selectedType.value;
     final networkId = _networkId;
+    final posId = _queryPosId;
+    final scopeRevision = _scopeRevision;
     if (type == null ||
         networkId == null ||
         isExportActionRunning.value ||
@@ -807,14 +928,26 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final actionRevision = ++_exportActionRevision;
+    final criteriaSnapshot = criteria.value;
+    bool isCurrentRequest() =>
+        actionRevision == _exportActionRevision &&
+        scopeRevision == _scopeRevision &&
+        type == selectedType.value &&
+        networkId == _networkId &&
+        posId == _queryPosId &&
+        identical(criteriaSnapshot, criteria.value);
+
     isExportActionRunning.value = true;
     try {
       final result = await requestExportUseCase(
         type: type,
         networkId: networkId,
-        posId: _queryPosId,
-        criteria: _effectiveCriteria(),
+        posId: posId,
+        criteria: criteriaSnapshot,
       );
+      if (!isCurrentRequest()) return;
+
       exportJob.value = result;
       CustomSnackbar.show(
         title: 'تم استلام طلب التصدير',
@@ -822,16 +955,18 @@ class OperationalReportsController extends GetxController {
         type: SnackType.success,
       );
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذر طلب التصدير',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر إرسال طلب تجهيز التقرير.',
-        ),
-        type: SnackType.error,
-      );
+      if (isCurrentRequest()) {
+        CustomSnackbar.show(
+          title: 'تعذر طلب التصدير',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر إرسال طلب تجهيز التقرير.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isExportActionRunning.value = false;
+      if (isCurrentRequest()) isExportActionRunning.value = false;
     }
   }
 
@@ -847,36 +982,54 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final actionRevision = ++_documentActionRevision;
+    final scopeRevision = _scopeRevision;
+    final criteriaSnapshot = criteria.value;
+    final presentationSnapshot = presentation.value;
+    final organizationName = reportOrganizationName;
+    final logoUrl = reportLogoUrl;
+    final filters = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final scopeLabel = reportScopeLabel;
+    bool isCurrentAction() =>
+        actionRevision == _documentActionRevision &&
+        scopeRevision == _scopeRevision &&
+        type == selectedType.value &&
+        identical(criteriaSnapshot, criteria.value) &&
+        identical(presentationSnapshot, presentation.value);
+
     isPdfActionRunning.value = true;
     try {
       await saveSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
         summary: data,
-        organizationName: reportOrganizationName,
-        logoUrl: reportLogoUrl,
-        activeFilters: activeFilterDisplays,
-        scopeLabel: reportScopeLabel,
+        organizationName: organizationName,
+        logoUrl: logoUrl,
+        activeFilters: filters,
+        scopeLabel: scopeLabel,
       );
-      CustomSnackbar.show(
-        title: 'تم إنشاء ملخص PDF',
-        message: 'حُفظ الملخص التنفيذي في مجلد Reports.',
-        type: SnackType.success,
-      );
+      if (isCurrentAction()) {
+        CustomSnackbar.show(
+          title: 'تم إنشاء ملخص PDF',
+          message: 'حُفظ الملخص التنفيذي في مجلد Reports.',
+          type: SnackType.success,
+        );
+      }
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذر إنشاء ملخص PDF',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر إنشاء مستند ملخص التقرير.',
-        ),
-        type: SnackType.error,
-      );
+      if (isCurrentAction()) {
+        CustomSnackbar.show(
+          title: 'تعذر إنشاء ملخص PDF',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر إنشاء مستند ملخص التقرير.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isPdfActionRunning.value = false;
+      if (isCurrentAction()) isPdfActionRunning.value = false;
     }
   }
-
 
   Future<void> exportDetailedPdf() async {
     final type = selectedType.value;
@@ -907,6 +1060,8 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final documentRevision = ++_documentActionRevision;
+    final scopeRevision = _scopeRevision;
     final organizationName = reportOrganizationName;
     final logoUrl = reportLogoUrl;
     final filtersSnapshot = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
@@ -919,9 +1074,12 @@ class OperationalReportsController extends GetxController {
         networkId: networkId,
         posId: posId,
         criteria: criteriaSnapshot,
+        documentRevision: documentRevision,
       );
 
-      if (selectedType.value != type ||
+      if (documentRevision != _documentActionRevision ||
+          scopeRevision != _scopeRevision ||
+          selectedType.value != type ||
           _networkId != networkId ||
           _queryPosId != posId ||
           !identical(criteria.value, criteriaSnapshot) ||
@@ -937,6 +1095,15 @@ class OperationalReportsController extends GetxController {
         posId: posId,
         criteria: criteriaSnapshot,
       );
+      if (documentRevision != _documentActionRevision ||
+          scopeRevision != _scopeRevision ||
+          selectedType.value != type ||
+          _networkId != networkId ||
+          _queryPosId != posId ||
+          !identical(criteria.value, criteriaSnapshot) ||
+          !identical(presentation.value, presentationSnapshot)) {
+        throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+      }
       if (jsonEncode(summaryBefore.values) != jsonEncode(summaryAfter.values)) {
         throw StateError('تغيرت نتائج التقرير أثناء تحميل الصفحات؛ أُوقف التصدير لضمان اتساق المستند.');
       }
@@ -954,7 +1121,8 @@ class OperationalReportsController extends GetxController {
         scopeLabel: scopeSnapshot,
       );
 
-      if (saved) {
+      if (saved && documentRevision == _documentActionRevision &&
+          scopeRevision == _scopeRevision && selectedType.value == type) {
         CustomSnackbar.show(
           title: 'تم إنشاء التقرير التفصيلي',
           message: 'حُفظ ملف PDF شاملاً السجلات المطابقة وإعدادات العرض المحددة.',
@@ -962,6 +1130,10 @@ class OperationalReportsController extends GetxController {
         );
       }
     } catch (error) {
+      if (documentRevision != _documentActionRevision ||
+          scopeRevision != _scopeRevision) {
+        return;
+      }
       final message = error is StateError
           ? error.toString().replaceFirst('Bad state: ', '')
           : AppException.sanitizeMessage(
@@ -974,7 +1146,10 @@ class OperationalReportsController extends GetxController {
         type: SnackType.error,
       );
     } finally {
-      isPdfActionRunning.value = false;
+      if (documentRevision == _documentActionRevision &&
+          scopeRevision == _scopeRevision) {
+        isPdfActionRunning.value = false;
+      }
     }
   }
 
@@ -983,6 +1158,7 @@ class OperationalReportsController extends GetxController {
     required int networkId,
     required int? posId,
     required ReportCriteria criteria,
+    required int documentRevision,
   }) async {
     const maxRows = 1500;
     final records = <OperationalReportRecord>[];
@@ -991,6 +1167,9 @@ class OperationalReportsController extends GetxController {
     String? cursor;
 
     do {
+      if (documentRevision != _documentActionRevision) {
+        throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+      }
       final page = await getReportUseCase(
         type: type,
         networkId: networkId,
@@ -999,6 +1178,9 @@ class OperationalReportsController extends GetxController {
         cursor: cursor,
         perPage: 50,
       );
+      if (documentRevision != _documentActionRevision) {
+        throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+      }
 
       for (final record in page.items) {
         final identity = _reportRecordIdentity(record, type);
@@ -1018,6 +1200,9 @@ class OperationalReportsController extends GetxController {
       }
     } while (cursor != null);
 
+    if (documentRevision != _documentActionRevision) {
+      throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+    }
     final latestPage = await getReportUseCase(
       type: type,
       networkId: networkId,
@@ -1025,6 +1210,9 @@ class OperationalReportsController extends GetxController {
       criteria: criteria,
       perPage: 1,
     );
+    if (documentRevision != _documentActionRevision) {
+      throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+    }
     final capturedLatest = records.isEmpty ? null : records.first;
     final currentLatest = latestPage.items.isEmpty ? null : latestPage.items.first;
     if (capturedLatest == null && currentLatest != null ||
@@ -1052,18 +1240,33 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final actionRevision = ++_documentActionRevision;
+    final scopeRevision = _scopeRevision;
+    final criteriaSnapshot = criteria.value;
+    final presentationSnapshot = presentation.value;
+    final organizationName = reportOrganizationName;
+    final logoUrl = reportLogoUrl;
+    final filters = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final scopeLabel = reportScopeLabel;
+    bool isCurrentAction() =>
+        actionRevision == _documentActionRevision &&
+        scopeRevision == _scopeRevision &&
+        type == selectedType.value &&
+        identical(criteriaSnapshot, criteria.value) &&
+        identical(presentationSnapshot, presentation.value);
+
     isPdfActionRunning.value = true;
     try {
       final shared = await shareSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
         summary: data,
-        organizationName: reportOrganizationName,
-        logoUrl: reportLogoUrl,
-        activeFilters: activeFilterDisplays,
-        scopeLabel: reportScopeLabel,
+        organizationName: organizationName,
+        logoUrl: logoUrl,
+        activeFilters: filters,
+        scopeLabel: scopeLabel,
       );
-      if (shared) {
+      if (shared && isCurrentAction()) {
         CustomSnackbar.show(
           title: 'تم تجهيز المستند للمشاركة',
           message: 'تم إنشاء ملخص PDF وفتح نافذة المشاركة.',
@@ -1071,16 +1274,18 @@ class OperationalReportsController extends GetxController {
         );
       }
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذرت مشاركة الملخص',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر إنشاء أو مشاركة مستند التقرير.',
-        ),
-        type: SnackType.error,
-      );
+      if (isCurrentAction()) {
+        CustomSnackbar.show(
+          title: 'تعذرت مشاركة الملخص',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر إنشاء أو مشاركة مستند التقرير.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isPdfActionRunning.value = false;
+      if (isCurrentAction()) isPdfActionRunning.value = false;
     }
   }
 
@@ -1096,18 +1301,33 @@ class OperationalReportsController extends GetxController {
       return;
     }
 
+    final actionRevision = ++_documentActionRevision;
+    final scopeRevision = _scopeRevision;
+    final criteriaSnapshot = criteria.value;
+    final presentationSnapshot = presentation.value;
+    final organizationName = reportOrganizationName;
+    final logoUrl = reportLogoUrl;
+    final filters = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final scopeLabel = reportScopeLabel;
+    bool isCurrentAction() =>
+        actionRevision == _documentActionRevision &&
+        scopeRevision == _scopeRevision &&
+        type == selectedType.value &&
+        identical(criteriaSnapshot, criteria.value) &&
+        identical(presentationSnapshot, presentation.value);
+
     isPdfActionRunning.value = true;
     try {
       final printed = await printSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
         summary: data,
-        organizationName: reportOrganizationName,
-        logoUrl: reportLogoUrl,
-        activeFilters: activeFilterDisplays,
-        scopeLabel: reportScopeLabel,
+        organizationName: organizationName,
+        logoUrl: logoUrl,
+        activeFilters: filters,
+        scopeLabel: scopeLabel,
       );
-      if (printed) {
+      if (printed && isCurrentAction()) {
         CustomSnackbar.show(
           title: 'تم فتح نافذة الطباعة',
           message: 'أُرسل ملخص التقرير إلى خدمة الطباعة.',
@@ -1115,26 +1335,38 @@ class OperationalReportsController extends GetxController {
         );
       }
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذرت طباعة الملخص',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر إنشاء مستند التقرير للطباعة.',
-        ),
-        type: SnackType.error,
-      );
+      if (isCurrentAction()) {
+        CustomSnackbar.show(
+          title: 'تعذرت طباعة الملخص',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر إنشاء مستند التقرير للطباعة.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isPdfActionRunning.value = false;
+      if (isCurrentAction()) isPdfActionRunning.value = false;
     }
   }
 
   Future<void> refreshExportStatus() async {
     final job = exportJob.value;
     if (job == null || isCheckingExport.value) return;
+
+    final actionRevision = _exportActionRevision;
+    final scopeRevision = _scopeRevision;
+    bool isCurrentJob() =>
+        actionRevision == _exportActionRevision &&
+        scopeRevision == _scopeRevision &&
+        exportJob.value?.exportId == job.exportId;
     isCheckingExport.value = true;
+
     try {
       final status = await getExportStatusUseCase(job.exportId);
+      if (!isCurrentJob()) return;
       exportJob.value = status;
+
       if (status.isReady) {
         // Never pass a server-supplied absolute URL to the authenticated
         // Dio client. Build the download path from the trusted API route and
@@ -1143,9 +1375,11 @@ class OperationalReportsController extends GetxController {
           status.exportId,
         );
         final bytes = await downloadExportUseCase(url);
+        if (!isCurrentJob()) return;
         if (bytes == null || bytes.isEmpty) {
           throw const AppException('التصدير جاهز لكن تعذر تنزيل الملف.');
         }
+
         final type = selectedType.value;
         final fileName = 'تقرير_${type?.wireValue ?? 'تشغيلي'}_${DateTime.now().millisecondsSinceEpoch}';
         final result = await FileExportService.instance.saveFile(
@@ -1157,6 +1391,7 @@ class OperationalReportsController extends GetxController {
           autoOpen: false,
           showFeedback: false,
         );
+        if (!isCurrentJob()) return;
         if (!result.isSuccess) {
           throw AppException(
             result.errorMessage ?? 'تعذر حفظ ملف التقرير.',
@@ -1181,16 +1416,18 @@ class OperationalReportsController extends GetxController {
         );
       }
     } catch (error) {
-      CustomSnackbar.show(
-        title: 'تعذر تحديث حالة التصدير',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر التحقق من حالة ملف التقرير.',
-        ),
-        type: SnackType.error,
-      );
+      if (isCurrentJob()) {
+        CustomSnackbar.show(
+          title: 'تعذر تحديث حالة التصدير',
+          message: AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر التحقق من حالة ملف التقرير.',
+          ),
+          type: SnackType.error,
+        );
+      }
     } finally {
-      isCheckingExport.value = false;
+      if (isCurrentJob()) isCheckingExport.value = false;
     }
   }
 }

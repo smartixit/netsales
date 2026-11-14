@@ -139,7 +139,7 @@ final class PayvTextShapingProvider {
     }
 
     if (text.isEmpty) {
-      return const ShapedDocumentLine(
+      return ShapedDocumentLine(
         paragraphLevel: 0,
         visualRuns: <ShapedDocumentRun>[],
         advance: 0,

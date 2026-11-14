@@ -208,7 +208,7 @@ class WalletStatementDocumentService {
             DocumentStatusBanner(label: 'كشف حساب تشغيلي تفصيلي', tone: DocumentStatusTone.info, detail: 'يعرض القيود بترتيب إدراجها في دفتر الأستاذ'),
             DocumentInfoGrid(items: info, columns: 3, compact: true),
             if (openingBalanceSource == 'BACKFILLED')
-              const DocumentCallout(
+              DocumentCallout(
                 title: 'تنبيه بشأن الرصيد الافتتاحي',
                 body: 'الرصيد الافتتاحي أعيد بناؤه عند ترحيل دفتر الأستاذ من الرصيد الحالي والحركات المتاحة؛ لا يمثل كشفاً تاريخياً مستقلاً قبل الترحيل.',
                 tone: DocumentStatusTone.warning,
@@ -222,10 +222,10 @@ class WalletStatementDocumentService {
             ),
             DocumentHeading(text: 'تفاصيل الحركات', level: 2, direction: DocumentTextDirection.rightToLeft),
             if (tableRows.isEmpty)
-              const DocumentCallout(title: 'لا توجد حركات مسجلة', body: 'لا توجد قيود دفتر أستاذ لهذه المحفظة حتى وقت إنشاء الكشف.', tone: DocumentStatusTone.neutral)
+              DocumentCallout(title: 'لا توجد حركات مسجلة', body: 'لا توجد قيود دفتر أستاذ لهذه المحفظة حتى وقت إنشاء الكشف.', tone: DocumentStatusTone.neutral)
             else
               DocumentTable(
-                columns: const [
+                columns: [
                   DocumentTableColumn(id: 'id', label: 'القيد'),
                   DocumentTableColumn(id: 'date', label: 'التاريخ'),
                   DocumentTableColumn(id: 'operation', label: 'الحركة'),
@@ -326,7 +326,7 @@ class WalletStatementDocumentService {
   };
 
   String _money(double value, String currencyCode) =>
-      '${AmountFormatter.format(value)} $currencyCode';
+      '${AmountFormatter.format(value.toString())} $currencyCode';
 
   static String _display(String? value, [String fallback = '—']) {
     final normalized = value?.trim();

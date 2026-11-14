@@ -38,7 +38,7 @@ class OperationalReportSummary {
       final points = raw[slot.id];
       if (points is List) {
         result[slot.id] = points
-            .whereType<Map>()
+            .whereType<Map<String, dynamic>>()
             .map((point) => Map<String, dynamic>.from(point))
             .toList(growable: false);
       }

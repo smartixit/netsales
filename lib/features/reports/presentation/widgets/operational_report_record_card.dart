@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/invoice_payment_status.dart';
+import 'package:netsales/core/enums/request_status.dart';
+import 'package:netsales/core/enums/wallet_operation_type.dart';
+import 'package:netsales/core/enums/sale_type.dart';
+import 'package:netsales/core/enums/repayment_status.dart';
+import 'package:netsales/core/enums/receivable_aging_bucket.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -8,6 +16,7 @@ import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/widgets/cards/custom_surface_card.dart';
 
 class OperationalReportRecordCard extends StatelessWidget {
   const OperationalReportRecordCard({
@@ -29,49 +38,57 @@ class OperationalReportRecordCard extends StatelessWidget {
     return fallback;
   }
 
-  SemanticTone _statusTone(String value) {
-    final status = value.toUpperCase();
-    if (status == 'PAID' ||
-        status == 'DEPOSIT' ||
-        status == 'COMPLETED' ||
-        status == 'APPROVED') {
-      return SemanticTone.success;
+  EnumPresentation _statusPresentation(String value) {
+    final normalized = value.trim();
+    if (normalized.isEmpty || normalized == '—') {
+      return EnumPresentation.unknown(fallbackLabel: 'غير متاح');
     }
-    if (status == 'PARTIALLY_PAID' ||
-        status == 'PENDING' ||
-        status == 'WITHDRAW' ||
-        status == '31_60' ||
-        status == '61_90') {
-      return SemanticTone.warning;
-    }
-    if (status == 'REJECTED' ||
-        status == 'REVERSED' ||
-        status == 'UNPAID' ||
-        status == 'CANCELLED' ||
-        status == 'OVER_90') {
-      return SemanticTone.danger;
-    }
-    return SemanticTone.neutral;
+
+    final presentation = switch (type) {
+      OperationalReportType.sales =>
+        EnumPresentationRegistry.resolveInvoicePaymentStatus(
+          InvoicePaymentStatus.fromWire(normalized),
+        ),
+      OperationalReportType.networkWallet ||
+      OperationalReportType.posWallet =>
+        EnumPresentationRegistry.resolveWalletOperationType(
+          WalletOperationType.fromWire(normalized),
+        ),
+      OperationalReportType.repayments =>
+        EnumPresentationRegistry.resolveRepaymentStatus(
+          RepaymentStatus.fromWire(normalized),
+        ),
+      OperationalReportType.requests =>
+        EnumPresentationRegistry.resolveRequestStatus(
+          RequestStatus.fromWire(normalized),
+        ),
+      OperationalReportType.debtAging =>
+        _debtAgingPresentation(normalized),
+      OperationalReportType.expenses => EnumPresentation(
+          label: normalized,
+          tone: SemanticTone.neutral,
+          icon: Icons.receipt_long_outlined,
+        ),
+      _ => EnumPresentation.unknown(rawValue: normalized),
+    };
+
+    return presentation.isKnown
+        ? presentation
+        : EnumPresentation.unknown(rawValue: normalized);
   }
 
-  String _statusLabel(String value) => switch (value.toUpperCase()) {
-    'PAID' => 'مسددة',
-    'PARTIALLY_PAID' => 'مسددة جزئياً',
-    'UNPAID' => 'غير مسددة',
-    'DEPOSIT' => 'إيداع',
-    'WITHDRAW' => 'سحب',
-    'COMPLETED' => 'مكتمل',
-    'REVERSED' => 'معكوس',
-    'PENDING' => 'قيد الانتظار',
-    'APPROVED' => 'معتمد',
-    'REJECTED' => 'مرفوض',
-    'CANCELLED' => 'ملغى',
-    '0_30' => 'حتى 30 يوماً',
-    '31_60' => '31–60 يوماً',
-    '61_90' => '61–90 يوماً',
-    'OVER_90' => 'أكثر من 90 يوماً',
-    _ => value,
-  };
+  EnumPresentation _debtAgingPresentation(String value) {
+    final bucket = ReceivableAgingBucket.fromWire(value);
+    if (bucket.isKnown) {
+      return EnumPresentationRegistry.resolveReceivableAgingBucket(bucket);
+    }
+    final paymentStatus = InvoicePaymentStatus.fromWire(value);
+    final presentation =
+        EnumPresentationRegistry.resolveInvoicePaymentStatus(paymentStatus);
+    return presentation.isKnown
+        ? presentation
+        : EnumPresentation.unknown(rawValue: value);
+  }
 
   String _date(String key) => _dateFirst([key]);
 
@@ -85,11 +102,12 @@ class OperationalReportRecordCard extends StatelessWidget {
     return '—';
   }
 
-  String _saleTypeLabel(String value) => switch (value.toUpperCase()) {
-    'CASH' => 'نقدي',
-    'CREDIT' => 'آجل',
-    _ => value,
-  };
+  String _saleTypeLabel(String value) {
+    final presentation = EnumPresentationRegistry.resolveSaleType(
+      SaleType.fromWire(value),
+    );
+    return presentation.isKnown ? presentation.label : value;
+  }
 
   String _amount(String key) {
     final raw = record.valueAt(key);
@@ -183,17 +201,14 @@ class OperationalReportRecordCard extends StatelessWidget {
       ),
     };
 
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: colors.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.65)),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(AppSpacing.cardPadding),
-        child: Column(
+    final statusPresentation = _statusPresentation(descriptor.status);
+
+    return CustomSurfaceCard(
+      padding: EdgeInsets.all(AppSpacing.cardPadding),
+      backgroundColor: colors.surfaceContainerLow,
+      borderColor: colors.outlineVariant.withValues(alpha: 0.65),
+      radius: 18,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -211,8 +226,8 @@ class OperationalReportRecordCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 CustomStatusBadge(
-                  label: _statusLabel(descriptor.status),
-                  tone: _statusTone(descriptor.status),
+                  label: statusPresentation.label,
+                  tone: statusPresentation.tone,
                   isCompact: true,
                 ),
               ],
@@ -270,7 +285,6 @@ class OperationalReportRecordCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }

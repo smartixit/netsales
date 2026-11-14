@@ -5,6 +5,7 @@ import 'package:document_engine/document_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j5ZkAAAAASUVORK5CYII=';
   test('QR payload is opaque and bounded', () {
     final qr = DocumentQrCode(payload: 'https://verify.example/d/opaque-id');
     expect(qr.payload, 'https://verify.example/d/opaque-id');
@@ -75,7 +76,7 @@ void main() {
   });
 
   test('watermark uses bounded defensive-copied PNG/JPEG image bytes', () {
-    final source = Uint8List.fromList(base64.decode('$b64'));
+    final source = Uint8List.fromList(base64.decode(b64));
     final watermark = DocumentWatermark(imageBytes: source, opacity: 0.1);
     source[0] = 0;
     expect(watermark.imageBytes.first, 0x89);
@@ -94,7 +95,7 @@ void main() {
     );
     expect(
       () => DocumentWatermark(
-        imageBytes: Uint8List.fromList(base64.decode('$b64')),
+        imageBytes: Uint8List.fromList(base64.decode(b64)),
         opacity: 0.9,
       ),
       throwsArgumentError,

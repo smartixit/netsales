@@ -67,3 +67,19 @@ Preset schema version is currently 1. The API validates the saved report schema 
 The Reports feature is embedded in both workspace shells and uses the shared Report Configuration Studio. User-owned saved presets are stored by the API with `ReportCriteria` and `ReportPresentationOptions` JSON; see the preset endpoint contract above.
 Detailed report PDF rendering consumes the current presentation options (columns, sorts, grouping, template/version, locale, page profile, metrics, charts). It rejects more than 1,500 rows and never recomputes financial values.
 Network/POS wallet statements use server-supplied opening/current balances and per-entry balance snapshots, reject mixed currencies or concurrent source changes, and render a branded landscape ledger PDF. Invoice/expense/repayment PDFs use the immutable API document snapshot and artifact workflow.
+
+
+## Billing self-service collections — 2026-11-14
+
+The canonical Laravel collection endpoints validate `search`, `status`, `per_page`, and `cursor` as applicable. Flutter must send search/status in the initial request and repeat the same criteria with each subsequent cursor. The server remains responsible for filtering and account authorization.
+
+- Plans: plan name/key search; currency-scoped catalogue.
+- Subscriptions: status, subscription ID, plan name/key search.
+- Invoices: status, invoice number/ID, and related plan search.
+- Payments: status, payment reference, external reference, invoice number, and ID search.
+- Credit notes: status, credit-note number, reason, invoice number, and ID search.
+- Refunds: status, refund reference, reason, related payment reference, and ID search.
+
+Each Flutter collection owns an independent filter and cursor state. A change in one collection must not reset another collection's criteria or pages. Switching Billing account or Network clears all prior-scope criteria. First-page and load-more responses must be discarded when account, network, or page revision changes.
+
+Financial resources expose decimal money values (`total`, `remaining`, `amount`) and nested `currency.code` / `currency.decimal_places`. Render those authoritative values with shared currency widgets; do not display `*_minor` values as decimal currency amounts.

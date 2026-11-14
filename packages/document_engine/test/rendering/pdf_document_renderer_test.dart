@@ -7,6 +7,7 @@ import 'package:document_engine/document_engine_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j5ZkAAAAASUVORK5CYII=';
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late PayvTextShapingProvider shapingProvider;
@@ -432,7 +433,7 @@ void main() {
         pageProfile: DocumentPageProfile.a4Portrait(),
         generatedAt: DateTime.utc(2026, 11, 9, 10),
         watermark: DocumentWatermark(
-          imageBytes: Uint8List.fromList(base64.decode('$b64')),
+          imageBytes: Uint8List.fromList(base64.decode(b64)),
         ),
       ),
     );
@@ -547,7 +548,7 @@ void main() {
     final renderer = PdfDocumentRenderer(textShapingProvider: shapingProvider);
     final rtlCases = <List<DocumentNode>>[
       const [DocumentParagraph(text: 'Invoice INV-2026-001 رقم الفاتورة')],
-      const [DocumentHeading(text: 'Customer details بيانات العميل')],
+      [DocumentHeading(text: 'Customer details بيانات العميل')],
       [
         DocumentTable(
           columns: [

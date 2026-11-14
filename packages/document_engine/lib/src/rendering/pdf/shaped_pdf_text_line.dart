@@ -1,11 +1,17 @@
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:payv/payv.dart' as payv;
 
 import '../../document/document_locale.dart';
 import 'document_font_weight.dart';
 import 'payv_text_shaping_provider.dart';
 import 'pdf_font_face_cache.dart';
+
+double _pathCoordinate(dynamic value) {
+  if (value is num) {
+    return value.toDouble();
+  }
+  throw StateError('Payv outline coordinate is not numeric: $value');
+}
 
 /// A single-line, vector-outline PDF text widget.
 ///
@@ -94,34 +100,37 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
             canvas.setFillColor(color);
 
             for (final command in glyph.outline.cubicCommands) {
-              switch (command) {
-                case payv.MoveTo():
+              final dynamic pathCommand = command;
+              switch (command.runtimeType.toString()) {
+                case 'MoveTo':
                   canvas.moveTo(
-                    originX + command.x * scale,
-                    originY + command.y * scale,
+                    originX + _pathCoordinate(pathCommand.x) * scale,
+                    originY + _pathCoordinate(pathCommand.y) * scale,
                   );
-                case payv.LineTo():
+                case 'LineTo':
                   canvas.lineTo(
-                    originX + command.x * scale,
-                    originY + command.y * scale,
+                    originX + _pathCoordinate(pathCommand.x) * scale,
+                    originY + _pathCoordinate(pathCommand.y) * scale,
                   );
-                case payv.CubicTo():
+                case 'CubicTo':
                   canvas.curveTo(
-                    originX + command.c1x * scale,
-                    originY + command.c1y * scale,
-                    originX + command.c2x * scale,
-                    originY + command.c2y * scale,
-                    originX + command.x * scale,
-                    originY + command.y * scale,
+                    originX + _pathCoordinate(pathCommand.c1x) * scale,
+                    originY + _pathCoordinate(pathCommand.c1y) * scale,
+                    originX + _pathCoordinate(pathCommand.c2x) * scale,
+                    originY + _pathCoordinate(pathCommand.c2y) * scale,
+                    originX + _pathCoordinate(pathCommand.x) * scale,
+                    originY + _pathCoordinate(pathCommand.y) * scale,
                   );
-                case payv.QuadTo():
+                case 'QuadTo':
                   // cubicCommands converts every quadratic exactly. Keep this
                   // defensive branch so a future Payv API change fails loudly.
                   throw StateError(
                     'Payv cubicCommands returned an unconverted quadratic.',
                   );
-                case payv.ClosePath():
+                case 'ClosePath':
                   canvas.closePath();
+                default:
+                  throw StateError('Unsupported Payv outline command: $command');
               }
             }
             if (glyph.outline.isNotEmpty) {

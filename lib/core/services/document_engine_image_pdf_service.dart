@@ -115,48 +115,53 @@ class DocumentEngineImagePdfService {
   }
 
   Future<Uint8List> _normalizeImage(Uint8List sourceBytes) async {
-    for (final maximumDimension in [1600, 1400, 1200, 1000, 800]) {
-      final codec = await ui.instantiateImageCodecWithSize(
-        sourceBytes,
-        getTargetSize: (sourceWidth, sourceHeight) {
-          final scale = math.min(
-            1.0,
-            maximumDimension /
-                math.max(sourceWidth, sourceHeight).toDouble(),
-          );
-          return ui.TargetImageSize(
-            width: (sourceWidth * scale)
-                .round()
-                .clamp(1, maximumDimension)
-                .toInt(),
-            height: (sourceHeight * scale)
-                .round()
-                .clamp(1, maximumDimension)
-                .toInt(),
-          );
-        },
-      );
-      try {
-        final frame = await codec.getNextFrame();
+    final buffer = await ui.ImmutableBuffer.fromUint8List(sourceBytes);
+    try {
+      for (final maximumDimension in [1600, 1400, 1200, 1000, 800]) {
+        final codec = await ui.instantiateImageCodecWithSize(
+          buffer,
+          getTargetSize: (sourceWidth, sourceHeight) {
+            final scale = math.min(
+              1.0,
+              maximumDimension /
+                  math.max(sourceWidth, sourceHeight).toDouble(),
+            );
+            return ui.TargetImageSize(
+              width: (sourceWidth * scale)
+                  .round()
+                  .clamp(1, maximumDimension)
+                  .toInt(),
+              height: (sourceHeight * scale)
+                  .round()
+                  .clamp(1, maximumDimension)
+                  .toInt(),
+            );
+          },
+        );
         try {
-          final data = await frame.image.toByteData(
-            format: ui.ImageByteFormat.png,
-          );
-          if (data == null) continue;
+          final frame = await codec.getNextFrame();
+          try {
+            final data = await frame.image.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
+            if (data == null) continue;
 
-          final encoded = data.buffer.asUint8List(
-            data.offsetInBytes,
-            data.lengthInBytes,
-          );
-          if (encoded.length <= _maxImageBytes) {
-            return Uint8List.fromList(encoded);
+            final encoded = data.buffer.asUint8List(
+              data.offsetInBytes,
+              data.lengthInBytes,
+            );
+            if (encoded.length <= _maxImageBytes) {
+              return Uint8List.fromList(encoded);
+            }
+          } finally {
+            frame.image.dispose();
           }
         } finally {
-          frame.image.dispose();
+          codec.dispose();
         }
-      } finally {
-        codec.dispose();
       }
+    } finally {
+      buffer.dispose();
     }
 
     throw StateError(
