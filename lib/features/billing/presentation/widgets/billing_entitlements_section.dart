@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
-import 'package:netsales/features/billing/presentation/widgets/billing_status_badge.dart';
-import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/cards/custom_info_list_tile.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/features/billing/presentation/widgets/billing_trial_policy_summary.dart';
 
 class BillingEntitlementsSection extends StatelessWidget {
   const BillingEntitlementsSection({required this.controller, super.key});
@@ -34,7 +32,7 @@ class BillingEntitlementsSection extends StatelessWidget {
           )
         else
           ...features.map(_featureTile),
-        if (trial is Map<String, dynamic>) _trialCard(trial),
+        if (trial is Map<String, dynamic>) BillingTrialPolicySummary(trial: trial),
       ],
     );
   }
@@ -65,24 +63,4 @@ class BillingEntitlementsSection extends StatelessWidget {
     );
   }
 
-  Widget _trialCard(Map<String, dynamic> trial) {
-    return CustomSurfaceCard(
-      margin: const EdgeInsets.all(4),
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('حالة الفترة التجريبية', style: AppTypography.titleSmall),
-          BillingStatusBadge(status: trial['status']?.toString()),
-          Text(
-            trial['awaiting_first_activation'] == true
-                ? 'التجربة معتمدة وتبدأ عند أول تفعيل تشغيلي؛ لم يبدأ عدادها بعد.'
-                : 'تفاصيل دورة التجربة كما وردت من الخادم.',
-          ),
-          Text('تاريخ البدء: ${trial['start']?.toString() ?? 'لم تبدأ'}'),
-          Text('تاريخ الانتهاء: ${trial['end']?.toString() ?? '—'}'),
-        ],
-      ),
-    );
-  }
 }
