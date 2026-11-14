@@ -131,7 +131,7 @@ class BillingReportDocumentService {
     final template=DocumentTemplateDefinition(
       id:TemplateId('netsales.billing-report.$reportType.executive'),
       version:TemplateVersion(major:1,minor:0,patch:0),
-      documentTypeId:const DocumentTypeId('netsales.billing-report'),
+      documentTypeId:DocumentTypeId('netsales.billing-report'),
       displayName:'NetSales $reportLabel Executive',
       supportedLocaleTags:[localeTag,'ar-YE','en'],
       capabilities:TemplateCapabilities([
