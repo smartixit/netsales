@@ -19,6 +19,7 @@ import 'document_font_weight.dart';
 import 'payv_text_shaping_provider.dart';
 import 'pdf_font_face_cache.dart';
 import 'shaped_pdf_paragraph.dart';
+import 'shaped_pdf_text_line.dart';
 
 final Expando<Map<DocumentFontRole, pw.Font>> _brandingFontFaces =
     Expando<Map<DocumentFontRole, pw.Font>>('document-engine-branding-font-faces');
@@ -1394,7 +1395,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                 columns[index].alignment,
                 false,
                 style.compact,
-                entry.$2.cells[index].direction,
+                entry.$2.cells[index].direction ?? DocumentTextDirection.auto,
               ),
           ],
         ),
