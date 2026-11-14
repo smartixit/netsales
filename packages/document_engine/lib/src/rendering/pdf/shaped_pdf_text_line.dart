@@ -102,8 +102,8 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
                   );
                 case 'LineTo':
                   canvas.lineTo(
-                    originX + command.x * scale,
-                    originY + command.y * scale,
+                    originX + pathCommand.x * scale,
+                    originY + pathCommand.y * scale,
                   );
                 case 'CubicTo':
                   canvas.curveTo(
@@ -111,8 +111,8 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
                     originY + pathCommand.c1y * scale,
                     originX + pathCommand.c2x * scale,
                     originY + pathCommand.c2y * scale,
-                    originX + command.x * scale,
-                    originY + command.y * scale,
+                    originX + pathCommand.x * scale,
+                    originY + pathCommand.y * scale,
                   );
                 case 'QuadTo':
                   // cubicCommands converts every quadratic exactly. Keep this
@@ -122,6 +122,8 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
                   );
                 case 'ClosePath':
                   canvas.closePath();
+                default:
+                  throw StateError('Unsupported Payv outline command: $command');
               }
             }
             if (glyph.outline.isNotEmpty) {
