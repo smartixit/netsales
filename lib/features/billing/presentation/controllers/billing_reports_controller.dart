@@ -581,7 +581,7 @@ class BillingReportsController extends GetxController {
         final query = <String, dynamic>{
           ...filtersSnapshot,
           'per_page': 100,
-          if (cursor != null) 'cursor': cursor,
+          ...? (cursor == null ? null : {'cursor': cursor}),
         };
         final page = _map(
           await useCases.billingReport(network, type, query),
