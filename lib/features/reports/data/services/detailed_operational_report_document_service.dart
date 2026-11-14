@@ -109,7 +109,7 @@ class DetailedOperationalReportDocumentService {
     }
 
     if (records.isEmpty) {
-      nodes.add(const DocumentCallout(
+      nodes.add(DocumentCallout(
         title: 'لا توجد سجلات مطابقة',
         body: 'لم يُرجع الخادم سجلات تفصيلية للمرشحات المحددة.',
         tone: DocumentStatusTone.neutral,
@@ -142,16 +142,16 @@ class DetailedOperationalReportDocumentService {
 
     final templateId = presentation.template?.id ??
         (definition.templates.isEmpty
-            ? const TemplateId('netsales.operational-report.executive')
+            ? TemplateId('netsales.operational-report.executive')
             : definition.templates.first.id);
     final templateVersion = presentation.template?.version ??
         (definition.templates.isEmpty
-            ? const TemplateVersion(major: 1, minor: 0, patch: 0)
+            ? TemplateVersion(major: 1, minor: 0, patch: 0)
             : definition.templates.first.version);
     final template = DocumentTemplateDefinition(
       id: templateId,
       version: templateVersion,
-      documentTypeId: const DocumentTypeId('netsales.operational-report'),
+      documentTypeId: DocumentTypeId('netsales.operational-report'),
       displayName: 'NetSales ${entry.label} Detailed Report',
       description: 'Detailed Arabic operational report',
       supportedLocaleTags: definition.supportedLocaleTags.toList(growable: false),
@@ -238,7 +238,7 @@ class DetailedOperationalReportDocumentService {
       );
     }).toList(growable: false);
     return DocumentTable(
-      columns: const [
+      columns: [
         DocumentTableColumn(id: 'metric', label: 'المؤشر'),
         DocumentTableColumn(id: 'value', label: 'القيمة', alignment: DocumentCellAlignment.decimal),
       ],
