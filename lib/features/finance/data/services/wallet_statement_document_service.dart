@@ -326,7 +326,7 @@ class WalletStatementDocumentService {
   };
 
   String _money(double value, String currencyCode) =>
-      '${AmountFormatter.format(value)} $currencyCode';
+      '${AmountFormatter.format(value.toString())} $currencyCode';
 
   static String _display(String? value, [String fallback = '—']) {
     final normalized = value?.trim();
