@@ -14,6 +14,7 @@ import 'package:netsales/core/enums/wallet_operation_type.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/enums/billing_status.dart';
+import 'package:netsales/core/enums/billing_trial_entitlement_mode.dart';
 import 'package:netsales/core/enums/network_status.dart';
 import 'package:netsales/core/enums/pos_status.dart';
 import 'package:netsales/core/enums/repayment_status.dart';
@@ -434,6 +435,43 @@ class EnumPresentationRegistry {
           icon: Icons.error_outline_rounded,
         ),
       ReceivableAgingBucket.unknown =>
+        EnumPresentation.unknown(fallbackLabel: label),
+    };
+  }
+
+  static EnumPresentation resolveBillingTrialEntitlementMode(
+    BillingTrialEntitlementMode mode, {
+    String? serverLabel,
+    bool english = false,
+  }) {
+    final fallback = switch (mode) {
+      BillingTrialEntitlementMode.fullPlan =>
+        english ? 'Full plan' : 'كامل مزايا الخطة',
+      BillingTrialEntitlementMode.restricted =>
+        english ? 'Restricted features' : 'مزايا محددة',
+      BillingTrialEntitlementMode.none =>
+        english ? 'No operational features' : 'دون مزايا تشغيلية',
+      BillingTrialEntitlementMode.unknown =>
+        english ? 'Unknown entitlement mode' : 'نمط استحقاق غير معروف',
+    };
+    final label = _effectiveLabel(serverLabel, fallback);
+    return switch (mode) {
+      BillingTrialEntitlementMode.fullPlan => EnumPresentation(
+          label: label,
+          tone: SemanticTone.success,
+          icon: Icons.verified_rounded,
+        ),
+      BillingTrialEntitlementMode.restricted => EnumPresentation(
+          label: label,
+          tone: SemanticTone.warning,
+          icon: Icons.tune_rounded,
+        ),
+      BillingTrialEntitlementMode.none => EnumPresentation(
+          label: label,
+          tone: SemanticTone.neutral,
+          icon: Icons.lock_outline_rounded,
+        ),
+      BillingTrialEntitlementMode.unknown =>
         EnumPresentation.unknown(fallbackLabel: label),
     };
   }
