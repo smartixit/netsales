@@ -80,8 +80,8 @@ class BillingReportDocumentService {
     ];
     final snapshot=DocumentSnapshot(
       metadata:DocumentMetadata(
-        id:DocumentId('billing-report-'+reportType+'-'+generatedAt.microsecondsSinceEpoch.toString()),
-        documentTypeId:const DocumentTypeId('netsales.billing-report'),
+        id:DocumentId('billing-report-$reportType-${generatedAt.microsecondsSinceEpoch}'),
+        documentTypeId:DocumentTypeId('netsales.billing-report'),
         title:reportLabel,
         subtitle:isArabic?'ملخص تنفيذي لتقارير الاشتراكات والفوترة':'Executive subscription and billing report',
         locale:DocumentLocale(languageTag:localeTag,direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
@@ -129,10 +129,10 @@ class BillingReportDocumentService {
       ],
     );
     final template=DocumentTemplateDefinition(
-      id:TemplateId('netsales.billing-report.'+reportType+'.executive'),
+      id:TemplateId('netsales.billing-report.$reportType.executive'),
       version:TemplateVersion(major:1,minor:0,patch:0),
       documentTypeId:const DocumentTypeId('netsales.billing-report'),
-      displayName:'NetSales '+reportLabel+' Executive',
+      displayName:'NetSales $reportLabel Executive',
       supportedLocaleTags:[localeTag,'ar-YE','en'],
       capabilities:TemplateCapabilities([
         TemplateCapability.coverPage,TemplateCapability.repeatingHeader,
@@ -211,7 +211,7 @@ class BillingReportDocumentService {
       'completed_at':'وقت الإكمال','due_on':'تاريخ الاستحقاق','issued_on':'تاريخ الإصدار',
       'created_at':'تاريخ الإنشاء','occurred_at':'وقت الحدث','name':'الاسم','email':'البريد الإلكتروني',
     };
-    return labels[key]??key.replaceAll('_',' ');
+    return labels[key] ?? key.replaceAll('_', ' ');
   }
 
   DocumentValue _documentValue(dynamic value,String localeTag){
@@ -255,6 +255,6 @@ class BillingReportDocumentService {
     'started_at':'Started at','completed_at':'Completed at','name':'Name','email':'Email',
   }[key]??key.replaceAll('_',' ');
   DocumentTextDirection _valueDirection(dynamic value,bool isArabic)=>value is num?DocumentTextDirection.leftToRight:(isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight);
-  String _date(DateTime value)=>value.year.toString().padLeft(4,'0')+'-'+value.month.toString().padLeft(2,'0')+'-'+value.day.toString().padLeft(2,'0');
-  String _hex(Color color)=>color.value.toRadixString(16).substring(2).toUpperCase();
+  String _date(DateTime value) => '${value.year.toString().padLeft(4, '0')}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
+  String _hex(Color color)=>color.toARGB32().toRadixString(16).substring(2).toUpperCase();
 }
