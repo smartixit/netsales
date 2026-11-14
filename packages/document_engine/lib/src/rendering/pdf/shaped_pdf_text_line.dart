@@ -6,6 +6,13 @@ import 'document_font_weight.dart';
 import 'payv_text_shaping_provider.dart';
 import 'pdf_font_face_cache.dart';
 
+double _pathCoordinate(dynamic value) {
+  if (value is num) {
+    return value.toDouble();
+  }
+  throw StateError('Payv outline coordinate is not numeric: $value');
+}
+
 /// A single-line, vector-outline PDF text widget.
 ///
 /// Shaped glyph commands are emitted directly to PdfGraphics. Payv's
@@ -97,22 +104,22 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
               switch (command.runtimeType.toString()) {
                 case 'MoveTo':
                   canvas.moveTo(
-                    originX + pathCommand.x * scale,
-                    originY + pathCommand.y * scale,
+                    originX + _pathCoordinate(pathCommand.x) * scale,
+                    originY + _pathCoordinate(pathCommand.y) * scale,
                   );
                 case 'LineTo':
                   canvas.lineTo(
-                    originX + pathCommand.x * scale,
-                    originY + pathCommand.y * scale,
+                    originX + _pathCoordinate(pathCommand.x) * scale,
+                    originY + _pathCoordinate(pathCommand.y) * scale,
                   );
                 case 'CubicTo':
                   canvas.curveTo(
-                    originX + pathCommand.c1x * scale,
-                    originY + pathCommand.c1y * scale,
-                    originX + pathCommand.c2x * scale,
-                    originY + pathCommand.c2y * scale,
-                    originX + pathCommand.x * scale,
-                    originY + pathCommand.y * scale,
+                    originX + _pathCoordinate(pathCommand.c1x) * scale,
+                    originY + _pathCoordinate(pathCommand.c1y) * scale,
+                    originX + _pathCoordinate(pathCommand.c2x) * scale,
+                    originY + _pathCoordinate(pathCommand.c2y) * scale,
+                    originX + _pathCoordinate(pathCommand.x) * scale,
+                    originY + _pathCoordinate(pathCommand.y) * scale,
                   );
                 case 'QuadTo':
                   // cubicCommands converts every quadratic exactly. Keep this
