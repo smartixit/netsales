@@ -338,23 +338,46 @@ class BillingDialogs {
     final eligibility = await controller.checkTrial(priceId);
     if (eligibility == null) return;
     final ready = eligibility['purchase_ready'] == true;
-    final trial = eligibility['trial'];
-    final trialEligible = trial is Map<String, dynamic> && trial['eligible'] == true;
-    final blockers = (eligibility['purchase_blockers'] as List<dynamic>? ?? const <dynamic>[]).join('، ');
+    final rawTrial = eligibility['trial'];
+    final trial = rawTrial is Map
+        ? Map<String, dynamic>.from(rawTrial)
+        : const <String, dynamic>{};
+    final trialEligible = trial['eligible'] == true;
+    final rawPolicy = trial['policy'];
+    final trialPolicy = rawPolicy is Map
+        ? Map<String, dynamic>.from(rawPolicy)
+        : null;
+    final blockers = (eligibility['purchase_blockers'] as List<dynamic>? ??
+            const <dynamic>[])
+        .map((item) => _purchaseBlockerLabel(item.toString()))
+        .join('، ');
     final accepted = await CustomDialog.show(
       type: ready ? DialogType.confirmation : DialogType.warning,
       title: 'تأكيد الاشتراك',
       message: !ready
           ? 'لا يمكن الشراء حالياً: $blockers'
           : (trialEligible
-              ? 'السعر مؤهل لفترة تجريبية وفق سياسة المنصة.'
-              : 'سيُنشأ طلب الاشتراك والفاتورة وفق شروط الخطة.') +
-              ' لن تُفعّل الاستحقاقات قبل اعتماد الدفع.',
+              ? 'أهلية التجربة متاحة وفق سياسة المنصة المبينة أدناه.'
+              : 'لا توجد أهلية لتجربة مجانية لهذا السعر؛ سيتم الشراء وفق السعر والدورة المنشورين.') +
+              ' لن تُفعّل الاستحقاقات المدفوعة قبل اعتماد الدفع.',
+      content: trialPolicy == null
+          ? null
+          : BillingTrialPolicySummary(
+              trial: trialPolicy,
+              showAdjustments: false,
+              title: 'شروط التجربة لهذا السعر',
+            ),
       confirmLabel: ready ? 'متابعة' : 'فهمت',
       cancelLabel: 'رجوع',
     );
     if (accepted == true && ready) await controller.purchase(priceId);
   }
+
+  static String _purchaseBlockerLabel(String code) => switch (code) {
+        'DUNNING_POLICY_UNAVAILABLE' => 'سياسة التحصيل غير منشورة أو غير فعالة',
+        'NETWORK_SUBSCRIPTION_ALREADY_EXISTS' => 'توجد دورة اشتراك قائمة للشبكة',
+        _ => code,
+      };
 
   static Future<void> cancelSubscription(BillingController controller, int id) async {
     final accepted = await CustomDialog.show(
