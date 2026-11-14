@@ -34,7 +34,7 @@ class BillingTrialPolicySummary extends StatelessWidget {
     final awaitingActivation = trial['awaiting_first_activation'] == true;
     final adjustments = trial['adjustments'] is List
         ? (trial['adjustments'] as List)
-            .whereType<Map>()
+            .whereType<Map<String, dynamic>>()
             .map((item) => Map<String, dynamic>.from(item))
             .toList(growable: false)
         : const <Map<String, dynamic>>[];
