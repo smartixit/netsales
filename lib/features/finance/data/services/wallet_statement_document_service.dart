@@ -222,7 +222,7 @@ class WalletStatementDocumentService {
             ),
             DocumentHeading(text: 'تفاصيل الحركات', level: 2, direction: DocumentTextDirection.rightToLeft),
             if (tableRows.isEmpty)
-              const DocumentCallout(title: 'لا توجد حركات مسجلة', body: 'لا توجد قيود دفتر أستاذ لهذه المحفظة حتى وقت إنشاء الكشف.', tone: DocumentStatusTone.neutral)
+              DocumentCallout(title: 'لا توجد حركات مسجلة', body: 'لا توجد قيود دفتر أستاذ لهذه المحفظة حتى وقت إنشاء الكشف.', tone: DocumentStatusTone.neutral)
             else
               DocumentTable(
                 columns: [
