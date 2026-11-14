@@ -65,7 +65,7 @@ class BillingReportDocumentService {
     for(final entry in summary.entries){addValue(_label(entry.key,localeTag),entry.value);}
     if(metricRows.isEmpty){
       metricRows.add(DocumentTableRow(id:'billing-summary-empty',cells:[
-        const DocumentTableCell(value:DocumentTextValue(isArabic?'النتيجة':'Result'),direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
+        DocumentTableCell(value:DocumentTextValue(isArabic?'النتيجة':'Result'),direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
         DocumentTableCell(value:DocumentTextValue(isArabic?'لا توجد مؤشرات متاحة':'No metrics available')),
       ]));
     }
