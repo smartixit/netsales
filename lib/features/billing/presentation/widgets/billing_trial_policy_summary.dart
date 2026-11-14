@@ -13,12 +13,14 @@ class BillingTrialPolicySummary extends StatelessWidget {
     required this.trial,
     this.showAdjustments = true,
     this.title = 'سياسة الفترة التجريبية',
+    this.showLifecycle = true,
     super.key,
   });
 
   final Map<String, dynamic> trial;
   final bool showAdjustments;
   final String title;
+  final bool showLifecycle;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +39,14 @@ class BillingTrialPolicySummary extends StatelessWidget {
             .map((item) => Map<String, dynamic>.from(item))
             .toList(growable: false)
         : const <Map<String, dynamic>>[];
-    final allowedFeatures = trial['allowed_features'] is List
-        ? (trial['allowed_features'] as List)
+    final rawEntitlementConfig = trial['entitlement_config'];
+    final entitlementConfig = rawEntitlementConfig is Map
+        ? Map<String, dynamic>.from(rawEntitlementConfig)
+        : const <String, dynamic>{};
+    final rawAllowedFeatures =
+        trial['allowed_features'] ?? entitlementConfig['allowed_features'];
+    final allowedFeatures = rawAllowedFeatures is List
+        ? rawAllowedFeatures
             .map((item) => item.toString())
             .toList(growable: false)
         : const <String>[];
@@ -75,9 +83,11 @@ class BillingTrialPolicySummary extends StatelessWidget {
             trial['requires_manual_approval'] == true ? 'مطلوبة' : 'غير مطلوبة',
           ),
           _detail('السلوك عند الانتهاء', _endBehaviorLabel()),
-          _detail('تاريخ البدء', _dateTimeLabel(trial['start'])),
-          _detail('تاريخ الانتهاء', _dateTimeLabel(trial['end'])),
-          _detail('الوقت المتبقي', _remainingLabel()),
+          if (showLifecycle) ...[
+            _detail('تاريخ البدء', _dateTimeLabel(trial['start'])),
+            _detail('تاريخ الانتهاء', _dateTimeLabel(trial['end'])),
+            _detail('الوقت المتبقي', _remainingLabel()),
+          ],
           if (mode == BillingTrialEntitlementMode.restricted) ...[
             const SizedBox(height: 8),
             Text('المزايا المسموحة خلال التجربة', style: AppTypography.titleSmall),
