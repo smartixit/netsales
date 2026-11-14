@@ -138,7 +138,7 @@ class BillingController extends GetxController {
     }
     if (value is! List) return const [];
     return value
-        .whereType<Map>()
+        .whereType<Map<String, dynamic>>()
         .map((row) => Map<String, dynamic>.from(row))
         .toList(growable: false);
   }
