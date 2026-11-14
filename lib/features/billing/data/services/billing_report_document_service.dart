@@ -112,7 +112,7 @@ class BillingReportDocumentService {
                 label:_label((column['id']??column['key']??column['label']??'').toString(),localeTag),
               )).toList(),
               rows:rows.asMap().entries.map((entry)=>DocumentTableRow(
-                id:'billing-detail-'+entry.key.toString(),
+                id:'billing-detail-${entry.key}',
                 cells:columns.take(10).map((column){
                   final key=(column['key']??column['id']??'').toString();
                   return DocumentTableCell(
@@ -165,7 +165,7 @@ class BillingReportDocumentService {
     }
     return FileExportService.instance.saveFile(
       bytes:result.artifact.bytes,
-      fileName:'Billing-$reportType-Summary'',
+      fileName:'Billing-$reportType-Summary',
       extension:'pdf',
       folderName:'Reports',
       namingStrategy:FileNamingStrategy.report,
