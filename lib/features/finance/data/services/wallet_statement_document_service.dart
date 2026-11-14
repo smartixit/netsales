@@ -208,7 +208,7 @@ class WalletStatementDocumentService {
             DocumentStatusBanner(label: 'كشف حساب تشغيلي تفصيلي', tone: DocumentStatusTone.info, detail: 'يعرض القيود بترتيب إدراجها في دفتر الأستاذ'),
             DocumentInfoGrid(items: info, columns: 3, compact: true),
             if (openingBalanceSource == 'BACKFILLED')
-              const DocumentCallout(
+              DocumentCallout(
                 title: 'تنبيه بشأن الرصيد الافتتاحي',
                 body: 'الرصيد الافتتاحي أعيد بناؤه عند ترحيل دفتر الأستاذ من الرصيد الحالي والحركات المتاحة؛ لا يمثل كشفاً تاريخياً مستقلاً قبل الترحيل.',
                 tone: DocumentStatusTone.warning,
@@ -225,7 +225,7 @@ class WalletStatementDocumentService {
               const DocumentCallout(title: 'لا توجد حركات مسجلة', body: 'لا توجد قيود دفتر أستاذ لهذه المحفظة حتى وقت إنشاء الكشف.', tone: DocumentStatusTone.neutral)
             else
               DocumentTable(
-                columns: const [
+                columns: [
                   DocumentTableColumn(id: 'id', label: 'القيد'),
                   DocumentTableColumn(id: 'date', label: 'التاريخ'),
                   DocumentTableColumn(id: 'operation', label: 'الحركة'),
