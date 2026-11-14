@@ -26,11 +26,16 @@ class BillingReportsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      final english = controller.selectedLocale.value == 'en';
       final catalogItems = controller.catalog
           .map(
             (item) => DropdownItem<String>(
               value: item['id'].toString(),
-              child: Text(item['label']?.toString() ?? item['id'].toString()),
+              child: Text(
+                english
+                    ? BillingReportLabels.englishReport(item['id'].toString())
+                    : item['label']?.toString() ?? item['id'].toString(),
+              ),
             ),
           )
           .toList(growable: false);
@@ -44,6 +49,10 @@ class BillingReportsContent extends StatelessWidget {
             isExportingPdf: controller.isExportingPdf.value,
             isExportingCsv: controller.isExportingCsv.value,
             isLoading: controller.isLoading.value,
+            title: english ? 'Subscription reports' : 'تقارير الاشتراكات',
+            subtitle: english
+                ? 'Billing reports are separate from sales and operational reports.'
+                : 'تقارير Billing مستقلة عن تقارير المبيعات والتشغيل.',
             onExportPdf: controller.exportPdfSummary,
             onExportCsv: controller.exportCsv,
             onRefresh: controller.loadCatalog,
@@ -54,8 +63,8 @@ class BillingReportsContent extends StatelessWidget {
               items: catalogItems,
               rxValue: controller.selectedType,
               onChanged: controller.selectReport,
-              label: 'نوع التقرير',
-              hint: 'اختر تقريراً',
+              label: english ? 'Report type' : 'نوع التقرير',
+              hint: english ? 'Select a report' : 'اختر تقريراً',
             ),
           if (definition != null)
             ReportConfigurationStudio(
@@ -99,6 +108,7 @@ class BillingReportsContent extends StatelessWidget {
                     criteria: criteria,
                     resolveLabel: resolveLabel,
                     onChanged: onChanged,
+                    english: english,
                   ),
               presentationSectionBuilder: (
                 context, {
@@ -113,11 +123,12 @@ class BillingReportsContent extends StatelessWidget {
                     presentation: presentation,
                     resolveLabel: resolveLabel,
                     onChanged: onChanged,
+                    english: english,
                   ),
             ),
           if (controller.errorMessage.value != null)
             CustomErrorState.compact(
-              title: 'تعذر تحميل بيانات التقرير',
+              title: english ? 'Unable to load report data' : 'تعذر تحميل بيانات التقرير',
               subtitle: controller.errorMessage.value,
               onRetry: controller.loadCatalog,
             ),
@@ -126,7 +137,7 @@ class BillingReportsContent extends StatelessWidget {
             CustomResultsCounterBar(
               count: controller.rows.length,
               totalCount: (reportSummary['record_count'] as num).toInt(),
-              recordLabel: 'سجل',
+              recordLabel: english ? 'Records' : 'سجل',
               isFiltered: controller.criteria.value.filters.isNotEmpty,
               isLoading: controller.isLoading.value,
               onClear: controller.criteria.value.filters.isEmpty
@@ -137,12 +148,10 @@ class BillingReportsContent extends StatelessWidget {
             BillingReportSummarySection(
               summary: reportSummary,
               charts: controller.charts,
-              title: controller.selectedLocale.value == 'en'
-                  ? 'Report summary'
-                  : 'ملخص التقرير',
+              title: english ? 'Report summary' : 'ملخص التقرير',
               arabicLabel: (key) => BillingReportLabels.field(
                 key,
-                english: controller.selectedLocale.value == 'en',
+                english: english,
               ),
             ),
           BillingReportRecordsSection(
@@ -154,8 +163,13 @@ class BillingReportsContent extends StatelessWidget {
             displayValue: (key, value) => BillingReportLabels.displayValue(
               key,
               value,
-              english: controller.selectedLocale.value == 'en',
+              english: english,
             ),
+            emptyTitle: english ? 'No matching records' : 'لا توجد سجلات مطابقة',
+            emptySubtitle: english
+                ? 'Change the search or filters, then reload the report.'
+                : 'غيّر معايير البحث أو الفلاتر ثم أعد تحميل التقرير.',
+            loadMoreLabel: english ? 'Load more report records' : 'تحميل المزيد من سجلات التقرير',
           ),
         ],
       );
