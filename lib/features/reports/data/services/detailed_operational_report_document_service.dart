@@ -172,7 +172,7 @@ class DetailedOperationalReportDocumentService {
     final snapshot = DocumentSnapshot(
       metadata: DocumentMetadata(
         id: DocumentId('netsales-operational-report-${type.wireValue}-${generatedAt.millisecondsSinceEpoch}'),
-        documentTypeId: const DocumentTypeId('netsales.operational-report'),
+        documentTypeId: DocumentTypeId('netsales.operational-report'),
         title: entry.label,
         subtitle: 'تقرير تشغيلي تفصيلي',
         reference: type.wireValue,
