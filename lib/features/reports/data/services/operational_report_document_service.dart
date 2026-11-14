@@ -307,7 +307,7 @@ class OperationalReportDocumentService {
               direction: DocumentTextDirection.rightToLeft,
             ),
             if (rows.isEmpty)
-              const DocumentCallout(
+              DocumentCallout(
                 title: 'لا توجد مؤشرات',
                 body: 'لم يرسل الخادم مؤشرات قابلة للعرض لهذا التقرير.',
                 tone: DocumentStatusTone.neutral,
@@ -332,7 +332,7 @@ class OperationalReportDocumentService {
                   columnWeights: const [2.4, 1.1],
                 ),
               ),
-            const DocumentCallout(
+            DocumentCallout(
               title: 'نطاق هذا المستند',
               body:
                   'يعرض هذا المستند ملخصاً مجمعاً محسوباً على كامل النتائج المطابقة. لتصدير التفاصيل الكاملة لكل سجل استخدم ملف CSV من شاشة التقارير.',
