@@ -280,13 +280,13 @@ class BillingDialogs {
                 policy['entitlement_mode'] ??
                     policyVersion['entitlement_mode'] ??
                     'FULL_PLAN',
-            'allowed_features': entitlementConfig['allowed_features'] ?? [],
+            'allowed_features': entitlementConfig['allowed_features'] ?? const <dynamic>[],
             'awaiting_first_activation':
                 detail['status'] == 'INCOMPLETE' &&
                     (policy['start_trigger'] ??
                             policyVersion['start_trigger']) ==
                         'FIRST_ACTIVATION',
-            'adjustments': redemption?['adjustments'] ?? [],
+            'adjustments': redemption?['adjustments'] ?? const <dynamic>[],
           };
     await CustomDialog.show(
       type: DialogType.info,
