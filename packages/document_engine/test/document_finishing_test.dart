@@ -5,6 +5,7 @@ import 'package:document_engine/document_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j5ZkAAAAASUVORK5CYII=';
   test('QR payload is opaque and bounded', () {
     final qr = DocumentQrCode(payload: 'https://verify.example/d/opaque-id');
     expect(qr.payload, 'https://verify.example/d/opaque-id');
