@@ -503,7 +503,6 @@ class CustomErrorState extends StatelessWidget {
                     child: SelectableText(
                       technicalDetails!,
                       style: AppTypography.badgeText.copyWith(
-                        fontFamily: 'monospace',
                         color: colors.error,
                         height: 1.4,
                       ),

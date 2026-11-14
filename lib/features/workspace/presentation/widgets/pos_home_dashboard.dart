@@ -3,10 +3,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
+import 'package:netsales/features/workspace/presentation/widgets/pos_active_supply_order_tracker.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_network_carousel_card.dart';
+import 'package:netsales/features/workspace/presentation/widgets/pos_network_packages_catalog.dart';
+import 'package:netsales/features/workspace/presentation/widgets/pos_quick_action_card.dart';
+import 'package:netsales/features/workspace/presentation/widgets/pos_recent_transactions_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_selected_network_financial_summary.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_welcome_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -18,6 +23,7 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:premium_carousel_slider/premium_carousel_slider.dart';
 
+/// الشاشة الرئيسية لمساحة عمل نقطة البيع (PosHomeDashboard - Pure API-Driven Clean Architecture)
 class PosHomeDashboard extends StatelessWidget {
   const PosHomeDashboard({super.key, required this.controller});
   final PosWorkspaceController controller;
@@ -25,16 +31,16 @@ class PosHomeDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return RefreshIndicator(
+    return RefreshIndicator.adaptive(
       onRefresh: controller.loadWorkspace,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
         padding: EdgeInsets.fromLTRB(
-          AppSpacing.screenPadding,
-          AppSpacing.md,
-          AppSpacing.screenPadding,
+          AppBreakpoints.screenMargin(context),
+          MediaQuery.paddingOf(context).top + 20.h,
+          AppBreakpoints.screenMargin(context),
           AppSpacing.xxxl,
         ),
         child: Center(
@@ -139,7 +145,7 @@ class PosHomeDashboard extends StatelessWidget {
                             ),
                             SizedBox(height: 3.h),
                             Text(
-                              'اسحب لاستعراض حساباتك لدى كل شبكة',
+                              'اسحب لاستعراض حساباتك ومحافظك لدى كل شبكة',
                               style: AppTypography.bodySmall.copyWith(
                                 color: colors.onSurfaceVariant,
                               ),
@@ -177,12 +183,10 @@ class PosHomeDashboard extends StatelessWidget {
                     PremiumCarouselSlider(
                       items: controller.networkLinks,
                       currentIndex: controller.currentNetworkIndex.value,
-                      options: const PremiumCarouselOptions(
-                        height: 184,
-                        viewportFraction: 0.88,
-                        itemSpacing: 8,
-                        enableInfiniteScroll: false,
-                        autoPlay: false,
+                      options: const PremiumCarouselOptions.bankCard(
+                        height: 205,
+                        viewportFraction: 0.86,
+                        itemSpacing: 10,
                         enlargeCenterPage: true,
                       ),
                       itemBuilder: (context, link, index) =>
@@ -194,12 +198,20 @@ class PosHomeDashboard extends StatelessWidget {
                                     .value
                                     ?.networkId ==
                                 link.networkId,
+                            wallet:
+                                controller
+                                        .selectedNetworkLink
+                                        .value
+                                        ?.networkId ==
+                                    link.networkId
+                                ? controller.selectedWallet.value
+                                : null,
                             onTap: () => controller.onNetworkPageChanged(index),
                           ),
                       onPageChanged: controller.onNetworkPageChanged,
                       hasMoreItems: controller.hasMoreNetworks.value,
                       loadingItemBuilder: (_) =>
-                          const CustomSkeletonCard(height: 184),
+                          const CustomSkeletonCard(height: 205),
                       onLoadMore: () {
                         final posId = controller.activePos.value?.posId;
                         if (posId != null) {
@@ -240,8 +252,22 @@ class PosHomeDashboard extends StatelessWidget {
                     ),
                     AppSpacing.vXl,
                   ],
+
+                  // قسم آخر العمليات والحركات الحية من الـ API الحقيقي
+                  PosRecentTransactionsSection(controller: controller),
+                  AppSpacing.vXl,
+
+                  // كتالوج باقات الشبكة وأسعار الجملة المعتمدة من الخادم
+                  PosNetworkPackagesCatalog(controller: controller),
+                  AppSpacing.vXl,
+
+                  // تتبع طلبات التوريد المفتوحة من الـ API الحقيقي
+                  PosActiveSupplyOrderTracker(controller: controller),
+                  AppSpacing.vXl,
+
+                  // لوحة العمليات السريعة المتكاملة
                   Text(
-                    'ابدأ عملك',
+                    'العمليات السريعة',
                     style: AppTypography.titleLarge.copyWith(
                       color: colors.onSurface,
                       fontWeight: FontWeight.bold,
@@ -251,7 +277,7 @@ class PosHomeDashboard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _QuickAction(
+                        child: PosQuickActionCard(
                           icon: Icons.add_shopping_cart_rounded,
                           title: 'طلب توريد',
                           subtitle: 'اطلب باقات بالجملة',
@@ -261,12 +287,48 @@ class PosHomeDashboard extends StatelessWidget {
                       ),
                       AppSpacing.hMd,
                       Expanded(
-                        child: _QuickAction(
+                        child: PosQuickActionCard(
                           icon: Icons.receipt_long_rounded,
                           title: 'فواتيري',
-                          subtitle: 'راجع مشترياتك',
+                          subtitle: 'سجل مشترياتك',
                           onTap: () =>
                               Get.toNamed<void>(AppRoutes.purchaseInvoices),
+                        ),
+                      ),
+                    ],
+                  ),
+                  AppSpacing.vMd,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: PosQuickActionCard(
+                          icon: Icons.payment_rounded,
+                          title: 'سداد دفعة للشبكة',
+                          subtitle: 'تسوية ديون وزيادة السقف',
+                          onTap: () =>
+                              Get.toNamed<void>(AppRoutes.posDebtLedger),
+                        ),
+                      ),
+                      AppSpacing.hMd,
+                      Expanded(
+                        child: PosQuickActionCard(
+                          icon: Icons.account_balance_wallet_rounded,
+                          title: 'كشف الحساب',
+                          subtitle: 'حركات المحفظة بالتفصيل',
+                          onTap: () {
+                            final networkId =
+                                controller.selectedNetworkLink.value?.networkId;
+                            final args = <String, dynamic>{
+                              'pos_id': activePos.posId,
+                            };
+                            if (networkId != null) {
+                              args['network_id'] = networkId;
+                            }
+                            Get.toNamed<void>(
+                              AppRoutes.posWalletStatement,
+                              arguments: args,
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -306,58 +368,6 @@ class PosHomeDashboard extends StatelessWidget {
             ),
           );
         }).toList(),
-      ),
-    );
-  }
-}
-
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return CustomInteractiveBounce(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.45),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: colors.primary, size: 25.r),
-            AppSpacing.vMd,
-            Text(
-              title,
-              style: AppTypography.titleSmall.copyWith(
-                color: colors.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 3.h),
-            Text(
-              subtitle,
-              style: AppTypography.bodySmall.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

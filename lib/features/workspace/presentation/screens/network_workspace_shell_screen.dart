@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
-import 'package:netsales/features/billing/presentation/screens/billing_workspace_screen.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_reports_screen.dart';
+import 'package:netsales/features/billing/presentation/screens/billing_workspace_screen.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
 import 'package:netsales/features/finance/presentation/widgets/network_finance_workspace_hub.dart';
 import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
-import 'package:netsales/features/requests/presentation/screens/network_supply_requests_review_screen.dart';
 import 'package:netsales/features/reports/presentation/screens/operational_reports_screen.dart';
+import 'package:netsales/features/requests/presentation/screens/network_supply_requests_review_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/adaptive_workspace_scaffold.dart';
 import 'package:netsales/features/workspace/presentation/widgets/network_workspace_dashboard.dart';
@@ -43,6 +44,12 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           ),
         ),
         const WorkspaceNavItem(
+          label: 'المالية والديون',
+          icon: Icons.account_balance_wallet_outlined,
+          activeIcon: Icons.account_balance_wallet_rounded,
+          content: NetworkFinanceWorkspaceHub(),
+        ),
+        const WorkspaceNavItem(
           label: 'الاشتراك والفوترة',
           icon: Icons.workspace_premium_outlined,
           activeIcon: Icons.workspace_premium_rounded,
@@ -60,12 +67,6 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           activeIcon: Icons.groups_rounded,
           content: MembershipScreen(),
         ),
-        const WorkspaceNavItem(
-          label: 'المالية والديون',
-          icon: Icons.account_balance_wallet_outlined,
-          activeIcon: Icons.account_balance_wallet_rounded,
-          content: NetworkFinanceWorkspaceHub(),
-        ),
         WorkspaceNavItem(
           label: 'التقارير',
           icon: Icons.analytics_outlined,
@@ -79,14 +80,30 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         ),
       ];
 
+      // القائمة المقلصة للتبويبات الأساسية الأربعة على أجهزة الجوال
+      final mobileNavItems = [
+        navItems[0], // الرئيسية
+        navItems[1], // طلبات التوريد
+        navItems[2], // نقاط البيع
+        navItems[3], // المالية والديون
+      ];
+
+      final networkTitle = controller.selectedNetwork?.networkName ?? 'لوحة الشبكة';
+
       return AdaptiveWorkspaceScaffold(
-        appBar: const WorkspaceAppBar(
-          title: 'لوحة التحكم',
+        appBar: WorkspaceAppBar(
+          title: networkTitle,
           workspace: AppWorkspace.network,
         ),
         items: navItems,
+        mobileItems: mobileNavItems,
         currentIndex: controller.selectedNavIndex.value,
         onIndexChanged: controller.onNavItemSelected,
+        centerActionIcon: Icons.add_rounded,
+        centerActionTooltip: 'إصدار فاتورة بيع جديدة',
+        onCenterActionTap: () {
+          Get.toNamed<dynamic>(AppRoutes.networkCreateSaleInvoice);
+        },
       );
     });
   }

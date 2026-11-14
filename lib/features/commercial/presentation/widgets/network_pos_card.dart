@@ -155,7 +155,6 @@ class NetworkPosCard extends GetView<CommercialDirectoryController> {
                       child: Text(
                         pos!.posUuid,
                         style: AppTypography.labelSmall.copyWith(
-                          fontFamily: 'monospace',
                           color: colors.onSurfaceVariant,
                         ),
                         overflow: TextOverflow.ellipsis,

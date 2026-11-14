@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_finance_workspace_hub.dart';
 import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
 import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
@@ -12,7 +13,7 @@ import 'package:netsales/features/workspace/presentation/widgets/pos_home_dashbo
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
 
-/// هيكل مساحة عمل نقطة البيع (POS Workspace Shell)
+/// هيكل مساحة عمل نقطة البيع (POS Workspace Shell - Executive Edition)
 class PosWorkspaceShell extends GetView<PosWorkspaceController> {
   const PosWorkspaceShell({super.key});
 
@@ -39,16 +40,16 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           content: PosPurchaseInvoicesScreen(embedded: true),
         ),
         const WorkspaceNavItem(
-          label: 'فريق العمل',
-          icon: Icons.groups_outlined,
-          activeIcon: Icons.groups_rounded,
-          content: MembershipScreen(),
-        ),
-        const WorkspaceNavItem(
           label: 'الرصيد والديون',
           icon: Icons.account_balance_wallet_outlined,
           activeIcon: Icons.account_balance_wallet_rounded,
           content: PosFinanceWorkspaceHub(),
+        ),
+        const WorkspaceNavItem(
+          label: 'فريق العمل',
+          icon: Icons.groups_outlined,
+          activeIcon: Icons.groups_rounded,
+          content: MembershipScreen(),
         ),
         WorkspaceNavItem(
           label: 'التقارير',
@@ -64,14 +65,30 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         ),
       ];
 
+      // القائمة المقلصة للتبويبات الأربعة الأساسية على الجوال
+      final mobileNavItems = [
+        navItems[0], // الرئيسية
+        navItems[1], // طلبات التوريد
+        navItems[2], // فواتيري
+        navItems[3], // الرصيد والديون
+      ];
+
+      final posTitle = controller.activePos.value?.posName ?? 'لوحة نقطة البيع';
+
       return AdaptiveWorkspaceScaffold(
-        appBar: const WorkspaceAppBar(
-          title: 'لوحة التحكم',
+        appBar: WorkspaceAppBar(
+          title: posTitle,
           workspace: AppWorkspace.pos,
         ),
         items: navItems,
+        mobileItems: mobileNavItems,
         currentIndex: controller.selectedNavIndex.value,
         onIndexChanged: controller.onNavItemSelected,
+        centerActionIcon: Icons.add_rounded,
+        centerActionTooltip: 'طلب توريد جديد',
+        onCenterActionTap: () {
+          Get.toNamed<dynamic>(AppRoutes.newProcurementOrder);
+        },
       );
     });
   }

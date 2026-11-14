@@ -118,7 +118,6 @@ class CurrentDeviceCard extends StatelessWidget {
                 'المعرف: ${_formatDeviceUuid(device.deviceUuid)}',
                 style: AppTypography.bodySmall.copyWith(
                   color: colors.onSurfaceVariant,
-                  fontFamily: 'monospace',
                 ),
               ),
               CustomStatusBadge.fromPresentation(

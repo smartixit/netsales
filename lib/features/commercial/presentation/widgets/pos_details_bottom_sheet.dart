@@ -58,7 +58,9 @@ class PosDetailsBottomSheet {
             selectedGovernorate.value = foundGov;
             govDisplayController.text = foundGov.governorateName;
             isLoadingDirectorates.value = true;
-            final dirs = await controller.loadDirectorates(foundGov.governorateId);
+            final dirs = await controller.loadDirectorates(
+              foundGov.governorateId,
+            );
             directorates.assignAll(dirs);
             isLoadingDirectorates.value = false;
 
@@ -179,7 +181,6 @@ class PosDetailsBottomSheet {
                             Text(
                               pos.posUuid,
                               style: AppTypography.bodySmall.copyWith(
-                                fontFamily: 'monospace',
                                 fontWeight: FontWeight.bold,
                                 color: colors.onSurface,
                               ),
@@ -272,7 +273,9 @@ class PosDetailsBottomSheet {
                           child: CustomTextField(
                             controller: dirDisplayController,
                             label: 'المديرية',
-                            prefixIcon: const Icon(Icons.location_city_outlined),
+                            prefixIcon: const Icon(
+                              Icons.location_city_outlined,
+                            ),
                             readOnly: true,
                             isRequired: false,
                           ),

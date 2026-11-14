@@ -26,6 +26,31 @@ class PremiumCarouselOptions {
         assert(initialPage >= 0),
         assert(enlargeFactor >= 0 && enlargeFactor <= 1);
 
+  /// Pre-configured optimal settings for luxury bank card carousels.
+  const PremiumCarouselOptions.bankCard({
+    this.height = 205,
+    this.aspectRatio = 1.586,
+    this.viewportFraction = 0.86,
+    this.itemSpacing = 10,
+    this.initialPage = 0,
+    this.enableInfiniteScroll = false,
+    this.reverse = false,
+    this.autoPlay = false,
+    this.autoPlayInterval = const Duration(seconds: 5),
+    this.autoPlayAnimationDuration = const Duration(milliseconds: 650),
+    this.autoPlayCurve = Curves.easeInOutCubic,
+    this.enlargeCenterPage = true,
+    this.enlargeFactor = 0.12,
+    this.scrollDirection = Axis.horizontal,
+    this.padEnds = true,
+    this.pageSnapping = true,
+  })  : assert(height == null || height > 0),
+        assert(aspectRatio > 0),
+        assert(viewportFraction > 0 && viewportFraction <= 1),
+        assert(itemSpacing >= 0),
+        assert(initialPage >= 0),
+        assert(enlargeFactor >= 0 && enlargeFactor <= 1);
+
   final double? height;
   final double aspectRatio;
   final double viewportFraction;

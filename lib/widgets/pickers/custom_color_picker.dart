@@ -147,7 +147,6 @@ class CustomColorPicker extends StatelessWidget {
                             style: AppTypography.titleSmall.copyWith(
                               color: colors.onSurface,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'monospace',
                             ),
                           ),
                         ],

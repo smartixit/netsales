@@ -193,7 +193,7 @@ class MyApp extends StatelessWidget {
               page: () => const CustomNotFound(),
             ),
             defaultTransition: Transition.fadeIn,
-            transitionDuration: AppMotion.page,
+            transitionDuration: AppMotion.normal,
             locale: const Locale('ar'),
             supportedLocales: const [Locale('en'), Locale('ar')],
             localizationsDelegates: const [

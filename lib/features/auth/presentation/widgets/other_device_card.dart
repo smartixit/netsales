@@ -90,7 +90,6 @@ class OtherDeviceCard extends StatelessWidget {
                   'المعرف: ${_formatDeviceUuid(device.deviceUuid)}',
                   style: AppTypography.badgeText.copyWith(
                     color: colors.outline,
-                    fontFamily: 'monospace',
                   ),
                 ),
               ],

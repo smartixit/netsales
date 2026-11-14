@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
@@ -7,11 +6,12 @@ import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_i
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 
 /// الهيكل التكيفي الموحد لمساحات العمل (AdaptiveWorkspaceScaffold)
-/// يتكيف تلقائياً بين شاشات الهواتف (CustomFloatingBottomNavBar بتصميم زجاجي عائم فخم)
+/// يتكيف تلقائياً بين شاشات الهواتف (CustomFloatingBottomNavBar بتصميم زجاجي عائم فخم مع زر إجراء مركزي)
 /// والأجهزة اللوحية (NavigationRail المتجاوبة)
 class AdaptiveWorkspaceScaffold extends StatelessWidget {
   final WorkspaceAppBar appBar;
   final List<WorkspaceNavItem> items;
+  final List<WorkspaceNavItem>? mobileItems;
   final int currentIndex;
   final ValueChanged<int> onIndexChanged;
   final VoidCallback? onCenterActionTap;
@@ -22,6 +22,7 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
     super.key,
     required this.appBar,
     required this.items,
+    this.mobileItems,
     required this.currentIndex,
     required this.onIndexChanged,
     this.onCenterActionTap,
@@ -38,7 +39,8 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
         : 0;
 
     if (isMobile) {
-      final floatingItems = items.map((item) {
+      final effectiveNavList = mobileItems ?? items;
+      final floatingItems = effectiveNavList.map((item) {
         return CustomFloatingNavItem(
           icon: item.icon,
           activeIcon: item.activeIcon,
@@ -48,19 +50,38 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
         );
       }).toList();
 
+      // حساب الفهرس النشط في قائمة الجوال المقلصة
+      int mobileActiveIndex = -1;
+      if (mobileItems != null) {
+        final currentItem = items[activeIndex];
+        mobileActiveIndex = mobileItems!.indexOf(currentItem);
+      } else {
+        mobileActiveIndex = activeIndex;
+      }
+
       return Scaffold(
         extendBody: true,
+        extendBodyBehindAppBar: true,
+        backgroundColor: colors.background,
         appBar: appBar,
         body: SafeArea(
+          top: false,
           bottom: false,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 84.h),
-            child: items[activeIndex].content,
-          ),
+          child: items[activeIndex].content,
         ),
         bottomNavigationBar: CustomFloatingBottomNavBar(
-          currentIndex: activeIndex,
-          onTap: onIndexChanged,
+          currentIndex: mobileActiveIndex,
+          onTap: (navIdx) {
+            if (mobileItems != null) {
+              final targetItem = mobileItems![navIdx];
+              final realIdx = items.indexOf(targetItem);
+              if (realIdx != -1) {
+                onIndexChanged(realIdx);
+              }
+            } else {
+              onIndexChanged(navIdx);
+            }
+          },
           items: floatingItems,
           onCenterActionTap: onCenterActionTap,
           centerActionIcon: centerActionIcon,

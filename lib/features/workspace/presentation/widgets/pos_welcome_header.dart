@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
@@ -7,6 +6,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
+import 'package:netsales/widgets/images/custom_cached_image.dart';
 
 class PosWelcomeHeader extends StatelessWidget {
   const PosWelcomeHeader({super.key, required this.controller});
@@ -87,9 +87,10 @@ class PosWelcomeHeader extends StatelessWidget {
                       user,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.titleLarge.copyWith(
+                      style: AppTypography.titleMedium.copyWith(
                         color: colors.onPrimary,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16.sp,
                       ),
                     ),
                     SizedBox(height: 3.h),
@@ -124,38 +125,14 @@ Widget _buildProfileAvatar({
 }) {
   final url = profileUrl?.trim();
   if (url != null && url.isNotEmpty) {
-    return ClipOval(
-      child: CachedNetworkImage(
-        imageUrl: url,
-        width: 52.r,
-        height: 52.r,
-        fit: BoxFit.cover,
-        placeholder: (context, value) => Center(
-          child: Text(
-            initial,
-            style: AppTypography.titleLarge.copyWith(
-              color: foregroundColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        errorWidget: (context, value, error) => Center(
-          child: Text(
-            initial,
-            style: AppTypography.titleLarge.copyWith(
-              color: foregroundColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
+    return CustomCachedImage.avatar(url: url, radius: AppRadius.md + 1);
   }
   return Text(
     initial,
-    style: AppTypography.titleLarge.copyWith(
+    style: AppTypography.titleMedium.copyWith(
       color: foregroundColor,
-      fontWeight: FontWeight.bold,
+      fontWeight: FontWeight.w900,
+      fontSize: 15.sp,
     ),
   );
 }

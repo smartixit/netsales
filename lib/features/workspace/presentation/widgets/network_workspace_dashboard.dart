@@ -21,6 +21,8 @@ import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:premium_carousel_slider/premium_carousel_slider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class NetworkWorkspaceDashboard extends GetView<NetworkWorkspaceController> {
@@ -30,7 +32,15 @@ class NetworkWorkspaceDashboard extends GetView<NetworkWorkspaceController> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (controller.isLoading.value && controller.overview.value == null) {
-        return const CustomSkeletonFeed(itemCount: 4, cardHeight: 140);
+        return Padding(
+          padding: EdgeInsets.only(
+            top: MediaQuery.paddingOf(context).top + 10.h,
+            bottom: AppSpacing.xxl,
+            left: AppBreakpoints.screenMargin(context),
+            right: AppBreakpoints.screenMargin(context),
+          ),
+          child: const CustomSkeletonFeed(itemCount: 4, cardHeight: 140),
+        );
       }
       if (controller.errorMessage.value != null &&
           controller.overview.value == null) {
@@ -52,7 +62,8 @@ class NetworkWorkspaceDashboard extends GetView<NetworkWorkspaceController> {
         return CustomErrorState.boxed(
           title: 'بيانات لوحة الشبكة غير متاحة',
           subtitle:
-              controller.errorMessage.value ?? 'لم تصل استجابة صالحة من الخادم.',
+              controller.errorMessage.value ??
+              'لم تصل استجابة صالحة من الخادم.',
           onRetry: () => controller.loadOverview(),
         );
       }
@@ -75,9 +86,11 @@ class _VipDashboardContent extends GetView<NetworkWorkspaceController> {
       onRefresh: controller.loadWorkspace,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.symmetric(
-          horizontal: AppBreakpoints.screenMargin(context),
-          vertical: AppSpacing.md,
+        padding: EdgeInsets.only(
+          top: MediaQuery.paddingOf(context).top + 10.h,
+          bottom: AppSpacing.xxl,
+          left: AppBreakpoints.screenMargin(context),
+          right: AppBreakpoints.screenMargin(context),
         ),
         children: [
           // 1. كرت الترحيب القيادي الديناميكي
@@ -103,11 +116,21 @@ class _VipDashboardContent extends GetView<NetworkWorkspaceController> {
                   .toList(growable: false),
               onChanged: controller.selectNetwork,
             ),
+            SizedBox(height: AppSpacing.md),
+          ],
+
+          // كاروسيل بطاقات الشبكات التابعة للمزود بأسلوب البطاقات المصرفية الفاخرة
+          if (controller.networks.isNotEmpty) ...[
+            _ProviderNetworksBankCardCarousel(
+              controller: controller,
+              overview: overview,
+            ),
             SizedBox(height: AppSpacing.lg),
           ],
 
           // 2. كرت السيولة والعمليات السريعة (يظهر عند توفر بيانات المحفظة أو المبيعات)
-          if (metrics.containsKey('wallet') || metrics.containsKey('sales')) ...[
+          if (metrics.containsKey('wallet') ||
+              metrics.containsKey('sales')) ...[
             _HeroLiquidityVaultCard(overview: overview),
             SizedBox(height: AppSpacing.lg),
           ],
@@ -139,9 +162,8 @@ class _VipDashboardContent extends GetView<NetworkWorkspaceController> {
           if (overview.recentPendingRequests.isNotEmpty) ...[
             _LivePendingOrdersStream(
               requests: overview.recentPendingRequests,
-              totalPendingCount: int.tryParse(
-                    overview.count('requests', 'pending'),
-                  ) ??
+              totalPendingCount:
+                  int.tryParse(overview.count('requests', 'pending')) ??
                   overview.recentPendingRequests.length,
               onViewAll: () => controller.onNavItemSelected(1),
             ),
@@ -149,14 +171,15 @@ class _VipDashboardContent extends GetView<NetworkWorkspaceController> {
           ],
 
           // تذييل التوقيت الزمني الحقيقي
-          Text(
-            'آخر تحديث للبيانات: ${DateFormatter.dateTime(DateTime.tryParse(overview.generatedAt) ?? DateTime.now())}',
-            textAlign: TextAlign.center,
-            style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant.withValues(alpha: 0.7),
-            ),
-          ),
-          SizedBox(height: AppSpacing.xxl),
+          // Text(
+          //   'آخر تحديث للبيانات: ${DateFormatter.dateTime(DateTime.tryParse(overview.generatedAt) ?? DateTime.now())}',
+          //   textAlign: TextAlign.center,
+          //   style: AppTypography.labelSmall.copyWith(
+          //     color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+          //   ),
+          // ),
+          SizedBox(height: AppSpacing.huge),
+          SizedBox(height: AppSpacing.huge),
         ],
       ),
     );
@@ -191,9 +214,8 @@ class _ExecutiveWelcomeHeroCard extends StatelessWidget {
         : 0;
 
     final realFullName = user?.userFullName ?? 'المستخدم';
-    final realRole = user?.role?.roleName ??
-        user?.statusLabel ??
-        (user?.isSuperAdmin == true ? 'مدير عام النظام' : 'مزود شبكة معتمد');
+    final realRole =
+        user?.role?.roleName ?? user?.statusLabel ?? 'مزود شبكة معتمد';
     final initials = TextFormatter.avatarInitials(realFullName, maxChars: 2);
     final todayStr = DateFormatter.fullDate(DateTime.now());
 
@@ -247,10 +269,13 @@ class _ExecutiveWelcomeHeroCard extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(AppRadius.lg - 1),
-                        color: isDark ? const Color(0xFF0E1522) : colors.surface,
+                        color: isDark
+                            ? const Color(0xFF0E1522)
+                            : colors.surface,
                       ),
                       alignment: Alignment.center,
-                      child: user?.userProfileLogo != null &&
+                      child:
+                          user?.userProfileLogo != null &&
                               user!.userProfileLogo!.isNotEmpty
                           ? CustomCachedImage.avatar(
                               url: user.userProfileLogo,
@@ -315,9 +340,10 @@ class _ExecutiveWelcomeHeroCard extends StatelessWidget {
                       realFullName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.titleLarge.copyWith(
+                      style: AppTypography.titleMedium.copyWith(
                         color: colors.onSurface,
                         fontWeight: FontWeight.w900,
+                        fontSize: 16.sp,
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -329,6 +355,7 @@ class _ExecutiveWelcomeHeroCard extends StatelessWidget {
                           style: AppTypography.bodySmall.copyWith(
                             color: colors.onSurfaceVariant,
                             fontWeight: FontWeight.w600,
+                            fontSize: 11.sp,
                           ),
                         ),
                         Container(
@@ -348,6 +375,7 @@ class _ExecutiveWelcomeHeroCard extends StatelessWidget {
                             style: AppTypography.bodySmall.copyWith(
                               color: colors.primary,
                               fontWeight: FontWeight.bold,
+                              fontSize: 11.sp,
                             ),
                           ),
                         ),
@@ -359,57 +387,66 @@ class _ExecutiveWelcomeHeroCard extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.sm),
           Divider(
             color: isDark
                 ? Colors.white.withValues(alpha: 0.06)
                 : colors.outlineVariant.withValues(alpha: 0.5),
             height: 1,
           ),
-          SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.sm),
 
           // الشريط الأفقي: تاريخ اليوم الحقيقي + حالة الطلبات الحقيقية
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'تاريخ اليوم',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                      fontSize: 10.sp,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'تاريخ اليوم',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  Text(
-                    todayStr,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.bold,
+                    SizedBox(height: 1.h),
+                    Text(
+                      todayStr,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11.sp,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
-              if (hasRequests)
+              if (hasRequests) ...[
+                SizedBox(width: 8.w),
                 CustomInteractiveBounce(
                   onTap: onPendingTap,
                   child: Container(
                     padding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
+                      horizontal: 9.w,
+                      vertical: 5.h,
                     ),
                     decoration: BoxDecoration(
                       color: colors.warning.withValues(
                         alpha: isDark ? 0.12 : 0.08,
                       ),
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
                       border: Border.all(
                         color: colors.warning.withValues(
                           alpha: isDark ? 0.35 : 0.25,
                         ),
-                        width: 1,
+                        width: 0.8,
                       ),
                     ),
                     child: Row(
@@ -420,39 +457,30 @@ class _ExecutiveWelcomeHeroCard extends StatelessWidget {
                           size: 5.r,
                           enablePing: pendingCount > 0,
                         ),
-                        SizedBox(width: 8.w),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              pendingCount > 0 ? 'بانتظار قرارك' : 'حالة الطلبات',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.warning,
-                                fontSize: 9.sp,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Text(
-                              pendingCount > 0
-                                  ? '$pendingCount طلب توريد بانتظار الاعتماد'
-                                  : 'لا توجد طلبات معلقة',
-                              style: AppTypography.labelMedium.copyWith(
-                                color: colors.warning,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
+                        SizedBox(width: 5.w),
+                        Text(
+                          pendingCount > 0
+                              ? '$pendingCount طلب توريد بانتظارك'
+                              : 'لا توجد طلبات معلقة',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: colors.warning,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 10.sp,
+                          ),
                         ),
-                        SizedBox(width: 6.w),
+                        SizedBox(width: 3.w),
                         Icon(
                           Icons.arrow_forward_ios_rounded,
-                          size: 13.r,
+                          size: 9.r,
                           color: colors.warning,
                         ),
                       ],
                     ),
                   ),
                 ),
+              ],
             ],
           ),
         ],
@@ -483,8 +511,8 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
     final balanceStr = hasWallet && wallet != null
         ? AmountFormatter.format(overview.amount('wallet', 'balance'))
         : (hasSales
-            ? AmountFormatter.format(overview.amount('sales', 'total_amount'))
-            : '0.00');
+              ? AmountFormatter.format(overview.amount('sales', 'total_amount'))
+              : '0.00');
 
     final isWalletActive = wallet?['is_active'] == true;
 
@@ -495,8 +523,8 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
     final String growthText = growthRate > 0
         ? '+${growthRate.toStringAsFixed(1)}% نمو'
         : (growthRate < 0
-            ? '${growthRate.toStringAsFixed(1)}% تراجع'
-            : '0.0% استقرار');
+              ? '${growthRate.toStringAsFixed(1)}% تراجع'
+              : '0.0% استقرار');
 
     final paidAmountStr = hasSales
         ? AmountFormatter.format(overview.amount('sales', 'paid_amount'))
@@ -509,9 +537,9 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
     final totalPos = hasPos ? overview.count('points_of_sale', 'total') : '0';
 
     return Container(
-      padding: EdgeInsets.all(AppSpacing.xl),
+      padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         gradient: LinearGradient(
           colors: isDark
               ? [
@@ -546,106 +574,169 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  Container(
+                    padding: EdgeInsets.all(5.r),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
+                    child: Icon(
+                      Icons.account_balance_wallet_outlined,
+                      size: 15.r,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(width: 7.w),
                   Text(
                     hasWallet ? 'صافي السيولة التشغيلية' : 'إجمالي المبيعات',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: isDark
-                          ? colors.primary
-                          : Colors.white.withValues(alpha: 0.9),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  if (hasSales) ...[
-                    SizedBox(width: 8.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 3.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? colors.primary.withValues(alpha: 0.18)
-                            : Colors.white.withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(AppRadius.full),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            growthRate >= 0
-                                ? Icons.trending_up_rounded
-                                : Icons.trending_down_rounded,
-                            size: 13.r,
-                            color: isDark ? colors.primary : Colors.white,
-                          ),
-                          SizedBox(width: 3.w),
-                          Text(
-                            growthText,
-                            style: AppTypography.badgeText.copyWith(
-                              color: isDark ? colors.primary : Colors.white,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
+                ],
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.5.h),
+                decoration: BoxDecoration(
+                  color: isWalletActive
+                      ? const Color(0xFF10B981).withValues(alpha: 0.25)
+                      : Colors.white.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 0.8,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CustomPulsingIndicator(
+                      color: isWalletActive
+                          ? const Color(0xFF34D399)
+                          : Colors.white70,
+                      size: 4.r,
+                      enablePing: false,
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      hasWallet
+                          ? (isWalletActive
+                                ? 'المحفظة نشطة'
+                                : 'المحفظة غير نشطة')
+                          : 'محدث لحظياً',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 9.5.sp,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
-                ],
-              ),
-              Text(
-                hasWallet
-                    ? (isWalletActive ? 'المحفظة نشطة' : 'المحفظة غير نشطة')
-                    : 'محدث لحظياً',
-                style: AppTypography.labelSmall.copyWith(
-                  color: isDark
-                      ? colors.onSurfaceVariant
-                      : Colors.white.withValues(alpha: 0.7),
-                  fontSize: 10.sp,
                 ),
               ),
             ],
           ),
-          SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.sm),
 
           // الرصيد الرئيسي الحقيقي
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(
-                balanceStr,
-                style: AppTypography.headlineLarge.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 34.sp,
-                  letterSpacing: -0.5,
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        balanceStr,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 24.sp,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'ر.ي',
+                        style: TextStyle(
+                          color: isDark
+                              ? colors.primary
+                              : const Color(0xFFA7F3D0),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              SizedBox(width: 8.w),
-              Text(
-                'ريال يمني',
-                style: AppTypography.titleMedium.copyWith(
-                  color: isDark ? colors.primary : const Color(0xFFA7F3D0),
-                  fontWeight: FontWeight.bold,
+              if (hasSales) ...[
+                SizedBox(width: 8.w),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 7.w,
+                    vertical: 2.5.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        growthRate >= 0
+                            ? Icons.trending_up_rounded
+                            : Icons.trending_down_rounded,
+                        size: 11.r,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 3.w),
+                      Text(
+                        growthText,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
-          SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.md),
 
           // شريط المؤشرات الفرعية الحقيقية
           Container(
-            padding: EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: 8.h,
+            ),
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.15),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.08),
-                width: 1,
+                width: 0.8,
               ),
             ),
             child: Row(
@@ -656,18 +747,21 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
                     children: [
                       Text(
                         'المبيعات النقدية',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 10.sp,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.72),
+                          fontSize: 9.sp,
                         ),
                       ),
-                      SizedBox(height: 2.h),
+                      SizedBox(height: 1.h),
                       Text(
                         '$paidAmountStr ر.ي',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTypography.titleSmall.copyWith(
+                        style: TextStyle(
                           color: Colors.white,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -676,29 +770,32 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
                 ),
                 Container(
                   width: 1,
-                  height: 32.h,
+                  height: 24.h,
                   color: Colors.white.withValues(alpha: 0.12),
                 ),
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w),
+                    padding: EdgeInsets.symmetric(horizontal: 6.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'الديون المستحقة',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 10.sp,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.72),
+                            fontSize: 9.sp,
                           ),
                         ),
-                        SizedBox(height: 2.h),
+                        SizedBox(height: 1.h),
                         Text(
                           '$outstandingStr ر.ي',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.titleSmall.copyWith(
+                          style: TextStyle(
                             color: const Color(0xFFFBBF24),
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -709,29 +806,32 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
                 if (hasPos) ...[
                   Container(
                     width: 1,
-                    height: 32.h,
+                    height: 24.h,
                     color: Colors.white.withValues(alpha: 0.12),
                   ),
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsetsDirectional.only(start: 8.w),
+                      padding: EdgeInsetsDirectional.only(start: 6.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'نقاط البيع',
-                            style: AppTypography.labelSmall.copyWith(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 10.sp,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.72),
+                              fontSize: 9.sp,
                             ),
                           ),
-                          SizedBox(height: 2.h),
+                          SizedBox(height: 1.h),
                           Text(
                             '$activePos / $totalPos متصلة',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: AppTypography.titleSmall.copyWith(
+                            style: TextStyle(
                               color: const Color(0xFFA7F3D0),
+                              fontSize: 11.sp,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -743,7 +843,7 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.sm),
 
           // الأزرار السريعة الثلاثة
           Row(
@@ -751,20 +851,18 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
               Expanded(
                 flex: 4,
                 child: CustomInteractiveBounce(
-                  onTap: () => Get.toNamed<void>(
-                    AppRoutes.networkCreateSaleInvoice,
-                  ),
+                  onTap: () =>
+                      Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice),
                   child: Container(
-                    height: 46.h,
+                    height: 38.h,
                     decoration: BoxDecoration(
                       color: isDark ? colors.primary : Colors.white,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                       boxShadow: [
                         BoxShadow(
-                          color: (isDark ? colors.primary : Colors.white)
-                              .withValues(alpha: 0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
@@ -773,18 +871,19 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.add_rounded,
-                          size: 18.r,
+                          Icons.add_shopping_cart_rounded,
+                          size: 15.r,
                           color: isDark
-                              ? const Color(0xFF022C22)
+                              ? colors.onPrimary
                               : const Color(0xFF065F46),
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          'إصدار فاتورة جملة',
-                          style: AppTypography.labelMedium.copyWith(
+                          'فاتورة بيع',
+                          style: TextStyle(
+                            fontSize: 11.sp,
                             color: isDark
-                                ? const Color(0xFF022C22)
+                                ? colors.onPrimary
                                 : const Color(0xFF065F46),
                             fontWeight: FontWeight.w900,
                           ),
@@ -794,21 +893,18 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: AppSpacing.sm),
-
+              SizedBox(width: 6.w),
               Expanded(
                 flex: 4,
                 child: CustomInteractiveBounce(
-                  onTap: () => Get.toNamed<void>(
-                    AppRoutes.repaymentCollection,
-                  ),
+                  onTap: () => Get.toNamed<void>(AppRoutes.repaymentCollection),
                   child: Container(
-                    height: 46.h,
+                    height: 38.h,
                     decoration: BoxDecoration(
                       color: isDark
                           ? const Color(0xFF131D2E)
                           : Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                       border: Border.all(
                         color: Colors.white.withValues(alpha: 0.2),
                         width: 1,
@@ -820,13 +916,14 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.check_circle_outline_rounded,
-                          size: 16.r,
+                          size: 15.r,
                           color: const Color(0xFFA7F3D0),
                         ),
                         SizedBox(width: 4.w),
                         Text(
                           'تحصيل دفعة',
-                          style: AppTypography.labelMedium.copyWith(
+                          style: TextStyle(
+                            fontSize: 11.sp,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
@@ -836,20 +933,18 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: AppSpacing.sm),
-
+              SizedBox(width: 6.w),
               CustomInteractiveBounce(
-                onTap: () => Get.toNamed<void>(
-                  AppRoutes.networkWalletStatement,
-                ),
+                onTap: () =>
+                    Get.toNamed<void>(AppRoutes.networkWalletStatement),
                 child: Container(
-                  height: 46.h,
-                  padding: EdgeInsets.symmetric(horizontal: 14.w),
+                  height: 38.h,
+                  padding: EdgeInsets.symmetric(horizontal: 10.w),
                   decoration: BoxDecoration(
                     color: isDark
                         ? const Color(0xFF131D2E)
                         : Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     border: Border.all(
                       color: Colors.white.withValues(alpha: 0.2),
                       width: 1,
@@ -860,13 +955,14 @@ class _HeroLiquidityVaultCard extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.account_balance_wallet_outlined,
-                        size: 16.r,
+                        size: 15.r,
                         color: const Color(0xFF93C5FD),
                       ),
                       SizedBox(width: 4.w),
                       Text(
                         'كشف الحساب',
-                        style: AppTypography.labelMedium.copyWith(
+                        style: TextStyle(
+                          fontSize: 11.sp,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1283,7 +1379,9 @@ class _DynamicMetricsGrid extends StatelessWidget {
           badgeColor: isActive ? colors.primary : colors.error,
           mainValue: balance,
           unit: 'ر.ي',
-          subtitle: isActive ? 'المحفظة تعمل وجاهزة للعمليات' : 'المحفظة غير نشطة',
+          subtitle: isActive
+              ? 'المحفظة تعمل وجاهزة للعمليات'
+              : 'المحفظة غير نشطة',
           subtitleColor: isActive ? colors.primary : colors.error,
           icon: Icons.account_balance_wallet_rounded,
           onTap: onWalletTap,
@@ -1300,7 +1398,8 @@ class _DynamicMetricsGrid extends StatelessWidget {
         final isMobile = constraints.maxWidth < 650;
         final columns = isMobile ? 1 : (constraints.maxWidth < 950 ? 2 : 3);
         final gap = AppSpacing.md;
-        final itemWidth = (constraints.maxWidth - (gap * (columns - 1))) / columns;
+        final itemWidth =
+            (constraints.maxWidth - (gap * (columns - 1))) / columns;
 
         return Wrap(
           spacing: gap,
@@ -1387,10 +1486,7 @@ class _VipKpiCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8.w,
-                    vertical: 2.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                   decoration: BoxDecoration(
                     color: badgeColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppRadius.full),
@@ -1533,7 +1629,8 @@ class _VipPendingOrderRow extends StatelessWidget {
     final requestUuid = request['request_uuid']?.toString() ?? '';
     final saleTypeLabel = request['sale_type_label']?.toString() ?? 'نقد';
     final totalAmount = request['request_total_amount']?.toString() ?? '0.00';
-    final isCash = saleTypeLabel.contains('نقد') || saleTypeLabel.contains('كاش');
+    final isCash =
+        saleTypeLabel.contains('نقد') || saleTypeLabel.contains('كاش');
     final initials = TextFormatter.avatarInitials(posName, maxChars: 2);
 
     return Container(
@@ -1647,6 +1744,144 @@ class _VipPendingOrderRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// كاروسيل بطاقات الشبكات التابعة للمزود المعتمد بأسلوب البطاقات المصرفية التنفيذية (VIP Bank Card Carousel).
+class _ProviderNetworksBankCardCarousel extends StatelessWidget {
+  const _ProviderNetworksBankCardCarousel({
+    required this.controller,
+    required this.overview,
+  });
+
+  final NetworkWorkspaceController controller;
+  final NetworkWorkspaceOverviewEntity overview;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final networks = controller.networks;
+    final selectedId = controller.selectedNetworkId.value;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.hub_rounded, color: colors.primary, size: 20.r),
+                  SizedBox(width: 8.w),
+                  Text(
+                    'الشبكات التابعة لحسابك',
+                    style: AppTypography.titleSmall.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xxs,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+                child: Text(
+                  '${networks.length} شبكات',
+                  style: AppTypography.badgeText.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: AppSpacing.sm),
+        PremiumCarouselSlider<NetworkEntity>(
+          items: networks,
+          currentIndex: networks
+              .indexWhere((n) => n.networkId == selectedId)
+              .clamp(0, networks.length - 1),
+          options: const PremiumCarouselOptions.bankCard(
+            height: 205,
+            viewportFraction: 0.86,
+            itemSpacing: 10,
+            enlargeCenterPage: true,
+          ),
+          itemBuilder: (context, network, index) {
+            final isSelected = network.networkId == selectedId;
+            final subtitle = [
+              if (network.governorateName != null &&
+                  network.governorateName!.isNotEmpty)
+                network.governorateName!,
+              if (network.directorateName != null &&
+                  network.directorateName!.isNotEmpty)
+                network.directorateName!,
+            ].join(' • ');
+
+            final salesMetric = overview.metric('sales');
+            final salesTotal = salesMetric?['total'];
+            final salesValue = isSelected && salesTotal is num
+                ? '${AmountFormatter.formatValue(salesTotal, decimalPlaces: 0)} YER'
+                : '•••• YER';
+
+            final posMetric = overview.metric('pos');
+            final posTotal = posMetric?['total'];
+            final posCount = isSelected && posTotal != null
+                ? '$posTotal نقطة بيع'
+                : 'وكلاء معتمدين';
+
+            return PremiumBankCard(
+              title: network.networkName,
+              subtitle: subtitle.isNotEmpty ? subtitle : 'شبكة اتصالات معتمدة',
+              logo:
+                  network.networkProfileLogoUrl != null &&
+                      network.networkProfileLogoUrl!.isNotEmpty
+                  ? CustomCachedImage.avatar(
+                      url: network.networkProfileLogoUrl,
+                      radius: 19.r,
+                    )
+                  : const Icon(
+                      Icons.hub_rounded,
+                      size: 20,
+                      color: Colors.white70,
+                    ),
+              cardUuidLabel: 'Network UUID',
+              cardNumber: network.networkUuid,
+              primaryLabel: 'إجمالي المبيعات المحققة',
+              primaryValue: salesValue,
+              secondaryLabel: 'الوكلاء المعتمدين',
+              secondaryValue: posCount,
+              cardholderName:
+                  network.ownerName ??
+                  SessionService.to.currentUser?.userFullName ??
+                  'المزود المعتمد',
+              statusText: network.isActive ? 'مرخصة ونشطة' : 'معلقة',
+              theme: isSelected
+                  ? PremiumBankCardTheme.emerald
+                  : (index % 2 == 0
+                        ? PremiumBankCardTheme.obsidian
+                        : PremiumBankCardTheme.sapphire),
+              isSelected: isSelected,
+              onTap: () => controller.selectNetwork(network.networkId),
+            );
+          },
+          onPageChanged: (index) {
+            if (index >= 0 && index < networks.length) {
+              controller.selectNetwork(networks[index].networkId);
+            }
+          },
+        ),
+      ],
     );
   }
 }
