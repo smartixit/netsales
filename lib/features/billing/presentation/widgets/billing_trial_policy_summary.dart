@@ -12,11 +12,13 @@ class BillingTrialPolicySummary extends StatelessWidget {
   const BillingTrialPolicySummary({
     required this.trial,
     this.showAdjustments = true,
+    this.title = 'سياسة الفترة التجريبية',
     super.key,
   });
 
   final Map<String, dynamic> trial;
   final bool showAdjustments;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +49,7 @@ class BillingTrialPolicySummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('سياسة الفترة التجريبية', style: AppTypography.titleSmall),
+          Text(title, style: AppTypography.titleSmall),
           const SizedBox(height: 8),
           if (status != null) BillingStatusBadge(status: status),
           const SizedBox(height: 8),
