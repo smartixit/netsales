@@ -14,11 +14,11 @@ class BillingReportChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final rawData = payload['data'];
     final data = rawData is List
-        ? rawData.whereType<Map>().map((row) => Map<String, dynamic>.from(row)).toList()
+        ? rawData.whereType<Map<String, dynamic>>().map((row) => Map<String, dynamic>.from(row)).toList()
         : <Map<String, dynamic>>[];
     final rawSeries = payload['series'];
     final seriesConfig = rawSeries is List
-        ? rawSeries.whereType<Map>().map((item) => Map<String, dynamic>.from(item)).toList()
+        ? rawSeries.whereType<Map<String, dynamic>>().map((item) => Map<String, dynamic>.from(item)).toList()
         : <Map<String, dynamic>>[];
     final typeName = (payload['type'] ?? 'column').toString();
     final type = ChartType.values.firstWhere(
