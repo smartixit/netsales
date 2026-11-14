@@ -1,6 +1,7 @@
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:payv/payv.dart' as payv;
+import 'package:payv/src/font/glyph_path.dart' as payv_path;
 
 import '../../document/document_locale.dart';
 import 'document_font_weight.dart';
@@ -95,17 +96,17 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
 
             for (final command in glyph.outline.cubicCommands) {
               switch (command) {
-                case payv.MoveTo():
+                case payv_path.MoveTo():
                   canvas.moveTo(
                     originX + command.x * scale,
                     originY + command.y * scale,
                   );
-                case payv.LineTo():
+                case payv_path.LineTo():
                   canvas.lineTo(
                     originX + command.x * scale,
                     originY + command.y * scale,
                   );
-                case payv.CubicTo():
+                case payv_path.CubicTo():
                   canvas.curveTo(
                     originX + command.c1x * scale,
                     originY + command.c1y * scale,
@@ -114,13 +115,13 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
                     originX + command.x * scale,
                     originY + command.y * scale,
                   );
-                case payv.QuadTo():
+                case payv_path.QuadTo():
                   // cubicCommands converts every quadratic exactly. Keep this
                   // defensive branch so a future Payv API change fails loudly.
                   throw StateError(
                     'Payv cubicCommands returned an unconverted quadratic.',
                   );
-                case payv.ClosePath():
+                case payv_path.ClosePath():
                   canvas.closePath();
               }
             }
