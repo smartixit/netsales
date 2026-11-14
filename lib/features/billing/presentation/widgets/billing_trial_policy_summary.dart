@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/core/enums/billing_status.dart';
 import 'package:netsales/core/enums/billing_trial_entitlement_mode.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_typography.dart';
