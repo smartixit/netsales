@@ -19,7 +19,7 @@ class ThemeService extends GetxService with WidgetsBindingObserver {
   static ThemeService get to =>
       Get.isRegistered<ThemeService>() ? Get.find<ThemeService>() : instance;
 
-  final Rx<ThemeMode> _themeMode = ThemeMode.system.obs;
+  final Rx<ThemeMode> _themeMode = ThemeMode.light.obs;
 
   /// وضع المظهر الحالي المسجل
   ThemeMode get themeMode => _themeMode.value;
@@ -60,7 +60,7 @@ class ThemeService extends GetxService with WidgetsBindingObserver {
     final mode = switch (saved) {
       'dark' => ThemeMode.dark,
       'light' => ThemeMode.light,
-      _ => ThemeMode.system,
+      _ => ThemeMode.light,
     };
 
     _themeMode.value = mode;

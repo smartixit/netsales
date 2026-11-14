@@ -1,32 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 
 /// ============================================================================
 /// زر النطاط التفاعلي الموحد فائق الدقة (CustomInteractiveBounce)
 /// ============================================================================
 /// يوفر تأثير ضغط انبعاثي ميكرو-تفاعلي (Micro-interaction Scale Bounce) سلس وفاخر،
-/// متوافق تماماً مع كافة سياقات الواجهة والقوائم القابلة للتمرير.
-///
-/// المميزات المعمارية الصارمة:
-/// 1. يعتمد على نظام الـ GestureArena الأصيل في Flutter لمنع أي تضارب بين
-///    المكونات المتداخلة (Nested Interactive Elements) نهائياً:
-///    عند النقر على زر أو مكون ابن تفاعلي داخل بطاقة أو حاوية تمتلك هذا التأثير،
-///    يفوز الابن حصراً بالنقرة، ولا يتم استدعاء onTap للأب مطلقاً.
-///
-/// 2. يحل مشكلة اختفاء حركة الارتداد في النقر السريع عبر ضمان دورة انكماش
-///    وارتداد مرنة كاملة (Minimum Animation Cycle) حتى عند أسرع النقرات.
+/// مع دعم الـ Hover والرفع الرأسي الخفيف (-2px) ومؤشر النقر والتغذية اللمسية.
 class CustomInteractiveBounce extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
   final double lowerBound;
   final Duration duration;
+  final bool enableHover;
+  final bool enableHaptic;
+  final double hoverTranslateY;
 
   const CustomInteractiveBounce({
     super.key,
     required this.child,
     this.onTap,
-    this.lowerBound = 0.94,
-    this.duration = const Duration(milliseconds: 90),
+    this.lowerBound = 0.96,
+    this.duration = const Duration(milliseconds: 100),
+    this.enableHover = true,
+    this.enableHaptic = true,
+    this.hoverTranslateY = -2.0,
   });
 
   @override
@@ -38,6 +36,7 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scaleAnimation;
+  bool _isHovered = false;
 
   /// تتبع ما إذا كان المستخدم يضغط حالياً باستمرار على العنصر
   bool _isHolding = false;
@@ -67,6 +66,9 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
 
   void _handleTapDown(TapDownDetails details) {
     _isHolding = true;
+    if (widget.enableHaptic) {
+      HapticFeedback.selectionClick();
+    }
     _controller.forward();
   }
 
@@ -89,7 +91,6 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
   /// يضمن اكتمال دورة الانكماش ثم الارتداد بسلاسة تامة حتى عند النقر الخاطف
   void _triggerBounceRelease() {
     if (_controller.isAnimating) {
-      // إذا كان لا يزال ينكمش، ننتظر وصوله للنهاية ثم يرتد فوراً
       _controller.addStatusListener(_onAnimationStatusChanged);
     } else {
       if (mounted) {
@@ -121,13 +122,38 @@ class _CustomInteractiveBounceState extends State<CustomInteractiveBounce>
       );
     }
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleTapCancel,
-      onTap: _handleTap,
-      child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
+    final isInteractive = widget.onTap != null;
+
+    Widget content = ScaleTransition(
+      scale: _scaleAnimation,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.translationValues(
+          0,
+          (_isHovered && widget.enableHover) ? widget.hoverTranslateY : 0.0,
+          0,
+        ),
+        child: widget.child,
+      ),
+    );
+
+    return MouseRegion(
+      cursor: isInteractive ? SystemMouseCursors.click : MouseCursor.defer,
+      onEnter: (_) {
+        if (mounted && widget.enableHover) setState(() => _isHovered = true);
+      },
+      onExit: (_) {
+        if (mounted && widget.enableHover) setState(() => _isHovered = false);
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: _handleTapDown,
+        onTapUp: _handleTapUp,
+        onTapCancel: _handleTapCancel,
+        onTap: _handleTap,
+        child: content,
+      ),
     );
   }
 }
