@@ -433,7 +433,7 @@ void main() {
         pageProfile: DocumentPageProfile.a4Portrait(),
         generatedAt: DateTime.utc(2026, 11, 9, 10),
         watermark: DocumentWatermark(
-          imageBytes: Uint8List.fromList(base64.decode('$b64')),
+          imageBytes: Uint8List.fromList(base64.decode(b64)),
         ),
       ),
     );
