@@ -46,15 +46,15 @@ class BillingReportDocumentService {
     final metricRows=<DocumentTableRow>[];
     void addValue(String label,dynamic value){
       if(value is Map<String,dynamic>){
-        for(final entry in value.entries){addValue(label+' / '+entry.key.replaceAll('_',' '),entry.value);}
+        for(final entry in value.entries){addValue('$label / ${entry.key.replaceAll('_',' ')}',entry.value);}
       }else if(value is List<dynamic>){
         for(var index=0;index<value.length;index++){
-          addValue(label+' '+(index+1).toString(),value[index]);
+          addValue('$label ${index+1}',value[index]);
         }
       }else{
         if(metricRows.length>=300)throw StateError('يتجاوز ملخص التقرير الحد الآمن لعناصر PDF.');
         metricRows.add(DocumentTableRow(
-          id:'billing-summary-'+(metricRows.length+1).toString(),
+          id:'billing-summary-${metricRows.length+1}',
           cells:[
             DocumentTableCell(value:DocumentTextValue(label),direction:isArabic?DocumentTextDirection.rightToLeft:DocumentTextDirection.leftToRight),
             DocumentTableCell(value:_documentValue(value,localeTag),direction:_valueDirection(value,isArabic)),
@@ -151,7 +151,7 @@ class BillingReportDocumentService {
       options:DocumentRenderOptions(
         pageProfile:DocumentPageProfile.a4Portrait(marginTop:38,marginRight:36,marginBottom:42,marginLeft:36),
         generatedAt:generatedAt,
-        headerText:'NetSales · '+reportLabel,
+        headerText:'NetSales · $reportLabel',
         footerText:isArabic?'تقرير فوترة — بيانات معتمدة من الخادم':'Billing report — server-authoritative data',
         watermark:DocumentWatermark(imageBytes:logo,opacity:0.075,angleRadians:-0.6108652381980153,widthFactor:0.58,heightFactor:0.46),
         branding:branding,
@@ -165,7 +165,7 @@ class BillingReportDocumentService {
     }
     return FileExportService.instance.saveFile(
       bytes:result.artifact.bytes,
-      fileName:'Billing-'+reportType+'-Summary',
+      fileName:'Billing-$reportType-Summary'',
       extension:'pdf',
       folderName:'Reports',
       namingStrategy:FileNamingStrategy.report,
