@@ -360,18 +360,34 @@ class BillingDialogs {
               ? 'أهلية التجربة متاحة وفق سياسة المنصة المبينة أدناه.'
               : 'لا توجد أهلية لتجربة مجانية لهذا السعر؛ سيتم الشراء وفق السعر والدورة المنشورين.') +
               ' لن تُفعّل الاستحقاقات المدفوعة قبل اعتماد الدفع.',
-      content: trialPolicy == null
-          ? null
-          : BillingTrialPolicySummary(
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!trialEligible && trial['reason_code'] != null)
+            Text(
+              'سبب عدم الأهلية: ${_trialReasonLabel(trial['reason_code'].toString())}',
+            ),
+          if (trialPolicy != null)
+            BillingTrialPolicySummary(
               trial: trialPolicy,
               showAdjustments: false,
+              showLifecycle: false,
               title: 'شروط التجربة لهذا السعر',
             ),
+        ],
+      ),
       confirmLabel: ready ? 'متابعة' : 'فهمت',
       cancelLabel: 'رجوع',
     );
     if (accepted == true && ready) await controller.purchase(priceId);
   }
+
+  static String _trialReasonLabel(String code) => switch (code) {
+        'TRIAL_NOT_AVAILABLE' => 'لا توجد سياسة تجربة منشورة لهذا السعر',
+        'TRIAL_ALREADY_REDEEMED' => 'تم استخدام التجربة مسبقاً ضمن نطاق السياسة',
+        _ => code,
+      };
 
   static String _purchaseBlockerLabel(String code) => switch (code) {
         'DUNNING_POLICY_UNAVAILABLE' => 'سياسة التحصيل غير منشورة أو غير فعالة',
