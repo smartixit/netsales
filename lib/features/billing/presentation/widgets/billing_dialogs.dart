@@ -234,7 +234,59 @@ class BillingDialogs {
       );
       return;
     }
-    final trial = detail['trial_redemption'];
+    final rawRedemption = detail['trial_redemption'];
+    final redemption = rawRedemption is Map
+        ? Map<String, dynamic>.from(rawRedemption)
+        : null;
+    final rawPolicy = detail['trial_policy_snapshot'];
+    final policy = rawPolicy is Map
+        ? Map<String, dynamic>.from(rawPolicy)
+        : <String, dynamic>{};
+    final rawPolicyVersion = redemption?['policy_version'];
+    final policyVersion = rawPolicyVersion is Map
+        ? Map<String, dynamic>.from(rawPolicyVersion)
+        : <String, dynamic>{};
+    final rawEntitlementConfig = policy['entitlement_config'];
+    final entitlementConfig = rawEntitlementConfig is Map
+        ? Map<String, dynamic>.from(rawEntitlementConfig)
+        : <String, dynamic>{};
+    final trial = redemption == null && policy.isEmpty
+        ? null
+        : <String, dynamic>{
+            'status': redemption?['status'],
+            'redemption_scope':
+                redemption?['redemption_scope'] ?? policy['redemption_scope'],
+            'start': detail['trial_start'],
+            'end': detail['trial_end'],
+            'start_at': detail['trial_start_at'],
+            'end_at': detail['trial_end_at'],
+            'server_now': detail['server_now'],
+            'duration_value':
+                policy['duration_value'] ?? policyVersion['duration_value'],
+            'duration_unit':
+                policy['duration_unit'] ?? policyVersion['duration_unit'],
+            'start_trigger':
+                policy['start_trigger'] ?? policyVersion['start_trigger'],
+            'eligibility_mode':
+                policy['eligibility_mode'] ?? policyVersion['eligibility_mode'],
+            'requires_manual_approval':
+                policy['requires_manual_approval'] ??
+                    policyVersion['requires_manual_approval'] ??
+                    false,
+            'end_behavior':
+                policy['end_behavior'] ?? policyVersion['end_behavior'],
+            'entitlement_mode':
+                policy['entitlement_mode'] ??
+                    policyVersion['entitlement_mode'] ??
+                    'FULL_PLAN',
+            'allowed_features': entitlementConfig['allowed_features'] ?? [],
+            'awaiting_first_activation':
+                detail['status'] == 'INCOMPLETE' &&
+                    (policy['start_trigger'] ??
+                            policyVersion['start_trigger']) ==
+                        'FIRST_ACTIVATION',
+            'adjustments': redemption?['adjustments'] ?? [],
+          };
     await CustomDialog.show(
       type: DialogType.info,
       title: 'تفاصيل الاشتراك',
@@ -248,12 +300,9 @@ class BillingDialogs {
             Text('الحالة: ${detail['status_label']?.toString() ?? detail['status']?.toString() ?? '—'}'),
             Text('بداية الفترة: ${detail['current_period_start']?.toString() ?? '—'}'),
             Text('نهاية الفترة: ${detail['current_period_end']?.toString() ?? '—'}'),
-            if (trial is Map<String, dynamic>) ...[
+            if (trial != null) ...[
               const SizedBox(height: 8),
-              Text('الفترة التجريبية', style: AppTypography.titleSmall),
-              Text('الحالة: ${trial['status']?.toString() ?? '—'}'),
-              Text('تاريخ البدء: ${trial['started_at']?.toString() ?? '—'}'),
-              Text('تاريخ الانتهاء: ${trial['completed_at']?.toString() ?? '—'}'),
+              BillingTrialPolicySummary(trial: trial),
             ],
             const SizedBox(height: 10),
             Text('الاستخدام المسجل', style: AppTypography.titleSmall),
