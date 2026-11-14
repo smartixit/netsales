@@ -20,6 +20,8 @@ import 'package:netsales/features/finance/domain/repositories/finance_repository
 import 'package:netsales/features/finance/domain/usecases/debt_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/network_wallet_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
+import 'package:netsales/features/finance/domain/usecases/export_wallet_statement_document_use_case.dart';
+import 'package:netsales/features/finance/domain/repositories/wallet_statement_document_repository.dart';
 import 'package:netsales/features/finance/domain/usecases/repayment_use_cases.dart';
 import 'package:netsales/features/finance/domain/usecases/transfer_pos_to_network_use_case.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
@@ -29,6 +31,22 @@ import 'package:netsales/features/finance/presentation/controllers/pos_wallet_da
 import 'package:netsales/features/finance/presentation/controllers/repayment_collection_controller.dart';
 import 'package:netsales/features/finance/presentation/controllers/repayment_history_controller.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
+
+
+class _FakeWalletStatementDocumentRepository
+    implements WalletStatementDocumentRepository {
+  @override
+  Future<bool> exportNetworkStatement(
+    NetworkWalletEntity wallet,
+    List<NetworkWalletLogEntity> logs,
+  ) async => true;
+
+  @override
+  Future<bool> exportPosStatement(
+    PosWalletEntity wallet,
+    List<PosWalletLogEntity> logs,
+  ) async => true;
+}
 
 class MockCommercialRepository implements CommercialRepository {
   List<NetworkEntity> networks = [];
@@ -420,6 +438,12 @@ void main() {
         final controller = PosWalletDashboardController(
           getPosWalUseCase: GetPosWalUseCase(repository),
           getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+          getPosWalletByNetworkAndPosUseCase:
+              GetPosWalletByNetworkAndPosUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
         );
 
         await controller.loadWallets();
@@ -970,6 +994,12 @@ void main() {
         final controller = PosWalletDashboardController(
           getPosWalUseCase: GetPosWalUseCase(repository),
           getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+          getPosWalletByNetworkAndPosUseCase:
+              GetPosWalletByNetworkAndPosUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
         );
 
         await controller.loadWallets();
@@ -998,6 +1028,12 @@ void main() {
         final controller = NetworkWalletDashboardController(
           getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
           getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+          getNetworkWalletByIdUseCase:
+              GetNetworkWalletByIdUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
         );
 
         await controller.loadWallets();
@@ -1167,6 +1203,12 @@ void main() {
       final controller = NetworkWalletDashboardController(
         getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
         getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+          getNetworkWalletByIdUseCase:
+              GetNetworkWalletByIdUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
       );
 
       await controller.loadWallets();
@@ -1195,6 +1237,12 @@ void main() {
       final controller = NetworkWalletDashboardController(
         getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
         getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+          getNetworkWalletByIdUseCase:
+              GetNetworkWalletByIdUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
       );
 
       await controller.loadWallets();
@@ -1229,6 +1277,12 @@ void main() {
         final controller = PosWalletDashboardController(
           getPosWalUseCase: GetPosWalUseCase(repository),
           getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+          getPosWalletByNetworkAndPosUseCase:
+              GetPosWalletByNetworkAndPosUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
         );
 
         await controller.loadWallets();
@@ -1259,6 +1313,12 @@ void main() {
       final controller = PosWalletDashboardController(
         getPosWalUseCase: GetPosWalUseCase(repository),
         getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+          getPosWalletByNetworkAndPosUseCase:
+              GetPosWalletByNetworkAndPosUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
       );
 
       await controller.loadWallets();
@@ -1692,6 +1752,12 @@ void main() {
       final controller = NetworkWalletDashboardController(
         getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
         getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+          getNetworkWalletByIdUseCase:
+              GetNetworkWalletByIdUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
       );
 
       await controller.loadWallets();
@@ -1735,6 +1801,12 @@ void main() {
         final controller = PosWalletDashboardController(
           getPosWalUseCase: GetPosWalUseCase(repository),
           getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+          getPosWalletByNetworkAndPosUseCase:
+              GetPosWalletByNetworkAndPosUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
         );
 
         await controller.loadWallets();
@@ -1768,6 +1840,12 @@ void main() {
         final controller = NetworkWalletDashboardController(
           getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
           getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+          getNetworkWalletByIdUseCase:
+              GetNetworkWalletByIdUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
         );
 
         await controller.loadWallets();
@@ -1812,6 +1890,12 @@ void main() {
       final controller = NetworkWalletDashboardController(
         getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
         getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+          getNetworkWalletByIdUseCase:
+              GetNetworkWalletByIdUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
       );
       controller.selectedWallet.value = walletA;
       final oldFuture = controller.loadWalletLogs(1, isRefresh: true);
@@ -1861,6 +1945,12 @@ void main() {
         final controller = PosWalletDashboardController(
           getPosWalUseCase: GetPosWalUseCase(repository),
           getPosWalletLogsUseCase: GetPosWalletLogsUseCase(repository),
+          getPosWalletByNetworkAndPosUseCase:
+              GetPosWalletByNetworkAndPosUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
         );
         controller.selectedWallet.value = walletA;
         final oldFuture = controller.loadWalletLogs(1, isRefresh: true);
@@ -1946,6 +2036,12 @@ void main() {
         final controller = NetworkWalletDashboardController(
           getNetworkWalletsUseCase: GetNetworkWalletsUseCase(repository),
           getNetworkWalletLogsUseCase: GetNetworkWalletLogsUseCase(repository),
+          getNetworkWalletByIdUseCase:
+              GetNetworkWalletByIdUseCase(repository),
+          exportWalletStatementDocumentUseCase:
+              ExportWalletStatementDocumentUseCase(
+                _FakeWalletStatementDocumentRepository(),
+              ),
         );
 
         await controller.loadWallets();
