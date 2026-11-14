@@ -548,7 +548,7 @@ void main() {
     final renderer = PdfDocumentRenderer(textShapingProvider: shapingProvider);
     final rtlCases = <List<DocumentNode>>[
       const [DocumentParagraph(text: 'Invoice INV-2026-001 رقم الفاتورة')],
-      const [DocumentHeading(text: 'Customer details بيانات العميل')],
+      [DocumentHeading(text: 'Customer details بيانات العميل')],
       [
         DocumentTable(
           columns: [
