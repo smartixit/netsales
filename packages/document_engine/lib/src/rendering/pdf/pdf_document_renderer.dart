@@ -171,9 +171,6 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       );
     }
 
-    final rtlPattern = RegExp(
-      r'[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]',
-    );
     final locale = snapshot.metadata.locale.languageTag.toLowerCase();
     if (textShapingProvider == null &&
         (snapshot.metadata.locale.direction ==
