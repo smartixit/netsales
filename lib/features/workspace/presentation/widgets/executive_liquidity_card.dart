@@ -4,58 +4,46 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// كرت السيولة والعمليات المالية القيادية (ExecutiveLiquidityCard)
 /// مصمم بنمط زجاجي كربوني فاخر يمنع التزاحم ويضمن عدم تجاوز الحواف على أي حجم شاشة
 class ExecutiveLiquidityCard extends StatelessWidget {
-  final NetworkWorkspaceOverviewEntity overview;
+  final ({
+    String balance,
+    bool hasWallet,
+    bool isWalletActive,
+    bool hasSales,
+    double growthRate,
+    String cashSales,
+    String outstandingReceivables,
+    String posCoverage,
+  }) summary;
 
   const ExecutiveLiquidityCard({
     super.key,
-    required this.overview,
+    required this.summary,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final metrics = overview.metrics;
 
-    final hasWallet = metrics.containsKey('wallet');
-    final hasSales = metrics.containsKey('sales');
-    final hasPos = metrics.containsKey('points_of_sale');
-
-    final wallet = overview.metric('wallet');
-    final balanceStr = hasWallet && wallet != null
-        ? AmountFormatter.format(overview.amount('wallet', 'balance'))
-        : (hasSales
-            ? AmountFormatter.format(overview.amount('sales', 'total_amount'))
-            : '0.00');
-
-    final isWalletActive = wallet?['is_active'] == true;
-
-    // قراءة نسبة النمو الحقيقية المحسوبة من الباكيند
-    final salesMetric = overview.metric('sales');
-    final rawGrowth = salesMetric?['growth_rate'];
-    final double growthRate = (rawGrowth is num) ? rawGrowth.toDouble() : 0.0;
-    final String growthText = growthRate > 0
+    final balanceStr = summary.balance;
+    final hasWallet = summary.hasWallet;
+    final isWalletActive = summary.isWalletActive;
+    final hasSales = summary.hasSales;
+    final growthRate = summary.growthRate;
+    final growthText = growthRate > 0
         ? '+${growthRate.toStringAsFixed(1)}% نمو'
         : (growthRate < 0
             ? '${growthRate.toStringAsFixed(1)}% تراجع'
             : '0.0% استقرار');
 
-    final paidAmountStr = hasSales
-        ? AmountFormatter.format(overview.amount('sales', 'paid_amount'))
-        : '0.00';
-    final outstandingStr = hasSales
-        ? AmountFormatter.format(overview.amount('sales', 'outstanding_amount'))
-        : '0.00';
-
-    final activePos = hasPos ? overview.count('points_of_sale', 'active') : '0';
-    final totalPos = hasPos ? overview.count('points_of_sale', 'total') : '0';
+    final paidAmountStr = summary.cashSales;
+    final outstandingStr = summary.outstandingReceivables;
+    final posCoverageStr = summary.posCoverage;
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.md),
@@ -365,38 +353,37 @@ class ExecutiveLiquidityCard extends StatelessWidget {
                   ),
                 ),
 
-                if (hasPos) ...[
-                  // فاصل رأسي
-                  Container(
-                    width: 1,
-                    height: 22.h,
-                    color: Colors.white.withValues(alpha: 0.1),
-                  ),
+                // فاصل رأسي
+                Container(
+                  width: 1,
+                  height: 22.h,
+                  color: Colors.white.withValues(alpha: 0.1),
+                ),
 
-                  // كبسولة 3: نقاط البيع المتصلة
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsetsDirectional.only(start: 6.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'نقاط البيع',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.65),
-                              fontSize: 8.5.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
+                // كبسولة 3: نقاط البيع المتصلة
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(start: 6.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'نقاط البيع',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.65),
+                            fontSize: 8.5.sp,
+                            fontWeight: FontWeight.w500,
                           ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            '$activePos / $totalPos متصلة',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          '$posCoverageStr متصلة',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
                               color: Colors.white,
                               fontSize: 10.5.sp,
                               fontWeight: FontWeight.w800,
@@ -407,7 +394,6 @@ class ExecutiveLiquidityCard extends StatelessWidget {
                     ),
                   ),
                 ],
-              ],
             ),
           ),
           SizedBox(height: AppSpacing.sm),

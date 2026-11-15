@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_card.dart';
-import 'package:netsales/widgets/images/custom_cached_image.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 
 /// بطاقة مصرفية فاخرة تعبر عن حساب الوكيل لدى الشبكة المزودة المختارة.
 /// مطبقة عبر CustomCarouselCard الموحدة لتعزيز الجاذبية البصرية والموثوقية المؤسسية.
@@ -46,16 +45,12 @@ class PosNetworkCarouselCard extends StatelessWidget {
         ? '${AmountFormatter.formatValue(wallet!.creditLimit!, decimalPlaces: 0)} $currency'
         : (wallet != null ? 'غير محدد' : '••••');
 
-    final logoWidget = logoUrl != null && logoUrl.trim().isNotEmpty
-        ? CustomCachedImage.avatar(
-            url: logoUrl,
-            radius: 17.r,
-          )
-        : const Icon(
-            Icons.hub_rounded,
-            size: 20,
-            color: Colors.white70,
-          );
+    final logoWidget = CustomAvatarBadge(
+      imageUrl: logoUrl,
+      initials: name,
+      size: AvatarBadgeSize.sm,
+      hasPulse: false,
+    );
 
     return CustomCarouselCard(
       title: name,

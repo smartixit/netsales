@@ -6,7 +6,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
-import 'package:netsales/widgets/images/custom_cached_image.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 
 class PosWelcomeHeader extends StatelessWidget {
   const PosWelcomeHeader({super.key, required this.controller});
@@ -54,22 +54,11 @@ class PosWelcomeHeader extends StatelessWidget {
           ),
           Row(
             children: [
-              Container(
-                width: 52.r,
-                height: 52.r,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: colors.onPrimary.withValues(alpha: 0.16),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: colors.onPrimary.withValues(alpha: 0.28),
-                  ),
-                ),
-                child: _buildProfileAvatar(
-                  profileUrl: SessionService.to.currentUser?.userProfileLogo,
-                  initial: initial,
-                  foregroundColor: colors.onPrimary,
-                ),
+              CustomAvatarBadge(
+                imageUrl: SessionService.to.currentUser?.userProfileLogo,
+                initials: initial,
+                size: AvatarBadgeSize.md,
+                hasPulse: false,
               ),
               AppSpacing.hMd,
               Expanded(
@@ -116,23 +105,4 @@ class PosWelcomeHeader extends StatelessWidget {
       ),
     );
   }
-}
-
-Widget _buildProfileAvatar({
-  required String? profileUrl,
-  required String initial,
-  required Color foregroundColor,
-}) {
-  final url = profileUrl?.trim();
-  if (url != null && url.isNotEmpty) {
-    return CustomCachedImage.avatar(url: url, radius: AppRadius.md + 1);
-  }
-  return Text(
-    initial,
-    style: AppTypography.titleMedium.copyWith(
-      color: foregroundColor,
-      fontWeight: FontWeight.w900,
-      fontSize: 15.sp,
-    ),
-  );
 }

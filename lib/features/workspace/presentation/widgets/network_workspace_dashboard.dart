@@ -92,7 +92,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                 children: [
                   // 1. كرت الترحيب القيادي
                   ExecutiveWelcomeHeroCard(
-                    overview: overview,
+                    controller: ctrl,
                     onPendingTap: () => ctrl.onNavItemSelected(1),
                   ),
                   AppSpacing.vLg,
@@ -118,24 +118,22 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
 
                   // 3. كاروسيل بطاقات الشبكات التابعة للمزود
                   if (ctrl.networks.isNotEmpty) ...[
-                    NetworkProviderCarouselSection(
-                      controller: ctrl,
-                      overview: overview,
-                    ),
+                    NetworkProviderCarouselSection(controller: ctrl),
                     AppSpacing.vLg,
                   ],
 
                   // 4. كرت السيولة والعمليات السريعة
                   if (metrics.containsKey('wallet') ||
                       metrics.containsKey('sales')) ...[
-                    ExecutiveLiquidityCard(overview: overview),
+                    ExecutiveLiquidityCard(summary: ctrl.liquiditySummary),
                     AppSpacing.vLg,
                   ],
 
                   // 5. منحنى وتيرة المبيعات والطلبات
                   if (metrics.containsKey('sales')) ...[
                     ExecutiveSalesVelocityChart(
-                      overview: overview,
+                      chartDefinition: ctrl.salesChartDefinition,
+                      summary: ctrl.salesVelocitySummary,
                       selectedPeriod: ctrl.selectedPeriod.value,
                       onPeriodChanged: ctrl.selectPeriod,
                     ),
@@ -144,7 +142,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
 
                   // 6. شبكة المؤشرات الحيوية التنفيذية (2 أعمدة متوازية)
                   ExecutiveMetricsGrid(
-                    overview: overview,
+                    items: ctrl.kpiMetrics,
                     onPointsOfSaleTap: () => ctrl.onNavItemSelected(2),
                     onRequestsTap: () => ctrl.onNavItemSelected(1),
                     onPackagesTap: () =>
@@ -160,9 +158,9 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                   if (overview.recentPendingRequests.isNotEmpty) ...[
                     NetworkLivePendingOrdersStream(
                       requests: overview.recentPendingRequests,
-                      totalPendingCount:
-                          int.tryParse(overview.count('requests', 'pending')) ??
-                          overview.recentPendingRequests.length,
+                      totalPendingCount: ctrl.pendingRequestsCount > 0
+                          ? ctrl.pendingRequestsCount
+                          : overview.recentPendingRequests.length,
                       onViewAll: () => ctrl.onNavItemSelected(1),
                     ),
                     AppSpacing.vXl,

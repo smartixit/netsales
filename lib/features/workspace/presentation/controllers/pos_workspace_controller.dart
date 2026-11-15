@@ -1,5 +1,10 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
+import 'package:netsales/core/enums/role_key.dart';
+import 'package:netsales/core/enums/role_scope.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/utils/greeting_formatter.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/session_service.dart';
@@ -77,12 +82,39 @@ class PosWorkspaceController extends GetxController {
     return name.isEmpty ? 'مرحباً بك' : name;
   }
 
-  String get welcomePeriod {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'صباح الخير';
-    if (hour < 17) return 'طاب يومك';
-    return 'مساء الخير';
+  String get welcomePeriod => GreetingFormatter.greeting();
+
+  /// كائن العرض الدلالي للدور الوظيفي لنقطة البيع
+  EnumPresentation get rolePresentation {
+    final user = SessionService.to.currentUser;
+    final membership = user?.workspaceMemberships.firstWhereOrNull(
+      (m) => m.scope == RoleScope.pos,
+    );
+    final rawRoleKey = membership?.roleKey ??
+        user?.role?.roleKey ??
+        user?.generalRoleKey;
+    final serverLabel = membership?.roleName ??
+        user?.role?.roleName ??
+        user?.role?.roleKeyLabel;
+    final typedRoleKey = RoleKey.fromWire(rawRoleKey);
+    final presentation = EnumPresentationRegistry.resolveRoleKey(
+      typedRoleKey,
+      serverLabel: serverLabel,
+    );
+    if (presentation.isKnown) {
+      return presentation;
+    }
+    return EnumPresentationRegistry.resolveRoleScope(
+      RoleScope.pos,
+      serverLabel: serverLabel,
+    );
   }
+
+  /// رتبة أو صفة المستخدم المستخرجة ديناميكياً من Enum الأدوار وسجل العرض
+  String get userRole => rolePresentation.label;
+
+  /// رابط صورة المستخدم
+  String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;
 
   @override
   void onInit() {
@@ -178,12 +210,11 @@ class PosWorkspaceController extends GetxController {
 
     try {
       final result = await getPosNetworksListUseCase(
-         posId,
+        posId,
         cursor: refresh ? null : networkCursor.value,
         perPage: 10,
       );
-      if (generation != _networkGeneration ||
-          activePos.value?.posId != posId) {
+      if (generation != _networkGeneration || activePos.value?.posId != posId) {
         return;
       }
 
@@ -203,7 +234,8 @@ class PosWorkspaceController extends GetxController {
         final savedLink = networkLinks.firstWhereOrNull(
           (link) => link.networkId == savedNetworkId && link.status,
         );
-        final initialLink = savedLink ??
+        final initialLink =
+            savedLink ??
             (networkLinks.length == 1 ? networkLinks.single : null);
         if (initialLink != null) {
           await selectNetwork(

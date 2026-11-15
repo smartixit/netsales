@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_card.dart';
-import 'package:netsales/widgets/images/custom_cached_image.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 
 /// مهايئ بطاقة الشبكة التنفيذية المربوط بالنموذج (ExecutiveNetworkCard)
 /// يقوم بتمرير بيانات NetworkEntity إلى ودجت الكاروسيل العامة CustomCarouselCard
@@ -64,22 +63,12 @@ class ExecutiveNetworkCard extends StatelessWidget {
         ? network.ownerName!
         : 'المزود المعتمد';
 
-    final logoWidget = network.networkProfileLogoUrl != null &&
-            network.networkProfileLogoUrl!.isNotEmpty
-        ? CustomCachedImage.avatar(
-            url: network.networkProfileLogoUrl,
-            radius: 17.r,
-          )
-        : Text(
-            network.networkName.isNotEmpty
-                ? network.networkName.substring(0, 1)
-                : 'ش',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w900,
-              fontSize: 14.sp,
-            ),
-          );
+    final logoWidget = CustomAvatarBadge(
+      imageUrl: network.networkProfileLogoUrl,
+      initials: network.networkName,
+      size: AvatarBadgeSize.sm,
+      hasPulse: false,
+    );
 
     return CustomCarouselCard(
       title: network.networkName,

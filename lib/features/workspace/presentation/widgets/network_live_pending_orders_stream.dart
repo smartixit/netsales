@@ -9,6 +9,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
@@ -129,28 +130,15 @@ class NetworkPendingOrderRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 44.r,
-            height: 44.r,
-            decoration: BoxDecoration(
-              color: isCash
-                  ? colors.primary.withValues(alpha: 0.12)
-                  : colors.info.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: isCash
-                    ? colors.primary.withValues(alpha: 0.3)
-                    : colors.info.withValues(alpha: 0.3),
-              ),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              initials,
-              style: AppTypography.titleSmall.copyWith(
-                color: isCash ? colors.primary : colors.info,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
+          CustomAvatarBadge(
+            initials: initials,
+            size: AvatarBadgeSize.sm,
+            customDimension: 44,
+            hasPulse: false,
+            gradientColors: isCash
+                ? [colors.primary, colors.primaryContainer]
+                : [colors.secondary, colors.secondaryContainer],
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           SizedBox(width: AppSpacing.md),
 

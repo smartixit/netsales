@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
-import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
+import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// كرت الترحيب القيادي التنفيذي المتجاوب (ExecutiveWelcomeHeroCard)
 /// يعرض هوية المشغل وحالة الاتصال والكبسولات السريعة دون أي أخطاء تجاوز أو اقتطاع
 class ExecutiveWelcomeHeroCard extends StatelessWidget {
-  final NetworkWorkspaceOverviewEntity overview;
+  final NetworkWorkspaceController controller;
   final VoidCallback onPendingTap;
 
   const ExecutiveWelcomeHeroCard({
     super.key,
-    required this.overview,
+    required this.controller,
     required this.onPendingTap,
   });
 
@@ -28,21 +25,13 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final user = Get.isRegistered<SessionService>()
-        ? SessionService.to.currentUser
-        : null;
 
-    final greeting = DateFormatter.greeting();
-    final hasRequests = overview.metrics.containsKey('requests');
-    final pendingCount = hasRequests
-        ? int.tryParse(overview.count('requests', 'pending')) ?? 0
-        : 0;
-
-    final realFullName = user?.userFullName ?? 'المستخدم';
-    final realRole =
-        user?.role?.roleName ?? user?.statusLabel ?? 'مزود شبكة معتمد';
+    final greeting = controller.welcomeGreeting;
+    final pendingCount = controller.pendingRequestsCount;
+    final realFullName = controller.userName;
+    final realRole = controller.userRole;
     final initials = TextFormatter.avatarInitials(realFullName, maxChars: 2);
-    final todayStr = DateFormatter.fullDate(DateTime.now());
+    final todayStr = controller.todayFormatted;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -75,7 +64,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
             children: [
               // الأفاتار مع مؤشر النبض الحي الموحد
               CustomAvatarBadge(
-                imageUrl: user?.userProfileLogo,
+                imageUrl: controller.userProfileLogo,
                 initials: initials,
                 size: AvatarBadgeSize.md,
                 pulseColor: colors.primary,
@@ -165,7 +154,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                         ),
                         Flexible(
                           child: Text(
-                            overview.networkName,
+                            controller.activeNetworkName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.bodySmall.copyWith(

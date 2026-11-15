@@ -4,9 +4,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
-import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_network_card.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_slider.dart';
@@ -14,12 +12,10 @@ import 'package:netsales/widgets/carousels/custom_carousel_slider.dart';
 /// قسم كاروسيل بطاقات الشبكات التابعة للمزود (NetworkProviderCarouselSection)
 class NetworkProviderCarouselSection extends StatelessWidget {
   final NetworkWorkspaceController controller;
-  final NetworkWorkspaceOverviewEntity overview;
 
   const NetworkProviderCarouselSection({
     super.key,
     required this.controller,
-    required this.overview,
   });
 
   @override
@@ -79,17 +75,8 @@ class NetworkProviderCarouselSection extends StatelessWidget {
           viewportFraction: 0.88,
           itemBuilder: (context, network, index) {
             final isSelected = network.networkId == selectedId;
-            final salesMetric = overview.metric('sales');
-            final salesTotal = salesMetric?['total'];
-            final salesValue = isSelected && salesTotal is num
-                ? '${AmountFormatter.formatValue(salesTotal, decimalPlaces: 0)} YER'
-                : '••••';
-
-            final posMetric = overview.metric('pos');
-            final posTotal = posMetric?['total'];
-            final posCount = isSelected && posTotal != null
-                ? '$posTotal نقطة بيع'
-                : 'وكلاء معتمدين';
+            final salesValue = controller.formatNetworkSales(network, isSelected);
+            final posCount = controller.formatNetworkPosCount(network, isSelected);
 
             return ExecutiveNetworkCard(
               network: network,
