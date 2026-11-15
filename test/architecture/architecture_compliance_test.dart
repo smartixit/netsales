@@ -91,7 +91,9 @@ void main() {
           if (content.contains('/data/') ||
               content.contains('/presentation/') ||
               content.contains('package:get/get.dart') ||
-              content.contains('package:flutter/material.dart')) {
+              RegExp(r'package:flutter/').hasMatch(content) ||
+              content.contains("import 'dart:ui'") ||
+              content.contains('package:netsales/widgets/')) {
             violations.add(file.path);
           }
         }
@@ -158,6 +160,60 @@ void main() {
         reason:
             'All switch controls must use CustomSwitch from lib/widgets/inputs/custom_switch.dart. '
             'Violations found in: $violations',
+      );
+    });
+
+    test('Presentation widgets must not introduce local mutable form state', () {
+      // Existing violations are baselined for the ordered Commercial/Billing/Requests/
+      // Reports remediation phases. New view-local form state must be owned by GetX.
+      const legacyFormStateFiles = <String>{
+        'lib/features/billing/presentation/widgets/billing_dialogs.dart',
+        'lib/features/requests/presentation/widgets/procurement_action_dialogs.dart',
+        'lib/features/reports/presentation/widgets/operational_report_preset_dialog.dart',
+        'lib/features/commercial/presentation/widgets/network_details_bottom_sheet.dart',
+        'lib/features/commercial/presentation/widgets/pos_details_bottom_sheet.dart',
+        'lib/features/commercial/presentation/widgets/link_pos_bottom_sheet.dart',
+      };
+
+      final violations = <String>[];
+      for (final featureDir in featureSubDirs) {
+        final presentationDir = Directory('${featureDir.path}/presentation');
+        if (!presentationDir.existsSync()) continue;
+
+        final viewFiles = presentationDir
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((file) => file.path.endsWith('.dart'))
+            .where((file) {
+              final normalized = file.path.replaceAll('\\\\', '/');
+              return normalized.contains('/presentation/screens/') ||
+                  normalized.contains('/presentation/widgets/');
+            });
+
+        for (final file in viewFiles) {
+          final content = file.readAsStringSync();
+          final ownsTextController =
+              RegExp(r'\\bTextEditingController\\s*\\(').hasMatch(content);
+          final ownsFormKey =
+              RegExp(r'\\bGlobalKey<FormState>\\s*\\(').hasMatch(content);
+
+          if (ownsTextController || ownsFormKey) {
+            violations.add(file.path.replaceAll('\\\\', '/'));
+          }
+        }
+      }
+
+      final unbaselined = violations
+          .where((path) => !legacyFormStateFiles.contains(path))
+          .toList(growable: false);
+
+      expect(
+        unbaselined,
+        isEmpty,
+        reason:
+            'Screens and feature widgets must not own mutable form state. '
+            'Move TextEditingController and FormState ownership into the feature GetX controller. '
+            'Existing baselined paths are being remediated in order; new violations: $unbaselined',
       );
     });
 
