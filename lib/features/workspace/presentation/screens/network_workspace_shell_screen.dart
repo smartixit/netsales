@@ -30,7 +30,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           content: NetworkWorkspaceDashboard(),
         ),
         const WorkspaceNavItem(
-          label: 'طلبات التوريد',
+          label: 'الطلبات',
           icon: Icons.receipt_long_outlined,
           activeIcon: Icons.receipt_long_rounded,
           content: NetworkSupplyRequestsReviewScreen(embedded: true),

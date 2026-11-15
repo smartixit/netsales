@@ -29,7 +29,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           content: PosHomeDashboard(controller: controller),
         ),
         const WorkspaceNavItem(
-          label: 'طلبات التوريد',
+          label: 'الطلبات',
           icon: Icons.receipt_long_outlined,
           activeIcon: Icons.receipt_long_rounded,
           content: PosProcurementOrdersScreen(embedded: true),
@@ -41,7 +41,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           content: PosPurchaseInvoicesScreen(embedded: true),
         ),
         const WorkspaceNavItem(
-          label: 'الرصيد والديون',
+          label: 'الرصيد',
           icon: Icons.account_balance_wallet_outlined,
           activeIcon: Icons.account_balance_wallet_rounded,
           content: PosFinanceWorkspaceHub(),

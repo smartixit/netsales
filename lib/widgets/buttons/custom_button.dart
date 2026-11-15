@@ -755,49 +755,65 @@ class CustomButton extends StatelessWidget {
       }
     }
 
-    // 4. بناء هيكل الزر مع الحواف والظلال والتأثيرات
-    Widget buttonBody = AnimatedOpacity(
-      opacity: isDisabled ? 0.55 : 1.0,
-      duration: AppMotion.fast,
-      curve: AppMotion.emphasized,
-      child: Container(
-        margin: margin,
-        width: effectiveWidth,
-        height: _effectiveHeight,
-        decoration: BoxDecoration(
-          gradient: resolvedGradient,
-          color: resolvedGradient == null ? resolvedBgColor : null,
-          borderRadius: _effectiveBorderRadius,
-          border: resolvedBorder,
-          boxShadow: resolvedShadow,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
+    // 4. بناء هيكل الزر مع الحواف والظلال والتأثيرات والحماية من الانهيار في القيود اللانهائية
+    Widget buildBody(double? resolvedWidth) {
+      return AnimatedOpacity(
+        opacity: isDisabled ? 0.55 : 1.0,
+        duration: AppMotion.fast,
+        curve: AppMotion.emphasized,
+        child: Container(
+          margin: margin,
+          width: resolvedWidth,
+          height: _effectiveHeight,
+          decoration: BoxDecoration(
+            gradient: resolvedGradient,
+            color: resolvedGradient == null ? resolvedBgColor : null,
             borderRadius: _effectiveBorderRadius,
-            onTap: (enableScaleAnimation && !isDisabled)
-                ? null
-                : (isDisabled ? null : _handleTap),
-            child: Padding(
-              padding:
-                  padding ??
-                  (variant == AppButtonVariant.icon ||
-                          variant == AppButtonVariant.floating
-                      ? EdgeInsets.zero
-                      : (variant == AppButtonVariant.text
-                            ? EdgeInsets.symmetric(
-                                horizontal: AppSpacing.sm,
-                                vertical: AppSpacing.xs,
-                              )
-                            : EdgeInsets.symmetric(
-                                horizontal: AppSpacing.buttonPaddingH / 1.5,
-                              ))),
-              child: content,
+            border: resolvedBorder,
+            boxShadow: resolvedShadow,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: _effectiveBorderRadius,
+              onTap: (enableScaleAnimation && !isDisabled)
+                  ? null
+                  : (isDisabled ? null : _handleTap),
+              child: Padding(
+                padding:
+                    padding ??
+                    (variant == AppButtonVariant.icon ||
+                            variant == AppButtonVariant.floating
+                        ? EdgeInsets.zero
+                        : (variant == AppButtonVariant.text
+                              ? EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.sm,
+                                  vertical: AppSpacing.xs,
+                                )
+                              : EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.buttonPaddingH / 1.5,
+                                ))),
+                child: content,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    Widget buttonBody;
+    if (effectiveWidth == double.infinity) {
+      buttonBody = LayoutBuilder(
+        builder: (context, constraints) {
+          final resolvedWidth = constraints.maxWidth.isInfinite
+              ? null
+              : double.infinity;
+          return buildBody(resolvedWidth);
+        },
+      );
+    } else {
+      buttonBody = buildBody(effectiveWidth);
+    }
 
     // 5. ربط تفاعل اللمس النابض مع CustomInteractiveBounce من lib/widgets
     if (enableScaleAnimation && !isDisabled) {

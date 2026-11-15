@@ -106,6 +106,7 @@ class PosNetworkPackagesCatalog extends StatelessWidget {
         ),
         CustomButton.outline(
           text: 'طلب توريد',
+          size: AppButtonSize.small,
           prefix: Icons.add_shopping_cart_rounded,
           onPressed: () => Get.toNamed<void>(AppRoutes.newProcurementOrder),
         ),
