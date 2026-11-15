@@ -264,7 +264,7 @@ class PosProcurementController extends GetxController {
       final posList = await getMyPosUseCase!();
       myPosList.assignAll(posList);
 
-      final resolvedId = WorkspaceService.to.resolveActivePosId(
+      final resolvedId = WorkspaceService.to.resolveExplicitActivePosId(
         posList.map((p) => p.posId).toList(),
       );
 
