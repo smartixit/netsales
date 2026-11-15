@@ -3,7 +3,7 @@ import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 
 /// نموذج عرض مجرد لسطر حركة أو معاملة في لوحة التحكم (WorkspaceTransactionItem)
 /// يُجهزه الـ Controller بالكامل حاملاً البيانات الجاهزة للعرض بدون أي منطق أو تحويل داخل الواجهة
-class WorkspaceTransactionItem {
+class WorkspaceTransactionItemEntity {
   final String title;
   final String? reference;
   final String subtitle;
@@ -17,7 +17,7 @@ class WorkspaceTransactionItem {
   final VoidCallback? onAction;
   final String? actionLabel;
 
-  const WorkspaceTransactionItem({
+  const WorkspaceTransactionItemEntity({
     required this.title,
     required this.subtitle,
     required this.formattedAmount,

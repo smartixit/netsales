@@ -76,8 +76,8 @@ class CustomFloatingBottomNavBar extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? const Color(0xFF0F172A).withValues(alpha: 0.95)
-                        : colors.surface.withValues(alpha: 0.96),
+                        ? const Color(0xFF0F172A).withValues(alpha: 0.80)
+                        : colors.surface.withValues(alpha: 0.82),
                     borderRadius: BorderRadius.circular(AppRadius.xl),
                     border: Border.all(
                       color: isDark

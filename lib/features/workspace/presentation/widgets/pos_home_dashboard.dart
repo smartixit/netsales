@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
@@ -41,7 +42,7 @@ class PosHomeDashboard extends StatelessWidget {
           AppBreakpoints.screenMargin(context),
           MediaQuery.paddingOf(context).top + 20.h,
           AppBreakpoints.screenMargin(context),
-          AppSpacing.xxxl,
+          115.h + MediaQuery.paddingOf(context).bottom,
         ),
         child: Center(
           child: ConstrainedBox(
@@ -153,14 +154,58 @@ class PosHomeDashboard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      if (controller.networkLinks.isNotEmpty)
-                        Text(
-                          '${controller.networkLinks.length}${controller.hasMoreNetworks.value ? '+' : ''} شبكة',
-                          style: AppTypography.labelMedium.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.bold,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CustomInteractiveBounce(
+                            onTap: controller.openQrScanner,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 9.w,
+                                vertical: 4.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withValues(alpha: 0.1),
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.full),
+                                border: Border.all(
+                                  color: colors.primary.withValues(alpha: 0.35),
+                                  width: 0.9,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.qr_code_scanner_rounded,
+                                    size: 13.r,
+                                    color: colors.primary,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    'ربط شبكة +',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: colors.primary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 10.5.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                          if (controller.networkLinks.isNotEmpty) ...[
+                            SizedBox(width: 6.w),
+                            Text(
+                              '${controller.networkLinks.length}${controller.hasMoreNetworks.value ? '+' : ''} شبكة',
+                              style: AppTypography.labelMedium.copyWith(
+                                color: colors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
                   AppSpacing.vMd,
@@ -173,11 +218,14 @@ class PosHomeDashboard extends StatelessWidget {
                       onRetry: controller.retryNetworks,
                     )
                   else if (controller.networkLinks.isEmpty)
-                    const CustomEmptyState.boxed(
-                      title: 'لا توجد شبكات مرتبطة',
-                      subtitle: 'ستظهر هنا الشبكات التي ترتبط بها نقطة البيع.',
+                    CustomEmptyState.boxed(
+                      title: 'لا توجد شبكات مرتبطة حالياً',
+                      subtitle:
+                          'اربط نقطة البيع بمزود شبكة عبر مسح رمز QR لبدء طلب باقات الكروت فورياً.',
                       icon: Icons.hub_outlined,
-                      animationPath: null,
+                      actionLabel: 'مسح رمز QR للربط',
+                      actionIcon: Icons.qr_code_scanner_rounded,
+                      onAction: controller.openQrScanner,
                     )
                   else
                     CustomCarouselSlider<NetworkPosLinkEntity>(
@@ -188,6 +236,7 @@ class PosHomeDashboard extends StatelessWidget {
                       itemBuilder: (context, link, index) =>
                           PosNetworkCarouselCard(
                             link: link,
+                            cardIndex: index,
                             isSelected:
                                 controller
                                     .selectedNetworkLink
@@ -215,7 +264,7 @@ class PosHomeDashboard extends StatelessWidget {
                               .value!
                               .network
                               ?.networkName ??
-                          'شبكة #${controller.selectedNetworkLink.value!.networkId}',
+                          'الشبكة المحددة',
                       wallet: controller.selectedWallet.value,
                       isLoading: controller.isLoadingWallet.value,
                       error: controller.walletError.value,

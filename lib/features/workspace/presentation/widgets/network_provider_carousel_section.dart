@@ -8,6 +8,7 @@ import 'package:netsales/features/commercial/domain/entities/network_entity.dart
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_network_card.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_slider.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// قسم كاروسيل بطاقات الشبكات التابعة للمزود (NetworkProviderCarouselSection)
 class NetworkProviderCarouselSection extends StatelessWidget {
@@ -45,22 +46,64 @@ class NetworkProviderCarouselSection extends StatelessWidget {
                   ),
                 ],
               ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xxs,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Text(
-                  '${networks.length} شبكات',
-                  style: AppTypography.badgeText.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.bold,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CustomInteractiveBounce(
+                    onTap: controller.openQrInviteSheet,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 9.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                        border: Border.all(
+                          color: colors.primary.withValues(alpha: 0.35),
+                          width: 0.9,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.qr_code_2_rounded,
+                            size: 14.r,
+                            color: colors.primary,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            'دعوة QR +',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: colors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10.5.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  SizedBox(width: 6.w),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xxs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                    ),
+                    child: Text(
+                      '${networks.length} شبكات',
+                      style: AppTypography.badgeText.copyWith(
+                        color: colors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

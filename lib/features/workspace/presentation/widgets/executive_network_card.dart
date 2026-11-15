@@ -53,10 +53,8 @@ class ExecutiveNetworkCard extends StatelessWidget {
 
     final networkCode = network.networkUuid != null &&
             network.networkUuid!.isNotEmpty
-        ? (network.networkUuid!.length > 16
-            ? network.networkUuid!.substring(0, 16)
-            : network.networkUuid!)
-        : 'NET-${network.networkId.toString().padLeft(4, '0')}';
+        ? network.networkUuid!
+        : '';
 
     final ownerDisplay = network.ownerName != null &&
             network.ownerName!.isNotEmpty

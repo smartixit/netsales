@@ -1,8 +1,10 @@
 import 'package:get/get.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
 import 'package:netsales/features/catalog/presentation/bindings/package_catalog_binding.dart';
+import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
 import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
@@ -36,6 +38,10 @@ class PosWorkspaceBinding extends Bindings {
         getPosInvoicesUseCase: Get.find<GetPosInvoicesUseCase>(),
         getRequestsUseCase: Get.find<GetRequestsUseCase>(),
         getNetworkPackagesUseCase: Get.find<GetNetworkPackagesUseCase>(),
+        previewNetworkPosLinkChallengeUseCase:
+            Get.find<PreviewNetworkPosLinkChallengeUseCase>(),
+        confirmNetworkPosLinkChallengeUseCase:
+            Get.find<ConfirmNetworkPosLinkChallengeUseCase>(),
       ),
     );
   }

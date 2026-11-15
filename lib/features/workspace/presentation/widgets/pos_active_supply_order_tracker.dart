@@ -38,7 +38,13 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
         return const SizedBox.shrink();
       }
 
-      final reference = activeRequest.requestUuid ?? '#REQ-${activeRequest.requestId}';
+      final reference =
+          activeRequest.requestUuid != null &&
+                  activeRequest.requestUuid!.isNotEmpty
+              ? (activeRequest.requestUuid!.length > 8
+                  ? activeRequest.requestUuid!.substring(0, 8)
+                  : activeRequest.requestUuid!)
+              : 'طلب توريد';
       final status = activeRequest.statusRaw?.toUpperCase() ?? 'PENDING';
 
       final isStep1Done = true;

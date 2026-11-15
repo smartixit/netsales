@@ -4,100 +4,323 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
+/// كرت الترحيب التنفيذي المتجاوب لنقطة البيع (PosWelcomeHeader)
+/// مصمم وفق أعلى معايير الشركات العالمية وموحد مع ExecutiveWelcomeHeroCard لمساحة الشبكة
 class PosWelcomeHeader extends StatelessWidget {
-  const PosWelcomeHeader({super.key, required this.controller});
+  const PosWelcomeHeader({
+    super.key,
+    required this.controller,
+    this.onQrTap,
+  });
+
   final PosWorkspaceController controller;
+  final VoidCallback? onQrTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final user = controller.userName;
-    final initial = user.isNotEmpty ? user.characters.first : 'م';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final greeting = controller.welcomeGreeting;
+    final realFullName = controller.userName;
+    final realRole = controller.userRole;
+    final initials = TextFormatter.avatarInitials(realFullName, maxChars: 2);
+    final todayStr = controller.todayFormatted;
+    final posName = controller.activePosName;
+
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: 14.h,
+      ),
       decoration: BoxDecoration(
+        color: isDark ? colors.surfaceContainerLow : colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [colors.primary, colors.secondary],
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : colors.outlineVariant.withValues(alpha: 0.7),
+          width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: colors.primary.withValues(alpha: 0.18),
-            blurRadius: 24.r,
-            offset: Offset(0, 10.h),
+            color: colors.shadow.withValues(alpha: isDark ? 0.35 : 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: Stack(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Positioned(
-            left: -18.w,
-            top: -26.h,
-            child: Container(
-              width: 112.r,
-              height: 112.r,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: colors.onPrimary.withValues(alpha: 0.10),
-                  width: 18.r,
-                ),
-              ),
-            ),
-          ),
+          // 1. هوية مشغل نقطة البيع والبيانات التشغيلية
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               CustomAvatarBadge(
-                imageUrl: SessionService.to.currentUser?.userProfileLogo,
-                initials: initial,
+                imageUrl: controller.userProfileLogo,
+                initials: initials,
                 size: AvatarBadgeSize.md,
-                hasPulse: false,
+                pulseColor: colors.primary,
               ),
-              AppSpacing.hMd,
+              SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      controller.welcomePeriod,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: colors.onPrimary.withValues(alpha: 0.82),
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          greeting,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10.5.sp,
+                          ),
+                        ),
+                        Container(
+                          width: 3.5,
+                          height: 3.5,
+                          margin: EdgeInsets.symmetric(horizontal: 5.w),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colors.outline,
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 5.w,
+                            vertical: 1.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppRadius.full),
+                          ),
+                          child: Text(
+                            'جلسة نشطة',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: colors.primary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 9.5.sp,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 3.h),
+                    SizedBox(height: 2.h),
                     Text(
-                      user,
+                      realFullName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.titleMedium.copyWith(
-                        color: colors.onPrimary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16.sp,
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15.sp,
+                        letterSpacing: -0.2,
                       ),
                     ),
-                    SizedBox(height: 3.h),
-                    Text(
-                      'إدارة مشترياتك وحساباتك لدى الشبكات من مكان واحد',
-                      maxLines: 2,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: colors.onPrimary.withValues(alpha: 0.86),
-                        height: 1.45,
-                      ),
+                    SizedBox(height: 2.h),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            realRole,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: colors.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11.sp,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 3,
+                          height: 3,
+                          margin: EdgeInsets.symmetric(horizontal: 5.w),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colors.outline,
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            posName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: colors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11.sp,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.waving_hand_rounded,
-                color: colors.onPrimary.withValues(alpha: 0.92),
-                size: 25.r,
+            ],
+          ),
+
+          SizedBox(height: AppSpacing.sm),
+          Divider(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : colors.outlineVariant.withValues(alpha: 0.5),
+            height: 1,
+          ),
+          SizedBox(height: AppSpacing.sm),
+
+          // 2. الكبسولتان السريعتان المتجاوبتان
+          Row(
+            children: [
+              // كبسولة التاريخ
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 8.w,
+                    vertical: 6.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : colors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : colors.outlineVariant.withValues(alpha: 0.6),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 26.r,
+                        height: 26.r,
+                        decoration: BoxDecoration(
+                          color: colors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Icon(
+                          Icons.calendar_today_rounded,
+                          size: 13.r,
+                          color: colors.primary,
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'تاريخ اليوم',
+                              style: TextStyle(
+                                color: colors.onSurfaceVariant,
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              todayStr,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: colors.onSurface,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 10.5.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+
+              // كبسولة مسح رمز QR وربط شبكة جديدة (Interactive Touchpoint)
+              Expanded(
+                child: CustomInteractiveBounce(
+                  onTap: onQrTap ?? controller.openQrScanner,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? colors.primary.withValues(alpha: 0.08)
+                          : colors.primary.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(
+                        color: colors.primary.withValues(alpha: 0.35),
+                        width: 0.9,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 26.r,
+                          height: 26.r,
+                          decoration: BoxDecoration(
+                            color: colors.primary.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          child: Icon(
+                            Icons.qr_code_scanner_rounded,
+                            size: 14.r,
+                            color: colors.primary,
+                          ),
+                        ),
+                        SizedBox(width: 6.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'ربط شبكة مزود',
+                                style: TextStyle(
+                                  color: colors.onSurfaceVariant,
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    'مسح كود QR',
+                                    style: TextStyle(
+                                      color: colors.primary,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 10.5.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 3.w),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 8.r,
+                                    color: colors.primary,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

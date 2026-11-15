@@ -12,19 +12,35 @@ class PosNetworkCarouselCard extends StatelessWidget {
     super.key,
     required this.link,
     required this.isSelected,
+    this.cardIndex = 0,
     required this.onTap,
     this.wallet,
   });
 
   final NetworkPosLinkEntity link;
   final bool isSelected;
+  final int cardIndex;
   final VoidCallback onTap;
   final PosWalletEntity? wallet;
+
+  CustomCarouselCardTheme _resolveTheme(int index, bool selected) {
+    if (selected) {
+      return CustomCarouselCardTheme.emerald;
+    }
+    final variant = index % 3;
+    if (variant == 0) {
+      return CustomCarouselCardTheme.sapphire;
+    } else if (variant == 1) {
+      return CustomCarouselCardTheme.amethyst;
+    } else {
+      return CustomCarouselCardTheme.titanium;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final network = link.network;
-    final name = network?.networkName ?? 'شبكة #${link.networkId}';
+    final name = network?.networkName ?? 'الشبكة المزودة';
     final logoUrl = network?.networkProfileLogoUrl;
     final currency = wallet?.currencyCode ?? 'YER';
 
@@ -56,7 +72,8 @@ class PosNetworkCarouselCard extends StatelessWidget {
       title: name,
       subtitle: locationParts.isNotEmpty ? locationParts : 'المزود المعتمد',
       logo: logoWidget,
-      cardNumber: wallet?.walletUuid,
+      cardNumber:
+          wallet?.walletUuid ?? network?.networkUuid ?? link.pos?.posUuid ?? '',
       primaryLabel: 'رصيد نقطة البيع المتاح',
       primaryValue: formattedBalance,
       currencyTag: currency,
@@ -66,9 +83,7 @@ class PosNetworkCarouselCard extends StatelessWidget {
       isStatusActive: link.isActive,
       metricText: link.pos?.posName ?? 'نقطة البيع',
       metricIcon: Icons.storefront_rounded,
-      theme: isSelected
-          ? CustomCarouselCardTheme.emerald
-          : CustomCarouselCardTheme.sapphire,
+      theme: _resolveTheme(cardIndex, isSelected),
       isSelected: isSelected,
       onTap: onTap,
     );

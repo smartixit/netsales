@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/enums/role_key.dart';
@@ -17,11 +18,13 @@ import 'package:netsales/core/utils/greeting_formatter.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_challenge_sheet.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/domain/usecases/get_network_workspace_overview_use_case.dart';
-import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item.dart';
+import 'package:netsales/features/workspace/domain/entities/workspace_transaction_item_entity.dart';
 import 'package:netsales/widgets/charts/charting.dart';
 import 'package:netsales/widgets/dashboard_metrics/dashboard_metrics.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class NetworkWorkspaceController extends GetxController {
   NetworkWorkspaceController({
@@ -72,10 +75,10 @@ class NetworkWorkspaceController extends GetxController {
     final membership = user?.workspaceMemberships.firstWhereOrNull(
       (m) => m.scope == RoleScope.network,
     );
-    final rawRoleKey = membership?.roleKey ??
-        user?.role?.roleKey ??
-        user?.generalRoleKey;
-    final serverLabel = membership?.roleName ??
+    final rawRoleKey =
+        membership?.roleKey ?? user?.role?.roleKey ?? user?.generalRoleKey;
+    final serverLabel =
+        membership?.roleName ??
         user?.role?.roleName ??
         user?.role?.roleKeyLabel;
     final typedRoleKey = RoleKey.fromWire(rawRoleKey);
@@ -114,46 +117,49 @@ class NetworkWorkspaceController extends GetxController {
   }
 
   /// قائمة طلبات التوريد المعلقة المحولة كـ ViewModels جاهزة للعرض
-  List<WorkspaceTransactionItem> get recentPendingOrderItems {
+  List<WorkspaceTransactionItemEntity> get recentPendingOrderItems {
     final pending = overview.value?.recentPendingRequests ?? const [];
-    return pending.map((req) {
-      final refShort = req.requestUuid.isNotEmpty
-          ? req.requestUuid.split('-').first
-          : '#${req.requestId}';
-      final date = DateFormatter.tryParse(req.requestDate);
-      final dateText = date != null ? DateFormatter.smart(date) : '';
-      final subtitle = dateText.isNotEmpty
-          ? '${req.saleTypeLabel} • $dateText'
-          : req.saleTypeLabel;
+    return pending
+        .map((req) {
+          final refShort = req.requestUuid.isNotEmpty
+              ? req.requestUuid.split('-').first
+              : '';
+          final date = DateFormatter.tryParse(req.requestDate);
+          final dateText = date != null ? DateFormatter.smart(date) : '';
+          final subtitle = dateText.isNotEmpty
+              ? '${req.saleTypeLabel} • $dateText'
+              : req.saleTypeLabel;
 
-      final statusPresentation = EnumPresentationRegistry.resolveRequestStatus(
-        req.status,
-        serverLabel: req.statusLabel,
-      );
+          final statusPresentation =
+              EnumPresentationRegistry.resolveRequestStatus(
+                req.status,
+                serverLabel: req.statusLabel,
+              );
 
-      return WorkspaceTransactionItem(
-        title: req.posName,
-        reference: refShort,
-        subtitle: subtitle,
-        formattedAmount:
-            '${AmountFormatter.formatValue(req.requestTotalAmount)} ر.ي',
-        statusPresentation: statusPresentation,
-        initials: TextFormatter.avatarInitials(req.posName, maxChars: 2),
-        actionLabel: 'اعتماد',
-        onAction: () {
-          Get.toNamed<void>(
-            AppRoutes.voucherRequestDetails,
-            arguments: req.requestId,
+          return WorkspaceTransactionItemEntity(
+            title: req.posName,
+            reference: refShort,
+            subtitle: subtitle,
+            formattedAmount:
+                '${AmountFormatter.formatValue(req.requestTotalAmount)} ر.ي',
+            statusPresentation: statusPresentation,
+            initials: TextFormatter.avatarInitials(req.posName, maxChars: 2),
+            actionLabel: 'اعتماد',
+            onAction: () {
+              Get.toNamed<void>(
+                AppRoutes.voucherRequestDetails,
+                arguments: req.requestId,
+              );
+            },
+            onTap: () {
+              Get.toNamed<void>(
+                AppRoutes.voucherRequestDetails,
+                arguments: req.requestId,
+              );
+            },
           );
-        },
-        onTap: () {
-          Get.toNamed<void>(
-            AppRoutes.voucherRequestDetails,
-            arguments: req.requestId,
-          );
-        },
-      );
-    }).toList(growable: false);
+        })
+        .toList(growable: false);
   }
 
   /// تنسيق قيمة مبيعات الشبكة الجاهزة للعرض
@@ -170,7 +176,8 @@ class NetworkWorkspaceController extends GetxController {
   /// تنسيق عدد نقاط بيع الشبكة الجاهز للعرض
   String formatNetworkPosCount(NetworkEntity network, bool isSelected) {
     if (!isSelected) return 'وكلاء معتمدين';
-    final posMetric = overview.value?.metric('points_of_sale') ??
+    final posMetric =
+        overview.value?.metric('points_of_sale') ??
         overview.value?.metric('pos');
     final posTotal = posMetric?['total'];
     if (posTotal != null) {
@@ -189,7 +196,8 @@ class NetworkWorkspaceController extends GetxController {
     String cashSales,
     String outstandingReceivables,
     String posCoverage,
-  }) get liquiditySummary {
+  })
+  get liquiditySummary {
     final ov = overview.value;
     if (ov == null) {
       return (
@@ -213,8 +221,8 @@ class NetworkWorkspaceController extends GetxController {
     final balance = (wallet != null)
         ? AmountFormatter.format(ov.amount('wallet', 'balance'))
         : (sales != null
-            ? AmountFormatter.format(ov.amount('sales', 'total_amount'))
-            : '0.00');
+              ? AmountFormatter.format(ov.amount('sales', 'total_amount'))
+              : '0.00');
 
     final isWalletActive = wallet?['is_active'] == true;
     final rawGrowth = sales?['growth_rate'];
@@ -244,11 +252,8 @@ class NetworkWorkspaceController extends GetxController {
   }
 
   /// ملخص مؤشرات المبيعات السريع المرافق للمنحنى
-  ({
-    String totalSales,
-    int invoiceCount,
-    double growthRate,
-  }) get salesVelocitySummary {
+  ({String totalSales, int invoiceCount, double growthRate})
+  get salesVelocitySummary {
     final ov = overview.value;
     final sales = ov?.metric('sales');
     if (sales == null) {
@@ -422,9 +427,7 @@ class NetworkWorkspaceController extends GetxController {
     // 6. محفظة الشبكة
     final wallet = metrics['wallet'];
     if (wallet is Map<String, dynamic>) {
-      final balance = AmountFormatter.format(
-        ov.amount('wallet', 'balance'),
-      );
+      final balance = AmountFormatter.format(ov.amount('wallet', 'balance'));
       final isActive = wallet['is_active'] == true;
       items.add(
         DashboardMetricData(
@@ -554,5 +557,25 @@ class NetworkWorkspaceController extends GetxController {
     selectedPeriod.value = period;
     overview.value = null;
     await loadOverview();
+  }
+
+  /// فتح نافذة إنشاء ومشاركة بطاقة دعوة ربط نقطة بيع عبر رمز QR كصورة عالية الدقة
+  Future<void> openQrInviteSheet() async {
+    final net = selectedNetwork ?? networks.firstOrNull;
+    if (net == null) {
+      CustomSnackbar.show(
+        title: 'تنبيه',
+        message: 'يرجى اختيار شبكة أولاً لمشاركة رمز الدعوة',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
+    await HapticFeedback.lightImpact();
+    await NetworkPosQrChallengeSheet.show(
+      networkId: net.networkId,
+      networkName: net.networkName,
+      networkPhone: net.networkPhoneNumber,
+    );
   }
 }

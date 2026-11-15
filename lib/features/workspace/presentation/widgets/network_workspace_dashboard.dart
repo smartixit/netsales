@@ -40,7 +40,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
           AppBreakpoints.screenMargin(context),
           MediaQuery.paddingOf(context).top + 20.h,
           AppBreakpoints.screenMargin(context),
-          AppSpacing.xxxl,
+          115.h + MediaQuery.paddingOf(context).bottom,
         ),
         child: Center(
           child: ConstrainedBox(

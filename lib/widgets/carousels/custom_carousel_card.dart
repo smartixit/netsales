@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// السمات اللونية الفاخرة المحددة مسبقاً لبطاقات الكاروسيل (CustomCarouselCardTheme)
 enum CustomCarouselCardTheme {
@@ -330,96 +333,62 @@ class CustomCarouselCard extends StatelessWidget {
               ],
             ),
 
-            // 2. الصف الأوسط: المؤشر المالي الرئيسي وكود البطاقة
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
+            // 2. الصف الأوسط: المؤشر المالي الرئيسي بهيبة تنفيذية فسيحة
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        primaryLabel,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 9.5.sp,
-                        ),
-                      ),
-                      SizedBox(height: 2.h),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              primaryValue,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 17.sp,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ),
-                          if (currencyTag != null &&
-                              currencyTag!.isNotEmpty) ...[
-                            SizedBox(width: 5.w),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 5.w,
-                                vertical: 1.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.16),
-                                borderRadius: BorderRadius.circular(4.r),
-                              ),
-                              child: Text(
-                                currencyTag!,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 9.5.sp,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
+                Text(
+                  primaryLabel,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 9.5.sp,
                   ),
                 ),
-                if (cardNumber != null && cardNumber!.isNotEmpty) ...[
-                  SizedBox(width: 8.w),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 7.w,
-                      vertical: 3.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(6.r),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.12),
-                        width: 0.8,
+                SizedBox(height: 2.h),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        primaryValue,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 17.sp,
+                          letterSpacing: -0.2,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      cardNumber!,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 9.5.sp,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'monospace',
+                    if (currencyTag != null &&
+                        currencyTag!.isNotEmpty) ...[
+                      SizedBox(width: 5.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 5.w,
+                          vertical: 1.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Text(
+                          currencyTag!,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 9.5.sp,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                    ],
+                  ],
+                ),
               ],
             ),
 
@@ -430,38 +399,94 @@ class CustomCarouselCard extends StatelessWidget {
               thickness: 0.8,
             ),
 
-            // 3. الصف السفلي: التسمية والقيمة الإضافية وشارة المؤشر الفرعي
+            // 3. الصف السفلي: التسمية والقيمة الإضافية + كود البطاقة القابل للنسخ + شارة المؤشر الفرعي
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                  child: Row(
                     children: [
-                      if (secondaryLabel != null &&
-                          secondaryLabel!.isNotEmpty)
-                        Text(
-                          secondaryLabel!,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.55),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 9.sp,
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (secondaryLabel != null &&
+                                secondaryLabel!.isNotEmpty)
+                              Text(
+                                secondaryLabel!,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.55),
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 9.sp,
+                                ),
+                              ),
+                            if (secondaryValue != null &&
+                                secondaryValue!.isNotEmpty)
+                              Text(
+                                secondaryValue!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11.sp,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (cardNumber != null && cardNumber!.isNotEmpty) ...[
+                        SizedBox(width: 6.w),
+                        CustomInteractiveBounce(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            UrlLauncherService.copyToClipboard(cardNumber!);
+                            CustomSnackbar.show(
+                              title: 'تم النسخ بنجاح',
+                              message: 'تم نسخ الرمز التعريفي: $cardNumber',
+                              type: SnackType.info,
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6.w,
+                              vertical: 3.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(6.r),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.18),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  cardNumber!.length > 10
+                                      ? '${cardNumber!.substring(0, 8)}...'
+                                      : cardNumber!,
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                    fontSize: 8.5.sp,
+                                    fontWeight: FontWeight.w700,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                                SizedBox(width: 3.w),
+                                Icon(
+                                  Icons.copy_rounded,
+                                  size: 10.r,
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      if (secondaryValue != null &&
-                          secondaryValue!.isNotEmpty)
-                        Text(
-                          secondaryValue!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11.sp,
-                          ),
-                        ),
+                      ],
                     ],
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/enums/role_key.dart';
@@ -18,15 +19,21 @@ import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
+import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
+import 'package:netsales/features/commercial/presentation/widgets/network_pos_link_confirm_sheet.dart';
 import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item.dart';
+import 'package:netsales/features/workspace/domain/entities/workspace_transaction_item_entity.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم مساحة عمل نقطة البيع التفاعلي الشامل المرتبط كلياً بواجهات الـ API (PosWorkspaceController)
 class PosWorkspaceController extends GetxController {
@@ -37,6 +44,8 @@ class PosWorkspaceController extends GetxController {
     this.getPosInvoicesUseCase,
     this.getRequestsUseCase,
     this.getNetworkPackagesUseCase,
+    this.previewNetworkPosLinkChallengeUseCase,
+    this.confirmNetworkPosLinkChallengeUseCase,
   });
 
   final GetMyPosUseCase getMyPosUseCase;
@@ -45,6 +54,10 @@ class PosWorkspaceController extends GetxController {
   final GetPosInvoicesUseCase? getPosInvoicesUseCase;
   final GetRequestsUseCase? getRequestsUseCase;
   final GetNetworkPackagesUseCase? getNetworkPackagesUseCase;
+  final PreviewNetworkPosLinkChallengeUseCase?
+      previewNetworkPosLinkChallengeUseCase;
+  final ConfirmNetworkPosLinkChallengeUseCase?
+      confirmNetworkPosLinkChallengeUseCase;
 
   final RxInt selectedNavIndex = 0.obs;
   final RxList<PosEntity> availablePos = <PosEntity>[].obs;
@@ -89,16 +102,116 @@ class PosWorkspaceController extends GetxController {
 
   String get welcomePeriod => GreetingFormatter.greeting();
 
+  String get welcomeGreeting => GreetingFormatter.greeting();
+
+  String get todayFormatted => DateFormatter.smart(DateTime.now());
+
+  String get activePosName => activePos.value?.posName ?? 'نقطة البيع';
+
+  /// فتح ماسح رمز QR للارتباط بمزود شبكة جديد
+  Future<void> openQrScanner() async {
+    final currentPosId = activePos.value?.posId;
+    if (currentPosId == null || currentPosId <= 0) {
+      CustomSnackbar.show(
+        title: 'تنبيه',
+        message: 'يرجى اختيار وتفعيل نقطة البيع أولاً قبل مسح رمز الارتباط',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
+    await HapticFeedback.mediumImpact();
+    await Get.to<void>(
+      () => CustomQrScanner(
+        title: 'مسح رمز ربط شبكة',
+        instruction: 'وجّه الكاميرا نحو رمز QR لدعوة شبكة المزود',
+        onClose: () => Get.back<void>(),
+        onScan: (result) async {
+          Get.back<void>();
+          await _handleScannedQrPayload(result.rawValue, currentPosId);
+        },
+      ),
+      fullscreenDialog: true,
+    );
+  }
+
+  Future<void> _handleScannedQrPayload(String payload, int posId) async {
+    try {
+      await HapticFeedback.lightImpact();
+      final previewUseCase = previewNetworkPosLinkChallengeUseCase ??
+          (Get.isRegistered<PreviewNetworkPosLinkChallengeUseCase>()
+              ? Get.find<PreviewNetworkPosLinkChallengeUseCase>()
+              : null);
+      if (previewUseCase == null) return;
+
+      final preview = await previewUseCase.execute(
+        payload: payload,
+        posId: posId,
+      );
+
+      final confirmed = await NetworkPosLinkConfirmSheet.show(
+        preview: preview,
+        onConfirm: () async {
+          try {
+            final confirmUseCase = confirmNetworkPosLinkChallengeUseCase ??
+                (Get.isRegistered<ConfirmNetworkPosLinkChallengeUseCase>()
+                    ? Get.find<ConfirmNetworkPosLinkChallengeUseCase>()
+                    : null);
+            if (confirmUseCase == null) return false;
+
+            final newLink = await confirmUseCase.execute(
+              challengeUuid: preview.challengeUuid,
+              posId: posId,
+            );
+
+            final existingIdx = networkLinks.indexWhere(
+              (l) => l.networkId == newLink.networkId,
+            );
+            if (existingIdx == -1) {
+              networkLinks.insert(0, newLink);
+              await selectNetwork(newLink, index: 0);
+            } else {
+              networkLinks[existingIdx] = newLink;
+              await selectNetwork(newLink, index: existingIdx);
+            }
+
+            await CustomAnimationOverlay.showSuccess(
+              message: 'تم ربط نقطة البيع بنجاح مع شبكة ${preview.networkName}',
+            );
+            return true;
+          } catch (e) {
+            CustomSnackbar.show(
+              title: 'تعذر تأكيد الارتباط',
+              message: AppException.sanitizeMessage(e.toString()),
+              type: SnackType.error,
+            );
+            return false;
+          }
+        },
+      );
+
+      if (confirmed == true) {
+        await loadNetworks(posId, refresh: true);
+      }
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'رمز غير صالح أو منتهي',
+        message: AppException.sanitizeMessage(e.toString()),
+        type: SnackType.error,
+      );
+    }
+  }
+
   /// كائن العرض الدلالي للدور الوظيفي لنقطة البيع
   EnumPresentation get rolePresentation {
     final user = SessionService.to.currentUser;
     final membership = user?.workspaceMemberships.firstWhereOrNull(
       (m) => m.scope == RoleScope.pos,
     );
-    final rawRoleKey = membership?.roleKey ??
-        user?.role?.roleKey ??
-        user?.generalRoleKey;
-    final serverLabel = membership?.roleName ??
+    final rawRoleKey =
+        membership?.roleKey ?? user?.role?.roleKey ?? user?.generalRoleKey;
+    final serverLabel =
+        membership?.roleName ??
         user?.role?.roleName ??
         user?.role?.roleKeyLabel;
     final typedRoleKey = RoleKey.fromWire(rawRoleKey);
@@ -119,8 +232,8 @@ class PosWorkspaceController extends GetxController {
   String get userRole => rolePresentation.label;
 
   /// قائمة حركات الحساب والمشتريات المحولة كـ ViewModels جاهزة للعرض
-  List<WorkspaceTransactionItem> get recentTransactionItems {
-    final items = <WorkspaceTransactionItem>[];
+  List<WorkspaceTransactionItemEntity> get recentTransactionItems {
+    final items = <WorkspaceTransactionItemEntity>[];
 
     for (final inv in recentInvoices) {
       final paymentPresentation =
@@ -134,11 +247,15 @@ class PosWorkspaceController extends GetxController {
       );
       final dateText = date != null ? DateFormatter.smart(date) : '';
       final subtitle = dateText.isNotEmpty ? '$saleType • $dateText' : saleType;
-      final ref = inv.invoiceUuid ?? '#INV-${inv.invoiceId}';
+      final ref = inv.invoiceUuid != null && inv.invoiceUuid!.isNotEmpty
+          ? (inv.invoiceUuid!.length > 8
+              ? inv.invoiceUuid!.substring(0, 8)
+              : inv.invoiceUuid!)
+          : 'فاتورة توريد';
 
       items.add(
-        WorkspaceTransactionItem(
-          title: 'فاتورة توريد #${inv.invoiceId}',
+        WorkspaceTransactionItemEntity(
+          title: 'فاتورة توريد',
           reference: ref,
           subtitle: subtitle,
           formattedAmount:
@@ -147,10 +264,7 @@ class PosWorkspaceController extends GetxController {
           statusPresentation: paymentPresentation,
           icon: Icons.inventory_2_rounded,
           onTap: () {
-            Get.toNamed<void>(
-              AppRoutes.purchaseInvoiceDetails,
-              arguments: inv,
-            );
+            Get.toNamed<void>(AppRoutes.purchaseInvoiceDetails, arguments: inv);
           },
         ),
       );
@@ -167,11 +281,15 @@ class PosWorkspaceController extends GetxController {
       );
       final dateText = date != null ? DateFormatter.smart(date) : '';
       final subtitle = dateText.isNotEmpty ? '$saleType • $dateText' : saleType;
-      final ref = req.requestUuid ?? '#REQ-${req.requestId}';
+      final ref = req.requestUuid != null && req.requestUuid!.isNotEmpty
+          ? (req.requestUuid!.length > 8
+              ? req.requestUuid!.substring(0, 8)
+              : req.requestUuid!)
+          : 'طلب توريد';
 
       items.add(
-        WorkspaceTransactionItem(
-          title: 'طلب توريد #${req.requestId}',
+        WorkspaceTransactionItemEntity(
+          title: 'طلب توريد',
           reference: ref,
           subtitle: subtitle,
           formattedAmount:
@@ -179,10 +297,7 @@ class PosWorkspaceController extends GetxController {
           statusPresentation: statusPresentation,
           icon: Icons.send_rounded,
           onTap: () {
-            Get.toNamed<void>(
-              AppRoutes.procurementOrders,
-              arguments: req,
-            );
+            Get.toNamed<void>(AppRoutes.procurementOrders, arguments: req);
           },
         ),
       );
