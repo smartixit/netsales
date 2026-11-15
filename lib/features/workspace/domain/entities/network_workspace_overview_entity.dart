@@ -1,3 +1,6 @@
+import 'package:netsales/features/workspace/domain/entities/network_pending_request_entity.dart';
+
+/// كيان ملخص مساحة عمل الشبكة (NetworkWorkspaceOverviewEntity)
 class NetworkWorkspaceOverviewEntity {
   const NetworkWorkspaceOverviewEntity({
     required this.networkId,
@@ -13,7 +16,7 @@ class NetworkWorkspaceOverviewEntity {
   final String generatedAt;
   final String periodKey;
   final Map<String, dynamic> metrics;
-  final List<Map<String, dynamic>> recentPendingRequests;
+  final List<NetworkPendingRequestEntity> recentPendingRequests;
 
   Map<String, dynamic>? metric(String group) {
     final value = metrics[group];

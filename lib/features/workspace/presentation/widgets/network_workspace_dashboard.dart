@@ -155,12 +155,12 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                   AppSpacing.vXl,
 
                   // 7. شريط أحدث طلبات التوريد بانتظار الاعتماد
-                  if (overview.recentPendingRequests.isNotEmpty) ...[
+                  if (ctrl.recentPendingOrderItems.isNotEmpty) ...[
                     NetworkLivePendingOrdersStream(
-                      requests: overview.recentPendingRequests,
+                      items: ctrl.recentPendingOrderItems,
                       totalPendingCount: ctrl.pendingRequestsCount > 0
                           ? ctrl.pendingRequestsCount
-                          : overview.recentPendingRequests.length,
+                          : ctrl.recentPendingOrderItems.length,
                       onViewAll: () => ctrl.onNavItemSelected(1),
                     ),
                     AppSpacing.vXl,

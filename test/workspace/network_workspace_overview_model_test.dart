@@ -85,10 +85,10 @@ void main() {
       expect(model.periodKey, '30d');
       expect(model.count('points_of_sale', 'active'), '6');
       expect(model.amount('sales', 'outstanding_amount'), '6000.00');
-      expect(model.recentPendingRequests.single['request_id'], 90);
+      expect(model.recentPendingRequests.single.requestId, 90);
       expect(
-        model.recentPendingRequests.single['request_total_amount'],
-        '900.00',
+        model.recentPendingRequests.single.requestTotalAmount,
+        900.00,
       );
     });
 

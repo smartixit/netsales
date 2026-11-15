@@ -1,9 +1,13 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/core/utils/greeting_formatter.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -22,6 +26,7 @@ import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
+import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item.dart';
 
 /// متحكم مساحة عمل نقطة البيع التفاعلي الشامل المرتبط كلياً بواجهات الـ API (PosWorkspaceController)
 class PosWorkspaceController extends GetxController {
@@ -112,6 +117,79 @@ class PosWorkspaceController extends GetxController {
 
   /// رتبة أو صفة المستخدم المستخرجة ديناميكياً من Enum الأدوار وسجل العرض
   String get userRole => rolePresentation.label;
+
+  /// قائمة حركات الحساب والمشتريات المحولة كـ ViewModels جاهزة للعرض
+  List<WorkspaceTransactionItem> get recentTransactionItems {
+    final items = <WorkspaceTransactionItem>[];
+
+    for (final inv in recentInvoices) {
+      final paymentPresentation =
+          EnumPresentationRegistry.resolveInvoicePaymentStatus(
+            inv.paymentStatus,
+            serverLabel: inv.paymentStatusLabel,
+          );
+      final saleType = inv.saleTypeLabel ?? 'شراء';
+      final date = DateFormatter.tryParse(
+        inv.invoiceDate ?? inv.createdAt ?? '',
+      );
+      final dateText = date != null ? DateFormatter.smart(date) : '';
+      final subtitle = dateText.isNotEmpty ? '$saleType • $dateText' : saleType;
+      final ref = inv.invoiceUuid ?? '#INV-${inv.invoiceId}';
+
+      items.add(
+        WorkspaceTransactionItem(
+          title: 'فاتورة توريد #${inv.invoiceId}',
+          reference: ref,
+          subtitle: subtitle,
+          formattedAmount:
+              '${AmountFormatter.formatValue(inv.invoiceTotalAmount)} ر.ي',
+          amountColor: const Color(0xFFBA1A1A),
+          statusPresentation: paymentPresentation,
+          icon: Icons.inventory_2_rounded,
+          onTap: () {
+            Get.toNamed<void>(
+              AppRoutes.purchaseInvoiceDetails,
+              arguments: inv,
+            );
+          },
+        ),
+      );
+    }
+
+    for (final req in recentRequests) {
+      final statusPresentation = EnumPresentationRegistry.resolveRequestStatus(
+        req.status,
+        serverLabel: req.statusLabel,
+      );
+      final saleType = req.saleTypeLabel ?? 'طلب شراء';
+      final date = DateFormatter.tryParse(
+        req.requestDate ?? req.createdAt ?? '',
+      );
+      final dateText = date != null ? DateFormatter.smart(date) : '';
+      final subtitle = dateText.isNotEmpty ? '$saleType • $dateText' : saleType;
+      final ref = req.requestUuid ?? '#REQ-${req.requestId}';
+
+      items.add(
+        WorkspaceTransactionItem(
+          title: 'طلب توريد #${req.requestId}',
+          reference: ref,
+          subtitle: subtitle,
+          formattedAmount:
+              '${AmountFormatter.formatValue(req.requestTotalAmount)} ر.ي',
+          statusPresentation: statusPresentation,
+          icon: Icons.send_rounded,
+          onTap: () {
+            Get.toNamed<void>(
+              AppRoutes.procurementOrders,
+              arguments: req,
+            );
+          },
+        ),
+      );
+    }
+
+    return items;
+  }
 
   /// رابط صورة المستخدم
   String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;

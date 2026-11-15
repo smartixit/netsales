@@ -1,3 +1,4 @@
+import 'package:netsales/features/workspace/domain/entities/network_pending_request_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 
 class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
@@ -75,19 +76,42 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
           }
 
           final request = Map<String, dynamic>.from(item);
-          if (request['request_id'] is! num ||
-              request['request_uuid'] is! String ||
-              request['pos_id'] is! num ||
-              request['pos_name'] is! String ||
-              request['sale_type_label'] is! String ||
-              request['request_date'] is! String ||
-              request['request_total_amount'] is! String ||
-              request['status'] is! String ||
-              request['status_label'] is! String) {
+          final requestId = request['request_id'];
+          final requestUuid = request['request_uuid'];
+          final posId = request['pos_id'];
+          final posName = request['pos_name'];
+          final saleTypeLabel = request['sale_type_label'];
+          final requestDate = request['request_date'];
+          final requestTotalAmount = request['request_total_amount'];
+          final status = request['status'];
+          final statusLabel = request['status_label'];
+
+          if (requestId is! num ||
+              requestUuid is! String ||
+              posId is! num ||
+              posName is! String ||
+              saleTypeLabel is! String ||
+              requestDate is! String ||
+              requestTotalAmount is! String ||
+              status is! String ||
+              statusLabel is! String) {
             throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
           }
 
-          return request;
+          final amountNum = double.tryParse(requestTotalAmount) ?? 0.0;
+
+          return NetworkPendingRequestEntity(
+            requestId: requestId.toInt(),
+            requestUuid: requestUuid,
+            posId: posId.toInt(),
+            posName: posName,
+            saleTypeRaw: request['sale_type']?.toString(),
+            saleTypeLabel: saleTypeLabel,
+            requestDate: requestDate,
+            requestTotalAmount: amountNum,
+            statusRaw: status,
+            statusLabel: statusLabel,
+          );
         })
         .toList(growable: false);
 
