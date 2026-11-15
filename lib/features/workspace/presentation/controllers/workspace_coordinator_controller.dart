@@ -138,6 +138,11 @@ class WorkspaceCoordinatorController extends GetxController {
     await _setActiveWorkspaceUseCase(workspace);
     await refreshWorkspaceContext();
 
+    if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) {
+      Get.back<void>();
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+    }
+
     if (workspace == AppWorkspace.network) {
       await Get.offAllNamed<dynamic>(AppRoutes.networkWorkspace);
     } else if (workspace == AppWorkspace.pos) {

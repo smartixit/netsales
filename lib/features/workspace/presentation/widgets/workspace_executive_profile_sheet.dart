@@ -142,8 +142,9 @@ class WorkspaceExecutiveProfileSheet extends StatelessWidget {
             iconColor: colors.primary,
             title: 'تبديل مساحة العمل',
             subtitle: switchWorkspaceTooltip,
-            onTap: () {
+            onTap: () async {
               Get.back<void>();
+              await Future<void>.delayed(const Duration(milliseconds: 150));
               onSwitchWorkspace!();
             },
           ),

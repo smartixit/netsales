@@ -352,17 +352,15 @@ class CustomCarouselCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Flexible(
-                      child: Text(
-                        primaryValue,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 17.sp,
-                          letterSpacing: -0.2,
-                        ),
+                    Text(
+                      primaryValue,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 17.sp,
+                        letterSpacing: -0.2,
                       ),
                     ),
                     if (currencyTag != null &&
@@ -439,7 +437,8 @@ class CustomCarouselCard extends StatelessWidget {
                       ),
                       if (cardNumber != null && cardNumber!.isNotEmpty) ...[
                         SizedBox(width: 6.w),
-                        CustomInteractiveBounce(
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
                           onTap: () {
                             HapticFeedback.lightImpact();
                             UrlLauncherService.copyToClipboard(cardNumber!);

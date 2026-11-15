@@ -578,4 +578,24 @@ class NetworkWorkspaceController extends GetxController {
       networkPhone: net.networkPhoneNumber,
     );
   }
+
+  /// فتح نافذة إنشاء ومشاركة بطاقة دعوة ربط نقطة بيع عبر رمز QR كصورة عالية الدقة
+  Future<void> openQrInviteSheet() async {
+    final net = selectedNetwork ?? networks.firstOrNull;
+    if (net == null) {
+      CustomSnackbar.show(
+        title: 'تنبيه',
+        message: 'يرجى اختيار شبكة أولاً لمشاركة رمز الدعوة',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
+    await HapticFeedback.lightImpact();
+    await NetworkPosQrChallengeSheet.show(
+      networkId: net.networkId,
+      networkName: net.networkName,
+      networkPhone: net.networkPhoneNumber,
+    );
+  }
 }
