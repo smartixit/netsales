@@ -10,6 +10,7 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -25,8 +26,6 @@ class PosNetworkPackagesCatalog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return Obx(() {
       if (controller.isLoadingPackages.value && controller.networkPackages.isEmpty) {
         return const CustomSkeletonCard(height: 160);
@@ -35,15 +34,8 @@ class PosNetworkPackagesCatalog extends StatelessWidget {
       final packages = controller.networkPackages;
 
       if (packages.isEmpty) {
-        return Container(
+        return CustomSurfaceCard(
           padding: EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: colors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(
-              color: colors.outlineVariant.withValues(alpha: 0.45),
-            ),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -59,15 +51,8 @@ class PosNetworkPackagesCatalog extends StatelessWidget {
         );
       }
 
-      return Container(
+      return CustomSurfaceCard(
         padding: EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.45),
-          ),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

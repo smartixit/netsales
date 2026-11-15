@@ -344,7 +344,7 @@ class PosWorkspaceController extends GetxController {
       );
       final resolvedPosition = resolvedId != null
           ? positions.firstWhereOrNull((p) => p.posId == resolvedId)
-          : null;
+          : positions.firstOrNull;
 
       if (resolvedPosition?.posId != previousPosId) {
         _clearNetworkContext();

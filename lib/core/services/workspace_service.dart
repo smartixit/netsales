@@ -224,10 +224,9 @@ class WorkspaceService extends GetxService {
     } catch (_) {}
   }
 
-  /// تحديد معرف نقطة البيع النشطة حتمياً دون اعتماد على first أو ترتيب الاستجابة:
-  /// 1. نقطة بيع واحدة فقط -> اختيار تلقائي.
-  /// 2. عدة نقاط بيع -> استعادة المعرف المحفوظ إن كان موجوداً ضمن القائمة المصرح بها.
-  /// 3. عدة نقاط بيع دون اختيار محفوظ صالح -> إرجاع null لإلزام المستخدم بالاختيار الصريح.
+  /// تحديد معرف نقطة البيع النشطة:
+  /// 1. استعادة المعرف المحفوظ إن كان موجوداً ضمن القائمة المصرح بها.
+  /// 2. عند عدم وجود اختيار محفوظ -> اختيار أول نقطة بيع تلقائياً لتفادي الحالات الفارغة المعطلة.
   int? resolveActivePosId(List<int> availablePosIds) {
     if (availablePosIds.isEmpty) return null;
 
@@ -236,12 +235,7 @@ class WorkspaceService extends GetxService {
       return savedId;
     }
 
-    if (availablePosIds.length == 1) {
-      return availablePosIds.first;
-    }
-
-    // لا يتم اختيار first أبداً عند تعدد نقاط البيع دون اختيار محفوظ
-    return null;
+    return availablePosIds.first;
   }
 
   /// مفتاح التخزين الموحد للشبكة النشطة للمستخدم الحالي
@@ -271,10 +265,9 @@ class WorkspaceService extends GetxService {
     } catch (_) {}
   }
 
-  /// تحديد معرف الشبكة النشطة حتمياً:
-  /// 1. شبكة واحدة فقط -> اختيار تلقائي.
-  /// 2. عدة شبكات -> استعادة المعرف المحفوظ إن كان موجوداً ضمن القائمة المصرح بها.
-  /// 3. عدة شبكات دون اختيار محفوظ صالح -> إرجاع null لإلزام المستخدم بالاختيار الصريح.
+  /// تحديد معرف الشبكة النشطة:
+  /// 1. استعادة المعرف المحفوظ إن كان موجوداً ضمن القائمة المصرح بها.
+  /// 2. عند عدم وجود اختيار محفوظ -> اختيار أول شبكة مصرح بها تلقائياً.
   int? resolveActiveNetworkId(List<int> availableNetworkIds) {
     if (availableNetworkIds.isEmpty) return null;
 
@@ -283,12 +276,7 @@ class WorkspaceService extends GetxService {
       return savedId;
     }
 
-    if (availableNetworkIds.length == 1) {
-      return availableNetworkIds.first;
-    }
-
-    // لا يتم اختيار first أبداً عند تعدد الشبكات دون اختيار محفوظ
-    return null;
+    return availableNetworkIds.first;
   }
 
   /// المسار المستهدف عند توجيه مساحة العمل

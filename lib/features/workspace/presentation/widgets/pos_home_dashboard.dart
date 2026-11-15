@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
@@ -9,22 +8,19 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_active_supply_order_tracker.dart';
-import 'package:netsales/features/workspace/presentation/widgets/pos_network_carousel_card.dart';
+import 'package:netsales/features/workspace/presentation/widgets/pos_connected_networks_carousel_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_network_packages_catalog.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_quick_action_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_recent_transactions_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_selected_network_financial_summary.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_welcome_header.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
-import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
-import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
-import 'package:netsales/widgets/carousels/custom_carousel_slider.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
-/// الشاشة الرئيسية لمساحة عمل نقطة البيع (PosHomeDashboard - Pure API-Driven Clean Architecture)
+/// الشاشة الرئيسية لمساحة عمل نقطة البيع (PosHomeDashboard)
+/// متوافقة هندسياً ومعمارياً بنسبة 100% مع معايير مساحات العمل وشاشة NetworkWorkspaceDashboard
 class PosHomeDashboard extends StatelessWidget {
   const PosHomeDashboard({super.key, required this.controller});
   final PosWorkspaceController controller;
@@ -48,7 +44,8 @@ class PosHomeDashboard extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 760),
             child: Obx(() {
-              if (controller.isLoadingPos.value) {
+              if (controller.isLoadingPos.value &&
+                  controller.activePos.value == null) {
                 return const Column(
                   children: [
                     CustomSkeletonCard(height: 126),
@@ -59,7 +56,8 @@ class PosHomeDashboard extends StatelessWidget {
                   ],
                 );
               }
-              if (controller.posError.value != null) {
+              if (controller.posError.value != null &&
+                  controller.activePos.value == null) {
                 return CustomErrorState.boxed(
                   title: 'تعذر تحميل نقاط البيع',
                   subtitle: 'تحقق من الاتصال ثم أعد المحاولة.',
@@ -67,26 +65,11 @@ class PosHomeDashboard extends StatelessWidget {
                 );
               }
               if (controller.activePos.value == null) {
-                return CustomEmptyState.boxed(
-                  title: controller.availablePos.isEmpty
-                      ? 'لا توجد نقطة بيع مرتبطة بحسابك'
-                      : 'اختر نقطة البيع',
-                  subtitle: controller.availablePos.isEmpty
-                      ? 'لا توجد نقطة بيع متاحة حاليًا لهذا الحساب.'
-                      : 'لديك أكثر من نقطة بيع. اختر الكيان الذي تريد إدارته.',
-                  icon: Icons.storefront_rounded,
-                  animationPath: null,
-                  customAction: controller.availablePos.isEmpty
-                      ? null
-                      : Wrap(
-                          spacing: AppSpacing.sm,
-                          children: controller.availablePos.map((pos) {
-                            return CustomButton.outline(
-                              text: pos.posName,
-                              onPressed: () => controller.selectPos(pos),
-                            );
-                          }).toList(),
-                        ),
+                return const CustomEmptyState(
+                  icon: Icons.storefront_outlined,
+                  title: 'لا توجد نقطة بيع مرتبطة بحسابك',
+                  subtitle:
+                      'لا يمكن عرض مؤشرات مساحة العمل قبل توفر نقطة بيع مصرح بها.',
                 );
               }
 
@@ -94,172 +77,43 @@ class PosHomeDashboard extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 1. كرت الترحيب القيادي لنقطة البيع
                   PosWelcomeHeader(controller: controller),
-                  AppSpacing.vXl,
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'نقطة البيع النشطة',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.onSurfaceVariant,
-                              ),
+                  AppSpacing.vLg,
+
+                  // 2. محدد نقطة البيع النشطة عند تعدد نقاط البيع
+                  if (controller.availablePos.length > 1) ...[
+                    CustomDropdown<int>(
+                      label: 'نقطة البيع النشطة للعمليات',
+                      rxValue: Rx<int?>(activePos.posId),
+                      searchEnabled: controller.availablePos.length > 5,
+                      items: controller.availablePos
+                          .map(
+                            (pos) => DropdownItem<int>(
+                              value: pos.posId,
+                              child: Text(pos.posName),
                             ),
-                            SizedBox(height: 3.h),
-                            Text(
-                              activePos.posName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.titleMedium.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (controller.availablePos.length > 1)
-                        CustomButton.outline(
-                          text: 'تبديل',
-                          prefix: Icons.swap_horiz_rounded,
-                          onPressed: () => _showPosPicker(context),
-                        ),
-                    ],
-                  ),
-                  AppSpacing.vXl,
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'شبكاتك المرتبطة',
-                              style: AppTypography.titleLarge.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 3.h),
-                            Text(
-                              'اسحب لاستعراض حساباتك ومحافظك لدى كل شبكة',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CustomInteractiveBounce(
-                            onTap: controller.openQrScanner,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 9.w,
-                                vertical: 4.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colors.primary.withValues(alpha: 0.1),
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.full),
-                                border: Border.all(
-                                  color: colors.primary.withValues(alpha: 0.35),
-                                  width: 0.9,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.qr_code_scanner_rounded,
-                                    size: 13.r,
-                                    color: colors.primary,
-                                  ),
-                                  SizedBox(width: 4.w),
-                                  Text(
-                                    'ربط شبكة +',
-                                    style: AppTypography.labelSmall.copyWith(
-                                      color: colors.primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10.5.sp,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          if (controller.networkLinks.isNotEmpty) ...[
-                            SizedBox(width: 6.w),
-                            Text(
-                              '${controller.networkLinks.length}${controller.hasMoreNetworks.value ? '+' : ''} شبكة',
-                              style: AppTypography.labelMedium.copyWith(
-                                color: colors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                  AppSpacing.vMd,
-                  if (controller.isLoadingNetworks.value)
-                    const CustomSkeletonCard(height: 190)
-                  else if (controller.networksError.value != null)
-                    CustomErrorState.boxed(
-                      title: 'تعذر تحميل الشبكات',
-                      subtitle: 'لم نتمكن من جلب علاقات نقطة البيع.',
-                      onRetry: controller.retryNetworks,
-                    )
-                  else if (controller.networkLinks.isEmpty)
-                    CustomEmptyState.boxed(
-                      title: 'لا توجد شبكات مرتبطة حالياً',
-                      subtitle:
-                          'اربط نقطة البيع بمزود شبكة عبر مسح رمز QR لبدء طلب باقات الكروت فورياً.',
-                      icon: Icons.hub_outlined,
-                      actionLabel: 'مسح رمز QR للربط',
-                      actionIcon: Icons.qr_code_scanner_rounded,
-                      onAction: controller.openQrScanner,
-                    )
-                  else
-                    CustomCarouselSlider<NetworkPosLinkEntity>(
-                      items: controller.networkLinks,
-                      currentIndex: controller.currentNetworkIndex.value,
-                      height: 205,
-                      viewportFraction: 0.88,
-                      itemBuilder: (context, link, index) =>
-                          PosNetworkCarouselCard(
-                            link: link,
-                            cardIndex: index,
-                            isSelected:
-                                controller
-                                    .selectedNetworkLink
-                                    .value
-                                    ?.networkId ==
-                                link.networkId,
-                            wallet:
-                                controller
-                                        .selectedNetworkLink
-                                        .value
-                                        ?.networkId ==
-                                    link.networkId
-                                ? controller.selectedWallet.value
-                                : null,
-                            onTap: () => controller.onNetworkPageChanged(index),
-                          ),
-                      onPageChanged: controller.onNetworkPageChanged,
+                          )
+                          .toList(growable: false),
+                      onChanged: (newId) {
+                        if (newId != null) {
+                          final selected = controller.availablePos
+                              .firstWhereOrNull((p) => p.posId == newId);
+                          if (selected != null) controller.selectPos(selected);
+                        }
+                      },
                     ),
-                  AppSpacing.vXl,
+                    AppSpacing.vMd,
+                  ],
+
+                  // 3. كاروسيل بطاقات الشبكات المرتبطة بنقطة البيع
+                  PosConnectedNetworksCarouselSection(controller: controller),
+                  AppSpacing.vLg,
+
+                  // 4. كرت السيولة والملخص المالي للشبكة المحددة (VIP Luxury Carbon Card)
                   if (controller.selectedNetworkLink.value != null) ...[
                     PosSelectedNetworkFinancialSummary(
-                      networkName:
-                          controller
+                      networkName: controller
                               .selectedNetworkLink
                               .value!
                               .network
@@ -281,27 +135,40 @@ class PosHomeDashboard extends StatelessWidget {
                         },
                       ),
                     ),
-                    AppSpacing.vXl,
+                    AppSpacing.vLg,
                   ],
 
-                  // قسم آخر العمليات والحركات الحية من الـ API الحقيقي
-                  PosRecentTransactionsSection(controller: controller),
-                  AppSpacing.vXl,
-
-                  // كتالوج باقات الشبكة وأسعار الجملة المعتمدة من الخادم
-                  PosNetworkPackagesCatalog(controller: controller),
-                  AppSpacing.vXl,
-
-                  // تتبع طلبات التوريد المفتوحة من الـ API الحقيقي
+                  // 5. متابعة طلبات التوريد المفتوحة من الـ API الحقيقي
                   PosActiveSupplyOrderTracker(controller: controller),
-                  AppSpacing.vXl,
+                  AppSpacing.vLg,
 
-                  // لوحة العمليات السريعة المتكاملة
-                  Text(
-                    'العمليات السريعة',
-                    style: AppTypography.titleLarge.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.bold,
+                  // 6. قسم آخر العمليات والحركات الحية من الـ API الحقيقي
+                  PosRecentTransactionsSection(controller: controller),
+                  AppSpacing.vLg,
+
+                  // 7. كتالوج باقات الشبكة وأسعار الجملة المعتمدة
+                  PosNetworkPackagesCatalog(controller: controller),
+                  AppSpacing.vLg,
+
+                  // 8. لوحة العمليات السريعة المتكاملة
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.bolt_rounded,
+                          color: colors.primary,
+                          size: 20.r,
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'العمليات السريعة',
+                          style: AppTypography.titleSmall.copyWith(
+                            color: colors.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   AppSpacing.vMd,
@@ -369,36 +236,6 @@ class PosHomeDashboard extends StatelessWidget {
             }),
           ),
         ),
-      ),
-    );
-  }
-
-  void _showPosPicker(BuildContext context) {
-    CustomBottomSheet.show<void>(
-      title: 'تبديل نقطة البيع',
-      subtitle: 'اختر نقطة البيع التي تريد إدارتها',
-      leadingIcon: Icons.storefront_rounded,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: controller.availablePos.map((pos) {
-          final selected = controller.activePos.value?.posId == pos.posId;
-          return Padding(
-            padding: EdgeInsets.only(bottom: AppSpacing.sm),
-            child: CustomInteractiveBounce(
-              onTap: () {
-                Get.back<void>();
-                controller.selectPos(pos);
-              },
-              child: ListTile(
-                leading: const Icon(Icons.storefront_rounded),
-                title: Text(pos.posName),
-                trailing: selected
-                    ? const Icon(Icons.check_circle_rounded)
-                    : const Icon(Icons.chevron_left_rounded),
-              ),
-            ),
-          );
-        }).toList(),
       ),
     );
   }

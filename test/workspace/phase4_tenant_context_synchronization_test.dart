@@ -65,16 +65,16 @@ void main() {
       // 1. Single network -> auto resolves to that network
       expect(workspaceService.resolveActiveNetworkId([50]), equals(50));
 
-      // 2. Multiple networks without saved selection -> returns null (forces explicit selection)
-      expect(workspaceService.resolveActiveNetworkId([50, 60, 70]), isNull);
+      // 2. Multiple networks without saved selection -> auto resolves to first network
+      expect(workspaceService.resolveActiveNetworkId([50, 60, 70]), equals(50));
 
       // 3. Save active network and verify resolution
       await workspaceService.saveActiveNetworkId(60);
       expect(workspaceService.savedActiveNetworkId, equals(60));
       expect(workspaceService.resolveActiveNetworkId([50, 60, 70]), equals(60));
 
-      // 4. If saved network is not in available authorized list -> returns null
-      expect(workspaceService.resolveActiveNetworkId([80, 90]), isNull);
+      // 4. If saved network is not in available authorized list -> falls back to first network
+      expect(workspaceService.resolveActiveNetworkId([80, 90]), equals(80));
 
       // 5. Clear active network
       await workspaceService.clearActiveNetworkId();
@@ -85,8 +85,8 @@ void main() {
       // 1. Single POS -> auto resolves
       expect(workspaceService.resolveActivePosId([101]), equals(101));
 
-      // 2. Multiple POS without saved selection -> returns null
-      expect(workspaceService.resolveActivePosId([101, 102, 103]), isNull);
+      // 2. Multiple POS without saved selection -> auto resolves to first POS
+      expect(workspaceService.resolveActivePosId([101, 102, 103]), equals(101));
 
       // 3. Save active POS and verify resolution
       await workspaceService.saveActivePosId(102);

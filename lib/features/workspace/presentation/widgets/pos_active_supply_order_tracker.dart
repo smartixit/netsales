@@ -8,6 +8,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
+import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// ويدجت متابعة طلبات التوريد النشطة الحقيقية من الـ API (PosActiveSupplyOrderTracker)
@@ -60,15 +61,8 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
             arguments: activeRequest,
           );
         },
-        child: Container(
+        child: CustomSurfaceCard(
           padding: EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: colors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(
-              color: colors.outlineVariant.withValues(alpha: 0.45),
-            ),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

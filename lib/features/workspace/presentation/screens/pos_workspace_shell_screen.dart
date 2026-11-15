@@ -74,12 +74,15 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         navItems[3], // الرصيد والديون
       ];
 
+      final isAppBarLoading =
+          controller.isLoadingPos.value && controller.activePos.value == null;
       final posTitle = controller.activePos.value?.posName ?? 'لوحة نقطة البيع';
 
       return AdaptiveWorkspaceScaffold(
         appBar: WorkspaceAppBar(
           title: posTitle,
           workspace: AppWorkspace.pos,
+          isLoading: isAppBarLoading,
           rolePresentation: controller.rolePresentation,
           userProfileLogo: controller.userProfileLogo,
           userInitials: TextFormatter.avatarInitials(

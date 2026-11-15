@@ -89,12 +89,16 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         navItems[3], // المالية والديون
       ];
 
-      final networkTitle = controller.selectedNetwork?.networkName ?? 'لوحة الشبكة';
+      final isAppBarLoading =
+          controller.isLoading.value && controller.selectedNetwork == null;
+      final networkTitle =
+          controller.selectedNetwork?.networkName ?? 'لوحة الشبكة';
 
       return AdaptiveWorkspaceScaffold(
         appBar: WorkspaceAppBar(
           title: networkTitle,
           workspace: AppWorkspace.network,
+          isLoading: isAppBarLoading,
           rolePresentation: controller.rolePresentation,
           userProfileLogo: controller.userProfileLogo,
           userInitials: TextFormatter.avatarInitials(

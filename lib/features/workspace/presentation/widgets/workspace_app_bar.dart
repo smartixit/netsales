@@ -14,6 +14,7 @@ import 'package:netsales/features/notifications/presentation/widgets/notificatio
 import 'package:netsales/features/workspace/presentation/controllers/workspace_coordinator_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_entity_picker_sheet.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
@@ -22,6 +23,7 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final AppWorkspace workspace;
+  final bool isLoading;
   final EnumPresentation? rolePresentation;
   final String? userProfileLogo;
   final String? userInitials;
@@ -33,6 +35,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.title,
     required this.workspace,
+    this.isLoading = false,
     this.rolePresentation,
     this.userProfileLogo,
     this.userInitials,
@@ -94,73 +97,117 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               child: Row(
                 children: [
-                  // الأفاتار القيادي الموحد مع نقطة الحالة النابضة
-                  CustomAvatarBadge(
-                    imageUrl: userProfileLogo,
-                    initials: effectiveInitials,
-                    size: AvatarBadgeSize.sm,
-                    customDimension: 46,
-                    pulseColor: colors.primary,
-                    onTap: onProfileTap ??
-                        () => WorkspaceCoordinatorController.to.showExecutiveProfile(
-                              context,
-                              workspace: workspace,
-                              userRole: effectivePresentation.label,
-                            ),
-                  ),
+                  // الأفاتار القيادي الموحد مع نقطة الحالة النابضة (أو وميض الهيكل العظمي في وضع التحميل)
+                  if (isLoading)
+                    CustomSkeletonShimmer(
+                      child: Container(
+                        width: 46.r,
+                        height: 46.r,
+                        decoration: BoxDecoration(
+                          color: colors.surfaceContainerHigh,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    )
+                  else
+                    CustomAvatarBadge(
+                      imageUrl: userProfileLogo,
+                      initials: effectiveInitials,
+                      size: AvatarBadgeSize.sm,
+                      customDimension: 46,
+                      pulseColor: colors.primary,
+                      onTap: onProfileTap ??
+                          () => WorkspaceCoordinatorController.to
+                              .showExecutiveProfile(
+                                context,
+                                workspace: workspace,
+                                userRole: effectivePresentation.label,
+                              ),
+                    ),
                   SizedBox(width: 10.w),
 
                   // هوية المساحة والشبكة
                   Expanded(
-                    child: CustomInteractiveBounce(
-                      onTap: onEntityPickerTap ??
-                          () => WorkspaceEntityPickerSheet.show(
-                                context,
-                                currentWorkspace: workspace,
+                    child: isLoading
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CustomSkeletonShimmer(
+                                child: Container(
+                                  width: 64.w,
+                                  height: 18.h,
+                                  decoration: BoxDecoration(
+                                    color: colors.surfaceContainerHigh,
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.full),
+                                  ),
+                                ),
                               ),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CustomStatusBadge.fromPresentation(
-                              effectivePresentation,
-                              isCompact: true,
-                              showDot: true,
-                            ),
-                            SizedBox(height: 3.h),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.titleMedium.copyWith(
-                                      color: colors.onSurface,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 14.sp,
+                              SizedBox(height: 5.h),
+                              CustomSkeletonShimmer(
+                                child: Container(
+                                  width: 108.w,
+                                  height: 14.h,
+                                  decoration: BoxDecoration(
+                                    color: colors.surfaceContainerHigh,
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.xs.r),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : CustomInteractiveBounce(
+                            onTap: onEntityPickerTap ??
+                                () => WorkspaceEntityPickerSheet.show(
+                                      context,
+                                      currentWorkspace: workspace,
                                     ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CustomStatusBadge.fromPresentation(
+                                    effectivePresentation,
+                                    isCompact: true,
+                                    showDot: true,
                                   ),
-                                ),
-                                SizedBox(width: 4.w),
-                                Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  size: 16.r,
-                                  color: colors.onSurfaceVariant.withValues(
-                                    alpha: 0.7,
+                                  SizedBox(height: 3.h),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          title,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTypography.titleMedium.copyWith(
+                                            color: colors.onSurface,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 14.sp,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 4.w),
+                                      Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        size: 16.r,
+                                        color: colors.onSurfaceVariant.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
+                          ),
                   ),
 
                   // الإجراءات: شارة الإشعارات الحقيقية + زر التحكم القيادي

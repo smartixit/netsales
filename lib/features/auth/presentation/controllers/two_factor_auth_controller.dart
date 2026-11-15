@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
-import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/features/auth/domain/usecases/resend_otp_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/verify_two_factor_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
@@ -175,7 +177,12 @@ class TwoFactorAuthController extends GetxController {
       );
 
       if (isClosed) return;
-      await Get.offAllNamed<void>(AppRoutes.dashboard);
+      final targetWorkspace =
+          WorkspaceService.to.resolveWorkspaceForUser(result.user);
+      final destination = targetWorkspace == AppWorkspace.network
+          ? AppRoutes.networkWorkspace
+          : AppRoutes.posWorkspace;
+      await Get.offAllNamed<void>(destination);
     } catch (error) {
       await CustomAnimationOverlay.hide();
       // الحارس يمنع الكتابة في متحكم OTP محرَّر بعد إغلاق الشاشة أثناء الطلب.
