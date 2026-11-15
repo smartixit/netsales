@@ -18,10 +18,10 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
-import 'package:netsales/widgets/indicators/custom_page_indicator.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
-import 'package:premium_carousel_slider/premium_carousel_slider.dart';
+import 'package:netsales/widgets/carousels/custom_carousel_slider.dart';
 
 /// الشاشة الرئيسية لمساحة عمل نقطة البيع (PosHomeDashboard - Pure API-Driven Clean Architecture)
 class PosHomeDashboard extends StatelessWidget {
@@ -180,15 +180,11 @@ class PosHomeDashboard extends StatelessWidget {
                       animationPath: null,
                     )
                   else
-                    PremiumCarouselSlider(
+                    CustomCarouselSlider<NetworkPosLinkEntity>(
                       items: controller.networkLinks,
                       currentIndex: controller.currentNetworkIndex.value,
-                      options: const PremiumCarouselOptions.bankCard(
-                        height: 205,
-                        viewportFraction: 0.86,
-                        itemSpacing: 10,
-                        enlargeCenterPage: true,
-                      ),
+                      height: 205,
+                      viewportFraction: 0.88,
                       itemBuilder: (context, link, index) =>
                           PosNetworkCarouselCard(
                             link: link,
@@ -209,20 +205,6 @@ class PosHomeDashboard extends StatelessWidget {
                             onTap: () => controller.onNetworkPageChanged(index),
                           ),
                       onPageChanged: controller.onNetworkPageChanged,
-                      hasMoreItems: controller.hasMoreNetworks.value,
-                      loadingItemBuilder: (_) =>
-                          const CustomSkeletonCard(height: 205),
-                      onLoadMore: () {
-                        final posId = controller.activePos.value?.posId;
-                        if (posId != null) {
-                          controller.loadNetworks(posId, refresh: false);
-                        }
-                      },
-                      indicatorBuilder: (context, current, total) =>
-                          CustomPageIndicator(
-                            itemCount: total,
-                            currentIndex: current,
-                          ),
                     ),
                   AppSpacing.vXl,
                   if (controller.selectedNetworkLink.value != null) ...[
