@@ -82,6 +82,16 @@ class DateFormatter {
 
   // ---------- الوقت ----------
 
+  /// صباح الخير / مساء الخير بحسب توقيت اليوم
+  static String greeting([DateTime? time, DateLang lang = DateLang.ar]) {
+    final t = time ?? DateTime.now();
+    final isMorning = t.hour >= 4 && t.hour < 12;
+    if (lang == DateLang.en) {
+      return isMorning ? 'Good morning' : 'Good evening';
+    }
+    return isMorning ? 'صباح الخير' : 'مساء الخير';
+  }
+
   /// 02:30 م / 02:30 PM
   static String time(
     DateTime d, {

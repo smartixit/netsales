@@ -40,7 +40,7 @@ class PosNetworkCarouselCard extends StatelessWidget {
 
     final formattedBalance = wallet != null
         ? '${AmountFormatter.formatValue(wallet!.walletBalance, decimalPlaces: 0)} $currency'
-        : '•••• $currency';
+        : '••••';
 
     final formattedCredit = wallet?.creditLimit != null
         ? '${AmountFormatter.formatValue(wallet!.creditLimit!, decimalPlaces: 0)} $currency'

@@ -9,8 +9,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
-import 'package:netsales/widgets/images/custom_cached_image.dart';
-import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// كرت الترحيب القيادي التنفيذي المتجاوب (ExecutiveWelcomeHeroCard)
@@ -33,8 +32,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
         ? SessionService.to.currentUser
         : null;
 
-    final hour = DateTime.now().hour;
-    final greeting = (hour >= 4 && hour < 12) ? 'صباح الخير' : 'مساء الخير';
+    final greeting = DateFormatter.greeting();
     final hasRequests = overview.metrics.containsKey('requests');
     final pendingCount = hasRequests
         ? int.tryParse(overview.count('requests', 'pending')) ?? 0
@@ -75,63 +73,12 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // الأفاتار مع مؤشر النبض الحي
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: 52.r,
-                    height: 52.r,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      gradient: LinearGradient(
-                        colors: [colors.primary, colors.secondary],
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colors.primary.withValues(alpha: 0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(1.8),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppRadius.lg - 1),
-                        color: isDark
-                            ? const Color(0xFF0E1522)
-                            : colors.surface,
-                      ),
-                      alignment: Alignment.center,
-                      child: user?.userProfileLogo != null &&
-                              user!.userProfileLogo!.isNotEmpty
-                          ? CustomCachedImage.avatar(
-                              url: user.userProfileLogo,
-                              radius: 24.r,
-                            )
-                          : Text(
-                              initials,
-                              style: AppTypography.titleMedium.copyWith(
-                                color: colors.primary,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 16.sp,
-                              ),
-                            ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: -1,
-                    left: -1,
-                    child: CustomPulsingIndicator(
-                      color: colors.primary,
-                      size: 6.r,
-                      enablePing: true,
-                    ),
-                  ),
-                ],
+              // الأفاتار مع مؤشر النبض الحي الموحد
+              CustomAvatarBadge(
+                imageUrl: user?.userProfileLogo,
+                initials: initials,
+                size: AvatarBadgeSize.md,
+                pulseColor: colors.primary,
               ),
               SizedBox(width: AppSpacing.md),
 

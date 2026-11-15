@@ -1,14 +1,16 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_indicators.dart';
 
+export 'package:carousel_slider/carousel_slider.dart' show CarouselSliderController;
 export 'package:netsales/widgets/carousels/custom_carousel_card.dart';
 export 'package:netsales/widgets/carousels/custom_carousel_indicators.dart';
 
 /// ودجت كاروسيل عامة ومستقلة وقابلة لإعادة الاستخدام بالكامل (CustomCarouselSlider)
-/// مبنية على أساسات Flutter الأصلية دون أي حزم خارجية
-/// تدعم التمرير الانسيابي، والعمق الحركي للبطاقات الجانبية، والمؤشرات التفاعلية
+/// مبنية كغلاف نظيف وموحد لحزمة carousel_slider المعتمدة
+/// تدعم التوسيط التلقائي، والعمق الحركي للبطاقات الجانبية، والمؤشرات التفاعلية
 class CustomCarouselSlider<T> extends StatelessWidget {
   final List<T> items;
   final Widget Function(BuildContext context, T item, int index) itemBuilder;
@@ -17,10 +19,11 @@ class CustomCarouselSlider<T> extends StatelessWidget {
   final double height;
   final double viewportFraction;
   final bool showIndicator;
-  final PageController? controller;
+  final bool enableInfiniteScroll;
+  final bool autoPlay;
+  final bool enlargeCenterPage;
+  final CarouselSliderController? carouselController;
   final WidgetBuilder? emptyBuilder;
-  final double scaleFactor;
-  final double inactiveOpacity;
 
   const CustomCarouselSlider({
     super.key,
@@ -31,10 +34,11 @@ class CustomCarouselSlider<T> extends StatelessWidget {
     this.height = 208,
     this.viewportFraction = 0.88,
     this.showIndicator = true,
-    this.controller,
+    this.enableInfiniteScroll = false,
+    this.autoPlay = false,
+    this.enlargeCenterPage = true,
+    this.carouselController,
     this.emptyBuilder,
-    this.scaleFactor = 0.94,
-    this.inactiveOpacity = 0.78,
   });
 
   @override
@@ -44,40 +48,32 @@ class CustomCarouselSlider<T> extends StatelessWidget {
     }
 
     final safeIndex = currentIndex.clamp(0, items.length - 1);
-    final pageController = controller ??
-        PageController(
-          initialPage: safeIndex,
-          viewportFraction: viewportFraction,
-        );
+    final controller = carouselController ?? CarouselSliderController();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(
-          height: height.h,
-          child: PageView.builder(
-            controller: pageController,
+        CarouselSlider.builder(
+          carouselController: controller,
+          itemCount: items.length,
+          options: CarouselOptions(
+            height: height.h,
+            viewportFraction: viewportFraction,
+            initialPage: safeIndex,
+            enableInfiniteScroll: enableInfiniteScroll,
+            autoPlay: autoPlay,
+            enlargeCenterPage: enlargeCenterPage,
+            enlargeFactor: 0.16,
+            scrollPhysics: const BouncingScrollPhysics(),
             padEnds: true,
-            physics: const BouncingScrollPhysics(),
-            itemCount: items.length,
-            onPageChanged: onPageChanged,
-            itemBuilder: (context, index) {
-              final isSelected = index == safeIndex;
-
-              return AnimatedScale(
-                scale: isSelected ? 1.0 : scaleFactor,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.fastOutSlowIn,
-                child: AnimatedOpacity(
-                  opacity: isSelected ? 1.0 : inactiveOpacity,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.fastOutSlowIn,
-                  child: itemBuilder(context, items[index], index),
-                ),
-              );
+            onPageChanged: (index, reason) {
+              onPageChanged?.call(index);
             },
           ),
+          itemBuilder: (context, index, realIndex) {
+            return itemBuilder(context, items[index], index);
+          },
         ),
         if (showIndicator && items.length > 1) ...[
           SizedBox(height: AppSpacing.sm),
@@ -85,13 +81,11 @@ class CustomCarouselSlider<T> extends StatelessWidget {
             itemCount: items.length,
             currentIndex: safeIndex,
             onIndicatorTap: (index) {
-              if (pageController.hasClients) {
-                pageController.animateToPage(
-                  index,
-                  duration: const Duration(milliseconds: 350),
-                  curve: Curves.fastOutSlowIn,
-                );
-              }
+              controller.animateToPage(
+                index,
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.fastOutSlowIn,
+              );
               onPageChanged?.call(index);
             },
           ),
