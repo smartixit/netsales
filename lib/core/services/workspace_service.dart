@@ -238,6 +238,21 @@ class WorkspaceService extends GetxService {
     return availablePosIds.first;
   }
 
+  /// Resolve a POS context for workflows that must never guess between tenants.
+  ///
+  /// A previously saved and still-authorized POS is preferred. A single available
+  /// POS can be selected safely; multiple POS memberships require an explicit choice.
+  int? resolveExplicitActivePosId(List<int> availablePosIds) {
+    if (availablePosIds.isEmpty) return null;
+
+    final savedId = savedActivePosId;
+    if (savedId != null && availablePosIds.contains(savedId)) {
+      return savedId;
+    }
+
+    return availablePosIds.length == 1 ? availablePosIds.single : null;
+  }
+
   /// مفتاح التخزين الموحد للشبكة النشطة للمستخدم الحالي
   String get activeNetworkStorageKey =>
       '${StorageKeys.activeNetworkTenantPrefix}_${SessionService.to.currentUser?.userId ?? 0}';
