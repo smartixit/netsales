@@ -98,6 +98,34 @@ void main() {
       expect(workspaceService.savedActivePosId, isNull);
     });
 
+    test('Explicit POS resolution never guesses between multiple memberships', () async {
+      expect(workspaceService.resolveExplicitActivePosId([]), isNull);
+      expect(workspaceService.resolveExplicitActivePosId([101]), 101);
+      expect(
+        workspaceService.resolveExplicitActivePosId([101, 102]),
+        isNull,
+      );
+
+      await workspaceService.saveActivePosId(102);
+      expect(
+        workspaceService.resolveExplicitActivePosId([101, 102]),
+        102,
+      );
+
+      await workspaceService.saveActivePosId(999);
+      expect(
+        workspaceService.resolveExplicitActivePosId([101, 102]),
+        isNull,
+      );
+      expect(
+        workspaceService.resolveExplicitActivePosId([101]),
+        101,
+      );
+
+      await workspaceService.clearActivePosId();
+      expect(workspaceService.savedActivePosId, isNull);
+    });
+
     test('Strict tenant isolation: revoked membership context is purged upon sync', () async {
       final storage = StorageService.instance;
       const userId = 55;
