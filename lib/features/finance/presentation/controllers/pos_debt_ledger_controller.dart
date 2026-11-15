@@ -159,7 +159,7 @@ class PosDebtLedgerController extends GetxController {
       posOptions.assignAll(uniquePositions);
 
       final posIds = uniquePositions.map((p) => p.posId).toList(growable: false);
-      final resolvedId = WorkspaceService.to.resolveActivePosId(posIds);
+      final resolvedId = WorkspaceService.to.resolveExplicitActivePosId(posIds);
       if (resolvedId != null) {
         autoSelectPosId = resolvedId;
       }
