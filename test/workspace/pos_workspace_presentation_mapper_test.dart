@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_active_supply_order_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_network_package_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_wallet_summary_mapper.dart';
 
 void main() {
   group('POS workspace presentation mappers', () {
@@ -34,6 +36,26 @@ void main() {
       expect(result.single.supplyPrice, contains('450'));
       expect(result.single.retailPrice, contains('500'));
       expect(result.single.specifications, isNotEmpty);
+    });
+
+    test('maps wallet amounts and credit labels for display', () {
+      const wallet = PosWalletEntity(
+        walletId: 1,
+        networkId: 2,
+        posId: 3,
+        walletBalance: 1250,
+        creditLimit: null,
+        availableOverdraftCapacity: 500,
+        isOverdrawn: true,
+      );
+
+      final result = PosWalletSummaryMapper.map(wallet);
+
+      expect(result, isNotNull);
+      expect(result!.isOverdrawn, isTrue);
+      expect(result.formattedBalance, contains('1,250'));
+      expect(result.creditLimitLabel, 'بدون تسهيلات');
+      expect(result.availableOverdraftLabel, contains('500'));
     });
 
     test('maps active request progress without UI-side status interpretation', () {
