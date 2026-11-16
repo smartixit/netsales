@@ -117,7 +117,12 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
 
                   // 4. كرت السيولة والعمليات السريعة
                   if (dashboard.showLiquiditySection) ...[
-                    ExecutiveLiquidityCard(summary: dashboard.liquiditySummary),
+                    ExecutiveLiquidityCard(
+                      summary: dashboard.liquiditySummary,
+                      onCreateSaleInvoice: controller.openCreateSaleInvoice,
+                      onCollectRepayment: controller.openRepaymentCollection,
+                      onOpenWalletStatement: controller.openNetworkWalletStatement,
+                    ),
                     AppSpacing.vLg,
                   ],
 
