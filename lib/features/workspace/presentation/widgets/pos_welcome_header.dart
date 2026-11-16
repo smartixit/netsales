@@ -14,11 +14,11 @@ class PosWelcomeHeader extends StatelessWidget {
   const PosWelcomeHeader({
     super.key,
     required this.controller,
-    this.onQrTap,
+    required this.onQrTap,
   });
 
   final PosWorkspaceController controller;
-  final VoidCallback? onQrTap;
+  final VoidCallback onQrTap;
 
   @override
   Widget build(BuildContext context) {
@@ -250,7 +250,7 @@ class PosWelcomeHeader extends StatelessWidget {
               // كبسولة مسح رمز QR وربط شبكة جديدة (Interactive Touchpoint)
               Expanded(
                 child: CustomInteractiveBounce(
-                  onTap: onQrTap ?? controller.openQrScanner,
+                  onTap: onQrTap,
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 8.w,
