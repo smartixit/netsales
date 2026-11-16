@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/services/storage_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
@@ -399,13 +401,16 @@ void main() {
   late TestFinanceRepository repository;
   late MockCommercialRepository commercialRepository;
 
-  setUp(() {
+  setUp(() async {
     Get.testMode = true;
+    SharedPreferences.setMockInitialValues({});
+    await StorageService.instance.init();
     repository = TestFinanceRepository();
     commercialRepository = MockCommercialRepository();
   });
 
-  tearDown(() {
+  tearDown(() async {
+    await StorageService.instance.clear();
     Get.reset();
   });
 
