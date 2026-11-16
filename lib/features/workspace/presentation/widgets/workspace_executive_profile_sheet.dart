@@ -6,7 +6,6 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_sheet_action_tile.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -16,6 +15,7 @@ import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 class WorkspaceExecutiveProfileSheet extends StatelessWidget {
   final String userName;
   final String userRole;
+  final String userInitials;
   final String? userPhoneNumber;
   final String? userProfileLogo;
   final AppWorkspace currentWorkspace;
@@ -31,6 +31,7 @@ class WorkspaceExecutiveProfileSheet extends StatelessWidget {
     super.key,
     required this.userName,
     required this.userRole,
+    required this.userInitials,
     this.userPhoneNumber,
     this.userProfileLogo,
     required this.currentWorkspace,
@@ -49,6 +50,7 @@ class WorkspaceExecutiveProfileSheet extends StatelessWidget {
     required AppWorkspace currentWorkspace,
     required String userName,
     required String userRole,
+    required String userInitials,
     String? userPhoneNumber,
     String? userProfileLogo,
     bool canSwitchWorkspace = false,
@@ -68,6 +70,7 @@ class WorkspaceExecutiveProfileSheet extends StatelessWidget {
       child: WorkspaceExecutiveProfileSheet(
         userName: userName,
         userRole: userRole,
+        userInitials: userInitials,
         userPhoneNumber: userPhoneNumber,
         userProfileLogo: userProfileLogo,
         currentWorkspace: currentWorkspace,
@@ -85,7 +88,6 @@ class WorkspaceExecutiveProfileSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final initials = TextFormatter.avatarInitials(userName, maxChars: 2);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -103,7 +105,7 @@ class WorkspaceExecutiveProfileSheet extends StatelessWidget {
             children: [
               CustomAvatarBadge(
                 imageUrl: userProfileLogo,
-                initials: initials,
+                initials: userInitials,
                 size: AvatarBadgeSize.md,
                 hasPulse: false,
               ),
