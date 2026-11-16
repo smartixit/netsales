@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
 import 'package:netsales/features/catalog/presentation/bindings/package_catalog_binding.dart';
 import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
@@ -31,7 +32,7 @@ class PosWorkspaceBinding extends Bindings {
     ProcurementRequestBinding().dependencies();
     PackageCatalogBinding().dependencies();
 
-    Get.lazyPut<PosWorkspaceController>(
+    registerLazyIfAbsent<PosWorkspaceController>(
       () => PosWorkspaceController(
         getMyPosUseCase: Get.find<GetMyPosUseCase>(),
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
