@@ -400,7 +400,7 @@ void main() {
     );
 
     test(
-      'loadLinkedNetworks and loadNetworkPackages selects first unfiltered package',
+      'loads the catalogue without silently selecting or adding a package',
       () async {
         await controller.loadLinkedNetworks(20);
         expect(controller.linkedNetworks.length, 1);
@@ -408,26 +408,68 @@ void main() {
 
         await controller.loadNetworkPackages(10);
         expect(controller.availablePackages.length, 1);
-        expect(controller.selectedPackage.value?.packageId, 5);
-        expect(controller.requestedVoucherCount, 100);
+        expect(controller.selectedPackage.value, isNull);
+        expect(controller.requestedVoucherCount, 0);
+        expect(controller.procurementCart, isEmpty);
       },
     );
 
     test(
-      'package search preserves the selected package and entered quantity',
+      'package search never clears quantities already stored in the cart',
       () async {
         await controller.loadLinkedNetworks(20);
-        controller.setVoucherCount(175);
+        controller.adjustPackageQuantity(samplePackage, 175);
 
         controller.onPackageSearchChanged('غير موجودة');
         await controller.refreshNetworkPackages();
 
         expect(mockPackageRepo.lastSearch, 'غير موجودة');
         expect(controller.availablePackages, isEmpty);
-        expect(controller.selectedPackage.value?.packageId, 5);
-        expect(controller.requestedVoucherCount, 175);
+        expect(controller.cartQuantityForPackage(5), 175);
+        expect(controller.procurementCart.single.package.packageId, 5);
       },
     );
+
+    test('catalogue quantity controls maintain independent package quantities', () {
+      const secondPackage = PackageEntity(
+        packageId: 6,
+        networkId: 10,
+        packageName: 'باقة الفضة',
+        packageBalance: 5.0,
+        packageVoucherCount: 60,
+        packageVoucherPrice: 900.0,
+        packageDefaultCashDiscount: 0,
+        packageDefaultCreditDiscount: 0,
+        cashDiscountAmount: 0,
+        creditDiscountAmount: 0,
+        effectiveCashPrice: 900,
+        effectiveCreditPrice: 900,
+        status: true,
+      );
+
+      controller.adjustPackageQuantity(samplePackage, 1);
+      controller.adjustPackageQuantity(secondPackage, 1);
+      controller.adjustPackageQuantity(samplePackage, 1);
+
+      expect(controller.cartQuantityForPackage(5), 2);
+      expect(controller.cartQuantityForPackage(6), 1);
+      expect(controller.procurementCart.length, 2);
+
+      controller.adjustPackageQuantity(samplePackage, -2);
+      expect(controller.cartQuantityForPackage(5), 0);
+      expect(controller.cartQuantityForPackage(6), 1);
+      expect(controller.procurementCart.length, 1);
+    });
+
+    test('manual quantities accept non-sheet multiples and zero removes the line', () {
+      controller.setPackageVoucherCount(samplePackage, 175);
+      expect(controller.cartQuantityForPackage(5), 175);
+      expect(controller.procurementCart.single.voucherCount, 175);
+      expect(controller.procurementCart.single.sheets, 1.75);
+
+      controller.setPackageVoucherCount(samplePackage, 0);
+      expect(controller.procurementCart, isEmpty);
+    });
   });
 
   group('NetworkProcurementReviewController Tests (M6.2)', () {

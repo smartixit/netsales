@@ -7,13 +7,11 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_cart_section.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_add_to_cart_action.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_network_context_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_pos_context_section.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_sheet_quantity_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
@@ -85,11 +83,6 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                           const ProcurementNetworkContextSection(),
                           AppSpacing.vLg,
                           const ProcurementPackageSelectionSection(),
-                          if (controller.selectedPackage.value != null) ...[
-                            AppSpacing.vLg,
-                            const ProcurementSheetQuantitySection(),
-                            const ProcurementAddToCartAction(),
-                          ],
                         ] else ...[
                           const ProcurementCartSection(),
                           AppSpacing.vLg,

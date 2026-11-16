@@ -11,6 +11,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/form_validators.dart';
+import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
@@ -104,7 +105,6 @@ class PosProcurementController extends GetxController {
     }
     currentOrderStep.value = 1;
     FocusManager.instance.primaryFocus?.unfocus();
-    unawaited(fetchServerQuote());
   }
 
   void returnToOrderItems() {
@@ -154,12 +154,19 @@ class PosProcurementController extends GetxController {
 
   bool get hasCartItems => procurementCart.isNotEmpty;
 
+  /// يمنع إرسال الطلب بعرض سعر قديم أثناء تقارب نقرات الكمية.
+  final isQuotePending = false.obs;
+  final _cartQuoteChanges = 0.obs;
+  Worker? _cartQuoteWorker;
+
   /// هل يملك الطلب عرض سعر حديثاً يطابق سياق الإرسال الحالي؟
   bool get hasCurrentServerQuote {
     if (getProcurementQuoteUseCase == null) return true;
 
     final quote = serverQuote.value;
-    if (isLoadingQuote.value || quote == null) return false;
+    if (isQuotePending.value || isLoadingQuote.value || quote == null) {
+      return false;
+    }
 
     final matchesContext =
         quote.networkId == selectedNetworkId.value &&
@@ -336,11 +343,13 @@ class PosProcurementController extends GetxController {
       time: const Duration(milliseconds: 350),
     );
 
-    ever(selectedSaleType, (_) {
-      if (procurementCart.isNotEmpty) {
-        unawaited(fetchServerQuote());
-      }
-    });
+    _cartQuoteWorker = debounce(
+      _cartQuoteChanges,
+      (_) => unawaited(fetchServerQuote()),
+      time: const Duration(milliseconds: 450),
+    );
+
+    ever(selectedSaleType, (_) => _scheduleServerQuoteRefresh());
 
     loadInitialData();
   }
@@ -351,6 +360,7 @@ class PosProcurementController extends GetxController {
     packageSearchController.dispose();
     quantityController.dispose();
     notesController.dispose();
+    _cartQuoteWorker?.dispose();
     _requestListRevision++;
     super.onClose();
   }
@@ -501,22 +511,8 @@ class PosProcurementController extends GetxController {
       if (reset) {
         availablePackages.assignAll(paginated.items);
         packageNextCursor.value = paginated.nextCursor;
-        final selectedId = selectedPackage.value?.packageId;
-        final stillAvailable = selectedId == null
-            ? null
-            : paginated.items.firstWhereOrNull(
-                (package) => package.packageId == selectedId,
-              );
-
-        if (stillAvailable != null) {
-          _setSelectedPackage(stillAvailable);
-        } else if (selectedId == null &&
-            packageSearchQuery.value.isEmpty &&
-            paginated.items.isNotEmpty) {
-          // Choose a sensible default only on the initial, unfiltered catalogue.
-          // A search result must never silently replace the user's selection.
-          onPackageSelected(paginated.items.first);
-        }
+        // Cart quantities are independent from catalogue pagination and search.
+        // Loading a catalogue page must never create or replace an order line.
       } else {
         final knownIds = availablePackages.map((item) => item.packageId).toSet();
         availablePackages.addAll(
@@ -577,32 +573,46 @@ class PosProcurementController extends GetxController {
     loadNetworkPackages(networkId);
   }
 
-  void addOrUpdateCartLine() {
-    final package = selectedPackage.value;
-    final voucherCount = requestedVoucherCount;
+  /// الكمية الحالية لباقة؛ السلة هي المصدر الوحيد للحقيقة.
+  int cartQuantityForPackage(int packageId) {
+    return procurementCart
+            .firstWhereOrNull((line) => line.package.packageId == packageId)
+            ?.voucherCount ??
+        0;
+  }
 
-    if (package == null) {
-      CustomSnackbar.show(
-        title: 'اختر الباقة أولاً',
-        message: 'حدد الباقة التي تريد إضافتها إلى طلب التوريد.',
-        type: SnackType.warning,
-      );
-      return;
-    }
-    if (voucherCount <= 0) {
-      CustomSnackbar.show(
-        title: 'كمية الكروت غير صالحة',
-        message: 'أدخل عدداً صحيحاً من الكروت أكبر من صفر قبل إضافة الباقة.',
-        type: SnackType.warning,
-      );
-      return;
-    }
+  /// يهيئ محرر الكمية دون التأثير على السلة حتى يضغط المستخدم «تطبيق».
+  void preparePackageQuantityEdit(PackageEntity package, int currentCount) {
+    _setSelectedPackage(package);
+    setVoucherCount(currentCount);
+  }
+
+  /// يثبت كمية باقة مباشرة في السلة. الصفر يعني إزالة الباقة.
+  void setPackageVoucherCount(PackageEntity package, int voucherCount) {
     if (package.networkId != selectedNetworkId.value) {
       CustomSnackbar.show(
         title: 'الباقة لا تتبع الشبكة المحددة',
         message: 'اختر باقة من كتالوج الشبكة الموردة الحالية.',
         type: SnackType.error,
       );
+      return;
+    }
+
+    final safeCount = voucherCount < 0 ? 0 : voucherCount;
+    final existingIndex = procurementCart.indexWhere(
+      (line) => line.package.packageId == package.packageId,
+    );
+    final currentCount = existingIndex == -1
+        ? 0
+        : procurementCart[existingIndex].voucherCount;
+    if (safeCount == currentCount) return;
+
+    if (safeCount == 0) {
+      if (existingIndex != -1) {
+        procurementCart.removeAt(existingIndex);
+        if (procurementCart.isEmpty) returnToOrderItems();
+        _scheduleServerQuoteRefresh();
+      }
       return;
     }
 
@@ -615,59 +625,59 @@ class PosProcurementController extends GetxController {
       return;
     }
 
-    final calculatedSheets = voucherCount / package.packageVoucherCount;
     final line = ProcurementCartLineEntity(
       package: package,
-      sheets: calculatedSheets,
-      voucherCount: voucherCount,
+      sheets: VoucherSheetCalculator.breakdown(
+        safeCount,
+        package.packageVoucherCount,
+      ).totalSheetsFraction,
+      voucherCount: safeCount,
     );
-    final index = procurementCart.indexWhere(
-      (item) => item.package.packageId == package.packageId,
-    );
-
-    if (index == -1) {
+    if (existingIndex == -1) {
       procurementCart.add(line);
-      CustomSnackbar.show(
-        title: 'أضيفت الباقة إلى الطلب',
-        message:
-            'تمت إضافة ${package.packageName} إلى سلة التوريد ($voucherCount كرت).',
-        type: SnackType.success,
-      );
     } else {
-      procurementCart[index] = line;
-      CustomSnackbar.show(
-        title: 'تم تحديث كمية الباقة',
-        message: 'تم تحديث كمية ${package.packageName} إلى $voucherCount كرت.',
-        type: SnackType.success,
-      );
+      procurementCart[existingIndex] = line;
     }
-    unawaited(fetchServerQuote());
-    FocusManager.instance.primaryFocus?.unfocus();
+    _scheduleServerQuoteRefresh();
   }
 
-  void editCartLine(ProcurementCartLineEntity line) {
-    _setSelectedPackage(line.package);
-    setVoucherCount(line.voucherCount);
-    returnToOrderItems();
+  /// التحكم السريع في الكمية من بطاقة الكتالوج أو بطاقة السلة.
+  void adjustPackageQuantity(PackageEntity package, int delta) {
+    if (delta == 0) return;
+    setPackageVoucherCount(
+      package,
+      cartQuantityForPackage(package.packageId) + delta,
+    );
+  }
+
+  /// يبطل العرض السابق فوراً ثم يطلب معاينة موحدة بعد توقف التفاعل.
+  void _scheduleServerQuoteRefresh() {
+    _quoteRevision++;
+    serverQuote.value = null;
+    quoteError.value = null;
+    isLoadingQuote.value = false;
+    if (procurementCart.isEmpty || getProcurementQuoteUseCase == null) {
+      isQuotePending.value = false;
+      return;
+    }
+    isQuotePending.value = true;
+    _cartQuoteChanges.value++;
   }
 
   void removeCartLine(int packageId) {
+    final previousLength = procurementCart.length;
     procurementCart.removeWhere((line) => line.package.packageId == packageId);
-    if (procurementCart.isEmpty) {
-      returnToOrderItems();
-      _quoteRevision++;
-      isLoadingQuote.value = false;
-      serverQuote.value = null;
-      quoteError.value = null;
-    } else {
-      unawaited(fetchServerQuote());
-    }
+    if (procurementCart.length == previousLength) return;
+
+    if (procurementCart.isEmpty) returnToOrderItems();
+    _scheduleServerQuoteRefresh();
   }
 
   void clearProcurementCart() {
     procurementCart.clear();
     _quoteRevision++;
     isLoadingQuote.value = false;
+    isQuotePending.value = false;
     serverQuote.value = null;
     quoteError.value = null;
     _clearPendingCreateIdempotencyKey();
@@ -676,6 +686,7 @@ class PosProcurementController extends GetxController {
   /// جلب واحتساب عرض الأسعار الرسمي المعتمد سيادياً من الخادم لبنود السلة وطريقة الدفع المختارة
   Future<void> fetchServerQuote() async {
     final revision = ++_quoteRevision;
+    isQuotePending.value = false;
     final networkId = selectedNetworkId.value;
     final posId = selectedPosId.value;
     final items = procurementCart.toList(growable: false);
@@ -685,6 +696,7 @@ class PosProcurementController extends GetxController {
         items.isEmpty ||
         getProcurementQuoteUseCase == null) {
       isLoadingQuote.value = false;
+      isQuotePending.value = false;
       serverQuote.value = null;
       quoteError.value = null;
       return;
@@ -733,16 +745,6 @@ class PosProcurementController extends GetxController {
     }
   }
 
-  /// اختيار الباقة المطلوبة
-  void onPackageSelected(PackageEntity package) {
-    if (selectedPackage.value?.packageId != package.packageId) {
-      clearVoucherQuantity();
-    }
-    _setSelectedPackage(package);
-    setDefaultSheetIfEmpty();
-    unawaited(loadEffectiveDiscount());
-  }
-
   /// تعديل كمية بند موجود في السلة مباشرة دون فتح محرر منفصل.
   void adjustCartLine(int packageId, int delta) {
     final index = procurementCart.indexWhere(
@@ -762,7 +764,7 @@ class PosProcurementController extends GetxController {
       sheets: nextCount / sheetSize,
       voucherCount: nextCount,
     );
-    unawaited(fetchServerQuote());
+    _scheduleServerQuoteRefresh();
   }
 
   void adjustCartLineBySheet(int packageId, int direction) {
@@ -985,7 +987,7 @@ class PosProcurementController extends GetxController {
       editCartLine(procurementCart.first);
     }
 
-    unawaited(fetchServerQuote());
+    _scheduleServerQuoteRefresh();
     await Get.toNamed<void>(AppRoutes.newProcurementOrder);
   }
 
@@ -1214,7 +1216,7 @@ class PosProcurementController extends GetxController {
 
       if (isLoadingQuote.value || !quoteMatchesContext || quoteExpired) {
         if (!isLoadingQuote.value) {
-          unawaited(fetchServerQuote());
+          _scheduleServerQuoteRefresh();
         }
         CustomSnackbar.show(
           title: quoteExpired ? 'انتهت صلاحية عرض الأسعار' : 'عرض الأسعار غير جاهز',
@@ -1275,7 +1277,7 @@ class PosProcurementController extends GetxController {
       if (e.message.contains('أسعار') ||
           e.message.contains('pricing') ||
           e.message.contains('عرض الأسعار')) {
-        unawaited(fetchServerQuote());
+        _scheduleServerQuoteRefresh();
       }
       CustomSnackbar.show(
         title: 'فشل تقديم الطلب',

@@ -7,7 +7,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_option_card.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_pricing_discount_card.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_quantity_editor_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
@@ -15,7 +15,7 @@ import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
-/// كتالوج وصف الباقات مع اختيار صريح وبحث وترقيم خادمي.
+/// كتالوج الباقات: استعراض وتكوين السلة مباشرة مع بحث وترقيم خادمي.
 class ProcurementPackageSelectionSection
     extends GetView<PosProcurementController> {
   const ProcurementPackageSelectionSection({super.key});
@@ -36,7 +36,7 @@ class ProcurementPackageSelectionSection
         ),
         AppSpacing.vXxs,
         Text(
-          'استعرض مواصفات الباقة وسعة الورقة قبل تحديد الكمية. الأسعار والخصومات تظهر من معاينة الخادم بعد اختيار الباقة.',
+          'عدّل كمية كل باقة من بطاقتها مباشرة. يمكنك إضافة أكثر من باقة، وستظهر الأسعار المعتمدة عند مراجعة الطلب.',
           style: AppTypography.bodySmall.copyWith(
             color: colors.onSurfaceVariant,
           ),
@@ -126,11 +126,29 @@ class ProcurementPackageSelectionSection
                                 width: cardWidth,
                                 child: ProcurementPackageOptionCard(
                                   package: package,
-                                  isSelected:
-                                      controller.selectedPackage.value?.packageId ==
-                                      package.packageId,
-                                  onTap: () =>
-                                      controller.onPackageSelected(package),
+                                  quantity: controller.cartQuantityForPackage(
+                                    package.packageId,
+                                  ),
+                                  onIncrement: () =>
+                                      controller.adjustPackageQuantity(package, 1),
+                                  onDecrement:
+                                      controller.cartQuantityForPackage(
+                                            package.packageId,
+                                          ) >
+                                          0
+                                      ? () => controller.adjustPackageQuantity(
+                                          package,
+                                          -1,
+                                        )
+                                      : null,
+                                  onEditQuantity: () =>
+                                      ProcurementQuantityEditorSheet.show(
+                                        package: package,
+                                        currentQuantity:
+                                            controller.cartQuantityForPackage(
+                                              package.packageId,
+                                            ),
+                                      ),
                                 ),
                               );
                             }),
@@ -167,21 +185,7 @@ class ProcurementPackageSelectionSection
             ],
           );
         }),
-        Obx(() {
-          final package = controller.selectedPackage.value;
-          if (package == null) return const SizedBox.shrink();
 
-          return Padding(
-            padding: EdgeInsets.only(top: AppSpacing.md),
-            child: ProcurementPricingDiscountCard(
-              package: package,
-              discount: controller.effectiveDiscount.value,
-              isLoading: controller.isLoadingDiscount.value,
-              errorMessage: controller.discountError.value,
-              saleType: controller.selectedSaleType.value,
-            ),
-          );
-        }),
       ],
     );
   }

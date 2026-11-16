@@ -72,7 +72,7 @@ void main() {
       getPosNetworksListUseCase: GetPosNetworksListUseCase(MockCommercialRepo()),
       getPackagesUseCase: GetPackagesUseCase(MockPackageRepo()),
     );
-    controller.onPackageSelected(testPackage);
+    controller.preparePackageQuantityEdit(testPackage, 0);
   });
 
   tearDown(() {
@@ -80,9 +80,9 @@ void main() {
   });
 
   group('PosProcurementController Voucher Quantity Stepper & Additive Logic', () {
-    test('اختيار الباقة يعين افتراضياً سعة ورقة واحدة إذا كان الحقل فارغاً', () {
-      expect(controller.requestedVoucherCount, equals(51));
-      expect(controller.quantityController.text, equals('51'));
+    test('محرر الكمية يبدأ بصفر ولا يضيف ورقة ضمنية بمجرد استعراض الباقة', () {
+      expect(controller.requestedVoucherCount, equals(0));
+      expect(controller.quantityController.text, isEmpty);
     });
 
     test('الإدخال التراكمي addVoucherQuantity يجمع الكروت المتكررة بدقة', () {

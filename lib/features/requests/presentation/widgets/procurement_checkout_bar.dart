@@ -29,8 +29,9 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
       final quote = controller.serverQuote.value;
       final quoteSummary = cartLines.isEmpty
           ? 'السلة فارغة'
-          : controller.isLoadingQuote.value
-              ? 'جاري احتساب السعر المعتمد...'
+          : (controller.isQuotePending.value ||
+                    controller.isLoadingQuote.value)
+              ? 'جاري تحديث السعر المعتمد...'
               : quote == null
                   ? (controller.getProcurementQuoteUseCase == null
                       ? 'سيحتسب الخادم السعر عند التقديم'
