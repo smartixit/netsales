@@ -5,13 +5,13 @@ import 'package:netsales/features/membership/presentation/controllers/membership
 import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 
 void main() {
-  setUp(() async {
+  setUp(() {
     Get.testMode = true;
-    await Get.reset();
+    Get.reset();
   });
 
-  tearDown(() async {
-    await Get.reset();
+  tearDown(() {
+    Get.reset();
   });
 
   test('membership controllers are registered independently per workspace', () {
