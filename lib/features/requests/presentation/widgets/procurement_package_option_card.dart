@@ -263,7 +263,7 @@ class _LivePackagePrice extends StatelessWidget {
           AppSpacing.vXs,
           Text(
             active == null ? 'السعر الحالي غير متاح' :
-              'سعر الكرت: ' + AmountFormatter.formatValue(active / 100) + ' ر.ي',
+              'سعر الكرت: ${AmountFormatter.formatValue(active / 100)} ر.ي',
             style: AppTypography.labelMedium.copyWith(
               color: colors.primary, fontWeight: FontWeight.w800,
             ),
@@ -290,7 +290,7 @@ class _PriceValue extends StatelessWidget {
           color: active ? colors.primary : colors.onSurfaceVariant,
         )),
         Text(
-          value == null ? '—' : AmountFormatter.formatValue(value! / 100) + ' ر.ي',
+          value == null ? '—' : '${AmountFormatter.formatValue(value! / 100)} ر.ي',
           style: AppTypography.titleSmall.copyWith(
             color: active ? colors.primary : colors.onSurface,
             fontWeight: FontWeight.w800,

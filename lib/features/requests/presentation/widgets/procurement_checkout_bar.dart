@@ -4,7 +4,6 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_cart_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -17,7 +16,7 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
     final colors = context.colors;
     return Obx(() {
       final lineCount = controller.procurementCart.length;
-      final voucherCount = controller.procurementCart.fold<int>(0, (sum, line) => sum + line.voucherCount);
+      controller.procurementCart.fold<int>(0, (sum, line) => sum + line.voucherCount);
       final total = '\${AmountFormatter.formatValue(controller.liveOrderTotalMinor / 100)} ر.ي';
       return Container(
         padding: EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md,

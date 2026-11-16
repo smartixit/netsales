@@ -22,7 +22,6 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return Obx(() => CustomAppScaffold(
       appBarTitle: controller.isEditing.value ? 'تعديل طلب التوريد' : 'اكتشاف باقات التوريد',
       appBarSubtitle: 'قارن التعرفة واضبط الكمية وشاهد إجمالي الطلب مباشرة',
@@ -216,7 +215,7 @@ class _LiveCartPanel extends GetView<PosProcurementController> {
             Expanded(child: Text('سلة الطلب', style: AppTypography.titleSmall.copyWith(
               color: colors.onSurface, fontWeight: FontWeight.w800,
             ))),
-            Obx(() => Text(controller.procurementCart.length.toString() + ' باقة',
+            Obx(() => Text('${controller.procurementCart.length} باقة',
               style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant))),
           ]),
           AppSpacing.vSm,
@@ -229,13 +228,13 @@ class _LiveCartPanel extends GetView<PosProcurementController> {
               color: colors.onSurfaceVariant, fontWeight: FontWeight.w700,
             ))),
             Obx(() => Text(
-              AmountFormatter.formatValue(controller.liveOrderTotalMinor / 100) + ' ر.ي',
+              '${AmountFormatter.formatValue(controller.liveOrderTotalMinor / 100)} ر.ي',
               style: AppTypography.titleLarge.copyWith(color: colors.primary, fontWeight: FontWeight.w900),
             )),
           ]),
           AppSpacing.vXs,
           Obx(() => Text(
-            'إجمالي الخصم: ' + AmountFormatter.formatValue(controller.liveOrderDiscountMinor / 100) + ' ر.ي',
+            'إجمالي الخصم: ${AmountFormatter.formatValue(controller.liveOrderDiscountMinor / 100)} ر.ي',
             style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant),
           )),
         ],

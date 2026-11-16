@@ -1,11 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
-import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
@@ -16,7 +13,6 @@ import 'package:netsales/features/commercial/domain/repositories/commercial_repo
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/data/models/procurement_quote_model.dart';
-import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
@@ -29,7 +25,6 @@ import 'package:netsales/features/requests/domain/usecases/create_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
 
 class FakeQuoteRequestRepository implements RequestRepository {
   ProcurementQuoteEntity? nextQuote;
@@ -338,8 +333,4 @@ void main() {
       expect(result.pricingToken, 'fake_valid_hmac_token');
     });
   });
-
-);
-
-);
 }
