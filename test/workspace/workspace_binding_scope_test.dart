@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
 import 'package:netsales/features/membership/presentation/controllers/membership_controller.dart';
+import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 
 void main() {
   setUp(() async {
@@ -30,6 +31,17 @@ void main() {
       isTrue,
     );
     expect(Get.isRegistered<MembershipController>(), isFalse);
+  });
+
+  test('membership screens resolve the matching workspace controller tag', () {
+    expect(
+      const MembershipScreen(isNetwork: true).tag,
+      MembershipBinding.networkTag,
+    );
+    expect(
+      const MembershipScreen(isNetwork: false).tag,
+      MembershipBinding.posTag,
+    );
   });
 
   test('re-entering workspace bindings does not duplicate registrations', () {
