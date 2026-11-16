@@ -187,7 +187,7 @@ class WorkspaceExecutiveProfileSheet extends StatelessWidget {
               ? Icons.light_mode_outlined
               : Icons.dark_mode_outlined,
           iconColor: colors.warning,
-          title: ThemeService.to.isDarkMode
+          title: Theme.of(context).brightness == Brightness.dark
               ? 'التبديل إلى الوضع النهاري (الفاتح)'
               : 'التبديل إلى الوضع الليلي (الداكن)',
           subtitle: 'تغيير سمة وألوان الواجهة فورياً',
