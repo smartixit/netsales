@@ -27,7 +27,7 @@ class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
       }
 
       // 1. حالة جلب الأسعار والخصومات من الخادم
-      if (controller.isLoadingQuote.value) {
+      if (controller.isQuotePending.value || controller.isLoadingQuote.value) {
         return Container(
           width: double.infinity,
           padding: EdgeInsets.all(AppSpacing.md),

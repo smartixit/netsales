@@ -1,50 +1,28 @@
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
+import 'package:netsales/widgets/badges/custom_chip.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
-/// مكون موحد ومعياري لإدخال كمية كروت الباقات (Voucher Quantity Stepper)
-/// يدعم:
-/// 1. الإدخال اليدوي المباشر بعدد الكروت عبر لوحة المفاتيح.
-/// 2. أزرار التحكم الدقيق (+ ورقة / - ورقة) بمقدار سعة الورقة للباقة مع حماية من الأرقام السالبة.
-/// 3. شريط كبسولات الإضافة التراكمية السريعة (+ كبسولات أوراق وأنصاف أوراق).
-/// 4. بطاقة التوصيف والتفكيك اللغوي الفصيح لحجم الطلب المعادل دون أي تداخل في النصوص.
-/// 5. زر المسح والتصفير السريع.
+/// تحكم موحد بكمية الكروت: تعديل كرت واحد، ورقة كاملة، أو إدخال يدوي.
 class VoucherQuantityStepper extends StatelessWidget {
-  /// متحكم حقل الإدخال النصي
   final TextEditingController controller;
-
-  /// سعة الورقة الواحدة للباقة المختارة (تأتي من الباكيند packageVoucherCount)
   final int sheetSize;
-
-  /// القيمة الحالية بعدد الكروت
   final int currentCount;
-
-  /// دالة تحديث القيمة عند الزيادة أو النقص أو الإدخال التراكمي
   final ValueChanged<int> onCountChanged;
-
-  /// عنوان الحقل
   final String label;
-
-  /// هل يتم إظهار كبسولات الإضافة التراكمية السريعة؟
   final bool showPresets;
-
-  /// هل يتم إظهار بطاقة الملخص والتفكيك المقابل للأوراق؟
   final bool showSummaryCard;
-
-  /// هل يتم إظهار زر مسح وتصفير الكمية؟
   final bool showClearAction;
-
-  /// إمكانية إضافة التحقق المخصص
+  final int presetLimit;
   final FormFieldValidator<String>? validator;
-
-  /// دالة اختيارية تنفذ عند تغيير النص يدوياً
   final ValueChanged<String>? onTextChanged;
 
   const VoucherQuantityStepper({
@@ -57,50 +35,42 @@ class VoucherQuantityStepper extends StatelessWidget {
     this.showPresets = true,
     this.showSummaryCard = true,
     this.showClearAction = true,
+    this.presetLimit = 8,
     this.validator,
     this.onTextChanged,
   });
 
-  /// زيادة ورقة كاملة وفق سعة الورقة للباقة
-  void _stepUp() {
-    final step = sheetSize > 0 ? sheetSize : 1;
-    onCountChanged(currentCount + step);
+  void _changeByCard(int delta) {
+    final next = currentCount + delta;
+    onCountChanged(next < 0 ? 0 : next);
   }
 
-  /// إنقاص ورقة كاملة مع حظر الأرقام السالبة نهائياً (Zero Clamp)
-  void _stepDown() {
-    if (currentCount <= 0) return;
-    final step = sheetSize > 0 ? sheetSize : 1;
-    final target = math.max(0, currentCount - step);
-    onCountChanged(target);
+  void _changeBySheet(int delta) {
+    final sheetCards = VoucherSheetCalculator.cardsForSheets(1, sheetSize);
+    if (sheetCards <= 0) return;
+    final next = currentCount + (delta * sheetCards);
+    onCountChanged(next < 0 ? 0 : next);
   }
 
-  /// إضافة كمية تراكمية
-  void _addQuantity(int count) {
-    if (count <= 0) return;
-    onCountChanged(currentCount + count);
-  }
-
-  /// تصفير الكمية
-  void _clear() {
-    onCountChanged(0);
+  void _addPreset(int cards) {
+    if (cards > 0) onCountChanged(currentCount + cards);
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final presets = showPresets && sheetSize > 0
-        ? VoucherSheetCalculator.getPresets(sheetSize)
+        ? VoucherSheetCalculator.getPresets(sheetSize).take(presetLimit).toList(growable: false)
         : const <VoucherSheetPreset>[];
-
-    final verbalDescription = sheetSize > 0 && currentCount > 0
+    final description = currentCount > 0 && sheetSize > 0
         ? VoucherSheetCalculator.describe(currentCount, sheetSize)
-        : null;
+        : 'لم تُحدد الكمية بعد';
 
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(
           color: colors.outlineVariant.withValues(alpha: 0.4),
@@ -110,223 +80,174 @@ class VoucherQuantityStepper extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // شريط العنوان مع إجراء مسح الكمية
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                label,
-                style: AppTypography.titleSmall.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'التحكم بالكمية',
+                  style: AppTypography.titleSmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               if (showClearAction && currentCount > 0)
-                InkWell(
-                  onTap: _clear,
-                  borderRadius: BorderRadius.circular(AppRadius.xs),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
-                    child: Text(
-                      'مسح الكمية',
-                      style: AppTypography.labelSmall.copyWith(
-                        color: colors.error,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                CustomButton.text(
+                  text: 'مسح',
+                  icon: Icons.delete_sweep_outlined,
+                  size: AppButtonSize.small,
+                  foregroundColor: colors.error,
+                  onPressed: () => onCountChanged(0),
                 ),
             ],
           ),
-
           AppSpacing.vSm,
-
-          // صندوق التحكم الرقمي المركزي (Hero Stepper Row)
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: colors.outlineVariant.withValues(alpha: 0.5),
-              ),
-            ),
-            child: Row(
+          if (sheetSize > 0) ...[
+            Row(
               children: [
-                // زر إنقاص ورقة
-                CustomButton.outline(
-                  text: '- ورقة',
-                  size: AppButtonSize.small,
-                  icon: Icons.remove_rounded,
-                  borderColor: colors.outlineVariant,
-                  foregroundColor: colors.onSurface,
-                  onPressed: currentCount > 0 ? _stepDown : null,
-                ),
-
-                // العرض المركزي المنسق للكمية مع إمكانية التعديل
                 Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          IntrinsicWidth(
-                            child: TextField(
-                              controller: controller,
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.center,
-                              style: AppTypography.headlineMedium.copyWith(
-                                color: colors.primary,
-                                fontWeight: FontWeight.bold,
-                                height: 1.1,
-                              ),
-                              decoration: const InputDecoration(
-                                isDense: true,
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                              onChanged: onTextChanged,
-                            ),
-                          ),
-                          AppSpacing.hXxs,
-                          Text(
-                            'كرت',
-                            style: AppTypography.labelMedium.copyWith(
-                              color: colors.onSurfaceVariant,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (verbalDescription != null) ...[
-                        AppSpacing.vXxs,
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.w,
-                            vertical: 2.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.primary.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(AppRadius.full),
-                          ),
-                          child: Text(
-                            'يعادل: $verbalDescription',
-                            style: AppTypography.labelSmall.copyWith(
-                              color: colors.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10.sp,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ],
+                  child: CustomButton.outline(
+                    text: '− ورقة',
+                    icon: Icons.remove_rounded,
+                    size: AppButtonSize.small,
+                    onPressed: currentCount > 0
+                        ? () => _changeBySheet(-1)
+                        : null,
                   ),
                 ),
-
-                // زر زيادة ورقة
-                CustomButton.outline(
-                  text: '+ ورقة',
-                  size: AppButtonSize.small,
-                  icon: Icons.add_rounded,
-                  borderColor: colors.primary.withValues(alpha: 0.5),
-                  foregroundColor: colors.primary,
-                  onPressed: _stepUp,
+                AppSpacing.hSm,
+                Expanded(
+                  child: CustomButton.outline(
+                    text: '+ ورقة',
+                    icon: Icons.add_rounded,
+                    size: AppButtonSize.small,
+                    foregroundColor: colors.primary,
+                    borderColor: colors.primary.withValues(alpha: 0.45),
+                    onPressed: () => _changeBySheet(1),
+                  ),
                 ),
               ],
             ),
-          ),
-
-          // كبسولات الإضافة التراكمية السريعة (Quick Add Preset Pills)
-          if (presets.isNotEmpty) ...[
             AppSpacing.vSm,
-            Text(
-              'إضافة سريعة تراكمية (انقر للإضافة إلى الإجمالي):',
-              style: AppTypography.labelSmall.copyWith(
-                color: colors.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            AppSpacing.vXs,
-            Row(
-              children: presets.map((preset) {
-                return Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 2.w),
-                    child: InkWell(
-                      onTap: () => _addQuantity(preset.cards),
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 6.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colors.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                          border: Border.all(
-                            color: colors.outlineVariant.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '+ ${preset.shortLabel}',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              '(${preset.cards} كرت)',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.onSurfaceVariant,
-                                fontSize: 9.sp,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(growable: false),
-            ),
           ],
-
-          // بطاقة التوصيف المعياري وسعة الورقة
-          if (showSummaryCard && sheetSize > 0) ...[
-            AppSpacing.vSm,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'سعة الورقة للباقة: $sheetSize كرت',
-                  style: AppTypography.labelSmall.copyWith(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CustomButton.icon(
+                icon: Icons.remove_rounded,
+                tooltip: 'إنقاص كرت واحد',
+                dimension: 44.r,
+                size: AppButtonSize.medium,
+                onPressed: currentCount > 0 ? () => _changeByCard(-1) : null,
+              ),
+              AppSpacing.hSm,
+              Expanded(
+                child: CustomTextField(
+                  controller: controller,
+                  label: label,
+                  hint: 'أدخل العدد يدوياً',
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  validator: validator,
+                  onChanged: onTextChanged,
+                  isRequired: false,
+                  textInputAction: TextInputAction.done,
+                ),
+              ),
+              AppSpacing.hSm,
+              CustomButton.icon(
+                icon: Icons.add_rounded,
+                tooltip: 'إضافة كرت واحد',
+                dimension: 44.r,
+                size: AppButtonSize.medium,
+                backgroundColor: colors.primary.withValues(alpha: 0.10),
+                foregroundColor: colors.primary,
+                onPressed: () => _changeByCard(1),
+              ),
+            ],
+          ),
+          AppSpacing.vSm,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 16.r,
+                color: colors.onSurfaceVariant,
+              ),
+              AppSpacing.hXs,
+              Expanded(
+                child: Text(
+                  sheetSize > 0
+                      ? 'سعة الورقة لهذه الباقة $sheetSize كرت. يمكنك طلب جزء من الورقة أو أي عدد يدوي.'
+                      : 'أدخل العدد المطلوب من الكروت يدوياً.',
+                  style: AppTypography.bodySmall.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
                 ),
-                if (currentCount > 0)
+              ),
+            ],
+          ),
+          if (presets.isNotEmpty) ...[
+            AppSpacing.vMd,
+            Text(
+              'إضافات سريعة إلى الكمية الحالية',
+              style: AppTypography.labelMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            AppSpacing.vXs,
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: presets
+                  .map(
+                    (preset) => CustomChip(
+                      label: '+ ${preset.shortLabel} • ${preset.cards}',
+                      icon: Icons.add_rounded,
+                      onTap: () => _addPreset(preset.cards),
+                      isCompact: true,
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+          ],
+          if (showSummaryCard && sheetSize > 0) ...[
+            AppSpacing.vMd,
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: 0.16),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'الإجمالي المحتسب: $currentCount كرت',
-                    style: AppTypography.labelSmall.copyWith(
+                    description,
+                    style: AppTypography.titleSmall.copyWith(
                       color: colors.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-              ],
+                  AppSpacing.vXxs,
+                  Text(
+                    currentCount > 0
+                        ? 'الإجمالي: $currentCount كرت • سعة الورقة: $sheetSize كرت'
+                        : 'اختر كمية لتظهر هنا بصورة وصفية.',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],

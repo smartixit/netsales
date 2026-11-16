@@ -8,6 +8,7 @@ import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_li
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
@@ -71,7 +72,7 @@ void main() {
       getPosNetworksListUseCase: GetPosNetworksListUseCase(MockCommercialRepo()),
       getPackagesUseCase: GetPackagesUseCase(MockPackageRepo()),
     );
-    controller.onPackageSelected(testPackage);
+    controller.preparePackageQuantityEdit(testPackage, 0);
   });
 
   tearDown(() {
@@ -79,9 +80,9 @@ void main() {
   });
 
   group('PosProcurementController Voucher Quantity Stepper & Additive Logic', () {
-    test('اختيار الباقة يعين افتراضياً سعة ورقة واحدة إذا كان الحقل فارغاً', () {
-      expect(controller.requestedVoucherCount, equals(51));
-      expect(controller.quantityController.text, equals('51'));
+    test('محرر الكمية يبدأ بصفر ولا يضيف ورقة ضمنية بمجرد استعراض الباقة', () {
+      expect(controller.requestedVoucherCount, equals(0));
+      expect(controller.quantityController.text, isEmpty);
     });
 
     test('الإدخال التراكمي addVoucherQuantity يجمع الكروت المتكررة بدقة', () {
@@ -140,6 +141,49 @@ void main() {
       // إنقاص ورقة كاملة (51 كرت) من 26 -> ينزل للصفر بحماية تامة
       controller.stepDownSheet();
       expect(controller.requestedVoucherCount, equals(0));
+    });
+
+    test('زيادة ونقصان كرت واحد تحافظ على الكمية غير السالبة', () {
+      controller.setVoucherCount(10);
+      controller.addVoucherQuantity(1);
+      expect(controller.requestedVoucherCount, 11);
+      controller.setVoucherCount(1);
+      controller.addVoucherQuantity(-1);
+      expect(controller.requestedVoucherCount, 1);
+    });
+
+    test('تعديل بند السلة بكرت واحد يعيد حساب الأوراق ويحدّث الكمية', () {
+      controller.procurementCart.add(
+        const ProcurementCartLineEntity(
+          package: testPackage,
+          sheets: 1,
+          voucherCount: 51,
+        ),
+      );
+
+      controller.adjustCartLine(10, 1);
+      expect(controller.procurementCart.single.voucherCount, 52);
+      expect(controller.procurementCart.single.sheets, closeTo(52 / 51, 0.0001));
+
+      controller.adjustCartLine(10, -1);
+      expect(controller.procurementCart.single.voucherCount, 51);
+      expect(controller.procurementCart.single.sheets, 1);
+    });
+
+    test('تعديل بند السلة بورقة كاملة يستخدم سعة الباقة ويحمي من السالب', () {
+      controller.procurementCart.add(
+        const ProcurementCartLineEntity(
+          package: testPackage,
+          sheets: 1,
+          voucherCount: 51,
+        ),
+      );
+
+      controller.adjustCartLineBySheet(10, 1);
+      expect(controller.procurementCart.single.voucherCount, 102);
+
+      controller.adjustCartLineBySheet(10, -1);
+      expect(controller.procurementCart.single.voucherCount, 51);
     });
 
     test('زر مسح الكمية clearVoucherQuantity يصفر الحقل فوراً', () {

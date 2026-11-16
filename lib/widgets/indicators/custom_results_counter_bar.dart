@@ -11,10 +11,7 @@ class ActiveFilterItem {
   final String label;
   final VoidCallback onRemove;
 
-  const ActiveFilterItem({
-    required this.label,
-    required this.onRemove,
-  });
+  const ActiveFilterItem({required this.label, required this.onRemove});
 }
 
 /// ============================================================================
@@ -63,10 +60,7 @@ class CustomResultsCounterBar extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: 6.h,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6.h),
       decoration: BoxDecoration(
         color: isFiltered
             ? colors.primary.withValues(alpha: 0.05)
@@ -83,15 +77,20 @@ class CustomResultsCounterBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // 1. أيقونة الدلالة الإحصائية
               Icon(
-                isFiltered ? Icons.filter_alt_outlined : Icons.list_alt_rounded,
+                isFiltered
+                    ? Icons.filter_alt_outlined
+                    : Icons.list_alt_rounded,
                 size: 16.sp,
-                color: isFiltered ? colors.primary : colors.onSurfaceVariant,
+                color: isFiltered
+                    ? colors.primary
+                    : colors.onSurfaceVariant,
               ),
               SizedBox(width: 6.w),
-
+      
               // 2. نص العداد وحالة النتائج
               Expanded(
                 child: AnimatedSwitcher(
@@ -121,16 +120,22 @@ class CustomResultsCounterBar extends StatelessWidget {
                             Text(
                               '$count $recordLabel',
                               style: AppTypography.labelMedium.copyWith(
-                                color: isFiltered ? colors.primary : colors.onSurface,
+                                color: isFiltered
+                                    ? colors.primary
+                                    : colors.onSurface,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            if (totalCount != null && isFiltered && totalCount != count) ...[
+                            if (totalCount != null &&
+                                isFiltered &&
+                                totalCount != count) ...[
                               SizedBox(width: 4.w),
                               Text(
                                 '(من أصل $totalCount)',
                                 style: AppTypography.labelSmall.copyWith(
-                                  color: colors.onSurfaceVariant.withValues(alpha: 0.8),
+                                  color: colors.onSurfaceVariant.withValues(
+                                    alpha: 0.8,
+                                  ),
                                 ),
                               ),
                             ],
@@ -138,7 +143,7 @@ class CustomResultsCounterBar extends StatelessWidget {
                         ),
                 ),
               ),
-
+      
               // 3. زر مسح التصفية
               if (showClearButton)
                 CustomButton.icon(
@@ -152,7 +157,7 @@ class CustomResultsCounterBar extends StatelessWidget {
                 ),
             ],
           ),
-
+      
           // 4. شارات الفلاتر النشطة إن وجدت
           if (activeFilters.isNotEmpty && !isLoading) ...[
             SizedBox(height: 6.h),
@@ -163,7 +168,10 @@ class CustomResultsCounterBar extends StatelessWidget {
                   return Padding(
                     padding: EdgeInsetsDirectional.only(end: 6.w),
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
                         color: colors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(AppRadius.xs),
@@ -205,4 +213,3 @@ class CustomResultsCounterBar extends StatelessWidget {
     );
   }
 }
-

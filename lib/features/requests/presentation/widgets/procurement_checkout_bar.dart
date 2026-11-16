@@ -20,20 +20,18 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
 
     return Obx(() {
       final isEditMode = controller.isEditing.value;
+      final isReviewStep = controller.currentOrderStep.value == 1;
       final cartLines = controller.procurementCart;
       final totalVouchers = cartLines.fold<int>(
         0,
         (sum, item) => sum + item.voucherCount,
       );
-      final totalSheets = cartLines.fold<double>(
-        0.0,
-        (sum, item) => sum + item.sheets,
-      );
       final quote = controller.serverQuote.value;
       final quoteSummary = cartLines.isEmpty
           ? 'السلة فارغة'
-          : controller.isLoadingQuote.value
-              ? 'جاري احتساب السعر المعتمد...'
+          : (controller.isQuotePending.value ||
+                    controller.isLoadingQuote.value)
+              ? 'جاري تحديث السعر المعتمد...'
               : quote == null
                   ? (controller.getProcurementQuoteUseCase == null
                       ? 'سيحتسب الخادم السعر عند التقديم'
@@ -76,7 +74,7 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
               children: [
                 Text(
                   totalVouchers > 0
-                      ? '$totalVouchers كرت • ${totalSheets.toStringAsFixed(totalSheets.truncateToDouble() == totalSheets ? 0 : 1)} ورقة'
+                      ? '$totalVouchers كرت • ${cartLines.length} باقة'
                       : 'السلة فارغة',
                   style: AppTypography.labelSmall.copyWith(
                     color: colors.onSurfaceVariant,
@@ -95,15 +93,20 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
               ],
             );
 
-            final submitButton = CustomButton(
-              text: isEditMode ? 'حفظ تعديلات الطلب' : 'تقديم طلب التوريد',
-              icon: isEditMode ? Icons.check_circle_rounded : Icons.send_rounded,
+            final canContinue = controller.procurementCart.isNotEmpty;
+            final actionButton = CustomButton(
+              text: isReviewStep
+                  ? (isEditMode ? 'حفظ تعديلات الطلب' : 'تأكيد وإرسال الطلب')
+                  : 'متابعة إلى مراجعة الطلب',
+              icon: isReviewStep
+                  ? Icons.send_rounded
+                  : Icons.arrow_forward_rounded,
               width: isCompact ? double.infinity : null,
-              loading: controller.isSubmitting.value,
-              enabled: controller.canSubmitOrder,
-              onPressed: controller.canSubmitOrder
-                  ? controller.submitOrderAndClose
-                  : null,
+              loading: isReviewStep && controller.isSubmitting.value,
+              enabled: isReviewStep ? controller.canSubmitOrder : canContinue,
+              onPressed: isReviewStep
+                  ? (controller.canSubmitOrder ? controller.submitOrderAndClose : null)
+                  : (canContinue ? controller.continueToOrderReview : null),
             );
 
             if (isCompact) {
@@ -113,7 +116,7 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
                 children: [
                   summary,
                   AppSpacing.vSm,
-                  submitButton,
+                  actionButton,
                 ],
               );
             }
@@ -122,7 +125,7 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
               children: [
                 Expanded(child: summary),
                 AppSpacing.hMd,
-                submitButton,
+                actionButton,
               ],
             );
           },

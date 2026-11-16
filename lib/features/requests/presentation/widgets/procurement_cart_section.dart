@@ -8,8 +8,10 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_line_entity.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_quantity_editor_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// عرض سلة بنود التوريد وإجراءات تعديل الكمية أو حذف الباقة.
 class ProcurementCartSection extends GetView<PosProcurementController> {
@@ -64,7 +66,7 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
                   AppSpacing.hSm,
                   Expanded(
                     child: Text(
-                      'لم تضف أي باقة بعد. اختر باقة وحدد كمية الأوراق ثم أضفها إلى الطلب.',
+                      'السلة فارغة. ارجع إلى كتالوج الباقات واستخدم + داخل بطاقة أي باقة لإضافتها مباشرة.',
                       style: AppTypography.bodySmall.copyWith(
                         color: colors.onSurfaceVariant,
                       ),
@@ -81,10 +83,13 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
               return _ProcurementCartLineCard(
                 line: line,
                 quoteLine: quoteLine,
-                onEdit: () => controller.editCartLine(line),
-                onDelete: () => controller.removeCartLine(
-                  line.package.packageId,
+                onEdit: () => ProcurementQuantityEditorSheet.show(
+                  package: line.package,
+                  currentQuantity: line.voucherCount,
                 ),
+                onDelete: () => controller.removeCartLine(line.package.packageId),
+                onIncrement: () => controller.adjustPackageQuantity(line.package, 1),
+                onDecrement: () => controller.adjustPackageQuantity(line.package, -1),
               );
             }),
         ],
@@ -98,12 +103,16 @@ class _ProcurementCartLineCard extends StatelessWidget {
   final ProcurementQuoteLineEntity? quoteLine;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
 
   const _ProcurementCartLineCard({
     required this.line,
     required this.quoteLine,
     required this.onEdit,
     required this.onDelete,
+    required this.onIncrement,
+    required this.onDecrement,
   });
 
   @override
@@ -188,23 +197,48 @@ class _ProcurementCartLineCard extends StatelessWidget {
                         AppSpacing.vXs,
                         Row(
                           children: [
+                            CustomButton.icon(
+                              icon: Icons.remove_rounded,
+                              tooltip: 'إنقاص كرت واحد',
+                              size: AppButtonSize.small,
+                              onPressed: onDecrement,
+                            ),
+                            AppSpacing.hXs,
                             Expanded(
-                              child: CustomButton.outline(
-                                text: 'تعديل الكمية',
-                                icon: Icons.edit_outlined,
-                                size: AppButtonSize.small,
-                                onPressed: onEdit,
+                              child: CustomInteractiveBounce(
+                                onTap: onEdit,
+                                child: Container(
+                                  constraints: const BoxConstraints(minHeight: 40),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: colors.primary.withValues(alpha: 0.07),
+                                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                                  ),
+                                  child: Text(
+                                    '${line.voucherCount} كرت • تعديل',
+                                    style: AppTypography.labelMedium.copyWith(
+                                      color: colors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                            AppSpacing.hSm,
+                            AppSpacing.hXs,
+                            CustomButton.icon(
+                              icon: Icons.add_rounded,
+                              tooltip: 'إضافة كرت واحد',
+                              size: AppButtonSize.small,
+                              foregroundColor: colors.primary,
+                              onPressed: onIncrement,
+                            ),
+                            AppSpacing.hXs,
                             CustomButton.icon(
                               icon: Icons.delete_outline_rounded,
                               tooltip: 'حذف ${line.package.packageName} من الطلب',
                               size: AppButtonSize.small,
                               foregroundColor: colors.error,
-                              backgroundColor: colors.error.withValues(
-                                alpha: 0.08,
-                              ),
+                              backgroundColor: colors.error.withValues(alpha: 0.08),
                               onPressed: onDelete,
                             ),
                           ],
