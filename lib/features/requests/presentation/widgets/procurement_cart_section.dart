@@ -85,6 +85,22 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
                 onDelete: () => controller.removeCartLine(
                   line.package.packageId,
                 ),
+                onIncrement: () => controller.adjustCartLine(
+                  line.package.packageId,
+                  1,
+                ),
+                onDecrement: () => controller.adjustCartLine(
+                  line.package.packageId,
+                  -1,
+                ),
+                onAddSheet: () => controller.adjustCartLineBySheet(
+                  line.package.packageId,
+                  1,
+                ),
+                onRemoveSheet: () => controller.adjustCartLineBySheet(
+                  line.package.packageId,
+                  -1,
+                ),
               );
             }),
         ],
@@ -98,12 +114,20 @@ class _ProcurementCartLineCard extends StatelessWidget {
   final ProcurementQuoteLineEntity? quoteLine;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
+  final VoidCallback onAddSheet;
+  final VoidCallback onRemoveSheet;
 
   const _ProcurementCartLineCard({
     required this.line,
     required this.quoteLine,
     required this.onEdit,
     required this.onDelete,
+    required this.onIncrement,
+    required this.onDecrement,
+    required this.onAddSheet,
+    required this.onRemoveSheet,
   });
 
   @override

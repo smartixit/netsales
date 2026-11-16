@@ -25,10 +25,6 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
         0,
         (sum, item) => sum + item.voucherCount,
       );
-      final totalSheets = cartLines.fold<double>(
-        0.0,
-        (sum, item) => sum + item.sheets,
-      );
       final quote = controller.serverQuote.value;
       final quoteSummary = cartLines.isEmpty
           ? 'السلة فارغة'
@@ -76,7 +72,7 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
               children: [
                 Text(
                   totalVouchers > 0
-                      ? '$totalVouchers كرت • ${totalSheets.toStringAsFixed(totalSheets.truncateToDouble() == totalSheets ? 0 : 1)} ورقة'
+                      ? '$totalVouchers كرت • ${cartLines.length} باقة'
                       : 'السلة فارغة',
                   style: AppTypography.labelSmall.copyWith(
                     color: colors.onSurfaceVariant,

@@ -107,6 +107,13 @@ class PosProcurementController extends GetxController {
   final selectedPackage = Rxn<PackageEntity>();
   final selectedPackageId = RxnInt();
   final isLoadingPackages = false.obs;
+  final isLoadingMorePackages = false.obs;
+  final packageSearchController = TextEditingController();
+  final packageSearchQuery = ''.obs;
+  final packageNextCursor = RxnString();
+  final packageErrorMessage = RxnString();
+  final packageLoadMoreErrorMessage = RxnString();
+  int _packageRevision = 0;
 
   // الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية
   final effectiveDiscount = Rxn<EffectivePackageDiscountEntity>();
@@ -286,6 +293,9 @@ class PosProcurementController extends GetxController {
     searchController.addListener(() {
       searchQuery.value = searchController.text;
     });
+    packageSearchController.addListener(() {
+      packageSearchQuery.value = packageSearchController.text.trim();
+    });
     quantityController.addListener(() {
       quantityInput.value = quantityController.text;
     });
@@ -294,6 +304,11 @@ class PosProcurementController extends GetxController {
       searchQuery,
       (_) => loadRequests(isRefresh: true),
       time: const Duration(milliseconds: 500),
+    );
+    debounce(
+      packageSearchQuery,
+      (_) => refreshNetworkPackages(),
+      time: const Duration(milliseconds: 350),
     );
 
     ever(selectedSaleType, (_) {
@@ -308,6 +323,7 @@ class PosProcurementController extends GetxController {
   @override
   void onClose() {
     searchController.dispose();
+    packageSearchController.dispose();
     quantityController.dispose();
     notesController.dispose();
     _requestListRevision++;
@@ -404,40 +420,116 @@ class PosProcurementController extends GetxController {
     }
   }
 
-  /// جلب كتالوج الباقات مع تجاهل أي استجابة تخص شبكة سابقة.
+  /// جلب أول صفحة من كتالوج الشبكة مع بحث خادمي وحماية من الاستجابات القديمة.
   Future<void> loadNetworkPackages(int networkId) async {
-    if (getPackagesUseCase == null) return;
+    packageSearchController.clear();
+    packageSearchQuery.value = '';
+    packageNextCursor.value = null;
+    packageLoadMoreErrorMessage.value = null;
+    await _fetchNetworkPackages(networkId, reset: true);
+  }
 
-    isLoadingPackages.value = true;
+  Future<void> refreshNetworkPackages() async {
+    final networkId = selectedNetworkId.value;
+    if (networkId == null) return;
+    await _fetchNetworkPackages(networkId, reset: true);
+  }
+
+  Future<void> _fetchNetworkPackages(
+    int networkId, {
+    required bool reset,
+  }) async {
+    if (getPackagesUseCase == null) return;
+    final revision = reset ? ++_packageRevision : _packageRevision;
+    if (reset) {
+      isLoadingPackages.value = true;
+      packageErrorMessage.value = null;
+      packageLoadMoreErrorMessage.value = null;
+      packageNextCursor.value = null;
+    } else {
+      if (isLoadingMorePackages.value ||
+          isLoadingPackages.value ||
+          packageNextCursor.value == null) {
+        return;
+      }
+      isLoadingMorePackages.value = true;
+    }
+
+    final cursor = reset ? null : packageNextCursor.value;
     try {
       final paginated = await getPackagesUseCase!(
         networkId: networkId,
         status: true,
+        search: packageSearchQuery.value.isEmpty
+            ? null
+            : packageSearchQuery.value,
+        cursor: cursor,
+        perPage: 20,
       );
-      if (selectedNetworkId.value != null &&
+      if (revision != _packageRevision ||
           selectedNetworkId.value != networkId) {
         return;
       }
 
-      availablePackages.assignAll(paginated.items);
-      final initialPkg = availablePackages.isNotEmpty
-          ? availablePackages.first
-          : null;
-      _setSelectedPackage(initialPkg);
-      if (initialPkg != null) {
-        setDefaultSheetIfEmpty();
-        unawaited(loadEffectiveDiscount());
+      if (reset) {
+        availablePackages.assignAll(paginated.items);
+        packageNextCursor.value = paginated.nextCursor;
+        final selectedId = selectedPackage.value?.packageId;
+        final stillAvailable = selectedId == null
+            ? null
+            : paginated.items.firstWhereOrNull(
+                (package) => package.packageId == selectedId,
+              );
+        if (stillAvailable != null) {
+          _setSelectedPackage(stillAvailable);
+        } else {
+          _setSelectedPackage(null);
+          clearVoucherQuantity();
+        }
+      } else {
+        final knownIds = availablePackages.map((item) => item.packageId).toSet();
+        availablePackages.addAll(
+          paginated.items.where(
+            (item) => !knownIds.contains(item.packageId),
+          ),
+        );
+        packageNextCursor.value = paginated.nextCursor;
       }
-    } catch (_) {
-      if (selectedNetworkId.value != null &&
-          selectedNetworkId.value != networkId) {
-        return;
+    } catch (error) {
+      if (revision != _packageRevision) return;
+      final message = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر تحميل كتالوج الباقات.',
+      );
+      if (reset) {
+        packageErrorMessage.value = message;
+        availablePackages.clear();
+        packageNextCursor.value = null;
+      } else {
+        packageLoadMoreErrorMessage.value = message;
       }
-      availablePackages.clear();
-      _setSelectedPackage(null);
     } finally {
-      isLoadingPackages.value = false;
+      if (revision == _packageRevision) {
+        isLoadingPackages.value = false;
+        isLoadingMorePackages.value = false;
+      }
     }
+  }
+
+  void onPackageSearchChanged(String value) {
+    packageSearchQuery.value = value.trim();
+  }
+
+  void clearPackageSearch() {
+    packageSearchController.clear();
+    packageSearchQuery.value = '';
+    refreshNetworkPackages();
+  }
+
+  Future<void> loadMorePackages() async {
+    final networkId = selectedNetworkId.value;
+    if (networkId == null) return;
+    await _fetchNetworkPackages(networkId, reset: false);
   }
 
   /// اختيار الشبكة الموردة وتحديث الباقات
@@ -608,9 +700,45 @@ class PosProcurementController extends GetxController {
 
   /// اختيار الباقة المطلوبة
   void onPackageSelected(PackageEntity package) {
+    if (selectedPackage.value?.packageId != package.packageId) {
+      clearVoucherQuantity();
+    }
     _setSelectedPackage(package);
     setDefaultSheetIfEmpty();
     unawaited(loadEffectiveDiscount());
+  }
+
+  /// تعديل كمية بند موجود في السلة مباشرة دون فتح محرر منفصل.
+  void adjustCartLine(int packageId, int delta) {
+    final index = procurementCart.indexWhere(
+      (line) => line.package.packageId == packageId,
+    );
+    if (index == -1 || delta == 0) return;
+    final line = procurementCart[index];
+    final nextCount = line.voucherCount + delta;
+    if (nextCount <= 0) {
+      removeCartLine(packageId);
+      return;
+    }
+    final sheetSize = line.package.packageVoucherCount;
+    if (sheetSize <= 0) return;
+    procurementCart[index] = ProcurementCartLineEntity(
+      package: line.package,
+      sheets: nextCount / sheetSize,
+      voucherCount: nextCount,
+    );
+    unawaited(fetchServerQuote());
+  }
+
+  void adjustCartLineBySheet(int packageId, int direction) {
+    final line = procurementCart.firstWhereOrNull(
+      (item) => item.package.packageId == packageId,
+    );
+    if (line == null || direction == 0) return;
+    adjustCartLine(
+      packageId,
+      line.package.packageVoucherCount * direction,
+    );
   }
 
   /// استرجاع الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية من Laravel
