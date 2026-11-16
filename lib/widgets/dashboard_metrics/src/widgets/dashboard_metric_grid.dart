@@ -15,6 +15,7 @@ class DashboardMetricGrid extends StatelessWidget {
     this.runSpacing,
     this.minimumCardWidth = 230,
     this.maximumColumns = 5,
+    this.cardHeight,
     this.onMetricTap,
     super.key,
   }) : assert(minimumCardWidth > 0),
@@ -26,6 +27,7 @@ class DashboardMetricGrid extends StatelessWidget {
   final double? runSpacing;
   final double minimumCardWidth;
   final int maximumColumns;
+  final double? cardHeight;
   final ValueChanged<String>? onMetricTap;
 
   @override
@@ -39,23 +41,46 @@ class DashboardMetricGrid extends StatelessWidget {
         final columns = ((availableWidth + gap) / (minimumCardWidth + gap))
             .floor()
             .clamp(1, maximumColumns);
-        final itemWidth = (availableWidth - (gap * (columns - 1))) / columns;
+        if (metrics.isEmpty) {
+          return const SizedBox.shrink();
+        }
 
-        return Wrap(
-          spacing: gap,
-          runSpacing: runSpacing ?? gap,
+        final rows = <List<DashboardMetricData>>[];
+        for (var i = 0; i < metrics.length; i += columns) {
+          final end =
+              (i + columns < metrics.length) ? i + columns : metrics.length;
+          rows.add(metrics.sublist(i, end));
+        }
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (final metric in metrics)
-              SizedBox(
-                width: itemWidth,
-                child: DashboardMetricCard(
-                  metric: metric,
-                  state: state,
-                  onTap: onMetricTap == null
-                      ? null
-                      : () => onMetricTap!(metric.id),
+            for (var r = 0; r < rows.length; r++) ...[
+              if (r > 0) SizedBox(height: runSpacing ?? gap),
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var c = 0; c < columns; c++) ...[
+                      if (c > 0) SizedBox(width: gap),
+                      Expanded(
+                        child: c < rows[r].length
+                            ? DashboardMetricCard(
+                                metric: rows[r][c],
+                                state: state,
+                                height: cardHeight,
+                                onTap: onMetricTap == null
+                                    ? null
+                                    : () => onMetricTap!(rows[r][c].id),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    ],
+                  ],
                 ),
               ),
+            ],
           ],
         );
       },

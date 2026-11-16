@@ -112,9 +112,9 @@ class NetworkWorkspaceDashboardMapper {
     final sales = overview?.metric('sales');
     final total = sales?['total_amount'] ?? sales?['total'];
     if (total is num) {
-      return '${AmountFormatter.formatValue(total, decimalPlaces: 0)} YER';
+      return AmountFormatter.formatValue(total, decimalPlaces: 0);
     }
-    return '0 YER';
+    return '0';
   }
 
   static String formatNetworkPosCount(

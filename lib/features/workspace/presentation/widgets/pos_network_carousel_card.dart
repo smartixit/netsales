@@ -16,13 +16,13 @@ class PosNetworkCarouselCard extends StatelessWidget {
   final PosNetworkCarouselCardViewModel item;
   final VoidCallback onTap;
 
-
   @override
   Widget build(BuildContext context) {
     final logoWidget = CustomAvatarBadge(
       imageUrl: item.logoUrl,
-      initials: item.networkName,
+      initials: item.avatarInitial,
       size: AvatarBadgeSize.sm,
+      customDimension: 40,
       hasPulse: false,
     );
 
@@ -30,11 +30,13 @@ class PosNetworkCarouselCard extends StatelessWidget {
       title: item.networkName,
       subtitle: item.locationLabel,
       logo: logoWidget,
+      avatarUrl: item.logoUrl,
+      avatarInitial: item.avatarInitial,
       cardNumber: item.cardNumber,
       primaryLabel: 'رصيد نقطة البيع المتاح',
       primaryValue: item.formattedBalance,
       currencyTag: item.currency,
-      secondaryLabel: 'سقف الائتمان الممنوح',
+      secondaryLabel: 'سقف الائتمان',
       secondaryValue: item.formattedCredit,
       statusText: item.statusText,
       isStatusActive: item.isStatusActive,

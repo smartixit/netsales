@@ -33,14 +33,23 @@ class PosWorkspaceTransactionMapper {
     final dateLabel =
         parsedDate == null ? '' : DateFormatter.smart(parsedDate);
     final reference = _shortReference(invoice.invoiceUuid, 'فاتورة توريد');
+    final voucherDetail = invoice.totalVouchersCount > 0
+        ? '${invoice.totalVouchersCount} كرت'
+        : null;
+
+    final subtitleParts = [
+      saleType,
+      if (dateLabel.isNotEmpty) dateLabel,
+      ?voucherDetail,
+    ];
 
     return WorkspaceTransactionItemViewModel(
       title: 'فاتورة توريد',
       reference: reference,
-      subtitle: dateLabel.isEmpty ? saleType : '$saleType • $dateLabel',
+      subtitle: subtitleParts.join(' • '),
       formattedAmount:
-          '${AmountFormatter.formatValue(invoice.invoiceTotalAmount)} ر.ي',
-      amountColor: const Color(0xFFBA1A1A),
+          '- ${AmountFormatter.formatValue(invoice.invoiceTotalAmount)} ر.ي',
+      amountColor: const Color(0xFFDC2626),
       statusPresentation:
           EnumPresentationRegistry.resolveInvoicePaymentStatus(
         invoice.paymentStatus,

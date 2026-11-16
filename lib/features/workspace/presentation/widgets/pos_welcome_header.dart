@@ -33,10 +33,7 @@ class PosWelcomeHeader extends StatelessWidget {
     final posName = controller.activePosName;
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: 14.h,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14.h),
       decoration: BoxDecoration(
         color: isDark ? colors.surfaceContainerLow : colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -183,10 +180,7 @@ class PosWelcomeHeader extends StatelessWidget {
               // كبسولة التاريخ
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8.w,
-                    vertical: 6.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
                   decoration: BoxDecoration(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.04)

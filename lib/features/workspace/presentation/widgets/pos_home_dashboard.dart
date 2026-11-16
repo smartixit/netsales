@@ -18,7 +18,6 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
-import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 /// الشاشة الرئيسية لمساحة عمل نقطة البيع (PosHomeDashboard)
 /// متوافقة هندسياً ومعمارياً بنسبة 100% مع معايير مساحات العمل وشاشة NetworkWorkspaceDashboard
@@ -78,30 +77,11 @@ class PosHomeDashboard extends StatelessWidget {
             ),
             AppSpacing.vLg,
 
-            // 2. محدد نقطة البيع النشطة عند تعدد نقاط البيع
-            if (controller.availablePos.length > 1) ...[
-              CustomDropdown<int>(
-                label: 'نقطة البيع النشطة للعمليات',
-                rxValue: Rx<int?>(controller.activePos.value!.posId),
-                searchEnabled: controller.availablePos.length > 5,
-                items: controller.availablePos
-                    .map(
-                      (pos) => DropdownItem<int>(
-                        value: pos.posId,
-                        child: Text(pos.posName),
-                      ),
-                    )
-                    .toList(growable: false),
-                onChanged: controller.selectPosById,
-              ),
-              AppSpacing.vMd,
-            ],
-
-            // 3. كاروسيل بطاقات الشبكات المرتبطة بنقطة البيع
+            // 2. كاروسيل بطاقات الشبكات المرتبطة بنقطة البيع
             PosConnectedNetworksCarouselSection(
-                    controller: controller,
-                    onLinkNetwork: PosNetworkLinkingFlow(controller).start,
-                  ),
+              controller: controller,
+              onLinkNetwork: PosNetworkLinkingFlow(controller).start,
+            ),
             AppSpacing.vLg,
 
             // 4. كرت السيولة والملخص المالي للشبكة المحددة (VIP Luxury Carbon Card)

@@ -111,22 +111,27 @@ class NetworkProviderCarouselSection extends StatelessWidget {
           ),
         ),
         AppSpacing.vSm,
-        CustomCarouselSlider<NetworkProviderCardViewModel>(
-          items: controller.providerCards,
-          currentIndex: networks
-              .indexWhere((n) => n.networkId == selectedId)
-              .clamp(0, networks.length - 1),
-          height: 205,
-          viewportFraction: 0.88,
-          itemBuilder: (context, item, index) => ExecutiveNetworkCard(
-            item: item,
-            onTap: () => controller.selectNetwork(item.networkId),
+        ClipRRect(
+          clipBehavior: Clip.none,
+          child: CustomCarouselSlider<NetworkProviderCardViewModel>(
+            items: controller.providerCards,
+            currentIndex: networks
+                .indexWhere((n) => n.networkId == selectedId)
+                .clamp(0, networks.length - 1),
+            height: 205,
+            viewportFraction: 0.88,
+            itemBuilder: (context, item, index) => ExecutiveNetworkCard(
+              item: item,
+              onTap: () => controller.selectNetwork(item.networkId),
+            ),
+            onPageChanged: (index) {
+              if (index >= 0 && index < networks.length) {
+                controller.selectNetwork(
+                  controller.providerCards[index].networkId,
+                );
+              }
+            },
           ),
-          onPageChanged: (index) {
-            if (index >= 0 && index < networks.length) {
-              controller.selectNetwork(controller.providerCards[index].networkId);
-            }
-          },
         ),
       ],
     );

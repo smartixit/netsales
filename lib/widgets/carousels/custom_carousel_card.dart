@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -38,6 +40,12 @@ class CustomCarouselCard extends StatelessWidget {
 
   /// الشعار أو الأيقونة التعريفية في الزاوية العلوية
   final Widget? logo;
+
+  /// رابط صورة الشعار اختياري للأفاتار الموحد (CustomAvatarBadge)
+  final String? avatarUrl;
+
+  /// الحرف الرمز للأفاتار الموحد في حال عدم توفر الصورة (حرف واحد)
+  final String? avatarInitial;
 
   /// رمز أو رقم الحساب / الكود التعريفي (UUID أو رقم البطاقة)
   final String? cardNumber;
@@ -95,6 +103,8 @@ class CustomCarouselCard extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.logo,
+    this.avatarUrl,
+    this.avatarInitial,
     this.cardNumber,
     required this.primaryLabel,
     required this.primaryValue,
@@ -109,7 +119,7 @@ class CustomCarouselCard extends StatelessWidget {
     this.customGradient,
     this.isSelected = false,
     this.onTap,
-    this.showSmartChip = true,
+    this.showSmartChip = false,
     this.height,
     this.borderRadius,
   });
@@ -124,50 +134,31 @@ class CustomCarouselCard extends StatelessWidget {
         return const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [
-            Color(0xFF064E3B),
-            Color(0xFF03261D),
-            Color(0xFF01140F),
-          ],
+          colors: [Color(0xFF064E3B), Color(0xFF03261D), Color(0xFF01140F)],
         );
       case CustomCarouselCardTheme.sapphire:
         return const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [
-            Color(0xFF0F2B5C),
-            Color(0xFF0A1938),
-            Color(0xFF050B18),
-          ],
+          colors: [Color(0xFF0F2B5C), Color(0xFF0A1938), Color(0xFF050B18)],
         );
       case CustomCarouselCardTheme.amethyst:
         return const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [
-            Color(0xFF381254),
-            Color(0xFF1F0833),
-            Color(0xFF10031C),
-          ],
+          colors: [Color(0xFF381254), Color(0xFF1F0833), Color(0xFF10031C)],
         );
       case CustomCarouselCardTheme.titanium:
         return const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [
-            Color(0xFF242D3D),
-            Color(0xFF131A26),
-            Color(0xFF0A0E17),
-          ],
+          colors: [Color(0xFF242D3D), Color(0xFF131A26), Color(0xFF0A0E17)],
         );
       case CustomCarouselCardTheme.custom:
         return const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [
-            Color(0xFF1E293B),
-            Color(0xFF0F172A),
-          ],
+          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
         );
     }
   }
@@ -176,6 +167,20 @@ class CustomCarouselCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveRadius = borderRadius ?? AppRadius.xl;
     final effectiveGradient = _resolveGradient();
+    final effectiveLogo = logo ??
+        ((avatarUrl != null && avatarUrl!.isNotEmpty) ||
+                (avatarInitial != null && avatarInitial!.isNotEmpty) ||
+                title.isNotEmpty
+            ? CustomAvatarBadge(
+                imageUrl: avatarUrl,
+                initials: (avatarInitial != null && avatarInitial!.isNotEmpty)
+                    ? avatarInitial!
+                    : TextFormatter.avatarInitial(title, fallback: 'ش'),
+                size: AvatarBadgeSize.sm,
+                customDimension: 40,
+                hasPulse: false,
+              )
+            : null);
 
     return CustomInteractiveBounce(
       onTap: onTap,
@@ -209,26 +214,13 @@ class CustomCarouselCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 1. الصف العلوي: الشعار + تفاصيل البطاقة + الشريحة والحالة
+            // 1. الصف العلوي: الشعار + تفاصيل البطاقة + شارة الحالة الحية
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (logo != null) ...[
-                  Container(
-                    width: 36.r,
-                    height: 36.r,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: logo,
-                  ),
-                  SizedBox(width: 8.w),
+                if (effectiveLogo != null) ...[
+                  effectiveLogo,
+                  SizedBox(width: 10.w),
                 ],
 
                 // العنوان والتصنيف
@@ -244,36 +236,88 @@ class CustomCarouselCard extends StatelessWidget {
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
-                          fontSize: 13.5.sp,
+                          fontSize: 14.5.sp,
                           height: 1.2,
                         ),
                       ),
-                      if (subtitle != null && subtitle!.isNotEmpty) ...[
-                        SizedBox(height: 1.h),
+                      if (cardNumber != null && cardNumber!.isNotEmpty) ...[
+                        SizedBox(height: 3.h),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            UrlLauncherService.copyToClipboard(cardNumber!);
+                            CustomSnackbar.show(
+                              title: 'تم النسخ بنجاح',
+                              message: 'تم نسخ الرمز: $cardNumber',
+                              type: SnackType.info,
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6.w,
+                              vertical: 2.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(AppRadius.xs),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.18),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  TextFormatter.truncate(
+                                    cardNumber!,
+                                    10,
+                                    ellipsis: '…',
+                                  ),
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 9.sp,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                                SizedBox(width: 4.w),
+                                Icon(
+                                  Icons.copy_rounded,
+                                  size: 10.r,
+                                  color: Colors.white.withValues(alpha: 0.75),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ] else if (subtitle != null && subtitle!.isNotEmpty) ...[
+                        SizedBox(height: 2.h),
                         Text(
                           subtitle!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.72),
+                            color: Colors.white.withValues(alpha: 0.75),
                             fontWeight: FontWeight.w500,
-                            fontSize: 10.sp,
+                            fontSize: 10.5.sp,
                           ),
                         ),
                       ],
                     ],
                   ),
                 ),
-                SizedBox(width: 6.w),
+                SizedBox(width: 8.w),
 
-                // الشريحة الذكية وشارة الحالة
+                // شارة الحالة (وشريحة البطاقة اختيارياً فقط عند تفعيلها)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (showSmartChip) ...[
                       Container(
-                        width: 22.w,
-                        height: 16.h,
+                        width: 20.w,
+                        height: 15.h,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [Color(0xFFFDE68A), Color(0xFFD97706)],
@@ -281,13 +325,6 @@ class CustomCarouselCard extends StatelessWidget {
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(3.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.25),
-                              blurRadius: 3,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
                         ),
                       ),
                       SizedBox(width: 6.w),
@@ -295,8 +332,8 @@ class CustomCarouselCard extends StatelessWidget {
                     if (statusText != null && statusText!.isNotEmpty)
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 7.w,
-                          vertical: 3.h,
+                          horizontal: 8.w,
+                          vertical: 4.h,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.15),
@@ -313,10 +350,10 @@ class CustomCarouselCard extends StatelessWidget {
                               color: isStatusActive
                                   ? const Color(0xFF10B981)
                                   : const Color(0xFFF59E0B),
-                              size: 4.r,
+                              size: 4.5.r,
                               enablePing: isStatusActive,
                             ),
-                            SizedBox(width: 4.w),
+                            SizedBox(width: 5.w),
                             Text(
                               statusText!,
                               style: TextStyle(
@@ -333,7 +370,7 @@ class CustomCarouselCard extends StatelessWidget {
               ],
             ),
 
-            // 2. الصف الأوسط: المؤشر المالي الرئيسي بهيبة تنفيذية فسيحة
+            // 2. الصف الأوسط: المؤشر المالي الرئيسي
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -341,46 +378,61 @@ class CustomCarouselCard extends StatelessWidget {
                 Text(
                   primaryLabel,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: Colors.white.withValues(alpha: 0.72),
                     fontWeight: FontWeight.w600,
-                    fontSize: 9.5.sp,
+                    fontSize: 10.sp,
+                    letterSpacing: 0.2,
                   ),
                 ),
-                SizedBox(height: 2.h),
+                SizedBox(height: 3.h),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text(
-                      primaryValue,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 17.sp,
-                        letterSpacing: -0.2,
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          primaryValue,
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 22.sp,
+                            letterSpacing: -0.3,
+                            fontFeatures: const [
+                              FontFeature.tabularFigures(),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     if (currencyTag != null &&
-                        currencyTag!.isNotEmpty) ...[
-                      SizedBox(width: 5.w),
+                        currencyTag!.isNotEmpty &&
+                        !primaryValue.contains(currencyTag!)) ...[
+                      SizedBox(width: 6.w),
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 5.w,
-                          vertical: 1.h,
+                          horizontal: 6.w,
+                          vertical: 2.h,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(4.r),
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(5.r),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.25),
+                            width: 0.8,
+                          ),
                         ),
                         child: Text(
                           currencyTag!,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: Colors.white,
                             fontWeight: FontWeight.w800,
                             fontSize: 9.5.sp,
+                            letterSpacing: 0.3,
                           ),
                         ),
                       ),
@@ -390,115 +442,61 @@ class CustomCarouselCard extends StatelessWidget {
               ],
             ),
 
-            // خط فاصل ناعم
+            // خط فاصل ناعم خافت
             Divider(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: Colors.white.withValues(alpha: 0.10),
               height: 1,
               thickness: 0.8,
             ),
 
-            // 3. الصف السفلي: التسمية والقيمة الإضافية + كود البطاقة القابل للنسخ + شارة المؤشر الفرعي
+            // 3. الصف السفلي: تفاصيل السقف الائتماني/الكيان التجاري وشارة المؤشر الفرعي
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (secondaryLabel != null &&
-                                secondaryLabel!.isNotEmpty)
-                              Text(
-                                secondaryLabel!,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.55),
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 9.sp,
-                                ),
-                              ),
-                            if (secondaryValue != null &&
-                                secondaryValue!.isNotEmpty)
-                              Text(
-                                secondaryValue!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11.sp,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      if (cardNumber != null && cardNumber!.isNotEmpty) ...[
-                        SizedBox(width: 6.w),
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            UrlLauncherService.copyToClipboard(cardNumber!);
-                            CustomSnackbar.show(
-                              title: 'تم النسخ بنجاح',
-                              message: 'تم نسخ الرمز التعريفي: $cardNumber',
-                              type: SnackType.info,
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 6.w,
-                              vertical: 3.h,
+                if (secondaryValue != null && secondaryValue!.isNotEmpty)
+                  Flexible(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (secondaryLabel != null &&
+                            secondaryLabel!.isNotEmpty)
+                          Text(
+                            '$secondaryLabel: ',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.6),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 9.5.sp,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.35),
-                              borderRadius: BorderRadius.circular(6.r),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.18),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  cardNumber!.length > 10
-                                      ? '${cardNumber!.substring(0, 8)}...'
-                                      : cardNumber!,
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.85),
-                                    fontSize: 8.5.sp,
-                                    fontWeight: FontWeight.w700,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
-                                SizedBox(width: 3.w),
-                                Icon(
-                                  Icons.copy_rounded,
-                                  size: 10.r,
-                                  color: Colors.white.withValues(alpha: 0.7),
-                                ),
+                          ),
+                        Flexible(
+                          child: Text(
+                            secondaryValue!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 11.sp,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
                               ],
                             ),
                           ),
                         ),
                       ],
-                    ],
+                    ),
                   ),
-                ),
                 if (metricText != null && metricText!.isNotEmpty) ...[
                   SizedBox(width: 8.w),
                   Container(
                     padding: EdgeInsets.symmetric(
-                      horizontal: 7.w,
-                      vertical: 3.h,
+                      horizontal: 8.w,
+                      vertical: 3.5.h,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(6.r),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
                       border: Border.all(
                         color: Colors.white.withValues(alpha: 0.18),
                         width: 0.8,
@@ -510,7 +508,7 @@ class CustomCarouselCard extends StatelessWidget {
                         if (metricIcon != null) ...[
                           Icon(
                             metricIcon,
-                            size: 13.r,
+                            size: 12.r,
                             color: Colors.white.withValues(alpha: 0.9),
                           ),
                           SizedBox(width: 4.w),

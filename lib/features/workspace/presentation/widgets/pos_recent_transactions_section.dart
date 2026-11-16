@@ -21,8 +21,6 @@ class PosRecentTransactionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return Obx(() {
       final items = controller.recentTransactionItems;
       if (controller.isLoadingRecentData.value && items.isEmpty) {
@@ -40,8 +38,7 @@ class PosRecentTransactionsSection extends StatelessWidget {
               const CustomEmptyState(
                 icon: Icons.receipt_long_outlined,
                 title: 'لا توجد حركات سابقة',
-                subtitle:
-                    'لم يتم تسجيل أي فواتير أو طلبات توريد لهذه الشبكة حتى الآن.',
+                subtitle: 'لم يتم تسجيل أي فواتير أو طلبات توريد لهذه الشبكة حتى الآن.',
               ),
             ],
           ),
@@ -49,17 +46,13 @@ class PosRecentTransactionsSection extends StatelessWidget {
       }
 
       return CustomSurfaceCard(
-        padding: EdgeInsets.all(AppSpacing.lg),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(context),
-            AppSpacing.vMd,
-            for (int i = 0; i < items.length; i++) ...[
-              if (i > 0)
-                Divider(color: colors.outlineVariant.withValues(alpha: 0.3)),
-              WorkspaceTransactionTile.fromItem(items[i]),
-            ],
+            AppSpacing.vSm,
+            for (final item in items) WorkspaceTransactionTile.fromItem(item),
           ],
         ),
       );
@@ -83,11 +76,15 @@ class PosRecentTransactionsSection extends StatelessWidget {
                     enablePing: true,
                   ),
                   AppSpacing.hSm,
-                  Text(
-                    'آخر حركات الحساب والمشتريات',
-                    style: AppTypography.titleMedium.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      'آخر حركات الحساب والمشتريات',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.titleMedium.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -104,7 +101,7 @@ class PosRecentTransactionsSection extends StatelessWidget {
         ),
         CustomButton.text(
           text: 'عرض الكل',
-          suffix: Icons.chevron_left_rounded,
+          suffix: Icons.chevron_right_rounded,
           onPressed: controller.openPurchaseInvoices,
         ),
       ],

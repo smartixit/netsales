@@ -1,3 +1,4 @@
+import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/presentation/mappers/network_workspace_dashboard_mapper.dart';
@@ -24,13 +25,18 @@ class NetworkProviderCardMapper {
         networkId: network.networkId,
         networkName: network.networkName,
         logoUrl: network.networkProfileLogoUrl,
+        avatarInitial: TextFormatter.avatarInitial(
+          network.networkName,
+          fallback: 'ش',
+        ),
         subtitle: locationParts.isEmpty
             ? 'شبكة مصرحة ومعتمدة'
             : locationParts.join(' • '),
         networkCode: network.networkUuid ?? '',
-        ownerDisplay: network.ownerName?.isNotEmpty == true
-            ? network.ownerName!
-            : 'المزود المعتمد',
+        ownerDisplay: TextFormatter.firstAndLast(
+          network.ownerName,
+          fallback: 'المزود المعتمد',
+        ),
         isActive: network.isActive,
         salesValue: NetworkWorkspaceDashboardMapper.formatNetworkSales(
           overview,
