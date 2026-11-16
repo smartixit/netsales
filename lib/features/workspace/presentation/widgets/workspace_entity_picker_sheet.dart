@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -8,8 +6,6 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
-import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_coordinator_controller.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_entity_picker_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_network_picker_tile.dart';
@@ -26,30 +22,12 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
 
   const WorkspaceEntityPickerSheet({super.key, required this.currentWorkspace});
 
-  /// عرض النافذة السفلية التفاعلية فوراً مع إظهار Skeleton Shimmer أثناء التحميل
+  /// يعرض نافذة اختيار الكيان؛ تحميل البيانات وتهيئة الحالة مسؤولية Controller.
   static Future<void> show(
     BuildContext context, {
     required AppWorkspace currentWorkspace,
-  }) async {
-    if (!Get.isRegistered<WorkspaceEntityPickerController>()) {
-      Get.put(
-        WorkspaceEntityPickerController(
-          getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
-          getMyPosUseCase: Get.find<GetMyPosUseCase>(),
-        ),
-      );
-    }
-
-    final controller = WorkspaceEntityPickerController.to;
-    controller.selectedSegment.value =
-        currentWorkspace == AppWorkspace.network ? 0 : 1;
-
-    // إطلاق جلب البيانات وإظهار الهيكل العظمي فوراً داخل النافذة
-    unawaited(controller.loadEntities());
-
-    if (!context.mounted) return;
-
-    await CustomBottomSheet.show<void>(
+  }) {
+    return CustomBottomSheet.show<void>(
       title: 'الكيانات ومساحات العمل',
       subtitle: 'اختر الشبكة أو نقطة البيع للتنقل الفوري للعمليات',
       leadingIcon: Icons.hub_rounded,
