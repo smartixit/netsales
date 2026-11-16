@@ -13,10 +13,12 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 /// قسم كاروسيل بطاقات الشبكات التابعة للمزود (NetworkProviderCarouselSection)
 class NetworkProviderCarouselSection extends StatelessWidget {
   final NetworkWorkspaceController controller;
+  final VoidCallback onInvitePos;
 
   const NetworkProviderCarouselSection({
     super.key,
     required this.controller,
+    required this.onInvitePos,
   });
 
   @override
@@ -50,7 +52,7 @@ class NetworkProviderCarouselSection extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CustomInteractiveBounce(
-                    onTap: controller.openQrInviteSheet,
+                    onTap: onInvitePos,
                     child: Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: 9.w,
