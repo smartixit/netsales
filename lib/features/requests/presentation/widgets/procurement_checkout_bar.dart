@@ -18,7 +18,7 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
     return Obx(() {
       final lineCount = controller.procurementCart.length;
       final voucherCount = controller.procurementCart.fold<int>(0, (sum, line) => sum + line.voucherCount);
-      final total = '\${AmountFormatter.formatValue(controller.liveOrderTotalMinor / 100)} ر.ي';
+      final total = '${AmountFormatter.formatValue(controller.liveOrderTotalMinor / 100)} ر.ي';
       return Container(
         padding: EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md,
           AppSpacing.sm + MediaQuery.paddingOf(context).bottom),
@@ -36,7 +36,7 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('\$lineCount باقة • \$voucherCount كرت',
+                  Text('$lineCount باقة • $voucherCount كرت',
                     style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
                   AppSpacing.vXxs,
                   FittedBox(

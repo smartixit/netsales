@@ -281,15 +281,15 @@ class _LocalCartPrice extends StatelessWidget {
       children: [
         Text(
           unit == null ? 'تعرفة غير متاحة' :
-            'سعر الكرت: \${AmountFormatter.formatValue(unit / 100)} ر.ي',
+            'سعر الكرت: ${AmountFormatter.formatValue(unit / 100)} ر.ي',
           style: AppTypography.labelSmall.copyWith(color: colors.primary, fontWeight: FontWeight.w700),
         ),
         Text(
-          'الخصم: \${AmountFormatter.formatValue(discount / 100)} ر.ي',
+          'الخصم: ${AmountFormatter.formatValue(discount / 100)} ر.ي',
           style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant),
         ),
         Text(
-          'صافي البند: \${AmountFormatter.formatValue(net / 100)} ر.ي',
+          'صافي البند: ${AmountFormatter.formatValue(net / 100)} ر.ي',
           style: AppTypography.labelSmall.copyWith(color: colors.onSurface, fontWeight: FontWeight.w800),
         ),
       ],
