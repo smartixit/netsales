@@ -56,6 +56,19 @@ class WorkspaceEntityPickerController extends GetxController {
     }
   }
 
+  bool get canSwitchWorkspace =>
+      Get.isRegistered<WorkspaceCoordinatorController>() &&
+      WorkspaceCoordinatorController.to.canSwitchWorkspace;
+
+  String get switchWorkspaceTooltip =>
+      WorkspaceCoordinatorController.to.switchWorkspaceTooltip;
+
+  Future<void> toggleWorkspace() async {
+    if (!Get.isRegistered<WorkspaceCoordinatorController>()) return;
+    Get.back<void>();
+    await WorkspaceCoordinatorController.to.toggleWorkspace();
+  }
+
   int? get activeNetworkId {
     if (Get.isRegistered<NetworkWorkspaceController>()) {
       return Get.find<NetworkWorkspaceController>().selectedNetworkId.value;
