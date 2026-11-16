@@ -593,8 +593,49 @@ void main() {
       expect(find.text('إجمالي الخصم المعتمد:'), findsOneWidget);
       expect(find.text('- 5,000.00 YER'), findsOneWidget);
       expect(find.text('وفر 10.0%'), findsOneWidget);
-      expect(find.text('الإجمالي النهائي المستحق:'), findsOneWidget);
+      expect(find.text('صافي قيمة الطلب:'), findsOneWidget);
       expect(find.text('45,000.00 YER'), findsOneWidget);
+    });
+
+    testWidgets('Shows expired quote state and explicit refresh action', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      Get.put(controller);
+      controller.quoteError.value = null;
+      controller.isLoadingQuote.value = false;
+      controller.procurementCart.add(
+        const ProcurementCartLineEntity(
+          package: testPackage,
+          sheets: 1,
+          voucherCount: 100,
+        ),
+      );
+      controller.serverQuote.value = ProcurementQuoteEntity(
+        networkId: 10,
+        posId: 20,
+        saleType: SaleType.cash,
+        saleTypeLabel: 'نقدي',
+        grossTotal: 10000,
+        discountTotal: 1000,
+        netTotal: 9000,
+        currency: 'YER',
+        pricingToken: 'expired_quote_token',
+        expiresAt: DateTime.now().subtract(const Duration(minutes: 1)),
+        items: const [],
+      );
+
+      await tester.pumpWidget(
+        buildTestableWidget(const ProcurementFinancialQuoteCard()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('انتهت صلاحية عرض السعر'), findsOneWidget);
+      expect(find.text('إعادة احتساب السعر'), findsOneWidget);
     });
 
     testWidgets('Renders loading shimmer/indicator while fetching server quote', (tester) async {
