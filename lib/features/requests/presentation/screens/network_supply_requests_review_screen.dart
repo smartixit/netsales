@@ -7,6 +7,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_search_filter_header.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_list_intro.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
@@ -28,6 +29,12 @@ class NetworkSupplyRequestsReviewScreen
 
     final content = Column(
       children: [
+        if (!embedded)
+          const ProcurementListIntro(
+            icon: Icons.inbox_outlined,
+            title: 'طلبات التوريد الواردة',
+            subtitle: 'راجع طلبات نقاط البيع، قارن التعديلات والأسعار، ثم اتخذ قرار الاعتماد أو الرفض.',
+          ),
         if (embedded)
           Padding(
             padding: EdgeInsets.symmetric(
