@@ -32,6 +32,8 @@ import 'package:netsales/features/requests/domain/usecases/get_requests_use_case
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_workspace_transaction_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_network_package_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_active_supply_order_mapper.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_active_supply_order_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/pos_network_package_view_model.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
@@ -235,6 +237,12 @@ class PosWorkspaceController extends GetxController {
 
   List<PosNetworkPackageViewModel> get networkPackageItems =>
       PosNetworkPackageMapper.map(networkPackages);
+
+  PosActiveSupplyOrderViewModel? get activeSupplyOrder =>
+      PosActiveSupplyOrderMapper.map(recentRequests);
+
+  void openProcurementOrder(RequestEntity request) =>
+      Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
 
   void openProcurementOrderForPackage(int packageId) {
     Get.toNamed<void>(
