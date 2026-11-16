@@ -257,6 +257,9 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
       switchWorkspaceTooltip: coordinator.switchWorkspaceTooltip,
       onSwitchWorkspace: coordinator.toggleWorkspace,
       onLogout: coordinator.logout,
+      onOpenSecuritySettings: coordinator.openSecuritySettings,
+      onOpenActiveSessions: coordinator.openActiveSessions,
+      onToggleTheme: coordinator.toggleTheme,
     );
   }
 
