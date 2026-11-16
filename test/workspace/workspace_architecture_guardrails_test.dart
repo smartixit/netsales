@@ -15,7 +15,11 @@ void main() {
         final forbiddenImports = RegExp(
           r'''import\s+['"](?:package:flutter/|dart:ui|package:netsales/(?:widgets|features/.*/presentation)/)''',
         );
-        if (forbiddenImports.hasMatch(source)) {
+        final forbiddenUiTypes = RegExp(
+          r'\b(?:BuildContext|Color|IconData|VoidCallback|Widget)\b',
+        );
+        if (forbiddenImports.hasMatch(source) ||
+            forbiddenUiTypes.hasMatch(source)) {
           violations.add(entity.path);
         }
       }
