@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_liquidity_card.dart';
@@ -85,7 +83,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                 );
               }
 
-              final metrics = overview.metrics;
+              final dashboard = ctrl.dashboardViewModel;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,17 +121,16 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                   ],
 
                   // 4. كرت السيولة والعمليات السريعة
-                  if (metrics.containsKey('wallet') ||
-                      metrics.containsKey('sales')) ...[
-                    ExecutiveLiquidityCard(summary: ctrl.liquiditySummary),
+                  if (dashboard.showLiquiditySection) ...[
+                    ExecutiveLiquidityCard(summary: dashboard.liquiditySummary),
                     AppSpacing.vLg,
                   ],
 
                   // 5. منحنى وتيرة المبيعات والطلبات
-                  if (metrics.containsKey('sales')) ...[
+                  if (dashboard.showSalesSection) ...[
                     ExecutiveSalesVelocityChart(
-                      chartDefinition: ctrl.salesChartDefinition,
-                      summary: ctrl.salesVelocitySummary,
+                      chartDefinition: dashboard.salesChartDefinition,
+                      summary: dashboard.salesVelocitySummary,
                       selectedPeriod: ctrl.selectedPeriod.value,
                       onPeriodChanged: ctrl.selectPeriod,
                     ),
@@ -142,13 +139,11 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
 
                   // 6. شبكة المؤشرات الحيوية التنفيذية (2 أعمدة متوازية)
                   ExecutiveMetricsGrid(
-                    items: ctrl.kpiMetrics,
+                    items: dashboard.kpiMetrics,
                     onPointsOfSaleTap: () => ctrl.onNavItemSelected(2),
                     onRequestsTap: () => ctrl.onNavItemSelected(1),
-                    onPackagesTap: () =>
-                        Get.toNamed<void>(AppRoutes.voucherPackagesCatalog),
-                    onSalesTap: () =>
-                        Get.toNamed<void>(AppRoutes.wholesaleInvoices),
+                    onPackagesTap: ctrl.openPackagesCatalog,
+                    onSalesTap: ctrl.openWholesaleInvoices,
                     onExpensesTap: () => ctrl.onNavItemSelected(3),
                     onWalletTap: () => ctrl.onNavItemSelected(3),
                   ),
@@ -158,8 +153,8 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                   if (ctrl.recentPendingOrderItems.isNotEmpty) ...[
                     NetworkLivePendingOrdersStream(
                       items: ctrl.recentPendingOrderItems,
-                      totalPendingCount: ctrl.pendingRequestsCount > 0
-                          ? ctrl.pendingRequestsCount
+                      totalPendingCount: dashboard.pendingRequestsCount > 0
+                          ? dashboard.pendingRequestsCount
                           : ctrl.recentPendingOrderItems.length,
                       onViewAll: () => ctrl.onNavItemSelected(1),
                     ),
