@@ -30,7 +30,7 @@ import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/workspace/domain/entities/workspace_transaction_item_entity.dart';
+import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -232,8 +232,8 @@ class PosWorkspaceController extends GetxController {
   String get userRole => rolePresentation.label;
 
   /// قائمة حركات الحساب والمشتريات المحولة كـ ViewModels جاهزة للعرض
-  List<WorkspaceTransactionItemEntity> get recentTransactionItems {
-    final items = <WorkspaceTransactionItemEntity>[];
+  List<WorkspaceTransactionItemViewModel> get recentTransactionItems {
+    final items = <WorkspaceTransactionItemViewModel>[];
 
     for (final inv in recentInvoices) {
       final paymentPresentation =
@@ -254,7 +254,7 @@ class PosWorkspaceController extends GetxController {
           : 'فاتورة توريد';
 
       items.add(
-        WorkspaceTransactionItemEntity(
+        WorkspaceTransactionItemViewModel(
           title: 'فاتورة توريد',
           reference: ref,
           subtitle: subtitle,
@@ -288,7 +288,7 @@ class PosWorkspaceController extends GetxController {
           : 'طلب توريد';
 
       items.add(
-        WorkspaceTransactionItemEntity(
+        WorkspaceTransactionItemViewModel(
           title: 'طلب توريد',
           reference: ref,
           subtitle: subtitle,
