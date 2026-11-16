@@ -229,6 +229,7 @@ class FakePackageCatalogRepository implements PackageCatalogRepository {
   @override
   Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
+    int? posId,
     bool? status,
     String? search,
     String? cursor,
