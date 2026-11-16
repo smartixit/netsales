@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source_impl.dart';
 import 'package:netsales/features/auth/data/repositories/auth_repository_impl.dart';
@@ -31,61 +32,61 @@ class CommercialBinding extends Bindings {
   @override
   void dependencies() {
     // 1. Data Source
-    Get.lazyPut<CommercialRemoteDataSource>(
+    registerLazyIfAbsent<CommercialRemoteDataSource>(
       () => const CommercialRemoteDataSourceImpl(),
     );
 
     // 2. Repository
-    Get.lazyPut<CommercialRepository>(
+    registerLazyIfAbsent<CommercialRepository>(
       () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
     );
 
     // 3. Use Cases
-    Get.lazyPut(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
-    Get.lazyPut(() => GetMyPosUseCase(Get.find<CommercialRepository>()));
-    Get.lazyPut(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
-    Get.lazyPut(() => GetMyPosUseCase(Get.find<CommercialRepository>()));
-    Get.lazyPut(
+    registerLazyIfAbsent<GetMyNetworksUseCase>(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
+    registerLazyIfAbsent<GetMyPosUseCase>(() => GetMyPosUseCase(Get.find<CommercialRepository>()));
+    registerLazyIfAbsent<GetMyNetworksUseCase>(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
+    registerLazyIfAbsent<GetMyPosUseCase>(() => GetMyPosUseCase(Get.find<CommercialRepository>()));
+    registerLazyIfAbsent<GetNetworkPosListUseCase>(
       () => GetNetworkPosListUseCase(Get.find<CommercialRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<GetPosNetworksListUseCase>(
       () => GetPosNetworksListUseCase(Get.find<CommercialRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<CreateNetworkPosLinkUseCase>(
       () => CreateNetworkPosLinkUseCase(Get.find<CommercialRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<ToggleNetworkPosLinkStatusUseCase>(
       () => ToggleNetworkPosLinkStatusUseCase(Get.find<CommercialRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<DeleteNetworkPosLinkUseCase>(
       () => DeleteNetworkPosLinkUseCase(Get.find<CommercialRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<GetNetworkDetailsUseCase>(
       () => GetNetworkDetailsUseCase(Get.find<CommercialRepository>()),
     );
-    Get.lazyPut(() => GetPosDetailsUseCase(Get.find<CommercialRepository>()));
-    Get.lazyPut(
+    registerLazyIfAbsent<GetPosDetailsUseCase>(() => GetPosDetailsUseCase(Get.find<CommercialRepository>()));
+    registerLazyIfAbsent<UpdateNetworkDetailsUseCase>(
       () => UpdateNetworkDetailsUseCase(Get.find<CommercialRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<UpdatePosDetailsUseCase>(
       () => UpdatePosDetailsUseCase(Get.find<CommercialRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<CreateNetworkPosLinkChallengeUseCase>(
       () => CreateNetworkPosLinkChallengeUseCase(
         Get.find<CommercialRepository>(),
       ),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<PreviewNetworkPosLinkChallengeUseCase>(
       () => PreviewNetworkPosLinkChallengeUseCase(
         Get.find<CommercialRepository>(),
       ),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<ConfirmNetworkPosLinkChallengeUseCase>(
       () => ConfirmNetworkPosLinkChallengeUseCase(
         Get.find<CommercialRepository>(),
       ),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<RevokeNetworkPosLinkChallengeUseCase>(
       () => RevokeNetworkPosLinkChallengeUseCase(
         Get.find<CommercialRepository>(),
       ),
@@ -93,22 +94,22 @@ class CommercialBinding extends Bindings {
 
     // 4. Geography (المحافظات والمديريات)
     if (!Get.isRegistered<AuthRemoteDataSource>()) {
-      Get.lazyPut<AuthRemoteDataSource>(() => const AuthRemoteDataSourceImpl());
+      registerLazyIfAbsent<AuthRemoteDataSource>(() => const AuthRemoteDataSourceImpl());
     }
     if (!Get.isRegistered<AuthRepository>()) {
-      Get.lazyPut<AuthRepository>(
+      registerLazyIfAbsent<AuthRepository>(
         () => AuthRepositoryImpl(Get.find<AuthRemoteDataSource>()),
       );
     }
     if (!Get.isRegistered<GetGovernoratesUseCase>()) {
-      Get.lazyPut(() => GetGovernoratesUseCase(Get.find<AuthRepository>()));
+      registerLazyIfAbsent<GetGovernoratesUseCase>(() => GetGovernoratesUseCase(Get.find<AuthRepository>()));
     }
     if (!Get.isRegistered<GetDirectoratesUseCase>()) {
-      Get.lazyPut(() => GetDirectoratesUseCase(Get.find<AuthRepository>()));
+      registerLazyIfAbsent<GetDirectoratesUseCase>(() => GetDirectoratesUseCase(Get.find<AuthRepository>()));
     }
 
     // 5. Controller
-    Get.lazyPut<CommercialDirectoryController>(
+    registerLazyIfAbsent<CommercialDirectoryController>(
       () => CommercialDirectoryController(
         getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
