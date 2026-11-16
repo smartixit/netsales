@@ -5,6 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
+import 'package:netsales/features/workspace/presentation/flows/network_pos_invite_flow.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_liquidity_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_metrics_grid.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_sales_velocity_chart.dart';
@@ -111,7 +112,10 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
 
             // 3. كاروسيل بطاقات الشبكات التابعة للمزود
             if (controller.networks.isNotEmpty) ...[
-              NetworkProviderCarouselSection(controller: controller),
+              NetworkProviderCarouselSection(
+              controller: controller,
+              onInvitePos: NetworkPosInviteFlow(controller).start,
+            ),
               AppSpacing.vLg,
             ],
 
