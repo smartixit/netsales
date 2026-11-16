@@ -414,6 +414,7 @@ void main() {
 
       expect(firstAttempt, isFalse);
       expect(mockRepo.lastCreatePayload, isNull);
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       expect(mockRepo.lastQuotePayload, isNotNull);
 
       await pumpEventQueue();
@@ -526,6 +527,7 @@ void main() {
       final success = await controller.submitOrder();
 
       expect(success, isFalse);
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       await pumpEventQueue();
 
       // Verified: Quote was automatically re-requested to refresh updated prices
