@@ -65,6 +65,54 @@ void main() {
       expect(violations, isEmpty, reason: 'Widgets must not navigate, execute use cases, or map business data.');
     });
 
+    test('workspace controllers do not depend on presentation widgets', () {
+      final directory = Directory('lib/features/workspace/presentation/controllers');
+      expect(directory.existsSync(), isTrue);
+
+      final violations = <String>[];
+      for (final entity in directory.listSync(recursive: true)) {
+        if (entity is! File || !entity.path.endsWith('.dart')) continue;
+        final source = entity.readAsStringSync();
+        if (RegExp(
+          r'''import\s+['"]package:netsales/features/.*/presentation/widgets/''',
+        ).hasMatch(source)) {
+          violations.add(entity.path);
+        }
+      }
+
+      expect(
+        violations,
+        isEmpty,
+        reason: 'Controllers coordinate presentation state and must not own or import widget flows.',
+      );
+    });
+
+    test('workspace screens remain composition-only', () {
+      final directory = Directory('lib/features/workspace/presentation/screens');
+      final forbiddenImports = RegExp(
+        r'''import\s+['"](?:package:get/|package:netsales/core/services/|package:netsales/features/.*/domain/usecases/)''',
+      );
+      final forbiddenCalls = RegExp(
+        r'\b(?:Get\.(?:to|toNamed|offAll|offAllNamed|back)|\.execute\()',
+      );
+      final violations = <String>[];
+
+      for (final entity in directory.listSync(recursive: true)) {
+        if (entity is! File || !entity.path.endsWith('.dart')) continue;
+        final source = entity.readAsStringSync();
+        if (forbiddenImports.hasMatch(source) ||
+            forbiddenCalls.hasMatch(source)) {
+          violations.add(entity.path);
+        }
+      }
+
+      expect(
+        violations,
+        isEmpty,
+        reason: 'Screens compose widgets; navigation and session actions belong to controllers.',
+      );
+    });
+
     test('workspace widgets use project button components instead of raw Material buttons', () {
       final directory = Directory('lib/features/workspace/presentation/widgets');
       final forbidden = RegExp(
