@@ -97,9 +97,10 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                           CustomSegmentedBar(
                             selectedIndex: controller.selectedSaleType.value == SaleType.cash ? 0 : 1,
                             onSegmentChanged: (index) {
+                              // The controller observes this state and debounces the
+                              // authoritative quote refresh with any pending quantity edits.
                               controller.selectedSaleType.value =
                                   index == 0 ? SaleType.cash : SaleType.credit;
-                              controller.fetchServerQuote();
                             },
                             items: const [
                               CustomSegmentItem(label: 'نقدي', icon: Icons.payments_outlined),
