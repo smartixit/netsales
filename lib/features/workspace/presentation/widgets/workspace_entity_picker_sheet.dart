@@ -109,7 +109,7 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                             children: networks.map((network) {
                               final isSelected =
                                   currentWorkspace == AppWorkspace.network &&
-                                  network.networkId == activeNetId;
+                                  network.id == activeNetId;
                               return WorkspaceNetworkPickerTile(
                                 item: network,
                                 isSelected: isSelected,
@@ -127,7 +127,7 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                             children: pointsOfSale.map((pos) {
                               final isSelected =
                                   currentWorkspace == AppWorkspace.pos &&
-                                  pos.posId == activePosId;
+                                  pos.id == activePosId;
                               return WorkspacePosPickerTile(
                                 item: pos,
                                 isSelected: isSelected,
