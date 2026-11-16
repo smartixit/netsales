@@ -24,6 +24,7 @@ import 'package:netsales/features/workspace/presentation/mappers/network_workspa
 import 'package:netsales/features/workspace/presentation/mappers/network_workspace_dashboard_mapper.dart';
 import 'package:netsales/features/workspace/presentation/models/network_workspace_dashboard_view_model.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
+import 'package:netsales/widgets/charts/charting.dart';
 
 class NetworkWorkspaceController extends GetxController {
   NetworkWorkspaceController({
@@ -108,6 +109,8 @@ class NetworkWorkspaceController extends GetxController {
 
   NetworkWorkspaceDashboardViewModel get dashboardViewModel =>
       NetworkWorkspaceDashboardMapper.map(overview.value);
+
+  int get pendingRequestsCount => dashboardViewModel.pendingRequestsCount;
 
   String networkSalesValue(bool isSelected) =>
       NetworkWorkspaceDashboardMapper.formatNetworkSales(
