@@ -108,6 +108,24 @@ class NetworkWorkspaceController extends GetxController {
   NetworkWorkspaceDashboardViewModel get dashboardViewModel =>
       NetworkWorkspaceDashboardMapper.map(overview.value);
 
+  String networkSalesValue(bool isSelected) =>
+      NetworkWorkspaceDashboardMapper.formatNetworkSales(
+        overview.value,
+        isSelected: isSelected,
+      );
+
+  String networkPosCountLabel(bool isSelected) =>
+      NetworkWorkspaceDashboardMapper.formatNetworkPosCount(
+        overview.value,
+        isSelected: isSelected,
+      );
+
+  void openPackagesCatalog() =>
+      Get.toNamed<void>(AppRoutes.voucherPackagesCatalog);
+
+  void openWholesaleInvoices() =>
+      Get.toNamed<void>(AppRoutes.wholesaleInvoices);
+
   List<WorkspaceTransactionItemViewModel> get recentPendingOrderItems {
     return NetworkWorkspaceTransactionMapper.mapPendingRequests(
       overview.value?.recentPendingRequests ?? const [],
