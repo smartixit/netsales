@@ -23,7 +23,7 @@ class NetworkWorkspaceTransactionMapper {
       final subtitle = dateLabel.isEmpty
           ? request.saleTypeLabel
           : '${request.saleTypeLabel} • $dateLabel';
-      final openRequest = () => onOpenRequest(request.requestId);
+      void openRequest() => onOpenRequest(request.requestId);
 
       return WorkspaceTransactionItemViewModel(
         title: request.posName,
