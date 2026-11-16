@@ -42,10 +42,12 @@ class CommercialBinding extends Bindings {
     );
 
     // 3. Use Cases
-    registerLazyIfAbsent<GetMyNetworksUseCase>(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
-    registerLazyIfAbsent<GetMyPosUseCase>(() => GetMyPosUseCase(Get.find<CommercialRepository>()));
-    registerLazyIfAbsent<GetMyNetworksUseCase>(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
-    registerLazyIfAbsent<GetMyPosUseCase>(() => GetMyPosUseCase(Get.find<CommercialRepository>()));
+    registerLazyIfAbsent<GetMyNetworksUseCase>(
+      () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
+    );
+    registerLazyIfAbsent<GetMyPosUseCase>(
+      () => GetMyPosUseCase(Get.find<CommercialRepository>()),
+    );
     registerLazyIfAbsent<GetNetworkPosListUseCase>(
       () => GetNetworkPosListUseCase(Get.find<CommercialRepository>()),
     );
