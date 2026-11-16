@@ -79,4 +79,11 @@ class InvoiceEntity {
   bool get isUnpaid => paymentStatus == InvoicePaymentStatus.unpaid;
   bool get isPartiallyPaid =>
       paymentStatus == InvoicePaymentStatus.partiallyPaid;
+
+  /// إجمالي عدد الكروت عبر كافة بنود الفاتورة
+  int get totalVouchersCount =>
+      items.fold(0, (sum, item) => sum + item.voucherCount);
+
+  /// عدد باقات الفاتورة المعتمدة
+  int get packagesCount => items.length;
 }

@@ -134,5 +134,63 @@ void main() {
       expect(unpaidInvoice.isUnpaid, isTrue);
       expect(unpaidInvoice.isPartiallyPaid, isFalse);
     });
+
+    test(
+      'InvoiceItemEntity should format unified quantity label with sheet breakdown',
+      () {
+        final json = {
+          'item_id': 105,
+          'invoice_id': 50,
+          'package_id': 15,
+          'voucher_price': 500.0,
+          'voucher_count': 77,
+          'item_discount': 0.0,
+          'item_total_amount': 38500.0,
+          'package': {
+            'package_name': 'باقة النجوم 10 جيجا',
+            'package_color': '#3B82F6',
+            'package_voucher_count': 51,
+          },
+        };
+
+        final item = InvoiceItemModel.fromJson(json);
+
+        expect(item.sheetSize, equals(51));
+        expect(item.sheetDescription, equals('ورقة ونصف'));
+        expect(item.fullQuantityLabel, equals('ورقة ونصف  •  77 كرت'));
+      },
+    );
+
+    test('InvoiceEntity computes totalVouchersCount and packagesCount correctly', () {
+      final json = {
+        'invoice_id': 300,
+        'network_id': 1,
+        'pos_id': 2,
+        'invoice_total_amount': 25000.0,
+        'items': [
+          {
+            'item_id': 1,
+            'invoice_id': 300,
+            'package_id': 10,
+            'voucher_price': 100.0,
+            'voucher_count': 50,
+            'item_total_amount': 5000.0,
+          },
+          {
+            'item_id': 2,
+            'invoice_id': 300,
+            'package_id': 20,
+            'voucher_price': 200.0,
+            'voucher_count': 100,
+            'item_total_amount': 20000.0,
+          },
+        ],
+      };
+
+      final invoice = InvoiceModel.fromJson(json);
+
+      expect(invoice.packagesCount, equals(2));
+      expect(invoice.totalVouchersCount, equals(150));
+    });
   });
 }

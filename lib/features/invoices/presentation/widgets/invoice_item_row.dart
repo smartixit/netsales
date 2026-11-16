@@ -86,14 +86,14 @@ class InvoiceItemRow extends StatelessWidget {
                         ),
                       ),
 
-                      // الكمية
+                      // الكمية بالأسلوب الموحد للمشروع
                       Expanded(
-                        flex: 2,
+                        flex: 3,
                         child: Text(
-                          '${item.voucherCount} كرت',
+                          item.fullQuantityLabel,
                           textAlign: TextAlign.center,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: colors.onSurface,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

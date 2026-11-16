@@ -131,10 +131,16 @@ class NetworkWholesaleInvoicesScreen
                         }
 
                         final invoice = controller.invoices[index];
-                        return InvoiceCard(
-                          invoice: invoice,
-                          isNetworkView: true,
-                          onTap: () => controller.openInvoiceDetails(invoice),
+                        return Obx(
+                          () => InvoiceCard(
+                            invoice: invoice,
+                            isNetworkView: true,
+                            isExpanded: controller.expandedInvoiceId.value ==
+                                invoice.invoiceId,
+                            onToggleExpansion: () => controller
+                                .toggleInvoiceExpansion(invoice.invoiceId),
+                            onTap: () => controller.openInvoiceDetails(invoice),
+                          ),
                         );
                       },
                     ),

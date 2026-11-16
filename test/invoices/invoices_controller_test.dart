@@ -188,6 +188,26 @@ void main() {
       expect(controller.selectedSaleType.value, equals('CREDIT'));
       expect(mockRepo.lastSaleType, equals('CREDIT'));
     });
+
+    test('toggleInvoiceExpansion manages exclusive accordion expansion correctly', () {
+      final controller = NetworkInvoicesController(
+        getNetworkInvoicesUseCase: getNetworkInvoicesUseCase,
+      );
+
+      expect(controller.expandedInvoiceId.value, isNull);
+
+      // توسيع الفاتورة رقم 1
+      controller.toggleInvoiceExpansion(1);
+      expect(controller.expandedInvoiceId.value, equals(1));
+
+      // توسيع الفاتورة رقم 2 يجب أن يطوي الفاتورة 1 تلقائياً
+      controller.toggleInvoiceExpansion(2);
+      expect(controller.expandedInvoiceId.value, equals(2));
+
+      // النقر على الفاتورة 2 مرة ثانية يطويها
+      controller.toggleInvoiceExpansion(2);
+      expect(controller.expandedInvoiceId.value, isNull);
+    });
   });
 
   group('PosInvoicesController Tests', () {
@@ -218,6 +238,17 @@ void main() {
       expect(controller.searchController.text, isEmpty);
       expect(controller.searchQuery.value, isEmpty);
       expect(controller.selectedSaleType.value, isNull);
+    });
+
+    test('PosInvoicesController toggleInvoiceExpansion works correctly', () {
+      final controller = PosInvoicesController(
+        getPosInvoicesUseCase: getPosInvoicesUseCase,
+      );
+
+      controller.toggleInvoiceExpansion(10);
+      expect(controller.expandedInvoiceId.value, equals(10));
+      controller.toggleInvoiceExpansion(10);
+      expect(controller.expandedInvoiceId.value, isNull);
     });
   });
 

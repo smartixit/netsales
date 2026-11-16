@@ -32,44 +32,52 @@ import 'package:netsales/features/requests/presentation/controllers/procurement_
 class ProcurementRequestBinding extends Bindings {
   @override
   void dependencies() {
-    // 1. Data Source & Repository
-    if (!Get.isRegistered<RequestRemoteDataSource>()) {
-      Get.lazyPut<RequestRemoteDataSource>(
-        () => const RequestRemoteDataSourceImpl(),
-      );
-    }
-    if (!Get.isRegistered<RequestRepository>()) {
-      Get.lazyPut<RequestRepository>(
-        () => RequestRepositoryImpl(Get.find<RequestRemoteDataSource>()),
-      );
-    }
+    // 1. Data Source & Repository (fenix: true للبقاء حياً عبر التنقل بين الشاشات)
+    Get.lazyPut<RequestRemoteDataSource>(
+      () => const RequestRemoteDataSourceImpl(),
+      fenix: true,
+    );
+    Get.lazyPut<RequestRepository>(
+      () => RequestRepositoryImpl(Get.find<RequestRemoteDataSource>()),
+      fenix: true,
+    );
 
     // 2. Commercial & Catalog Dependencies for Dropdowns
     if (!Get.isRegistered<CommercialRemoteDataSource>()) {
       Get.lazyPut<CommercialRemoteDataSource>(
         () => const CommercialRemoteDataSourceImpl(),
+        fenix: true,
       );
     }
     if (!Get.isRegistered<CommercialRepository>()) {
       Get.lazyPut<CommercialRepository>(
         () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
+        fenix: true,
       );
     }
     if (!Get.isRegistered<GetMyPosUseCase>()) {
-      Get.lazyPut(() => GetMyPosUseCase(Get.find<CommercialRepository>()));
+      Get.lazyPut(
+        () => GetMyPosUseCase(Get.find<CommercialRepository>()),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<GetPosNetworksListUseCase>()) {
       Get.lazyPut(
         () => GetPosNetworksListUseCase(Get.find<CommercialRepository>()),
+        fenix: true,
       );
     }
     if (!Get.isRegistered<GetMyNetworksUseCase>()) {
-      Get.lazyPut(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
+      Get.lazyPut(
+        () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
+        fenix: true,
+      );
     }
 
     if (!Get.isRegistered<PackageCatalogRemoteDataSource>()) {
       Get.lazyPut<PackageCatalogRemoteDataSource>(
         () => const PackageCatalogRemoteDataSourceImpl(),
+        fenix: true,
       );
     }
     if (!Get.isRegistered<PackageCatalogRepository>()) {
@@ -77,32 +85,57 @@ class ProcurementRequestBinding extends Bindings {
         () => PackageCatalogRepositoryImpl(
           Get.find<PackageCatalogRemoteDataSource>(),
         ),
+        fenix: true,
       );
     }
     if (!Get.isRegistered<GetPackagesUseCase>()) {
-      Get.lazyPut(
+      Get.lazyPut<GetPackagesUseCase>(
         () => GetPackagesUseCase(Get.find<PackageCatalogRepository>()),
+        fenix: true,
       );
     }
     if (!Get.isRegistered<GetEffectivePackageDiscountUseCase>()) {
-      Get.lazyPut(
+      Get.lazyPut<GetEffectivePackageDiscountUseCase>(
         () => GetEffectivePackageDiscountUseCase(
           Get.find<PackageCatalogRepository>(),
         ),
+        fenix: true,
       );
     }
 
-    // 3. Request Use Cases
-    Get.lazyPut(() => GetRequestsUseCase(Get.find<RequestRepository>()));
-    Get.lazyPut(() => GetRequestDetailsUseCase(Get.find<RequestRepository>()));
-    Get.lazyPut(() => CreateRequestUseCase(Get.find<RequestRepository>()));
-    Get.lazyPut(() => CancelRequestUseCase(Get.find<RequestRepository>()));
-    Get.lazyPut(() => ApproveRequestUseCase(Get.find<RequestRepository>()));
-    Get.lazyPut(() => RejectRequestUseCase(Get.find<RequestRepository>()));
-    Get.lazyPut(
-      () => PreviewRequestModificationUseCase(Get.find<RequestRepository>()),
+    // 3. Request Use Cases (مع تحديد الصنف الصريح و fenix: true)
+    Get.lazyPut<GetRequestsUseCase>(
+      () => GetRequestsUseCase(Get.find<RequestRepository>()),
+      fenix: true,
     );
-    Get.lazyPut(() => GetProcurementQuoteUseCase(Get.find<RequestRepository>()));
+    Get.lazyPut<GetRequestDetailsUseCase>(
+      () => GetRequestDetailsUseCase(Get.find<RequestRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<CreateRequestUseCase>(
+      () => CreateRequestUseCase(Get.find<RequestRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<CancelRequestUseCase>(
+      () => CancelRequestUseCase(Get.find<RequestRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<ApproveRequestUseCase>(
+      () => ApproveRequestUseCase(Get.find<RequestRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<RejectRequestUseCase>(
+      () => RejectRequestUseCase(Get.find<RequestRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<PreviewRequestModificationUseCase>(
+      () => PreviewRequestModificationUseCase(Get.find<RequestRepository>()),
+      fenix: true,
+    );
+    Get.lazyPut<GetProcurementQuoteUseCase>(
+      () => GetProcurementQuoteUseCase(Get.find<RequestRepository>()),
+      fenix: true,
+    );
 
     // 4. Controllers
     Get.lazyPut<PosProcurementController>(
@@ -117,6 +150,7 @@ class ProcurementRequestBinding extends Bindings {
             Get.find<GetEffectivePackageDiscountUseCase>(),
         getProcurementQuoteUseCase: Get.find<GetProcurementQuoteUseCase>(),
       ),
+      fenix: true,
     );
 
     Get.lazyPut<NetworkProcurementReviewController>(
@@ -130,12 +164,14 @@ class ProcurementRequestBinding extends Bindings {
         getRequestDetailsUseCase: Get.find<GetRequestDetailsUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
       ),
+      fenix: true,
     );
 
     Get.lazyPut<ProcurementRequestDetailsController>(
       () => ProcurementRequestDetailsController(
         getRequestDetailsUseCase: Get.find<GetRequestDetailsUseCase>(),
       ),
+      fenix: true,
     );
   }
 }

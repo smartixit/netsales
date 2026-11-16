@@ -21,6 +21,17 @@ class PosInvoicesController extends GetxController {
   final errorMessage = RxnString();
   final nextCursor = RxnString();
 
+  // حالة التوسيع الحصرية لبطاقات الفواتير (Single-Expansion Accordion)
+  final expandedInvoiceId = RxnInt();
+
+  void toggleInvoiceExpansion(int invoiceId) {
+    if (expandedInvoiceId.value == invoiceId) {
+      expandedInvoiceId.value = null;
+    } else {
+      expandedInvoiceId.value = invoiceId;
+    }
+  }
+
   bool get hasMore => nextCursor.value != null;
 
   void openInvoiceDetails(InvoiceEntity invoice) {

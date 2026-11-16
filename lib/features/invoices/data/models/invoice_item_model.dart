@@ -12,6 +12,7 @@ class InvoiceItemModel extends InvoiceItemEntity {
     required super.itemTotalAmount,
     super.packageName,
     super.packageColor,
+    super.sheetSize = 0,
     super.createdAt,
     super.updatedAt,
   });
@@ -19,10 +20,12 @@ class InvoiceItemModel extends InvoiceItemEntity {
   factory InvoiceItemModel.fromJson(Map<String, dynamic> json) {
     String? pkgName;
     String? pkgColor;
+    int sheetSize = 0;
     if (json['package'] is Map<String, dynamic>) {
       final pkg = json['package'] as Map<String, dynamic>;
       pkgName = pkg['package_name'] as String?;
       pkgColor = pkg['package_color'] as String?;
+      sheetSize = (pkg['package_voucher_count'] as num?)?.toInt() ?? 0;
     }
 
     return InvoiceItemModel(
@@ -35,6 +38,7 @@ class InvoiceItemModel extends InvoiceItemEntity {
       itemTotalAmount: (json['item_total_amount'] as num?)?.toDouble() ?? 0.0,
       packageName: pkgName,
       packageColor: pkgColor,
+      sheetSize: sheetSize,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
     );

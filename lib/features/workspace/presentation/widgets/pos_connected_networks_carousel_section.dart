@@ -130,8 +130,7 @@ class PosConnectedNetworksCarouselSection extends StatelessWidget {
         else if (controller.networkLinks.isEmpty)
           CustomEmptyState.boxed(
             title: 'لا توجد شبكات مرتبطة حالياً',
-            subtitle:
-                'اربط نقطة البيع بمزود شبكة عبر مسح رمز QR لبدء طلب باقات الكروت فورياً.',
+            subtitle: 'اربط نقطة البيع بمزود شبكة عبر مسح رمز QR لبدء طلب باقات الكروت فورياً.',
             icon: Icons.hub_outlined,
             actionLabel: 'مسح رمز QR للربط',
             actionIcon: Icons.qr_code_scanner_rounded,
@@ -147,7 +146,6 @@ class PosConnectedNetworksCarouselSection extends StatelessWidget {
               item: item,
               onTap: () => controller.onNetworkPageChanged(index),
             ),
-            onPageChanged: controller.onNetworkPageChanged,
           ),
       ],
     );

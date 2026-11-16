@@ -117,10 +117,16 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
                         }
 
                         final invoice = controller.invoices[index];
-                        return InvoiceCard(
-                          invoice: invoice,
-                          isNetworkView: false,
-                          onTap: () => controller.openInvoiceDetails(invoice),
+                        return Obx(
+                          () => InvoiceCard(
+                            invoice: invoice,
+                            isNetworkView: false,
+                            isExpanded: controller.expandedInvoiceId.value ==
+                                invoice.invoiceId,
+                            onToggleExpansion: () => controller
+                                .toggleInvoiceExpansion(invoice.invoiceId),
+                            onTap: () => controller.openInvoiceDetails(invoice),
+                          ),
                         );
                       },
                     ),
