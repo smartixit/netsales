@@ -14,6 +14,7 @@ import 'package:netsales/features/workspace/presentation/widgets/network_provide
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
+import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 /// الشاشة الرئيسية لمساحة عمل الشبكة (NetworkWorkspaceDashboard)
@@ -28,23 +29,17 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator.adaptive(
+    return CustomRefreshablePage(
       onRefresh: controller.loadWorkspace,
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        padding: EdgeInsets.fromLTRB(
-          AppBreakpoints.screenMargin(context),
-          MediaQuery.paddingOf(context).top + 20.h,
-          AppBreakpoints.screenMargin(context),
-          115.h + MediaQuery.paddingOf(context).bottom,
-        ),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Obx(() {
-              if (ctrl.isLoading.value && ctrl.overview.value == null) {
+      padding: EdgeInsets.fromLTRB(
+        AppBreakpoints.screenMargin(context),
+        MediaQuery.paddingOf(context).top + 20.h,
+        AppBreakpoints.screenMargin(context),
+        115.h + MediaQuery.paddingOf(context).bottom,
+      ),
+      maxContentWidth: 760,
+      child: Obx(() {
+              if (controller.isLoading.value && controller.overview.value == null) {
                 return const Column(
                   children: [
                     CustomSkeletonCard(height: 126),
@@ -55,15 +50,15 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                   ],
                 );
               }
-              if (ctrl.errorMessage.value != null &&
-                  ctrl.overview.value == null) {
+              if (controller.errorMessage.value != null &&
+                  controller.overview.value == null) {
                 return CustomErrorState.boxed(
                   title: 'تعذر تحميل لوحة الشبكة',
-                  subtitle: ctrl.errorMessage.value,
-                  onRetry: ctrl.loadWorkspace,
+                  subtitle: controller.errorMessage.value,
+                  onRetry: controller.loadWorkspace,
                 );
               }
-              if (ctrl.networks.isEmpty) {
+              if (controller.networks.isEmpty) {
                 return const CustomEmptyState(
                   icon: Icons.hub_outlined,
                   title: 'لا توجد شبكة مرتبطة بالحساب',
@@ -72,18 +67,18 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                 );
               }
 
-              final overview = ctrl.overview.value;
+              final overview = controller.overview.value;
               if (overview == null) {
                 return CustomErrorState.boxed(
                   title: 'بيانات لوحة الشبكة غير متاحة',
                   subtitle:
-                      ctrl.errorMessage.value ??
+                      controller.errorMessage.value ??
                       'لم تصل استجابة صالحة من الخادم.',
-                  onRetry: () => ctrl.loadOverview(),
+                  onRetry: () => controller.loadOverview(),
                 );
               }
 
-              final dashboard = ctrl.dashboardViewModel;
+              final dashboard = controller.dashboardViewModel;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,17 +86,17 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                   // 1. كرت الترحيب القيادي
                   ExecutiveWelcomeHeroCard(
                     controller: ctrl,
-                    onPendingTap: () => ctrl.onNavItemSelected(1),
+                    onPendingTap: () => controller.onNavItemSelected(1),
                   ),
                   AppSpacing.vLg,
 
                   // 2. محدد الشبكة النشطة إذا كان للمزود أكثر من شبكة
-                  if (ctrl.networks.length > 1) ...[
+                  if (controller.networks.length > 1) ...[
                     CustomDropdown<int>(
                       label: 'الشبكة النشطة للعمليات',
-                      rxValue: ctrl.selectedNetworkId,
-                      searchEnabled: ctrl.networks.length > 5,
-                      items: ctrl.networks
+                      rxValue: controller.selectedNetworkId,
+                      searchEnabled: controller.networks.length > 5,
+                      items: controller.networks
                           .map(
                             (NetworkEntity network) => DropdownItem<int>(
                               value: network.networkId,
@@ -109,13 +104,13 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                             ),
                           )
                           .toList(growable: false),
-                      onChanged: ctrl.selectNetwork,
+                      onChanged: controller.selectNetwork,
                     ),
                     AppSpacing.vMd,
                   ],
 
                   // 3. كاروسيل بطاقات الشبكات التابعة للمزود
-                  if (ctrl.networks.isNotEmpty) ...[
+                  if (controller.networks.isNotEmpty) ...[
                     NetworkProviderCarouselSection(controller: ctrl),
                     AppSpacing.vLg,
                   ],
@@ -131,8 +126,8 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                     ExecutiveSalesVelocityChart(
                       chartDefinition: dashboard.salesChartDefinition,
                       summary: dashboard.salesVelocitySummary,
-                      selectedPeriod: ctrl.selectedPeriod.value,
-                      onPeriodChanged: ctrl.selectPeriod,
+                      selectedPeriod: controller.selectedPeriod.value,
+                      onPeriodChanged: controller.selectPeriod,
                     ),
                     AppSpacing.vLg,
                   ],
@@ -140,32 +135,29 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                   // 6. شبكة المؤشرات الحيوية التنفيذية (2 أعمدة متوازية)
                   ExecutiveMetricsGrid(
                     items: dashboard.kpiMetrics,
-                    onPointsOfSaleTap: () => ctrl.onNavItemSelected(2),
-                    onRequestsTap: () => ctrl.onNavItemSelected(1),
-                    onPackagesTap: ctrl.openPackagesCatalog,
-                    onSalesTap: ctrl.openWholesaleInvoices,
-                    onExpensesTap: () => ctrl.onNavItemSelected(3),
-                    onWalletTap: () => ctrl.onNavItemSelected(3),
+                    onPointsOfSaleTap: () => controller.onNavItemSelected(2),
+                    onRequestsTap: () => controller.onNavItemSelected(1),
+                    onPackagesTap: controller.openPackagesCatalog,
+                    onSalesTap: controller.openWholesaleInvoices,
+                    onExpensesTap: () => controller.onNavItemSelected(3),
+                    onWalletTap: () => controller.onNavItemSelected(3),
                   ),
                   AppSpacing.vXl,
 
                   // 7. شريط أحدث طلبات التوريد بانتظار الاعتماد
-                  if (ctrl.recentPendingOrderItems.isNotEmpty) ...[
+                  if (controller.recentPendingOrderItems.isNotEmpty) ...[
                     NetworkLivePendingOrdersStream(
-                      items: ctrl.recentPendingOrderItems,
+                      items: controller.recentPendingOrderItems,
                       totalPendingCount: dashboard.pendingRequestsCount > 0
                           ? dashboard.pendingRequestsCount
-                          : ctrl.recentPendingOrderItems.length,
-                      onViewAll: () => ctrl.onNavItemSelected(1),
+                          : controller.recentPendingOrderItems.length,
+                      onViewAll: () => controller.onNavItemSelected(1),
                     ),
                     AppSpacing.vXl,
                   ],
                 ],
               );
-            }),
-          ),
-        ),
-      ),
+      }),
     );
   }
 }
