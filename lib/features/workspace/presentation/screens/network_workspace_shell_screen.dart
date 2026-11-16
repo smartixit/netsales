@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_reports_screen.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_workspace_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
@@ -101,10 +99,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           isLoading: isAppBarLoading,
           rolePresentation: controller.rolePresentation,
           userProfileLogo: controller.userProfileLogo,
-          userInitials: TextFormatter.avatarInitials(
-            controller.userName,
-            maxChars: 2,
-          ),
+          userInitials: controller.userInitials,
         ),
         items: navItems,
         mobileItems: mobileNavItems,
@@ -112,9 +107,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         onIndexChanged: controller.onNavItemSelected,
         centerActionIcon: Icons.add_rounded,
         centerActionTooltip: 'إصدار فاتورة بيع جديدة',
-        onCenterActionTap: () {
-          Get.toNamed<dynamic>(AppRoutes.networkCreateSaleInvoice);
-        },
+        onCenterActionTap: controller.openCreateSaleInvoice,
       );
     });
   }
