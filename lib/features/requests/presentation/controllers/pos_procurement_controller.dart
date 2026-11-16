@@ -662,19 +662,27 @@ class PosProcurementController extends GetxController {
                   ? package.effectiveCashPrice
                   : package.effectiveCreditPrice) * 100).round());
 
-  int get liveOrderTotalMinor => procurementCart.fold<int>(
-        0,
-        (sum, line) => sum + _unitPriceMinor(line.package) * line.voucherCount,
-      );
+  int _lineGrossMinor(ProcurementCartLineEntity line) =>
+      (line.package.procurementBaseUnitPriceMinor ??
+          (line.package.packageVoucherPrice * 100).round()) * line.voucherCount;
 
-  int get liveOrderGrossMinor => procurementCart.fold<int>(
-        0,
-        (sum, line) => sum +
-            (line.package.procurementBaseUnitPriceMinor ??
-                (line.package.packageVoucherPrice * 100).round()) * line.voucherCount,
-      );
+  int _lineDiscountMinor(ProcurementCartLineEntity line) {
+    final rate = selectedSaleType.value == SaleType.cash
+        ? line.package.procurementCashDiscountBasisPoints
+        : line.package.procurementCreditDiscountBasisPoints;
+    if (rate == null) return 0;
+    final gross = _lineGrossMinor(line);
+    return ((gross * rate) + 5000) ~/ 10000;
+  }
 
-  int get liveOrderDiscountMinor => liveOrderGrossMinor - liveOrderTotalMinor;
+  /// يطابق قاعدة Laravel: تقريب الخصم على إجمالي البند، لا على سعر الوحدة.
+  int get liveOrderGrossMinor =>
+      procurementCart.fold<int>(0, (sum, line) => sum + _lineGrossMinor(line));
+
+  int get liveOrderDiscountMinor =>
+      procurementCart.fold<int>(0, (sum, line) => sum + _lineDiscountMinor(line));
+
+  int get liveOrderTotalMinor => liveOrderGrossMinor - liveOrderDiscountMinor;
 
   String? get missingPricingPackageName => procurementCart
       .where((line) => line.package.procurementPricingSnapshotToken == null ||
