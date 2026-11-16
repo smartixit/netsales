@@ -36,6 +36,7 @@ class NetworkWorkspaceDashboardMapper {
       isWalletActive: wallet?['is_active'] == true,
       hasSales: hasSales,
       growthRate: growthRate,
+      growthLabel: _growthLabel(growthRate),
       cashSales: hasSales
           ? AmountFormatter.format(overview.amount('sales', 'paid_amount'))
           : '0.00',
@@ -137,6 +138,7 @@ class NetworkWorkspaceDashboardMapper {
         isWalletActive: false,
         hasSales: false,
         growthRate: 0,
+        growthLabel: '0.0% استقرار',
         cashSales: '0.00',
         outstandingReceivables: '0.00',
         posCoverage: '0/0',
@@ -161,6 +163,12 @@ class NetworkWorkspaceDashboardMapper {
       ),
       kpiMetrics: const [],
     );
+  }
+
+  static String _growthLabel(double growthRate) {
+    if (growthRate > 0) return '+${growthRate.toStringAsFixed(1)}% نمو';
+    if (growthRate < 0) return '${growthRate.toStringAsFixed(1)}% تراجع';
+    return '0.0% استقرار';
   }
 
   static int _pendingRequestsCount(NetworkWorkspaceOverviewEntity overview) {
