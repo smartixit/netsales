@@ -85,7 +85,7 @@ class NetworkWorkspaceBinding extends Bindings {
         ),
       );
     }
-    Get.lazyPut<NetworkWorkspaceController>(
+    registerLazyIfAbsent<NetworkWorkspaceController>(
       () => NetworkWorkspaceController(
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
         getOverviewUseCase: Get.find<GetNetworkWorkspaceOverviewUseCase>(),
