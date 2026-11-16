@@ -21,7 +21,7 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_challenge_sheet.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/domain/usecases/get_network_workspace_overview_use_case.dart';
-import 'package:netsales/features/workspace/domain/entities/workspace_transaction_item_entity.dart';
+import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 import 'package:netsales/widgets/charts/charting.dart';
 import 'package:netsales/widgets/dashboard_metrics/dashboard_metrics.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -117,7 +117,7 @@ class NetworkWorkspaceController extends GetxController {
   }
 
   /// قائمة طلبات التوريد المعلقة المحولة كـ ViewModels جاهزة للعرض
-  List<WorkspaceTransactionItemEntity> get recentPendingOrderItems {
+  List<WorkspaceTransactionItemViewModel> get recentPendingOrderItems {
     final pending = overview.value?.recentPendingRequests ?? const [];
     return pending
         .map((req) {
@@ -136,7 +136,7 @@ class NetworkWorkspaceController extends GetxController {
                 serverLabel: req.statusLabel,
               );
 
-          return WorkspaceTransactionItemEntity(
+          return WorkspaceTransactionItemViewModel(
             title: req.posName,
             reference: refShort,
             subtitle: subtitle,
