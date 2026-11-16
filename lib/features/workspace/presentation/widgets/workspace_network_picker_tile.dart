@@ -4,21 +4,20 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/text_formatter.dart';
-import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/workspace/presentation/models/workspace_network_picker_item_view_model.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// بطاقة اختيار شبكة واحدة داخل النافذة السفلية (WorkspaceNetworkPickerTile)
 class WorkspaceNetworkPickerTile extends StatelessWidget {
-  final NetworkEntity network;
+  final WorkspaceNetworkPickerItemViewModel item;
   final bool isSelected;
   final VoidCallback onTap;
 
   const WorkspaceNetworkPickerTile({
     super.key,
-    required this.network,
+    required this.item,
     required this.isSelected,
     required this.onTap,
   });
@@ -28,19 +27,7 @@ class WorkspaceNetworkPickerTile extends StatelessWidget {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final locationParts = [
-      if (network.governorateName != null &&
-          network.governorateName!.isNotEmpty)
-        network.governorateName!,
-      if (network.directorateName != null &&
-          network.directorateName!.isNotEmpty)
-        network.directorateName!,
-    ].join(' • ');
-
-    final initials = TextFormatter.avatarInitials(
-      network.networkName,
-      maxChars: 2,
-    );
+    final initials = item.initials;
 
     return Padding(
       padding: EdgeInsets.only(bottom: AppSpacing.sm),
@@ -92,10 +79,10 @@ class WorkspaceNetworkPickerTile extends StatelessWidget {
                   ),
                   alignment: Alignment.center,
                   child:
-                      network.networkProfileLogoUrl != null &&
-                              network.networkProfileLogoUrl!.isNotEmpty
+                      item.logoUrl != null &&
+                              item.logoUrl!.isNotEmpty
                           ? CustomCachedImage.avatar(
-                              url: network.networkProfileLogoUrl,
+                              url: item.logoUrl,
                               radius: 19.r,
                             )
                           : Text(
@@ -118,7 +105,7 @@ class WorkspaceNetworkPickerTile extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            network.networkName,
+                            item.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.titleSmall.copyWith(
@@ -127,7 +114,7 @@ class WorkspaceNetworkPickerTile extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (network.isActive) ...[
+                        if (item.isActive) ...[
                           SizedBox(width: 6.w),
                           CustomPulsingIndicator(
                             color: colors.success,
@@ -141,8 +128,8 @@ class WorkspaceNetworkPickerTile extends StatelessWidget {
                     Text(
                       locationParts.isNotEmpty
                           ? locationParts
-                          : (network.networkPhoneNumber.isNotEmpty
-                              ? network.networkPhoneNumber
+                          : (item.subtitle.isNotEmpty
+                              ? item.subtitle
                               : 'شبكة اتصالات معتمدة'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
