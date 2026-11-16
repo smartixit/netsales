@@ -19,19 +19,17 @@ import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 /// الشاشة الرئيسية لمساحة عمل الشبكة (NetworkWorkspaceDashboard)
 /// متوافقة هندسياً وتنظيمياً بنسبة 100% مع معايير مساحات العمل وشاشة PosHomeDashboard
 class NetworkWorkspaceDashboard extends StatelessWidget {
-  final NetworkWorkspaceController? controller;
+  final NetworkWorkspaceController controller;
 
   const NetworkWorkspaceDashboard({
     super.key,
-    this.controller,
+    required this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
-    final ctrl = controller ?? Get.find<NetworkWorkspaceController>();
-
     return RefreshIndicator.adaptive(
-      onRefresh: ctrl.loadWorkspace,
+      onRefresh: controller.loadWorkspace,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
