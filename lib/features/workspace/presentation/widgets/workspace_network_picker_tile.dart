@@ -126,11 +126,7 @@ class WorkspaceNetworkPickerTile extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      locationParts.isNotEmpty
-                          ? locationParts
-                          : (item.subtitle.isNotEmpty
-                              ? item.subtitle
-                              : 'شبكة اتصالات معتمدة'),
+                      item.subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.labelSmall.copyWith(
