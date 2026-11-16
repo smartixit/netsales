@@ -1218,8 +1218,11 @@ class PosProcurementController extends GetxController {
       final quoteExpired = quote?.expiresAt != null &&
           !DateTime.now().isBefore(quote!.expiresAt!);
 
-      if (isLoadingQuote.value || !quoteMatchesContext || quoteExpired) {
-        if (!isLoadingQuote.value) {
+      if (isQuotePending.value ||
+          isLoadingQuote.value ||
+          !quoteMatchesContext ||
+          quoteExpired) {
+        if (!isLoadingQuote.value && !isQuotePending.value) {
           _scheduleServerQuoteRefresh();
         }
         CustomSnackbar.show(
