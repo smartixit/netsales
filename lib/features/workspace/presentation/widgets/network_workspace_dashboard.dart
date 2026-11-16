@@ -15,7 +15,6 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
-import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 /// الشاشة الرئيسية لمساحة عمل الشبكة (NetworkWorkspaceDashboard)
 /// متوافقة هندسياً وتنظيمياً بنسبة 100% مع معايير مساحات العمل وشاشة PosHomeDashboard
@@ -90,26 +89,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
             ),
             AppSpacing.vLg,
 
-            // 2. محدد الشبكة النشطة إذا كان للمزود أكثر من شبكة
-            if (controller.networks.length > 1) ...[
-              CustomDropdown<int>(
-                label: 'الشبكة النشطة للعمليات',
-                rxValue: controller.selectedNetworkId,
-                searchEnabled: controller.networks.length > 5,
-                items: controller.networks
-                    .map(
-                      (card) => DropdownItem<int>(
-                        value: card.networkId,
-                        child: Text(card.networkName),
-                      ),
-                    )
-                    .toList(growable: false),
-                onChanged: controller.selectNetwork,
-              ),
-              AppSpacing.vMd,
-            ],
-
-            // 3. كاروسيل بطاقات الشبكات التابعة للمزود
+            // 2. قسم كاروسيل بطاقات الشبكات التابعة للمزود
             if (controller.networks.isNotEmpty) ...[
               NetworkProviderCarouselSection(
                 controller: controller,

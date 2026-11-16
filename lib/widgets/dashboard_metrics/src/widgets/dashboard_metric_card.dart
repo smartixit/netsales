@@ -11,6 +11,7 @@ class DashboardMetricCard extends StatelessWidget {
   const DashboardMetricCard({
     required this.metric,
     this.state = DashboardMetricState.data,
+    this.height,
     this.emptyMessage,
     this.errorMessage,
     this.retryLabel = 'Retry',
@@ -22,6 +23,7 @@ class DashboardMetricCard extends StatelessWidget {
 
   final DashboardMetricData metric;
   final DashboardMetricState state;
+  final double? height;
   final String? emptyMessage;
   final String? errorMessage;
   final String retryLabel;
@@ -56,7 +58,9 @@ class DashboardMetricCard extends StatelessWidget {
               boxShadow: tokens.cardShadows,
             ),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 132),
+              constraints: BoxConstraints(
+                minHeight: height ?? 110,
+              ),
               child: state == DashboardMetricState.data
                   ? DashboardMetricContent(
                       metric: metric,

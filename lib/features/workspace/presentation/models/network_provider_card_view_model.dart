@@ -3,6 +3,7 @@ class NetworkProviderCardViewModel {
     required this.networkId,
     required this.networkName,
     required this.logoUrl,
+    required this.avatarInitial,
     required this.subtitle,
     required this.networkCode,
     required this.ownerDisplay,
@@ -16,6 +17,7 @@ class NetworkProviderCardViewModel {
   final int networkId;
   final String networkName;
   final String? logoUrl;
+  final String avatarInitial;
   final String subtitle;
   final String networkCode;
   final String ownerDisplay;

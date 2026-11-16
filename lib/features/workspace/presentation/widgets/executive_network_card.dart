@@ -16,13 +16,13 @@ class ExecutiveNetworkCard extends StatelessWidget {
     required this.onTap,
   });
 
-
   @override
   Widget build(BuildContext context) {
     final logoWidget = CustomAvatarBadge(
       imageUrl: item.logoUrl,
-      initials: item.networkName,
+      initials: item.avatarInitial,
       size: AvatarBadgeSize.sm,
+      customDimension: 40,
       hasPulse: false,
     );
 
@@ -30,11 +30,13 @@ class ExecutiveNetworkCard extends StatelessWidget {
       title: item.networkName,
       subtitle: item.subtitle,
       logo: logoWidget,
+      avatarUrl: item.logoUrl,
+      avatarInitial: item.avatarInitial,
       cardNumber: item.networkCode,
       primaryLabel: 'إجمالي المبيعات المحصلة',
       primaryValue: item.salesValue,
       currencyTag: 'YER',
-      secondaryLabel: 'الكيان التجاري',
+      secondaryLabel: null,
       secondaryValue: item.ownerDisplay,
       statusText: item.isActive ? 'مرخصة ونشطة' : 'معلقة',
       isStatusActive: item.isActive,

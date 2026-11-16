@@ -36,12 +36,12 @@ class DashboardMetricContent extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Text(
                 metric.title,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: textTheme.titleSmall?.copyWith(
                   color: scheme.onSurfaceVariant,
@@ -50,34 +50,34 @@ class DashboardMetricContent extends StatelessWidget {
               ),
             ),
             if (metric.icon != null) ...[
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Tooltip(
                 message: metric.tooltip ?? metric.title,
                 child: Container(
-                  width: 38,
-                  height: 38,
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(tokens.iconRadius),
                   ),
                   alignment: Alignment.center,
-                  child: Icon(metric.icon, size: 20, color: accent),
+                  child: Icon(metric.icon, size: 18, color: accent),
                 ),
               ),
             ] else if (metric.tooltip != null) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Tooltip(
                 message: metric.tooltip!,
                 child: Icon(
                   Icons.info_outline_rounded,
-                  size: 17,
+                  size: 16,
                   color: tokens.mutedForeground,
                 ),
               ),
             ],
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 8),
         Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
@@ -99,7 +99,7 @@ class DashboardMetricContent extends StatelessWidget {
               ),
             ),
             if (metric.unit != null) ...[
-              const SizedBox(width: 7),
+              const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   metric.unit!,
@@ -114,22 +114,22 @@ class DashboardMetricContent extends StatelessWidget {
           ],
         ),
         if (metric.description != null) ...[
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
           Text(
             metric.description!,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: textTheme.bodySmall?.copyWith(color: tokens.mutedForeground),
           ),
         ],
         if (showTrend) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _TrendLine(trend: metric.trend!, tokens: tokens),
         ],
         if (showSparkline) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           SizedBox(
-            height: 34,
+            height: 28,
             width: double.infinity,
             child: DashboardMetricSparkline(
               points: metric.sparkline,
@@ -140,11 +140,11 @@ class DashboardMetricContent extends StatelessWidget {
         ],
         if (metric.variant == DashboardMetricVariant.target &&
             metric.target != null) ...[
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
           _TargetProgress(target: metric.target!, tokens: tokens),
         ],
         if (metric.variant == DashboardMetricVariant.status) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           _StatusCaption(
             tone: metric.tone,
             tokens: tokens,
@@ -152,7 +152,7 @@ class DashboardMetricContent extends StatelessWidget {
           ),
         ],
         if (metric.source != null) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _SourceLine(source: metric.source!, tokens: tokens),
         ],
       ],

@@ -3,6 +3,7 @@ class PosNetworkCarouselCardViewModel {
     required this.networkId,
     required this.networkName,
     required this.logoUrl,
+    required this.avatarInitial,
     required this.locationLabel,
     required this.currency,
     required this.formattedBalance,
@@ -18,6 +19,7 @@ class PosNetworkCarouselCardViewModel {
   final int networkId;
   final String networkName;
   final String? logoUrl;
+  final String avatarInitial;
   final String locationLabel;
   final String currency;
   final String formattedBalance;

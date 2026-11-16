@@ -83,23 +83,36 @@ class WorkspaceTransactionTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.md),
           )
         : Container(
-            width: 40.r,
-            height: 40.r,
+            width: 42.r,
+            height: 42.r,
             decoration: BoxDecoration(
-              color: colors.surfaceContainerHighest,
+              color: (amountColor ?? colors.primary).withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(
+                color: (amountColor ?? colors.primary).withValues(alpha: 0.20),
+                width: 0.8,
+              ),
             ),
             child: Icon(
               icon ?? Icons.receipt_long_rounded,
-              color: colors.primary,
+              color: amountColor ?? colors.primary,
               size: 20.r,
             ),
           );
 
     return CustomInteractiveBounce(
       onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 6.h),
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 3.h),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerLow.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: 0.25),
+            width: 0.6,
+          ),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -127,17 +140,26 @@ class WorkspaceTransactionTile extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 6.w,
-                            vertical: 1.h,
+                            vertical: 1.5.h,
                           ),
                           decoration: BoxDecoration(
-                            color: colors.surfaceContainerHighest,
+                            color: colors.surfaceContainerHigh,
                             borderRadius: BorderRadius.circular(4.r),
+                            border: Border.all(
+                              color:
+                                  colors.outlineVariant.withValues(alpha: 0.35),
+                              width: 0.5,
+                            ),
                           ),
                           child: Text(
                             reference!,
                             style: AppTypography.labelSmall.copyWith(
                               color: colors.onSurfaceVariant,
-                              fontSize: 9.sp,
+                              fontSize: 9.5.sp,
+                              fontWeight: FontWeight.w600,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures()
+                              ],
                             ),
                           ),
                         ),
@@ -168,7 +190,9 @@ class WorkspaceTransactionTile extends StatelessWidget {
                   formattedAmount,
                   style: AppTypography.titleSmall.copyWith(
                     color: amountColor ?? colors.onSurface,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.3,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
                 SizedBox(height: 3.h),
