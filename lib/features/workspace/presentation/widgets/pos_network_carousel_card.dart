@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
-import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_network_carousel_card_view_model.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_card.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 
@@ -10,18 +8,12 @@ import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 class PosNetworkCarouselCard extends StatelessWidget {
   const PosNetworkCarouselCard({
     super.key,
-    required this.link,
-    required this.isSelected,
-    this.cardIndex = 0,
+    required this.item,
     required this.onTap,
-    this.wallet,
   });
 
-  final NetworkPosLinkEntity link;
-  final bool isSelected;
-  final int cardIndex;
+  final PosNetworkCarouselCardViewModel item;
   final VoidCallback onTap;
-  final PosWalletEntity? wallet;
 
   CustomCarouselCardTheme _resolveTheme(int index, bool selected) {
     if (selected) {
@@ -39,52 +31,29 @@ class PosNetworkCarouselCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final network = link.network;
-    final name = network?.networkName ?? 'الشبكة المزودة';
-    final logoUrl = network?.networkProfileLogoUrl;
-    final currency = wallet?.currencyCode ?? 'YER';
-
-    final locationParts = [
-      if (network?.governorateName != null &&
-          network!.governorateName!.isNotEmpty)
-        network.governorateName!,
-      if (network?.directorateName != null &&
-          network!.directorateName!.isNotEmpty)
-        network.directorateName!,
-    ].join(' • ');
-
-    final formattedBalance = wallet != null
-        ? '${AmountFormatter.formatValue(wallet!.walletBalance, decimalPlaces: 0)} $currency'
-        : '••••';
-
-    final formattedCredit = wallet?.creditLimit != null
-        ? '${AmountFormatter.formatValue(wallet!.creditLimit!, decimalPlaces: 0)} $currency'
-        : (wallet != null ? 'غير محدد' : '••••');
-
     final logoWidget = CustomAvatarBadge(
-      imageUrl: logoUrl,
-      initials: name,
+      imageUrl: item.logoUrl,
+      initials: item.networkName,
       size: AvatarBadgeSize.sm,
       hasPulse: false,
     );
 
     return CustomCarouselCard(
-      title: name,
-      subtitle: locationParts.isNotEmpty ? locationParts : 'المزود المعتمد',
+      title: item.networkName,
+      subtitle: item.locationLabel,
       logo: logoWidget,
-      cardNumber:
-          wallet?.walletUuid ?? network?.networkUuid ?? link.pos?.posUuid ?? '',
+      cardNumber: item.cardNumber,
       primaryLabel: 'رصيد نقطة البيع المتاح',
-      primaryValue: formattedBalance,
-      currencyTag: currency,
+      primaryValue: item.formattedBalance,
+      currencyTag: item.currency,
       secondaryLabel: 'سقف الائتمان الممنوح',
-      secondaryValue: formattedCredit,
-      statusText: link.isActive ? 'مرتبط ونشط' : 'معلّق',
-      isStatusActive: link.isActive,
-      metricText: link.pos?.posName ?? 'نقطة البيع',
+      secondaryValue: item.formattedCredit,
+      statusText: item.statusText,
+      isStatusActive: item.isStatusActive,
+      metricText: item.metricText,
       metricIcon: Icons.storefront_rounded,
-      theme: _resolveTheme(cardIndex, isSelected),
-      isSelected: isSelected,
+      theme: _resolveTheme(item.cardIndex, item.isSelected),
+      isSelected: item.isSelected,
       onTap: onTap,
     );
   }
