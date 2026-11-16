@@ -4,7 +4,7 @@ import 'package:netsales/widgets/carousels/custom_carousel_card.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 
 /// مهايئ بطاقة الشبكة التنفيذية المربوط بالنموذج (ExecutiveNetworkCard)
-/// يقوم بتمرير بيانات NetworkEntity إلى ودجت الكاروسيل العامة CustomCarouselCard
+/// يعرض نموذج بطاقة الشبكة المحوّل عبر مكوّن الكاروسيل المشترك CustomCarouselCard
 class ExecutiveNetworkCard extends StatelessWidget {
   final NetworkProviderCardViewModel item;
   final bool isSelected;
