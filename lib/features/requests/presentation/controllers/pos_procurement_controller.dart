@@ -91,27 +91,6 @@ class PosProcurementController extends GetxController {
   final searchQuery = ''.obs;
   final statusFilter = RxnString(); // null = all, PENDING, APPROVED, etc.
 
-  // Guided procurement flow: build the request, then review and submit it.
-  final currentOrderStep = 0.obs;
-
-  void continueToOrderReview() {
-    if (procurementCart.isEmpty) {
-      CustomSnackbar.show(
-        title: 'الطلب غير مكتمل',
-        message: 'أضف باقة واحدة على الأقل قبل الانتقال إلى المراجعة.',
-        type: SnackType.warning,
-      );
-      return;
-    }
-    currentOrderStep.value = 1;
-    FocusManager.instance.primaryFocus?.unfocus();
-  }
-
-  void returnToOrderItems() {
-    currentOrderStep.value = 0;
-    FocusManager.instance.primaryFocus?.unfocus();
-  }
-
   // State: معالج إنشاء طلب جديد (Wizard Form)
   final formKey = GlobalKey<FormState>();
   final myPosList = <PosEntity>[].obs;
@@ -156,8 +135,6 @@ class PosProcurementController extends GetxController {
 
   /// يمنع إرسال الطلب بعرض سعر قديم أثناء تقارب نقرات الكمية.
   final isQuotePending = false.obs;
-  final _cartQuoteChanges = 0.obs;
-  Worker? _cartQuoteWorker;
 
   /// هل يملك الطلب عرض سعر حديثاً يطابق سياق الإرسال الحالي؟
   bool get hasCurrentServerQuote {
@@ -354,7 +331,6 @@ class PosProcurementController extends GetxController {
     packageSearchController.dispose();
     quantityController.dispose();
     notesController.dispose();
-    _cartQuoteWorker?.dispose();
     _requestListRevision++;
     super.onClose();
   }
@@ -605,7 +581,6 @@ class PosProcurementController extends GetxController {
     if (safeCount == 0) {
       if (existingIndex != -1) {
         procurementCart.removeAt(existingIndex);
-        if (procurementCart.isEmpty) returnToOrderItems();
         _invalidateLocalPricingSnapshot();
       }
       return;
@@ -654,14 +629,6 @@ class PosProcurementController extends GetxController {
     isQuotePending.value = false;
   }
 
-  int _unitPriceMinor(PackageEntity package) =>
-      (selectedSaleType.value == SaleType.cash
-          ? package.procurementCashUnitPriceMinor
-          : package.procurementCreditUnitPriceMinor) ??
-      (((selectedSaleType.value == SaleType.cash
-                  ? package.effectiveCashPrice
-                  : package.effectiveCreditPrice) * 100).round());
-
   int _lineGrossMinor(ProcurementCartLineEntity line) =>
       (line.package.procurementBaseUnitPriceMinor ??
           (line.package.packageVoucherPrice * 100).round()) * line.voucherCount;
@@ -697,7 +664,6 @@ class PosProcurementController extends GetxController {
     procurementCart.removeWhere((line) => line.package.packageId == packageId);
     if (procurementCart.length == previousLength) return;
 
-    if (procurementCart.isEmpty) returnToOrderItems();
     _invalidateLocalPricingSnapshot();
   }
 
@@ -957,7 +923,6 @@ class PosProcurementController extends GetxController {
 
   /// تهيئة نموذج طلب جديد
   void initNewOrderForm() {
-    currentOrderStep.value = 0;
     isEditing.value = false;
     editingRequestId.value = null;
     clearProcurementCart();
