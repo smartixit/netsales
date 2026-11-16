@@ -23,7 +23,7 @@ class ProcurementOriginalItemsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'البنود الأصلية في الطلب (' + items.length.toString() + ')',
+          'البنود الأصلية في الطلب (${items.length})',
           style: AppTypography.titleSmall.copyWith(
             color: colors.onSurface,
             fontWeight: FontWeight.bold,

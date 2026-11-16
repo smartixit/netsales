@@ -67,11 +67,11 @@ class ProcurementRequestOverviewPanel extends StatelessWidget {
           AppSpacing.vSm,
           ProcurementRequestInfoRow(
             label: 'الشبكة الموردة:',
-            value: request.networkName ?? 'شبكة #' + request.networkId.toString(),
+            value: request.networkName ?? 'شبكة #${request.networkId}',
           ),
           ProcurementRequestInfoRow(
             label: 'نقطة البيع:',
-            value: request.posName ?? 'نقطة بيع #' + request.posId.toString(),
+            value: request.posName ?? 'نقطة بيع #${request.posId}',
           ),
           ProcurementRequestInfoRow(
             label: 'طريقة الدفع:',
@@ -90,7 +90,7 @@ class ProcurementRequestOverviewPanel extends StatelessWidget {
           if (request.invoiceId != null)
             ProcurementRequestInfoRow(
               label: 'الفاتورة المرتبطة:',
-              value: request.invoiceUuid ?? 'فاتورة #' + request.invoiceId.toString(),
+              value: request.invoiceUuid ?? 'فاتورة #${request.invoiceId}',
               isHighlight: true,
             ),
           if (request.requestNote != null &&
