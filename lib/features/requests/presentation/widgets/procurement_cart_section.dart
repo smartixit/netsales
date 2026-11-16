@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_quantity_editor_sheet.dart';
@@ -77,6 +79,7 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
             ...lines.map((line) {
               return _ProcurementCartLineCard(
                 line: line,
+                saleType: controller.selectedSaleType.value,
                 onEdit: () => ProcurementQuantityEditorSheet.show(
                   package: line.package,
                   currentQuantity: line.voucherCount,
@@ -94,6 +97,7 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
 
 class _ProcurementCartLineCard extends StatelessWidget {
   final ProcurementCartLineEntity line;
+  final SaleType saleType;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onIncrement;
@@ -101,6 +105,7 @@ class _ProcurementCartLineCard extends StatelessWidget {
 
   const _ProcurementCartLineCard({
     required this.line,
+    required this.saleType,
     required this.onEdit,
     required this.onDelete,
     required this.onIncrement,
@@ -174,6 +179,8 @@ class _ProcurementCartLineCard extends StatelessWidget {
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
+                                  AppSpacing.vXxs,
+                                  _LocalCartPrice(line: line, saleType: saleType),
                                 ],
                               ),
                             ),
@@ -246,3 +253,46 @@ class _ProcurementCartLineCard extends StatelessWidget {
   }
 }
 
+
+
+class _LocalCartPrice extends StatelessWidget {
+  const _LocalCartPrice({required this.line, required this.saleType});
+  final ProcurementCartLineEntity line;
+  final SaleType saleType;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final package = line.package;
+    final unit = saleType == SaleType.cash
+        ? package.procurementCashUnitPriceMinor
+        : package.procurementCreditUnitPriceMinor;
+    final basisPoints = saleType == SaleType.cash
+        ? package.procurementCashDiscountBasisPoints
+        : package.procurementCreditDiscountBasisPoints;
+    final gross = (package.procurementBaseUnitPriceMinor ??
+        (package.packageVoucherPrice * 100).round()) * line.voucherCount;
+    final discount = basisPoints == null ? 0 : ((gross * basisPoints) + 5000) ~/ 10000;
+    final net = gross - discount;
+
+    return Wrap(
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.xxs,
+      children: [
+        Text(
+          unit == null ? 'تعرفة غير متاحة' :
+            'سعر الكرت: ${AmountFormatter.formatValue(unit / 100)} ر.ي',
+          style: AppTypography.labelSmall.copyWith(color: colors.primary, fontWeight: FontWeight.w700),
+        ),
+        Text(
+          'الخصم: ${AmountFormatter.formatValue(discount / 100)} ر.ي',
+          style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant),
+        ),
+        Text(
+          'صافي البند: ${AmountFormatter.formatValue(net / 100)} ر.ي',
+          style: AppTypography.labelSmall.copyWith(color: colors.onSurface, fontWeight: FontWeight.w800),
+        ),
+      ],
+    );
+  }
+}
