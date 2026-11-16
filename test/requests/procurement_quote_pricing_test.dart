@@ -343,10 +343,9 @@ void main() {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
 
-      controller.onPackageSelected(testPackage);
-      controller.setVoucherCount(500);
-      controller.addOrUpdateCartLine();
+      controller.setPackageVoucherCount(testPackage, 500);
 
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       await pumpEventQueue();
 
       expect(controller.serverQuote.value, isNotNull);
@@ -370,6 +369,7 @@ void main() {
 
       // Change from CASH to CREDIT
       controller.selectedSaleType.value = SaleType.credit;
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       await pumpEventQueue();
 
       expect(mockRepo.lastQuotePayload, isNotNull);
