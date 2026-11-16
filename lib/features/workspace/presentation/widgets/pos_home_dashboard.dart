@@ -16,6 +16,7 @@ import 'package:netsales/features/workspace/presentation/widgets/pos_welcome_hea
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
+import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 /// الشاشة الرئيسية لمساحة عمل نقطة البيع (PosHomeDashboard)
@@ -27,22 +28,16 @@ class PosHomeDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return RefreshIndicator.adaptive(
+    return CustomRefreshablePage(
       onRefresh: controller.loadWorkspace,
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        padding: EdgeInsets.fromLTRB(
-          AppBreakpoints.screenMargin(context),
-          MediaQuery.paddingOf(context).top + 20.h,
-          AppBreakpoints.screenMargin(context),
-          115.h + MediaQuery.paddingOf(context).bottom,
-        ),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Obx(() {
+      padding: EdgeInsets.fromLTRB(
+        AppBreakpoints.screenMargin(context),
+        MediaQuery.paddingOf(context).top + 20.h,
+        AppBreakpoints.screenMargin(context),
+        115.h + MediaQuery.paddingOf(context).bottom,
+      ),
+      maxContentWidth: 760,
+      child: Obx(() {
               if (controller.isLoadingPos.value &&
                   controller.activePos.value == null) {
                 return const Column(
@@ -203,10 +198,7 @@ class PosHomeDashboard extends StatelessWidget {
                   ),
                 ],
               );
-            }),
-          ),
-        ),
-      ),
+      }),
     );
   }
 }
