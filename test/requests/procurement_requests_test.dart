@@ -5,6 +5,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/requests/data/models/request_item_model.dart';
 import 'package:netsales/features/requests/data/models/request_model.dart';
+import 'package:netsales/features/requests/data/models/request_approval_result_model.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
@@ -317,6 +318,46 @@ void main() {
       expect(model.posName, 'نقطة الأمل للمبيعات');
       expect(model.items.length, 1);
       expect(model.items.first.voucherCount, 25);
+    });
+
+    test('approval result preserves the approved request and authoritative invoice', () {
+      final result = RequestApprovalResultModel.fromJson({
+        'request': {
+          'request_id': 101,
+          'network_id': 5,
+          'pos_id': 12,
+          'request_uuid': 'req-uuid-12345',
+          'sale_type': 'CREDIT',
+          'request_total_amount': 25000.0,
+          'status': 'APPROVED',
+          'invoice_id': 901,
+          'invoice_uuid': 'inv-uuid-901',
+        },
+        'invoice': {
+          'invoice_id': 901,
+          'network_id': 5,
+          'pos_id': 12,
+          'request_id': 101,
+          'request_uuid': 'req-uuid-12345',
+          'invoice_uuid': 'inv-uuid-901',
+          'sale_type': 'CREDIT',
+          'invoice_total_amount': 27000.0,
+          'paid_amount': 12000.0,
+          'remaining_amount': 15000.0,
+          'payment_status': 'PARTIALLY_PAID',
+          'payment_status_label': 'مسددة جزئياً',
+          'is_fully_paid': false,
+          'items': [],
+        },
+      });
+
+      expect(result.request.requestId, 101);
+      expect(result.request.status, RequestStatus.approved);
+      expect(result.invoice.invoiceId, 901);
+      expect(result.invoice.invoiceTotalAmount, 27000.0);
+      expect(result.invoice.paidAmount, 12000.0);
+      expect(result.invoice.remainingAmount, 15000.0);
+      expect(result.invoice.isPartiallyPaid, isTrue);
     });
 
     test('RequestModel toJson serializes accurately without currency keys', () {
