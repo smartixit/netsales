@@ -6,7 +6,6 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/workspace/presentation/controllers/workspace_coordinator_controller.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_entity_picker_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_network_picker_tile.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_pos_picker_tile.dart';
@@ -40,10 +39,6 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller = WorkspaceEntityPickerController.to;
-    final coordinator = Get.isRegistered<WorkspaceCoordinatorController>()
-        ? WorkspaceCoordinatorController.to
-        : null;
-
     return Obx(() {
       final isLoading = controller.isLoading.value;
       final errorMessage = controller.errorMessage.value;
@@ -144,7 +139,7 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
           ),
 
           // زر التبديل المباشر بين مساحتي العمل إذا كان مصرحاً له
-          if (coordinator != null && coordinator.canSwitchWorkspace) ...[
+          if (controller.canSwitchWorkspace) ...[
             SizedBox(height: AppSpacing.sm),
             Divider(
               color: isDark
@@ -154,8 +149,7 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
             SizedBox(height: AppSpacing.xs),
             CustomInteractiveBounce(
               onTap: () {
-                Get.back<void>();
-                coordinator.toggleWorkspace();
+                controller.toggleWorkspace();
               },
               child: Container(
                 padding: EdgeInsets.symmetric(
@@ -198,7 +192,7 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            coordinator.switchWorkspaceTooltip,
+                            controller.switchWorkspaceTooltip,
                             style: AppTypography.labelSmall.copyWith(
                               color: colors.onSurfaceVariant,
                             ),
