@@ -347,7 +347,7 @@ void main() {
           'payment_status': 'PARTIALLY_PAID',
           'payment_status_label': 'مسددة جزئياً',
           'is_fully_paid': false,
-          'items': [],
+          'items': <Map<String, dynamic>>[],
         },
       });
 
