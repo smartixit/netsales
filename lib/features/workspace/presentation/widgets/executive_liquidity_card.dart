@@ -39,6 +39,7 @@ class ExecutiveLiquidityCard extends StatelessWidget {
     final hasWallet = summary.hasWallet;
     final isWalletActive = summary.isWalletActive;
     final hasSales = summary.hasSales;
+    final growthRate = summary.growthRate;
     final growthText = summary.growthLabel;
 
     final paidAmountStr = summary.cashSales;
