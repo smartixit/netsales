@@ -27,13 +27,22 @@ class NetworkWorkspaceBinding extends Bindings {
   @override
   void dependencies() {
     if (!Get.isRegistered<BillingRemoteDataSource>()) {
-      registerLazyIfAbsent<BillingRemoteDataSource>(() => const BillingRemoteDataSourceImpl(), fenix: true);
+      registerLazyIfAbsent<BillingRemoteDataSource>(
+        () => const BillingRemoteDataSourceImpl(),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<BillingRepository>()) {
-      registerLazyIfAbsent<BillingRepository>(() => BillingRepositoryImpl(Get.find<BillingRemoteDataSource>()), fenix: true);
+      registerLazyIfAbsent<BillingRepository>(
+        () => BillingRepositoryImpl(Get.find<BillingRemoteDataSource>()),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<BillingUseCases>()) {
-      registerLazyIfAbsent<BillingUseCases>(() => BillingUseCases(Get.find<BillingRepository>()), fenix: true);
+      registerLazyIfAbsent<BillingUseCases>(
+        () => BillingUseCases(Get.find<BillingRepository>()),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<BillingReportsController>()) {
       registerLazyIfAbsent<BillingReportsController>(() => BillingReportsController(
