@@ -991,10 +991,6 @@ class PosProcurementController extends GetxController {
       );
     }
 
-    if (procurementCart.isNotEmpty) {
-      editCartLine(procurementCart.first);
-    }
-
     _scheduleServerQuoteRefresh();
     await Get.toNamed<void>(AppRoutes.newProcurementOrder);
   }
