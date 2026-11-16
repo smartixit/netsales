@@ -6,13 +6,13 @@ import 'package:netsales/features/workspace/presentation/controllers/network_wor
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 
 void main() {
-  setUp(() async {
+  setUp(() {
     Get.testMode = true;
-    await Get.reset();
+    Get.reset();
   });
 
-  tearDown(() async {
-    await Get.reset();
+  tearDown(() {
+    Get.reset();
   });
 
   test('network and POS workspace bindings can be composed repeatedly', () {
