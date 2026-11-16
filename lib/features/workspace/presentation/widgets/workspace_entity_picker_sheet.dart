@@ -42,8 +42,8 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
     return Obx(() {
       final isLoading = controller.isLoading.value;
       final errorMessage = controller.errorMessage.value;
-      final networks = controller.networks;
-      final pointsOfSale = controller.pointsOfSale;
+      final networks = controller.networkItems;
+      final pointsOfSale = controller.posItems;
       final activeNetId = controller.activeNetworkId;
       final activePosId = controller.activePosId;
       final currentSegment = controller.selectedSegment.value;
@@ -111,9 +111,9 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                                   currentWorkspace == AppWorkspace.network &&
                                   network.networkId == activeNetId;
                               return WorkspaceNetworkPickerTile(
-                                network: network,
+                                item: network,
                                 isSelected: isSelected,
-                                onTap: () => controller.selectNetwork(network),
+                                onTap: () => controller.selectNetworkById(network.id),
                               );
                             }).toList(),
                           ))
@@ -129,9 +129,9 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                                   currentWorkspace == AppWorkspace.pos &&
                                   pos.posId == activePosId;
                               return WorkspacePosPickerTile(
-                                pos: pos,
+                                item: pos,
                                 isSelected: isSelected,
-                                onTap: () => controller.selectPos(pos),
+                                onTap: () => controller.selectPosById(pos.id),
                               );
                             }).toList(),
                           )),
