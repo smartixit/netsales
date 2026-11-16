@@ -17,10 +17,12 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 /// متطابق هندسياً ومعمارياً مع قسم NetworkProviderCarouselSection في مساحة الشبكة
 class PosConnectedNetworksCarouselSection extends StatelessWidget {
   final PosWorkspaceController controller;
+  final VoidCallback onLinkNetwork;
 
   const PosConnectedNetworksCarouselSection({
     super.key,
     required this.controller,
+    required this.onLinkNetwork,
   });
 
   @override
@@ -52,7 +54,7 @@ class PosConnectedNetworksCarouselSection extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CustomInteractiveBounce(
-                    onTap: controller.openQrScanner,
+                    onTap: onLinkNetwork,
                     child: Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: 9.w,
@@ -133,7 +135,7 @@ class PosConnectedNetworksCarouselSection extends StatelessWidget {
             icon: Icons.hub_outlined,
             actionLabel: 'مسح رمز QR للربط',
             actionIcon: Icons.qr_code_scanner_rounded,
-            onAction: controller.openQrScanner,
+            onAction: onLinkNetwork,
           )
         else
           CustomCarouselSlider<NetworkPosLinkEntity>(
