@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/membership/presentation/controllers/membership_controller.dart';
+import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_add_form.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_list.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -11,7 +12,10 @@ import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class MembershipScreen extends GetView<MembershipController> {
-  const MembershipScreen({super.key});
+  const MembershipScreen({super.key, required this.isNetwork})
+    : super(tag: isNetwork ? MembershipBinding.networkTag : MembershipBinding.posTag);
+
+  final bool isNetwork;
   @override
   Widget build(BuildContext context) => Obx(() {
     final tenants = controller.isNetwork
