@@ -431,8 +431,7 @@ void main() {
       // Select network and package, add to cart
       controller.onNetworkSelected(10);
       await controller.loadNetworkPackages(10);
-      controller.onPackageSelected(package1);
-      controller.addOrUpdateCartLine();
+      controller.setPackageVoucherCount(package1, 100);
       expect(controller.procurementCart.length, equals(1));
 
       // Switch to POS 202
@@ -449,8 +448,7 @@ void main() {
 
       // Add package from network 2
       await controller.loadNetworkPackages(20);
-      controller.onPackageSelected(package2);
-      controller.addOrUpdateCartLine();
+      controller.setPackageVoucherCount(package2, 100);
 
       // Submit order
       final success = await controller.submitOrder();
