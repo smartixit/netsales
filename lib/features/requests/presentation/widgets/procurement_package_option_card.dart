@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/sale_type.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
@@ -15,6 +17,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
     super.key,
     required this.package,
     required this.quantity,
+    required this.saleType,
     required this.onIncrement,
     required this.onDecrement,
     required this.onEditQuantity,
@@ -22,6 +25,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
 
   final PackageEntity package;
   final int quantity;
+  final SaleType saleType;
   final VoidCallback onIncrement;
   final VoidCallback? onDecrement;
   final VoidCallback onEditQuantity;
@@ -126,6 +130,8 @@ class ProcurementPackageOptionCard extends StatelessWidget {
             ],
           ),
           AppSpacing.vSm,
+          _LivePackagePrice(package: package, saleType: saleType),
+          AppSpacing.vSm,
           Divider(height: 1, color: colors.outlineVariant.withValues(alpha: 0.35)),
           AppSpacing.vXs,
           Row(
@@ -218,6 +224,78 @@ class _PackageSpec extends StatelessWidget {
         Icon(icon, size: 14, color: colors.onSurfaceVariant),
         AppSpacing.hXxs,
         Text(label, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
+      ],
+    );
+  }
+}
+
+
+class _LivePackagePrice extends StatelessWidget {
+  const _LivePackagePrice({required this.package, required this.saleType});
+  final PackageEntity package;
+  final SaleType saleType;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final cash = package.procurementCashUnitPriceMinor;
+    final credit = package.procurementCreditUnitPriceMinor;
+    final active = saleType == SaleType.cash ? cash : credit;
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('تعرفة نقطة البيع', style: AppTypography.labelSmall.copyWith(
+            color: colors.onSurfaceVariant, fontWeight: FontWeight.w700,
+          )),
+          AppSpacing.vXs,
+          Row(
+            children: [
+              Expanded(child: _PriceValue(label: 'نقدي', value: cash, active: saleType == SaleType.cash)),
+              Expanded(child: _PriceValue(label: 'آجل', value: credit, active: saleType == SaleType.credit)),
+            ],
+          ),
+          AppSpacing.vXs,
+          Text(
+            active == null ? 'السعر الحالي غير متاح' :
+              'سعر الكرت: ' + AmountFormatter.formatValue(active / 100) + ' ر.ي',
+            style: AppTypography.labelMedium.copyWith(
+              color: colors.primary, fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PriceValue extends StatelessWidget {
+  const _PriceValue({required this.label, required this.value, required this.active});
+  final String label;
+  final int? value;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTypography.labelSmall.copyWith(
+          color: active ? colors.primary : colors.onSurfaceVariant,
+        )),
+        Text(
+          value == null ? '—' : AmountFormatter.formatValue(value! / 100) + ' ر.ي',
+          style: AppTypography.titleSmall.copyWith(
+            color: active ? colors.primary : colors.onSurface,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ],
     );
   }

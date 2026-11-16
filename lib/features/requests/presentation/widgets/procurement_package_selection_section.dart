@@ -126,6 +126,7 @@ class ProcurementPackageSelectionSection
                                 width: cardWidth,
                                 child: ProcurementPackageOptionCard(
                                   package: package,
+                                  saleType: controller.selectedSaleType.value,
                                   quantity: controller.cartQuantityForPackage(
                                     package.packageId,
                                   ),
