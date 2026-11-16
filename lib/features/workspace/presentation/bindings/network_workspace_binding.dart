@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/billing/data/datasources/billing_remote_data_source.dart';
 import 'package:netsales/features/billing/data/datasources/billing_remote_data_source_impl.dart';
@@ -26,23 +27,23 @@ class NetworkWorkspaceBinding extends Bindings {
   @override
   void dependencies() {
     if (!Get.isRegistered<BillingRemoteDataSource>()) {
-      Get.lazyPut<BillingRemoteDataSource>(() => const BillingRemoteDataSourceImpl(), fenix: true);
+      registerLazyIfAbsent<BillingRemoteDataSource>(() => const BillingRemoteDataSourceImpl(), fenix: true);
     }
     if (!Get.isRegistered<BillingRepository>()) {
-      Get.lazyPut<BillingRepository>(() => BillingRepositoryImpl(Get.find<BillingRemoteDataSource>()), fenix: true);
+      registerLazyIfAbsent<BillingRepository>(() => BillingRepositoryImpl(Get.find<BillingRemoteDataSource>()), fenix: true);
     }
     if (!Get.isRegistered<BillingUseCases>()) {
-      Get.lazyPut<BillingUseCases>(() => BillingUseCases(Get.find<BillingRepository>()), fenix: true);
+      registerLazyIfAbsent<BillingUseCases>(() => BillingUseCases(Get.find<BillingRepository>()), fenix: true);
     }
     if (!Get.isRegistered<BillingReportsController>()) {
-      Get.lazyPut<BillingReportsController>(() => BillingReportsController(
+      registerLazyIfAbsent<BillingReportsController>(() => BillingReportsController(
         useCases: Get.find<BillingUseCases>(),
         networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
         networkIdSignal: Get.find<NetworkWorkspaceController>().selectedNetworkId,
       ), fenix: true);
     }
     if (!Get.isRegistered<BillingController>()) {
-      Get.lazyPut<BillingController>(() => BillingController(
+      registerLazyIfAbsent<BillingController>(() => BillingController(
         useCases: Get.find<BillingUseCases>(),
         networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
         networkIdSignal: Get.find<NetworkWorkspaceController>().selectedNetworkId,
