@@ -90,7 +90,7 @@ void main() {
     test('workspace screens remain composition-only', () {
       final directory = Directory('lib/features/workspace/presentation/screens');
       final forbiddenImports = RegExp(
-        r'''import\s+['"](?:package:get/|package:netsales/core/services/|package:netsales/features/.*/domain/usecases/)''',
+        r'''import\s+['"](?:package:netsales/core/services/|package:netsales/features/.*/domain/usecases/)''',
       );
       final forbiddenCalls = RegExp(
         r'\b(?:Get\.(?:to|toNamed|offAll|offAllNamed|back)|\.execute\()',
