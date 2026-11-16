@@ -7,6 +7,7 @@ typedef NetworkLiquiditySummary = ({
   bool isWalletActive,
   bool hasSales,
   double growthRate,
+  String growthLabel,
   String cashSales,
   String outstandingReceivables,
   String posCoverage,
