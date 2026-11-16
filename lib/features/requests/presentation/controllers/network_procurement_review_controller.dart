@@ -9,6 +9,7 @@ import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
@@ -22,6 +23,8 @@ import 'package:netsales/features/requests/presentation/widgets/network_request_
 import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
+import 'package:netsales/features/requests/presentation/widgets/request_approval_result_sheet.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم مراجعة واعتماد طلبات التوريد لمشغلي الشبكة (Network Procurement Review Controller)
@@ -71,6 +74,7 @@ class NetworkProcurementReviewController extends GetxController {
   final isLoadingPackages = false.obs;
   final isPreviewingModification = false.obs;
   final currentPreview = Rxn<RequestModificationPreviewEntity>();
+  final lastApprovalResult = Rxn<RequestApprovalResultEntity>();
   final modificationLines = <RequestModificationLineEntity>[].obs;
   final editingRequestId = RxnInt();
   final modificationNoteController = TextEditingController();
@@ -472,15 +476,17 @@ class NetworkProcurementReviewController extends GetxController {
     );
 
     try {
-      final approved = await approveRequestUseCase(
+      final approvalResult = await approveRequestUseCase(
         requestId,
         requestNote: requestNote,
         items: items,
       );
+      lastApprovalResult.value = approvalResult;
 
+      final approvedRequest = approvalResult.request;
       final index = requests.indexWhere((r) => r.requestId == requestId);
       if (index != -1) {
-        requests[index] = approved;
+        requests[index] = approvedRequest;
       }
 
       clearModificationEditor();
@@ -490,9 +496,23 @@ class NetworkProcurementReviewController extends GetxController {
       CustomSnackbar.show(
         title: 'نجاح الاعتماد',
         message:
-            'تم اعتماد الطلب رقم #${approved.requestId} وتوليد فاتورة المبيعات.',
+            'تم اعتماد الطلب رقم #${approvedRequest.requestUuid ?? approvedRequest.requestId} وتوليد الفاتورة رقم #${approvalResult.invoice.invoiceUuid ?? approvalResult.invoice.invoiceId}.',
         type: SnackType.success,
       );
+      if (Get.context != null) {
+        await CustomBottomSheet.show<void>(
+          title: 'اكتمل اعتماد الطلب',
+          subtitle: 'نتيجة الفاتورة كما أعادها الخادم',
+          leadingIcon: Icons.receipt_long_rounded,
+          scrollable: true,
+          child: RequestApprovalResultSheet(result: approvalResult),
+          stickyFooter: CustomButton.primary(
+            text: 'إغلاق',
+            width: double.infinity,
+            onPressed: () => Get.back<void>(),
+          ),
+        );
+      }
       return true;
     } on AppException catch (e) {
       if (CustomAnimationOverlay.isShowing) {

@@ -10,6 +10,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/form_validators.dart';
+import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discount_use_case.dart';
@@ -1014,7 +1015,12 @@ class PosProcurementController extends GetxController {
             .toList(growable: false),
       };
 
-      final created = await createRequestUseCase(payload);
+      final created = await createRequestUseCase(
+        payload,
+        idempotencyKey: IdempotencyHelper.forVoucherRequest(
+          selectedNetworkId.value,
+        ),
+      );
       requests.insert(0, created);
       clearProcurementCart();
       clearVoucherQuantity();
