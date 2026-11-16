@@ -64,7 +64,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           label: 'فريق العمل',
           icon: Icons.groups_outlined,
           activeIcon: Icons.groups_rounded,
-          content: MembershipScreen(),
+          content: MembershipScreen(isNetwork: true),
         ),
         WorkspaceNavItem(
           label: 'التقارير',
