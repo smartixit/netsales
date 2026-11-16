@@ -778,6 +778,14 @@ class PosProcurementController extends GetxController {
     );
   }
 
+  /// واجهة توافقية لقراءة الخصم التفصيلي؛ لا تُستخدم لتحديد كمية الطلب.
+  /// كمية الطلب نفسها تُدار حصراً عبر procurementCart.
+  void onPackageSelected(PackageEntity package) {
+    _setSelectedPackage(package);
+    setDefaultSheetIfEmpty();
+    unawaited(loadEffectiveDiscount());
+  }
+
   /// استرجاع الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية من Laravel
   Future<void> loadEffectiveDiscount() async {
     final posId = selectedPosId.value;
