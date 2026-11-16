@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
@@ -25,12 +24,10 @@ class PosRecentTransactionsSection extends StatelessWidget {
     final colors = context.colors;
 
     return Obx(() {
-      if (controller.isLoadingRecentData.value &&
-          controller.recentTransactionItems.isEmpty) {
+      final items = controller.recentTransactionItems;
+      if (controller.isLoadingRecentData.value && items.isEmpty) {
         return const CustomSkeletonCard(height: 160);
       }
-
-      final items = controller.recentTransactionItems;
 
       if (items.isEmpty) {
         return CustomSurfaceCard(
@@ -108,7 +105,7 @@ class PosRecentTransactionsSection extends StatelessWidget {
         CustomButton.text(
           text: 'عرض الكل',
           suffix: Icons.chevron_left_rounded,
-          onPressed: () => Get.toNamed<void>(AppRoutes.purchaseInvoices),
+          onPressed: controller.openPurchaseInvoices,
         ),
       ],
     );

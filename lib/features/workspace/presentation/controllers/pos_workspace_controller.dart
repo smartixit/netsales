@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/enums/role_key.dart';
@@ -7,9 +5,9 @@ import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/core/utils/greeting_formatter.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/session_service.dart';
@@ -18,22 +16,28 @@ import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
-import 'package:netsales/features/commercial/presentation/widgets/network_pos_link_confirm_sheet.dart';
 import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/workspace/domain/entities/workspace_transaction_item_entity.dart';
-import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
-import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
-import 'package:netsales/widgets/toasts/custom_snackbar.dart';
+import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_workspace_transaction_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_network_package_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_active_supply_order_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_wallet_summary_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_network_carousel_card_mapper.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_network_carousel_card_view_model.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_wallet_summary_view_model.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_active_supply_order_view_model.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_network_package_view_model.dart';
 
 /// متحكم مساحة عمل نقطة البيع التفاعلي الشامل المرتبط كلياً بواجهات الـ API (PosWorkspaceController)
 class PosWorkspaceController extends GetxController {
@@ -108,98 +112,47 @@ class PosWorkspaceController extends GetxController {
 
   String get activePosName => activePos.value?.posName ?? 'نقطة البيع';
 
-  /// فتح ماسح رمز QR للارتباط بمزود شبكة جديد
-  Future<void> openQrScanner() async {
-    final currentPosId = activePos.value?.posId;
-    if (currentPosId == null || currentPosId <= 0) {
-      CustomSnackbar.show(
-        title: 'تنبيه',
-        message: 'يرجى اختيار وتفعيل نقطة البيع أولاً قبل مسح رمز الارتباط',
-        type: SnackType.warning,
-      );
-      return;
-    }
+  Future<NetworkPosLinkPreviewEntity?> previewNetworkLinkChallenge({
+    required String payload,
+    required int posId,
+  }) async {
+    final useCase = previewNetworkPosLinkChallengeUseCase ??
+        (Get.isRegistered<PreviewNetworkPosLinkChallengeUseCase>()
+            ? Get.find<PreviewNetworkPosLinkChallengeUseCase>()
+            : null);
+    if (useCase == null) return null;
 
-    await HapticFeedback.mediumImpact();
-    await Get.to<void>(
-      () => CustomQrScanner(
-        title: 'مسح رمز ربط شبكة',
-        instruction: 'وجّه الكاميرا نحو رمز QR لدعوة شبكة المزود',
-        onClose: () => Get.back<void>(),
-        onScan: (result) async {
-          Get.back<void>();
-          await _handleScannedQrPayload(result.rawValue, currentPosId);
-        },
-      ),
-      fullscreenDialog: true,
-    );
+    return useCase.execute(payload: payload, posId: posId);
   }
 
-  Future<void> _handleScannedQrPayload(String payload, int posId) async {
-    try {
-      await HapticFeedback.lightImpact();
-      final previewUseCase = previewNetworkPosLinkChallengeUseCase ??
-          (Get.isRegistered<PreviewNetworkPosLinkChallengeUseCase>()
-              ? Get.find<PreviewNetworkPosLinkChallengeUseCase>()
-              : null);
-      if (previewUseCase == null) return;
+  Future<bool> confirmNetworkLinkChallenge({
+    required String challengeUuid,
+    required int posId,
+  }) async {
+    final useCase = confirmNetworkPosLinkChallengeUseCase ??
+        (Get.isRegistered<ConfirmNetworkPosLinkChallengeUseCase>()
+            ? Get.find<ConfirmNetworkPosLinkChallengeUseCase>()
+            : null);
+    if (useCase == null) return false;
 
-      final preview = await previewUseCase.execute(
-        payload: payload,
-        posId: posId,
-      );
+    final newLink = await useCase.execute(
+      challengeUuid: challengeUuid,
+      posId: posId,
+    );
 
-      final confirmed = await NetworkPosLinkConfirmSheet.show(
-        preview: preview,
-        onConfirm: () async {
-          try {
-            final confirmUseCase = confirmNetworkPosLinkChallengeUseCase ??
-                (Get.isRegistered<ConfirmNetworkPosLinkChallengeUseCase>()
-                    ? Get.find<ConfirmNetworkPosLinkChallengeUseCase>()
-                    : null);
-            if (confirmUseCase == null) return false;
+    final existingIndex = networkLinks.indexWhere(
+      (link) => link.networkId == newLink.networkId,
+    );
+    final selectedIndex = existingIndex < 0 ? 0 : existingIndex;
 
-            final newLink = await confirmUseCase.execute(
-              challengeUuid: preview.challengeUuid,
-              posId: posId,
-            );
-
-            final existingIdx = networkLinks.indexWhere(
-              (l) => l.networkId == newLink.networkId,
-            );
-            if (existingIdx == -1) {
-              networkLinks.insert(0, newLink);
-              await selectNetwork(newLink, index: 0);
-            } else {
-              networkLinks[existingIdx] = newLink;
-              await selectNetwork(newLink, index: existingIdx);
-            }
-
-            await CustomAnimationOverlay.showSuccess(
-              message: 'تم ربط نقطة البيع بنجاح مع شبكة ${preview.networkName}',
-            );
-            return true;
-          } catch (e) {
-            CustomSnackbar.show(
-              title: 'تعذر تأكيد الارتباط',
-              message: AppException.sanitizeMessage(e.toString()),
-              type: SnackType.error,
-            );
-            return false;
-          }
-        },
-      );
-
-      if (confirmed == true) {
-        await loadNetworks(posId, refresh: true);
-      }
-    } catch (e) {
-      CustomSnackbar.show(
-        title: 'رمز غير صالح أو منتهي',
-        message: AppException.sanitizeMessage(e.toString()),
-        type: SnackType.error,
-      );
+    if (existingIndex < 0) {
+      networkLinks.insert(0, newLink);
+    } else {
+      networkLinks[existingIndex] = newLink;
     }
+
+    await selectNetwork(newLink, index: selectedIndex);
+    return true;
   }
 
   /// كائن العرض الدلالي للدور الوظيفي لنقطة البيع
@@ -231,79 +184,50 @@ class PosWorkspaceController extends GetxController {
   /// رتبة أو صفة المستخدم المستخرجة ديناميكياً من Enum الأدوار وسجل العرض
   String get userRole => rolePresentation.label;
 
+  List<PosNetworkPackageViewModel> get networkPackageItems =>
+      PosNetworkPackageMapper.map(networkPackages);
+
+  PosActiveSupplyOrderViewModel? get activeSupplyOrder =>
+      PosActiveSupplyOrderMapper.map(recentRequests);
+
+  PosWalletSummaryViewModel? get selectedWalletSummary =>
+      PosWalletSummaryMapper.map(selectedWallet.value);
+
+  List<PosNetworkCarouselCardViewModel> get networkCarouselItems =>
+      PosNetworkCarouselCardMapper.map(
+        links: networkLinks,
+        selectedLink: selectedNetworkLink.value,
+        selectedWallet: selectedWallet.value,
+      );
+
+  void openProcurementOrder(RequestEntity request) =>
+      Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
+
+  void openProcurementOrderForPackage(int packageId) {
+    Get.toNamed<void>(
+      AppRoutes.newProcurementOrder,
+      arguments: {'package_id': packageId},
+    );
+  }
+
   /// قائمة حركات الحساب والمشتريات المحولة كـ ViewModels جاهزة للعرض
-  List<WorkspaceTransactionItemEntity> get recentTransactionItems {
-    final items = <WorkspaceTransactionItemEntity>[];
-
-    for (final inv in recentInvoices) {
-      final paymentPresentation =
-          EnumPresentationRegistry.resolveInvoicePaymentStatus(
-            inv.paymentStatus,
-            serverLabel: inv.paymentStatusLabel,
-          );
-      final saleType = inv.saleTypeLabel ?? 'شراء';
-      final date = DateFormatter.tryParse(
-        inv.invoiceDate ?? inv.createdAt ?? '',
-      );
-      final dateText = date != null ? DateFormatter.smart(date) : '';
-      final subtitle = dateText.isNotEmpty ? '$saleType • $dateText' : saleType;
-      final ref = inv.invoiceUuid != null && inv.invoiceUuid!.isNotEmpty
-          ? (inv.invoiceUuid!.length > 8
-              ? inv.invoiceUuid!.substring(0, 8)
-              : inv.invoiceUuid!)
-          : 'فاتورة توريد';
-
-      items.add(
-        WorkspaceTransactionItemEntity(
-          title: 'فاتورة توريد',
-          reference: ref,
-          subtitle: subtitle,
-          formattedAmount:
-              '${AmountFormatter.formatValue(inv.invoiceTotalAmount)} ر.ي',
-          amountColor: const Color(0xFFBA1A1A),
-          statusPresentation: paymentPresentation,
-          icon: Icons.inventory_2_rounded,
-          onTap: () {
-            Get.toNamed<void>(AppRoutes.purchaseInvoiceDetails, arguments: inv);
-          },
-        ),
-      );
-    }
-
-    for (final req in recentRequests) {
-      final statusPresentation = EnumPresentationRegistry.resolveRequestStatus(
-        req.status,
-        serverLabel: req.statusLabel,
-      );
-      final saleType = req.saleTypeLabel ?? 'طلب شراء';
-      final date = DateFormatter.tryParse(
-        req.requestDate ?? req.createdAt ?? '',
-      );
-      final dateText = date != null ? DateFormatter.smart(date) : '';
-      final subtitle = dateText.isNotEmpty ? '$saleType • $dateText' : saleType;
-      final ref = req.requestUuid != null && req.requestUuid!.isNotEmpty
-          ? (req.requestUuid!.length > 8
-              ? req.requestUuid!.substring(0, 8)
-              : req.requestUuid!)
-          : 'طلب توريد';
-
-      items.add(
-        WorkspaceTransactionItemEntity(
-          title: 'طلب توريد',
-          reference: ref,
-          subtitle: subtitle,
-          formattedAmount:
-              '${AmountFormatter.formatValue(req.requestTotalAmount)} ر.ي',
-          statusPresentation: statusPresentation,
-          icon: Icons.send_rounded,
-          onTap: () {
-            Get.toNamed<void>(AppRoutes.procurementOrders, arguments: req);
-          },
-        ),
-      );
-    }
-
-    return items;
+  List<WorkspaceTransactionItemViewModel> get recentTransactionItems {
+    return PosWorkspaceTransactionMapper.map(
+      invoices: recentInvoices,
+      requests: recentRequests,
+      onOpenInvoice: (invoice) {
+        Get.toNamed<void>(
+          AppRoutes.purchaseInvoiceDetails,
+          arguments: invoice,
+        );
+      },
+      onOpenRequest: (request) {
+        Get.toNamed<void>(
+          AppRoutes.procurementOrders,
+          arguments: request,
+        );
+      },
+    );
   }
 
   /// رابط صورة المستخدم
@@ -641,6 +565,36 @@ class PosWorkspaceController extends GetxController {
     recentDataError.value = null;
     packagesError.value = null;
   }
+
+  Future<void> selectPosById(int? posId) async {
+    if (posId == null) return;
+    final selected = availablePos.firstWhereOrNull(
+      (position) => position.posId == posId,
+    );
+    if (selected != null) await selectPos(selected);
+  }
+
+  void openNewProcurementOrder() =>
+      Get.toNamed<void>(AppRoutes.newProcurementOrder);
+
+  void openPurchaseInvoices() =>
+      Get.toNamed<void>(AppRoutes.purchaseInvoices);
+
+  void openPosDebtLedger() => Get.toNamed<void>(AppRoutes.posDebtLedger);
+
+  void openWalletStatement() {
+    final posId = activePos.value?.posId;
+    if (posId == null) return;
+    final networkId = selectedNetworkLink.value?.networkId;
+    final arguments = <String, dynamic>{'pos_id': posId};
+    if (networkId != null) arguments['network_id'] = networkId;
+    Get.toNamed<void>(
+      AppRoutes.posWalletStatement,
+      arguments: arguments,
+    );
+  }
+
+  String get userInitials => TextFormatter.avatarInitials(userName, maxChars: 2);
 
   void onNavItemSelected(int index) {
     selectedNavIndex.value = index;

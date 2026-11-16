@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -8,9 +6,6 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
-import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
-import 'package:netsales/features/workspace/presentation/controllers/workspace_coordinator_controller.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_entity_picker_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_network_picker_tile.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_pos_picker_tile.dart';
@@ -26,30 +21,12 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
 
   const WorkspaceEntityPickerSheet({super.key, required this.currentWorkspace});
 
-  /// عرض النافذة السفلية التفاعلية فوراً مع إظهار Skeleton Shimmer أثناء التحميل
+  /// يعرض نافذة اختيار الكيان؛ تحميل البيانات وتهيئة الحالة مسؤولية Controller.
   static Future<void> show(
     BuildContext context, {
     required AppWorkspace currentWorkspace,
-  }) async {
-    if (!Get.isRegistered<WorkspaceEntityPickerController>()) {
-      Get.put(
-        WorkspaceEntityPickerController(
-          getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
-          getMyPosUseCase: Get.find<GetMyPosUseCase>(),
-        ),
-      );
-    }
-
-    final controller = WorkspaceEntityPickerController.to;
-    controller.selectedSegment.value =
-        currentWorkspace == AppWorkspace.network ? 0 : 1;
-
-    // إطلاق جلب البيانات وإظهار الهيكل العظمي فوراً داخل النافذة
-    unawaited(controller.loadEntities());
-
-    if (!context.mounted) return;
-
-    await CustomBottomSheet.show<void>(
+  }) {
+    return CustomBottomSheet.show<void>(
       title: 'الكيانات ومساحات العمل',
       subtitle: 'اختر الشبكة أو نقطة البيع للتنقل الفوري للعمليات',
       leadingIcon: Icons.hub_rounded,
@@ -62,15 +39,11 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller = WorkspaceEntityPickerController.to;
-    final coordinator = Get.isRegistered<WorkspaceCoordinatorController>()
-        ? WorkspaceCoordinatorController.to
-        : null;
-
     return Obx(() {
       final isLoading = controller.isLoading.value;
       final errorMessage = controller.errorMessage.value;
-      final networks = controller.networks;
-      final pointsOfSale = controller.pointsOfSale;
+      final networks = controller.networkItems;
+      final pointsOfSale = controller.posItems;
       final activeNetId = controller.activeNetworkId;
       final activePosId = controller.activePosId;
       final currentSegment = controller.selectedSegment.value;
@@ -136,11 +109,11 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                             children: networks.map((network) {
                               final isSelected =
                                   currentWorkspace == AppWorkspace.network &&
-                                  network.networkId == activeNetId;
+                                  network.id == activeNetId;
                               return WorkspaceNetworkPickerTile(
-                                network: network,
+                                item: network,
                                 isSelected: isSelected,
-                                onTap: () => controller.selectNetwork(network),
+                                onTap: () => controller.selectNetworkById(network.id),
                               );
                             }).toList(),
                           ))
@@ -154,11 +127,11 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                             children: pointsOfSale.map((pos) {
                               final isSelected =
                                   currentWorkspace == AppWorkspace.pos &&
-                                  pos.posId == activePosId;
+                                  pos.id == activePosId;
                               return WorkspacePosPickerTile(
-                                pos: pos,
+                                item: pos,
                                 isSelected: isSelected,
-                                onTap: () => controller.selectPos(pos),
+                                onTap: () => controller.selectPosById(pos.id),
                               );
                             }).toList(),
                           )),
@@ -166,7 +139,7 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
           ),
 
           // زر التبديل المباشر بين مساحتي العمل إذا كان مصرحاً له
-          if (coordinator != null && coordinator.canSwitchWorkspace) ...[
+          if (controller.canSwitchWorkspace) ...[
             SizedBox(height: AppSpacing.sm),
             Divider(
               color: isDark
@@ -176,8 +149,7 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
             SizedBox(height: AppSpacing.xs),
             CustomInteractiveBounce(
               onTap: () {
-                Get.back<void>();
-                coordinator.toggleWorkspace();
+                controller.toggleWorkspace();
               },
               child: Container(
                 padding: EdgeInsets.symmetric(
@@ -220,7 +192,7 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            coordinator.switchWorkspaceTooltip,
+                            controller.switchWorkspaceTooltip,
                             style: AppTypography.labelSmall.copyWith(
                               color: colors.onSurfaceVariant,
                             ),

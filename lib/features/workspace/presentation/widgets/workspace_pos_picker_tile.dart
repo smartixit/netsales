@@ -4,20 +4,20 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
+import 'package:netsales/features/workspace/presentation/models/workspace_pos_picker_item_view_model.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// بطاقة اختيار نقطة بيع واحدة داخل النافذة السفلية (WorkspacePosPickerTile)
 class WorkspacePosPickerTile extends StatelessWidget {
-  final PosEntity pos;
+  final WorkspacePosPickerItemViewModel item;
   final bool isSelected;
   final VoidCallback onTap;
 
   const WorkspacePosPickerTile({
     super.key,
-    required this.pos,
+    required this.item,
     required this.isSelected,
     required this.onTap,
   });
@@ -26,13 +26,6 @@ class WorkspacePosPickerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final locationParts = [
-      if (pos.governorateName != null && pos.governorateName!.isNotEmpty)
-        pos.governorateName!,
-      if (pos.directorateName != null && pos.directorateName!.isNotEmpty)
-        pos.directorateName!,
-    ].join(' • ');
 
     return Padding(
       padding: EdgeInsets.only(bottom: AppSpacing.sm),
@@ -77,10 +70,10 @@ class WorkspacePosPickerTile extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child:
-                    pos.posProfileLogoUrl != null &&
-                            pos.posProfileLogoUrl!.isNotEmpty
+                    item.logoUrl != null &&
+                            item.logoUrl!.isNotEmpty
                         ? CustomCachedImage.avatar(
-                            url: pos.posProfileLogoUrl,
+                            url: item.logoUrl,
                             radius: 19.r,
                           )
                         : Icon(
@@ -100,7 +93,7 @@ class WorkspacePosPickerTile extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            pos.posName,
+                            item.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.titleSmall.copyWith(
@@ -109,7 +102,7 @@ class WorkspacePosPickerTile extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (pos.isActive) ...[
+                        if (item.isActive) ...[
                           SizedBox(width: 6.w),
                           CustomPulsingIndicator(
                             color: colors.success,
@@ -121,11 +114,7 @@ class WorkspacePosPickerTile extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      locationParts.isNotEmpty
-                          ? locationParts
-                          : (pos.posPhoneNumber.isNotEmpty
-                              ? pos.posPhoneNumber
-                              : 'نقطة بيع معتمدة'),
+                      item.subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.labelSmall.copyWith(

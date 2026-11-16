@@ -4,7 +4,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_network_carousel_card_view_model.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_network_carousel_card.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_slider.dart';
@@ -17,10 +17,12 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 /// متطابق هندسياً ومعمارياً مع قسم NetworkProviderCarouselSection في مساحة الشبكة
 class PosConnectedNetworksCarouselSection extends StatelessWidget {
   final PosWorkspaceController controller;
+  final VoidCallback onLinkNetwork;
 
   const PosConnectedNetworksCarouselSection({
     super.key,
     required this.controller,
+    required this.onLinkNetwork,
   });
 
   @override
@@ -52,7 +54,7 @@ class PosConnectedNetworksCarouselSection extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CustomInteractiveBounce(
-                    onTap: controller.openQrScanner,
+                    onTap: onLinkNetwork,
                     child: Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: 9.w,
@@ -133,25 +135,16 @@ class PosConnectedNetworksCarouselSection extends StatelessWidget {
             icon: Icons.hub_outlined,
             actionLabel: 'مسح رمز QR للربط',
             actionIcon: Icons.qr_code_scanner_rounded,
-            onAction: controller.openQrScanner,
+            onAction: onLinkNetwork,
           )
         else
-          CustomCarouselSlider<NetworkPosLinkEntity>(
-            items: controller.networkLinks,
+          CustomCarouselSlider<PosNetworkCarouselCardViewModel>(
+            items: controller.networkCarouselItems,
             currentIndex: controller.currentNetworkIndex.value,
             height: 205,
             viewportFraction: 0.88,
-            itemBuilder: (context, link, index) => PosNetworkCarouselCard(
-              link: link,
-              cardIndex: index,
-              isSelected:
-                  controller.selectedNetworkLink.value?.networkId ==
-                  link.networkId,
-              wallet:
-                  controller.selectedNetworkLink.value?.networkId ==
-                          link.networkId
-                      ? controller.selectedWallet.value
-                      : null,
+            itemBuilder: (context, item, index) => PosNetworkCarouselCard(
+              item: item,
               onTap: () => controller.onNetworkPageChanged(index),
             ),
             onPageChanged: controller.onNetworkPageChanged,

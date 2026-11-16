@@ -18,6 +18,7 @@ import 'package:netsales/features/workspace/data/repositories/network_workspace_
 import 'package:netsales/features/workspace/domain/repositories/network_workspace_repository.dart';
 import 'package:netsales/features/workspace/domain/usecases/get_network_workspace_overview_use_case.dart';
 import 'package:netsales/features/workspace/presentation/bindings/workspace_coordinator_binding.dart';
+import 'package:netsales/features/workspace/presentation/bindings/workspace_entity_picker_binding.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 
 /// ربط تبعيات مساحة عمل مزود الشبكة
@@ -49,6 +50,7 @@ class NetworkWorkspaceBinding extends Bindings {
     }
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();
+    WorkspaceEntityPickerBinding().dependencies();
     OperationalReportsBinding().dependencies();
     FinanceBinding().dependencies();
     MembershipBinding(isNetwork: true).dependencies();

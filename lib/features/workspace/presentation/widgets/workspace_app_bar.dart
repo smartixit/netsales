@@ -12,7 +12,9 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/notifications/presentation/widgets/notification_badge_button.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_coordinator_controller.dart';
+import 'package:netsales/features/workspace/presentation/controllers/workspace_entity_picker_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_entity_picker_sheet.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_executive_profile_sheet.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
@@ -116,13 +118,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                       size: AvatarBadgeSize.sm,
                       customDimension: 46,
                       pulseColor: colors.primary,
-                      onTap: onProfileTap ??
-                          () => WorkspaceCoordinatorController.to
-                              .showExecutiveProfile(
-                                context,
-                                workspace: workspace,
-                                userRole: effectivePresentation.label,
-                              ),
+                      onTap: onProfileTap ?? () => _showExecutiveProfile(context, effectivePresentation),
                     ),
                   SizedBox(width: 10.w),
 
@@ -160,11 +156,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                             ],
                           )
                         : CustomInteractiveBounce(
-                            onTap: onEntityPickerTap ??
-                                () => WorkspaceEntityPickerSheet.show(
-                                      context,
-                                      currentWorkspace: workspace,
-                                    ),
+                            onTap: onEntityPickerTap ?? () => _showEntityPicker(context),
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: AlignmentDirectional.centerStart,
@@ -215,12 +207,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                   const NotificationBadgeButton(),
                   SizedBox(width: 8.w),
                   CustomInteractiveBounce(
-                    onTap: onProfileTap ??
-                        () => WorkspaceCoordinatorController.to.showExecutiveProfile(
-                              context,
-                              workspace: workspace,
-                              userRole: effectivePresentation.label,
-                            ),
+                    onTap: onProfileTap ?? () => _showExecutiveProfile(context, effectivePresentation),
                     child: Container(
                       width: 42.r,
                       height: 42.r,
@@ -251,4 +238,35 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
+  void _showEntityPicker(BuildContext context) {
+    WorkspaceEntityPickerController.to.prepareForWorkspace(workspace);
+    WorkspaceEntityPickerSheet.show(
+      context,
+      currentWorkspace: workspace,
+    );
+  }
+
+  void _showExecutiveProfile(
+    BuildContext context,
+    EnumPresentation presentation,
+  ) {
+    final coordinator = WorkspaceCoordinatorController.to;
+    WorkspaceExecutiveProfileSheet.show(
+      context,
+      currentWorkspace: workspace,
+      userName: coordinator.currentUserName,
+      userRole: presentation.label,
+      userInitials: coordinator.currentUserInitials,
+      userPhoneNumber: coordinator.currentUserPhoneNumber,
+      userProfileLogo: coordinator.currentUserProfileLogo,
+      canSwitchWorkspace: coordinator.canSwitchWorkspace,
+      switchWorkspaceTooltip: coordinator.switchWorkspaceTooltip,
+      onSwitchWorkspace: coordinator.toggleWorkspace,
+      onLogout: coordinator.logout,
+      onOpenSecuritySettings: coordinator.openSecuritySettings,
+      onOpenActiveSessions: coordinator.openActiveSessions,
+      onToggleTheme: coordinator.toggleTheme,
+    );
+  }
+
 }

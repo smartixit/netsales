@@ -4,8 +4,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_wallet_summary_view_model.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
@@ -17,7 +16,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
   const PosSelectedNetworkFinancialSummary({
     super.key,
     required this.networkName,
-    required this.wallet,
+    required this.summary,
     required this.isLoading,
     required this.error,
     required this.onRetry,
@@ -25,7 +24,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
   });
 
   final String networkName;
-  final PosWalletEntity? wallet;
+  final PosWalletSummaryViewModel? summary;
   final bool isLoading;
   final String? error;
   final VoidCallback onRetry;
@@ -68,11 +67,12 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
       );
     }
 
-    if (wallet == null) {
+    final walletSummary = summary;
+    if (walletSummary == null) {
       return const SizedBox.shrink();
     }
 
-    final isOverdrawn = wallet!.isOverdrawn;
+    final isOverdrawn = walletSummary.isOverdrawn;
     final balanceColor = isOverdrawn ? const Color(0xFFF87171) : const Color(0xFF34D399);
 
     return Container(
@@ -225,7 +225,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                AmountFormatter.format(wallet!.walletBalance.toString()),
+                walletSummary.formattedBalance,
                 style: TextStyle(
                   color: balanceColor,
                   fontSize: 22.sp,
@@ -272,9 +272,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
                       ),
                       SizedBox(height: 3.h),
                       Text(
-                        wallet!.creditLimit == null
-                            ? 'بدون تسهيلات'
-                            : '${AmountFormatter.format(wallet!.creditLimit.toString())} ر.ي',
+                        walletSummary.creditLimitLabel,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 12.sp,
@@ -303,7 +301,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
                       ),
                       SizedBox(height: 3.h),
                       Text(
-                        '${AmountFormatter.format(wallet!.availableOverdraftCapacity.toString())} ر.ي',
+                        walletSummary.availableOverdraftLabel,
                         style: TextStyle(
                           color: const Color(0xFF38BDF8),
                           fontSize: 12.sp,

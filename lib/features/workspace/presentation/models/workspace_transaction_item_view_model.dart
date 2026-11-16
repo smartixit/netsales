@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 
-/// نموذج عرض مجرد لسطر حركة أو معاملة في لوحة التحكم (WorkspaceTransactionItem)
-/// يُجهزه الـ Controller بالكامل حاملاً البيانات الجاهزة للعرض بدون أي منطق أو تحويل داخل الواجهة
-class WorkspaceTransactionItemEntity {
+/// Immutable presentation model for a transaction row in a workspace dashboard.
+///
+/// This type intentionally lives in the presentation layer because its fields
+/// describe UI rendering and interactions rather than business-domain data.
+class WorkspaceTransactionItemViewModel {
   final String title;
   final String? reference;
   final String subtitle;
@@ -17,7 +19,7 @@ class WorkspaceTransactionItemEntity {
   final VoidCallback? onAction;
   final String? actionLabel;
 
-  const WorkspaceTransactionItemEntity({
+  const WorkspaceTransactionItemViewModel({
     required this.title,
     required this.subtitle,
     required this.formattedAmount,

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_finance_workspace_hub.dart';
 import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
 import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
@@ -85,10 +83,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           isLoading: isAppBarLoading,
           rolePresentation: controller.rolePresentation,
           userProfileLogo: controller.userProfileLogo,
-          userInitials: TextFormatter.avatarInitials(
-            controller.userName,
-            maxChars: 2,
-          ),
+          userInitials: controller.userInitials,
         ),
         items: navItems,
         mobileItems: mobileNavItems,
@@ -96,9 +91,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         onIndexChanged: controller.onNavItemSelected,
         centerActionIcon: Icons.add_rounded,
         centerActionTooltip: 'طلب توريد جديد',
-        onCenterActionTap: () {
-          Get.toNamed<dynamic>(AppRoutes.newProcurementOrder);
-        },
+        onCenterActionTap: controller.openNewProcurementOrder,
       );
     });
   }

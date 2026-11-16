@@ -4,7 +4,6 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -15,11 +14,11 @@ class PosWelcomeHeader extends StatelessWidget {
   const PosWelcomeHeader({
     super.key,
     required this.controller,
-    this.onQrTap,
+    required this.onQrTap,
   });
 
   final PosWorkspaceController controller;
-  final VoidCallback? onQrTap;
+  final VoidCallback onQrTap;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +28,7 @@ class PosWelcomeHeader extends StatelessWidget {
     final greeting = controller.welcomeGreeting;
     final realFullName = controller.userName;
     final realRole = controller.userRole;
-    final initials = TextFormatter.avatarInitials(realFullName, maxChars: 2);
+    final initials = controller.userInitials;
     final todayStr = controller.todayFormatted;
     final posName = controller.activePosName;
 
@@ -251,7 +250,7 @@ class PosWelcomeHeader extends StatelessWidget {
               // كبسولة مسح رمز QR وربط شبكة جديدة (Interactive Touchpoint)
               Expanded(
                 child: CustomInteractiveBounce(
-                  onTap: onQrTap ?? controller.openQrScanner,
+                  onTap: onQrTap,
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 8.w,

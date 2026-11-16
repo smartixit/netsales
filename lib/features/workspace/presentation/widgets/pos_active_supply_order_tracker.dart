@@ -3,10 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -25,42 +23,11 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
     final colors = context.colors;
 
     return Obx(() {
-      final requests = controller.recentRequests;
-      // البحث عن أول طلب غير مكتمل / نشط
-      final activeRequest = requests.firstWhereOrNull(
-        (r) =>
-            r.statusRaw == 'PENDING' ||
-            r.statusRaw == 'UNDER_REVIEW' ||
-            r.statusRaw == 'APPROVED' ||
-            r.statusRaw == 'PROCESSING',
-      );
-
-      if (activeRequest == null) {
-        return const SizedBox.shrink();
-      }
-
-      final reference =
-          activeRequest.requestUuid != null &&
-                  activeRequest.requestUuid!.isNotEmpty
-              ? (activeRequest.requestUuid!.length > 8
-                  ? activeRequest.requestUuid!.substring(0, 8)
-                  : activeRequest.requestUuid!)
-              : 'طلب توريد';
-      final status = activeRequest.statusRaw?.toUpperCase() ?? 'PENDING';
-
-      final isStep1Done = true;
-      final isStep2Active = status == 'PENDING' || status == 'UNDER_REVIEW';
-      final isStep2Done = status == 'APPROVED' || status == 'PROCESSING' || status == 'DELIVERED';
-      final isStep3Active = status == 'PROCESSING';
-      final isStep3Done = status == 'DELIVERED';
+      final activeOrder = controller.activeSupplyOrder;
+      if (activeOrder == null) return const SizedBox.shrink();
 
       return CustomInteractiveBounce(
-        onTap: () {
-          Get.toNamed<void>(
-            AppRoutes.procurementOrders,
-            arguments: activeRequest,
-          );
-        },
+        onTap: () => controller.openProcurementOrder(activeOrder.request),
         child: CustomSurfaceCard(
           padding: EdgeInsets.all(AppSpacing.lg),
           child: Column(
@@ -96,7 +63,7 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Text(
-                      activeRequest.statusLabel ?? 'نشط',
+                      activeOrder.statusLabel,
                       style: AppTypography.labelSmall.copyWith(
                         color: colors.primary,
                         fontWeight: FontWeight.bold,
@@ -107,7 +74,7 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
               ),
               SizedBox(height: 6.h),
               Text(
-                'طلب توريد $reference • الإجمالي: ${AmountFormatter.formatValue(activeRequest.requestTotalAmount)} ر.ي',
+                'طلب توريد ${activeOrder.reference} • الإجمالي: ${activeOrder.formattedAmount} ر.ي',
                 style: AppTypography.bodySmall.copyWith(
                   color: colors.onSurfaceVariant,
                 ),
@@ -117,34 +84,34 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
                 children: [
                   OrderStepNode(
                     title: 'تم الإرسال',
-                    isDone: isStep1Done,
+                    isDone: true,
                     isActive: false,
                   ),
                   Expanded(
                     child: Container(
                       height: 2.h,
-                      color: isStep2Done || isStep2Active
+                      color: activeOrder.isReviewComplete || activeOrder.isReviewActive
                           ? colors.primary
                           : colors.surfaceContainerHighest,
                     ),
                   ),
                   OrderStepNode(
                     title: 'مراجعة المزود',
-                    isDone: isStep2Done,
-                    isActive: isStep2Active,
+                    isDone: activeOrder.isReviewComplete,
+                    isActive: activeOrder.isReviewActive,
                   ),
                   Expanded(
                     child: Container(
                       height: 2.h,
-                      color: isStep3Done || isStep3Active
+                      color: activeOrder.isDeliveryComplete || activeOrder.isDeliveryActive
                           ? colors.primary
                           : colors.surfaceContainerHighest,
                     ),
                   ),
                   OrderStepNode(
                     title: 'المعالجة والتسليم',
-                    isDone: isStep3Done,
-                    isActive: isStep3Active,
+                    isDone: activeOrder.isDeliveryComplete,
+                    isActive: activeOrder.isDeliveryActive,
                   ),
                 ],
               ),
