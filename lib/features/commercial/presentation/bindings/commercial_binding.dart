@@ -34,19 +34,23 @@ class CommercialBinding extends Bindings {
     // 1. Data Source
     registerLazyIfAbsent<CommercialRemoteDataSource>(
       () => const CommercialRemoteDataSourceImpl(),
+      fenix: true,
     );
 
     // 2. Repository
     registerLazyIfAbsent<CommercialRepository>(
       () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
+      fenix: true,
     );
 
     // 3. Use Cases
     registerLazyIfAbsent<GetMyNetworksUseCase>(
       () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
     );
     registerLazyIfAbsent<GetMyPosUseCase>(
       () => GetMyPosUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
     );
     registerLazyIfAbsent<GetNetworkPosListUseCase>(
       () => GetNetworkPosListUseCase(Get.find<CommercialRepository>()),

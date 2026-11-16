@@ -67,7 +67,6 @@ class PosHomeDashboard extends StatelessWidget {
           );
         }
 
-        final activePos = controller.activePos.value!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
