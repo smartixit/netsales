@@ -505,6 +505,18 @@ void main() {
           voucherCount: 100,
         ),
       );
+      controller.serverQuote.value = const ProcurementQuoteEntity(
+        networkId: 10,
+        posId: 20,
+        saleType: SaleType.cash,
+        saleTypeLabel: 'نقدي',
+        grossTotal: 10000,
+        discountTotal: 1000,
+        netTotal: 9000,
+        currency: 'YER',
+        pricingToken: 'expired_or_changed_server_token',
+        items: [],
+      );
 
       mockRepo.throwPricingOnCreate = true;
       mockRepo.lastQuotePayload = null;
