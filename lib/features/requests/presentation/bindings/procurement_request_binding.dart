@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource_impl.dart';
 import 'package:netsales/features/catalog/data/repositories/package_catalog_repository_impl.dart';
@@ -33,55 +34,55 @@ class ProcurementRequestBinding extends Bindings {
   @override
   void dependencies() {
     // 1. Data Source & Repository (fenix: true للبقاء حياً عبر التنقل بين الشاشات)
-    Get.lazyPut<RequestRemoteDataSource>(
+    registerLazyIfAbsent<RequestRemoteDataSource>(
       () => const RequestRemoteDataSourceImpl(),
       fenix: true,
     );
-    Get.lazyPut<RequestRepository>(
+    registerLazyIfAbsent<RequestRepository>(
       () => RequestRepositoryImpl(Get.find<RequestRemoteDataSource>()),
       fenix: true,
     );
 
     // 2. Commercial & Catalog Dependencies for Dropdowns
     if (!Get.isRegistered<CommercialRemoteDataSource>()) {
-      Get.lazyPut<CommercialRemoteDataSource>(
+      registerLazyIfAbsent<CommercialRemoteDataSource>(
         () => const CommercialRemoteDataSourceImpl(),
         fenix: true,
       );
     }
     if (!Get.isRegistered<CommercialRepository>()) {
-      Get.lazyPut<CommercialRepository>(
+      registerLazyIfAbsent<CommercialRepository>(
         () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
         fenix: true,
       );
     }
     if (!Get.isRegistered<GetMyPosUseCase>()) {
-      Get.lazyPut(
+      registerLazyIfAbsent<GetMyPosUseCase>(
         () => GetMyPosUseCase(Get.find<CommercialRepository>()),
         fenix: true,
       );
     }
     if (!Get.isRegistered<GetPosNetworksListUseCase>()) {
-      Get.lazyPut(
+      registerLazyIfAbsent<GetPosNetworksListUseCase>(
         () => GetPosNetworksListUseCase(Get.find<CommercialRepository>()),
         fenix: true,
       );
     }
     if (!Get.isRegistered<GetMyNetworksUseCase>()) {
-      Get.lazyPut(
+      registerLazyIfAbsent<GetMyNetworksUseCase>(
         () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
         fenix: true,
       );
     }
 
     if (!Get.isRegistered<PackageCatalogRemoteDataSource>()) {
-      Get.lazyPut<PackageCatalogRemoteDataSource>(
+      registerLazyIfAbsent<PackageCatalogRemoteDataSource>(
         () => const PackageCatalogRemoteDataSourceImpl(),
         fenix: true,
       );
     }
     if (!Get.isRegistered<PackageCatalogRepository>()) {
-      Get.lazyPut<PackageCatalogRepository>(
+      registerLazyIfAbsent<PackageCatalogRepository>(
         () => PackageCatalogRepositoryImpl(
           Get.find<PackageCatalogRemoteDataSource>(),
         ),
@@ -89,13 +90,13 @@ class ProcurementRequestBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<GetPackagesUseCase>()) {
-      Get.lazyPut<GetPackagesUseCase>(
+      registerLazyIfAbsent<GetPackagesUseCase>(
         () => GetPackagesUseCase(Get.find<PackageCatalogRepository>()),
         fenix: true,
       );
     }
     if (!Get.isRegistered<GetEffectivePackageDiscountUseCase>()) {
-      Get.lazyPut<GetEffectivePackageDiscountUseCase>(
+      registerLazyIfAbsent<GetEffectivePackageDiscountUseCase>(
         () => GetEffectivePackageDiscountUseCase(
           Get.find<PackageCatalogRepository>(),
         ),
@@ -104,41 +105,41 @@ class ProcurementRequestBinding extends Bindings {
     }
 
     // 3. Request Use Cases (مع تحديد الصنف الصريح و fenix: true)
-    Get.lazyPut<GetRequestsUseCase>(
+    registerLazyIfAbsent<GetRequestsUseCase>(
       () => GetRequestsUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetRequestDetailsUseCase>(
+    registerLazyIfAbsent<GetRequestDetailsUseCase>(
       () => GetRequestDetailsUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
-    Get.lazyPut<CreateRequestUseCase>(
+    registerLazyIfAbsent<CreateRequestUseCase>(
       () => CreateRequestUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
-    Get.lazyPut<CancelRequestUseCase>(
+    registerLazyIfAbsent<CancelRequestUseCase>(
       () => CancelRequestUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
-    Get.lazyPut<ApproveRequestUseCase>(
+    registerLazyIfAbsent<ApproveRequestUseCase>(
       () => ApproveRequestUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
-    Get.lazyPut<RejectRequestUseCase>(
+    registerLazyIfAbsent<RejectRequestUseCase>(
       () => RejectRequestUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
-    Get.lazyPut<PreviewRequestModificationUseCase>(
+    registerLazyIfAbsent<PreviewRequestModificationUseCase>(
       () => PreviewRequestModificationUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetProcurementQuoteUseCase>(
+    registerLazyIfAbsent<GetProcurementQuoteUseCase>(
       () => GetProcurementQuoteUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
 
     // 4. Controllers
-    Get.lazyPut<PosProcurementController>(
+    registerLazyIfAbsent<PosProcurementController>(
       () => PosProcurementController(
         getRequestsUseCase: Get.find<GetRequestsUseCase>(),
         createRequestUseCase: Get.find<CreateRequestUseCase>(),
@@ -153,7 +154,7 @@ class ProcurementRequestBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<NetworkProcurementReviewController>(
+    registerLazyIfAbsent<NetworkProcurementReviewController>(
       () => NetworkProcurementReviewController(
         getRequestsUseCase: Get.find<GetRequestsUseCase>(),
         approveRequestUseCase: Get.find<ApproveRequestUseCase>(),
@@ -167,7 +168,7 @@ class ProcurementRequestBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<ProcurementRequestDetailsController>(
+    registerLazyIfAbsent<ProcurementRequestDetailsController>(
       () => ProcurementRequestDetailsController(
         getRequestDetailsUseCase: Get.find<GetRequestDetailsUseCase>(),
       ),
