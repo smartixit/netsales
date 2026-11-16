@@ -130,6 +130,12 @@ class NetworkWorkspaceController extends GetxController {
   void openWholesaleInvoices() =>
       Get.toNamed<void>(AppRoutes.wholesaleInvoices);
 
+  void openRepaymentCollection() =>
+      Get.toNamed<void>(AppRoutes.repaymentCollection);
+
+  void openNetworkWalletStatement() =>
+      Get.toNamed<void>(AppRoutes.networkWalletStatement);
+
   List<WorkspaceTransactionItemViewModel> get recentPendingOrderItems {
     return NetworkWorkspaceTransactionMapper.mapPendingRequests(
       overview.value?.recentPendingRequests ?? const [],
