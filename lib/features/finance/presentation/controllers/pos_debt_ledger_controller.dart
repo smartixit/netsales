@@ -159,9 +159,15 @@ class PosDebtLedgerController extends GetxController {
       posOptions.assignAll(uniquePositions);
 
       final posIds = uniquePositions.map((p) => p.posId).toList(growable: false);
-      final resolvedId = WorkspaceService.to.resolveActivePosId(posIds);
-      if (resolvedId != null) {
-        autoSelectPosId = resolvedId;
+      final savedPosId = WorkspaceService.to.savedActivePosId;
+
+      // Debt data must not default to an arbitrary tenant when the account
+      // belongs to multiple POS locations. Restore only a valid prior choice,
+      // or auto-select when there is exactly one available POS.
+      if (savedPosId != null && posIds.contains(savedPosId)) {
+        autoSelectPosId = savedPosId;
+      } else if (posIds.length == 1) {
+        autoSelectPosId = posIds.single;
       }
     } on AppException catch (e) {
       if (requestVersion == _posOptionsRequestVersion) {
