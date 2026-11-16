@@ -150,7 +150,7 @@ class ProcurementRequestDetailsScreen
                         ),
                       if (request.invoiceId != null)
                         ProcurementRequestInfoRow(
-                          label: 'رقم فاتورة المبيعات:',
+                          label: 'الفاتورة المرتبطة:',
                           value: 'فاتورة #${request.invoiceId}',
                           isHighlight: true,
                         ),
@@ -169,11 +169,44 @@ class ProcurementRequestDetailsScreen
                   ),
                 ),
 
-                AppSpacing.vLg,
+                if (request.isApproved && request.invoiceId != null) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: colors.success.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(
+                        color: colors.success.withValues(alpha: 0.24),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.receipt_long_rounded,
+                          color: colors.success,
+                          size: 22,
+                        ),
+                        AppSpacing.hSm,
+                        Expanded(
+                          child: Text(
+                            'تم إنشاء فاتورة مرتبطة بهذا الطلب. قد تختلف قيمتها وبنودها عن الطلب الأصلي إذا أُجريت تعديلات أثناء المراجعة. اعتمد الفاتورة بوصفها المرجع النهائي للتسوية.',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: colors.onSurface,
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  AppSpacing.vLg,
+                ],
 
-                // 2. جدول بنود طلب الكروت
+                // 2. البنود الأصلية التي أرسلها صاحب الطلب
                 Text(
-                  'بنود الكروت المطلوبة (${request.items.length})',
+                  'البنود الأصلية في الطلب (${request.items.length})',
                   style: AppTypography.titleSmall.copyWith(
                     color: colors.onSurface,
                     fontWeight: FontWeight.bold,

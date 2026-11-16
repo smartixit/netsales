@@ -2,19 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
-/// شريط البحث والفلترة القطاعية لطلبات التوريد
+/// بحث وفلاتر حالات طلب التوريد، مع تمرير أفقي مناسب لمساحة الهاتف.
 class ProcurementSearchFilterHeader extends StatelessWidget {
-  final TextEditingController searchController;
-  final String searchQuery;
-  final String? selectedStatus;
-  final ValueChanged<String?> onStatusChanged;
-  final VoidCallback onClearSearch;
-
   const ProcurementSearchFilterHeader({
     super.key,
     required this.searchController,
@@ -24,41 +18,44 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
     required this.onClearSearch,
   });
 
+  final TextEditingController searchController;
+  final String searchQuery;
+  final String? selectedStatus;
+  final ValueChanged<String?> onStatusChanged;
+  final VoidCallback onClearSearch;
+
+  static const _filters = <_RequestFilter>[
+    _RequestFilter(label: 'الكل', value: null),
+    _RequestFilter(label: 'بانتظار المراجعة', value: 'PENDING'),
+    _RequestFilter(label: 'معتمدة', value: 'APPROVED'),
+    _RequestFilter(label: 'مرفوضة', value: 'REJECTED'),
+    _RequestFilter(label: 'ملغاة', value: 'CANCELLED'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    int selectedIndex = 0;
-    if (selectedStatus == 'PENDING') {
-      selectedIndex = 1;
-    } else if (selectedStatus == 'APPROVED') {
-      selectedIndex = 2;
-    } else if (selectedStatus == 'REJECTED') {
-      selectedIndex = 3;
-    }
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        boxShadow: AppElevation.level1(context),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.cardPadding,
+        AppSpacing.sm,
+        AppSpacing.cardPadding,
+        AppSpacing.sm,
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomTextField(
             controller: searchController,
-            label: 'البحث في طلبات التوريد',
-            hint: 'ابحث برقم الطلب أو اسم الجهة...',
+            label: 'البحث في الطلبات',
+            hint: 'رقم الطلب أو اسم الشبكة أو نقطة البيع',
             prefixIcon: const Icon(Icons.search_rounded),
             suffixIcon: searchQuery.isNotEmpty
                 ? CustomButton.icon(
-                    icon: Icons.clear_rounded,
+                    icon: Icons.close_rounded,
                     tooltip: 'مسح البحث',
                     dimension: 36.r,
-                    iconSize: 18.r,
                     backgroundColor: Colors.transparent,
                     onPressed: onClearSearch,
                   )
@@ -66,34 +63,58 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
             isRequired: false,
           ),
           AppSpacing.vSm,
-          CustomSegmentedBar(
-            selectedIndex: selectedIndex,
-            onSegmentChanged: (idx) {
-              if (idx == 0) {
-                onStatusChanged(null);
-              } else if (idx == 1) {
-                onStatusChanged('PENDING');
-              } else if (idx == 2) {
-                onStatusChanged('APPROVED');
-              } else if (idx == 3) {
-                onStatusChanged('REJECTED');
-              }
-            },
-            items: const [
-              CustomSegmentItem(label: 'الكل', icon: Icons.list_alt_rounded),
-              CustomSegmentItem(
-                label: 'قيد الانتظار',
-                icon: Icons.hourglass_top_rounded,
-              ),
-              CustomSegmentItem(
-                label: 'معتمدة',
-                icon: Icons.check_circle_outline_rounded,
-              ),
-              CustomSegmentItem(label: 'مرفوضة', icon: Icons.cancel_outlined),
-            ],
+          SizedBox(
+            height: 42.h,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: _filters.length,
+              separatorBuilder: (_, _) => AppSpacing.hXs,
+              itemBuilder: (context, index) {
+                final filter = _filters[index];
+                final selected = selectedStatus == filter.value;
+                return CustomInteractiveBounce(
+                  onTap: () => onStatusChanged(filter.value),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? colors.primary.withValues(alpha: 0.12)
+                          : colors.surfaceContainerHighest.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(24.r),
+                      border: Border.all(
+                        color: selected
+                            ? colors.primary.withValues(alpha: 0.42)
+                            : colors.outlineVariant.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        filter.label,
+                        style: AppTypography.labelMedium.copyWith(
+                          color: selected ? colors.primary : colors.onSurfaceVariant,
+                          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+class _RequestFilter {
+  const _RequestFilter({required this.label, required this.value});
+
+  final String label;
+  final String? value;
 }
