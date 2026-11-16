@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/features/workspace/presentation/utils/workspace_carousel_theme.dart';
 import 'package:netsales/features/workspace/presentation/models/network_provider_card_view_model.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_card.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
@@ -21,19 +22,6 @@ class ExecutiveNetworkCard extends StatelessWidget {
     required this.onTap,
   });
 
-  CustomCarouselCardTheme _resolveTheme(int index, bool selected) {
-    if (selected) {
-      return CustomCarouselCardTheme.emerald;
-    }
-    final variant = index % 3;
-    if (variant == 0) {
-      return CustomCarouselCardTheme.sapphire;
-    } else if (variant == 1) {
-      return CustomCarouselCardTheme.amethyst;
-    } else {
-      return CustomCarouselCardTheme.titanium;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +46,10 @@ class ExecutiveNetworkCard extends StatelessWidget {
       isStatusActive: item.isActive,
       metricText: item.posCountText,
       metricIcon: Icons.storefront_rounded,
-      theme: _resolveTheme(item.cardIndex, item.isSelected),
+      theme: WorkspaceCarouselTheme.resolve(
+        index: item.cardIndex,
+        selected: item.isSelected,
+      ),
       isSelected: item.isSelected,
       onTap: onTap,
     );
