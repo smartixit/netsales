@@ -118,8 +118,8 @@ class NetworkProviderCarouselSection extends StatelessWidget {
           viewportFraction: 0.88,
           itemBuilder: (context, network, index) {
             final isSelected = network.networkId == selectedId;
-            final salesValue = controller.formatNetworkSales(network, isSelected);
-            final posCount = controller.formatNetworkPosCount(network, isSelected);
+            final salesValue = controller.networkSalesValue(isSelected);
+            final posCount = controller.networkPosCountLabel(isSelected);
 
             return ExecutiveNetworkCard(
               network: network,
