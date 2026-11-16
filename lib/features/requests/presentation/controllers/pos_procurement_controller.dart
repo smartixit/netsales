@@ -485,11 +485,15 @@ class PosProcurementController extends GetxController {
             : paginated.items.firstWhereOrNull(
                 (package) => package.packageId == selectedId,
               );
+
         if (stillAvailable != null) {
           _setSelectedPackage(stillAvailable);
-        } else {
-          _setSelectedPackage(null);
-          clearVoucherQuantity();
+        } else if (selectedId == null &&
+            packageSearchQuery.value.isEmpty &&
+            paginated.items.isNotEmpty) {
+          // Choose a sensible default only on the initial, unfiltered catalogue.
+          // A search result must never silently replace the user's selection.
+          onPackageSelected(paginated.items.first);
         }
       } else {
         final knownIds = availablePackages.map((item) => item.packageId).toSet();
