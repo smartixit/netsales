@@ -127,20 +127,7 @@ class MockRequestRepository implements RequestRepository {
         posName: existing.posName,
       );
       _requests[index] = updated;
-      return RequestApprovalResultEntity(
-        request: updated,
-        invoice: InvoiceEntity(
-          invoiceId: 901,
-          networkId: updated.networkId,
-          posId: updated.posId,
-          requestId: updated.requestId,
-          invoiceTotalAmount: updated.requestTotalAmount,
-          paidAmount: updated.requestTotalAmount,
-          remainingAmount: 0,
-          paymentStatusRaw: 'PAID',
-          isFullyPaid: true,
-        ),
-      );
+      return updated;
     }
     throw const AppException('الطلب غير موجود', code: '404');
   }
@@ -202,7 +189,20 @@ class MockRequestRepository implements RequestRepository {
         posName: existing.posName,
       );
       _requests[index] = updated;
-      return updated;
+      return RequestApprovalResultEntity(
+        request: updated,
+        invoice: InvoiceEntity(
+          invoiceId: 901,
+          networkId: updated.networkId,
+          posId: updated.posId,
+          requestId: updated.requestId,
+          invoiceTotalAmount: updated.requestTotalAmount,
+          paidAmount: updated.requestTotalAmount,
+          remainingAmount: 0,
+          paymentStatusRaw: 'PAID',
+          isFullyPaid: true,
+        ),
+      );
     }
     throw const AppException('الطلب غير موجود', code: '404');
   }
