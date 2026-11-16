@@ -6,7 +6,6 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_cart_section.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_pricing_discount_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_sheet_quantity_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_pos_context_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_network_context_section.dart';
