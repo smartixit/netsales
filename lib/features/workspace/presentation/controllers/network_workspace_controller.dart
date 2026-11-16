@@ -12,6 +12,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/greeting_formatter.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
@@ -156,6 +157,11 @@ class NetworkWorkspaceController extends GetxController {
     _revision++;
     super.onClose();
   }
+
+  String get userInitials => TextFormatter.avatarInitials(userName, maxChars: 2);
+
+  void openCreateSaleInvoice() =>
+      Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice);
 
   void onNavItemSelected(int index) => selectedNavIndex.value = index;
 
