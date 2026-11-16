@@ -7,6 +7,7 @@ import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:netsales/features/workspace/domain/entities/workspace_context_entity.dart';
 import 'package:netsales/features/workspace/domain/usecases/get_active_workspace_use_case.dart';
@@ -104,6 +105,14 @@ class WorkspaceCoordinatorController extends GetxController {
 
   String? get currentUserProfileLogo =>
       SessionService.to.currentUser?.userProfileLogo;
+
+  void openSecuritySettings() =>
+      Get.toNamed<void>(AppRoutes.securitySettings);
+
+  void openActiveSessions() =>
+      Get.toNamed<void>(AppRoutes.activeSessions);
+
+  void toggleTheme() => ThemeService.to.toggleTheme();
 
   /// التبديل التلقائي إلى المساحة المقابلة
   Future<void> toggleWorkspace() async {
