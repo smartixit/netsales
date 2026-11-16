@@ -430,7 +430,8 @@ void main() {
       },
     );
 
-    test('catalogue quantity controls maintain independent package quantities', () {
+    test('catalogue quantity controls maintain independent package quantities', () async {
+      await controller.loadLinkedNetworks(20);
       const secondPackage = PackageEntity(
         packageId: 6,
         networkId: 10,
@@ -461,7 +462,8 @@ void main() {
       expect(controller.procurementCart.length, 1);
     });
 
-    test('manual quantities accept non-sheet multiples and zero removes the line', () {
+    test('manual quantities accept non-sheet multiples and zero removes the line', () async {
+      await controller.loadLinkedNetworks(20);
       controller.setPackageVoucherCount(samplePackage, 175);
       expect(controller.cartQuantityForPackage(5), 175);
       expect(controller.procurementCart.single.voucherCount, 175);
