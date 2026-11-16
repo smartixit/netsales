@@ -14,6 +14,8 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
+import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
@@ -71,7 +73,10 @@ class MockRequestRepository implements RequestRepository {
   }
 
   @override
-  Future<RequestEntity> createRequest(Map<String, dynamic> data) async {
+  Future<RequestEntity> createRequest(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
+  }) async {
     final req = RequestEntity(
       requestId: items.length + 1,
       networkId: data['network_id'] as int,
@@ -113,7 +118,7 @@ class MockRequestRepository implements RequestRepository {
   }
 
   @override
-  Future<RequestEntity> approveRequest(
+  Future<RequestApprovalResultEntity> approveRequest(
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
@@ -131,7 +136,20 @@ class MockRequestRepository implements RequestRepository {
       invoiceId: 777,
     );
     this.items[index] = updated;
-    return updated;
+    return RequestApprovalResultEntity(
+        request: updated,
+        invoice: InvoiceEntity(
+          invoiceId: 777,
+          networkId: updated.networkId,
+          posId: updated.posId,
+          requestId: updated.requestId,
+          invoiceTotalAmount: updated.requestTotalAmount,
+          paidAmount: updated.requestTotalAmount,
+          remainingAmount: 0,
+          paymentStatusRaw: 'PAID',
+          isFullyPaid: true,
+        ),
+      );
   }
 
   @override

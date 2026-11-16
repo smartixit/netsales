@@ -55,7 +55,10 @@ class MockRequestRepo implements RequestRepository {
   }
 
   @override
-  Future<RequestEntity> createRequest(Map<String, dynamic> data) async {
+  Future<RequestEntity> createRequest(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
+  }) async {
     createdPayloads.add(Map<String, dynamic>.from(data));
     return RequestEntity(
       requestId: 999,

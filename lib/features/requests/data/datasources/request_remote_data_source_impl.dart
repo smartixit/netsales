@@ -4,6 +4,7 @@ import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/requests/data/datasources/request_remote_data_source.dart';
 import 'package:netsales/features/requests/data/models/procurement_quote_model.dart';
 import 'package:netsales/features/requests/data/models/request_model.dart';
+import 'package:netsales/features/requests/data/models/request_approval_result_model.dart';
 
 /// تطبيق مصدر البيانات البعيد لطلبات الكروت عبر ApiService
 class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
@@ -48,10 +49,14 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
   }
 
   @override
-  Future<ApiResponse<RequestModel>> createRequest(Map<String, dynamic> data) {
+  Future<ApiResponse<RequestModel>> createRequest(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
+  }) {
     return ApiService.instance.post<RequestModel>(
       ApiConstants.voucherRequests,
       data: data,
+      idempotencyKey: idempotencyKey,
       fromJson: (data) => RequestModel.fromJson(data as Map<String, dynamic>),
     );
   }
@@ -84,23 +89,16 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
   }
 
   @override
-  Future<ApiResponse<dynamic>> approveRequest(
+  Future<ApiResponse<RequestApprovalResultModel>> approveRequest(
     int requestId, {
     Map<String, dynamic>? data,
   }) {
-    return ApiService.instance.post<dynamic>(
+    return ApiService.instance.post<RequestApprovalResultModel>(
       ApiConstants.voucherRequestApprove(requestId),
       data: data,
-      fromJson: (resData) {
-        if (resData is Map<String, dynamic> && resData.containsKey('request')) {
-          return RequestModel.fromJson(
-            resData['request'] as Map<String, dynamic>,
-          );
-        } else if (resData is Map<String, dynamic>) {
-          return RequestModel.fromJson(resData);
-        }
-        return resData;
-      },
+      fromJson: (responseData) => RequestApprovalResultModel.fromJson(
+        responseData as Map<String, dynamic>,
+      ),
     );
   }
 

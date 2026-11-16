@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/form_validators.dart';
+import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discount_use_case.dart';
@@ -122,6 +124,26 @@ class PosProcurementController extends GetxController {
 
   bool get hasCartItems => procurementCart.isNotEmpty;
 
+  /// هل يملك الطلب عرض سعر حديثاً يطابق سياق الإرسال الحالي؟
+  bool get hasCurrentServerQuote {
+    if (getProcurementQuoteUseCase == null) return true;
+
+    final quote = serverQuote.value;
+    if (isLoadingQuote.value || quote == null) return false;
+
+    final matchesContext =
+        quote.networkId == selectedNetworkId.value &&
+        quote.posId == selectedPosId.value &&
+        quote.saleType == selectedSaleType.value;
+    if (!matchesContext) return false;
+
+    final expiresAt = quote.expiresAt;
+    return expiresAt == null || DateTime.now().isBefore(expiresAt);
+  }
+
+  bool get canSubmitOrder =>
+      hasCartItems && !isSubmitting.value && hasCurrentServerQuote;
+
   void _setSelectedNetworkId(int? value) {
     selectedNetworkId.value = value;
   }
@@ -145,6 +167,25 @@ class PosProcurementController extends GetxController {
   final isSubmitting = false.obs;
 
   int _requestListRevision = 0;
+  String? _pendingCreatePayloadSignature;
+  String? _pendingCreateIdempotencyKey;
+
+  String _resolveCreateIdempotencyKey(Map<String, dynamic> payload) {
+    final signature = jsonEncode(payload);
+    if (_pendingCreatePayloadSignature != signature ||
+        _pendingCreateIdempotencyKey == null) {
+      _pendingCreatePayloadSignature = signature;
+      _pendingCreateIdempotencyKey = IdempotencyHelper.forVoucherRequest(
+        selectedNetworkId.value,
+      );
+    }
+    return _pendingCreateIdempotencyKey!;
+  }
+
+  void _clearPendingCreateIdempotencyKey() {
+    _pendingCreatePayloadSignature = null;
+    _pendingCreateIdempotencyKey = null;
+  }
 
   /// التحقق من صلاحيات طلبات التوريد لنقطة البيع
   bool get canCreateOrder =>
@@ -487,6 +528,8 @@ class PosProcurementController extends GetxController {
   void removeCartLine(int packageId) {
     procurementCart.removeWhere((line) => line.package.packageId == packageId);
     if (procurementCart.isEmpty) {
+      _quoteRevision++;
+      isLoadingQuote.value = false;
       serverQuote.value = null;
       quoteError.value = null;
     } else {
@@ -496,12 +539,16 @@ class PosProcurementController extends GetxController {
 
   void clearProcurementCart() {
     procurementCart.clear();
+    _quoteRevision++;
+    isLoadingQuote.value = false;
     serverQuote.value = null;
     quoteError.value = null;
+    _clearPendingCreateIdempotencyKey();
   }
 
   /// جلب واحتساب عرض الأسعار الرسمي المعتمد سيادياً من الخادم لبنود السلة وطريقة الدفع المختارة
   Future<void> fetchServerQuote() async {
+    final revision = ++_quoteRevision;
     final networkId = selectedNetworkId.value;
     final posId = selectedPosId.value;
     final items = procurementCart.toList(growable: false);
@@ -510,12 +557,13 @@ class PosProcurementController extends GetxController {
         posId == null ||
         items.isEmpty ||
         getProcurementQuoteUseCase == null) {
+      isLoadingQuote.value = false;
       serverQuote.value = null;
       quoteError.value = null;
       return;
     }
 
-    final revision = ++_quoteRevision;
+    serverQuote.value = null;
     isLoadingQuote.value = true;
     quoteError.value = null;
 
@@ -990,6 +1038,31 @@ class PosProcurementController extends GetxController {
       return false;
     }
 
+    if (getProcurementQuoteUseCase != null) {
+      final quote = serverQuote.value;
+      final quoteMatchesContext =
+          quote != null &&
+          quote.networkId == selectedNetworkId.value &&
+          quote.posId == posId &&
+          quote.saleType == selectedSaleType.value;
+      final quoteExpired = quote?.expiresAt != null &&
+          !DateTime.now().isBefore(quote!.expiresAt!);
+
+      if (isLoadingQuote.value || !quoteMatchesContext || quoteExpired) {
+        if (!isLoadingQuote.value) {
+          unawaited(fetchServerQuote());
+        }
+        CustomSnackbar.show(
+          title: quoteExpired ? 'انتهت صلاحية عرض الأسعار' : 'عرض الأسعار غير جاهز',
+          message: quoteExpired
+              ? 'تم طلب عرض أسعار محدث. راجعه قبل تقديم الطلب.'
+              : 'يجب جلب عرض الأسعار المعتمد للشبكة ونقطة البيع وطريقة الدفع الحالية قبل التقديم.',
+          type: SnackType.warning,
+        );
+        return false;
+      }
+    }
+
     isSubmitting.value = true;
     await CustomAnimationOverlay.showLoading(
       message: 'جاري تقديم طلب التوريد للشبكة...',
@@ -1014,7 +1087,10 @@ class PosProcurementController extends GetxController {
             .toList(growable: false),
       };
 
-      final created = await createRequestUseCase(payload);
+      final created = await createRequestUseCase(
+        payload,
+        idempotencyKey: _resolveCreateIdempotencyKey(payload),
+      );
       requests.insert(0, created);
       clearProcurementCart();
       clearVoucherQuantity();

@@ -20,6 +20,7 @@ import 'package:netsales/features/requests/domain/entities/procurement_cart_line
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
@@ -34,7 +35,9 @@ class FakeQuoteRequestRepository implements RequestRepository {
   ProcurementQuoteEntity? nextQuote;
   bool throwOnQuote = false;
   bool throwPricingOnCreate = false;
+  bool throwOnceOnCreate = false;
   Map<String, dynamic>? lastCreatePayload;
+  final List<String?> createIdempotencyKeys = [];
   Map<String, dynamic>? lastQuotePayload;
 
   @override
@@ -74,8 +77,16 @@ class FakeQuoteRequestRepository implements RequestRepository {
   }
 
   @override
-  Future<RequestEntity> createRequest(Map<String, dynamic> data) async {
+  Future<RequestEntity> createRequest(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
+  }) async {
     lastCreatePayload = data;
+    createIdempotencyKeys.add(idempotencyKey);
+    if (throwOnceOnCreate) {
+      throwOnceOnCreate = false;
+      throw const AppException('تعذر الاتصال بالخادم', code: '500');
+    }
     if (throwPricingOnCreate) {
       throw const AppException(
         'تم تحديث أسعار الباقات أو شروط الخصم المعتمدة لدى الشبكة. يرجى مراجعة وتحديث عرض الأسعار قبل الإرسال.',
@@ -121,7 +132,7 @@ class FakeQuoteRequestRepository implements RequestRepository {
       throw UnimplementedError();
 
   @override
-  Future<RequestEntity> approveRequest(
+  Future<RequestApprovalResultEntity> approveRequest(
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
@@ -385,6 +396,35 @@ void main() {
       expect(controller.quoteError.value, isNull);
     });
 
+    test('Submission waits for a current server quote before creating a request', () async {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
+      controller.myPosList.assignAll([testPos]);
+      controller.linkedNetworks.assignAll([testLink]);
+      controller.procurementCart.add(
+        const ProcurementCartLineEntity(
+          package: testPackage,
+          sheets: 1,
+          voucherCount: 100,
+        ),
+      );
+
+      expect(controller.canSubmitOrder, isFalse);
+      final firstAttempt = await controller.submitOrder();
+
+      expect(firstAttempt, isFalse);
+      expect(mockRepo.lastCreatePayload, isNull);
+      expect(mockRepo.lastQuotePayload, isNotNull);
+
+      await pumpEventQueue();
+      expect(controller.serverQuote.value, isNotNull);
+      expect(controller.canSubmitOrder, isTrue);
+
+      final secondAttempt = await controller.submitOrder();
+      expect(secondAttempt, isTrue);
+      expect(mockRepo.lastCreatePayload?['pricing_token'], 'fake_valid_hmac_token');
+    });
+
     test('Submitting order includes pricing_token from authoritative server quote', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
@@ -416,6 +456,42 @@ void main() {
 
       expect(success, isTrue);
       expect(mockRepo.lastCreatePayload!['pricing_token'], 'authoritative_server_token_xyz');
+      expect(mockRepo.createIdempotencyKeys.single, isNotEmpty);
+    });
+
+    test('retries reuse the same idempotency key for an unchanged submission', () async {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
+      controller.myPosList.assignAll([testPos]);
+      controller.linkedNetworks.assignAll([testLink]);
+      controller.procurementCart.add(
+        const ProcurementCartLineEntity(
+          package: testPackage,
+          sheets: 1,
+          voucherCount: 100,
+        ),
+      );
+      controller.serverQuote.value = const ProcurementQuoteEntity(
+        networkId: 10,
+        posId: 20,
+        saleType: SaleType.cash,
+        saleTypeLabel: 'نقدي',
+        grossTotal: 10000,
+        discountTotal: 1000,
+        netTotal: 9000,
+        currency: 'YER',
+        pricingToken: 'stable_retry_token',
+        items: [],
+      );
+      mockRepo.throwOnceOnCreate = true;
+
+      expect(await controller.submitOrder(), isFalse);
+      expect(await controller.submitOrder(), isTrue);
+      expect(mockRepo.createIdempotencyKeys, hasLength(2));
+      expect(
+        mockRepo.createIdempotencyKeys[0],
+        mockRepo.createIdempotencyKeys[1],
+      );
     });
 
     test('Server price change rejection automatically triggers quote re-fetch to protect user', () async {
@@ -430,6 +506,18 @@ void main() {
           sheets: 1,
           voucherCount: 100,
         ),
+      );
+      controller.serverQuote.value = const ProcurementQuoteEntity(
+        networkId: 10,
+        posId: 20,
+        saleType: SaleType.cash,
+        saleTypeLabel: 'نقدي',
+        grossTotal: 10000,
+        discountTotal: 1000,
+        netTotal: 9000,
+        currency: 'YER',
+        pricingToken: 'expired_or_changed_server_token',
+        items: [],
       );
 
       mockRepo.throwPricingOnCreate = true;
@@ -505,8 +593,49 @@ void main() {
       expect(find.text('إجمالي الخصم المعتمد:'), findsOneWidget);
       expect(find.text('- 5,000.00 YER'), findsOneWidget);
       expect(find.text('وفر 10.0%'), findsOneWidget);
-      expect(find.text('الإجمالي النهائي المستحق:'), findsOneWidget);
+      expect(find.text('صافي قيمة الطلب:'), findsOneWidget);
       expect(find.text('45,000.00 YER'), findsOneWidget);
+    });
+
+    testWidgets('Shows expired quote state and explicit refresh action', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      Get.put(controller);
+      controller.quoteError.value = null;
+      controller.isLoadingQuote.value = false;
+      controller.procurementCart.add(
+        const ProcurementCartLineEntity(
+          package: testPackage,
+          sheets: 1,
+          voucherCount: 100,
+        ),
+      );
+      controller.serverQuote.value = ProcurementQuoteEntity(
+        networkId: 10,
+        posId: 20,
+        saleType: SaleType.cash,
+        saleTypeLabel: 'نقدي',
+        grossTotal: 10000,
+        discountTotal: 1000,
+        netTotal: 9000,
+        currency: 'YER',
+        pricingToken: 'expired_quote_token',
+        expiresAt: DateTime.now().subtract(const Duration(minutes: 1)),
+        items: const [],
+      );
+
+      await tester.pumpWidget(
+        buildTestableWidget(const ProcurementFinancialQuoteCard()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('انتهت صلاحية عرض السعر'), findsOneWidget);
+      expect(find.text('إعادة احتساب السعر'), findsOneWidget);
     });
 
     testWidgets('Renders loading shimmer/indicator while fetching server quote', (tester) async {

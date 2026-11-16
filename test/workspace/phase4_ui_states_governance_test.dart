@@ -9,6 +9,8 @@ import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
+import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
@@ -61,13 +63,25 @@ class MockResilientRequestRepo implements RequestRepository {
   }
 
   @override
-  Future<RequestEntity> createRequest(Map<String, dynamic> data) async => items.first;
+  Future<RequestEntity> createRequest(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
+  }) async => items.first;
 
   @override
   Future<RequestEntity> cancelRequest(int requestId) async => items.first;
 
   @override
-  Future<RequestEntity> approveRequest(int requestId, {String? requestNote, List<RequestModificationLineEntity>? items}) async => this.items.first;
+  Future<RequestApprovalResultEntity> approveRequest(int requestId, {String? requestNote, List<RequestModificationLineEntity>? items}) async => RequestApprovalResultEntity(
+    request: this.items.first,
+    invoice: InvoiceEntity(
+      invoiceId: 1,
+      networkId: this.items.first.networkId,
+      posId: this.items.first.posId,
+      requestId: this.items.first.requestId,
+      invoiceTotalAmount: this.items.first.requestTotalAmount,
+    ),
+  );
 
   @override
   Future<RequestEntity> rejectRequest(int requestId, String reason) async => items.first;

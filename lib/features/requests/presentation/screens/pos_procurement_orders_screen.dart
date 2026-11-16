@@ -7,6 +7,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_search_filter_header.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_list_intro.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
@@ -42,6 +43,12 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
       padding: EdgeInsets.only(top: topPadding),
       child: Column(
         children: [
+          if (!embedded)
+            const ProcurementListIntro(
+              icon: Icons.shopping_bag_outlined,
+              title: 'مشتريات نقاط البيع',
+              subtitle: 'تابع طلبات التوريد، راجع حالتها، وارجع إلى تفاصيل الفاتورة بعد الاعتماد.',
+            ),
           // شريط البحث والفلترة
           Obx(() {
             return ProcurementSearchFilterHeader(
@@ -211,18 +218,12 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
         ],
       ),
       floatingActionButton: controller.canCreateOrder
-          ? FloatingActionButton.extended(
+          ? CustomButton.primary(
+              text: 'طلب توريد جديد',
+              icon: Icons.add_shopping_cart_rounded,
+              size: AppButtonSize.medium,
+              shape: AppButtonShape.pill,
               onPressed: controller.navigateToNewOrder,
-              backgroundColor: colors.primary,
-              foregroundColor: colors.onPrimary,
-              icon: const Icon(Icons.add_shopping_cart_rounded),
-              label: Text(
-                'طلب توريد جديد',
-                style: AppTypography.labelLarge.copyWith(
-                  color: colors.onPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
             )
           : null,
       body: content,

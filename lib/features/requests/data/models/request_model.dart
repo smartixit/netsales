@@ -1,4 +1,5 @@
 import 'package:netsales/features/requests/data/models/request_item_model.dart';
+import 'package:netsales/features/requests/data/models/request_modification_summary_model.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 
 /// نموذج بيانات طلب الكروت والتوريد للتحويل من وإلى JSON
@@ -23,6 +24,7 @@ class RequestModel extends RequestEntity {
     super.networkName,
     super.posName,
     super.items = const [],
+    super.modificationSummary,
     super.createdAt,
     super.updatedAt,
   });
@@ -49,6 +51,18 @@ class RequestModel extends RequestEntity {
       }
     }
 
+    final rawSummary = json['modifications_summary'];
+    if (rawSummary != null && rawSummary is! Map) {
+      throw const FormatException(
+        'ملخص تعديلات الطلب يجب أن يكون كائناً.',
+      );
+    }
+    final modificationSummary = rawSummary is Map
+        ? RequestModificationSummaryModel.fromJson(
+            Map<String, dynamic>.from(rawSummary),
+          )
+        : null;
+
     return RequestModel(
       requestId: json['request_id'] as int? ?? 0,
       networkId: json['network_id'] as int? ?? 0,
@@ -70,6 +84,7 @@ class RequestModel extends RequestEntity {
       networkName: networkName,
       posName: posName,
       items: itemsList,
+      modificationSummary: modificationSummary,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
     );

@@ -1,6 +1,7 @@
 import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/features/requests/domain/entities/request_item_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_summary_entity.dart';
 
 /// كيان دورة حياة طلب الكروت والتوريد (Procurement Request Entity)
 class RequestEntity {
@@ -23,6 +24,7 @@ class RequestEntity {
   final String? networkName;
   final String? posName;
   final List<RequestItemEntity> items;
+  final RequestModificationSummaryEntity? modificationSummary;
   final String? createdAt;
   final String? updatedAt;
 
@@ -46,6 +48,7 @@ class RequestEntity {
     this.networkName,
     this.posName,
     this.items = const [],
+    this.modificationSummary,
     this.createdAt,
     this.updatedAt,
   });

@@ -1,6 +1,7 @@
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 
@@ -23,7 +24,10 @@ abstract interface class RequestRepository {
   Future<RequestEntity> getRequestDetails(int requestId);
 
   /// تقديم طلب توريد كروت جديد من نقطة البيع
-  Future<RequestEntity> createRequest(Map<String, dynamic> data);
+  Future<RequestEntity> createRequest(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
+  });
 
   /// تعديل طلب الكروت قيد الانتظار (تغيير البنود أو الكميات أو نوع الشراء)
   Future<RequestEntity> updateRequest(
@@ -44,7 +48,7 @@ abstract interface class RequestRepository {
   );
 
   /// اعتماد الطلب مع البنود نفسها ورموز المعاينة الصادرة من الخادم.
-  Future<RequestEntity> approveRequest(
+  Future<RequestApprovalResultEntity> approveRequest(
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,

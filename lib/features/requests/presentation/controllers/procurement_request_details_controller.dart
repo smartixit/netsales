@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -45,5 +48,17 @@ class ProcurementRequestDetailsController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// فتح الفاتورة المنشأة من الطلب في منظور مساحة العمل الحالية.
+  Future<void> openLinkedInvoice() async {
+    final invoiceId = request.value?.invoiceId;
+    if (invoiceId == null || invoiceId <= 0) return;
+
+    final route = WorkspaceService.to.activeWorkspace == AppWorkspace.pos
+        ? AppRoutes.purchaseInvoiceDetails
+        : AppRoutes.saleInvoiceDetails;
+
+    await Get.toNamed<void>(route, arguments: invoiceId);
   }
 }

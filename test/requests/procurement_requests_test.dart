@@ -5,8 +5,12 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/requests/data/models/request_item_model.dart';
 import 'package:netsales/features/requests/data/models/request_model.dart';
+import 'package:netsales/features/requests/data/models/request_modification_summary_model.dart';
+import 'package:netsales/features/requests/data/models/request_approval_result_model.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
+import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
@@ -86,7 +90,10 @@ class MockRequestRepository implements RequestRepository {
   }
 
   @override
-  Future<RequestEntity> createRequest(Map<String, dynamic> data) async {
+  Future<RequestEntity> createRequest(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
+  }) async {
     final req = RequestEntity(
       requestId: _requests.length + 1,
       networkId: data['network_id'] as int? ?? 1,
@@ -160,7 +167,7 @@ class MockRequestRepository implements RequestRepository {
   }
 
   @override
-  Future<RequestEntity> approveRequest(
+  Future<RequestApprovalResultEntity> approveRequest(
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
@@ -184,7 +191,20 @@ class MockRequestRepository implements RequestRepository {
         posName: existing.posName,
       );
       _requests[index] = updated;
-      return updated;
+      return RequestApprovalResultEntity(
+        request: updated,
+        invoice: InvoiceEntity(
+          invoiceId: 901,
+          networkId: updated.networkId,
+          posId: updated.posId,
+          requestId: updated.requestId,
+          invoiceTotalAmount: updated.requestTotalAmount,
+          paidAmount: updated.requestTotalAmount,
+          remainingAmount: 0,
+          paymentStatusRaw: 'PAID',
+          isFullyPaid: true,
+        ),
+      );
     }
     throw const AppException('الطلب غير موجود', code: '404');
   }
@@ -301,6 +321,80 @@ void main() {
       expect(model.items.first.voucherCount, 25);
     });
 
+    test('RequestModel maps the server modification summary without recomputing values', () {
+      final model = RequestModel.fromJson({
+        'request_id': 102,
+        'network_id': 5,
+        'pos_id': 12,
+        'request_total_amount': 25000.0,
+        'status': 'APPROVED',
+        'modifications_summary': {
+          'has_modifications': true,
+          'original_total': 25000.0,
+          'approved_total': 27000.0,
+          'original_items_count': 2,
+          'approved_items_count': 3,
+        },
+      });
+
+      expect(model.modificationSummary, isA<RequestModificationSummaryModel>());
+      expect(model.modificationSummary?.hasModifications, isTrue);
+      expect(model.modificationSummary?.originalTotal, 25000.0);
+      expect(model.modificationSummary?.approvedTotal, 27000.0);
+      expect(model.modificationSummary?.originalItemsCount, 2);
+      expect(model.modificationSummary?.approvedItemsCount, 3);
+    });
+
+    test('RequestModel rejects incomplete modification summary instead of showing zero values', () {
+      expect(
+        () => RequestModificationSummaryModel.fromJson({
+          'has_modifications': true,
+          'original_total': 25000.0,
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('approval result preserves the approved request and authoritative invoice', () {
+      final result = RequestApprovalResultModel.fromJson({
+        'request': {
+          'request_id': 101,
+          'network_id': 5,
+          'pos_id': 12,
+          'request_uuid': 'req-uuid-12345',
+          'sale_type': 'CREDIT',
+          'request_total_amount': 25000.0,
+          'status': 'APPROVED',
+          'invoice_id': 901,
+          'invoice_uuid': 'inv-uuid-901',
+        },
+        'invoice': {
+          'invoice_id': 901,
+          'network_id': 5,
+          'pos_id': 12,
+          'request_id': 101,
+          'request_uuid': 'req-uuid-12345',
+          'invoice_uuid': 'inv-uuid-901',
+          'sale_type': 'CREDIT',
+          'invoice_total_amount': 27000.0,
+          'paid_amount': 12000.0,
+          'remaining_amount': 15000.0,
+          'payment_status': 'PARTIALLY_PAID',
+          'payment_status_label': 'مسددة جزئياً',
+          'is_fully_paid': false,
+          'items': <Map<String, dynamic>>[],
+        },
+      });
+
+      expect(result.request.requestId, 101);
+      expect(result.request.status, RequestStatus.approved);
+      expect(result.invoice.invoiceId, 901);
+      expect(result.invoice.invoiceTotalAmount, 27000.0);
+      expect(result.invoice.paidAmount, 12000.0);
+      expect(result.invoice.remainingAmount, 15000.0);
+      expect(result.invoice.isPartiallyPaid, isTrue);
+    });
+
     test('RequestModel toJson serializes accurately without currency keys', () {
       final model = RequestModel(
         requestId: 101,
@@ -393,9 +487,9 @@ void main() {
     test('ApproveRequestUseCase updates status to APPROVED and sets invoice',
         () async {
       final approved = await approveRequestUseCase(1);
-      expect(approved.isApproved, true);
-      expect(approved.status, RequestStatus.approved);
-      expect(approved.invoiceId, 901);
+      expect(approved.request.isApproved, true);
+      expect(approved.request.status, RequestStatus.approved);
+      expect(approved.invoice.invoiceId, 901);
     });
 
     test('RejectRequestUseCase updates status to REJECTED with reason',
