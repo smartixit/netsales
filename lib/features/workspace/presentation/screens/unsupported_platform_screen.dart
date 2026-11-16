@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -12,7 +9,12 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 /// تمنع حسابات SUPER_ADMIN و SUPPORT_AGENT من العمل عبر تطبيق الهاتف،
 /// وترشدهم رسمياً لاستخدام تطبيق إدارة المنصة المكتبي المستقل لنظام Windows.
 class UnsupportedPlatformScreen extends StatelessWidget {
-  const UnsupportedPlatformScreen({super.key});
+  const UnsupportedPlatformScreen({
+    super.key,
+    required this.onLogout,
+  });
+
+  final Future<void> Function() onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -76,12 +78,7 @@ class UnsupportedPlatformScreen extends StatelessWidget {
               CustomButton.danger(
                 text: 'تسجيل الخروج الآمن',
                 icon: Icons.logout_rounded,
-                onPressed: () async {
-                  if (Get.isRegistered<SessionService>()) {
-                    await SessionService.to.terminateSession();
-                  }
-                  await Get.offAllNamed<dynamic>(AppRoutes.login);
-                },
+                onPressed: onLogout,
               ),
             ],
           ),
