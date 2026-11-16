@@ -343,13 +343,7 @@ class PosProcurementController extends GetxController {
       time: const Duration(milliseconds: 350),
     );
 
-    _cartQuoteWorker = debounce(
-      _cartQuoteChanges,
-      (_) => unawaited(fetchServerQuote()),
-      time: const Duration(milliseconds: 450),
-    );
-
-    ever(selectedSaleType, (_) => _scheduleServerQuoteRefresh());
+    // Live pricing is derived locally from signed POS catalogue snapshots.
 
     loadInitialData();
   }
@@ -496,6 +490,7 @@ class PosProcurementController extends GetxController {
     try {
       final paginated = await getPackagesUseCase!(
         networkId: networkId,
+        posId: selectedPosId.value,
         status: true,
         search: packageSearchQuery.value.isEmpty
             ? null
@@ -611,7 +606,7 @@ class PosProcurementController extends GetxController {
       if (existingIndex != -1) {
         procurementCart.removeAt(existingIndex);
         if (procurementCart.isEmpty) returnToOrderItems();
-        _scheduleServerQuoteRefresh();
+        _invalidateLocalPricingSnapshot();
       }
       return;
     }
@@ -638,7 +633,7 @@ class PosProcurementController extends GetxController {
     } else {
       procurementCart[existingIndex] = line;
     }
-    _scheduleServerQuoteRefresh();
+    _invalidateLocalPricingSnapshot();
   }
 
   /// التحكم السريع في الكمية من بطاقة الكتالوج أو بطاقة السلة.
@@ -650,19 +645,44 @@ class PosProcurementController extends GetxController {
     );
   }
 
-  /// يبطل العرض السابق فوراً ثم يطلب معاينة موحدة بعد توقف التفاعل.
-  void _scheduleServerQuoteRefresh() {
+  /// إبطال أي Quote قديم دون إرسال HTTP؛ إجمالي السلة مشتق محلياً من تعرفة POS.
+  void _invalidateLocalPricingSnapshot() {
     _quoteRevision++;
     serverQuote.value = null;
     quoteError.value = null;
     isLoadingQuote.value = false;
-    if (procurementCart.isEmpty || getProcurementQuoteUseCase == null) {
-      isQuotePending.value = false;
-      return;
-    }
-    isQuotePending.value = true;
-    _cartQuoteChanges.value++;
+    isQuotePending.value = false;
   }
+
+  int _unitPriceMinor(PackageEntity package) =>
+      (selectedSaleType.value == SaleType.cash
+          ? package.procurementCashUnitPriceMinor
+          : package.procurementCreditUnitPriceMinor) ??
+      (((selectedSaleType.value == SaleType.cash
+                  ? package.effectiveCashPrice
+                  : package.effectiveCreditPrice) * 100).round());
+
+  int get liveOrderTotalMinor => procurementCart.fold<int>(
+        0,
+        (sum, line) => sum + _unitPriceMinor(line.package) * line.voucherCount,
+      );
+
+  int get liveOrderGrossMinor => procurementCart.fold<int>(
+        0,
+        (sum, line) => sum +
+            (line.package.procurementBaseUnitPriceMinor ??
+                (line.package.packageVoucherPrice * 100).round()) * line.voucherCount,
+      );
+
+  int get liveOrderDiscountMinor => liveOrderGrossMinor - liveOrderTotalMinor;
+
+  String? get missingPricingPackageName => procurementCart
+      .where((line) => line.package.procurementPricingSnapshotToken == null ||
+          (selectedSaleType.value == SaleType.cash
+              ? line.package.procurementCashUnitPriceMinor
+              : line.package.procurementCreditUnitPriceMinor) == null)
+      .map((line) => line.package.packageName)
+      .firstOrNull;
 
   void removeCartLine(int packageId) {
     final previousLength = procurementCart.length;
@@ -670,7 +690,7 @@ class PosProcurementController extends GetxController {
     if (procurementCart.length == previousLength) return;
 
     if (procurementCart.isEmpty) returnToOrderItems();
-    _scheduleServerQuoteRefresh();
+    _invalidateLocalPricingSnapshot();
   }
 
   void clearProcurementCart() {
@@ -764,7 +784,7 @@ class PosProcurementController extends GetxController {
       sheets: nextCount / sheetSize,
       voucherCount: nextCount,
     );
-    _scheduleServerQuoteRefresh();
+    _invalidateLocalPricingSnapshot();
   }
 
   void adjustCartLineBySheet(int packageId, int direction) {
@@ -991,7 +1011,7 @@ class PosProcurementController extends GetxController {
       );
     }
 
-    _scheduleServerQuoteRefresh();
+    _invalidateLocalPricingSnapshot();
     await Get.toNamed<void>(AppRoutes.newProcurementOrder);
   }
 
@@ -1208,32 +1228,13 @@ class PosProcurementController extends GetxController {
       return false;
     }
 
-    if (getProcurementQuoteUseCase != null) {
-      final quote = serverQuote.value;
-      final quoteMatchesContext =
-          quote != null &&
-          quote.networkId == selectedNetworkId.value &&
-          quote.posId == posId &&
-          quote.saleType == selectedSaleType.value;
-      final quoteExpired = quote?.expiresAt != null &&
-          !DateTime.now().isBefore(quote!.expiresAt!);
-
-      if (isQuotePending.value ||
-          isLoadingQuote.value ||
-          !quoteMatchesContext ||
-          quoteExpired) {
-        if (!isLoadingQuote.value && !isQuotePending.value) {
-          _scheduleServerQuoteRefresh();
-        }
-        CustomSnackbar.show(
-          title: quoteExpired ? 'انتهت صلاحية عرض الأسعار' : 'عرض الأسعار غير جاهز',
-          message: quoteExpired
-              ? 'تم طلب عرض أسعار محدث. راجعه قبل تقديم الطلب.'
-              : 'يجب جلب عرض الأسعار المعتمد للشبكة ونقطة البيع وطريقة الدفع الحالية قبل التقديم.',
-          type: SnackType.warning,
-        );
-        return false;
-      }
+    if (missingPricingPackageName != null) {
+      CustomSnackbar.show(
+        title: 'تعرفة الباقة غير متاحة',
+        message: 'تعذر تحميل تعرفة ${missingPricingPackageName!} الخاصة بنقطة البيع. حدّث الكتالوج قبل الإرسال.',
+        type: SnackType.warning,
+      );
+      return false;
     }
 
     isSubmitting.value = true;
@@ -1255,6 +1256,7 @@ class PosProcurementController extends GetxController {
               (line) => {
                 'package_id': line.package.packageId,
                 'voucher_count': line.voucherCount,
+                'pricing_snapshot_token': line.package.procurementPricingSnapshotToken,
               },
             )
             .toList(growable: false),
@@ -1284,7 +1286,7 @@ class PosProcurementController extends GetxController {
       if (e.message.contains('أسعار') ||
           e.message.contains('pricing') ||
           e.message.contains('عرض الأسعار')) {
-        _scheduleServerQuoteRefresh();
+        _invalidateLocalPricingSnapshot();
       }
       CustomSnackbar.show(
         title: 'فشل تقديم الطلب',

@@ -7,6 +7,7 @@ abstract class PackageCatalogRepository {
   /// استرجاع قائمة الباقات مع الفلترة والبحث وترقيم المؤشر
   Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
+    int? posId,
     bool? status,
     String? search,
     String? cursor,

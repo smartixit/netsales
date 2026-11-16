@@ -9,6 +9,7 @@ class GetPackagesUseCase {
 
   Future<PaginatedList<PackageEntity>> call({
     int? networkId,
+    int? posId,
     bool? status,
     String? search,
     String? cursor,
@@ -16,6 +17,7 @@ class GetPackagesUseCase {
   }) {
     return _repository.getPackages(
       networkId: networkId,
+      posId: posId,
       status: status,
       search: search,
       cursor: cursor,

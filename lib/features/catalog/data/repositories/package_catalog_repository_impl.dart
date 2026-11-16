@@ -14,6 +14,7 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
   @override
   Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
+    int? posId,
     bool? status,
     String? search,
     String? cursor,
@@ -21,6 +22,7 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
   }) async {
     final query = <String, dynamic>{};
     if (networkId != null) query['network_id'] = networkId;
+    if (posId != null) query['pos_id'] = posId;
     if (status != null) query['status'] = status ? '1' : '0';
     if (search != null && search.trim().isNotEmpty) {
       query['search'] = search.trim();

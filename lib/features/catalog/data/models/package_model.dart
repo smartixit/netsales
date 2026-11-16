@@ -23,6 +23,12 @@ class PackageModel extends PackageEntity {
     super.createdAt,
     super.updatedAt,
     super.networkName,
+    super.procurementBaseUnitPriceMinor,
+    super.procurementCashUnitPriceMinor,
+    super.procurementCreditUnitPriceMinor,
+    super.procurementCashDiscountBasisPoints,
+    super.procurementCreditDiscountBasisPoints,
+    super.procurementPricingSnapshotToken,
   });
 
   factory PackageModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +55,9 @@ class PackageModel extends PackageEntity {
         (json['effective_cash_price'] as num?)?.toDouble() ?? price;
     final effCredit =
         (json['effective_credit_price'] as num?)?.toDouble() ?? price;
+    final procurement = json['procurement_pricing'] is Map<String, dynamic>
+        ? json['procurement_pricing'] as Map<String, dynamic>
+        : const <String, dynamic>{};
 
     return PackageModel(
       packageId: (json['package_id'] as num?)?.toInt() ?? 0,
@@ -74,6 +83,12 @@ class PackageModel extends PackageEntity {
       createdAt: rawCreatedAt != null ? DateTime.tryParse(rawCreatedAt) : null,
       updatedAt: rawUpdatedAt != null ? DateTime.tryParse(rawUpdatedAt) : null,
       networkName: netName,
+      procurementBaseUnitPriceMinor: (procurement['base_unit_price_minor'] as num?)?.toInt(),
+      procurementCashUnitPriceMinor: (procurement['cash_effective_unit_price_minor'] as num?)?.toInt(),
+      procurementCreditUnitPriceMinor: (procurement['credit_effective_unit_price_minor'] as num?)?.toInt(),
+      procurementCashDiscountBasisPoints: (procurement['cash_discount_basis_points'] as num?)?.toInt(),
+      procurementCreditDiscountBasisPoints: (procurement['credit_discount_basis_points'] as num?)?.toInt(),
+      procurementPricingSnapshotToken: procurement['pricing_snapshot_token']?.toString(),
     );
   }
 
