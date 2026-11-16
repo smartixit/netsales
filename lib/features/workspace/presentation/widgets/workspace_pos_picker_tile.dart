@@ -27,7 +27,6 @@ class WorkspacePosPickerTile extends StatelessWidget {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-
     return Padding(
       padding: EdgeInsets.only(bottom: AppSpacing.sm),
       child: CustomInteractiveBounce(
@@ -115,11 +114,7 @@ class WorkspacePosPickerTile extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      locationParts.isNotEmpty
-                          ? locationParts
-                          : (item.subtitle.isNotEmpty
-                              ? item.subtitle
-                              : 'نقطة بيع معتمدة'),
+                      item.subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.labelSmall.copyWith(
