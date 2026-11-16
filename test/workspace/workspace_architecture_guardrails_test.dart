@@ -56,7 +56,8 @@ void main() {
         if (source.contains('Get.toNamed') ||
             source.contains('UseCase(') ||
             source.contains('.execute(') ||
-            source.contains('AmountFormatter.')) {
+            source.contains('AmountFormatter.') ||
+            source.contains('TextFormatter.')) {
           violations.add(entity.path);
         }
       }
