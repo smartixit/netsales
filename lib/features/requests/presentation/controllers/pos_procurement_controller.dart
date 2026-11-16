@@ -90,6 +90,28 @@ class PosProcurementController extends GetxController {
   final searchQuery = ''.obs;
   final statusFilter = RxnString(); // null = all, PENDING, APPROVED, etc.
 
+  // Guided procurement flow: build the request, then review and submit it.
+  final currentOrderStep = 0.obs;
+
+  void continueToOrderReview() {
+    if (procurementCart.isEmpty) {
+      CustomSnackbar.show(
+        title: 'الطلب غير مكتمل',
+        message: 'أضف باقة واحدة على الأقل قبل الانتقال إلى المراجعة.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+    currentOrderStep.value = 1;
+    FocusManager.instance.primaryFocus?.unfocus();
+    unawaited(fetchServerQuote());
+  }
+
+  void returnToOrderItems() {
+    currentOrderStep.value = 0;
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
   // State: معالج إنشاء طلب جديد (Wizard Form)
   final formKey = GlobalKey<FormState>();
   final myPosList = <PosEntity>[].obs;
@@ -895,6 +917,7 @@ class PosProcurementController extends GetxController {
 
   /// تهيئة نموذج طلب جديد
   void initNewOrderForm() {
+    currentOrderStep.value = 0;
     isEditing.value = false;
     editingRequestId.value = null;
     clearProcurementCart();
