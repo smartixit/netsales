@@ -12,8 +12,9 @@ import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class MembershipScreen extends GetView<MembershipController> {
-  const MembershipScreen({super.key, required this.isNetwork})
-    : super(tag: isNetwork ? MembershipBinding.networkTag : MembershipBinding.posTag);
+  const MembershipScreen({super.key, required this.isNetwork}) : super(
+    tag: isNetwork ? MembershipBinding.networkTag : MembershipBinding.posTag,
+  );
 
   final bool isNetwork;
   @override
