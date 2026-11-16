@@ -12,16 +12,14 @@ import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/core/utils/greeting_formatter.dart';
-import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_challenge_sheet.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/domain/usecases/get_network_workspace_overview_use_case.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
+import 'package:netsales/features/workspace/presentation/mappers/network_workspace_transaction_mapper.dart';
 import 'package:netsales/widgets/charts/charting.dart';
 import 'package:netsales/widgets/dashboard_metrics/dashboard_metrics.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -118,48 +116,15 @@ class NetworkWorkspaceController extends GetxController {
 
   /// قائمة طلبات التوريد المعلقة المحولة كـ ViewModels جاهزة للعرض
   List<WorkspaceTransactionItemViewModel> get recentPendingOrderItems {
-    final pending = overview.value?.recentPendingRequests ?? const [];
-    return pending
-        .map((req) {
-          final refShort = req.requestUuid.isNotEmpty
-              ? req.requestUuid.split('-').first
-              : '';
-          final date = DateFormatter.tryParse(req.requestDate);
-          final dateText = date != null ? DateFormatter.smart(date) : '';
-          final subtitle = dateText.isNotEmpty
-              ? '${req.saleTypeLabel} • $dateText'
-              : req.saleTypeLabel;
-
-          final statusPresentation =
-              EnumPresentationRegistry.resolveRequestStatus(
-                req.status,
-                serverLabel: req.statusLabel,
-              );
-
-          return WorkspaceTransactionItemViewModel(
-            title: req.posName,
-            reference: refShort,
-            subtitle: subtitle,
-            formattedAmount:
-                '${AmountFormatter.formatValue(req.requestTotalAmount)} ر.ي',
-            statusPresentation: statusPresentation,
-            initials: TextFormatter.avatarInitials(req.posName, maxChars: 2),
-            actionLabel: 'اعتماد',
-            onAction: () {
-              Get.toNamed<void>(
-                AppRoutes.voucherRequestDetails,
-                arguments: req.requestId,
-              );
-            },
-            onTap: () {
-              Get.toNamed<void>(
-                AppRoutes.voucherRequestDetails,
-                arguments: req.requestId,
-              );
-            },
-          );
-        })
-        .toList(growable: false);
+    return NetworkWorkspaceTransactionMapper.mapPendingRequests(
+      overview.value?.recentPendingRequests ?? const [],
+      onOpenRequest: (requestId) {
+        Get.toNamed<void>(
+          AppRoutes.voucherRequestDetails,
+          arguments: requestId,
+        );
+      },
+    );
   }
 
   /// تنسيق قيمة مبيعات الشبكة الجاهزة للعرض
