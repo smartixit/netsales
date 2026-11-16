@@ -2,6 +2,7 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/requests/data/datasources/request_remote_data_source.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/data/models/request_modification_preview_model.dart';
@@ -57,8 +58,14 @@ class RequestRepositoryImpl implements RequestRepository {
   }
 
   @override
-  Future<RequestEntity> createRequest(Map<String, dynamic> data) async {
-    final response = await _remoteDataSource.createRequest(data);
+  Future<RequestEntity> createRequest(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
+  }) async {
+    final response = await _remoteDataSource.createRequest(
+      data,
+      idempotencyKey: idempotencyKey,
+    );
     return response.data!;
   }
 
@@ -103,7 +110,7 @@ class RequestRepositoryImpl implements RequestRepository {
   }
 
   @override
-  Future<RequestEntity> approveRequest(
+  Future<RequestApprovalResultEntity> approveRequest(
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
@@ -118,13 +125,13 @@ class RequestRepositoryImpl implements RequestRepository {
       requestId,
       data: data.isNotEmpty ? data : null,
     );
-
-    if (response.data is RequestEntity) {
-      return response.data as RequestEntity;
+    final result = response.data;
+    if (result == null) {
+      throw const FormatException(
+        'الخادم لم يُرجع نتيجة الاعتماد والفاتورة المرتبطة.',
+      );
     }
-
-    // إذا أعاد الخادم تفاصيل الطلب داخل كائن مركب
-    return await getRequestDetails(requestId);
+    return result;
   }
 
   List<Map<String, dynamic>> _mapModificationItems(

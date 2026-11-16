@@ -7,7 +7,13 @@ class CreateRequestUseCase {
 
   const CreateRequestUseCase(this._repository);
 
-  Future<RequestEntity> call(Map<String, dynamic> data) {
-    return _repository.createRequest(data);
+  Future<RequestEntity> call(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
+  }) {
+    return _repository.createRequest(
+      data,
+      idempotencyKey: idempotencyKey,
+    );
   }
 }

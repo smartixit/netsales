@@ -1,6 +1,7 @@
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/requests/data/models/procurement_quote_model.dart';
 import 'package:netsales/features/requests/data/models/request_model.dart';
+import 'package:netsales/features/requests/data/models/request_approval_result_model.dart';
 
 /// واجهة مصدر البيانات البعيد لطلبات الكروت والتوريد
 abstract interface class RequestRemoteDataSource {
@@ -12,7 +13,10 @@ abstract interface class RequestRemoteDataSource {
 
   Future<ApiResponse<RequestModel>> getRequestDetails(int requestId);
 
-  Future<ApiResponse<RequestModel>> createRequest(Map<String, dynamic> data);
+  Future<ApiResponse<RequestModel>> createRequest(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
+  });
 
   Future<ApiResponse<RequestModel>> updateRequest(
     int requestId,
@@ -23,7 +27,7 @@ abstract interface class RequestRemoteDataSource {
 
   Future<ApiResponse<dynamic>> deleteRequest(int requestId);
 
-  Future<ApiResponse<dynamic>> approveRequest(
+  Future<ApiResponse<RequestApprovalResultModel>> approveRequest(
     int requestId, {
     Map<String, dynamic>? data,
   });

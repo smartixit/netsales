@@ -1,4 +1,4 @@
-import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 
@@ -8,7 +8,7 @@ class ApproveRequestUseCase {
 
   const ApproveRequestUseCase(this._repository);
 
-  Future<RequestEntity> call(
+  Future<RequestApprovalResultEntity> call(
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
