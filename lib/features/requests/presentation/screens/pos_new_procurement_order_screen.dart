@@ -5,6 +5,7 @@ import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_cart_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
@@ -13,7 +14,7 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_pack
 import 'package:netsales/features/requests/presentation/widgets/procurement_pos_context_section.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
-import 'package:netsales/widgets/inputs/custom_segmented_bar.dart';
+import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 
 /// مساحة اكتشاف وتكوين طلب واحدة؛ السعر والكمية والإجمالي تتحدث محلياً وفورياً.
 class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
