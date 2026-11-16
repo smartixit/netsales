@@ -94,7 +94,9 @@ class WorkspaceEntityPickerController extends GetxController {
   }
 
   Future<void> selectNetworkById(int networkId) async {
-    final network = networks.firstWhereOrNull((item) => item.networkId == networkId);
+    final network = networks.firstWhereOrNull(
+      (item) => item.networkId == networkId,
+    );
     if (network == null) return;
     await WorkspaceService.to.saveActiveNetworkId(network.networkId);
     if (Get.isRegistered<NetworkWorkspaceController>()) {
@@ -113,7 +115,9 @@ class WorkspaceEntityPickerController extends GetxController {
   }
 
   Future<void> selectPosById(int posId) async {
-    final pos = pointsOfSale.firstWhereOrNull((item) => item.posId == posId);
+    final pos = pointsOfSale.firstWhereOrNull(
+      (item) => item.posId == posId,
+    );
     if (pos == null) return;
     await WorkspaceService.to.saveActivePosId(pos.posId);
     if (Get.isRegistered<PosWorkspaceController>()) {
