@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -18,7 +19,7 @@ import 'package:netsales/features/workspace/presentation/controllers/workspace_c
 class WorkspaceCoordinatorBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<WorkspaceLocalDataSource>(
+    registerLazyIfAbsent<WorkspaceLocalDataSource>(
       () => WorkspaceLocalDataSourceImpl(
         storageService: StorageService.instance,
         workspaceService: WorkspaceService.to,
@@ -26,43 +27,43 @@ class WorkspaceCoordinatorBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<WorkspaceRepository>(
+    registerLazyIfAbsent<WorkspaceRepository>(
       () => WorkspaceRepositoryImpl(Get.find<WorkspaceLocalDataSource>()),
       fenix: true,
     );
 
-    Get.lazyPut<GetActiveWorkspaceUseCase>(
+    registerLazyIfAbsent<GetActiveWorkspaceUseCase>(
       () => GetActiveWorkspaceUseCase(Get.find<WorkspaceRepository>()),
       fenix: true,
     );
 
-    Get.lazyPut<SetActiveWorkspaceUseCase>(
+    registerLazyIfAbsent<SetActiveWorkspaceUseCase>(
       () => SetActiveWorkspaceUseCase(Get.find<WorkspaceRepository>()),
       fenix: true,
     );
 
     if (!Get.isRegistered<AuthRemoteDataSource>()) {
-      Get.lazyPut<AuthRemoteDataSource>(
+      registerLazyIfAbsent<AuthRemoteDataSource>(
         () => const AuthRemoteDataSourceImpl(),
         fenix: true,
       );
     }
 
     if (!Get.isRegistered<AuthRepository>()) {
-      Get.lazyPut<AuthRepository>(
+      registerLazyIfAbsent<AuthRepository>(
         () => AuthRepositoryImpl(Get.find<AuthRemoteDataSource>()),
         fenix: true,
       );
     }
 
     if (!Get.isRegistered<LogoutUseCase>()) {
-      Get.lazyPut<LogoutUseCase>(
+      registerLazyIfAbsent<LogoutUseCase>(
         () => LogoutUseCase(Get.find<AuthRepository>()),
         fenix: true,
       );
     }
 
-    Get.lazyPut<WorkspaceCoordinatorController>(
+    registerLazyIfAbsent<WorkspaceCoordinatorController>(
       () => WorkspaceCoordinatorController(
         getActiveWorkspaceUseCase: Get.find<GetActiveWorkspaceUseCase>(),
         setActiveWorkspaceUseCase: Get.find<SetActiveWorkspaceUseCase>(),
