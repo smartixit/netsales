@@ -191,7 +191,7 @@ class ProcurementRequestDetailsScreen
                         AppSpacing.hSm,
                         Expanded(
                           child: Text(
-                            'تم إنشاء فاتورة مرتبطة بهذا الطلب. قد تختلف قيمتها وبنودها عن الطلب الأصلي إذا أُجريت تعديلات أثناء المراجعة. اعتمد الفاتورة بوصفها المرجع النهائي للتسوية.',
+                            'أُنشئت فاتورة مرتبطة بهذا الطلب. قد تختلف قيمتها وبنودها عن الطلب الأصلي بعد مراجعة الشبكة؛ وتبقى الفاتورة المرجع النهائي للتسوية.',
                             style: AppTypography.bodySmall.copyWith(
                               color: colors.onSurface,
                               height: 1.5,
@@ -244,7 +244,7 @@ class ProcurementRequestDetailsScreen
 
                 AppSpacing.vLg,
 
-                // 3. إجمالي الفاتورة والطلب السيادي
+                // 3. القيمة الأصلية للطلب (ليست بالضرورة قيمة الفاتورة النهائية)
                 Container(
                   padding: EdgeInsets.all(AppSpacing.cardPadding),
                   decoration: BoxDecoration(
@@ -260,7 +260,7 @@ class ProcurementRequestDetailsScreen
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'إجمالي المبلغ المستحق:',
+                            'قيمة الطلب عند الإرسال:',
                             style: AppTypography.bodyMedium.copyWith(
                               color: colors.onSurface,
                               fontWeight: FontWeight.bold,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -146,6 +147,25 @@ class PosProcurementController extends GetxController {
   final isSubmitting = false.obs;
 
   int _requestListRevision = 0;
+  String? _pendingCreatePayloadSignature;
+  String? _pendingCreateIdempotencyKey;
+
+  String _resolveCreateIdempotencyKey(Map<String, dynamic> payload) {
+    final signature = jsonEncode(payload);
+    if (_pendingCreatePayloadSignature != signature ||
+        _pendingCreateIdempotencyKey == null) {
+      _pendingCreatePayloadSignature = signature;
+      _pendingCreateIdempotencyKey = IdempotencyHelper.forVoucherRequest(
+        selectedNetworkId.value,
+      );
+    }
+    return _pendingCreateIdempotencyKey!;
+  }
+
+  void _clearPendingCreateIdempotencyKey() {
+    _pendingCreatePayloadSignature = null;
+    _pendingCreateIdempotencyKey = null;
+  }
 
   /// التحقق من صلاحيات طلبات التوريد لنقطة البيع
   bool get canCreateOrder =>
@@ -499,6 +519,7 @@ class PosProcurementController extends GetxController {
     procurementCart.clear();
     serverQuote.value = null;
     quoteError.value = null;
+    _clearPendingCreateIdempotencyKey();
   }
 
   /// جلب واحتساب عرض الأسعار الرسمي المعتمد سيادياً من الخادم لبنود السلة وطريقة الدفع المختارة
@@ -1017,9 +1038,7 @@ class PosProcurementController extends GetxController {
 
       final created = await createRequestUseCase(
         payload,
-        idempotencyKey: IdempotencyHelper.forVoucherRequest(
-          selectedNetworkId.value,
-        ),
+        idempotencyKey: _resolveCreateIdempotencyKey(payload),
       );
       requests.insert(0, created);
       clearProcurementCart();

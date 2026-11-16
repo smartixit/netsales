@@ -35,7 +35,9 @@ class FakeQuoteRequestRepository implements RequestRepository {
   ProcurementQuoteEntity? nextQuote;
   bool throwOnQuote = false;
   bool throwPricingOnCreate = false;
+  bool throwOnceOnCreate = false;
   Map<String, dynamic>? lastCreatePayload;
+  final List<String?> createIdempotencyKeys = [];
   Map<String, dynamic>? lastQuotePayload;
 
   @override
@@ -80,6 +82,11 @@ class FakeQuoteRequestRepository implements RequestRepository {
     String? idempotencyKey,
   }) async {
     lastCreatePayload = data;
+    createIdempotencyKeys.add(idempotencyKey);
+    if (throwOnceOnCreate) {
+      throwOnceOnCreate = false;
+      throw const AppException('تعذر الاتصال بالخادم', code: '500');
+    }
     if (throwPricingOnCreate) {
       throw const AppException(
         'تم تحديث أسعار الباقات أو شروط الخصم المعتمدة لدى الشبكة. يرجى مراجعة وتحديث عرض الأسعار قبل الإرسال.',
@@ -420,6 +427,42 @@ void main() {
 
       expect(success, isTrue);
       expect(mockRepo.lastCreatePayload!['pricing_token'], 'authoritative_server_token_xyz');
+      expect(mockRepo.createIdempotencyKeys.single, isNotEmpty);
+    });
+
+    test('retries reuse the same idempotency key for an unchanged submission', () async {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
+      controller.myPosList.assignAll([testPos]);
+      controller.linkedNetworks.assignAll([testLink]);
+      controller.procurementCart.add(
+        const ProcurementCartLineEntity(
+          package: testPackage,
+          sheets: 1,
+          voucherCount: 100,
+        ),
+      );
+      controller.serverQuote.value = const ProcurementQuoteEntity(
+        networkId: 10,
+        posId: 20,
+        saleType: SaleType.cash,
+        saleTypeLabel: 'نقدي',
+        grossTotal: 10000,
+        discountTotal: 1000,
+        netTotal: 9000,
+        currency: 'YER',
+        pricingToken: 'stable_retry_token',
+        items: [],
+      );
+      mockRepo.throwOnceOnCreate = true;
+
+      expect(await controller.submitOrder(), isFalse);
+      expect(await controller.submitOrder(), isTrue);
+      expect(mockRepo.createIdempotencyKeys, hasLength(2));
+      expect(
+        mockRepo.createIdempotencyKeys[0],
+        mockRepo.createIdempotencyKeys[1],
+      );
     });
 
     test('Server price change rejection automatically triggers quote re-fetch to protect user', () async {
