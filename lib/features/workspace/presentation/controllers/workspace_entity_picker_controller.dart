@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -27,6 +29,11 @@ class WorkspaceEntityPickerController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
   final RxInt selectedSegment = 0.obs; // 0: شبكات, 1: نقاط بيع
+
+  void prepareForWorkspace(AppWorkspace workspace) {
+    selectedSegment.value = workspace == AppWorkspace.network ? 0 : 1;
+    unawaited(loadEntities());
+  }
 
   Future<void> loadEntities({bool forceSkeleton = true}) async {
     if (forceSkeleton) {
