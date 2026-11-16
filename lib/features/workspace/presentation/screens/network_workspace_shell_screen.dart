@@ -21,11 +21,11 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final navItems = [
-        const WorkspaceNavItem(
+        WorkspaceNavItem(
           label: 'الرئيسية',
           icon: Icons.dashboard_outlined,
           activeIcon: Icons.dashboard_rounded,
-          content: NetworkWorkspaceDashboard(),
+          content: NetworkWorkspaceDashboard(controller: controller),
         ),
         const WorkspaceNavItem(
           label: 'الطلبات',
