@@ -124,6 +124,26 @@ class PosProcurementController extends GetxController {
 
   bool get hasCartItems => procurementCart.isNotEmpty;
 
+  /// هل يملك الطلب عرض سعر حديثاً يطابق سياق الإرسال الحالي؟
+  bool get hasCurrentServerQuote {
+    if (getProcurementQuoteUseCase == null) return true;
+
+    final quote = serverQuote.value;
+    if (isLoadingQuote.value || quote == null) return false;
+
+    final matchesContext =
+        quote.networkId == selectedNetworkId.value &&
+        quote.posId == selectedPosId.value &&
+        quote.saleType == selectedSaleType.value;
+    if (!matchesContext) return false;
+
+    final expiresAt = quote.expiresAt;
+    return expiresAt == null || DateTime.now().isBefore(expiresAt);
+  }
+
+  bool get canSubmitOrder =>
+      hasCartItems && !isSubmitting.value && hasCurrentServerQuote;
+
   void _setSelectedNetworkId(int? value) {
     selectedNetworkId.value = value;
   }

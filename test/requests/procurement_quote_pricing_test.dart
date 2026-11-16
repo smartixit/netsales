@@ -409,6 +409,7 @@ void main() {
         ),
       );
 
+      expect(controller.canSubmitOrder, isFalse);
       final firstAttempt = await controller.submitOrder();
 
       expect(firstAttempt, isFalse);
@@ -417,6 +418,7 @@ void main() {
 
       await pumpEventQueue();
       expect(controller.serverQuote.value, isNotNull);
+      expect(controller.canSubmitOrder, isTrue);
 
       final secondAttempt = await controller.submitOrder();
       expect(secondAttempt, isTrue);

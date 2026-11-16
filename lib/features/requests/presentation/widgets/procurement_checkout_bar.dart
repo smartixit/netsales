@@ -28,7 +28,16 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
         0.0,
         (sum, item) => sum + item.sheets,
       );
-      final totalAmount = controller.serverQuote.value?.netTotal ?? 0.0;
+      final quote = controller.serverQuote.value;
+      final quoteSummary = cartLines.isEmpty
+          ? 'السلة فارغة'
+          : controller.isLoadingQuote.value
+              ? 'جاري احتساب السعر المعتمد...'
+              : quote == null
+                  ? (controller.getProcurementQuoteUseCase == null
+                      ? 'سيحتسب الخادم السعر عند التقديم'
+                      : 'عرض السعر غير متاح')
+                  : AmountFormatter.format(quote.netTotal.toString());
 
       return Container(
         padding: EdgeInsets.fromLTRB(
@@ -73,9 +82,11 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
                     ),
                   ),
                   Text(
-                    AmountFormatter.format(totalAmount.toString()),
+                    quoteSummary,
                     style: AppTypography.titleMedium.copyWith(
-                      color: colors.primary,
+                      color: quote == null
+                          ? colors.onSurfaceVariant
+                          : colors.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -90,10 +101,10 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
               text: isEditMode ? 'حفظ تعديلات الطلب' : 'تقديم طلب التوريد',
               icon: isEditMode ? Icons.check_circle_rounded : Icons.send_rounded,
               loading: controller.isSubmitting.value,
-              enabled: cartLines.isNotEmpty && !controller.isSubmitting.value,
-              onPressed: cartLines.isEmpty
-                  ? null
-                  : controller.submitOrderAndClose,
+              enabled: controller.canSubmitOrder,
+              onPressed: controller.canSubmitOrder
+                  ? controller.submitOrderAndClose
+                  : null,
             ),
           ],
         ),
