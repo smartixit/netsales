@@ -21,6 +21,7 @@ class VoucherQuantityStepper extends StatelessWidget {
   final bool showPresets;
   final bool showSummaryCard;
   final bool showClearAction;
+  final int presetLimit;
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onTextChanged;
 
@@ -34,6 +35,7 @@ class VoucherQuantityStepper extends StatelessWidget {
     this.showPresets = true,
     this.showSummaryCard = true,
     this.showClearAction = true,
+    this.presetLimit = 8,
     this.validator,
     this.onTextChanged,
   });
@@ -58,7 +60,7 @@ class VoucherQuantityStepper extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final presets = showPresets && sheetSize > 0
-        ? VoucherSheetCalculator.getPresets(sheetSize)
+        ? VoucherSheetCalculator.getPresets(sheetSize).take(presetLimit).toList(growable: false)
         : const <VoucherSheetPreset>[];
     final description = currentCount > 0 && sheetSize > 0
         ? VoucherSheetCalculator.describe(currentCount, sheetSize)
