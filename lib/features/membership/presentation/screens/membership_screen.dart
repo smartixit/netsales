@@ -12,11 +12,15 @@ import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class MembershipScreen extends GetWidget<MembershipController> {
-  const MembershipScreen({super.key, required this.isNetwork}) : super(
-    tag: isNetwork ? MembershipBinding.networkTag : MembershipBinding.posTag,
-  );
+  const MembershipScreen({super.key, required this.isNetwork});
 
   final bool isNetwork;
+
+  String get controllerScopeTag =>
+      isNetwork ? MembershipBinding.networkTag : MembershipBinding.posTag;
+
+  @override
+  String? get tag => controllerScopeTag;
   @override
   Widget build(BuildContext context) => Obx(() {
     final tenants = controller.isNetwork
