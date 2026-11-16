@@ -4,8 +4,8 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
+import 'package:netsales/features/workspace/presentation/models/network_provider_card_view_model.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_network_card.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_slider.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -111,30 +111,20 @@ class NetworkProviderCarouselSection extends StatelessWidget {
           ),
         ),
         AppSpacing.vSm,
-        CustomCarouselSlider<NetworkEntity>(
-          items: networks,
+        CustomCarouselSlider<NetworkProviderCardViewModel>(
+          items: controller.providerCards,
           currentIndex: networks
               .indexWhere((n) => n.networkId == selectedId)
               .clamp(0, networks.length - 1),
           height: 205,
           viewportFraction: 0.88,
-          itemBuilder: (context, network, index) {
-            final isSelected = network.networkId == selectedId;
-            final salesValue = controller.networkSalesValue(isSelected);
-            final posCount = controller.networkPosCountLabel(isSelected);
-
-            return ExecutiveNetworkCard(
-              network: network,
-              isSelected: isSelected,
-              cardIndex: index,
-              salesValue: salesValue,
-              posCountText: posCount,
-              onTap: () => controller.selectNetwork(network.networkId),
-            );
-          },
+          itemBuilder: (context, item, index) => ExecutiveNetworkCard(
+            item: item,
+            onTap: () => controller.selectNetwork(item.networkId),
+          ),
           onPageChanged: (index) {
             if (index >= 0 && index < networks.length) {
-              controller.selectNetwork(networks[index].networkId);
+              controller.selectNetwork(controller.providerCards[index].networkId);
             }
           },
         ),
