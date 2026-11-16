@@ -586,6 +586,34 @@ class PosWorkspaceController extends GetxController {
     packagesError.value = null;
   }
 
+  Future<void> selectPosById(int? posId) async {
+    if (posId == null) return;
+    final selected = availablePos.firstWhereOrNull(
+      (position) => position.posId == posId,
+    );
+    if (selected != null) await selectPos(selected);
+  }
+
+  void openNewProcurementOrder() =>
+      Get.toNamed<void>(AppRoutes.newProcurementOrder);
+
+  void openPurchaseInvoices() =>
+      Get.toNamed<void>(AppRoutes.purchaseInvoices);
+
+  void openPosDebtLedger() => Get.toNamed<void>(AppRoutes.posDebtLedger);
+
+  void openWalletStatement() {
+    final posId = activePos.value?.posId;
+    if (posId == null) return;
+    final networkId = selectedNetworkLink.value?.networkId;
+    final arguments = <String, dynamic>{'pos_id': posId};
+    if (networkId != null) arguments['network_id'] = networkId;
+    Get.toNamed<void>(
+      AppRoutes.posWalletStatement,
+      arguments: arguments,
+    );
+  }
+
   void onNavItemSelected(int index) {
     selectedNavIndex.value = index;
   }
