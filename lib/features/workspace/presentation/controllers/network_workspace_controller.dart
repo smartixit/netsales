@@ -20,6 +20,8 @@ import 'package:netsales/features/workspace/domain/usecases/get_network_workspac
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 import 'package:netsales/features/workspace/presentation/mappers/network_workspace_transaction_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/network_workspace_dashboard_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/network_provider_card_mapper.dart';
+import 'package:netsales/features/workspace/presentation/models/network_provider_card_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/network_workspace_dashboard_view_model.dart';
 import 'package:netsales/widgets/charts/charting.dart';
 
@@ -109,16 +111,11 @@ class NetworkWorkspaceController extends GetxController {
 
   int get pendingRequestsCount => dashboardViewModel.pendingRequestsCount;
 
-  String networkSalesValue(bool isSelected) =>
-      NetworkWorkspaceDashboardMapper.formatNetworkSales(
-        overview.value,
-        isSelected: isSelected,
-      );
-
-  String networkPosCountLabel(bool isSelected) =>
-      NetworkWorkspaceDashboardMapper.formatNetworkPosCount(
-        overview.value,
-        isSelected: isSelected,
+  List<NetworkProviderCardViewModel> get providerCards =>
+      NetworkProviderCardMapper.map(
+        networks: networks,
+        selectedNetworkId: selectedNetworkId.value,
+        overview: overview.value,
       );
 
   void openPackagesCatalog() =>
