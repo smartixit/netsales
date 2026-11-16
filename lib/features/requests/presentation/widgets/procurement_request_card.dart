@@ -245,12 +245,12 @@ class ProcurementRequestCard extends StatelessWidget {
                     ),
                   ),
 
-                  // إجمالي الطلب السيادي
+                  // قيمة الطلب الأصلية كما أرسلها صاحب الطلب
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'إجمالي الطلب',
+                        'قيمة الطلب الأصلي',
                         style: AppTypography.labelSmall.copyWith(
                           color: colors.onSurfaceVariant,
                           fontSize: 10.sp,
