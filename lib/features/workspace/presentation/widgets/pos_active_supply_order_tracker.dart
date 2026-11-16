@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -83,7 +84,7 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
                 children: [
                   OrderStepNode(
                     title: 'تم الإرسال',
-                    isDone: isStep1Done,
+                    isDone: true,
                     isActive: false,
                   ),
                   Expanded(
