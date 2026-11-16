@@ -258,6 +258,7 @@ class MockCommercialRepository implements CommercialRepository {
 
 class MockPackageCatalogRepository implements PackageCatalogRepository {
   final List<PackageEntity> packages;
+  String? lastSearch;
 
   MockPackageCatalogRepository(this.packages);
 
@@ -269,7 +270,15 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
     String? cursor,
     int? perPage,
   }) async {
-    return PaginatedList<PackageEntity>(items: packages);
+    lastSearch = search;
+    final filtered = search == null || search.isEmpty
+        ? packages
+        : packages
+            .where(
+              (package) => package.packageName.contains(search),
+            )
+            .toList(growable: false);
+    return PaginatedList<PackageEntity>(items: filtered);
   }
 
   @override
@@ -391,7 +400,7 @@ void main() {
     );
 
     test(
-      'loadLinkedNetworks and loadNetworkPackages populates wizard form',
+      'loadLinkedNetworks and loadNetworkPackages selects first unfiltered package',
       () async {
         await controller.loadLinkedNetworks(20);
         expect(controller.linkedNetworks.length, 1);
@@ -400,6 +409,23 @@ void main() {
         await controller.loadNetworkPackages(10);
         expect(controller.availablePackages.length, 1);
         expect(controller.selectedPackage.value?.packageId, 5);
+        expect(controller.requestedVoucherCount, 100);
+      },
+    );
+
+    test(
+      'package search preserves the selected package and entered quantity',
+      () async {
+        await controller.loadLinkedNetworks(20);
+        controller.setVoucherCount(175);
+
+        controller.onPackageSearchChanged('غير موجودة');
+        await controller.refreshNetworkPackages();
+
+        expect(mockPackageRepo.lastSearch, 'غير موجودة');
+        expect(controller.availablePackages, isEmpty);
+        expect(controller.selectedPackage.value?.packageId, 5);
+        expect(controller.requestedVoucherCount, 175);
       },
     );
   });
