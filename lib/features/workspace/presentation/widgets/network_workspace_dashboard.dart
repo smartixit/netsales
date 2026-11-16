@@ -85,7 +85,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                 children: [
                   // 1. كرت الترحيب القيادي
                   ExecutiveWelcomeHeroCard(
-                    controller: ctrl,
+                    controller: controller,
                     onPendingTap: () => controller.onNavItemSelected(1),
                   ),
                   AppSpacing.vLg,
@@ -111,7 +111,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
 
                   // 3. كاروسيل بطاقات الشبكات التابعة للمزود
                   if (controller.networks.isNotEmpty) ...[
-                    NetworkProviderCarouselSection(controller: ctrl),
+                    NetworkProviderCarouselSection(controller: controller),
                     AppSpacing.vLg,
                   ],
 
