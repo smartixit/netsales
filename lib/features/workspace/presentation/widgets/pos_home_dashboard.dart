@@ -68,7 +68,6 @@ class PosHomeDashboard extends StatelessWidget {
           );
         }
 
-        final activePos = controller.activePos.value!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -83,7 +82,7 @@ class PosHomeDashboard extends StatelessWidget {
             if (controller.availablePos.length > 1) ...[
               CustomDropdown<int>(
                 label: 'نقطة البيع النشطة للعمليات',
-                rxValue: Rx<int?>(activePos.posId),
+                rxValue: Rx<int?>(controller.activePos.value!.posId),
                 searchEnabled: controller.availablePos.length > 5,
                 items: controller.availablePos
                     .map(
