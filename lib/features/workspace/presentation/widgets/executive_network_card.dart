@@ -8,17 +8,11 @@ import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 /// يعرض نموذج بطاقة الشبكة المحوّل عبر مكوّن الكاروسيل المشترك CustomCarouselCard
 class ExecutiveNetworkCard extends StatelessWidget {
   final NetworkProviderCardViewModel item;
-  final bool isSelected;
-  final int cardIndex;
   final VoidCallback onTap;
 
   const ExecutiveNetworkCard({
     super.key,
     required this.item,
-    required this.isSelected,
-    required this.cardIndex,
-    
-    
     required this.onTap,
   });
 
