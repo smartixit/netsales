@@ -4,9 +4,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
-import 'package:netsales/features/requests/domain/entities/procurement_quote_line_entity.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_quantity_editor_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -77,12 +75,8 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
             )
           else
             ...lines.map((line) {
-              final quoteLine = controller.serverQuote.value
-                  ?.findLine(line.package.packageId);
-
               return _ProcurementCartLineCard(
                 line: line,
-                quoteLine: quoteLine,
                 onEdit: () => ProcurementQuantityEditorSheet.show(
                   package: line.package,
                   currentQuantity: line.voucherCount,
@@ -100,7 +94,6 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
 
 class _ProcurementCartLineCard extends StatelessWidget {
   final ProcurementCartLineEntity line;
-  final ProcurementQuoteLineEntity? quoteLine;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onIncrement;
@@ -108,7 +101,6 @@ class _ProcurementCartLineCard extends StatelessWidget {
 
   const _ProcurementCartLineCard({
     required this.line,
-    required this.quoteLine,
     required this.onEdit,
     required this.onDelete,
     required this.onIncrement,
@@ -182,8 +174,6 @@ class _ProcurementCartLineCard extends StatelessWidget {
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                  if (quoteLine != null)
-                                    _CartLineQuoteSummary(quoteLine: quoteLine!),
                                 ],
                               ),
                             ),
@@ -256,47 +246,3 @@ class _ProcurementCartLineCard extends StatelessWidget {
   }
 }
 
-class _CartLineQuoteSummary extends StatelessWidget {
-  final ProcurementQuoteLineEntity quoteLine;
-
-  const _CartLineQuoteSummary({required this.quoteLine});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final hasDiscount = quoteLine.discountRate > 0;
-
-    return Padding(
-      padding: EdgeInsets.only(top: AppSpacing.xs),
-      child: Row(
-        children: [
-          Text(
-            'السعر: ${AmountFormatter.formatValue(quoteLine.effectivePrice)} ر.ي',
-            style: AppTypography.labelSmall.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (hasDiscount) ...[
-            AppSpacing.hXxs,
-            Text(
-              '(-${quoteLine.discountRate.toStringAsFixed(1)}%)',
-              style: AppTypography.labelSmall.copyWith(
-                color: colors.secondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-          const Spacer(),
-          Text(
-            'المجموع: ${AmountFormatter.formatValue(quoteLine.lineNetTotal)} ر.ي',
-            style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
