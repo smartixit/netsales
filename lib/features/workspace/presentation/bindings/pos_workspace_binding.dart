@@ -15,6 +15,7 @@ import 'package:netsales/features/reports/presentation/bindings/operational_repo
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
 import 'package:netsales/features/workspace/presentation/bindings/workspace_coordinator_binding.dart';
+import 'package:netsales/features/workspace/presentation/bindings/workspace_entity_picker_binding.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 
 class PosWorkspaceBinding extends Bindings {
@@ -22,6 +23,7 @@ class PosWorkspaceBinding extends Bindings {
   void dependencies() {
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();
+    WorkspaceEntityPickerBinding().dependencies();
     OperationalReportsBinding().dependencies();
     FinanceBinding().dependencies();
     InvoiceBinding().dependencies();
