@@ -14,7 +14,7 @@ void main() {
         governorateName: 'صنعاء',
         directorateName: 'التحرير',
         ownerName: 'المزود',
-        status: 'active',
+        status: 'ACTIVE',
       );
 
       final result = NetworkProviderCardMapper.map(
