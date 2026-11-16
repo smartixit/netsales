@@ -119,6 +119,9 @@ class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
       }
 
       final hasDiscount = quote.discountTotal > 0;
+      final expiresAt = quote.expiresAt?.toLocal();
+      final isExpired =
+          expiresAt != null && !DateTime.now().isBefore(expiresAt);
 
       return Container(
         width: double.infinity,
@@ -291,6 +294,45 @@ class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
                     amount: quote.netTotal,
                     currencyCode: quote.currency,
                   ),
+                  if (expiresAt != null) ...[
+                    AppSpacing.vSm,
+                    Row(
+                      children: [
+                        Icon(
+                          isExpired
+                              ? Icons.timer_off_outlined
+                              : Icons.schedule_rounded,
+                          size: 16,
+                          color: isExpired ? colors.warning : colors.success,
+                        ),
+                        AppSpacing.hXs,
+                        Expanded(
+                          child: Text(
+                            isExpired
+                                ? 'انتهت صلاحية عرض السعر'
+                                : 'صالح حتى ${TimeOfDay.fromDateTime(expiresAt).format(context)}',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: isExpired
+                                  ? colors.warning
+                                  : colors.onSurfaceVariant,
+                              fontWeight: isExpired
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (isExpired) ...[
+                      AppSpacing.vSm,
+                      CustomButton.outline(
+                        text: 'إعادة احتساب السعر',
+                        icon: Icons.refresh_rounded,
+                        size: AppButtonSize.small,
+                        onPressed: controller.fetchServerQuote,
+                      ),
+                    ],
+                  ],
                   AppSpacing.vSm,
                   Text(
                     'تقديم الطلب لا ينشئ فاتورة ولا يغيّر أرصدة المحافظ. تنشأ الفاتورة وتتم التسوية فقط بعد اعتماد الشبكة.',
