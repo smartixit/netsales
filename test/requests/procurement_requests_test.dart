@@ -411,9 +411,9 @@ void main() {
     test('ApproveRequestUseCase updates status to APPROVED and sets invoice',
         () async {
       final approved = await approveRequestUseCase(1);
-      expect(approved.isApproved, true);
-      expect(approved.status, RequestStatus.approved);
-      expect(approved.invoiceId, 901);
+      expect(approved.request.isApproved, true);
+      expect(approved.request.status, RequestStatus.approved);
+      expect(approved.invoice.invoiceId, 901);
     });
 
     test('RejectRequestUseCase updates status to REJECTED with reason',
