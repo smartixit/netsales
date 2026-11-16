@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
@@ -506,10 +507,29 @@ class NetworkProcurementReviewController extends GetxController {
           leadingIcon: Icons.receipt_long_rounded,
           scrollable: true,
           child: RequestApprovalResultSheet(result: approvalResult),
-          stickyFooter: CustomButton.primary(
-            text: 'إغلاق',
-            width: double.infinity,
-            onPressed: () => Get.back<void>(),
+          stickyFooter: Row(
+            children: [
+              Expanded(
+                child: CustomButton.outline(
+                  text: 'إغلاق',
+                  onPressed: () => Get.back<void>(),
+                ),
+              ),
+              AppSpacing.hSm,
+              Expanded(
+                child: CustomButton.primary(
+                  text: 'فتح الفاتورة',
+                  icon: Icons.receipt_long_rounded,
+                  onPressed: () {
+                    Get.back<void>();
+                    Get.toNamed<void>(
+                      AppRoutes.saleInvoiceDetails,
+                      arguments: approvalResult.invoice.invoiceId,
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         );
       }
