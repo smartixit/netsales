@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/presentation/models/network_workspace_dashboard_view_model.dart';
 import 'package:netsales/widgets/charts/charting.dart';
