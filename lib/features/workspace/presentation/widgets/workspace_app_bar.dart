@@ -256,6 +256,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
       currentWorkspace: workspace,
       userName: coordinator.currentUserName,
       userRole: presentation.label,
+      userInitials: coordinator.currentUserInitials,
       userPhoneNumber: coordinator.currentUserPhoneNumber,
       userProfileLogo: coordinator.currentUserProfileLogo,
       canSwitchWorkspace: coordinator.canSwitchWorkspace,
