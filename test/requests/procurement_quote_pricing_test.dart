@@ -396,6 +396,33 @@ void main() {
       expect(controller.quoteError.value, isNull);
     });
 
+    test('Submission waits for a current server quote before creating a request', () async {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
+      controller.myPosList.assignAll([testPos]);
+      controller.linkedNetworks.assignAll([testLink]);
+      controller.procurementCart.add(
+        const ProcurementCartLineEntity(
+          package: testPackage,
+          sheets: 1,
+          voucherCount: 100,
+        ),
+      );
+
+      final firstAttempt = await controller.submitOrder();
+
+      expect(firstAttempt, isFalse);
+      expect(mockRepo.lastCreatePayload, isNull);
+      expect(mockRepo.lastQuotePayload, isNotNull);
+
+      await pumpEventQueue();
+      expect(controller.serverQuote.value, isNotNull);
+
+      final secondAttempt = await controller.submitOrder();
+      expect(secondAttempt, isTrue);
+      expect(mockRepo.lastCreatePayload?['pricing_token'], 'fake_valid_hmac_token');
+    });
+
     test('Submitting order includes pricing_token from authoritative server quote', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;

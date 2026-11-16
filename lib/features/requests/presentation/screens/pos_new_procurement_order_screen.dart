@@ -12,6 +12,7 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_pos_
 import 'package:netsales/features/requests/presentation/widgets/procurement_network_context_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
@@ -137,6 +138,11 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                     ],
                   );
                 }),
+
+                AppSpacing.vLg,
+
+                // عرض الأسعار النهائي المعتمد من الخادم قبل تقديم الطلب
+                const ProcurementFinancialQuoteCard(),
 
                 AppSpacing.vLg,
 

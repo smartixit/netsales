@@ -508,6 +508,8 @@ class PosProcurementController extends GetxController {
   void removeCartLine(int packageId) {
     procurementCart.removeWhere((line) => line.package.packageId == packageId);
     if (procurementCart.isEmpty) {
+      _quoteRevision++;
+      isLoadingQuote.value = false;
       serverQuote.value = null;
       quoteError.value = null;
     } else {
@@ -517,6 +519,8 @@ class PosProcurementController extends GetxController {
 
   void clearProcurementCart() {
     procurementCart.clear();
+    _quoteRevision++;
+    isLoadingQuote.value = false;
     serverQuote.value = null;
     quoteError.value = null;
     _clearPendingCreateIdempotencyKey();
@@ -524,6 +528,7 @@ class PosProcurementController extends GetxController {
 
   /// جلب واحتساب عرض الأسعار الرسمي المعتمد سيادياً من الخادم لبنود السلة وطريقة الدفع المختارة
   Future<void> fetchServerQuote() async {
+    final revision = ++_quoteRevision;
     final networkId = selectedNetworkId.value;
     final posId = selectedPosId.value;
     final items = procurementCart.toList(growable: false);
@@ -532,12 +537,13 @@ class PosProcurementController extends GetxController {
         posId == null ||
         items.isEmpty ||
         getProcurementQuoteUseCase == null) {
+      isLoadingQuote.value = false;
       serverQuote.value = null;
       quoteError.value = null;
       return;
     }
 
-    final revision = ++_quoteRevision;
+    serverQuote.value = null;
     isLoadingQuote.value = true;
     quoteError.value = null;
 
@@ -1010,6 +1016,31 @@ class PosProcurementController extends GetxController {
         type: SnackType.error,
       );
       return false;
+    }
+
+    if (getProcurementQuoteUseCase != null) {
+      final quote = serverQuote.value;
+      final quoteMatchesContext =
+          quote != null &&
+          quote.networkId == selectedNetworkId.value &&
+          quote.posId == posId &&
+          quote.saleType == selectedSaleType.value;
+      final quoteExpired = quote?.expiresAt != null &&
+          !DateTime.now().isBefore(quote!.expiresAt!);
+
+      if (isLoadingQuote.value || !quoteMatchesContext || quoteExpired) {
+        if (!isLoadingQuote.value) {
+          unawaited(fetchServerQuote());
+        }
+        CustomSnackbar.show(
+          title: quoteExpired ? 'انتهت صلاحية عرض الأسعار' : 'عرض الأسعار غير جاهز',
+          message: quoteExpired
+              ? 'تم طلب عرض أسعار محدث. راجعه قبل تقديم الطلب.'
+              : 'يجب جلب عرض الأسعار المعتمد للشبكة ونقطة البيع وطريقة الدفع الحالية قبل التقديم.',
+          type: SnackType.warning,
+        );
+        return false;
+      }
     }
 
     isSubmitting.value = true;

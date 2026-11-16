@@ -261,7 +261,7 @@ class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'الإجمالي النهائي المستحق:',
+                              'صافي قيمة الطلب:',
                               style: AppTypography.titleSmall.copyWith(
                                 color: colors.onSurface,
                                 fontWeight: FontWeight.bold,
@@ -269,7 +269,7 @@ class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
                             ),
                             AppSpacing.vXxs,
                             Text(
-                              'المبلغ المعتمد للتسوية المالية',
+                              'عرض السعر الحالي المعتمد من الخادم',
                               style: AppTypography.labelSmall.copyWith(
                                 color: colors.onSurfaceVariant,
                               ),
@@ -290,6 +290,14 @@ class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
                   CustomAmountToWordsBanner(
                     amount: quote.netTotal,
                     currencyCode: quote.currency,
+                  ),
+                  AppSpacing.vSm,
+                  Text(
+                    'تقديم الطلب لا ينشئ فاتورة ولا يغيّر أرصدة المحافظ. تنشأ الفاتورة وتتم التسوية فقط بعد اعتماد الشبكة.',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      height: 1.45,
+                    ),
                   ),
                 ],
               ),
