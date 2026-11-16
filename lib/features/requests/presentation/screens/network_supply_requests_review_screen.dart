@@ -81,9 +81,11 @@ class NetworkSupplyRequestsReviewScreen
             () => CustomResultsCounterBar(
               count: controller.requests.length,
               recordLabel: 'طلب توريد',
-              isFiltered: controller.searchQuery.value.isNotEmpty ||
+              isFiltered:
+                  controller.searchQuery.value.isNotEmpty ||
                   controller.statusFilter.value != null,
-              isLoading: controller.isLoading.value && controller.requests.isEmpty,
+              isLoading:
+                  controller.isLoading.value && controller.requests.isEmpty,
               onClear: controller.resetFilters,
             ),
           ),
@@ -136,7 +138,8 @@ class NetworkSupplyRequestsReviewScreen
             }
 
             if (controller.requests.isEmpty) {
-              final hasFilter = controller.searchQuery.value.isNotEmpty ||
+              final hasFilter =
+                  controller.searchQuery.value.isNotEmpty ||
                   controller.statusFilter.value != null;
               return Center(
                 child: CustomEmptyState(
@@ -190,13 +193,16 @@ class NetworkSupplyRequestsReviewScreen
                       request: request,
                       isNetworkView: true,
                       onTap: () => controller.openRequestDetails(request),
-                      onModify: (request.isPending && controller.canModifyRequests)
+                      onModify:
+                          (request.isPending && controller.canModifyRequests)
                           ? () => controller.openModificationSheet(request)
                           : null,
-                      onApprove: (request.isPending && controller.canApproveRequests)
+                      onApprove:
+                          (request.isPending && controller.canApproveRequests)
                           ? () => controller.promptApproveRequest(request)
                           : null,
-                      onReject: (request.isPending && controller.canRejectRequests)
+                      onReject:
+                          (request.isPending && controller.canRejectRequests)
                           ? () => controller.promptRejectRequest(request)
                           : null,
                     );

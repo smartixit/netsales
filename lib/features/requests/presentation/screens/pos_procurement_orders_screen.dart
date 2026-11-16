@@ -32,11 +32,9 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
     final colors = context.colors;
 
     // حساب الحشوات الهندسية لمنع التداخل مع الـ WorkspaceAppBar والـ Floating Bottom Bar
-    final topPadding = embedded
-        ? (MediaQuery.paddingOf(context).top + 80.h + AppSpacing.xs)
-        : 0.0;
+    final topPadding = embedded ? (MediaQuery.paddingOf(context).top) : 0.0;
     final bottomNavPadding = embedded
-        ? (115.h + MediaQuery.paddingOf(context).bottom)
+        ? (MediaQuery.paddingOf(context).bottom)
         : AppSpacing.cardPadding;
 
     final content = Padding(
@@ -69,7 +67,8 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
               () => CustomResultsCounterBar(
                 count: controller.requests.length,
                 recordLabel: 'طلب شراء',
-                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                isFiltered:
+                    controller.searchQuery.value.isNotEmpty ||
                     controller.statusFilter.value != null,
                 isLoading:
                     controller.isLoading.value && controller.requests.isEmpty,
@@ -118,8 +117,8 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                     onAction: hasFilter
                         ? () => controller.setStatusFilter(null)
                         : (controller.canCreateOrder
-                            ? controller.navigateToNewOrder
-                            : null),
+                              ? controller.navigateToNewOrder
+                              : null),
                   ),
                 );
               }
@@ -142,7 +141,8 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                       AppSpacing.cardPadding,
                       bottomNavPadding,
                     ),
-                    itemCount: controller.requests.length +
+                    itemCount:
+                        controller.requests.length +
                         (controller.isLoadingMore.value ? 1 : 0),
                     separatorBuilder: (context, index) => AppSpacing.vSm,
                     itemBuilder: (context, index) {
@@ -159,7 +159,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                       return Obx(() {
                         final isExpanded =
                             controller.expandedRequestId.value ==
-                                request.requestId;
+                            request.requestId;
                         return ProcurementRequestCard(
                           request: request,
                           isNetworkView: false,
@@ -169,18 +169,16 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                               controller.toggleAccordion(request.requestId),
                           onEdit:
                               (request.isPending && controller.canCreateOrder)
-                                  ? () => controller.openEditOrder(request)
-                                  : null,
+                              ? () => controller.openEditOrder(request)
+                              : null,
                           onCancel:
                               (request.isPending && controller.canCancelOrder)
-                                  ? () =>
-                                      controller.promptCancelRequest(request)
-                                  : null,
+                              ? () => controller.promptCancelRequest(request)
+                              : null,
                           onDelete:
                               (request.isCancelled && controller.canCancelOrder)
-                                  ? () =>
-                                      controller.promptDeleteRequest(request)
-                                  : null,
+                              ? () => controller.promptDeleteRequest(request)
+                              : null,
                         );
                       });
                     },
