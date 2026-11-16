@@ -38,166 +38,166 @@ class PosHomeDashboard extends StatelessWidget {
       ),
       maxContentWidth: 760,
       child: Obx(() {
-              if (controller.isLoadingPos.value &&
-                  controller.activePos.value == null) {
-                return const Column(
-                  children: [
-                    CustomSkeletonCard(height: 126),
-                    SizedBox(height: 20),
-                    CustomSkeletonCard(height: 210),
-                    SizedBox(height: 16),
-                    CustomSkeletonCard(height: 156),
-                  ],
-                );
-              }
-              if (controller.posError.value != null &&
-                  controller.activePos.value == null) {
-                return CustomErrorState.boxed(
-                  title: 'تعذر تحميل نقاط البيع',
-                  subtitle: 'تحقق من الاتصال ثم أعد المحاولة.',
-                  onRetry: controller.loadPosTenants,
-                );
-              }
-              if (controller.activePos.value == null) {
-                return const CustomEmptyState(
-                  icon: Icons.storefront_outlined,
-                  title: 'لا توجد نقطة بيع مرتبطة بحسابك',
-                  subtitle:
-                      'لا يمكن عرض مؤشرات مساحة العمل قبل توفر نقطة بيع مصرح بها.',
-                );
-              }
+        if (controller.isLoadingPos.value &&
+            controller.activePos.value == null) {
+          return const Column(
+            children: [
+              CustomSkeletonCard(height: 126),
+              SizedBox(height: 20),
+              CustomSkeletonCard(height: 210),
+              SizedBox(height: 16),
+              CustomSkeletonCard(height: 156),
+            ],
+          );
+        }
+        if (controller.posError.value != null &&
+            controller.activePos.value == null) {
+          return CustomErrorState.boxed(
+            title: 'تعذر تحميل نقاط البيع',
+            subtitle: 'تحقق من الاتصال ثم أعد المحاولة.',
+            onRetry: controller.loadPosTenants,
+          );
+        }
+        if (controller.activePos.value == null) {
+          return const CustomEmptyState(
+            icon: Icons.storefront_outlined,
+            title: 'لا توجد نقطة بيع مرتبطة بحسابك',
+            subtitle:
+                'لا يمكن عرض مؤشرات مساحة العمل قبل توفر نقطة بيع مصرح بها.',
+          );
+        }
 
-              final activePos = controller.activePos.value!;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        final activePos = controller.activePos.value!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. كرت الترحيب القيادي لنقطة البيع
+            PosWelcomeHeader(controller: controller),
+            AppSpacing.vLg,
+
+            // 2. محدد نقطة البيع النشطة عند تعدد نقاط البيع
+            if (controller.availablePos.length > 1) ...[
+              CustomDropdown<int>(
+                label: 'نقطة البيع النشطة للعمليات',
+                rxValue: Rx<int?>(activePos.posId),
+                searchEnabled: controller.availablePos.length > 5,
+                items: controller.availablePos
+                    .map(
+                      (pos) => DropdownItem<int>(
+                        value: pos.posId,
+                        child: Text(pos.posName),
+                      ),
+                    )
+                    .toList(growable: false),
+                onChanged: controller.selectPosById,
+              ),
+              AppSpacing.vMd,
+            ],
+
+            // 3. كاروسيل بطاقات الشبكات المرتبطة بنقطة البيع
+            PosConnectedNetworksCarouselSection(controller: controller),
+            AppSpacing.vLg,
+
+            // 4. كرت السيولة والملخص المالي للشبكة المحددة (VIP Luxury Carbon Card)
+            if (controller.selectedNetworkLink.value != null) ...[
+              PosSelectedNetworkFinancialSummary(
+                networkName: controller
+                        .selectedNetworkLink
+                        .value!
+                        .network
+                        ?.networkName ??
+                    'الشبكة المحددة',
+                summary: controller.selectedWalletSummary,
+                isLoading: controller.isLoadingWallet.value,
+                error: controller.walletError.value,
+                onRetry: () => controller.selectNetwork(
+                  controller.selectedNetworkLink.value!,
+                  index: controller.currentNetworkIndex.value,
+                ),
+                onOpenAccount: controller.openWalletStatement,
+              ),
+              AppSpacing.vLg,
+            ],
+
+            // 5. متابعة طلبات التوريد المفتوحة من الـ API الحقيقي
+            PosActiveSupplyOrderTracker(controller: controller),
+            AppSpacing.vLg,
+
+            // 6. قسم آخر العمليات والحركات الحية من الـ API الحقيقي
+            PosRecentTransactionsSection(controller: controller),
+            AppSpacing.vLg,
+
+            // 7. كتالوج باقات الشبكة وأسعار الجملة المعتمدة
+            PosNetworkPackagesCatalog(controller: controller),
+            AppSpacing.vLg,
+
+            // 8. لوحة العمليات السريعة المتكاملة
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+              child: Row(
                 children: [
-                  // 1. كرت الترحيب القيادي لنقطة البيع
-                  PosWelcomeHeader(controller: controller),
-                  AppSpacing.vLg,
-
-                  // 2. محدد نقطة البيع النشطة عند تعدد نقاط البيع
-                  if (controller.availablePos.length > 1) ...[
-                    CustomDropdown<int>(
-                      label: 'نقطة البيع النشطة للعمليات',
-                      rxValue: Rx<int?>(activePos.posId),
-                      searchEnabled: controller.availablePos.length > 5,
-                      items: controller.availablePos
-                          .map(
-                            (pos) => DropdownItem<int>(
-                              value: pos.posId,
-                              child: Text(pos.posName),
-                            ),
-                          )
-                          .toList(growable: false),
-                      onChanged: controller.selectPosById,
-                    ),
-                    AppSpacing.vMd,
-                  ],
-
-                  // 3. كاروسيل بطاقات الشبكات المرتبطة بنقطة البيع
-                  PosConnectedNetworksCarouselSection(controller: controller),
-                  AppSpacing.vLg,
-
-                  // 4. كرت السيولة والملخص المالي للشبكة المحددة (VIP Luxury Carbon Card)
-                  if (controller.selectedNetworkLink.value != null) ...[
-                    PosSelectedNetworkFinancialSummary(
-                      networkName: controller
-                              .selectedNetworkLink
-                              .value!
-                              .network
-                              ?.networkName ??
-                          'الشبكة المحددة',
-                      summary: controller.selectedWalletSummary,
-                      isLoading: controller.isLoadingWallet.value,
-                      error: controller.walletError.value,
-                      onRetry: () => controller.selectNetwork(
-                        controller.selectedNetworkLink.value!,
-                        index: controller.currentNetworkIndex.value,
-                      ),
-                      onOpenAccount: controller.openWalletStatement,
-                    ),
-                    AppSpacing.vLg,
-                  ],
-
-                  // 5. متابعة طلبات التوريد المفتوحة من الـ API الحقيقي
-                  PosActiveSupplyOrderTracker(controller: controller),
-                  AppSpacing.vLg,
-
-                  // 6. قسم آخر العمليات والحركات الحية من الـ API الحقيقي
-                  PosRecentTransactionsSection(controller: controller),
-                  AppSpacing.vLg,
-
-                  // 7. كتالوج باقات الشبكة وأسعار الجملة المعتمدة
-                  PosNetworkPackagesCatalog(controller: controller),
-                  AppSpacing.vLg,
-
-                  // 8. لوحة العمليات السريعة المتكاملة
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.bolt_rounded,
-                          color: colors.primary,
-                          size: 20.r,
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          'العمليات السريعة',
-                          style: AppTypography.titleSmall.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                  Icon(
+                    Icons.bolt_rounded,
+                    color: colors.primary,
+                    size: 20.r,
                   ),
-                  AppSpacing.vMd,
-                  Row(
-                    children: [
-                      Expanded(
-                        child: PosQuickActionCard(
-                          icon: Icons.add_shopping_cart_rounded,
-                          title: 'طلب توريد',
-                          subtitle: 'اطلب باقات بالجملة',
-                          onTap: controller.openNewProcurementOrder,
-                        ),
-                      ),
-                      AppSpacing.hMd,
-                      Expanded(
-                        child: PosQuickActionCard(
-                          icon: Icons.receipt_long_rounded,
-                          title: 'فواتيري',
-                          subtitle: 'سجل مشترياتك',
-                          onTap: controller.openPurchaseInvoices,
-                        ),
-                      ),
-                    ],
-                  ),
-                  AppSpacing.vMd,
-                  Row(
-                    children: [
-                      Expanded(
-                        child: PosQuickActionCard(
-                          icon: Icons.payment_rounded,
-                          title: 'سداد دفعة للشبكة',
-                          subtitle: 'تسوية ديون وزيادة السقف',
-                          onTap: controller.openPosDebtLedger,
-                        ),
-                      ),
-                      AppSpacing.hMd,
-                      Expanded(
-                        child: PosQuickActionCard(
-                          icon: Icons.account_balance_wallet_rounded,
-                          title: 'كشف الحساب',
-                          subtitle: 'حركات المحفظة بالتفصيل',
-                          onTap: controller.openWalletStatement,
-                        ),
-                      ),
-                    ],
+                  SizedBox(width: 8.w),
+                  Text(
+                    'العمليات السريعة',
+                    style: AppTypography.titleSmall.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
-              );
+              ),
+            ),
+            AppSpacing.vMd,
+            Row(
+              children: [
+                Expanded(
+                  child: PosQuickActionCard(
+                    icon: Icons.add_shopping_cart_rounded,
+                    title: 'طلب توريد',
+                    subtitle: 'اطلب باقات بالجملة',
+                    onTap: controller.openNewProcurementOrder,
+                  ),
+                ),
+                AppSpacing.hMd,
+                Expanded(
+                  child: PosQuickActionCard(
+                    icon: Icons.receipt_long_rounded,
+                    title: 'فواتيري',
+                    subtitle: 'سجل مشترياتك',
+                    onTap: controller.openPurchaseInvoices,
+                  ),
+                ),
+              ],
+            ),
+            AppSpacing.vMd,
+            Row(
+              children: [
+                Expanded(
+                  child: PosQuickActionCard(
+                    icon: Icons.payment_rounded,
+                    title: 'سداد دفعة للشبكة',
+                    subtitle: 'تسوية ديون وزيادة السقف',
+                    onTap: controller.openPosDebtLedger,
+                  ),
+                ),
+                AppSpacing.hMd,
+                Expanded(
+                  child: PosQuickActionCard(
+                    icon: Icons.account_balance_wallet_rounded,
+                    title: 'كشف الحساب',
+                    subtitle: 'حركات المحفظة بالتفصيل',
+                    onTap: controller.openWalletStatement,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
       }),
     );
   }
