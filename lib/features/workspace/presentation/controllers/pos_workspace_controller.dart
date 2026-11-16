@@ -31,6 +31,8 @@ import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_workspace_transaction_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_network_package_mapper.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_network_package_view_model.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -230,6 +232,16 @@ class PosWorkspaceController extends GetxController {
 
   /// رتبة أو صفة المستخدم المستخرجة ديناميكياً من Enum الأدوار وسجل العرض
   String get userRole => rolePresentation.label;
+
+  List<PosNetworkPackageViewModel> get networkPackageItems =>
+      PosNetworkPackageMapper.map(networkPackages);
+
+  void openProcurementOrderForPackage(int packageId) {
+    Get.toNamed<void>(
+      AppRoutes.newProcurementOrder,
+      arguments: {'package_id': packageId},
+    );
+  }
 
   /// قائمة حركات الحساب والمشتريات المحولة كـ ViewModels جاهزة للعرض
   List<WorkspaceTransactionItemViewModel> get recentTransactionItems {
