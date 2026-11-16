@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -95,13 +93,7 @@ class PosHomeDashboard extends StatelessWidget {
                             ),
                           )
                           .toList(growable: false),
-                      onChanged: (newId) {
-                        if (newId != null) {
-                          final selected = controller.availablePos
-                              .firstWhereOrNull((p) => p.posId == newId);
-                          if (selected != null) controller.selectPos(selected);
-                        }
-                      },
+                      onChanged: controller.selectPosById,
                     ),
                     AppSpacing.vMd,
                   ],
@@ -126,14 +118,7 @@ class PosHomeDashboard extends StatelessWidget {
                         controller.selectedNetworkLink.value!,
                         index: controller.currentNetworkIndex.value,
                       ),
-                      onOpenAccount: () => Get.toNamed<void>(
-                        AppRoutes.posWalletStatement,
-                        arguments: {
-                          'pos_id': activePos.posId,
-                          'network_id':
-                              controller.selectedNetworkLink.value!.networkId,
-                        },
-                      ),
+                      onOpenAccount: controller.openWalletStatement,
                     ),
                     AppSpacing.vLg,
                   ],
@@ -179,8 +164,7 @@ class PosHomeDashboard extends StatelessWidget {
                           icon: Icons.add_shopping_cart_rounded,
                           title: 'طلب توريد',
                           subtitle: 'اطلب باقات بالجملة',
-                          onTap: () =>
-                              Get.toNamed<void>(AppRoutes.newProcurementOrder),
+                          onTap: controller.openNewProcurementOrder,
                         ),
                       ),
                       AppSpacing.hMd,
@@ -189,8 +173,7 @@ class PosHomeDashboard extends StatelessWidget {
                           icon: Icons.receipt_long_rounded,
                           title: 'فواتيري',
                           subtitle: 'سجل مشترياتك',
-                          onTap: () =>
-                              Get.toNamed<void>(AppRoutes.purchaseInvoices),
+                          onTap: controller.openPurchaseInvoices,
                         ),
                       ),
                     ],
@@ -203,8 +186,7 @@ class PosHomeDashboard extends StatelessWidget {
                           icon: Icons.payment_rounded,
                           title: 'سداد دفعة للشبكة',
                           subtitle: 'تسوية ديون وزيادة السقف',
-                          onTap: () =>
-                              Get.toNamed<void>(AppRoutes.posDebtLedger),
+                          onTap: controller.openPosDebtLedger,
                         ),
                       ),
                       AppSpacing.hMd,
@@ -213,20 +195,7 @@ class PosHomeDashboard extends StatelessWidget {
                           icon: Icons.account_balance_wallet_rounded,
                           title: 'كشف الحساب',
                           subtitle: 'حركات المحفظة بالتفصيل',
-                          onTap: () {
-                            final networkId =
-                                controller.selectedNetworkLink.value?.networkId;
-                            final args = <String, dynamic>{
-                              'pos_id': activePos.posId,
-                            };
-                            if (networkId != null) {
-                              args['network_id'] = networkId;
-                            }
-                            Get.toNamed<void>(
-                              AppRoutes.posWalletStatement,
-                              arguments: args,
-                            );
-                          },
+                          onTap: controller.openWalletStatement,
                         ),
                       ),
                     ],
