@@ -59,7 +59,7 @@ void main() {
             source.contains('AmountFormatter.') ||
             source.contains('TextFormatter.') ||
             RegExp(
-              r'''import\\s+['"]package:netsales/features/.*/domain/entities/''',
+              r'''import\s+['"]package:netsales/features/.*/domain/entities/''',
             ).hasMatch(source)) {
           violations.add(entity.path);
         }
