@@ -23,7 +23,6 @@ import 'package:netsales/features/workspace/presentation/mappers/network_workspa
 import 'package:netsales/features/workspace/presentation/mappers/network_provider_card_mapper.dart';
 import 'package:netsales/features/workspace/presentation/models/network_provider_card_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/network_workspace_dashboard_view_model.dart';
-import 'package:netsales/widgets/charts/charting.dart';
 
 class NetworkWorkspaceController extends GetxController {
   NetworkWorkspaceController({
@@ -54,13 +53,6 @@ class NetworkWorkspaceController extends GetxController {
       selectedNetwork?.networkName ??
       'الشبكة المصرحة';
 
-  /// خيارات الفترات المعتمدة من الباكيند API
-  static const List<ChartPeriodOption> periodOptions = [
-    ChartPeriodOption(id: '7d', label: '7 أيام'),
-    ChartPeriodOption(id: '30d', label: '30 يوماً'),
-    ChartPeriodOption(id: '90d', label: '3 أشهر'),
-    ChartPeriodOption(id: '12m', label: 'سنة'),
-  ];
 
   /// اسم المستخدم من الجلسة
   String get userName {
