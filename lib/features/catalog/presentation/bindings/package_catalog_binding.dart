@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource_impl.dart';
 import 'package:netsales/features/catalog/data/repositories/package_catalog_repository_impl.dart';
@@ -22,12 +23,12 @@ class PackageCatalogBinding extends Bindings {
   @override
   void dependencies() {
     // 1. Data Source
-    Get.lazyPut<PackageCatalogRemoteDataSource>(
+    registerLazyIfAbsent<PackageCatalogRemoteDataSource>(
       () => const PackageCatalogRemoteDataSourceImpl(),
     );
 
     // 2. Repository
-    Get.lazyPut<PackageCatalogRepository>(
+    registerLazyIfAbsent<PackageCatalogRepository>(
       () => PackageCatalogRepositoryImpl(
         Get.find<PackageCatalogRemoteDataSource>(),
       ),
@@ -35,42 +36,42 @@ class PackageCatalogBinding extends Bindings {
 
     // 3. Commercial Dependencies for Network Selection
     if (!Get.isRegistered<CommercialRemoteDataSource>()) {
-      Get.lazyPut<CommercialRemoteDataSource>(
+      registerLazyIfAbsent<CommercialRemoteDataSource>(
         () => const CommercialRemoteDataSourceImpl(),
       );
     }
     if (!Get.isRegistered<CommercialRepository>()) {
-      Get.lazyPut<CommercialRepository>(
+      registerLazyIfAbsent<CommercialRepository>(
         () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
       );
     }
     if (!Get.isRegistered<GetMyNetworksUseCase>()) {
-      Get.lazyPut(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
+      registerLazyIfAbsent<GetMyNetworksUseCase>(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
     }
 
     // 4. Use Cases
-    Get.lazyPut(() => GetPackagesUseCase(Get.find<PackageCatalogRepository>()));
-    Get.lazyPut(
+    registerLazyIfAbsent<GetPackagesUseCase>(() => GetPackagesUseCase(Get.find<PackageCatalogRepository>()));
+    registerLazyIfAbsent<GetNetworkPackagesUseCase>(
       () => GetNetworkPackagesUseCase(Get.find<PackageCatalogRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<GetPackageDetailsUseCase>(
       () => GetPackageDetailsUseCase(Get.find<PackageCatalogRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<CreatePackageUseCase>(
       () => CreatePackageUseCase(Get.find<PackageCatalogRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<UpdatePackageUseCase>(
       () => UpdatePackageUseCase(Get.find<PackageCatalogRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<TogglePackageStatusUseCase>(
       () => TogglePackageStatusUseCase(Get.find<PackageCatalogRepository>()),
     );
-    Get.lazyPut(
+    registerLazyIfAbsent<DeletePackageUseCase>(
       () => DeletePackageUseCase(Get.find<PackageCatalogRepository>()),
     );
 
     // 5. Controller
-    Get.lazyPut<PackageCatalogController>(
+    registerLazyIfAbsent<PackageCatalogController>(
       () => PackageCatalogController(
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
         getNetworkPackagesUseCase: Get.find<GetNetworkPackagesUseCase>(),

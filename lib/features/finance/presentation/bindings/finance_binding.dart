@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source_impl.dart';
 import 'package:netsales/features/commercial/data/repositories/commercial_repository_impl.dart';
@@ -42,51 +43,51 @@ class FinanceBinding extends Bindings {
   @override
   void dependencies() {
     // 1. Data Source
-    Get.lazyPut<FinanceRemoteDataSource>(
+    registerLazyIfAbsent<FinanceRemoteDataSource>(
       () => const FinanceRemoteDataSourceImpl(),
       fenix: true,
     );
 
     // 2. Commercial Data Source & Repositories for Relations
     if (!Get.isRegistered<CommercialRemoteDataSource>()) {
-      Get.lazyPut<CommercialRemoteDataSource>(
+      registerLazyIfAbsent<CommercialRemoteDataSource>(
         () => const CommercialRemoteDataSourceImpl(),
         fenix: true,
       );
     }
     if (!Get.isRegistered<CommercialRepository>()) {
-      Get.lazyPut<CommercialRepository>(
+      registerLazyIfAbsent<CommercialRepository>(
         () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
         fenix: true,
       );
     }
     if (!Get.isRegistered<GetMyNetworksUseCase>()) {
-      Get.lazyPut<GetMyNetworksUseCase>(
+      registerLazyIfAbsent<GetMyNetworksUseCase>(
         () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
         fenix: true,
       );
     }
     if (!Get.isRegistered<GetMyPosUseCase>()) {
-      Get.lazyPut<GetMyPosUseCase>(
+      registerLazyIfAbsent<GetMyPosUseCase>(
         () => GetMyPosUseCase(Get.find<CommercialRepository>()),
         fenix: true,
       );
     }
     if (!Get.isRegistered<GetPosNetworksListUseCase>()) {
-      Get.lazyPut<GetPosNetworksListUseCase>(
+      registerLazyIfAbsent<GetPosNetworksListUseCase>(
         () => GetPosNetworksListUseCase(Get.find<CommercialRepository>()),
         fenix: true,
       );
     }
     if (!Get.isRegistered<GetNetworkPosListUseCase>()) {
-      Get.lazyPut<GetNetworkPosListUseCase>(
+      registerLazyIfAbsent<GetNetworkPosListUseCase>(
         () => GetNetworkPosListUseCase(Get.find<CommercialRepository>()),
         fenix: true,
       );
     }
 
     // 3. Finance Repository
-    Get.lazyPut<FinanceRepository>(
+    registerLazyIfAbsent<FinanceRepository>(
       () => FinanceRepositoryImpl(
         remoteDataSource: Get.find<FinanceRemoteDataSource>(),
       ),
@@ -94,88 +95,88 @@ class FinanceBinding extends Bindings {
     );
 
     // 4. Use Cases
-    Get.lazyPut<GetPosWalUseCase>(
+    registerLazyIfAbsent<GetPosWalUseCase>(
       () => GetPosWalUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetPosWalletByNetworkAndPosUseCase>(
+    registerLazyIfAbsent<GetPosWalletByNetworkAndPosUseCase>(
       () => GetPosWalletByNetworkAndPosUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetPosWalletLogsUseCase>(
+    registerLazyIfAbsent<GetPosWalletLogsUseCase>(
       () => GetPosWalletLogsUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
 
-    Get.lazyPut<GetNetworkWalletsUseCase>(
+    registerLazyIfAbsent<GetNetworkWalletsUseCase>(
       () => GetNetworkWalletsUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetNetworkWalletLogsUseCase>(
+    registerLazyIfAbsent<GetNetworkWalletLogsUseCase>(
       () => GetNetworkWalletLogsUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetNetworkWalletByIdUseCase>(
+    registerLazyIfAbsent<GetNetworkWalletByIdUseCase>(
       () => GetNetworkWalletByIdUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<TransferFromNetworkToPosUseCase>(
+    registerLazyIfAbsent<TransferFromNetworkToPosUseCase>(
       () => TransferFromNetworkToPosUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<TransferPosToNetworkUseCase>(
+    registerLazyIfAbsent<TransferPosToNetworkUseCase>(
       () => TransferPosToNetworkUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<UpdatePosCreditLimitUseCase>(
+    registerLazyIfAbsent<UpdatePosCreditLimitUseCase>(
       () => UpdatePosCreditLimitUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<DepositPosWalletUseCase>(
+    registerLazyIfAbsent<DepositPosWalletUseCase>(
       () => DepositPosWalletUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<WithdrawPosWalletUseCase>(
+    registerLazyIfAbsent<WithdrawPosWalletUseCase>(
       () => WithdrawPosWalletUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<DepositNetworkWalletUseCase>(
+    registerLazyIfAbsent<DepositNetworkWalletUseCase>(
       () => DepositNetworkWalletUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<WithdrawNetworkWalletUseCase>(
+    registerLazyIfAbsent<WithdrawNetworkWalletUseCase>(
       () => WithdrawNetworkWalletUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
 
-    Get.lazyPut<GetDebtSummaryUseCase>(
+    registerLazyIfAbsent<GetDebtSummaryUseCase>(
       () => GetDebtSummaryUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetOutstandingInvoicesUseCase>(
+    registerLazyIfAbsent<GetOutstandingInvoicesUseCase>(
       () => GetOutstandingInvoicesUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
 
-    Get.lazyPut<GetRepaymentsUseCase>(
+    registerLazyIfAbsent<GetRepaymentsUseCase>(
       () => GetRepaymentsUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetRepaymentDetailsUseCase>(
+    registerLazyIfAbsent<GetRepaymentDetailsUseCase>(
       () => GetRepaymentDetailsUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<CollectRepaymentUseCase>(
+    registerLazyIfAbsent<CollectRepaymentUseCase>(
       () => CollectRepaymentUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<ReverseRepaymentUseCase>(
+    registerLazyIfAbsent<ReverseRepaymentUseCase>(
       () => ReverseRepaymentUseCase(Get.find<FinanceRepository>()),
       fenix: true,
     );
 
     if (!Get.isRegistered<RepaymentDocumentRepository>()) {
-      Get.lazyPut<RepaymentDocumentRepository>(
+      registerLazyIfAbsent<RepaymentDocumentRepository>(
         () => RepaymentDocumentRepositoryImpl(
           documentService: RepaymentDocumentService.instance,
         ),
@@ -183,7 +184,7 @@ class FinanceBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<RepaymentDocumentUseCase>()) {
-      Get.lazyPut<RepaymentDocumentUseCase>(
+      registerLazyIfAbsent<RepaymentDocumentUseCase>(
         () => RepaymentDocumentUseCase(
           Get.find<RepaymentDocumentRepository>(),
         ),
@@ -192,7 +193,7 @@ class FinanceBinding extends Bindings {
     }
 
     if (!Get.isRegistered<WalletStatementDocumentRepository>()) {
-      Get.lazyPut<WalletStatementDocumentRepository>(
+      registerLazyIfAbsent<WalletStatementDocumentRepository>(
         () => WalletStatementDocumentRepositoryImpl(
           documentService: WalletStatementDocumentService.instance,
         ),
@@ -200,7 +201,7 @@ class FinanceBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<ExportWalletStatementDocumentUseCase>()) {
-      Get.lazyPut<ExportWalletStatementDocumentUseCase>(
+      registerLazyIfAbsent<ExportWalletStatementDocumentUseCase>(
         () => ExportWalletStatementDocumentUseCase(
           Get.find<WalletStatementDocumentRepository>(),
         ),
@@ -209,7 +210,7 @@ class FinanceBinding extends Bindings {
     }
 
     // 5. Controllers
-    Get.lazyPut<PosWalletDashboardController>(
+    registerLazyIfAbsent<PosWalletDashboardController>(
       () => PosWalletDashboardController(
         getPosWalUseCase: Get.find<GetPosWalUseCase>(),
         getPosWalletLogsUseCase: Get.find<GetPosWalletLogsUseCase>(),
@@ -220,7 +221,7 @@ class FinanceBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<PosDebtLedgerController>(
+    registerLazyIfAbsent<PosDebtLedgerController>(
       () => PosDebtLedgerController(
         getDebtSummaryUseCase: Get.find<GetDebtSummaryUseCase>(),
         getOutstandingInvoicesUseCase:
@@ -231,7 +232,7 @@ class FinanceBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<RepaymentHistoryController>(
+    registerLazyIfAbsent<RepaymentHistoryController>(
       () => RepaymentHistoryController(
         getRepaymentsUseCase: Get.find<GetRepaymentsUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
@@ -241,7 +242,7 @@ class FinanceBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<RepaymentCollectionController>(
+    registerLazyIfAbsent<RepaymentCollectionController>(
       () => RepaymentCollectionController(
         collectRepaymentUseCase: Get.find<CollectRepaymentUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
@@ -250,7 +251,7 @@ class FinanceBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<NetworkWalletDashboardController>(
+    registerLazyIfAbsent<NetworkWalletDashboardController>(
       () => NetworkWalletDashboardController(
         getNetworkWalletsUseCase: Get.find<GetNetworkWalletsUseCase>(),
         getNetworkWalletLogsUseCase: Get.find<GetNetworkWalletLogsUseCase>(),
@@ -260,7 +261,7 @@ class FinanceBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<NetworkWalletTransferController>(
+    registerLazyIfAbsent<NetworkWalletTransferController>(
       () => NetworkWalletTransferController(
         transferFromNetworkToPosUseCase:
             Get.find<TransferFromNetworkToPosUseCase>(),
@@ -271,14 +272,14 @@ class FinanceBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<UpdatePosCreditLimitController>(
+    registerLazyIfAbsent<UpdatePosCreditLimitController>(
       () => UpdatePosCreditLimitController(
         updatePosCreditLimitUseCase: Get.find<UpdatePosCreditLimitUseCase>(),
       ),
       fenix: true,
     );
 
-    Get.lazyPut<ManualWalletTransactionController>(
+    registerLazyIfAbsent<ManualWalletTransactionController>(
       () => ManualWalletTransactionController(
         depositPosWalletUseCase: Get.find<DepositPosWalletUseCase>(),
         withdrawPosWalletUseCase: Get.find<WithdrawPosWalletUseCase>(),

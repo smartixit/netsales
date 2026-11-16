@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource_impl.dart';
 import 'package:netsales/features/catalog/data/repositories/package_catalog_repository_impl.dart';
@@ -32,32 +33,32 @@ class InvoiceBinding extends Bindings {
   @override
   void dependencies() {
     // 1. Data Source
-    Get.lazyPut<InvoiceRemoteDataSource>(
+    registerLazyIfAbsent<InvoiceRemoteDataSource>(
       () => const InvoiceRemoteDataSourceImpl(),
       fenix: true,
     );
 
     // 2. Commercial Data Source (للشبكات المصرح بها)
     if (!Get.isRegistered<CommercialRemoteDataSource>()) {
-      Get.lazyPut<CommercialRemoteDataSource>(
+      registerLazyIfAbsent<CommercialRemoteDataSource>(
         () => const CommercialRemoteDataSourceImpl(),
         fenix: true,
       );
     }
     if (!Get.isRegistered<CommercialRepository>()) {
-      Get.lazyPut<CommercialRepository>(
+      registerLazyIfAbsent<CommercialRepository>(
         () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
         fenix: true,
       );
     }
     if (!Get.isRegistered<GetMyNetworksUseCase>()) {
-      Get.lazyPut<GetMyNetworksUseCase>(
+      registerLazyIfAbsent<GetMyNetworksUseCase>(
         () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
         fenix: true,
       );
     }
     if (!Get.isRegistered<GetNetworkPosListUseCase>()) {
-      Get.lazyPut<GetNetworkPosListUseCase>(
+      registerLazyIfAbsent<GetNetworkPosListUseCase>(
         () => GetNetworkPosListUseCase(Get.find<CommercialRepository>()),
         fenix: true,
       );
@@ -65,13 +66,13 @@ class InvoiceBinding extends Bindings {
 
     // Package catalog dependencies used by the Network direct invoice form.
     if (!Get.isRegistered<PackageCatalogRemoteDataSource>()) {
-      Get.lazyPut<PackageCatalogRemoteDataSource>(
+      registerLazyIfAbsent<PackageCatalogRemoteDataSource>(
         () => const PackageCatalogRemoteDataSourceImpl(),
         fenix: true,
       );
     }
     if (!Get.isRegistered<PackageCatalogRepository>()) {
-      Get.lazyPut<PackageCatalogRepository>(
+      registerLazyIfAbsent<PackageCatalogRepository>(
         () => PackageCatalogRepositoryImpl(
           Get.find<PackageCatalogRemoteDataSource>(),
         ),
@@ -79,14 +80,14 @@ class InvoiceBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<GetPackagesUseCase>()) {
-      Get.lazyPut<GetPackagesUseCase>(
+      registerLazyIfAbsent<GetPackagesUseCase>(
         () => GetPackagesUseCase(Get.find<PackageCatalogRepository>()),
         fenix: true,
       );
     }
 
     // 3. Repository
-    Get.lazyPut<InvoiceRepository>(
+    registerLazyIfAbsent<InvoiceRepository>(
       () => InvoiceRepositoryImpl(
         remoteDataSource: Get.find<InvoiceRemoteDataSource>(),
       ),
@@ -94,39 +95,39 @@ class InvoiceBinding extends Bindings {
     );
 
     // 4. Use Cases
-    Get.lazyPut<GetNetworkInvoicesUseCase>(
+    registerLazyIfAbsent<GetNetworkInvoicesUseCase>(
       () => GetNetworkInvoicesUseCase(Get.find<InvoiceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetPosInvoicesUseCase>(
+    registerLazyIfAbsent<GetPosInvoicesUseCase>(
       () => GetPosInvoicesUseCase(Get.find<InvoiceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<GetInvoiceDetailsUseCase>(
+    registerLazyIfAbsent<GetInvoiceDetailsUseCase>(
       () => GetInvoiceDetailsUseCase(Get.find<InvoiceRepository>()),
       fenix: true,
     );
-    Get.lazyPut<InvoiceDocumentService>(
+    registerLazyIfAbsent<InvoiceDocumentService>(
       () => InvoiceDocumentService.instance,
       fenix: true,
     );
-    Get.lazyPut<InvoiceDocumentRepository>(
+    registerLazyIfAbsent<InvoiceDocumentRepository>(
       () => InvoiceDocumentRepositoryImpl(
         documentService: Get.find<InvoiceDocumentService>(),
       ),
       fenix: true,
     );
-    Get.lazyPut<InvoiceDocumentUseCase>(
+    registerLazyIfAbsent<InvoiceDocumentUseCase>(
       () => InvoiceDocumentUseCase(Get.find<InvoiceDocumentRepository>()),
       fenix: true,
     );
-    Get.lazyPut<CreateDirectSaleInvoiceUseCase>(
+    registerLazyIfAbsent<CreateDirectSaleInvoiceUseCase>(
       () => CreateDirectSaleInvoiceUseCase(Get.find<InvoiceRepository>()),
       fenix: true,
     );
 
     // 5. Controllers
-    Get.lazyPut<NetworkInvoicesController>(
+    registerLazyIfAbsent<NetworkInvoicesController>(
       () => NetworkInvoicesController(
         getNetworkInvoicesUseCase: Get.find<GetNetworkInvoicesUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
@@ -134,7 +135,7 @@ class InvoiceBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<NetworkDirectInvoiceController>(
+    registerLazyIfAbsent<NetworkDirectInvoiceController>(
       () => NetworkDirectInvoiceController(
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
         getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
@@ -145,14 +146,14 @@ class InvoiceBinding extends Bindings {
       fenix: true,
     );
 
-    Get.lazyPut<PosInvoicesController>(
+    registerLazyIfAbsent<PosInvoicesController>(
       () => PosInvoicesController(
         getPosInvoicesUseCase: Get.find<GetPosInvoicesUseCase>(),
       ),
       fenix: true,
     );
 
-    Get.lazyPut<InvoiceDetailsController>(
+    registerLazyIfAbsent<InvoiceDetailsController>(
       () => InvoiceDetailsController(
         getInvoiceDetailsUseCase: Get.find<GetInvoiceDetailsUseCase>(),
         invoiceDocumentUseCase: Get.find<InvoiceDocumentUseCase>(),

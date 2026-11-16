@@ -48,7 +48,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           label: 'فريق العمل',
           icon: Icons.groups_outlined,
           activeIcon: Icons.groups_rounded,
-          content: MembershipScreen(),
+          content: MembershipScreen(isNetwork: false),
         ),
         WorkspaceNavItem(
           label: 'التقارير',
