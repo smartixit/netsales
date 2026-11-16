@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
@@ -16,14 +14,21 @@ class ExecutiveLiquidityCard extends StatelessWidget {
     bool isWalletActive,
     bool hasSales,
     double growthRate,
+    String growthLabel,
     String cashSales,
     String outstandingReceivables,
     String posCoverage,
   }) summary;
+  final VoidCallback onCreateSaleInvoice;
+  final VoidCallback onCollectRepayment;
+  final VoidCallback onOpenWalletStatement;
 
   const ExecutiveLiquidityCard({
     super.key,
     required this.summary,
+    required this.onCreateSaleInvoice,
+    required this.onCollectRepayment,
+    required this.onOpenWalletStatement,
   });
 
   @override
@@ -34,12 +39,7 @@ class ExecutiveLiquidityCard extends StatelessWidget {
     final hasWallet = summary.hasWallet;
     final isWalletActive = summary.isWalletActive;
     final hasSales = summary.hasSales;
-    final growthRate = summary.growthRate;
-    final growthText = growthRate > 0
-        ? '+${growthRate.toStringAsFixed(1)}% نمو'
-        : (growthRate < 0
-            ? '${growthRate.toStringAsFixed(1)}% تراجع'
-            : '0.0% استقرار');
+    final growthText = summary.growthLabel;
 
     final paidAmountStr = summary.cashSales;
     final outstandingStr = summary.outstandingReceivables;
@@ -405,7 +405,7 @@ class ExecutiveLiquidityCard extends StatelessWidget {
                 flex: 4,
                 child: CustomInteractiveBounce(
                   onTap: () =>
-                      Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice),
+                      onCreateSaleInvoice(),
                   child: Container(
                     height: 38.h,
                     decoration: BoxDecoration(
@@ -450,7 +450,7 @@ class ExecutiveLiquidityCard extends StatelessWidget {
               Expanded(
                 flex: 4,
                 child: CustomInteractiveBounce(
-                  onTap: () => Get.toNamed<void>(AppRoutes.repaymentCollection),
+                  onTap: () => onCollectRepayment(),
                   child: Container(
                     height: 38.h,
                     decoration: BoxDecoration(
@@ -487,7 +487,7 @@ class ExecutiveLiquidityCard extends StatelessWidget {
               SizedBox(width: 6.w),
               CustomInteractiveBounce(
                 onTap: () =>
-                    Get.toNamed<void>(AppRoutes.networkWalletStatement),
+                    onOpenWalletStatement(),
                 child: Container(
                   height: 38.h,
                   padding: EdgeInsets.symmetric(horizontal: 10.w),
