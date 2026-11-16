@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
+import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_liquidity_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_metrics_grid.dart';
@@ -103,7 +105,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                       searchEnabled: ctrl.networks.length > 5,
                       items: ctrl.networks
                           .map(
-                            (network) => DropdownItem<int>(
+                            (NetworkEntity network) => DropdownItem<int>(
                               value: network.networkId,
                               child: Text(network.networkName),
                             ),
