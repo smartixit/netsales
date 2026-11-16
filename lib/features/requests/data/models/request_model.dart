@@ -52,6 +52,11 @@ class RequestModel extends RequestEntity {
     }
 
     final rawSummary = json['modifications_summary'];
+    if (rawSummary != null && rawSummary is! Map) {
+      throw const FormatException(
+        'ملخص تعديلات الطلب يجب أن يكون كائناً.',
+      );
+    }
     final modificationSummary = rawSummary is Map
         ? RequestModificationSummaryModel.fromJson(
             Map<String, dynamic>.from(rawSummary),

@@ -345,6 +345,16 @@ void main() {
       expect(model.modificationSummary?.approvedItemsCount, 3);
     });
 
+    test('RequestModel rejects incomplete modification summary instead of showing zero values', () {
+      expect(
+        () => RequestModificationSummaryModel.fromJson({
+          'has_modifications': true,
+          'original_total': 25000.0,
+        }),
+        throwsFormatException,
+      );
+    });
+
     test('approval result preserves the approved request and authoritative invoice', () {
       final result = RequestApprovalResultModel.fromJson({
         'request': {
