@@ -10,6 +10,10 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_coordinator_controller.dart';
+import 'package:netsales/features/workspace/presentation/mappers/workspace_network_picker_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/workspace_pos_picker_mapper.dart';
+import 'package:netsales/features/workspace/presentation/models/workspace_network_picker_item_view_model.dart';
+import 'package:netsales/features/workspace/presentation/models/workspace_pos_picker_item_view_model.dart';
 
 /// متحكم نافذة اختيار الكيانات والمساحات المرتبطة بالمستخدم (WorkspaceEntityPickerController)
 class WorkspaceEntityPickerController extends GetxController {
@@ -29,6 +33,12 @@ class WorkspaceEntityPickerController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
   final RxInt selectedSegment = 0.obs; // 0: شبكات, 1: نقاط بيع
+
+  List<WorkspaceNetworkPickerItemViewModel> get networkItems =>
+      WorkspaceNetworkPickerMapper.map(networks);
+
+  List<WorkspacePosPickerItemViewModel> get posItems =>
+      WorkspacePosPickerMapper.map(pointsOfSale);
 
   void prepareForWorkspace(AppWorkspace workspace) {
     selectedSegment.value = workspace == AppWorkspace.network ? 0 : 1;
@@ -83,7 +93,9 @@ class WorkspaceEntityPickerController extends GetxController {
     return WorkspaceService.to.savedActivePosId;
   }
 
-  Future<void> selectNetwork(NetworkEntity network) async {
+  Future<void> selectNetworkById(int networkId) async {
+    final network = networks.firstWhereOrNull((item) => item.networkId == networkId);
+    if (network == null) return;
     await WorkspaceService.to.saveActiveNetworkId(network.networkId);
     if (Get.isRegistered<NetworkWorkspaceController>()) {
       await Get.find<NetworkWorkspaceController>().selectNetwork(
@@ -100,7 +112,9 @@ class WorkspaceEntityPickerController extends GetxController {
     }
   }
 
-  Future<void> selectPos(PosEntity pos) async {
+  Future<void> selectPosById(int posId) async {
+    final pos = pointsOfSale.firstWhereOrNull((item) => item.posId == posId);
+    if (pos == null) return;
     await WorkspaceService.to.saveActivePosId(pos.posId);
     if (Get.isRegistered<PosWorkspaceController>()) {
       await Get.find<PosWorkspaceController>().selectPos(pos);
