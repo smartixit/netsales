@@ -67,11 +67,12 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
       );
     }
 
-    if (summary == null) {
+    final walletSummary = summary;
+    if (walletSummary == null) {
       return const SizedBox.shrink();
     }
 
-    final isOverdrawn = summary.isOverdrawn;
+    final isOverdrawn = walletSummary.isOverdrawn;
     final balanceColor = isOverdrawn ? const Color(0xFFF87171) : const Color(0xFF34D399);
 
     return Container(
@@ -224,7 +225,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                summary.formattedBalance,
+                walletSummary.formattedBalance,
                 style: TextStyle(
                   color: balanceColor,
                   fontSize: 22.sp,
@@ -271,7 +272,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
                       ),
                       SizedBox(height: 3.h),
                       Text(
-                        summary.creditLimitLabel,
+                        walletSummary.creditLimitLabel,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 12.sp,
@@ -300,7 +301,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
                       ),
                       SizedBox(height: 3.h),
                       Text(
-                        summary.availableOverdraftLabel,
+                        walletSummary.availableOverdraftLabel,
                         style: TextStyle(
                           color: const Color(0xFF38BDF8),
                           fontSize: 12.sp,
