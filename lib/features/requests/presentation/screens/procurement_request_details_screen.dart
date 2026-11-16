@@ -9,6 +9,7 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/procurement_request_details_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_info_row.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_item_row.dart';
+import 'package:netsales/features/requests/presentation/widgets/request_modification_summary_panel.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
@@ -168,6 +169,14 @@ class ProcurementRequestDetailsScreen
                     ],
                   ),
                 ),
+
+                if (request.isApproved &&
+                    request.modificationSummary != null) ...[
+                  AppSpacing.vMd,
+                  RequestModificationSummaryPanel(
+                    summary: request.modificationSummary!,
+                  ),
+                ],
 
                 if (request.isApproved && request.invoiceId != null) ...[
                   Container(

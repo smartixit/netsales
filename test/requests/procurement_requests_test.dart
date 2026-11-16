@@ -5,6 +5,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/requests/data/models/request_item_model.dart';
 import 'package:netsales/features/requests/data/models/request_model.dart';
+import 'package:netsales/features/requests/data/models/request_modification_summary_model.dart';
 import 'package:netsales/features/requests/data/models/request_approval_result_model.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
@@ -318,6 +319,30 @@ void main() {
       expect(model.posName, 'نقطة الأمل للمبيعات');
       expect(model.items.length, 1);
       expect(model.items.first.voucherCount, 25);
+    });
+
+    test('RequestModel maps the server modification summary without recomputing values', () {
+      final model = RequestModel.fromJson({
+        'request_id': 102,
+        'network_id': 5,
+        'pos_id': 12,
+        'request_total_amount': 25000.0,
+        'status': 'APPROVED',
+        'modifications_summary': {
+          'has_modifications': true,
+          'original_total': 25000.0,
+          'approved_total': 27000.0,
+          'original_items_count': 2,
+          'approved_items_count': 3,
+        },
+      });
+
+      expect(model.modificationSummary, isA<RequestModificationSummaryModel>());
+      expect(model.modificationSummary?.hasModifications, isTrue);
+      expect(model.modificationSummary?.originalTotal, 25000.0);
+      expect(model.modificationSummary?.approvedTotal, 27000.0);
+      expect(model.modificationSummary?.originalItemsCount, 2);
+      expect(model.modificationSummary?.approvedItemsCount, 3);
     });
 
     test('approval result preserves the approved request and authoritative invoice', () {
