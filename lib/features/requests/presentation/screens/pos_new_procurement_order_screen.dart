@@ -7,6 +7,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_cart_section.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_add_to_cart_action.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_network_context_section.dart';
@@ -87,6 +88,7 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                           if (controller.selectedPackage.value != null) ...[
                             AppSpacing.vLg,
                             const ProcurementSheetQuantitySection(),
+                            const ProcurementAddToCartAction(),
                           ],
                         ] else ...[
                           const ProcurementCartSection(),
