@@ -73,7 +73,10 @@ class PosHomeDashboard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. كرت الترحيب القيادي لنقطة البيع
-            PosWelcomeHeader(controller: controller),
+            PosWelcomeHeader(
+              controller: controller,
+              onQrTap: PosNetworkLinkingFlow(controller).start,
+            ),
             AppSpacing.vLg,
 
             // 2. محدد نقطة البيع النشطة عند تعدد نقاط البيع
