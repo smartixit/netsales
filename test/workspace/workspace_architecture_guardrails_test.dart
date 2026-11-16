@@ -13,7 +13,7 @@ void main() {
         if (entity is! File || !entity.path.endsWith('.dart')) continue;
         final source = entity.readAsStringSync();
         final forbiddenImports = RegExp(
-          r"import\s+['\"](?:package:flutter/|dart:ui|package:netsales/(?:widgets|features/.*/presentation)/)",
+          r'''import\s+['"](?:package:flutter/|dart:ui|package:netsales/(?:widgets|features/.*/presentation)/)''',
         );
         if (forbiddenImports.hasMatch(source)) {
           violations.add(entity.path);
