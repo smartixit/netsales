@@ -91,7 +91,8 @@ void main() {
           if (content.contains('/data/') ||
               content.contains('/presentation/') ||
               content.contains('package:get/get.dart') ||
-              content.contains('package:flutter/material.dart')) {
+              RegExp(r"package:flutter/").hasMatch(content) ||
+              RegExp(r"import\\s+['\"]dart:ui['\"]").hasMatch(content)) {
             violations.add(file.path);
           }
         }
