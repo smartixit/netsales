@@ -210,26 +210,74 @@ class _ProcurementCartLineCard extends StatelessWidget {
                           color: colors.outlineVariant.withValues(alpha: 0.3),
                         ),
                         AppSpacing.vXs,
-                        Row(
+                        Column(
                           children: [
-                            Expanded(
-                              child: CustomButton.outline(
-                                text: 'تعديل الكمية',
-                                icon: Icons.edit_outlined,
-                                size: AppButtonSize.small,
-                                onPressed: onEdit,
-                              ),
+                            Row(
+                              children: [
+                                CustomButton.icon(
+                                  icon: Icons.remove_rounded,
+                                  tooltip: 'إنقاص كرت واحد',
+                                  size: AppButtonSize.small,
+                                  onPressed: line.voucherCount > 1
+                                      ? onDecrement
+                                      : null,
+                                ),
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      '${line.voucherCount} كرت',
+                                      style: AppTypography.labelMedium.copyWith(
+                                        color: colors.onSurface,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                CustomButton.icon(
+                                  icon: Icons.add_rounded,
+                                  tooltip: 'إضافة كرت واحد',
+                                  size: AppButtonSize.small,
+                                  foregroundColor: colors.primary,
+                                  onPressed: onIncrement,
+                                ),
+                              ],
                             ),
-                            AppSpacing.hSm,
-                            CustomButton.icon(
-                              icon: Icons.delete_outline_rounded,
-                              tooltip: 'حذف ${line.package.packageName} من الطلب',
-                              size: AppButtonSize.small,
-                              foregroundColor: colors.error,
-                              backgroundColor: colors.error.withValues(
-                                alpha: 0.08,
-                              ),
-                              onPressed: onDelete,
+                            AppSpacing.vXs,
+                            Wrap(
+                              alignment: WrapAlignment.spaceBetween,
+                              spacing: AppSpacing.xs,
+                              runSpacing: AppSpacing.xs,
+                              children: [
+                                CustomButton.outline(
+                                  text: '− ورقة',
+                                  size: AppButtonSize.small,
+                                  onPressed: line.voucherCount > 0
+                                      ? onRemoveSheet
+                                      : null,
+                                ),
+                                CustomButton.outline(
+                                  text: '+ ورقة',
+                                  size: AppButtonSize.small,
+                                  foregroundColor: colors.primary,
+                                  onPressed: onAddSheet,
+                                ),
+                                CustomButton.icon(
+                                  icon: Icons.edit_outlined,
+                                  tooltip: 'تعديل العدد يدوياً',
+                                  size: AppButtonSize.small,
+                                  onPressed: onEdit,
+                                ),
+                                CustomButton.icon(
+                                  icon: Icons.delete_outline_rounded,
+                                  tooltip: 'حذف ${line.package.packageName} من الطلب',
+                                  size: AppButtonSize.small,
+                                  foregroundColor: colors.error,
+                                  backgroundColor: colors.error.withValues(
+                                    alpha: 0.08,
+                                  ),
+                                  onPressed: onDelete,
+                                ),
+                              ],
                             ),
                           ],
                         ),

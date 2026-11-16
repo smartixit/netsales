@@ -114,6 +114,7 @@ class PosProcurementController extends GetxController {
   final packageErrorMessage = RxnString();
   final packageLoadMoreErrorMessage = RxnString();
   int _packageRevision = 0;
+  bool _suppressPackageSearchListener = false;
 
   // الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية
   final effectiveDiscount = Rxn<EffectivePackageDiscountEntity>();
@@ -294,7 +295,9 @@ class PosProcurementController extends GetxController {
       searchQuery.value = searchController.text;
     });
     packageSearchController.addListener(() {
-      packageSearchQuery.value = packageSearchController.text.trim();
+      if (!_suppressPackageSearchListener) {
+        packageSearchQuery.value = packageSearchController.text.trim();
+      }
     });
     quantityController.addListener(() {
       quantityInput.value = quantityController.text;
@@ -422,8 +425,10 @@ class PosProcurementController extends GetxController {
 
   /// جلب أول صفحة من كتالوج الشبكة مع بحث خادمي وحماية من الاستجابات القديمة.
   Future<void> loadNetworkPackages(int networkId) async {
+    _suppressPackageSearchListener = true;
     packageSearchController.clear();
     packageSearchQuery.value = '';
+    _suppressPackageSearchListener = false;
     packageNextCursor.value = null;
     packageLoadMoreErrorMessage.value = null;
     await _fetchNetworkPackages(networkId, reset: true);
@@ -521,8 +526,10 @@ class PosProcurementController extends GetxController {
   }
 
   void clearPackageSearch() {
+    _suppressPackageSearchListener = true;
     packageSearchController.clear();
     packageSearchQuery.value = '';
+    _suppressPackageSearchListener = false;
     refreshNetworkPackages();
   }
 
