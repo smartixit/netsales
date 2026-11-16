@@ -6,6 +6,7 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
+import 'package:netsales/features/workspace/presentation/flows/pos_network_linking_flow.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_active_supply_order_tracker.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_connected_networks_carousel_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_network_packages_catalog.dart';
@@ -95,7 +96,10 @@ class PosHomeDashboard extends StatelessWidget {
             ],
 
             // 3. كاروسيل بطاقات الشبكات المرتبطة بنقطة البيع
-            PosConnectedNetworksCarouselSection(controller: controller),
+            PosConnectedNetworksCarouselSection(
+                    controller: controller,
+                    onLinkNetwork: PosNetworkLinkingFlow(controller).start,
+                  ),
             AppSpacing.vLg,
 
             // 4. كرت السيولة والملخص المالي للشبكة المحددة (VIP Luxury Carbon Card)
