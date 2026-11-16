@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
@@ -1457,6 +1458,7 @@ void main() {
 
       await controller.initializeScope();
 
+      expect(controller.selectedPosId.value, 2);
       expect(controller.summary.value, isNotNull);
       expect(controller.outstandingInvoices, isEmpty);
       expect(controller.invoicesErrorMessage.value, isNotNull);
@@ -1532,6 +1534,9 @@ void main() {
     });
 
     test('multiple POS memberships require explicit POS selection before loading debt', () async {
+      await WorkspaceService.to.clearActivePosId();
+      addTearDown(WorkspaceService.to.clearActivePosId);
+
       commercialRepository.myPos = [
         const PosEntity(
           posId: 1,
@@ -1595,6 +1600,66 @@ void main() {
         'networkId': 20,
         'posId': 2,
       });
+    });
+
+    test('restores a previously selected POS when multiple memberships exist', () async {
+      commercialRepository.myPos = [
+        const PosEntity(
+          posId: 1,
+          ownerId: 1,
+          posUuid: 'pos-1',
+          posName: 'نقطة البيع الأولى',
+          posPhoneNumber: '777000001',
+        ),
+        const PosEntity(
+          posId: 2,
+          ownerId: 1,
+          posUuid: 'pos-2',
+          posName: 'نقطة البيع الثانية',
+          posPhoneNumber: '777000002',
+        ),
+      ];
+      commercialRepository.posNetworkLinks = const PaginatedList(
+        items: [
+          NetworkPosLinkEntity(
+            networkPosId: 201,
+            networkId: 20,
+            posId: 2,
+            status: true,
+            network: NetworkEntity(
+              networkId: 20,
+              ownerId: 1,
+              networkName: 'شبكة النقطة الثانية',
+              networkPhoneNumber: '777222000',
+              networkUuid: 'NET-222',
+            ),
+          ),
+        ],
+      );
+      await WorkspaceService.to.saveActivePosId(2);
+      addTearDown(WorkspaceService.to.clearActivePosId);
+
+      final controller = PosDebtLedgerController(
+        getDebtSummaryUseCase: GetDebtSummaryUseCase(repository),
+        getOutstandingInvoicesUseCase: GetOutstandingInvoicesUseCase(
+          repository,
+        ),
+        getMyPosUseCase: GetMyPosUseCase(commercialRepository),
+        getPosNetworksListUseCase: GetPosNetworksListUseCase(
+          commercialRepository,
+        ),
+      );
+
+      await controller.initializeScope();
+
+      expect(controller.selectedPosId.value, 2);
+      expect(controller.selectedNetworkId.value, 20);
+      expect(repository.requestedDebtScopes, [
+        {'networkId': 20, 'posId': 2},
+      ]);
+      expect(repository.requestedInvoiceScopes, [
+        {'networkId': 20, 'posId': 2},
+      ]);
     });
 
     test('remote network search preserves selected supplier and records the server query', () async {
