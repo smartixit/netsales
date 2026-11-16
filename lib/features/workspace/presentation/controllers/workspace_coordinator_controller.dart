@@ -8,6 +8,7 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:netsales/features/workspace/domain/entities/workspace_context_entity.dart';
 import 'package:netsales/features/workspace/domain/usecases/get_active_workspace_use_case.dart';
@@ -99,6 +100,9 @@ class WorkspaceCoordinatorController extends GetxController {
     final name = SessionService.to.currentUser?.userFullName.trim() ?? '';
     return name.isEmpty ? 'المستخدم' : name;
   }
+
+  String get currentUserInitials =>
+      TextFormatter.avatarInitials(currentUserName, maxChars: 2);
 
   String? get currentUserPhoneNumber =>
       SessionService.to.currentUser?.userPhoneNumber;
