@@ -107,7 +107,7 @@ class PosHomeDashboard extends StatelessWidget {
                               .network
                               ?.networkName ??
                           'الشبكة المحددة',
-                      wallet: controller.selectedWallet.value,
+                      summary: controller.selectedWalletSummary,
                       isLoading: controller.isLoadingWallet.value,
                       error: controller.walletError.value,
                       onRetry: () => controller.selectNetwork(
