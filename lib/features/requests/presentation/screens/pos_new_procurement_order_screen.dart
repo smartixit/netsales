@@ -13,6 +13,7 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_netw
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_pos_context_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_sheet_quantity_section.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -41,9 +42,11 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
           centerTitle: true,
           elevation: 0,
           leading: isReviewStep
-              ? IconButton(
+              ? CustomButton.icon(
                   tooltip: 'العودة لاختيار الباقات',
-                  icon: const Icon(Icons.arrow_back_rounded),
+                  icon: Icons.arrow_back_rounded,
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: colors.onSurface,
                   onPressed: controller.returnToOrderItems,
                 )
               : null,
@@ -73,7 +76,6 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                       children: [
                         _ProcurementStepIndicator(
                           isReviewStep: isReviewStep,
-                          colors: colors,
                         ),
                         AppSpacing.vLg,
                         if (!isReviewStep) ...[
@@ -144,11 +146,9 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
 class _ProcurementStepIndicator extends StatelessWidget {
   const _ProcurementStepIndicator({
     required this.isReviewStep,
-    required this.colors,
   });
 
   final bool isReviewStep;
-  final dynamic colors;
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +159,7 @@ class _ProcurementStepIndicator extends StatelessWidget {
           child: Container(
             height: 1,
             margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            color: colors.outlineVariant,
+            color: context.colors.outlineVariant,
           ),
         ),
         _StepMarker(number: '2', label: 'مراجعة وإرسال', active: isReviewStep),
