@@ -33,6 +33,8 @@ import 'package:netsales/features/workspace/presentation/models/workspace_transa
 import 'package:netsales/features/workspace/presentation/mappers/pos_workspace_transaction_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_network_package_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_active_supply_order_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_wallet_summary_mapper.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_wallet_summary_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/pos_active_supply_order_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/pos_network_package_view_model.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
@@ -240,6 +242,9 @@ class PosWorkspaceController extends GetxController {
 
   PosActiveSupplyOrderViewModel? get activeSupplyOrder =>
       PosActiveSupplyOrderMapper.map(recentRequests);
+
+  PosWalletSummaryViewModel? get selectedWalletSummary =>
+      PosWalletSummaryMapper.map(selectedWallet.value);
 
   void openProcurementOrder(RequestEntity request) =>
       Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
