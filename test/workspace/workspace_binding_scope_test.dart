@@ -35,11 +35,11 @@ void main() {
 
   test('membership screens resolve the matching workspace controller tag', () {
     expect(
-      const MembershipScreen(isNetwork: true).tag,
+      const MembershipScreen(isNetwork: true).controllerScopeTag,
       MembershipBinding.networkTag,
     );
     expect(
-      const MembershipScreen(isNetwork: false).tag,
+      const MembershipScreen(isNetwork: false).controllerScopeTag,
       MembershipBinding.posTag,
     );
   });
