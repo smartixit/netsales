@@ -648,11 +648,13 @@ class PosProcurementController extends GetxController {
   void editCartLine(ProcurementCartLineEntity line) {
     _setSelectedPackage(line.package);
     setVoucherCount(line.voucherCount);
+    returnToOrderItems();
   }
 
   void removeCartLine(int packageId) {
     procurementCart.removeWhere((line) => line.package.packageId == packageId);
     if (procurementCart.isEmpty) {
+      returnToOrderItems();
       _quoteRevision++;
       isLoadingQuote.value = false;
       serverQuote.value = null;
