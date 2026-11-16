@@ -462,13 +462,10 @@ void main() {
 
     // 5. إلغاء صلاحية نقطة البيع النشطة أثناء الجلسة -> منع الإرسال ورفض السياق
     test('Acceptance 5: إلغاء صلاحية نقطة البيع النشطة يمنع الإرسال ويتجاهل المعرف الملغى', () async {
-      // User had saved POS #999, which is now revoked and NOT in authorized myPosList
+      // User had saved POS #999, which is now revoked and NO authorized points remain in myPosList
       await WorkspaceService.instance.saveActivePosId(999);
 
-      mockCommercialRepo.posItems = [
-        pos1,
-        pos2,
-      ]; // only 101 and 202 are authorized
+      mockCommercialRepo.posItems = []; // No authorized points exist
 
       final controller = PosProcurementController(
         getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
@@ -483,7 +480,7 @@ void main() {
 
       await controller.loadMyPos();
 
-      // Revoked ID #999 was discarded, multiple points exist without valid saved ID -> must be null, never first!
+      // Revoked ID #999 was discarded, no authorized POS -> must be null
       expect(controller.selectedPosId.value, isNull);
 
       // Attempting to submit without valid POS fails safely

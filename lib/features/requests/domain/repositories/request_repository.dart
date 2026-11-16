@@ -25,8 +25,17 @@ abstract interface class RequestRepository {
   /// تقديم طلب توريد كروت جديد من نقطة البيع
   Future<RequestEntity> createRequest(Map<String, dynamic> data);
 
+  /// تعديل طلب الكروت قيد الانتظار (تغيير البنود أو الكميات أو نوع الشراء)
+  Future<RequestEntity> updateRequest(
+    int requestId,
+    Map<String, dynamic> data,
+  );
+
   /// إلغاء طلب الكروت قيد الانتظار من قبل نقطة البيع
   Future<RequestEntity> cancelRequest(int requestId);
+
+  /// حذف طلب كروت من السجل (للطلبات الملغية أو قيد الانتظار)
+  Future<bool> deleteRequest(int requestId);
 
   /// معاينة بنود التعديل وحساب أسعارها وخصوماتها سيادياً دون تغيير الطلب.
   Future<RequestModificationPreviewEntity> previewRequestModification(

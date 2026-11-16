@@ -63,9 +63,24 @@ class RequestRepositoryImpl implements RequestRepository {
   }
 
   @override
+  Future<RequestEntity> updateRequest(
+    int requestId,
+    Map<String, dynamic> data,
+  ) async {
+    final response = await _remoteDataSource.updateRequest(requestId, data);
+    return response.data!;
+  }
+
+  @override
   Future<RequestEntity> cancelRequest(int requestId) async {
     final response = await _remoteDataSource.cancelRequest(requestId);
     return response.data!;
+  }
+
+  @override
+  Future<bool> deleteRequest(int requestId) async {
+    final response = await _remoteDataSource.deleteRequest(requestId);
+    return response.success;
   }
 
   @override

@@ -23,8 +23,10 @@ import 'package:netsales/features/requests/domain/entities/procurement_cart_line
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/delete_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -33,7 +35,9 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class PosProcurementController extends GetxController {
   final GetRequestsUseCase getRequestsUseCase;
   final CreateRequestUseCase createRequestUseCase;
+  final UpdateRequestUseCase? updateRequestUseCase;
   final CancelRequestUseCase cancelRequestUseCase;
+  final DeleteRequestUseCase? deleteRequestUseCase;
   final GetMyPosUseCase? getMyPosUseCase;
   final GetPosNetworksListUseCase? getPosNetworksListUseCase;
   final GetPackagesUseCase? getPackagesUseCase;
@@ -43,7 +47,9 @@ class PosProcurementController extends GetxController {
   PosProcurementController({
     required this.getRequestsUseCase,
     required this.createRequestUseCase,
+    this.updateRequestUseCase,
     required this.cancelRequestUseCase,
+    this.deleteRequestUseCase,
     this.getMyPosUseCase,
     this.getPosNetworksListUseCase,
     this.getPackagesUseCase,
@@ -60,6 +66,22 @@ class PosProcurementController extends GetxController {
   final nextCursor = RxnString();
 
   bool get hasMore => nextCursor.value != null;
+
+  /// معرف الطلب المفتوح في الـ Accordion حالياً (الطي الحصري الذكي)
+  final RxnInt expandedRequestId = RxnInt();
+
+  /// تبديل فتح/إغلاق الـ Accordion بحيث إذا فتحت بطاقة تُقفل الأخرى تلقائياً
+  void toggleAccordion(int requestId) {
+    if (expandedRequestId.value == requestId) {
+      expandedRequestId.value = null;
+    } else {
+      expandedRequestId.value = requestId;
+    }
+  }
+
+  /// حالة وضع التعديل (Edit Mode)
+  final isEditing = false.obs;
+  final editingRequestId = RxnInt();
 
   // فلاتر وبحث الطلبات
   final searchController = TextEditingController();
@@ -686,6 +708,8 @@ class PosProcurementController extends GetxController {
 
   /// تهيئة نموذج طلب جديد
   void initNewOrderForm() {
+    isEditing.value = false;
+    editingRequestId.value = null;
     clearProcurementCart();
     _setSelectedPackage(null);
     clearVoucherQuantity();
@@ -695,6 +719,207 @@ class PosProcurementController extends GetxController {
     if (linkedNetworks.length == 1) {
       _setSelectedNetworkId(linkedNetworks.first.networkId);
       loadNetworkPackages(linkedNetworks.first.networkId);
+    }
+  }
+
+  /// فتح شاشة تعديل طلب التوريد القائم المعلق
+  Future<void> openEditOrder(RequestEntity request) async {
+    isEditing.value = true;
+    editingRequestId.value = request.requestId;
+    selectedPosId.value = request.posId;
+    selectedNetworkId.value = request.networkId;
+    selectedSaleType.value = request.saleType;
+    notesController.text = request.requestNote ?? '';
+    clearProcurementCart();
+
+    await loadNetworkPackages(request.networkId);
+
+    for (final item in request.items) {
+      final pkg = availablePackages
+              .firstWhereOrNull((p) => p.packageId == item.packageId) ??
+          item.voucherPackage ??
+          PackageEntity(
+            packageId: item.packageId,
+            networkId: request.networkId,
+            packageName:
+                item.voucherPackage?.packageName ?? 'باقة #${item.packageId}',
+            packageColor: item.voucherPackage?.packageColor,
+            packageBalance: 0.0,
+            packageVoucherCount:
+                item.voucherPackage?.packageVoucherCount ?? 100,
+            packageVoucherPrice: item.voucherPrice,
+            packageDefaultCashDiscount: item.itemDiscount,
+            packageDefaultCreditDiscount: item.itemDiscount,
+            cashDiscountAmount: 0.0,
+            creditDiscountAmount: 0.0,
+            effectiveCashPrice: item.voucherPrice,
+            effectiveCreditPrice: item.voucherPrice,
+            status: true,
+          );
+
+      final sheetSize =
+          pkg.packageVoucherCount > 0 ? pkg.packageVoucherCount : 100;
+      final calculatedSheets = item.voucherCount / sheetSize;
+      procurementCart.add(
+        ProcurementCartLineEntity(
+          package: pkg,
+          sheets: calculatedSheets,
+          voucherCount: item.voucherCount,
+        ),
+      );
+    }
+
+    if (procurementCart.isNotEmpty) {
+      editCartLine(procurementCart.first);
+    }
+
+    unawaited(fetchServerQuote());
+    await Get.toNamed<void>(AppRoutes.newProcurementOrder);
+  }
+
+  /// إرسال تحديثات الطلب المعلق إلى الخادم
+  Future<bool> updateOrder() async {
+    final requestId = editingRequestId.value;
+    if (requestId == null || updateRequestUseCase == null) {
+      CustomSnackbar.show(
+        title: 'خطأ في عملية التعديل',
+        message: 'معرف الطلب المراد تعديله غير متوفر.',
+        type: SnackType.error,
+      );
+      return false;
+    }
+
+    if (procurementCart.isEmpty) {
+      CustomSnackbar.show(
+        title: 'سلة التوريد فارغة',
+        message: 'أضف باقة واحدة على الأقل إلى الطلب قبل إرسال التعديل.',
+        type: SnackType.warning,
+      );
+      return false;
+    }
+
+    isSubmitting.value = true;
+    await CustomAnimationOverlay.showLoading(
+      message: 'جاري تحديث بيانات طلب التوريد...',
+    );
+
+    try {
+      final token = serverQuote.value?.pricingToken;
+      final payload = <String, dynamic>{
+        'sale_type': selectedSaleType.value.wireValue,
+        if (token != null && token.isNotEmpty) 'pricing_token': token,
+        if (notesController.text.trim().isNotEmpty)
+          'request_note': notesController.text.trim(),
+        'items': procurementCart
+            .map(
+              (line) => {
+                'package_id': line.package.packageId,
+                'voucher_count': line.voucherCount,
+              },
+            )
+            .toList(growable: false),
+      };
+
+      final updated = await updateRequestUseCase!(requestId, payload);
+      final index = requests.indexWhere((r) => r.requestId == requestId);
+      if (index != -1) {
+        requests[index] = updated;
+      }
+
+      isEditing.value = false;
+      editingRequestId.value = null;
+      clearProcurementCart();
+      clearVoucherQuantity();
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم حفظ تعديلات طلب التوريد بنجاح',
+      );
+      CustomSnackbar.show(
+        title: 'تم التحديث بنجاح',
+        message: 'تم تحديث طلب التوريد رقم #${updated.requestUuid} بنجاح.',
+        type: SnackType.success,
+      );
+      return true;
+    } on AppException catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'فشل تعديل الطلب',
+        message: e.message,
+        type: SnackType.error,
+      );
+      return false;
+    } catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'خطأ غير متوقع',
+        message: 'تعذر تعديل طلب التوريد: $e',
+        type: SnackType.error,
+      );
+      return false;
+    } finally {
+      isSubmitting.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+
+  /// حذف طلب توريد ملغي أو معلق من قبل نقطة البيع
+  Future<bool> deleteRequest(int requestId) async {
+    if (deleteRequestUseCase == null) {
+      CustomSnackbar.show(
+        title: 'العملية غير مدعومة',
+        message: 'خاصية حذف الطلبات غير مهيأة.',
+        type: SnackType.error,
+      );
+      return false;
+    }
+
+    await CustomAnimationOverlay.showLoading(
+      message: 'جاري حذف طلب التوريد من السجل...',
+    );
+
+    try {
+      await deleteRequestUseCase!(requestId);
+      requests.removeWhere((r) => r.requestId == requestId);
+
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم حذف طلب التوريد بنجاح',
+      );
+      CustomSnackbar.show(
+        title: 'تم الحذف',
+        message: 'تم حذف سجل الطلب بنجاح.',
+        type: SnackType.success,
+      );
+      return true;
+    } on AppException catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'تعذر حذف الطلب',
+        message: e.message,
+        type: SnackType.error,
+      );
+      return false;
+    } catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+      CustomSnackbar.show(
+        title: 'خطأ غير متوقع',
+        message: 'تعذر إتمام عملية الحذف: $e',
+        type: SnackType.error,
+      );
+      return false;
+    } finally {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 
@@ -910,9 +1135,18 @@ class PosProcurementController extends GetxController {
     );
   }
 
-  /// تقديم طلب التوريد والعودة في حال النجاح
+  /// حوار حذف طلب التوريد الملغي أو المعلق
+  Future<void> promptDeleteRequest(RequestEntity request) async {
+    await ProcurementActionDialogs.showDeleteDialog(
+      requestId: request.requestId,
+      requestUuid: request.requestUuid,
+      onConfirm: () => deleteRequest(request.requestId),
+    );
+  }
+
+  /// تقديم طلب التوريد أو حفظ التعديلات والعودة في حال النجاح
   Future<void> submitOrderAndClose() async {
-    final ok = await submitOrder();
+    final ok = isEditing.value ? await updateOrder() : await submitOrder();
     if (ok) Get.back<void>();
   }
 }

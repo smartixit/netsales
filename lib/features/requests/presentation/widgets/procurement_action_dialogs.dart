@@ -100,4 +100,25 @@ class ProcurementActionDialogs {
       },
     );
   }
+
+  /// نافذة حوار حذف طلب التوريد (حذف ناعم للطلبات الملغية أو المعلقة)
+  static Future<void> showDeleteDialog({
+    required int requestId,
+    String? requestUuid,
+    required Future<void> Function() onConfirm,
+  }) async {
+    final ref = requestUuid != null ? '#$requestUuid' : '#$requestId';
+    await CustomDialog.show(
+      type: DialogType.error,
+      title: 'حذف طلب التوريد $ref',
+      message:
+          'هل أنت متأكد من حذف هذا الطلب نهائياً من قائمة طلباتك؟ لن تظهر هذه المعاملة مجدداً.',
+      confirmLabel: 'نعم، حذف الطلب',
+      cancelLabel: 'تراجع',
+      onConfirm: () async {
+        Get.back<void>();
+        await onConfirm();
+      },
+    );
+  }
 }

@@ -14,7 +14,14 @@ abstract interface class RequestRemoteDataSource {
 
   Future<ApiResponse<RequestModel>> createRequest(Map<String, dynamic> data);
 
+  Future<ApiResponse<RequestModel>> updateRequest(
+    int requestId,
+    Map<String, dynamic> data,
+  );
+
   Future<ApiResponse<RequestModel>> cancelRequest(int requestId);
+
+  Future<ApiResponse<dynamic>> deleteRequest(int requestId);
 
   Future<ApiResponse<dynamic>> approveRequest(
     int requestId, {

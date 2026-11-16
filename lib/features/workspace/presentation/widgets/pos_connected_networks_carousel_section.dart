@@ -137,17 +137,14 @@ class PosConnectedNetworksCarouselSection extends StatelessWidget {
             onAction: onLinkNetwork,
           )
         else
-          ClipRRect(
-            clipBehavior: Clip.none,
-            child: CustomCarouselSlider<PosNetworkCarouselCardViewModel>(
-              items: controller.networkCarouselItems,
-              currentIndex: controller.currentNetworkIndex.value,
-              height: 205,
-              viewportFraction: 0.88,
-              itemBuilder: (context, item, index) => PosNetworkCarouselCard(
-                item: item,
-                onTap: () => controller.onNetworkPageChanged(index),
-              ),
+          CustomCarouselSlider<PosNetworkCarouselCardViewModel>(
+            items: controller.networkCarouselItems,
+            currentIndex: controller.currentNetworkIndex.value,
+            height: 205,
+            viewportFraction: 0.88,
+            itemBuilder: (context, item, index) => PosNetworkCarouselCard(
+              item: item,
+              onTap: () => controller.onNetworkPageChanged(index),
             ),
           ),
       ],

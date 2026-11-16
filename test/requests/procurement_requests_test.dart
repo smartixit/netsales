@@ -217,6 +217,37 @@ class MockRequestRepository implements RequestRepository {
     }
     throw const AppException('الطلب غير موجود', code: '404');
   }
+
+  @override
+  Future<RequestEntity> updateRequest(
+    int requestId,
+    Map<String, dynamic> data,
+  ) async {
+    final index = _requests.indexWhere((r) => r.requestId == requestId);
+    if (index >= 0) {
+      final existing = _requests[index];
+      final updated = RequestEntity(
+        requestId: existing.requestId,
+        networkId: existing.networkId,
+        posId: existing.posId,
+        requestUuid: existing.requestUuid,
+        saleTypeRaw: data['sale_type'] as String? ?? existing.saleTypeRaw,
+        requestTotalAmount: existing.requestTotalAmount,
+        statusRaw: existing.statusRaw,
+        statusLabel: existing.statusLabel,
+        requestNote: data['request_note'] as String? ?? existing.requestNote,
+      );
+      _requests[index] = updated;
+      return updated;
+    }
+    throw const AppException('الطلب غير موجود', code: '404');
+  }
+
+  @override
+  Future<bool> deleteRequest(int requestId) async {
+    _requests.removeWhere((r) => r.requestId == requestId);
+    return true;
+  }
 }
 
 void main() {

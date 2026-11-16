@@ -50,47 +50,50 @@ class CustomCarouselSlider<T> extends StatelessWidget {
     final safeIndex = currentIndex.clamp(0, items.length - 1);
     final controller = carouselController ?? CarouselSliderController();
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        CarouselSlider.builder(
-          carouselController: controller,
-          itemCount: items.length,
-          options: CarouselOptions(
-            height: height.h,
-            viewportFraction: viewportFraction,
-            initialPage: safeIndex,
-            enableInfiniteScroll: enableInfiniteScroll,
-            autoPlay: autoPlay,
-            enlargeCenterPage: enlargeCenterPage,
-            enlargeFactor: 0.16,
-            scrollPhysics: const BouncingScrollPhysics(),
-            padEnds: true,
-            onPageChanged: (index, reason) {
-              onPageChanged?.call(index);
-            },
-          ),
-          itemBuilder: (context, index, realIndex) {
-            return itemBuilder(context, items[index], index);
-          },
-        ),
-        if (showIndicator && items.length > 1) ...[
-          SizedBox(height: AppSpacing.sm),
-          CustomCarouselIndicators(
+    return Container(
+      clipBehavior: Clip.none,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CarouselSlider.builder(
+            carouselController: controller,
             itemCount: items.length,
-            currentIndex: safeIndex,
-            onIndicatorTap: (index) {
-              controller.animateToPage(
-                index,
-                duration: const Duration(milliseconds: 350),
-                curve: Curves.fastOutSlowIn,
-              );
-              onPageChanged?.call(index);
+            options: CarouselOptions(
+              height: height.h,
+              viewportFraction: viewportFraction,
+              initialPage: safeIndex,
+              enableInfiniteScroll: enableInfiniteScroll,
+              autoPlay: autoPlay,
+              enlargeCenterPage: enlargeCenterPage,
+              enlargeFactor: 0.16,
+              scrollPhysics: const BouncingScrollPhysics(),
+              padEnds: true,
+              onPageChanged: (index, reason) {
+                onPageChanged?.call(index);
+              },
+            ),
+            itemBuilder: (context, index, realIndex) {
+              return itemBuilder(context, items[index], index);
             },
           ),
+          if (showIndicator && items.length > 1) ...[
+            SizedBox(height: AppSpacing.sm),
+            CustomCarouselIndicators(
+              itemCount: items.length,
+              currentIndex: safeIndex,
+              onIndicatorTap: (index) {
+                controller.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 350),
+                  curve: Curves.fastOutSlowIn,
+                );
+                onPageChanged?.call(index);
+              },
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

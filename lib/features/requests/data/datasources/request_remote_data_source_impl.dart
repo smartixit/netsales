@@ -57,10 +57,29 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
   }
 
   @override
+  Future<ApiResponse<RequestModel>> updateRequest(
+    int requestId,
+    Map<String, dynamic> data,
+  ) {
+    return ApiService.instance.put<RequestModel>(
+      ApiConstants.voucherRequest(requestId),
+      data: data,
+      fromJson: (data) => RequestModel.fromJson(data as Map<String, dynamic>),
+    );
+  }
+
+  @override
   Future<ApiResponse<RequestModel>> cancelRequest(int requestId) {
     return ApiService.instance.post<RequestModel>(
       ApiConstants.voucherRequestCancel(requestId),
       fromJson: (data) => RequestModel.fromJson(data as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Future<ApiResponse<dynamic>> deleteRequest(int requestId) {
+    return ApiService.instance.delete<dynamic>(
+      ApiConstants.voucherRequest(requestId),
     );
   }
 

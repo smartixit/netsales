@@ -134,6 +134,16 @@ class FakeQuoteRequestRepository implements RequestRepository {
     String rejectionReason,
   ) async =>
       throw UnimplementedError();
+
+  @override
+  Future<RequestEntity> updateRequest(
+    int requestId,
+    Map<String, dynamic> data,
+  ) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<bool> deleteRequest(int requestId) async => true;
 }
 
 const testPos = PosEntity(

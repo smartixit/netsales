@@ -20,10 +20,12 @@ import 'package:netsales/features/requests/domain/repositories/request_repositor
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/delete_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
@@ -117,8 +119,16 @@ class ProcurementRequestBinding extends Bindings {
       () => CreateRequestUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
+    registerLazyIfAbsent<UpdateRequestUseCase>(
+      () => UpdateRequestUseCase(Get.find<RequestRepository>()),
+      fenix: true,
+    );
     registerLazyIfAbsent<CancelRequestUseCase>(
       () => CancelRequestUseCase(Get.find<RequestRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<DeleteRequestUseCase>(
+      () => DeleteRequestUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
     registerLazyIfAbsent<ApproveRequestUseCase>(
@@ -143,7 +153,9 @@ class ProcurementRequestBinding extends Bindings {
       () => PosProcurementController(
         getRequestsUseCase: Get.find<GetRequestsUseCase>(),
         createRequestUseCase: Get.find<CreateRequestUseCase>(),
+        updateRequestUseCase: Get.find<UpdateRequestUseCase>(),
         cancelRequestUseCase: Get.find<CancelRequestUseCase>(),
+        deleteRequestUseCase: Get.find<DeleteRequestUseCase>(),
         getMyPosUseCase: Get.find<GetMyPosUseCase>(),
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),

@@ -172,6 +172,37 @@ class MockRequestRepository implements RequestRepository {
     items[index] = updated;
     return updated;
   }
+
+  @override
+  Future<RequestEntity> updateRequest(
+    int requestId,
+    Map<String, dynamic> data,
+  ) async {
+    final index = items.indexWhere((r) => r.requestId == requestId);
+    if (index != -1) {
+      final existing = items[index];
+      final updated = RequestEntity(
+        requestId: existing.requestId,
+        networkId: existing.networkId,
+        posId: existing.posId,
+        requestUuid: existing.requestUuid,
+        saleTypeRaw: data['sale_type'] as String? ?? existing.saleTypeRaw,
+        requestTotalAmount: existing.requestTotalAmount,
+        statusRaw: existing.statusRaw,
+        statusLabel: existing.statusLabel,
+        requestNote: data['request_note'] as String? ?? existing.requestNote,
+      );
+      items[index] = updated;
+      return updated;
+    }
+    throw const AppException('Request not found', code: '404');
+  }
+
+  @override
+  Future<bool> deleteRequest(int requestId) async {
+    items.removeWhere((r) => r.requestId == requestId);
+    return true;
+  }
 }
 
 class MockCommercialRepository implements CommercialRepository {
