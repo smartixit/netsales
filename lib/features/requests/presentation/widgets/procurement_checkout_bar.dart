@@ -1,134 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_cart_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
-/// شريط ملخص السلة وتقديم طلب التوريد.
+/// ملخص حي مثبت أسفل مساحة اكتشاف الباقات، بلا خطوة مراجعة منفصلة.
 class ProcurementCheckoutBar extends GetView<PosProcurementController> {
   const ProcurementCheckoutBar({super.key});
 
   @override
-  /// شريط الدفع والإتمام المثبت في أسفل الشاشة (Sticky Bottom Checkout Bar)
   Widget build(BuildContext context) {
     final colors = context.colors;
-
     return Obx(() {
-      final isEditMode = controller.isEditing.value;
-      final isReviewStep = controller.currentOrderStep.value == 1;
-      final cartLines = controller.procurementCart;
-      final totalVouchers = cartLines.fold<int>(
-        0,
-        (sum, item) => sum + item.voucherCount,
-      );
-      final quote = controller.serverQuote.value;
-      final quoteSummary = cartLines.isEmpty
-          ? 'السلة فارغة'
-          : (controller.isQuotePending.value ||
-                    controller.isLoadingQuote.value)
-              ? 'جاري تحديث السعر المعتمد...'
-              : quote == null
-                  ? (controller.getProcurementQuoteUseCase == null
-                      ? 'سيحتسب الخادم السعر عند التقديم'
-                      : 'عرض السعر غير متاح')
-                  : AmountFormatter.format(quote.netTotal.toString());
-
+      final lineCount = controller.procurementCart.length;
+      final voucherCount = controller.procurementCart.fold<int>(0, (sum, line) => sum + line.voucherCount);
+      final total = AmountFormatter.formatValue(controller.liveOrderTotalMinor / 100) + ' ر.ي';
       return Container(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.cardPadding,
-          AppSpacing.sm,
-          AppSpacing.cardPadding,
-          AppSpacing.cardPadding + MediaQuery.paddingOf(context).bottom,
-        ),
+        padding: EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md,
+          AppSpacing.sm + MediaQuery.paddingOf(context).bottom),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppRadius.lg),
-          ),
-          border: Border(
-            top: BorderSide(
-              color: colors.outlineVariant.withValues(alpha: 0.35),
-            ),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, -4),
-            ),
-          ],
+          border: Border(top: BorderSide(color: colors.outlineVariant.withValues(alpha: .45))),
+          boxShadow: [BoxShadow(color: colors.shadow.withValues(alpha: .08), blurRadius: 20, offset: const Offset(0, -6))],
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isCompact = constraints.maxWidth <=
-                AppBreakpoints.mobileSmallMax + (AppSpacing.cardPadding * 2);
-
-            final summary = Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  totalVouchers > 0
-                      ? '$totalVouchers كرت • ${cartLines.length} باقة'
-                      : 'السلة فارغة',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
+        child: SafeArea(
+          top: false,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(lineCount.toString() + ' باقة • ' + voucherCount.toString() + ' كرت',
+                      style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
+                    AppSpacing.vXxs,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(total, style: AppTypography.titleLarge.copyWith(
+                        color: colors.primary, fontWeight: FontWeight.w900,
+                      )),
+                    ),
+                  ],
                 ),
-                Text(
-                  quoteSummary,
-                  style: AppTypography.titleMedium.copyWith(
-                    color: quote == null
-                        ? colors.onSurfaceVariant
-                        : colors.primary,
-                    fontWeight: FontWeight.bold,
+              ),
+              AppSpacing.hSm,
+              CustomButton.outline(
+                text: 'السلة',
+                icon: Icons.shopping_bag_outlined,
+                size: AppButtonSize.medium,
+                onPressed: lineCount == 0 ? null : () => Get.bottomSheet<void>(
+                  Container(
+                    constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * .86),
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.all(AppSpacing.md),
+                        child: const ProcurementCartSection(),
+                      ),
+                    ),
                   ),
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
                 ),
-              ],
-            );
-
-            final canContinue = controller.procurementCart.isNotEmpty;
-            final actionButton = CustomButton(
-              text: isReviewStep
-                  ? (isEditMode ? 'حفظ تعديلات الطلب' : 'تأكيد وإرسال الطلب')
-                  : 'متابعة إلى مراجعة الطلب',
-              icon: isReviewStep
-                  ? Icons.send_rounded
-                  : Icons.arrow_forward_rounded,
-              width: isCompact ? double.infinity : null,
-              loading: isReviewStep && controller.isSubmitting.value,
-              enabled: isReviewStep ? controller.canSubmitOrder : canContinue,
-              onPressed: isReviewStep
-                  ? (controller.canSubmitOrder ? controller.submitOrderAndClose : null)
-                  : (canContinue ? controller.continueToOrderReview : null),
-            );
-
-            if (isCompact) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  summary,
-                  AppSpacing.vSm,
-                  actionButton,
-                ],
-              );
-            }
-
-            return Row(
-              children: [
-                Expanded(child: summary),
-                AppSpacing.hMd,
-                actionButton,
-              ],
-            );
-          },
+              ),
+              AppSpacing.hSm,
+              Expanded(
+                flex: 2,
+                child: CustomButton(
+                  text: controller.isEditing.value ? 'حفظ التعديل' : 'إرسال الطلب',
+                  icon: Icons.send_rounded,
+                  loading: controller.isSubmitting.value,
+                  enabled: controller.canCreateOrder && controller.canSubmitOrder,
+                  onPressed: controller.submitOrderAndClose,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     });

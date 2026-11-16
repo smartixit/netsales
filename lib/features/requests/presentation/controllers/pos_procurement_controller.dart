@@ -179,7 +179,7 @@ class PosProcurementController extends GetxController {
   }
 
   bool get canSubmitOrder =>
-      hasCartItems && !isSubmitting.value && hasCurrentServerQuote;
+      hasCartItems && !isSubmitting.value && missingPricingPackageName == null;
 
   void _setSelectedNetworkId(int? value) {
     selectedNetworkId.value = value;

@@ -8,199 +8,260 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_cart_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_network_context_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_pos_context_section.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/inputs/custom_segmented_bar.dart';
 
-/// إنشاء الطلب على مرحلتين: اختيار الباقات والكميات، ثم مراجعة الطلب وإرساله.
+/// مساحة اكتشاف وتكوين طلب واحدة؛ السعر والكمية والإجمالي تتحدث محلياً وفورياً.
 class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
   const PosNewProcurementOrderScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-
-    return Obx(() {
-      final isReviewStep = controller.currentOrderStep.value == 1;
-      final isEditMode = controller.isEditing.value;
-      final title = isEditMode
-          ? 'تعديل طلب التوريد #${controller.editingRequestId.value}'
-          : 'طلب توريد جديد';
-
-      return CustomAppScaffold(
-        appBar: AppBar(
-          title: Text(title, style: AppTypography.titleMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-          )),
-          centerTitle: true,
-          elevation: 0,
-          leading: isReviewStep
-              ? CustomButton.icon(
-                  tooltip: 'العودة لاختيار الباقات',
-                  icon: Icons.arrow_back_rounded,
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: colors.onSurface,
-                  onPressed: controller.returnToOrderItems,
-                )
-              : null,
-        ),
-        bottomNavigationBar: const ProcurementCheckoutBar(),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            final horizontalPadding = constraints.maxWidth < AppBreakpoints.mobileSmallMax
-                ? AppSpacing.sm
-                : AppSpacing.cardPadding;
-            return Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: AppBreakpoints.maxFormWidth),
-                child: SingleChildScrollView(
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: EdgeInsets.fromLTRB(
-                    horizontalPadding,
-                    AppSpacing.md,
-                    horizontalPadding,
-                    AppSpacing.xl,
-                  ),
-                  child: Form(
-                    key: controller.formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _ProcurementStepIndicator(
-                          isReviewStep: isReviewStep,
-                        ),
-                        AppSpacing.vLg,
-                        if (!isReviewStep) ...[
-                          const ProcurementPosContextSection(),
-                          AppSpacing.vMd,
-                          const ProcurementNetworkContextSection(),
-                          AppSpacing.vLg,
-                          const ProcurementPackageSelectionSection(),
-                        ] else ...[
-                          const ProcurementCartSection(),
-                          AppSpacing.vLg,
-                          Text(
-                            'طريقة الدفع',
-                            style: AppTypography.titleSmall.copyWith(
-                              color: colors.onSurface,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          AppSpacing.vXs,
-                          CustomSegmentedBar(
-                            selectedIndex: controller.selectedSaleType.value == SaleType.cash ? 0 : 1,
-                            onSegmentChanged: (index) {
-                              // The controller observes this state and debounces the
-                              // authoritative quote refresh with any pending quantity edits.
-                              controller.selectedSaleType.value =
-                                  index == 0 ? SaleType.cash : SaleType.credit;
-                            },
-                            items: const [
-                              CustomSegmentItem(label: 'نقدي', icon: Icons.payments_outlined),
-                              CustomSegmentItem(label: 'آجل', icon: Icons.credit_card_outlined),
-                            ],
-                          ),
-                          AppSpacing.vLg,
-                          const ProcurementFinancialQuoteCard(),
-                          AppSpacing.vLg,
-                          CustomTextField(
-                            controller: controller.notesController,
-                            label: 'ملاحظات للشبكة (اختياري)',
-                            hint: 'أضف توضيحاً يساعد الشبكة على معالجة الطلب',
-                            maxLines: 3,
-                            isRequired: false,
-                          ),
-                          AppSpacing.vSm,
-                          Text(
-                            'سيبقى الطلب قيد الانتظار حتى تراجعه الشبكة وتعتمده. لا تُنشأ فاتورة عند الإرسال.',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: colors.onSurfaceVariant,
-                              height: 1.45,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
+    return Obx(() => CustomAppScaffold(
+      appBarTitle: controller.isEditing.value ? 'تعديل طلب التوريد' : 'اكتشاف باقات التوريد',
+      appBarSubtitle: 'قارن التعرفة واضبط الكمية وشاهد إجمالي الطلب مباشرة',
+      showBackButton: true,
+      bottomNavigationBar: const ProcurementCheckoutBar(),
+      maxWidth: AppBreakpoints.desktopMax,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 960;
+          final side = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _IntroPanel(),
+              AppSpacing.vMd,
+              _ContextPanel(),
+              AppSpacing.vMd,
+              _SaleTypePanel(),
+              AppSpacing.vLg,
+              const ProcurementPackageSelectionSection(),
+              AppSpacing.vLg,
+              CustomTextField(
+                controller: controller.notesController,
+                label: 'ملاحظة للشبكة (اختياري)',
+                hint: 'أضف توضيحاً مختصراً حول طلب التوريد',
+                maxLines: 2,
+                isRequired: false,
               ),
-            );
-          },
-        ),
-      );
-    });
+            ],
+          );
+          return SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.all(constraints.maxWidth < 360 ? AppSpacing.sm : AppSpacing.md),
+            child: isWide
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(flex: 7, child: side),
+                      AppSpacing.hLg,
+                      SizedBox(
+                        width: 350,
+                        child: Column(
+                          children: [
+                            const _LiveCartPanel(),
+                            AppSpacing.vMd,
+                            const _PolicyPanel(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      side,
+                      AppSpacing.vLg,
+                      const _LiveCartPanel(),
+                      AppSpacing.vMd,
+                      const _PolicyPanel(),
+                    ],
+                  ),
+          );
+        },
+      ),
+    ));
   }
 }
 
-class _ProcurementStepIndicator extends StatelessWidget {
-  const _ProcurementStepIndicator({
-    required this.isReviewStep,
-  });
-
-  final bool isReviewStep;
-
+class _IntroPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _StepMarker(number: '1', label: 'اختيار الباقات', active: !isReviewStep),
-        Expanded(
-          child: Container(
-            height: 1,
-            margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            color: context.colors.outlineVariant,
-          ),
+    final colors = context.colors;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: [colors.primary.withValues(alpha: .14), colors.surfaceContainerLow],
         ),
-        _StepMarker(number: '2', label: 'مراجعة وإرسال', active: isReviewStep),
-      ],
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colors.primary.withValues(alpha: .18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(Icons.auto_awesome_rounded, color: colors.primary, size: 18),
+            AppSpacing.hXs,
+            Text('PROCUREMENT WORKSPACE', style: AppTypography.labelSmall.copyWith(
+              color: colors.primary, fontWeight: FontWeight.w800, letterSpacing: 1.1,
+            )),
+          ]),
+          AppSpacing.vSm,
+          Text('كوّن طلب التوريد الخاص بك', style: AppTypography.headlineSmall.copyWith(
+            color: colors.onSurface, fontWeight: FontWeight.w900,
+          )),
+          AppSpacing.vXs,
+          Text('كل تفاصيل الباقة وتعرفة نقطة البيع والكمية والسلة في مساحة واحدة، دون انتقال بين خطوات منفصلة.',
+            style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant, height: 1.5)),
+        ],
+      ),
     );
   }
 }
 
-class _StepMarker extends StatelessWidget {
-  const _StepMarker({
-    required this.number,
-    required this.label,
-    required this.active,
-  });
+class _ContextPanel extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: .45)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('سياق التوريد', style: AppTypography.titleSmall.copyWith(
+            color: colors.onSurface, fontWeight: FontWeight.w800,
+          )),
+          AppSpacing.vSm,
+          const ProcurementPosContextSection(),
+          AppSpacing.vSm,
+          const ProcurementNetworkContextSection(),
+        ],
+      ),
+    );
+  }
+}
 
-  final String number;
-  final String label;
-  final bool active;
+class _SaleTypePanel extends GetView<PosProcurementController> {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: .45)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('طريقة البيع والتعرفة', style: AppTypography.titleSmall.copyWith(
+            color: colors.onSurface, fontWeight: FontWeight.w800,
+          )),
+          AppSpacing.vXxs,
+          Text('تتغير أسعار الباقات وإجمالي السلة فور اختيار النوع.', style: AppTypography.labelSmall.copyWith(
+            color: colors.onSurfaceVariant,
+          )),
+          AppSpacing.vSm,
+          Obx(() => CustomSegmentedBar(
+            selectedIndex: controller.selectedSaleType.value == SaleType.cash ? 0 : 1,
+            onSegmentChanged: (index) {
+              controller.selectedSaleType.value = index == 0 ? SaleType.cash : SaleType.credit;
+            },
+            items: const [
+              CustomSegmentItem(label: 'نقدي', icon: Icons.payments_outlined),
+              CustomSegmentItem(label: 'آجل', icon: Icons.credit_card_outlined),
+            ],
+          )),
+        ],
+      ),
+    );
+  }
+}
+
+class _LiveCartPanel extends GetView<PosProcurementController> {
+  const _LiveCartPanel();
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircleAvatar(
-          radius: 13,
-          backgroundColor: active ? colors.primary : colors.surfaceContainerHighest,
-          child: Text(
-            number,
-            style: AppTypography.labelSmall.copyWith(
-              color: active ? colors.onPrimary : colors.onSurfaceVariant,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        AppSpacing.hXs,
-        Text(
-          label,
-          style: AppTypography.labelSmall.copyWith(
-            color: active ? colors.primary : colors.onSurfaceVariant,
-            fontWeight: active ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ],
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colors.primary.withValues(alpha: .22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(Icons.shopping_bag_outlined, color: colors.primary),
+            AppSpacing.hXs,
+            Expanded(child: Text('سلة الطلب', style: AppTypography.titleSmall.copyWith(
+              color: colors.onSurface, fontWeight: FontWeight.w800,
+            ))),
+            Obx(() => Text(controller.procurementCart.length.toString() + ' باقة',
+              style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant))),
+          ]),
+          AppSpacing.vSm,
+          const ProcurementCartSection(),
+          AppSpacing.vSm,
+          Divider(color: colors.outlineVariant.withValues(alpha: .5)),
+          AppSpacing.vSm,
+          Row(children: [
+            Expanded(child: Text('الإجمالي الحالي', style: AppTypography.labelMedium.copyWith(
+              color: colors.onSurfaceVariant, fontWeight: FontWeight.w700,
+            ))),
+            Obx(() => Text(
+              AmountFormatter.formatValue(controller.liveOrderTotalMinor / 100) + ' ر.ي',
+              style: AppTypography.titleLarge.copyWith(color: colors.primary, fontWeight: FontWeight.w900),
+            )),
+          ]),
+          AppSpacing.vXs,
+          Obx(() => Text(
+            'إجمالي الخصم: ' + AmountFormatter.formatValue(controller.liveOrderDiscountMinor / 100) + ' ر.ي',
+            style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant),
+          )),
+        ],
+      ),
+    );
+  }
+}
+
+class _PolicyPanel extends StatelessWidget {
+  const _PolicyPanel();
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(color: colors.surfaceContainerLow, borderRadius: BorderRadius.circular(16)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline_rounded, color: colors.primary, size: 18),
+          AppSpacing.hSm,
+          Expanded(child: Text(
+            'يُرسل الطلب إلى الشبكة للمراجعة. لا تُنشأ فاتورة أو تسوية مالية إلا بعد اعتماد الطلب.',
+            style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant, height: 1.45),
+          )),
+        ],
+      ),
     );
   }
 }
