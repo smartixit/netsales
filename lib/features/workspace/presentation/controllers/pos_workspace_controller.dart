@@ -7,6 +7,7 @@ import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/utils/greeting_formatter.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -613,6 +614,8 @@ class PosWorkspaceController extends GetxController {
       arguments: arguments,
     );
   }
+
+  String get userInitials => TextFormatter.avatarInitials(userName, maxChars: 2);
 
   void onNavItemSelected(int index) {
     selectedNavIndex.value = index;
