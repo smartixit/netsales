@@ -145,7 +145,7 @@ class VoucherQuantityStepper extends StatelessWidget {
                   label: label,
                   hint: 'أدخل العدد يدوياً',
                   keyboardType: TextInputType.number,
-                  inputFormatters: const [
+                  inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                   ],
                   validator: validator,
