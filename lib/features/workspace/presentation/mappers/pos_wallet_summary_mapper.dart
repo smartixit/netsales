@@ -11,7 +11,7 @@ class PosWalletSummaryMapper {
       isOverdrawn: wallet.isOverdrawn,
       formattedBalance: AmountFormatter.format(wallet.walletBalance.toString()),
       creditLimitLabel: wallet.creditLimit == null
-          ? 'غير محدد'
+          ? 'بدون تسهيلات'
           : '${AmountFormatter.format(wallet.creditLimit.toString())} ر.ي',
       availableOverdraftLabel:
           '${AmountFormatter.format(wallet.availableOverdraftCapacity.toString())} ر.ي',
