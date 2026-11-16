@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/enums/role_key.dart';
@@ -16,14 +15,12 @@ import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
-import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_challenge_sheet.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/domain/usecases/get_network_workspace_overview_use_case.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 import 'package:netsales/features/workspace/presentation/mappers/network_workspace_transaction_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/network_workspace_dashboard_mapper.dart';
 import 'package:netsales/features/workspace/presentation/models/network_workspace_dashboard_view_model.dart';
-import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 import 'package:netsales/widgets/charts/charting.dart';
 
 class NetworkWorkspaceController extends GetxController {
@@ -255,23 +252,4 @@ class NetworkWorkspaceController extends GetxController {
     await loadOverview();
   }
 
-  /// فتح نافذة إنشاء ومشاركة بطاقة دعوة ربط نقطة بيع عبر رمز QR كصورة عالية الدقة
-  Future<void> openQrInviteSheet() async {
-    final net = selectedNetwork ?? networks.firstOrNull;
-    if (net == null) {
-      CustomSnackbar.show(
-        title: 'تنبيه',
-        message: 'يرجى اختيار شبكة أولاً لمشاركة رمز الدعوة',
-        type: SnackType.warning,
-      );
-      return;
-    }
-
-    await HapticFeedback.lightImpact();
-    await NetworkPosQrChallengeSheet.show(
-      networkId: net.networkId,
-      networkName: net.networkName,
-      networkPhone: net.networkPhoneNumber,
-    );
-  }
 }
