@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_breakpoints.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -64,49 +65,67 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
             ),
           ],
         ),
-        child: Row(
-          children: [
-            // ملخص الكمية والإجمالي المالي
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    totalVouchers > 0
-                        ? '$totalVouchers كرت • ${totalSheets.toStringAsFixed(totalSheets.truncateToDouble() == totalSheets ? 0 : 1)} ورقة'
-                        : 'السلة فارغة',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    quoteSummary,
-                    style: AppTypography.titleMedium.copyWith(
-                      color: quote == null
-                          ? colors.onSurfaceVariant
-                          : colors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth <=
+                AppBreakpoints.mobileSmallMax + (AppSpacing.cardPadding * 2);
 
-            AppSpacing.hMd,
+            final summary = Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  totalVouchers > 0
+                      ? '$totalVouchers كرت • ${totalSheets.toStringAsFixed(totalSheets.truncateToDouble() == totalSheets ? 0 : 1)} ورقة'
+                      : 'السلة فارغة',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  quoteSummary,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: quote == null
+                        ? colors.onSurfaceVariant
+                        : colors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            );
 
-            // زر تقديم أو حفظ تعديلات الطلب
-            CustomButton(
+            final submitButton = CustomButton(
               text: isEditMode ? 'حفظ تعديلات الطلب' : 'تقديم طلب التوريد',
               icon: isEditMode ? Icons.check_circle_rounded : Icons.send_rounded,
+              width: isCompact ? double.infinity : null,
               loading: controller.isSubmitting.value,
               enabled: controller.canSubmitOrder,
               onPressed: controller.canSubmitOrder
                   ? controller.submitOrderAndClose
                   : null,
-            ),
-          ],
+            );
+
+            if (isCompact) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  summary,
+                  AppSpacing.vSm,
+                  submitButton,
+                ],
+              );
+            }
+
+            return Row(
+              children: [
+                Expanded(child: summary),
+                AppSpacing.hMd,
+                submitButton,
+              ],
+            );
+          },
         ),
       );
     });
