@@ -4,7 +4,6 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -29,7 +28,7 @@ class PosWelcomeHeader extends StatelessWidget {
     final greeting = controller.welcomeGreeting;
     final realFullName = controller.userName;
     final realRole = controller.userRole;
-    final initials = TextFormatter.avatarInitials(realFullName, maxChars: 2);
+    final initials = controller.userInitials;
     final todayStr = controller.todayFormatted;
     final posName = controller.activePosName;
 
