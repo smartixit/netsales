@@ -10,6 +10,7 @@ import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 class NetworkRequestModificationSheet
@@ -243,6 +244,16 @@ class NetworkRequestModificationSheet
                   ),
                 ),
           AppSpacing.vMd,
+          const _SectionTitle('ملاحظة للمورد'),
+          AppSpacing.vXs,
+          CustomTextField(
+            controller: controller.modificationNoteController,
+            label: 'ملاحظة الاعتماد (اختياري)',
+            hint: 'أضف توضيحاً مختصراً لنقطة البيع عند اعتماد التعديل...',
+            maxLines: 2,
+            isRequired: false,
+          ),
+          AppSpacing.vMd,
           const _SectionTitle('معاينة الأسعار'),
           AppSpacing.vXs,
           const _InfoPanel(
@@ -264,7 +275,7 @@ class NetworkRequestModificationSheet
             ),
             Divider(color: colors.outlineVariant.withValues(alpha: 0.4)),
             _TotalRow(
-              label: 'الإجمالي المقترح',
+              label: 'الإجمالي المقترح للاعتماد',
               amount: preview.previewTotalAmount,
               emphasize: true,
             ),
@@ -278,17 +289,71 @@ class NetworkRequestModificationSheet
                 final desc = sheetSize > 0
                     ? VoucherSheetCalculator.describe(item.voucherCount, sheetSize)
                     : null;
-                final qtyLabel = desc != null
+                final quantityLabel = desc != null
                     ? '$desc (${item.voucherCount} كرت)'
                     : '${item.voucherCount} كرت';
+                final previousQuantity = item.originalVoucherCount;
+                final isQuantityChanged = item.changeType == 'QUANTITY_CHANGED';
+                final quantitySummary = isQuantityChanged && previousQuantity != null
+                    ? 'من $previousQuantity إلى ${item.voucherCount} كرت'
+                    : quantityLabel;
 
-                return Padding(
-                  padding: EdgeInsets.only(bottom: AppSpacing.xs),
-                  child: Text(
-                    '${item.packageName} — $qtyLabel — خصم ${item.itemDiscount}% — ${AmountFormatter.format(item.itemTotalAmount.toString())}',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.onSurfaceVariant,
+                return Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(bottom: AppSpacing.xs),
+                  padding: EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                    border: Border.all(
+                      color: colors.outlineVariant.withValues(alpha: 0.3),
                     ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.packageName,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: colors.onSurface,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          _ModificationChangeBadge(changeType: item.changeType),
+                        ],
+                      ),
+                      AppSpacing.vXxs,
+                      Text(
+                        quantitySummary,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      AppSpacing.vXxs,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'خصم ${item.itemDiscount}%',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: colors.success,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            AmountFormatter.format(item.itemTotalAmount.toString()),
+                            style: AppTypography.labelLarge.copyWith(
+                              color: colors.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 );
               },
@@ -312,9 +377,12 @@ class NetworkRequestModificationSheet
                       ? '$desc (${item.originalVoucherCount} كرت)'
                       : '${item.originalVoucherCount} كرت';
 
-                  return Text(
-                    '${item.packageName} — $qtyLabel',
-                    style: AppTypography.bodySmall.copyWith(color: colors.error),
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: AppSpacing.xxs),
+                    child: Text(
+                      '${item.packageName} — $qtyLabel — ${AmountFormatter.format(item.originalItemTotal.toString())}',
+                      style: AppTypography.bodySmall.copyWith(color: colors.error),
+                    ),
                   );
                 },
               ),
@@ -325,6 +393,45 @@ class NetworkRequestModificationSheet
         ],
       );
     });
+  }
+}
+
+class _ModificationChangeBadge extends StatelessWidget {
+  const _ModificationChangeBadge({required this.changeType});
+
+  final String changeType;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final label = switch (changeType) {
+      'ADDED' => 'باقة مضافة',
+      'QUANTITY_CHANGED' => 'تغيير كمية',
+      _ => 'كما هي',
+    };
+    final toneColor = switch (changeType) {
+      'ADDED' => colors.primary,
+      'QUANTITY_CHANGED' => colors.warning,
+      _ => colors.onSurfaceVariant,
+    };
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: toneColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppRadius.xs),
+      ),
+      child: Text(
+        label,
+        style: AppTypography.labelSmall.copyWith(
+          color: toneColor,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
 }
 
