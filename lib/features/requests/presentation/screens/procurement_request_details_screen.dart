@@ -151,7 +151,7 @@ class ProcurementRequestDetailsScreen
                       if (request.invoiceId != null)
                         ProcurementRequestInfoRow(
                           label: 'الفاتورة المرتبطة:',
-                          value: 'فاتورة #${request.invoiceId}',
+                          value: request.invoiceUuid ?? 'فاتورة #${request.invoiceId}',
                           isHighlight: true,
                         ),
                       if (request.requestNote != null &&
@@ -180,22 +180,36 @@ class ProcurementRequestDetailsScreen
                         color: colors.success.withValues(alpha: 0.24),
                       ),
                     ),
-                    child: Row(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.receipt_long_rounded,
-                          color: colors.success,
-                          size: 22,
-                        ),
-                        AppSpacing.hSm,
-                        Expanded(
-                          child: Text(
-                            'أُنشئت فاتورة مرتبطة بهذا الطلب. قد تختلف قيمتها وبنودها عن الطلب الأصلي بعد مراجعة الشبكة؛ وتبقى الفاتورة المرجع النهائي للتسوية.',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: colors.onSurface,
-                              height: 1.5,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.receipt_long_rounded,
+                              color: colors.success,
+                              size: 22,
                             ),
+                            AppSpacing.hSm,
+                            Expanded(
+                              child: Text(
+                                'أُنشئت فاتورة مرتبطة بهذا الطلب. قد تختلف قيمتها وبنودها عن الطلب الأصلي بعد مراجعة الشبكة؛ وتبقى الفاتورة المرجع النهائي للتسوية.',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: colors.onSurface,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        AppSpacing.vSm,
+                        SizedBox(
+                          width: double.infinity,
+                          child: CustomButton.outline(
+                            text: 'عرض الفاتورة المرتبطة',
+                            icon: Icons.open_in_new_rounded,
+                            onPressed: controller.openLinkedInvoice,
                           ),
                         ),
                       ],
