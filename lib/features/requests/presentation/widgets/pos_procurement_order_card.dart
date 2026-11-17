@@ -7,7 +7,6 @@ import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
@@ -223,24 +222,9 @@ class PosProcurementOrderCard extends StatelessWidget {
                   ),
                   AppSpacing.vSm,
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Expanded(
-                        child: Text(
-                          AmountFormatter.format(request.requestTotalAmount.toString()),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.titleMedium.copyWith(color: colors.primary, fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                      CustomButton.outline(
-                        text: 'عرض التفاصيل',
-                        icon: Icons.chevron_left_rounded,
-                        iconPosition: AppButtonIconPosition.end,
-                        size: AppButtonSize.small,
-                        onPressed: onDetails,
-                      ),
                       if (onEdit != null || onCancel != null || onDelete != null) ...[
-                        AppSpacing.hXs,
                         CustomButton.icon(
                           icon: Icons.more_vert_rounded,
                           tooltip: 'إجراءات أخرى',
@@ -249,7 +233,15 @@ class PosProcurementOrderCard extends StatelessWidget {
                           foregroundColor: colors.onSurfaceVariant,
                           onPressed: _showActions,
                         ),
+                        AppSpacing.hXs,
                       ],
+                      CustomButton.outline(
+                        text: 'عرض التفاصيل',
+                        icon: Icons.chevron_left_rounded,
+                        iconPosition: AppButtonIconPosition.end,
+                        size: AppButtonSize.small,
+                        onPressed: onDetails,
+                      ),
                     ],
                   ),
                 ],
