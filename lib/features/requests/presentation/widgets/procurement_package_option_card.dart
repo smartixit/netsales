@@ -718,15 +718,15 @@ class _QuantityControls extends StatelessWidget {
                 child: Row(
                   children: [
                     CustomButton.icon(
-                      icon: Icons.remove_rounded,
-                      tooltip: 'إنقاص كرت',
+                      icon: Icons.add_rounded,
+                      tooltip: 'إضافة كرت',
                       dimension: 38.r,
                       size: AppButtonSize.small,
                       backgroundColor: colors.primary,
                       foregroundColor: colors.onPrimary,
-                      onPressed: quantity > 0 ? () => onChanged(quantity - 1) : null,
+                      onPressed: () => onChanged((quantity + 1).clamp(0, 1000000)),
                     ),
-                    Expanded(
+                  ],                    Expanded(
                       child: CustomTextField(
                         controller: controller,
                         label: '',
@@ -752,15 +752,15 @@ class _QuantityControls extends StatelessWidget {
                       ),
                     ),
                     CustomButton.icon(
-                      icon: Icons.add_rounded,
-                      tooltip: 'إضافة كرت',
+                      icon: Icons.remove_rounded,
+                      tooltip: 'إنقاص كرت',
                       dimension: 38.r,
                       size: AppButtonSize.small,
                       backgroundColor: colors.primary,
                       foregroundColor: colors.onPrimary,
-                      onPressed: () => onChanged((quantity + 1).clamp(0, 1000000)),
+                      onPressed: quantity > 0 ? () => onChanged(quantity - 1) : null,
                     ),
-                  ],
+
                 ),
               ),
             ),
