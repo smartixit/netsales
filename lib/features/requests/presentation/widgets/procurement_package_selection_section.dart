@@ -116,7 +116,9 @@ class ProcurementPackageSelectionSection
                 )
               else if (controller.packageErrorMessage.value != null &&
                   controller.availablePackages.isEmpty)
-                _buildCatalogFailureState(context)
+                SizedBox(
+                  width: double.infinity,
+                  child: _buildCatalogFailureState(context))
               else if (controller.availablePackages.isEmpty &&
                   controller.packageSearchQuery.value.isNotEmpty)
                 CustomEmptyState.search(
@@ -124,17 +126,23 @@ class ProcurementPackageSelectionSection
                   onClearSearch: controller.clearPackageSearch,
                 )
               else if (controller.availablePackages.isEmpty)
-                const CustomEmptyState.compact(
-                  title: 'لا توجد باقات نشطة',
-                  subtitle: 'لا تتوفر باقات نشطة لدى الشبكة المحددة حالياً.',
-                  icon: Icons.inventory_2_outlined,
+                SizedBox(
+                  width: double.infinity,
+                  child: const CustomEmptyState.compact(
+                    title: 'لا توجد باقات نشطة',
+                    subtitle: 'لا تتوفر باقات نشطة لدى الشبكة المحددة حالياً.',
+                    icon: Icons.inventory_2_outlined,
+                  ),
                 )
               else ...[
                 if (controller.packageDiscountError.value != null) ...[
-                  CustomErrorState.compact(
-                    title: 'تعذر تحميل الخصم المخصص لنقطة البيع',
-                    subtitle: controller.packageDiscountError.value,
-                    onRetry: controller.loadEffectivePackageDiscounts,
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomErrorState.compact(
+                      title: 'تعذر تحميل الخصم المخصص لنقطة البيع',
+                      subtitle: controller.packageDiscountError.value,
+                      onRetry: controller.loadEffectivePackageDiscounts,
+                    ),
                   ),
                   AppSpacing.vSm,
                 ],
