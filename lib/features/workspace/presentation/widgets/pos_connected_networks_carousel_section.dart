@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -10,7 +11,6 @@ import 'package:netsales/features/workspace/presentation/widgets/pos_network_car
 import 'package:netsales/widgets/carousels/custom_carousel_slider.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// قسم كاروسيل بطاقات الشبكات المرتبطة بنقطة البيع (PosConnectedNetworksCarouselSection)
@@ -120,7 +120,7 @@ class PosConnectedNetworksCarouselSection extends StatelessWidget {
         ),
         AppSpacing.vMd,
         if (controller.isLoadingNetworks.value)
-          const CustomSkeletonCard(height: 190)
+          const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 190, maxColumns: 1, minItemWidth: 180))
         else if (controller.networksError.value != null)
           CustomErrorState.boxed(
             title: 'تعذر تحميل الشبكات',
