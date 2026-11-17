@@ -444,8 +444,9 @@ class PosNewProcurementOrderController extends GetxController {
           : linkedNetworks.firstWhereOrNull(
               (link) => link.networkId == preferredNetworkId,
             );
-      final selectedLink = preferredLink ??
-          (linkedNetworks.length == 1 ? linkedNetworks.first : null);
+      final selectedLink = preferredNetworkId != null
+          ? preferredLink
+          : (linkedNetworks.length == 1 ? linkedNetworks.first : null);
       if (selectedLink != null) {
         _setSelectedNetworkId(selectedLink.networkId);
         await loadNetworkPackages(selectedLink.networkId);
