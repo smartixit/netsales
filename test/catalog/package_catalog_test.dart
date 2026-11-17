@@ -27,10 +27,12 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async {
     final filtered = _packages.where((p) {
       if (networkId != null && p.networkId != networkId) return false;
       if (status != null && p.status != status) return false;
+      if (packageIds != null && !packageIds.contains(p.packageId)) return false;
       if (search != null && search.isNotEmpty) {
         if (!p.packageName.toLowerCase().contains(search.toLowerCase())) {
           return false;
