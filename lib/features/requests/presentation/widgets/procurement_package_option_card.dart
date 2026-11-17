@@ -228,11 +228,12 @@ class _PackageHero extends StatelessWidget {
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Icon(
                               isCustomDiscount
                                   ? Icons.storefront_rounded
-                                  : Icons.star_rounded,
+                                  : Icons.auto_awesome_rounded,
                               color: Colors.white,
                               size: 14.r,
                             ),
@@ -249,6 +250,7 @@ class _PackageHero extends StatelessWidget {
                                 style: AppTypography.labelSmall.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
+                                  height: 0,
                                 ),
                               ),
                             ),
@@ -355,15 +357,15 @@ class _PackageArtwork extends StatelessWidget {
               ),
             ),
             CustomPaint(painter: _NetworkArtworkPainter()),
-            Positioned(
-              top: 10.r,
-              left: 10.r,
-              child: Icon(
-                Icons.auto_awesome_rounded,
-                color: Colors.white.withValues(alpha: .9),
-                size: 15.r,
-              ),
-            ),
+            // Positioned(
+            //   top: 10.r,
+            //   left: 10.r,
+            //   child: Icon(
+            //     Icons.star_rounded,
+            //     color: Colors.white.withValues(alpha: .9),
+            //     size: 15.r,
+            //   ),
+            // ),
             Center(
               child: Transform.rotate(
                 angle: -.20,
