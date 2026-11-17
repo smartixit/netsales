@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -22,7 +21,8 @@ class ProcurementPackageSelectionSection
   Widget _buildCatalogFailureState(BuildContext context) {
     final message = controller.packageErrorMessage.value ?? '';
     final normalized = message.toLowerCase();
-    final offline = normalized.contains('socket') ||
+    final offline =
+        normalized.contains('socket') ||
         normalized.contains('network') ||
         normalized.contains('connection') ||
         normalized.contains('internet') ||
@@ -74,10 +74,13 @@ class ProcurementPackageSelectionSection
         AppSpacing.vSm,
         Obx(() {
           if (controller.selectedNetworkId.value == null) {
-            return const CustomEmptyState.compact(
-              title: 'اختر الشبكة الموردة أولاً',
-              subtitle: 'سيظهر هنا كتالوج الباقات النشطة التابعة للشبكة.',
-              icon: Icons.hub_outlined,
+            return SizedBox(
+              width: double.infinity,
+              child: const CustomEmptyState.compact(
+                title: 'اختر الشبكة الموردة أولاً',
+                subtitle: 'سيظهر هنا كتالوج الباقات النشطة التابعة للشبكة.',
+                icon: Icons.hub_outlined,
+              ),
             );
           }
 
@@ -103,7 +106,14 @@ class ProcurementPackageSelectionSection
               ),
               AppSpacing.vSm,
               if (controller.isLoadingPackages.value)
-                const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 170))
+                const CustomStateView.loading(
+                  presentation: CustomStatePresentation.skeletonOnly,
+                  skeleton: CustomStateSkeleton(
+                    layout: CustomStateSkeletonLayout.list,
+                    itemCount: 3,
+                    cardHeight: 170,
+                  ),
+                )
               else if (controller.packageErrorMessage.value != null &&
                   controller.availablePackages.isEmpty)
                 _buildCatalogFailureState(context)
@@ -132,8 +142,8 @@ class ProcurementPackageSelectionSection
                   builder: (context, constraints) {
                     final columns =
                         constraints.maxWidth >= AppBreakpoints.mobileMax
-                            ? 2
-                            : 1;
+                        ? 2
+                        : 1;
                     final cardWidth = columns == 1
                         ? constraints.maxWidth
                         : (constraints.maxWidth - AppSpacing.md) / 2;
@@ -147,18 +157,23 @@ class ProcurementPackageSelectionSection
                           children: [
                             ...controller.availablePackages.map((package) {
                               return SizedBox(
-                                key: ValueKey('procurement-package-${package.packageId}'),
+                                key: ValueKey(
+                                  'procurement-package-${package.packageId}',
+                                ),
                                 width: cardWidth,
                                 child: Obx(() {
                                   final quantity = controller
-                                      .cartQuantityForPackage(package.packageId);
+                                      .cartQuantityForPackage(
+                                        package.packageId,
+                                      );
                                   final customDiscount = controller
                                       .discountForPackage(package.packageId);
-                                  final isDiscountLoading =
-                                      controller.isLoadingPackageDiscounts.value;
+                                  final isDiscountLoading = controller
+                                      .isLoadingPackageDiscounts
+                                      .value;
                                   final isCashSale =
                                       controller.selectedSaleType.value ==
-                                          SaleType.cash;
+                                      SaleType.cash;
                                   final quote = controller.serverQuote.value;
                                   final hasCurrentQuote =
                                       controller.hasCurrentServerQuote;
@@ -167,10 +182,10 @@ class ProcurementPackageSelectionSection
                                     package: package,
                                     quantity: quantity,
                                     customDiscount: customDiscount,
-                                    quantityController:
-                                        controller.quantityControllerForPackage(
-                                      package.packageId,
-                                    ),
+                                    quantityController: controller
+                                        .quantityControllerForPackage(
+                                          package.packageId,
+                                        ),
                                     isDiscountLoading: isDiscountLoading,
                                     isCashSale: isCashSale,
                                     quoteLine: hasCurrentQuote
@@ -178,9 +193,9 @@ class ProcurementPackageSelectionSection
                                         : null,
                                     onSetQuantity: (nextQuantity) =>
                                         controller.setPackageVoucherCount(
-                                      package,
-                                      nextQuantity,
-                                    ),
+                                          package,
+                                          nextQuantity,
+                                        ),
                                   );
                                 }),
                               );
@@ -188,7 +203,17 @@ class ProcurementPackageSelectionSection
                             if (controller.isLoadingMorePackages.value)
                               SizedBox(
                                 width: cardWidth,
-                                child: const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 124, maxColumns: 1, minItemWidth: 180)),
+                                child: const CustomStateView.loading(
+                                  presentation:
+                                      CustomStatePresentation.skeletonOnly,
+                                  skeleton: CustomStateSkeleton(
+                                    layout: CustomStateSkeletonLayout.cards,
+                                    itemCount: 1,
+                                    cardHeight: 124,
+                                    maxColumns: 1,
+                                    minItemWidth: 180,
+                                  ),
+                                ),
                               ),
                           ],
                         ),
@@ -219,7 +244,6 @@ class ProcurementPackageSelectionSection
             ],
           );
         }),
-
       ],
     );
   }
