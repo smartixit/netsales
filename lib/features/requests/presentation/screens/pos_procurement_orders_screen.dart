@@ -34,7 +34,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
             embedded: embedded,
             canCreate: controller.canCreateOrder,
             onCreate: controller.navigateToNewOrder,
-            onRefresh: () => controller.loadRequests(isRefresh: true),
+            onRefresh: controller.refreshOrders,
           ),
           Obx(
             () => PosProcurementOrdersSummaryStrip(
@@ -106,7 +106,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
               }
 
               return RefreshIndicator.adaptive(
-                onRefresh: () => controller.loadRequests(isRefresh: true),
+                onRefresh: controller.refreshOrders,
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (scroll) {
                     if (scroll.metrics.pixels >=
@@ -177,7 +177,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
             icon: Icons.refresh_rounded,
             tooltip: 'تحديث الطلبات',
             backgroundColor: Colors.transparent,
-            onPressed: () => controller.loadRequests(isRefresh: true),
+            onPressed: controller.refreshOrders,
           ),
         ],
       ),
