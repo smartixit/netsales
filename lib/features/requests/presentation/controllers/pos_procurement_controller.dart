@@ -407,6 +407,7 @@ class PosProcurementController extends GetxController {
     if (!isAuthorized) return;
 
     selectedPosId.value = posId;
+    expandedProcurementContext.value = '';
     await WorkspaceService.to.saveActivePosId(posId);
 
     // تصفير بيانات وسلة وسياق الشبكات والباقات والخصومات السابقة كلياً
@@ -565,6 +566,7 @@ class PosProcurementController extends GetxController {
 
   /// اختيار الشبكة الموردة وتحديث الباقات
   void onNetworkSelected(int networkId) {
+    expandedProcurementContext.value = '';
     _setSelectedNetworkId(networkId);
     clearProcurementCart();
     _setSelectedPackage(null);
