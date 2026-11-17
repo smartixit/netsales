@@ -438,6 +438,7 @@ class PosNewProcurementOrderController extends GetxController {
     int? preferredNetworkId,
   }) async {
     if (getPosNetworksListUseCase == null) return;
+    final lifecycleRevision = _lifecycleRevision;
 
     _setSelectedNetworkId(null);
     _setSelectedPackage(null);
@@ -448,7 +449,8 @@ class PosNewProcurementOrderController extends GetxController {
 
     try {
       final paginated = await getPosNetworksListUseCase!(posId, status: true);
-      if (selectedPosId.value != null && selectedPosId.value != posId) {
+      if (lifecycleRevision != _lifecycleRevision ||
+          (selectedPosId.value != null && selectedPosId.value != posId)) {
         return;
       }
 
@@ -466,7 +468,8 @@ class PosNewProcurementOrderController extends GetxController {
         await loadNetworkPackages(selectedLink.networkId);
       }
     } catch (_) {
-      if (selectedPosId.value != null && selectedPosId.value != posId) {
+      if (lifecycleRevision != _lifecycleRevision ||
+          (selectedPosId.value != null && selectedPosId.value != posId)) {
         return;
       }
       linkedNetworks.clear();
@@ -480,6 +483,7 @@ class PosNewProcurementOrderController extends GetxController {
 
   /// جلب أول صفحة من كتالوج الشبكة مع بحث خادمي وحماية من الاستجابات القديمة.
   Future<void> loadNetworkPackages(int networkId) async {
+    final lifecycleRevision = _lifecycleRevision;
     _suppressPackageSearchListener = true;
     packageSearchController.clear();
     packageSearchQuery.value = '';
@@ -487,6 +491,7 @@ class PosNewProcurementOrderController extends GetxController {
     packageNextCursor.value = null;
     packageLoadMoreErrorMessage.value = null;
     await _fetchNetworkPackages(networkId, reset: true);
+    if (lifecycleRevision != _lifecycleRevision) return;
     await loadEffectivePackageDiscounts();
   }
 
@@ -835,6 +840,7 @@ class PosNewProcurementOrderController extends GetxController {
 
   /// Loads every active custom discount for the current POS in one catalogue-level request.
   Future<void> loadEffectivePackageDiscounts() async {
+    if (isClosed) return;
     final networkId = selectedNetworkId.value;
     final posId = selectedPosId.value;
     final useCase = getEffectivePackageDiscountsForPosUseCase;
@@ -1017,6 +1023,7 @@ class PosNewProcurementOrderController extends GetxController {
 
   /// Initializes the form from immutable route arguments; no list-controller state is shared.
   Future<void> _initializeForm() async {
+    final lifecycleRevision = _lifecycleRevision;
     final request = Get.arguments;
     if (request is! RequestEntity) {
       initNewOrderForm();
@@ -1032,6 +1039,7 @@ class PosNewProcurementOrderController extends GetxController {
       preferredPosId: request.posId,
       preferredNetworkId: request.networkId,
     );
+    if (lifecycleRevision != _lifecycleRevision) return;
 
     for (final item in request.items) {
       final pkg =
