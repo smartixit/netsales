@@ -168,8 +168,11 @@ extension on CustomStateView {
         borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: colors.outlineVariant.withValues(alpha: .36)),
       ),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: Material(
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           tilePadding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
           title: Text(
@@ -208,6 +211,7 @@ extension on CustomStateView {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
