@@ -9,9 +9,7 @@ class RepaymentDocumentRepositoryImpl implements RepaymentDocumentRepository {
   final RepaymentDocumentService documentService;
 
   @override
-  Future<bool> exportAndSave(
-    PosRepaymentEntity repayment,
-  ) async {
+  Future<bool> exportAndSave(PosRepaymentEntity repayment) async {
     final result = await documentService.exportAndSave(repayment);
     return result.isSuccess;
   }

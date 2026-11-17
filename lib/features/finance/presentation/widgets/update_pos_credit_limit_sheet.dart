@@ -73,8 +73,7 @@ class UpdatePosCreditLimitSheet
             prefix: Icons.check_rounded,
             width: double.infinity,
             loading: controller.isSubmitting.value,
-            onPressed:
-                controller.isSubmitting.value ? null : controller.submit,
+            onPressed: controller.isSubmitting.value ? null : controller.submit,
           ),
         ),
         AppSpacing.vXs,

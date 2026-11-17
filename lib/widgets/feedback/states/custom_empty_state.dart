@@ -82,7 +82,8 @@ class CustomEmptyState extends StatelessWidget {
       icon: Icons.search_off_rounded,
       animationPath: null,
       title: 'لم يتم العثور على أي نتائج',
-      subtitle: subtitle ??
+      subtitle:
+          subtitle ??
           (query.isNotEmpty
               ? 'لم تتطابق نتائج البحث مع "$query". يرجى التحقق من صحة الكلمات أو إعادة التصفية.'
               : 'لم نتمكن من العثور على أي سجلات متطابقة مع معايير البحث الحالية.'),
@@ -119,8 +120,8 @@ class CustomEmptyState extends StatelessWidget {
     final presentation = compact || variant == EmptyStateVariant.compact
         ? CustomStatePresentation.compact
         : variant == EmptyStateVariant.boxed
-            ? CustomStatePresentation.boxed
-            : CustomStatePresentation.fullscreen;
+        ? CustomStatePresentation.boxed
+        : CustomStatePresentation.fullscreen;
 
     return CustomStateView(
       kind: CustomStateKind.empty,

@@ -33,8 +33,7 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
                 selectedSaleType: controller.selectedSaleType.value,
                 onSaleTypeChanged: controller.onSaleTypeChanged,
                 onClear: controller.resetFilters,
-                searchHint:
-                    'بحث برقم الفاتورة، UUID، أو اسم الشبكة المزودة...',
+                searchHint: 'بحث برقم الفاتورة، UUID، أو اسم الشبكة المزودة...',
               ),
             ),
 
@@ -45,114 +44,113 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
               () => CustomResultsCounterBar(
                 count: controller.invoices.length,
                 recordLabel: 'فاتورة مشتريات',
-                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                isFiltered:
+                    controller.searchQuery.value.isNotEmpty ||
                     controller.selectedSaleType.value != null,
-                isLoading: controller.isLoading.value && controller.invoices.isEmpty,
+                isLoading:
+                    controller.isLoading.value && controller.invoices.isEmpty,
                 onClear: controller.resetFilters,
               ),
             ),
 
             AppSpacing.vMd,
 
-              // 2. قائمة الفواتير مع الترقيم بالمؤشر
-              Expanded(
-                child: Obx(() {
-                  if (controller.isLoading.value &&
-                      controller.invoices.isEmpty) {
-                    return const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-);
-                  }
-
-                  if (controller.errorMessage.value != null &&
-                      controller.invoices.isEmpty) {
-                    return CustomEmptyState(
-                      icon: Icons.error_outline,
-                      title: 'تعذر تحميل فواتير المشتريات',
-                      subtitle: controller.errorMessage.value ?? '',
-                      actionLabel: 'إعادة المحاولة',
-                      onAction: () => controller.loadInvoices(isRefresh: true),
-                    );
-                  }
-
-                  if (controller.invoices.isEmpty) {
-                    return CustomEmptyState(
-                      icon: Icons.receipt_long_outlined,
-                      title: 'لا توجد فواتير مشتريات',
-                      subtitle: controller.searchQuery.value.isNotEmpty
-                          ? 'لم يتم العثور على أي فاتورة تطابق عبارة البحث.'
-                          : 'لم تسجل أي فواتير مشتريات لصالح نقطة البيع بعد.',
-                      actionLabel: controller.searchQuery.value.isNotEmpty
-                          ? 'إعادة التعيين'
-                          : null,
-                      onAction: controller.searchQuery.value.isNotEmpty
-                          ? controller.resetFilters
-                          : null,
-                    );
-                  }
-
-                  return NotificationListener<ScrollNotification>(
-                    onNotification: (scrollInfo) {
-                      if (scrollInfo.metrics.pixels >=
-                              scrollInfo.metrics.maxScrollExtent - 200 &&
-                          controller.hasMore &&
-                          !controller.isLoadingMore.value) {
-                        controller.loadMoreInvoices();
-                      }
-                      return false;
-                    },
-                    child: ListView.builder(
-                      itemCount:
-                          controller.invoices.length +
-                          (controller.hasMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == controller.invoices.length) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: AppSpacing.sm,
-                            ),
-                            child: const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-),
-                          );
-                        }
-
-                        final invoice = controller.invoices[index];
-                        return Obx(
-                          () => InvoiceCard(
-                            invoice: invoice,
-                            isNetworkView: false,
-                            isExpanded: controller.expandedInvoiceId.value ==
-                                invoice.invoiceId,
-                            onToggleExpansion: () => controller
-                                .toggleInvoiceExpansion(invoice.invoiceId),
-                            onTap: () => controller.openInvoiceDetails(invoice),
-                          ),
-                        );
-                      },
+            // 2. قائمة الفواتير مع الترقيم بالمؤشر
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value && controller.invoices.isEmpty) {
+                  return const CustomStateView.loading(
+                    presentation: CustomStatePresentation.skeletonOnly,
+                    skeleton: CustomStateSkeleton(
+                      layout: CustomStateSkeletonLayout.list,
+                      itemCount: 3,
+                      cardHeight: 112,
+                      hasLeading: true,
                     ),
                   );
-                }),
-              ),
-            ],
-          ),
+                }
+
+                if (controller.errorMessage.value != null &&
+                    controller.invoices.isEmpty) {
+                  return CustomEmptyState(
+                    icon: Icons.error_outline,
+                    title: 'تعذر تحميل فواتير المشتريات',
+                    subtitle: controller.errorMessage.value ?? '',
+                    actionLabel: 'إعادة المحاولة',
+                    onAction: () => controller.loadInvoices(isRefresh: true),
+                  );
+                }
+
+                if (controller.invoices.isEmpty) {
+                  return CustomEmptyState(
+                    icon: Icons.receipt_long_outlined,
+                    title: 'لا توجد فواتير مشتريات',
+                    subtitle: controller.searchQuery.value.isNotEmpty
+                        ? 'لم يتم العثور على أي فاتورة تطابق عبارة البحث.'
+                        : 'لم تسجل أي فواتير مشتريات لصالح نقطة البيع بعد.',
+                    actionLabel: controller.searchQuery.value.isNotEmpty
+                        ? 'إعادة التعيين'
+                        : null,
+                    onAction: controller.searchQuery.value.isNotEmpty
+                        ? controller.resetFilters
+                        : null,
+                  );
+                }
+
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (scrollInfo) {
+                    if (scrollInfo.metrics.pixels >=
+                            scrollInfo.metrics.maxScrollExtent - 200 &&
+                        controller.hasMore &&
+                        !controller.isLoadingMore.value) {
+                      controller.loadMoreInvoices();
+                    }
+                    return false;
+                  },
+                  child: ListView.builder(
+                    itemCount:
+                        controller.invoices.length +
+                        (controller.hasMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == controller.invoices.length) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: AppSpacing.sm,
+                          ),
+                          child: const CustomStateView.loading(
+                            presentation: CustomStatePresentation.skeletonOnly,
+                            skeleton: CustomStateSkeleton(
+                              layout: CustomStateSkeletonLayout.list,
+                              itemCount: 3,
+                              cardHeight: 112,
+                              hasLeading: true,
+                            ),
+                          ),
+                        );
+                      }
+
+                      final invoice = controller.invoices[index];
+                      return Obx(
+                        () => InvoiceCard(
+                          invoice: invoice,
+                          isNetworkView: false,
+                          isExpanded:
+                              controller.expandedInvoiceId.value ==
+                              invoice.invoiceId,
+                          onToggleExpansion: () => controller
+                              .toggleInvoiceExpansion(invoice.invoiceId),
+                          onTap: () => controller.openInvoiceDetails(invoice),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }),
+            ),
+          ],
         ),
-      );
-    
+      ),
+    );
 
     if (embedded) return content;
 
@@ -162,4 +160,3 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
     );
   }
 }
-

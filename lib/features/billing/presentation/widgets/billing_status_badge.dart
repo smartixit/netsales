@@ -25,9 +25,6 @@ class BillingStatusBadge extends StatelessWidget {
       serverLabel: serverLabel,
       english: english,
     );
-    return CustomStatusBadge.fromPresentation(
-      presentation,
-      isCompact: compact,
-    );
+    return CustomStatusBadge.fromPresentation(presentation, isCompact: compact);
   }
 }

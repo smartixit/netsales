@@ -332,7 +332,8 @@ class RepaymentCollectionController extends GetxController {
       return false;
     } catch (e) {
       if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide();
-      final isTimeout = e.toString().toLowerCase().contains('timeout') ||
+      final isTimeout =
+          e.toString().toLowerCase().contains('timeout') ||
           e.toString().toLowerCase().contains('connection') ||
           e.toString().toLowerCase().contains('socket');
 

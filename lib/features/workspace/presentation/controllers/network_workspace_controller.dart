@@ -53,7 +53,6 @@ class NetworkWorkspaceController extends GetxController {
       selectedNetwork?.networkName ??
       'الشبكة المصرحة';
 
-
   /// اسم المستخدم من الجلسة
   String get userName {
     final name = SessionService.to.currentUser?.userFullName.trim() ?? '';
@@ -153,7 +152,8 @@ class NetworkWorkspaceController extends GetxController {
     super.onClose();
   }
 
-  String get userInitials => TextFormatter.avatarInitials(userName, maxChars: 2);
+  String get userInitials =>
+      TextFormatter.avatarInitials(userName, maxChars: 2);
 
   void openCreateSaleInvoice() =>
       Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice);
@@ -240,5 +240,4 @@ class NetworkWorkspaceController extends GetxController {
     overview.value = null;
     await loadOverview();
   }
-
 }

@@ -105,21 +105,42 @@ class OperationalReportsBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<GetOperationalReportPresetsUseCase>()) {
-      Get.lazyPut<GetOperationalReportPresetsUseCase>(() => GetOperationalReportPresetsUseCase(Get.find<OperationalReportRepository>()), fenix: true);
+      Get.lazyPut<GetOperationalReportPresetsUseCase>(
+        () => GetOperationalReportPresetsUseCase(
+          Get.find<OperationalReportRepository>(),
+        ),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<SaveOperationalReportPresetUseCase>()) {
-      Get.lazyPut<SaveOperationalReportPresetUseCase>(() => SaveOperationalReportPresetUseCase(Get.find<OperationalReportRepository>()), fenix: true);
+      Get.lazyPut<SaveOperationalReportPresetUseCase>(
+        () => SaveOperationalReportPresetUseCase(
+          Get.find<OperationalReportRepository>(),
+        ),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<UpdateOperationalReportPresetUseCase>()) {
-      Get.lazyPut<UpdateOperationalReportPresetUseCase>(() => UpdateOperationalReportPresetUseCase(Get.find<OperationalReportRepository>()), fenix: true);
+      Get.lazyPut<UpdateOperationalReportPresetUseCase>(
+        () => UpdateOperationalReportPresetUseCase(
+          Get.find<OperationalReportRepository>(),
+        ),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<DeleteOperationalReportPresetUseCase>()) {
-      Get.lazyPut<DeleteOperationalReportPresetUseCase>(() => DeleteOperationalReportPresetUseCase(Get.find<OperationalReportRepository>()), fenix: true);
+      Get.lazyPut<DeleteOperationalReportPresetUseCase>(
+        () => DeleteOperationalReportPresetUseCase(
+          Get.find<OperationalReportRepository>(),
+        ),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<OperationalReportsController>()) {
       Get.lazyPut<OperationalReportsController>(
         () => OperationalReportsController(
-          getReportCatalogUseCase: Get.find<GetOperationalReportCatalogUseCase>(),
+          getReportCatalogUseCase:
+              Get.find<GetOperationalReportCatalogUseCase>(),
           getReportUseCase: Get.find<GetOperationalReportUseCase>(),
           getSummaryUseCase: Get.find<GetOperationalReportSummaryUseCase>(),
           requestExportUseCase:
@@ -141,7 +162,6 @@ class OperationalReportsBinding extends Bindings {
           savePresetUseCase: Get.find<SaveOperationalReportPresetUseCase>(),
           updatePresetUseCase: Get.find<UpdateOperationalReportPresetUseCase>(),
           deletePresetUseCase: Get.find<DeleteOperationalReportPresetUseCase>(),
-
         ),
       );
     }

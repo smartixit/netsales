@@ -45,8 +45,7 @@ class OperationalReportSummaryAndCharts extends StatelessWidget {
         }),
         Obx(() {
           final summary = controller.summary.value;
-          if (summary == null ||
-              !controller.presentation.value.includeCharts) {
+          if (summary == null || !controller.presentation.value.includeCharts) {
             return const SizedBox.shrink();
           }
           return Padding(

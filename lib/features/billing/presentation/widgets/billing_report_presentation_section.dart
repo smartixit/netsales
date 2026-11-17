@@ -30,10 +30,7 @@ class BillingReportPresentationSection extends StatelessWidget {
       (item) => item.id.value == id,
     );
     if (selected == null) return presentation.template;
-    return ReportTemplateSelection(
-      id: selected.id,
-      version: selected.version,
-    );
+    return ReportTemplateSelection(id: selected.id, version: selected.version);
   }
 
   ReportPresentationOptions _copy({
@@ -85,7 +82,13 @@ class BillingReportPresentationSection extends StatelessWidget {
                 .map(
                   (id) => DropdownItem<String>(
                     value: id,
-                    child: Text(english ? (id == 'a4-landscape' ? 'A4 landscape' : 'A4 portrait') : (id == 'a4-landscape' ? 'A4 أفقي' : 'A4 عمودي')),
+                    child: Text(
+                      english
+                          ? (id == 'a4-landscape'
+                                ? 'A4 landscape'
+                                : 'A4 portrait')
+                          : (id == 'a4-landscape' ? 'A4 أفقي' : 'A4 عمودي'),
+                    ),
                   ),
                 )
                 .toList(growable: false),
@@ -120,15 +123,20 @@ class BillingReportPresentationSection extends StatelessWidget {
         if (definition.templates.length == 1)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text('${english ? 'Template: ' : 'القالب: '}${definition.templates.first.id.value}'),
+            child: Text(
+              '${english ? 'Template: ' : 'القالب: '}${definition.templates.first.id.value}',
+            ),
           ),
         Row(
           children: [
-            Expanded(child: Text(english ? 'Include summary metrics' : 'إظهار مؤشرات الملخص')),
+            Expanded(
+              child: Text(
+                english ? 'Include summary metrics' : 'إظهار مؤشرات الملخص',
+              ),
+            ),
             CustomSwitch(
               value: presentation.includeMetrics,
-              onChanged: (value) =>
-                  onChanged(_copy(includeMetrics: value)),
+              onChanged: (value) => onChanged(_copy(includeMetrics: value)),
             ),
           ],
         ),
@@ -147,9 +155,8 @@ class BillingReportPresentationSection extends StatelessWidget {
           presentation: presentation,
           resolveLabel: resolveLabel,
           title: english ? 'Visible PDF columns' : 'الأعمدة الظاهرة في PDF',
-          onChanged: (visibleColumnIds) => onChanged(
-            _copy(visibleColumnIds: visibleColumnIds),
-          ),
+          onChanged: (visibleColumnIds) =>
+              onChanged(_copy(visibleColumnIds: visibleColumnIds)),
         ),
       ],
     );

@@ -13,10 +13,7 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 class PosActiveSupplyOrderTracker extends StatelessWidget {
   final PosWorkspaceController controller;
 
-  const PosActiveSupplyOrderTracker({
-    super.key,
-    required this.controller,
-  });
+  const PosActiveSupplyOrderTracker({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +54,10 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
                     ],
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 2.h,
+                    ),
                     decoration: BoxDecoration(
                       color: colors.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(AppRadius.full),
@@ -90,7 +90,9 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
                   Expanded(
                     child: Container(
                       height: 2.h,
-                      color: activeOrder.isReviewComplete || activeOrder.isReviewActive
+                      color:
+                          activeOrder.isReviewComplete ||
+                              activeOrder.isReviewActive
                           ? colors.primary
                           : colors.surfaceContainerHighest,
                     ),
@@ -103,7 +105,9 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
                   Expanded(
                     child: Container(
                       height: 2.h,
-                      color: activeOrder.isDeliveryComplete || activeOrder.isDeliveryActive
+                      color:
+                          activeOrder.isDeliveryComplete ||
+                              activeOrder.isDeliveryActive
                           ? colors.primary
                           : colors.surfaceContainerHighest,
                     ),
@@ -157,7 +161,9 @@ class OrderStepNode extends StatelessWidget {
         Text(
           title,
           style: AppTypography.labelSmall.copyWith(
-            color: isDone || isActive ? colors.onSurface : colors.onSurfaceVariant,
+            color: isDone || isActive
+                ? colors.onSurface
+                : colors.onSurfaceVariant,
             fontSize: 9.sp,
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           ),

@@ -177,8 +177,9 @@ class TwoFactorAuthController extends GetxController {
       );
 
       if (isClosed) return;
-      final targetWorkspace =
-          WorkspaceService.to.resolveWorkspaceForUser(result.user);
+      final targetWorkspace = WorkspaceService.to.resolveWorkspaceForUser(
+        result.user,
+      );
       final destination = targetWorkspace == AppWorkspace.network
           ? AppRoutes.networkWorkspace
           : AppRoutes.posWorkspace;

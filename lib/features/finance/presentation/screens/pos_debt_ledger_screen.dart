@@ -62,15 +62,14 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                         final debtSummary = controller.summary.value;
                         if (debtSummary == null && controller.isLoading.value) {
                           return const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-);
+                            presentation: CustomStatePresentation.skeletonOnly,
+                            skeleton: CustomStateSkeleton(
+                              layout: CustomStateSkeletonLayout.list,
+                              itemCount: 3,
+                              cardHeight: 112,
+                              hasLeading: true,
+                            ),
+                          );
                         }
                         if (debtSummary == null &&
                             controller.summaryErrorMessage.value != null) {
@@ -102,15 +101,15 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                           if (controller.isLoadingInvoices.value &&
                               controller.outstandingInvoices.isEmpty) {
                             return const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-);
+                              presentation:
+                                  CustomStatePresentation.skeletonOnly,
+                              skeleton: CustomStateSkeleton(
+                                layout: CustomStateSkeletonLayout.list,
+                                itemCount: 3,
+                                cardHeight: 112,
+                                hasLeading: true,
+                              ),
+                            );
                           }
 
                           if (controller.outstandingInvoices.isEmpty &&

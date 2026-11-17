@@ -167,7 +167,8 @@ class CustomCarouselCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveRadius = borderRadius ?? AppRadius.xl;
     final effectiveGradient = _resolveGradient();
-    final effectiveLogo = logo ??
+    final effectiveLogo =
+        logo ??
         ((avatarUrl != null && avatarUrl!.isNotEmpty) ||
                 (avatarInitial != null && avatarInitial!.isNotEmpty) ||
                 title.isNotEmpty
@@ -402,9 +403,7 @@ class CustomCarouselCard extends StatelessWidget {
                             fontWeight: FontWeight.w900,
                             fontSize: 22.sp,
                             letterSpacing: -0.3,
-                            fontFeatures: const [
-                              FontFeature.tabularFigures(),
-                            ],
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ),

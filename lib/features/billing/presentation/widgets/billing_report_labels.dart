@@ -15,10 +15,7 @@ class BillingReportLabels {
   ) {
     final english = controller.selectedLocale.value == 'en';
     if (key.startsWith('billing.status.')) {
-      return status(
-        key.substring('billing.status.'.length),
-        english: english,
-      );
+      return status(key.substring('billing.status.'.length), english: english);
     }
     if (key.startsWith('billing.report.column.') ||
         key.startsWith('billing.report.metric.')) {
@@ -42,7 +39,8 @@ class BillingReportLabels {
     ).label;
   }
 
-  static String englishReport(String type) => const {
+  static String englishReport(String type) =>
+      const {
         'subscriptions': 'Subscriptions',
         'trials': 'Trial usage',
         'trial_conversion': 'Trial conversion funnel',
@@ -66,7 +64,8 @@ class BillingReportLabels {
     return english ? englishField(key) : arabic(key);
   }
 
-  static String englishField(String key) => const {
+  static String englishField(String key) =>
+      const {
         'record_count': 'Record count',
         'active_subscriptions': 'Active subscriptions',
         'trialing_subscriptions': 'Trial subscriptions',
@@ -87,7 +86,8 @@ class BillingReportLabels {
       }[key] ??
       key.replaceAll('_', ' ');
 
-  static String arabic(String key) => const {
+  static String arabic(String key) =>
+      const {
         'record_count': 'عدد السجلات',
         'active_subscriptions': 'الاشتراكات النشطة',
         'trialing_subscriptions': 'الاشتراكات التجريبية',
@@ -121,13 +121,13 @@ class BillingReportLabels {
       }
       return value;
     }
-    final isAmount = key.endsWith('_minor') ||
+    final isAmount =
+        key.endsWith('_minor') ||
         key == 'amount' ||
         key == 'mrr' ||
         key == 'arr' ||
         key.contains('revenue');
-    if (isAmount &&
-        (value is num || num.tryParse(value.toString()) != null)) {
+    if (isAmount && (value is num || num.tryParse(value.toString()) != null)) {
       return AmountFormatter.format(value.toString());
     }
     return value.toString();

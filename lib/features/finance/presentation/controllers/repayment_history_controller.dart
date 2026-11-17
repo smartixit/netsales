@@ -56,9 +56,10 @@ class RepaymentHistoryController extends GetxController {
   }) {
     if (!isNetworkView || !item.isCompleted) return false;
     final permissions = PermissionService.to;
-    return permissions.hasAnyRole(
-          [AppRoles.networkOwner, AppRoles.superAdmin],
-        ) ||
+    return permissions.hasAnyRole([
+          AppRoles.networkOwner,
+          AppRoles.superAdmin,
+        ]) ||
         permissions.can(AppPermissions.posWalletsManage);
   }
 
@@ -80,8 +81,7 @@ class RepaymentHistoryController extends GetxController {
       final confirmed = await CustomDialog.show(
         type: DialogType.warning,
         title: 'تأكيد عكس سند السداد',
-        message:
-            'سيُرسل طلب العكس إلى الخادم ليعيد تقييم التسويات والقيود المرتبطة بالسند. لا يمكن تنفيذ هذا الإجراء دون سبب موثق.',
+        message: 'سيُرسل طلب العكس إلى الخادم ليعيد تقييم التسويات والقيود المرتبطة بالسند. لا يمكن تنفيذ هذا الإجراء دون سبب موثق.',
         content: Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: CustomTextField(
@@ -111,10 +111,7 @@ class RepaymentHistoryController extends GetxController {
         return;
       }
 
-      final reversed = await reverseRepayment(
-        repayment.repaymentId,
-        reason,
-      );
+      final reversed = await reverseRepayment(repayment.repaymentId, reason);
       if (reversed) {
         Get.back<void>();
       }
@@ -356,10 +353,7 @@ class RepaymentHistoryController extends GetxController {
     } catch (error) {
       CustomSnackbar.show(
         title: 'تعذر تنفيذ العملية',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: failureMessage,
-        ),
+        message: AppException.sanitizeMessage(error, fallback: failureMessage),
         type: SnackType.error,
       );
     } finally {

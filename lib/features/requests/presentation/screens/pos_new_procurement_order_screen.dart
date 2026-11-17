@@ -29,35 +29,57 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
           : 'طلب توريد جديد';
       return CustomAppScaffold(
         appBar: AppBar(
-          title: Text(title, style: AppTypography.titleMedium.copyWith(color: colors.onSurface, fontWeight: FontWeight.bold)),
+          title: Text(
+            title,
+            style: AppTypography.titleMedium.copyWith(
+              color: colors.onSurface,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           centerTitle: true,
           elevation: 0,
         ),
         bottomNavigationBar: const ProcurementCheckoutBar(),
         body: LayoutBuilder(
           builder: (context, constraints) {
-            final horizontalPadding = constraints.maxWidth < AppBreakpoints.mobileSmallMax
+            final horizontalPadding =
+                constraints.maxWidth < AppBreakpoints.mobileSmallMax
                 ? AppSpacing.sm
                 : AppSpacing.cardPadding;
             return Align(
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: AppBreakpoints.maxFormWidth),
+                constraints: const BoxConstraints(
+                  maxWidth: AppBreakpoints.maxFormWidth,
+                ),
                 child: SingleChildScrollView(
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: EdgeInsets.fromLTRB(horizontalPadding, AppSpacing.md, horizontalPadding, AppSpacing.xl),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    AppSpacing.md,
+                    horizontalPadding,
+                    AppSpacing.xl,
+                  ),
                   child: Form(
                     key: controller.formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _ProcurementHeroCard(isEditMode: isEditMode, requestId: controller.editingRequestId.value),
+                        _ProcurementHeroCard(
+                          isEditMode: isEditMode,
+                          requestId: controller.editingRequestId.value,
+                        ),
                         AppSpacing.vMd,
                         const ProcurementNetworkContextSection(),
                         AppSpacing.vSm,
                         const ProcurementPosContextSection(),
                         AppSpacing.vLg,
-                        _SectionHeading(title: 'طريقة التسعير', subtitle: 'تتغير تعرفة العرض حسب طريقة الدفع المختارة.'),
+                        _SectionHeading(
+                          title: 'طريقة التسعير',
+                          subtitle:
+                              'تتغير تعرفة العرض حسب طريقة الدفع المختارة.',
+                        ),
                         AppSpacing.vSm,
                         const ProcurementSaleTypeSelector(),
                         AppSpacing.vLg,
@@ -73,7 +95,10 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                         AppSpacing.vSm,
                         Text(
                           'سيبقى الطلب قيد الانتظار حتى تراجعه الشبكة وتعتمده. لا تُنشأ فاتورة عند الإرسال.',
-                          style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant, height: 1.45),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.onSurfaceVariant,
+                            height: 1.45,
+                          ),
                         ),
                       ],
                     ),
@@ -97,7 +122,6 @@ class _ProcurementHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topRight,
@@ -105,46 +129,134 @@ class _ProcurementHeroCard extends StatelessWidget {
           colors: [Color(0xFF087F68), Color(0xFF075B55), Color(0xFF123F49)],
         ),
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(color: const Color(0xFFFFD98A).withValues(alpha: .32)),
+        border: Border.all(
+          color: const Color(0xFFFFD98A).withValues(alpha: .32),
+        ),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF087F68).withValues(alpha: .23), blurRadius: 24, offset: const Offset(0, 11)),
-          BoxShadow(color: Colors.black.withValues(alpha: .08), blurRadius: 8, offset: const Offset(0, 3)),
+          BoxShadow(
+            color: const Color(0xFF087F68).withValues(alpha: .23),
+            blurRadius: 24,
+            offset: const Offset(0, 11),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .08),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Stack(
         children: [
-          PositionedDirectional(end: -18, top: -28, child: Container(width: 112.r, height: 112.r, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: .055)))),
-          PositionedDirectional(end: 40, bottom: -48, child: Container(width: 90.r, height: 90.r, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white.withValues(alpha: .08), width: 16)))),
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-              width: 54.r, height: 54.r,
+          PositionedDirectional(
+            end: -18,
+            top: -28,
+            child: Container(
+              width: 112.r,
+              height: 112.r,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: .13),
-                borderRadius: BorderRadius.circular(17.r),
-                border: Border.all(color: const Color(0xFFFFE7B0).withValues(alpha: .38)),
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: .055),
               ),
-              child: Icon(Icons.inventory_2_rounded, color: const Color(0xFFFFE7B0), size: 27.r),
             ),
-            AppSpacing.hMd,
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(isEditMode ? 'تحديث طلب التوريد' : 'مساحة طلب التوريد', style: AppTypography.titleLarge.copyWith(color: Colors.white, fontWeight: FontWeight.w900, height: 1.2)),
-              AppSpacing.vXs,
-              Text(
-                isEditMode ? 'مراجعة تفاصيل الطلب #${requestId ?? ''} وتعديل الكميات قبل حفظ التغييرات.' : 'اختر الشبكة ونقطة البيع، ثم كوّن طلبك مباشرة من الباقات والأسعار المتاحة.',
-                style: AppTypography.bodySmall.copyWith(color: Colors.white.withValues(alpha: .88), height: 1.55),
+          ),
+          PositionedDirectional(
+            end: 40,
+            bottom: -48,
+            child: Container(
+              width: 90.r,
+              height: 90.r,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: .08),
+                  width: 16,
+                ),
               ),
-              AppSpacing.vSm,
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
-                decoration: BoxDecoration(color: const Color(0xFFFFE7B0).withValues(alpha: .13), borderRadius: BorderRadius.circular(AppRadius.full), border: Border.all(color: const Color(0xFFFFE7B0).withValues(alpha: .24))),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.bolt_rounded, size: 14.r, color: const Color(0xFFFFE7B0)),
-                  AppSpacing.hXxs,
-                  Text('اختيار مباشر • تحديث فوري للكمية', style: AppTypography.labelSmall.copyWith(color: const Color(0xFFFFE7B0), fontWeight: FontWeight.w700)),
-                ]),
-              ),
-            ])),
-          ]),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(AppSpacing.lg),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 54.r,
+                  height: 54.r,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .13),
+                    borderRadius: BorderRadius.circular(17.r),
+                    border: Border.all(
+                      color: const Color(0xFFFFE7B0).withValues(alpha: .38),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.inventory_2_rounded,
+                    color: const Color(0xFFFFE7B0),
+                    size: 27.r,
+                  ),
+                ),
+                AppSpacing.hMd,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isEditMode ? 'تحديث طلب التوريد' : 'مساحة طلب التوريد',
+                        style: AppTypography.titleLarge.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          height: 1.2,
+                        ),
+                      ),
+                      AppSpacing.vXs,
+                      Text(
+                        isEditMode
+                            ? 'مراجعة تفاصيل الطلب #${requestId ?? ''} وتعديل الكميات قبل حفظ التغييرات.'
+                            : 'اختر الشبكة ونقطة البيع، ثم كوّن طلبك مباشرة من الباقات والأسعار المتاحة.',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.white.withValues(alpha: .88),
+                          height: 1.55,
+                        ),
+                      ),
+                      AppSpacing.vSm,
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFE7B0).withValues(alpha: .13),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                          border: Border.all(
+                            color: const Color(0xFFFFE7B0)
+                                .withValues(alpha: .24),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.bolt_rounded,
+                              size: 14.r,
+                              color: const Color(0xFFFFE7B0),
+                            ),
+                            AppSpacing.hXxs,
+                            Text(
+                              'اختيار مباشر • تحديث فوري للكمية',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: const Color(0xFFFFE7B0),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -157,10 +269,24 @@ class _SectionHeading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(title, style: AppTypography.titleSmall.copyWith(color: colors.onSurface, fontWeight: FontWeight.w800)),
-      AppSpacing.vXxs,
-      Text(subtitle, style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppTypography.titleSmall.copyWith(
+            color: colors.onSurface,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        AppSpacing.vXxs,
+        Text(
+          subtitle,
+          style: AppTypography.bodySmall.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
   }
 }

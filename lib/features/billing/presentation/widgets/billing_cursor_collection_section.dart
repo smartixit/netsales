@@ -68,7 +68,14 @@ class BillingCursorCollectionSection extends StatelessWidget {
               onRetry: onRefresh,
             ),
           if (page.items.isEmpty && page.isLoadingFirstPage.value)
-            const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 2, cardHeight: 112, ))
+            const CustomStateView.loading(
+              presentation: CustomStatePresentation.skeletonOnly,
+              skeleton: CustomStateSkeleton(
+                layout: CustomStateSkeletonLayout.list,
+                itemCount: 2,
+                cardHeight: 112,
+              ),
+            )
           else if (page.items.isEmpty && page.firstPageError.value == null)
             CustomEmptyState.compact(title: emptyTitle)
           else

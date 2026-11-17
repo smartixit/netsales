@@ -50,10 +50,7 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
 
               final titleSection = Row(
                 children: [
-                  CustomPulsingIndicator(
-                    color: colors.primary,
-                    size: 8.r,
-                  ),
+                  CustomPulsingIndicator(color: colors.primary, size: 8.r),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Column(
@@ -98,22 +95,24 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                 child: Row(
                   mainAxisSize: isCompact ? MainAxisSize.max : MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: periodOptions.map((option) {
-                    final isSelected = selectedPeriod == option.id;
-                    return isCompact
-                        ? Expanded(
-                            child: _PeriodPill(
-                              label: option.label,
-                              isSelected: isSelected,
-                              onTap: () => onPeriodChanged(option.id),
-                            ),
-                          )
-                        : _PeriodPill(
-                            label: option.label,
-                            isSelected: isSelected,
-                            onTap: () => onPeriodChanged(option.id),
-                          );
-                  }).toList(growable: false),
+                  children: periodOptions
+                      .map((option) {
+                        final isSelected = selectedPeriod == option.id;
+                        return isCompact
+                            ? Expanded(
+                                child: _PeriodPill(
+                                  label: option.label,
+                                  isSelected: isSelected,
+                                  onTap: () => onPeriodChanged(option.id),
+                                ),
+                              )
+                            : _PeriodPill(
+                                label: option.label,
+                                isSelected: isSelected,
+                                onTap: () => onPeriodChanged(option.id),
+                              );
+                      })
+                      .toList(growable: false),
                 ),
               );
 
@@ -302,9 +301,7 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
             height: 185.h,
             child: NetSalesChartsThemeAdapter.wrap(
               context: context,
-              child: ChartRenderer(
-                definition: chartDefinition,
-              ),
+              child: ChartRenderer(definition: chartDefinition),
             ),
           ),
         ],

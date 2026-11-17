@@ -27,8 +27,12 @@ class NetworkWorkspaceDashboardMapper {
         : '0.00';
     final rawGrowth = sales?['growth_rate'];
     final growthRate = rawGrowth is num ? rawGrowth.toDouble() : 0.0;
-    final posTotal = pos == null ? '0' : overview.count('points_of_sale', 'total');
-    final posActive = pos == null ? '0' : overview.count('points_of_sale', 'active');
+    final posTotal = pos == null
+        ? '0'
+        : overview.count('points_of_sale', 'total');
+    final posActive = pos == null
+        ? '0'
+        : overview.count('points_of_sale', 'active');
 
     final liquidity = (
       balance: balance,
@@ -41,7 +45,9 @@ class NetworkWorkspaceDashboardMapper {
           ? AmountFormatter.format(overview.amount('sales', 'paid_amount'))
           : '0.00',
       outstandingReceivables: hasSales
-          ? AmountFormatter.format(overview.amount('sales', 'outstanding_amount'))
+          ? AmountFormatter.format(
+              overview.amount('sales', 'outstanding_amount'),
+            )
           : '0.00',
       posCoverage: '$posActive/$posTotal',
     );
@@ -122,7 +128,8 @@ class NetworkWorkspaceDashboardMapper {
     required bool isSelected,
   }) {
     if (!isSelected) return 'وكلاء معتمدين';
-    final total = overview?.metric('points_of_sale')?['total'] ??
+    final total =
+        overview?.metric('points_of_sale')?['total'] ??
         overview?.metric('pos')?['total'];
     return total == null ? 'وكلاء معتمدين' : '$total نقطة بيع';
   }
@@ -187,46 +194,52 @@ class NetworkWorkspaceDashboardMapper {
       final total = overview.count('points_of_sale', 'total');
       final active = overview.count('points_of_sale', 'active');
       final inactive = overview.count('points_of_sale', 'inactive');
-      items.add(DashboardMetricData(
-        id: 'pos',
-        title: 'نقاط البيع',
-        value: total,
-        unit: 'نقطة',
-        icon: Icons.storefront_rounded,
-        tone: DashboardMetricTone.primary,
-        variant: DashboardMetricVariant.standard,
-        description: 'نشطة $active · غير نشطة $inactive',
-      ));
+      items.add(
+        DashboardMetricData(
+          id: 'pos',
+          title: 'نقاط البيع',
+          value: total,
+          unit: 'نقطة',
+          icon: Icons.storefront_rounded,
+          tone: DashboardMetricTone.primary,
+          variant: DashboardMetricVariant.standard,
+          description: 'نشطة $active · غير نشطة $inactive',
+        ),
+      );
     }
 
     if (metrics.containsKey('requests')) {
       final total = overview.count('requests', 'total');
       final pending = overview.count('requests', 'pending');
-      items.add(DashboardMetricData(
-        id: 'requests',
-        title: 'طلبات التوريد',
-        value: total,
-        unit: 'طلب',
-        icon: Icons.inbox_rounded,
-        tone: DashboardMetricTone.warning,
-        variant: DashboardMetricVariant.standard,
-        description: 'بانتظار الاعتماد $pending',
-      ));
+      items.add(
+        DashboardMetricData(
+          id: 'requests',
+          title: 'طلبات التوريد',
+          value: total,
+          unit: 'طلب',
+          icon: Icons.inbox_rounded,
+          tone: DashboardMetricTone.warning,
+          variant: DashboardMetricVariant.standard,
+          description: 'بانتظار الاعتماد $pending',
+        ),
+      );
     }
 
     if (metrics.containsKey('packages')) {
       final total = overview.count('packages', 'total');
       final active = overview.count('packages', 'active');
-      items.add(DashboardMetricData(
-        id: 'packages',
-        title: 'باقات الكتالوج',
-        value: total,
-        unit: 'باقة',
-        icon: Icons.widgets_rounded,
-        tone: DashboardMetricTone.info,
-        variant: DashboardMetricVariant.standard,
-        description: 'باقات نشطة: $active',
-      ));
+      items.add(
+        DashboardMetricData(
+          id: 'packages',
+          title: 'باقات الكتالوج',
+          value: total,
+          unit: 'باقة',
+          icon: Icons.widgets_rounded,
+          tone: DashboardMetricTone.info,
+          variant: DashboardMetricVariant.standard,
+          description: 'باقات نشطة: $active',
+        ),
+      );
     }
 
     if (metrics.containsKey('sales')) {
@@ -234,16 +247,18 @@ class NetworkWorkspaceDashboardMapper {
       final totalAmount = AmountFormatter.format(
         overview.amount('sales', 'total_amount'),
       );
-      items.add(DashboardMetricData(
-        id: 'sales',
-        title: 'فواتير المبيعات',
-        value: totalAmount,
-        unit: 'ر.ي',
-        icon: Icons.receipt_long_rounded,
-        tone: DashboardMetricTone.success,
-        variant: DashboardMetricVariant.standard,
-        description: '$invoiceCount فاتورة معتمدة',
-      ));
+      items.add(
+        DashboardMetricData(
+          id: 'sales',
+          title: 'فواتير المبيعات',
+          value: totalAmount,
+          unit: 'ر.ي',
+          icon: Icons.receipt_long_rounded,
+          tone: DashboardMetricTone.success,
+          variant: DashboardMetricVariant.standard,
+          description: '$invoiceCount فاتورة معتمدة',
+        ),
+      );
     }
 
     if (metrics.containsKey('expenses')) {
@@ -251,34 +266,38 @@ class NetworkWorkspaceDashboardMapper {
       final totalAmount = AmountFormatter.format(
         overview.amount('expenses', 'total_amount'),
       );
-      items.add(DashboardMetricData(
-        id: 'expenses',
-        title: 'مصروفات الشبكة',
-        value: totalAmount,
-        unit: 'ر.ي',
-        icon: Icons.trending_down_rounded,
-        tone: DashboardMetricTone.danger,
-        variant: DashboardMetricVariant.standard,
-        description: '$expenseCount سند موثق',
-      ));
+      items.add(
+        DashboardMetricData(
+          id: 'expenses',
+          title: 'مصروفات الشبكة',
+          value: totalAmount,
+          unit: 'ر.ي',
+          icon: Icons.trending_down_rounded,
+          tone: DashboardMetricTone.danger,
+          variant: DashboardMetricVariant.standard,
+          description: '$expenseCount سند موثق',
+        ),
+      );
     }
 
     final wallet = overview.metric('wallet');
     if (wallet != null) {
       final isActive = wallet['is_active'] == true;
-      items.add(DashboardMetricData(
-        id: 'wallet',
-        title: 'رصيد المحفظة',
-        value: AmountFormatter.format(overview.amount('wallet', 'balance')),
-        unit: 'ر.ي',
-        icon: Icons.account_balance_wallet_rounded,
-        tone: isActive
-            ? DashboardMetricTone.primary
-            : DashboardMetricTone.danger,
-        variant: DashboardMetricVariant.status,
-        statusLabel: isActive ? 'المحفظة نشطة' : 'المحفظة معطلة',
-        description: isActive ? 'جاهزة للعمليات' : 'غير مفعلة',
-      ));
+      items.add(
+        DashboardMetricData(
+          id: 'wallet',
+          title: 'رصيد المحفظة',
+          value: AmountFormatter.format(overview.amount('wallet', 'balance')),
+          unit: 'ر.ي',
+          icon: Icons.account_balance_wallet_rounded,
+          tone: isActive
+              ? DashboardMetricTone.primary
+              : DashboardMetricTone.danger,
+          variant: DashboardMetricVariant.status,
+          statusLabel: isActive ? 'المحفظة نشطة' : 'المحفظة معطلة',
+          description: isActive ? 'جاهزة للعمليات' : 'غير مفعلة',
+        ),
+      );
     }
 
     return List.unmodifiable(items);

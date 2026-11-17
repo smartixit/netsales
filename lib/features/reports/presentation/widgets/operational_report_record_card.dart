@@ -49,8 +49,7 @@ class OperationalReportRecordCard extends StatelessWidget {
         EnumPresentationRegistry.resolveInvoicePaymentStatus(
           InvoicePaymentStatus.fromWire(normalized),
         ),
-      OperationalReportType.networkWallet ||
-      OperationalReportType.posWallet =>
+      OperationalReportType.networkWallet || OperationalReportType.posWallet =>
         EnumPresentationRegistry.resolveWalletOperationType(
           WalletOperationType.fromWire(normalized),
         ),
@@ -62,13 +61,12 @@ class OperationalReportRecordCard extends StatelessWidget {
         EnumPresentationRegistry.resolveRequestStatus(
           RequestStatus.fromWire(normalized),
         ),
-      OperationalReportType.debtAging =>
-        _debtAgingPresentation(normalized),
+      OperationalReportType.debtAging => _debtAgingPresentation(normalized),
       OperationalReportType.expenses => EnumPresentation(
-          label: normalized,
-          tone: SemanticTone.neutral,
-          icon: Icons.receipt_long_outlined,
-        ),
+        label: normalized,
+        tone: SemanticTone.neutral,
+        icon: Icons.receipt_long_outlined,
+      ),
       _ => EnumPresentation.unknown(rawValue: normalized),
     };
 
@@ -83,8 +81,9 @@ class OperationalReportRecordCard extends StatelessWidget {
       return EnumPresentationRegistry.resolveReceivableAgingBucket(bucket);
     }
     final paymentStatus = InvoicePaymentStatus.fromWire(value);
-    final presentation =
-        EnumPresentationRegistry.resolveInvoicePaymentStatus(paymentStatus);
+    final presentation = EnumPresentationRegistry.resolveInvoicePaymentStatus(
+      paymentStatus,
+    );
     return presentation.isKnown
         ? presentation
         : EnumPresentation.unknown(rawValue: value);
@@ -130,7 +129,8 @@ class OperationalReportRecordCard extends StatelessWidget {
         date: _date('invoice_date'),
         amount: _amount('invoice_total_amount'),
         status: _first(['payment_status']),
-        detail: 'المسدّد: ${_amount('paid_amount')}  •  المتبقي: ${_amount('remaining_amount')}',
+        detail:
+            'المسدّد: ${_amount('paid_amount')}  •  المتبقي: ${_amount('remaining_amount')}',
       ),
       OperationalReportType.expenses => (
         reference: _first(['expense_uuid', 'expense_id']),
@@ -162,7 +162,11 @@ class OperationalReportRecordCard extends StatelessWidget {
         date: _date('repayment_date'),
         amount: _amount('amount'),
         status: _first(['status']),
-        detail: _first(['payment_method', 'reference_number', 'reversal_reason']),
+        detail: _first([
+          'payment_method',
+          'reference_number',
+          'reversal_reason',
+        ]),
       ),
       OperationalReportType.debtAging => (
         reference: _first(['invoice_uuid', 'invoice_id']),
@@ -170,7 +174,8 @@ class OperationalReportRecordCard extends StatelessWidget {
         date: _date('invoice_date'),
         amount: _amount('remaining_amount'),
         status: _first(['aging_bucket', 'payment_status']),
-        detail: 'إجمالي الفاتورة: ${_amount('invoice_total_amount')}  •  عمر الدين: ${_first(['age_days'])} يوم',
+        detail:
+            'إجمالي الفاتورة: ${_amount('invoice_total_amount')}  •  عمر الدين: ${_first(['age_days'])} يوم',
       ),
       OperationalReportType.requests => (
         reference: _first(['request_uuid', 'request_id']),
@@ -209,82 +214,82 @@ class OperationalReportRecordCard extends StatelessWidget {
       borderColor: colors.outlineVariant.withValues(alpha: 0.65),
       radius: 18,
       child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    descriptor.reference,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.titleSmall.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w700,
-                    ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  descriptor.reference,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.titleSmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(width: 8),
-                CustomStatusBadge(
-                  label: statusPresentation.label,
-                  tone: statusPresentation.tone,
-                  isCompact: true,
-                ),
-              ],
-            ),
-            AppSpacing.vSm,
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        descriptor.party,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: colors.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        descriptor.date,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+              ),
+              const SizedBox(width: 8),
+              CustomStatusBadge(
+                label: statusPresentation.label,
+                tone: statusPresentation.tone,
+                isCompact: true,
+              ),
+            ],
+          ),
+          AppSpacing.vSm,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      descriptor.amount,
-                      style: AppTypography.titleMedium.copyWith(
-                        color: colors.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      descriptor.detail,
+                      descriptor.party,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.end,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      descriptor.date,
                       style: AppTypography.labelSmall.copyWith(
                         color: colors.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    descriptor.amount,
+                    style: AppTypography.titleMedium.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    descriptor.detail,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

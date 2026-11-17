@@ -68,7 +68,16 @@ class PackageCatalogGrid extends GetView<PackageCatalogController> {
                     horizontal: AppSpacing.cardPadding,
                     vertical: AppSpacing.xs,
                   ),
-                  child: CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 140.h, maxColumns: 1, minItemWidth: 180)),
+                  child: CustomStateView.loading(
+                    presentation: CustomStatePresentation.skeletonOnly,
+                    skeleton: CustomStateSkeleton(
+                      layout: CustomStateSkeletonLayout.cards,
+                      itemCount: 1,
+                      cardHeight: 140.h,
+                      maxColumns: 1,
+                      minItemWidth: 180,
+                    ),
+                  ),
                 ),
               ),
           ],

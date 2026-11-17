@@ -25,7 +25,10 @@ class ProcurementQuoteModel extends ProcurementQuoteEntity {
 
     final rawItems = json['items'] as List<dynamic>? ?? [];
     final parsedItems = rawItems
-        .map((it) => ProcurementQuoteLineModel.fromJson(it as Map<String, dynamic>))
+        .map(
+          (it) =>
+              ProcurementQuoteLineModel.fromJson(it as Map<String, dynamic>),
+        )
         .toList(growable: false);
 
     DateTime? expires;
@@ -37,7 +40,9 @@ class ProcurementQuoteModel extends ProcurementQuoteEntity {
       networkId: json['network_id'] as int? ?? 0,
       posId: json['pos_id'] as int? ?? 0,
       saleType: parsedSaleType,
-      saleTypeLabel: json['sale_type_label'] as String? ?? (parsedSaleType == SaleType.cash ? 'نقدي' : 'آجل'),
+      saleTypeLabel:
+          json['sale_type_label'] as String? ??
+          (parsedSaleType == SaleType.cash ? 'نقدي' : 'آجل'),
       grossTotal: (json['gross_total'] as num?)?.toDouble() ?? 0.0,
       discountTotal: (json['discount_total'] as num?)?.toDouble() ?? 0.0,
       netTotal: (json['net_total'] as num?)?.toDouble() ?? 0.0,
@@ -61,23 +66,28 @@ class ProcurementQuoteModel extends ProcurementQuoteEntity {
       'pricing_token': pricingToken,
       'expires_at': expiresAt?.toIso8601String(),
       'items': items
-          .map((it) => (it is ProcurementQuoteLineModel ? it : ProcurementQuoteLineModel(
-                packageId: it.packageId,
-                packageName: it.packageName,
-                packageColor: it.packageColor,
-                packageVoucherCount: it.packageVoucherCount,
-                voucherCount: it.voucherCount,
-                unitPrice: it.unitPrice,
-                discountRate: it.discountRate,
-                effectivePrice: it.effectivePrice,
-                lineGrossTotal: it.lineGrossTotal,
-                lineDiscountAmount: it.lineDiscountAmount,
-                lineNetTotal: it.lineNetTotal,
-                isCustomDiscount: it.isCustomDiscount,
-                pricingToken: it.pricingToken,
-              )).toJson())
+          .map(
+            (it) =>
+                (it is ProcurementQuoteLineModel
+                        ? it
+                        : ProcurementQuoteLineModel(
+                            packageId: it.packageId,
+                            packageName: it.packageName,
+                            packageColor: it.packageColor,
+                            packageVoucherCount: it.packageVoucherCount,
+                            voucherCount: it.voucherCount,
+                            unitPrice: it.unitPrice,
+                            discountRate: it.discountRate,
+                            effectivePrice: it.effectivePrice,
+                            lineGrossTotal: it.lineGrossTotal,
+                            lineDiscountAmount: it.lineDiscountAmount,
+                            lineNetTotal: it.lineNetTotal,
+                            isCustomDiscount: it.isCustomDiscount,
+                            pricingToken: it.pricingToken,
+                          ))
+                    .toJson(),
+          )
           .toList(),
     };
   }
 }
-

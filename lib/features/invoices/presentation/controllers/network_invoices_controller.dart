@@ -50,10 +50,7 @@ class NetworkInvoicesController extends GetxController {
   }
 
   void openInvoiceDetails(InvoiceEntity invoice) {
-    Get.toNamed<void>(
-      AppRoutes.saleInvoiceDetails,
-      arguments: invoice,
-    );
+    Get.toNamed<void>(AppRoutes.saleInvoiceDetails, arguments: invoice);
   }
 
   // فلاتر البحث ونوع البيع
@@ -97,8 +94,12 @@ class NetworkInvoicesController extends GetxController {
       try {
         final networks = await getMyNetworksUseCase!();
         authorizedNetworks.assignAll(networks);
-        final networkIds = networks.map((n) => n.networkId).toList(growable: false);
-        final resolvedId = WorkspaceService.to.resolveActiveNetworkId(networkIds);
+        final networkIds = networks
+            .map((n) => n.networkId)
+            .toList(growable: false);
+        final resolvedId = WorkspaceService.to.resolveActiveNetworkId(
+          networkIds,
+        );
         selectedNetworkId.value = resolvedId;
         if (resolvedId != null) {
           await WorkspaceService.to.saveActiveNetworkId(resolvedId);

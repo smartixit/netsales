@@ -7,9 +7,13 @@ class ExportWalletStatementDocumentUseCase {
   const ExportWalletStatementDocumentUseCase(this.repository);
   final WalletStatementDocumentRepository repository;
 
-  Future<bool> exportNetwork(NetworkWalletEntity wallet, List<NetworkWalletLogEntity> logs) =>
-      repository.exportNetworkStatement(wallet, logs);
+  Future<bool> exportNetwork(
+    NetworkWalletEntity wallet,
+    List<NetworkWalletLogEntity> logs,
+  ) => repository.exportNetworkStatement(wallet, logs);
 
-  Future<bool> exportPos(PosWalletEntity wallet, List<PosWalletLogEntity> logs) =>
-      repository.exportPosStatement(wallet, logs);
+  Future<bool> exportPos(
+    PosWalletEntity wallet,
+    List<PosWalletLogEntity> logs,
+  ) => repository.exportPosStatement(wallet, logs);
 }

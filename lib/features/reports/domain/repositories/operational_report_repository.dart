@@ -1,4 +1,5 @@
 import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
+
 import 'dart:typed_data';
 
 import 'package:netsales/core/models/paginated_list.dart';
@@ -70,7 +71,6 @@ abstract interface class OperationalReportRepository {
     String? scopeLabel,
   });
 
-
   Future<bool> saveDetailedPdf({
     required OperationalReportType type,
     required OperationalReportCatalogEntry entry,
@@ -84,11 +84,36 @@ abstract interface class OperationalReportRepository {
     String? scopeLabel,
   });
 
-
-  Future<List<SavedReportPreset>> getPresets({required OperationalReportType type, required int networkId, int? posId});
-  Future<SavedReportPreset> savePreset({required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation});
-  Future<SavedReportPreset> updatePreset({required String presetId, required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation});
-  Future<void> deletePreset({required String presetId, required OperationalReportType type, required int networkId, int? posId});
+  Future<List<SavedReportPreset>> getPresets({
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+  });
+  Future<SavedReportPreset> savePreset({
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+    required String name,
+    required int reportSchemaVersion,
+    required ReportCriteria criteria,
+    required ReportPresentationOptions presentation,
+  });
+  Future<SavedReportPreset> updatePreset({
+    required String presetId,
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+    required String name,
+    required int reportSchemaVersion,
+    required ReportCriteria criteria,
+    required ReportPresentationOptions presentation,
+  });
+  Future<void> deletePreset({
+    required String presetId,
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+  });
 
   Future<Uint8List?> downloadExport(String url);
 }

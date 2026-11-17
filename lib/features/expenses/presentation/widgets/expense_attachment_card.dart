@@ -58,9 +58,7 @@ class ExpenseAttachmentCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: .4),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: .4)),
       ),
       child: Row(
         children: [
@@ -71,21 +69,21 @@ class ExpenseAttachmentCard extends StatelessWidget {
               color: isImage
                   ? colors.primaryContainer.withValues(alpha: .5)
                   : isPdf
-                      ? colors.error.withValues(alpha: .15)
-                      : colors.surfaceContainerHighest,
+                  ? colors.error.withValues(alpha: .15)
+                  : colors.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Icon(
               isImage
                   ? Icons.image_outlined
                   : isPdf
-                      ? Icons.picture_as_pdf_outlined
-                      : Icons.attach_file_rounded,
+                  ? Icons.picture_as_pdf_outlined
+                  : Icons.attach_file_rounded,
               color: isImage
                   ? colors.primary
                   : isPdf
-                      ? colors.error
-                      : colors.onSurfaceVariant,
+                  ? colors.error
+                  : colors.onSurfaceVariant,
             ),
           ),
           AppSpacing.hMd,
@@ -131,4 +129,3 @@ class ExpenseAttachmentCard extends StatelessWidget {
     );
   }
 }
-

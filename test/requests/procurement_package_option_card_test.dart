@@ -92,35 +92,44 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('shows balance with validity and duration, and sheet capacity under title', (tester) async {
-    await pumpCard(tester);
+  testWidgets(
+    'shows balance with validity and duration, and sheet capacity under title',
+    (tester) async {
+      await pumpCard(tester);
 
-    expect(find.text('الرصيد'), findsOneWidget);
-    expect(find.text('2 جيجابايت'), findsOneWidget);
-    expect(find.text('الصلاحية'), findsOneWidget);
-    expect(find.text('المدة'), findsOneWidget);
-    expect(find.text('السعة'), findsNothing);
-    expect(find.text('سعة الورقة: 100 كرت'), findsOneWidget);
-    expect(find.text('الكمية المطلوبة'), findsOneWidget);
-    expect(find.text('ورقة'), findsOneWidget);
-    expect(find.text('نصف'), findsOneWidget);
-    expect(find.text('تصفير'), findsOneWidget);
+      expect(find.text('الرصيد'), findsOneWidget);
+      expect(find.text('2 جيجابايت'), findsOneWidget);
+      expect(find.text('الصلاحية'), findsOneWidget);
+      expect(find.text('المدة'), findsOneWidget);
+      expect(find.text('السعة'), findsNothing);
+      expect(find.text('سعة الورقة: 100 كرت'), findsOneWidget);
+      expect(find.text('الكمية المطلوبة'), findsOneWidget);
+      expect(find.text('ورقة'), findsOneWidget);
+      expect(find.text('نصف'), findsOneWidget);
+      expect(find.text('تصفير'), findsOneWidget);
 
-    final basePriceTop = tester.getTopLeft(find.text('السعر الأساسي قبل الخصم')).dy;
-    final cashPriceTop = tester.getTopLeft(find.text('السعر النقدي')).dy;
-    expect(basePriceTop, lessThan(cashPriceTop));
-    expect(tester.takeException(), isNull);
-  });
+      final basePriceTop = tester
+          .getTopLeft(find.text('السعر الأساسي قبل الخصم'))
+          .dy;
+      final cashPriceTop = tester.getTopLeft(find.text('السعر النقدي')).dy;
+      expect(basePriceTop, lessThan(cashPriceTop));
+      expect(tester.takeException(), isNull);
+    },
+  );
 
-  testWidgets('marks a custom pricing snapshot as a POS-specific discount', (tester) async {
+  testWidgets('marks a custom pricing snapshot as a POS-specific discount', (
+    tester,
+  ) async {
     await pumpCard(tester, hasPosCustomDiscount: true);
 
-    expect(find.text('خصم نقطة البيع'), findsOneWidget);
-    expect(find.text('عرض الباقة'), findsNothing);
+    expect(find.text('خصم خاص'), findsOneWidget);
+    expect(find.text('خصم افتراضي'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('does not infer POS badge from a separate discount response', (tester) async {
+  testWidgets('does not infer POS badge from a separate discount response', (
+    tester,
+  ) async {
     final separateDiscount = EffectivePackageDiscountEntity(
       discountCash: 10,
       discountCredit: 5,
@@ -134,11 +143,13 @@ void main() {
 
     await pumpCard(tester, customDiscount: separateDiscount);
 
-    expect(find.text('عرض الباقة'), findsOneWidget);
-    expect(find.text('خصم نقطة البيع'), findsNothing);
+    expect(find.text('خصم افتراضي'), findsOneWidget);
+    expect(find.text('خصم خاص'), findsNothing);
   });
 
-  testWidgets('keeps the card valid in dark mode on a narrow phone viewport', (tester) async {
+  testWidgets('keeps the card valid in dark mode on a narrow phone viewport', (
+    tester,
+  ) async {
     await pumpCard(
       tester,
       isDark: true,
@@ -151,7 +162,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('keeps the card valid on a tablet-width viewport', (tester) async {
+  testWidgets('keeps the card valid on a tablet-width viewport', (
+    tester,
+  ) async {
     await pumpCard(tester, viewport: const Size(820, 1180));
 
     expect(find.text('السعر الأساسي قبل الخصم'), findsOneWidget);

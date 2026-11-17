@@ -71,16 +71,18 @@ class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
           decoration: BoxDecoration(
             color: colors.error.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(
-              color: colors.error.withValues(alpha: 0.35),
-            ),
+            border: Border.all(color: colors.error.withValues(alpha: 0.35)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(Icons.error_outline_rounded, color: colors.error, size: 20),
+                  Icon(
+                    Icons.error_outline_rounded,
+                    color: colors.error,
+                    size: 20,
+                  ),
                   AppSpacing.hSm,
                   Expanded(
                     child: Text(
@@ -158,11 +160,7 @@ class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.verified_rounded,
-                    color: colors.primary,
-                    size: 18,
-                  ),
+                  Icon(Icons.verified_rounded, color: colors.primary, size: 18),
                   AppSpacing.hXs,
                   Expanded(
                     child: Text(

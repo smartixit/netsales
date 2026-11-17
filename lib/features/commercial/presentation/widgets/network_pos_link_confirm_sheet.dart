@@ -211,7 +211,6 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _NetworkPosInfoRow extends StatelessWidget {

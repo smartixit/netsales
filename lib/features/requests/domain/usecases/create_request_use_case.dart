@@ -11,9 +11,6 @@ class CreateRequestUseCase {
     Map<String, dynamic> data, {
     String? idempotencyKey,
   }) {
-    return _repository.createRequest(
-      data,
-      idempotencyKey: idempotencyKey,
-    );
+    return _repository.createRequest(data, idempotencyKey: idempotencyKey);
   }
 }

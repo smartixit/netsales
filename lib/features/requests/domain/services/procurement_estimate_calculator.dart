@@ -6,10 +6,7 @@ import 'package:netsales/features/requests/domain/entities/procurement_cart_line
 class ProcurementEstimateCalculator {
   const ProcurementEstimateCalculator();
 
-  bool hasCurrentSnapshots(
-    Iterable<PackageEntity> packages, {
-    DateTime? now,
-  }) {
+  bool hasCurrentSnapshots(Iterable<PackageEntity> packages, {DateTime? now}) {
     final currentTime = now ?? DateTime.now();
     var foundPackage = false;
     for (final package in packages) {

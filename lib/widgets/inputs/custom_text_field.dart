@@ -295,108 +295,108 @@ class _CustomTextFieldState extends State<CustomTextField>
             }
           },
 
-        validator: _effectiveValidator,
+          validator: _effectiveValidator,
 
-        inputFormatters: effectiveInputFormatters,
+          inputFormatters: effectiveInputFormatters,
 
-        autofillHints: widget.autofillHints,
+          autofillHints: widget.autofillHints,
 
-        style: widget.textStyle ?? theme.textTheme.bodyLarge,
+          style: widget.textStyle ?? theme.textTheme.bodyLarge,
 
-        decoration: InputDecoration(
-          isDense: widget.isDense,
-          contentPadding: widget.contentPadding,
-          label: widget.label.isNotEmpty
-              ? Text.rich(
-                  TextSpan(
-                    text: widget.label,
-                    children: [
-                      if (widget.isRequired) ...[
-                        const WidgetSpan(child: SizedBox(width: 4)),
-                        TextSpan(
-                          text: '*',
-                          style: AppTypography.inputLabel.copyWith(
-                            color: context.colors.error,
+          decoration: InputDecoration(
+            isDense: widget.isDense,
+            contentPadding: widget.contentPadding,
+            label: widget.label.isNotEmpty
+                ? Text.rich(
+                    TextSpan(
+                      text: widget.label,
+                      children: [
+                        if (widget.isRequired) ...[
+                          const WidgetSpan(child: SizedBox(width: 4)),
+                          TextSpan(
+                            text: '*',
+                            style: AppTypography.inputLabel.copyWith(
+                              color: context.colors.error,
+                            ),
                           ),
-                        ),
+                        ],
                       ],
-                    ],
-                  ),
-                )
-              : null,
+                    ),
+                  )
+                : null,
 
-          hintText: widget.hint,
+            hintText: widget.hint,
 
-          prefixIcon: widget.prefixIcon,
+            prefixIcon: widget.prefixIcon,
 
-          suffixIcon: widget.enablePasswordToggle
-              ? CustomButton.icon(
-                  icon: _obscureText
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  foregroundColor: context.colors.onSurfaceVariant.withValues(
-                    alpha: 0.5,
-                  ),
-                  backgroundColor: Colors.transparent,
-                  tooltip: _obscureText
-                      ? 'إظهار كلمة المرور'
-                      : 'إخفاء كلمة المرور',
-                  onPressed: () {
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
-                  },
-                )
-              : widget.suffixIcon,
+            suffixIcon: widget.enablePasswordToggle
+                ? CustomButton.icon(
+                    icon: _obscureText
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    foregroundColor: context.colors.onSurfaceVariant.withValues(
+                      alpha: 0.5,
+                    ),
+                    backgroundColor: Colors.transparent,
+                    tooltip: _obscureText
+                        ? 'إظهار كلمة المرور'
+                        : 'إخفاء كلمة المرور',
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  )
+                : widget.suffixIcon,
 
-          // filled: true,
+            // filled: true,
 
-          // fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+            // fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
 
-          // labelStyle: theme.textTheme.bodyMedium?.copyWith(
-          //   color: colorScheme.onSurfaceVariant,
-          // ),
+            // labelStyle: theme.textTheme.bodyMedium?.copyWith(
+            //   color: colorScheme.onSurfaceVariant,
+            // ),
 
-          // hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          //   color: colorScheme.onSurfaceVariant.withValues(alpha: .7),
-          // ),
+            // hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            //   color: colorScheme.onSurfaceVariant.withValues(alpha: .7),
+            // ),
 
-          // contentPadding: EdgeInsets.symmetric(
-          //   horizontal: AppSpacing.inputPadding,
-          //   vertical: AppSpacing.inputPadding,
-          // ),
+            // contentPadding: EdgeInsets.symmetric(
+            //   horizontal: AppSpacing.inputPadding,
+            //   vertical: AppSpacing.inputPadding,
+            // ),
 
-          // border: OutlineInputBorder(
-          //   borderRadius: BorderRadius.circular(AppRadius.input),
+            // border: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(AppRadius.input),
 
-          //   borderSide: BorderSide.none,
-          // ),
+            //   borderSide: BorderSide.none,
+            // ),
 
-          // enabledBorder: OutlineInputBorder(
-          //   borderRadius: BorderRadius.circular(AppRadius.input),
+            // enabledBorder: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(AppRadius.input),
 
-          //   borderSide: BorderSide(
-          //     color: colorScheme.outline.withValues(alpha: .25),
-          //   ),
-          // ),
+            //   borderSide: BorderSide(
+            //     color: colorScheme.outline.withValues(alpha: .25),
+            //   ),
+            // ),
 
-          // focusedBorder: OutlineInputBorder(
-          //   borderRadius: BorderRadius.circular(16),
+            // focusedBorder: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(16),
 
-          //   borderSide: BorderSide(color: colorScheme.primary, width: 1.8),
-          // ),
+            //   borderSide: BorderSide(color: colorScheme.primary, width: 1.8),
+            // ),
 
-          // errorBorder: OutlineInputBorder(
-          //   borderRadius: BorderRadius.circular(AppRadius.input),
+            // errorBorder: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(AppRadius.input),
 
-          //   borderSide: BorderSide(color: colorScheme.error),
-          // ),
+            //   borderSide: BorderSide(color: colorScheme.error),
+            // ),
 
-          // focusedErrorBorder: OutlineInputBorder(
-          //   borderRadius: BorderRadius.circular(16),
+            // focusedErrorBorder: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(16),
 
-          //   borderSide: BorderSide(color: colorScheme.error, width: 1.8),
-          // ),
+            //   borderSide: BorderSide(color: colorScheme.error, width: 1.8),
+            // ),
           ),
         ),
       ),

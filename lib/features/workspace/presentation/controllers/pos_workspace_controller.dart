@@ -59,9 +59,9 @@ class PosWorkspaceController extends GetxController {
   final GetRequestsUseCase? getRequestsUseCase;
   final GetNetworkPackagesUseCase? getNetworkPackagesUseCase;
   final PreviewNetworkPosLinkChallengeUseCase?
-      previewNetworkPosLinkChallengeUseCase;
+  previewNetworkPosLinkChallengeUseCase;
   final ConfirmNetworkPosLinkChallengeUseCase?
-      confirmNetworkPosLinkChallengeUseCase;
+  confirmNetworkPosLinkChallengeUseCase;
 
   final RxInt selectedNavIndex = 0.obs;
   final RxList<PosEntity> availablePos = <PosEntity>[].obs;
@@ -116,7 +116,8 @@ class PosWorkspaceController extends GetxController {
     required String payload,
     required int posId,
   }) async {
-    final useCase = previewNetworkPosLinkChallengeUseCase ??
+    final useCase =
+        previewNetworkPosLinkChallengeUseCase ??
         (Get.isRegistered<PreviewNetworkPosLinkChallengeUseCase>()
             ? Get.find<PreviewNetworkPosLinkChallengeUseCase>()
             : null);
@@ -129,7 +130,8 @@ class PosWorkspaceController extends GetxController {
     required String challengeUuid,
     required int posId,
   }) async {
-    final useCase = confirmNetworkPosLinkChallengeUseCase ??
+    final useCase =
+        confirmNetworkPosLinkChallengeUseCase ??
         (Get.isRegistered<ConfirmNetworkPosLinkChallengeUseCase>()
             ? Get.find<ConfirmNetworkPosLinkChallengeUseCase>()
             : null);
@@ -216,16 +218,10 @@ class PosWorkspaceController extends GetxController {
       invoices: recentInvoices,
       requests: recentRequests,
       onOpenInvoice: (invoice) {
-        Get.toNamed<void>(
-          AppRoutes.purchaseInvoiceDetails,
-          arguments: invoice,
-        );
+        Get.toNamed<void>(AppRoutes.purchaseInvoiceDetails, arguments: invoice);
       },
       onOpenRequest: (request) {
-        Get.toNamed<void>(
-          AppRoutes.procurementOrders,
-          arguments: request,
-        );
+        Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
       },
     );
   }
@@ -577,8 +573,7 @@ class PosWorkspaceController extends GetxController {
   void openNewProcurementOrder() =>
       Get.toNamed<void>(AppRoutes.newProcurementOrder);
 
-  void openPurchaseInvoices() =>
-      Get.toNamed<void>(AppRoutes.purchaseInvoices);
+  void openPurchaseInvoices() => Get.toNamed<void>(AppRoutes.purchaseInvoices);
 
   void openPosDebtLedger() => Get.toNamed<void>(AppRoutes.posDebtLedger);
 
@@ -588,13 +583,11 @@ class PosWorkspaceController extends GetxController {
     final networkId = selectedNetworkLink.value?.networkId;
     final arguments = <String, dynamic>{'pos_id': posId};
     if (networkId != null) arguments['network_id'] = networkId;
-    Get.toNamed<void>(
-      AppRoutes.posWalletStatement,
-      arguments: arguments,
-    );
+    Get.toNamed<void>(AppRoutes.posWalletStatement, arguments: arguments);
   }
 
-  String get userInitials => TextFormatter.avatarInitials(userName, maxChars: 2);
+  String get userInitials =>
+      TextFormatter.avatarInitials(userName, maxChars: 2);
 
   void onNavItemSelected(int index) {
     selectedNavIndex.value = index;

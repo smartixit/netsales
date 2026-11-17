@@ -10,7 +10,8 @@ class NetworkPosInviteFlow {
   final NetworkWorkspaceController controller;
 
   Future<void> start() async {
-    final network = controller.selectedNetwork ?? controller.networks.firstOrNull;
+    final network =
+        controller.selectedNetwork ?? controller.networks.firstOrNull;
     if (network == null) {
       CustomSnackbar.show(
         title: 'تنبيه',

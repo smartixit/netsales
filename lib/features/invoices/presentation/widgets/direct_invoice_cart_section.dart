@@ -79,134 +79,137 @@ class DirectInvoiceCartSection extends GetView<NetworkDirectInvoiceController> {
           ),
           AppSpacing.vSm,
           for (final line in controller.cart)
-            Builder(builder: (context) {
-              final packageColor =
-                  CustomColorPicker.parseHex(line.package.packageColor);
+            Builder(
+              builder: (context) {
+                final packageColor = CustomColorPicker.parseHex(
+                  line.package.packageColor,
+                );
 
-              return Padding(
-                padding: EdgeInsets.only(bottom: AppSpacing.sm),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.35),
+                return Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(
+                        color: colors.outlineVariant.withValues(alpha: 0.35),
+                      ),
                     ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    child: IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                            width: 5,
-                            color: packageColor,
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.all(AppSpacing.md),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 38,
-                                    height: 38,
-                                    decoration: BoxDecoration(
-                                      color:
-                                          packageColor.withValues(alpha: 0.12),
-                                      borderRadius:
-                                          BorderRadius.circular(AppRadius.sm),
-                                    ),
-                                    child: Icon(
-                                      Icons.wifi_tethering_rounded,
-                                      color: packageColor,
-                                      size: 19,
-                                    ),
-                                  ),
-                                  AppSpacing.hSm,
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          line.package.packageName,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style:
-                                              AppTypography.bodyMedium.copyWith(
-                                            color: colors.onSurface,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Container(width: 5, color: packageColor),
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.all(AppSpacing.md),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 38,
+                                      height: 38,
+                                      decoration: BoxDecoration(
+                                        color: packageColor.withValues(
+                                          alpha: 0.12,
                                         ),
-                                        AppSpacing.vXxs,
-                                        Text(
-                                          line.fullQuantityLabel,
-                                          style:
-                                              AppTypography.bodySmall.copyWith(
-                                            color: colors.onSurfaceVariant,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                        borderRadius: BorderRadius.circular(
+                                          AppRadius.sm,
                                         ),
-                                      ],
+                                      ),
+                                      child: Icon(
+                                        Icons.wifi_tethering_rounded,
+                                        color: packageColor,
+                                        size: 19,
+                                      ),
                                     ),
-                                  ),
-                                  CustomButton.icon(
-                                    icon: Icons.remove_rounded,
-                                    tooltip: 'تقليل الكمية',
-                                    dimension: 32,
-                                    iconSize: 17,
-                                    backgroundColor: Colors.transparent,
-                                    foregroundColor: colors.onSurfaceVariant,
-                                    onPressed: line.voucherCount > 1
-                                        ? () => controller.updateLineQuantity(
+                                    AppSpacing.hSm,
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            line.package.packageName,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: AppTypography.bodyMedium
+                                                .copyWith(
+                                                  color: colors.onSurface,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                          AppSpacing.vXxs,
+                                          Text(
+                                            line.fullQuantityLabel,
+                                            style: AppTypography.bodySmall
+                                                .copyWith(
+                                                  color:
+                                                      colors.onSurfaceVariant,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    CustomButton.icon(
+                                      icon: Icons.remove_rounded,
+                                      tooltip: 'تقليل الكمية',
+                                      dimension: 32,
+                                      iconSize: 17,
+                                      backgroundColor: Colors.transparent,
+                                      foregroundColor: colors.onSurfaceVariant,
+                                      onPressed: line.voucherCount > 1
+                                          ? () => controller.updateLineQuantity(
                                               line.package.packageId,
                                               line.voucherCount - 1,
                                             )
-                                        : null,
-                                  ),
-                                  Text(
-                                    line.voucherCount.toString(),
-                                    style: AppTypography.titleSmall.copyWith(
-                                      color: colors.onSurface,
-                                      fontWeight: FontWeight.bold,
+                                          : null,
                                     ),
-                                  ),
-                                  CustomButton.icon(
-                                    icon: Icons.add_rounded,
-                                    tooltip: 'زيادة الكمية',
-                                    dimension: 32,
-                                    iconSize: 17,
-                                    backgroundColor: Colors.transparent,
-                                    foregroundColor: colors.primary,
-                                    onPressed: () =>
-                                        controller.updateLineQuantity(
-                                      line.package.packageId,
-                                      line.voucherCount + 1,
+                                    Text(
+                                      line.voucherCount.toString(),
+                                      style: AppTypography.titleSmall.copyWith(
+                                        color: colors.onSurface,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  CustomButton.icon(
-                                    icon: Icons.delete_outline_rounded,
-                                    tooltip: 'حذف الباقة',
-                                    dimension: 32,
-                                    iconSize: 17,
-                                    backgroundColor: Colors.transparent,
-                                    foregroundColor: colors.error,
-                                    onPressed: () => controller.removeLine(
-                                      line.package.packageId,
+                                    CustomButton.icon(
+                                      icon: Icons.add_rounded,
+                                      tooltip: 'زيادة الكمية',
+                                      dimension: 32,
+                                      iconSize: 17,
+                                      backgroundColor: Colors.transparent,
+                                      foregroundColor: colors.primary,
+                                      onPressed: () =>
+                                          controller.updateLineQuantity(
+                                            line.package.packageId,
+                                            line.voucherCount + 1,
+                                          ),
                                     ),
-                                  ),
-                                ],
+                                    CustomButton.icon(
+                                      icon: Icons.delete_outline_rounded,
+                                      tooltip: 'حذف الباقة',
+                                      dimension: 32,
+                                      iconSize: 17,
+                                      backgroundColor: Colors.transparent,
+                                      foregroundColor: colors.error,
+                                      onPressed: () => controller.removeLine(
+                                        line.package.packageId,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              },
+            ),
         ],
       );
     });

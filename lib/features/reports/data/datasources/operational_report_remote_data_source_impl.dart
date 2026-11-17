@@ -12,7 +12,6 @@ class OperationalReportRemoteDataSourceImpl
     implements OperationalReportRemoteDataSource {
   const OperationalReportRemoteDataSourceImpl();
 
-
   @override
   Future<ApiResponse<OperationalReportCatalogModel>> getCatalog({
     required Map<String, dynamic> query,
@@ -36,12 +35,14 @@ class OperationalReportRemoteDataSourceImpl
         if (rows is! List) {
           throw const FormatException('لم يُرجع الخادم قائمة سجلات صالحة.');
         }
-        return rows.map((row) {
-          if (row is! Map) {
-            throw const FormatException('يوجد سجل تقرير بتنسيق غير صالح.');
-          }
-          return Map<String, dynamic>.from(row);
-        }).toList(growable: false);
+        return rows
+            .map((row) {
+              if (row is! Map) {
+                throw const FormatException('يوجد سجل تقرير بتنسيق غير صالح.');
+              }
+              return Map<String, dynamic>.from(row);
+            })
+            .toList(growable: false);
       },
     );
   }
@@ -83,38 +84,46 @@ class OperationalReportRemoteDataSourceImpl
     );
   }
 
+  @override
+  Future<ApiResponse<List<SavedReportPreset>>> getPresets({
+    required Map<String, dynamic> query,
+  }) => ApiService.instance.getList<SavedReportPreset>(
+    ApiConstants.operationalReportPresets,
+    queryParameters: query,
+    fromJson: (json) =>
+        SavedReportPreset.fromJson(Map<String, Object?>.from(json as Map)),
+  );
 
   @override
-  Future<ApiResponse<List<SavedReportPreset>>> getPresets({required Map<String, dynamic> query}) =>
-      ApiService.instance.getList<SavedReportPreset>(
-        ApiConstants.operationalReportPresets,
-        queryParameters: query,
-        fromJson: (json) => SavedReportPreset.fromJson(Map<String, Object?>.from(json as Map)),
-      );
+  Future<ApiResponse<SavedReportPreset>> savePreset({
+    required Map<String, dynamic> payload,
+  }) => ApiService.instance.post<SavedReportPreset>(
+    ApiConstants.operationalReportPresets,
+    data: payload,
+    fromJson: (json) =>
+        SavedReportPreset.fromJson(Map<String, Object?>.from(json as Map)),
+  );
 
   @override
-  Future<ApiResponse<SavedReportPreset>> savePreset({required Map<String, dynamic> payload}) =>
-      ApiService.instance.post<SavedReportPreset>(
-        ApiConstants.operationalReportPresets,
-        data: payload,
-        fromJson: (json) => SavedReportPreset.fromJson(Map<String, Object?>.from(json as Map)),
-      );
+  Future<ApiResponse<SavedReportPreset>> updatePreset(
+    String presetId, {
+    required Map<String, dynamic> payload,
+  }) => ApiService.instance.put<SavedReportPreset>(
+    ApiConstants.operationalReportPreset(presetId),
+    data: payload,
+    fromJson: (json) =>
+        SavedReportPreset.fromJson(Map<String, Object?>.from(json as Map)),
+  );
 
   @override
-  Future<ApiResponse<SavedReportPreset>> updatePreset(String presetId, {required Map<String, dynamic> payload}) =>
-      ApiService.instance.put<SavedReportPreset>(
-        ApiConstants.operationalReportPreset(presetId),
-        data: payload,
-        fromJson: (json) => SavedReportPreset.fromJson(Map<String, Object?>.from(json as Map)),
-      );
-
-  @override
-  Future<ApiResponse<bool>> deletePreset(String presetId, {required Map<String, dynamic> query}) =>
-      ApiService.instance.delete<bool>(
-        ApiConstants.operationalReportPreset(presetId),
-        queryParameters: query,
-        fromJson: (_) => true,
-      );
+  Future<ApiResponse<bool>> deletePreset(
+    String presetId, {
+    required Map<String, dynamic> query,
+  }) => ApiService.instance.delete<bool>(
+    ApiConstants.operationalReportPreset(presetId),
+    queryParameters: query,
+    fromJson: (_) => true,
+  );
 
   @override
   Future<Uint8List?> downloadExport(String url) {

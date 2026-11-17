@@ -74,15 +74,14 @@ class DebtScopeSelector extends StatelessWidget {
           Obx(() {
             if (controller.isLoadingScope.value) {
               return const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-);
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 3,
+                  cardHeight: 112,
+                  hasLeading: true,
+                ),
+              );
             }
 
             if (controller.scopeErrorMessage.value != null &&
@@ -152,7 +151,6 @@ class DebtScopeSelector extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _DebtNetworkSelector extends StatelessWidget {
@@ -167,15 +165,14 @@ class _DebtNetworkSelector extends StatelessWidget {
     return Obx(() {
       if (controller.isLoadingNetworks.value) {
         return const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-);
+          presentation: CustomStatePresentation.skeletonOnly,
+          skeleton: CustomStateSkeleton(
+            layout: CustomStateSkeletonLayout.list,
+            itemCount: 3,
+            cardHeight: 112,
+            hasLeading: true,
+          ),
+        );
       }
 
       if (controller.networksErrorMessage.value != null &&
@@ -204,15 +201,14 @@ class _DebtNetworkSelector extends StatelessWidget {
         final selected = controller.selectedNetwork;
         if (selected == null) {
           return const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-);
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.list,
+              itemCount: 3,
+              cardHeight: 112,
+              hasLeading: true,
+            ),
+          );
         }
         return _ScopeValue(
           label: 'مزود الشبكة',
@@ -287,15 +283,14 @@ class _DebtNetworkSelector extends StatelessWidget {
           if (controller.isLoadingMoreNetworks.value) ...[
             AppSpacing.vXs,
             const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-),
+              presentation: CustomStatePresentation.skeletonOnly,
+              skeleton: CustomStateSkeleton(
+                layout: CustomStateSkeletonLayout.list,
+                itemCount: 3,
+                cardHeight: 112,
+                hasLeading: true,
+              ),
+            ),
           ] else if (controller.hasMoreNetworkOptions) ...[
             AppSpacing.vXs,
             CustomButton.secondary(

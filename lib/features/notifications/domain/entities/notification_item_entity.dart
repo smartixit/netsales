@@ -67,4 +67,3 @@ class NotificationItemEntity {
     return DateFormatter.timeAgo(createdAt!);
   }
 }
-

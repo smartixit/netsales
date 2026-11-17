@@ -60,10 +60,8 @@ class PackageCatalogRemoteDataSourceImpl
   }
 
   @override
-  Future<ApiResponse<List<EffectivePackageDiscountModel>>> getEffectiveDiscountsForPos({
-    required int networkId,
-    required int posId,
-  }) {
+  Future<ApiResponse<List<EffectivePackageDiscountModel>>>
+  getEffectiveDiscountsForPos({required int networkId, required int posId}) {
     return ApiService.instance.get<List<EffectivePackageDiscountModel>>(
       ApiConstants.voucherPackageDiscounts,
       queryParameters: {

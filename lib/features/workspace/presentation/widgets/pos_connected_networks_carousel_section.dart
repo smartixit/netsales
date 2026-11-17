@@ -120,7 +120,16 @@ class PosConnectedNetworksCarouselSection extends StatelessWidget {
         ),
         AppSpacing.vMd,
         if (controller.isLoadingNetworks.value)
-          const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 190, maxColumns: 1, minItemWidth: 180))
+          const CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.cards,
+              itemCount: 1,
+              cardHeight: 190,
+              maxColumns: 1,
+              minItemWidth: 180,
+            ),
+          )
         else if (controller.networksError.value != null)
           CustomErrorState.boxed(
             title: 'تعذر تحميل الشبكات',

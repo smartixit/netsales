@@ -15,8 +15,7 @@ class ProcurementPosContextSection extends GetView<PosProcurementController> {
     return Obx(() {
       final positions = controller.myPosList;
       final selected = controller.activePos;
-      final isExpanded =
-          controller.expandedProcurementContext.value == 'pos';
+      final isExpanded = controller.expandedProcurementContext.value == 'pos';
 
       return ProcurementContextSelector(
         title: 'نقطة البيع',
@@ -38,8 +37,7 @@ class ProcurementPosContextSection extends GetView<PosProcurementController> {
             ? 'لا توجد نقاط بيع معتمدة ومصرح بها لحسابك حالياً.'
             : null,
         onToggle: () {
-          controller.expandedProcurementContext.value =
-              isExpanded ? '' : 'pos';
+          controller.expandedProcurementContext.value = isExpanded ? '' : 'pos';
         },
         options: positions
             .map(

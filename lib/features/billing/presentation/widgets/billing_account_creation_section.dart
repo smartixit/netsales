@@ -5,10 +5,7 @@ import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class BillingAccountCreationSection extends StatelessWidget {
-  const BillingAccountCreationSection({
-    required this.controller,
-    super.key,
-  });
+  const BillingAccountCreationSection({required this.controller, super.key});
 
   final BillingController controller;
 
@@ -19,8 +16,7 @@ class BillingAccountCreationSection extends StatelessWidget {
       children: [
         const CustomEmptyState.boxed(
           title: 'لا يوجد حساب فوترة',
-          subtitle:
-              'أنشئ حساب فوترة للشبكة للبدء في إدارة الخطط والاشتراكات والفواتير.',
+          subtitle: 'أنشئ حساب فوترة للشبكة للبدء في إدارة الخطط والاشتراكات والفواتير.',
         ),
         CustomDropdown<int>(
           items: controller.currencies

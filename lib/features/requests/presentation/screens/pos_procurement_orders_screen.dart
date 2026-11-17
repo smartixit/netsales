@@ -82,7 +82,14 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
               if (controller.isLoading.value) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
-                  child: CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 4, cardHeight: 130.h, )),
+                  child: CustomStateView.loading(
+                    presentation: CustomStatePresentation.skeletonOnly,
+                    skeleton: CustomStateSkeleton(
+                      layout: CustomStateSkeletonLayout.list,
+                      itemCount: 4,
+                      cardHeight: 130.h,
+                    ),
+                  ),
                 );
               }
 
@@ -150,7 +157,16 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                           padding: EdgeInsets.symmetric(
                             vertical: AppSpacing.xs,
                           ),
-                          child: CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 130.h, maxColumns: 1, minItemWidth: 180)),
+                          child: CustomStateView.loading(
+                            presentation: CustomStatePresentation.skeletonOnly,
+                            skeleton: CustomStateSkeleton(
+                              layout: CustomStateSkeletonLayout.cards,
+                              itemCount: 1,
+                              cardHeight: 130.h,
+                              maxColumns: 1,
+                              minItemWidth: 180,
+                            ),
+                          ),
                         );
                       }
 

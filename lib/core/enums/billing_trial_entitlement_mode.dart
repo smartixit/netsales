@@ -6,11 +6,7 @@ enum BillingTrialEntitlementMode {
   none('NONE', 'دون مزايا تشغيلية', SemanticTone.neutral),
   unknown('UNKNOWN', 'نمط استحقاق غير معروف', SemanticTone.neutral);
 
-  const BillingTrialEntitlementMode(
-    this.wireValue,
-    this.label,
-    this.tone,
-  );
+  const BillingTrialEntitlementMode(this.wireValue, this.label, this.tone);
 
   final String wireValue;
   final String label;

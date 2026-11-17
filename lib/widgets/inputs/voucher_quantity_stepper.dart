@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -60,7 +59,9 @@ class VoucherQuantityStepper extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final presets = showPresets && sheetSize > 0
-        ? VoucherSheetCalculator.getPresets(sheetSize).take(presetLimit).toList(growable: false)
+        ? VoucherSheetCalculator.getPresets(sheetSize)
+              .take(presetLimit)
+              .toList(growable: false)
         : const <VoucherSheetPreset>[];
     final description = currentCount > 0 && sheetSize > 0
         ? VoucherSheetCalculator.describe(currentCount, sheetSize)
@@ -72,9 +73,7 @@ class VoucherQuantityStepper extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.4),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,9 +146,7 @@ class VoucherQuantityStepper extends StatelessWidget {
                   label: label,
                   hint: 'أدخل العدد يدوياً',
                   keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   validator: validator,
                   onChanged: onTextChanged,
                   isRequired: false,

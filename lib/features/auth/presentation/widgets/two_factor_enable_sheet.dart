@@ -42,17 +42,11 @@ class TwoFactorEnableSheet extends StatelessWidget {
           decoration: BoxDecoration(
             color: colors.primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: colors.primary.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.sms_outlined,
-                color: colors.primary,
-                size: 20.sp,
-              ),
+              Icon(Icons.sms_outlined, color: colors.primary, size: 20.sp),
               AppSpacing.hSm,
               Expanded(
                 child: Text(

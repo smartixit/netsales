@@ -40,15 +40,14 @@ class NetworkPosQrChallengeSheet {
             return const Padding(
               padding: EdgeInsets.all(24.0),
               child: CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-),
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 3,
+                  cardHeight: 112,
+                  hasLeading: true,
+                ),
+              ),
             );
           }
 

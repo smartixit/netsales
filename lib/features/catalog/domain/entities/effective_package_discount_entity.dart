@@ -6,6 +6,7 @@ class EffectivePackageDiscountEntity {
 
   /// Indicates whether the custom discount is active at the current server time.
   final bool isEffectiveNow;
+
   /// نسبة الخصم النقدي %
   final double discountCash;
 
@@ -43,4 +44,3 @@ class EffectivePackageDiscountEntity {
     required this.creditSavings,
   });
 }
-

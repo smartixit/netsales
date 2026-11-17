@@ -49,9 +49,7 @@ class DocumentEngineImagePdfService {
 
     final snapshot = DocumentSnapshot(
       metadata: DocumentMetadata(
-        id: DocumentId(
-          'netsales-image-${generatedAt.microsecondsSinceEpoch}',
-        ),
+        id: DocumentId('netsales-image-${generatedAt.microsecondsSinceEpoch}'),
         documentTypeId: documentType,
         title: documentTitle,
         locale: DocumentLocale(
@@ -67,9 +65,13 @@ class DocumentEngineImagePdfService {
             DocumentImage(
               bytes: normalizedBytes,
               widthPoints:
-                  profile.widthPoints - profile.marginLeft - profile.marginRight,
+                  profile.widthPoints -
+                  profile.marginLeft -
+                  profile.marginRight,
               heightPoints:
-                  profile.heightPoints - profile.marginTop - profile.marginBottom,
+                  profile.heightPoints -
+                  profile.marginTop -
+                  profile.marginBottom,
               fit: DocumentImageFit.contain,
               alignment: DocumentImageAlignment.center,
             ),
@@ -95,8 +97,8 @@ class DocumentEngineImagePdfService {
     );
 
     final renderer = PdfDocumentRenderer(
-      textShapingProvider:
-          await DocumentEngineFontService.instance.arabicTextShapingProvider(),
+      textShapingProvider: await DocumentEngineFontService.instance
+          .arabicTextShapingProvider(),
     );
     final result = await renderer.render(
       snapshot: snapshot,
@@ -123,8 +125,7 @@ class DocumentEngineImagePdfService {
           getTargetSize: (sourceWidth, sourceHeight) {
             final scale = math.min(
               1.0,
-              maximumDimension /
-                  math.max(sourceWidth, sourceHeight).toDouble(),
+              maximumDimension / math.max(sourceWidth, sourceHeight).toDouble(),
             );
             return ui.TargetImageSize(
               width: (sourceWidth * scale)
@@ -164,9 +165,7 @@ class DocumentEngineImagePdfService {
       buffer.dispose();
     }
 
-    throw StateError(
-      'تعذر ضغط الصورة إلى الحد الأقصى المسموح به لمستند PDF.',
-    );
+    throw StateError('تعذر ضغط الصورة إلى الحد الأقصى المسموح به لمستند PDF.');
   }
 
   static String _normalizeTitle(String value) {

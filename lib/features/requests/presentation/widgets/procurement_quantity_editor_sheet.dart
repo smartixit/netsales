@@ -9,10 +9,7 @@ import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// محرر ثانوي للكمية الدقيقة؛ يُفتح عند الحاجة ولا يزاحم بطاقة الباقة.
 class ProcurementQuantityEditorSheet extends GetView<PosProcurementController> {
-  const ProcurementQuantityEditorSheet({
-    super.key,
-    required this.package,
-  });
+  const ProcurementQuantityEditorSheet({super.key, required this.package});
 
   final PackageEntity package;
 
@@ -43,10 +40,7 @@ class ProcurementQuantityEditorSheet extends GetView<PosProcurementController> {
             Get.back<void>();
           },
         ),
-        CustomButton.text(
-          text: 'إلغاء',
-          onPressed: () => Get.back<void>(),
-        ),
+        CustomButton.text(text: 'إلغاء', onPressed: () => Get.back<void>()),
       ],
     );
   }

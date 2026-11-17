@@ -1,4 +1,5 @@
 import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -43,7 +44,8 @@ class OperationalReportsController extends GetxController {
   final GetOperationalReportUseCase getReportUseCase;
   final Rxn<OperationalReportCatalog> catalog = Rxn<OperationalReportCatalog>();
   final Rx<ReportCriteria> criteria = ReportCriteria().obs;
-  final Rx<ReportPresentationOptions> presentation = ReportPresentationOptions().obs;
+  final Rx<ReportPresentationOptions> presentation =
+      ReportPresentationOptions().obs;
   final GetOperationalReportSummaryUseCase getSummaryUseCase;
   final RequestOperationalReportExportUseCase requestExportUseCase;
   final GetOperationalReportExportStatusUseCase getExportStatusUseCase;
@@ -164,16 +166,21 @@ class OperationalReportsController extends GetxController {
             ReportBooleanFilterValue() => value.value ? 'نعم' : 'لا',
             ReportChoiceFilterValue() =>
               entry.choiceLabels[filter.id]?[value.value] ?? value.value,
-            ReportChoicesFilterValue() => value.values
-                .map((choice) => entry.choiceLabels[filter.id]?[choice] ?? choice)
-                .join('، '),
+            ReportChoicesFilterValue() =>
+              value.values
+                  .map(
+                    (choice) =>
+                        entry.choiceLabels[filter.id]?[choice] ?? choice,
+                  )
+                  .join('، '),
           };
           return OperationalReportFilterDisplay(
             id: filter.id,
             label: entry.filterLabels[filter.labelKey] ?? filter.id,
             value: displayValue,
           );
-        }).toList(growable: false);
+        })
+        .toList(growable: false);
   }
 
   TextEditingController textControllerFor(ReportFilterDefinition filter) {
@@ -193,9 +200,7 @@ class OperationalReportsController extends GetxController {
   RxnString choiceValueFor(String filterId) {
     return _choiceValues.putIfAbsent(filterId, () {
       final value = criteria.value.filters[filterId];
-      return RxnString(
-        value is ReportChoiceFilterValue ? value.value : null,
-      );
+      return RxnString(value is ReportChoiceFilterValue ? value.value : null);
     });
   }
 
@@ -257,9 +262,7 @@ class OperationalReportsController extends GetxController {
         '${local.day.toString().padLeft(2, '0')}';
   }
 
-  Future<bool> _loadReportCatalog({
-    required int scopeRevision,
-  }) async {
+  Future<bool> _loadReportCatalog({required int scopeRevision}) async {
     final networkId = _networkId;
     if (networkId == null) {
       if (scopeRevision == _scopeRevision) catalog.value = null;
@@ -396,13 +399,14 @@ class OperationalReportsController extends GetxController {
     }
 
     try {
-      final loaded = await _loadReportCatalog(
-        scopeRevision: scopeRevision,
-      );
+      final loaded = await _loadReportCatalog(scopeRevision: scopeRevision);
       if (!loaded || scopeRevision != _scopeRevision) return;
     } catch (error) {
       if (scopeRevision != _scopeRevision) return;
-      errorMessage.value = AppException.sanitizeMessage(error, fallback: 'تعذر تحميل كتالوج التقارير. يرجى المحاولة مجدداً.');
+      errorMessage.value = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر تحميل كتالوج التقارير. يرجى المحاولة مجدداً.',
+      );
       isLoading.value = false;
       return;
     }
@@ -465,7 +469,6 @@ class OperationalReportsController extends GetxController {
     await loadReport(refresh: true);
     await loadSavedPresets();
   }
-
 
   Future<void> loadSavedPresets() async {
     final type = selectedType.value;
@@ -605,9 +608,7 @@ class OperationalReportsController extends GetxController {
     final networkId = _networkId;
     final posId = _queryPosId;
     final scopeRevision = _scopeRevision;
-    if (type == null ||
-        networkId == null ||
-        isDeletingPreset.value) {
+    if (type == null || networkId == null || isDeletingPreset.value) {
       return;
     }
 
@@ -671,10 +672,7 @@ class OperationalReportsController extends GetxController {
     await loadPosOptions(refresh: true, search: normalized);
   }
 
-  Future<void> loadPosOptions({
-    bool refresh = false,
-    String? search,
-  }) async {
+  Future<void> loadPosOptions({bool refresh = false, String? search}) async {
     final networkId = _networkId;
     if (!_isNetworkWorkspace || networkId == null) return;
     if (!refresh &&
@@ -736,16 +734,24 @@ class OperationalReportsController extends GetxController {
   ) {
     final identity = switch (type) {
       OperationalReportType.sales ||
-      OperationalReportType.debtAging =>
-        record.textAt('invoice_id', fallback: record.textAt('invoice_uuid', fallback: '')),
-      OperationalReportType.expenses =>
-        record.textAt('expense_id', fallback: record.textAt('expense_uuid', fallback: '')),
+      OperationalReportType.debtAging => record.textAt(
+        'invoice_id',
+        fallback: record.textAt('invoice_uuid', fallback: ''),
+      ),
+      OperationalReportType.expenses => record.textAt(
+        'expense_id',
+        fallback: record.textAt('expense_uuid', fallback: ''),
+      ),
       OperationalReportType.networkWallet ||
       OperationalReportType.posWallet => record.textAt('log_id', fallback: ''),
-      OperationalReportType.repayments =>
-        record.textAt('repayment_id', fallback: record.textAt('repayment_uuid', fallback: '')),
-      OperationalReportType.requests =>
-        record.textAt('request_id', fallback: record.textAt('request_uuid', fallback: '')),
+      OperationalReportType.repayments => record.textAt(
+        'repayment_id',
+        fallback: record.textAt('repayment_uuid', fallback: ''),
+      ),
+      OperationalReportType.requests => record.textAt(
+        'request_id',
+        fallback: record.textAt('request_uuid', fallback: ''),
+      ),
       _ => record.textAt(
         'id',
         fallback: record.textAt(
@@ -801,8 +807,7 @@ class OperationalReportsController extends GetxController {
       errorMessage.value = 'لا تملك صلاحية عرض هذا التقرير.';
       return;
     }
-    if (!refresh &&
-        (isLoading.value || isLoadingMore.value || !hasMore)) {
+    if (!refresh && (isLoading.value || isLoadingMore.value || !hasMore)) {
       return;
     }
 
@@ -828,12 +833,12 @@ class OperationalReportsController extends GetxController {
     try {
       final PaginatedList<OperationalReportRecord> page =
           await getReportUseCase(
-        type: type,
-        networkId: networkId,
-        posId: requestedPosId,
-        criteria: _effectiveCriteria(),
-        cursor: requestedCursor,
-      );
+            type: type,
+            networkId: networkId,
+            posId: requestedPosId,
+            criteria: _effectiveCriteria(),
+            cursor: requestedCursor,
+          );
       if (revision != _requestRevision ||
           networkId != _networkId ||
           type != selectedType.value ||
@@ -988,7 +993,9 @@ class OperationalReportsController extends GetxController {
     final presentationSnapshot = presentation.value;
     final organizationName = reportOrganizationName;
     final logoUrl = reportLogoUrl;
-    final filters = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final filters = List<OperationalReportFilterDisplay>.of(
+      activeFilterDisplays,
+    );
     final scopeLabel = reportScopeLabel;
     bool isCurrentAction() =>
         actionRevision == _documentActionRevision &&
@@ -1064,7 +1071,9 @@ class OperationalReportsController extends GetxController {
     final scopeRevision = _scopeRevision;
     final organizationName = reportOrganizationName;
     final logoUrl = reportLogoUrl;
-    final filtersSnapshot = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final filtersSnapshot = List<OperationalReportFilterDisplay>.of(
+      activeFilterDisplays,
+    );
     final scopeSnapshot = reportScopeLabel;
     isPdfActionRunning.value = true;
 
@@ -1085,8 +1094,11 @@ class OperationalReportsController extends GetxController {
           !identical(criteria.value, criteriaSnapshot) ||
           !identical(presentation.value, presentationSnapshot) ||
           !identical(summary.value, summaryBefore) ||
-          selectedReportEntry?.definition.schemaVersion != entry.definition.schemaVersion) {
-        throw StateError('تغيرت إعدادات التقرير أثناء التجهيز؛ لم يتم إنشاء مستند بإعدادات مختلطة.');
+          selectedReportEntry?.definition.schemaVersion !=
+              entry.definition.schemaVersion) {
+        throw StateError(
+          'تغيرت إعدادات التقرير أثناء التجهيز؛ لم يتم إنشاء مستند بإعدادات مختلطة.',
+        );
       }
 
       final summaryAfter = await getSummaryUseCase(
@@ -1102,10 +1114,14 @@ class OperationalReportsController extends GetxController {
           _queryPosId != posId ||
           !identical(criteria.value, criteriaSnapshot) ||
           !identical(presentation.value, presentationSnapshot)) {
-        throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+        throw StateError(
+          'تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.',
+        );
       }
       if (jsonEncode(summaryBefore.values) != jsonEncode(summaryAfter.values)) {
-        throw StateError('تغيرت نتائج التقرير أثناء تحميل الصفحات؛ أُوقف التصدير لضمان اتساق المستند.');
+        throw StateError(
+          'تغيرت نتائج التقرير أثناء تحميل الصفحات؛ أُوقف التصدير لضمان اتساق المستند.',
+        );
       }
 
       final saved = await saveDetailedPdfUseCase(
@@ -1121,11 +1137,14 @@ class OperationalReportsController extends GetxController {
         scopeLabel: scopeSnapshot,
       );
 
-      if (saved && documentRevision == _documentActionRevision &&
-          scopeRevision == _scopeRevision && selectedType.value == type) {
+      if (saved &&
+          documentRevision == _documentActionRevision &&
+          scopeRevision == _scopeRevision &&
+          selectedType.value == type) {
         CustomSnackbar.show(
           title: 'تم إنشاء التقرير التفصيلي',
-          message: 'حُفظ ملف PDF شاملاً السجلات المطابقة وإعدادات العرض المحددة.',
+          message:
+              'حُفظ ملف PDF شاملاً السجلات المطابقة وإعدادات العرض المحددة.',
           type: SnackType.success,
         );
       }
@@ -1168,7 +1187,9 @@ class OperationalReportsController extends GetxController {
 
     do {
       if (documentRevision != _documentActionRevision) {
-        throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+        throw StateError(
+          'تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.',
+        );
       }
       final page = await getReportUseCase(
         type: type,
@@ -1179,24 +1200,32 @@ class OperationalReportsController extends GetxController {
         perPage: 50,
       );
       if (documentRevision != _documentActionRevision) {
-        throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
+        throw StateError(
+          'تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.',
+        );
       }
 
       for (final record in page.items) {
         final identity = _reportRecordIdentity(record, type);
         if (!seenIds.add(identity)) {
-          throw StateError('أعاد الخادم سجلاً مكرراً أثناء تصدير PDF؛ أُوقف إنشاء المستند.');
+          throw StateError(
+            'أعاد الخادم سجلاً مكرراً أثناء تصدير PDF؛ أُوقف إنشاء المستند.',
+          );
         }
         records.add(record);
         if (records.length > maxRows) {
-          throw StateError('يتجاوز التقرير الحد الآمن البالغ 1500 سجل لملف PDF؛ لم يتم إنشاء مستند جزئي.');
+          throw StateError(
+            'يتجاوز التقرير الحد الآمن البالغ 1500 سجل لملف PDF؛ لم يتم إنشاء مستند جزئي.',
+          );
         }
       }
 
       cursor = page.nextCursor?.trim();
       if (cursor != null && cursor.isEmpty) cursor = null;
       if (cursor != null && !seenCursors.add(cursor)) {
-        throw StateError('أعاد الخادم مؤشر صفحة مكرراً؛ أُوقف إنشاء التقرير لتجنب التكرار أو فقد السجلات.');
+        throw StateError(
+          'أعاد الخادم مؤشر صفحة مكرراً؛ أُوقف إنشاء التقرير لتجنب التكرار أو فقد السجلات.',
+        );
       }
     } while (cursor != null);
 
@@ -1214,15 +1243,20 @@ class OperationalReportsController extends GetxController {
       throw StateError('تغيرت إعدادات التقرير أثناء تجهيز PDF؛ أُوقف التصدير.');
     }
     final capturedLatest = records.isEmpty ? null : records.first;
-    final currentLatest = latestPage.items.isEmpty ? null : latestPage.items.first;
+    final currentLatest = latestPage.items.isEmpty
+        ? null
+        : latestPage.items.first;
     if (capturedLatest == null && currentLatest != null ||
         capturedLatest != null && currentLatest == null ||
         capturedLatest != null &&
             currentLatest != null &&
             (_reportRecordIdentity(capturedLatest, type) !=
                     _reportRecordIdentity(currentLatest, type) ||
-                jsonEncode(capturedLatest.values) != jsonEncode(currentLatest.values))) {
-      throw StateError('تغيرت أحدث سجلات التقرير أثناء التجهيز؛ لم يتم إنشاء PDF غير متزامن.');
+                jsonEncode(capturedLatest.values) !=
+                    jsonEncode(currentLatest.values))) {
+      throw StateError(
+        'تغيرت أحدث سجلات التقرير أثناء التجهيز؛ لم يتم إنشاء PDF غير متزامن.',
+      );
     }
 
     return records;
@@ -1246,7 +1280,9 @@ class OperationalReportsController extends GetxController {
     final presentationSnapshot = presentation.value;
     final organizationName = reportOrganizationName;
     final logoUrl = reportLogoUrl;
-    final filters = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final filters = List<OperationalReportFilterDisplay>.of(
+      activeFilterDisplays,
+    );
     final scopeLabel = reportScopeLabel;
     bool isCurrentAction() =>
         actionRevision == _documentActionRevision &&
@@ -1307,7 +1343,9 @@ class OperationalReportsController extends GetxController {
     final presentationSnapshot = presentation.value;
     final organizationName = reportOrganizationName;
     final logoUrl = reportLogoUrl;
-    final filters = List<OperationalReportFilterDisplay>.of(activeFilterDisplays);
+    final filters = List<OperationalReportFilterDisplay>.of(
+      activeFilterDisplays,
+    );
     final scopeLabel = reportScopeLabel;
     bool isCurrentAction() =>
         actionRevision == _documentActionRevision &&
@@ -1381,7 +1419,8 @@ class OperationalReportsController extends GetxController {
         }
 
         final type = selectedType.value;
-        final fileName = 'تقرير_${type?.wireValue ?? 'تشغيلي'}_${DateTime.now().millisecondsSinceEpoch}';
+        final fileName =
+            'تقرير_${type?.wireValue ?? 'تشغيلي'}_${DateTime.now().millisecondsSinceEpoch}';
         final result = await FileExportService.instance.saveFile(
           bytes: bytes,
           fileName: fileName,
@@ -1393,9 +1432,7 @@ class OperationalReportsController extends GetxController {
         );
         if (!isCurrentJob()) return;
         if (!result.isSuccess) {
-          throw AppException(
-            result.errorMessage ?? 'تعذر حفظ ملف التقرير.',
-          );
+          throw AppException(result.errorMessage ?? 'تعذر حفظ ملف التقرير.');
         }
         CustomSnackbar.show(
           title: 'اكتمل تصدير التقرير',
@@ -1405,7 +1442,8 @@ class OperationalReportsController extends GetxController {
       } else if (status.isFailed) {
         CustomSnackbar.show(
           title: 'فشل تجهيز التقرير',
-          message: status.failureCode ?? status.statusLabel ?? 'تعذر إنشاء الملف.',
+          message:
+              status.failureCode ?? status.statusLabel ?? 'تعذر إنشاء الملف.',
           type: SnackType.error,
         );
       } else {

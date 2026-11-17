@@ -34,7 +34,8 @@ class CustomCarouselIndicators extends StatelessWidget {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final effectiveActiveColor = activeColor ?? colors.primary;
-    final effectiveInactiveColor = inactiveColor ??
+    final effectiveInactiveColor =
+        inactiveColor ??
         (isDark
             ? Colors.white.withValues(alpha: 0.15)
             : colors.outlineVariant.withValues(alpha: 0.5));

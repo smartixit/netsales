@@ -67,9 +67,7 @@ class NetworkOperatingExpensesBinding extends Bindings {
       fenix: true,
     );
     Get.lazyPut<ExpenseDocumentUseCase>(
-      () => ExpenseDocumentUseCase(
-        Get.find<ExpenseDocumentRepository>(),
-      ),
+      () => ExpenseDocumentUseCase(Get.find<ExpenseDocumentRepository>()),
       fenix: true,
     );
 

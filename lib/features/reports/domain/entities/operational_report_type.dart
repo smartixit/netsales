@@ -11,8 +11,9 @@ final class OperationalReportType {
 
   static const sales = OperationalReportType('sales');
   static const expenses = OperationalReportType('expenses');
-  static const networkWallet =
-      OperationalReportType('network_wallet_statement');
+  static const networkWallet = OperationalReportType(
+    'network_wallet_statement',
+  );
   static const posWallet = OperationalReportType('pos_wallet_statement');
   static const repayments = OperationalReportType('repayments');
   static const debtAging = OperationalReportType('debt_aging');

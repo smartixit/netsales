@@ -16,10 +16,7 @@ import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 
 /// Composition-only content for the billing workspace.
 class BillingWorkspaceContent extends StatelessWidget {
-  const BillingWorkspaceContent({
-    super.key,
-    required this.controller,
-  });
+  const BillingWorkspaceContent({super.key, required this.controller});
 
   final BillingController controller;
 
@@ -27,7 +24,14 @@ class BillingWorkspaceContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       if (controller.isLoading.value && controller.account.value == null) {
-        return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 4, cardHeight: 112, ));
+        return const CustomStateView.loading(
+          presentation: CustomStatePresentation.skeletonOnly,
+          skeleton: CustomStateSkeleton(
+            layout: CustomStateSkeletonLayout.list,
+            itemCount: 4,
+            cardHeight: 112,
+          ),
+        );
       }
 
       if (controller.errorMessage.value != null &&
@@ -57,8 +61,9 @@ class BillingWorkspaceContent extends StatelessWidget {
                   text: 'تحديث',
                   prefix: Icons.refresh_rounded,
                   loading: controller.isLoading.value,
-                  onPressed:
-                      controller.isLoading.value ? null : controller.load,
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : controller.load,
                 ),
               ],
             ),

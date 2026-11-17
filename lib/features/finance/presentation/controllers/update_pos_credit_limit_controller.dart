@@ -8,9 +8,7 @@ import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class UpdatePosCreditLimitController extends GetxController {
-  UpdatePosCreditLimitController({
-    required this.updatePosCreditLimitUseCase,
-  });
+  UpdatePosCreditLimitController({required this.updatePosCreditLimitUseCase});
 
   final UpdatePosCreditLimitUseCase updatePosCreditLimitUseCase;
 
@@ -52,8 +50,7 @@ class UpdatePosCreditLimitController extends GetxController {
     if (text.isNotEmpty && (newLimit == null || newLimit < 0)) {
       CustomSnackbar.show(
         title: 'قيمة غير صالحة',
-        message:
-            'أدخل حداً ائتمانياً صحيحاً أكبر من أو يساوي صفر، أو اتركه فارغاً لإلغاء التسهيل.',
+        message: 'أدخل حداً ائتمانياً صحيحاً أكبر من أو يساوي صفر، أو اتركه فارغاً لإلغاء التسهيل.',
         type: SnackType.warning,
       );
       return;
@@ -110,4 +107,3 @@ class UpdatePosCreditLimitController extends GetxController {
     }
   }
 }
-

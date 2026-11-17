@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:netsales/core/constants/api_constants.dart';
@@ -77,7 +76,8 @@ class DocumentEngineBrandAssetService {
   }
 
   static bool _isPngOrJpeg(List<int> bytes) {
-    final png = bytes.length >= 8 &&
+    final png =
+        bytes.length >= 8 &&
         bytes[0] == 0x89 &&
         bytes[1] == 0x50 &&
         bytes[2] == 0x4E &&
@@ -86,7 +86,8 @@ class DocumentEngineBrandAssetService {
         bytes[5] == 0x0A &&
         bytes[6] == 0x1A &&
         bytes[7] == 0x0A;
-    final jpeg = bytes.length >= 3 &&
+    final jpeg =
+        bytes.length >= 3 &&
         bytes[0] == 0xFF &&
         bytes[1] == 0xD8 &&
         bytes[2] == 0xFF;

@@ -65,7 +65,8 @@ class WorkspaceService extends GetxService {
       return AppWorkspace.network;
     }
 
-    final preferred = preferredWorkspace ??
+    final preferred =
+        preferredWorkspace ??
         (currentWorkspace.value.name.isNotEmpty
             ? currentWorkspace.value.name
             : StorageService.instance.getString(

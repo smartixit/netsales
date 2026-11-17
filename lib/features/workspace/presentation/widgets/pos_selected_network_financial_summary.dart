@@ -36,7 +36,16 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (isLoading) {
-      return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 190, maxColumns: 1, minItemWidth: 180));
+      return const CustomStateView.loading(
+        presentation: CustomStatePresentation.skeletonOnly,
+        skeleton: CustomStateSkeleton(
+          layout: CustomStateSkeletonLayout.cards,
+          itemCount: 1,
+          cardHeight: 190,
+          maxColumns: 1,
+          minItemWidth: 180,
+        ),
+      );
     }
 
     if (error != null) {
@@ -45,9 +54,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
         decoration: BoxDecoration(
           color: colors.errorContainer.withValues(alpha: 0.22),
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: colors.error.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: colors.error.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -73,7 +80,9 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
     }
 
     final isOverdrawn = walletSummary.isOverdrawn;
-    final balanceColor = isOverdrawn ? const Color(0xFFF87171) : const Color(0xFF34D399);
+    final balanceColor = isOverdrawn
+        ? const Color(0xFFF87171)
+        : const Color(0xFF34D399);
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.md),
@@ -168,10 +177,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
               ),
               SizedBox(width: 8.w),
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 8.w,
-                  vertical: 3.5.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.5.h),
                 decoration: BoxDecoration(
                   color: isOverdrawn
                       ? const Color(0xFFEF4444).withValues(alpha: 0.18)
@@ -253,9 +259,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.08),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
             ),
             child: Row(
               children: [
@@ -325,9 +329,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.18),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

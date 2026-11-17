@@ -70,7 +70,9 @@ class CommercialBinding extends Bindings {
     registerLazyIfAbsent<GetNetworkDetailsUseCase>(
       () => GetNetworkDetailsUseCase(Get.find<CommercialRepository>()),
     );
-    registerLazyIfAbsent<GetPosDetailsUseCase>(() => GetPosDetailsUseCase(Get.find<CommercialRepository>()));
+    registerLazyIfAbsent<GetPosDetailsUseCase>(
+      () => GetPosDetailsUseCase(Get.find<CommercialRepository>()),
+    );
     registerLazyIfAbsent<UpdateNetworkDetailsUseCase>(
       () => UpdateNetworkDetailsUseCase(Get.find<CommercialRepository>()),
     );
@@ -100,7 +102,9 @@ class CommercialBinding extends Bindings {
 
     // 4. Geography (المحافظات والمديريات)
     if (!Get.isRegistered<AuthRemoteDataSource>()) {
-      registerLazyIfAbsent<AuthRemoteDataSource>(() => const AuthRemoteDataSourceImpl());
+      registerLazyIfAbsent<AuthRemoteDataSource>(
+        () => const AuthRemoteDataSourceImpl(),
+      );
     }
     if (!Get.isRegistered<AuthRepository>()) {
       registerLazyIfAbsent<AuthRepository>(
@@ -108,10 +112,14 @@ class CommercialBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<GetGovernoratesUseCase>()) {
-      registerLazyIfAbsent<GetGovernoratesUseCase>(() => GetGovernoratesUseCase(Get.find<AuthRepository>()));
+      registerLazyIfAbsent<GetGovernoratesUseCase>(
+        () => GetGovernoratesUseCase(Get.find<AuthRepository>()),
+      );
     }
     if (!Get.isRegistered<GetDirectoratesUseCase>()) {
-      registerLazyIfAbsent<GetDirectoratesUseCase>(() => GetDirectoratesUseCase(Get.find<AuthRepository>()));
+      registerLazyIfAbsent<GetDirectoratesUseCase>(
+        () => GetDirectoratesUseCase(Get.find<AuthRepository>()),
+      );
     }
 
     // 5. Controller

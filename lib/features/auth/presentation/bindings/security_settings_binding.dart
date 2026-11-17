@@ -22,4 +22,3 @@ class SecuritySettingsBinding extends Bindings {
     );
   }
 }
-

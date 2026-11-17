@@ -27,6 +27,8 @@ class ProcurementCartLineEntity {
     return '$desc  •  $voucherCount كرت';
   }
 
-  @Deprecated('استخدم sheetDescription أو fullQuantityLabel لضمان الدقة اللغوية وتجنب الكسور العشرية غير المنطقية')
+  @Deprecated(
+    'استخدم sheetDescription أو fullQuantityLabel لضمان الدقة اللغوية وتجنب الكسور العشرية غير المنطقية',
+  )
   String get sheetsLabel => sheetDescription;
 }

@@ -27,7 +27,7 @@ class OfficialDocumentArtifactService {
         'document_type': documentType,
         'document_id': documentId,
         'network_id': networkId,
-        ...? (posId == null ? null : {'pos_id': posId}),
+        ...?(posId == null ? null : {'pos_id': posId}),
         'template_id': templateId,
         'template_version': templateVersion,
       },
@@ -53,9 +53,7 @@ class OfficialDocumentArtifactService {
     requireCurrencyCode(snapshot);
     final snapshotUuid = snapshot['snapshot_uuid']?.toString();
     final source = snapshot['source_snapshot'];
-    if (snapshotUuid == null ||
-        snapshotUuid.isEmpty ||
-        source is! Map) {
+    if (snapshotUuid == null || snapshotUuid.isEmpty || source is! Map) {
       throw const AppException(
         'أعاد الخادم لقطة مستند غير مكتملة.',
         code: 'OFFICIAL_DOCUMENT_SNAPSHOT_INVALID',
@@ -68,8 +66,7 @@ class OfficialDocumentArtifactService {
   /// Validates the ISO-4217 currency code supplied by the API snapshot.
   String requireCurrencyCode(Map<String, dynamic> snapshot) {
     final value = snapshot['currency_code'];
-    if (value is! String ||
-        !RegExp(r'^[A-Z]{3}$').hasMatch(value.trim())) {
+    if (value is! String || !RegExp(r'^[A-Z]{3}$').hasMatch(value.trim())) {
       throw const AppException(
         'لقطة المستند لا تحتوي رمز عملة تشغيلية صالحاً.',
         code: 'OFFICIAL_DOCUMENT_CURRENCY_INVALID',
@@ -79,9 +76,7 @@ class OfficialDocumentArtifactService {
   }
 
   /// Downloads the canonical artifact only when the server marks it ready.
-  Future<Uint8List?> downloadIfReady(
-    Map<String, dynamic> snapshot,
-  ) async {
+  Future<Uint8List?> downloadIfReady(Map<String, dynamic> snapshot) async {
     if (snapshot['artifact_ready'] != true) return null;
 
     final snapshotUuid = snapshot['snapshot_uuid']?.toString();
@@ -117,22 +112,22 @@ class OfficialDocumentArtifactService {
       );
     }
 
-    final response =
-        await ApiService.instance.uploadBytes<Map<String, dynamic>>(
-      ApiConstants.operationalDocumentSnapshotArtifact(snapshotUuid),
-      bytes: pdfBytes,
-      fileName: fileName.toLowerCase().endsWith('.pdf')
-          ? fileName
-          : '$fileName.pdf',
-      fileField: 'artifact',
-      idempotencyKey: 'document-artifact-$snapshotUuid',
-      fromJson: (json) {
-        if (json is! Map) {
-          throw const FormatException('استجابة ملف المستند غير صالحة.');
-        }
-        return Map<String, dynamic>.from(json);
-      },
-    );
+    final response = await ApiService.instance
+        .uploadBytes<Map<String, dynamic>>(
+          ApiConstants.operationalDocumentSnapshotArtifact(snapshotUuid),
+          bytes: pdfBytes,
+          fileName: fileName.toLowerCase().endsWith('.pdf')
+              ? fileName
+              : '$fileName.pdf',
+          fileField: 'artifact',
+          idempotencyKey: 'document-artifact-$snapshotUuid',
+          fromJson: (json) {
+            if (json is! Map) {
+              throw const FormatException('استجابة ملف المستند غير صالحة.');
+            }
+            return Map<String, dynamic>.from(json);
+          },
+        );
 
     if (!response.success ||
         response.data == null ||

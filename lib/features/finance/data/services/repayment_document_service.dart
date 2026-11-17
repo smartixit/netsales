@@ -17,8 +17,7 @@ import 'package:printing/printing.dart';
 class RepaymentDocumentService {
   RepaymentDocumentService._();
 
-  static final RepaymentDocumentService instance =
-      RepaymentDocumentService._();
+  static final RepaymentDocumentService instance = RepaymentDocumentService._();
 
   Future<Uint8List> generatePdf(PosRepaymentEntity repayment) async {
     final snapshots = OfficialDocumentArtifactService.instance;
@@ -75,42 +74,42 @@ class RepaymentDocumentService {
 
     final snapshot = _buildSnapshot(repayment, reference, currencyCode);
     final generatedAt = DateTime.now();
-    final result = await PdfDocumentRenderer(
-      textShapingProvider: await fontService.arabicTextShapingProvider(),
-    ).render(
-      snapshot: snapshot,
-      template: _template,
-      options: DocumentRenderOptions(
-        pageProfile: DocumentPageProfile.a5Portrait(
-          marginTop: 28,
-          marginRight: 26,
-          marginBottom: 30,
-          marginLeft: 26,
-        ),
-        generatedAt: generatedAt,
-        showPageNumbers: true,
-        headerText: '$organizationName · سند سداد',
-        footerText: 'مستند صادر عن NetSales — بيانات السداد والتسويات من الخادم',
-        watermark: DocumentWatermark(
-          imageBytes: logoBytes,
-          opacity: 0.075,
-          angleRadians: -0.6108652381980153,
-          widthFactor: 0.58,
-          heightFactor: 0.46,
-        ),
-        branding: branding,
-        maxPages: 100,
-      ),
-    );
+    final result =
+        await PdfDocumentRenderer(
+          textShapingProvider: await fontService.arabicTextShapingProvider(),
+        ).render(
+          snapshot: snapshot,
+          template: _template,
+          options: DocumentRenderOptions(
+            pageProfile: DocumentPageProfile.a5Portrait(
+              marginTop: 28,
+              marginRight: 26,
+              marginBottom: 30,
+              marginLeft: 26,
+            ),
+            generatedAt: generatedAt,
+            showPageNumbers: true,
+            headerText: '$organizationName · سند سداد',
+            footerText:
+                'مستند صادر عن NetSales — بيانات السداد والتسويات من الخادم',
+            watermark: DocumentWatermark(
+              imageBytes: logoBytes,
+              opacity: 0.075,
+              angleRadians: -0.6108652381980153,
+              widthFactor: 0.58,
+              heightFactor: 0.46,
+            ),
+            branding: branding,
+            maxPages: 100,
+          ),
+        );
 
     if (result is DocumentRenderSuccess) return result.artifact.bytes;
     if (result is DocumentRenderFailure) throw StateError(result.message);
     throw StateError('تعذر إنشاء سند السداد.');
   }
 
-  Future<FileExportResult> exportAndSave(
-    PosRepaymentEntity repayment,
-  ) async {
+  Future<FileExportResult> exportAndSave(PosRepaymentEntity repayment) async {
     final bytes = await generatePdf(repayment);
     return FileExportService.instance.saveFile(
       bytes: bytes,
@@ -176,7 +175,8 @@ class RepaymentDocumentService {
           value: DocumentTextValue(repayment.createdByName!.trim()),
           direction: DocumentTextDirection.rightToLeft,
         ),
-      if (status == RepaymentStatus.reversed && _hasText(repayment.reversedByName))
+      if (status == RepaymentStatus.reversed &&
+          _hasText(repayment.reversedByName))
         DocumentInfoItem(
           label: 'عكس السند بواسطة',
           value: DocumentTextValue(repayment.reversedByName!.trim()),
@@ -201,7 +201,8 @@ class RepaymentDocumentService {
         value: DocumentTextValue(currencyCode),
         direction: DocumentTextDirection.leftToRight,
       ),
-      if (status == RepaymentStatus.reversed && repayment.reversalRepaymentId != null)
+      if (status == RepaymentStatus.reversed &&
+          repayment.reversalRepaymentId != null)
         DocumentInfoItem(
           label: 'مرجع قيد العكس',
           value: DocumentTextValue('#${repayment.reversalRepaymentId}'),
@@ -224,35 +225,41 @@ class RepaymentDocumentService {
       if (repayment.posBalanceAfter != null)
         DocumentInfoItem(
           label: 'رصيد نقطة البيع بعد السداد',
-          value: DocumentTextValue(_money(repayment.posBalanceAfter!, currencyCode)),
+          value: DocumentTextValue(
+            _money(repayment.posBalanceAfter!, currencyCode),
+          ),
           direction: DocumentTextDirection.leftToRight,
         ),
     ];
 
-    final allocationRows = repayment.allocations.indexed.map((entry) {
-      final allocation = entry.$2;
-      return DocumentTableRow(
-        id: 'allocation-${allocation.allocationId}',
-        cells: [
-          DocumentTableCell(
-            value: DocumentTextValue(allocation.invoice.invoiceUuid),
-            direction: DocumentTextDirection.leftToRight,
-          ),
-          DocumentTableCell(
-            value: DocumentTextValue(_money(allocation.allocatedAmount, currencyCode)),
-            direction: DocumentTextDirection.leftToRight,
-          ),
-          DocumentTableCell(
-            value: DocumentTextValue(allocation.invoice.invoiceDate),
-            direction: DocumentTextDirection.leftToRight,
-          ),
-          DocumentTableCell(
-            value: DocumentTextValue(allocation.invoice.paymentStatusLabel),
-            direction: DocumentTextDirection.rightToLeft,
-          ),
-        ],
-      );
-    }).toList(growable: false);
+    final allocationRows = repayment.allocations.indexed
+        .map((entry) {
+          final allocation = entry.$2;
+          return DocumentTableRow(
+            id: 'allocation-${allocation.allocationId}',
+            cells: [
+              DocumentTableCell(
+                value: DocumentTextValue(allocation.invoice.invoiceUuid),
+                direction: DocumentTextDirection.leftToRight,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(
+                  _money(allocation.allocatedAmount, currencyCode),
+                ),
+                direction: DocumentTextDirection.leftToRight,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(allocation.invoice.invoiceDate),
+                direction: DocumentTextDirection.leftToRight,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(allocation.invoice.paymentStatusLabel),
+                direction: DocumentTextDirection.rightToLeft,
+              ),
+            ],
+          );
+        })
+        .toList(growable: false);
 
     final nodes = <DocumentNode>[
       DocumentHeading(
@@ -348,7 +355,8 @@ class RepaymentDocumentService {
           languageTag: 'ar-YE',
           direction: DocumentTextDirection.rightToLeft,
         ),
-        createdAt: _parseDate(repayment.repaymentDate) ??
+        createdAt:
+            _parseDate(repayment.repaymentDate) ??
             _parseDate(repayment.createdAt) ??
             DateTime.now(),
       ),
@@ -387,7 +395,8 @@ class RepaymentDocumentService {
   static String _fileName(PosRepaymentEntity repayment) =>
       'سند_سداد_${_reference(repayment)}';
 
-  static String _amount(double value) => AmountFormatter.format(value.toString());
+  static String _amount(double value) =>
+      AmountFormatter.format(value.toString());
 
   static String _money(double value, String currencyCode) =>
       '${_amount(value)} $currencyCode';
@@ -405,6 +414,8 @@ class RepaymentDocumentService {
     return DateTime.tryParse(normalized);
   }
 
-  static String _colorHex(Color color) =>
-      (color.toARGB32() & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase();
+  static String _colorHex(Color color) => (color.toARGB32() & 0x00FFFFFF)
+      .toRadixString(16)
+      .padLeft(6, '0')
+      .toUpperCase();
 }

@@ -110,9 +110,9 @@ class PosRepaymentModel extends PosRepaymentEntity {
 
     String? networkLogoUrl;
     if (json['network'] is Map<String, dynamic>) {
-      networkLogoUrl = (json['network'] as Map<String, dynamic>)[
-        'network_profile_logo'
-      ] as String?;
+      networkLogoUrl =
+          (json['network'] as Map<String, dynamic>)['network_profile_logo']
+              as String?;
     }
 
     final creator = json['created_by_user'];

@@ -81,7 +81,9 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                           iconSize: 18,
                           dimension: 36,
                           backgroundColor: Colors.transparent,
-                          foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                          foregroundColor: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant,
                           onPressed: () {
                             controller.searchController.clear();
                           },
@@ -89,7 +91,7 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                       : null,
                   label: 'بحث في الإشعارات...',
                 ),
-               AppSpacing.vSm,
+                AppSpacing.vSm,
                 Obx(() {
                   final activeFilter = controller.selectedFilter.value;
                   return Row(
@@ -124,16 +126,19 @@ class NotificationCenterScreen extends GetView<NotificationController> {
           AppSpacing.vSm,
 
           // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
-           Obx(
-              () => CustomResultsCounterBar(
-                count: controller.notifications.length,
-                recordLabel: 'إشعار',
-                isFiltered: controller.searchQuery.value.isNotEmpty ||
-                    controller.selectedFilter.value != null,
-                isLoading: controller.isLoading.value && controller.notifications.isEmpty,
-                onClear: controller.resetFilters,
-              ),
+          Obx(
+            () => CustomResultsCounterBar(
+              count: controller.notifications.length,
+              recordLabel: 'إشعار',
+              isFiltered:
+                  controller.searchQuery.value.isNotEmpty ||
+                  controller.selectedFilter.value != null,
+              isLoading:
+                  controller.isLoading.value &&
+                  controller.notifications.isEmpty,
+              onClear: controller.resetFilters,
             ),
+          ),
 
           // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
           Padding(
@@ -145,9 +150,12 @@ class NotificationCenterScreen extends GetView<NotificationController> {
               () => CustomResultsCounterBar(
                 count: controller.notifications.length,
                 recordLabel: 'إشعار',
-                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                isFiltered:
+                    controller.searchQuery.value.isNotEmpty ||
                     controller.selectedFilter.value != null,
-                isLoading: controller.isLoading.value && controller.notifications.isEmpty,
+                isLoading:
+                    controller.isLoading.value &&
+                    controller.notifications.isEmpty,
                 onClear: controller.resetFilters,
               ),
             ),
@@ -158,7 +166,14 @@ class NotificationCenterScreen extends GetView<NotificationController> {
             child: Obx(() {
               if (controller.isLoading.value &&
                   controller.notifications.isEmpty) {
-                return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 112, ));
+                return const CustomStateView.loading(
+                  presentation: CustomStatePresentation.skeletonOnly,
+                  skeleton: CustomStateSkeleton(
+                    layout: CustomStateSkeletonLayout.list,
+                    itemCount: 3,
+                    cardHeight: 112,
+                  ),
+                );
               }
 
               if (controller.errorMessage.value != null &&
@@ -208,7 +223,16 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                             horizontal: AppSpacing.md,
                             vertical: AppSpacing.xs,
                           ),
-                          child: CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 72.h, maxColumns: 1, minItemWidth: 180)),
+                          child: CustomStateView.loading(
+                            presentation: CustomStatePresentation.skeletonOnly,
+                            skeleton: CustomStateSkeleton(
+                              layout: CustomStateSkeletonLayout.cards,
+                              itemCount: 1,
+                              cardHeight: 72.h,
+                              maxColumns: 1,
+                              minItemWidth: 180,
+                            ),
+                          ),
                         );
                       }
 

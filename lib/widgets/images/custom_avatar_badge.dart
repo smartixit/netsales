@@ -57,10 +57,8 @@ class CustomAvatarBadge extends StatelessWidget {
       (effectiveRadius.topLeft.x - 1.5).clamp(2.0, 99.0),
     );
 
-    final effectiveGradients = gradientColors ?? [
-      colors.primary,
-      colors.secondary,
-    ];
+    final effectiveGradients =
+        gradientColors ?? [colors.primary, colors.secondary];
 
     Widget content = Stack(
       clipBehavior: Clip.none,

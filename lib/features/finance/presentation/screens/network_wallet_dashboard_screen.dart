@@ -64,7 +64,8 @@ class NetworkWalletDashboardScreen
                 );
               }),
               Obx(() {
-                if (controller.selectedWallet.value == null) return const SizedBox.shrink();
+                if (controller.selectedWallet.value == null)
+                  return const SizedBox.shrink();
                 return Padding(
                   padding: EdgeInsets.only(top: AppSpacing.sm),
                   child: CustomButton.outline(
@@ -89,7 +90,14 @@ class NetworkWalletDashboardScreen
                 child: Obx(() {
                   if (controller.isLoadingLogs.value &&
                       controller.logs.isEmpty) {
-                    return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 112, ));
+                    return const CustomStateView.loading(
+                      presentation: CustomStatePresentation.skeletonOnly,
+                      skeleton: CustomStateSkeleton(
+                        layout: CustomStateSkeletonLayout.list,
+                        itemCount: 3,
+                        cardHeight: 112,
+                      ),
+                    );
                   }
 
                   if (controller.logs.isEmpty &&
@@ -169,4 +177,3 @@ class NetworkWalletDashboardScreen
     );
   }
 }
-

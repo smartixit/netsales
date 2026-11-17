@@ -12,43 +12,45 @@ class NetworkProviderCardMapper {
     required int? selectedNetworkId,
     required NetworkWorkspaceOverviewEntity? overview,
   }) {
-    return List.unmodifiable(networks.toList().asMap().entries.map((entry) {
-      final network = entry.value;
-      final isSelected = network.networkId == selectedNetworkId;
-      final locationParts = [
-        if (network.governorateName?.isNotEmpty == true)
-          network.governorateName!,
-        if (network.directorateName?.isNotEmpty == true)
-          network.directorateName!,
-      ];
-      return NetworkProviderCardViewModel(
-        networkId: network.networkId,
-        networkName: network.networkName,
-        logoUrl: network.networkProfileLogoUrl,
-        avatarInitial: TextFormatter.avatarInitial(
-          network.networkName,
-          fallback: 'ش',
-        ),
-        subtitle: locationParts.isEmpty
-            ? 'شبكة مصرحة ومعتمدة'
-            : locationParts.join(' • '),
-        networkCode: network.networkUuid ?? '',
-        ownerDisplay: TextFormatter.firstAndLast(
-          network.ownerName,
-          fallback: 'المزود المعتمد',
-        ),
-        isActive: network.isActive,
-        salesValue: NetworkWorkspaceDashboardMapper.formatNetworkSales(
-          overview,
+    return List.unmodifiable(
+      networks.toList().asMap().entries.map((entry) {
+        final network = entry.value;
+        final isSelected = network.networkId == selectedNetworkId;
+        final locationParts = [
+          if (network.governorateName?.isNotEmpty == true)
+            network.governorateName!,
+          if (network.directorateName?.isNotEmpty == true)
+            network.directorateName!,
+        ];
+        return NetworkProviderCardViewModel(
+          networkId: network.networkId,
+          networkName: network.networkName,
+          logoUrl: network.networkProfileLogoUrl,
+          avatarInitial: TextFormatter.avatarInitial(
+            network.networkName,
+            fallback: 'ش',
+          ),
+          subtitle: locationParts.isEmpty
+              ? 'شبكة مصرحة ومعتمدة'
+              : locationParts.join(' • '),
+          networkCode: network.networkUuid ?? '',
+          ownerDisplay: TextFormatter.firstAndLast(
+            network.ownerName,
+            fallback: 'المزود المعتمد',
+          ),
+          isActive: network.isActive,
+          salesValue: NetworkWorkspaceDashboardMapper.formatNetworkSales(
+            overview,
+            isSelected: isSelected,
+          ),
+          posCountText: NetworkWorkspaceDashboardMapper.formatNetworkPosCount(
+            overview,
+            isSelected: isSelected,
+          ),
           isSelected: isSelected,
-        ),
-        posCountText: NetworkWorkspaceDashboardMapper.formatNetworkPosCount(
-          overview,
-          isSelected: isSelected,
-        ),
-        isSelected: isSelected,
-        cardIndex: entry.key,
-      );
-    }));
+          cardIndex: entry.key,
+        );
+      }),
+    );
   }
 }

@@ -10,9 +10,7 @@ class RequestModificationSummaryModel extends RequestModificationSummaryEntity {
     required super.approvedItemsCount,
   });
 
-  factory RequestModificationSummaryModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory RequestModificationSummaryModel.fromJson(Map<String, dynamic> json) {
     final hasModifications = json['has_modifications'];
     final originalTotal = json['original_total'];
     final approvedTotal = json['approved_total'];

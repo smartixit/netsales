@@ -44,23 +44,28 @@ class ProcurementPackageOptionCard extends StatelessWidget {
   static const _emerald = Color(0xFF087B61);
   static const _deepEmerald = Color(0xFF064F43);
 
-  double get _basePrice => customDiscount?.originalPackagePrice ??
+  double get _basePrice =>
+      customDiscount?.originalPackagePrice ??
       (package.procurementBaseUnitPriceMinor != null
           ? package.procurementBaseUnitPriceMinor! / 100
           : package.packageVoucherPrice);
-  double get _cashPrice => customDiscount?.effectiveCashPrice ??
+  double get _cashPrice =>
+      customDiscount?.effectiveCashPrice ??
       (package.procurementCashUnitPriceMinor != null
           ? package.procurementCashUnitPriceMinor! / 100
           : package.effectiveCashPrice);
-  double get _creditPrice => customDiscount?.effectiveCreditPrice ??
+  double get _creditPrice =>
+      customDiscount?.effectiveCreditPrice ??
       (package.procurementCreditUnitPriceMinor != null
           ? package.procurementCreditUnitPriceMinor! / 100
           : package.effectiveCreditPrice);
-  double get _cashDiscount => customDiscount?.discountCash ??
+  double get _cashDiscount =>
+      customDiscount?.discountCash ??
       (package.procurementCashDiscountBasisPoints != null
           ? package.procurementCashDiscountBasisPoints! / 100
           : package.packageDefaultCashDiscount);
-  double get _creditDiscount => customDiscount?.discountCredit ??
+  double get _creditDiscount =>
+      customDiscount?.discountCredit ??
       (package.procurementCreditDiscountBasisPoints != null
           ? package.procurementCreditDiscountBasisPoints! / 100
           : package.packageDefaultCreditDiscount);
@@ -232,10 +237,10 @@ class _PackageHero extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 isCustomDiscount
-                                    ? 'خصم نقطة البيع'
+                                    ? 'خصم خاص'
                                     : discount > 0
-                                        ? 'عرض الباقة'
-                                        : 'باقة الشبكة',
+                                    ? 'خصم افتراضي'
+                                    : 'باقة الشبكة',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.labelSmall.copyWith(
@@ -403,10 +408,7 @@ class _VoucherTicketPainter extends CustomPainter {
     );
     final ticket = Path()
       ..addRRect(
-        RRect.fromRectAndRadius(
-          ticketRect,
-          Radius.circular(size.width * .10),
-        ),
+        RRect.fromRectAndRadius(ticketRect, Radius.circular(size.width * .10)),
       );
     final perforationX = size.width * .72;
     final cutouts = Path()
@@ -451,7 +453,11 @@ class _VoucherTicketPainter extends CustomPainter {
       ..color = const Color(0xFF087B61).withValues(alpha: .58)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
-    for (var y = size.height * .18; y < size.height * .84; y += size.height * .09) {
+    for (
+      var y = size.height * .18;
+      y < size.height * .84;
+      y += size.height * .09
+    ) {
       canvas.drawLine(
         Offset(perforationX, y),
         Offset(perforationX, y + size.height * .035),
@@ -472,13 +478,25 @@ class _VoucherTicketPainter extends CustomPainter {
     );
     final seal = Path()
       ..moveTo(sealCenter.dx, sealCenter.dy - size.width * .045)
-      ..lineTo(sealCenter.dx + size.width * .012, sealCenter.dy - size.width * .012)
+      ..lineTo(
+        sealCenter.dx + size.width * .012,
+        sealCenter.dy - size.width * .012,
+      )
       ..lineTo(sealCenter.dx + size.width * .047, sealCenter.dy)
-      ..lineTo(sealCenter.dx + size.width * .012, sealCenter.dy + size.width * .012)
+      ..lineTo(
+        sealCenter.dx + size.width * .012,
+        sealCenter.dy + size.width * .012,
+      )
       ..lineTo(sealCenter.dx, sealCenter.dy + size.width * .047)
-      ..lineTo(sealCenter.dx - size.width * .012, sealCenter.dy + size.width * .012)
+      ..lineTo(
+        sealCenter.dx - size.width * .012,
+        sealCenter.dy + size.width * .012,
+      )
       ..lineTo(sealCenter.dx - size.width * .047, sealCenter.dy)
-      ..lineTo(sealCenter.dx - size.width * .012, sealCenter.dy - size.width * .012)
+      ..lineTo(
+        sealCenter.dx - size.width * .012,
+        sealCenter.dy - size.width * .012,
+      )
       ..close();
     canvas.drawPath(seal, Paint()..color = const Color(0xFF98702B));
 
@@ -882,11 +900,8 @@ class _SpecificationDivider extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: 1,
-        height: 49.r,
-        color: color.withValues(alpha: .72),
-      );
+  Widget build(BuildContext context) =>
+      Container(width: 1, height: 49.r, color: color.withValues(alpha: .72));
 }
 
 class _QuantityControls extends StatelessWidget {
@@ -1058,7 +1073,11 @@ class _PaperEquivalent extends StatelessWidget {
 }
 
 class _LineTotal extends StatelessWidget {
-  const _LineTotal({required this.line, required this.estimatedLineTotalMinor, required this.selected});
+  const _LineTotal({
+    required this.line,
+    required this.estimatedLineTotalMinor,
+    required this.selected,
+  });
   final ProcurementQuoteLineEntity? line;
   final int? estimatedLineTotalMinor;
   final bool selected;
@@ -1096,7 +1115,14 @@ class _LineTotal extends StatelessWidget {
           if (estimatedLineTotalMinor != null)
             FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text('${AmountFormatter.format((estimatedLineTotalMinor! / 100).toStringAsFixed(2))} ر.ي', textDirection: TextDirection.ltr, style: AppTypography.currencyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+              child: Text(
+                '${AmountFormatter.format((estimatedLineTotalMinor! / 100).toStringAsFixed(2))} ر.ي',
+                textDirection: TextDirection.ltr,
+                style: AppTypography.currencyMedium.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             )
           else if (line != null)
             FittedBox(

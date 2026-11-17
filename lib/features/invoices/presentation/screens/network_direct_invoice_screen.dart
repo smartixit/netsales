@@ -41,7 +41,14 @@ class NetworkDirectInvoiceScreen
             controller.authorizedNetworks.isEmpty) {
           return Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),
-            child: const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 90, )),
+            child: const CustomStateView.loading(
+              presentation: CustomStatePresentation.skeletonOnly,
+              skeleton: CustomStateSkeleton(
+                layout: CustomStateSkeletonLayout.list,
+                itemCount: 3,
+                cardHeight: 90,
+              ),
+            ),
           );
         }
 
@@ -177,8 +184,7 @@ class NetworkDirectInvoiceScreen
                 AppSpacing.vLg,
                 const DirectInvoiceSectionHeading(
                   title: 'باقات الكروت والكميات',
-                  description:
-                      'أدخل عدد الكروت المطلوب لكل باقة، ثم أضفها إلى الفاتورة.',
+                  description: 'أدخل عدد الكروت المطلوب لكل باقة، ثم أضفها إلى الفاتورة.',
                 ),
                 AppSpacing.vSm,
                 Obx(() {
@@ -208,7 +214,9 @@ class NetworkDirectInvoiceScreen
                     searchEnabled: controller.availablePackages.length > 5,
                     items: controller.availablePackages
                         .map((package) {
-                          final pkgColor = CustomColorPicker.parseHex(package.packageColor);
+                          final pkgColor = CustomColorPicker.parseHex(
+                            package.packageColor,
+                          );
                           return DropdownItem<int>(
                             value: package.packageId,
                             child: Row(
@@ -281,8 +289,7 @@ class NetworkDirectInvoiceScreen
                 AppSpacing.vLg,
                 const DirectInvoiceSectionHeading(
                   title: 'طريقة البيع',
-                  description:
-                      'اختر نوع الفاتورة؛ يتم التحقق من الرصيد والسقف الائتماني لدى الخادم.',
+                  description: 'اختر نوع الفاتورة؛ يتم التحقق من الرصيد والسقف الائتماني لدى الخادم.',
                 ),
                 AppSpacing.vSm,
                 Obx(
@@ -333,4 +340,3 @@ class NetworkDirectInvoiceScreen
     );
   }
 }
-

@@ -56,5 +56,6 @@ abstract final class StorageKeys {
   static const String lastServerCatchupRun = 'last_server_catchup_run_ms';
 
   /// عدد مرات الفشل المتتالية لاستدعاء مهام السيرفر لحساب التراجع الأسي (Circuit Breaker)
-  static const String serverCatchupFailuresCount = 'server_catchup_failures_count';
+  static const String serverCatchupFailuresCount =
+      'server_catchup_failures_count';
 }

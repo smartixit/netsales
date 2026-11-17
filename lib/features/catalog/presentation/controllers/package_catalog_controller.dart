@@ -142,7 +142,9 @@ class PackageCatalogController extends GetxController {
     try {
       final networks = await getMyNetworksUseCase!();
       authorizedNetworks.assignAll(networks);
-      final networkIds = networks.map((n) => n.networkId).toList(growable: false);
+      final networkIds = networks
+          .map((n) => n.networkId)
+          .toList(growable: false);
       final resolvedId = WorkspaceService.to.resolveActiveNetworkId(networkIds);
       if (formNetworkId.value == null && resolvedId != null) {
         formNetworkId.value = resolvedId;

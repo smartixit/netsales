@@ -17,8 +17,7 @@ class TwoFactorDisableDialog extends StatelessWidget {
     await CustomDialog.show(
       type: DialogType.warning,
       title: 'تعطيل المصادقة الثنائية',
-      message:
-          'تعطيل هذه الميزة يقلل من أمان حسابك ويسمح بالدخول بكلمة المرور فقط دون رمز التحقق الإضافي.',
+      message: 'تعطيل هذه الميزة يقلل من أمان حسابك ويسمح بالدخول بكلمة المرور فقط دون رمز التحقق الإضافي.',
       confirmLabel: 'تأكيد التعطيل',
       cancelLabel: 'إلغاء',
       onConfirm: controller.submitDisable2fa,

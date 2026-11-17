@@ -73,9 +73,8 @@ class OperationalReportFilterField extends StatelessWidget {
           label: label,
           value: selected,
           isRequired: definition.required,
-          onChanged: (date) => onChanged(
-            date == null ? null : ReportDateFilterValue(date),
-          ),
+          onChanged: (date) =>
+              onChanged(date == null ? null : ReportDateFilterValue(date)),
         );
 
       case ReportFilterKind.dateRange:
@@ -109,8 +108,8 @@ class OperationalReportFilterField extends StatelessWidget {
 
       case ReportFilterKind.boolean:
         final currentValue = value;
-        final enabled = currentValue is ReportBooleanFilterValue &&
-            currentValue.value;
+        final enabled =
+            currentValue is ReportBooleanFilterValue && currentValue.value;
         return Row(
           children: [
             Expanded(child: Text(label)),
@@ -128,10 +127,7 @@ class OperationalReportFilterField extends StatelessWidget {
           isRequired: definition.required,
           rxValue: choiceValue,
           items: [
-            const DropdownItem<String>(
-              value: '',
-              child: Text('الكل'),
-            ),
+            const DropdownItem<String>(value: '', child: Text('الكل')),
             ...definition.choices.map(
               (choice) => DropdownItem<String>(
                 value: choice.value,
@@ -159,27 +155,29 @@ class OperationalReportFilterField extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: definition.choices.map((choice) {
-                final active = selected.contains(choice.value);
-                return CustomFilterChip(
-                  label: resolveLabel(context, choice.labelKey),
-                  isSelected: active,
-                  onSelected: () {
-                    final next = <String>{...selected};
-                    if (active) {
-                      next.remove(choice.value);
-                    } else {
-                      next.add(choice.value);
-                    }
-                    onChanged(
-                      next.isEmpty
-                          ? null
-                          : ReportChoicesFilterValue(next.toList()..sort()),
+              children: definition.choices
+                  .map((choice) {
+                    final active = selected.contains(choice.value);
+                    return CustomFilterChip(
+                      label: resolveLabel(context, choice.labelKey),
+                      isSelected: active,
+                      onSelected: () {
+                        final next = <String>{...selected};
+                        if (active) {
+                          next.remove(choice.value);
+                        } else {
+                          next.add(choice.value);
+                        }
+                        onChanged(
+                          next.isEmpty
+                              ? null
+                              : ReportChoicesFilterValue(next.toList()..sort()),
+                        );
+                      },
+                      isCompact: true,
                     );
-                  },
-                  isCompact: true,
-                );
-              }).toList(growable: false),
+                  })
+                  .toList(growable: false),
             ),
           ],
         );

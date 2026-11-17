@@ -43,15 +43,14 @@ class MembershipScreen extends GetWidget<MembershipController> {
               .toList();
     if (controller.isLoadingTenants.value) {
       return const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-);
+        presentation: CustomStatePresentation.skeletonOnly,
+        skeleton: CustomStateSkeleton(
+          layout: CustomStateSkeletonLayout.list,
+          itemCount: 3,
+          cardHeight: 112,
+          hasLeading: true,
+        ),
+      );
     }
     if (controller.errorMessage.value != null && tenants.isEmpty) {
       return CustomErrorState(
@@ -104,15 +103,14 @@ class MembershipScreen extends GetWidget<MembershipController> {
             if (controller.selectedTenantId.value != null &&
                 controller.isLoading.value)
               const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-)
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 3,
+                  cardHeight: 112,
+                  hasLeading: true,
+                ),
+              )
             else if (controller.selectedTenantId.value != null &&
                 controller.errorMessage.value != null)
               CustomErrorState.boxed(

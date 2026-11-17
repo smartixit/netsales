@@ -45,7 +45,8 @@ class PosProcurementController extends GetxController {
   final GetMyPosUseCase? getMyPosUseCase;
   final GetPosNetworksListUseCase? getPosNetworksListUseCase;
   final GetPackagesUseCase? getPackagesUseCase;
-  final GetEffectivePackageDiscountsForPosUseCase? getEffectivePackageDiscountsForPosUseCase;
+  final GetEffectivePackageDiscountsForPosUseCase?
+  getEffectivePackageDiscountsForPosUseCase;
   final GetProcurementQuoteUseCase? getProcurementQuoteUseCase;
   final ProcurementEstimateCalculator procurementEstimateCalculator;
 
@@ -128,6 +129,7 @@ class PosProcurementController extends GetxController {
   final linkedNetworks = <NetworkPosLinkEntity>[].obs;
   final selectedNetworkId = RxnInt();
   final isLoadingNetworks = false.obs;
+
   /// يحدد بطاقة السياق المفتوحة حالياً لمنع تكدس خيارات الشبكة ونقطة البيع.
   final expandedProcurementContext = ''.obs;
 
@@ -163,7 +165,10 @@ class PosProcurementController extends GetxController {
   final Map<int, TextEditingController> _packageQuantityControllers = {};
 
   TextEditingController quantityControllerForPackage(int packageId) =>
-      _packageQuantityControllers.putIfAbsent(packageId, TextEditingController.new);
+      _packageQuantityControllers.putIfAbsent(
+        packageId,
+        TextEditingController.new,
+      );
 
   bool get hasCartItems => procurementCart.isNotEmpty;
 
@@ -196,10 +201,8 @@ class PosProcurementController extends GetxController {
     return expiresAt == null || DateTime.now().isBefore(expiresAt);
   }
 
-  bool get hasCurrentProcurementSnapshots =>
-      procurementEstimateCalculator.hasCurrentSnapshots(
-        procurementCart.map((line) => line.package),
-      );
+  bool get hasCurrentProcurementSnapshots => procurementEstimateCalculator
+      .hasCurrentSnapshots(procurementCart.map((line) => line.package));
 
   int? estimatedLineTotalMinor(PackageEntity package, int quantity) =>
       procurementEstimateCalculator.calculateLineTotalMinor(
@@ -214,7 +217,8 @@ class PosProcurementController extends GetxController {
         selectedSaleType.value,
       );
 
-  bool get canSubmitOrder => hasCartItems && hasCurrentProcurementSnapshots && !isSubmitting.value;
+  bool get canSubmitOrder =>
+      hasCartItems && hasCurrentProcurementSnapshots && !isSubmitting.value;
 
   void _setSelectedNetworkId(int? value) {
     selectedNetworkId.value = value;
@@ -557,11 +561,11 @@ class PosProcurementController extends GetxController {
         // Cart quantities are independent from catalogue pagination and search.
         // Loading a catalogue page must never create or replace an order line.
       } else {
-        final knownIds = availablePackages.map((item) => item.packageId).toSet();
+        final knownIds = availablePackages
+            .map((item) => item.packageId)
+            .toSet();
         availablePackages.addAll(
-          paginated.items.where(
-            (item) => !knownIds.contains(item.packageId),
-          ),
+          paginated.items.where((item) => !knownIds.contains(item.packageId)),
         );
         packageNextCursor.value = paginated.nextCursor;
       }
@@ -857,10 +861,7 @@ class PosProcurementController extends GetxController {
       (item) => item.package.packageId == packageId,
     );
     if (line == null || direction == 0) return;
-    adjustCartLine(
-      packageId,
-      line.package.packageVoucherCount * direction,
-    );
+    adjustCartLine(packageId, line.package.packageVoucherCount * direction);
   }
 
   /// The POS tariff catalogue is loaded once per network/POS context.
@@ -997,8 +998,10 @@ class PosProcurementController extends GetxController {
     await loadNetworkPackages(request.networkId);
 
     for (final item in request.items) {
-      final pkg = availablePackages
-              .firstWhereOrNull((p) => p.packageId == item.packageId) ??
+      final pkg =
+          availablePackages.firstWhereOrNull(
+            (p) => p.packageId == item.packageId,
+          ) ??
           item.voucherPackage ??
           PackageEntity(
             packageId: item.packageId,
@@ -1019,8 +1022,9 @@ class PosProcurementController extends GetxController {
             status: true,
           );
 
-      final sheetSize =
-          pkg.packageVoucherCount > 0 ? pkg.packageVoucherCount : 100;
+      final sheetSize = pkg.packageVoucherCount > 0
+          ? pkg.packageVoucherCount
+          : 100;
       final calculatedSheets = item.voucherCount / sheetSize;
       procurementCart.add(
         ProcurementCartLineEntity(
@@ -1247,7 +1251,12 @@ class PosProcurementController extends GetxController {
     }
 
     if (!hasCurrentProcurementSnapshots) {
-      CustomSnackbar.show(title: 'بيانات التعرفة غير مكتملة أو منتهية', message: 'حدّث كتالوج الباقات للحصول على تعرفة موقعة وحديثة قبل الإرسال.', type: SnackType.warning);
+      CustomSnackbar.show(
+        title: 'بيانات التعرفة غير مكتملة أو منتهية',
+        message:
+            'حدّث كتالوج الباقات للحصول على تعرفة موقعة وحديثة قبل الإرسال.',
+        type: SnackType.warning,
+      );
       return false;
     }
 
@@ -1296,7 +1305,10 @@ class PosProcurementController extends GetxController {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
-      if (e.message.contains('تعرفة') || e.message.contains('pricing') || e.message.contains('سعر') || e.message.contains('أسعار')) {
+      if (e.message.contains('تعرفة') ||
+          e.message.contains('pricing') ||
+          e.message.contains('سعر') ||
+          e.message.contains('أسعار')) {
         packageErrorMessage.value = e.message;
       }
       CustomSnackbar.show(

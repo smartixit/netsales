@@ -111,8 +111,7 @@ class ProcurementActionDialogs {
     await CustomDialog.show(
       type: DialogType.error,
       title: 'حذف طلب التوريد $ref',
-      message:
-          'هل أنت متأكد من حذف هذا الطلب نهائياً من قائمة طلباتك؟ لن تظهر هذه المعاملة مجدداً.',
+      message: 'هل أنت متأكد من حذف هذا الطلب نهائياً من قائمة طلباتك؟ لن تظهر هذه المعاملة مجدداً.',
       confirmLabel: 'نعم، حذف الطلب',
       cancelLabel: 'تراجع',
       onConfirm: () async {

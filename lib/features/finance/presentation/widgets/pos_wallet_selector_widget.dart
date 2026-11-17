@@ -126,4 +126,3 @@ class PosWalletSelectorWidget extends StatelessWidget {
     });
   }
 }
-

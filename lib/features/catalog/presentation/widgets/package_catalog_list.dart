@@ -35,7 +35,16 @@ class PackageCatalogList extends GetView<PackageCatalogController> {
             if (index == items.length) {
               return Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                child: CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 110.h, maxColumns: 1, minItemWidth: 180)),
+                child: CustomStateView.loading(
+                  presentation: CustomStatePresentation.skeletonOnly,
+                  skeleton: CustomStateSkeleton(
+                    layout: CustomStateSkeletonLayout.cards,
+                    itemCount: 1,
+                    cardHeight: 110.h,
+                    maxColumns: 1,
+                    minItemWidth: 180,
+                  ),
+                ),
               );
             }
 

@@ -9,10 +9,7 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 /// تمنع حسابات SUPER_ADMIN و SUPPORT_AGENT من العمل عبر تطبيق الهاتف،
 /// وترشدهم رسمياً لاستخدام تطبيق إدارة المنصة المكتبي المستقل لنظام Windows.
 class UnsupportedPlatformScreen extends StatelessWidget {
-  const UnsupportedPlatformScreen({
-    super.key,
-    required this.onLogout,
-  });
+  const UnsupportedPlatformScreen({super.key, required this.onLogout});
 
   final Future<void> Function() onLogout;
 

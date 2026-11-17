@@ -1,4 +1,5 @@
 part of '../custom_state_view.dart';
+
 extension on CustomStateView {
   Widget _buildContent(BuildContext context, Color accent) {
     final colors = context.colors;
@@ -34,12 +35,12 @@ extension on CustomStateView {
           ],
           if (kind == CustomStateKind.loading && showLoadingSkeleton) ...[
             AppSpacing.vMd,
-            CustomStateSkeletonView(recipe: skeleton ?? const CustomStateSkeleton(), builder: skeletonBuilder),
+            CustomStateSkeletonView(
+              recipe: skeleton ?? const CustomStateSkeleton(),
+              builder: skeletonBuilder,
+            ),
           ],
-          if (_hasActions) ...[
-            AppSpacing.vMd,
-            _buildActions(context),
-          ],
+          if (_hasActions) ...[AppSpacing.vMd, _buildActions(context)],
           if (technicalDetails != null && technicalDetails!.isNotEmpty) ...[
             AppSpacing.vMd,
             _buildTechnicalDetails(context),
@@ -77,7 +78,10 @@ extension on CustomStateView {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: colors.surfaceContainerLow.withValues(alpha: .9),
-              border: Border.all(color: accent.withValues(alpha: .28), width: 1.3),
+              border: Border.all(
+                color: accent.withValues(alpha: .28),
+                width: 1.3,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: accent.withValues(alpha: .10),
@@ -106,7 +110,11 @@ extension on CustomStateView {
                 color: accent.withValues(alpha: .12),
                 border: Border.all(color: accent.withValues(alpha: .28)),
               ),
-              child: Icon(icon ?? _defaultIcon(), color: accent, size: size * .28),
+              child: Icon(
+                icon ?? _defaultIcon(),
+                color: accent,
+                size: size * .28,
+              ),
             ),
           if (kind == CustomStateKind.loading)
             Icon(icon ?? _defaultIcon(), color: accent, size: size * .24),
@@ -117,20 +125,29 @@ extension on CustomStateView {
 
   Widget _buildBadge(BuildContext context, Color accent) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
+      ),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: .09),
         borderRadius: BorderRadius.circular(AppRadius.full),
         border: Border.all(color: accent.withValues(alpha: .24)),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon ?? _defaultIcon(), size: 13.r, color: accent),
-        AppSpacing.hXxs,
-        Text(
-          badgeLabel ?? _defaultBadge(),
-          style: AppTypography.badgeText.copyWith(color: accent, fontWeight: FontWeight.w800),
-        ),
-      ]),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon ?? _defaultIcon(), size: 13.r, color: accent),
+          AppSpacing.hXxs,
+          Text(
+            badgeLabel ?? _defaultBadge(),
+            style: AppTypography.badgeText.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -173,48 +190,63 @@ extension on CustomStateView {
         borderRadius: BorderRadius.circular(AppRadius.md),
         child: Theme(
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          tilePadding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          title: Text(
-            'التفاصيل الفنية والدعم التقني',
-            style: AppTypography.labelMedium.copyWith(
-              color: colors.onSurfaceVariant,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          leading: Icon(Icons.terminal_rounded, color: colors.onSurfaceVariant),
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SelectableText(
-                    technicalDetails!,
-                    style: AppTypography.bodySmall.copyWith(color: colors.error, height: 1.4),
-                  ),
-                  AppSpacing.vSm,
-                  Align(
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: CustomButton.text(
-                      text: 'نسخ تفاصيل الخطأ',
-                      icon: Icons.copy_rounded,
-                      size: AppButtonSize.small,
-                      foregroundColor: colors.primary,
-                      onPressed: () async {
-                        await UrlLauncherService.copyToClipboard(technicalDetails!);
-                        CustomToast.show(message: 'تم نسخ تفاصيل الخطأ للحافظة', icon: Icons.copy_rounded);
-                      },
-                    ),
-                  ),
-                ],
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            title: Text(
+              'التفاصيل الفنية والدعم التقني',
+              style: AppTypography.labelMedium.copyWith(
+                color: colors.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ],
-        ),
+            leading: Icon(
+              Icons.terminal_rounded,
+              color: colors.onSurfaceVariant,
+            ),
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  0,
+                  AppSpacing.md,
+                  AppSpacing.md,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SelectableText(
+                      technicalDetails!,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: colors.error,
+                        height: 1.4,
+                      ),
+                    ),
+                    AppSpacing.vSm,
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: CustomButton.text(
+                        text: 'نسخ تفاصيل الخطأ',
+                        icon: Icons.copy_rounded,
+                        size: AppButtonSize.small,
+                        foregroundColor: colors.primary,
+                        onPressed: () async {
+                          await UrlLauncherService.copyToClipboard(
+                            technicalDetails!,
+                          );
+                          CustomToast.show(
+                            message: 'تم نسخ تفاصيل الخطأ للحافظة',
+                            icon: Icons.copy_rounded,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-
 }

@@ -7,29 +7,30 @@ class WorkspaceNetworkPickerMapper {
 
   static List<WorkspaceNetworkPickerItemViewModel> map(
     Iterable<NetworkEntity> networks,
-  ) =>
-      List.unmodifiable(networks.map((network) {
-        final location = [
-          if (network.governorateName?.isNotEmpty == true)
-            network.governorateName!,
-          if (network.directorateName?.isNotEmpty == true)
-            network.directorateName!,
-        ].join(' • ');
+  ) => List.unmodifiable(
+    networks.map((network) {
+      final location = [
+        if (network.governorateName?.isNotEmpty == true)
+          network.governorateName!,
+        if (network.directorateName?.isNotEmpty == true)
+          network.directorateName!,
+      ].join(' • ');
 
-        return WorkspaceNetworkPickerItemViewModel(
-          id: network.networkId,
-          name: network.networkName,
-          logoUrl: network.networkProfileLogoUrl,
-          initials: TextFormatter.avatarInitials(
-            network.networkName,
-            maxChars: 2,
-          ),
-          subtitle: location.isNotEmpty
-              ? location
-              : network.networkPhoneNumber.isNotEmpty
-                  ? network.networkPhoneNumber
-                  : 'شبكة اتصالات معتمدة',
-          isActive: network.isActive,
-        );
-      }));
+      return WorkspaceNetworkPickerItemViewModel(
+        id: network.networkId,
+        name: network.networkName,
+        logoUrl: network.networkProfileLogoUrl,
+        initials: TextFormatter.avatarInitials(
+          network.networkName,
+          maxChars: 2,
+        ),
+        subtitle: location.isNotEmpty
+            ? location
+            : network.networkPhoneNumber.isNotEmpty
+            ? network.networkPhoneNumber
+            : 'شبكة اتصالات معتمدة',
+        isActive: network.isActive,
+      );
+    }),
+  );
 }

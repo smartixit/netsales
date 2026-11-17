@@ -28,7 +28,8 @@ class ProcurementQuoteLineModel extends ProcurementQuoteLineEntity {
       discountRate: (json['discount_rate'] as num?)?.toDouble() ?? 0.0,
       effectivePrice: (json['effective_price'] as num?)?.toDouble() ?? 0.0,
       lineGrossTotal: (json['line_gross_total'] as num?)?.toDouble() ?? 0.0,
-      lineDiscountAmount: (json['line_discount_amount'] as num?)?.toDouble() ?? 0.0,
+      lineDiscountAmount:
+          (json['line_discount_amount'] as num?)?.toDouble() ?? 0.0,
       lineNetTotal: (json['line_net_total'] as num?)?.toDouble() ?? 0.0,
       isCustomDiscount: json['is_custom_discount'] as bool? ?? false,
       pricingToken: json['pricing_token'] as String?,
@@ -53,4 +54,3 @@ class ProcurementQuoteLineModel extends ProcurementQuoteLineEntity {
     };
   }
 }
-

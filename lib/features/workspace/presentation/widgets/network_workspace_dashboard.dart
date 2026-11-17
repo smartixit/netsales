@@ -21,10 +21,7 @@ import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 class NetworkWorkspaceDashboard extends StatelessWidget {
   final NetworkWorkspaceController controller;
 
-  const NetworkWorkspaceDashboard({
-    super.key,
-    required this.controller,
-  });
+  const NetworkWorkspaceDashboard({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +38,38 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
         if (controller.isLoading.value && controller.overview.value == null) {
           return const Column(
             children: [
-              CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 126, maxColumns: 1, minItemWidth: 180)),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 126,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
               SizedBox(height: 20),
-              CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 210, maxColumns: 1, minItemWidth: 180)),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 210,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
               SizedBox(height: 16),
-              CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 156, maxColumns: 1, minItemWidth: 180)),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 156,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
             ],
           );
         }
@@ -61,8 +85,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
           return const CustomEmptyState(
             icon: Icons.hub_outlined,
             title: 'لا توجد شبكة مرتبطة بالحساب',
-            subtitle:
-                'لا يمكن عرض مؤشرات مساحة العمل قبل توفر شبكة مصرح بها.',
+            subtitle: 'لا يمكن عرض مؤشرات مساحة العمل قبل توفر شبكة مصرح بها.',
           );
         }
 

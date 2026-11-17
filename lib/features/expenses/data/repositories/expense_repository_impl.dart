@@ -134,11 +134,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   Future<void> deleteExpense(int expenseId) async {
     final response = await remoteDataSource.deleteExpense(expenseId);
     if (!response.success) {
-      throw _failure(
-        response,
-        'تعذر حذف المصروف.',
-        'EXPENSE_DELETE_FAILED',
-      );
+      throw _failure(response, 'تعذر حذف المصروف.', 'EXPENSE_DELETE_FAILED');
     }
   }
 }

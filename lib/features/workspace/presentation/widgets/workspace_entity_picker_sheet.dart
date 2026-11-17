@@ -64,10 +64,9 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
               ),
               CustomSegmentItem(
                 label: 'نقاط البيع',
-                count:
-                    isLoading && pointsOfSale.isEmpty
-                        ? 0
-                        : pointsOfSale.length,
+                count: isLoading && pointsOfSale.isEmpty
+                    ? 0
+                    : pointsOfSale.length,
                 icon: Icons.storefront_rounded,
               ),
             ],
@@ -78,17 +77,43 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
           ConstrainedBox(
             constraints: BoxConstraints(maxHeight: 340.h),
             child: SingleChildScrollView(
-              child:
-                  isLoading
-                      ? Column(
-                          children: [
-                            const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 72, maxColumns: 1, minItemWidth: 180)),
-                            SizedBox(height: AppSpacing.sm),
-                            const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 72, maxColumns: 1, minItemWidth: 180)),
-                            SizedBox(height: AppSpacing.sm),
-                            const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 72, maxColumns: 1, minItemWidth: 180)),
-                          ],
-                        )
+              child: isLoading
+                  ? Column(
+                      children: [
+                        const CustomStateView.loading(
+                          presentation: CustomStatePresentation.skeletonOnly,
+                          skeleton: CustomStateSkeleton(
+                            layout: CustomStateSkeletonLayout.cards,
+                            itemCount: 1,
+                            cardHeight: 72,
+                            maxColumns: 1,
+                            minItemWidth: 180,
+                          ),
+                        ),
+                        SizedBox(height: AppSpacing.sm),
+                        const CustomStateView.loading(
+                          presentation: CustomStatePresentation.skeletonOnly,
+                          skeleton: CustomStateSkeleton(
+                            layout: CustomStateSkeletonLayout.cards,
+                            itemCount: 1,
+                            cardHeight: 72,
+                            maxColumns: 1,
+                            minItemWidth: 180,
+                          ),
+                        ),
+                        SizedBox(height: AppSpacing.sm),
+                        const CustomStateView.loading(
+                          presentation: CustomStatePresentation.skeletonOnly,
+                          skeleton: CustomStateSkeleton(
+                            layout: CustomStateSkeletonLayout.cards,
+                            itemCount: 1,
+                            cardHeight: 72,
+                            maxColumns: 1,
+                            minItemWidth: 180,
+                          ),
+                        ),
+                      ],
+                    )
                   : errorMessage != null &&
                         networks.isEmpty &&
                         pointsOfSale.isEmpty
@@ -113,7 +138,8 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                               return WorkspaceNetworkPickerTile(
                                 item: network,
                                 isSelected: isSelected,
-                                onTap: () => controller.selectNetworkById(network.id),
+                                onTap: () =>
+                                    controller.selectNetworkById(network.id),
                               );
                             }).toList(),
                           ))

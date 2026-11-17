@@ -72,7 +72,8 @@ class CustomInteractiveAmountText extends StatelessWidget {
       suffix: suffix,
     );
 
-    final effectiveStyle = style ??
+    final effectiveStyle =
+        style ??
         AppTypography.titleMedium.copyWith(
           color: colors.primary,
           fontWeight: FontWeight.bold,
@@ -90,7 +91,10 @@ class CustomInteractiveAmountText extends StatelessWidget {
       message: words,
       preferBelow: false,
       verticalOffset: 12.h,
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       margin: EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
         color: colors.surfaceContainerHighest,
@@ -130,7 +134,9 @@ class CustomInteractiveAmountText extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                trailingText != null ? '$displayText $trailingText' : displayText,
+                trailingText != null
+                    ? '$displayText $trailingText'
+                    : displayText,
                 style: effectiveStyle,
               ),
               SizedBox(width: 3.w),
@@ -162,4 +168,3 @@ class CustomInteractiveAmountText extends StatelessWidget {
     );
   }
 }
-

@@ -29,8 +29,9 @@ class ProcurementRequestItemRow extends StatelessWidget {
     final quantityDesc = sheetSize > 0
         ? VoucherSheetCalculator.describe(item.voucherCount, sheetSize)
         : null;
-    final packageColor =
-        CustomColorPicker.parseHex(item.voucherPackage?.packageColor);
+    final packageColor = CustomColorPicker.parseHex(
+      item.voucherPackage?.packageColor,
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -45,10 +46,7 @@ class ProcurementRequestItemRow extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 4,
-                color: packageColor,
-              ),
+              Container(width: 4, color: packageColor),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(AppSpacing.sm),
@@ -122,7 +120,9 @@ class ProcurementRequestItemRow extends StatelessWidget {
                       Expanded(
                         flex: 2,
                         child: Text(
-                          AmountFormatter.format(item.itemTotalAmount.toString()),
+                          AmountFormatter.format(
+                            item.itemTotalAmount.toString(),
+                          ),
                           textAlign: TextAlign.end,
                           style: AppTypography.titleSmall.copyWith(
                             color: colors.onSurface,

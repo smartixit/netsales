@@ -1,4 +1,5 @@
 import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
+
 import 'dart:typed_data';
 
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -16,8 +17,7 @@ import 'package:netsales/features/reports/domain/entities/operational_report_typ
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 import 'package:netsales/features/reports/domain/repositories/operational_report_repository.dart';
 
-class OperationalReportRepositoryImpl
-    implements OperationalReportRepository {
+class OperationalReportRepositoryImpl implements OperationalReportRepository {
   OperationalReportRepositoryImpl(this.remoteDataSource);
 
   final OperationalReportRemoteDataSource remoteDataSource;
@@ -32,13 +32,14 @@ class OperationalReportRepositoryImpl
     required int networkId,
     int? posId,
   }) async {
-    final response = await remoteDataSource.getCatalog(query: {
-      'network_id': networkId,
-      'pos_id': ?posId,
-    });
+    final response = await remoteDataSource.getCatalog(
+      query: {'network_id': networkId, 'pos_id': ?posId},
+    );
     if (!response.success || response.data == null) {
       throw AppException(
-        response.message.isNotEmpty ? response.message : 'تعذر تحميل كتالوج التقارير.',
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر تحميل كتالوج التقارير.',
         code: 'OPERATIONAL_REPORT_CATALOG_FAILED',
         details: response.errors,
       );
@@ -56,11 +57,13 @@ class OperationalReportRepositoryImpl
           '${date.month.toString().padLeft(2, '0')}-'
           '${date.day.toString().padLeft(2, '0')}';
     }
+
     for (final entry in criteria.filters.entries) {
       final value = entry.value;
       switch (value) {
         case ReportTextFilterValue():
-          if (value.value.trim().isNotEmpty) result[entry.key] = value.value.trim();
+          if (value.value.trim().isNotEmpty)
+            result[entry.key] = value.value.trim();
         case ReportIntegerFilterValue():
           result[entry.key] = value.value;
         case ReportDecimalFilterValue():
@@ -146,7 +149,8 @@ class OperationalReportRepositoryImpl
         details: response.errors,
       );
     }
-    final catalog = _catalogCache[_catalogKey(networkId, posId)] ??
+    final catalog =
+        _catalogCache[_catalogKey(networkId, posId)] ??
         await getCatalog(networkId: networkId, posId: posId);
     final entry = catalog.entryFor(type);
     if (entry == null) {
@@ -236,7 +240,6 @@ class OperationalReportRepositoryImpl
     );
   }
 
-
   @override
   Future<bool> saveDetailedPdf({
     required OperationalReportType type,
@@ -250,18 +253,19 @@ class OperationalReportRepositoryImpl
     required List<OperationalReportFilterDisplay> activeFilters,
     String? scopeLabel,
   }) async {
-    final result = await DetailedOperationalReportDocumentService.instance.exportAndSave(
-      type: type,
-      entry: entry,
-      records: records,
-      presentation: presentation,
-      summary: summary,
-      pageProfileId: pageProfileId,
-      organizationName: organizationName,
-      logoUrl: logoUrl,
-      activeFilters: activeFilters,
-      scopeLabel: scopeLabel,
-    );
+    final result = await DetailedOperationalReportDocumentService.instance
+        .exportAndSave(
+          type: type,
+          entry: entry,
+          records: records,
+          presentation: presentation,
+          summary: summary,
+          pageProfileId: pageProfileId,
+          organizationName: organizationName,
+          logoUrl: logoUrl,
+          activeFilters: activeFilters,
+          scopeLabel: scopeLabel,
+        );
     if (!result.isSuccess) {
       throw AppException(
         result.errorMessage ?? 'تعذر حفظ التقرير التفصيلي بصيغة PDF.',
@@ -314,52 +318,140 @@ class OperationalReportRepositoryImpl
     return response.data!;
   }
 
-
-  Map<String, dynamic> _presetScope(OperationalReportType type, int networkId, int? posId) =>
-      {'report_type': type.wireValue, 'network_id': networkId, 'pos_id': ?posId};
+  Map<String, dynamic> _presetScope(
+    OperationalReportType type,
+    int networkId,
+    int? posId,
+  ) => {
+    'report_type': type.wireValue,
+    'network_id': networkId,
+    'pos_id': ?posId,
+  };
 
   Map<String, dynamic> _presetPayload({
-    required OperationalReportType type, required int networkId, int? posId,
-    required String name, required int reportSchemaVersion,
-    required ReportCriteria criteria, required ReportPresentationOptions presentation,
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+    required String name,
+    required int reportSchemaVersion,
+    required ReportCriteria criteria,
+    required ReportPresentationOptions presentation,
   }) => {
-    ..._presetScope(type, networkId, posId), 'name': name.trim(),
-    'report_schema_version': reportSchemaVersion, 'criteria': criteria.toJson(),
+    ..._presetScope(type, networkId, posId),
+    'name': name.trim(),
+    'report_schema_version': reportSchemaVersion,
+    'criteria': criteria.toJson(),
     'presentation': presentation.toJson(),
   };
 
   @override
-  Future<List<SavedReportPreset>> getPresets({required OperationalReportType type, required int networkId, int? posId}) async {
-    final response = await remoteDataSource.getPresets(query: _presetScope(type, networkId, posId));
+  Future<List<SavedReportPreset>> getPresets({
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+  }) async {
+    final response = await remoteDataSource.getPresets(
+      query: _presetScope(type, networkId, posId),
+    );
     if (!response.success || response.data == null) {
-      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر تحميل الإعدادات المحفوظة.', code: 'OPERATIONAL_REPORT_PRESETS_LOAD_FAILED', details: response.errors);
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر تحميل الإعدادات المحفوظة.',
+        code: 'OPERATIONAL_REPORT_PRESETS_LOAD_FAILED',
+        details: response.errors,
+      );
     }
     return response.data!;
   }
 
   @override
-  Future<SavedReportPreset> savePreset({required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation}) async {
-    final response = await remoteDataSource.savePreset(payload: _presetPayload(type: type, networkId: networkId, posId: posId, name: name, reportSchemaVersion: reportSchemaVersion, criteria: criteria, presentation: presentation));
+  Future<SavedReportPreset> savePreset({
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+    required String name,
+    required int reportSchemaVersion,
+    required ReportCriteria criteria,
+    required ReportPresentationOptions presentation,
+  }) async {
+    final response = await remoteDataSource.savePreset(
+      payload: _presetPayload(
+        type: type,
+        networkId: networkId,
+        posId: posId,
+        name: name,
+        reportSchemaVersion: reportSchemaVersion,
+        criteria: criteria,
+        presentation: presentation,
+      ),
+    );
     if (!response.success || response.data == null) {
-      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر حفظ إعداد التقرير.', code: 'OPERATIONAL_REPORT_PRESET_SAVE_FAILED', details: response.errors);
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر حفظ إعداد التقرير.',
+        code: 'OPERATIONAL_REPORT_PRESET_SAVE_FAILED',
+        details: response.errors,
+      );
     }
     return response.data!;
   }
 
   @override
-  Future<SavedReportPreset> updatePreset({required String presetId, required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation}) async {
-    final response = await remoteDataSource.updatePreset(presetId, payload: _presetPayload(type: type, networkId: networkId, posId: posId, name: name, reportSchemaVersion: reportSchemaVersion, criteria: criteria, presentation: presentation));
+  Future<SavedReportPreset> updatePreset({
+    required String presetId,
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+    required String name,
+    required int reportSchemaVersion,
+    required ReportCriteria criteria,
+    required ReportPresentationOptions presentation,
+  }) async {
+    final response = await remoteDataSource.updatePreset(
+      presetId,
+      payload: _presetPayload(
+        type: type,
+        networkId: networkId,
+        posId: posId,
+        name: name,
+        reportSchemaVersion: reportSchemaVersion,
+        criteria: criteria,
+        presentation: presentation,
+      ),
+    );
     if (!response.success || response.data == null) {
-      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر تحديث إعداد التقرير.', code: 'OPERATIONAL_REPORT_PRESET_UPDATE_FAILED', details: response.errors);
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر تحديث إعداد التقرير.',
+        code: 'OPERATIONAL_REPORT_PRESET_UPDATE_FAILED',
+        details: response.errors,
+      );
     }
     return response.data!;
   }
 
   @override
-  Future<void> deletePreset({required String presetId, required OperationalReportType type, required int networkId, int? posId}) async {
-    final response = await remoteDataSource.deletePreset(presetId, query: _presetScope(type, networkId, posId));
+  Future<void> deletePreset({
+    required String presetId,
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+  }) async {
+    final response = await remoteDataSource.deletePreset(
+      presetId,
+      query: _presetScope(type, networkId, posId),
+    );
     if (!response.success) {
-      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر حذف إعداد التقرير.', code: 'OPERATIONAL_REPORT_PRESET_DELETE_FAILED', details: response.errors);
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر حذف إعداد التقرير.',
+        code: 'OPERATIONAL_REPORT_PRESET_DELETE_FAILED',
+        details: response.errors,
+      );
     }
   }
 

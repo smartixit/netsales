@@ -183,13 +183,13 @@ class ProcurementContextSelector extends StatelessWidget {
                           children: [
                             Divider(
                               height: AppSpacing.sm,
-                              color: colors.outlineVariant.withValues(alpha: .5),
+                              color: colors.outlineVariant.withValues(
+                                alpha: .5,
+                              ),
                             ),
                             ...options.map(
                               (option) => Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: AppSpacing.xs,
-                                ),
+                                padding: EdgeInsets.only(bottom: AppSpacing.xs),
                                 child: _ContextOptionTile(
                                   option: option,
                                   accent: accent,

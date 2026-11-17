@@ -24,7 +24,16 @@ class PosRecentTransactionsSection extends StatelessWidget {
     return Obx(() {
       final items = controller.recentTransactionItems;
       if (controller.isLoadingRecentData.value && items.isEmpty) {
-        return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 160, maxColumns: 1, minItemWidth: 180));
+        return const CustomStateView.loading(
+          presentation: CustomStatePresentation.skeletonOnly,
+          skeleton: CustomStateSkeleton(
+            layout: CustomStateSkeletonLayout.cards,
+            itemCount: 1,
+            cardHeight: 160,
+            maxColumns: 1,
+            minItemWidth: 180,
+          ),
+        );
       }
 
       if (items.isEmpty) {

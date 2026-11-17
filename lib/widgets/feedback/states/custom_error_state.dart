@@ -32,7 +32,8 @@ class CustomErrorState extends StatelessWidget {
   factory CustomErrorState.connection({
     Key? key,
     String title = 'تعذر الاتصال بالشبكة',
-    String subtitle = 'يرجى التحقق من اتصالك بالإنترنت أو بيانات الهاتف ثم المحاولة مجدداً.',
+    String subtitle =
+        'يرجى التحقق من اتصالك بالإنترنت أو بيانات الهاتف ثم المحاولة مجدداً.',
     String retryLabel = 'إعادة فحص الاتصال',
     VoidCallback? onRetry,
     VoidCallback? onOpenSettings,
@@ -155,8 +156,8 @@ class CustomErrorState extends StatelessWidget {
       kind: isOffline
           ? CustomStateKind.offline
           : type == ErrorStateType.notFound
-              ? CustomStateKind.notFound
-              : CustomStateKind.error,
+          ? CustomStateKind.notFound
+          : CustomStateKind.error,
       title: title,
       subtitle: subtitle,
       presentation: presentation,

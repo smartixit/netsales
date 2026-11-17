@@ -64,15 +64,14 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                     child: Obx(() {
                       if (controller.isLoadingNetworks.value) {
                         return const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-);
+                          presentation: CustomStatePresentation.skeletonOnly,
+                          skeleton: CustomStateSkeleton(
+                            layout: CustomStateSkeletonLayout.list,
+                            itemCount: 3,
+                            cardHeight: 112,
+                            hasLeading: true,
+                          ),
+                        );
                       }
 
                       if (controller.networkErrorMessage.value != null &&
@@ -103,15 +102,14 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                       if (controller.isLoading.value &&
                           controller.repayments.isEmpty) {
                         return const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-     
-  ),
-);
+                          presentation: CustomStatePresentation.skeletonOnly,
+                          skeleton: CustomStateSkeleton(
+                            layout: CustomStateSkeletonLayout.list,
+                            itemCount: 3,
+                            cardHeight: 112,
+                            hasLeading: true,
+                          ),
+                        );
                       }
 
                       if (controller.repayments.isEmpty &&

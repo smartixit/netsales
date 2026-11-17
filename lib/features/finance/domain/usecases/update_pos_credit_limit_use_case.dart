@@ -5,14 +5,10 @@ class UpdatePosCreditLimitUseCase {
 
   const UpdatePosCreditLimitUseCase(this.repository);
 
-  Future<void> call({
-    required int posWalletId,
-    required double? creditLimit,
-  }) {
+  Future<void> call({required int posWalletId, required double? creditLimit}) {
     return repository.updatePosCreditLimit(
       posWalletId: posWalletId,
       creditLimit: creditLimit,
     );
   }
 }
-

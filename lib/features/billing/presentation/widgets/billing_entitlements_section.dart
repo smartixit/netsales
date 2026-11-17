@@ -29,12 +29,11 @@ class BillingEntitlementsSection extends StatelessWidget {
           child: Text('الاستحقاقات والمزايا', style: AppTypography.titleMedium),
         ),
         if (features.isEmpty)
-          const CustomEmptyState.compact(
-            title: 'لا توجد استحقاقات متاحة للعرض',
-          )
+          const CustomEmptyState.compact(title: 'لا توجد استحقاقات متاحة للعرض')
         else
           ...features.map(_featureTile),
-        if (trial is Map<String, dynamic>) BillingTrialPolicySummary(trial: trial),
+        if (trial is Map<String, dynamic>)
+          BillingTrialPolicySummary(trial: trial),
       ],
     );
   }
@@ -55,14 +54,10 @@ class BillingEntitlementsSection extends StatelessWidget {
         ),
         trailing: CustomStatusBadge(
           label: available ? 'متاح' : 'غير متاح',
-          tone:
-              available ? SemanticTone.success : SemanticTone.neutral,
-          icon: available
-              ? Icons.check_circle_rounded
-              : Icons.block_rounded,
+          tone: available ? SemanticTone.success : SemanticTone.neutral,
+          icon: available ? Icons.check_circle_rounded : Icons.block_rounded,
         ),
       ),
     );
   }
-
 }

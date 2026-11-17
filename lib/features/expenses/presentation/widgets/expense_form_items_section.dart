@@ -99,9 +99,8 @@ class ExpenseFormItemsSection extends StatelessWidget {
                     controller: item.statementController,
                     label: 'وصف المصروف',
                     hint: 'مثال: إيجار مقر الشبكة، صيانة المولد...',
-                    validator: (v) => v == null || v.trim().isEmpty
-                        ? 'أدخل وصف البند'
-                        : null,
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'أدخل وصف البند' : null,
                   ),
                   AppSpacing.vSm,
                   CustomTextField(

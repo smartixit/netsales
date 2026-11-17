@@ -53,8 +53,7 @@ class PackageModel extends PackageEntity {
         (json['cash_discount_amount'] as num?)?.toDouble() ?? 0.0;
     final creditDiscountAmt =
         (json['credit_discount_amount'] as num?)?.toDouble() ?? 0.0;
-    final effCash =
-        (json['effective_cash_price'] as num?)?.toDouble() ?? price;
+    final effCash = (json['effective_cash_price'] as num?)?.toDouble() ?? price;
     final effCredit =
         (json['effective_credit_price'] as num?)?.toDouble() ?? price;
     final procurement = json['procurement_pricing'] is Map<String, dynamic>
@@ -85,13 +84,21 @@ class PackageModel extends PackageEntity {
       createdAt: rawCreatedAt != null ? DateTime.tryParse(rawCreatedAt) : null,
       updatedAt: rawUpdatedAt != null ? DateTime.tryParse(rawUpdatedAt) : null,
       networkName: netName,
-      procurementBaseUnitPriceMinor: (procurement['base_unit_price_minor'] as num?)?.toInt(),
-      procurementCashUnitPriceMinor: (procurement['cash_effective_unit_price_minor'] as num?)?.toInt(),
-      procurementCreditUnitPriceMinor: (procurement['credit_effective_unit_price_minor'] as num?)?.toInt(),
-      procurementCashDiscountBasisPoints: (procurement['cash_discount_basis_points'] as num?)?.toInt(),
-      procurementCreditDiscountBasisPoints: (procurement['credit_discount_basis_points'] as num?)?.toInt(),
-      procurementPricingSnapshotToken: procurement['pricing_snapshot_token']?.toString(),
-      procurementPricingSnapshotExpiresAt: DateTime.tryParse(procurement['pricing_snapshot_expires_at']?.toString() ?? ''),
+      procurementBaseUnitPriceMinor:
+          (procurement['base_unit_price_minor'] as num?)?.toInt(),
+      procurementCashUnitPriceMinor:
+          (procurement['cash_effective_unit_price_minor'] as num?)?.toInt(),
+      procurementCreditUnitPriceMinor:
+          (procurement['credit_effective_unit_price_minor'] as num?)?.toInt(),
+      procurementCashDiscountBasisPoints:
+          (procurement['cash_discount_basis_points'] as num?)?.toInt(),
+      procurementCreditDiscountBasisPoints:
+          (procurement['credit_discount_basis_points'] as num?)?.toInt(),
+      procurementPricingSnapshotToken: procurement['pricing_snapshot_token']
+          ?.toString(),
+      procurementPricingSnapshotExpiresAt: DateTime.tryParse(
+        procurement['pricing_snapshot_expires_at']?.toString() ?? '',
+      ),
       procurementIsCustomDiscount: _parseBoolean(procurement['is_custom']),
     );
   }

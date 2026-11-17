@@ -104,7 +104,9 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
 
     if (response.success && response.data != null) {
       return response.data!
-          .where((discount) => discount.packageId != null && discount.isEffectiveNow)
+          .where(
+            (discount) => discount.packageId != null && discount.isEffectiveNow,
+          )
           .toList(growable: false);
     }
 

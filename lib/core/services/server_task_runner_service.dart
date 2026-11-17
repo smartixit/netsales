@@ -29,8 +29,8 @@ class ServerTaskRunnerService extends GetxService {
 
   static ServerTaskRunnerService get to =>
       Get.isRegistered<ServerTaskRunnerService>()
-          ? Get.find<ServerTaskRunnerService>()
-          : instance;
+      ? Get.find<ServerTaskRunnerService>()
+      : instance;
 
   // ─── الإعدادات الزمنية الافتراضية ───
   /// الحد الأدنى الافتراضي بين كل عملية استدراك (5 دقائق) لمنع إجهاد الخادم
@@ -61,9 +61,7 @@ class ServerTaskRunnerService extends GetxService {
   // ═══════════════════════════════════════════════════════════════════════════
 
   /// بدء النبض الدوري الخفيف أثناء استخدام التطبيق
-  void startForegroundHeartbeat({
-    Duration interval = minCatchupInterval,
-  }) {
+  void startForegroundHeartbeat({Duration interval = minCatchupInterval}) {
     if (isHeartbeatRunning) {
       log('⚙️ [ServerTaskRunnerService] النبض الدوري يعمل بالفعل');
       return;
@@ -114,7 +112,9 @@ class ServerTaskRunnerService extends GetxService {
       final session = SessionService.to;
       final sessionId = session.currentSessionId;
       if (!session.isAuthenticated || sessionId == null || sessionId.isEmpty) {
-        log('⏭️ [ServerTaskRunnerService] لا توجد جلسة نشطة — تخطي مهام السيرفر');
+        log(
+          '⏭️ [ServerTaskRunnerService] لا توجد جلسة نشطة — تخطي مهام السيرفر',
+        );
         return ServerTaskResult.skippedNoSession;
       }
 
@@ -139,8 +139,8 @@ class ServerTaskRunnerService extends GetxService {
       }
 
       // 5. التحقق من الاتصال بالإنترنت
-      final hasInternet =
-          await InternetConnectionService.instance.hasInternet();
+      final hasInternet = await InternetConnectionService.instance
+          .hasInternet();
       if (!hasInternet) {
         log(
           '🌐 [ServerTaskRunnerService] لا يتوفر اتصال بالإنترنت، تخطي المهام',
@@ -148,7 +148,9 @@ class ServerTaskRunnerService extends GetxService {
         return ServerTaskResult.skippedNoNetwork;
       }
 
-      log('🔄 [ServerTaskRunnerService] جاري إرسال نبضة استدراك المهام للخادم...');
+      log(
+        '🔄 [ServerTaskRunnerService] جاري إرسال نبضة استدراك المهام للخادم...',
+      );
 
       // 6. استدعاء نقطة النهاية المعتمدة في الخادم (Scheduled Tasks Catch-up Endpoint)
       final response = await ApiService.instance.post<Map<String, dynamic>>(
@@ -174,7 +176,8 @@ class ServerTaskRunnerService extends GetxService {
         return ServerTaskResult.success;
       } else {
         final message = response.message.toLowerCase();
-        final isLocked = message.contains('lock') ||
+        final isLocked =
+            message.contains('lock') ||
             message.contains('running') ||
             message.contains('concurrent') ||
             response.message.contains('قيد التنفيذ');
@@ -254,4 +257,3 @@ class ServerTaskRunnerService extends GetxService {
     log('🧹 [ServerTaskRunnerService] تم تصفير سجلات ومؤقتات مشغل المهام');
   }
 }
-

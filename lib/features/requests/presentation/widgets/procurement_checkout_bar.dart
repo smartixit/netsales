@@ -26,79 +26,153 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
       final quoteReady = controller.hasCurrentServerQuote && quote != null;
       final estimate = controller.estimatedProcurementTotalsMinor;
       final hasEstimate = estimate != null;
-      final quoteExpired = quote?.expiresAt != null &&
+      final quoteExpired =
+          quote?.expiresAt != null &&
           !DateTime.now().isBefore(quote!.expiresAt!);
-      final isCompact = MediaQuery.sizeOf(context).width <= AppBreakpoints.mobileMax;
-      final gross = quoteReady ? quote.grossTotal : (hasEstimate ? estimate.$1 / 100 : 0);
-      final discount = quoteReady ? quote.discountTotal : (hasEstimate ? estimate.$2 / 100 : 0);
-      final net = quoteReady ? quote.netTotal : (hasEstimate ? estimate.$3 / 100 : 0);
+      final isCompact =
+          MediaQuery.sizeOf(context).width <= AppBreakpoints.mobileMax;
+      final gross = quoteReady
+          ? quote.grossTotal
+          : (hasEstimate ? estimate.$1 / 100 : 0);
+      final discount = quoteReady
+          ? quote.discountTotal
+          : (hasEstimate ? estimate.$2 / 100 : 0);
+      final net = quoteReady
+          ? quote.netTotal
+          : (hasEstimate ? estimate.$3 / 100 : 0);
       final summaryRows = Row(
         children: [
-          Expanded(child: _SummaryMetric(label: 'الإجمالي', value: AmountFormatter.formatValue(gross), currency: currency)),
+          Expanded(
+            child: _SummaryMetric(
+              label: 'الإجمالي',
+              value: AmountFormatter.formatValue(gross),
+              currency: currency,
+            ),
+          ),
           AppSpacing.hXs,
-          Expanded(child: _SummaryMetric(label: 'الخصم', value: AmountFormatter.formatValue(discount), currency: currency, isDiscount: true)),
+          Expanded(
+            child: _SummaryMetric(
+              label: 'الخصم',
+              value: AmountFormatter.formatValue(discount),
+              currency: currency,
+              isDiscount: true,
+            ),
+          ),
           AppSpacing.hXs,
-          Expanded(child: _SummaryMetric(label: 'الصافي التقديري', value: AmountFormatter.formatValue(net), currency: currency, isNet: true)),
+          Expanded(
+            child: _SummaryMetric(
+              label: 'الصافي التقديري',
+              value: AmountFormatter.formatValue(net),
+              currency: currency,
+              isNet: true,
+            ),
+          ),
         ],
       );
 
       return SafeArea(
         top: false,
         child: Container(
-          padding: EdgeInsets.fromLTRB(AppSpacing.cardPadding, AppSpacing.sm, AppSpacing.cardPadding, AppSpacing.sm),
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.cardPadding,
+            AppSpacing.sm,
+            AppSpacing.cardPadding,
+            AppSpacing.sm,
+          ),
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
-            border: Border(top: BorderSide(color: colors.outlineVariant.withValues(alpha: .4))),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .10), blurRadius: 22, offset: const Offset(0, -7))],
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppRadius.lg),
+            ),
+            border: Border(
+              top: BorderSide(
+                color: colors.outlineVariant.withValues(alpha: .4),
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .10),
+                blurRadius: 22,
+                offset: const Offset(0, -7),
+              ),
+            ],
           ),
-          child: LayoutBuilder(builder: (context, constraints) {
-            final metrics = Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (quoteExpired && !controller.isQuotePending.value) ...[
-                  CustomStateView.pricingExpired(
-                    presentation: CustomStatePresentation.compact,
-                    onAction: controller.fetchServerQuote,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final metrics = Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (quoteExpired && !controller.isQuotePending.value) ...[
+                    CustomStateView.pricingExpired(
+                      presentation: CustomStatePresentation.compact,
+                      onAction: controller.fetchServerQuote,
+                    ),
+                    AppSpacing.vXs,
+                  ],
+                  if (!hasEstimate && lines.isNotEmpty) ...[
+                    CustomStateView.pricingExpired(
+                      presentation: CustomStatePresentation.compact,
+                      onAction: controller.refreshNetworkPackages,
+                    ),
+                    AppSpacing.vXs,
+                  ],
+                  summaryRows,
+                  AppSpacing.vXs,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.layers_rounded,
+                        size: 16.r,
+                        color: colors.primary,
+                      ),
+                      AppSpacing.hXs,
+                      Text(
+                        '$count كرت',
+                        style: AppTypography.labelMedium.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${lines.length} باقة مختارة',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
-                  AppSpacing.vXs,
                 ],
-                if (!hasEstimate && lines.isNotEmpty) ...[
-                  CustomStateView.pricingExpired(presentation: CustomStatePresentation.compact, onAction: controller.refreshNetworkPackages),
-                  AppSpacing.vXs,
+              );
+              final action = CustomButton(
+                text: controller.isEditing.value
+                    ? 'حفظ التعديلات'
+                    : 'إرسال طلب التوريد',
+                icon: Icons.send_rounded,
+                width: isCompact ? double.infinity : 190,
+                loading: controller.isSubmitting.value,
+                enabled: controller.canSubmitOrder,
+                onPressed: controller.canSubmitOrder
+                    ? controller.submitOrderAndClose
+                    : null,
+              );
+              if (isCompact) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [metrics, AppSpacing.vSm, action],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(child: metrics),
+                  AppSpacing.hMd,
+                  action,
                 ],
-                summaryRows,
-                AppSpacing.vXs,
-                Row(children: [
-                  Icon(Icons.layers_rounded, size: 16.r, color: colors.primary),
-                  AppSpacing.hXs,
-                  Text('$count كرت', style: AppTypography.labelMedium.copyWith(color: colors.onSurface, fontWeight: FontWeight.w800)),
-                  const Spacer(),
-                  Text('${lines.length} باقة مختارة', style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
-                ]),
-              ],
-            );
-            final action = CustomButton(
-              text: controller.isEditing.value ? 'حفظ التعديلات' : 'إرسال طلب التوريد',
-              icon: Icons.send_rounded,
-              width: isCompact ? double.infinity : 190,
-              loading: controller.isSubmitting.value,
-              enabled: controller.canSubmitOrder,
-              onPressed: controller.canSubmitOrder ? controller.submitOrderAndClose : null,
-            );
-            if (isCompact) {
-              return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                metrics,
-                AppSpacing.vSm,
-                action,
-              ]);
-            }
-            return Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Expanded(child: metrics),
-              AppSpacing.hMd,
-              action,
-            ]);
-          }),
+              );
+            },
+          ),
         ),
       );
     });
@@ -123,18 +197,37 @@ class _SummaryMetric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final accent = isNet ? colors.primary : (isDiscount ? colors.tertiary : colors.onSurface);
+    final accent = isNet
+        ? colors.primary
+        : (isDiscount ? colors.tertiary : colors.onSurface);
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
-        color: isNet ? colors.primary.withValues(alpha: .08) : colors.surfaceContainerLow,
+        color: isNet
+            ? colors.primary.withValues(alpha: .08)
+            : colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: isNet ? colors.primary.withValues(alpha: .24) : colors.outlineVariant.withValues(alpha: .35)),
+        border: Border.all(
+          color: isNet
+              ? colors.primary.withValues(alpha: .24)
+              : colors.outlineVariant.withValues(alpha: .35),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant, fontWeight: FontWeight.w700)),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.labelSmall.copyWith(
+              color: colors.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           AppSpacing.vXxs,
           SizedBox(
             width: double.infinity,
@@ -151,7 +244,12 @@ class _SummaryMetric extends StatelessWidget {
               ),
             ),
           ),
-          Text(currency, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
+          Text(
+            currency,
+            style: AppTypography.labelSmall.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
     );

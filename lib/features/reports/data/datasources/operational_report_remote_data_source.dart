@@ -26,9 +26,19 @@ abstract interface class OperationalReportRemoteDataSource {
     String exportId,
   );
 
-  Future<ApiResponse<List<SavedReportPreset>>> getPresets({required Map<String, dynamic> query});
-  Future<ApiResponse<SavedReportPreset>> savePreset({required Map<String, dynamic> payload});
-  Future<ApiResponse<SavedReportPreset>> updatePreset(String presetId, {required Map<String, dynamic> payload});
-  Future<ApiResponse<bool>> deletePreset(String presetId, {required Map<String, dynamic> query});
+  Future<ApiResponse<List<SavedReportPreset>>> getPresets({
+    required Map<String, dynamic> query,
+  });
+  Future<ApiResponse<SavedReportPreset>> savePreset({
+    required Map<String, dynamic> payload,
+  });
+  Future<ApiResponse<SavedReportPreset>> updatePreset(
+    String presetId, {
+    required Map<String, dynamic> payload,
+  });
+  Future<ApiResponse<bool>> deletePreset(
+    String presetId, {
+    required Map<String, dynamic> query,
+  });
   Future<Uint8List?> downloadExport(String url);
 }

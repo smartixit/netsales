@@ -1,11 +1,12 @@
 part of '../custom_state_view.dart';
-extension on CustomStateView {
-Widget _buildSkeleton(BuildContext context) => CustomStateSkeletonView(
-  recipe: skeleton ?? const CustomStateSkeleton(),
-  builder: skeletonBuilder,
-);
 
-Widget _buildStateView(BuildContext context) {
+extension on CustomStateView {
+  Widget _buildSkeleton(BuildContext context) => CustomStateSkeletonView(
+    recipe: skeleton ?? const CustomStateSkeleton(),
+    builder: skeletonBuilder,
+  );
+
+  Widget _buildStateView(BuildContext context) {
     final colors = context.colors;
     final accent = accentColor ?? _resolveAccent(colors);
 
@@ -88,33 +89,59 @@ Widget _buildStateView(BuildContext context) {
     final colors = context.colors;
     return Padding(
       padding: padding ?? EdgeInsets.all(AppSpacing.md),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-          width: 42.r,
-          height: 42.r,
-          decoration: BoxDecoration(
-            color: accent.withValues(alpha: .10),
-            shape: BoxShape.circle,
-            border: Border.all(color: accent.withValues(alpha: .25)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 42.r,
+            height: 42.r,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: .10),
+              shape: BoxShape.circle,
+              border: Border.all(color: accent.withValues(alpha: .25)),
+            ),
+            child: Center(
+              child: kind == CustomStateKind.loading
+                  ? SizedBox.square(
+                      dimension: 18.r,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: accent,
+                      ),
+                    )
+                  : Icon(icon ?? _defaultIcon(), color: accent, size: 20.r),
+            ),
           ),
-          child: Center(
-            child: kind == CustomStateKind.loading
-                ? SizedBox.square(dimension: 18.r, child: CircularProgressIndicator(strokeWidth: 2, color: accent))
-                : Icon(icon ?? _defaultIcon(), color: accent, size: 20.r),
+          AppSpacing.vXs,
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: AppTypography.labelLarge.copyWith(
+              color: colors.onSurface,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ),
-        AppSpacing.vXs,
-        Text(title, textAlign: TextAlign.center, style: AppTypography.labelLarge.copyWith(color: colors.onSurface, fontWeight: FontWeight.w800)),
-        if (subtitle != null && subtitle!.isNotEmpty) ...[
-          AppSpacing.vXxs,
-          Text(subtitle!, textAlign: TextAlign.center, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant, height: 1.4)),
+          if (subtitle != null && subtitle!.isNotEmpty) ...[
+            AppSpacing.vXxs,
+            Text(
+              subtitle!,
+              textAlign: TextAlign.center,
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+          ],
+          if (kind == CustomStateKind.loading && showLoadingSkeleton) ...[
+            AppSpacing.vSm,
+            CustomStateSkeletonView(
+              recipe: skeleton ?? const CustomStateSkeleton(),
+              builder: skeletonBuilder,
+            ),
+          ],
+          if (_hasActions) ...[AppSpacing.vXs, _buildActions(context)],
         ],
-        if (kind == CustomStateKind.loading && showLoadingSkeleton) ...[
-          AppSpacing.vSm,
-          CustomStateSkeletonView(recipe: skeleton ?? const CustomStateSkeleton(), builder: skeletonBuilder),
-        ],
-        if (_hasActions) ...[AppSpacing.vXs, _buildActions(context)],
-      ]),
+      ),
     );
   }
 
@@ -122,21 +149,39 @@ Widget _buildStateView(BuildContext context) {
     final colors = context.colors;
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: .10),
         borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: accent.withValues(alpha: .20)),
       ),
-      child: Row(children: [
-        Icon(icon ?? _defaultIcon(), size: 17.r, color: accent),
-        AppSpacing.hXs,
-        Expanded(
-          child: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppTypography.labelSmall.copyWith(color: colors.onSurface, fontWeight: FontWeight.w800)),
-        ),
-        if (onAction != null)
-          CustomButton.text(text: actionLabel ?? 'إعادة المحاولة', size: AppButtonSize.small, foregroundColor: colors.primary, onPressed: onAction),
-      ]),
+      child: Row(
+        children: [
+          Icon(icon ?? _defaultIcon(), size: 17.r, color: accent),
+          AppSpacing.hXs,
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          if (onAction != null)
+            CustomButton.text(
+              text: actionLabel ?? 'إعادة المحاولة',
+              size: AppButtonSize.small,
+              foregroundColor: colors.primary,
+              onPressed: onAction,
+            ),
+        ],
+      ),
     );
   }
 
@@ -144,7 +189,4 @@ Widget _buildStateView(BuildContext context) {
       customAction != null ||
       (actionLabel != null && onAction != null) ||
       (secondaryActionLabel != null && onSecondaryAction != null);
-
-
-
 }

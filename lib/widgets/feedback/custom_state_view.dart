@@ -159,7 +159,8 @@ class CustomStateView extends StatelessWidget {
   const CustomStateView.pricingExpired({
     super.key,
     this.title = 'انتهت صلاحية التعرفة',
-    this.subtitle = 'لم يعد عرض الأسعار الحالي صالحاً. حدّث التعرفة قبل إرسال الطلب.',
+    this.subtitle =
+        'لم يعد عرض الأسعار الحالي صالحاً. حدّث التعرفة قبل إرسال الطلب.',
     this.presentation = CustomStatePresentation.boxed,
     this.badgeLabel = 'PRICING EXPIRED',
     this.icon = Icons.timer_off_rounded,

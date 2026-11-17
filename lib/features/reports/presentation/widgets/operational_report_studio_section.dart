@@ -28,9 +28,7 @@ class OperationalReportStudioSection extends StatelessWidget {
             children: [
               Icon(icon, color: Theme.of(context).colorScheme.primary),
               AppSpacing.hSm,
-              Expanded(
-                child: Text(title, style: AppTypography.titleMedium),
-              ),
+              Expanded(child: Text(title, style: AppTypography.titleMedium)),
             ],
           ),
           AppSpacing.vSm,
@@ -70,10 +68,8 @@ class OperationalReportValidationNotice extends StatelessWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: colors.error,
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(context).textTheme.labelLarge
+                ?.copyWith(color: colors.error, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
           for (final message in messages)
@@ -81,9 +77,8 @@ class OperationalReportValidationNotice extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 3),
               child: Text(
                 '• $message',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colors.onErrorContainer,
-                    ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: colors.onErrorContainer),
               ),
             ),
         ],

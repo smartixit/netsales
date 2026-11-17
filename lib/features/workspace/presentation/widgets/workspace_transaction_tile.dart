@@ -146,8 +146,9 @@ class WorkspaceTransactionTile extends StatelessWidget {
                             color: colors.surfaceContainerHigh,
                             borderRadius: BorderRadius.circular(4.r),
                             border: Border.all(
-                              color:
-                                  colors.outlineVariant.withValues(alpha: 0.35),
+                              color: colors.outlineVariant.withValues(
+                                alpha: 0.35,
+                              ),
                               width: 0.5,
                             ),
                           ),
@@ -158,7 +159,7 @@ class WorkspaceTransactionTile extends StatelessWidget {
                               fontSize: 9.5.sp,
                               fontWeight: FontWeight.w600,
                               fontFeatures: const [
-                                FontFeature.tabularFigures()
+                                FontFeature.tabularFigures(),
                               ],
                             ),
                           ),

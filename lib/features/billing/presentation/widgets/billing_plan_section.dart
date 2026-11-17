@@ -32,8 +32,9 @@ class BillingPlanSection extends StatelessWidget {
 
   Widget _planCard(BuildContext context, Map<String, dynamic> plan) {
     final version = plan['current_version'];
-    final rawPrices =
-        version is Map<String, dynamic> ? version['prices'] : null;
+    final rawPrices = version is Map<String, dynamic>
+        ? version['prices']
+        : null;
     final prices = rawPrices is List
         ? rawPrices.whereType<Map<String, dynamic>>().toList(growable: false)
         : const <Map<String, dynamic>>[];
@@ -67,15 +68,13 @@ class BillingPlanSection extends StatelessWidget {
 
   Widget _priceTile(Map<String, dynamic> price) {
     final id = (price['price_id'] as num?)?.toInt();
-    final amount =
-        price['unit_amount'] ?? price['unit_amount_minor'] ?? '—';
+    final amount = price['unit_amount'] ?? price['unit_amount_minor'] ?? '—';
     final rawCurrency = price['currency'];
     final currency = rawCurrency is Map
         ? Map<String, dynamic>.from(rawCurrency)
         : const <String, dynamic>{};
     final currencyCode = currency['code']?.toString();
-    final decimalPlaces =
-        (currency['decimal_places'] as num?)?.toInt() ?? 2;
+    final decimalPlaces = (currency['decimal_places'] as num?)?.toInt() ?? 2;
 
     return CustomInfoListTile(
       padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 14, 10),
@@ -85,15 +84,15 @@ class BillingPlanSection extends StatelessWidget {
         amount: amount,
         currencyCode: currencyCode,
         decimalPlaces: decimalPlaces,
-        trailingText:
-            price['unit_amount'] != null ? currencyCode : 'وحدة صغرى',
+        trailingText: price['unit_amount'] != null ? currencyCode : 'وحدة صغرى',
         enableTooltip: false,
       ),
       trailing: CustomButton.primary(
         text: 'اختيار',
         loading: controller.isMutating.value,
-        onPressed:
-            id == null ? null : () => BillingDialogs.purchase(controller, id),
+        onPressed: id == null
+            ? null
+            : () => BillingDialogs.purchase(controller, id),
       ),
     );
   }

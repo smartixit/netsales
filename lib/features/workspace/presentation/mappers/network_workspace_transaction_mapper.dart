@@ -13,33 +13,39 @@ class NetworkWorkspaceTransactionMapper {
     Iterable<NetworkPendingRequestEntity> requests, {
     required void Function(int requestId) onOpenRequest,
   }) {
-    return requests.map((request) {
-      final reference = request.requestUuid.isEmpty
-          ? ''
-          : request.requestUuid.split('-').first;
-      final parsedDate = DateFormatter.tryParse(request.requestDate);
-      final dateLabel =
-          parsedDate == null ? '' : DateFormatter.smart(parsedDate);
-      final subtitle = dateLabel.isEmpty
-          ? request.saleTypeLabel
-          : '${request.saleTypeLabel} • $dateLabel';
-      void openRequest() => onOpenRequest(request.requestId);
+    return requests
+        .map((request) {
+          final reference = request.requestUuid.isEmpty
+              ? ''
+              : request.requestUuid.split('-').first;
+          final parsedDate = DateFormatter.tryParse(request.requestDate);
+          final dateLabel = parsedDate == null
+              ? ''
+              : DateFormatter.smart(parsedDate);
+          final subtitle = dateLabel.isEmpty
+              ? request.saleTypeLabel
+              : '${request.saleTypeLabel} • $dateLabel';
+          void openRequest() => onOpenRequest(request.requestId);
 
-      return WorkspaceTransactionItemViewModel(
-        title: request.posName,
-        reference: reference,
-        subtitle: subtitle,
-        formattedAmount:
-            '${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي',
-        statusPresentation: EnumPresentationRegistry.resolveRequestStatus(
-          request.status,
-          serverLabel: request.statusLabel,
-        ),
-        initials: TextFormatter.avatarInitials(request.posName, maxChars: 2),
-        actionLabel: 'اعتماد',
-        onAction: openRequest,
-        onTap: openRequest,
-      );
-    }).toList(growable: false);
+          return WorkspaceTransactionItemViewModel(
+            title: request.posName,
+            reference: reference,
+            subtitle: subtitle,
+            formattedAmount:
+                '${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي',
+            statusPresentation: EnumPresentationRegistry.resolveRequestStatus(
+              request.status,
+              serverLabel: request.statusLabel,
+            ),
+            initials: TextFormatter.avatarInitials(
+              request.posName,
+              maxChars: 2,
+            ),
+            actionLabel: 'اعتماد',
+            onAction: openRequest,
+            onTap: openRequest,
+          );
+        })
+        .toList(growable: false);
   }
 }

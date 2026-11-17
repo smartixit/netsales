@@ -34,10 +34,7 @@ class FloatingNavBarItemWidget extends StatelessWidget {
         child: AnimatedContainer(
           duration: AppMotion.fast,
           curve: AppMotion.standard,
-          padding: EdgeInsets.symmetric(
-            horizontal: 6.w,
-            vertical: 4.h,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
           decoration: BoxDecoration(
             color: isSelected
                 ? colors.primary.withValues(alpha: 0.12)

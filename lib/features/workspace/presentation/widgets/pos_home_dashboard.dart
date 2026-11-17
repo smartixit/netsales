@@ -42,11 +42,38 @@ class PosHomeDashboard extends StatelessWidget {
             controller.activePos.value == null) {
           return const Column(
             children: [
-              CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 126, maxColumns: 1, minItemWidth: 180)),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 126,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
               SizedBox(height: 20),
-              CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 210, maxColumns: 1, minItemWidth: 180)),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 210,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
               SizedBox(height: 16),
-              CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 156, maxColumns: 1, minItemWidth: 180)),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 156,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
             ],
           );
         }
@@ -87,7 +114,8 @@ class PosHomeDashboard extends StatelessWidget {
             // 4. كرت السيولة والملخص المالي للشبكة المحددة (VIP Luxury Carbon Card)
             if (controller.selectedNetworkLink.value != null) ...[
               PosSelectedNetworkFinancialSummary(
-                networkName: controller
+                networkName:
+                    controller
                         .selectedNetworkLink
                         .value!
                         .network
@@ -122,11 +150,7 @@ class PosHomeDashboard extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.bolt_rounded,
-                    color: colors.primary,
-                    size: 20.r,
-                  ),
+                  Icon(Icons.bolt_rounded, color: colors.primary, size: 20.r),
                   SizedBox(width: 8.w),
                   Text(
                     'العمليات السريعة',

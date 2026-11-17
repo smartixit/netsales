@@ -27,7 +27,8 @@ class ProcurementNetworkContextSection
         icon: Icons.cell_tower_rounded,
         accent: colors.primary,
         selectedName: selected?.network?.networkName ?? 'اختر الشبكة المورّدة',
-        selectedDetail: selected?.network?.networkAddress ??
+        selectedDetail:
+            selected?.network?.networkAddress ??
             'حدد الشبكة المرتبطة بنقطة البيع',
         selectedLogoUrl: selected?.network?.networkProfileLogoUrl,
         selectedInitial: TextFormatter.avatarInitial(
@@ -41,8 +42,9 @@ class ProcurementNetworkContextSection
             ? 'لا توجد شبكات مورّدة نشطة مرتبطة بنقطة البيع حالياً.'
             : null,
         onToggle: () {
-          controller.expandedProcurementContext.value =
-              isExpanded ? '' : 'network';
+          controller.expandedProcurementContext.value = isExpanded
+              ? ''
+              : 'network';
         },
         options: links
             .map(

@@ -32,7 +32,14 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
           appBar: AppBar(title: const Text('تفاصيل الفاتورة')),
           body: Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),
-            child: const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 112, )),
+            child: const CustomStateView.loading(
+              presentation: CustomStatePresentation.skeletonOnly,
+              skeleton: CustomStateSkeleton(
+                layout: CustomStateSkeletonLayout.list,
+                itemCount: 3,
+                cardHeight: 112,
+              ),
+            ),
           ),
         );
       }
@@ -410,4 +417,3 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
     });
   }
 }
-

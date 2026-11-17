@@ -22,10 +22,9 @@ class PackageInfoService extends GetxService {
 
   static final PackageInfoService instance = PackageInfoService._();
 
-  static PackageInfoService get to =>
-      Get.isRegistered<PackageInfoService>()
-          ? Get.find<PackageInfoService>()
-          : instance;
+  static PackageInfoService get to => Get.isRegistered<PackageInfoService>()
+      ? Get.find<PackageInfoService>()
+      : instance;
 
   // ─── البيانات السيادية للحزمة ───
   String _appName = 'NetSales';
@@ -99,12 +98,12 @@ class PackageInfoService extends GetxService {
 
   /// ترويسات العميل المعيارية الموجهة للواجهة الخلفية (API Client Headers)
   Map<String, String> get apiHeaders => {
-        'X-App-Name': _appName,
-        'X-App-Package': _packageName,
-        'X-App-Version': _version,
-        'X-App-Build': _buildNumberStr,
-        'X-App-Platform': platformName,
-      };
+    'X-App-Name': _appName,
+    'X-App-Package': _packageName,
+    'X-App-Version': _version,
+    'X-App-Build': _buildNumberStr,
+    'X-App-Platform': platformName,
+  };
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 1. التهيئة واستخراج البيانات (Initialization)
@@ -115,11 +114,13 @@ class PackageInfoService extends GetxService {
     try {
       final info = await PackageInfo.fromPlatform();
       _appName = info.appName.isNotEmpty ? info.appName : _appName;
-      _packageName =
-          info.packageName.isNotEmpty ? info.packageName : _packageName;
+      _packageName = info.packageName.isNotEmpty
+          ? info.packageName
+          : _packageName;
       _version = info.version.isNotEmpty ? info.version : _version;
-      _buildNumberStr =
-          info.buildNumber.isNotEmpty ? info.buildNumber : _buildNumberStr;
+      _buildNumberStr = info.buildNumber.isNotEmpty
+          ? info.buildNumber
+          : _buildNumberStr;
       _buildNumber = int.tryParse(_buildNumberStr) ?? 1;
       _buildSignature = info.buildSignature;
       _installerStore = info.installerStore;
@@ -192,4 +193,3 @@ class PackageInfoService extends GetxService {
     return parts.map((part) => int.tryParse(part.trim()) ?? 0).toList();
   }
 }
-

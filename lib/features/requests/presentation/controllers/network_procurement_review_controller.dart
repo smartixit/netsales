@@ -197,9 +197,13 @@ class NetworkProcurementReviewController extends GetxController {
 
   /// زيادة أو إنقاص كمية التعديل بمقدار ورقة كاملة وفق سعة الباقة (Zero Clamp)
   void stepModificationSheet(int packageId, {required bool isIncrement}) {
-    final line = modificationLines.firstWhereOrNull((l) => l.packageId == packageId);
+    final line = modificationLines.firstWhereOrNull(
+      (l) => l.packageId == packageId,
+    );
     if (line == null) return;
-    final package = availablePackages.firstWhereOrNull((p) => p.packageId == packageId);
+    final package = availablePackages.firstWhereOrNull(
+      (p) => p.packageId == packageId,
+    );
     final sheetSize = package?.packageVoucherCount ?? 0;
     final step = sheetSize > 0 ? sheetSize : 1;
 
@@ -342,7 +346,9 @@ class NetworkProcurementReviewController extends GetxController {
       final networks = await getMyNetworksUseCase!();
       authorizedNetworks.assignAll(networks);
       if (selectedNetworkId.value == null) {
-        final networkIds = networks.map((n) => n.networkId).toList(growable: false);
+        final networkIds = networks
+            .map((n) => n.networkId)
+            .toList(growable: false);
         final resolvedId = Get.isRegistered<WorkspaceService>()
             ? WorkspaceService.to.resolveActiveNetworkId(networkIds)
             : (networks.length == 1 ? networks.first.networkId : null);
@@ -643,10 +649,7 @@ class NetworkProcurementReviewController extends GetxController {
   Future<void> promptApproveRequest(RequestEntity request) async {
     await ProcurementActionDialogs.showApprovalDialog(
       requestId: request.requestId,
-      onConfirm: (note) => approveRequest(
-        request.requestId,
-        requestNote: note,
-      ),
+      onConfirm: (note) => approveRequest(request.requestId, requestNote: note),
     );
   }
 
@@ -654,10 +657,7 @@ class NetworkProcurementReviewController extends GetxController {
   Future<void> promptRejectRequest(RequestEntity request) async {
     await ProcurementActionDialogs.showRejectionDialog(
       requestId: request.requestId,
-      onConfirm: (reason) => rejectRequest(
-        request.requestId,
-        reason,
-      ),
+      onConfirm: (reason) => rejectRequest(request.requestId, reason),
     );
   }
 
@@ -668,8 +668,7 @@ class NetworkProcurementReviewController extends GetxController {
 
     await CustomBottomSheet.showConfirmation<void>(
       title: 'تأكيد اعتماد التعديل',
-      message:
-          'سيتم اعتماد البنود المعروضة في آخر معاينة وإنشاء الفاتورة وفق أسعار النظام المعتمدة. لا يمكن تعديل الطلب بعد اعتماده.',
+      message: 'سيتم اعتماد البنود المعروضة في آخر معاينة وإنشاء الفاتورة وفق أسعار النظام المعتمدة. لا يمكن تعديل الطلب بعد اعتماده.',
       confirmLabel: 'اعتماد وإنشاء الفاتورة',
       onConfirm: () async {
         final success = await approvePreview(

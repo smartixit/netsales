@@ -104,7 +104,8 @@ class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
                 prefix: Icons.payments_rounded,
                 size: AppButtonSize.large,
                 width: double.infinity,
-                onPressed: () => Get.toNamed<void>(AppRoutes.repaymentCollection),
+                onPressed: () =>
+                    Get.toNamed<void>(AppRoutes.repaymentCollection),
               ),
             ),
           ],
@@ -253,7 +254,14 @@ class _NetworkFinanceSnapshot extends StatelessWidget {
           );
         }
         if (controller.isLoading.value) {
-          return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 2, cardHeight: 92, ));
+          return const CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.list,
+              itemCount: 2,
+              cardHeight: 92,
+            ),
+          );
         }
         return const SizedBox.shrink();
       }

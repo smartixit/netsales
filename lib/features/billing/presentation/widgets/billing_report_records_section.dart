@@ -27,24 +27,20 @@ class BillingReportRecordsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (controller.isLoading.value && controller.rows.isEmpty) {
       return const CustomStateView.loading(
-  presentation: CustomStatePresentation.skeletonOnly,
-  skeleton: CustomStateSkeleton(
-    layout: CustomStateSkeletonLayout.list,
-    itemCount: 3,
-    cardHeight: 112,
-    hasLeading: true,
-    
-  ),
-);
+        presentation: CustomStatePresentation.skeletonOnly,
+        skeleton: CustomStateSkeleton(
+          layout: CustomStateSkeletonLayout.list,
+          itemCount: 3,
+          cardHeight: 112,
+          hasLeading: true,
+        ),
+      );
     }
     if (controller.rows.isEmpty && controller.errorMessage.value != null) {
       return const SizedBox.shrink();
     }
     if (controller.rows.isEmpty) {
-      return CustomEmptyState.boxed(
-        title: emptyTitle,
-        subtitle: emptySubtitle,
-      );
+      return CustomEmptyState.boxed(title: emptyTitle, subtitle: emptySubtitle);
     }
 
     return Column(

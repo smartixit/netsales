@@ -13,27 +13,35 @@ import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart
 /// This renderer never calculates or aggregates financial amounts locally.
 class WalletStatementDocumentService {
   WalletStatementDocumentService._();
-  static final WalletStatementDocumentService instance = WalletStatementDocumentService._();
+  static final WalletStatementDocumentService instance =
+      WalletStatementDocumentService._();
 
-  Future<FileExportResult> exportNetworkStatement(NetworkWalletEntity wallet, List<NetworkWalletLogEntity> logs) async {
+  Future<FileExportResult> exportNetworkStatement(
+    NetworkWalletEntity wallet,
+    List<NetworkWalletLogEntity> logs,
+  ) async {
     final currencyCode = _requireCurrency(wallet.currencyCode);
     final openingBalance = wallet.openingBalance;
     if (openingBalance == null || !openingBalance.isFinite) {
       throw StateError('لم يرسل الخادم رصيداً افتتاحياً صالحاً لمحفظة الشبكة.');
     }
-    final rows = logs.map((log) => _movement(
-      id: log.logId,
-      date: log.logDate,
-      operation: log.logOperationLabel ?? log.logOperation ?? 'غير معروف',
-      statement: log.logStatement,
-      amount: log.logAmount,
-      balanceBefore: log.balanceBefore,
-      balanceAfter: log.balanceAfter,
-      snapshotSource: log.balanceSnapshotSource,
-      currencyCode: log.currencyCode,
-      expectedCurrencyCode: currencyCode,
-      creator: log.createdByName,
-    )).toList(growable: false);
+    final rows = logs
+        .map(
+          (log) => _movement(
+            id: log.logId,
+            date: log.logDate,
+            operation: log.logOperationLabel ?? log.logOperation ?? 'غير معروف',
+            statement: log.logStatement,
+            amount: log.logAmount,
+            balanceBefore: log.balanceBefore,
+            balanceAfter: log.balanceAfter,
+            snapshotSource: log.balanceSnapshotSource,
+            currencyCode: log.currencyCode,
+            expectedCurrencyCode: currencyCode,
+            creator: log.createdByName,
+          ),
+        )
+        .toList(growable: false);
 
     return _export(
       walletId: wallet.walletId,
@@ -54,25 +62,37 @@ class WalletStatementDocumentService {
     );
   }
 
-  Future<FileExportResult> exportPosStatement(PosWalletEntity wallet, List<PosWalletLogEntity> logs) async {
+  Future<FileExportResult> exportPosStatement(
+    PosWalletEntity wallet,
+    List<PosWalletLogEntity> logs,
+  ) async {
     final currencyCode = _requireCurrency(wallet.currencyCode);
     final openingBalance = wallet.openingBalance;
     if (openingBalance == null || !openingBalance.isFinite) {
-      throw StateError('لم يرسل الخادم رصيداً افتتاحياً صالحاً لمحفظة نقطة البيع.');
+      throw StateError(
+        'لم يرسل الخادم رصيداً افتتاحياً صالحاً لمحفظة نقطة البيع.',
+      );
     }
-    final rows = logs.map((log) => _movement(
-      id: log.logId,
-      date: log.logDate,
-      operation: log.logOperationTypeLabel ?? log.logOperationType ?? 'غير معروف',
-      statement: log.logStatement,
-      amount: log.logAmount,
-      balanceBefore: log.balanceBefore,
-      balanceAfter: log.balanceAfter,
-      snapshotSource: log.balanceSnapshotSource,
-      currencyCode: log.currencyCode,
-      expectedCurrencyCode: currencyCode,
-      creator: log.createdByName,
-    )).toList(growable: false);
+    final rows = logs
+        .map(
+          (log) => _movement(
+            id: log.logId,
+            date: log.logDate,
+            operation:
+                log.logOperationTypeLabel ??
+                log.logOperationType ??
+                'غير معروف',
+            statement: log.logStatement,
+            amount: log.logAmount,
+            balanceBefore: log.balanceBefore,
+            balanceAfter: log.balanceAfter,
+            snapshotSource: log.balanceSnapshotSource,
+            currencyCode: log.currencyCode,
+            expectedCurrencyCode: currencyCode,
+            creator: log.createdByName,
+          ),
+        )
+        .toList(growable: false);
 
     return _export(
       walletId: wallet.walletId,
@@ -106,12 +126,19 @@ class WalletStatementDocumentService {
     required String expectedCurrencyCode,
     required String? creator,
   }) {
-    if (!amount.isFinite || balanceBefore == null || balanceAfter == null ||
-        !balanceBefore.isFinite || !balanceAfter.isFinite) {
-      throw StateError('يوجد قيد لا يحتوي على مبلغ وأرصدة قبل الحركة وبعدها بصورة صالحة؛ أُوقف إنشاء الكشف.');
+    if (!amount.isFinite ||
+        balanceBefore == null ||
+        balanceAfter == null ||
+        !balanceBefore.isFinite ||
+        !balanceAfter.isFinite) {
+      throw StateError(
+        'يوجد قيد لا يحتوي على مبلغ وأرصدة قبل الحركة وبعدها بصورة صالحة؛ أُوقف إنشاء الكشف.',
+      );
     }
     if (_requireCurrency(currencyCode) != expectedCurrencyCode) {
-      throw StateError('عملة أحد القيود لا تطابق عملة المحفظة؛ أُوقف إنشاء الكشف دون تحويل عملة.');
+      throw StateError(
+        'عملة أحد القيود لا تطابق عملة المحفظة؛ أُوقف إنشاء الكشف دون تحويل عملة.',
+      );
     }
     return _WalletStatementMovement(
       id: id,
@@ -143,13 +170,17 @@ class WalletStatementDocumentService {
     required String templateId,
     required String documentTypeId,
   }) async {
-    if (!currentBalance.isFinite || (creditLimit != null && !creditLimit.isFinite)) {
-      throw StateError('تتضمن بيانات المحفظة رصيداً أو سقفاً ائتمانياً غير صالح.');
+    if (!currentBalance.isFinite ||
+        (creditLimit != null && !creditLimit.isFinite)) {
+      throw StateError(
+        'تتضمن بيانات المحفظة رصيداً أو سقفاً ائتمانياً غير صالح.',
+      );
     }
     final orderedLogs = List<_WalletStatementMovement>.of(logs)
       ..sort((left, right) => left.id.compareTo(right.id));
     final generatedAt = DateTime.now();
-    final logoBytes = await DocumentEngineBrandAssetService.instance.resolveLogoBytes(logoUrl);
+    final logoBytes = await DocumentEngineBrandAssetService.instance
+        .resolveLogoBytes(logoUrl);
     final fontService = DocumentEngineFontService.instance;
     final branding = DocumentBranding(
       organizationName: networkName,
@@ -165,38 +196,110 @@ class WalletStatementDocumentService {
     );
 
     final info = <DocumentInfoItem>[
-      DocumentInfoItem(label: 'المحفظة', value: DocumentTextValue(walletName), direction: DocumentTextDirection.rightToLeft),
-      DocumentInfoItem(label: 'الشبكة', value: DocumentTextValue(networkName), direction: DocumentTextDirection.rightToLeft),
-      if (posName != null) DocumentInfoItem(label: 'نقطة البيع', value: DocumentTextValue(posName), direction: DocumentTextDirection.rightToLeft),
-      DocumentInfoItem(label: 'رقم المحفظة', value: DocumentTextValue(walletId.toString()), direction: DocumentTextDirection.leftToRight),
-      DocumentInfoItem(label: 'العملة', value: DocumentTextValue(currencyCode), direction: DocumentTextDirection.leftToRight),
-      DocumentInfoItem(label: 'مصدر الرصيد الافتتاحي', value: DocumentTextValue(_openingSourceLabel(openingBalanceSource)), direction: DocumentTextDirection.rightToLeft),
-      if (creditLimit != null) DocumentInfoItem(label: 'السقف الائتماني', value: DocumentTextValue(_money(creditLimit, currencyCode)), direction: DocumentTextDirection.leftToRight),
+      DocumentInfoItem(
+        label: 'المحفظة',
+        value: DocumentTextValue(walletName),
+        direction: DocumentTextDirection.rightToLeft,
+      ),
+      DocumentInfoItem(
+        label: 'الشبكة',
+        value: DocumentTextValue(networkName),
+        direction: DocumentTextDirection.rightToLeft,
+      ),
+      if (posName != null)
+        DocumentInfoItem(
+          label: 'نقطة البيع',
+          value: DocumentTextValue(posName),
+          direction: DocumentTextDirection.rightToLeft,
+        ),
+      DocumentInfoItem(
+        label: 'رقم المحفظة',
+        value: DocumentTextValue(walletId.toString()),
+        direction: DocumentTextDirection.leftToRight,
+      ),
+      DocumentInfoItem(
+        label: 'العملة',
+        value: DocumentTextValue(currencyCode),
+        direction: DocumentTextDirection.leftToRight,
+      ),
+      DocumentInfoItem(
+        label: 'مصدر الرصيد الافتتاحي',
+        value: DocumentTextValue(_openingSourceLabel(openingBalanceSource)),
+        direction: DocumentTextDirection.rightToLeft,
+      ),
+      if (creditLimit != null)
+        DocumentInfoItem(
+          label: 'السقف الائتماني',
+          value: DocumentTextValue(_money(creditLimit, currencyCode)),
+          direction: DocumentTextDirection.leftToRight,
+        ),
     ];
 
-    final tableRows = orderedLogs.map((log) => DocumentTableRow(
-      id: 'wallet-log-${log.id}',
-      cells: [
-        DocumentTableCell(value: DocumentTextValue(log.id.toString()), direction: DocumentTextDirection.leftToRight),
-        DocumentTableCell(value: DocumentTextValue(log.date), direction: DocumentTextDirection.leftToRight),
-        DocumentTableCell(value: DocumentTextValue(log.operation), direction: DocumentTextDirection.rightToLeft),
-        DocumentTableCell(value: DocumentTextValue(log.statement), direction: DocumentTextDirection.rightToLeft),
-        DocumentTableCell(value: DocumentTextValue(_money(log.amount, currencyCode)), direction: DocumentTextDirection.leftToRight),
-        DocumentTableCell(value: DocumentTextValue(_money(log.balanceBefore, currencyCode)), direction: DocumentTextDirection.leftToRight),
-        DocumentTableCell(value: DocumentTextValue(_money(log.balanceAfter, currencyCode)), direction: DocumentTextDirection.leftToRight),
-        DocumentTableCell(value: DocumentTextValue(log.creator), direction: DocumentTextDirection.rightToLeft),
-        DocumentTableCell(value: DocumentTextValue(_snapshotSourceLabel(log.snapshotSource)), direction: DocumentTextDirection.rightToLeft),
-      ],
-    )).toList(growable: false);
+    final tableRows = orderedLogs
+        .map(
+          (log) => DocumentTableRow(
+            id: 'wallet-log-${log.id}',
+            cells: [
+              DocumentTableCell(
+                value: DocumentTextValue(log.id.toString()),
+                direction: DocumentTextDirection.leftToRight,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(log.date),
+                direction: DocumentTextDirection.leftToRight,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(log.operation),
+                direction: DocumentTextDirection.rightToLeft,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(log.statement),
+                direction: DocumentTextDirection.rightToLeft,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(_money(log.amount, currencyCode)),
+                direction: DocumentTextDirection.leftToRight,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(
+                  _money(log.balanceBefore, currencyCode),
+                ),
+                direction: DocumentTextDirection.leftToRight,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(
+                  _money(log.balanceAfter, currencyCode),
+                ),
+                direction: DocumentTextDirection.leftToRight,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(log.creator),
+                direction: DocumentTextDirection.rightToLeft,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(
+                  _snapshotSourceLabel(log.snapshotSource),
+                ),
+                direction: DocumentTextDirection.rightToLeft,
+              ),
+            ],
+          ),
+        )
+        .toList(growable: false);
 
     final snapshot = DocumentSnapshot(
       metadata: DocumentMetadata(
-        id: DocumentId('netsales-wallet-statement-$walletId-${generatedAt.millisecondsSinceEpoch}'),
+        id: DocumentId(
+          'netsales-wallet-statement-$walletId-${generatedAt.millisecondsSinceEpoch}',
+        ),
         documentTypeId: DocumentTypeId(documentTypeId),
         title: title,
         subtitle: 'كشف دفتر أستاذ تفصيلي',
         reference: 'WALLET-$walletId',
-        locale: DocumentLocale(languageTag: 'ar-YE', direction: DocumentTextDirection.rightToLeft),
+        locale: DocumentLocale(
+          languageTag: 'ar-YE',
+          direction: DocumentTextDirection.rightToLeft,
+        ),
         createdAt: generatedAt,
       ),
       sections: [
@@ -204,8 +307,17 @@ class WalletStatementDocumentService {
           id: 'wallet-statement',
           title: title,
           nodes: [
-            DocumentHeading(text: title, level: 1, direction: DocumentTextDirection.rightToLeft, weight: DocumentTextWeight.bold),
-            DocumentStatusBanner(label: 'كشف حساب تشغيلي تفصيلي', tone: DocumentStatusTone.info, detail: 'يعرض القيود بترتيب إدراجها في دفتر الأستاذ'),
+            DocumentHeading(
+              text: title,
+              level: 1,
+              direction: DocumentTextDirection.rightToLeft,
+              weight: DocumentTextWeight.bold,
+            ),
+            DocumentStatusBanner(
+              label: 'كشف حساب تشغيلي تفصيلي',
+              tone: DocumentStatusTone.info,
+              detail: 'يعرض القيود بترتيب إدراجها في دفتر الأستاذ',
+            ),
             DocumentInfoGrid(items: info, columns: 3, compact: true),
             if (openingBalanceSource == 'BACKFILLED')
               DocumentCallout(
@@ -216,13 +328,33 @@ class WalletStatementDocumentService {
             DocumentFinancialSummary(
               title: 'أرصدة المحفظة',
               lines: [
-                DocumentFinancialLine(label: 'الرصيد الافتتاحي', value: DocumentTextValue(_money(openingBalance, currencyCode))),
-                DocumentFinancialLine(label: 'الرصيد الحالي', value: DocumentTextValue(_money(currentBalance, currencyCode)), emphasis: DocumentFinancialEmphasis.total),
+                DocumentFinancialLine(
+                  label: 'الرصيد الافتتاحي',
+                  value: DocumentTextValue(
+                    _money(openingBalance, currencyCode),
+                  ),
+                ),
+                DocumentFinancialLine(
+                  label: 'الرصيد الحالي',
+                  value: DocumentTextValue(
+                    _money(currentBalance, currencyCode),
+                  ),
+                  emphasis: DocumentFinancialEmphasis.total,
+                ),
               ],
             ),
-            DocumentHeading(text: 'تفاصيل الحركات', level: 2, direction: DocumentTextDirection.rightToLeft),
+            DocumentHeading(
+              text: 'تفاصيل الحركات',
+              level: 2,
+              direction: DocumentTextDirection.rightToLeft,
+            ),
             if (tableRows.isEmpty)
-              DocumentCallout(title: 'لا توجد حركات مسجلة', body: 'لا توجد قيود دفتر أستاذ لهذه المحفظة حتى وقت إنشاء الكشف.', tone: DocumentStatusTone.neutral)
+              DocumentCallout(
+                title: 'لا توجد حركات مسجلة',
+                body:
+                    'لا توجد قيود دفتر أستاذ لهذه المحفظة حتى وقت إنشاء الكشف.',
+                tone: DocumentStatusTone.neutral,
+              )
             else
               DocumentTable(
                 columns: [
@@ -230,9 +362,21 @@ class WalletStatementDocumentService {
                   DocumentTableColumn(id: 'date', label: 'التاريخ'),
                   DocumentTableColumn(id: 'operation', label: 'الحركة'),
                   DocumentTableColumn(id: 'statement', label: 'البيان'),
-                  DocumentTableColumn(id: 'amount', label: 'المبلغ', alignment: DocumentCellAlignment.decimal),
-                  DocumentTableColumn(id: 'before', label: 'قبل الحركة', alignment: DocumentCellAlignment.decimal),
-                  DocumentTableColumn(id: 'after', label: 'بعد الحركة', alignment: DocumentCellAlignment.decimal),
+                  DocumentTableColumn(
+                    id: 'amount',
+                    label: 'المبلغ',
+                    alignment: DocumentCellAlignment.decimal,
+                  ),
+                  DocumentTableColumn(
+                    id: 'before',
+                    label: 'قبل الحركة',
+                    alignment: DocumentCellAlignment.decimal,
+                  ),
+                  DocumentTableColumn(
+                    id: 'after',
+                    label: 'بعد الحركة',
+                    alignment: DocumentCellAlignment.decimal,
+                  ),
                   DocumentTableColumn(id: 'creator', label: 'المستخدم'),
                   DocumentTableColumn(id: 'source', label: 'مصدر الرصيد'),
                 ],
@@ -243,7 +387,17 @@ class WalletStatementDocumentService {
                   showBorders: true,
                   headerColor: 'E8F3EF',
                   alternateRowColor: 'F7FAF9',
-                  columnWeights: const [0.55, 1.05, 0.9, 2.5, 1.0, 1.1, 1.1, 1.0, 0.85],
+                  columnWeights: const [
+                    0.55,
+                    1.05,
+                    0.9,
+                    2.5,
+                    1.0,
+                    1.1,
+                    1.1,
+                    1.0,
+                    0.85,
+                  ],
                 ),
               ),
             const DocumentParagraph(
@@ -255,25 +409,38 @@ class WalletStatementDocumentService {
       ],
     );
 
-    final result = await PdfDocumentRenderer(
-      textShapingProvider: await fontService.arabicTextShapingProvider(),
-    ).render(
-      snapshot: snapshot,
-      template: _template(templateId, documentTypeId),
-      options: DocumentRenderOptions(
-        pageProfile: DocumentPageProfile.a4Landscape(marginTop: 30, marginRight: 28, marginBottom: 34, marginLeft: 28),
-        generatedAt: generatedAt,
-        showPageNumbers: true,
-        headerText: '$networkName · $title',
-        footerText: 'NetSales — كشف حساب تشغيلي · العملة $currencyCode',
-        watermark: DocumentWatermark(imageBytes: logoBytes, opacity: 0.07, angleRadians: -0.6108652381980153, widthFactor: 0.58, heightFactor: 0.46),
-        branding: branding,
-        maxPages: 100,
-      ),
-    );
+    final result =
+        await PdfDocumentRenderer(
+          textShapingProvider: await fontService.arabicTextShapingProvider(),
+        ).render(
+          snapshot: snapshot,
+          template: _template(templateId, documentTypeId),
+          options: DocumentRenderOptions(
+            pageProfile: DocumentPageProfile.a4Landscape(
+              marginTop: 30,
+              marginRight: 28,
+              marginBottom: 34,
+              marginLeft: 28,
+            ),
+            generatedAt: generatedAt,
+            showPageNumbers: true,
+            headerText: '$networkName · $title',
+            footerText: 'NetSales — كشف حساب تشغيلي · العملة $currencyCode',
+            watermark: DocumentWatermark(
+              imageBytes: logoBytes,
+              opacity: 0.07,
+              angleRadians: -0.6108652381980153,
+              widthFactor: 0.58,
+              heightFactor: 0.46,
+            ),
+            branding: branding,
+            maxPages: 100,
+          ),
+        );
 
     if (result is DocumentRenderFailure) throw StateError(result.message);
-    if (result is! DocumentRenderSuccess) throw StateError('تعذر إنشاء كشف الحساب بصيغة PDF.');
+    if (result is! DocumentRenderSuccess)
+      throw StateError('تعذر إنشاء كشف الحساب بصيغة PDF.');
 
     return FileExportService.instance.saveFile(
       bytes: result.artifact.bytes,
@@ -286,24 +453,25 @@ class WalletStatementDocumentService {
     );
   }
 
-  DocumentTemplateDefinition _template(String id, String documentTypeId) => DocumentTemplateDefinition(
-    id: TemplateId(id),
-    version: TemplateVersion(major: 1, minor: 0, patch: 0),
-    documentTypeId: DocumentTypeId(documentTypeId),
-    displayName: 'NetSales Wallet Statement',
-    description: 'Arabic operational wallet ledger statement',
-    supportedLocaleTags: const ['ar'],
-    capabilities: TemplateCapabilities([
-      TemplateCapability.pageNumbering,
-      TemplateCapability.repeatingHeader,
-      TemplateCapability.repeatingFooter,
-      TemplateCapability.tables,
-      TemplateCapability.watermark,
-      TemplateCapability.landscapePage,
-    ]),
-    isDefault: true,
-    layout: DocumentTemplateLayout.executive,
-  );
+  DocumentTemplateDefinition _template(String id, String documentTypeId) =>
+      DocumentTemplateDefinition(
+        id: TemplateId(id),
+        version: TemplateVersion(major: 1, minor: 0, patch: 0),
+        documentTypeId: DocumentTypeId(documentTypeId),
+        displayName: 'NetSales Wallet Statement',
+        description: 'Arabic operational wallet ledger statement',
+        supportedLocaleTags: const ['ar'],
+        capabilities: TemplateCapabilities([
+          TemplateCapability.pageNumbering,
+          TemplateCapability.repeatingHeader,
+          TemplateCapability.repeatingFooter,
+          TemplateCapability.tables,
+          TemplateCapability.watermark,
+          TemplateCapability.landscapePage,
+        ]),
+        isDefault: true,
+        layout: DocumentTemplateLayout.executive,
+      );
 
   String _requireCurrency(String? raw) {
     final code = raw?.trim().toUpperCase();
@@ -333,8 +501,10 @@ class WalletStatementDocumentService {
     return normalized == null || normalized.isEmpty ? fallback : normalized;
   }
 
-  static String _colorHex(Color color) =>
-      (color.toARGB32() & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase();
+  static String _colorHex(Color color) => (color.toARGB32() & 0x00FFFFFF)
+      .toRadixString(16)
+      .padLeft(6, '0')
+      .toUpperCase();
 }
 
 class _WalletStatementMovement {

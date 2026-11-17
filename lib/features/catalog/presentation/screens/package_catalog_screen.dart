@@ -87,9 +87,11 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
                 count: controller.filteredPackages.length,
                 totalCount: controller.packages.length,
                 recordLabel: 'باقة كروت',
-                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                isFiltered:
+                    controller.searchQuery.value.isNotEmpty ||
                     controller.statusFilter.value != null,
-                isLoading: controller.isLoading.value && controller.packages.isEmpty,
+                isLoading:
+                    controller.isLoading.value && controller.packages.isEmpty,
                 onClear: controller.resetFilters,
               ),
             ),
@@ -104,7 +106,14 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
               if (controller.isLoading.value) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
-                  child: CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 4, cardHeight: 140.h, )),
+                  child: CustomStateView.loading(
+                    presentation: CustomStatePresentation.skeletonOnly,
+                    skeleton: CustomStateSkeleton(
+                      layout: CustomStateSkeletonLayout.list,
+                      itemCount: 4,
+                      cardHeight: 140.h,
+                    ),
+                  ),
                 );
               }
 

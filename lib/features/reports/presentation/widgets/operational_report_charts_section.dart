@@ -5,10 +5,7 @@ import 'package:netsales/widgets/charts/charting.dart';
 /// Renders the chart slots and aggregates supplied by the selected server
 /// provider. It never derives financial totals from the paginated client rows.
 class OperationalReportChartsSection extends StatelessWidget {
-  const OperationalReportChartsSection({
-    required this.summary,
-    super.key,
-  });
+  const OperationalReportChartsSection({required this.summary, super.key});
 
   final OperationalReportSummary summary;
 
@@ -29,16 +26,19 @@ class OperationalReportChartsSection extends StatelessWidget {
         itemBuilder: (context, index) {
           final slot = slots[index];
           final rawPoints = chartValues[slot.id]!;
-          final points = rawPoints.map((point) {
-            final rawValue = point[slot.valueKey];
-            final value = rawValue is num
-                ? rawValue
-                : num.tryParse(rawValue?.toString() ?? '');
-            return ChartDataPoint(
-              x: point[slot.labelKey]?.toString() ?? '—',
-              y: value,
-            );
-          }).where((point) => point.y != null).toList(growable: false);
+          final points = rawPoints
+              .map((point) {
+                final rawValue = point[slot.valueKey];
+                final value = rawValue is num
+                    ? rawValue
+                    : num.tryParse(rawValue?.toString() ?? '');
+                return ChartDataPoint(
+                  x: point[slot.labelKey]?.toString() ?? '—',
+                  y: value,
+                );
+              })
+              .where((point) => point.y != null)
+              .toList(growable: false);
 
           final type = slot.chartType == 'line'
               ? ChartType.line

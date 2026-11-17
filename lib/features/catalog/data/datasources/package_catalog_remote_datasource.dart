@@ -15,10 +15,8 @@ abstract class PackageCatalogRemoteDataSource {
 
   Future<ApiResponse<PackageModel>> getPackageDetails(int packageId);
 
-  Future<ApiResponse<List<EffectivePackageDiscountModel>>> getEffectiveDiscountsForPos({
-    required int networkId,
-    required int posId,
-  });
+  Future<ApiResponse<List<EffectivePackageDiscountModel>>>
+  getEffectiveDiscountsForPos({required int networkId, required int posId});
 
   Future<ApiResponse<EffectivePackageDiscountModel>> getEffectiveDiscount({
     required int networkId,

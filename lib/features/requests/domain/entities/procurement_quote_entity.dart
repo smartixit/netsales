@@ -47,17 +47,16 @@ class ProcurementQuoteEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        networkId,
-        posId,
-        saleType,
-        saleTypeLabel,
-        grossTotal,
-        discountTotal,
-        netTotal,
-        currency,
-        pricingToken,
-        expiresAt,
-        items,
-      ];
+    networkId,
+    posId,
+    saleType,
+    saleTypeLabel,
+    grossTotal,
+    discountTotal,
+    netTotal,
+    currency,
+    pricingToken,
+    expiresAt,
+    items,
+  ];
 }
-

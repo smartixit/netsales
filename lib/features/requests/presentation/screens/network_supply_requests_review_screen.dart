@@ -122,7 +122,14 @@ class NetworkSupplyRequestsReviewScreen
             if (controller.isLoading.value) {
               return Padding(
                 padding: EdgeInsets.all(AppSpacing.md),
-                child: CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 4, cardHeight: 140.h, )),
+                child: CustomStateView.loading(
+                  presentation: CustomStatePresentation.skeletonOnly,
+                  skeleton: CustomStateSkeleton(
+                    layout: CustomStateSkeletonLayout.list,
+                    itemCount: 4,
+                    cardHeight: 140.h,
+                  ),
+                ),
               );
             }
 
@@ -182,7 +189,14 @@ class NetworkSupplyRequestsReviewScreen
                   separatorBuilder: (context, index) => AppSpacing.vSm,
                   itemBuilder: (context, index) {
                     if (index == controller.requests.length) {
-                      return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 1, cardHeight: 132, ));
+                      return const CustomStateView.loading(
+                        presentation: CustomStatePresentation.skeletonOnly,
+                        skeleton: CustomStateSkeleton(
+                          layout: CustomStateSkeletonLayout.list,
+                          itemCount: 1,
+                          cardHeight: 132,
+                        ),
+                      );
                     }
 
                     final request = controller.requests[index];

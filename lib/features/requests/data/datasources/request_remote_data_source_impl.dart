@@ -11,7 +11,9 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
   const RequestRemoteDataSourceImpl();
 
   @override
-  Future<ApiResponse<ProcurementQuoteModel>> getQuote(Map<String, dynamic> data) {
+  Future<ApiResponse<ProcurementQuoteModel>> getQuote(
+    Map<String, dynamic> data,
+  ) {
     return ApiService.instance.post<ProcurementQuoteModel>(
       ApiConstants.voucherRequestsQuote,
       data: data,

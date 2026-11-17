@@ -469,7 +469,8 @@ abstract final class ApiConstants {
   static const String operationalReportSummary = '/reports/summary';
   static const String operationalReportExports = '/reports/exports';
   static const String operationalReportPresets = '/reports/presets';
-  static String operationalReportPreset(String presetId) => '/reports/presets/$presetId';
+  static String operationalReportPreset(String presetId) =>
+      '/reports/presets/$presetId';
   static String operationalReportExportStatus(String exportId) =>
       '/reports/exports/$exportId';
   static String operationalReportExportDownload(String exportId) =>
@@ -477,28 +478,48 @@ abstract final class ApiConstants {
 
   // Network Billing self-service — Laravel Billing engine is the source of truth.
   static const String billingCurrencies = '/billing/currencies';
-  static String billingNetworkAccounts(int networkId) => '/networks/$networkId/billing/accounts';
+  static String billingNetworkAccounts(int networkId) =>
+      '/networks/$networkId/billing/accounts';
   static String billingAccount(int accountId) => '/billing/accounts/$accountId';
-  static String billingAccountPlans(int accountId) => '/billing/accounts/$accountId/plans';
-  static String billingAccountEntitlements(int accountId) => '/billing/accounts/$accountId/entitlements';
-  static String billingNetworkReportsCatalog(int networkId) => '/networks/$networkId/billing/reports/catalog';
-  static String billingNetworkReport(int networkId, String type) => '/networks/$networkId/billing/reports/$type';
-  static String billingNetworkReportSummary(int networkId, String type) => '/networks/$networkId/billing/reports/$type/summary';
-  static String billingNetworkReportExport(int networkId, String type) => '/networks/$networkId/billing/reports/$type/export.csv';
-  static String billingAccountSubscriptions(int accountId) => '/billing/accounts/$accountId/subscriptions';
-  static String billingAccountInvoices(int accountId) => '/billing/accounts/$accountId/invoices';
-  static String billingAccountPaymentMethods(int accountId) => '/billing/accounts/$accountId/payment-methods';
-  static String billingAccountPayments(int accountId) => '/billing/accounts/$accountId/payments';
-  static String billingAccountCreditNotes(int accountId) => '/billing/accounts/$accountId/credit-notes';
-  static String billingAccountRefunds(int accountId) => '/billing/accounts/$accountId/refunds';
-  static String billingTrialEligibility(int accountId, int priceId) => '/billing/accounts/$accountId/prices/$priceId/trial-eligibility';
-  static String billingPurchase(int accountId) => '/billing/accounts/$accountId/subscriptions';
-  static String billingSubscription(int subscriptionId) => '/billing/subscriptions/$subscriptionId';
-  static String billingSubscriptionEvents(int subscriptionId) => '/billing/subscriptions/$subscriptionId/events';
-  static String billingSubscriptionUsage(int subscriptionId) => '/billing/subscriptions/$subscriptionId/usage';
-  static String billingCancelSubscription(int subscriptionId) => '/billing/subscriptions/$subscriptionId/cancel';
+  static String billingAccountPlans(int accountId) =>
+      '/billing/accounts/$accountId/plans';
+  static String billingAccountEntitlements(int accountId) =>
+      '/billing/accounts/$accountId/entitlements';
+  static String billingNetworkReportsCatalog(int networkId) =>
+      '/networks/$networkId/billing/reports/catalog';
+  static String billingNetworkReport(int networkId, String type) =>
+      '/networks/$networkId/billing/reports/$type';
+  static String billingNetworkReportSummary(int networkId, String type) =>
+      '/networks/$networkId/billing/reports/$type/summary';
+  static String billingNetworkReportExport(int networkId, String type) =>
+      '/networks/$networkId/billing/reports/$type/export.csv';
+  static String billingAccountSubscriptions(int accountId) =>
+      '/billing/accounts/$accountId/subscriptions';
+  static String billingAccountInvoices(int accountId) =>
+      '/billing/accounts/$accountId/invoices';
+  static String billingAccountPaymentMethods(int accountId) =>
+      '/billing/accounts/$accountId/payment-methods';
+  static String billingAccountPayments(int accountId) =>
+      '/billing/accounts/$accountId/payments';
+  static String billingAccountCreditNotes(int accountId) =>
+      '/billing/accounts/$accountId/credit-notes';
+  static String billingAccountRefunds(int accountId) =>
+      '/billing/accounts/$accountId/refunds';
+  static String billingTrialEligibility(int accountId, int priceId) =>
+      '/billing/accounts/$accountId/prices/$priceId/trial-eligibility';
+  static String billingPurchase(int accountId) =>
+      '/billing/accounts/$accountId/subscriptions';
+  static String billingSubscription(int subscriptionId) =>
+      '/billing/subscriptions/$subscriptionId';
+  static String billingSubscriptionEvents(int subscriptionId) =>
+      '/billing/subscriptions/$subscriptionId/events';
+  static String billingSubscriptionUsage(int subscriptionId) =>
+      '/billing/subscriptions/$subscriptionId/usage';
+  static String billingCancelSubscription(int subscriptionId) =>
+      '/billing/subscriptions/$subscriptionId/cancel';
   static String billingInvoice(int invoiceId) => '/billing/invoices/$invoiceId';
-  static String billingInvoicePayments(int invoiceId) => '/billing/invoices/$invoiceId/payments';
+  static String billingInvoicePayments(int invoiceId) =>
+      '/billing/invoices/$invoiceId/payments';
 
   // Immutable operational document snapshots and official PDF artifacts.
   static const String operationalDocumentSnapshots = '/documents/snapshots';

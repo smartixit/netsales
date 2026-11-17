@@ -106,9 +106,11 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
               () => CustomResultsCounterBar(
                 count: controller.links.length,
                 recordLabel: 'نقطة بيع مرتبطة',
-                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                isFiltered:
+                    controller.searchQuery.value.isNotEmpty ||
                     controller.selectedStatusFilter.value != null,
-                isLoading: controller.isLoading.value && controller.links.isEmpty,
+                isLoading:
+                    controller.isLoading.value && controller.links.isEmpty,
                 onClear: controller.resetFilters,
               ),
             ),
@@ -123,7 +125,14 @@ class NetworkPosDirectoryScreen extends GetView<CommercialDirectoryController> {
               if (controller.isLoading.value) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
-                  child: const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 4, cardHeight: 130, )),
+                  child: const CustomStateView.loading(
+                    presentation: CustomStatePresentation.skeletonOnly,
+                    skeleton: CustomStateSkeleton(
+                      layout: CustomStateSkeletonLayout.list,
+                      itemCount: 4,
+                      cardHeight: 130,
+                    ),
+                  ),
                 );
               }
 

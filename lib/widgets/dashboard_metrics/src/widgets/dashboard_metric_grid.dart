@@ -47,8 +47,9 @@ class DashboardMetricGrid extends StatelessWidget {
 
         final rows = <List<DashboardMetricData>>[];
         for (var i = 0; i < metrics.length; i += columns) {
-          final end =
-              (i + columns < metrics.length) ? i + columns : metrics.length;
+          final end = (i + columns < metrics.length)
+              ? i + columns
+              : metrics.length;
           rows.add(metrics.sublist(i, end));
         }
 

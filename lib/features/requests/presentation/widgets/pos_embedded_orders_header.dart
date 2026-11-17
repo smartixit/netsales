@@ -50,4 +50,3 @@ class PosEmbeddedOrdersHeader extends StatelessWidget {
     );
   }
 }
-

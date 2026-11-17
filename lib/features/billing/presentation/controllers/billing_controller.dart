@@ -28,12 +28,12 @@ class BillingController extends GetxController {
   final selectedCurrencyId = RxnInt();
 
   final plansPage = BillingCursorPageState(identityKey: 'plan_id');
-  final subscriptionsPage =
-      BillingCursorPageState(identityKey: 'billing_subscription_id');
+  final subscriptionsPage = BillingCursorPageState(
+    identityKey: 'billing_subscription_id',
+  );
   final invoicesPage = BillingCursorPageState(identityKey: 'invoice_id');
   final paymentsPage = BillingCursorPageState(identityKey: 'payment_id');
-  final creditNotesPage =
-      BillingCursorPageState(identityKey: 'credit_note_id');
+  final creditNotesPage = BillingCursorPageState(identityKey: 'credit_note_id');
   final refundsPage = BillingCursorPageState(identityKey: 'refund_id');
 
   final plansFilter = CustomCollectionFilterState();
@@ -86,13 +86,13 @@ class BillingController extends GetxController {
   );
 
   List<CustomCollectionFilterState> get _collectionFilters => [
-        plansFilter,
-        subscriptionsFilter,
-        invoicesFilter,
-        paymentsFilter,
-        creditNotesFilter,
-        refundsFilter,
-      ];
+    plansFilter,
+    subscriptionsFilter,
+    invoicesFilter,
+    paymentsFilter,
+    creditNotesFilter,
+    refundsFilter,
+  ];
 
   RxList<Map<String, dynamic>> get plans => plansPage.items;
   RxList<Map<String, dynamic>> get subscriptions => subscriptionsPage.items;
@@ -113,8 +113,7 @@ class BillingController extends GetxController {
 
   final subscriptionDetails = Rxn<Map<String, dynamic>>();
   final eventsPage = BillingCursorPageState(identityKey: 'event_id');
-  final usagePage =
-      BillingCursorPageState(identityKey: 'usage_aggregate_id');
+  final usagePage = BillingCursorPageState(identityKey: 'usage_aggregate_id');
   RxList<Map<String, dynamic>> get eventRows => eventsPage.items;
   RxList<Map<String, dynamic>> get usageRows => usagePage.items;
 
@@ -123,16 +122,17 @@ class BillingController extends GetxController {
   int? _detailsSubscriptionId;
 
   List<BillingCursorPageState> get _accountPages => [
-        plansPage,
-        subscriptionsPage,
-        invoicesPage,
-        paymentsPage,
-        creditNotesPage,
-        refundsPage,
-      ];
+    plansPage,
+    subscriptionsPage,
+    invoicesPage,
+    paymentsPage,
+    creditNotesPage,
+    refundsPage,
+  ];
 
   List<Map<String, dynamic>> _rows(BillingPayload payload) {
-    dynamic value = payload.data['data'] ?? payload.data['items'] ?? payload.data;
+    dynamic value =
+        payload.data['data'] ?? payload.data['items'] ?? payload.data;
     if (value is Map<String, dynamic>) {
       value = value['data'] ?? value['items'];
     }
@@ -145,9 +145,7 @@ class BillingController extends GetxController {
 
   Map<String, dynamic> _object(BillingPayload payload) {
     final value = payload.data['data'] ?? payload.data;
-    return value is Map
-        ? Map<String, dynamic>.from(value)
-        : payload.data;
+    return value is Map ? Map<String, dynamic>.from(value) : payload.data;
   }
 
   Map<String, dynamic> _page(BillingPayload payload) => _object(payload);
@@ -168,13 +166,10 @@ class BillingController extends GetxController {
     }
   }
 
-  Map<String, dynamic> _firstPageQuery(
-    CustomCollectionFilterState filter,
-  ) =>
-      {
-        'per_page': 25,
-        ...filter.queryParameters,
-      };
+  Map<String, dynamic> _firstPageQuery(CustomCollectionFilterState filter) => {
+    'per_page': 25,
+    ...filter.queryParameters,
+  };
 
   Future<void> _refreshCollection({
     required BillingCursorPageState page,
@@ -223,8 +218,9 @@ class BillingController extends GetxController {
   void searchRefunds(String value) =>
       refundsFilter.onSearchChanged(value, refreshRefunds);
 
-  void setSubscriptionStatus(String? value) =>
-      unawaited(subscriptionsFilter.onStatusChanged(value, refreshSubscriptions));
+  void setSubscriptionStatus(String? value) => unawaited(
+    subscriptionsFilter.onStatusChanged(value, refreshSubscriptions),
+  );
   void setInvoiceStatus(String? value) =>
       unawaited(invoicesFilter.onStatusChanged(value, refreshInvoices));
   void setPaymentStatus(String? value) =>
@@ -235,41 +231,42 @@ class BillingController extends GetxController {
       unawaited(refundsFilter.onStatusChanged(value, refreshRefunds));
 
   Future<void> refreshPlans() => _refreshCollection(
-        page: plansPage,
-        filter: plansFilter,
-        fetchPage: (query) => useCases.plans(selectedAccountId.value!, query),
-        fallback: 'تعذر تحديث الخطط المطابقة.',
-      );
+    page: plansPage,
+    filter: plansFilter,
+    fetchPage: (query) => useCases.plans(selectedAccountId.value!, query),
+    fallback: 'تعذر تحديث الخطط المطابقة.',
+  );
   Future<void> refreshSubscriptions() => _refreshCollection(
-        page: subscriptionsPage,
-        filter: subscriptionsFilter,
-        fetchPage: (query) => useCases.subscriptions(selectedAccountId.value!, query),
-        fallback: 'تعذر تحديث الاشتراكات المطابقة.',
-      );
+    page: subscriptionsPage,
+    filter: subscriptionsFilter,
+    fetchPage: (query) =>
+        useCases.subscriptions(selectedAccountId.value!, query),
+    fallback: 'تعذر تحديث الاشتراكات المطابقة.',
+  );
   Future<void> refreshInvoices() => _refreshCollection(
-        page: invoicesPage,
-        filter: invoicesFilter,
-        fetchPage: (query) => useCases.invoices(selectedAccountId.value!, query),
-        fallback: 'تعذر تحديث الفواتير المطابقة.',
-      );
+    page: invoicesPage,
+    filter: invoicesFilter,
+    fetchPage: (query) => useCases.invoices(selectedAccountId.value!, query),
+    fallback: 'تعذر تحديث الفواتير المطابقة.',
+  );
   Future<void> refreshPayments() => _refreshCollection(
-        page: paymentsPage,
-        filter: paymentsFilter,
-        fetchPage: (query) => useCases.payments(selectedAccountId.value!, query),
-        fallback: 'تعذر تحديث المدفوعات المطابقة.',
-      );
+    page: paymentsPage,
+    filter: paymentsFilter,
+    fetchPage: (query) => useCases.payments(selectedAccountId.value!, query),
+    fallback: 'تعذر تحديث المدفوعات المطابقة.',
+  );
   Future<void> refreshCreditNotes() => _refreshCollection(
-        page: creditNotesPage,
-        filter: creditNotesFilter,
-        fetchPage: (query) => useCases.creditNotes(selectedAccountId.value!, query),
-        fallback: 'تعذر تحديث الإشعارات الدائنة المطابقة.',
-      );
+    page: creditNotesPage,
+    filter: creditNotesFilter,
+    fetchPage: (query) => useCases.creditNotes(selectedAccountId.value!, query),
+    fallback: 'تعذر تحديث الإشعارات الدائنة المطابقة.',
+  );
   Future<void> refreshRefunds() => _refreshCollection(
-        page: refundsPage,
-        filter: refundsFilter,
-        fetchPage: (query) => useCases.refunds(selectedAccountId.value!, query),
-        fallback: 'تعذر تحديث الاستردادات المطابقة.',
-      );
+    page: refundsPage,
+    filter: refundsFilter,
+    fetchPage: (query) => useCases.refunds(selectedAccountId.value!, query),
+    fallback: 'تعذر تحديث الاستردادات المطابقة.',
+  );
 
   void _clearSubscriptionDetails() {
     _detailsRevision++;
@@ -337,8 +334,8 @@ class BillingController extends GetxController {
       accounts.assignAll(_rows(results[0]));
       currencies.assignAll(_rows(results[1]));
       if (selectedCurrencyId.value == null && currencies.isNotEmpty) {
-        selectedCurrencyId.value =
-            (currencies.first['currency_id'] as num).toInt();
+        selectedCurrencyId.value = (currencies.first['currency_id'] as num)
+            .toInt();
       }
 
       if (accounts.isEmpty) {
@@ -351,7 +348,8 @@ class BillingController extends GetxController {
       }
 
       final previousAccountId = selectedAccountId.value;
-      final chosen = accounts.firstWhereOrNull(
+      final chosen =
+          accounts.firstWhereOrNull(
             (row) => row['billing_account_id'] == previousAccountId,
           ) ??
           accounts.first;
@@ -471,7 +469,7 @@ class BillingController extends GetxController {
   Future<void> _loadMorePage({
     required BillingCursorPageState state,
     required Future<BillingPayload> Function(Map<String, dynamic> query)
-        fetchPage,
+    fetchPage,
     required String fallback,
     int perPage = 25,
     bool Function()? additionalGuard,
@@ -495,10 +493,7 @@ class BillingController extends GetxController {
     state.loadMoreError.value = null;
 
     try {
-      final payload = await fetchPage({
-        'per_page': perPage,
-        'cursor': cursor,
-      });
+      final payload = await fetchPage({'per_page': perPage, 'cursor': cursor});
       if (controllerRevision != _revision ||
           accountId != selectedAccountId.value ||
           requestNetworkId != networkId() ||
@@ -523,8 +518,7 @@ class BillingController extends GetxController {
         );
       }
     } finally {
-      if (controllerRevision == _revision &&
-          pageRevision == state.revision) {
+      if (controllerRevision == _revision && pageRevision == state.revision) {
         state.isLoadingMore.value = false;
       }
     }
@@ -535,7 +529,8 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: plansPage,
-      fetchPage: (query) => useCases.plans(accountId, {...plansFilter.queryParameters, ...query}),
+      fetchPage: (query) =>
+          useCases.plans(accountId, {...plansFilter.queryParameters, ...query}),
       fallback: 'تعذر تحميل بقية الخطط.',
     );
   }
@@ -545,7 +540,10 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: subscriptionsPage,
-      fetchPage: (query) => useCases.subscriptions(accountId, {...subscriptionsFilter.queryParameters, ...query}),
+      fetchPage: (query) => useCases.subscriptions(accountId, {
+        ...subscriptionsFilter.queryParameters,
+        ...query,
+      }),
       fallback: 'تعذر تحميل بقية الاشتراكات.',
     );
   }
@@ -555,7 +553,10 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: invoicesPage,
-      fetchPage: (query) => useCases.invoices(accountId, {...invoicesFilter.queryParameters, ...query}),
+      fetchPage: (query) => useCases.invoices(accountId, {
+        ...invoicesFilter.queryParameters,
+        ...query,
+      }),
       fallback: 'تعذر تحميل بقية الفواتير.',
     );
   }
@@ -565,7 +566,10 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: paymentsPage,
-      fetchPage: (query) => useCases.payments(accountId, {...paymentsFilter.queryParameters, ...query}),
+      fetchPage: (query) => useCases.payments(accountId, {
+        ...paymentsFilter.queryParameters,
+        ...query,
+      }),
       fallback: 'تعذر تحميل بقية المدفوعات.',
     );
   }
@@ -575,7 +579,10 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: creditNotesPage,
-      fetchPage: (query) => useCases.creditNotes(accountId, {...creditNotesFilter.queryParameters, ...query}),
+      fetchPage: (query) => useCases.creditNotes(accountId, {
+        ...creditNotesFilter.queryParameters,
+        ...query,
+      }),
       fallback: 'تعذر تحميل بقية الإشعارات الدائنة.',
     );
   }
@@ -585,7 +592,10 @@ class BillingController extends GetxController {
     if (accountId == null) return Future<void>.value();
     return _loadMorePage(
       state: refundsPage,
-      fetchPage: (query) => useCases.refunds(accountId, {...refundsFilter.queryParameters, ...query}),
+      fetchPage: (query) => useCases.refunds(accountId, {
+        ...refundsFilter.queryParameters,
+        ...query,
+      }),
       fallback: 'تعذر تحميل بقية الاستردادات.',
     );
   }
@@ -625,8 +635,7 @@ class BillingController extends GetxController {
         useCases.subscription(id),
         useCases.usage(id, const {'per_page': 30}),
       ]);
-      if (detailsRevision != _detailsRevision ||
-          id != _detailsSubscriptionId) {
+      if (detailsRevision != _detailsRevision || id != _detailsSubscriptionId) {
         return;
       }
 
@@ -662,8 +671,7 @@ class BillingController extends GetxController {
       fetchPage: (query) => useCases.events(id, query),
       fallback: 'تعذر تحميل بقية أحداث الاشتراك.',
       additionalGuard: () =>
-          detailsRevision == _detailsRevision &&
-          id == _detailsSubscriptionId,
+          detailsRevision == _detailsRevision && id == _detailsSubscriptionId,
     );
   }
 
@@ -677,8 +685,7 @@ class BillingController extends GetxController {
       fetchPage: (query) => useCases.usage(id, query),
       fallback: 'تعذر تحميل بقية سجلات الاستخدام.',
       additionalGuard: () =>
-          detailsRevision == _detailsRevision &&
-          id == _detailsSubscriptionId,
+          detailsRevision == _detailsRevision && id == _detailsSubscriptionId,
     );
   }
 
@@ -778,9 +785,10 @@ class BillingController extends GetxController {
     isMutating.value = true;
     try {
       final random = Random.secure();
-      final key = List<int>.generate(16, (_) => random.nextInt(256))
-          .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-          .join();
+      final key = List<int>.generate(
+        16,
+        (_) => random.nextInt(256),
+      ).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
       await useCases.recordPayment(
         invoiceId,
         paymentMethodId,

@@ -19,10 +19,13 @@ class CustomStateSkeletonView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final skeletonContent = builder?.call(context) ??
+    final skeletonContent =
+        builder?.call(context) ??
         switch (recipe.layout) {
           CustomStateSkeletonLayout.list => _buildList(context),
-          CustomStateSkeletonLayout.cards => _buildResponsiveCollection(context),
+          CustomStateSkeletonLayout.cards => _buildResponsiveCollection(
+            context,
+          ),
           CustomStateSkeletonLayout.grid => _buildResponsiveCollection(context),
           CustomStateSkeletonLayout.detail => _buildDetail(context),
           CustomStateSkeletonLayout.text => _buildText(context),
@@ -58,8 +61,7 @@ class CustomStateSkeletonView extends StatelessWidget {
             .floor()
             .clamp(1, recipe.maxColumns)
             .toInt();
-        final itemWidth =
-            (availableWidth - spacing * (columns - 1)) / columns;
+        final itemWidth = (availableWidth - spacing * (columns - 1)) / columns;
 
         return Wrap(
           spacing: spacing,
@@ -86,15 +88,13 @@ class CustomStateSkeletonView extends StatelessWidget {
           child: FractionallySizedBox(
             widthFactor: widthFactor,
             alignment: AlignmentDirectional.centerStart,
-            child: _placeholder(
-              context,
-              height: index == 0 ? 12 : 9,
-            ),
+            child: _placeholder(context, height: index == 0 ? 12 : 9),
           ),
         );
       }),
     );
   }
+
   Widget _buildDetail(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -109,11 +109,7 @@ class CustomStateSkeletonView extends StatelessWidget {
             padding: EdgeInsets.only(
               bottom: index == recipe.itemCount - 1 ? 0 : recipe.spacing.h,
             ),
-            child: _buildItem(
-              context,
-              width: double.infinity,
-              compact: true,
-            ),
+            child: _buildItem(context, width: double.infinity, compact: true),
           ),
         ),
       ],
@@ -150,10 +146,7 @@ class CustomStateSkeletonView extends StatelessWidget {
                 child: FractionallySizedBox(
                   widthFactor: factor,
                   alignment: AlignmentDirectional.centerStart,
-                  child: _placeholder(
-                    context,
-                    height: index == 0 ? 11 : 8,
-                  ),
+                  child: _placeholder(context, height: index == 0 ? 11 : 8),
                 ),
               );
             }),
@@ -176,9 +169,7 @@ class CustomStateSkeletonView extends StatelessWidget {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.card.r),
           border: recipe.showCardSurface
-              ? Border.all(
-                  color: colors.outlineVariant.withValues(alpha: .30),
-                )
+              ? Border.all(color: colors.outlineVariant.withValues(alpha: .30))
               : null,
         ),
         child: Padding(
@@ -206,7 +197,11 @@ class CustomStateSkeletonView extends StatelessWidget {
         circular ? AppRadius.full : AppRadius.xs,
       ),
     );
-    final child = Container(height: height.h, width: width?.w, decoration: shape);
+    final child = Container(
+      height: height.h,
+      width: width?.w,
+      decoration: shape,
+    );
     if (widthFactor != null) {
       return FractionallySizedBox(
         widthFactor: widthFactor,

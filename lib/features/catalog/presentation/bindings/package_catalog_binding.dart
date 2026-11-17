@@ -46,11 +46,15 @@ class PackageCatalogBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<GetMyNetworksUseCase>()) {
-      registerLazyIfAbsent<GetMyNetworksUseCase>(() => GetMyNetworksUseCase(Get.find<CommercialRepository>()));
+      registerLazyIfAbsent<GetMyNetworksUseCase>(
+        () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
+      );
     }
 
     // 4. Use Cases
-    registerLazyIfAbsent<GetPackagesUseCase>(() => GetPackagesUseCase(Get.find<PackageCatalogRepository>()));
+    registerLazyIfAbsent<GetPackagesUseCase>(
+      () => GetPackagesUseCase(Get.find<PackageCatalogRepository>()),
+    );
     registerLazyIfAbsent<GetNetworkPackagesUseCase>(
       () => GetNetworkPackagesUseCase(Get.find<PackageCatalogRepository>()),
     );

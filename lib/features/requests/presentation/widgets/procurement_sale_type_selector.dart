@@ -11,24 +11,20 @@ class ProcurementSaleTypeSelector extends GetView<PosProcurementController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final selectedIndex =
-          controller.selectedSaleType.value == SaleType.cash ? 0 : 1;
+      final selectedIndex = controller.selectedSaleType.value == SaleType.cash
+          ? 0
+          : 1;
 
       return CustomSegmentedBar(
         selectedIndex: selectedIndex,
         onSegmentChanged: (index) {
-          controller.selectedSaleType.value =
-              index == 0 ? SaleType.cash : SaleType.credit;
+          controller.selectedSaleType.value = index == 0
+              ? SaleType.cash
+              : SaleType.credit;
         },
         items: const [
-          CustomSegmentItem(
-            label: 'نقدي',
-            icon: Icons.payments_outlined,
-          ),
-          CustomSegmentItem(
-            label: 'آجل',
-            icon: Icons.credit_card_outlined,
-          ),
+          CustomSegmentItem(label: 'نقدي', icon: Icons.payments_outlined),
+          CustomSegmentItem(label: 'آجل', icon: Icons.credit_card_outlined),
         ],
       );
     });

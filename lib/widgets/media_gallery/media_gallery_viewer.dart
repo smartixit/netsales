@@ -235,13 +235,17 @@ class _MediaGalleryViewerState extends State<MediaGalleryViewer> {
       } else if (!item.isPdf) {
         CustomSnackbar.show(
           title: 'الطباعة غير مدعومة',
-          message: 'نزّل هذا النوع من الملفات وافتحه في التطبيق المناسب للطباعة.',
+          message:
+              'نزّل هذا النوع من الملفات وافتحه في التطبيق المناسب للطباعة.',
           type: SnackType.warning,
         );
         return;
       }
 
-      await Printing.layoutPdf(onLayout: (_) async => printBytes, name: item.title);
+      await Printing.layoutPdf(
+        onLayout: (_) async => printBytes,
+        name: item.title,
+      );
     } catch (_) {
       CustomSnackbar.show(
         title: 'خطأ',

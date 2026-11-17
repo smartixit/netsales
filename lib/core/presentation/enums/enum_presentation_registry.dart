@@ -393,17 +393,16 @@ class EnumPresentationRegistry {
     final label = _effectiveLabel(serverLabel, status.label);
     return switch (status) {
       RepaymentStatus.completed => EnumPresentation(
-          label: label,
-          tone: SemanticTone.success,
-          icon: Icons.check_circle_rounded,
-        ),
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.check_circle_rounded,
+      ),
       RepaymentStatus.reversed => EnumPresentation(
-          label: label,
-          tone: SemanticTone.danger,
-          icon: Icons.undo_rounded,
-        ),
-      RepaymentStatus.unknown =>
-        EnumPresentation.unknown(fallbackLabel: label),
+        label: label,
+        tone: SemanticTone.danger,
+        icon: Icons.undo_rounded,
+      ),
+      RepaymentStatus.unknown => EnumPresentation.unknown(fallbackLabel: label),
     };
   }
 
@@ -415,27 +414,28 @@ class EnumPresentationRegistry {
     final label = _effectiveLabel(serverLabel, bucket.label);
     return switch (bucket) {
       ReceivableAgingBucket.days0To30 => EnumPresentation(
-          label: label,
-          tone: SemanticTone.neutral,
-          icon: Icons.schedule_rounded,
-        ),
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.schedule_rounded,
+      ),
       ReceivableAgingBucket.days31To60 => EnumPresentation(
-          label: label,
-          tone: SemanticTone.warning,
-          icon: Icons.timelapse_rounded,
-        ),
+        label: label,
+        tone: SemanticTone.warning,
+        icon: Icons.timelapse_rounded,
+      ),
       ReceivableAgingBucket.days61To90 => EnumPresentation(
-          label: label,
-          tone: SemanticTone.warning,
-          icon: Icons.warning_amber_rounded,
-        ),
+        label: label,
+        tone: SemanticTone.warning,
+        icon: Icons.warning_amber_rounded,
+      ),
       ReceivableAgingBucket.over90 => EnumPresentation(
-          label: label,
-          tone: SemanticTone.danger,
-          icon: Icons.error_outline_rounded,
-        ),
-      ReceivableAgingBucket.unknown =>
-        EnumPresentation.unknown(fallbackLabel: label),
+        label: label,
+        tone: SemanticTone.danger,
+        icon: Icons.error_outline_rounded,
+      ),
+      ReceivableAgingBucket.unknown => EnumPresentation.unknown(
+        fallbackLabel: label,
+      ),
     };
   }
 
@@ -457,22 +457,23 @@ class EnumPresentationRegistry {
     final label = _effectiveLabel(serverLabel, fallback);
     return switch (mode) {
       BillingTrialEntitlementMode.fullPlan => EnumPresentation(
-          label: label,
-          tone: SemanticTone.success,
-          icon: Icons.verified_rounded,
-        ),
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.verified_rounded,
+      ),
       BillingTrialEntitlementMode.restricted => EnumPresentation(
-          label: label,
-          tone: SemanticTone.warning,
-          icon: Icons.tune_rounded,
-        ),
+        label: label,
+        tone: SemanticTone.warning,
+        icon: Icons.tune_rounded,
+      ),
       BillingTrialEntitlementMode.none => EnumPresentation(
-          label: label,
-          tone: SemanticTone.neutral,
-          icon: Icons.lock_outline_rounded,
-        ),
-      BillingTrialEntitlementMode.unknown =>
-        EnumPresentation.unknown(fallbackLabel: label),
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.lock_outline_rounded,
+      ),
+      BillingTrialEntitlementMode.unknown => EnumPresentation.unknown(
+        fallbackLabel: label,
+      ),
     };
   }
 

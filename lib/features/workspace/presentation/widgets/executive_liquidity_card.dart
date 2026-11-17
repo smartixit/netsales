@@ -18,7 +18,8 @@ class ExecutiveLiquidityCard extends StatelessWidget {
     String cashSales,
     String outstandingReceivables,
     String posCoverage,
-  }) summary;
+  })
+  summary;
   final VoidCallback onCreateSaleInvoice;
   final VoidCallback onCollectRepayment;
   final VoidCallback onOpenWalletStatement;
@@ -110,7 +111,9 @@ class ExecutiveLiquidityCard extends StatelessWidget {
                     SizedBox(width: 8.w),
                     Flexible(
                       child: Text(
-                        hasWallet ? 'صافي السيولة التشغيلية' : 'إجمالي المبيعات',
+                        hasWallet
+                            ? 'صافي السيولة التشغيلية'
+                            : 'إجمالي المبيعات',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -125,10 +128,7 @@ class ExecutiveLiquidityCard extends StatelessWidget {
               ),
               SizedBox(width: 8.w),
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 8.w,
-                  vertical: 3.5.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.5.h),
                 decoration: BoxDecoration(
                   color: isWalletActive
                       ? const Color(0xFF10B981).withValues(alpha: 0.18)
@@ -154,7 +154,9 @@ class ExecutiveLiquidityCard extends StatelessWidget {
                     SizedBox(width: 5.w),
                     Text(
                       hasWallet
-                          ? (isWalletActive ? 'المحفظة نشطة' : 'المحفظة غير نشطة')
+                          ? (isWalletActive
+                                ? 'المحفظة نشطة'
+                                : 'المحفظة غير نشطة')
                           : 'محدث لحظياً',
                       style: TextStyle(
                         color: Colors.white,
@@ -217,21 +219,20 @@ class ExecutiveLiquidityCard extends StatelessWidget {
               if (hasSales) ...[
                 SizedBox(width: 8.w),
                 Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 7.w,
-                    vertical: 3.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
                   decoration: BoxDecoration(
-                    color: (growthRate >= 0
-                            ? const Color(0xFF10B981)
-                            : const Color(0xFFF59E0B))
-                        .withValues(alpha: 0.15),
+                    color:
+                        (growthRate >= 0
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFFF59E0B))
+                            .withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(AppRadius.full),
                     border: Border.all(
-                      color: (growthRate >= 0
-                              ? const Color(0xFF10B981)
-                              : const Color(0xFFF59E0B))
-                          .withValues(alpha: 0.35),
+                      color:
+                          (growthRate >= 0
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFF59E0B))
+                              .withValues(alpha: 0.35),
                       width: 0.8,
                     ),
                   ),
@@ -268,10 +269,7 @@ class ExecutiveLiquidityCard extends StatelessWidget {
 
           // 3. كبسولات المؤشرات التحتية المتوازنة (3 أعمدة متناسقة بدون أي Bottom Overflow)
           Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 8.w,
-              vertical: 8.h,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(AppRadius.md),
@@ -385,16 +383,16 @@ class ExecutiveLiquidityCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10.5.sp,
-                              fontWeight: FontWeight.w800,
-                            ),
+                            color: Colors.white,
+                            fontSize: 10.5.sp,
+                            fontWeight: FontWeight.w800,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
+              ],
             ),
           ),
           SizedBox(height: AppSpacing.sm),
@@ -405,8 +403,7 @@ class ExecutiveLiquidityCard extends StatelessWidget {
               Expanded(
                 flex: 4,
                 child: CustomInteractiveBounce(
-                  onTap: () =>
-                      onCreateSaleInvoice(),
+                  onTap: () => onCreateSaleInvoice(),
                   child: Container(
                     height: 38.h,
                     decoration: BoxDecoration(
@@ -418,7 +415,8 @@ class ExecutiveLiquidityCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF10B981).withValues(alpha: 0.25),
+                          color: const Color(0xFF10B981)
+                              .withValues(alpha: 0.25),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -487,8 +485,7 @@ class ExecutiveLiquidityCard extends StatelessWidget {
               ),
               SizedBox(width: 6.w),
               CustomInteractiveBounce(
-                onTap: () =>
-                    onOpenWalletStatement(),
+                onTap: () => onOpenWalletStatement(),
                 child: Container(
                   height: 38.h,
                   padding: EdgeInsets.symmetric(horizontal: 10.w),

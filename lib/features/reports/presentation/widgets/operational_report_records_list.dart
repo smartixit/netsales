@@ -9,10 +9,7 @@ import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 class OperationalReportRecordsList extends StatelessWidget {
-  const OperationalReportRecordsList({
-    required this.controller,
-    super.key,
-  });
+  const OperationalReportRecordsList({required this.controller, super.key});
 
   final OperationalReportsController controller;
 
@@ -28,11 +25,17 @@ class OperationalReportRecordsList extends StatelessWidget {
       }
 
       if (controller.isLoading.value && controller.reports.isEmpty) {
-        return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 5, cardHeight: 112, ));
+        return const CustomStateView.loading(
+          presentation: CustomStatePresentation.skeletonOnly,
+          skeleton: CustomStateSkeleton(
+            layout: CustomStateSkeletonLayout.list,
+            itemCount: 5,
+            cardHeight: 112,
+          ),
+        );
       }
 
-      if (controller.errorMessage.value != null &&
-          controller.reports.isEmpty) {
+      if (controller.errorMessage.value != null && controller.reports.isEmpty) {
         return CustomErrorState.compact(
           title: 'تعذر تحميل التقرير',
           subtitle: controller.errorMessage.value,
@@ -51,7 +54,8 @@ class OperationalReportRecordsList extends StatelessWidget {
       final type = controller.selectedType.value;
       if (type == null) return const SizedBox.shrink();
 
-      final hasTail = controller.hasMore ||
+      final hasTail =
+          controller.hasMore ||
           controller.loadMoreError.value != null ||
           controller.isLoadingMore.value;
 

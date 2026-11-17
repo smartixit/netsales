@@ -67,7 +67,14 @@ class NetworkExpenseDetailsScreen
       ],
       body: Obx(() {
         if (controller.isLoadingDetails.value) {
-          return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 4, cardHeight: 112, ));
+          return const CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.list,
+              itemCount: 4,
+              cardHeight: 112,
+            ),
+          );
         }
 
         final expense = controller.selectedExpense.value;
@@ -245,4 +252,3 @@ class NetworkExpenseDetailsScreen
     );
   }
 }
-

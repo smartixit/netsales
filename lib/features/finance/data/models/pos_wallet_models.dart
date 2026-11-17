@@ -55,7 +55,8 @@ class PosWalletModel extends PosWalletEntity {
       openingBalanceSource: json['opening_balance_source'] as String?,
       currencyCode: json['currency_code'] as String?,
       networkProfileLogo: json['network'] is Map<String, dynamic>
-          ? (json['network'] as Map<String, dynamic>)['network_profile_logo'] as String?
+          ? (json['network'] as Map<String, dynamic>)['network_profile_logo']
+                as String?
           : null,
       posProfileLogo: json['pos'] is Map<String, dynamic>
           ? (json['pos'] as Map<String, dynamic>)['pos_profile_logo'] as String?
@@ -69,8 +70,7 @@ class PosWalletModel extends PosWalletEntity {
       isOverdrawn: json['is_overdrawn'] as bool? ?? false,
       debitAmount: _readWalletDecimal(json['debit_amount']) ?? 0.0,
       creditAmount: _readWalletDecimal(json['credit_amount']) ?? 0.0,
-      totalPurchasingPower:
-          _readWalletDecimal(json['total_purchasing_power']),
+      totalPurchasingPower: _readWalletDecimal(json['total_purchasing_power']),
       networkName: netName,
       posName: pName,
       createdAt: json['created_at'] as String?,

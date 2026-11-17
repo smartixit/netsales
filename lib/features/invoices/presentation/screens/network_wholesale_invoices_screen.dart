@@ -59,9 +59,11 @@ class NetworkWholesaleInvoicesScreen
                 () => CustomResultsCounterBar(
                   count: controller.invoices.length,
                   recordLabel: 'فاتورة',
-                  isFiltered: controller.searchQuery.value.isNotEmpty ||
+                  isFiltered:
+                      controller.searchQuery.value.isNotEmpty ||
                       controller.selectedSaleType.value != null,
-                  isLoading: controller.isLoading.value && controller.invoices.isEmpty,
+                  isLoading:
+                      controller.isLoading.value && controller.invoices.isEmpty,
                   onClear: controller.resetFilters,
                 ),
               ),
@@ -73,7 +75,14 @@ class NetworkWholesaleInvoicesScreen
                 child: Obx(() {
                   if (controller.isLoading.value &&
                       controller.invoices.isEmpty) {
-                    return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 4, cardHeight: 112, ));
+                    return const CustomStateView.loading(
+                      presentation: CustomStatePresentation.skeletonOnly,
+                      skeleton: CustomStateSkeleton(
+                        layout: CustomStateSkeletonLayout.list,
+                        itemCount: 4,
+                        cardHeight: 112,
+                      ),
+                    );
                   }
 
                   if (controller.errorMessage.value != null &&
@@ -123,7 +132,15 @@ class NetworkWholesaleInvoicesScreen
                             padding: EdgeInsets.symmetric(
                               vertical: AppSpacing.sm,
                             ),
-                            child: const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 1, cardHeight: 120, )),
+                            child: const CustomStateView.loading(
+                              presentation:
+                                  CustomStatePresentation.skeletonOnly,
+                              skeleton: CustomStateSkeleton(
+                                layout: CustomStateSkeletonLayout.list,
+                                itemCount: 1,
+                                cardHeight: 120,
+                              ),
+                            ),
                           );
                         }
 
@@ -132,7 +149,8 @@ class NetworkWholesaleInvoicesScreen
                           () => InvoiceCard(
                             invoice: invoice,
                             isNetworkView: true,
-                            isExpanded: controller.expandedInvoiceId.value ==
+                            isExpanded:
+                                controller.expandedInvoiceId.value ==
                                 invoice.invoiceId,
                             onToggleExpansion: () => controller
                                 .toggleInvoiceExpansion(invoice.invoiceId),
