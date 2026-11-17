@@ -456,7 +456,6 @@ class PosProcurementController extends GetxController {
         final networkId = linkedNetworks.first.networkId;
         _setSelectedNetworkId(networkId);
         await loadNetworkPackages(networkId);
-        await loadEffectivePackageDiscounts();
       }
     } catch (_) {
       if (selectedPosId.value != null && selectedPosId.value != posId) {
@@ -833,56 +832,11 @@ class PosProcurementController extends GetxController {
     );
   }
 
-  /// واجهة توافقية لقراءة الخصم التفصيلي؛ لا تُستخدم لتحديد كمية الطلب.
-  /// كمية الطلب نفسها تُدار حصراً عبر procurementCart.
+  /// The POS tariff catalogue is loaded once per network/POS context.
+  /// Selecting a package is a local presentation operation only.
   void onPackageSelected(PackageEntity package) {
     _setSelectedPackage(package);
     setDefaultSheetIfEmpty();
-    // Pricing is loaded once for the POS catalogue; selecting a card does not call the API.
-  }
-
-  /// استرجاع الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية من Laravel
-  Future<void> loadEffectiveDiscount() async {
-    final posId = selectedPosId.value;
-    final networkId = selectedNetworkId.value;
-    final packageId = selectedPackage.value?.packageId;
-
-    effectiveDiscount.value = null;
-    discountError.value = null;
-
-    if (posId == null ||
-        networkId == null ||
-        packageId == null ||
-        getEffectivePackageDiscountUseCase == null) {
-      return;
-    }
-
-    final revision = ++_discountLoadRevision;
-    isLoadingDiscount.value = true;
-
-    try {
-      final result = await getEffectivePackageDiscountUseCase!(
-        networkId: networkId,
-        posId: posId,
-        packageId: packageId,
-      );
-
-      if (revision != _discountLoadRevision ||
-          selectedPosId.value != posId ||
-          selectedNetworkId.value != networkId ||
-          selectedPackage.value?.packageId != packageId) {
-        return;
-      }
-
-      effectiveDiscount.value = result;
-    } catch (e) {
-      if (revision != _discountLoadRevision) return;
-      discountError.value = e is AppException ? e.message : e.toString();
-    } finally {
-      if (revision == _discountLoadRevision) {
-        isLoadingDiscount.value = false;
-      }
-    }
   }
 
   /// تحميل طلبات التوريد من الخادم مع ترقيم المؤشر
