@@ -13,12 +13,44 @@ import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// كتالوج الباقات: استعراض وتكوين السلة مباشرة مع بحث وترقيم خادمي.
 class ProcurementPackageSelectionSection
     extends GetView<PosProcurementController> {
   const ProcurementPackageSelectionSection({super.key});
+
+  Widget _buildCatalogFailureState(BuildContext context) {
+    final message = controller.packageErrorMessage.value ?? '';
+    final normalized = message.toLowerCase();
+    final offline = normalized.contains('socket') ||
+        normalized.contains('network') ||
+        normalized.contains('connection') ||
+        normalized.contains('internet') ||
+        message.contains('الاتصال') ||
+        message.contains('الإنترنت');
+    final networkId = controller.selectedNetworkId.value;
+    final retry = networkId == null
+        ? null
+        : () => controller.loadNetworkPackages(networkId);
+
+    if (offline) {
+      return CustomStateView.offline(
+        title: 'تعذر الاتصال بكتالوج الشبكة',
+        subtitle: 'تحقق من اتصال الإنترنت ثم أعد المحاولة لتحميل الباقات.',
+        presentation: CustomStatePresentation.compact,
+        onAction: retry,
+      );
+    }
+
+    return CustomStateView.error(
+      title: 'تعذر تحميل كتالوج الباقات',
+      subtitle: message,
+      presentation: CustomStatePresentation.compact,
+      onAction: retry,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,16 +113,7 @@ class ProcurementPackageSelectionSection
                 )
               else if (controller.packageErrorMessage.value != null &&
                   controller.availablePackages.isEmpty)
-                CustomErrorState.compact(
-                  title: 'تعذر تحميل كتالوج الباقات',
-                  subtitle: controller.packageErrorMessage.value,
-                  onRetry: () {
-                    final networkId = controller.selectedNetworkId.value;
-                    if (networkId != null) {
-                      controller.loadNetworkPackages(networkId);
-                    }
-                  },
-                )
+                _buildCatalogFailureState(context)
               else if (controller.availablePackages.isEmpty &&
                   controller.packageSearchQuery.value.isNotEmpty)
                 CustomEmptyState.search(
