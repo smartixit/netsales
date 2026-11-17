@@ -9,8 +9,8 @@ import 'package:netsales/features/finance/presentation/widgets/repayment_payment
 import 'package:netsales/features/finance/presentation/widgets/repayment_beneficiary_skeleton.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
