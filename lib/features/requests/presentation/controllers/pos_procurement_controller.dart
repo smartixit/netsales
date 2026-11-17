@@ -179,7 +179,14 @@ class PosProcurementController extends GetxController {
         quote.networkId == selectedNetworkId.value &&
         quote.posId == selectedPosId.value &&
         quote.saleType == selectedSaleType.value;
-    if (!matchesContext) return false;
+    if (!matchesContext || quote.items.length != procurementCart.length) {
+      return false;
+    }
+    final matchesCart = procurementCart.every((line) {
+      final quotedLine = quote.findLine(line.package.packageId);
+      return quotedLine != null && quotedLine.voucherCount == line.voucherCount;
+    });
+    if (!matchesCart) return false;
 
     final expiresAt = quote.expiresAt;
     return expiresAt == null || DateTime.now().isBefore(expiresAt);
