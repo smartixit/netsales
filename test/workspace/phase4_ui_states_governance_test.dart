@@ -9,6 +9,8 @@ import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_status_summary_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
@@ -56,6 +58,18 @@ class MockResilientRequestRepo implements RequestRepository {
     return PaginatedList<RequestEntity>(
       items: cursor == null ? filtered.take(1).toList() : filtered.skip(1).toList(),
       nextCursor: cursor == null && filtered.length > 1 ? 'cursor_page_2' : null,
+    );
+  }
+
+  @override
+  Future<RequestStatusSummaryEntity> getRequestStatusSummary({int? posId}) async {
+    final scoped = items.where((request) => posId == null || request.posId == posId);
+    return RequestStatusSummaryEntity(
+      total: scoped.length,
+      pending: scoped.where((request) => request.isPending).length,
+      approved: scoped.where((request) => request.isApproved).length,
+      rejected: scoped.where((request) => request.isRejected).length,
+      cancelled: scoped.where((request) => request.isCancelled).length,
     );
   }
 
@@ -202,6 +216,7 @@ void main() {
 
       final posController = PosProcurementOrdersController(
         getRequestsUseCase: GetRequestsUseCase(mockRepo),
+        getRequestStatusSummaryUseCase: GetRequestStatusSummaryUseCase(mockRepo),
         getMyPosUseCase: GetMyPosUseCase(DummyCommercialRepo()),
         cancelRequestUseCase: CancelRequestUseCase(mockRepo),
         deleteRequestUseCase: DeleteRequestUseCase(mockRepo),
