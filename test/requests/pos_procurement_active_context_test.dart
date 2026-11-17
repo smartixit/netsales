@@ -45,6 +45,7 @@ class MockRequestRepo implements RequestRepository {
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async {
     return const PaginatedList(items: [], nextCursor: null);
   }
