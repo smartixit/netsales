@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
@@ -10,7 +11,6 @@ import 'package:netsales/features/workspace/presentation/controllers/pos_workspa
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// كتالوج باقات الشبكة وأسعار الجملة المعتمدة حقيقياً من الـ API (PosNetworkPackagesCatalog)
@@ -26,7 +26,7 @@ class PosNetworkPackagesCatalog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       if (controller.isLoadingPackages.value && controller.networkPackages.isEmpty) {
-        return const CustomSkeletonCard(height: 160);
+        return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 160, maxColumns: 1, minItemWidth: 180));
       }
 
       final packages = controller.networkPackageItems;
