@@ -14,7 +14,9 @@ import 'package:netsales/features/requests/domain/usecases/get_requests_use_case
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_sale_type_selector.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton_view.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 class _FakeRequestRepository implements RequestRepository {
   @override
@@ -96,6 +98,35 @@ void main() {
     await tester.tap(finder);
     await tester.pump(const Duration(milliseconds: 250));
   }
+
+  testWidgets(
+    'يعرض عداد نتائج الباقات أسفل البحث ويتحدث مع حالة البحث',
+    (tester) async {
+      Get.put(controller);
+      configurePackageCatalog(discountLoading: false);
+
+      await tester.pumpWidget(buildTestableWidget());
+      await tester.pumpAndSettle();
+
+      final searchField = find.byType(CustomTextField);
+      final counter = find.byType(CustomResultsCounterBar);
+
+      expect(counter, findsOneWidget);
+      expect(
+        tester.getTopLeft(counter).dy,
+        greaterThan(tester.getBottomLeft(searchField).dy),
+      );
+      expect(find.text('1 باقة محمّلة'), findsOneWidget);
+      expect(find.text('الإجمالي: '), findsOneWidget);
+
+      controller.packageSearchQuery.value = 'الاختبار';
+      await tester.pump();
+
+      expect(find.text('نتائج البحث: '), findsOneWidget);
+      expect(find.text('1 باقة محمّلة'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'تستمر أزرار الكمية في العمل مع النقرات المتتابعة لكل الإجراءات',
