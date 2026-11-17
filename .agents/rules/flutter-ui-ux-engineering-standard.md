@@ -65,7 +65,7 @@ A UI feature is **incomplete** and rejected if it exhibits:
   - `CustomStateKind.pricingExpired`
 - Every new or refactored data state MUST use `CustomStateView` (or its named constructors) for a consistent visual language, hierarchy, spacing, iconography, and actions.
 - Specialized `CustomEmptyState`, `CustomErrorState`, and `CustomNotFoundState` are semantic components under `lib/widgets/feedback/states/`; they delegate shared presentation to `CustomStateView` and are not compatibility wrappers. `CustomStateView.notFound` must remain distinct from an empty result.
-- `CustomOfflineBanner` must render the same canonical offline design in banner presentation.
+- `CustomOfflineState` is the full-content offline component; `CustomOfflineBanner` is an inline warning that must preserve already-loaded content.
 - Expired/invalid server pricing must use `CustomStateView.pricingExpired` and offer an explicit refresh action where refresh is available.
 - Loading skeleton primitives remain valid for content-shaped initial loading and incremental pagination. They are not alternative full-page state designs. Keep load-more skeletons appended to existing data.
 - Do not create feature-local duplicate state cards. Add a new presentation option or behavior to `CustomStateView` when a genuinely shared need exists.
