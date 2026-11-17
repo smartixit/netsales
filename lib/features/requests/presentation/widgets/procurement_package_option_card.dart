@@ -13,9 +13,7 @@ import 'package:netsales/features/requests/domain/entities/procurement_quote_lin
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
-/// بطاقة الباقة وفق المرجع المرئي المرسل: هوية بصرية، أسعار، مواصفات،
-///
-/// كمية مباشرة، مكافئ ورقي، وقيمة البند في تسلسل رأسي واحد.
+/// بطاقة باقة إنترنت: الهوية، التعرفة، المواصفات، والتحكم المباشر بالكمية.
 class ProcurementPackageOptionCard extends StatelessWidget {
   const ProcurementPackageOptionCard({
     super.key,
@@ -38,25 +36,26 @@ class ProcurementPackageOptionCard extends StatelessWidget {
   final ProcurementQuoteLineEntity? quoteLine;
   final bool isPricingLoading;
 
-  static const _emerald = Color(0xFF087B61);
-  static const _deepEmerald = Color(0xFF064F43);
-
   double get _basePrice => customDiscount?.originalPackagePrice ??
       (package.procurementBaseUnitPriceMinor != null
           ? package.procurementBaseUnitPriceMinor! / 100
           : package.packageVoucherPrice);
+
   double get _cashPrice => customDiscount?.effectiveCashPrice ??
       (package.procurementCashUnitPriceMinor != null
           ? package.procurementCashUnitPriceMinor! / 100
           : package.effectiveCashPrice);
+
   double get _creditPrice => customDiscount?.effectiveCreditPrice ??
       (package.procurementCreditUnitPriceMinor != null
           ? package.procurementCreditUnitPriceMinor! / 100
           : package.effectiveCreditPrice);
+
   double get _cashDiscount => customDiscount?.discountCash ??
       (package.procurementCashDiscountBasisPoints != null
           ? package.procurementCashDiscountBasisPoints! / 100
           : package.packageDefaultCashDiscount);
+
   double get _creditDiscount => customDiscount?.discountCredit ??
       (package.procurementCreditDiscountBasisPoints != null
           ? package.procurementCreditDiscountBasisPoints! / 100
@@ -65,58 +64,57 @@ class ProcurementPackageOptionCard extends StatelessWidget {
   String _money(num value) =>
       AmountFormatter.formatValue(value, decimalPlaces: 2);
 
-  String _paperDescription(int count, int sheetSize) {
-    if (count <= 0) return 'لم تحدد كمية بعد';
-    return VoucherSheetCalculator.describe(count, sheetSize);
-  }
-
   bool get _hasMatchingQuote =>
       quoteLine != null && quantity > 0 && quoteLine!.voucherCount == quantity;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final sheetSize = package.packageVoucherCount > 0
-        ? package.packageVoucherCount
-        : 1;
-    final halfSheet = (sheetSize / 2).ceil();
+    final accent = _packageAccent(package.packageColor, colors.primary);
+    final tint = Color.alphaBlend(
+      accent.withValues(alpha: .11),
+      colors.surface,
+    );
+    final sheetSize =
+        package.packageVoucherCount > 0 ? package.packageVoucherCount : 1;
     final selected = quantity > 0;
-    final discount = isCashSale ? _cashDiscount : _creditDiscount;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 190),
+      duration: const Duration(milliseconds: 180),
       width: double.infinity,
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(24.r),
+        borderRadius: BorderRadius.circular(19.r),
         border: Border.all(
           color: selected
-              ? _emerald.withValues(alpha: .46)
-              : colors.outlineVariant.withValues(alpha: .72),
+              ? accent.withValues(alpha: .52)
+              : colors.outlineVariant.withValues(alpha: .68),
           width: selected ? 1.35 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: _deepEmerald.withValues(alpha: selected ? .105 : .045),
-            blurRadius: selected ? 21 : 15,
-            offset: const Offset(0, 7),
+            color: colors.shadow.withValues(alpha: selected ? .075 : .035),
+            blurRadius: selected ? 19 : 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
         children: [
-          _PackageHero(
-            package: package,
-            isCustomDiscount: customDiscount?.isCustom == true,
-            discount: discount,
-          ),
           Padding(
-            padding: EdgeInsets.fromLTRB(11.r, 11.r, 11.r, 11.r),
+            padding: EdgeInsets.fromLTRB(13.r, 13.r, 13.r, 12.r),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                _PackageHeader(
+                  package: package,
+                  accent: accent,
+                  tint: tint,
+                  isSelected: selected,
+                  isCustomDiscount: customDiscount?.isCustom == true,
+                ),
+                AppSpacing.vSm,
                 _TariffPanel(
                   basePrice: _basePrice,
                   cashPrice: _cashPrice,
@@ -127,390 +125,177 @@ class ProcurementPackageOptionCard extends StatelessWidget {
                   isPricingLoading: isPricingLoading,
                   money: _money,
                 ),
-                AppSpacing.vSm,
-                _SpecificationStrip(package: package),
-                AppSpacing.vSm,
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 11.r),
+                  child: _SpecificationStrip(package: package),
+                ),
                 _QuantityControls(
                   quantity: quantity,
                   controller: quantityController,
                   sheetSize: sheetSize,
-                  halfSheet: halfSheet,
+                  halfSheet: (sheetSize / 2).ceil(),
                   onChanged: onSetQuantity,
                 ),
-                AppSpacing.vSm,
-                _PaperEquivalent(
-                  description: _paperDescription(quantity, sheetSize),
+                if (selected) ...[
+                  AppSpacing.vSm,
+                  _PaperEquivalent(quantity: quantity, sheetSize: sheetSize),
+                  AppSpacing.vSm,
+                  _LinePreview(
+                    line: _hasMatchingQuote ? quoteLine : null,
+                    accent: accent,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          PositionedDirectional(
+            end: 0,
+            top: 0,
+            bottom: 0,
+            child: IgnorePointer(
+              child: Container(
+                width: 3.r,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: .92),
+                  borderRadius: BorderRadiusDirectional.only(
+                    topEnd: Radius.circular(19.r),
+                    bottomEnd: Radius.circular(19.r),
+                  ),
                 ),
-                AppSpacing.vSm,
-                _LineTotal(
-                  line: _hasMatchingQuote ? quoteLine : null,
-                  selected: selected,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Color _packageAccent(String? value, Color fallback) {
+  final normalized = value?.trim().replaceFirst('#', '');
+  if (normalized == null ||
+      (normalized.length != 6 && normalized.length != 8)) {
+    return fallback;
+  }
+
+  final parsed = int.tryParse(normalized, radix: 16);
+  if (parsed == null) return fallback;
+  return normalized.length == 6
+      ? Color(0xFF000000 | parsed)
+      : Color(parsed);
+}
+
+class _PackageHeader extends StatelessWidget {
+  const _PackageHeader({
+    required this.package,
+    required this.accent,
+    required this.tint,
+    required this.isSelected,
+    required this.isCustomDiscount,
+  });
+
+  final PackageEntity package;
+  final Color accent;
+  final Color tint;
+  final bool isSelected;
+  final bool isCustomDiscount;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 43.r,
+          height: 43.r,
+          decoration: BoxDecoration(
+            color: tint,
+            borderRadius: BorderRadius.circular(14.r),
+            border: Border.all(color: accent.withValues(alpha: .13)),
+          ),
+          child: Icon(
+            Icons.wifi_tethering_rounded,
+            color: accent,
+            size: 22.r,
+          ),
+        ),
+        AppSpacing.hSm,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 4.r,
+                    height: 4.r,
+                    decoration: BoxDecoration(
+                      color: accent,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  AppSpacing.hXxs,
+                  Flexible(
+                    child: Text(
+                      isCustomDiscount
+                          ? 'اتفاق تعاقدي مخصص'
+                          : 'تعرفة الشبكة الأساسية',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.labelSmall.copyWith(
+                        color: accent,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              AppSpacing.vXxs,
+              Text(
+                package.packageName,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.titleSmall.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w900,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (isSelected) ...[
+          AppSpacing.hXs,
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 7.r, vertical: 5.r),
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(
+                color: colors.outlineVariant.withValues(alpha: .7),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check_rounded, size: 11.r, color: colors.success),
+                AppSpacing.hXxs,
+                Text(
+                  'ضمن الطلب',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ],
             ),
           ),
         ],
-      ),
+      ],
     );
   }
-}
-
-class _PackageHero extends StatelessWidget {
-  const _PackageHero({
-    required this.package,
-    required this.isCustomDiscount,
-    required this.discount,
-  });
-  final PackageEntity package;
-  final bool isCustomDiscount;
-  final double discount;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return SizedBox(
-      height: 124.r,
-      child: Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(12.r, 9.r, 8.r, 9.r),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.r, vertical: 5.r),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.centerRight,
-                        end: Alignment.centerLeft,
-                        colors: [Color(0xFF0BA777), Color(0xFF075C49)],
-                      ),
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _emerald.withValues(alpha: .18),
-                          blurRadius: 9,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.star_rounded, color: Colors.white, size: 14.r),
-                        AppSpacing.hXxs,
-                        Text(
-                          isCustomDiscount
-                              ? 'خصم خاص'
-                              : discount > 0
-                                  ? 'عرض الباقة'
-                                  : 'باقة الشبكة',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  AppSpacing.vXs,
-                  Text(
-                    package.packageName,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: AppTypography.titleMedium.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w900,
-                      height: 1.3,
-                    ),
-                  ),
-                  AppSpacing.vXxs,
-                  Text(
-                    'باقة إنترنت متكاملة للمنشآت',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const _PackageArtwork(),
-        ],
-      ),
-    );
-  }
-}
-
-const _emerald = Color(0xFF087B61);
-
-/// لون الباقة محصور في مساحة الهوية؛ لا ينتقل إلى نصوص أو أزرار المحتوى.
-class _PackageArtwork extends StatelessWidget {
-  const _PackageArtwork();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 124.r,
-      height: 124.r,
-      child: ClipRRect(
-        borderRadius: BorderRadiusDirectional.only(
-          bottomStart: Radius.circular(25.r),
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF12B88A),
-                    Color(0xFF087B61),
-                    Color(0xFF03483E),
-                  ],
-                ),
-              ),
-            ),
-            CustomPaint(painter: _NetworkArtworkPainter()),
-            Positioned(
-              top: 10.r,
-              left: 10.r,
-              child: Icon(
-                Icons.auto_awesome_rounded,
-                color: Colors.white.withValues(alpha: .9),
-                size: 15.r,
-              ),
-            ),
-            Center(
-              child: Transform.rotate(
-                angle: -.20,
-                child: Container(
-                  width: 61.r,
-                  height: 78.r,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFFFFFFFF), Color(0xFFBCE9D9)],
-                    ),
-                    borderRadius: BorderRadius.circular(14.r),
-                    border: Border.all(color: Colors.white, width: 1.5),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: .27),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: CustomPaint(
-                    size: Size(61.r, 78.r),
-                    painter: _SimCardPainter(),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SimCardPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cardPath = Path()
-      ..moveTo(size.width * .23, size.height * .04)
-      ..lineTo(size.width * .78, size.height * .02)
-      ..quadraticBezierTo(
-        size.width * .94,
-        size.height * .03,
-        size.width * .96,
-        size.height * .19,
-      )
-      ..lineTo(size.width * .88, size.height * .90)
-      ..quadraticBezierTo(
-        size.width * .86,
-        size.height * .99,
-        size.width * .71,
-        size.height * .98,
-      )
-      ..lineTo(size.width * .13, size.height * .91)
-      ..quadraticBezierTo(
-        size.width * .02,
-        size.height * .89,
-        size.width * .04,
-        size.height * .75,
-      )
-      ..lineTo(size.width * .12, size.height * .18)
-      ..quadraticBezierTo(
-        size.width * .13,
-        size.height * .05,
-        size.width * .23,
-        size.height * .04,
-      )
-      ..close();
-
-    canvas.drawShadow(
-      cardPath,
-      const Color(0xFF001F18).withValues(alpha: .32),
-      5,
-      true,
-    );
-    canvas.drawPath(
-      cardPath,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFFFFFF), Color(0xFFE4F8F0), Color(0xFFB5E4D5)],
-        ).createShader(Offset.zero & size),
-    );
-    canvas.drawPath(
-      cardPath,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.2
-        ..color = const Color(0xFF087B61).withValues(alpha: .45),
-    );
-
-    final chipRect = Rect.fromLTWH(
-      size.width * .28,
-      size.height * .29,
-      size.width * .45,
-      size.height * .39,
-    );
-    final chipRRect = RRect.fromRectAndRadius(
-      chipRect,
-      Radius.circular(size.width * .07),
-    );
-    canvas.drawRRect(
-      chipRRect,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFFE99A), Color(0xFFD9A83D), Color(0xFFF7D76E)],
-        ).createShader(chipRect),
-    );
-    canvas.drawRRect(
-      chipRRect,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = const Color(0xFF95651D),
-    );
-
-    final chipLine = Paint()
-      ..color = const Color(0xFF986A24)
-      ..strokeWidth = 1.15
-      ..style = PaintingStyle.stroke;
-    final x1 = size.width * .43;
-    final x2 = size.width * .58;
-    final y1 = size.height * .29;
-    final y2 = size.height * .68;
-    canvas.drawLine(Offset(x1, y1), Offset(x1, y2), chipLine);
-    canvas.drawLine(Offset(x2, y1), Offset(x2, y2), chipLine);
-    canvas.drawLine(
-      Offset(size.width * .28, size.height * .48),
-      Offset(size.width * .73, size.height * .48),
-      chipLine,
-    );
-    canvas.drawLine(
-      Offset(size.width * .35, size.height * .29),
-      Offset(size.width * .42, size.height * .40),
-      chipLine,
-    );
-    canvas.drawLine(
-      Offset(size.width * .66, size.height * .29),
-      Offset(size.width * .59, size.height * .40),
-      chipLine,
-    );
-    canvas.drawLine(
-      Offset(size.width * .35, size.height * .68),
-      Offset(size.width * .42, size.height * .57),
-      chipLine,
-    );
-    canvas.drawLine(
-      Offset(size.width * .66, size.height * .68),
-      Offset(size.width * .59, size.height * .57),
-      chipLine,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _NetworkArtworkPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final points = <Offset>[
-      Offset(size.width * .10, size.height * .16),
-      Offset(size.width * .40, size.height * .11),
-      Offset(size.width * .78, size.height * .19),
-      Offset(size.width * .19, size.height * .46),
-      Offset(size.width * .72, size.height * .52),
-      Offset(size.width * .12, size.height * .82),
-      Offset(size.width * .86, size.height * .83),
-    ];
-    final links = Paint()
-      ..color = Colors.white.withValues(alpha: .24)
-      ..strokeWidth = .8;
-    for (var i = 0; i < points.length; i++) {
-      for (var j = i + 1; j < points.length; j++) {
-        if ((points[i] - points[j]).distance < size.width * .58) {
-          canvas.drawLine(points[i], points[j], links);
-        }
-      }
-    }
-    final globe = Paint()
-      ..color = Colors.white.withValues(alpha: .20)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    final center = Offset(size.width * .49, size.height * .49);
-    canvas.drawCircle(center, size.width * .41, globe);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: center,
-        width: size.width * .30,
-        height: size.height * .80,
-      ),
-      globe,
-    );
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: center,
-        width: size.width * .76,
-        height: size.height * .25,
-      ),
-      globe,
-    );
-    final node = Paint()..color = const Color(0xFF8CFFE0);
-    for (final point in points) {
-      canvas.drawCircle(point, 2, node);
-      canvas.drawCircle(
-        point,
-        5,
-        Paint()
-          ..color = const Color(0xFF8CFFE0).withValues(alpha: .24)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _TariffPanel extends StatelessWidget {
@@ -524,6 +309,7 @@ class _TariffPanel extends StatelessWidget {
     required this.isPricingLoading,
     required this.money,
   });
+
   final double basePrice;
   final double cashPrice;
   final double creditPrice;
@@ -536,39 +322,58 @@ class _TariffPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 11.r, vertical: 10.r),
+      padding: EdgeInsets.all(10.r),
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: colors.outlineVariant.withValues(alpha: .58)),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: .65),
+        ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(
-                child: _PriceColumn(
-                  label: 'السعر النقدي',
-                  price: cashPrice,
-                  discount: cashDiscount,
-                  money: money,
-                  selected: isCashSale,
+              Text(
+                'تعرفة هذه الباقة',
+                style: AppTypography.labelMedium.copyWith(
+                  color: colors.onSurfaceVariant,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-              Container(
-                width: 1,
-                height: 70.r,
-                margin: EdgeInsets.symmetric(horizontal: 10.r),
-                color: colors.outlineVariant,
+              const Spacer(),
+              Text(
+                'السعر لكل كرت',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
               ),
+            ],
+          ),
+          AppSpacing.vSm,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Expanded(
-                child: _PriceColumn(
-                  label: 'السعر الآجل',
+                child: _PriceOption(
+                  label: 'نقدي',
+                  price: cashPrice,
+                  discount: cashDiscount,
+                  selected: isCashSale,
+                  money: money,
+                ),
+              ),
+              AppSpacing.hXs,
+              Expanded(
+                child: _PriceOption(
+                  label: 'آجل',
                   price: creditPrice,
                   discount: creditDiscount,
-                  money: money,
                   selected: !isCashSale,
+                  money: money,
                 ),
               ),
             ],
@@ -578,7 +383,7 @@ class _TariffPanel extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'السعر الأساسي قبل الخصم',
+                  'سعر الوحدة قبل الخصم',
                   style: AppTypography.labelSmall.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
@@ -589,8 +394,8 @@ class _TariffPanel extends StatelessWidget {
                 textDirection: TextDirection.ltr,
                 style: AppTypography.labelSmall.copyWith(
                   color: colors.onSurfaceVariant,
-                  decoration: TextDecoration.lineThrough,
                   fontWeight: FontWeight.w800,
+                  decoration: TextDecoration.lineThrough,
                 ),
               ),
             ],
@@ -612,130 +417,92 @@ class _TariffPanel extends StatelessWidget {
   }
 }
 
-class _PriceColumn extends StatelessWidget {
-  const _PriceColumn({
+class _PriceOption extends StatelessWidget {
+  const _PriceOption({
     required this.label,
     required this.price,
     required this.discount,
-    required this.money,
     required this.selected,
+    required this.money,
   });
+
   final String label;
   final double price;
   final double discount;
-  final String Function(num) money;
   final bool selected;
+  final String Function(num) money;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                textAlign: TextAlign.end,
-                style: AppTypography.labelMedium.copyWith(
-                  color: colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            if (selected)
-              Container(
-                width: 6.r,
-                height: 6.r,
-                decoration: BoxDecoration(
-                  color: colors.primary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-          ],
+
+    return Container(
+      constraints: BoxConstraints(minHeight: 82.r),
+      padding: EdgeInsets.symmetric(horizontal: 9.r, vertical: 8.r),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(11.r),
+        border: Border.all(
+          color: selected ? colors.primary : Colors.transparent,
+          width: selected ? 1.2 : 1,
         ),
-        AppSpacing.vXxs,
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: AlignmentDirectional.centerEnd,
-          child: Text(
-            '${money(price)} ر.ي',
-            textDirection: TextDirection.ltr,
-            maxLines: 1,
-            style: AppTypography.titleLarge.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.w900,
-              height: 1,
-            ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              if (selected)
+                Text(
+                  'المحدد الآن',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+            ],
           ),
-        ),
-        AppSpacing.vXxs,
-        if (discount > 0)
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 9.r, vertical: 4.r),
-            decoration: BoxDecoration(
-              color: colors.success.withValues(alpha: .12),
-              borderRadius: BorderRadius.circular(AppRadius.full),
-              border: Border.all(color: colors.success.withValues(alpha: .22)),
-            ),
+          AppSpacing.vXxs,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerEnd,
             child: Text(
-              'خصم ${discount.toStringAsFixed(2)}٪',
-              style: AppTypography.labelSmall.copyWith(
-                color: colors.success,
+              '${money(price)} ر.ي',
+              textDirection: TextDirection.ltr,
+              maxLines: 1,
+              style: AppTypography.titleSmall.copyWith(
+                color: colors.onSurface,
                 fontWeight: FontWeight.w900,
               ),
             ),
-          )
-        else
-          Text(
-            'حسب التعرفة',
-            style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
           ),
-      ],
-    );
-  }
-}
-
-class _SpecificationStrip extends StatelessWidget {
-  const _SpecificationStrip({required this.package});
-  final PackageEntity package;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 3.r, vertical: 10.r),
-      decoration: BoxDecoration(
-        color: _emerald.withValues(alpha: .075),
-        borderRadius: BorderRadius.circular(17.r),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _Specification(
-              icon: Icons.inventory_2_rounded,
-              label: 'السعة',
-              value: '${package.packageVoucherCount} كرت',
-            ),
-          ),
-          _SpecificationDivider(color: colors.outlineVariant),
-          Expanded(
-            child: _Specification(
-              icon: Icons.access_time_rounded,
-              label: 'الصلاحية',
-              value: package.validityDisplay,
-            ),
-          ),
-          _SpecificationDivider(color: colors.outlineVariant),
-          Expanded(
-            child: _Specification(
-              icon: Icons.bolt_rounded,
-              label: 'المدة',
-              value: package.uptimeDisplay,
-            ),
+          AppSpacing.vXxs,
+          Row(
+            children: [
+              Text(
+                'خصم تعاقدي',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${discount.toStringAsFixed(2)}٪',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.success,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -743,12 +510,53 @@ class _SpecificationStrip extends StatelessWidget {
   }
 }
 
-class _Specification extends StatelessWidget {
-  const _Specification({
+class _SpecificationStrip extends StatelessWidget {
+  const _SpecificationStrip({required this.package});
+
+  final PackageEntity package;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: _PackageSpec(
+            icon: Icons.data_usage_rounded,
+            label: 'السعة',
+            value: package.balanceDisplay,
+          ),
+        ),
+        _SpecDivider(color: colors.outlineVariant),
+        Expanded(
+          child: _PackageSpec(
+            icon: Icons.timer_outlined,
+            label: 'وقت الاستخدام',
+            value: package.uptimeDisplay,
+          ),
+        ),
+        _SpecDivider(color: colors.outlineVariant),
+        Expanded(
+          child: _PackageSpec(
+            icon: Icons.event_available_outlined,
+            label: 'الصلاحية',
+            value: package.validityDisplay,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PackageSpec extends StatelessWidget {
+  const _PackageSpec({
     required this.icon,
     required this.label,
     required this.value,
   });
+
   final IconData icon;
   final String label;
   final String value;
@@ -756,29 +564,49 @@ class _Specification extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.r),
-      child: Column(
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 7.r),
+      child: Row(
         children: [
-          Icon(icon, size: 21.r, color: colors.primary),
-          AppSpacing.vXxs,
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.labelSmall.copyWith(
+          Container(
+            width: 25.r,
+            height: 25.r,
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Icon(
+              icon,
+              size: 13.r,
               color: colors.onSurfaceVariant,
             ),
           ),
-          AppSpacing.vXxs,
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: AppTypography.labelMedium.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.w900,
+          AppSpacing.hXxs,
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+                AppSpacing.vXxs,
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -787,15 +615,17 @@ class _Specification extends StatelessWidget {
   }
 }
 
-class _SpecificationDivider extends StatelessWidget {
-  const _SpecificationDivider({required this.color});
+class _SpecDivider extends StatelessWidget {
+  const _SpecDivider({required this.color});
+
   final Color color;
 
   @override
   Widget build(BuildContext context) => Container(
         width: 1,
-        height: 49.r,
-        color: color.withValues(alpha: .72),
+        height: 34.r,
+        margin: EdgeInsets.symmetric(horizontal: 2.r),
+        color: color.withValues(alpha: .65),
       );
 }
 
@@ -817,85 +647,86 @@ class _QuantityControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Expanded(
               child: Text(
-                'الكمية',
-                style: AppTypography.titleSmall.copyWith(
+                'الكمية المطلوبة',
+                style: AppTypography.labelLarge.copyWith(
                   color: colors.onSurface,
                   fontWeight: FontWeight.w900,
                 ),
               ),
             ),
-            SizedBox(
-              width: 180.r,
-              child: Container(
-                height: 48.r,
-                padding: EdgeInsets.all(4.r),
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(
-                    color: colors.outlineVariant.withValues(alpha: .85),
+            Text(
+              'سعة الورقة: $sheetSize كرت',
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        AppSpacing.vSm,
+        Row(
+          children: [
+            CustomButton.icon(
+              icon: Icons.add_rounded,
+              tooltip: 'إضافة كرت',
+              dimension: 36.r,
+              size: AppButtonSize.small,
+              backgroundColor: colors.primary,
+              foregroundColor: colors.onPrimary,
+              onPressed: () => onChanged((quantity + 1).clamp(0, 1000000)),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 7.r),
+                child: CustomTextField(
+                  controller: controller,
+                  label: '',
+                  hint: '0',
+                  isRequired: false,
+                  isDense: true,
+                  textAlign: TextAlign.center,
+                  textStyle: AppTypography.titleMedium.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w900,
                   ),
-                ),
-                child: Row(
-                  children: [
-                    CustomButton.icon(
-                      icon: Icons.add_rounded,
-                      tooltip: 'إضافة كرت',
-                      dimension: 38.r,
-                      size: AppButtonSize.small,
-                      backgroundColor: colors.primary,
-                      foregroundColor: colors.onPrimary,
-                      onPressed: () =>
-                          onChanged((quantity + 1).clamp(0, 1000000)),
-                    ),
-                    Expanded(
-                      child: CustomTextField(
-                        controller: controller,
-                        label: '',
-                        hint: '0',
-                        isRequired: false,
-                        isDense: true,
-                        textAlign: TextAlign.center,
-                        textStyle: AppTypography.titleLarge.copyWith(
-                          color: colors.onSurface,
-                          fontWeight: FontWeight.w900,
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 2.r,
-                          vertical: 5.r,
-                        ),
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.done,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          const _MaximumQuantityInputFormatter(1000000),
-                        ],
-                        onChanged: (value) {
-                          final parsed = int.tryParse(value) ?? 0;
-                          onChanged(parsed.clamp(0, 1000000));
-                        },
-                      ),
-                    ),
-                    CustomButton.icon(
-                      icon: Icons.remove_rounded,
-                      tooltip: 'إنقاص كرت',
-                      dimension: 38.r,
-                      size: AppButtonSize.small,
-                      backgroundColor: colors.primary,
-                      foregroundColor: colors.onPrimary,
-                      onPressed: quantity > 0
-                          ? () => onChanged(quantity - 1)
-                          : null,
-                    ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 3.r,
+                    vertical: 6.r,
+                  ),
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.done,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    const _MaximumQuantityInputFormatter(1000000),
                   ],
+                  onChanged: (value) {
+                    final parsed = int.tryParse(value) ?? 0;
+                    onChanged(parsed.clamp(0, 1000000));
+                  },
                 ),
+              ),
+            ),
+            CustomButton.icon(
+              icon: Icons.remove_rounded,
+              tooltip: 'إنقاص كرت',
+              dimension: 36.r,
+              size: AppButtonSize.small,
+              backgroundColor: colors.surfaceContainerLow,
+              foregroundColor: colors.onSurfaceVariant,
+              onPressed: quantity > 0 ? () => onChanged(quantity - 1) : null,
+            ),
+            AppSpacing.hXs,
+            Text(
+              'كرت',
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurfaceVariant,
               ),
             ),
           ],
@@ -905,17 +736,11 @@ class _QuantityControls extends StatelessWidget {
           children: [
             Expanded(
               child: CustomButton.outline(
-                text: 'إضافة ورقة',
+                text: '+ ورقة',
                 icon: Icons.note_add_outlined,
                 size: AppButtonSize.small,
-                height: 43.r,
-                borderRadius: 13.r,
-                foregroundColor: colors.primary,
-                borderColor: colors.primary.withValues(alpha: .72),
-                textStyle: AppTypography.labelMedium.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w900,
-                ),
+                foregroundColor: colors.onSurfaceVariant,
+                borderColor: colors.outlineVariant,
                 onPressed: () =>
                     onChanged((quantity + sheetSize).clamp(0, 1000000)),
               ),
@@ -923,17 +748,11 @@ class _QuantityControls extends StatelessWidget {
             AppSpacing.hXs,
             Expanded(
               child: CustomButton.outline(
-                text: 'نصف ورقة',
+                text: '½ ورقة',
                 icon: Icons.description_outlined,
                 size: AppButtonSize.small,
-                height: 43.r,
-                borderRadius: 13.r,
-                foregroundColor: colors.primary,
-                borderColor: colors.primary.withValues(alpha: .52),
-                textStyle: AppTypography.labelMedium.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w900,
-                ),
+                foregroundColor: colors.onSurfaceVariant,
+                borderColor: colors.outlineVariant,
                 onPressed: () =>
                     onChanged((quantity + halfSheet).clamp(0, 1000000)),
               ),
@@ -941,17 +760,11 @@ class _QuantityControls extends StatelessWidget {
             AppSpacing.hXs,
             Expanded(
               child: CustomButton.outline(
-                text: 'تصفير الكمية',
+                text: 'تصفير',
                 icon: Icons.refresh_rounded,
                 size: AppButtonSize.small,
-                height: 43.r,
-                borderRadius: 13.r,
                 foregroundColor: colors.error,
-                borderColor: colors.error.withValues(alpha: .75),
-                textStyle: AppTypography.labelMedium.copyWith(
-                  color: colors.error,
-                  fontWeight: FontWeight.w900,
-                ),
+                borderColor: colors.error.withValues(alpha: .55),
                 onPressed: quantity > 0 ? () => onChanged(0) : null,
               ),
             ),
@@ -963,31 +776,50 @@ class _QuantityControls extends StatelessWidget {
 }
 
 class _PaperEquivalent extends StatelessWidget {
-  const _PaperEquivalent({required this.description});
-  final String description;
+  const _PaperEquivalent({
+    required this.quantity,
+    required this.sheetSize,
+  });
+
+  final int quantity;
+  final int sheetSize;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final description = VoucherSheetCalculator.describe(quantity, sheetSize);
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 11.r, vertical: 10.r),
+      padding: EdgeInsets.symmetric(horizontal: 10.r, vertical: 8.r),
       decoration: BoxDecoration(
-        color: _emerald.withValues(alpha: .10),
-        borderRadius: BorderRadius.circular(15.r),
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: .65),
+        ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.card_giftcard_rounded, size: 19.r, color: colors.primary),
+          Icon(
+            Icons.layers_outlined,
+            size: 16.r,
+            color: colors.onSurfaceVariant,
+          ),
           AppSpacing.hXs,
-          Flexible(
+          Expanded(
             child: Text(
-              'المكافئ الورقي: $description',
-              textAlign: TextAlign.center,
-              style: AppTypography.labelLarge.copyWith(
-                color: colors.onSurface,
-                fontWeight: FontWeight.w900,
+              'المكافئ الورقي للكمية',
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurfaceVariant,
               ),
+            ),
+          ),
+          Text(
+            description,
+            textAlign: TextAlign.end,
+            style: AppTypography.labelSmall.copyWith(
+              color: colors.onSurface,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ],
@@ -996,39 +828,50 @@ class _PaperEquivalent extends StatelessWidget {
   }
 }
 
-class _LineTotal extends StatelessWidget {
-  const _LineTotal({required this.line, required this.selected});
+class _LinePreview extends StatelessWidget {
+  const _LinePreview({
+    required this.line,
+    required this.accent,
+  });
+
   final ProcurementQuoteLineEntity? line;
-  final bool selected;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15.r, vertical: 14.r),
+      padding: EdgeInsets.symmetric(horizontal: 9.r, vertical: 8.r),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.centerRight,
-          end: Alignment.centerLeft,
-          colors: [Color(0xFF075D50), Color(0xFF033F38)],
+        color: Color.alphaBlend(
+          accent.withValues(alpha: .045),
+          colors.surface,
         ),
-        borderRadius: BorderRadius.circular(22.r),
-        boxShadow: [
-          BoxShadow(
-            color: _emerald.withValues(alpha: .20),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: accent.withValues(alpha: .15)),
       ),
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              'قيمة البند التقديرية',
-              style: AppTypography.titleSmall.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w900,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  line == null ? 'حالة التسعير' : 'عرض السعر المعتمد للبند',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+                AppSpacing.vXxs,
+                Text(
+                  line == null ? 'بانتظار عرض سعر مطابق للكمية' : 'قيمة البند',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
             ),
           ),
           if (line != null)
@@ -1037,18 +880,10 @@ class _LineTotal extends StatelessWidget {
               child: Text(
                 '${AmountFormatter.formatValue(line!.lineNetTotal, decimalPlaces: 2)} ر.ي',
                 textDirection: TextDirection.ltr,
-                style: AppTypography.titleLarge.copyWith(
-                  color: Colors.white,
+                style: AppTypography.titleSmall.copyWith(
+                  color: colors.onSurface,
                   fontWeight: FontWeight.w900,
                 ),
-              ),
-            )
-          else
-            Text(
-              selected ? 'بانتظار عرض السعر' : '—',
-              style: AppTypography.labelMedium.copyWith(
-                color: Colors.white.withValues(alpha: .86),
-                fontWeight: FontWeight.w800,
               ),
             ),
         ],
@@ -1059,6 +894,7 @@ class _LineTotal extends StatelessWidget {
 
 class _MaximumQuantityInputFormatter extends TextInputFormatter {
   const _MaximumQuantityInputFormatter(this.maximum);
+
   final int maximum;
 
   @override
