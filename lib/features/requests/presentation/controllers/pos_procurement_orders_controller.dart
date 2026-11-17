@@ -121,7 +121,7 @@ class PosProcurementOrdersController extends GetxController {
     final revision = ++_requestListRevision;
     isLoading.value = true;
     errorMessage.value = null;
-    loadMoreError.value = null;
+    if (isRefresh) loadMoreError.value = null;
     nextCursor.value = null;
     isLoadingMore.value = false;
 
