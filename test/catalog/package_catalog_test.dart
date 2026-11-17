@@ -180,6 +180,9 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
   }
 
   @override
+  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({required int networkId, required int posId}) async => const [];
+
+  @override
   Future<EffectivePackageDiscountEntity> getEffectiveDiscount({required int networkId, required int posId, required int packageId}) {
     throw UnimplementedError();
   }
