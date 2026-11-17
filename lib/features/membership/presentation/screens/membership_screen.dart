@@ -46,8 +46,8 @@ class MembershipScreen extends GetWidget<MembershipController> {
   presentation: CustomStatePresentation.skeletonOnly,
   skeleton: CustomStateSkeleton(
     layout: CustomStateSkeletonLayout.list,
-    itemCount: x,
-    cardHeight: x,
+    itemCount: 3,
+    cardHeight: 112,
     hasLeading: true,
      
   ),
@@ -107,8 +107,8 @@ class MembershipScreen extends GetWidget<MembershipController> {
   presentation: CustomStatePresentation.skeletonOnly,
   skeleton: CustomStateSkeleton(
     layout: CustomStateSkeletonLayout.list,
-    itemCount: x,
-    cardHeight: x,
+    itemCount: 3,
+    cardHeight: 112,
     hasLeading: true,
      
   ),
