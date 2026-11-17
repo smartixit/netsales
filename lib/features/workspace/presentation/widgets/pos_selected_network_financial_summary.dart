@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -6,7 +7,6 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/models/pos_wallet_summary_view_model.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
@@ -36,7 +36,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (isLoading) {
-      return const CustomSkeletonCard(height: 190);
+      return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 190, maxColumns: 1, minItemWidth: 180));
     }
 
     if (error != null) {
