@@ -573,8 +573,6 @@ class CustomStateView extends StatelessWidget {
       customAction != null ||
       (actionLabel != null && onAction != null) ||
       (secondaryActionLabel != null && onSecondaryAction != null);
-}
-
 
   Widget _buildSkeleton(BuildContext context) {
     final recipe = skeleton ?? const CustomStateSkeleton();
@@ -590,9 +588,10 @@ class CustomStateView extends StatelessWidget {
                 ? ((width + gap) / (recipe.minItemWidth.w + gap))
                     .floor()
                     .clamp(1, recipe.maxColumns)
+                    .toInt()
                 : 1;
             final items = List.generate(
-              recipe.itemCount.clamp(1, 12),
+              recipe.itemCount.clamp(1, 12).toInt(),
               (index) => _SkeletonItem(recipe: recipe, index: index),
             );
 
@@ -647,6 +646,7 @@ class CustomStateView extends StatelessWidget {
       highlightColor: colors.surfaceContainerHighest,
     );
   }
+
 }
 
 class _SkeletonItem extends StatelessWidget {
@@ -721,10 +721,7 @@ class _SkeletonItem extends StatelessWidget {
         ],
       ),
     );
-    return recipe.layout == CustomStateSkeletonLayout.list ||
-            recipe.layout == CustomStateSkeletonLayout.cards
-        ? card
-        : card;
+    return card;
   }
 }
 
