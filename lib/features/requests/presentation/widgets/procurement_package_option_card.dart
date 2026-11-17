@@ -263,16 +263,35 @@ class _PackageHero extends StatelessWidget {
                         ),
                       ),
                       AppSpacing.vMd,
-                      Text(
-                        package.packageName,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.start,
-                        style: AppTypography.titleMedium.copyWith(
-                          color: packageAccentColor,
-                          fontWeight: FontWeight.w700,
-                          height: 1.3,
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            key: const ValueKey(
+                              'procurement-package-color-accent',
+                            ),
+                            width: 4.r,
+                            height: 42.r,
+                            decoration: BoxDecoration(
+                              color: packageAccentColor,
+                              borderRadius: BorderRadius.circular(AppRadius.full),
+                            ),
+                          ),
+                          AppSpacing.hXs,
+                          Expanded(
+                            child: Text(
+                              package.packageName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.start,
+                              style: AppTypography.titleMedium.copyWith(
+                                color: packageAccentColor,
+                                fontWeight: FontWeight.w700,
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       AppSpacing.vSm,
                       Container(
@@ -808,8 +827,26 @@ class _PriceOptionCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Reserve the same marker footprint in both states. The
-                // selection animation changes visibility and color only.
+                // The text badge and check mark reserve identical space in
+                // both states, so selecting cash/credit never changes card height.
+                AppSpacing.hXxs,
+                SizedBox(
+                  width: 37.r,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 160),
+                    opacity: selected ? 1 : 0,
+                    child: Text(
+                      'المحدد',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 9.r,
+                      ),
+                    ),
+                  ),
+                ),
                 AppSpacing.hXxs,
                 SizedBox.square(
                   dimension: 19.r,
