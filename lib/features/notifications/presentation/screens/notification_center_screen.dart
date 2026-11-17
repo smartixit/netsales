@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/notifications/presentation/controllers/notification_controller.dart';
@@ -11,7 +12,6 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -159,7 +159,7 @@ class NotificationCenterScreen extends GetView<NotificationController> {
             child: Obx(() {
               if (controller.isLoading.value &&
                   controller.notifications.isEmpty) {
-                return const CustomSkeletonFeed();
+                return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 112, ));
               }
 
               if (controller.errorMessage.value != null &&
