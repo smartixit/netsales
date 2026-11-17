@@ -4,8 +4,7 @@ import 'package:netsales/widgets/feedback/custom_state_view.dart';
 /// أنماط عرض الحالة الفارغة (Empty State Variants).
 enum EmptyStateVariant { fullscreen, boxed, compact }
 
-/// Canonical empty-state component. Visual rendering is delegated to the shared state presenter.
-/// الآن [CustomStateView] لضمان توحيد التصميم عبر التطبيق دون كسر الاستدعاءات.
+/// Canonical empty-state component using the shared visual state presenter.
 class CustomEmptyState extends StatelessWidget {
   const CustomEmptyState({
     super.key,
