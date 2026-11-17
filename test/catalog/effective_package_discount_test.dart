@@ -9,15 +9,8 @@ import 'package:netsales/features/commercial/domain/repositories/commercial_repo
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
-import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
-
-class _RequestRepository implements RequestRepository {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 
 class _CommercialRepository implements CommercialRepository {
   @override
@@ -108,10 +101,8 @@ void main() {
   test('loads all POS discounts once and indexes them by package', () async {
     Get.reset();
     final repository = _PackageRepository();
-    final controller = PosProcurementController(
-      getRequestsUseCase: GetRequestsUseCase(_RequestRepository()),
+    final controller = PosNewProcurementOrderController(
       createRequestUseCase: CreateRequestUseCase(_RequestRepository()),
-      cancelRequestUseCase: CancelRequestUseCase(_RequestRepository()),
       getMyPosUseCase: GetMyPosUseCase(_CommercialRepository()),
       getPosNetworksListUseCase: GetPosNetworksListUseCase(_CommercialRepository()),
       getEffectivePackageDiscountsForPosUseCase:
@@ -135,10 +126,8 @@ void main() {
   test('quantity edits update the cart without calling the pricing API', () {
     Get.reset();
     final repository = _PackageRepository();
-    final controller = PosProcurementController(
-      getRequestsUseCase: GetRequestsUseCase(_RequestRepository()),
+    final controller = PosNewProcurementOrderController(
       createRequestUseCase: CreateRequestUseCase(_RequestRepository()),
-      cancelRequestUseCase: CancelRequestUseCase(_RequestRepository()),
       getEffectivePackageDiscountsForPosUseCase:
           GetEffectivePackageDiscountsForPosUseCase(repository),
     );
