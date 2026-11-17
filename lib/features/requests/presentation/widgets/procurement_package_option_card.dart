@@ -95,7 +95,6 @@ class ProcurementPackageOptionCard extends StatelessWidget {
     final isSelected = quantity > 0;
     final activePrice = isCashSale ? _cashPrice : _creditPrice;
     final activeDiscount = isCashSale ? _cashDiscount : _creditDiscount;
-    final grossTotal = _basePrice * quantity;
     final netTotal = activePrice * quantity;
 
     return AnimatedContainer(
