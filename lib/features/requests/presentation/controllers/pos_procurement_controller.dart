@@ -152,6 +152,7 @@ class PosProcurementController extends GetxController {
   final packageDiscountError = RxnString();
   int _packageDiscountRevision = 0;
   final isRefreshingCartPricing = false.obs;
+  final cartPricingRefreshError = RxnString();
   int _cartPricingRefreshRevision = 0;
 
   EffectivePackageDiscountEntity? discountForPackage(int packageId) =>
@@ -541,6 +542,7 @@ class PosProcurementController extends GetxController {
     final refreshedPackages = <int, PackageEntity>{};
 
     isRefreshingCartPricing.value = true;
+    cartPricingRefreshError.value = null;
     try {
       // The API caps an ID-filtered request at 50 packages. Keep large carts
       // bounded without downloading unrelated catalogue pages.
@@ -603,6 +605,7 @@ class PosProcurementController extends GetxController {
         );
       }
 
+      cartPricingRefreshError.value = null;
       procurementCart.assignAll(refreshedLines);
       final refreshedAvailablePackages = availablePackages
           .map(
@@ -624,12 +627,13 @@ class PosProcurementController extends GetxController {
       await loadEffectivePackageDiscounts();
     } catch (error) {
       if (revision != _cartPricingRefreshRevision) return;
+      cartPricingRefreshError.value = AppException.sanitizeMessage(
+        error,
+        fallback: 'لم نتمكن من جلب التعرفة الحالية للباقات المختارة.',
+      );
       CustomSnackbar.show(
         title: 'تعذر تحديث التعرفة',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: 'لم نتمكن من جلب التعرفة الحالية للباقات المختارة.',
-        ),
+        message: cartPricingRefreshError.value!,
         type: SnackType.error,
       );
     } finally {
@@ -898,6 +902,7 @@ class PosProcurementController extends GetxController {
   void clearProcurementCart() {
     _cartPricingRefreshRevision++;
     isRefreshingCartPricing.value = false;
+    cartPricingRefreshError.value = null;
     procurementCart.clear();
     for (final controller in _packageQuantityControllers.values) {
       controller.clear();
