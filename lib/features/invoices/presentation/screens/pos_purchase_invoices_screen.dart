@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/features/invoices/presentation/controllers/pos_invoices_controller.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_card.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_search_filter_header.dart';
 import 'package:netsales/features/invoices/presentation/widgets/pos_embedded_invoices_header.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
@@ -59,7 +59,16 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
                 child: Obx(() {
                   if (controller.isLoading.value &&
                       controller.invoices.isEmpty) {
-                    return const CustomSkeletonFeed(itemCount: 4);
+                    return const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+);
                   }
 
                   if (controller.errorMessage.value != null &&
@@ -109,10 +118,16 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
                             padding: EdgeInsets.symmetric(
                               vertical: AppSpacing.sm,
                             ),
-                            child: const CustomSkeletonFeed(
-                              itemCount: 1,
-                              cardHeight: 120,
-                            ),
+                            child: const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+),
                           );
                         }
 
