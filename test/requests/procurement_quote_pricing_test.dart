@@ -242,7 +242,7 @@ class FakePackageCatalogRepository implements PackageCatalogRepository {
     String? cursor,
     int? perPage,
   }) async =>
-      const PaginatedList(
+      PaginatedList(
         items: [testPackage],
         nextCursor: null,
       );
