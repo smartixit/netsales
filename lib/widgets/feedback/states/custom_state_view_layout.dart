@@ -1,5 +1,10 @@
 part of '../custom_state_view.dart';
 extension on CustomStateView {
+Widget _buildSkeleton(BuildContext context) => CustomStateSkeletonView(
+  recipe: skeleton ?? const CustomStateSkeleton(),
+  builder: skeletonBuilder,
+);
+
 Widget _buildStateView(BuildContext context) {
     final colors = context.colors;
     final accent = accentColor ?? _resolveAccent(colors);
