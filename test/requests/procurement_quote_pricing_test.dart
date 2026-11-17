@@ -20,6 +20,7 @@ import 'package:netsales/features/requests/domain/entities/procurement_cart_line
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
@@ -120,6 +121,16 @@ class FakeQuoteRequestRepository implements RequestRepository {
   @override
   Future<RequestEntity> cancelRequest(int requestId) async =>
       throw UnimplementedError();
+
+  @override
+  Future<RequestStatusSummaryEntity> getRequestStatusSummary({int? posId}) async =>
+      const RequestStatusSummaryEntity(
+        total: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+        cancelled: 0,
+      );
 
   @override
   Future<RequestEntity> getRequestDetails(int requestId) async =>
