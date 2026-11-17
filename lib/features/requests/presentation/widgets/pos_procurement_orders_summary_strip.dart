@@ -29,12 +29,13 @@ class PosProcurementOrdersSummaryStrip extends StatelessWidget {
         icon: Icons.receipt_long_rounded,
         gradient: AppGradients.financialHero(context),
         foreground: colors.onPrimary,
+        prominent: true,
       ),
       _SummaryCardData(
         label: 'قيد المراجعة',
         value: summary?.pending,
         color: colors.warning,
-        icon: Icons.schedule_rounded,
+        icon: Icons.hourglass_top_rounded,
         gradient: AppGradients.accentHero3(context, colors.warning),
         foreground: colors.onSurface,
       ),
@@ -54,9 +55,12 @@ class PosProcurementOrdersSummaryStrip extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           for (var index = 0; index < cards.length; index++) ...[
-            if (index > 0) AppSpacing.hSm,
+            if (index > 0) AppSpacing.hXs,
             Expanded(
-              child: _SummaryCard(data: cards[index], isLoading: isLoading),
+              child: _SummaryCard(
+                data: cards[index],
+                isLoading: isLoading,
+              ),
             ),
           ],
         ],
@@ -73,6 +77,7 @@ class _SummaryCardData {
     required this.icon,
     required this.gradient,
     required this.foreground,
+    this.prominent = false,
   });
 
   final String label;
@@ -81,6 +86,7 @@ class _SummaryCardData {
   final IconData icon;
   final Gradient gradient;
   final Color foreground;
+  final bool prominent;
 }
 
 class _SummaryCard extends StatelessWidget {
@@ -93,45 +99,53 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final dark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      height: 108.h,
-      padding: EdgeInsets.fromLTRB(9.r, 10.r, 9.r, 9.r),
+      height: 96.h,
+      padding: EdgeInsetsDirectional.fromSTEB(8.r, 9.r, 8.r, 8.r),
       decoration: BoxDecoration(
         gradient: data.gradient,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: dark
-              ? colors.onSurface.withValues(alpha: .10)
-              : data.color.withValues(alpha: .16),
+          color: data.prominent
+              ? colors.onPrimary.withValues(alpha: .16)
+              : data.color.withValues(alpha: dark ? .24 : .18),
         ),
-        boxShadow: AppElevation.tinted(
-          context,
-          data.color,
-          alpha: .09,
-          blur: 13,
-          dy: 4,
-        ),
+        boxShadow: data.prominent
+            ? AppElevation.tinted(
+                context,
+                data.color,
+                alpha: .14,
+                blur: 14,
+                dy: 5,
+              )
+            : AppElevation.level1(context),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 36.r,
-            height: 36.r,
+            width: 31.r,
+            height: 31.r,
             decoration: BoxDecoration(
-              color: data.foreground.withValues(alpha: dark ? .16 : .12),
+              color: data.foreground.withValues(alpha: data.prominent ? .14 : .10),
               shape: BoxShape.circle,
-              border: Border.all(color: data.foreground.withValues(alpha: .18)),
-              boxShadow: AppElevation.level1(context),
+              border: Border.all(
+                color: data.foreground.withValues(alpha: .20),
+              ),
             ),
-            child: Icon(data.icon, size: 19.r, color: data.foreground),
+            child: Icon(
+              data.icon,
+              size: 17.r,
+              color: data.prominent ? data.foreground : data.color,
+            ),
           ),
-          AppSpacing.vXs,
+          AppSpacing.vXxs,
           Text(
             isLoading ? '—' : (data.value?.toString() ?? '—'),
             style: AppTypography.titleLarge.copyWith(
               color: data.foreground,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               height: 1.05,
             ),
           ),
@@ -142,7 +156,7 @@ class _SummaryCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.labelSmall.copyWith(
-              color: data.foreground.withValues(alpha: .86),
+              color: data.foreground.withValues(alpha: .88),
               fontWeight: FontWeight.w700,
             ),
           ),

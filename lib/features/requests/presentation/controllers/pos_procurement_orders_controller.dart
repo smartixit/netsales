@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
@@ -14,8 +12,6 @@ import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/delete_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
-import 'package:netsales/features/requests/domain/usecases/get_request_status_summary_use_case.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -24,24 +20,18 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class PosProcurementOrdersController extends GetxController {
   PosProcurementOrdersController({
     required this.getRequestsUseCase,
-    required this.getRequestStatusSummaryUseCase,
     required this.getMyPosUseCase,
     required this.cancelRequestUseCase,
     required this.deleteRequestUseCase,
   });
 
   final GetRequestsUseCase getRequestsUseCase;
-  final GetRequestStatusSummaryUseCase getRequestStatusSummaryUseCase;
   final GetMyPosUseCase getMyPosUseCase;
   final CancelRequestUseCase cancelRequestUseCase;
   final DeleteRequestUseCase deleteRequestUseCase;
 
   final requests = <RequestEntity>[].obs;
-  final Rxn<RequestStatusSummaryEntity> statusSummary = Rxn<RequestStatusSummaryEntity>();
-  final isSummaryLoading = false.obs;
-  // Start in loading state so the first frame never announces an empty list
-  // before loadInitialData finishes resolving the active POS context.
-  final isLoading = true.obs;
+  final isLoading = false.obs;
   final isLoadingMore = false.obs;
   final errorMessage = RxnString();
   final loadMoreError = RxnString();
@@ -87,30 +77,7 @@ class PosProcurementOrdersController extends GetxController {
 
   Future<void> loadInitialData() async {
     await loadMyPos();
-    await Future.wait([
-      loadRequests(isRefresh: true),
-      loadStatusSummary(),
-    ]);
-  }
-
-  Future<void> refreshOrders() async {
-    await Future.wait([
-      loadRequests(isRefresh: true),
-      loadStatusSummary(),
-    ]);
-  }
-
-  Future<void> loadStatusSummary() async {
-    isSummaryLoading.value = true;
-    try {
-      statusSummary.value = await getRequestStatusSummaryUseCase(
-        posId: selectedPosId.value,
-      );
-    } catch (_) {
-      statusSummary.value = null;
-    } finally {
-      isSummaryLoading.value = false;
-    }
+    await loadRequests(isRefresh: true);
   }
 
   Future<void> loadMyPos() async {
@@ -130,7 +97,7 @@ class PosProcurementOrdersController extends GetxController {
     final revision = ++_requestListRevision;
     isLoading.value = true;
     errorMessage.value = null;
-    if (isRefresh) loadMoreError.value = null;
+    loadMoreError.value = null;
     nextCursor.value = null;
     isLoadingMore.value = false;
 
@@ -233,7 +200,6 @@ class PosProcurementOrdersController extends GetxController {
       } else {
         requests[index] = cancelled;
       }
-      unawaited(loadStatusSummary());
 
       await CustomAnimationOverlay.showSuccess(
         message: 'تم إلغاء طلب الكروت بنجاح',
@@ -273,7 +239,6 @@ class PosProcurementOrdersController extends GetxController {
     try {
       await deleteRequestUseCase(requestId);
       requests.removeWhere((request) => request.requestId == requestId);
-      unawaited(loadStatusSummary());
       await CustomAnimationOverlay.showSuccess(
         message: 'تم حذف طلب التوريد بنجاح',
       );

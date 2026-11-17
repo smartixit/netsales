@@ -390,7 +390,8 @@ class PosNewProcurementOrderController extends GetxController {
 
     if (lifecycleRevision != _lifecycleRevision) return;
     final availablePosIds = posList.map((p) => p.posId).toList();
-    final resolvedId = preferredPosId != null && availablePosIds.contains(preferredPosId)
+    final resolvedId =
+        preferredPosId != null && availablePosIds.contains(preferredPosId)
         ? preferredPosId
         : WorkspaceService.to.resolveActivePosId(availablePosIds);
 
@@ -400,7 +401,7 @@ class PosNewProcurementOrderController extends GetxController {
         resolvedId,
         preferredNetworkId: preferredNetworkId,
       );
-      selectedNetworkId.value=linkedNetworks.firstOrNull?.networkId;
+      selectedNetworkId.value = linkedNetworks.firstOrNull?.networkId;
     } else {
       selectedPosId.value = null;
       _setSelectedNetworkId(null);
@@ -434,10 +435,7 @@ class PosNewProcurementOrderController extends GetxController {
   }
 
   /// جلب قائمة الشبكات الموردة المرتبطة بنقطة البيع المحددة
-  Future<void> loadLinkedNetworks(
-    int posId, {
-    int? preferredNetworkId,
-  }) async {
+  Future<void> loadLinkedNetworks(int posId, {int? preferredNetworkId}) async {
     if (getPosNetworksListUseCase == null) return;
     final lifecycleRevision = _lifecycleRevision;
 
@@ -457,13 +455,13 @@ class PosNewProcurementOrderController extends GetxController {
 
       linkedNetworks.assignAll(paginated.items);
       final preferredLink = preferredNetworkId == null
-          ? null
+          ? linkedNetworks.first
           : linkedNetworks.firstWhereOrNull(
               (link) => link.networkId == preferredNetworkId,
             );
       final selectedLink = preferredNetworkId != null
           ? preferredLink
-          : (linkedNetworks.length == 1 ? linkedNetworks.first : null);
+          : linkedNetworks.first;
       if (selectedLink != null) {
         _setSelectedNetworkId(selectedLink.networkId);
         await loadNetworkPackages(selectedLink.networkId);
@@ -559,21 +557,25 @@ class PosNewProcurementOrderController extends GetxController {
       // in flight. The next refresh will use the latest cart contents.
       if (!_matchesCartSnapshot(cartLines)) return;
 
-      final refreshedLines = cartLines.map((line) {
-        final package = refreshedPackages[line.package.packageId]!;
-        if (package.packageVoucherCount <= 0) {
-          throw const AppException('تعذر تحديث التعرفة بسبب سعة باقة غير صالحة.');
-        }
+      final refreshedLines = cartLines
+          .map((line) {
+            final package = refreshedPackages[line.package.packageId]!;
+            if (package.packageVoucherCount <= 0) {
+              throw const AppException(
+                'تعذر تحديث التعرفة بسبب سعة باقة غير صالحة.',
+              );
+            }
 
-        return ProcurementCartLineEntity(
-          package: package,
-          voucherCount: line.voucherCount,
-          sheets: VoucherSheetCalculator.breakdown(
-            line.voucherCount,
-            package.packageVoucherCount,
-          ).totalSheetsFraction,
-        );
-      }).toList(growable: false);
+            return ProcurementCartLineEntity(
+              package: package,
+              voucherCount: line.voucherCount,
+              sheets: VoucherSheetCalculator.breakdown(
+                line.voucherCount,
+                package.packageVoucherCount,
+              ).totalSheetsFraction,
+            );
+          })
+          .toList(growable: false);
 
       if (!procurementEstimateCalculator.hasCurrentSnapshots(
         refreshedLines.map((line) => line.package),
@@ -586,9 +588,7 @@ class PosNewProcurementOrderController extends GetxController {
       cartPricingRefreshError.value = null;
       procurementCart.assignAll(refreshedLines);
       final refreshedAvailablePackages = availablePackages
-          .map(
-            (package) => refreshedPackages[package.packageId] ?? package,
-          )
+          .map((package) => refreshedPackages[package.packageId] ?? package)
           .toList(growable: false);
       availablePackages.assignAll(refreshedAvailablePackages);
       final selectedPackageIdValue = selectedPackageId.value;
@@ -1323,4 +1323,3 @@ class PosNewProcurementOrderController extends GetxController {
     if (success) Get.back<void>();
   }
 }
-

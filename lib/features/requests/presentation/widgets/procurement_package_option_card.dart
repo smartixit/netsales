@@ -193,8 +193,18 @@ class _PackageHero extends StatelessWidget {
             // The card is hosted in a vertical scroll view, so its max height
             // is unbounded. Center lets the hero grow to its natural content
             // height instead of stretching children toward infinity.
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                key: const ValueKey('procurement-package-color-accent'),
+                width: 4.r,
+                height: 54.r,
+                decoration: BoxDecoration(
+                  color: packageAccentColor,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+              ),
+              AppSpacing.hXs,
               Expanded(
                 child: Padding(
                   padding: EdgeInsetsDirectional.fromSTEB(
@@ -263,35 +273,16 @@ class _PackageHero extends StatelessWidget {
                         ),
                       ),
                       AppSpacing.vMd,
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            key: const ValueKey(
-                              'procurement-package-color-accent',
-                            ),
-                            width: 4.r,
-                            height: 42.r,
-                            decoration: BoxDecoration(
-                              color: packageAccentColor,
-                              borderRadius: BorderRadius.circular(AppRadius.full),
-                            ),
-                          ),
-                          AppSpacing.hXs,
-                          Expanded(
-                            child: Text(
-                              package.packageName,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.start,
-                              style: AppTypography.titleMedium.copyWith(
-                                color: packageAccentColor,
-                                fontWeight: FontWeight.w700,
-                                height: 1.3,
-                              ),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        package.packageName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.start,
+                        style: AppTypography.titleMedium.copyWith(
+                          color: packageAccentColor,
+                          fontWeight: FontWeight.w700,
+                          height: 1.3,
+                        ),
                       ),
                       AppSpacing.vSm,
                       Container(
@@ -827,29 +818,26 @@ class _PriceOptionCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // The text badge and check mark reserve identical space in
-                // both states, so selecting cash/credit never changes card height.
+                // Reserve the same marker footprint in both states. The
+                // selection animation changes visibility and color only.
                 AppSpacing.hXxs,
                 SizedBox(
                   width: 37.r,
-                  height: 12.r,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 160),
-                    child: selected
-                        ? Text(
-                            'المحدد',
-                            key: const ValueKey('selected-price-label'),
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            style: AppTypography.labelSmall.copyWith(
-                              color: colors.primary,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 9.r,
-                            ),
-                          )
-                        : const SizedBox.shrink(
-                            key: ValueKey('unselected-price-label'),
-                          ),
+                  height: 16.r,
+                  child: Center(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 160),
+                      opacity: selected ? 1 : 0,
+                      child: Text(
+                        'المحدد',
+                        maxLines: 1,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 9.r,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 AppSpacing.hXxs,
@@ -1144,6 +1132,7 @@ class _QuantityControls extends StatelessWidget {
             Expanded(
               child: CustomButton.outline(
                 text: 'ورقة',
+                icon: Icons.note_add_outlined,
                 size: AppButtonSize.small,
                 foregroundColor: colors.onSurfaceVariant,
                 borderColor: colors.outlineVariant,
@@ -1155,6 +1144,7 @@ class _QuantityControls extends StatelessWidget {
             Expanded(
               child: CustomButton.outline(
                 text: 'نصف',
+                icon: Icons.description_outlined,
                 size: AppButtonSize.small,
                 foregroundColor: colors.onSurfaceVariant,
                 borderColor: colors.outlineVariant,
@@ -1166,6 +1156,7 @@ class _QuantityControls extends StatelessWidget {
             Expanded(
               child: CustomButton.outline(
                 text: 'تصفير',
+                icon: Icons.refresh_rounded,
                 size: AppButtonSize.small,
                 foregroundColor: colors.error,
                 borderColor: colors.error.withValues(alpha: .55),

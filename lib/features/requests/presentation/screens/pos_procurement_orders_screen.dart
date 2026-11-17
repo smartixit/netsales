@@ -24,7 +24,10 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
   @override
   Widget build(BuildContext context) {
     final bottomPadding = embedded
-        ? MediaQuery.paddingOf(context).bottom + AppSpacing.xxl
+        ? MediaQuery.paddingOf(context).bottom +
+            AppSpacing.bottomNavHeight +
+            AppSpacing.cardPadding +
+            AppSpacing.sm
         : AppSpacing.cardPadding;
 
     final scrollView = RefreshIndicator.adaptive(

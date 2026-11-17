@@ -9,7 +9,6 @@ import 'package:netsales/features/requests/data/models/request_modification_summ
 import 'package:netsales/features/requests/data/models/request_approval_result_model.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
-import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
@@ -75,18 +74,6 @@ class MockRequestRepository implements RequestRepository {
       currency: 'YER',
       pricingToken: 'quote_mock_token_test',
       items: [],
-    );
-  }
-
-  @override
-  Future<RequestStatusSummaryEntity> getRequestStatusSummary({int? posId}) async {
-    final scoped = _requests.where((request) => posId == null || request.posId == posId);
-    return RequestStatusSummaryEntity(
-      total: scoped.length,
-      pending: scoped.where((request) => request.isPending).length,
-      approved: scoped.where((request) => request.isApproved).length,
-      rejected: scoped.where((request) => request.isRejected).length,
-      cancelled: scoped.where((request) => request.isCancelled).length,
     );
   }
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -41,7 +43,9 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
         return CustomBottomSheetActionItem(
           title: filter.label,
           icon: filter.icon,
-          trailing: selected ? Icon(Icons.check_circle_rounded, size: 20.r) : null,
+          trailing: selected
+              ? Icon(Icons.check_circle_rounded, size: 20.r)
+              : null,
           onTap: () => onStatusChanged(filter.value),
         );
       }).toList(growable: false),
@@ -59,23 +63,27 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.cardPadding,
-        AppSpacing.md,
-        AppSpacing.cardPadding,
         AppSpacing.sm,
+        AppSpacing.cardPadding,
+        AppSpacing.xs,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             child: CustomTextField(
               controller: searchController,
-              label: 'البحث في الطلبات',
-              hint: 'رقم الطلب أو اسم الشبكة أو نقطة البيع',
-              prefixIcon: Icon(Icons.search_rounded, color: colors.onSurfaceVariant),
+              label: '',
+              hint: 'رقم الطلب أو اسم نقطة البيع',
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: colors.onSurfaceVariant,
+              ),
               suffixIcon: searchQuery.isNotEmpty
                   ? CustomButton.icon(
                       icon: Icons.close_rounded,
                       tooltip: 'مسح البحث',
-                      dimension: 34.r,
+                      dimension: 32.r,
                       backgroundColor: Colors.transparent,
                       foregroundColor: colors.onSurfaceVariant,
                       onPressed: onClearSearch,
@@ -86,18 +94,34 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
             ),
           ),
           AppSpacing.hSm,
-          CustomButton.icon(
-            icon: Icons.filter_list_rounded,
-            tooltip: 'تصفية الطلبات: $selectedLabel',
-            dimension: 52.r,
-            backgroundColor: selectedStatus == null
-                ? colors.surfaceContainerHighest
-                : colors.primary.withValues(alpha: 0.12),
-            foregroundColor: selectedStatus == null
-                ? colors.onSurfaceVariant
-                : colors.primary,
-            borderColor: selectedStatus == null ? colors.outlineVariant : colors.primary,
-            onPressed: _openFilters,
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              boxShadow: selectedStatus == null
+                  ? AppElevation.level1(context)
+                  : AppElevation.tinted(
+                      context,
+                      colors.primary,
+                      alpha: .10,
+                      blur: 9,
+                      dy: 3,
+                    ),
+            ),
+            child: CustomButton.icon(
+              icon: Icons.tune_rounded,
+              tooltip: 'تصفية الطلبات: $selectedLabel',
+              dimension: 46.r,
+              backgroundColor: selectedStatus == null
+                  ? colors.surfaceContainerHigh
+                  : colors.primaryContainer,
+              foregroundColor: selectedStatus == null
+                  ? colors.onSurfaceVariant
+                  : colors.onPrimaryContainer,
+              borderColor: selectedStatus == null
+                  ? colors.outlineVariant
+                  : colors.primary.withValues(alpha: .42),
+              onPressed: _openFilters,
+            ),
           ),
         ],
       ),

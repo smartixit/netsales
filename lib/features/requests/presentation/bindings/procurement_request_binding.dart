@@ -24,7 +24,6 @@ import 'package:netsales/features/requests/domain/usecases/delete_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/get_request_status_summary_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
@@ -109,10 +108,6 @@ class ProcurementRequestBinding extends Bindings {
     // 3. Request Use Cases (مع تحديد الصنف الصريح و fenix: true)
     registerLazyIfAbsent<GetRequestsUseCase>(
       () => GetRequestsUseCase(Get.find<RequestRepository>()),
-      fenix: true,
-    );
-    registerLazyIfAbsent<GetRequestStatusSummaryUseCase>(
-      () => GetRequestStatusSummaryUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
     registerLazyIfAbsent<GetRequestDetailsUseCase>(

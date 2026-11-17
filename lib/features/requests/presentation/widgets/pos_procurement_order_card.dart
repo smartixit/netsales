@@ -16,6 +16,8 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
+/// Request card built from the package card's layered visual language:
+/// a focused identity hero, a distinct contents panel, and a precise metric rail.
 class PosProcurementOrderCard extends StatelessWidget {
   const PosProcurementOrderCard({
     super.key,
@@ -31,17 +33,6 @@ class PosProcurementOrderCard extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onCancel;
   final VoidCallback? onDelete;
-
-  Color _statusAccent(BuildContext context) {
-    final colors = context.colors;
-    return switch (request.status) {
-      RequestStatus.pending => colors.warning,
-      RequestStatus.approved => colors.success,
-      RequestStatus.rejected => colors.error,
-      RequestStatus.cancelled => colors.onSurfaceVariant,
-      RequestStatus.unknown => colors.outline,
-    };
-  }
 
   String _dateLabel() {
     final raw = request.requestDate ?? request.createdAt;
@@ -80,7 +71,7 @@ class PosProcurementOrderCard extends StatelessWidget {
           onTap: onDelete!,
         ),
     ];
-    if (actions.isEmpty) return Future<void>.value();
+    if (actions.isEmpty) return;
     await CustomBottomSheet.showActions<void>(
       title: 'إجراءات الطلب #${request.requestId}',
       leadingIcon: Icons.more_horiz_rounded,
@@ -91,7 +82,6 @@ class PosProcurementOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final accent = _statusAccent(context);
     final status = EnumPresentationRegistry.resolveRequestStatus(
       request.status,
       serverLabel: request.statusLabel,
@@ -104,15 +94,18 @@ class PosProcurementOrderCard extends StatelessWidget {
         .map((item) => item.voucherPackage)
         .whereType<PackageEntity>()
         .toList(growable: false);
-    final visibleColors = packages.take(4).toList(growable: false);
+    final visiblePackages = packages.take(4).toList(growable: false);
 
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.38)),
-        boxShadow: AppElevation.level2(context),
+        borderRadius: AppRadius.xxlRadius,
+        border: Border.all(
+          color: colors.primary.withValues(alpha: .17),
+          width: 1,
+        ),
+        boxShadow: AppElevation.level3(context),
       ),
       child: Stack(
         children: [
@@ -121,156 +114,239 @@ class PosProcurementOrderCard extends StatelessWidget {
             top: 0,
             bottom: 0,
             width: 4.w,
-            child: ColoredBox(color: accent),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: AppGradients.accentBadge(
+                  context,
+                  _statusColor(context, request.status),
+                ),
+              ),
+            ),
           ),
-          Padding(
-            padding: EdgeInsetsDirectional.only(start: 4.w),
-            child: Padding(
-              padding: EdgeInsets.all(AppSpacing.cardPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                  padding: EdgeInsets.all(11.r),
-                  decoration: BoxDecoration(
-                    gradient: AppGradients.accentHero3(context, accent),
-                    borderRadius: BorderRadius.circular(18.r),
-                    border: Border.all(color: accent.withValues(alpha: .16)),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'طلب توريد #${request.requestId}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.titleMedium.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            AppSpacing.vXs,
-                            Wrap(
-                              spacing: AppSpacing.xs,
-                              runSpacing: AppSpacing.xxs,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                Icon(Icons.calendar_today_rounded, size: 13.r, color: colors.onSurfaceVariant),
-                                Text(_dateLabel(), style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
-                                if (_timeLabel().isNotEmpty) ...[
-                                  Icon(Icons.schedule_rounded, size: 13.r, color: colors.onSurfaceVariant),
-                                  Text(_timeLabel(), style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
-                                ],
-                              ],
-                            ),
-                          ],
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _OrderIdentityHero(
+                request: request,
+                status: status,
+                saleType: saleType,
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  13.r,
+                  12.r,
+                  13.r,
+                  12.r,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _PackageSummaryPanel(
+                      request: request,
+                      packages: visiblePackages,
+                    ),
+                    AppSpacing.vSm,
+                    _OrderMetricRail(
+                      itemCount: request.items.length,
+                      totalQuantity: request.totalVouchers,
+                      saleType: saleType,
+                    ),
+                    AppSpacing.vSm,
+                    Row(
+                      children: [
+                        if (onEdit != null ||
+                            onCancel != null ||
+                            onDelete != null) ...[
+                          CustomButton.icon(
+                            icon: Icons.more_vert_rounded,
+                            tooltip: 'إجراءات أخرى',
+                            dimension: 38.r,
+                            backgroundColor: colors.surfaceContainerHigh,
+                            foregroundColor: colors.onSurfaceVariant,
+                            borderColor: colors.outlineVariant.withValues(alpha: .75),
+                            onPressed: _showActions,
+                          ),
+                          AppSpacing.hXs,
+                        ],
+                        CustomButton.outline(
+                          text: 'عرض التفاصيل',
+                          icon: Icons.chevron_left_rounded,
+                          iconPosition: AppButtonIconPosition.end,
+                          width: 142.w,
+                          height: 40.h,
+                          size: AppButtonSize.small,
+                          foregroundColor: colors.primary,
+                          borderColor: colors.primary.withValues(alpha: .72),
+                          onPressed: onDetails,
                         ),
-                      ),
-                      AppSpacing.hXs,
-                      CustomStatusBadge.fromPresentation(status, isCompact: true),
-                    ],
+                        const Spacer(),
+                        Text(
+                          request.requestUuid?.isNotEmpty == true
+                              ? request.requestUuid!
+                              : 'طلب #${request.requestId}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.caption.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _statusColor(BuildContext context, RequestStatus status) {
+    final colors = context.colors;
+    final presentation = EnumPresentationRegistry.resolveRequestStatus(status);
+    return switch (presentation.tone.name) {
+      'success' => colors.success,
+      'warning' => colors.warning,
+      'danger' => colors.error,
+      _ => colors.onSurfaceVariant,
+    };
+  }
+}
+
+class _OrderIdentityHero extends StatelessWidget {
+  const _OrderIdentityHero({
+    required this.request,
+    required this.status,
+    required this.saleType,
+  });
+
+  final RequestEntity request;
+  final dynamic status;
+  final dynamic saleType;
+
+  String _dateLabel() {
+    final raw = request.requestDate ?? request.createdAt;
+    if (raw == null || raw.isEmpty) return 'التاريخ غير متاح';
+    final parsed = DateTime.tryParse(raw);
+    return parsed == null ? raw : DateFormatter.longDate(parsed);
+  }
+
+  String _timeLabel() {
+    final raw = request.requestDate ?? request.createdAt;
+    if (raw == null || raw.isEmpty) return '';
+    final parsed = DateTime.tryParse(raw);
+    return parsed == null ? '' : DateFormatter.time(parsed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Container(
+      padding: EdgeInsets.all(13.r),
+      decoration: BoxDecoration(
+        gradient: AppGradients.accentHero3(context, colors.primary),
+        border: Border(
+          bottom: BorderSide(
+            color: colors.primary.withValues(alpha: .10),
+          ),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 54.r,
+            height: 58.r,
+            decoration: BoxDecoration(
+              gradient: AppGradients.financialHero(context),
+              borderRadius: BorderRadius.circular(18.r),
+              border: Border.all(
+                color: colors.onPrimary.withValues(alpha: .22),
+              ),
+              boxShadow: AppElevation.tinted(
+                context,
+                colors.primary,
+                alpha: .16,
+                blur: 12,
+                dy: 4,
+              ),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  Icons.receipt_long_rounded,
+                  color: colors.onPrimary,
+                  size: 27.r,
+                ),
+                PositionedDirectional(
+                  end: 7.r,
+                  top: 7.r,
+                  child: Container(
+                    width: 7.r,
+                    height: 7.r,
+                    decoration: BoxDecoration(
+                      color: colors.tertiary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: colors.onPrimary, width: 1),
+                    ),
                   ),
                 ),
-                  AppSpacing.vMd,
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 11.r, vertical: 9.r),
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(15.r),
-                      border: Border.all(color: colors.outlineVariant.withValues(alpha: .38)),
-                    ),
-                    child: Row(
-                      children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${request.items.length} ${request.items.length == 1 ? 'باقة' : 'باقات'}',
-                              style: AppTypography.titleSmall.copyWith(color: colors.onSurface, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '${request.totalVouchers} وحدة',
-                              style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant),
-                            ),
-                          ],
+              ],
+            ),
+          ),
+          AppSpacing.hSm,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'طلب توريد #${request.requestId}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.titleMedium.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      AppSpacing.hSm,
-                      if (visibleColors.isNotEmpty)
-                        Row(
-                          children: visibleColors.map((package) {
-                            final color = CustomColorPicker.parseHex(
-                              package.packageColor,
-                              fallback: colors.primary,
-                            );
-                            return Container(
-                              key: const ValueKey('pos-order-package-color-accent'),
-                              width: 7.r,
-                              height: 30.r,
-                              margin: EdgeInsetsDirectional.only(start: 5.w),
-                              decoration: BoxDecoration(
-                                color: color,
-                                borderRadius: BorderRadius.circular(AppRadius.full),
-                              ),
-                            );
-                          }).toList(growable: false),
-                        )
-                      else
-                        Icon(Icons.inventory_2_outlined, color: colors.primary, size: 22.r),
-                      ],
                     ),
-                  ),
-                  AppSpacing.vMd,
-                  Divider(height: 1, color: colors.outlineVariant.withValues(alpha: 0.35)),
-                  AppSpacing.vSm,
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.r, vertical: 11.r),
-                    decoration: BoxDecoration(
-                      gradient: AppGradients.accentBadge(context, accent),
-                      borderRadius: BorderRadius.circular(15.r),
-                      border: Border.all(color: accent.withValues(alpha: .12)),
+                    AppSpacing.hXxs,
+                    CustomStatusBadge.fromPresentation(
+                      status,
+                      isCompact: true,
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(child: _Metric(label: 'عدد البنود', value: request.items.length.toString())),
-                        _MetricDivider(),
-                        Expanded(child: _Metric(label: 'إجمالي الكمية', value: request.totalVouchers.toString())),
-                        _MetricDivider(),
-                        Expanded(child: _Metric(label: 'نوع السعر', value: saleType.label)),
-                      ],
+                  ],
+                ),
+                AppSpacing.vXs,
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xxs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    _OrderMetaItem(
+                      icon: Icons.calendar_today_rounded,
+                      label: _dateLabel(),
                     ),
-                  ),
-                  AppSpacing.vSm,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (onEdit != null || onCancel != null || onDelete != null) ...[
-                        CustomButton.icon(
-                          icon: Icons.more_vert_rounded,
-                          tooltip: 'إجراءات أخرى',
-                          dimension: 36.r,
-                          backgroundColor: colors.surfaceContainerHighest,
-                          foregroundColor: colors.onSurfaceVariant,
-                          onPressed: _showActions,
-                        ),
-                        AppSpacing.hXs,
-                      ],
-                      CustomButton.outline(
-                        text: 'عرض التفاصيل',
-                        icon: Icons.chevron_left_rounded,
-                        iconPosition: AppButtonIconPosition.end,
-                        size: AppButtonSize.small,
-                        onPressed: onDetails,
+                    if (_timeLabel().isNotEmpty)
+                      _OrderMetaItem(
+                        icon: Icons.schedule_rounded,
+                        label: _timeLabel(),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                  ],
+                ),
+                AppSpacing.vXs,
+                CustomStatusBadge.fromPresentation(
+                  saleType,
+                  isCompact: true,
+                ),
+              ],
             ),
           ),
         ],
@@ -279,21 +355,267 @@ class PosProcurementOrderCard extends StatelessWidget {
   }
 }
 
-class _Metric extends StatelessWidget {
-  const _Metric({required this.label, required this.value});
+class _OrderMetaItem extends StatelessWidget {
+  const _OrderMetaItem({required this.icon, required this.label});
+
+  final IconData icon;
   final String label;
-  final String value;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
-        AppSpacing.vXxs,
-        Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.titleSmall.copyWith(color: colors.onSurface, fontWeight: FontWeight.bold)),
+        Icon(icon, size: 12.r, color: colors.onSurfaceVariant),
+        AppSpacing.hXxs,
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.caption.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class _PackageSummaryPanel extends StatelessWidget {
+  const _PackageSummaryPanel({
+    required this.request,
+    required this.packages,
+  });
+
+  final RequestEntity request;
+  final List<PackageEntity> packages;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final packageCount = request.items.length;
+    final visibleNames = packages.take(2).map((package) => package.packageName).toList();
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 11.r),
+      decoration: BoxDecoration(
+        gradient: AppGradients.accentHero3(context, colors.primary),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(
+          color: colors.primary.withValues(alpha: .13),
+        ),
+      ),
+      child: Row(
+        children: [
+          _PackageAccentStack(packages: packages),
+          AppSpacing.hSm,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  packageCount == 0
+                      ? 'لا توجد باقات'
+                      : '$packageCount ${packageCount == 1 ? 'باقة' : 'باقات'}',
+                  style: AppTypography.titleSmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                AppSpacing.vXxs,
+                Text(
+                  '${request.totalVouchers} وحدة',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+                if (visibleNames.isNotEmpty) ...[
+                  AppSpacing.vXxs,
+                  Text(
+                    visibleNames.join(' • '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.caption.copyWith(
+                      color: colors.primary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Container(
+            width: 42.r,
+            height: 42.r,
+            decoration: BoxDecoration(
+              color: colors.surface.withValues(alpha: .76),
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(
+                color: colors.primary.withValues(alpha: .12),
+              ),
+            ),
+            child: Icon(
+              Icons.inventory_2_rounded,
+              color: colors.primary,
+              size: 21.r,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PackageAccentStack extends StatelessWidget {
+  const _PackageAccentStack({required this.packages});
+
+  final List<PackageEntity> packages;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    if (packages.isEmpty) {
+      return Container(
+        width: 7.r,
+        height: 34.r,
+        decoration: BoxDecoration(
+          color: colors.primary.withValues(alpha: .25),
+          borderRadius: BorderRadius.circular(AppRadius.full),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var index = 0; index < packages.length; index++) ...[
+          if (index > 0) AppSpacing.hXxs,
+          Container(
+            key: packages.length == 1
+                ? const ValueKey('pos-order-package-color-accent')
+                : ValueKey('pos-order-package-color-accent-${packages[index].packageId}'),
+            width: 6.r,
+            height: 34.r,
+            decoration: BoxDecoration(
+              color: CustomColorPicker.parseHex(
+                packages[index].packageColor,
+                fallback: colors.primary,
+              ),
+              borderRadius: BorderRadius.circular(AppRadius.full),
+              boxShadow: AppElevation.level1(context),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _OrderMetricRail extends StatelessWidget {
+  const _OrderMetricRail({
+    required this.itemCount,
+    required this.totalQuantity,
+    required this.saleType,
+  });
+
+  final int itemCount;
+  final int totalQuantity;
+  final dynamic saleType;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 7.r, vertical: 10.r),
+      decoration: BoxDecoration(
+        gradient: AppGradients.accentBadge(context, colors.primary),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: colors.primary.withValues(alpha: .10),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _OrderMetric(
+              label: 'عدد البنود',
+              value: itemCount.toString(),
+              icon: Icons.list_alt_rounded,
+            ),
+          ),
+          _MetricDivider(),
+          Expanded(
+            child: _OrderMetric(
+              label: 'إجمالي الكمية',
+              value: totalQuantity.toString(),
+              icon: Icons.confirmation_number_outlined,
+            ),
+          ),
+          _MetricDivider(),
+          Expanded(
+            child: _OrderMetric(
+              label: 'نوع البيع',
+              value: saleType.label,
+              icon: saleType.icon ?? Icons.sell_outlined,
+              emphasize: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OrderMetric extends StatelessWidget {
+  const _OrderMetric({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.emphasize = false,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final bool emphasize;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 3.r),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 15.r,
+            color: emphasize ? colors.primary : colors.onSurfaceVariant,
+          ),
+          AppSpacing.vXxs,
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: AppTypography.labelSmall.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          AppSpacing.vXxs,
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: AppTypography.titleSmall.copyWith(
+              color: emphasize ? colors.primary : colors.onSurface,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -301,8 +623,8 @@ class _Metric extends StatelessWidget {
 class _MetricDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
-    width: 1,
-    height: 34.h,
-    color: context.colors.outlineVariant.withValues(alpha: 0.45),
-  );
+        width: 1,
+        height: 44.h,
+        color: context.colors.outlineVariant.withValues(alpha: .55),
+      );
 }

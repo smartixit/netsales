@@ -5,7 +5,6 @@ import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
-import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 import 'package:netsales/features/requests/data/models/request_modification_preview_model.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 
@@ -50,18 +49,6 @@ class RequestRepositoryImpl implements RequestRepository {
       nextCursor: response.nextCursor,
       prevCursor: response.prevCursor,
     );
-  }
-
-  @override
-  Future<RequestStatusSummaryEntity> getRequestStatusSummary({int? posId}) async {
-    final response = await _remoteDataSource.getRequestStatusSummary(
-      query: {'pos_id': ?posId},
-    );
-    final summary = response.data;
-    if (summary == null) {
-      throw const FormatException('الخادم لم يُرجع ملخص طلبات التوريد.');
-    }
-    return summary;
   }
 
   @override
