@@ -128,6 +128,9 @@ void main() {
 
       controller.packageSearchQuery.value = 'الاختبار';
       await tester.pump();
+      // Flush the controller's 350ms search debounce within the fake clock.
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump();
 
       expect(find.text('نتائج البحث: '), findsOneWidget);
       expect(find.text('0 باقة محمّلة'), findsOneWidget);
