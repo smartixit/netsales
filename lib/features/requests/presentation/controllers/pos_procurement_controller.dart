@@ -685,7 +685,9 @@ class PosProcurementController extends GetxController {
       final discounts = await useCase(networkId: networkId, posId: posId);
       if (revision != _packageDiscountRevision ||
           selectedNetworkId.value != networkId ||
-          selectedPosId.value != posId) return;
+          selectedPosId.value != posId) {
+        return;
+      }
       effectiveDiscountsByPackageId.assignAll({
         for (final discount in discounts)
           if (discount.packageId != null) discount.packageId!: discount,

@@ -359,7 +359,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
                 ),
               ),
               Text(
-                _money(_basePrice) + ' ر.ي',
+                '${_money(_basePrice)} ر.ي',
                 textDirection: TextDirection.ltr,
                 style: AppTypography.labelSmall.copyWith(
                   color: colors.onSurfaceVariant,
@@ -560,14 +560,14 @@ class ProcurementPackageOptionCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '$quantity كرت • ' + _paperDescription(quantity, sheetSize),
+                          '$quantity كرت • ${_paperDescription(quantity, sheetSize)}',
                           style: AppTypography.labelSmall.copyWith(
                             color: colors.onSurfaceVariant,
                           ),
                         ),
                         AppSpacing.vXxs,
                         Text(
-                          'خصم ' + activeDiscount.toStringAsFixed(2) + '٪ على إجمالي البند',
+                          'خصم ${activeDiscount.toStringAsFixed(2)}٪ على إجمالي البند',
                           style: AppTypography.labelSmall.copyWith(
                             color: colors.success,
                             fontWeight: FontWeight.w900,
@@ -587,7 +587,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _money(netTotal) + ' ر.ي',
+                        '${_money(netTotal)} ر.ي',
                         textDirection: TextDirection.ltr,
                         style: AppTypography.titleSmall.copyWith(
                           color: accent,
@@ -644,7 +644,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
             ),
             keyboardType: TextInputType.number,
             textInputAction: TextInputAction.done,
-            inputFormatters: const [
+            inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               _MaximumQuantityInputFormatter(1000000),
             ],
@@ -743,7 +743,7 @@ class _TariffOption extends StatelessWidget {
               fit: BoxFit.scaleDown,
               alignment: AlignmentDirectional.centerEnd,
               child: Text(
-                AmountFormatter.formatValue(price, decimalPlaces: 2) + ' ر.ي',
+                '${AmountFormatter.formatValue(price, decimalPlaces: 2)} ر.ي',
                 textDirection: TextDirection.ltr,
                 maxLines: 1,
                 style: AppTypography.titleSmall.copyWith(
@@ -764,7 +764,7 @@ class _TariffOption extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                discount.toStringAsFixed(2) + '٪',
+                '${discount.toStringAsFixed(2)}٪',
                 style: AppTypography.labelSmall.copyWith(
                   color: colors.success,
                   fontWeight: FontWeight.w900,
