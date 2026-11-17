@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/membership/presentation/controllers/membership_controller.dart';
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
@@ -8,7 +9,6 @@ import 'package:netsales/features/membership/presentation/widgets/membership_add
 import 'package:netsales/features/membership/presentation/widgets/membership_list.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class MembershipScreen extends GetWidget<MembershipController> {
@@ -42,7 +42,16 @@ class MembershipScreen extends GetWidget<MembershipController> {
               )
               .toList();
     if (controller.isLoadingTenants.value) {
-      return const CustomSkeletonFeed(itemCount: 3);
+      return const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+);
     }
     if (controller.errorMessage.value != null && tenants.isEmpty) {
       return CustomErrorState(
@@ -94,7 +103,16 @@ class MembershipScreen extends GetWidget<MembershipController> {
             ],
             if (controller.selectedTenantId.value != null &&
                 controller.isLoading.value)
-              const CustomSkeletonFeed(itemCount: 4)
+              const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+)
             else if (controller.selectedTenantId.value != null &&
                 controller.errorMessage.value != null)
               CustomErrorState.boxed(
