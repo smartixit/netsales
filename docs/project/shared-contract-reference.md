@@ -83,3 +83,17 @@ The canonical Laravel collection endpoints validate `search`, `status`, `per_pag
 Each Flutter collection owns an independent filter and cursor state. A change in one collection must not reset another collection's criteria or pages. Switching Billing account or Network clears all prior-scope criteria. First-page and load-more responses must be discarded when account, network, or page revision changes.
 
 Financial resources expose decimal money values (`total`, `remaining`, `amount`) and nested `currency.code` / `currency.decimal_places`. Render those authoritative values with shared currency widgets; do not display `*_minor` values as decimal currency amounts.
+
+
+## 4. Canonical Shared Feedback & State UI
+
+`lib/widgets/feedback/custom_state_view.dart` is the single visual source for all application-level data states:
+- **Loading** — `CustomStateView.loading`
+- **Empty** — `CustomStateView.empty`
+- **Error** — `CustomStateView.error`
+- **Offline** — `CustomStateView.offline`
+- **Pricing expired** — `CustomStateView.pricingExpired`
+
+Choose `CustomStatePresentation.fullscreen`, `boxed`, `compact`, or `banner` according to the actual available space and user workflow. Existing `CustomEmptyState`, `CustomErrorState`, and `CustomLoadingState` are compatibility facades that delegate to the canonical component; do not implement new state visuals inside them. `CustomOfflineBanner` also delegates to the canonical offline presentation.
+
+Content-shaped `CustomSkeletonFeed`, `CustomSkeletonGrid`, `CustomSkeletonListTile`, and related shimmer primitives remain approved for loading list/feed content and incremental pagination. Load-more skeletons must append to existing results rather than replace them. Expired authoritative pricing must clearly block submission and provide a refresh action when supported by the relevant use case.
