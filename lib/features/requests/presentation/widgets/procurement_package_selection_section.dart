@@ -5,7 +5,7 @@ import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_option_card.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
@@ -16,7 +16,7 @@ import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// كتالوج الباقات: استعراض وتكوين السلة مباشرة مع بحث وترقيم خادمي.
 class ProcurementPackageSelectionSection
-    extends GetView<PosProcurementController> {
+    extends GetView<PosNewProcurementOrderController> {
   const ProcurementPackageSelectionSection({super.key});
 
   Widget _buildCatalogFailureState(BuildContext context) {
