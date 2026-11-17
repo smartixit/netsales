@@ -112,7 +112,10 @@ void main() {
       final counter = find.byType(CustomResultsCounterBar);
 
       expect(counter, findsOneWidget);
-      expect(tester.getTopLeft(counter).dy, greaterThan(tester.getBottomLeft(searchField).dy));
+      expect(
+        tester.getTopLeft(counter).dy,
+        greaterThan(tester.getBottomLeft(searchField).dy),
+      );
       expect(find.text('1 باقة محمّلة'), findsOneWidget);
       expect(find.text('الإجمالي: '), findsOneWidget);
 
