@@ -16,9 +16,6 @@ class CustomNotFound extends StatelessWidget {
         badgeLabel: '404 • NOT FOUND',
         icon: Icons.search_off_rounded,
         presentation: CustomStatePresentation.fullscreen,
-        actionLabel: 'العودة',
-        actionIcon: Icons.arrow_back_rounded,
-        onAction: null,
       ),
     );
   }
