@@ -632,7 +632,7 @@ class PosProcurementController extends GetxController {
       isQuotePending.value = false;
       _refreshProcurementPresentation();
 
-      await loadEffectivePackageDiscounts();
+      unawaited(loadEffectivePackageDiscounts());
     } catch (error) {
       if (revision != _cartPricingRefreshRevision) return;
       cartPricingRefreshError.value = AppException.sanitizeMessage(
