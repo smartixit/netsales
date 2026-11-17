@@ -32,9 +32,9 @@ class PosProcurementOrdersHero extends StatelessWidget {
         AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        gradient: AppGradients.entityAmethyst(context),
+        gradient: AppGradients.financialHero(context),
         borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: Colors.white.withValues(alpha: .12)),
+        border: Border.all(color: colors.onPrimary.withValues(alpha: .16)),
         boxShadow: AppElevation.tinted(
           context,
           colors.primary,
@@ -55,7 +55,7 @@ class PosProcurementOrdersHero extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: .07),
+                  color: colors.onPrimary.withValues(alpha: .07),
                   width: 18.r,
                 ),
               ),
@@ -69,7 +69,7 @@ class PosProcurementOrdersHero extends StatelessWidget {
               height: 110.r,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: .035),
+                color: colors.onPrimary.withValues(alpha: .035),
               ),
             ),
           ),
@@ -100,7 +100,7 @@ class PosProcurementOrdersHero extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.bodySmall.copyWith(
-                              color: Colors.white.withValues(alpha: .78),
+                              color: colors.onPrimary.withValues(alpha: .82),
                             ),
                           ),
                         ],
@@ -111,16 +111,16 @@ class PosProcurementOrdersHero extends StatelessWidget {
                       width: 58.r,
                       height: 58.r,
                       decoration: BoxDecoration(
-                        gradient: AppGradients.accentBadge(context, Colors.white),
+                        gradient: AppGradients.accentBadge(context, colors.onPrimary),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: .20),
+                          color: colors.onPrimary.withValues(alpha: .20),
                         ),
                         boxShadow: AppElevation.level2(context),
                       ),
                       child: Icon(
                         Icons.receipt_long_rounded,
-                        color: Colors.white,
+                        color: colors.onPrimary,
                         size: 29.r,
                       ),
                     ),
