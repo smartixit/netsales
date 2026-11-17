@@ -9,6 +9,7 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
+import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -101,7 +102,7 @@ class PosProcurementOrderCard extends StatelessWidget {
     );
     final packages = request.items
         .map((item) => item.voucherPackage)
-        .whereType<dynamic>()
+        .whereType<PackageEntity>()
         .toList(growable: false);
     final visibleColors = packages.take(4).toList(growable: false);
 
