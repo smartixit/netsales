@@ -14,8 +14,8 @@ import 'package:netsales/features/workspace/presentation/widgets/pos_quick_actio
 import 'package:netsales/features/workspace/presentation/widgets/pos_recent_transactions_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_selected_network_financial_summary.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_welcome_header.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 
