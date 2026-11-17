@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -35,7 +36,7 @@ class ProcurementPackageSelectionSection
         ),
         AppSpacing.vXxs,
         Text(
-          'عدّل كمية كل باقة من بطاقتها مباشرة. يمكنك إضافة أكثر من باقة، وستظهر الأسعار المعتمدة عند مراجعة الطلب.',
+          'عدّل كمية كل باقة من بطاقتها مباشرة. يمكنك إضافة أكثر من باقة، ووتظهر تعرفة النقدي والآجل مباشرة داخل كل بطاقة.',
           style: AppTypography.bodySmall.copyWith(
             color: colors.onSurfaceVariant,
           ),
@@ -128,19 +129,7 @@ class ProcurementPackageSelectionSection
                                   quantity: controller.cartQuantityForPackage(
                                     package.packageId,
                                   ),
-                                  onIncrement: () =>
-                                      controller.adjustPackageQuantity(package, 1),
-                                  onDecrement:
-                                      controller.cartQuantityForPackage(
-                                            package.packageId,
-                                          ) >
-                                          0
-                                      ? () => controller.adjustPackageQuantity(
-                                          package,
-                                          -1,
-                                        )
-                                      : null,
-                                  isCashSale: controller.selectedSaleType.value == SaleType.cash,
+isCashSale: controller.selectedSaleType.value == SaleType.cash,
                                   onSetQuantity: (quantity) =>
                                       controller.setPackageVoucherCount(package, quantity),
                                 ),
