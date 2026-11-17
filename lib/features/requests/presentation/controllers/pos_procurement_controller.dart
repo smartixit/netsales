@@ -15,7 +15,6 @@ import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discount_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discounts_for_pos_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
@@ -45,7 +44,6 @@ class PosProcurementController extends GetxController {
   final GetMyPosUseCase? getMyPosUseCase;
   final GetPosNetworksListUseCase? getPosNetworksListUseCase;
   final GetPackagesUseCase? getPackagesUseCase;
-  final GetEffectivePackageDiscountUseCase? getEffectivePackageDiscountUseCase;
   final GetEffectivePackageDiscountsForPosUseCase? getEffectivePackageDiscountsForPosUseCase;
   final GetProcurementQuoteUseCase? getProcurementQuoteUseCase;
 
@@ -58,7 +56,6 @@ class PosProcurementController extends GetxController {
     this.getMyPosUseCase,
     this.getPosNetworksListUseCase,
     this.getPackagesUseCase,
-    this.getEffectivePackageDiscountUseCase,
     this.getEffectivePackageDiscountsForPosUseCase,
     this.getProcurementQuoteUseCase,
   });
@@ -143,11 +140,6 @@ class PosProcurementController extends GetxController {
   int _packageRevision = 0;
   bool _suppressPackageSearchListener = false;
 
-  // الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية
-  final effectiveDiscount = Rxn<EffectivePackageDiscountEntity>();
-  final isLoadingDiscount = false.obs;
-  final discountError = RxnString();
-  int _discountLoadRevision = 0;
   final effectiveDiscountsByPackageId =
       <int, EffectivePackageDiscountEntity>{}.obs;
   final isLoadingPackageDiscounts = false.obs;
@@ -424,8 +416,6 @@ class PosProcurementController extends GetxController {
     clearProcurementCart();
     _setSelectedPackage(null);
     _setSelectedNetworkId(null);
-    effectiveDiscount.value = null;
-    discountError.value = null;
     effectiveDiscountsByPackageId.clear();
     packageDiscountError.value = null;
     linkedNetworks.clear();
@@ -583,8 +573,6 @@ class PosProcurementController extends GetxController {
     _setSelectedNetworkId(networkId);
     clearProcurementCart();
     _setSelectedPackage(null);
-    effectiveDiscount.value = null;
-    discountError.value = null;
     availablePackages.clear();
     clearVoucherQuantity();
     loadNetworkPackages(networkId);
