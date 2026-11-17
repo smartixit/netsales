@@ -9,8 +9,8 @@ import 'package:netsales/features/auth/presentation/controllers/active_sessions_
 import 'package:netsales/features/auth/presentation/widgets/current_device_card.dart';
 import 'package:netsales/features/auth/presentation/widgets/logout_other_devices_card.dart';
 import 'package:netsales/features/auth/presentation/widgets/other_device_card.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// شاشة إدارة الأجهزة والجلسات النشطة (ActiveSessionsScreen)
