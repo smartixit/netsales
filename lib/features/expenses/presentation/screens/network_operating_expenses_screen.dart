@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/features/expenses/presentation/controllers/network_operating_expenses_controller.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_card.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_network_scope_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -63,7 +63,16 @@ class NetworkOperatingExpensesScreen
             Expanded(
               child: Obx(() {
                 if (controller.isLoadingNetworks.value) {
-                  return const CustomSkeletonFeed(itemCount: 3);
+                  return const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+);
                 }
                 if (controller.networkError.value != null &&
                     controller.networks.isEmpty) {
@@ -88,7 +97,16 @@ class NetworkOperatingExpensesScreen
                   );
                 }
                 if (controller.isLoading.value && controller.expenses.isEmpty) {
-                  return const CustomSkeletonFeed(itemCount: 5);
+                  return const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+);
                 }
                 if (controller.error.value != null &&
                     controller.expenses.isEmpty) {
@@ -142,7 +160,16 @@ class NetworkOperatingExpensesScreen
                               },
                             );
                           }
-                          return const CustomSkeletonFeed(itemCount: 1);
+                          return const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+);
                         }
                         final expense = controller.expenses[index];
                         return ExpenseCard(
