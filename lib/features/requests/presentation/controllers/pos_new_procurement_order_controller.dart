@@ -41,7 +41,7 @@ class PosNewProcurementOrderController extends GetxController {
   final GetProcurementQuoteUseCase? getProcurementQuoteUseCase;
   final ProcurementEstimateCalculator procurementEstimateCalculator;
 
-  PosProcurementController({
+  PosNewProcurementOrderController({
     required this.createRequestUseCase,
     this.updateRequestUseCase,
     this.getMyPosUseCase,
@@ -325,9 +325,6 @@ class PosNewProcurementOrderController extends GetxController {
   void onInit() {
     super.onInit();
 
-    searchController.addListener(() {
-      searchQuery.value = searchController.text;
-    });
     packageSearchController.addListener(() {
       if (!_suppressPackageSearchListener) {
         packageSearchQuery.value = packageSearchController.text.trim();
@@ -337,11 +334,6 @@ class PosNewProcurementOrderController extends GetxController {
       quantityInput.value = quantityController.text;
     });
 
-    debounce(
-      searchQuery,
-      (_) => loadRequests(isRefresh: true),
-      time: const Duration(milliseconds: 500),
-    );
     debounce(
       packageSearchQuery,
       (_) => _refreshPackageSearchResults(),
@@ -356,7 +348,6 @@ class PosNewProcurementOrderController extends GetxController {
 
   @override
   void onClose() {
-    searchController.dispose();
     packageSearchController.dispose();
     quantityController.dispose();
     notesController.dispose();
