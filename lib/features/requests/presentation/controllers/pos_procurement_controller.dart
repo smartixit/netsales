@@ -164,6 +164,10 @@ class PosProcurementController extends GetxController {
   int _quoteRevision = 0;
 
   final procurementCart = <ProcurementCartLineEntity>[].obs;
+  final Map<int, TextEditingController> _packageQuantityControllers = {};
+
+  TextEditingController quantityControllerForPackage(int packageId) =>
+      _packageQuantityControllers.putIfAbsent(packageId, TextEditingController.new);
 
   bool get hasCartItems => procurementCart.isNotEmpty;
 
@@ -368,7 +372,9 @@ class PosProcurementController extends GetxController {
     packageSearchController.dispose();
     quantityController.dispose();
     notesController.dispose();
-    _cartQuoteWorker?.dispose();
+    for (final controller in _packageQuantityControllers.values) {
+      controller.dispose();
+    }
     _packageDiscountRevision++;
     _requestListRevision++;
     super.onClose();
@@ -613,7 +619,16 @@ class PosProcurementController extends GetxController {
       return;
     }
 
-    final safeCount = voucherCount < 0 ? 0 : voucherCount;
+    final safeCount = voucherCount.clamp(0, 1000000);
+    final quantityController = quantityControllerForPackage(package.packageId);
+    final quantityText = safeCount == 0 ? '' : '$safeCount';
+    if (quantityController.text != quantityText &&
+        FocusManager.instance.primaryFocus?.hasFocus != true) {
+      quantityController.value = TextEditingValue(
+        text: quantityText,
+        selection: TextSelection.collapsed(offset: quantityText.length),
+      );
+    }
     final existingIndex = procurementCart.indexWhere(
       (line) => line.package.packageId == package.packageId,
     );
@@ -1252,6 +1267,7 @@ class PosProcurementController extends GetxController {
     }
 
     if (getProcurementQuoteUseCase != null) {
+      await fetchServerQuote();
       final quote = serverQuote.value;
       final quoteMatchesContext =
           quote != null &&
