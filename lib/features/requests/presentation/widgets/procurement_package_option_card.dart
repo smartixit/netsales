@@ -13,6 +13,7 @@ import 'package:netsales/features/requests/domain/entities/procurement_quote_lin
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 
 /// بطاقة الباقة وفق المرجع المرئي المرسل: هوية بصرية، أسعار، مواصفات،
 ///
@@ -178,6 +179,10 @@ class _PackageHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final packageAccentColor = CustomColorPicker.parseHex(
+      package.packageColor,
+      fallback: colors.primary,
+    );
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 340.w;
@@ -258,16 +263,35 @@ class _PackageHero extends StatelessWidget {
                         ),
                       ),
                       AppSpacing.vSm,
-                      Text(
-                        package.packageName,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.start,
-                        style: AppTypography.titleMedium.copyWith(
-                          color: colors.onSurface,
-                          fontWeight: FontWeight.w700,
-                          height: 1.3,
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            key: const ValueKey(
+                              'procurement-package-color-accent',
+                            ),
+                            width: 4.r,
+                            height: 42.r,
+                            decoration: BoxDecoration(
+                              color: packageAccentColor,
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                          ),
+                          AppSpacing.hXs,
+                          Expanded(
+                            child: Text(
+                              package.packageName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.start,
+                              style: AppTypography.titleMedium.copyWith(
+                                color: colors.onSurface,
+                                fontWeight: FontWeight.w700,
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       AppSpacing.vXs,
                       Container(

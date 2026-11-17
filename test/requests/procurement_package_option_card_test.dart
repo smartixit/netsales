@@ -6,11 +6,15 @@ import 'package:netsales/features/catalog/domain/entities/effective_package_disc
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_option_card.dart';
 
-PackageEntity createPackage({bool hasPosCustomDiscount = false}) {
+PackageEntity createPackage({
+  bool hasPosCustomDiscount = false,
+  String? packageColor = '0xFF6A1B9A',
+}) {
   return PackageEntity(
     packageId: 101,
     networkId: 10,
     packageName: 'باقة الاختبار',
+    packageColor: packageColor,
     packageBalance: 2048,
     packageUptime: 120,
     packageValidity: 24,
@@ -51,6 +55,7 @@ void main() {
     WidgetTester tester, {
     bool isDark = false,
     bool hasPosCustomDiscount = false,
+    String? packageColor = '0xFF6A1B9A',
     bool isCashSale = true,
     EffectivePackageDiscountEntity? customDiscount,
     Size viewport = const Size(360, 780),
@@ -76,6 +81,7 @@ void main() {
                 child: ProcurementPackageOptionCard(
                   package: createPackage(
                     hasPosCustomDiscount: hasPosCustomDiscount,
+                    packageColor: packageColor,
                   ),
                   quantity: 0,
                   onSetQuantity: (_) {},
@@ -120,6 +126,29 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('renders packageColor as a vertical accent beside the title', (
+    tester,
+  ) async {
+    await pumpCard(tester, packageColor: '0xFF6A1B9A');
+
+    final accentFinder = find.byKey(
+      const ValueKey('procurement-package-color-accent'),
+    );
+    expect(accentFinder, findsOneWidget);
+
+    final accent = tester.widget<Container>(accentFinder);
+    final decoration = accent.decoration! as BoxDecoration;
+    expect(decoration.color, const Color(0xFF6A1B9A));
+
+    final accentSize = tester.getSize(accentFinder);
+    expect(accentSize.height, greaterThan(accentSize.width));
+
+    final accentCenter = tester.getCenter(accentFinder);
+    final titleCenter = tester.getCenter(find.text('باقة الاختبار'));
+    expect(accentCenter.dx, greaterThan(titleCenter.dx));
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'keeps cash and credit option heights unchanged when selection switches',
