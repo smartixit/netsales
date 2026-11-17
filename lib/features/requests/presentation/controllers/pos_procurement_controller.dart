@@ -606,8 +606,7 @@ class PosProcurementController extends GetxController {
     final safeCount = voucherCount.clamp(0, 1000000);
     final quantityController = quantityControllerForPackage(package.packageId);
     final quantityText = safeCount == 0 ? '' : '$safeCount';
-    if (quantityController.text != quantityText &&
-        FocusManager.instance.primaryFocus?.hasFocus != true) {
+    if (quantityController.text != quantityText) {
       quantityController.value = TextEditingValue(
         text: quantityText,
         selection: TextSelection.collapsed(offset: quantityText.length),
@@ -717,6 +716,9 @@ class PosProcurementController extends GetxController {
 
   void clearProcurementCart() {
     procurementCart.clear();
+    for (final controller in _packageQuantityControllers.values) {
+      controller.clear();
+    }
     _quoteRevision++;
     isLoadingQuote.value = false;
     isQuotePending.value = false;
