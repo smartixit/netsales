@@ -7,6 +7,7 @@ import 'package:netsales/features/catalog/presentation/widgets/package_form_sect
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 
 /// قسم البيانات التعريفية وهوية الباقة وشبكة التبعية
 class PackageFormIdentitySection extends GetView<PackageCatalogController> {
@@ -32,7 +33,14 @@ class PackageFormIdentitySection extends GetView<PackageCatalogController> {
           if (controller.isLoadingNetworks.value) {
             return Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
-              child: const LinearProgressIndicator(),
+              child: const CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.text,
+                  lineCount: 2,
+                  showCardSurface: false,
+                ),
+              ),
             );
           }
 
