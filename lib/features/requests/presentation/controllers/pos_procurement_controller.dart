@@ -16,6 +16,7 @@ import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discount_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discounts_for_pos_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
@@ -45,6 +46,7 @@ class PosProcurementController extends GetxController {
   final GetPosNetworksListUseCase? getPosNetworksListUseCase;
   final GetPackagesUseCase? getPackagesUseCase;
   final GetEffectivePackageDiscountUseCase? getEffectivePackageDiscountUseCase;
+  final GetEffectivePackageDiscountsForPosUseCase? getEffectivePackageDiscountsForPosUseCase;
   final GetProcurementQuoteUseCase? getProcurementQuoteUseCase;
 
   PosProcurementController({
@@ -57,6 +59,7 @@ class PosProcurementController extends GetxController {
     this.getPosNetworksListUseCase,
     this.getPackagesUseCase,
     this.getEffectivePackageDiscountUseCase,
+    this.getEffectivePackageDiscountsForPosUseCase,
     this.getProcurementQuoteUseCase,
   });
 
@@ -145,6 +148,14 @@ class PosProcurementController extends GetxController {
   final isLoadingDiscount = false.obs;
   final discountError = RxnString();
   int _discountLoadRevision = 0;
+  final effectiveDiscountsByPackageId =
+      <int, EffectivePackageDiscountEntity>{}.obs;
+  final isLoadingPackageDiscounts = false.obs;
+  final packageDiscountError = RxnString();
+  int _packageDiscountRevision = 0;
+
+  EffectivePackageDiscountEntity? discountForPackage(int packageId) =>
+      effectiveDiscountsByPackageId[packageId];
 
   // عرض الأسعار الرسمي المعتمد سيادياً من الخادم لكامل سلة التوريد (Phase 3.1 Quote)
   final serverQuote = Rxn<ProcurementQuoteEntity>();
@@ -345,13 +356,8 @@ class PosProcurementController extends GetxController {
       time: const Duration(milliseconds: 350),
     );
 
-    _cartQuoteWorker = debounce(
-      _cartQuoteChanges,
-      (_) => unawaited(fetchServerQuote()),
-      time: const Duration(milliseconds: 450),
-    );
-
-    ever(selectedSaleType, (_) => _scheduleServerQuoteRefresh());
+    // Pricing edits remain local. The server quote is requested only at submission.
+    ever(selectedSaleType, (_) => _refreshProcurementPresentation());
 
     loadInitialData();
   }
@@ -363,6 +369,7 @@ class PosProcurementController extends GetxController {
     quantityController.dispose();
     notesController.dispose();
     _cartQuoteWorker?.dispose();
+    _packageDiscountRevision++;
     _requestListRevision++;
     super.onClose();
   }
@@ -416,6 +423,8 @@ class PosProcurementController extends GetxController {
     _setSelectedNetworkId(null);
     effectiveDiscount.value = null;
     discountError.value = null;
+    effectiveDiscountsByPackageId.clear();
+    packageDiscountError.value = null;
     linkedNetworks.clear();
     availablePackages.clear();
 
@@ -444,6 +453,7 @@ class PosProcurementController extends GetxController {
         final networkId = linkedNetworks.first.networkId;
         _setSelectedNetworkId(networkId);
         await loadNetworkPackages(networkId);
+        await loadEffectivePackageDiscounts();
       }
     } catch (_) {
       if (selectedPosId.value != null && selectedPosId.value != posId) {
@@ -467,6 +477,7 @@ class PosProcurementController extends GetxController {
     packageNextCursor.value = null;
     packageLoadMoreErrorMessage.value = null;
     await _fetchNetworkPackages(networkId, reset: true);
+    await loadEffectivePackageDiscounts();
   }
 
   Future<void> refreshNetworkPackages() async {
@@ -615,7 +626,7 @@ class PosProcurementController extends GetxController {
       if (existingIndex != -1) {
         procurementCart.removeAt(existingIndex);
         if (procurementCart.isEmpty) returnToOrderItems();
-        _scheduleServerQuoteRefresh();
+        _refreshProcurementPresentation();
       }
       return;
     }
@@ -642,7 +653,7 @@ class PosProcurementController extends GetxController {
     } else {
       procurementCart[existingIndex] = line;
     }
-    _scheduleServerQuoteRefresh();
+    _refreshProcurementPresentation();
   }
 
   /// التحكم السريع في الكمية من بطاقة الكتالوج أو بطاقة السلة.
@@ -654,18 +665,46 @@ class PosProcurementController extends GetxController {
     );
   }
 
-  /// يبطل العرض السابق فوراً ثم يطلب معاينة موحدة بعد توقف التفاعل.
-  void _scheduleServerQuoteRefresh() {
-    _quoteRevision++;
-    serverQuote.value = null;
-    quoteError.value = null;
-    isLoadingQuote.value = false;
-    if (procurementCart.isEmpty || getProcurementQuoteUseCase == null) {
-      isQuotePending.value = false;
+  /// Rebuilds reactive UI values without a network request.
+  void _refreshProcurementPresentation() {
+    procurementCart.refresh();
+  }
+
+  /// Loads every active custom discount for the current POS in one catalogue-level request.
+  Future<void> loadEffectivePackageDiscounts() async {
+    final networkId = selectedNetworkId.value;
+    final posId = selectedPosId.value;
+    final useCase = getEffectivePackageDiscountsForPosUseCase;
+    if (networkId == null || posId == null || useCase == null) {
+      effectiveDiscountsByPackageId.clear();
       return;
     }
-    isQuotePending.value = true;
-    _cartQuoteChanges.value++;
+
+    final revision = ++_packageDiscountRevision;
+    isLoadingPackageDiscounts.value = true;
+    packageDiscountError.value = null;
+    try {
+      final discounts = await useCase(networkId: networkId, posId: posId);
+      if (revision != _packageDiscountRevision ||
+          selectedNetworkId.value != networkId ||
+          selectedPosId.value != posId) return;
+      effectiveDiscountsByPackageId.assignAll({
+        for (final discount in discounts)
+          if (discount.packageId != null) discount.packageId!: discount,
+      });
+      _refreshProcurementPresentation();
+    } catch (error) {
+      if (revision != _packageDiscountRevision) return;
+      effectiveDiscountsByPackageId.clear();
+      packageDiscountError.value = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر تحميل التعرفات الخاصة بنقطة البيع.',
+      );
+    } finally {
+      if (revision == _packageDiscountRevision) {
+        isLoadingPackageDiscounts.value = false;
+      }
+    }
   }
 
   void removeCartLine(int packageId) {
@@ -674,7 +713,7 @@ class PosProcurementController extends GetxController {
     if (procurementCart.length == previousLength) return;
 
     if (procurementCart.isEmpty) returnToOrderItems();
-    _scheduleServerQuoteRefresh();
+    _refreshProcurementPresentation();
   }
 
   void clearProcurementCart() {
@@ -768,7 +807,7 @@ class PosProcurementController extends GetxController {
       sheets: nextCount / sheetSize,
       voucherCount: nextCount,
     );
-    _scheduleServerQuoteRefresh();
+    _refreshProcurementPresentation();
   }
 
   void adjustCartLineBySheet(int packageId, int direction) {
@@ -787,7 +826,7 @@ class PosProcurementController extends GetxController {
   void onPackageSelected(PackageEntity package) {
     _setSelectedPackage(package);
     setDefaultSheetIfEmpty();
-    unawaited(loadEffectiveDiscount());
+    // Pricing is loaded once for the POS catalogue; selecting a card does not call the API.
   }
 
   /// استرجاع الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية من Laravel
@@ -995,7 +1034,7 @@ class PosProcurementController extends GetxController {
       );
     }
 
-    _scheduleServerQuoteRefresh();
+    await loadEffectivePackageDiscounts();
     await Get.toNamed<void>(AppRoutes.newProcurementOrder);
   }
 
@@ -1227,7 +1266,7 @@ class PosProcurementController extends GetxController {
           !quoteMatchesContext ||
           quoteExpired) {
         if (!isLoadingQuote.value && !isQuotePending.value) {
-          _scheduleServerQuoteRefresh();
+          _refreshProcurementPresentation();
         }
         CustomSnackbar.show(
           title: quoteExpired ? 'انتهت صلاحية عرض الأسعار' : 'عرض الأسعار غير جاهز',
@@ -1285,10 +1324,8 @@ class PosProcurementController extends GetxController {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
-      if (e.message.contains('أسعار') ||
-          e.message.contains('pricing') ||
-          e.message.contains('عرض الأسعار')) {
-        _scheduleServerQuoteRefresh();
+      if (e.message.contains('أسعار') || e.message.contains('pricing') || e.message.contains('عرض الأسعار')) {
+        quoteError.value = e.message;
       }
       CustomSnackbar.show(
         title: 'فشل تقديم الطلب',
