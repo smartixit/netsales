@@ -682,6 +682,7 @@ class _QuantityControls extends StatelessWidget {
     required this.halfSheet,
     required this.onChanged,
   });
+
   final int quantity;
   final TextEditingController controller;
   final int sheetSize;
@@ -713,7 +714,9 @@ class _QuantityControls extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: colors.surface,
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: colors.outlineVariant.withValues(alpha: .85)),
+                  border: Border.all(
+                    color: colors.outlineVariant.withValues(alpha: .85),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -724,9 +727,10 @@ class _QuantityControls extends StatelessWidget {
                       size: AppButtonSize.small,
                       backgroundColor: colors.primary,
                       foregroundColor: colors.onPrimary,
-                      onPressed: () => onChanged((quantity + 1).clamp(0, 1000000)),
+                      onPressed: () =>
+                          onChanged((quantity + 1).clamp(0, 1000000)),
                     ),
-                  ],                    Expanded(
+                    Expanded(
                       child: CustomTextField(
                         controller: controller,
                         label: '',
@@ -738,7 +742,10 @@ class _QuantityControls extends StatelessWidget {
                           color: colors.onSurface,
                           fontWeight: FontWeight.w900,
                         ),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 2.r, vertical: 5.r),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 2.r,
+                          vertical: 5.r,
+                        ),
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.done,
                         inputFormatters: [
@@ -758,9 +765,11 @@ class _QuantityControls extends StatelessWidget {
                       size: AppButtonSize.small,
                       backgroundColor: colors.primary,
                       foregroundColor: colors.onPrimary,
-                      onPressed: quantity > 0 ? () => onChanged(quantity - 1) : null,
+                      onPressed: quantity > 0
+                          ? () => onChanged(quantity - 1)
+                          : null,
                     ),
-
+                  ],
                 ),
               ),
             ),
@@ -782,7 +791,8 @@ class _QuantityControls extends StatelessWidget {
                   color: colors.primary,
                   fontWeight: FontWeight.w900,
                 ),
-                onPressed: () => onChanged((quantity + sheetSize).clamp(0, 1000000)),
+                onPressed: () =>
+                    onChanged((quantity + sheetSize).clamp(0, 1000000)),
               ),
             ),
             AppSpacing.hXs,
@@ -799,7 +809,8 @@ class _QuantityControls extends StatelessWidget {
                   color: colors.primary,
                   fontWeight: FontWeight.w900,
                 ),
-                onPressed: () => onChanged((quantity + halfSheet).clamp(0, 1000000)),
+                onPressed: () =>
+                    onChanged((quantity + halfSheet).clamp(0, 1000000)),
               ),
             ),
             AppSpacing.hXs,
