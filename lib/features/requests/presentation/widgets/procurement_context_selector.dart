@@ -6,7 +6,6 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_state_skeleton.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 

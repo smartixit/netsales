@@ -12,7 +12,6 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
-import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/inputs/voucher_quantity_stepper.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 
