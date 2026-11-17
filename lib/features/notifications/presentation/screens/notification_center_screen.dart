@@ -9,8 +9,8 @@ import 'package:netsales/features/notifications/presentation/controllers/notific
 import 'package:netsales/features/notifications/presentation/widgets/notification_item_card.dart';
 import 'package:netsales/widgets/badges/custom_filter_chip.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
