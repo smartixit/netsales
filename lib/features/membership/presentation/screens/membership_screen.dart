@@ -7,8 +7,8 @@ import 'package:netsales/features/membership/presentation/controllers/membership
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_add_form.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_list.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class MembershipScreen extends GetWidget<MembershipController> {
