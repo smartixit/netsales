@@ -692,7 +692,9 @@ class PosProcurementController extends GetxController {
       });
       _refreshProcurementPresentation();
     } catch (error) {
-      if (revision != _packageDiscountRevision) return;
+      if (revision != _packageDiscountRevision) {
+        return;
+      }
       effectiveDiscountsByPackageId.clear();
       packageDiscountError.value = AppException.sanitizeMessage(
         error,
