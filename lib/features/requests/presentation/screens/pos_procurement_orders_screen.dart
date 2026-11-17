@@ -2,25 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_request_card.dart';
+import 'package:netsales/features/requests/presentation/widgets/pos_procurement_order_card.dart';
+import 'package:netsales/features/requests/presentation/widgets/pos_procurement_orders_hero.dart';
+import 'package:netsales/features/requests/presentation/widgets/pos_procurement_orders_summary_strip.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_search_filter_header.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_list_intro.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
-/// شاشة قائمة طلبات التوريد والشراء لنقطة البيع (POS Procurement Orders Screen)
-/// تدعم:
-/// 1. الهيكلية المتجاوبة سواء كانت مضمنة في Shell أو كشاشة منفصلة دون أي تداخل مع الـ AppBar.
-/// 2. الـ Accordion الحصري الذكي لتفاصيل باقات وكميات وأسعار الطلب.
-/// 3. إمكانية تعديل الطلب المعلق وإلغائه، أو حذف الطلبات الملغية.
-/// 4. الحشو السفلي الآمن الذي يمنع تغطية البطاقات بشريط التنقل العائم.
+/// شاشة إدارة طلبات التوريد لنقطة البيع.
 class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController> {
   const PosProcurementOrdersScreen({super.key, this.embedded = false});
 
@@ -28,66 +21,48 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    // حساب الحشوات الهندسية لمنع التداخل مع الـ WorkspaceAppBar والـ Floating Bottom Bar
-    final topPadding = embedded ? (MediaQuery.paddingOf(context).top) : 0.0;
-    final bottomNavPadding = embedded
-        ? (MediaQuery.paddingOf(context).bottom)
+    final topPadding = embedded ? MediaQuery.paddingOf(context).top : 0.0;
+    final bottomPadding = embedded
+        ? MediaQuery.paddingOf(context).bottom
         : AppSpacing.cardPadding;
 
     final content = Padding(
       padding: EdgeInsets.only(top: topPadding),
       child: Column(
         children: [
-          if (!embedded)
-            const ProcurementListIntro(
-              icon: Icons.shopping_bag_outlined,
-              title: 'مشتريات نقاط البيع',
-              subtitle: 'تابع طلبات التوريد، راجع حالتها، وارجع إلى تفاصيل الفاتورة بعد الاعتماد.',
+          PosProcurementOrdersHero(
+            embedded: embedded,
+            canCreate: controller.canCreateOrder,
+            onCreate: controller.navigateToNewOrder,
+            onRefresh: () => controller.loadRequests(isRefresh: true),
+          ),
+          Obx(
+            () => PosProcurementOrdersSummaryStrip(
+              summary: controller.statusSummary.value,
+              isLoading: controller.isSummaryLoading.value,
             ),
-          // شريط البحث والفلترة
-          Obx(() {
-            return ProcurementSearchFilterHeader(
+          ),
+          Obx(
+            () => ProcurementSearchFilterHeader(
               searchController: controller.searchController,
               searchQuery: controller.searchQuery.value,
               selectedStatus: controller.statusFilter.value,
               onStatusChanged: controller.setStatusFilter,
               onClearSearch: controller.searchController.clear,
-            );
-          }),
-
-          AppSpacing.vXs,
-
-          // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: Obx(
-              () => CustomResultsCounterBar(
-                count: controller.requests.length,
-                recordLabel: 'طلب شراء',
-                isFiltered:
-                    controller.searchQuery.value.isNotEmpty ||
-                    controller.statusFilter.value != null,
-                isLoading:
-                    controller.isLoading.value && controller.requests.isEmpty,
-                onClear: controller.resetFilters,
-              ),
             ),
           ),
-
-          // قائمة الطلبات مع حالات التحميل والخطأ
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value) {
+              if (controller.isLoading.value && controller.requests.isEmpty) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
                   child: CustomStateView.loading(
                     presentation: CustomStatePresentation.skeletonOnly,
                     skeleton: CustomStateSkeleton(
-                      layout: CustomStateSkeletonLayout.list,
-                      itemCount: 4,
-                      cardHeight: 130.h,
+                      layout: CustomStateSkeletonLayout.cards,
+                      itemCount: 3,
+                      cardHeight: 190.h,
+                      maxColumns: 1,
                     ),
                   ),
                 );
@@ -105,26 +80,27 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
               }
 
               if (controller.requests.isEmpty) {
-                final hasFilter = controller.statusFilter.value != null;
+                final hasFilter = controller.statusFilter.value != null ||
+                    controller.searchQuery.value.trim().isNotEmpty;
                 return Center(
                   child: CustomEmptyState(
                     icon: hasFilter
                         ? Icons.search_off_rounded
                         : Icons.inventory_2_outlined,
                     title: hasFilter
-                        ? 'لا توجد طلبات مطابقة للحالة'
+                        ? 'لا توجد طلبات مطابقة'
                         : 'لا توجد طلبات توريد حالياً',
                     subtitle: hasFilter
-                        ? 'لم يتم العثور على أي طلبات بالحالة المختارة.'
-                        : 'يمكنك إنشاء طلب كروت جديد من شبكاتك الموردة.',
+                        ? 'جرّب تغيير كلمات البحث أو الفلاتر.'
+                        : 'يمكنك إنشاء طلب توريد جديد من شبكاتك الموردة.',
                     actionLabel: hasFilter
-                        ? 'عرض جميع الطلبات'
+                        ? 'مسح عوامل التصفية'
                         : (controller.canCreateOrder ? 'طلب توريد جديد' : null),
                     onAction: hasFilter
-                        ? () => controller.setStatusFilter(null)
+                        ? controller.resetFilters
                         : (controller.canCreateOrder
-                              ? controller.navigateToNewOrder
-                              : null),
+                            ? controller.navigateToNewOrder
+                            : null),
                   ),
                 );
               }
@@ -132,9 +108,9 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
               return RefreshIndicator.adaptive(
                 onRefresh: () => controller.loadRequests(isRefresh: true),
                 child: NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification scroll) {
+                  onNotification: (scroll) {
                     if (scroll.metrics.pixels >=
-                        scroll.metrics.maxScrollExtent - 200) {
+                        scroll.metrics.maxScrollExtent - 220) {
                       controller.loadMoreRequests();
                     }
                     return false;
@@ -143,59 +119,43 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(
                       AppSpacing.cardPadding,
-                      AppSpacing.xs,
+                      AppSpacing.sm,
                       AppSpacing.cardPadding,
-                      bottomNavPadding,
+                      bottomPadding,
                     ),
-                    itemCount:
-                        controller.requests.length +
+                    itemCount: controller.requests.length +
                         (controller.isLoadingMore.value ? 1 : 0),
-                    separatorBuilder: (context, index) => AppSpacing.vSm,
+                    separatorBuilder: (_, _) => AppSpacing.vSm,
                     itemBuilder: (context, index) {
                       if (index == controller.requests.length) {
                         return Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: AppSpacing.xs,
-                          ),
+                          padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
                           child: CustomStateView.loading(
                             presentation: CustomStatePresentation.skeletonOnly,
                             skeleton: CustomStateSkeleton(
                               layout: CustomStateSkeletonLayout.cards,
                               itemCount: 1,
-                              cardHeight: 130.h,
+                              cardHeight: 190.h,
                               maxColumns: 1,
-                              minItemWidth: 180,
                             ),
                           ),
                         );
                       }
 
                       final request = controller.requests[index];
-                      return Obx(() {
-                        final isExpanded =
-                            controller.expandedRequestId.value ==
-                            request.requestId;
-                        return ProcurementRequestCard(
-                          request: request,
-                          isNetworkView: false,
-                          isExpanded: isExpanded,
-                          onTap: () => controller.openRequestDetails(request),
-                          onToggleAccordion: () =>
-                              controller.toggleAccordion(request.requestId),
-                          onEdit:
-                              (request.isPending && controller.canCreateOrder)
-                              ? () => controller.openEditOrder(request)
-                              : null,
-                          onCancel:
-                              (request.isPending && controller.canCancelOrder)
-                              ? () => controller.promptCancelRequest(request)
-                              : null,
-                          onDelete:
-                              (request.isCancelled && controller.canCancelOrder)
-                              ? () => controller.promptDeleteRequest(request)
-                              : null,
-                        );
-                      });
+                      return PosProcurementOrderCard(
+                        request: request,
+                        onDetails: () => controller.openRequestDetails(request),
+                        onEdit: request.isPending && controller.canCreateOrder
+                            ? () => controller.openEditOrder(request)
+                            : null,
+                        onCancel: request.isPending && controller.canCancelOrder
+                            ? () => controller.promptCancelRequest(request)
+                            : null,
+                        onDelete: request.isCancelled && controller.canCancelOrder
+                            ? () => controller.promptDeleteRequest(request)
+                            : null,
+                      );
                     },
                   ),
                 ),
@@ -210,35 +170,16 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
 
     return CustomAppScaffold(
       appBar: AppBar(
-        title: Text(
-          'طلبات التوريد والمشتريات',
-          style: AppTypography.titleMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text('طلبات التوريد'),
         centerTitle: true,
-        elevation: 0,
         actions: [
-          CustomButton.icon(
-            icon: Icons.refresh_rounded,
+          IconButton(
             tooltip: 'تحديث الطلبات',
-            backgroundColor: Colors.transparent,
-            foregroundColor: colors.onSurfaceVariant,
             onPressed: () => controller.loadRequests(isRefresh: true),
+            icon: const Icon(Icons.refresh_rounded),
           ),
-          AppSpacing.hXs,
         ],
       ),
-      floatingActionButton: controller.canCreateOrder
-          ? CustomButton.primary(
-              text: 'طلب توريد جديد',
-              icon: Icons.add_shopping_cart_rounded,
-              size: AppButtonSize.medium,
-              shape: AppButtonShape.pill,
-              onPressed: controller.navigateToNewOrder,
-            )
-          : null,
       body: content,
     );
   }
