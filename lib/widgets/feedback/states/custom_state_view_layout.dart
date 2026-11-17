@@ -135,7 +135,7 @@ Widget _buildStateView(BuildContext context) {
           child: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppTypography.labelSmall.copyWith(color: colors.onSurface, fontWeight: FontWeight.w800)),
         ),
         if (onAction != null)
-          CustomButton.text(text: actionLabel ?? 'إعادة المحاولة', size: AppButtonSize.small, onPressed: onAction),
+          CustomButton.text(text: actionLabel ?? 'إعادة المحاولة', size: AppButtonSize.small, foregroundColor: colors.primary, onPressed: onAction),
       ]),
     );
   }
