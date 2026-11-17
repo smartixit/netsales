@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_cursor_page_state.dart';
 import 'package:netsales/widgets/lists/custom_collection_filter_bar.dart';
 import 'package:netsales/widgets/lists/custom_collection_filter_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
@@ -68,7 +68,7 @@ class BillingCursorCollectionSection extends StatelessWidget {
               onRetry: onRefresh,
             ),
           if (page.items.isEmpty && page.isLoadingFirstPage.value)
-            const CustomSkeletonFeed(itemCount: 2, shrinkWrap: true)
+            const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 2, cardHeight: 112, ))
           else if (page.items.isEmpty && page.firstPageError.value == null)
             CustomEmptyState.compact(title: emptyTitle)
           else
