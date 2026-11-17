@@ -145,6 +145,8 @@ class ProcurementPackageSelectionSection
                                   quantity: controller.cartQuantityForPackage(
                                     package.packageId,
                                   ),
+                                  customDiscount: controller.discountForPackage(package.packageId),
+                                  quantityController: controller.quantityControllerForPackage(package.packageId),
 isCashSale: controller.selectedSaleType.value == SaleType.cash,
                                   onSetQuantity: (quantity) =>
                                       controller.setPackageVoucherCount(package, quantity),
