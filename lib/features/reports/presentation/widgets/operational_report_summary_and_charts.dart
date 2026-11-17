@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_charts_section.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_summary_strip.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 
 /// Presents server-provided summary metrics and chart slots for the report.
 class OperationalReportSummaryAndCharts extends StatelessWidget {
