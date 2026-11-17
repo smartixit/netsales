@@ -10,7 +10,7 @@ import 'package:netsales/features/billing/presentation/widgets/billing_report_su
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_reports_header.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// Composition-only content for Billing subscription reports.
