@@ -53,6 +53,7 @@ Widget _buildStateView(BuildContext context) {
       CustomStateKind.error => colors.error,
       CustomStateKind.offline => colors.warning,
       CustomStateKind.pricingExpired => colors.tertiary,
+      CustomStateKind.notFound => colors.secondary,
     };
   }
 
@@ -63,6 +64,7 @@ Widget _buildStateView(BuildContext context) {
       CustomStateKind.error => 'حدث خطأ',
       CustomStateKind.offline => 'OFFLINE',
       CustomStateKind.pricingExpired => 'PRICING EXPIRED',
+      CustomStateKind.notFound => 'غير موجود',
     };
   }
 
@@ -73,6 +75,7 @@ Widget _buildStateView(BuildContext context) {
       CustomStateKind.error => Icons.error_outline_rounded,
       CustomStateKind.offline => Icons.wifi_off_rounded,
       CustomStateKind.pricingExpired => Icons.timer_off_rounded,
+      CustomStateKind.notFound => Icons.search_off_rounded,
     };
   }
 
