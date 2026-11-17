@@ -12,6 +12,7 @@ import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// كتالوج الباقات: استعراض وتكوين السلة مباشرة مع بحث وترقيم خادمي.
 class ProcurementPackageSelectionSection
@@ -103,6 +104,13 @@ class ProcurementPackageSelectionSection
                     : null,
                 isRequired: false,
                 onChanged: controller.onPackageSearchChanged,
+              ),
+              AppSpacing.vXs,
+              CustomResultsCounterBar(
+                count: controller.availablePackages.length,
+                recordLabel: 'باقة محمّلة',
+                isFiltered: controller.packageSearchQuery.value.isNotEmpty,
+                isLoading: controller.isLoadingPackages.value,
               ),
               AppSpacing.vSm,
               if (controller.isLoadingPackages.value)
