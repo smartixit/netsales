@@ -200,7 +200,7 @@ class _PackageHero extends StatelessWidget {
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
@@ -255,19 +255,19 @@ class _PackageHero extends StatelessWidget {
                           ],
                         ),
                       ),
-                      AppSpacing.vXs,
+                      AppSpacing.vSm,
                       Text(
                         package.packageName,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.end,
-                        style: AppTypography.titleSmall.copyWith(
+                        textAlign: TextAlign.start,
+                        style: AppTypography.titleMedium.copyWith(
                           color: colors.onSurface,
                           fontWeight: FontWeight.w700,
                           height: 1.3,
                         ),
                       ),
-                      AppSpacing.vXxs,
+                      AppSpacing.vXs,
                       Container(
                         constraints: BoxConstraints(
                           maxWidth: constraints.maxWidth - artworkSize - 28.r,
@@ -628,9 +628,7 @@ class _TariffPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: .58),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: .58)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -666,7 +664,7 @@ class _TariffPanel extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: Text(
                     '${money(basePrice)} ر.ي',
-                    textDirection: TextDirection.ltr,
+                    textDirection: TextDirection.rtl,
                     style: AppTypography.labelSmall.copyWith(
                       color: colors.onSurfaceVariant,
                       decoration: TextDecoration.lineThrough,
@@ -823,39 +821,36 @@ class _PriceOptionCard extends StatelessWidget {
               ],
             ),
             AppSpacing.vXs,
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                '${money(price)} ر.ي',
-                textDirection: TextDirection.ltr,
-                maxLines: 1,
-                style: AppTypography.titleSmall.copyWith(
-                  fontSize: 13.sp,
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
-                ),
-              ),
-            ),
-            AppSpacing.vXxs,
             if (isDiscountLoading)
               const CustomStateView.loading(
                 presentation: CustomStatePresentation.skeletonOnly,
                 skeleton: CustomStateSkeleton(
                   layout: CustomStateSkeletonLayout.text,
-                  lineCount: 1,
+                  lineCount: 2,
                   showCardSurface: false,
                 ),
               )
-            else if (discount > 0)
+            else if (discount > 0) ...{
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  '${money(price)} ر.ي',
+                  textDirection: TextDirection.rtl,
+                  maxLines: 1,
+                  style: AppTypography.titleSmall.copyWith(
+                    fontSize: 13.sp,
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+              AppSpacing.vXxs,
               Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 7.r,
-                    vertical: 3.r,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 7.r, vertical: 3.r),
                   decoration: BoxDecoration(
                     color: colors.success.withValues(alpha: .09),
                     borderRadius: BorderRadius.circular(AppRadius.full),
@@ -873,8 +868,8 @@ class _PriceOptionCard extends StatelessWidget {
                     ),
                   ),
                 ),
-              )
-            else
+              ),
+            } else
               Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: Text(
@@ -1198,26 +1193,30 @@ class _LineTotal extends StatelessWidget {
             ),
           ),
           if (estimatedLineTotalMinor != null)
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                '${AmountFormatter.format((estimatedLineTotalMinor! / 100).toStringAsFixed(2))} ر.ي',
-                textDirection: TextDirection.ltr,
-                style: AppTypography.currencyMedium.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  '${AmountFormatter.format((estimatedLineTotalMinor! / 100).toStringAsFixed(2))} ر.ي',
+                  textDirection: TextDirection.rtl,
+                  style: AppTypography.currencyMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             )
           else if (line != null)
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                '${AmountFormatter.formatValue(line!.lineNetTotal, decimalPlaces: 2)} ر.ي',
-                textDirection: TextDirection.ltr,
-                style: AppTypography.currencyMedium.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  '${AmountFormatter.formatValue(line!.lineNetTotal, decimalPlaces: 2)} ر.ي',
+                  textDirection: TextDirection.rtl,
+                  style: AppTypography.currencyMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             )
