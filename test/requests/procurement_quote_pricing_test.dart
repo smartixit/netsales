@@ -340,23 +340,20 @@ void main() {
   });
 
   group('Phase 3.1: PosProcurementController Server Authoritative Quote Integration', () {
-    test('Adding a cart item automatically triggers server quote fetch and updates serverQuote', () async {
+    test('Changing a cart quantity updates local state without requesting a server quote', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
 
       controller.setPackageVoucherCount(testPackage, 500);
 
-      await Future<void>.delayed(const Duration(milliseconds: 500));
       await pumpEventQueue();
 
-      expect(controller.serverQuote.value, isNotNull);
-      expect(controller.serverQuote.value!.netTotal, 45000.0);
-      expect(controller.serverQuote.value!.pricingToken, 'fake_valid_hmac_token');
-      expect(mockRepo.lastQuotePayload!['network_id'], 10);
-      expect(mockRepo.lastQuotePayload!['pos_id'], 20);
+      expect(controller.cartQuantityForPackage(testPackage.packageId), 500);
+      expect(controller.serverQuote.value, isNull);
+      expect(mockRepo.lastQuotePayload, isNull);
     });
 
-    test('Toggling payment method triggers server quote re-calculation with updated sale_type', () async {
+    test('Toggling payment method changes local selection without a quote request', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
 
@@ -370,11 +367,10 @@ void main() {
 
       // Change from CASH to CREDIT
       controller.selectedSaleType.value = SaleType.credit;
-      await Future<void>.delayed(const Duration(milliseconds: 500));
       await pumpEventQueue();
 
-      expect(mockRepo.lastQuotePayload, isNotNull);
-      expect(mockRepo.lastQuotePayload!['sale_type'], 'CREDIT');
+      expect(controller.selectedSaleType.value, SaleType.credit);
+      expect(mockRepo.lastQuotePayload, isNull);
     });
 
     test('Clearing procurement cart clears serverQuote and quoteError', () async {
@@ -397,7 +393,7 @@ void main() {
       expect(controller.quoteError.value, isNull);
     });
 
-    test('Submission waits for a current server quote before creating a request', () async {
+    test('Submission fetches the authoritative quote once and then creates the request', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
       controller.myPosList.assignAll([testPos]);
@@ -410,20 +406,12 @@ void main() {
         ),
       );
 
-      expect(controller.canSubmitOrder, isFalse);
-      final firstAttempt = await controller.submitOrder();
-
-      expect(firstAttempt, isFalse);
-      expect(mockRepo.lastCreatePayload, isNull);
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-      expect(mockRepo.lastQuotePayload, isNotNull);
-
-      await pumpEventQueue();
-      expect(controller.serverQuote.value, isNotNull);
       expect(controller.canSubmitOrder, isTrue);
+      final submitted = await controller.submitOrder();
 
-      final secondAttempt = await controller.submitOrder();
-      expect(secondAttempt, isTrue);
+      expect(submitted, isTrue);
+      expect(mockRepo.lastQuotePayload, isNotNull);
+      expect(mockRepo.lastQuotePayload!['sale_type'], 'CASH');
       expect(mockRepo.lastCreatePayload?['pricing_token'], 'fake_valid_hmac_token');
     });
 
@@ -441,7 +429,7 @@ void main() {
         ),
       );
 
-      controller.serverQuote.value = const ProcurementQuoteEntity(
+      mockRepo.nextQuote = const ProcurementQuoteEntity(
         networkId: 10,
         posId: 20,
         saleType: SaleType.cash,
@@ -496,7 +484,7 @@ void main() {
       );
     });
 
-    test('Server price change rejection automatically triggers quote re-fetch to protect user', () async {
+    test('Server price change rejection does not trigger an automatic background quote request', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
       controller.myPosList.assignAll([testPos]);
@@ -528,11 +516,10 @@ void main() {
       final success = await controller.submitOrder();
 
       expect(success, isFalse);
-      await Future<void>.delayed(const Duration(milliseconds: 500));
       await pumpEventQueue();
 
-      // Verified: Quote was automatically re-requested to refresh updated prices
       expect(mockRepo.lastQuotePayload, isNotNull);
+      expect(controller.quoteError.value, isNotNull);
     });
   });
 
