@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/toasts/custom_toast.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 
 /// الحالات الموحدة المعتمدة لكل واجهات NetSales.
@@ -23,6 +25,39 @@ enum CustomStatePresentation {
   boxed,
   compact,
   banner,
+  skeletonOnly,
+}
+
+enum CustomStateSkeletonLayout { list, cards, grid, detail }
+
+/// Declarative responsive skeleton recipe. Most screens need only choose a
+/// layout and item count; advanced screens may provide [skeletonBuilder].
+class CustomStateSkeleton {
+  const CustomStateSkeleton({
+    this.layout = CustomStateSkeletonLayout.list,
+    this.itemCount = 3,
+    this.cardHeight = 112,
+    this.maxColumns = 3,
+    this.minItemWidth = 220,
+    this.gap = 12,
+    this.lineCount = 2,
+    this.hasLeading = true,
+    this.hasTrailing = false,
+    this.showCardSurface = true,
+    this.padding,
+  });
+
+  final CustomStateSkeletonLayout layout;
+  final int itemCount;
+  final double cardHeight;
+  final int maxColumns;
+  final double minItemWidth;
+  final double gap;
+  final int lineCount;
+  final bool hasLeading;
+  final bool hasTrailing;
+  final bool showCardSurface;
+  final EdgeInsetsGeometry? padding;
 }
 
 /// مكوّن مركزي موحّد لحالات التحميل والفراغ والأخطاء والاتصال وانتهاء التعرفة.
@@ -50,6 +85,8 @@ class CustomStateView extends StatelessWidget {
     this.graphicSize,
     this.padding,
     this.showLoadingSkeleton = true,
+    this.skeleton,
+    this.skeletonBuilder,
   });
 
   const CustomStateView.loading({
@@ -63,6 +100,8 @@ class CustomStateView extends StatelessWidget {
     this.graphicSize,
     this.padding,
     this.showLoadingSkeleton = true,
+    this.skeleton,
+    this.skeletonBuilder,
   }) : kind = CustomStateKind.loading,
        actionLabel = null,
        actionIcon = null,
@@ -92,7 +131,9 @@ class CustomStateView extends StatelessWidget {
     this.padding,
   }) : kind = CustomStateKind.empty,
        technicalDetails = null,
-       showLoadingSkeleton = false;
+       showLoadingSkeleton = false,
+       skeleton = null,
+       skeletonBuilder = null;
 
   const CustomStateView.error({
     super.key,
@@ -113,7 +154,9 @@ class CustomStateView extends StatelessWidget {
     this.graphicSize,
     this.padding,
   }) : kind = CustomStateKind.error,
-       showLoadingSkeleton = false;
+       showLoadingSkeleton = false,
+       skeleton = null,
+       skeletonBuilder = null;
 
   const CustomStateView.offline({
     super.key,
@@ -134,7 +177,9 @@ class CustomStateView extends StatelessWidget {
     this.padding,
   }) : kind = CustomStateKind.offline,
        technicalDetails = null,
-       showLoadingSkeleton = false;
+       showLoadingSkeleton = false,
+       skeleton = null,
+       skeletonBuilder = null;
 
   const CustomStateView.pricingExpired({
     super.key,
@@ -155,7 +200,9 @@ class CustomStateView extends StatelessWidget {
     this.padding,
   }) : kind = CustomStateKind.pricingExpired,
        technicalDetails = null,
-       showLoadingSkeleton = false;
+       showLoadingSkeleton = false,
+       skeleton = null,
+       skeletonBuilder = null;
 
   final CustomStateKind kind;
   final String title;
@@ -175,11 +222,17 @@ class CustomStateView extends StatelessWidget {
   final double? graphicSize;
   final EdgeInsetsGeometry? padding;
   final bool showLoadingSkeleton;
+  final CustomStateSkeleton? skeleton;
+  final WidgetBuilder? skeletonBuilder;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final accent = accentColor ?? _resolveAccent(colors);
+
+    if (presentation == CustomStatePresentation.skeletonOnly) {
+      return _buildSkeleton(context);
+    }
 
     if (presentation == CustomStatePresentation.banner) {
       return _buildBanner(context, accent);
@@ -283,7 +336,7 @@ class CustomStateView extends StatelessWidget {
           ],
           if (kind == CustomStateKind.loading && showLoadingSkeleton) ...[
             AppSpacing.vMd,
-            _LoadingPreview(accent: accent),
+            _buildSkeleton(context),
           ],
           if (_hasActions) ...[
             AppSpacing.vMd,
@@ -486,6 +539,10 @@ class CustomStateView extends StatelessWidget {
           AppSpacing.vXxs,
           Text(subtitle!, textAlign: TextAlign.center, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant, height: 1.4)),
         ],
+        if (kind == CustomStateKind.loading && showLoadingSkeleton) ...[
+          AppSpacing.vSm,
+          _buildSkeleton(context),
+        ],
         if (_hasActions) ...[AppSpacing.vXs, _buildActions(context)],
       ]),
     );
@@ -519,37 +576,177 @@ class CustomStateView extends StatelessWidget {
       (secondaryActionLabel != null && onSecondaryAction != null);
 }
 
-class _LoadingPreview extends StatelessWidget {
-  const _LoadingPreview({required this.accent});
-  final Color accent;
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: 300.w),
-      child: Column(children: [
-        _LoadingLine(widthFactor: 1, accent: accent),
-        AppSpacing.vXs,
-        _LoadingLine(widthFactor: .78, accent: accent),
-        AppSpacing.vXs,
-        _LoadingLine(widthFactor: .9, accent: accent),
-      ]),
+
+  Widget _buildSkeleton(BuildContext context) {
+    final recipe = skeleton ?? const CustomStateSkeleton();
+    final colors = context.colors;
+    final gap = recipe.gap.h;
+    final skeleton = skeletonBuilder?.call(context) ??
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth.isFinite
+                ? constraints.maxWidth
+                : MediaQuery.sizeOf(context).width;
+            final columns = recipe.layout == CustomStateSkeletonLayout.grid
+                ? ((width + gap) / (recipe.minItemWidth.w + gap))
+                    .floor()
+                    .clamp(1, recipe.maxColumns)
+                : 1;
+            final items = List.generate(
+              recipe.itemCount.clamp(1, 12),
+              (index) => _SkeletonItem(recipe: recipe, index: index),
+            );
+
+            if (recipe.layout == CustomStateSkeletonLayout.grid) {
+              final itemWidth = (width - gap * (columns - 1)) / columns;
+              return Padding(
+                padding: recipe.padding ?? EdgeInsets.zero,
+                child: Wrap(
+                  spacing: gap,
+                  runSpacing: gap,
+                  children: items
+                      .map((item) => SizedBox(width: itemWidth, child: item))
+                      .toList(growable: false),
+                ),
+              );
+            }
+
+            if (recipe.layout == CustomStateSkeletonLayout.detail) {
+              return Padding(
+                padding: recipe.padding ?? EdgeInsets.zero,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _SkeletonBlock(widthFactor: .58, height: 22),
+                    SizedBox(height: gap),
+                    _SkeletonBlock(height: recipe.cardHeight * .62),
+                    SizedBox(height: gap),
+                    ...items,
+                  ],
+                ),
+              );
+            }
+
+            return Padding(
+              padding: recipe.padding ?? EdgeInsets.zero,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < items.length; i++) ...[
+                    if (i > 0) SizedBox(height: gap),
+                    items[i],
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+
+    return CustomSkeletonShimmer(
+      child: skeleton,
+      baseColor: colors.surfaceContainerHigh,
+      highlightColor: colors.surfaceContainerHighest,
     );
   }
 }
 
-class _LoadingLine extends StatelessWidget {
-  const _LoadingLine({required this.widthFactor, required this.accent});
+class _SkeletonItem extends StatelessWidget {
+  const _SkeletonItem({required this.recipe, required this.index});
+  final CustomStateSkeleton recipe;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final radius = BorderRadius.circular(AppRadius.card);
+    final card = Container(
+      height: recipe.cardHeight.h,
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: recipe.showCardSurface
+          ? BoxDecoration(
+              color: colors.surfaceContainerLow,
+              borderRadius: radius,
+              border: Border.all(
+                color: colors.outlineVariant.withValues(alpha: .32),
+              ),
+            )
+          : null,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (recipe.hasLeading) ...[
+            Container(
+              width: 42.r,
+              height: 42.r,
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(
+                  recipe.layout == CustomStateSkeletonLayout.grid
+                      ? AppRadius.md
+                      : AppRadius.full,
+                ),
+              ),
+            ),
+            AppSpacing.hSm,
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _SkeletonBlock(
+                  height: 13,
+                  widthFactor: index.isEven ? .82 : .68,
+                ),
+                for (var line = 1; line < recipe.lineCount; line++) ...[
+                  AppSpacing.vXs,
+                  _SkeletonBlock(
+                    height: 9,
+                    widthFactor: line == recipe.lineCount - 1 ? .46 : .94,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (recipe.hasTrailing) ...[
+            AppSpacing.hSm,
+            Container(
+              width: 42.r,
+              height: 28.h,
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+    return recipe.layout == CustomStateSkeletonLayout.list ||
+            recipe.layout == CustomStateSkeletonLayout.cards
+        ? card
+        : card;
+  }
+}
+
+class _SkeletonBlock extends StatelessWidget {
+  const _SkeletonBlock({
+    this.widthFactor = 1,
+    this.height = 10,
+  });
   final double widthFactor;
-  final Color accent;
+  final double height;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     return FractionallySizedBox(
       widthFactor: widthFactor,
+      alignment: AlignmentDirectional.centerStart,
       child: Container(
-        height: 8.h,
+        height: height.h,
         decoration: BoxDecoration(
-          color: colors.surfaceContainerHighest.withValues(alpha: .75),
+          color: colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppRadius.full),
         ),
       ),
