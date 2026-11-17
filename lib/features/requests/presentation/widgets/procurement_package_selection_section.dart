@@ -102,9 +102,8 @@ class ProcurementPackageSelectionSection
                 onChanged: controller.onPackageSearchChanged,
               ),
               AppSpacing.vSm,
-              if (controller.isLoadingPackages.value &&
-                  controller.availablePackages.isEmpty)
-                const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 124, ))
+              if (controller.isLoadingPackages.value && controller.availablePackages.isEmpty)
+                const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 170))
               else if (controller.packageErrorMessage.value != null &&
                   controller.availablePackages.isEmpty)
                 _buildCatalogFailureState(context)
@@ -152,6 +151,11 @@ isCashSale: controller.selectedSaleType.value == SaleType.cash,
                                 ),
                               );
                             }),
+                            if (controller.isLoadingPackages.value && controller.availablePackages.isNotEmpty)
+                              SizedBox(
+                                width: cardWidth,
+                                child: const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 170, maxColumns: 1, minItemWidth: 180)),
+                              ),
                             if (controller.isLoadingMorePackages.value)
                               SizedBox(
                                 width: cardWidth,
