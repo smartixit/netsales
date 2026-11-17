@@ -41,9 +41,6 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
         return CustomBottomSheetActionItem(
           title: filter.label,
           icon: filter.icon,
-          trailing: selected
-              ? Icon(Icons.check_circle_rounded, color: Colors.green, size: 20.r)
-              : null,
           onTap: () => onStatusChanged(filter.value),
         );
       }).toList(growable: false),
@@ -53,10 +50,10 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final selectedLabel = _filters
-        .where((filter) => filter.value == selectedStatus)
-        .map((filter) => filter.label)
-        .firstOrNull ?? 'كل الطلبات';
+    final selectedLabel = _filters.firstWhere(
+      (filter) => filter.value == selectedStatus,
+      orElse: () => _filters.first,
+    ).label;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
