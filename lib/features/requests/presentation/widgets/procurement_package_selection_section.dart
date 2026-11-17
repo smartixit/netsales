@@ -191,6 +191,7 @@ class ProcurementPackageSelectionSection
                                     quoteLine: hasCurrentQuote
                                         ? quote?.findLine(package.packageId)
                                         : null,
+                                    estimatedLineTotalMinor: controller.estimatedLineTotalMinor(package, quantity),
                                     onSetQuantity: (nextQuantity) =>
                                         controller.setPackageVoucherCount(
                                           package,

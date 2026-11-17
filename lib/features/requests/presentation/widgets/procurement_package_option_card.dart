@@ -26,6 +26,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
     required this.quantityController,
     this.customDiscount,
     this.quoteLine,
+    this.estimatedLineTotalMinor,
     this.isDiscountLoading = false,
   });
 
@@ -36,6 +37,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
   final TextEditingController quantityController;
   final EffectivePackageDiscountEntity? customDiscount;
   final ProcurementQuoteLineEntity? quoteLine;
+  final int? estimatedLineTotalMinor;
   final bool isDiscountLoading;
 
   static const _emerald = Color(0xFF087B61);
@@ -144,6 +146,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
                 AppSpacing.vSm,
                 _LineTotal(
                   line: _hasMatchingQuote ? quoteLine : null,
+                  estimatedLineTotalMinor: estimatedLineTotalMinor,
                   selected: selected,
                 ),
               ],
@@ -978,8 +981,9 @@ class _PaperEquivalent extends StatelessWidget {
 }
 
 class _LineTotal extends StatelessWidget {
-  const _LineTotal({required this.line, required this.selected});
+  const _LineTotal({required this.line, required this.estimatedLineTotalMinor, required this.selected});
   final ProcurementQuoteLineEntity? line;
+  final int? estimatedLineTotalMinor;
   final bool selected;
 
   @override
@@ -1012,7 +1016,12 @@ class _LineTotal extends StatelessWidget {
               ),
             ),
           ),
-          if (line != null)
+          if (estimatedLineTotalMinor != null)
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text('${AmountFormatter.format((estimatedLineTotalMinor! / 100).toStringAsFixed(2))} ر.ي', textDirection: TextDirection.ltr, style: AppTypography.currencyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+            )
+          else if (line != null)
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
@@ -1026,7 +1035,7 @@ class _LineTotal extends StatelessWidget {
             )
           else
             Text(
-              selected ? 'بانتظار عرض السعر' : '—',
+              selected ? 'حدّث التعرفة' : '—',
               style: AppTypography.labelMedium.copyWith(
                 color: Colors.white.withValues(alpha: .86),
                 fontWeight: FontWeight.w600,

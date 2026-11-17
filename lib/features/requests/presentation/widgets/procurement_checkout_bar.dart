@@ -25,28 +25,14 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
       final count = lines.fold<int>(0, (sum, line) => sum + line.voucherCount);
       final currency = quote?.currency ?? 'ر.ي';
       final quoteReady = controller.hasCurrentServerQuote && quote != null;
-      final estimate = lines.fold<(double, double, double)>((0, 0, 0), (sum, line) {
-        final custom = controller.discountForPackage(line.package.packageId);
-        final base = custom?.originalPackagePrice ?? (line.package.procurementBaseUnitPriceMinor != null ? line.package.procurementBaseUnitPriceMinor! / 100 : line.package.packageVoucherPrice);
-        final unit = controller.selectedSaleType.value == SaleType.cash
-            ? (custom?.effectiveCashPrice ??
-                (line.package.procurementCashUnitPriceMinor != null
-                    ? line.package.procurementCashUnitPriceMinor! / 100
-                    : line.package.effectiveCashPrice))
-            : (custom?.effectiveCreditPrice ??
-                (line.package.procurementCreditUnitPriceMinor != null
-                    ? line.package.procurementCreditUnitPriceMinor! / 100
-                    : line.package.effectiveCreditPrice));
-        final gross = base * line.voucherCount;
-        final net = unit * line.voucherCount;
-        return (sum.$1 + gross, sum.$2 + (gross - net), sum.$3 + net);
-      });
+      final estimate = controller.estimatedProcurementTotalsMinor;
+      final hasEstimate = estimate != null;
       final quoteExpired = quote?.expiresAt != null &&
           !DateTime.now().isBefore(quote!.expiresAt!);
       final isCompact = MediaQuery.sizeOf(context).width <= AppBreakpoints.mobileMax;
-      final gross = quoteReady ? quote.grossTotal : estimate.$1;
-      final discount = quoteReady ? quote.discountTotal : estimate.$2;
-      final net = quoteReady ? quote.netTotal : estimate.$3;
+      final gross = quoteReady ? quote.grossTotal : (hasEstimate ? estimate.$1 / 100 : 0);
+      final discount = quoteReady ? quote.discountTotal : (hasEstimate ? estimate.$2 / 100 : 0);
+      final net = quoteReady ? quote.netTotal : (hasEstimate ? estimate.$3 / 100 : 0);
       final summaryRows = Row(
         children: [
           Expanded(child: _SummaryMetric(label: 'الإجمالي', value: AmountFormatter.formatValue(gross), currency: currency)),
@@ -76,6 +62,10 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
                     presentation: CustomStatePresentation.compact,
                     onAction: controller.fetchServerQuote,
                   ),
+                  AppSpacing.vXs,
+                ],
+                if (!hasEstimate && lines.isNotEmpty) ...[
+                  CustomStateView.pricingExpired(presentation: CustomStatePresentation.compact, onAction: controller.refreshNetworkPackages),
                   AppSpacing.vXs,
                 ],
                 summaryRows,

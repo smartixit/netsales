@@ -31,6 +31,7 @@ class PackageEntity {
   final int? procurementCashDiscountBasisPoints;
   final int? procurementCreditDiscountBasisPoints;
   final String? procurementPricingSnapshotToken;
+  final DateTime? procurementPricingSnapshotExpiresAt;
 
   const PackageEntity({
     required this.packageId,
@@ -59,6 +60,7 @@ class PackageEntity {
     this.procurementCashDiscountBasisPoints,
     this.procurementCreditDiscountBasisPoints,
     this.procurementPricingSnapshotToken,
+    this.procurementPricingSnapshotExpiresAt,
   });
 
   bool get isActive => status;

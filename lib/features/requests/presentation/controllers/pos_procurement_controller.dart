@@ -185,7 +185,47 @@ class PosProcurementController extends GetxController {
     return expiresAt == null || DateTime.now().isBefore(expiresAt);
   }
 
-  bool get canSubmitOrder => hasCartItems && !isSubmitting.value;
+  bool get hasCurrentProcurementSnapshots {
+    if (procurementCart.isEmpty) return false;
+    final now = DateTime.now();
+    return procurementCart.every((line) {
+      final package = line.package;
+      final token = package.procurementPricingSnapshotToken;
+      final expiresAt = package.procurementPricingSnapshotExpiresAt;
+      return package.procurementBaseUnitPriceMinor != null &&
+          package.procurementCashDiscountBasisPoints != null &&
+          package.procurementCreditDiscountBasisPoints != null &&
+          token != null && token.isNotEmpty && expiresAt != null && now.isBefore(expiresAt);
+    });
+  }
+
+  int? estimatedLineTotalMinor(PackageEntity package, int quantity) {
+    if (quantity <= 0 || !hasCurrentProcurementSnapshots) return null;
+    final base = package.procurementBaseUnitPriceMinor;
+    final rate = selectedSaleType.value == SaleType.cash ? package.procurementCashDiscountBasisPoints : package.procurementCreditDiscountBasisPoints;
+    if (base == null || rate == null) return null;
+    final gross = base * quantity;
+    return gross - ((gross * rate + 5000) ~/ 10000);
+  }
+
+  (int, int, int)? get estimatedProcurementTotalsMinor {
+    if (!hasCurrentProcurementSnapshots) return null;
+    var gross = 0;
+    var discount = 0;
+    var net = 0;
+    for (final line in procurementCart) {
+      final base = line.package.procurementBaseUnitPriceMinor!;
+      final rate = selectedSaleType.value == SaleType.cash ? line.package.procurementCashDiscountBasisPoints! : line.package.procurementCreditDiscountBasisPoints!;
+      final lineGross = base * line.voucherCount;
+      final lineDiscount = (lineGross * rate + 5000) ~/ 10000;
+      gross += lineGross;
+      discount += lineDiscount;
+      net += lineGross - lineDiscount;
+    }
+    return (gross, discount, net);
+  }
+
+  bool get canSubmitOrder => hasCartItems && hasCurrentProcurementSnapshots && !isSubmitting.value;
 
   void _setSelectedNetworkId(int? value) {
     selectedNetworkId.value = value;
@@ -502,6 +542,7 @@ class PosProcurementController extends GetxController {
     try {
       final paginated = await getPackagesUseCase!(
         networkId: networkId,
+        posId: selectedPosId.value,
         status: true,
         search: packageSearchQuery.value.isEmpty
             ? null
@@ -764,6 +805,7 @@ class PosProcurementController extends GetxController {
               (line) => {
                 'package_id': line.package.packageId,
                 'voucher_count': line.voucherCount,
+                'pricing_snapshot_token': line.package.procurementPricingSnapshotToken,
               },
             )
             .toList(growable: false),
@@ -1025,10 +1067,8 @@ class PosProcurementController extends GetxController {
     );
 
     try {
-      final token = serverQuote.value?.pricingToken;
       final payload = <String, dynamic>{
         'sale_type': selectedSaleType.value.wireValue,
-        if (token != null && token.isNotEmpty) 'pricing_token': token,
         if (notesController.text.trim().isNotEmpty)
           'request_note': notesController.text.trim(),
         'items': procurementCart
@@ -1211,33 +1251,9 @@ class PosProcurementController extends GetxController {
       return false;
     }
 
-    if (getProcurementQuoteUseCase != null) {
-      await fetchServerQuote();
-      final quote = serverQuote.value;
-      final quoteMatchesContext =
-          quote != null &&
-          quote.networkId == selectedNetworkId.value &&
-          quote.posId == posId &&
-          quote.saleType == selectedSaleType.value;
-      final quoteExpired = quote?.expiresAt != null &&
-          !DateTime.now().isBefore(quote!.expiresAt!);
-
-      if (isQuotePending.value ||
-          isLoadingQuote.value ||
-          !quoteMatchesContext ||
-          quoteExpired) {
-        if (!isLoadingQuote.value && !isQuotePending.value) {
-          _refreshProcurementPresentation();
-        }
-        CustomSnackbar.show(
-          title: quoteExpired ? 'انتهت صلاحية عرض الأسعار' : 'عرض الأسعار غير جاهز',
-          message: quoteExpired
-              ? 'تم طلب عرض أسعار محدث. راجعه قبل تقديم الطلب.'
-              : 'يجب جلب عرض الأسعار المعتمد للشبكة ونقطة البيع وطريقة الدفع الحالية قبل التقديم.',
-          type: SnackType.warning,
-        );
-        return false;
-      }
+    if (!hasCurrentProcurementSnapshots) {
+      CustomSnackbar.show(title: 'بيانات التعرفة غير مكتملة أو منتهية', message: 'حدّث كتالوج الباقات للحصول على تعرفة موقعة وحديثة قبل الإرسال.', type: SnackType.warning);
+      return false;
     }
 
     isSubmitting.value = true;
@@ -1285,8 +1301,8 @@ class PosProcurementController extends GetxController {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
-      if (e.message.contains('أسعار') || e.message.contains('pricing') || e.message.contains('عرض الأسعار')) {
-        quoteError.value = e.message;
+      if (e.message.contains('تعرفة') || e.message.contains('pricing') || e.message.contains('سعر')) {
+        packageErrorMessage.value = e.message;
       }
       CustomSnackbar.show(
         title: 'فشل تقديم الطلب',

@@ -29,6 +29,7 @@ class PackageModel extends PackageEntity {
     super.procurementCashDiscountBasisPoints,
     super.procurementCreditDiscountBasisPoints,
     super.procurementPricingSnapshotToken,
+    super.procurementPricingSnapshotExpiresAt,
   });
 
   factory PackageModel.fromJson(Map<String, dynamic> json) {
@@ -89,6 +90,7 @@ class PackageModel extends PackageEntity {
       procurementCashDiscountBasisPoints: (procurement['cash_discount_basis_points'] as num?)?.toInt(),
       procurementCreditDiscountBasisPoints: (procurement['credit_discount_basis_points'] as num?)?.toInt(),
       procurementPricingSnapshotToken: procurement['pricing_snapshot_token']?.toString(),
+      procurementPricingSnapshotExpiresAt: DateTime.tryParse(procurement['pricing_snapshot_expires_at']?.toString() ?? ''),
     );
   }
 
