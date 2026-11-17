@@ -5,7 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_search_filter_header.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_list_intro.dart';
@@ -21,7 +21,7 @@ import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 /// 2. الـ Accordion الحصري الذكي لتفاصيل باقات وكميات وأسعار الطلب.
 /// 3. إمكانية تعديل الطلب المعلق وإلغائه، أو حذف الطلبات الملغية.
 /// 4. الحشو السفلي الآمن الذي يمنع تغطية البطاقات بشريط التنقل العائم.
-class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
+class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController> {
   const PosProcurementOrdersScreen({super.key, this.embedded = false});
 
   final bool embedded;
