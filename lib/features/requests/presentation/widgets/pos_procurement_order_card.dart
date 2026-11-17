@@ -96,6 +96,10 @@ class PosProcurementOrderCard extends StatelessWidget {
       request.status,
       serverLabel: request.statusLabel,
     );
+    final saleType = EnumPresentationRegistry.resolveSaleType(
+      request.saleType,
+      serverLabel: request.saleTypeLabel,
+    );
     final packages = request.items
         .map((item) => item.voucherPackage)
         .whereType<PackageEntity>()
@@ -236,6 +240,8 @@ class PosProcurementOrderCard extends StatelessWidget {
                         Expanded(child: _Metric(label: 'عدد البنود', value: request.items.length.toString())),
                         _MetricDivider(),
                         Expanded(child: _Metric(label: 'إجمالي الكمية', value: request.totalVouchers.toString())),
+                        _MetricDivider(),
+                        Expanded(child: _Metric(label: 'نوع السعر', value: saleType.label)),
                       ],
                     ),
                   ),
