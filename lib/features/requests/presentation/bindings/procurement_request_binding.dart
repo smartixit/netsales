@@ -28,7 +28,6 @@ import 'package:netsales/features/requests/domain/usecases/reject_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/controllers/procurement_request_details_controller.dart';
 
 /// ربط التبعيات لدورة حياة طلبات التوريد والشراء (Milestone 6 Binding)
@@ -149,23 +148,6 @@ class ProcurementRequestBinding extends Bindings {
     );
 
     // 4. Controllers
-    registerLazyIfAbsent<PosProcurementController>(
-      () => PosProcurementController(
-        getRequestsUseCase: Get.find<GetRequestsUseCase>(),
-        createRequestUseCase: Get.find<CreateRequestUseCase>(),
-        updateRequestUseCase: Get.find<UpdateRequestUseCase>(),
-        cancelRequestUseCase: Get.find<CancelRequestUseCase>(),
-        deleteRequestUseCase: Get.find<DeleteRequestUseCase>(),
-        getMyPosUseCase: Get.find<GetMyPosUseCase>(),
-        getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
-        getPackagesUseCase: Get.find<GetPackagesUseCase>(),
-        getEffectivePackageDiscountsForPosUseCase:
-            Get.find<GetEffectivePackageDiscountsForPosUseCase>(),
-        getProcurementQuoteUseCase: Get.find<GetProcurementQuoteUseCase>(),
-      ),
-      fenix: true,
-    );
-
     registerLazyIfAbsent<NetworkProcurementReviewController>(
       () => NetworkProcurementReviewController(
         getRequestsUseCase: Get.find<GetRequestsUseCase>(),
