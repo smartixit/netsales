@@ -28,7 +28,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
         children: [
           PosProcurementOrdersHero(
             embedded: embedded,
-            canCreate: controller.canCreateOrder,
+            canCreate: !embedded && controller.canCreateOrder,
             onCreate: controller.navigateToNewOrder,
           ),
           Obx(
