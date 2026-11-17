@@ -4,7 +4,6 @@ import 'package:netsales/features/catalog/data/datasources/package_catalog_remot
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource_impl.dart';
 import 'package:netsales/features/catalog/data/repositories/package_catalog_repository_impl.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discount_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discounts_for_pos_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
@@ -106,14 +105,6 @@ class ProcurementRequestBinding extends Bindings {
         fenix: true,
       );
     }
-    if (!Get.isRegistered<GetEffectivePackageDiscountUseCase>()) {
-      registerLazyIfAbsent<GetEffectivePackageDiscountUseCase>(
-        () => GetEffectivePackageDiscountUseCase(
-          Get.find<PackageCatalogRepository>(),
-        ),
-        fenix: true,
-      );
-    }
 
     // 3. Request Use Cases (مع تحديد الصنف الصريح و fenix: true)
     registerLazyIfAbsent<GetRequestsUseCase>(
@@ -168,8 +159,6 @@ class ProcurementRequestBinding extends Bindings {
         getMyPosUseCase: Get.find<GetMyPosUseCase>(),
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
-        getEffectivePackageDiscountUseCase:
-            Get.find<GetEffectivePackageDiscountUseCase>(),
         getEffectivePackageDiscountsForPosUseCase:
             Get.find<GetEffectivePackageDiscountsForPosUseCase>(),
         getProcurementQuoteUseCase: Get.find<GetProcurementQuoteUseCase>(),
