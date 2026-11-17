@@ -613,6 +613,14 @@ class PosProcurementController extends GetxController {
           )
           .toList(growable: false);
       availablePackages.assignAll(refreshedAvailablePackages);
+      final selectedPackageIdValue = selectedPackageId.value;
+      if (selectedPackageIdValue != null) {
+        final refreshedSelectedPackage =
+            refreshedPackages[selectedPackageIdValue];
+        if (refreshedSelectedPackage != null) {
+          _setSelectedPackage(refreshedSelectedPackage);
+        }
+      }
       effectiveDiscountsByPackageId.clear();
 
       // A previous server quote is no longer relevant after the signed
