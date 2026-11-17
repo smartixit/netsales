@@ -16,7 +16,6 @@ import 'package:netsales/features/requests/domain/entities/request_modification_
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/delete_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
