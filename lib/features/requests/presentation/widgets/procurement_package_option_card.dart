@@ -758,7 +758,8 @@ class _PriceOptionCard extends StatelessWidget {
             color: selected
                 ? colors.primary.withValues(alpha: .72)
                 : colors.outlineVariant.withValues(alpha: .58),
-            width: selected ? 1.5 : 1,
+            // Keep border geometry identical; only its color changes.
+            width: 1.25,
           ),
           boxShadow: selected
               ? [
@@ -787,33 +788,38 @@ class _PriceOptionCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (selected) ...[
-                  AppSpacing.hXxs,
-                  Tooltip(
-                    message: 'نوع البيع المحدد',
-                    child: Container(
-                      key: selectedMarkerKey,
-                      width: 19.r,
-                      height: 19.r,
-                      decoration: BoxDecoration(
-                        color: colors.primary,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: colors.primary.withValues(alpha: .20),
-                            blurRadius: 5,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.check_rounded,
-                        size: 13.r,
-                        color: colors.onPrimary,
+                // Reserve the same marker footprint in both states. The
+                // selection animation changes visibility and color only.
+                AppSpacing.hXxs,
+                SizedBox.square(
+                  dimension: 19.r,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 160),
+                    opacity: selected ? 1 : 0,
+                    child: Tooltip(
+                      message: 'نوع البيع المحدد',
+                      child: Container(
+                        key: selectedMarkerKey,
+                        decoration: BoxDecoration(
+                          color: colors.primary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.primary.withValues(alpha: .20),
+                              blurRadius: 5,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.check_rounded,
+                          size: 13.r,
+                          color: colors.onPrimary,
+                        ),
                       ),
                     ),
                   ),
-                ],
+                ),
               ],
             ),
             AppSpacing.vXs,
