@@ -435,7 +435,8 @@ void main() {
         controller.adjustPackageQuantity(samplePackage, 175);
 
         controller.onPackageSearchChanged('غير موجودة');
-        await controller.refreshNetworkPackages();
+        // Search is intentionally debounced and independent from cart pricing refresh.
+        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(mockPackageRepo.lastSearch, 'غير موجودة');
         expect(controller.availablePackages, isEmpty);
