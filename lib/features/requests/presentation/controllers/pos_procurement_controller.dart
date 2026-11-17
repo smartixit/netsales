@@ -119,6 +119,7 @@ class PosProcurementController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final myPosList = <PosEntity>[].obs;
   final selectedPosId = RxnInt();
+  final isLoadingMyPos = false.obs;
 
   /// نقطة البيع النشطة المحددة حالياً
   PosEntity? get activePos =>
@@ -406,26 +407,33 @@ class PosProcurementController extends GetxController {
   /// جلب وتحديد نقطة البيع النشطة التابعة للمستخدم الحالي
   Future<void> loadMyPos() async {
     if (getMyPosUseCase == null) return;
+
+    isLoadingMyPos.value = true;
+    late final List<PosEntity> posList;
     try {
-      final posList = await getMyPosUseCase!();
+      posList = await getMyPosUseCase!();
       myPosList.assignAll(posList);
-
-      final resolvedId = WorkspaceService.to.resolveActivePosId(
-        posList.map((p) => p.posId).toList(),
-      );
-
-      if (resolvedId != null) {
-        selectedPosId.value = resolvedId;
-        await loadLinkedNetworks(resolvedId);
-      } else {
-        selectedPosId.value = null;
-        _setSelectedNetworkId(null);
-        _setSelectedPackage(null);
-        linkedNetworks.clear();
-        availablePackages.clear();
-      }
     } catch (_) {
-      // Non-fatal, handled gracefully
+      // Non-fatal; the context selector will present its empty state.
+      myPosList.clear();
+      return;
+    } finally {
+      isLoadingMyPos.value = false;
+    }
+
+    final resolvedId = WorkspaceService.to.resolveActivePosId(
+      posList.map((p) => p.posId).toList(),
+    );
+
+    if (resolvedId != null) {
+      selectedPosId.value = resolvedId;
+      await loadLinkedNetworks(resolvedId);
+    } else {
+      selectedPosId.value = null;
+      _setSelectedNetworkId(null);
+      _setSelectedPackage(null);
+      linkedNetworks.clear();
+      availablePackages.clear();
     }
   }
 
@@ -1260,6 +1268,8 @@ class PosProcurementController extends GetxController {
               (line) => {
                 'package_id': line.package.packageId,
                 'voucher_count': line.voucherCount,
+                'pricing_snapshot_token':
+                    line.package.procurementPricingSnapshotToken,
               },
             )
             .toList(growable: false),
