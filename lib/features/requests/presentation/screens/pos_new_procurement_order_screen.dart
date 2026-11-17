@@ -218,39 +218,40 @@ class _ProcurementHeroCard extends StatelessWidget {
                           height: 1.55,
                         ),
                       ),
-                      AppSpacing.vSm,
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFE7B0).withValues(alpha: .13),
-                          borderRadius: BorderRadius.circular(AppRadius.full),
-                          border: Border.all(
-                            color: const Color(0xFFFFE7B0)
-                                .withValues(alpha: .24),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.bolt_rounded,
-                              size: 14.r,
-                              color: const Color(0xFFFFE7B0),
-                            ),
-                            AppSpacing.hXxs,
-                            Text(
-                              'اختيار مباشر • تحديث فوري للكمية',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: const Color(0xFFFFE7B0),
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+
+                      // AppSpacing.vSm,
+                      // Container(
+                      //   padding: EdgeInsets.symmetric(
+                      //     horizontal: AppSpacing.sm,
+                      //     vertical: AppSpacing.xs,
+                      //   ),
+                      //   decoration: BoxDecoration(
+                      //     color: const Color(0xFFFFE7B0).withValues(alpha: .13),
+                      //     borderRadius: BorderRadius.circular(AppRadius.full),
+                      //     border: Border.all(
+                      //       color: const Color(0xFFFFE7B0)
+                      //           .withValues(alpha: .24),
+                      //     ),
+                      //   ),
+                      //   child: Row(
+                      //     mainAxisSize: MainAxisSize.min,
+                      //     children: [
+                      //       Icon(
+                      //         Icons.bolt_rounded,
+                      //         size: 14.r,
+                      //         color: const Color(0xFFFFE7B0),
+                      //       ),
+                      //       AppSpacing.hXxs,
+                      //       Text(
+                      //         'اختيار مباشر • تحديث فوري للكمية',
+                      //         style: AppTypography.labelSmall.copyWith(
+                      //           color: const Color(0xFFFFE7B0),
+                      //           fontWeight: FontWeight.w700,
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
