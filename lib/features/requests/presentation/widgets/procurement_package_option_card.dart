@@ -1155,7 +1155,7 @@ class _PaperEquivalent extends StatelessWidget {
           AppSpacing.hXs,
           Flexible(
             child: Text(
-              'المكافئ الورقي: $description',
+              description,
               textAlign: TextAlign.center,
               style: AppTypography.labelMedium.copyWith(
                 color: colors.onSurface,
