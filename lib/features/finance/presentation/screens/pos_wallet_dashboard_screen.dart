@@ -9,8 +9,8 @@ import 'package:netsales/features/finance/presentation/widgets/pos_wallet_select
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_wallet_log_item_row.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_log_entry_skeleton.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
