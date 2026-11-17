@@ -204,7 +204,7 @@ class PosProcurementOrderCard extends StatelessWidget {
                   ),
                   AppSpacing.vMd,
                   Divider(height: 1, color: colors.outlineVariant.withValues(alpha: 0.35)),
-                  AppSpacing.sm,
+                  AppSpacing.vSm,
                   Row(
                     children: [
                       Expanded(child: _Metric(label: 'عدد البنود', value: request.items.length.toString())),
@@ -214,7 +214,7 @@ class PosProcurementOrderCard extends StatelessWidget {
                       Expanded(child: _Metric(label: 'نوع السعر', value: saleType.label)),
                     ],
                   ),
-                  AppSpacing.sm,
+                  AppSpacing.vSm,
                   Row(
                     children: [
                       Expanded(
