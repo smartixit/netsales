@@ -41,7 +41,7 @@ Before writing any UI widgets:
 ## 6. Arabic, RTL & Complete Interface State Quality
 - **First-Class RTL:** Verify correct reading order, logical alignment, appropriate icon orientation, and zero label clipping or awkward wraps.
 - **Explicit State Handling:** Every data view must implement contextual:
-  - **Loading:** Responsive content-shaped skeletons configured through `CustomStateView.loading` and `CustomStateSkeleton`; no separate feed/grid widgets.
+  - **Loading:** Responsive content-shaped skeletons configured through `CustomStateView.loading`, `CustomStateSkeleton`, and `SkeletonRecipes`; no separate feed/grid widgets.
   - **Empty:** Feature-specific contextual message explaining what is missing and offering a clear next action.
   - **Error:** Actionable error state with user retry.
   - **Success:** Polished, responsive data presentation.
