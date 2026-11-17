@@ -44,6 +44,17 @@ void main() {
     expect(find.text('قيد المراجعة'), findsOneWidget);
     expect(find.text('معتمدة'), findsOneWidget);
     expect(find.text('مكتملة'), findsNothing);
+
+    final summaryRow = tester.getSize(find.byType(Row));
+    expect(summaryRow.height.isFinite, isTrue);
+    expect(summaryRow.width.isFinite, isTrue);
+    final cards = tester.widgetList<Container>(
+      find.descendant(
+        of: find.byType(PosProcurementOrdersSummaryStrip),
+        matching: find.byType(Container),
+      ),
+    ).where((container) => container.constraints?.hasBoundedHeight ?? false);
+    expect(cards, isNotEmpty);
     expect(tester.takeException(), isNull);
   });
 
