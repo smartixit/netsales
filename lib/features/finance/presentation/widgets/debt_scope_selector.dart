@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_debt_ledger_controller.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
@@ -73,7 +73,16 @@ class DebtScopeSelector extends StatelessWidget {
           AppSpacing.vMd,
           Obx(() {
             if (controller.isLoadingScope.value) {
-              return const CustomSkeletonFeed(itemCount: 1);
+              return const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+);
             }
 
             if (controller.scopeErrorMessage.value != null &&
@@ -157,7 +166,16 @@ class _DebtNetworkSelector extends StatelessWidget {
 
     return Obx(() {
       if (controller.isLoadingNetworks.value) {
-        return const CustomSkeletonFeed(itemCount: 1);
+        return const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+);
       }
 
       if (controller.networksErrorMessage.value != null &&
@@ -185,7 +203,16 @@ class _DebtNetworkSelector extends StatelessWidget {
       if (!needsSelection) {
         final selected = controller.selectedNetwork;
         if (selected == null) {
-          return const CustomSkeletonFeed(itemCount: 1);
+          return const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+);
         }
         return _ScopeValue(
           label: 'مزود الشبكة',
@@ -259,7 +286,16 @@ class _DebtNetworkSelector extends StatelessWidget {
           ],
           if (controller.isLoadingMoreNetworks.value) ...[
             AppSpacing.vXs,
-            const CustomSkeletonFeed(itemCount: 2),
+            const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+),
           ] else if (controller.hasMoreNetworkOptions) ...[
             AppSpacing.vXs,
             CustomButton.secondary(
