@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/pos_procurement_order_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/pos_procurement_orders_hero.dart';
@@ -21,20 +19,17 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
 
   @override
   Widget build(BuildContext context) {
-    final topPadding = embedded ? MediaQuery.paddingOf(context).top : 0.0;
     final bottomPadding = embedded
         ? MediaQuery.paddingOf(context).bottom
         : AppSpacing.cardPadding;
 
     final content = Padding(
-      padding: EdgeInsets.only(top: topPadding),
       child: Column(
         children: [
           PosProcurementOrdersHero(
             embedded: embedded,
             canCreate: controller.canCreateOrder,
             onCreate: controller.navigateToNewOrder,
-            onRefresh: controller.refreshOrders,
           ),
           Obx(
             () => PosProcurementOrdersSummaryStrip(
@@ -59,9 +54,9 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
                   child: CustomStateView.loading(
                     presentation: CustomStatePresentation.skeletonOnly,
                     skeleton: CustomStateSkeleton(
-                      layout: CustomStateSkeletonLayout.cards,
+                      layout: CustomStateSkeletonLayout.list,
                       itemCount: 3,
-                      cardHeight: 190.h,
+                      cardHeight: 150.h,
                       maxColumns: 1,
                     ),
                   ),
@@ -172,14 +167,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
       appBar: AppBar(
         title: const Text('طلبات التوريد'),
         centerTitle: true,
-        actions: [
-          CustomButton.icon(
-            icon: Icons.refresh_rounded,
-            tooltip: 'تحديث الطلبات',
-            backgroundColor: Colors.transparent,
-            onPressed: controller.refreshOrders,
-          ),
-        ],
+        actions: const [],
       ),
       body: content,
     );
