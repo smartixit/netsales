@@ -157,6 +157,16 @@ class ProcurementPackageSelectionSection
                                   quantityController: controller.quantityControllerForPackage(package.packageId),
                                   isPricingLoading: controller.isLoadingPackageDiscounts.value,
                                   isCashSale: controller.selectedSaleType.value == SaleType.cash,
+                                  quoteLine: controller.serverQuote.value
+                                              ?.networkId ==
+                                          controller.selectedNetworkId.value &&
+                                      controller.serverQuote.value?.posId ==
+                                          controller.selectedPosId.value &&
+                                      controller.serverQuote.value?.saleType ==
+                                          controller.selectedSaleType.value
+                                  ? controller.serverQuote.value
+                                      ?.findLine(package.packageId)
+                                  : null,
                                   onSetQuantity: (quantity) =>
                                       controller.setPackageVoucherCount(package, quantity),
                                 ),
