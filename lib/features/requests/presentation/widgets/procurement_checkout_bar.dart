@@ -26,9 +26,6 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
       final quoteReady = controller.hasCurrentServerQuote && quote != null;
       final estimate = controller.estimatedProcurementTotalsMinor;
       final hasEstimate = estimate != null;
-      final quoteExpired =
-          quote?.expiresAt != null &&
-          !DateTime.now().isBefore(quote!.expiresAt!);
       final isCompact =
           MediaQuery.sizeOf(context).width <= AppBreakpoints.mobileMax;
       final gross = quoteReady
@@ -102,13 +99,6 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
               final metrics = Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (quoteExpired && !controller.isQuotePending.value) ...[
-                    CustomStateView.pricingExpired(
-                      presentation: CustomStatePresentation.compact,
-                      onAction: controller.fetchServerQuote,
-                    ),
-                    AppSpacing.vXs,
-                  ],
                   if (!hasEstimate && lines.isNotEmpty) ...[
                     CustomStateView.pricingExpired(
                       presentation: CustomStatePresentation.compact,
