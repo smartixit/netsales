@@ -55,7 +55,7 @@
 - **Infrastructure Reuse:** Mandatory reuse of existing foundation (never create redundant duplicates):
   - **Error & Toast Feedback:** All errors, exceptions, and API failure messages must use `CustomSnackbar.show(..., type: SnackType.error)`.
   - **Action Loading & Success Overlays:** Mutating actions must use `CustomAnimationOverlay.showLoading()` / `CustomAnimationOverlay.showSuccess()`, always safely hidden in `finally { if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide(); }`.
-  - **Feed & Card Loading:** All asynchronous list/feed loading states must use `CustomSkeletonFeed` or `CustomSkeletonShimmer`.
+  - **Feed & Card Loading:** All initial and incremental loading placeholders MUST use `CustomStateView.loading` with a responsive `CustomStateSkeleton` recipe. Do not use or recreate legacy feed/grid skeleton widgets.
   - **Dialogs & Confirmations:** Confirmation and alert dialogs must use `CustomDialog` (`CustomDialog.danger`, `CustomDialog.confirmation`).
   - **Sheets:** Modal sheets must use `CustomBottomSheet.show(...)`.
   - **Widgets (`lib/widgets/`):**
@@ -63,7 +63,7 @@
     - Sheets: `CustomBottomSheet`, `InvoicePrintFormatSheet`.
     - Buttons: `CustomButton`, `CustomThemeToggleButton`.
     - Inputs: `CustomTextField`, `CustomPasswordField`, `CustomPasswordRequirementItem`, `CustomPhoneField`, `CustomPinField`, `CustomDropdown`, `CustomNumericKeyboard`.
-    - Feedback & States: canonical `CustomStateView` (Loading, Empty, Error, Offline, Pricing Expired), compatibility facades `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, plus `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Skeleton Shimmers (`CustomSkeletonCard`, `CustomSkeletonFeed`, `CustomSkeletonGrid`, `CustomSkeletonListTile`, `CustomSkeletonShimmer`, `CustomSkeletonText`).
+    - Feedback & States: canonical `CustomStateView` (Loading, Empty, Error, Offline, Pricing Expired), compatibility facades `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, plus `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Adaptive skeleton engine: `CustomStateView.loading` + `CustomStateSkeleton` (`list`, `cards`, `grid`, `detail` layouts), with `CustomSkeletonShimmer` retained only as the low-level animation primitive. Legacy feed/grid/list-tile skeleton widgets are removed.
     - Toasts & Snackbars: `CustomSnackbar`, `CustomToast`.
     - Pickers: `CustomDatePickerField`, `CustomDatePickerModal`, `CustomFilePicker`, `CustomImagePicker`, `CustomContactPickerIconButton`, `CustomColorPicker`, `CustomPosSelectorField`.
     - Navigation & Foundation: `CustomAppScaffold`, `CustomFloatingBottomNavBar`, `DoubleBackExitScope`.
