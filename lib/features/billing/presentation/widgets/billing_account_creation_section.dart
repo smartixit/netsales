@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 
 class BillingAccountCreationSection extends StatelessWidget {
