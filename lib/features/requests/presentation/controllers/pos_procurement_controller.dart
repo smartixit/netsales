@@ -377,7 +377,7 @@ class PosProcurementController extends GetxController {
       time: const Duration(milliseconds: 350),
     );
 
-    // Pricing edits remain local. The server quote is requested only at submission.
+    // POS procurement estimates are derived locally from the current signed catalogue snapshot.
     ever(selectedSaleType, (_) => _refreshProcurementPresentation());
 
     loadInitialData();
@@ -793,8 +793,6 @@ class PosProcurementController extends GetxController {
               (line) => {
                 'package_id': line.package.packageId,
                 'voucher_count': line.voucherCount,
-                'pricing_snapshot_token': line.package.procurementPricingSnapshotToken,
-                'pricing_snapshot_token': line.package.procurementPricingSnapshotToken,
               },
             )
             .toList(growable: false),
