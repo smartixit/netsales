@@ -63,7 +63,7 @@
     - Sheets: `CustomBottomSheet`, `InvoicePrintFormatSheet`.
     - Buttons: `CustomButton`, `CustomThemeToggleButton`.
     - Inputs: `CustomTextField`, `CustomPasswordField`, `CustomPasswordRequirementItem`, `CustomPhoneField`, `CustomPinField`, `CustomDropdown`, `CustomNumericKeyboard`.
-    - Feedback & States: canonical `CustomStateView` (Loading, Empty, Error, Offline, Pricing Expired), compatibility facades `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, plus `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Adaptive skeleton engine: `CustomStateView.loading` + `CustomStateSkeleton` (`list`, `cards`, `grid`, `detail` layouts), with `CustomSkeletonShimmer` retained only as the low-level animation primitive. Legacy feed/grid/list-tile skeleton widgets are removed.
+    - Feedback & States: canonical `CustomStateView` (Loading, Empty, Error, Offline, Pricing Expired), specialized state components `CustomEmptyState`, `CustomErrorState`, `CustomNotFoundState`, plus `CustomLoadingIndicatorBar`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Adaptive skeleton engine: `CustomStateView.loading` + `CustomStateSkeleton` (`list`, `cards`, `grid`, `detail` layouts), with `CustomSkeletonShimmer` retained only as the low-level animation primitive. Legacy feed/grid/list-tile skeleton widgets are removed.
     - Toasts & Snackbars: `CustomSnackbar`, `CustomToast`.
     - Pickers: `CustomDatePickerField`, `CustomDatePickerModal`, `CustomFilePicker`, `CustomImagePicker`, `CustomContactPickerIconButton`, `CustomColorPicker`, `CustomPosSelectorField`.
     - Navigation & Foundation: `CustomAppScaffold`, `CustomFloatingBottomNavBar`, `DoubleBackExitScope`.
@@ -98,7 +98,7 @@
 
 ## 4.1 Canonical Shared State Presentation
 - All new or refactored Loading, Empty, Error, Offline, and Pricing Expired UI states MUST use `CustomStateView` from `lib/widgets/feedback/custom_state_view.dart`.
-- Existing `CustomEmptyState`, `CustomErrorState`, and `CustomLoadingState` are compatibility facades and must delegate to `CustomStateView`; do not add independent state visuals to them.
+- Specialized `CustomEmptyState`, `CustomErrorState`, and `CustomNotFoundState` live under `lib/widgets/feedback/states/` and delegate presentation to `CustomStateView`; they are canonical semantic components, not compatibility facades. `CustomStateView.notFound` must remain distinct from an empty result.
 - `CustomOfflineBanner` uses the shared offline state in banner presentation.
 - Feature-local state cards are prohibited. Shared state improvements belong in `CustomStateView`.
 - Content-shaped skeletons remain the required pattern for feed/list loading and append-only pagination; they complement the canonical state component and do not replace its design.
