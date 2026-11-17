@@ -6,7 +6,7 @@ import 'package:netsales/features/invoices/presentation/controllers/pos_invoices
 import 'package:netsales/features/invoices/presentation/widgets/invoice_card.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_search_filter_header.dart';
 import 'package:netsales/features/invoices/presentation/widgets/pos_embedded_invoices_header.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
