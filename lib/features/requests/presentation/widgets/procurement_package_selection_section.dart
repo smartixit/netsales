@@ -12,7 +12,6 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -106,11 +105,7 @@ class ProcurementPackageSelectionSection
               AppSpacing.vSm,
               if (controller.isLoadingPackages.value &&
                   controller.availablePackages.isEmpty)
-                const CustomSkeletonFeed(
-                  itemCount: 3,
-                  cardHeight: 124,
-                  shrinkWrap: true,
-                )
+                const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 124, ))
               else if (controller.packageErrorMessage.value != null &&
                   controller.availablePackages.isEmpty)
                 _buildCatalogFailureState(context)
