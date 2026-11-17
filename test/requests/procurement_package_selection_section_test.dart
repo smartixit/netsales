@@ -104,7 +104,7 @@ void main() {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
-      final searchField = find.byType(CustomTextField);
+      final searchField = find.byType(CustomTextField).first;
       final counter = find.byType(CustomResultsCounterBar);
 
       expect(counter, findsOneWidget);
