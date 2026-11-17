@@ -69,7 +69,7 @@ Before assembling any widget tree:
 
 ## 6. UI State & Feedback Checklist
 Every data-driven screen must implement:
-1. **Loading State:** Tailored skeleton shimmers (`CustomSkeletonFeed`, `CustomSkeletonGrid`, `CustomSkeletonListTile`).
+1. **Loading State:** Responsive skeleton layouts configured through `CustomStateView.loading` + `CustomStateSkeleton` (`list`, `cards`, `grid`, `detail`).
 2. **Empty State:** Distinct [`CustomEmptyState`](file:///d:/Smartix/NetSales/netsales/lib/widgets/feedback/custom_empty_state.dart) with feature-specific title, explanatory subtitle, and next action.
 3. **Error State:** [`CustomErrorState`](file:///d:/Smartix/NetSales/netsales/lib/widgets/feedback/custom_error_state.dart) with actionable retry button.
 4. **Success State:** Crisp, responsive presentation of authoritative server data.
