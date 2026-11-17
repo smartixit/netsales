@@ -12,6 +12,7 @@ abstract class PackageCatalogRepository {
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   });
 
   /// استرجاع باقات شبكة معينة مع ترقيم المؤشر
