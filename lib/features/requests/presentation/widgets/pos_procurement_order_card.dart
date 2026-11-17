@@ -170,28 +170,6 @@ class PosProcurementOrderCard extends StatelessWidget {
                   AppSpacing.vMd,
                   Row(
                     children: [
-                      if (visibleColors.isNotEmpty)
-                        Row(
-                          children: visibleColors.map((package) {
-                            final color = CustomColorPicker.parseHex(
-                              package.packageColor,
-                              fallback: colors.primary,
-                            );
-                            return Container(
-                              key: const ValueKey('pos-order-package-color-accent'),
-                              width: 7.r,
-                              height: 30.r,
-                              margin: EdgeInsetsDirectional.only(end: 5.w),
-                              decoration: BoxDecoration(
-                                color: color,
-                                borderRadius: BorderRadius.circular(AppRadius.full),
-                              ),
-                            );
-                          }).toList(growable: false),
-                        )
-                      else
-                        Icon(Icons.inventory_2_outlined, color: colors.primary, size: 22.r),
-                      AppSpacing.hSm,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,6 +185,28 @@ class PosProcurementOrderCard extends StatelessWidget {
                           ],
                         ),
                       ),
+                      AppSpacing.hSm,
+                      if (visibleColors.isNotEmpty)
+                        Row(
+                          children: visibleColors.map((package) {
+                            final color = CustomColorPicker.parseHex(
+                              package.packageColor,
+                              fallback: colors.primary,
+                            );
+                            return Container(
+                              key: const ValueKey('pos-order-package-color-accent'),
+                              width: 7.r,
+                              height: 30.r,
+                              margin: EdgeInsetsDirectional.only(start: 5.w),
+                              decoration: BoxDecoration(
+                                color: color,
+                                borderRadius: BorderRadius.circular(AppRadius.full),
+                              ),
+                            );
+                          }).toList(growable: false),
+                        )
+                      else
+                        Icon(Icons.inventory_2_outlined, color: colors.primary, size: 22.r),
                     ],
                   ),
                   AppSpacing.vMd,
