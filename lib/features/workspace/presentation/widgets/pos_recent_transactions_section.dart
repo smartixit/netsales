@@ -8,7 +8,7 @@ import 'package:netsales/features/workspace/presentation/controllers/pos_workspa
 import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_tile.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 
