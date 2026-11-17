@@ -170,7 +170,7 @@ void main() {
     await tester.pumpWidget(
       buildTestable(
         const CustomStateView.notFound(
-          presentation: CustomStatePresentation.compact,
+          presentation: CustomStatePresentation.boxed,
         ),
       ),
     );
