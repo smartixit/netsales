@@ -5,9 +5,9 @@ import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_cursor_page_state.dart';
 import 'package:netsales/widgets/lists/custom_collection_filter_bar.dart';
 import 'package:netsales/widgets/lists/custom_collection_filter_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 /// Feature-level composition for one independently cursor-paginated billing
