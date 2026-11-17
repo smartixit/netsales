@@ -588,6 +588,7 @@ class _TariffPanel extends StatelessWidget {
     required this.isDiscountLoading,
     required this.money,
   });
+
   final double basePrice;
   final double cashPrice;
   final double creditPrice;
@@ -620,14 +621,20 @@ class _TariffPanel extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.sell_outlined, size: 14.r, color: colors.onSurfaceVariant),
+                Icon(
+                  Icons.sell_outlined,
+                  size: 14.r,
+                  color: colors.onSurfaceVariant,
+                ),
                 AppSpacing.hXxs,
                 Expanded(
                   child: Text(
                     'السعر الأساسي قبل الخصم',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant),
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
                 ),
                 FittedBox(
@@ -647,6 +654,7 @@ class _TariffPanel extends StatelessWidget {
           ),
           AppSpacing.vSm,
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: _PriceColumn(
@@ -655,6 +663,7 @@ class _TariffPanel extends StatelessWidget {
                   discount: cashDiscount,
                   money: money,
                   selected: isCashSale,
+                  isDiscountLoading: isDiscountLoading,
                 ),
               ),
               Container(
@@ -670,21 +679,11 @@ class _TariffPanel extends StatelessWidget {
                   discount: creditDiscount,
                   money: money,
                   selected: !isCashSale,
+                  isDiscountLoading: isDiscountLoading,
                 ),
               ),
             ],
           ),
-          if (isDiscountLoading) ...[
-            AppSpacing.vXs,
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.full),
-              child: LinearProgressIndicator(
-                minHeight: 2.r,
-                color: colors.primary,
-                backgroundColor: colors.surfaceContainerHighest,
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -698,12 +697,14 @@ class _PriceColumn extends StatelessWidget {
     required this.discount,
     required this.money,
     required this.selected,
+    required this.isDiscountLoading,
   });
   final String label;
   final double price;
   final double discount;
   final String Function(num) money;
   final bool selected;
+  final bool isDiscountLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -750,7 +751,16 @@ class _PriceColumn extends StatelessWidget {
           ),
         ),
         AppSpacing.vXxs,
-        if (discount > 0)
+        if (isDiscountLoading)
+          const CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.text,
+              lineCount: 1,
+              showCardSurface: false,
+            ),
+          )
+        else if (discount > 0)
           Container(
             padding: EdgeInsets.symmetric(horizontal: 9.r, vertical: 4.r),
             decoration: BoxDecoration(
