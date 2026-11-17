@@ -107,6 +107,10 @@ void main() {
 
       Get.put(controller);
       configurePackageCatalog(discountLoading: false);
+      // This test targets the counter/search relationship, not package-card layout.
+      // Keep the catalogue in its loading state so card internals are covered by
+      // the dedicated responsive card and quantity interaction tests.
+      controller.isLoadingPackages.value = true;
 
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
