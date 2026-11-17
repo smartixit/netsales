@@ -28,7 +28,7 @@ import 'package:netsales/features/requests/domain/usecases/cancel_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
@@ -294,7 +294,7 @@ void main() {
   late FakeQuoteRequestRepository mockRepo;
   late FakeCommercialRepository commercialRepo;
   late FakePackageCatalogRepository packageRepo;
-  late PosProcurementController controller;
+  late PosNewProcurementOrderController controller;
 
   setUp(() {
     Get.reset();
@@ -302,10 +302,8 @@ void main() {
     commercialRepo = FakeCommercialRepository();
     packageRepo = FakePackageCatalogRepository();
 
-    controller = PosProcurementController(
-      getRequestsUseCase: GetRequestsUseCase(mockRepo),
+    controller = PosNewProcurementOrderController(
       createRequestUseCase: CreateRequestUseCase(mockRepo),
-      cancelRequestUseCase: CancelRequestUseCase(mockRepo),
       getMyPosUseCase: GetMyPosUseCase(commercialRepo),
       getPosNetworksListUseCase: GetPosNetworksListUseCase(commercialRepo),
       getPackagesUseCase: GetPackagesUseCase(packageRepo),
@@ -445,7 +443,7 @@ void main() {
     });
   });
 
-  group('Phase 3.1: PosProcurementController Server Authoritative Quote Integration', () {
+  group('Phase 3.1: PosNewProcurementOrderController Server Authoritative Quote Integration', () {
     test('Local estimate uses signed minor-unit price and rounds discount on the line gross', () {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
