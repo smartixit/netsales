@@ -98,8 +98,8 @@ void main() {
   testWidgets(
     'يعرض عداد نتائج الباقات أسفل البحث ويتحدث مع حالة البحث',
     (tester) async {
-      tester.view.physicalSize = const Size(2160, 2400);
-      tester.view.devicePixelRatio = 2;
+      tester.view.physicalSize = const Size(375, 812);
+      tester.view.devicePixelRatio = 1;
       addTearDown(() {
         tester.view.resetPhysicalSize();
         tester.view.resetDevicePixelRatio();
