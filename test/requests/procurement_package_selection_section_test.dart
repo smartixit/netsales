@@ -138,7 +138,7 @@ void main() {
   );
 
   testWidgets(
-    'يختفي مؤشر تحميل الخصومات من بطاقة التعرفة عند انتهاء التحميل',
+    'تظهر هياكل نصية للخصومات ثم تختفي عند اكتمال التحميل',
     (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2;
@@ -159,6 +159,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(find.byType(CustomStateSkeletonView), findsNothing);
     },
   );
 
