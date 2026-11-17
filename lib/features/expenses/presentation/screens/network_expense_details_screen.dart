@@ -10,8 +10,8 @@ import 'package:netsales/features/expenses/presentation/controllers/network_oper
 import 'package:netsales/features/expenses/presentation/widgets/expense_attachment_card.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_item_row.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 
