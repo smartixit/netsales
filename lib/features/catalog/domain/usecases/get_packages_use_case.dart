@@ -14,6 +14,7 @@ class GetPackagesUseCase {
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) {
     return _repository.getPackages(
       networkId: networkId,
@@ -22,6 +23,7 @@ class GetPackagesUseCase {
       search: search,
       cursor: cursor,
       perPage: perPage,
+      packageIds: packageIds,
     );
   }
 }
