@@ -27,10 +27,16 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
       final quoteReady = controller.hasCurrentServerQuote && quote != null;
       final estimate = lines.fold<(double, double, double)>((0, 0, 0), (sum, line) {
         final custom = controller.discountForPackage(line.package.packageId);
-        final base = custom?.originalPackagePrice ?? line.package.packageVoucherPrice;
+        final base = custom?.originalPackagePrice ?? (line.package.procurementBaseUnitPriceMinor != null ? line.package.procurementBaseUnitPriceMinor! / 100 : line.package.packageVoucherPrice);
         final unit = controller.selectedSaleType.value == SaleType.cash
-            ? (custom?.effectiveCashPrice ?? line.package.effectiveCashPrice)
-            : (custom?.effectiveCreditPrice ?? line.package.effectiveCreditPrice);
+            ? (custom?.effectiveCashPrice ??
+                (line.package.procurementCashUnitPriceMinor != null
+                    ? line.package.procurementCashUnitPriceMinor! / 100
+                    : line.package.effectiveCashPrice))
+            : (custom?.effectiveCreditPrice ??
+                (line.package.procurementCreditUnitPriceMinor != null
+                    ? line.package.procurementCreditUnitPriceMinor! / 100
+                    : line.package.effectiveCreditPrice));
         final gross = base * line.voucherCount;
         final net = unit * line.voucherCount;
         return (sum.$1 + gross, sum.$2 + (gross - net), sum.$3 + net);
