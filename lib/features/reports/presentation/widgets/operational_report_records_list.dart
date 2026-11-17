@@ -4,8 +4,8 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_record_card.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 class OperationalReportRecordsList extends StatelessWidget {
