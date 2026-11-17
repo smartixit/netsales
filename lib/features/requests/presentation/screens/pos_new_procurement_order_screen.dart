@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -12,8 +11,8 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_chec
 import 'package:netsales/features/requests/presentation/widgets/procurement_network_context_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_pos_context_section.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_sale_type_selector.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// مساحة إنشاء طلب التوريد الواحدة: السياق، الباقات، الكميات والإرسال دون شاشة مراجعة منفصلة.
@@ -60,16 +59,7 @@ class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
                         AppSpacing.vLg,
                         _SectionHeading(title: 'طريقة التسعير', subtitle: 'تتغير تعرفة العرض حسب طريقة الدفع المختارة.'),
                         AppSpacing.vSm,
-                        CustomSegmentedBar(
-                          selectedIndex: controller.selectedSaleType.value == SaleType.cash ? 0 : 1,
-                          onSegmentChanged: (index) {
-                            controller.selectedSaleType.value = index == 0 ? SaleType.cash : SaleType.credit;
-                          },
-                          items: const [
-                            CustomSegmentItem(label: 'نقدي', icon: Icons.payments_outlined),
-                            CustomSegmentItem(label: 'آجل', icon: Icons.credit_card_outlined),
-                          ],
-                        ),
+                        const ProcurementSaleTypeSelector(),
                         AppSpacing.vLg,
                         const ProcurementPackageSelectionSection(),
                         AppSpacing.vLg,

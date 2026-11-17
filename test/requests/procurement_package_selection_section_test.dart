@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:netsales/core/enums/sale_type.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/themes/app_themes.dart';
@@ -12,6 +13,7 @@ import 'package:netsales/features/requests/domain/usecases/create_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_sale_type_selector.dart';
 
 class _FakeRequestRepository implements RequestRepository {
   @override
@@ -157,4 +159,61 @@ void main() {
       expect(find.byType(LinearProgressIndicator), findsNothing);
     },
   );
+
+  testWidgets(
+    'يحدث محدد النقدي والآجل نفسه عند النقر وعند تغيير الحالة من المتحكم',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      Get.put(controller);
+      controller.selectedSaleType.value = SaleType.cash;
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(375, 812),
+          minTextAdapt: true,
+          builder: (context, _) => MaterialApp(
+            theme: AppThemes.light,
+            home: const Scaffold(
+              body: Padding(
+                padding: EdgeInsets.all(16),
+                child: ProcurementSaleTypeSelector(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      Color labelColor(String label) {
+        final text = tester.widget<Text>(find.text(label));
+        return text.style!.color!;
+      }
+
+      final selectedColor = AppThemes.light.colorScheme.primary;
+      final inactiveColor = AppThemes.light.colorScheme.onSurfaceVariant;
+
+      expect(labelColor('نقدي'), selectedColor);
+      expect(labelColor('آجل'), inactiveColor);
+
+      await tester.tap(find.text('آجل'));
+      await tester.pumpAndSettle();
+
+      expect(controller.selectedSaleType.value, SaleType.credit);
+      expect(labelColor('آجل'), selectedColor);
+      expect(labelColor('نقدي'), inactiveColor);
+
+      controller.selectedSaleType.value = SaleType.cash;
+      await tester.pumpAndSettle();
+
+      expect(labelColor('نقدي'), selectedColor);
+      expect(labelColor('آجل'), inactiveColor);
+    },
+  );
+
 }

@@ -520,7 +520,7 @@ class _SpecificationStrip extends StatelessWidget {
     final colors = context.colors;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: _PackageSpec(
