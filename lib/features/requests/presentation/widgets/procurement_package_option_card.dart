@@ -45,9 +45,6 @@ class ProcurementPackageOptionCard extends StatelessWidget {
     final active = quantity > 0;
     final sheet = package.packageVoucherCount;
     final half = sheet > 0 ? (sheet / 2).ceil() : 1;
-    final unitPrice = isCashSale
-        ? package.procurementCashUnitPriceMinor
-        : package.procurementCreditUnitPriceMinor;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
@@ -119,7 +116,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
           AppSpacing.hXs,
           Expanded(child: CustomButton.outline(text: '½ ورقة', icon: Icons.exposure_minus_1_rounded, size: AppButtonSize.small, foregroundColor: colors.onSurfaceVariant, onPressed: quantity > 0 ? () => onSetQuantity((quantity - half).clamp(0, 1 << 30)) : null)),
           AppSpacing.hXs,
-          Expanded(child: CustomButton.outline(text: '+ ورقة', icon: Icons.add_circle_outline_rounded, size: AppButtonSize.small, foregroundColor: accent, onPressed: () => onSetQuantity(quantity + (sheet > 0 ? sheet : 1))),
+          Expanded(child: CustomButton.outline(text: '+ ورقة', icon: Icons.add_circle_outline_rounded, size: AppButtonSize.small, foregroundColor: accent, onPressed: () => onSetQuantity(quantity + (sheet > 0 ? sheet : 1)))),
         ]),
         AppSpacing.vXs,
         Align(alignment: AlignmentDirectional.centerEnd, child: CustomButton.text(text: 'تصفير الكمية', icon: Icons.restart_alt_rounded, size: AppButtonSize.small, foregroundColor: colors.error, onPressed: quantity > 0 ? () => onSetQuantity(0) : null)),
