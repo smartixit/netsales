@@ -21,7 +21,7 @@ class EffectivePackageDiscountModel extends EffectivePackageDiscountEntity {
       isEffectiveNow: json['is_effective_now'] as bool? ?? true,
       discountCash: (json['discount_cash'] as num?)?.toDouble() ?? 0.0,
       discountCredit: (json['discount_credit'] as num?)?.toDouble() ?? 0.0,
-      isCustom: json['is_custom'] as bool? ?? false,
+      isCustom: json['is_custom'] as bool? ?? json['discount_id'] != null,
       originalPackagePrice:
           (json['original_package_price'] as num?)?.toDouble() ?? 0.0,
       effectiveCashPrice:
@@ -35,6 +35,8 @@ class EffectivePackageDiscountModel extends EffectivePackageDiscountEntity {
 
   Map<String, dynamic> toJson() {
     return {
+      'package_id': packageId,
+      'is_effective_now': isEffectiveNow,
       'discount_cash': discountCash,
       'discount_credit': discountCredit,
       'is_custom': isCustom,
