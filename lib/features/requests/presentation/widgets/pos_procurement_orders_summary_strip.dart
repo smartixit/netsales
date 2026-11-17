@@ -101,7 +101,7 @@ class _SummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(
           color: dark
-              ? Colors.white.withValues(alpha: .10)
+              ? colors.onSurface.withValues(alpha: .10)
               : data.color.withValues(alpha: .16),
         ),
         boxShadow: AppElevation.tinted(
