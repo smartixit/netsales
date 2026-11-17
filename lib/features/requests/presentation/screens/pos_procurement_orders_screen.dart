@@ -13,6 +13,9 @@ import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// شاشة إدارة طلبات التوريد لنقطة البيع.
+///
+/// تستخدم Scrollable واحداً للرأس والمؤشرات والبحث والقائمة حتى تبقى شجرة
+/// التخطيط وSemantics مستقرة عند الانتقال من التحميل إلى البيانات الفعلية.
 class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController> {
   const PosProcurementOrdersScreen({super.key, this.embedded = false});
 
@@ -21,43 +24,74 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
   @override
   Widget build(BuildContext context) {
     final bottomPadding = embedded
-        ? MediaQuery.paddingOf(context).bottom
+        ? MediaQuery.paddingOf(context).bottom + AppSpacing.xxl
         : AppSpacing.cardPadding;
 
-    final content = Column(
-        children: [
-          PosProcurementOrdersHero(
-            embedded: embedded,
-            canCreate: !embedded && controller.canCreateOrder,
-            onCreate: controller.navigateToNewOrder,
-          ),
-          Obx(
-            () => PosProcurementOrdersSummaryStrip(
-              summary: controller.statusSummary.value,
-              isLoading: controller.isSummaryLoading.value,
+    final scrollView = RefreshIndicator.adaptive(
+      onRefresh: controller.refreshOrders,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (scroll) {
+          if (scroll.depth == 0 &&
+              scroll.metrics.extentAfter <= 220 &&
+              controller.hasMore) {
+            controller.loadMoreRequests();
+          }
+          return false;
+        },
+        child: CustomScrollView(
+          key: const PageStorageKey<String>('pos-procurement-orders-scroll'),
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: PosProcurementOrdersHero(
+                embedded: embedded,
+                canCreate: !embedded && controller.canCreateOrder,
+                onCreate: controller.navigateToNewOrder,
+              ),
             ),
-          ),
-          Obx(
-            () => ProcurementSearchFilterHeader(
-              searchController: controller.searchController,
-              searchQuery: controller.searchQuery.value,
-              selectedStatus: controller.statusFilter.value,
-              onStatusChanged: controller.setStatusFilter,
-              onClearSearch: controller.searchController.clear,
+            SliverToBoxAdapter(
+              child: Obx(
+                () => PosProcurementOrdersSummaryStrip(
+                  summary: controller.statusSummary.value,
+                  isLoading: controller.isSummaryLoading.value,
+                ),
+              ),
             ),
-          ),
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value && controller.requests.isEmpty) {
-                return Padding(
-                  padding: EdgeInsets.all(AppSpacing.md),
-                  child: CustomStateView.loading(
-                    presentation: CustomStatePresentation.skeletonOnly,
-                    skeleton: CustomStateSkeleton(
-                      layout: CustomStateSkeletonLayout.list,
-                      itemCount: 3,
-                      cardHeight: 150.h,
-                      maxColumns: 1,
+            SliverToBoxAdapter(
+              child: Obx(
+                () => ProcurementSearchFilterHeader(
+                  searchController: controller.searchController,
+                  searchQuery: controller.searchQuery.value,
+                  selectedStatus: controller.statusFilter.value,
+                  onStatusChanged: controller.setStatusFilter,
+                  onClearSearch: controller.searchController.clear,
+                ),
+              ),
+            ),
+            Obx(() {
+              if (controller.isLoading.value &&
+                  controller.requests.isEmpty) {
+                // Skeleton elements are visual placeholders, not accessible
+                // content. Excluding them prevents the loading subtree from
+                // competing with the real request semantics during replacement.
+                return SliverToBoxAdapter(
+                  child: ExcludeSemantics(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        AppSpacing.cardPadding,
+                        AppSpacing.sm,
+                        AppSpacing.cardPadding,
+                        bottomPadding,
+                      ),
+                      child: CustomStateView.loading(
+                        presentation: CustomStatePresentation.skeletonOnly,
+                        skeleton: CustomStateSkeleton(
+                          layout: CustomStateSkeletonLayout.list,
+                          itemCount: 3,
+                          cardHeight: 150.h,
+                          maxColumns: 1,
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -65,11 +99,18 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
 
               if (controller.errorMessage.value != null &&
                   controller.requests.isEmpty) {
-                return Center(
-                  child: CustomErrorState(
-                    title: 'تعذر جلب طلبات التوريد',
-                    subtitle: controller.errorMessage.value,
-                    onRetry: () => controller.loadRequests(isRefresh: true),
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppSpacing.lg),
+                      child: CustomErrorState(
+                        title: 'تعذر جلب طلبات التوريد',
+                        subtitle: controller.errorMessage.value,
+                        onRetry: () =>
+                            controller.loadRequests(isRefresh: true),
+                      ),
+                    ),
                   ),
                 );
               }
@@ -77,98 +118,143 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
               if (controller.requests.isEmpty) {
                 final hasFilter = controller.statusFilter.value != null ||
                     controller.searchQuery.value.trim().isNotEmpty;
-                return Center(
-                  child: CustomEmptyState(
-                    icon: hasFilter
-                        ? Icons.search_off_rounded
-                        : Icons.inventory_2_outlined,
-                    title: hasFilter
-                        ? 'لا توجد طلبات مطابقة'
-                        : 'لا توجد طلبات توريد حالياً',
-                    subtitle: hasFilter
-                        ? 'جرّب تغيير كلمات البحث أو الفلاتر.'
-                        : 'يمكنك إنشاء طلب توريد جديد من شبكاتك الموردة.',
-                    actionLabel: hasFilter
-                        ? 'مسح عوامل التصفية'
-                        : (controller.canCreateOrder ? 'طلب توريد جديد' : null),
-                    onAction: hasFilter
-                        ? controller.resetFilters
-                        : (controller.canCreateOrder
-                            ? controller.navigateToNewOrder
-                            : null),
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppSpacing.lg),
+                      child: CustomEmptyState(
+                        icon: hasFilter
+                            ? Icons.search_off_rounded
+                            : Icons.inventory_2_outlined,
+                        title: hasFilter
+                            ? 'لا توجد طلبات مطابقة'
+                            : 'لا توجد طلبات توريد حالياً',
+                        subtitle: hasFilter
+                            ? 'جرّب تغيير كلمات البحث أو الفلاتر.'
+                            : 'يمكنك إنشاء طلب توريد جديد من شبكاتك الموردة.',
+                        actionLabel: hasFilter
+                            ? 'مسح عوامل التصفية'
+                            : (controller.canCreateOrder
+                                ? 'طلب توريد جديد'
+                                : null),
+                        onAction: hasFilter
+                            ? controller.resetFilters
+                            : (controller.canCreateOrder
+                                ? controller.navigateToNewOrder
+                                : null),
+                      ),
+                    ),
                   ),
                 );
               }
 
-              return RefreshIndicator.adaptive(
-                onRefresh: controller.refreshOrders,
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (scroll) {
-                    if (scroll.metrics.pixels >=
-                        scroll.metrics.maxScrollExtent - 220) {
-                      controller.loadMoreRequests();
-                    }
-                    return false;
-                  },
-                  child: ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(
-                      AppSpacing.cardPadding,
-                      AppSpacing.sm,
-                      AppSpacing.cardPadding,
-                      bottomPadding,
-                    ),
-                    itemCount: controller.requests.length +
-                        (controller.isLoadingMore.value ? 1 : 0),
-                    separatorBuilder: (_, _) => AppSpacing.vSm,
-                    itemBuilder: (context, index) {
-                      if (index == controller.requests.length) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                          child: CustomStateView.loading(
-                            presentation: CustomStatePresentation.skeletonOnly,
-                            skeleton: CustomStateSkeleton(
-                              layout: CustomStateSkeletonLayout.list,
-                              itemCount: 1,
-                              cardHeight: 150.h,
-                              maxColumns: 1,
-                            ),
-                          ),
-                        );
+              final requestCount = controller.requests.length;
+              return SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.cardPadding,
+                  AppSpacing.sm,
+                  AppSpacing.cardPadding,
+                  bottomPadding,
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index.isOdd) {
+                        return AppSpacing.vSm;
                       }
 
-                      final request = controller.requests[index];
+                      final requestIndex = index ~/ 2;
+                      final request = controller.requests[requestIndex];
                       return PosProcurementOrderCard(
+                        key: ValueKey<String>(
+                          'pos-procurement-order-${request.requestId}',
+                        ),
                         request: request,
-                        onDetails: () => controller.openRequestDetails(request),
-                        onEdit: request.isPending && controller.canCreateOrder
+                        onDetails: () =>
+                            controller.openRequestDetails(request),
+                        onEdit: request.isPending &&
+                                controller.canCreateOrder
                             ? () => controller.openEditOrder(request)
                             : null,
-                        onCancel: request.isPending && controller.canCancelOrder
-                            ? () => controller.promptCancelRequest(request)
+                        onCancel: request.isPending &&
+                                controller.canCancelOrder
+                            ? () =>
+                                controller.promptCancelRequest(request)
                             : null,
-                        onDelete: request.isCancelled && controller.canCancelOrder
-                            ? () => controller.promptDeleteRequest(request)
+                        onDelete: request.isCancelled &&
+                                controller.canCancelOrder
+                            ? () =>
+                                controller.promptDeleteRequest(request)
                             : null,
                       );
                     },
+                    childCount: requestCount == 0 ? 0 : requestCount * 2 - 1,
+                    addAutomaticKeepAlives: false,
                   ),
                 ),
               );
             }),
-          ),
-        ],
-      );
+            Obx(() {
+              if (controller.isLoadingMore.value) {
+                return SliverToBoxAdapter(
+                  child: ExcludeSemantics(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        AppSpacing.cardPadding,
+                        AppSpacing.xs,
+                        AppSpacing.cardPadding,
+                        bottomPadding,
+                      ),
+                      child: CustomStateView.loading(
+                        presentation: CustomStatePresentation.skeletonOnly,
+                        skeleton: const CustomStateSkeleton(
+                          layout: CustomStateSkeletonLayout.list,
+                          itemCount: 1,
+                          cardHeight: 150,
+                          maxColumns: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
 
-    if (embedded) return content;
+              if (controller.loadMoreError.value != null) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      AppSpacing.cardPadding,
+                      AppSpacing.xs,
+                      AppSpacing.cardPadding,
+                      bottomPadding,
+                    ),
+                    child: CustomStateView.error(
+                      title: 'تعذر تحميل بقية الطلبات',
+                      subtitle: controller.loadMoreError.value,
+                      presentation: CustomStatePresentation.banner,
+                      onAction: controller.loadMoreRequests,
+                      actionLabel: 'إعادة المحاولة',
+                    ),
+                  ),
+                );
+              }
+
+              return const SliverToBoxAdapter(child: SizedBox.shrink());
+            }),
+          ],
+        ),
+      ),
+    );
+
+    if (embedded) return scrollView;
 
     return CustomAppScaffold(
       appBar: AppBar(
         title: const Text('طلبات التوريد'),
         centerTitle: true,
-        actions: const [],
       ),
-      body: content,
+      body: scrollView,
     );
   }
 }
