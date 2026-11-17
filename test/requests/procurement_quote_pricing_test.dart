@@ -436,7 +436,7 @@ void main() {
       );
     });
 
-    test('Submitting order includes pricing_token from authoritative server quote', () async {
+    test('Submitting order ignores retired quote token and sends each signed snapshot', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
       controller.myPosList.assignAll([testPos]);
@@ -450,7 +450,7 @@ void main() {
         ),
       );
 
-      mockRepo.nextQuote = const ProcurementQuoteEntity(
+      controller.serverQuote.value = const ProcurementQuoteEntity(
         networkId: 10,
         posId: 20,
         saleType: SaleType.cash,
@@ -459,7 +459,7 @@ void main() {
         discountTotal: 1000,
         netTotal: 9000,
         currency: 'YER',
-        pricingToken: 'authoritative_server_token_xyz',
+        pricingToken: 'retired_quote_token_must_not_be_sent',
         items: [],
       );
 
