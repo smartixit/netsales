@@ -37,7 +37,6 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
       subtitle: 'اختر حالة الطلب التي تريد عرضها',
       leadingIcon: Icons.filter_list_rounded,
       items: _filters.map((filter) {
-        final selected = selectedStatus == filter.value;
         return CustomBottomSheetActionItem(
           title: filter.label,
           icon: filter.icon,
