@@ -23,7 +23,7 @@ This document provides direct mapping from Flutter feature domains to their cano
 ## 2. Invariant Rules for Flutter Engineers
 1. **Never calculate financial balances on client:** Rely 100% on Laravel API responses.
 2. **Reuse existing infrastructure (Mandatory):**
-   - Use `lib/widgets/` for all UI components (`CustomDialog`, `CustomBottomSheet`, `CustomButton`, `CustomTextField`, `CustomSnackbar`, `CustomToast`, `CustomEmptyState`, `CustomLoadingState`, `CustomErrorState`, skeletons, pickers). Never invent fake names or redundant dialogs.
+   - Use `lib/widgets/` for all UI components (`CustomDialog`, `CustomBottomSheet`, `CustomButton`, `CustomTextField`, `CustomSnackbar`, `CustomToast`, `CustomStateView`, specialized state components under `widgets/feedback/states/`, skeleton recipes under `widgets/feedback/skeletons/`, pickers). Never invent fake names or redundant dialogs.
    - Use `lib/core/utils/` for formatters (`DateFormatter`, `AmountFormatter`, `TextFormatter`, `FileSizeFormatter`, `FormValidators`, `IdempotencyHelper`).
    - Use `lib/core/services/` for system services (`ApiService`, `WorkspaceService`, `SessionService`, `ThemeService`, `StorageService`, etc.).
    - Use `lib/core/themes/` and `lib/core/constants/` for tokens (`AppColors`, `AppTypography`, `AppRadius`, `AppSpacing`, `AppElevation`, `AppGradients`, `AppMotion`, `AppThemes`).
@@ -94,6 +94,6 @@ Financial resources expose decimal money values (`total`, `remaining`, `amount`)
 - **Offline** — `CustomStateView.offline`
 - **Pricing expired** — `CustomStateView.pricingExpired`
 
-Choose `CustomStatePresentation.fullscreen`, `boxed`, `compact`, or `banner` according to the actual available space and user workflow. Existing `CustomEmptyState`, `CustomErrorState`, and `CustomLoadingState` are compatibility facades that delegate to the canonical component; do not implement new state visuals inside them. `CustomOfflineBanner` also delegates to the canonical offline presentation.
+Choose `CustomStatePresentation.fullscreen`, `boxed`, `compact`, or `banner` according to the actual available space and user workflow. `CustomEmptyState`, `CustomErrorState`, and `CustomNotFoundState` are canonical semantic components under `states/`; they delegate shared presentation to `CustomStateView`. There are no compatibility facades for loading/empty/error states. `CustomOfflineBanner` remains a distinct inline warning that preserves already-loaded content.
 
 All shared loading placeholders use the adaptive skeleton engine exposed by `CustomStateView.loading` and `CustomStateSkeleton`. It supports responsive `list`, `cards`, `grid`, and `detail` layouts, configurable item count, minimum grid item width, maximum columns, card height, spacing, leading/trailing placeholders, and custom widget builders. `CustomSkeletonFeed`, `CustomSkeletonGrid`, and `CustomSkeletonListTile` are removed and must not be reintroduced. The low-level `CustomSkeletonShimmer` remains an animation primitive only. During cursor pagination, the skeleton is appended to existing content and never replaces loaded records. Expired authoritative pricing must clearly block submission and provide a refresh action when supported by the relevant use case.
