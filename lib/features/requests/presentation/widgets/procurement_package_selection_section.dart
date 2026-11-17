@@ -102,7 +102,7 @@ class ProcurementPackageSelectionSection
                 onChanged: controller.onPackageSearchChanged,
               ),
               AppSpacing.vSm,
-              if (controller.isLoadingPackages.value && controller.availablePackages.isEmpty)
+              if (controller.isLoadingPackages.value)
                 const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 170))
               else if (controller.packageErrorMessage.value != null &&
                   controller.availablePackages.isEmpty)
@@ -119,7 +119,15 @@ class ProcurementPackageSelectionSection
                   subtitle: 'لا تتوفر باقات نشطة لدى الشبكة المحددة حالياً.',
                   icon: Icons.inventory_2_outlined,
                 )
-              else
+              else ...[
+                if (controller.packageDiscountError.value != null) ...[
+                  CustomErrorState.compact(
+                    title: 'تعذر تحميل الخصم المخصص لنقطة البيع',
+                    subtitle: controller.packageDiscountError.value,
+                    onRetry: controller.loadEffectivePackageDiscounts,
+                  ),
+                  AppSpacing.vSm,
+                ],
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final columns =
@@ -147,17 +155,13 @@ class ProcurementPackageSelectionSection
                                   ),
                                   customDiscount: controller.discountForPackage(package.packageId),
                                   quantityController: controller.quantityControllerForPackage(package.packageId),
-isCashSale: controller.selectedSaleType.value == SaleType.cash,
+                                  isPricingLoading: controller.isLoadingPackageDiscounts.value,
+                                  isCashSale: controller.selectedSaleType.value == SaleType.cash,
                                   onSetQuantity: (quantity) =>
                                       controller.setPackageVoucherCount(package, quantity),
                                 ),
                               );
                             }),
-                            if (controller.isLoadingPackages.value && controller.availablePackages.isNotEmpty)
-                              SizedBox(
-                                width: cardWidth,
-                                child: const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 170, maxColumns: 1, minItemWidth: 180)),
-                              ),
                             if (controller.isLoadingMorePackages.value)
                               SizedBox(
                                 width: cardWidth,
@@ -188,6 +192,7 @@ isCashSale: controller.selectedSaleType.value == SaleType.cash,
                     );
                   },
                 ),
+              ],
             ],
           );
         }),
