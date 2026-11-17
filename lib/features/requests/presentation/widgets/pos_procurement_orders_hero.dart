@@ -34,11 +34,13 @@ class PosProcurementOrdersHero extends StatelessWidget {
       ),
       padding: EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        gradient: AppGradients.entityAmethyst(context),
+        gradient: AppGradients.surfaceMesh(context),
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        boxShadow: AppElevation.level3(context),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.34)),
+        boxShadow: AppElevation.level1(context),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Column(
@@ -47,7 +49,7 @@ class PosProcurementOrdersHero extends StatelessWidget {
                 Text(
                   'الطلبات',
                   style: AppTypography.headlineSmall.copyWith(
-                    color: Colors.white,
+                    color: colors.primary,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -55,52 +57,34 @@ class PosProcurementOrdersHero extends StatelessWidget {
                 Text(
                   'إدارة طلبات التوريد ومتابعة حالتها',
                   style: AppTypography.bodySmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.82),
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
-                if (canCreate) ...[
-                  AppSpacing.vMd,
-                  CustomButton(
-                    text: 'طلب جديد',
-                    icon: Icons.add_rounded,
-                    size: AppButtonSize.medium,
-                    shape: AppButtonShape.pill,
-                    foregroundColor: colors.primary,
-                    backgroundColor: Colors.white,
-                    shadow: AppElevation.level2(context),
-                    onPressed: onCreate,
-                  ),
-                ],
               ],
             ),
           ),
-          AppSpacing.hSm,
-          Container(
-            width: 58.r,
-            height: 58.r,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          if (canCreate)
+            CustomButton.primary(
+              text: 'طلب جديد',
+              icon: Icons.add_rounded,
+              size: AppButtonSize.medium,
+              shape: AppButtonShape.pill,
+              gradient: AppGradients.entityAmethyst(context),
+              foregroundColor: Colors.white,
+              shadow: AppElevation.level2(context),
+              onPressed: onCreate,
             ),
-            child: Icon(
-              Icons.receipt_long_rounded,
-              color: Colors.white,
-              size: 30.r,
-            ),
-          ),
           if (embedded) ...[
             AppSpacing.hXs,
             CustomButton.icon(
               icon: Icons.refresh_rounded,
               tooltip: 'تحديث الطلبات',
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.white.withValues(alpha: 0.12),
+              foregroundColor: colors.onSurfaceVariant,
+              backgroundColor: colors.surfaceContainerHighest,
               onPressed: onRefresh,
             ),
           ],
         ],
       ),
     );
-  }
-}
+  }}
