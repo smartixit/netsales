@@ -315,7 +315,7 @@ class _PackageHero extends StatelessWidget {
               SizedBox(
                 width: artworkSize,
                 height: artworkSize,
-                child: const _PackageArtwork(),
+                child: _PackageArtwork(),
               ),
             ],
           ),
@@ -343,7 +343,7 @@ class _PackageArtwork extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            const DecoratedBox(
+            DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,

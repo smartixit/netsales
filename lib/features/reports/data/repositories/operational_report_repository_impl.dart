@@ -62,8 +62,9 @@ class OperationalReportRepositoryImpl implements OperationalReportRepository {
       final value = entry.value;
       switch (value) {
         case ReportTextFilterValue():
-          if (value.value.trim().isNotEmpty)
+          if (value.value.trim().isNotEmpty) {
             result[entry.key] = value.value.trim();
+          }
         case ReportIntegerFilterValue():
           result[entry.key] = value.value;
         case ReportDecimalFilterValue():

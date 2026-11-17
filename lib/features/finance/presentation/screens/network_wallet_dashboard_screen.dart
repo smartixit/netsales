@@ -64,8 +64,9 @@ class NetworkWalletDashboardScreen
                 );
               }),
               Obx(() {
-                if (controller.selectedWallet.value == null)
+                if (controller.selectedWallet.value == null) {
                   return const SizedBox.shrink();
+                }
                 return Padding(
                   padding: EdgeInsets.only(top: AppSpacing.sm),
                   child: CustomButton.outline(

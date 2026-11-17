@@ -499,14 +499,17 @@ class DetailedOperationalReportDocumentService {
     if (right == null) return -1;
     final leftNumber = left is num ? left : num.tryParse(left.toString());
     final rightNumber = right is num ? right : num.tryParse(right.toString());
-    if (leftNumber != null && rightNumber != null)
+    if (leftNumber != null && rightNumber != null) {
       return leftNumber.compareTo(rightNumber);
+    }
     final leftDate = DateTime.tryParse(left.toString());
     final rightDate = DateTime.tryParse(right.toString());
-    if (leftDate != null && rightDate != null)
+    if (leftDate != null && rightDate != null) {
       return leftDate.compareTo(rightDate);
-    if (left is bool && right is bool)
+    }
+    if (left is bool && right is bool) {
       return (left ? 1 : 0).compareTo(right ? 1 : 0);
+    }
     return left.toString().toLowerCase().compareTo(
       right.toString().toLowerCase(),
     );

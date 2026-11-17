@@ -14,15 +14,17 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
       return {
         'data': value
             .map((row) {
-              if (row is! Map<String, dynamic>)
+              if (row is! Map<String, dynamic>) {
                 throw const FormatException('سجل الفوترة غير صالح.');
+              }
               return Map<String, dynamic>.from(row);
             })
             .toList(growable: false),
       };
     }
-    if (value is! Map<String, dynamic>)
+    if (value is! Map<String, dynamic>) {
       throw const FormatException('استجابة الفوترة غير صالحة.');
+    }
     return Map<String, dynamic>.from(value);
   }
 
@@ -152,8 +154,9 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
       options: Options(responseType: ResponseType.bytes),
     );
     final bytes = response.data;
-    if (bytes == null || bytes.isEmpty)
+    if (bytes == null || bytes.isEmpty) {
       throw const FormatException('ملف التقرير فارغ.');
+    }
     return Uint8List.fromList(bytes);
   }
 

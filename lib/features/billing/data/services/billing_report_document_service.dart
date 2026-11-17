@@ -46,10 +46,11 @@ class BillingReportDocumentService {
       logoBytes: logo,
       fonts: await fonts.loadArabicBrandingFonts(),
     );
-    if (rows.length > 1500)
+    if (rows.length > 1500) {
       throw StateError(
         'يتجاوز التقرير الحد الآمن لملف PDF؛ استخدم تصدير CSV الكامل.',
       );
+    }
     final metricRows = <DocumentTableRow>[];
     void addValue(String label, dynamic value) {
       if (value is Map<String, dynamic>) {
@@ -61,8 +62,9 @@ class BillingReportDocumentService {
           addValue('$label ${index + 1}', value[index]);
         }
       } else {
-        if (metricRows.length >= 300)
+        if (metricRows.length >= 300) {
           throw StateError('يتجاوز ملخص التقرير الحد الآمن لعناصر PDF.');
+        }
         metricRows.add(
           DocumentTableRow(
             id: 'billing-summary-${metricRows.length + 1}',
@@ -332,8 +334,9 @@ class BillingReportDocumentService {
           ),
         );
     if (result is DocumentRenderFailure) throw StateError(result.message);
-    if (result is! DocumentRenderSuccess)
+    if (result is! DocumentRenderSuccess) {
       throw StateError('تعذر إنشاء PDF لتقرير الفوترة.');
+    }
     if (!isCurrent()) {
       throw StateError(
         'تغير نطاق التقرير أثناء تجهيز PDF؛ لم يتم حفظ المستند القديم.',
@@ -432,14 +435,16 @@ class BillingReportDocumentService {
 
   DocumentValue _documentValue(dynamic value, String localeTag) {
     if (value is int) return DocumentIntegerValue(value);
-    if (value is double && value.isFinite)
+    if (value is double && value.isFinite) {
       return DocumentTextValue(value.toString());
-    if (value is bool)
+    }
+    if (value is bool) {
       return DocumentTextValue(
         localeTag.toLowerCase().startsWith('ar')
             ? (value ? 'نعم' : 'لا')
             : (value ? 'Yes' : 'No'),
       );
+    }
     if (value is String) {
       final isArabic = localeTag.toLowerCase().startsWith('ar');
       final statuses = <String, String>{

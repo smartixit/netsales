@@ -369,11 +369,12 @@ class BillingReportsController extends GetxController {
       if (definition != null) _resetStudio(definition);
       await loadReport(revision: rev);
     } catch (e) {
-      if (rev == _revision)
+      if (rev == _revision) {
         errorMessage.value = AppException.sanitizeMessage(
           e,
           fallback: 'تعذر تحميل كتالوج تقارير الاشتراكات.',
         );
+      }
     } finally {
       if (rev == _revision) isLoading.value = false;
     }

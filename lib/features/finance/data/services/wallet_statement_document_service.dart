@@ -439,8 +439,9 @@ class WalletStatementDocumentService {
         );
 
     if (result is DocumentRenderFailure) throw StateError(result.message);
-    if (result is! DocumentRenderSuccess)
+    if (result is! DocumentRenderSuccess) {
       throw StateError('تعذر إنشاء كشف الحساب بصيغة PDF.');
+    }
 
     return FileExportService.instance.saveFile(
       bytes: result.artifact.bytes,

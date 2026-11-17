@@ -216,8 +216,9 @@ class BillingDialogs {
         int.tryParse(invoice['remaining_minor']?.toString() ?? '0') ?? 0;
     if (invoiceId == null ||
         remaining <= 0 ||
-        controller.paymentMethods.isEmpty)
+        controller.paymentMethods.isEmpty) {
       return;
+    }
 
     final amount = TextEditingController(text: remaining.toString());
     final reference = TextEditingController();
