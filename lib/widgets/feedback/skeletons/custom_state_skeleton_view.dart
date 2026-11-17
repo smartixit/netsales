@@ -25,6 +25,7 @@ class CustomStateSkeletonView extends StatelessWidget {
           CustomStateSkeletonLayout.cards => _buildResponsiveCollection(context),
           CustomStateSkeletonLayout.grid => _buildResponsiveCollection(context),
           CustomStateSkeletonLayout.detail => _buildDetail(context),
+          CustomStateSkeletonLayout.text => _buildText(context),
         };
 
     return CustomSkeletonShimmer(child: skeletonContent);
@@ -72,6 +73,28 @@ class CustomStateSkeletonView extends StatelessWidget {
     );
   }
 
+  Widget _buildText(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: List.generate(recipe.lineCount, (index) {
+        final widthFactor = index == recipe.lineCount - 1 ? .46 : .82;
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: index == recipe.lineCount - 1 ? 0 : recipe.spacing.h,
+          ),
+          child: FractionallySizedBox(
+            widthFactor: widthFactor,
+            alignment: AlignmentDirectional.centerStart,
+            child: _placeholder(
+              context,
+              height: index == 0 ? 12 : 9,
+            ),
+          ),
+        );
+      }),
+    );
+  }
   Widget _buildDetail(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
