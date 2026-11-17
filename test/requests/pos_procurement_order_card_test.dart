@@ -92,7 +92,7 @@ void main() {
   testWidgets('renders reference hierarchy and authoritative request fields', (tester) async {
     await pumpCard(tester);
 
-    expect(find.text('طلب توريد #REQ-10582'), findsOneWidget);
+    expect(find.text('طلب توريد #10582'), findsOneWidget);
     expect(find.text('قيد المراجعة'), findsOneWidget);
     expect(find.text('1 باقة'), findsOneWidget);
     expect(find.text('300 وحدة'), findsOneWidget);
