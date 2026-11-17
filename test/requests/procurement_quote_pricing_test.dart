@@ -30,6 +30,8 @@ import 'package:netsales/features/requests/domain/usecases/get_procurement_quote
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 
 class FakeQuoteRequestRepository implements RequestRepository {
   ProcurementQuoteEntity? nextQuote;
@@ -207,6 +209,29 @@ final testPackage = PackageEntity(
   procurementPricingSnapshotToken: 'signed_snapshot_token_for_package_101',
   procurementPricingSnapshotExpiresAt: DateTime(2099),
 );
+PackageEntity _expiredTestPackage() => PackageEntity(
+  packageId: testPackage.packageId,
+  networkId: testPackage.networkId,
+  packageName: testPackage.packageName,
+  packageBalance: testPackage.packageBalance,
+  packageVoucherPrice: testPackage.packageVoucherPrice,
+  packageVoucherCount: testPackage.packageVoucherCount,
+  packageDefaultCashDiscount: testPackage.packageDefaultCashDiscount,
+  packageDefaultCreditDiscount: testPackage.packageDefaultCreditDiscount,
+  cashDiscountAmount: testPackage.cashDiscountAmount,
+  creditDiscountAmount: testPackage.creditDiscountAmount,
+  effectiveCashPrice: testPackage.effectiveCashPrice,
+  effectiveCreditPrice: testPackage.effectiveCreditPrice,
+  status: true,
+  procurementBaseUnitPriceMinor: 10000,
+  procurementCashUnitPriceMinor: 9000,
+  procurementCreditUnitPriceMinor: 9500,
+  procurementCashDiscountBasisPoints: 1000,
+  procurementCreditDiscountBasisPoints: 500,
+  procurementPricingSnapshotToken: 'expired_snapshot_token',
+  procurementPricingSnapshotExpiresAt: DateTime(2020),
+);
+
 
 class FakeCommercialRepository implements CommercialRepository {
   @override
@@ -299,28 +324,7 @@ void main() {
     controller.myPosList.assignAll([testPos]);
     controller.linkedNetworks.assignAll([testLink]);
 
-    final expiredPackage = PackageEntity(
-      packageId: testPackage.packageId,
-      networkId: testPackage.networkId,
-      packageName: testPackage.packageName,
-      packageBalance: testPackage.packageBalance,
-      packageVoucherPrice: testPackage.packageVoucherPrice,
-      packageVoucherCount: testPackage.packageVoucherCount,
-      packageDefaultCashDiscount: testPackage.packageDefaultCashDiscount,
-      packageDefaultCreditDiscount: testPackage.packageDefaultCreditDiscount,
-      cashDiscountAmount: testPackage.cashDiscountAmount,
-      creditDiscountAmount: testPackage.creditDiscountAmount,
-      effectiveCashPrice: testPackage.effectiveCashPrice,
-      effectiveCreditPrice: testPackage.effectiveCreditPrice,
-      status: true,
-      procurementBaseUnitPriceMinor: 10000,
-      procurementCashUnitPriceMinor: 9000,
-      procurementCreditUnitPriceMinor: 9500,
-      procurementCashDiscountBasisPoints: 1000,
-      procurementCreditDiscountBasisPoints: 500,
-      procurementPricingSnapshotToken: 'expired_snapshot_token',
-      procurementPricingSnapshotExpiresAt: DateTime(2020),
-    );
+    final expiredPackage = _expiredTestPackage();
     packageRepo.refreshedPackages = [testPackage];
     controller.procurementCart.add(
       ProcurementCartLineEntity(
@@ -678,6 +682,52 @@ void main() {
       expect(find.text('صافي قيمة الطلب:'), findsOneWidget);
       expect(find.text('45,000.00 YER'), findsOneWidget);
     });
+
+    testWidgets(
+      'Hides expired pricing state after cart tariff refresh succeeds',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        Get.put(controller);
+        controller.selectedNetworkId.value = 10;
+        controller.selectedPosId.value = 20;
+        controller.myPosList.assignAll([testPos]);
+        controller.linkedNetworks.assignAll([testLink]);
+        controller.procurementCart.add(
+          ProcurementCartLineEntity(
+            package: _expiredTestPackage(),
+            sheets: 1,
+            voucherCount: 100,
+          ),
+        );
+        packageRepo.refreshedPackages = [testPackage];
+
+        final expiredPricingState = find.byWidgetPredicate(
+          (widget) =>
+              widget is CustomStateView &&
+              widget.kind == CustomStateKind.pricingExpired,
+        );
+
+        await tester.pumpWidget(
+          buildTestableWidget(const ProcurementCheckoutBar()),
+        );
+        await tester.pumpAndSettle();
+
+        expect(expiredPricingState, findsOneWidget);
+
+        await controller.refreshNetworkPackages();
+        await tester.pumpAndSettle();
+
+        expect(controller.hasCurrentProcurementSnapshots, isTrue);
+        expect(expiredPricingState, findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('Shows expired quote state and explicit refresh action', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
