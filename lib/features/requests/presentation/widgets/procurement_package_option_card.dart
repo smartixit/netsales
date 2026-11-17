@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -623,105 +624,128 @@ class _TariffPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 11.r, vertical: 10.r),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: colors.outlineVariant.withValues(alpha: .58)),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 9.r, vertical: 7.r),
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerHighest.withValues(alpha: .26),
-              borderRadius: BorderRadius.circular(AppRadius.chip),
-              border: Border.all(
-                color: colors.outlineVariant.withValues(alpha: .48),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.sell_outlined,
-                  size: 14.r,
-                  color: colors.onSurfaceVariant,
-                ),
-                AppSpacing.hXxs,
-                Expanded(
-                  child: Text(
-                    'السعر الأساسي قبل الخصم',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    '${money(basePrice)} ر.ي',
-                    textDirection: TextDirection.ltr,
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                      decoration: TextDecoration.lineThrough,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Keep both pricing choices readable in the narrow package cards used
+        // on phones and tablet grids. Only use two columns when each option
+        // has enough width for its amount and discount metadata.
+        final useStackedOptions =
+            constraints.maxWidth < AppBreakpoints.mobileMax;
+
+        final cashOption = _PriceOptionCard(
+          key: const ValueKey('procurement-price-option-cash'),
+          label: 'السعر النقدي',
+          icon: Icons.payments_rounded,
+          price: cashPrice,
+          discount: cashDiscount,
+          money: money,
+          selected: isCashSale,
+          isDiscountLoading: isDiscountLoading,
+        );
+        final creditOption = _PriceOptionCard(
+          key: const ValueKey('procurement-price-option-credit'),
+          label: 'السعر الآجل',
+          icon: Icons.event_repeat_rounded,
+          price: creditPrice,
+          discount: creditDiscount,
+          money: money,
+          selected: !isCashSale,
+          isDiscountLoading: isDiscountLoading,
+        );
+
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 11.r, vertical: 10.r),
+          decoration: BoxDecoration(
+            color: colors.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(
+              color: colors.outlineVariant.withValues(alpha: .58),
             ),
           ),
-          AppSpacing.vSm,
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: _PriceColumn(
-                  label: 'السعر النقدي',
-                  price: cashPrice,
-                  discount: cashDiscount,
-                  money: money,
-                  selected: isCashSale,
-                  isDiscountLoading: isDiscountLoading,
-                ),
-              ),
               Container(
-                width: 1,
-                height: 70.r,
-                margin: EdgeInsets.symmetric(horizontal: 10.r),
-                color: colors.outlineVariant,
-              ),
-              Expanded(
-                child: _PriceColumn(
-                  label: 'السعر الآجل',
-                  price: creditPrice,
-                  discount: creditDiscount,
-                  money: money,
-                  selected: !isCashSale,
-                  isDiscountLoading: isDiscountLoading,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 9.r,
+                  vertical: 7.r,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHighest.withValues(alpha: .26),
+                  borderRadius: BorderRadius.circular(AppRadius.chip),
+                  border: Border.all(
+                    color: colors.outlineVariant.withValues(alpha: .48),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.sell_outlined,
+                      size: 14.r,
+                      color: colors.onSurfaceVariant,
+                    ),
+                    AppSpacing.hXxs,
+                    Expanded(
+                      child: Text(
+                        'السعر الأساسي قبل الخصم',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        '${money(basePrice)} ر.ي',
+                        textDirection: TextDirection.ltr,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                          decoration: TextDecoration.lineThrough,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              AppSpacing.vSm,
+              if (useStackedOptions) ...[
+                cashOption,
+                AppSpacing.vSm,
+                creditOption,
+              ] else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: cashOption),
+                    AppSpacing.hSm,
+                    Expanded(child: creditOption),
+                  ],
+                ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
-class _PriceColumn extends StatelessWidget {
-  const _PriceColumn({
+class _PriceOptionCard extends StatelessWidget {
+  const _PriceOptionCard({
+    super.key,
     required this.label,
+    required this.icon,
     required this.price,
     required this.discount,
     required this.money,
     required this.selected,
     required this.isDiscountLoading,
   });
+
   final String label;
+  final IconData icon;
   final double price;
   final double discount;
   final String Function(num) money;
@@ -731,81 +755,155 @@ class _PriceColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                textAlign: TextAlign.end,
-                style: AppTypography.labelMedium.copyWith(
-                  color: colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
+    final accent = selected ? colors.primary : colors.onSurfaceVariant;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 190),
+      curve: Curves.easeOutCubic,
+      padding: EdgeInsets.symmetric(horizontal: 11.r, vertical: 10.r),
+      decoration: BoxDecoration(
+        color: selected
+            ? colors.primary.withValues(alpha: .085)
+            : colors.surface,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: selected
+              ? colors.primary.withValues(alpha: .66)
+              : colors.outlineVariant.withValues(alpha: .58),
+          width: selected ? 1.5 : 1,
+        ),
+        boxShadow: selected
+            ? [
+                BoxShadow(
+                  color: colors.primary.withValues(alpha: .075),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
                 ),
-              ),
-            ),
-            if (selected)
+              ]
+            : const [],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
               Container(
-                width: 6.r,
-                height: 6.r,
+                width: 30.r,
+                height: 30.r,
                 decoration: BoxDecoration(
-                  color: colors.primary,
-                  shape: BoxShape.circle,
+                  color: accent.withValues(alpha: selected ? .13 : .08),
+                  borderRadius: BorderRadius.circular(9.r),
+                ),
+                child: Icon(icon, size: 16.r, color: accent),
+              ),
+              AppSpacing.hXs,
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: selected ? colors.primary : colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-          ],
-        ),
-        AppSpacing.vXxs,
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: AlignmentDirectional.centerEnd,
-          child: Text(
-            '${money(price)} ر.ي',
-            textDirection: TextDirection.ltr,
-            maxLines: 1,
-            style: AppTypography.currencyMedium.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.w700,
-              height: 1,
-            ),
+              if (selected) ...[
+                AppSpacing.hXxs,
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 7.r,
+                    vertical: 4.r,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withValues(alpha: .13),
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                    border: Border.all(
+                      color: colors.primary.withValues(alpha: .30),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_rounded,
+                        size: 12.r,
+                        color: colors.primary,
+                      ),
+                      AppSpacing.hXxs,
+                      Text(
+                        'المحدد',
+                        style: AppTypography.badgeText.copyWith(
+                          color: colors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           ),
-        ),
-        AppSpacing.vXxs,
-        if (isDiscountLoading)
-          const CustomStateView.loading(
-            presentation: CustomStatePresentation.skeletonOnly,
-            skeleton: CustomStateSkeleton(
-              layout: CustomStateSkeletonLayout.text,
-              lineCount: 1,
-              showCardSurface: false,
-            ),
-          )
-        else if (discount > 0)
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 9.r, vertical: 4.r),
-            decoration: BoxDecoration(
-              color: colors.success.withValues(alpha: .12),
-              borderRadius: BorderRadius.circular(AppRadius.full),
-              border: Border.all(color: colors.success.withValues(alpha: .22)),
-            ),
+          AppSpacing.vSm,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
-              'خصم ${discount.toStringAsFixed(2)}٪',
-              style: AppTypography.labelSmall.copyWith(
-                color: colors.success,
+              '${money(price)} ر.ي',
+              textDirection: TextDirection.ltr,
+              maxLines: 1,
+              style: AppTypography.titleMedium.copyWith(
+                color: colors.onSurface,
                 fontWeight: FontWeight.w700,
               ),
             ),
-          )
-        else
-          Text(
-            'حسب التعرفة',
-            style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
           ),
-      ],
+          AppSpacing.vXs,
+          if (isDiscountLoading)
+            const CustomStateView.loading(
+              presentation: CustomStatePresentation.skeletonOnly,
+              skeleton: CustomStateSkeleton(
+                layout: CustomStateSkeletonLayout.text,
+                lineCount: 1,
+                showCardSurface: false,
+              ),
+            )
+          else if (discount > 0)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 8.r,
+                  vertical: 4.r,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.success.withValues(alpha: .10),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                  border: Border.all(
+                    color: colors.success.withValues(alpha: .20),
+                  ),
+                ),
+                child: Text(
+                  'خصم ${discount.toStringAsFixed(2)}٪',
+                  maxLines: 1,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.success,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            )
+          else
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                'حسب التعرفة',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
