@@ -14,6 +14,8 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_status_summary_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
@@ -66,6 +68,18 @@ class MockRequestRepository implements RequestRepository {
       nextCursor: cursor == null && filtered.isNotEmpty
           ? 'cursor_page_2'
           : null,
+    );
+  }
+
+  @override
+  Future<RequestStatusSummaryEntity> getRequestStatusSummary({int? posId}) async {
+    final scoped = items.where((request) => posId == null || request.posId == posId);
+    return RequestStatusSummaryEntity(
+      total: scoped.length,
+      pending: scoped.where((request) => request.isPending).length,
+      approved: scoped.where((request) => request.isApproved).length,
+      rejected: scoped.where((request) => request.isRejected).length,
+      cancelled: scoped.where((request) => request.isCancelled).length,
     );
   }
 
@@ -371,6 +385,7 @@ void main() {
 
       ordersController = PosProcurementOrdersController(
         getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
+        getRequestStatusSummaryUseCase: GetRequestStatusSummaryUseCase(mockRequestRepo),
         getMyPosUseCase: GetMyPosUseCase(mockCommercialRepo),
         cancelRequestUseCase: CancelRequestUseCase(mockRequestRepo),
         deleteRequestUseCase: DeleteRequestUseCase(mockRequestRepo),
