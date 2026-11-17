@@ -11,7 +11,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 
 /// مركز دخول عمليات المالية في مساحة عمل مزود الشبكة.
 /// لا يجري أي حساب أو تحميل مالي؛ يوجّه إلى الشاشات التي تجلب بياناتها من API.
