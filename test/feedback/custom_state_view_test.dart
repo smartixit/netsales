@@ -177,7 +177,7 @@ void main() {
 
     expect(find.text('المورد المطلوب غير موجود'), findsOneWidget);
     expect(find.text('غير موجود'), findsOneWidget);
-    expect(find.byIcon(Icons.search_off_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.search_off_rounded), findsNWidgets(2));
   });
 
 }
