@@ -131,7 +131,7 @@ class PosProcurementOrderCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'طلب توريد #${request.requestUuid ?? request.requestId}',
+                              'طلب توريد #${request.requestId}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.titleMedium.copyWith(
