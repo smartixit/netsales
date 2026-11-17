@@ -604,11 +604,12 @@ class PosProcurementController extends GetxController {
       }
 
       procurementCart.assignAll(refreshedLines);
-      availablePackages.assignAll(
-        availablePackages.map(
-          (package) => refreshedPackages[package.packageId] ?? package,
-        ),
-      );
+      final refreshedAvailablePackages = availablePackages
+          .map(
+            (package) => refreshedPackages[package.packageId] ?? package,
+          )
+          .toList(growable: false);
+      availablePackages.assignAll(refreshedAvailablePackages);
       effectiveDiscountsByPackageId.clear();
 
       // A previous server quote is no longer relevant after the signed
