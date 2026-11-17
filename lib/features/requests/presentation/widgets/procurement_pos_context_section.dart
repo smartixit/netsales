@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_context_selector.dart';
 
 /// Adapts the user's authorized POS entities to the shared context selector.
-class ProcurementPosContextSection extends GetView<PosProcurementController> {
+class ProcurementPosContextSection extends GetView<PosNewProcurementOrderController> {
   const ProcurementPosContextSection({super.key});
 
   @override
