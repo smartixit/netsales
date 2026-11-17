@@ -6,8 +6,8 @@ import 'package:netsales/features/expenses/presentation/controllers/network_oper
 import 'package:netsales/features/expenses/presentation/widgets/expense_card.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_network_scope_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
