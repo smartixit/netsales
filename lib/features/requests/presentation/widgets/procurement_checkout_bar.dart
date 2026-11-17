@@ -24,14 +24,31 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
       final count = lines.fold<int>(0, (sum, line) => sum + line.voucherCount);
       final currency = quote?.currency ?? 'ر.ي';
       final quoteReady = controller.hasCurrentServerQuote && quote != null;
+      final estimate = lines.fold<(double, double, double)>((0, 0, 0), (sum, line) {
+        final custom = controller.discountForPackage(line.package.packageId);
+        final base = custom?.originalPackagePrice ?? line.package.packageVoucherPrice;
+        final unit = controller.selectedSaleType.value.name == 'cash'
+            ? (custom?.effectiveCashPrice ?? line.package.effectiveCashPrice)
+            : (custom?.effectiveCreditPrice ?? line.package.effectiveCreditPrice);
+        final gross = base * line.voucherCount;
+        final net = unit * line.voucherCount;
+        return (sum.$1 + gross, sum.$2 + (gross - net), sum.$3 + net);
+      });
       final quoteExpired = quote?.expiresAt != null &&
           !DateTime.now().isBefore(quote!.expiresAt!);
       final isCompact = MediaQuery.sizeOf(context).width <= AppBreakpoints.mobileMax;
-      final summaryRows = <Widget>[
-        _SummaryRow(label: 'الإجمالي قبل الخصم', value: quoteReady ? AmountFormatter.formatValue(quote.grossTotal) : '—', currency: currency),
-        _SummaryRow(label: 'إجمالي الخصم', value: quoteReady ? AmountFormatter.formatValue(quote.discountTotal) : '—', currency: currency, isDiscount: true),
-        _SummaryRow(label: 'صافي الطلب التقديري', value: quoteReady ? AmountFormatter.formatValue(quote.netTotal) : (controller.isQuotePending.value || controller.isLoadingQuote.value ? 'جارٍ تحديث العرض…' : 'بانتظار عرض السعر'), currency: currency, isEmphasized: true),
-      ];
+      final gross = quoteReady ? quote!.grossTotal : estimate.$1;
+      final discount = quoteReady ? quote!.discountTotal : estimate.$2;
+      final net = quoteReady ? quote!.netTotal : estimate.$3;
+      final summaryRows = Row(
+        children: [
+          Expanded(child: _SummaryMetric(label: 'الإجمالي', value: AmountFormatter.formatValue(gross), currency: currency)),
+          AppSpacing.hXs,
+          Expanded(child: _SummaryMetric(label: 'الخصم', value: AmountFormatter.formatValue(discount), currency: currency, isDiscount: true)),
+          AppSpacing.hXs,
+          Expanded(child: _SummaryMetric(label: 'الصافي التقديري', value: AmountFormatter.formatValue(net), currency: currency, isNet: true)),
+        ],
+      );
 
       return SafeArea(
         top: false,
@@ -54,7 +71,7 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
                   ),
                   AppSpacing.vXs,
                 ],
-                ...summaryRows,
+                summaryRows,
                 AppSpacing.vXs,
                 Row(children: [
                   Icon(Icons.layers_rounded, size: 16.r, color: colors.primary),
@@ -92,21 +109,41 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
   }
 }
 
-class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({required this.label, required this.value, required this.currency, this.isDiscount = false, this.isEmphasized = false});
-  final String label, value, currency;
-  final bool isDiscount, isEmphasized;
+class _SummaryMetric extends StatelessWidget {
+  const _SummaryMetric({
+    required this.label,
+    required this.value,
+    required this.currency,
+    this.isDiscount = false,
+    this.isNet = false,
+  });
+
+  final String label;
+  final String value;
+  final String currency;
+  final bool isDiscount;
+  final bool isNet;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: AppSpacing.xxs),
-      child: Row(children: [
-        Expanded(child: Text(label, style: (isEmphasized ? AppTypography.labelLarge : AppTypography.labelSmall).copyWith(color: isEmphasized ? colors.onSurface : colors.onSurfaceVariant, fontWeight: isEmphasized ? FontWeight.w900 : FontWeight.w600))),
-        Text(value, style: (isEmphasized ? AppTypography.titleSmall : AppTypography.labelMedium).copyWith(color: isDiscount ? colors.tertiary : (isEmphasized ? colors.primary : colors.onSurface), fontWeight: FontWeight.w900)),
-        AppSpacing.hXxs,
-        Text(currency, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
-      ]),
+    final accent = isNet ? colors.primary : (isDiscount ? colors.tertiary : colors.onSurface);
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: isNet ? colors.primary.withValues(alpha: .08) : colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: isNet ? colors.primary.withValues(alpha: .24) : colors.outlineVariant.withValues(alpha: .35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant, fontWeight: FontWeight.w700)),
+          AppSpacing.vXxs,
+          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.titleSmall.copyWith(color: accent, fontWeight: FontWeight.w900)),
+          Text(currency, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
+        ],
+      ),
     );
   }
 }
