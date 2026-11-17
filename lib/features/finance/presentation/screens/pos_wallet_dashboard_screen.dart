@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_wallet_dashboard_controller.dart';
@@ -10,7 +11,6 @@ import 'package:netsales/features/finance/presentation/widgets/pos_wallet_log_it
 import 'package:netsales/features/finance/presentation/widgets/wallet_log_entry_skeleton.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
@@ -77,7 +77,7 @@ class PosWalletDashboardScreen extends GetView<PosWalletDashboardController> {
                 child: Obx(() {
                   if (controller.isLoadingLogs.value &&
                       controller.logs.isEmpty) {
-                    return const CustomSkeletonFeed(itemCount: 3);
+                    return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 112, ));
                   }
 
                   if (controller.logs.isEmpty &&
