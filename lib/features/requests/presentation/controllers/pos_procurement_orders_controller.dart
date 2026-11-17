@@ -139,7 +139,6 @@ class PosProcurementOrdersController extends GetxController {
       if (revision != _requestListRevision) return;
       requests.assignAll(result.items);
       nextCursor.value = result.nextCursor;
-      if (isRefresh) unawaited(loadStatusSummary());
     } catch (error) {
       if (revision != _requestListRevision) return;
       errorMessage.value = error is AppException
