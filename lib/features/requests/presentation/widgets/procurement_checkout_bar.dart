@@ -44,9 +44,9 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
       final quoteExpired = quote?.expiresAt != null &&
           !DateTime.now().isBefore(quote!.expiresAt!);
       final isCompact = MediaQuery.sizeOf(context).width <= AppBreakpoints.mobileMax;
-      final gross = quoteReady ? quote!.grossTotal : estimate.$1;
-      final discount = quoteReady ? quote!.discountTotal : estimate.$2;
-      final net = quoteReady ? quote!.netTotal : estimate.$3;
+      final gross = quoteReady ? quote.grossTotal : estimate.$1;
+      final discount = quoteReady ? quote.discountTotal : estimate.$2;
+      final net = quoteReady ? quote.netTotal : estimate.$3;
       final summaryRows = Row(
         children: [
           Expanded(child: _SummaryMetric(label: 'الإجمالي', value: AmountFormatter.formatValue(gross), currency: currency)),
