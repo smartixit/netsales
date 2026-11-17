@@ -832,19 +832,24 @@ class _PriceOptionCard extends StatelessWidget {
                 AppSpacing.hXxs,
                 SizedBox(
                   width: 37.r,
-                  child: AnimatedOpacity(
+                  height: 12.r,
+                  child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 160),
-                    opacity: selected ? 1 : 0,
-                    child: Text(
-                      'المحدد',
-                      maxLines: 1,
-                      textAlign: TextAlign.center,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: colors.primary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 9.r,
-                      ),
-                    ),
+                    child: selected
+                        ? Text(
+                            'المحدد',
+                            key: const ValueKey('selected-price-label'),
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            style: AppTypography.labelSmall.copyWith(
+                              color: colors.primary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 9.r,
+                            ),
+                          )
+                        : const SizedBox.shrink(
+                            key: ValueKey('unselected-price-label'),
+                          ),
                   ),
                 ),
                 AppSpacing.hXxs,
