@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -9,7 +10,6 @@ import 'package:netsales/features/workspace/presentation/widgets/workspace_trans
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 
 /// قسم آخر حركات الحساب والمشتريات الحية لنقطة البيع من الـ API (PosRecentTransactionsSection)
@@ -24,7 +24,7 @@ class PosRecentTransactionsSection extends StatelessWidget {
     return Obx(() {
       final items = controller.recentTransactionItems;
       if (controller.isLoadingRecentData.value && items.isEmpty) {
-        return const CustomSkeletonCard(height: 160);
+        return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 160, maxColumns: 1, minItemWidth: 180));
       }
 
       if (items.isEmpty) {
