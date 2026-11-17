@@ -400,6 +400,7 @@ class PosNewProcurementOrderController extends GetxController {
         resolvedId,
         preferredNetworkId: preferredNetworkId,
       );
+      selectedNetworkId.value=linkedNetworks.firstOrNull?.networkId;
     } else {
       selectedPosId.value = null;
       _setSelectedNetworkId(null);
