@@ -311,10 +311,9 @@ class _PackageArtwork extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Icon(
-                    Icons.sim_card_rounded,
-                    size: 49.r,
-                    color: const Color(0xFF087B61),
+                  child: CustomPaint(
+                    size: Size(61.r, 78.r),
+                    painter: _SimCardPainter(),
                   ),
                 ),
               ),
@@ -324,6 +323,132 @@ class _PackageArtwork extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SimCardPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cardPath = Path()
+      ..moveTo(size.width * .23, size.height * .04)
+      ..lineTo(size.width * .78, size.height * .02)
+      ..quadraticBezierTo(
+        size.width * .94,
+        size.height * .03,
+        size.width * .96,
+        size.height * .19,
+      )
+      ..lineTo(size.width * .88, size.height * .90)
+      ..quadraticBezierTo(
+        size.width * .86,
+        size.height * .99,
+        size.width * .71,
+        size.height * .98,
+      )
+      ..lineTo(size.width * .13, size.height * .91)
+      ..quadraticBezierTo(
+        size.width * .02,
+        size.height * .89,
+        size.width * .04,
+        size.height * .75,
+      )
+      ..lineTo(size.width * .12, size.height * .18)
+      ..quadraticBezierTo(
+        size.width * .13,
+        size.height * .05,
+        size.width * .23,
+        size.height * .04,
+      )
+      ..close();
+
+    canvas.drawShadow(
+      cardPath,
+      const Color(0xFF001F18).withValues(alpha: .32),
+      5,
+      true,
+    );
+    canvas.drawPath(
+      cardPath,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFFFFFF), Color(0xFFE4F8F0), Color(0xFFB5E4D5)],
+        ).createShader(Offset.zero & size),
+    );
+    canvas.drawPath(
+      cardPath,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2
+        ..color = const Color(0xFF087B61).withValues(alpha: .45),
+    );
+
+    final chipRect = Rect.fromLTWH(
+      size.width * .28,
+      size.height * .29,
+      size.width * .45,
+      size.height * .39,
+    );
+    final chipRRect = RRect.fromRectAndRadius(
+      chipRect,
+      Radius.circular(size.width * .07),
+    );
+    canvas.drawRRect(
+      chipRRect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFFE99A), Color(0xFFD9A83D), Color(0xFFF7D76E)],
+        ).createShader(chipRect),
+    );
+    canvas.drawRRect(
+      chipRRect,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = const Color(0xFF95651D),
+    );
+
+    final chipLine = Paint()
+      ..color = const Color(0xFF986A24)
+      ..strokeWidth = 1.15
+      ..style = PaintingStyle.stroke;
+    final x1 = size.width * .43;
+    final x2 = size.width * .58;
+    final y1 = size.height * .29;
+    final y2 = size.height * .68;
+    canvas.drawLine(Offset(x1, y1), Offset(x1, y2), chipLine);
+    canvas.drawLine(Offset(x2, y1), Offset(x2, y2), chipLine);
+    canvas.drawLine(
+      Offset(size.width * .28, size.height * .48),
+      Offset(size.width * .73, size.height * .48),
+      chipLine,
+    );
+    canvas.drawLine(
+      Offset(size.width * .35, size.height * .29),
+      Offset(size.width * .42, size.height * .40),
+      chipLine,
+    );
+    canvas.drawLine(
+      Offset(size.width * .66, size.height * .29),
+      Offset(size.width * .59, size.height * .40),
+      chipLine,
+    );
+    canvas.drawLine(
+      Offset(size.width * .35, size.height * .68),
+      Offset(size.width * .42, size.height * .57),
+      chipLine,
+    );
+    canvas.drawLine(
+      Offset(size.width * .66, size.height * .68),
+      Offset(size.width * .59, size.height * .57),
+      chipLine,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _NetworkArtworkPainter extends CustomPainter {
