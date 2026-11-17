@@ -151,6 +151,8 @@ class PosProcurementController extends GetxController {
   final isLoadingPackageDiscounts = false.obs;
   final packageDiscountError = RxnString();
   int _packageDiscountRevision = 0;
+  final isRefreshingCartPricing = false.obs;
+  int _cartPricingRefreshRevision = 0;
 
   EffectivePackageDiscountEntity? discountForPackage(int packageId) =>
       effectiveDiscountsByPackageId[packageId];
@@ -218,7 +220,10 @@ class PosProcurementController extends GetxController {
       );
 
   bool get canSubmitOrder =>
-      hasCartItems && hasCurrentProcurementSnapshots && !isSubmitting.value;
+      hasCartItems &&
+      hasCurrentProcurementSnapshots &&
+      !isRefreshingCartPricing.value &&
+      !isSubmitting.value;
 
   void _setSelectedNetworkId(int? value) {
     selectedNetworkId.value = value;
@@ -515,7 +520,137 @@ class PosProcurementController extends GetxController {
   Future<void> refreshNetworkPackages() async {
     final networkId = selectedNetworkId.value;
     if (networkId == null) return;
-    await _fetchNetworkPackages(networkId, reset: true);
+
+    final cartLines = procurementCart.toList(growable: false);
+    if (cartLines.isEmpty) {
+      await _fetchNetworkPackages(networkId, reset: true);
+      return;
+    }
+
+    final posId = selectedPosId.value;
+    final useCase = getPackagesUseCase;
+    if (posId == null || useCase == null || isRefreshingCartPricing.value) {
+      return;
+    }
+
+    final revision = ++_cartPricingRefreshRevision;
+    final packageIds = cartLines
+        .map((line) => line.package.packageId)
+        .toSet()
+        .toList(growable: false);
+    final refreshedPackages = <int, PackageEntity>{};
+
+    isRefreshingCartPricing.value = true;
+    try {
+      // The API caps an ID-filtered request at 50 packages. Keep large carts
+      // bounded without downloading unrelated catalogue pages.
+      for (var offset = 0; offset < packageIds.length; offset += 50) {
+        final batch = packageIds.skip(offset).take(50).toList(growable: false);
+        final result = await useCase(
+          networkId: networkId,
+          posId: posId,
+          status: true,
+          packageIds: batch,
+          perPage: batch.length,
+        );
+
+        if (revision != _cartPricingRefreshRevision ||
+            selectedNetworkId.value != networkId ||
+            selectedPosId.value != posId) {
+          return;
+        }
+
+        for (final package in result.items) {
+          if (batch.contains(package.packageId) &&
+              package.networkId == networkId) {
+            refreshedPackages[package.packageId] = package;
+          }
+        }
+      }
+
+      if (refreshedPackages.length != packageIds.length ||
+          packageIds.any((id) => !refreshedPackages.containsKey(id))) {
+        throw const AppException(
+          'لم تصل تعرفة حديثة لكل الباقات المختارة. تحقق من حالة الباقات ثم أعد المحاولة.',
+        );
+      }
+
+      // Do not apply a response to a cart that the user changed while it was
+      // in flight. The next refresh will use the latest cart contents.
+      if (!_matchesCartSnapshot(cartLines)) return;
+
+      final refreshedLines = cartLines.map((line) {
+        final package = refreshedPackages[line.package.packageId]!;
+        if (package.packageVoucherCount <= 0) {
+          throw const AppException('تعذر تحديث التعرفة بسبب سعة باقة غير صالحة.');
+        }
+
+        return ProcurementCartLineEntity(
+          package: package,
+          voucherCount: line.voucherCount,
+          sheets: VoucherSheetCalculator.breakdown(
+            line.voucherCount,
+            package.packageVoucherCount,
+          ).totalSheetsFraction,
+        );
+      }).toList(growable: false);
+
+      if (!procurementEstimateCalculator.hasCurrentSnapshots(
+        refreshedLines.map((line) => line.package),
+      )) {
+        throw const AppException(
+          'استلم التطبيق بيانات أسعار غير مكتملة أو منتهية. أعد تحديث التعرفة.',
+        );
+      }
+
+      procurementCart.assignAll(refreshedLines);
+      availablePackages.assignAll(
+        availablePackages.map(
+          (package) => refreshedPackages[package.packageId] ?? package,
+        ),
+      );
+      effectiveDiscountsByPackageId.clear();
+
+      // A previous server quote is no longer relevant after the signed
+      // package snapshots have been replaced.
+      _quoteRevision++;
+      serverQuote.value = null;
+      quoteError.value = null;
+      isLoadingQuote.value = false;
+      isQuotePending.value = false;
+      _refreshProcurementPresentation();
+
+      await loadEffectivePackageDiscounts();
+    } catch (error) {
+      if (revision != _cartPricingRefreshRevision) return;
+      CustomSnackbar.show(
+        title: 'تعذر تحديث التعرفة',
+        message: AppException.sanitizeMessage(
+          error,
+          fallback: 'لم نتمكن من جلب التعرفة الحالية للباقات المختارة.',
+        ),
+        type: SnackType.error,
+      );
+    } finally {
+      if (revision == _cartPricingRefreshRevision) {
+        isRefreshingCartPricing.value = false;
+      }
+    }
+  }
+
+  bool _matchesCartSnapshot(List<ProcurementCartLineEntity> snapshot) {
+    if (procurementCart.length != snapshot.length) return false;
+
+    for (var index = 0; index < snapshot.length; index++) {
+      final current = procurementCart[index];
+      final previous = snapshot[index];
+      if (current.package.packageId != previous.package.packageId ||
+          current.voucherCount != previous.voucherCount) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   Future<void> _fetchNetworkPackages(
@@ -760,6 +895,8 @@ class PosProcurementController extends GetxController {
   }
 
   void clearProcurementCart() {
+    _cartPricingRefreshRevision++;
+    isRefreshingCartPricing.value = false;
     procurementCart.clear();
     for (final controller in _packageQuantityControllers.values) {
       controller.clear();
