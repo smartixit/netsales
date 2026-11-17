@@ -164,6 +164,7 @@ class _PackageHero extends StatelessWidget {
     required this.isCustomDiscount,
     required this.discount,
   });
+
   final PackageEntity package;
   final bool isCustomDiscount;
   final double discount;
@@ -171,112 +172,144 @@ class _PackageHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return SizedBox(
-      height: 124.r,
-      child: Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(12.r, 9.r, 8.r, 9.r),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.r, vertical: 5.r),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.centerRight,
-                        end: Alignment.centerLeft,
-                        colors: [Color(0xFF0BA777), Color(0xFF075C49)],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 340.w;
+        final artworkSize = compact ? 104.r : 124.r;
+        return ConstrainedBox(
+          constraints: BoxConstraints(minHeight: artworkSize),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    compact ? 8.r : 12.r,
+                    9.r,
+                    8.r,
+                    9.r,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: constraints.maxWidth - artworkSize - 28.r,
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: compact ? 7.r : 10.r,
+                          vertical: 5.r,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.centerRight,
+                            end: Alignment.centerLeft,
+                            colors: [Color(0xFF0BA777), Color(0xFF075C49)],
+                          ),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _emerald.withValues(alpha: .18),
+                              blurRadius: 9,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isCustomDiscount
+                                  ? Icons.storefront_rounded
+                                  : Icons.star_rounded,
+                              color: Colors.white,
+                              size: 14.r,
+                            ),
+                            AppSpacing.hXxs,
+                            Flexible(
+                              child: Text(
+                                isCustomDiscount
+                                    ? 'خصم نقطة البيع'
+                                    : discount > 0
+                                        ? 'عرض الباقة'
+                                        : 'باقة الشبكة',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _emerald.withValues(alpha: .18),
-                          blurRadius: 9,
-                          offset: const Offset(0, 3),
+                      AppSpacing.vXs,
+                      Text(
+                        package.packageName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: AppTypography.titleSmall.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w700,
+                          height: 1.3,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isCustomDiscount
-                              ? Icons.storefront_rounded
-                              : Icons.star_rounded,
-                          color: Colors.white,
-                          size: 14.r,
+                      ),
+                      AppSpacing.vXxs,
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: constraints.maxWidth - artworkSize - 28.r,
                         ),
-                        AppSpacing.hXxs,
-                        Text(
-                          isCustomDiscount
-                              ? 'خصم نقطة البيع'
-                              : discount > 0
-                                  ? 'عرض الباقة'
-                                  : 'باقة الشبكة',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 7.r,
+                          vertical: 4.r,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.primary.withValues(alpha: .08),
+                          borderRadius: BorderRadius.circular(AppRadius.chip),
+                          border: Border.all(
+                            color: colors.primary.withValues(alpha: .14),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  AppSpacing.vXs,
-                  Text(
-                    package.packageName,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: AppTypography.titleSmall.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w700,
-                      height: 1.3,
-                    ),
-                  ),
-                  AppSpacing.vXxs,
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.r,
-                      vertical: 4.r,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colors.primary.withValues(alpha: .08),
-                      borderRadius: BorderRadius.circular(AppRadius.chip),
-                      border: Border.all(
-                        color: colors.primary.withValues(alpha: .14),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.layers_rounded,
+                              size: 13.r,
+                              color: colors.primary,
+                            ),
+                            AppSpacing.hXxs,
+                            Flexible(
+                              child: Text(
+                                'سعة الورقة: ${package.packageVoucherCount} كرت',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.layers_rounded,
-                          size: 13.r,
-                          color: colors.primary,
-                        ),
-                        AppSpacing.hXxs,
-                        Text(
-                          'سعة الورقة: ${package.packageVoucherCount} كرت',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+              SizedBox(
+                width: artworkSize,
+                height: artworkSize,
+                child: const _PackageArtwork(),
+              ),
+            ],
           ),
-          const _PackageArtwork(),
-        ],
-      ),
+        );
+      },
     );
   }
 }
