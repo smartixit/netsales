@@ -1,4 +1,4 @@
-part of 'custom_state_view.dart';
+part of '../custom_state_view.dart';
 extension on CustomStateView {
 Widget _buildStateView(BuildContext context) {
     final colors = context.colors;
