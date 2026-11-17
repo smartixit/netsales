@@ -30,6 +30,7 @@ class MockCatalogRepository implements PackageCatalogRepository {
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async {
     if (shouldThrow) {
       throw const AppException('فشل الاتصال بالخادم', code: '500');
@@ -38,6 +39,7 @@ class MockCatalogRepository implements PackageCatalogRepository {
     final filtered = items.where((p) {
       if (networkId != null && p.networkId != networkId) return false;
       if (status != null && p.status != status) return false;
+      if (packageIds != null && !packageIds.contains(p.packageId)) return false;
       if (search != null && search.isNotEmpty) {
         if (!p.packageName.toLowerCase().contains(search.toLowerCase())) {
           return false;
