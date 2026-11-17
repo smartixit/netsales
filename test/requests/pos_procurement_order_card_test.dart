@@ -110,7 +110,7 @@ void main() {
       viewport: const Size(320, 760),
     );
 
-    expect(find.text('باقة'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pos-order-package-color-accent')), findsOneWidget);
     expect(find.text('عرض التفاصيل'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
