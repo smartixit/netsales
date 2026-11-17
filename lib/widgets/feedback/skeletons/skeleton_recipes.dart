@@ -43,6 +43,18 @@ abstract final class SkeletonRecipes {
     maxColumns: maxColumns,
   );
 
+  static CustomStateSkeleton text({
+    int lineCount = 2,
+    double spacing = 8,
+  }) => CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.text,
+    itemCount: 1,
+    lineCount: lineCount,
+    spacing: spacing,
+    hasLeading: false,
+    hasTrailing: false,
+    showCardSurface: false,
+  );
   static CustomStateSkeleton detail({
     int itemCount = 3,
     double cardHeight = 64,
