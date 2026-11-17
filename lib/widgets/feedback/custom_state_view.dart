@@ -543,6 +543,7 @@ class _LoadingLine extends StatelessWidget {
   final Color accent;
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return FractionallySizedBox(
       widthFactor: widthFactor,
       child: Container(
