@@ -216,7 +216,7 @@ class _PackageHeader extends StatelessWidget {
             border: Border.all(color: accent.withValues(alpha: .13)),
           ),
           child: Icon(
-            Icons.wifi_tethering_rounded,
+            Icons.signal_cellular_alt_rounded,
             color: accent,
             size: 22.r,
           ),
