@@ -51,6 +51,7 @@ void main() {
     WidgetTester tester, {
     bool isDark = false,
     bool hasPosCustomDiscount = false,
+    bool isCashSale = true,
     EffectivePackageDiscountEntity? customDiscount,
     Size viewport = const Size(360, 780),
   }) async {
@@ -78,7 +79,7 @@ void main() {
                   ),
                   quantity: 0,
                   onSetQuantity: (_) {},
-                  isCashSale: true,
+                  isCashSale: isCashSale,
                   quantityController: quantityController,
                   customDiscount: customDiscount,
                   estimatedLineTotalMinor: 900000,
@@ -116,6 +117,33 @@ void main() {
           .dy;
       final cashPriceTop = tester.getTopLeft(find.text('السعر النقدي')).dy;
       expect(basePriceTop, lessThan(cashPriceTop));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'keeps cash and credit option heights unchanged when selection switches',
+    (tester) async {
+      await pumpCard(tester, isCashSale: true);
+
+      final cashCard = find.byKey(
+        const ValueKey('procurement-price-option-cash'),
+      );
+      final creditCard = find.byKey(
+        const ValueKey('procurement-price-option-credit'),
+      );
+      final cashHeightBefore = tester.getSize(cashCard).height;
+      final creditHeightBefore = tester.getSize(creditCard).height;
+
+      expect(cashHeightBefore, closeTo(creditHeightBefore, 0.01));
+
+      await pumpCard(tester, isCashSale: false);
+
+      expect(tester.getSize(cashCard).height, closeTo(cashHeightBefore, 0.01));
+      expect(
+        tester.getSize(creditCard).height,
+        closeTo(creditHeightBefore, 0.01),
+      );
       expect(tester.takeException(), isNull);
     },
   );
