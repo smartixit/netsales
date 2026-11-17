@@ -90,7 +90,7 @@ class PosProcurementOrdersHero extends StatelessWidget {
                             'الطلبات',
                             maxLines: 1,
                             style: AppTypography.headlineSmall.copyWith(
-                              color: Colors.white,
+                              color: colors.onPrimary,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
