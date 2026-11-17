@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/features/finance/domain/entities/network_wallet_entity.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_transfer_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -39,7 +39,16 @@ class NetworkWalletTransferSheet
             AppSpacing.vSm,
             if (controller.isLoadingPos.value &&
                 !controller.hasLoadedPosList.value)
-              const CustomSkeletonFeed(itemCount: 2)
+              const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+)
             else if (controller.posErrorMessage.value != null &&
                 !controller.hasLoadedPosList.value)
               CustomErrorState.compact(
@@ -111,7 +120,16 @@ class NetworkWalletTransferSheet
                   ],
                   if (controller.isLoadingMorePos.value) ...[
                     AppSpacing.vXs,
-                    const CustomSkeletonFeed(itemCount: 2),
+                    const CustomStateView.loading(
+  presentation: CustomStatePresentation.skeletonOnly,
+  skeleton: CustomStateSkeleton(
+    layout: CustomStateSkeletonLayout.list,
+    itemCount: x,
+    cardHeight: x,
+    hasLeading: true,
+     
+  ),
+),
                   ] else if (controller.hasMorePos) ...[
                     AppSpacing.vXs,
                     CustomButton.secondary(
