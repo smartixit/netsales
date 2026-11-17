@@ -16,7 +16,6 @@ class ProcurementNetworkContextSection extends GetView<PosProcurementController>
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return Obx(() {
       final links = controller.linkedNetworks;
       final selected = links.firstWhereOrNull(
