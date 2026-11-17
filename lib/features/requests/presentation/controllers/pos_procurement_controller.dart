@@ -631,11 +631,6 @@ class PosProcurementController extends GetxController {
         error,
         fallback: 'لم نتمكن من جلب التعرفة الحالية للباقات المختارة.',
       );
-      CustomSnackbar.show(
-        title: 'تعذر تحديث التعرفة',
-        message: cartPricingRefreshError.value!,
-        type: SnackType.error,
-      );
     } finally {
       if (revision == _cartPricingRefreshRevision) {
         isRefreshingCartPricing.value = false;
