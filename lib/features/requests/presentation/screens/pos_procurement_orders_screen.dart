@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/pos_procurement_order_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/pos_procurement_orders_hero.dart';
@@ -173,10 +173,11 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
         title: const Text('طلبات التوريد'),
         centerTitle: true,
         actions: [
-          IconButton(
+          CustomButton.icon(
+            icon: Icons.refresh_rounded,
             tooltip: 'تحديث الطلبات',
+            backgroundColor: Colors.transparent,
             onPressed: () => controller.loadRequests(isRefresh: true),
-            icon: const Icon(Icons.refresh_rounded),
           ),
         ],
       ),
