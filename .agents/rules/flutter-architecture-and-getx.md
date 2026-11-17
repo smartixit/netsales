@@ -42,7 +42,7 @@ lib/features/<feature_name>/
 Never re-implement components or utilities that already exist in `lib/widgets/` or `lib/core/`:
 - **Errors & Notifications:** Display exceptions and API errors exclusively via `CustomSnackbar.show(..., type: SnackType.error)`.
 - **Action Overlays:** Mutating actions must use `CustomAnimationOverlay.showLoading()` / `CustomAnimationOverlay.showSuccess()`, always safely closed in `finally { if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide(); }`.
-- **Feed & Shimmer Loading:** Asynchronous loading lists/grids must use `CustomSkeletonFeed` or `CustomSkeletonShimmer`.
+- **Feed & Shimmer Loading:** Asynchronous loading lists/grids must use `CustomStateView.loading` with `CustomStateSkeleton`; select a responsive layout recipe and preserve loaded content during incremental pagination.
 - **Dialogs & Confirmations:** Confirmation dialogs must use `CustomDialog` (`CustomDialog.danger`, `CustomDialog.confirmation`).
 - **Sheets:** Modal sheets must use `CustomBottomSheet.show(...)`.
 - **Shared Widgets (`lib/widgets/`):**
@@ -51,7 +51,7 @@ Never re-implement components or utilities that already exist in `lib/widgets/` 
   - **Dialogs (`lib/widgets/dialogs/`):** `CustomDialog`, `CustomAnimationOverlay`, `DialogActionBar`, `DialogBodyContent`, `DialogIconHeader`.
   - **Sheets (`lib/widgets/sheets/`):** `CustomBottomSheet`, `InvoicePrintFormatSheet`.
   - **Inputs (`lib/widgets/inputs/`):** `CustomTextField`, `CustomPasswordField`, `CustomPasswordRequirementItem`, `CustomPhoneField`, `CustomPinField`, `CustomDropdown`, `CustomNumericKeyboard`, `CustomSwitch`, `CustomSwitchListTile`.
-  - **Feedback & States (`lib/widgets/feedback/`):** `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Skeleton Shimmers (`CustomSkeletonCard`, `CustomSkeletonFeed`, `CustomSkeletonGrid`, `CustomSkeletonListTile`, `CustomSkeletonShimmer`, `CustomSkeletonText`).
+  - **Feedback & States (`lib/widgets/feedback/`):** `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Adaptive skeleton engine: `CustomStateView.loading` + `CustomStateSkeleton`; `CustomSkeletonShimmer` is only the low-level animation primitive. Legacy feed/grid/list-tile widgets are removed.
   - **Toasts (`lib/widgets/toasts/`):** `CustomSnackbar`, `CustomToast`.
   - **Pickers (`lib/widgets/pickers/`):** `CustomDatePickerField`, `CustomDatePickerModal`, `CustomFilePicker`, `CustomImagePicker`, `CustomContactPickerIconButton`, `CustomColorPicker`, `CustomPosSelectorField`, `FileCardItem`, `FilePickerDropzone`.
   - **Foundation & Nav (`lib/widgets/foundation/` & `lib/widgets/navigations/`):** `CustomAppScaffold`, `CustomFloatingBottomNavBar`, `DoubleBackExitScope`.
@@ -85,7 +85,7 @@ Every widget must be placed strictly according to its responsibility and reuse s
 
 ## 5. UI State Coverage & Cursor Pagination Standards
 Every view handling asynchronous data must explicitly implement:
-- **Loading State:** Content-matching skeletons (`CustomSkeletonFeed`, `CustomSkeletonShimmer`) for initial load.
+- **Loading State:** Content-matching adaptive skeletons through `CustomStateView.loading` + `CustomStateSkeleton` for initial load.
 - **Empty State:** Informative empty illustrations and messages.
 - **Error State:** Actionable error display with retry capability.
 - **Success State:** Loaded content rendered responsively.
