@@ -19,6 +19,7 @@ enum CustomStateKind {
   error,
   offline,
   pricingExpired,
+  notFound,
 }
 
 /// طرق تقديم الحالة دون تغيير هويتها البصرية.
@@ -169,6 +170,29 @@ class CustomStateView extends StatelessWidget {
     this.graphicSize,
     this.padding,
   }) : kind = CustomStateKind.pricingExpired,
+       technicalDetails = null,
+       showLoadingSkeleton = false,
+       skeleton = null,
+       skeletonBuilder = null;
+
+  const CustomStateView.notFound({
+    super.key,
+    this.title = 'المورد المطلوب غير موجود',
+    this.subtitle = 'قد يكون قد حُذف أو لم تعد تملك صلاحية الوصول إليه.',
+    this.presentation = CustomStatePresentation.fullscreen,
+    this.badgeLabel = '404 • NOT FOUND',
+    this.icon = Icons.search_off_rounded,
+    this.accentColor,
+    this.graphicSize,
+    this.padding,
+  }) : kind = CustomStateKind.notFound,
+       actionLabel = null,
+       actionIcon = null,
+       onAction = null,
+       secondaryActionLabel = null,
+       secondaryActionIcon = null,
+       onSecondaryAction = null,
+       customAction = null,
        technicalDetails = null,
        showLoadingSkeleton = false,
        skeleton = null,
