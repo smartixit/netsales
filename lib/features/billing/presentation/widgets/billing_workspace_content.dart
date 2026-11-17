@@ -12,7 +12,7 @@ import 'package:netsales/features/billing/presentation/widgets/billing_plan_sect
 import 'package:netsales/features/billing/presentation/widgets/billing_subscription_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_collection_status_options.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 
 /// Composition-only content for the billing workspace.
 class BillingWorkspaceContent extends StatelessWidget {
