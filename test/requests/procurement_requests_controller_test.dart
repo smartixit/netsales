@@ -44,6 +44,7 @@ class MockRequestRepository implements RequestRepository {
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async {
     lastRequestedNetworkId = networkId;
     if (shouldThrow) {
@@ -272,9 +273,12 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
     int? perPage,
   }) async {
     lastSearch = search;
-    final filtered = search == null || search.isEmpty
+    final scopedPackages = packageIds == null
         ? packages
-        : packages
+        : packages.where((package) => packageIds.contains(package.packageId)).toList();
+    final filtered = search == null || search.isEmpty
+        ? scopedPackages
+        : scopedPackages
             .where(
               (package) => package.packageName.contains(search),
             )
