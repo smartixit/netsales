@@ -56,7 +56,7 @@ class PosProcurementOrderCard extends StatelessWidget {
     return parsed == null ? '' : DateFormatter.time(parsed);
   }
 
-  Future<void> _showActions() {
+  Future<void> _showActions() async {
     final actions = <CustomBottomSheetActionItem>[
       if (onEdit != null)
         CustomBottomSheetActionItem(
@@ -80,7 +80,7 @@ class PosProcurementOrderCard extends StatelessWidget {
         ),
     ];
     if (actions.isEmpty) return Future<void>.value();
-    return CustomBottomSheet.showActions<void>(
+    await CustomBottomSheet.showActions<void>(
       title: 'إجراءات الطلب #${request.requestId}',
       leadingIcon: Icons.more_horiz_rounded,
       items: actions,
