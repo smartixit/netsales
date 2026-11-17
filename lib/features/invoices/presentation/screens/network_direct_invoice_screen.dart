@@ -12,6 +12,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/inputs/voucher_quantity_stepper.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 
@@ -121,7 +122,14 @@ class NetworkDirectInvoiceScreen
                 AppSpacing.vMd,
                 Obx(() {
                   if (controller.isLoadingPos.value) {
-                    return const LinearProgressIndicator();
+                    return const CustomStateView.loading(
+                      presentation: CustomStatePresentation.skeletonOnly,
+                      skeleton: CustomStateSkeleton(
+                        layout: CustomStateSkeletonLayout.text,
+                        lineCount: 2,
+                        showCardSurface: false,
+                      ),
+                    );
                   }
                   if (controller.linkedPos.isEmpty) {
                     return DirectInvoiceInlineNotice(
@@ -176,7 +184,14 @@ class NetworkDirectInvoiceScreen
                 AppSpacing.vSm,
                 Obx(() {
                   if (controller.isLoadingPackages.value) {
-                    return const LinearProgressIndicator();
+                    return const CustomStateView.loading(
+                      presentation: CustomStatePresentation.skeletonOnly,
+                      skeleton: CustomStateSkeleton(
+                        layout: CustomStateSkeletonLayout.text,
+                        lineCount: 2,
+                        showCardSurface: false,
+                      ),
+                    );
                   }
                   if (controller.availablePackages.isEmpty) {
                     return DirectInvoiceInlineNotice(
