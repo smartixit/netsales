@@ -12,7 +12,6 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_chec
 import 'package:netsales/features/requests/presentation/widgets/procurement_network_context_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_pos_context_section.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -106,7 +105,6 @@ class _ProcurementHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(AppSpacing.lg),
