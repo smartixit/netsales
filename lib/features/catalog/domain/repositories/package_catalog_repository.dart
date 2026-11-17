@@ -26,6 +26,12 @@ abstract class PackageCatalogRepository {
   /// استرجاع تفاصيل باقة محددة
   Future<PackageEntity> getPackageDetails(int packageId);
 
+  /// استرجاع جميع الخصومات المخصصة الفعالة لنقطة بيع وشبكة في طلب واحد.
+  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({
+    required int networkId,
+    required int posId,
+  });
+
   /// استرجاع الخصم الفعلي المعتمد لنقطة بيع على باقة معينة من الخادم
   Future<EffectivePackageDiscountEntity> getEffectiveDiscount({
     required int networkId,
