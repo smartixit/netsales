@@ -27,7 +27,8 @@ class PosProcurementOrdersSummaryStrip extends StatelessWidget {
         value: summary?.total,
         color: colors.primary,
         icon: Icons.receipt_long_rounded,
-        gradient: AppGradients.entityAmethyst(context),
+        gradient: AppGradients.financialHero(context),
+        foreground: colors.onPrimary,
       ),
       _SummaryCardData(
         label: 'قيد المراجعة',
@@ -35,6 +36,7 @@ class PosProcurementOrdersSummaryStrip extends StatelessWidget {
         color: colors.warning,
         icon: Icons.schedule_rounded,
         gradient: AppGradients.accentHero3(context, colors.warning),
+        foreground: colors.onSurface,
       ),
       _SummaryCardData(
         label: 'معتمدة',
@@ -42,6 +44,7 @@ class PosProcurementOrdersSummaryStrip extends StatelessWidget {
         color: colors.success,
         icon: Icons.verified_rounded,
         gradient: AppGradients.accentHero3(context, colors.success),
+        foreground: colors.onSurface,
       ),
     ];
 
@@ -69,6 +72,7 @@ class _SummaryCardData {
     required this.color,
     required this.icon,
     required this.gradient,
+    required this.foreground,
   });
 
   final String label;
@@ -76,6 +80,7 @@ class _SummaryCardData {
   final Color color;
   final IconData icon;
   final Gradient gradient;
+  final Color foreground;
 }
 
 class _SummaryCard extends StatelessWidget {
@@ -114,18 +119,18 @@ class _SummaryCard extends StatelessWidget {
             width: 36.r,
             height: 36.r,
             decoration: BoxDecoration(
-              color: data.color.withValues(alpha: dark ? .20 : .12),
+              color: data.foreground.withValues(alpha: dark ? .16 : .12),
               shape: BoxShape.circle,
-              border: Border.all(color: data.color.withValues(alpha: .20)),
+              border: Border.all(color: data.foreground.withValues(alpha: .18)),
               boxShadow: AppElevation.level1(context),
             ),
-            child: Icon(data.icon, size: 19.r, color: data.color),
+            child: Icon(data.icon, size: 19.r, color: data.foreground),
           ),
           AppSpacing.vXs,
           Text(
             isLoading ? '—' : (data.value?.toString() ?? '—'),
             style: AppTypography.titleLarge.copyWith(
-              color: colors.onSurface,
+              color: data.foreground,
               fontWeight: FontWeight.w800,
               height: 1.05,
             ),
@@ -137,7 +142,7 @@ class _SummaryCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant,
+              color: data.foreground.withValues(alpha: .86),
               fontWeight: FontWeight.w700,
             ),
           ),
