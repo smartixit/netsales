@@ -9,8 +9,8 @@ import 'package:netsales/features/finance/presentation/widgets/debt_aging_summar
 import 'package:netsales/features/finance/presentation/widgets/debt_scope_selector.dart';
 import 'package:netsales/features/finance/presentation/widgets/outstanding_invoice_skeleton.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_card.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
