@@ -10,7 +10,8 @@ import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
 export 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 
-part 'states/custom_state_view_renderer.dart';
+part 'states/custom_state_view_layout.dart';
+part 'states/custom_state_view_content.dart';
 
 /// الحالات الموحدة المعتمدة لكل واجهات NetSales.
 enum CustomStateKind {
