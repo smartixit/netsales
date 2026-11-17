@@ -67,7 +67,7 @@ class ProcurementPackageSelectionSection
         ),
         AppSpacing.vXxs,
         Text(
-          'عدّل كمية كل باقة من بطاقتها مباشرة. يمكنك إضافة أكثر من باقة، ووتظهر تعرفة النقدي والآجل مباشرة داخل كل بطاقة.',
+          'عدّل كمية كل باقة من بطاقتها مباشرة. يمكنك إضافة أكثر من باقة، وتظهر تعرفة النقدي والآجل مباشرة داخل كل بطاقة.',
           style: AppTypography.bodySmall.copyWith(
             color: colors.onSurfaceVariant,
           ),
@@ -126,7 +126,8 @@ class ProcurementPackageSelectionSection
                   controller.availablePackages.isEmpty)
                 SizedBox(
                   width: double.infinity,
-                  child: _buildCatalogFailureState(context))
+                  child: _buildCatalogFailureState(context),
+                )
               else if (controller.availablePackages.isEmpty &&
                   controller.packageSearchQuery.value.isNotEmpty)
                 CustomEmptyState.search(
