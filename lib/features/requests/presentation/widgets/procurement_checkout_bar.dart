@@ -101,8 +101,19 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
                 children: [
                   if (!hasEstimate && lines.isNotEmpty) ...[
                     CustomStateView.pricingExpired(
+                      title: controller.isRefreshingCartPricing.value
+                          ? 'جارٍ تحديث التعرفة'
+                          : 'انتهت صلاحية التعرفة',
+                      subtitle: controller.isRefreshingCartPricing.value
+                          ? 'نحدّث أسعار الباقات المختارة مع الحفاظ على كميات السلة.'
+                          : 'حدّث التعرفة الحالية قبل إرسال طلب التوريد.',
+                      actionLabel: controller.isRefreshingCartPricing.value
+                          ? 'جارٍ التحديث...'
+                          : 'تحديث التعرفة',
                       presentation: CustomStatePresentation.compact,
-                      onAction: controller.refreshNetworkPackages,
+                      onAction: controller.isRefreshingCartPricing.value
+                          ? null
+                          : controller.refreshNetworkPackages,
                     ),
                     AppSpacing.vXs,
                   ],
