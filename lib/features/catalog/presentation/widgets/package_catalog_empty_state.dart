@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 
 /// عنصر الحالة الفارغة المخصص لكتالوج باقات الكروت
 class PackageCatalogEmptyState extends GetView<PackageCatalogController> {
