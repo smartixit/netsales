@@ -354,7 +354,7 @@ void main() {
     status: true,
   );
 
-  group('PosProcurementController Tests (M6.1)', () {
+  group('POS Procurement Collection and Form Controller Tests (M6.1)', () {
     late MockRequestRepository mockRequestRepo;
     late MockCommercialRepository mockCommercialRepo;
     late MockPackageCatalogRepository mockPackageRepo;
