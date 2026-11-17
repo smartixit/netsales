@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_share_card.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// نافذة سفلية لعرض ومشاركة دعوة ربط نقطة البيع بالشبكة عبر QR
@@ -39,7 +39,15 @@ class NetworkPosQrChallengeSheet {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
               padding: EdgeInsets.all(24.0),
-              child: CustomSkeletonFeed(itemCount: 1, cardHeight: 280),
+              child: CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 3,
+                  cardHeight: 112,
+                  hasLeading: true,
+                ),
+              ),
             );
           }
 

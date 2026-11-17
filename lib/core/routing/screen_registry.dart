@@ -357,7 +357,10 @@ abstract final class ScreenRegistry {
   }
 
   /// التحقق مما إذا كان المستخدم يملك الصلاحية للوصول للشاشة المحددة بمسارها
-  static bool hasAccessToRoute(String route, {required bool Function(String) can}) {
+  static bool hasAccessToRoute(
+    String route, {
+    required bool Function(String) can,
+  }) {
     final descriptor = findByRoute(route);
     if (descriptor == null || descriptor.requiredPermission == null) {
       return true;

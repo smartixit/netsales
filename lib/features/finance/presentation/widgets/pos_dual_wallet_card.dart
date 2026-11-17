@@ -130,7 +130,8 @@ class PosDualWalletCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (wallet.creditLimit != null && wallet.totalPurchasingPower != null) ...[
+            if (wallet.creditLimit != null &&
+                wallet.totalPurchasingPower != null) ...[
               AppSpacing.vSm,
               Container(
                 padding: const EdgeInsets.symmetric(

@@ -208,7 +208,9 @@ class AmountToWordsConverter {
       buffer.write(_convertInteger(decimalPart));
       if (includeCurrency) {
         buffer.write(' ');
-        buffer.write(_resolveCurrencyLabel(decimalPart, config, isFraction: true));
+        buffer.write(
+          _resolveCurrencyLabel(decimalPart, config, isFraction: true),
+        );
       }
     }
 
@@ -330,4 +332,3 @@ class AmountToWordsConverter {
     return m;
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -11,9 +12,8 @@ import 'package:netsales/features/workspace/presentation/widgets/executive_sales
 import 'package:netsales/features/workspace/presentation/widgets/executive_welcome_hero_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/network_live_pending_orders_stream.dart';
 import 'package:netsales/features/workspace/presentation/widgets/network_provider_carousel_section.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 
 /// الشاشة الرئيسية لمساحة عمل الشبكة (NetworkWorkspaceDashboard)
@@ -21,10 +21,7 @@ import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 class NetworkWorkspaceDashboard extends StatelessWidget {
   final NetworkWorkspaceController controller;
 
-  const NetworkWorkspaceDashboard({
-    super.key,
-    required this.controller,
-  });
+  const NetworkWorkspaceDashboard({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +38,38 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
         if (controller.isLoading.value && controller.overview.value == null) {
           return const Column(
             children: [
-              CustomSkeletonCard(height: 126),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 126,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
               SizedBox(height: 20),
-              CustomSkeletonCard(height: 210),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 210,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
               SizedBox(height: 16),
-              CustomSkeletonCard(height: 156),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 156,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
             ],
           );
         }
@@ -61,8 +85,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
           return const CustomEmptyState(
             icon: Icons.hub_outlined,
             title: 'لا توجد شبكة مرتبطة بالحساب',
-            subtitle:
-                'لا يمكن عرض مؤشرات مساحة العمل قبل توفر شبكة مصرح بها.',
+            subtitle: 'لا يمكن عرض مؤشرات مساحة العمل قبل توفر شبكة مصرح بها.',
           );
         }
 

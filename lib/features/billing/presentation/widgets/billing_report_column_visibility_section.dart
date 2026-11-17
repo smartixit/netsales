@@ -24,22 +24,18 @@ class BillingReportColumnVisibilitySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
+        Text(title, style: Theme.of(context).textTheme.titleSmall),
         ...columns.map(
           (column) => Row(
             children: [
-              Expanded(
-                child: Text(resolveLabel(context, column.labelKey)),
-              ),
+              Expanded(child: Text(resolveLabel(context, column.labelKey))),
               CustomSwitch(
                 value: presentation.visibleColumnIds.contains(column.id),
                 enabled: column.hideable,
                 onChanged: (value) {
-                  final selected =
-                      List<String>.from(presentation.visibleColumnIds);
+                  final selected = List<String>.from(
+                    presentation.visibleColumnIds,
+                  );
                   if (value && !selected.contains(column.id)) {
                     selected.add(column.id);
                   }

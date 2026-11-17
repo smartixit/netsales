@@ -78,10 +78,7 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
           }
           labelsForFilter[value] = label;
           choices.add(
-            ReportChoiceOption(
-              value: value,
-              labelKey: '$filterId.$value',
-            ),
+            ReportChoiceOption(value: value, labelKey: '$filterId.$value'),
           );
         }
       }
@@ -101,12 +98,11 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
           choices: choices,
         ),
       );
-      filterLabels[filterId] = _requiredText(
-        filter['label'],
-        'filter.label',
-      );
+      filterLabels[filterId] = _requiredText(filter['label'], 'filter.label');
       if (labelsForFilter.isNotEmpty) {
-        choiceLabels[filterId] = Map<String, String>.unmodifiable(labelsForFilter);
+        choiceLabels[filterId] = Map<String, String>.unmodifiable(
+          labelsForFilter,
+        );
       }
     }
 
@@ -132,10 +128,7 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
           groupable: column['groupable'] == true,
         ),
       );
-      columnLabels[columnId] = _requiredText(
-        column['label'],
-        'column.label',
-      );
+      columnLabels[columnId] = _requiredText(column['label'], 'column.label');
     }
 
     final rawMetrics = _requiredList(raw['metric_slots'], 'metric_slots');
@@ -156,10 +149,7 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
           ),
         ),
       );
-      metricLabels[metricId] = _requiredText(
-        metric['label'],
-        'metric.label',
-      );
+      metricLabels[metricId] = _requiredText(metric['label'], 'metric.label');
     }
 
     final rawTemplates = _requiredList(raw['templates'], 'templates');
@@ -276,14 +266,13 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
     _ => throw FormatException('نوع عمود غير مدعوم: $value'),
   };
 
-  static ReportExecutionPolicy _executionPolicy(String value) => switch (
-    value
-  ) {
-    'client' => ReportExecutionPolicy.client,
-    'server' => ReportExecutionPolicy.server,
-    'either' => ReportExecutionPolicy.either,
-    _ => throw FormatException('سياسة تنفيذ التقرير غير مدعومة: $value'),
-  };
+  static ReportExecutionPolicy _executionPolicy(String value) =>
+      switch (value) {
+        'client' => ReportExecutionPolicy.client,
+        'server' => ReportExecutionPolicy.server,
+        'either' => ReportExecutionPolicy.either,
+        _ => throw FormatException('سياسة تنفيذ التقرير غير مدعومة: $value'),
+      };
 
   static TemplateVersion _templateVersion(String value) {
     final match = RegExp(r'^(\d+)\.(\d+)\.(\d+)$').firstMatch(value);
@@ -315,7 +304,9 @@ class OperationalReportCatalogModel extends OperationalReportCatalog {
   static List<String> _nonEmptyStringList(dynamic value, String field) {
     final values = _stringList(value, field);
     if (values.isEmpty) {
-      throw FormatException('قائمة $field يجب أن تحتوي عنصراً واحداً على الأقل.');
+      throw FormatException(
+        'قائمة $field يجب أن تحتوي عنصراً واحداً على الأقل.',
+      );
     }
     return values;
   }

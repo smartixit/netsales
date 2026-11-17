@@ -1,4 +1,5 @@
 import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
+
 import 'dart:typed_data';
 
 import 'package:netsales/core/models/paginated_list.dart';
@@ -16,7 +17,6 @@ class GetOperationalReportCatalogUseCase {
   Future<OperationalReportCatalog> call({required int networkId, int? posId}) =>
       repository.getCatalog(networkId: networkId, posId: posId);
 }
-
 
 class GetOperationalReportUseCase {
   const GetOperationalReportUseCase(this.repository);
@@ -103,7 +103,6 @@ class SaveOperationalReportSummaryPdfUseCase {
   );
 }
 
-
 class SaveOperationalReportDetailedPdfUseCase {
   const SaveOperationalReportDetailedPdfUseCase(this.repository);
   final OperationalReportRepository repository;
@@ -188,20 +187,71 @@ class DownloadOperationalReportExportUseCase {
 class GetOperationalReportPresetsUseCase {
   const GetOperationalReportPresetsUseCase(this.repository);
   final OperationalReportRepository repository;
-  Future<List<SavedReportPreset>> call({required OperationalReportType type, required int networkId, int? posId}) => repository.getPresets(type: type, networkId: networkId, posId: posId);
+  Future<List<SavedReportPreset>> call({
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+  }) => repository.getPresets(type: type, networkId: networkId, posId: posId);
 }
+
 class SaveOperationalReportPresetUseCase {
   const SaveOperationalReportPresetUseCase(this.repository);
   final OperationalReportRepository repository;
-  Future<SavedReportPreset> call({required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation}) => repository.savePreset(type: type, networkId: networkId, posId: posId, name: name, reportSchemaVersion: reportSchemaVersion, criteria: criteria, presentation: presentation);
+  Future<SavedReportPreset> call({
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+    required String name,
+    required int reportSchemaVersion,
+    required ReportCriteria criteria,
+    required ReportPresentationOptions presentation,
+  }) => repository.savePreset(
+    type: type,
+    networkId: networkId,
+    posId: posId,
+    name: name,
+    reportSchemaVersion: reportSchemaVersion,
+    criteria: criteria,
+    presentation: presentation,
+  );
 }
+
 class UpdateOperationalReportPresetUseCase {
   const UpdateOperationalReportPresetUseCase(this.repository);
   final OperationalReportRepository repository;
-  Future<SavedReportPreset> call({required String presetId, required OperationalReportType type, required int networkId, int? posId, required String name, required int reportSchemaVersion, required ReportCriteria criteria, required ReportPresentationOptions presentation}) => repository.updatePreset(presetId: presetId, type: type, networkId: networkId, posId: posId, name: name, reportSchemaVersion: reportSchemaVersion, criteria: criteria, presentation: presentation);
+  Future<SavedReportPreset> call({
+    required String presetId,
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+    required String name,
+    required int reportSchemaVersion,
+    required ReportCriteria criteria,
+    required ReportPresentationOptions presentation,
+  }) => repository.updatePreset(
+    presetId: presetId,
+    type: type,
+    networkId: networkId,
+    posId: posId,
+    name: name,
+    reportSchemaVersion: reportSchemaVersion,
+    criteria: criteria,
+    presentation: presentation,
+  );
 }
+
 class DeleteOperationalReportPresetUseCase {
   const DeleteOperationalReportPresetUseCase(this.repository);
   final OperationalReportRepository repository;
-  Future<void> call({required String presetId, required OperationalReportType type, required int networkId, int? posId}) => repository.deletePreset(presetId: presetId, type: type, networkId: networkId, posId: posId);
+  Future<void> call({
+    required String presetId,
+    required OperationalReportType type,
+    required int networkId,
+    int? posId,
+  }) => repository.deletePreset(
+    presetId: presetId,
+    type: type,
+    networkId: networkId,
+    posId: posId,
+  );
 }

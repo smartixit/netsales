@@ -139,8 +139,9 @@ class ProcurementRequestCard extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: colors.surfaceContainerHighest,
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.xs),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.xs,
+                                ),
                               ),
                               child: Text(
                                 '#${request.requestUuid ?? request.requestId.toString()}',
@@ -212,8 +213,9 @@ class ProcurementRequestCard extends StatelessWidget {
                                 color: request.saleTypeRaw == 'CREDIT'
                                     ? colors.warning.withValues(alpha: 0.12)
                                     : colors.primary.withValues(alpha: 0.1),
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.xs),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.xs,
+                                ),
                               ),
                               child: Text(
                                 saleTypePresentation.label,
@@ -329,7 +331,8 @@ class ProcurementRequestCard extends StatelessWidget {
                     children: [
                       ...request.items.map((item) {
                         final pkg = item.voucherPackage;
-                        final pkgName = pkg?.packageName ?? 'باقة #${item.packageId}';
+                        final pkgName =
+                            pkg?.packageName ?? 'باقة #${item.packageId}';
                         final pkgColor = pkg?.packageColor != null
                             ? CustomColorPicker.parseHex(pkg!.packageColor)
                             : colors.primary;

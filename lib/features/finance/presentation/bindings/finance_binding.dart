@@ -185,9 +185,7 @@ class FinanceBinding extends Bindings {
     }
     if (!Get.isRegistered<RepaymentDocumentUseCase>()) {
       registerLazyIfAbsent<RepaymentDocumentUseCase>(
-        () => RepaymentDocumentUseCase(
-          Get.find<RepaymentDocumentRepository>(),
-        ),
+        () => RepaymentDocumentUseCase(Get.find<RepaymentDocumentRepository>()),
         fenix: true,
       );
     }
@@ -216,7 +214,8 @@ class FinanceBinding extends Bindings {
         getPosWalletLogsUseCase: Get.find<GetPosWalletLogsUseCase>(),
         getPosWalletByNetworkAndPosUseCase:
             Get.find<GetPosWalletByNetworkAndPosUseCase>(),
-        exportWalletStatementDocumentUseCase: Get.find<ExportWalletStatementDocumentUseCase>(),
+        exportWalletStatementDocumentUseCase:
+            Get.find<ExportWalletStatementDocumentUseCase>(),
       ),
       fenix: true,
     );
@@ -256,7 +255,8 @@ class FinanceBinding extends Bindings {
         getNetworkWalletsUseCase: Get.find<GetNetworkWalletsUseCase>(),
         getNetworkWalletLogsUseCase: Get.find<GetNetworkWalletLogsUseCase>(),
         getNetworkWalletByIdUseCase: Get.find<GetNetworkWalletByIdUseCase>(),
-        exportWalletStatementDocumentUseCase: Get.find<ExportWalletStatementDocumentUseCase>(),
+        exportWalletStatementDocumentUseCase:
+            Get.find<ExportWalletStatementDocumentUseCase>(),
       ),
       fenix: true,
     );
@@ -265,8 +265,7 @@ class FinanceBinding extends Bindings {
       () => NetworkWalletTransferController(
         transferFromNetworkToPosUseCase:
             Get.find<TransferFromNetworkToPosUseCase>(),
-        transferPosToNetworkUseCase:
-            Get.find<TransferPosToNetworkUseCase>(),
+        transferPosToNetworkUseCase: Get.find<TransferPosToNetworkUseCase>(),
         getNetworkPosListUseCase: Get.find<GetNetworkPosListUseCase>(),
       ),
       fenix: true,

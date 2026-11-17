@@ -1,4 +1,5 @@
 import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
+
 import 'dart:typed_data';
 import 'dart:ui' show Color;
 
@@ -60,29 +61,29 @@ class OperationalReportDocumentService {
       generatedAt: generatedAt,
     );
 
-    final result = await PdfDocumentRenderer(
-      textShapingProvider: shapingProvider,
-    ).render(
-      snapshot: snapshot,
-      template: _template(type),
-      options: DocumentRenderOptions(
-        pageProfile: pageProfile,
-        generatedAt: generatedAt,
-        showPageNumbers: true,
-        headerText: '$normalizedOrganization · ${_reportTitle(summary, type)}',
-        footerText:
-            'ملخص تنفيذي محسوب على كامل النتائج المطابقة للفلاتر المحددة',
-        watermark: DocumentWatermark(
-          imageBytes: logoBytes,
-          opacity: 0.075,
-          angleRadians: -0.6108652381980153,
-          widthFactor: 0.58,
-          heightFactor: 0.46,
-        ),
-        branding: branding,
-        maxPages: 20,
-      ),
-    );
+    final result =
+        await PdfDocumentRenderer(textShapingProvider: shapingProvider).render(
+          snapshot: snapshot,
+          template: _template(type),
+          options: DocumentRenderOptions(
+            pageProfile: pageProfile,
+            generatedAt: generatedAt,
+            showPageNumbers: true,
+            headerText:
+                '$normalizedOrganization · ${_reportTitle(summary, type)}',
+            footerText:
+                'ملخص تنفيذي محسوب على كامل النتائج المطابقة للفلاتر المحددة',
+            watermark: DocumentWatermark(
+              imageBytes: logoBytes,
+              opacity: 0.075,
+              angleRadians: -0.6108652381980153,
+              widthFactor: 0.58,
+              heightFactor: 0.46,
+            ),
+            branding: branding,
+            maxPages: 20,
+          ),
+        );
 
     if (result is DocumentRenderSuccess) return result.artifact.bytes;
     if (result is DocumentRenderFailure) {
@@ -173,20 +174,20 @@ class OperationalReportDocumentService {
   DocumentPageProfile _resolvePageProfile(String pageProfileId) {
     return switch (pageProfileId) {
       'a4-portrait' => DocumentPageProfile.a4Portrait(
-          marginTop: 38,
-          marginRight: 36,
-          marginBottom: 42,
-          marginLeft: 36,
-        ),
+        marginTop: 38,
+        marginRight: 36,
+        marginBottom: 42,
+        marginLeft: 36,
+      ),
       'a4-landscape' => DocumentPageProfile.a4Landscape(
-          marginTop: 34,
-          marginRight: 34,
-          marginBottom: 38,
-          marginLeft: 34,
-        ),
+        marginTop: 34,
+        marginRight: 34,
+        marginBottom: 38,
+        marginLeft: 34,
+      ),
       _ => throw UnsupportedError(
-          'ملف الصفحة غير مدعوم في محرك المستندات: $pageProfileId',
-        ),
+        'ملف الصفحة غير مدعوم في محرك المستندات: $pageProfileId',
+      ),
     };
   }
 
@@ -213,24 +214,26 @@ class OperationalReportDocumentService {
       currencyCode = rawCurrencyCode.trim();
     }
 
-    final rows = metrics.map((metric) {
-      final value = metric.isCurrency
-          ? '${metric.value} $currencyCode'
-          : metric.value;
-      return DocumentTableRow(
-        id: 'report-metric-${metric.id}',
-        cells: [
-          DocumentTableCell(
-            value: DocumentTextValue(metric.label),
-            direction: DocumentTextDirection.rightToLeft,
-          ),
-          DocumentTableCell(
-            value: DocumentTextValue(value),
-            direction: DocumentTextDirection.leftToRight,
-          ),
-        ],
-      );
-    }).toList(growable: false);
+    final rows = metrics
+        .map((metric) {
+          final value = metric.isCurrency
+              ? '${metric.value} $currencyCode'
+              : metric.value;
+          return DocumentTableRow(
+            id: 'report-metric-${metric.id}',
+            cells: [
+              DocumentTableCell(
+                value: DocumentTextValue(metric.label),
+                direction: DocumentTextDirection.rightToLeft,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(value),
+                direction: DocumentTextDirection.leftToRight,
+              ),
+            ],
+          );
+        })
+        .toList(growable: false);
 
     final info = <DocumentInfoItem>[
       DocumentInfoItem(
@@ -297,8 +300,7 @@ class OperationalReportDocumentService {
             if (summary.values['opening_balance_source'] == 'BACKFILLED')
               DocumentCallout(
                 title: 'رصيد افتتاحي معاد بناؤه',
-                body:
-                    'تم اشتقاق الرصيد الافتتاحي عند ترحيل سجل المحفظة من الرصيد الحالي والحركات المتاحة آنذاك. هذه القيمة توثّق إعادة البناء ولا تعني وجود كشف تاريخي مستقل موثق قبل الترحيل.',
+                body: 'تم اشتقاق الرصيد الافتتاحي عند ترحيل سجل المحفظة من الرصيد الحالي والحركات المتاحة آنذاك. هذه القيمة توثّق إعادة البناء ولا تعني وجود كشف تاريخي مستقل موثق قبل الترحيل.',
                 tone: DocumentStatusTone.warning,
               ),
             DocumentHeading(
@@ -334,13 +336,11 @@ class OperationalReportDocumentService {
               ),
             DocumentCallout(
               title: 'نطاق هذا المستند',
-              body:
-                  'يعرض هذا المستند ملخصاً مجمعاً محسوباً على كامل النتائج المطابقة. لتصدير التفاصيل الكاملة لكل سجل استخدم ملف CSV من شاشة التقارير.',
+              body: 'يعرض هذا المستند ملخصاً مجمعاً محسوباً على كامل النتائج المطابقة. لتصدير التفاصيل الكاملة لكل سجل استخدم ملف CSV من شاشة التقارير.',
               tone: DocumentStatusTone.info,
             ),
             const DocumentParagraph(
-              text:
-                  'تم نقل القيم المالية من استجابة الخادم كما هي، دون إعادة احتسابها أو تعديلها داخل التطبيق.',
+              text: 'تم نقل القيم المالية من استجابة الخادم كما هي، دون إعادة احتسابها أو تعديلها داخل التطبيق.',
               direction: DocumentTextDirection.rightToLeft,
             ),
           ],
@@ -378,11 +378,10 @@ class OperationalReportDocumentService {
     return value.isEmpty ? type.wireValue : value;
   }
 
-  static String _colorHex(Color color) =>
-      (color.toARGB32() & 0x00FFFFFF)
-          .toRadixString(16)
-          .padLeft(6, '0')
-          .toUpperCase();
+  static String _colorHex(Color color) => (color.toARGB32() & 0x00FFFFFF)
+      .toRadixString(16)
+      .padLeft(6, '0')
+      .toUpperCase();
 
   static bool _hasText(String? value) =>
       value != null && value.trim().isNotEmpty;

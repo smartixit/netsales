@@ -43,9 +43,9 @@ class BillingInvoiceSection extends StatelessWidget {
         ? Map<String, dynamic>.from(rawCurrency)
         : const <String, dynamic>{};
     final currencyCode = currency['code']?.toString();
-    final decimalPlaces =
-        (currency['decimal_places'] as num?)?.toInt() ?? 2;
-    final canPay = remainingMinor > 0 &&
+    final decimalPlaces = (currency['decimal_places'] as num?)?.toInt() ?? 2;
+    final canPay =
+        remainingMinor > 0 &&
         invoice['status'] != 'PAID' &&
         invoice['status'] != 'VOID' &&
         invoiceId != null;

@@ -17,14 +17,15 @@ class BillingContactTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final id = (contact['contact_id'] as num?)?.toInt();
-    final details = [
-      contact['email'],
-      contact['phone'],
-      if (contact['is_primary'] == true) 'أساسية',
-      if (contact['receives_invoices'] == true) 'تستقبل الفواتير',
-    ]
-        .where((value) => value != null && value.toString().isNotEmpty)
-        .join(' • ');
+    final details =
+        [
+              contact['email'],
+              contact['phone'],
+              if (contact['is_primary'] == true) 'أساسية',
+              if (contact['receives_invoices'] == true) 'تستقبل الفواتير',
+            ]
+            .where((value) => value != null && value.toString().isNotEmpty)
+            .join(' • ');
 
     return CustomInfoListTile(
       padding: EdgeInsets.zero,
@@ -37,10 +38,7 @@ class BillingContactTile extends StatelessWidget {
               text: 'تعيين أساسية',
               onPressed: id == null
                   ? null
-                  : () => controller.updateContact(
-                        id,
-                        {'is_primary': true},
-                      ),
+                  : () => controller.updateContact(id, {'is_primary': true}),
             ),
           CustomButton.text(
             text: 'تعديل',

@@ -21,13 +21,15 @@ import 'package:netsales/features/requests/domain/entities/request_modification_
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/delete_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
 
 class MockRequestRepository implements RequestRepository {
   List<RequestEntity> items;
@@ -265,15 +267,20 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
   @override
   Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
+    int? posId,
     bool? status,
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async {
     lastSearch = search;
-    final filtered = search == null || search.isEmpty
+    final scopedPackages = packageIds == null
         ? packages
-        : packages
+        : packages.where((package) => packageIds.contains(package.packageId)).toList();
+    final filtered = search == null || search.isEmpty
+        ? scopedPackages
+        : scopedPackages
             .where(
               (package) => package.packageName.contains(search),
             )
@@ -347,11 +354,12 @@ void main() {
     status: true,
   );
 
-  group('PosProcurementController Tests (M6.1)', () {
+  group('POS Procurement Collection and Form Controller Tests (M6.1)', () {
     late MockRequestRepository mockRequestRepo;
     late MockCommercialRepository mockCommercialRepo;
     late MockPackageCatalogRepository mockPackageRepo;
-    late PosProcurementController controller;
+    late PosNewProcurementOrderController controller;
+    late PosProcurementOrdersController ordersController;
 
     setUp(() {
       mockRequestRepo = MockRequestRepository([sampleRequest1, sampleRequest2]);
@@ -361,10 +369,16 @@ void main() {
       );
       mockPackageRepo = MockPackageCatalogRepository([samplePackage]);
 
-      controller = PosProcurementController(
+      ordersController = PosProcurementOrdersController(
         getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
-        createRequestUseCase: CreateRequestUseCase(mockRequestRepo),
+        getMyPosUseCase: GetMyPosUseCase(mockCommercialRepo),
         cancelRequestUseCase: CancelRequestUseCase(mockRequestRepo),
+        deleteRequestUseCase: DeleteRequestUseCase(mockRequestRepo),
+      );
+      ordersController.onInit();
+
+      controller = PosNewProcurementOrderController(
+        createRequestUseCase: CreateRequestUseCase(mockRequestRepo),
         getMyPosUseCase: GetMyPosUseCase(mockCommercialRepo),
         getPosNetworksListUseCase: GetPosNetworksListUseCase(
           mockCommercialRepo,
@@ -375,27 +389,27 @@ void main() {
     });
 
     test('Initializes state and loads requests with cursor', () async {
-      await controller.loadInitialData();
-      expect(controller.requests.length, 2);
-      expect(controller.nextCursor.value, 'cursor_page_2');
-      expect(controller.hasMore, true);
-      expect(controller.selectedPosId.value, 20);
+      await ordersController.loadInitialData();
+      expect(ordersController.requests.length, 2);
+      expect(ordersController.nextCursor.value, 'cursor_page_2');
+      expect(ordersController.hasMore, true);
+      expect(ordersController.selectedPosId.value, 20);
     });
 
     test('setStatusFilter reloads requests filtered by status', () async {
-      controller.setStatusFilter('PENDING');
-      await controller.loadRequests();
+      ordersController.setStatusFilter('PENDING');
+      await ordersController.loadRequests();
 
-      expect(controller.requests.length, 1);
-      expect(controller.requests.first.requestId, 1);
+      expect(ordersController.requests.length, 1);
+      expect(ordersController.requests.first.requestId, 1);
     });
 
     test(
       'cancelRequest updates request status to CANCELLED in-place',
       () async {
-        final success = await controller.cancelRequest(1);
+        final success = await ordersController.cancelRequest(1);
         expect(success, true);
-        expect(controller.requests.first.isCancelled, true);
+        expect(ordersController.requests.first.isCancelled, true);
       },
     );
 
@@ -421,7 +435,8 @@ void main() {
         controller.adjustPackageQuantity(samplePackage, 175);
 
         controller.onPackageSearchChanged('غير موجودة');
-        await controller.refreshNetworkPackages();
+        // Search is intentionally debounced and independent from cart pricing refresh.
+        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(mockPackageRepo.lastSearch, 'غير موجودة');
         expect(controller.availablePackages, isEmpty);

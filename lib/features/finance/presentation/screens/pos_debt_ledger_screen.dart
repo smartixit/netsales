@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_debt_ledger_controller.dart';
@@ -8,9 +9,8 @@ import 'package:netsales/features/finance/presentation/widgets/debt_aging_summar
 import 'package:netsales/features/finance/presentation/widgets/debt_scope_selector.dart';
 import 'package:netsales/features/finance/presentation/widgets/outstanding_invoice_skeleton.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_card.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
@@ -61,7 +61,15 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                       Obx(() {
                         final debtSummary = controller.summary.value;
                         if (debtSummary == null && controller.isLoading.value) {
-                          return const CustomSkeletonFeed(itemCount: 1);
+                          return const CustomStateView.loading(
+                            presentation: CustomStatePresentation.skeletonOnly,
+                            skeleton: CustomStateSkeleton(
+                              layout: CustomStateSkeletonLayout.list,
+                              itemCount: 3,
+                              cardHeight: 112,
+                              hasLeading: true,
+                            ),
+                          );
                         }
                         if (debtSummary == null &&
                             controller.summaryErrorMessage.value != null) {
@@ -92,7 +100,16 @@ class PosDebtLedgerScreen extends GetView<PosDebtLedgerController> {
                         child: Obx(() {
                           if (controller.isLoadingInvoices.value &&
                               controller.outstandingInvoices.isEmpty) {
-                            return const CustomSkeletonFeed(itemCount: 3);
+                            return const CustomStateView.loading(
+                              presentation:
+                                  CustomStatePresentation.skeletonOnly,
+                              skeleton: CustomStateSkeleton(
+                                layout: CustomStateSkeletonLayout.list,
+                                itemCount: 3,
+                                cardHeight: 112,
+                                hasLeading: true,
+                              ),
+                            );
                           }
 
                           if (controller.outstandingInvoices.isEmpty &&

@@ -25,10 +25,12 @@ class MockCatalogRepository implements PackageCatalogRepository {
   @override
   Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
+    int? posId,
     bool? status,
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async {
     if (shouldThrow) {
       throw const AppException('فشل الاتصال بالخادم', code: '500');
@@ -37,6 +39,7 @@ class MockCatalogRepository implements PackageCatalogRepository {
     final filtered = items.where((p) {
       if (networkId != null && p.networkId != networkId) return false;
       if (status != null && p.status != status) return false;
+      if (packageIds != null && !packageIds.contains(p.packageId)) return false;
       if (search != null && search.isNotEmpty) {
         if (!p.packageName.toLowerCase().contains(search.toLowerCase())) {
           return false;
@@ -177,6 +180,9 @@ class MockCatalogRepository implements PackageCatalogRepository {
     }
     throw const AppException('الباقة غير موجودة', code: '404');
   }
+
+  @override
+  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({required int networkId, required int posId}) async => const [];
 
   @override
   Future<EffectivePackageDiscountEntity> getEffectiveDiscount({required int networkId, required int posId, required int packageId}) {

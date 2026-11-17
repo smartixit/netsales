@@ -30,8 +30,7 @@ class PosWorkspaceTransactionMapper {
     final parsedDate = DateFormatter.tryParse(
       invoice.invoiceDate ?? invoice.createdAt ?? '',
     );
-    final dateLabel =
-        parsedDate == null ? '' : DateFormatter.smart(parsedDate);
+    final dateLabel = parsedDate == null ? '' : DateFormatter.smart(parsedDate);
     final reference = _shortReference(invoice.invoiceUuid, 'فاتورة توريد');
     final voucherDetail = invoice.totalVouchersCount > 0
         ? '${invoice.totalVouchersCount} كرت'
@@ -50,8 +49,7 @@ class PosWorkspaceTransactionMapper {
       formattedAmount:
           '- ${AmountFormatter.formatValue(invoice.invoiceTotalAmount)} ر.ي',
       amountColor: const Color(0xFFDC2626),
-      statusPresentation:
-          EnumPresentationRegistry.resolveInvoicePaymentStatus(
+      statusPresentation: EnumPresentationRegistry.resolveInvoicePaymentStatus(
         invoice.paymentStatus,
         serverLabel: invoice.paymentStatusLabel,
       ),
@@ -68,8 +66,7 @@ class PosWorkspaceTransactionMapper {
     final parsedDate = DateFormatter.tryParse(
       request.requestDate ?? request.createdAt ?? '',
     );
-    final dateLabel =
-        parsedDate == null ? '' : DateFormatter.smart(parsedDate);
+    final dateLabel = parsedDate == null ? '' : DateFormatter.smart(parsedDate);
     final reference = _shortReference(request.requestUuid, 'طلب توريد');
 
     return WorkspaceTransactionItemViewModel(

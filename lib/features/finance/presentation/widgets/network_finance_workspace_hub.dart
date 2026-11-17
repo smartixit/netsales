@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
@@ -10,8 +11,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 
 /// مركز دخول عمليات المالية في مساحة عمل مزود الشبكة.
 /// لا يجري أي حساب أو تحميل مالي؛ يوجّه إلى الشاشات التي تجلب بياناتها من API.
@@ -104,7 +104,8 @@ class NetworkFinanceWorkspaceHub extends GetView<NetworkWorkspaceController> {
                 prefix: Icons.payments_rounded,
                 size: AppButtonSize.large,
                 width: double.infinity,
-                onPressed: () => Get.toNamed<void>(AppRoutes.repaymentCollection),
+                onPressed: () =>
+                    Get.toNamed<void>(AppRoutes.repaymentCollection),
               ),
             ),
           ],
@@ -253,7 +254,14 @@ class _NetworkFinanceSnapshot extends StatelessWidget {
           );
         }
         if (controller.isLoading.value) {
-          return const CustomSkeletonFeed(itemCount: 2, cardHeight: 92);
+          return const CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.list,
+              itemCount: 2,
+              cardHeight: 92,
+            ),
+          );
         }
         return const SizedBox.shrink();
       }

@@ -70,33 +70,35 @@ class ExpenseDocumentService {
     );
 
     final generatedAt = DateTime.now();
-    final result = await PdfDocumentRenderer(
-      textShapingProvider: await fontService.arabicTextShapingProvider(),
-    ).render(
-      snapshot: _buildSnapshot(expense, reference, currencyCode),
-      template: _template,
-      options: DocumentRenderOptions(
-        pageProfile: DocumentPageProfile.a4Portrait(
-          marginTop: 38,
-          marginRight: 36,
-          marginBottom: 42,
-          marginLeft: 36,
-        ),
-        generatedAt: generatedAt,
-        showPageNumbers: true,
-        headerText: '$organizationName · سند مصروف تشغيلي',
-        footerText: 'مستند صادر عن NetSales — إجمالي المصروف كما اعتمده الخادم',
-        watermark: DocumentWatermark(
-          imageBytes: logoBytes,
-          opacity: 0.075,
-          angleRadians: -0.6108652381980153,
-          widthFactor: 0.58,
-          heightFactor: 0.46,
-        ),
-        branding: branding,
-        maxPages: 100,
-      ),
-    );
+    final result =
+        await PdfDocumentRenderer(
+          textShapingProvider: await fontService.arabicTextShapingProvider(),
+        ).render(
+          snapshot: _buildSnapshot(expense, reference, currencyCode),
+          template: _template,
+          options: DocumentRenderOptions(
+            pageProfile: DocumentPageProfile.a4Portrait(
+              marginTop: 38,
+              marginRight: 36,
+              marginBottom: 42,
+              marginLeft: 36,
+            ),
+            generatedAt: generatedAt,
+            showPageNumbers: true,
+            headerText: '$organizationName · سند مصروف تشغيلي',
+            footerText:
+                'مستند صادر عن NetSales — إجمالي المصروف كما اعتمده الخادم',
+            watermark: DocumentWatermark(
+              imageBytes: logoBytes,
+              opacity: 0.075,
+              angleRadians: -0.6108652381980153,
+              widthFactor: 0.58,
+              heightFactor: 0.46,
+            ),
+            branding: branding,
+            maxPages: 100,
+          ),
+        );
 
     if (result is DocumentRenderSuccess) return result.artifact.bytes;
     if (result is DocumentRenderFailure) throw StateError(result.message);
@@ -175,22 +177,24 @@ class ExpenseDocumentService {
       ),
     ];
 
-    final rows = expense.items.indexed.map((entry) {
-      final item = entry.$2;
-      return DocumentTableRow(
-        id: 'expense-item-${item.itemId}',
-        cells: [
-          DocumentTableCell(
-            value: DocumentTextValue(item.statement),
-            direction: DocumentTextDirection.rightToLeft,
-          ),
-          DocumentTableCell(
-            value: DocumentTextValue(_money(item.amount, currencyCode)),
-            direction: DocumentTextDirection.leftToRight,
-          ),
-        ],
-      );
-    }).toList(growable: false);
+    final rows = expense.items.indexed
+        .map((entry) {
+          final item = entry.$2;
+          return DocumentTableRow(
+            id: 'expense-item-${item.itemId}',
+            cells: [
+              DocumentTableCell(
+                value: DocumentTextValue(item.statement),
+                direction: DocumentTextDirection.rightToLeft,
+              ),
+              DocumentTableCell(
+                value: DocumentTextValue(_money(item.amount, currencyCode)),
+                direction: DocumentTextDirection.leftToRight,
+              ),
+            ],
+          );
+        })
+        .toList(growable: false);
 
     final nodes = <DocumentNode>[
       DocumentHeading(
@@ -271,7 +275,8 @@ class ExpenseDocumentService {
           languageTag: 'ar-YE',
           direction: DocumentTextDirection.rightToLeft,
         ),
-        createdAt: _parseDate(expense.expenseDate) ??
+        createdAt:
+            _parseDate(expense.expenseDate) ??
             _parseDate(expense.createdAt) ??
             DateTime.now(),
       ),
@@ -310,7 +315,8 @@ class ExpenseDocumentService {
   static String _fileName(ExpenseEntity expense) =>
       'سند_صرف_${_reference(expense)}';
 
-  static String _amount(double value) => AmountFormatter.format(value.toString());
+  static String _amount(double value) =>
+      AmountFormatter.format(value.toString());
 
   static String _money(double value, String currencyCode) =>
       '${_amount(value)} $currencyCode';
@@ -328,6 +334,8 @@ class ExpenseDocumentService {
     return DateTime.tryParse(normalized);
   }
 
-  static String _colorHex(Color color) =>
-      (color.toARGB32() & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase();
+  static String _colorHex(Color color) => (color.toARGB32() & 0x00FFFFFF)
+      .toRadixString(16)
+      .padLeft(6, '0')
+      .toUpperCase();
 }

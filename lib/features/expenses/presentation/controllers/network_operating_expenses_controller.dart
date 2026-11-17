@@ -29,8 +29,8 @@ class ExpenseFormItemEntry {
   ExpenseFormItemEntry({
     String initialStatement = '',
     String initialAmount = '',
-  })  : statementController = TextEditingController(text: initialStatement),
-        amountController = TextEditingController(text: initialAmount);
+  }) : statementController = TextEditingController(text: initialStatement),
+       amountController = TextEditingController(text: initialAmount);
 
   final TextEditingController statementController;
   final TextEditingController amountController;
@@ -288,9 +288,7 @@ class NetworkOperatingExpensesController extends GetxController {
 
   void navigateToDetails(int expenseId) {
     loadDetails(expenseId);
-    Get.to<void>(
-      () => NetworkExpenseDetailsScreen(expenseId: expenseId),
-    );
+    Get.to<void>(() => NetworkExpenseDetailsScreen(expenseId: expenseId));
   }
 
   Future<void> saveExpenseAndClose() async {
@@ -442,7 +440,9 @@ class NetworkOperatingExpensesController extends GetxController {
   }
 
   // ── حذف المرفق المنفرد بعد التأكيد الصريح ──
-  Future<void> confirmAndDeleteAttachment(ExpenseAttachmentEntity attachment) async {
+  Future<void> confirmAndDeleteAttachment(
+    ExpenseAttachmentEntity attachment,
+  ) async {
     final expense = selectedExpense.value;
     if (expense == null || !canDeleteAttachment) return;
 
@@ -573,10 +573,7 @@ class NetworkOperatingExpensesController extends GetxController {
     } catch (error) {
       CustomSnackbar.show(
         title: 'تعذر تنفيذ العملية',
-        message: AppException.sanitizeMessage(
-          error,
-          fallback: failureMessage,
-        ),
+        message: AppException.sanitizeMessage(error, fallback: failureMessage),
         type: SnackType.error,
       );
     } finally {

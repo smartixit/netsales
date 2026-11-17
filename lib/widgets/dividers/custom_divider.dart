@@ -34,10 +34,7 @@ class CustomDivider extends StatelessWidget {
         child: Center(
           child: Container(
             width: thickness,
-            margin: EdgeInsetsDirectional.only(
-              top: indent,
-              bottom: endIndent,
-            ),
+            margin: EdgeInsetsDirectional.only(top: indent, bottom: endIndent),
             decoration: BoxDecoration(color: dividerColor),
           ),
         ),
@@ -49,10 +46,7 @@ class CustomDivider extends StatelessWidget {
       child: Center(
         child: Container(
           height: thickness,
-          margin: EdgeInsetsDirectional.only(
-            start: indent,
-            end: endIndent,
-          ),
+          margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
           decoration: BoxDecoration(color: dividerColor),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
@@ -9,8 +10,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_entity_picker_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_network_picker_tile.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_pos_picker_tile.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -64,10 +64,9 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
               ),
               CustomSegmentItem(
                 label: 'نقاط البيع',
-                count:
-                    isLoading && pointsOfSale.isEmpty
-                        ? 0
-                        : pointsOfSale.length,
+                count: isLoading && pointsOfSale.isEmpty
+                    ? 0
+                    : pointsOfSale.length,
                 icon: Icons.storefront_rounded,
               ),
             ],
@@ -78,17 +77,43 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
           ConstrainedBox(
             constraints: BoxConstraints(maxHeight: 340.h),
             child: SingleChildScrollView(
-              child:
-                  isLoading
-                      ? Column(
-                          children: [
-                            const CustomSkeletonCard(height: 72),
-                            SizedBox(height: AppSpacing.sm),
-                            const CustomSkeletonCard(height: 72),
-                            SizedBox(height: AppSpacing.sm),
-                            const CustomSkeletonCard(height: 72),
-                          ],
-                        )
+              child: isLoading
+                  ? Column(
+                      children: [
+                        const CustomStateView.loading(
+                          presentation: CustomStatePresentation.skeletonOnly,
+                          skeleton: CustomStateSkeleton(
+                            layout: CustomStateSkeletonLayout.cards,
+                            itemCount: 1,
+                            cardHeight: 72,
+                            maxColumns: 1,
+                            minItemWidth: 180,
+                          ),
+                        ),
+                        SizedBox(height: AppSpacing.sm),
+                        const CustomStateView.loading(
+                          presentation: CustomStatePresentation.skeletonOnly,
+                          skeleton: CustomStateSkeleton(
+                            layout: CustomStateSkeletonLayout.cards,
+                            itemCount: 1,
+                            cardHeight: 72,
+                            maxColumns: 1,
+                            minItemWidth: 180,
+                          ),
+                        ),
+                        SizedBox(height: AppSpacing.sm),
+                        const CustomStateView.loading(
+                          presentation: CustomStatePresentation.skeletonOnly,
+                          skeleton: CustomStateSkeleton(
+                            layout: CustomStateSkeletonLayout.cards,
+                            itemCount: 1,
+                            cardHeight: 72,
+                            maxColumns: 1,
+                            minItemWidth: 180,
+                          ),
+                        ),
+                      ],
+                    )
                   : errorMessage != null &&
                         networks.isEmpty &&
                         pointsOfSale.isEmpty
@@ -113,7 +138,8 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                               return WorkspaceNetworkPickerTile(
                                 item: network,
                                 isSelected: isSelected,
-                                onTap: () => controller.selectNetworkById(network.id),
+                                onTap: () =>
+                                    controller.selectNetworkById(network.id),
                               );
                             }).toList(),
                           ))

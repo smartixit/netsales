@@ -45,8 +45,8 @@ class CustomSurfaceCard extends StatelessWidget {
       side: borderWidth <= 0
           ? BorderSide.none
           : BorderSide(
-              color: borderColor ??
-                  colors.outlineVariant.withValues(alpha: 0.58),
+              color:
+                  borderColor ?? colors.outlineVariant.withValues(alpha: 0.58),
               width: borderWidth,
             ),
     );

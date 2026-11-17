@@ -55,7 +55,7 @@
 - **Infrastructure Reuse:** Mandatory reuse of existing foundation (never create redundant duplicates):
   - **Error & Toast Feedback:** All errors, exceptions, and API failure messages must use `CustomSnackbar.show(..., type: SnackType.error)`.
   - **Action Loading & Success Overlays:** Mutating actions must use `CustomAnimationOverlay.showLoading()` / `CustomAnimationOverlay.showSuccess()`, always safely hidden in `finally { if (CustomAnimationOverlay.isShowing) await CustomAnimationOverlay.hide(); }`.
-  - **Feed & Card Loading:** All asynchronous list/feed loading states must use `CustomSkeletonFeed` or `CustomSkeletonShimmer`.
+  - **Feed & Card Loading:** All initial and incremental loading placeholders MUST use `CustomStateView.loading` with a responsive `CustomStateSkeleton` recipe. Do not use or recreate legacy feed/grid skeleton widgets.
   - **Dialogs & Confirmations:** Confirmation and alert dialogs must use `CustomDialog` (`CustomDialog.danger`, `CustomDialog.confirmation`).
   - **Sheets:** Modal sheets must use `CustomBottomSheet.show(...)`.
   - **Widgets (`lib/widgets/`):**
@@ -63,7 +63,7 @@
     - Sheets: `CustomBottomSheet`, `InvoicePrintFormatSheet`.
     - Buttons: `CustomButton`, `CustomThemeToggleButton`.
     - Inputs: `CustomTextField`, `CustomPasswordField`, `CustomPasswordRequirementItem`, `CustomPhoneField`, `CustomPinField`, `CustomDropdown`, `CustomNumericKeyboard`.
-    - Feedback & States: `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Skeleton Shimmers (`CustomSkeletonCard`, `CustomSkeletonFeed`, `CustomSkeletonGrid`, `CustomSkeletonListTile`, `CustomSkeletonShimmer`, `CustomSkeletonText`).
+    - Feedback & States: canonical `CustomStateView` (Loading, Empty, Error, Offline, Pricing Expired, Not Found), specialized state components `CustomEmptyState`, `CustomErrorState`, `CustomNotFoundState`, plus `CustomLoadingIndicatorBar`, `CustomOfflineState`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Adaptive skeleton engine: `CustomStateView.loading` + `CustomStateSkeleton` models, `CustomStateSkeletonView` renderer, and `SkeletonRecipes` (`list`, `cards`, `grid`, `detail`), with `CustomSkeletonShimmer` retained only as the low-level animation primitive. Legacy feed/grid/list-tile skeleton widgets are removed.
     - Toasts & Snackbars: `CustomSnackbar`, `CustomToast`.
     - Pickers: `CustomDatePickerField`, `CustomDatePickerModal`, `CustomFilePicker`, `CustomImagePicker`, `CustomContactPickerIconButton`, `CustomColorPicker`, `CustomPosSelectorField`.
     - Navigation & Foundation: `CustomAppScaffold`, `CustomFloatingBottomNavBar`, `DoubleBackExitScope`.
@@ -95,3 +95,11 @@
   - Interactive or compact chips must use `CustomChip` (`lib/widgets/badges/custom_chip.dart`).
   - **Prohibition:** Never write ad-hoc `switch` statements or conditional color mappings for statuses directly inside screen or widget files.
 
+
+## 4.1 Canonical Shared State Presentation
+- All new or refactored Loading, Empty, Error, Offline, Pricing Expired, and Not Found UI states MUST use `CustomStateView` from `lib/widgets/feedback/custom_state_view.dart`.
+- Specialized `CustomEmptyState`, `CustomErrorState`, and `CustomNotFoundState` live under `lib/widgets/feedback/states/` and delegate presentation to `CustomStateView`; they are canonical semantic components, not compatibility facades. `CustomStateView.notFound` must remain distinct from an empty result.
+- `CustomOfflineBanner` uses the shared offline state in banner presentation.
+- Feature-local state cards are prohibited. Shared state improvements belong in `CustomStateView`.
+- Content-shaped skeletons remain the required pattern for feed/list loading and append-only pagination; they complement the canonical state component and do not replace its design.
+- Pricing expiry is a first-class state: show a clear expired-price message and the supported refresh action, and keep submission disabled until the authoritative quote is current.

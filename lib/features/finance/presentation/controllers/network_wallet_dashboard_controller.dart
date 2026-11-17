@@ -15,7 +15,8 @@ class NetworkWalletDashboardController extends GetxController {
   final GetNetworkWalletsUseCase getNetworkWalletsUseCase;
   final GetNetworkWalletLogsUseCase getNetworkWalletLogsUseCase;
   final GetNetworkWalletByIdUseCase getNetworkWalletByIdUseCase;
-  final ExportWalletStatementDocumentUseCase exportWalletStatementDocumentUseCase;
+  final ExportWalletStatementDocumentUseCase
+  exportWalletStatementDocumentUseCase;
 
   NetworkWalletDashboardController({
     required this.getNetworkWalletsUseCase,
@@ -70,8 +71,7 @@ class NetworkWalletDashboardController extends GetxController {
     unawaited(
       ManualWalletTransactionSheet.show(
         walletId: wallet.walletId,
-        accountName:
-            wallet.networkName ?? 'محفظة الشبكة #${wallet.networkId}',
+        accountName: wallet.networkName ?? 'محفظة الشبكة #${wallet.networkId}',
         currentBalance: wallet.walletBalance,
         isPosWallet: false,
         onSuccess: loadWallets,
@@ -314,25 +314,41 @@ class NetworkWalletDashboardController extends GetxController {
           walletBefore.walletBalance != walletAfter.walletBalance ||
           walletBefore.currencyCode != walletAfter.currencyCode ||
           walletBefore.openingBalance != walletAfter.openingBalance) {
-        throw StateError('تغيرت بيانات المحفظة أثناء إعداد الكشف؛ لم يتم إنشاء مستند ببيانات مختلطة. أعد المحاولة.');
+        throw StateError(
+          'تغيرت بيانات المحفظة أثناء إعداد الكشف؛ لم يتم إنشاء مستند ببيانات مختلطة. أعد المحاولة.',
+        );
       }
-      final success = await exportWalletStatementDocumentUseCase.exportNetwork(walletBefore, statementLogs);
+      final success = await exportWalletStatementDocumentUseCase.exportNetwork(
+        walletBefore,
+        statementLogs,
+      );
       CustomSnackbar.show(
         title: success ? 'تم إنشاء كشف الحساب' : 'تعذر حفظ كشف الحساب',
-        message: success ? 'تم تجهيز كشف حساب محفظة الشبكة وحفظ ملف PDF.' : 'لم تكتمل عملية حفظ ملف كشف الحساب.',
+        message: success
+            ? 'تم تجهيز كشف حساب محفظة الشبكة وحفظ ملف PDF.'
+            : 'لم تكتمل عملية حفظ ملف كشف الحساب.',
         type: success ? SnackType.success : SnackType.error,
       );
     } catch (error) {
       final message = error is StateError
           ? error.toString().replaceFirst('Bad state: ', '')
-          : AppException.sanitizeMessage(error, fallback: 'تعذر إنشاء كشف حساب محفظة الشبكة.');
-      CustomSnackbar.show(title: 'تعذر إنشاء كشف الحساب', message: message, type: SnackType.error);
+          : AppException.sanitizeMessage(
+              error,
+              fallback: 'تعذر إنشاء كشف حساب محفظة الشبكة.',
+            );
+      CustomSnackbar.show(
+        title: 'تعذر إنشاء كشف الحساب',
+        message: message,
+        type: SnackType.error,
+      );
     } finally {
       isExportingStatement.value = false;
     }
   }
 
-  Future<List<NetworkWalletLogEntity>> _loadAllStatementLogs(int walletId) async {
+  Future<List<NetworkWalletLogEntity>> _loadAllStatementLogs(
+    int walletId,
+  ) async {
     final result = <NetworkWalletLogEntity>[];
     final seenCursors = <String>{};
     String? cursor;
@@ -340,23 +356,35 @@ class NetworkWalletDashboardController extends GetxController {
       if (selectedWallet.value?.walletId != walletId) {
         throw StateError('تم تغيير المحفظة أثناء تجهيز الكشف؛ أعد المحاولة.');
       }
-      final page = await getNetworkWalletLogsUseCase(walletId, cursor: cursor, perPage: 50);
+      final page = await getNetworkWalletLogsUseCase(
+        walletId,
+        cursor: cursor,
+        perPage: 50,
+      );
       result.addAll(page.items);
       if (result.length > _maxStatementRows) {
-        throw StateError('يتجاوز عدد الحركات الحد الآمن لتوليد PDF؛ لم يتم إنشاء كشف جزئي.');
+        throw StateError(
+          'يتجاوز عدد الحركات الحد الآمن لتوليد PDF؛ لم يتم إنشاء كشف جزئي.',
+        );
       }
       cursor = page.nextCursor?.trim();
       if (cursor != null && cursor.isEmpty) cursor = null;
       if (cursor != null && !seenCursors.add(cursor)) {
-        throw StateError('توقف ترقيم الحركات عند مؤشر متكرر؛ لم يتم إنشاء كشف ناقص.');
+        throw StateError(
+          'توقف ترقيم الحركات عند مؤشر متكرر؛ لم يتم إنشاء كشف ناقص.',
+        );
       }
     } while (cursor != null);
 
     final latestPage = await getNetworkWalletLogsUseCase(walletId, perPage: 1);
     final capturedLatestId = result.isEmpty ? null : result.first.logId;
-    final currentLatestId = latestPage.items.isEmpty ? null : latestPage.items.first.logId;
+    final currentLatestId = latestPage.items.isEmpty
+        ? null
+        : latestPage.items.first.logId;
     if (capturedLatestId != currentLatestId) {
-      throw StateError('سُجلت حركة جديدة أثناء إعداد الكشف؛ لم يتم إنشاء كشف غير متزامن. أعد المحاولة.');
+      throw StateError(
+        'سُجلت حركة جديدة أثناء إعداد الكشف؛ لم يتم إنشاء كشف غير متزامن. أعد المحاولة.',
+      );
     }
     return result;
   }

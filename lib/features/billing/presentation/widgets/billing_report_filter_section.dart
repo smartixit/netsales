@@ -37,8 +37,7 @@ class BillingReportFilterSection extends StatelessWidget {
           prefixIcon: const Icon(Icons.search),
           isRequired: searchFilter.required,
           onChanged: (value) {
-            final next =
-                Map<String, ReportFilterValue>.from(criteria.filters);
+            final next = Map<String, ReportFilterValue>.from(criteria.filters);
             if (value.trim().isEmpty) {
               next.remove('search');
             } else {
@@ -66,8 +65,9 @@ class BillingReportFilterSection extends StatelessWidget {
                 .toList(growable: false),
             rxValue: controller.selectedStatus,
             onChanged: (value) {
-              final next =
-                  Map<String, ReportFilterValue>.from(criteria.filters);
+              final next = Map<String, ReportFilterValue>.from(
+                criteria.filters,
+              );
               if (value == null || value.isEmpty) {
                 next.remove('status');
               } else {
@@ -87,8 +87,9 @@ class BillingReportFilterSection extends StatelessWidget {
             hint: english ? 'Enter status' : 'أدخل الحالة',
             isRequired: statusFilter.required,
             onChanged: (value) {
-              final next =
-                  Map<String, ReportFilterValue>.from(criteria.filters);
+              final next = Map<String, ReportFilterValue>.from(
+                criteria.filters,
+              );
               if (value.trim().isEmpty) {
                 next.remove('status');
               } else {
@@ -121,5 +122,4 @@ class BillingReportFilterSection extends StatelessWidget {
       children: widgets,
     );
   }
-
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_account_creation_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_account_profile_section.dart';
@@ -11,15 +12,11 @@ import 'package:netsales/features/billing/presentation/widgets/billing_plan_sect
 import 'package:netsales/features/billing/presentation/widgets/billing_subscription_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_collection_status_options.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 
 /// Composition-only content for the billing workspace.
 class BillingWorkspaceContent extends StatelessWidget {
-  const BillingWorkspaceContent({
-    super.key,
-    required this.controller,
-  });
+  const BillingWorkspaceContent({super.key, required this.controller});
 
   final BillingController controller;
 
@@ -27,7 +24,14 @@ class BillingWorkspaceContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       if (controller.isLoading.value && controller.account.value == null) {
-        return const CustomSkeletonFeed(itemCount: 4, shrinkWrap: true);
+        return const CustomStateView.loading(
+          presentation: CustomStatePresentation.skeletonOnly,
+          skeleton: CustomStateSkeleton(
+            layout: CustomStateSkeletonLayout.list,
+            itemCount: 4,
+            cardHeight: 112,
+          ),
+        );
       }
 
       if (controller.errorMessage.value != null &&
@@ -57,8 +61,9 @@ class BillingWorkspaceContent extends StatelessWidget {
                   text: 'تحديث',
                   prefix: Icons.refresh_rounded,
                   loading: controller.isLoading.value,
-                  onPressed:
-                      controller.isLoading.value ? null : controller.load,
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : controller.load,
                 ),
               ],
             ),

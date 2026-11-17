@@ -38,7 +38,8 @@ class NetworkWalletModel extends NetworkWalletEntity {
       openingBalanceSource: json['opening_balance_source'] as String?,
       currencyCode: json['currency_code'] as String?,
       networkProfileLogo: json['network'] is Map<String, dynamic>
-          ? (json['network'] as Map<String, dynamic>)['network_profile_logo'] as String?
+          ? (json['network'] as Map<String, dynamic>)['network_profile_logo']
+                as String?
           : null,
       status: json['status'] as bool? ?? true,
       networkName: netName,

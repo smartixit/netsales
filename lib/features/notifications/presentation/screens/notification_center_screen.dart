@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/notifications/presentation/controllers/notification_controller.dart';
 import 'package:netsales/features/notifications/presentation/widgets/notification_item_card.dart';
 import 'package:netsales/widgets/badges/custom_filter_chip.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -82,7 +81,9 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                           iconSize: 18,
                           dimension: 36,
                           backgroundColor: Colors.transparent,
-                          foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                          foregroundColor: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant,
                           onPressed: () {
                             controller.searchController.clear();
                           },
@@ -90,7 +91,7 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                       : null,
                   label: 'بحث في الإشعارات...',
                 ),
-               AppSpacing.vSm,
+                AppSpacing.vSm,
                 Obx(() {
                   final activeFilter = controller.selectedFilter.value;
                   return Row(
@@ -125,16 +126,19 @@ class NotificationCenterScreen extends GetView<NotificationController> {
           AppSpacing.vSm,
 
           // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
-           Obx(
-              () => CustomResultsCounterBar(
-                count: controller.notifications.length,
-                recordLabel: 'إشعار',
-                isFiltered: controller.searchQuery.value.isNotEmpty ||
-                    controller.selectedFilter.value != null,
-                isLoading: controller.isLoading.value && controller.notifications.isEmpty,
-                onClear: controller.resetFilters,
-              ),
+          Obx(
+            () => CustomResultsCounterBar(
+              count: controller.notifications.length,
+              recordLabel: 'إشعار',
+              isFiltered:
+                  controller.searchQuery.value.isNotEmpty ||
+                  controller.selectedFilter.value != null,
+              isLoading:
+                  controller.isLoading.value &&
+                  controller.notifications.isEmpty,
+              onClear: controller.resetFilters,
             ),
+          ),
 
           // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
           Padding(
@@ -146,9 +150,12 @@ class NotificationCenterScreen extends GetView<NotificationController> {
               () => CustomResultsCounterBar(
                 count: controller.notifications.length,
                 recordLabel: 'إشعار',
-                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                isFiltered:
+                    controller.searchQuery.value.isNotEmpty ||
                     controller.selectedFilter.value != null,
-                isLoading: controller.isLoading.value && controller.notifications.isEmpty,
+                isLoading:
+                    controller.isLoading.value &&
+                    controller.notifications.isEmpty,
                 onClear: controller.resetFilters,
               ),
             ),
@@ -159,7 +166,14 @@ class NotificationCenterScreen extends GetView<NotificationController> {
             child: Obx(() {
               if (controller.isLoading.value &&
                   controller.notifications.isEmpty) {
-                return const CustomSkeletonFeed();
+                return const CustomStateView.loading(
+                  presentation: CustomStatePresentation.skeletonOnly,
+                  skeleton: CustomStateSkeleton(
+                    layout: CustomStateSkeletonLayout.list,
+                    itemCount: 3,
+                    cardHeight: 112,
+                  ),
+                );
               }
 
               if (controller.errorMessage.value != null &&
@@ -209,7 +223,16 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                             horizontal: AppSpacing.md,
                             vertical: AppSpacing.xs,
                           ),
-                          child: CustomSkeletonCard(height: 72.h),
+                          child: CustomStateView.loading(
+                            presentation: CustomStatePresentation.skeletonOnly,
+                            skeleton: CustomStateSkeleton(
+                              layout: CustomStateSkeletonLayout.cards,
+                              itemCount: 1,
+                              cardHeight: 72.h,
+                              maxColumns: 1,
+                              minItemWidth: 180,
+                            ),
+                          ),
                         );
                       }
 

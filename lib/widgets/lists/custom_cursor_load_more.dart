@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_list_tile.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 
 /// Shared cursor-pagination tail: inline skeleton, retry state, or load action.
 class CustomCursorLoadMore extends StatelessWidget {
@@ -27,7 +27,17 @@ class CustomCursorLoadMore extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return CustomSkeletonListTile(hasLeading: false);
+      return const CustomStateView.loading(
+        presentation: CustomStatePresentation.skeletonOnly,
+        skeleton: CustomStateSkeleton(
+          layout: CustomStateSkeletonLayout.list,
+          itemCount: 1,
+          cardHeight: 64,
+          hasLeading: false,
+          lineCount: 2,
+          showCardSurface: false,
+        ),
+      );
     }
     if (error != null) {
       return CustomErrorState.compact(

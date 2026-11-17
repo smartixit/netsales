@@ -10,7 +10,7 @@ import 'package:netsales/features/catalog/presentation/widgets/package_details_h
 import 'package:netsales/features/catalog/presentation/widgets/package_pricing_summary_card.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_specs_section.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// شاشة تفاصيل باقة الكروت — مسؤوليتها تركيب الصفحة فقط

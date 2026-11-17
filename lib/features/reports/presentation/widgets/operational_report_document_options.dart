@@ -32,10 +32,8 @@ class OperationalReportDocumentOptions extends StatelessWidget {
               child: Text('القالب الافتراضي'),
             ),
             ...definition.templates.map(
-              (item) => DropdownItem<String>(
-                value: item.key,
-                child: Text(item.key),
-              ),
+              (item) =>
+                  DropdownItem<String>(value: item.key, child: Text(item.key)),
             ),
           ],
           onChanged: (key) {
@@ -64,24 +62,15 @@ class OperationalReportDocumentOptions extends StatelessWidget {
         CustomDropdown<String>(
           label: 'لغة المستند',
           rxValue: RxnString(
-            presentation.languageTag ??
-                definition.supportedLocaleTags.first,
+            presentation.languageTag ?? definition.supportedLocaleTags.first,
           ),
           items: definition.supportedLocaleTags
-              .map(
-                (tag) => DropdownItem<String>(
-                  value: tag,
-                  child: Text(tag),
-                ),
-              )
+              .map((tag) => DropdownItem<String>(value: tag, child: Text(tag)))
               .toList(growable: false),
           onChanged: (tag) {
             if (tag != null) {
               onChanged(
-                copyReportPresentationOptions(
-                  presentation,
-                  languageTag: tag,
-                ),
+                copyReportPresentationOptions(presentation, languageTag: tag),
               );
             }
           },
@@ -97,20 +86,12 @@ class OperationalReportDocumentOptions extends StatelessWidget {
             presentation.pageProfileId ?? definition.pageProfileIds.first,
           ),
           items: definition.pageProfileIds
-              .map(
-                (id) => DropdownItem<String>(
-                  value: id,
-                  child: Text(id),
-                ),
-              )
+              .map((id) => DropdownItem<String>(value: id, child: Text(id)))
               .toList(growable: false),
           onChanged: (id) {
             if (id != null) {
               onChanged(
-                copyReportPresentationOptions(
-                  presentation,
-                  pageProfileId: id,
-                ),
+                copyReportPresentationOptions(presentation, pageProfileId: id),
               );
             }
           },

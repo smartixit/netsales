@@ -5,10 +5,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 
 /// Saved presets and report exports for the selected operational report.
 class OperationalReportActionsBar extends StatelessWidget {
-  const OperationalReportActionsBar({
-    required this.controller,
-    super.key,
-  });
+  const OperationalReportActionsBar({required this.controller, super.key});
 
   final OperationalReportsController controller;
 
@@ -26,24 +23,26 @@ class OperationalReportActionsBar extends StatelessWidget {
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: controller.savedPresets.map((preset) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CustomButton.outline(
-                      text: preset.name,
-                      onPressed: () => controller.applyPreset(preset),
-                    ),
-                    CustomButton.icon(
-                      icon: Icons.delete_outline,
-                      tooltip: 'حذف الإعداد',
-                      onPressed: controller.isDeletingPreset.value
-                          ? null
-                          : () => controller.deletePreset(preset),
-                    ),
-                  ],
-                );
-              }).toList(growable: false),
+              children: controller.savedPresets
+                  .map((preset) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CustomButton.outline(
+                          text: preset.name,
+                          onPressed: () => controller.applyPreset(preset),
+                        ),
+                        CustomButton.icon(
+                          icon: Icons.delete_outline,
+                          tooltip: 'حذف الإعداد',
+                          onPressed: controller.isDeletingPreset.value
+                              ? null
+                              : () => controller.deletePreset(preset),
+                        ),
+                      ],
+                    );
+                  })
+                  .toList(growable: false),
             ),
           );
         }),
@@ -62,7 +61,8 @@ class OperationalReportActionsBar extends StatelessWidget {
                 () => CustomButton.primary(
                   text: 'تصدير CSV',
                   prefix: Icons.table_view_outlined,
-                  onPressed: controller.canExport &&
+                  onPressed:
+                      controller.canExport &&
                           !controller.isExportActionRunning.value
                       ? controller.requestExport
                       : null,
@@ -73,7 +73,8 @@ class OperationalReportActionsBar extends StatelessWidget {
                 () => CustomButton.outline(
                   text: 'تصدير PDF تفصيلي',
                   prefix: Icons.picture_as_pdf_outlined,
-                  onPressed: controller.canExport &&
+                  onPressed:
+                      controller.canExport &&
                           controller.summary.value != null &&
                           !controller.isPdfActionRunning.value
                       ? controller.exportDetailedPdf
@@ -85,7 +86,8 @@ class OperationalReportActionsBar extends StatelessWidget {
                 () => CustomButton.outline(
                   text: 'حفظ ملخص PDF',
                   prefix: Icons.picture_as_pdf_outlined,
-                  onPressed: controller.canExport &&
+                  onPressed:
+                      controller.canExport &&
                           controller.summary.value != null &&
                           !controller.isPdfActionRunning.value
                       ? controller.exportSummaryPdf
@@ -97,7 +99,8 @@ class OperationalReportActionsBar extends StatelessWidget {
                 () => CustomButton.outline(
                   text: 'مشاركة PDF',
                   prefix: Icons.share_outlined,
-                  onPressed: controller.canExport &&
+                  onPressed:
+                      controller.canExport &&
                           controller.summary.value != null &&
                           !controller.isPdfActionRunning.value
                       ? controller.shareSummaryPdf
@@ -108,7 +111,8 @@ class OperationalReportActionsBar extends StatelessWidget {
                 () => CustomButton.outline(
                   text: 'طباعة PDF',
                   prefix: Icons.print_outlined,
-                  onPressed: controller.canExport &&
+                  onPressed:
+                      controller.canExport &&
                           controller.summary.value != null &&
                           !controller.isPdfActionRunning.value
                       ? controller.printSummaryPdf

@@ -42,8 +42,8 @@ class WorkspacePosPickerTile extends StatelessWidget {
               color: isSelected
                   ? colors.primary
                   : (isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : colors.outlineVariant.withValues(alpha: 0.8)),
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : colors.outlineVariant.withValues(alpha: 0.8)),
               width: isSelected ? 1.5 : 1,
             ),
             boxShadow: [
@@ -69,18 +69,13 @@ class WorkspacePosPickerTile extends StatelessWidget {
                   ),
                 ),
                 alignment: Alignment.center,
-                child:
-                    item.logoUrl != null &&
-                            item.logoUrl!.isNotEmpty
-                        ? CustomCachedImage.avatar(
-                            url: item.logoUrl,
-                            radius: 19.r,
-                          )
-                        : Icon(
-                            Icons.storefront_rounded,
-                            size: 22.r,
-                            color: colors.primary,
-                          ),
+                child: item.logoUrl != null && item.logoUrl!.isNotEmpty
+                    ? CustomCachedImage.avatar(url: item.logoUrl, radius: 19.r)
+                    : Icon(
+                        Icons.storefront_rounded,
+                        size: 22.r,
+                        color: colors.primary,
+                      ),
               ),
               SizedBox(width: AppSpacing.md),
 
@@ -128,10 +123,7 @@ class WorkspacePosPickerTile extends StatelessWidget {
               // شارة التحديد
               if (isSelected)
                 Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8.w,
-                    vertical: 3.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                   decoration: BoxDecoration(
                     color: colors.primary,
                     borderRadius: BorderRadius.circular(AppRadius.full),

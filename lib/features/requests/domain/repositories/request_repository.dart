@@ -30,10 +30,7 @@ abstract interface class RequestRepository {
   });
 
   /// تعديل طلب الكروت قيد الانتظار (تغيير البنود أو الكميات أو نوع الشراء)
-  Future<RequestEntity> updateRequest(
-    int requestId,
-    Map<String, dynamic> data,
-  );
+  Future<RequestEntity> updateRequest(int requestId, Map<String, dynamic> data);
 
   /// إلغاء طلب الكروت قيد الانتظار من قبل نقطة البيع
   Future<RequestEntity> cancelRequest(int requestId);

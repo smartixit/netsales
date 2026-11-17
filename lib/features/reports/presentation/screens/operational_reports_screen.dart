@@ -10,7 +10,7 @@ import 'package:netsales/features/reports/presentation/widgets/operational_repor
 import 'package:netsales/features/reports/presentation/widgets/operational_report_summary_and_charts.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_studio_workspace.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_type_selector.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class OperationalReportsScreen extends GetView<OperationalReportsController> {
@@ -70,8 +70,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                 if (types.isEmpty) {
                   return const CustomEmptyState.boxed(
                     title: 'لا توجد تقارير متاحة',
-                    subtitle:
-                        'لا توجد لديك صلاحية لعرض أي من التقارير التشغيلية في مساحة العمل الحالية.',
+                    subtitle: 'لا توجد لديك صلاحية لعرض أي من التقارير التشغيلية في مساحة العمل الحالية.',
                     icon: Icons.lock_outline_rounded,
                   );
                 }
@@ -79,8 +78,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                 if (!controller.hasNetworkScope) {
                   return const CustomEmptyState.boxed(
                     title: 'حدد مساحة العمل أولاً',
-                    subtitle:
-                        'اختر شبكة أو نقطة بيع مصرحاً بها حتى يمكن تحميل تقاريرها.',
+                    subtitle: 'اختر شبكة أو نقطة بيع مصرحاً بها حتى يمكن تحميل تقاريرها.',
                     icon: Icons.business_outlined,
                   );
                 }
@@ -103,9 +101,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                         ),
                       ),
                     OperationalReportActionsBar(controller: controller),
-                    OperationalReportSummaryAndCharts(
-                      controller: controller,
-                    ),
+                    OperationalReportSummaryAndCharts(controller: controller),
                     AppSpacing.vSm,
                     Expanded(
                       flex: 2,

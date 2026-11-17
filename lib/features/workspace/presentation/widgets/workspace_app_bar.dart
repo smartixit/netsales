@@ -54,13 +54,14 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final effectivePresentation = rolePresentation ??
+    final effectivePresentation =
+        rolePresentation ??
         EnumPresentationRegistry.resolveRoleScope(
           workspace == AppWorkspace.network ? RoleScope.network : RoleScope.pos,
         );
 
-    final effectiveInitials = userInitials ??
-        (workspace == AppWorkspace.network ? 'ش' : 'ن');
+    final effectiveInitials =
+        userInitials ?? (workspace == AppWorkspace.network ? 'ش' : 'ن');
 
     return SafeArea(
       bottom: false,
@@ -118,7 +119,12 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                       size: AvatarBadgeSize.sm,
                       customDimension: 46,
                       pulseColor: colors.primary,
-                      onTap: onProfileTap ?? () => _showExecutiveProfile(context, effectivePresentation),
+                      onTap:
+                          onProfileTap ??
+                          () => _showExecutiveProfile(
+                            context,
+                            effectivePresentation,
+                          ),
                     ),
                   SizedBox(width: 10.w),
 
@@ -136,8 +142,9 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                                   height: 18.h,
                                   decoration: BoxDecoration(
                                     color: colors.surfaceContainerHigh,
-                                    borderRadius:
-                                        BorderRadius.circular(AppRadius.full),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.full,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -148,15 +155,18 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                                   height: 14.h,
                                   decoration: BoxDecoration(
                                     color: colors.surfaceContainerHigh,
-                                    borderRadius:
-                                        BorderRadius.circular(AppRadius.xs.r),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.xs.r,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           )
                         : CustomInteractiveBounce(
-                            onTap: onEntityPickerTap ?? () => _showEntityPicker(context),
+                            onTap:
+                                onEntityPickerTap ??
+                                () => _showEntityPicker(context),
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: AlignmentDirectional.centerStart,
@@ -179,20 +189,20 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                                           title,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: AppTypography.titleMedium.copyWith(
-                                            color: colors.onSurface,
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 14.sp,
-                                          ),
+                                          style: AppTypography.titleMedium
+                                              .copyWith(
+                                                color: colors.onSurface,
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 14.sp,
+                                              ),
                                         ),
                                       ),
                                       SizedBox(width: 4.w),
                                       Icon(
                                         Icons.keyboard_arrow_down_rounded,
                                         size: 16.r,
-                                        color: colors.onSurfaceVariant.withValues(
-                                          alpha: 0.7,
-                                        ),
+                                        color: colors.onSurfaceVariant
+                                            .withValues(alpha: 0.7),
                                       ),
                                     ],
                                   ),
@@ -207,7 +217,12 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                   const NotificationBadgeButton(),
                   SizedBox(width: 8.w),
                   CustomInteractiveBounce(
-                    onTap: onProfileTap ?? () => _showExecutiveProfile(context, effectivePresentation),
+                    onTap:
+                        onProfileTap ??
+                        () => _showExecutiveProfile(
+                          context,
+                          effectivePresentation,
+                        ),
                     child: Container(
                       width: 42.r,
                       height: 42.r,
@@ -238,12 +253,10 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
+
   void _showEntityPicker(BuildContext context) {
     WorkspaceEntityPickerController.to.prepareForWorkspace(workspace);
-    WorkspaceEntityPickerSheet.show(
-      context,
-      currentWorkspace: workspace,
-    );
+    WorkspaceEntityPickerSheet.show(context, currentWorkspace: workspace);
   }
 
   void _showExecutiveProfile(
@@ -268,5 +281,4 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
       onToggleTheme: coordinator.toggleTheme,
     );
   }
-
 }

@@ -14,10 +14,7 @@ import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-enum WalletTransferDirection {
-  networkToPos,
-  posToNetwork,
-}
+enum WalletTransferDirection { networkToPos, posToNetwork }
 
 class NetworkWalletTransferController extends GetxController {
   final TransferFromNetworkToPosUseCase transferFromNetworkToPosUseCase;
@@ -280,7 +277,8 @@ class NetworkWalletTransferController extends GetxController {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
-      final isTimeout = e.toString().toLowerCase().contains('timeout') ||
+      final isTimeout =
+          e.toString().toLowerCase().contains('timeout') ||
           e.toString().toLowerCase().contains('connection') ||
           e.toString().toLowerCase().contains('socket');
 

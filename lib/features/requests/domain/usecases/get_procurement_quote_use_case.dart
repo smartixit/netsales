@@ -11,4 +11,3 @@ class GetProcurementQuoteUseCase {
     return repository.getQuote(payload);
   }
 }
-

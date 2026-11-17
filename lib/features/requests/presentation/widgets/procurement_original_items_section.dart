@@ -8,10 +8,7 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_requ
 
 /// البنود الأصلية التي أرسلها صاحب الطلب، دون استبدالها ببنود الفاتورة.
 class ProcurementOriginalItemsSection extends StatelessWidget {
-  const ProcurementOriginalItemsSection({
-    super.key,
-    required this.items,
-  });
+  const ProcurementOriginalItemsSection({super.key, required this.items});
 
   final List<RequestItemEntity> items;
 
@@ -51,10 +48,8 @@ class ProcurementOriginalItemsSection extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: items.length,
             separatorBuilder: (context, index) => AppSpacing.vXs,
-            itemBuilder: (context, index) => ProcurementRequestItemRow(
-              item: items[index],
-              index: index,
-            ),
+            itemBuilder: (context, index) =>
+                ProcurementRequestItemRow(item: items[index], index: index),
           ),
       ],
     );

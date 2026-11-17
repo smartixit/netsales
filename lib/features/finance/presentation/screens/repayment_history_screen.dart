@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -9,9 +10,8 @@ import 'package:netsales/features/finance/presentation/widgets/repayment_card.da
 import 'package:netsales/features/finance/presentation/widgets/repayment_card_skeleton.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_history_scope_panel.dart';
 import 'package:netsales/widgets/badges/custom_chip.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
@@ -63,7 +63,15 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
                   Expanded(
                     child: Obx(() {
                       if (controller.isLoadingNetworks.value) {
-                        return const CustomSkeletonFeed(itemCount: 3);
+                        return const CustomStateView.loading(
+                          presentation: CustomStatePresentation.skeletonOnly,
+                          skeleton: CustomStateSkeleton(
+                            layout: CustomStateSkeletonLayout.list,
+                            itemCount: 3,
+                            cardHeight: 112,
+                            hasLeading: true,
+                          ),
+                        );
                       }
 
                       if (controller.networkErrorMessage.value != null &&
@@ -93,7 +101,15 @@ class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
 
                       if (controller.isLoading.value &&
                           controller.repayments.isEmpty) {
-                        return const CustomSkeletonFeed(itemCount: 4);
+                        return const CustomStateView.loading(
+                          presentation: CustomStatePresentation.skeletonOnly,
+                          skeleton: CustomStateSkeleton(
+                            layout: CustomStateSkeletonLayout.list,
+                            itemCount: 3,
+                            cardHeight: 112,
+                            hasLeading: true,
+                          ),
+                        );
                       }
 
                       if (controller.repayments.isEmpty &&

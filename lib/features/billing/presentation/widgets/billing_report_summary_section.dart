@@ -79,9 +79,7 @@ class BillingReportSummarySection extends StatelessWidget {
           );
         }
       } else {
-        widgets.add(
-          Text('$label: ${_displayValue(entry.key, value)}'),
-        );
+        widgets.add(Text('$label: ${_displayValue(entry.key, value)}'));
       }
     }
     return widgets;
@@ -89,13 +87,13 @@ class BillingReportSummarySection extends StatelessWidget {
 
   String _displayValue(String key, dynamic value) {
     if (value == null) return '—';
-    final isAmount = key.endsWith('_minor') ||
+    final isAmount =
+        key.endsWith('_minor') ||
         key == 'amount' ||
         key == 'mrr' ||
         key == 'arr' ||
         key.contains('revenue');
-    if (isAmount &&
-        (value is num || num.tryParse(value.toString()) != null)) {
+    if (isAmount && (value is num || num.tryParse(value.toString()) != null)) {
       return AmountFormatter.format(value.toString());
     }
     return value.toString();

@@ -8,5 +8,6 @@ class BillingWorkspaceScreen extends GetView<BillingController> {
   const BillingWorkspaceScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => BillingWorkspaceContent(controller: controller);
+  Widget build(BuildContext context) =>
+      BillingWorkspaceContent(controller: controller);
 }

@@ -10,10 +10,8 @@ import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
-import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 
 class MockRequestRepo implements RequestRepository {
   @override
@@ -45,7 +43,7 @@ class MockPackageRepo implements PackageCatalogRepository {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  late PosProcurementController controller;
+  late PosNewProcurementOrderController controller;
   const testPackage = PackageEntity(
     packageId: 10,
     networkId: 1,
@@ -64,10 +62,8 @@ void main() {
 
   setUp(() {
     Get.reset();
-    controller = PosProcurementController(
-      getRequestsUseCase: GetRequestsUseCase(MockRequestRepo()),
+    controller = PosNewProcurementOrderController(
       createRequestUseCase: CreateRequestUseCase(MockRequestRepo()),
-      cancelRequestUseCase: CancelRequestUseCase(MockRequestRepo()),
       getMyPosUseCase: GetMyPosUseCase(MockCommercialRepo()),
       getPosNetworksListUseCase: GetPosNetworksListUseCase(MockCommercialRepo()),
       getPackagesUseCase: GetPackagesUseCase(MockPackageRepo()),
@@ -79,7 +75,7 @@ void main() {
     Get.reset();
   });
 
-  group('PosProcurementController Voucher Quantity Stepper & Additive Logic', () {
+  group('PosNewProcurementOrderController Voucher Quantity Stepper & Additive Logic', () {
     test('محرر الكمية يبدأ بصفر ولا يضيف ورقة ضمنية بمجرد استعراض الباقة', () {
       expect(controller.requestedVoucherCount, equals(0));
       expect(controller.quantityController.text, isEmpty);

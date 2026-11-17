@@ -38,7 +38,9 @@ class ProcurementPricingDiscountCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: colors.surfaceContainerLow,
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.3)),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: 0.3),
+          ),
         ),
         child: Row(
           children: [
@@ -114,9 +116,7 @@ class ProcurementPricingDiscountCard extends StatelessWidget {
     final discountRate = isCash
         ? discount!.discountCash
         : discount!.discountCredit;
-    final savings = isCash
-        ? discount!.cashSavings
-        : discount!.creditSavings;
+    final savings = isCash ? discount!.cashSavings : discount!.creditSavings;
     final isCustom = discount!.isCustom;
 
     return Container(

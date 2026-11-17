@@ -25,6 +25,14 @@ class PackageEntity {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? networkName;
+  final int? procurementBaseUnitPriceMinor;
+  final int? procurementCashUnitPriceMinor;
+  final int? procurementCreditUnitPriceMinor;
+  final int? procurementCashDiscountBasisPoints;
+  final int? procurementCreditDiscountBasisPoints;
+  final String? procurementPricingSnapshotToken;
+  final DateTime? procurementPricingSnapshotExpiresAt;
+  final bool procurementIsCustomDiscount;
 
   const PackageEntity({
     required this.packageId,
@@ -47,6 +55,14 @@ class PackageEntity {
     this.createdAt,
     this.updatedAt,
     this.networkName,
+    this.procurementBaseUnitPriceMinor,
+    this.procurementCashUnitPriceMinor,
+    this.procurementCreditUnitPriceMinor,
+    this.procurementCashDiscountBasisPoints,
+    this.procurementCreditDiscountBasisPoints,
+    this.procurementPricingSnapshotToken,
+    this.procurementPricingSnapshotExpiresAt,
+    this.procurementIsCustomDiscount = false,
   });
 
   bool get isActive => status;

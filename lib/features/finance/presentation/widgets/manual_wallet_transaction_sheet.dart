@@ -261,14 +261,17 @@ class ManualWalletTransactionSheet
           // زر حفظ القيد
           Obx(
             () => CustomButton.primary(
-              text: controller.isDeposit ? 'تأكيد قيد الإيداع' : 'تأكيد قيد السحب',
+              text: controller.isDeposit
+                  ? 'تأكيد قيد الإيداع'
+                  : 'تأكيد قيد السحب',
               prefix: controller.isDeposit
                   ? Icons.add_task_rounded
                   : Icons.assignment_returned_rounded,
               width: double.infinity,
               loading: controller.isSubmitting.value,
-              onPressed:
-                  controller.isSubmitting.value ? null : controller.submit,
+              onPressed: controller.isSubmitting.value
+                  ? null
+                  : controller.submit,
             ),
           ),
 

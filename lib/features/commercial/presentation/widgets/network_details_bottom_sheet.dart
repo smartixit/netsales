@@ -58,7 +58,9 @@ class NetworkDetailsBottomSheet {
             selectedGovernorate.value = foundGov;
             govDisplayController.text = foundGov.governorateName;
             isLoadingDirectorates.value = true;
-            final dirs = await controller.loadDirectorates(foundGov.governorateId);
+            final dirs = await controller.loadDirectorates(
+              foundGov.governorateId,
+            );
             directorates.assignAll(dirs);
             isLoadingDirectorates.value = false;
 
@@ -207,7 +209,9 @@ class NetworkDetailsBottomSheet {
                           child: CustomTextField(
                             controller: dirDisplayController,
                             label: 'المديرية',
-                            prefixIcon: const Icon(Icons.location_city_outlined),
+                            prefixIcon: const Icon(
+                              Icons.location_city_outlined,
+                            ),
                             readOnly: true,
                             isRequired: false,
                           ),

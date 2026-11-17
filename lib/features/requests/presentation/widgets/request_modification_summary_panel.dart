@@ -10,10 +10,7 @@ import 'package:netsales/widgets/badges/custom_status_badge.dart';
 
 /// يعرض المقارنة التي يرسلها الخادم بين الطلب الأصلي والاعتماد النهائي.
 class RequestModificationSummaryPanel extends StatelessWidget {
-  const RequestModificationSummaryPanel({
-    super.key,
-    required this.summary,
-  });
+  const RequestModificationSummaryPanel({super.key, required this.summary});
 
   final RequestModificationSummaryEntity summary;
 
@@ -131,13 +128,12 @@ class _SummaryValueRow extends StatelessWidget {
         ),
         Text(
           value,
-          style: (emphasize
-                  ? AppTypography.titleSmall
-                  : AppTypography.bodyMedium)
-              .copyWith(
-            color: emphasize ? colors.primary : colors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
+          style:
+              (emphasize ? AppTypography.titleSmall : AppTypography.bodyMedium)
+                  .copyWith(
+                    color: emphasize ? colors.primary : colors.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
         ),
       ],
     );
@@ -145,10 +141,7 @@ class _SummaryValueRow extends StatelessWidget {
 }
 
 class _SummaryCount extends StatelessWidget {
-  const _SummaryCount({
-    required this.label,
-    required this.value,
-  });
+  const _SummaryCount({required this.label, required this.value});
 
   final String label;
   final int value;

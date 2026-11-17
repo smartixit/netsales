@@ -7,7 +7,7 @@ import 'package:netsales/features/finance/presentation/controllers/repayment_his
 import 'package:netsales/features/finance/presentation/widgets/repayment_allocation_timeline.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_details_summary.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_reversal_action.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 

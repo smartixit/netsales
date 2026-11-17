@@ -37,10 +37,7 @@ class CustomInfoListTile extends StatelessWidget {
     final content = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        if (leading != null) ...[
-          leading!,
-          AppSpacing.hSm,
-        ],
+        if (leading != null) ...[leading!, AppSpacing.hSm],
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -64,14 +61,12 @@ class CustomInfoListTile extends StatelessWidget {
             ],
           ),
         ),
-        if (trailing != null) ...[
-          AppSpacing.hSm,
-          trailing!,
-        ],
+        if (trailing != null) ...[AppSpacing.hSm, trailing!],
       ],
     );
 
-    final effectivePadding = padding ??
+    final effectivePadding =
+        padding ??
         EdgeInsetsDirectional.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.sm,
@@ -90,10 +85,7 @@ class CustomInfoListTile extends StatelessWidget {
                 child: InkWell(
                   onTap: onTap,
                   borderRadius: BorderRadius.circular(AppRadius.md),
-                  child: Padding(
-                    padding: effectivePadding,
-                    child: content,
-                  ),
+                  child: Padding(padding: effectivePadding, child: content),
                 ),
               ),
       ),

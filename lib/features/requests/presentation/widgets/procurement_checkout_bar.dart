@@ -1,136 +1,259 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 
-/// شريط ملخص السلة وتقديم طلب التوريد.
-class ProcurementCheckoutBar extends GetView<PosProcurementController> {
+/// ملخص الطلب وإرساله؛ يبقى ثابتاً ويعرض صفوف الإجمالي والخصم والصافي.
+class ProcurementCheckoutBar extends GetView<PosNewProcurementOrderController> {
   const ProcurementCheckoutBar({super.key});
 
   @override
-  /// شريط الدفع والإتمام المثبت في أسفل الشاشة (Sticky Bottom Checkout Bar)
   Widget build(BuildContext context) {
     final colors = context.colors;
-
     return Obx(() {
-      final isEditMode = controller.isEditing.value;
-      final isReviewStep = controller.currentOrderStep.value == 1;
-      final cartLines = controller.procurementCart;
-      final totalVouchers = cartLines.fold<int>(
-        0,
-        (sum, item) => sum + item.voucherCount,
-      );
+      final lines = controller.procurementCart;
       final quote = controller.serverQuote.value;
-      final quoteSummary = cartLines.isEmpty
-          ? 'السلة فارغة'
-          : (controller.isQuotePending.value ||
-                    controller.isLoadingQuote.value)
-              ? 'جاري تحديث السعر المعتمد...'
-              : quote == null
-                  ? (controller.getProcurementQuoteUseCase == null
-                      ? 'سيحتسب الخادم السعر عند التقديم'
-                      : 'عرض السعر غير متاح')
-                  : AmountFormatter.format(quote.netTotal.toString());
-
-      return Container(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.cardPadding,
-          AppSpacing.sm,
-          AppSpacing.cardPadding,
-          AppSpacing.cardPadding + MediaQuery.paddingOf(context).bottom,
-        ),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppRadius.lg),
-          ),
-          border: Border(
-            top: BorderSide(
-              color: colors.outlineVariant.withValues(alpha: 0.35),
+      final count = lines.fold<int>(0, (sum, line) => sum + line.voucherCount);
+      final currency = quote?.currency ?? 'ر.ي';
+      final quoteReady = controller.hasCurrentServerQuote && quote != null;
+      final estimate = controller.estimatedProcurementTotalsMinor;
+      final hasEstimate = estimate != null;
+      final isCompact =
+          MediaQuery.sizeOf(context).width <= AppBreakpoints.mobileMax;
+      final gross = quoteReady
+          ? quote.grossTotal
+          : (hasEstimate ? estimate.$1 / 100 : 0);
+      final discount = quoteReady
+          ? quote.discountTotal
+          : (hasEstimate ? estimate.$2 / 100 : 0);
+      final net = quoteReady
+          ? quote.netTotal
+          : (hasEstimate ? estimate.$3 / 100 : 0);
+      final summaryRows = Row(
+        children: [
+          Expanded(
+            child: _SummaryMetric(
+              label: 'الإجمالي',
+              value: AmountFormatter.formatValue(gross),
+              currency: currency,
             ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, -4),
+          AppSpacing.hXs,
+          Expanded(
+            child: _SummaryMetric(
+              label: 'الخصم',
+              value: AmountFormatter.formatValue(discount),
+              currency: currency,
+              isDiscount: true,
             ),
-          ],
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isCompact = constraints.maxWidth <=
-                AppBreakpoints.mobileSmallMax + (AppSpacing.cardPadding * 2);
+          ),
+          AppSpacing.hXs,
+          Expanded(
+            child: _SummaryMetric(
+              label: 'الصافي التقديري',
+              value: AmountFormatter.formatValue(net),
+              currency: currency,
+              isNet: true,
+            ),
+          ),
+        ],
+      );
 
-            final summary = Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  totalVouchers > 0
-                      ? '$totalVouchers كرت • ${cartLines.length} باقة'
-                      : 'السلة فارغة',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  quoteSummary,
-                  style: AppTypography.titleMedium.copyWith(
-                    color: quote == null
-                        ? colors.onSurfaceVariant
-                        : colors.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            );
-
-            final canContinue = controller.procurementCart.isNotEmpty;
-            final actionButton = CustomButton(
-              text: isReviewStep
-                  ? (isEditMode ? 'حفظ تعديلات الطلب' : 'تأكيد وإرسال الطلب')
-                  : 'متابعة إلى مراجعة الطلب',
-              icon: isReviewStep
-                  ? Icons.send_rounded
-                  : Icons.arrow_forward_rounded,
-              width: isCompact ? double.infinity : null,
-              loading: isReviewStep && controller.isSubmitting.value,
-              enabled: isReviewStep ? controller.canSubmitOrder : canContinue,
-              onPressed: isReviewStep
-                  ? (controller.canSubmitOrder ? controller.submitOrderAndClose : null)
-                  : (canContinue ? controller.continueToOrderReview : null),
-            );
-
-            if (isCompact) {
-              return Column(
+      return SafeArea(
+        top: false,
+        child: Container(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.cardPadding,
+            AppSpacing.sm,
+            AppSpacing.cardPadding,
+            AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppRadius.lg),
+            ),
+            border: Border(
+              top: BorderSide(
+                color: colors.outlineVariant.withValues(alpha: .4),
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .10),
+                blurRadius: 22,
+                offset: const Offset(0, -7),
+              ),
+            ],
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final metrics = Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  summary,
-                  AppSpacing.vSm,
-                  actionButton,
+                  if (!hasEstimate && lines.isNotEmpty) ...[
+                    CustomStateView.pricingExpired(
+                      title: controller.isRefreshingCartPricing.value
+                          ? 'جارٍ تحديث التعرفة'
+                          : 'انتهت صلاحية التعرفة',
+                      subtitle: controller.isRefreshingCartPricing.value
+                          ? 'نحدّث أسعار الباقات المختارة مع الحفاظ على كميات السلة.'
+                          : controller.cartPricingRefreshError.value ??
+                                'حدّث التعرفة الحالية قبل إرسال طلب التوريد.',
+                      actionLabel: controller.isRefreshingCartPricing.value
+                          ? 'جارٍ التحديث...'
+                          : 'تحديث التعرفة',
+                      presentation: CustomStatePresentation.compact,
+                      onAction: controller.isRefreshingCartPricing.value
+                          ? null
+                          : controller.refreshNetworkPackages,
+                    ),
+                    AppSpacing.vXs,
+                  ],
+                  summaryRows,
+                  AppSpacing.vXs,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.layers_rounded,
+                        size: 16.r,
+                        color: colors.primary,
+                      ),
+                      AppSpacing.hXs,
+                      Text(
+                        '$count كرت',
+                        style: AppTypography.labelMedium.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${lines.length} باقة مختارة',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               );
-            }
-
-            return Row(
-              children: [
-                Expanded(child: summary),
-                AppSpacing.hMd,
-                actionButton,
-              ],
-            );
-          },
+              final action = CustomButton(
+                text: controller.isEditing.value
+                    ? 'حفظ التعديلات'
+                    : 'إرسال طلب التوريد',
+                icon: Icons.send_rounded,
+                width: isCompact ? double.infinity : 190,
+                loading: controller.isSubmitting.value,
+                enabled: controller.canSubmitOrder,
+                onPressed: controller.canSubmitOrder
+                    ? controller.submitOrderAndClose
+                    : null,
+              );
+              if (isCompact) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [metrics, AppSpacing.vSm, action],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(child: metrics),
+                  AppSpacing.hMd,
+                  action,
+                ],
+              );
+            },
+          ),
         ),
       );
     });
+  }
+}
+
+class _SummaryMetric extends StatelessWidget {
+  const _SummaryMetric({
+    required this.label,
+    required this.value,
+    required this.currency,
+    this.isDiscount = false,
+    this.isNet = false,
+  });
+
+  final String label;
+  final String value;
+  final String currency;
+  final bool isDiscount;
+  final bool isNet;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final accent = isNet
+        ? colors.primary
+        : (isDiscount ? colors.tertiary : colors.onSurface);
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: isNet
+            ? colors.primary.withValues(alpha: .08)
+            : colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(
+          color: isNet
+              ? colors.primary.withValues(alpha: .24)
+              : colors.outlineVariant.withValues(alpha: .35),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.labelSmall.copyWith(
+              color: colors.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          AppSpacing.vXxs,
+          SizedBox(
+            width: double.infinity,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                value,
+                maxLines: 1,
+                style: AppTypography.titleSmall.copyWith(
+                  color: accent,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+          Text(
+            currency,
+            style: AppTypography.labelSmall.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

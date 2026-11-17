@@ -71,15 +71,16 @@ class WorkspaceCoordinatorController extends GetxController {
     final user = Get.isRegistered<SessionService>()
         ? SessionService.to.currentUser
         : null;
-    final targetScope =
-        workspace == AppWorkspace.network ? RoleScope.network : RoleScope.pos;
+    final targetScope = workspace == AppWorkspace.network
+        ? RoleScope.network
+        : RoleScope.pos;
     final membership = user?.workspaceMemberships.firstWhereOrNull(
       (m) => m.scope == targetScope,
     );
-    final rawRoleKey = membership?.roleKey ??
-        user?.role?.roleKey ??
-        user?.generalRoleKey;
-    final serverLabel = membership?.roleName ??
+    final rawRoleKey =
+        membership?.roleKey ?? user?.role?.roleKey ?? user?.generalRoleKey;
+    final serverLabel =
+        membership?.roleName ??
         user?.role?.roleName ??
         user?.role?.roleKeyLabel;
     final typedRoleKey = RoleKey.fromWire(rawRoleKey);
@@ -110,11 +111,9 @@ class WorkspaceCoordinatorController extends GetxController {
   String? get currentUserProfileLogo =>
       SessionService.to.currentUser?.userProfileLogo;
 
-  void openSecuritySettings() =>
-      Get.toNamed<void>(AppRoutes.securitySettings);
+  void openSecuritySettings() => Get.toNamed<void>(AppRoutes.securitySettings);
 
-  void openActiveSessions() =>
-      Get.toNamed<void>(AppRoutes.activeSessions);
+  void openActiveSessions() => Get.toNamed<void>(AppRoutes.activeSessions);
 
   void toggleTheme() => ThemeService.to.toggleTheme();
 

@@ -7,13 +7,13 @@ import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 
 /// بطاقة عرض وتلخيص الحساب المالي الرسمي المعتمد من الخادم لطلب التوريد (Server-Authoritative Quote Card)
-class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
+class ProcurementFinancialQuoteCard extends GetView<PosNewProcurementOrderController> {
   const ProcurementFinancialQuoteCard({super.key});
 
   @override
@@ -71,16 +71,18 @@ class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
           decoration: BoxDecoration(
             color: colors.error.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(
-              color: colors.error.withValues(alpha: 0.35),
-            ),
+            border: Border.all(color: colors.error.withValues(alpha: 0.35)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(Icons.error_outline_rounded, color: colors.error, size: 20),
+                  Icon(
+                    Icons.error_outline_rounded,
+                    color: colors.error,
+                    size: 20,
+                  ),
                   AppSpacing.hSm,
                   Expanded(
                     child: Text(
@@ -158,11 +160,7 @@ class ProcurementFinancialQuoteCard extends GetView<PosProcurementController> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.verified_rounded,
-                    color: colors.primary,
-                    size: 18,
-                  ),
+                  Icon(Icons.verified_rounded, color: colors.primary, size: 18),
                   AppSpacing.hXs,
                   Expanded(
                     child: Text(

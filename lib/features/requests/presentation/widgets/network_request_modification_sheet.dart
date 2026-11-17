@@ -54,7 +54,9 @@ class NetworkRequestModificationSheet
             );
             final name = package?.packageName ?? 'باقة #${line.packageId}';
             final sheetSize = package?.packageVoucherCount ?? 0;
-            final packageColor = CustomColorPicker.parseHex(package?.packageColor);
+            final packageColor = CustomColorPicker.parseHex(
+              package?.packageColor,
+            );
             final breakdown = sheetSize > 0
                 ? VoucherSheetCalculator.describe(line.voucherCount, sheetSize)
                 : '';
@@ -75,10 +77,7 @@ class NetworkRequestModificationSheet
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // الشريط اللوني المميز للباقة
-                      Container(
-                        width: 5,
-                        color: packageColor,
-                      ),
+                      Container(width: 5, color: packageColor),
                       Expanded(
                         child: Padding(
                           padding: EdgeInsets.all(AppSpacing.md),
@@ -91,8 +90,12 @@ class NetworkRequestModificationSheet
                                     width: 36,
                                     height: 36,
                                     decoration: BoxDecoration(
-                                      color: packageColor.withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                                      color: packageColor.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        AppRadius.sm,
+                                      ),
                                     ),
                                     child: Icon(
                                       Icons.wifi_tethering_rounded,
@@ -103,23 +106,26 @@ class NetworkRequestModificationSheet
                                   AppSpacing.hSm,
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           name,
-                                          style: AppTypography.bodyMedium.copyWith(
-                                            color: colors.onSurface,
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                          style: AppTypography.bodyMedium
+                                              .copyWith(
+                                                color: colors.onSurface,
+                                                fontWeight: FontWeight.w700,
+                                              ),
                                         ),
                                         if (breakdown.isNotEmpty) ...[
                                           AppSpacing.vXxs,
                                           Text(
                                             breakdown,
-                                            style: AppTypography.bodySmall.copyWith(
-                                              color: colors.primary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                            style: AppTypography.bodySmall
+                                                .copyWith(
+                                                  color: colors.primary,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
                                         ],
                                       ],
@@ -130,7 +136,9 @@ class NetworkRequestModificationSheet
                                     size: AppButtonSize.small,
                                     foregroundColor: colors.error,
                                     onPressed: () =>
-                                        controller.removeModificationPackage(line.packageId),
+                                        controller.removeModificationPackage(
+                                          line.packageId,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -144,10 +152,11 @@ class NetworkRequestModificationSheet
                                     icon: Icons.remove_rounded,
                                     onPressed: line.voucherCount <= 1
                                         ? null
-                                        : () => controller.stepModificationSheet(
-                                              line.packageId,
-                                              isIncrement: false,
-                                            ),
+                                        : () =>
+                                              controller.stepModificationSheet(
+                                                line.packageId,
+                                                isIncrement: false,
+                                              ),
                                   ),
                                   AppSpacing.hSm,
                                   Expanded(
@@ -158,18 +167,22 @@ class NetworkRequestModificationSheet
                                       ),
                                       decoration: BoxDecoration(
                                         color: colors.surfaceContainerLowest,
-                                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                                        borderRadius: BorderRadius.circular(
+                                          AppRadius.sm,
+                                        ),
                                         border: Border.all(
-                                          color: colors.outlineVariant.withValues(alpha: 0.3),
+                                          color: colors.outlineVariant
+                                              .withValues(alpha: 0.3),
                                         ),
                                       ),
                                       child: Center(
                                         child: Text(
                                           '${line.voucherCount} كرت',
-                                          style: AppTypography.titleSmall.copyWith(
-                                            color: colors.onSurface,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style: AppTypography.titleSmall
+                                              .copyWith(
+                                                color: colors.onSurface,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                       ),
                                     ),
@@ -182,10 +195,11 @@ class NetworkRequestModificationSheet
                                     icon: Icons.add_rounded,
                                     onPressed: line.voucherCount >= 1000000
                                         ? null
-                                        : () => controller.stepModificationSheet(
-                                              line.packageId,
-                                              isIncrement: true,
-                                            ),
+                                        : () =>
+                                              controller.stepModificationSheet(
+                                                line.packageId,
+                                                isIncrement: true,
+                                              ),
                                   ),
                                 ],
                               ),
@@ -280,112 +294,119 @@ class NetworkRequestModificationSheet
               emphasize: true,
             ),
             AppSpacing.vSm,
-            ...preview.items.map(
-              (item) {
-                final package = controller.availablePackages.firstWhereOrNull(
-                  (p) => p.packageId == item.packageId,
-                );
-                final sheetSize = package?.packageVoucherCount ?? 0;
-                final desc = sheetSize > 0
-                    ? VoucherSheetCalculator.describe(item.voucherCount, sheetSize)
-                    : null;
-                final quantityLabel = desc != null
-                    ? '$desc (${item.voucherCount} كرت)'
-                    : '${item.voucherCount} كرت';
-                final previousQuantity = item.originalVoucherCount;
-                final isQuantityChanged = item.changeType == 'QUANTITY_CHANGED';
-                final quantitySummary = isQuantityChanged && previousQuantity != null
-                    ? 'من $previousQuantity إلى ${item.voucherCount} كرت'
-                    : quantityLabel;
+            ...preview.items.map((item) {
+              final package = controller.availablePackages.firstWhereOrNull(
+                (p) => p.packageId == item.packageId,
+              );
+              final sheetSize = package?.packageVoucherCount ?? 0;
+              final desc = sheetSize > 0
+                  ? VoucherSheetCalculator.describe(
+                      item.voucherCount,
+                      sheetSize,
+                    )
+                  : null;
+              final quantityLabel = desc != null
+                  ? '$desc (${item.voucherCount} كرت)'
+                  : '${item.voucherCount} كرت';
+              final previousQuantity = item.originalVoucherCount;
+              final isQuantityChanged = item.changeType == 'QUANTITY_CHANGED';
+              final quantitySummary =
+                  isQuantityChanged && previousQuantity != null
+                  ? 'من $previousQuantity إلى ${item.voucherCount} كرت'
+                  : quantityLabel;
 
-                return Container(
-                  width: double.infinity,
-                  margin: EdgeInsets.only(bottom: AppSpacing.xs),
-                  padding: EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: colors.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.3),
-                    ),
+              return Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(bottom: AppSpacing.xs),
+                padding: EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  border: Border.all(
+                    color: colors.outlineVariant.withValues(alpha: 0.3),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              item.packageName,
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          _ModificationChangeBadge(changeType: item.changeType),
-                        ],
-                      ),
-                      AppSpacing.vXxs,
-                      Text(
-                        quantitySummary,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                      AppSpacing.vXxs,
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'خصم ${item.itemDiscount}%',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.success,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            AmountFormatter.format(item.itemTotalAmount.toString()),
-                            style: AppTypography.labelLarge.copyWith(
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.packageName,
+                            style: AppTypography.bodySmall.copyWith(
                               color: colors.onSurface,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ],
+                        ),
+                        _ModificationChangeBadge(changeType: item.changeType),
+                      ],
+                    ),
+                    AppSpacing.vXxs,
+                    Text(
+                      quantitySummary,
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onSurfaceVariant,
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                    AppSpacing.vXxs,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'خصم ${item.itemDiscount}%',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: colors.success,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          AmountFormatter.format(
+                            item.itemTotalAmount.toString(),
+                          ),
+                          style: AppTypography.labelLarge.copyWith(
+                            color: colors.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
             if (preview.removedItems.isNotEmpty) ...[
               AppSpacing.vSm,
               Text(
                 'الباقات المحذوفة',
                 style: AppTypography.labelLarge.copyWith(color: colors.error),
               ),
-              ...preview.removedItems.map(
-                (item) {
-                  final package = controller.availablePackages.firstWhereOrNull(
-                    (p) => p.packageId == item.packageId,
-                  );
-                  final sheetSize = package?.packageVoucherCount ?? 0;
-                  final desc = sheetSize > 0
-                      ? VoucherSheetCalculator.describe(item.originalVoucherCount, sheetSize)
-                      : null;
-                  final qtyLabel = desc != null
-                      ? '$desc (${item.originalVoucherCount} كرت)'
-                      : '${item.originalVoucherCount} كرت';
+              ...preview.removedItems.map((item) {
+                final package = controller.availablePackages.firstWhereOrNull(
+                  (p) => p.packageId == item.packageId,
+                );
+                final sheetSize = package?.packageVoucherCount ?? 0;
+                final desc = sheetSize > 0
+                    ? VoucherSheetCalculator.describe(
+                        item.originalVoucherCount,
+                        sheetSize,
+                      )
+                    : null;
+                final qtyLabel = desc != null
+                    ? '$desc (${item.originalVoucherCount} كرت)'
+                    : '${item.originalVoucherCount} كرت';
 
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: AppSpacing.xxs),
-                    child: Text(
-                      '${item.packageName} — $qtyLabel — ${AmountFormatter.format(item.originalItemTotal.toString())}',
-                      style: AppTypography.bodySmall.copyWith(color: colors.error),
+                return Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.xxs),
+                  child: Text(
+                    '${item.packageName} — $qtyLabel — ${AmountFormatter.format(item.originalItemTotal.toString())}',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.error,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              }),
             ],
             if (!preview.hasModifications)
               const _InfoPanel('لم يتم اكتشاف أي تغيير عن الطلب الأصلي.'),
@@ -504,7 +525,9 @@ class _TotalRow extends StatelessWidget {
           Text(
             AmountFormatter.format(amount.toString()),
             style:
-                (emphasize ? AppTypography.titleMedium : AppTypography.bodyMedium)
+                (emphasize
+                        ? AppTypography.titleMedium
+                        : AppTypography.bodyMedium)
                     .copyWith(
                       color: emphasize ? colors.primary : colors.onSurface,
                       fontWeight: FontWeight.bold,

@@ -16,9 +16,9 @@ import 'package:netsales/widgets/data_grid/models/app_data_grid_column.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_features.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_pagination.dart';
 import 'package:netsales/widgets/data_grid/models/app_data_grid_state.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_grid.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
@@ -256,7 +256,16 @@ class AppDataGrid<T> extends StatelessWidget {
         return const Padding(
           key: ValueKey('data-grid-loading'),
           padding: EdgeInsets.all(16),
-          child: CustomSkeletonGrid(count: 6, crossAxisCount: 2),
+          child: CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.grid,
+              itemCount: 6,
+              maxColumns: 2,
+              minItemWidth: 180,
+              cardHeight: 116,
+            ),
+          ),
         );
       case AppDataGridViewState.error:
         return CustomErrorState.boxed(

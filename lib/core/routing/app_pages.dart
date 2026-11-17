@@ -29,6 +29,8 @@ import 'package:netsales/features/catalog/presentation/screens/package_catalog_s
 import 'package:netsales/features/catalog/presentation/screens/package_details_screen.dart';
 import 'package:netsales/features/catalog/presentation/screens/package_form_screen.dart';
 import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
+import 'package:netsales/features/requests/presentation/bindings/pos_procurement_orders_binding.dart';
+import 'package:netsales/features/requests/presentation/bindings/pos_new_procurement_order_binding.dart';
 import 'package:netsales/features/requests/presentation/screens/network_supply_requests_review_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/pos_new_procurement_order_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/pos_procurement_orders_screen.dart';
@@ -68,7 +70,7 @@ import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_sh
 import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_screen.dart';
 import 'package:netsales/widgets/data_grid/showcase/data_grid_showcase_binding.dart';
 import 'package:netsales/widgets/data_grid/showcase/data_grid_showcase_screen.dart';
-import 'package:netsales/widgets/feedback/custom_not_found.dart';
+import 'package:netsales/widgets/feedback/states/custom_not_found_state.dart';
 import 'package:netsales/widgets/feedback/custom_unauthorized.dart';
 
 /// ============================================================================
@@ -88,7 +90,7 @@ abstract final class AppPages {
     ),
 
     // Not Found
-    GetPage(name: AppRoutes.notFound, page: () => const CustomNotFound()),
+    GetPage(name: AppRoutes.notFound, page: () => const CustomNotFoundState()),
 
     // Unauthorized Access Rejection (Deep Link Defense)
     GetPage(
@@ -285,7 +287,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.procurementOrders,
       page: () => const PosProcurementOrdersScreen(),
-      binding: ProcurementRequestBinding(),
+      binding: PosProcurementOrdersBinding(),
       middlewares: [
         AuthGuard(),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
@@ -294,7 +296,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.newProcurementOrder,
       page: () => const PosNewProcurementOrderScreen(),
-      binding: ProcurementRequestBinding(),
+      binding: PosNewProcurementOrderBinding(),
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(

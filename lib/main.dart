@@ -30,7 +30,7 @@ import 'package:netsales/core/utils/system_ui_style_resolver.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/widgets/feedback/custom_not_found.dart';
+import 'package:netsales/widgets/feedback/states/custom_not_found_state.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/interactions/custome_theme_switcher.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -190,7 +190,7 @@ class MyApp extends StatelessWidget {
             getPages: AppPages.routes,
             unknownRoute: GetPage(
               name: AppRoutes.notFound,
-              page: () => const CustomNotFound(),
+              page: () => const CustomNotFoundState(),
             ),
             defaultTransition: Transition.fadeIn,
             transitionDuration: AppMotion.normal,

@@ -8,10 +8,7 @@ class BillingCollectionStatusOptions {
 
   static List<DropdownItem<String>> build(Iterable<String> values) {
     return [
-      DropdownItem<String>(
-        value: '',
-        child: Text('كل الحالات'),
-      ),
+      DropdownItem<String>(value: '', child: Text('كل الحالات')),
       ...values.map((value) {
         final presentation = EnumPresentationRegistry.resolveBillingStatus(
           BillingStatus.fromWire(value),

@@ -22,14 +22,17 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
   @override
   Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
+    int? posId,
     bool? status,
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async {
     final filtered = _packages.where((p) {
       if (networkId != null && p.networkId != networkId) return false;
       if (status != null && p.status != status) return false;
+      if (packageIds != null && !packageIds.contains(p.packageId)) return false;
       if (search != null && search.isNotEmpty) {
         if (!p.packageName.toLowerCase().contains(search.toLowerCase())) {
           return false;
@@ -179,6 +182,9 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
   }
 
   @override
+  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({required int networkId, required int posId}) async => const [];
+
+  @override
   Future<EffectivePackageDiscountEntity> getEffectiveDiscount({required int networkId, required int posId, required int packageId}) {
     throw UnimplementedError();
   }
@@ -208,6 +214,16 @@ void main() {
         'created_by': 1,
         'created_at': '2026-11-01 10:00:00',
         'updated_at': '2026-11-02 12:00:00',
+        'procurement_pricing': {
+          'base_unit_price_minor': 150000,
+          'cash_discount_basis_points': 1000,
+          'credit_discount_basis_points': 500,
+          'cash_effective_unit_price_minor': 135000,
+          'credit_effective_unit_price_minor': 142500,
+          'is_custom': true,
+          'pricing_snapshot_token': 'snapshot-token',
+          'pricing_snapshot_expires_at': '2026-11-02 12:30:00',
+        },
       };
 
       final model = PackageModel.fromJson(json);
@@ -228,6 +244,23 @@ void main() {
       expect(model.effectiveCashPrice, 1350.0);
       expect(model.effectiveCreditPrice, 1425.0);
       expect(model.status, true);
+      expect(model.procurementIsCustomDiscount, isTrue);
+    });
+
+    test('PackageModel defaults POS custom-discount metadata to false', () {
+      final model = PackageModel.fromJson({
+        'package_id': 101,
+        'network_id': 5,
+        'package_name': 'باقة النجوم',
+        'package_balance': 10.0,
+        'package_voucher_count': 100,
+        'package_voucher_price': 1500.0,
+        'package_default_cash_discount': 0.0,
+        'package_default_credit_discount': 0.0,
+        'status': true,
+      });
+
+      expect(model.procurementIsCustomDiscount, isFalse);
     });
 
     test(

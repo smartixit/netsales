@@ -67,7 +67,7 @@ class RequestEntity {
 
   /// إجمالي عدد الأوراق المقابلة لكافة بنود الطلب
   double get totalSheets => items.fold<double>(0.0, (sum, item) {
-        final sheetSize = item.voucherPackage?.packageVoucherCount ?? 100;
-        return sum + (sheetSize > 0 ? item.voucherCount / sheetSize : 0.0);
-      });
+    final sheetSize = item.voucherPackage?.packageVoucherCount ?? 100;
+    return sum + (sheetSize > 0 ? item.voucherCount / sheetSize : 0.0);
+  });
 }

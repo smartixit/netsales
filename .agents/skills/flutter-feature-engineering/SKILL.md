@@ -81,7 +81,7 @@ lib/features/<feature_name>/
   - **Dialogs & Sheets:** Reuse `CustomDialog`, `CustomAnimationOverlay`, `DialogActionBar`, `CustomBottomSheet`, `InvoicePrintFormatSheet`.
   - **Inputs & Switches:** Reuse `CustomTextField`, `CustomPasswordField`, `CustomPhoneField`, `CustomPinField`, `CustomDropdown`, `CustomNumericKeyboard`, `CustomSwitch`, `CustomSwitchListTile`.
   - **Buttons:** Reuse `CustomButton`, `CustomThemeToggleButton`.
-  - **Feedback & Skeletons:** Reuse `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, and skeleton shimmers (`CustomSkeletonCard`, `CustomSkeletonFeed`, `CustomSkeletonGrid`, `CustomSkeletonListTile`, `CustomSkeletonShimmer`, `CustomSkeletonText`).
+  - **Feedback & Skeletons:** Reuse `CustomStateView`, `CustomEmptyState`, `CustomErrorState`, `CustomNotFoundState`, `CustomLoadingIndicatorBar`, `CustomOfflineState`, `CustomOfflineBanner`, `CustomUnauthorized`, and the adaptive skeleton engine (`CustomStateView.loading` + `CustomStateSkeleton` + `CustomStateSkeletonView` + `SkeletonRecipes`). `CustomSkeletonShimmer` is only the shared low-level animation primitive; do not use separate feed/grid/list-tile skeleton widgets.
   - **Toasts:** Reuse `CustomSnackbar`, `CustomToast`.
   - **Pickers:** Reuse `CustomDatePickerField`, `CustomDatePickerModal`, `CustomFilePicker`, `CustomImagePicker`, `CustomContactPickerIconButton`, `CustomColorPicker`, `CustomPosSelectorField`.
   - **Foundation, Nav & Media:** Reuse `CustomAppScaffold`, `CustomFloatingBottomNavBar`, `DoubleBackExitScope`, `MediaGalleryViewer`, `CustomCachedImage`, `CustomQrCode`.

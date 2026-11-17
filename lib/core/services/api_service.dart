@@ -394,10 +394,7 @@ class ApiService {
       if (bytes.isEmpty) {
         return ApiResponse<T>(success: false, message: 'محتوى الملف فارغ');
       }
-      final multipartFile = MultipartFile.fromBytes(
-        bytes,
-        filename: fileName,
-      );
+      final multipartFile = MultipartFile.fromBytes(bytes, filename: fileName);
       final formData = FormData.fromMap({
         fileField: multipartFile,
         ...?extraFields,

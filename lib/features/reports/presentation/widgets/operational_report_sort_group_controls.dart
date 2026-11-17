@@ -23,8 +23,9 @@ class OperationalReportSortGroupControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final children = <Widget>[];
-    final sortable =
-        definition.columns.where((column) => column.sortable).toList();
+    final sortable = definition.columns
+        .where((column) => column.sortable)
+        .toList();
 
     if (sortable.isNotEmpty) {
       children.add(
@@ -32,15 +33,10 @@ class OperationalReportSortGroupControls extends StatelessWidget {
           label: 'ترتيب حسب',
           hint: 'بدون ترتيب',
           rxValue: RxnString(
-            presentation.sorts.isEmpty
-                ? ''
-                : presentation.sorts.first.fieldId,
+            presentation.sorts.isEmpty ? '' : presentation.sorts.first.fieldId,
           ),
           items: [
-            const DropdownItem<String>(
-              value: '',
-              child: Text('بدون ترتيب'),
-            ),
+            const DropdownItem<String>(value: '', child: Text('بدون ترتيب')),
             ...sortable.map(
               (column) => DropdownItem<String>(
                 value: column.id,
@@ -69,18 +65,16 @@ class OperationalReportSortGroupControls extends StatelessWidget {
       );
     }
 
-    final groupable =
-        definition.columns.where((column) => column.groupable).toList();
+    final groupable = definition.columns
+        .where((column) => column.groupable)
+        .toList();
     if (groupable.isNotEmpty) {
       children.add(
         CustomDropdown<String>(
           label: 'تجميع حسب',
           rxValue: RxnString(presentation.groupByFieldId ?? ''),
           items: [
-            const DropdownItem<String>(
-              value: '',
-              child: Text('بدون تجميع'),
-            ),
+            const DropdownItem<String>(value: '', child: Text('بدون تجميع')),
             ...groupable.map(
               (column) => DropdownItem<String>(
                 value: column.id,
@@ -103,9 +97,7 @@ class OperationalReportSortGroupControls extends StatelessWidget {
       children.add(
         CustomDropdown<ReportSortDirection>(
           label: 'اتجاه الترتيب',
-          rxValue: Rxn<ReportSortDirection>(
-            presentation.sorts.first.direction,
-          ),
+          rxValue: Rxn<ReportSortDirection>(presentation.sorts.first.direction),
           items: const [
             DropdownItem<ReportSortDirection>(
               value: ReportSortDirection.ascending,

@@ -24,12 +24,12 @@ import 'package:netsales/features/requests/domain/entities/request_approval_resu
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
-import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 
 class FakeQuoteRequestRepository implements RequestRepository {
   ProcurementQuoteEntity? nextQuote;
@@ -113,6 +113,7 @@ class FakeQuoteRequestRepository implements RequestRepository {
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async =>
       const PaginatedList(items: [], nextCursor: null);
 
@@ -183,7 +184,7 @@ final testLink = NetworkPosLinkEntity(
   pos: testPos,
 );
 
-const testPackage = PackageEntity(
+final testPackage = PackageEntity(
   packageId: 101,
   networkId: 10,
   packageName: 'باقة الفخامة',
@@ -198,7 +199,37 @@ const testPackage = PackageEntity(
   effectiveCreditPrice: 95.0,
   status: true,
   packageColor: '#00AAFF',
+  procurementBaseUnitPriceMinor: 10000,
+  procurementCashUnitPriceMinor: 9000,
+  procurementCreditUnitPriceMinor: 9500,
+  procurementCashDiscountBasisPoints: 1000,
+  procurementCreditDiscountBasisPoints: 500,
+  procurementPricingSnapshotToken: 'signed_snapshot_token_for_package_101',
+  procurementPricingSnapshotExpiresAt: DateTime(2099),
 );
+PackageEntity _expiredTestPackage() => PackageEntity(
+  packageId: testPackage.packageId,
+  networkId: testPackage.networkId,
+  packageName: testPackage.packageName,
+  packageBalance: testPackage.packageBalance,
+  packageVoucherPrice: testPackage.packageVoucherPrice,
+  packageVoucherCount: testPackage.packageVoucherCount,
+  packageDefaultCashDiscount: testPackage.packageDefaultCashDiscount,
+  packageDefaultCreditDiscount: testPackage.packageDefaultCreditDiscount,
+  cashDiscountAmount: testPackage.cashDiscountAmount,
+  creditDiscountAmount: testPackage.creditDiscountAmount,
+  effectiveCashPrice: testPackage.effectiveCashPrice,
+  effectiveCreditPrice: testPackage.effectiveCreditPrice,
+  status: true,
+  procurementBaseUnitPriceMinor: 10000,
+  procurementCashUnitPriceMinor: 9000,
+  procurementCreditUnitPriceMinor: 9500,
+  procurementCashDiscountBasisPoints: 1000,
+  procurementCreditDiscountBasisPoints: 500,
+  procurementPricingSnapshotToken: 'expired_snapshot_token',
+  procurementPricingSnapshotExpiresAt: DateTime(2020),
+);
+
 
 class FakeCommercialRepository implements CommercialRepository {
   @override
@@ -223,21 +254,36 @@ class FakeCommercialRepository implements CommercialRepository {
 }
 
 class FakePackageCatalogRepository implements PackageCatalogRepository {
+  List<PackageEntity>? refreshedPackages;
+  List<int>? lastRequestedPackageIds;
+  bool throwOnPackageRefresh = false;
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
   Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
+    int? posId,
     bool? status,
     String? search,
     String? cursor,
     int? perPage,
-  }) async =>
-      const PaginatedList(
-        items: [testPackage],
+    List<int>? packageIds,
+  }) async {
+    if (packageIds != null) {
+      lastRequestedPackageIds = List<int>.of(packageIds);
+      if (throwOnPackageRefresh) {
+        throw const AppException('تعذر تحديث التعرفة', code: '500');
+      }
+      return PaginatedList(
+        items: refreshedPackages ?? [testPackage],
         nextCursor: null,
       );
+    }
+
+    return PaginatedList(items: [testPackage], nextCursor: null);
+  }
 }
 
 void main() {
@@ -246,7 +292,7 @@ void main() {
   late FakeQuoteRequestRepository mockRepo;
   late FakeCommercialRepository commercialRepo;
   late FakePackageCatalogRepository packageRepo;
-  late PosProcurementController controller;
+  late PosNewProcurementOrderController controller;
 
   setUp(() {
     Get.reset();
@@ -254,10 +300,8 @@ void main() {
     commercialRepo = FakeCommercialRepository();
     packageRepo = FakePackageCatalogRepository();
 
-    controller = PosProcurementController(
-      getRequestsUseCase: GetRequestsUseCase(mockRepo),
+    controller = PosNewProcurementOrderController(
       createRequestUseCase: CreateRequestUseCase(mockRepo),
-      cancelRequestUseCase: CancelRequestUseCase(mockRepo),
       getMyPosUseCase: GetMyPosUseCase(commercialRepo),
       getPosNetworksListUseCase: GetPosNetworksListUseCase(commercialRepo),
       getPackagesUseCase: GetPackagesUseCase(packageRepo),
@@ -268,6 +312,65 @@ void main() {
 
   tearDown(() {
     Get.reset();
+  });
+
+  test('Refreshing expired cart pricing replaces snapshots and preserves quantities', () async {
+    controller.selectedNetworkId.value = 10;
+    controller.selectedPosId.value = 20;
+    controller.myPosList.assignAll([testPos]);
+    controller.linkedNetworks.assignAll([testLink]);
+
+    final expiredPackage = _expiredTestPackage();
+    packageRepo.refreshedPackages = [testPackage];
+    controller.procurementCart.add(
+      ProcurementCartLineEntity(
+        package: expiredPackage,
+        sheets: 2.5,
+        voucherCount: 250,
+      ),
+    );
+
+    expect(controller.hasCurrentProcurementSnapshots, isFalse);
+
+    await controller.refreshNetworkPackages();
+
+    expect(packageRepo.lastRequestedPackageIds, [testPackage.packageId]);
+    expect(controller.procurementCart, hasLength(1));
+    expect(
+      controller.procurementCart.single.package.procurementPricingSnapshotToken,
+      testPackage.procurementPricingSnapshotToken,
+    );
+    expect(controller.procurementCart.single.voucherCount, 250);
+    expect(controller.procurementCart.single.sheets, 2.5);
+    expect(controller.hasCurrentProcurementSnapshots, isTrue);
+    expect(controller.estimatedProcurementTotalsMinor, isNotNull);
+    expect(controller.isRefreshingCartPricing.value, isFalse);
+  });
+
+  test('Incomplete cart tariff refresh keeps expired snapshots and quantities', () async {
+    controller.selectedNetworkId.value = 10;
+    controller.selectedPosId.value = 20;
+    packageRepo.refreshedPackages = [];
+    final expiredPackage = _expiredTestPackage();
+    controller.procurementCart.add(
+      ProcurementCartLineEntity(
+        package: expiredPackage,
+        sheets: 2.5,
+        voucherCount: 250,
+      ),
+    );
+
+    await controller.refreshNetworkPackages();
+
+    expect(
+      controller.procurementCart.single.package.procurementPricingSnapshotToken,
+      expiredPackage.procurementPricingSnapshotToken,
+    );
+    expect(controller.procurementCart.single.voucherCount, 250);
+    expect(controller.hasCurrentProcurementSnapshots, isFalse);
+    expect(controller.estimatedProcurementTotalsMinor, isNull);
+    expect(controller.cartPricingRefreshError.value, isNotNull);
+    expect(controller.isRefreshingCartPricing.value, isFalse);
   });
 
   group('Phase 3.1: Procurement Quote Entity & Model Serialization', () {
@@ -338,29 +441,37 @@ void main() {
     });
   });
 
-  group('Phase 3.1: PosProcurementController Server Authoritative Quote Integration', () {
-    test('Adding a cart item automatically triggers server quote fetch and updates serverQuote', () async {
+  group('Phase 3.1: PosNewProcurementOrderController Server Authoritative Quote Integration', () {
+    test('Local estimate uses signed minor-unit price and rounds discount on the line gross', () {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
+      controller.procurementCart.add(
+        ProcurementCartLineEntity(package: testPackage, sheets: 1, voucherCount: 101),
+      );
+
+      expect(controller.estimatedLineTotalMinor(testPackage, 101), 909000);
+      expect(controller.estimatedProcurementTotalsMinor, (1010000, 101000, 909000));
+    });
+
+    test('Changing a cart quantity updates local state without requesting a server quote', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
 
       controller.setPackageVoucherCount(testPackage, 500);
 
-      await Future<void>.delayed(const Duration(milliseconds: 500));
       await pumpEventQueue();
 
-      expect(controller.serverQuote.value, isNotNull);
-      expect(controller.serverQuote.value!.netTotal, 45000.0);
-      expect(controller.serverQuote.value!.pricingToken, 'fake_valid_hmac_token');
-      expect(mockRepo.lastQuotePayload!['network_id'], 10);
-      expect(mockRepo.lastQuotePayload!['pos_id'], 20);
+      expect(controller.cartQuantityForPackage(testPackage.packageId), 500);
+      expect(controller.serverQuote.value, isNull);
+      expect(mockRepo.lastQuotePayload, isNull);
     });
 
-    test('Toggling payment method triggers server quote re-calculation with updated sale_type', () async {
+    test('Toggling payment method changes local selection without a quote request', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -369,11 +480,10 @@ void main() {
 
       // Change from CASH to CREDIT
       controller.selectedSaleType.value = SaleType.credit;
-      await Future<void>.delayed(const Duration(milliseconds: 500));
       await pumpEventQueue();
 
-      expect(mockRepo.lastQuotePayload, isNotNull);
-      expect(mockRepo.lastQuotePayload!['sale_type'], 'CREDIT');
+      expect(controller.selectedSaleType.value, SaleType.credit);
+      expect(mockRepo.lastQuotePayload, isNull);
     });
 
     test('Clearing procurement cart clears serverQuote and quoteError', () async {
@@ -396,44 +506,39 @@ void main() {
       expect(controller.quoteError.value, isNull);
     });
 
-    test('Submission waits for a current server quote before creating a request', () async {
+    test('Submission creates the request directly without fetching a quote', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
       controller.myPosList.assignAll([testPos]);
       controller.linkedNetworks.assignAll([testLink]);
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
         ),
       );
 
-      expect(controller.canSubmitOrder, isFalse);
-      final firstAttempt = await controller.submitOrder();
-
-      expect(firstAttempt, isFalse);
-      expect(mockRepo.lastCreatePayload, isNull);
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-      expect(mockRepo.lastQuotePayload, isNotNull);
-
-      await pumpEventQueue();
-      expect(controller.serverQuote.value, isNotNull);
       expect(controller.canSubmitOrder, isTrue);
+      final submitted = await controller.submitOrder();
 
-      final secondAttempt = await controller.submitOrder();
-      expect(secondAttempt, isTrue);
-      expect(mockRepo.lastCreatePayload?['pricing_token'], 'fake_valid_hmac_token');
+      expect(submitted, isTrue);
+      expect(mockRepo.lastQuotePayload, isNull);
+      expect(mockRepo.lastCreatePayload?['pricing_token'], isNull);
+      expect(
+        mockRepo.lastCreatePayload?['items']?[0]['pricing_snapshot_token'],
+        'signed_snapshot_token_for_package_101',
+      );
     });
 
-    test('Submitting order includes pricing_token from authoritative server quote', () async {
+    test('Submitting order ignores retired quote token and sends each signed snapshot', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
       controller.myPosList.assignAll([testPos]);
       controller.linkedNetworks.assignAll([testLink]);
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -449,14 +554,16 @@ void main() {
         discountTotal: 1000,
         netTotal: 9000,
         currency: 'YER',
-        pricingToken: 'authoritative_server_token_xyz',
+        pricingToken: 'retired_quote_token_must_not_be_sent',
         items: [],
       );
 
       final success = await controller.submitOrder();
 
       expect(success, isTrue);
-      expect(mockRepo.lastCreatePayload!['pricing_token'], 'authoritative_server_token_xyz');
+      expect(mockRepo.lastQuotePayload, isNull);
+      expect(mockRepo.lastCreatePayload!['pricing_token'], isNull);
+      expect(mockRepo.lastCreatePayload!['items'][0]['pricing_snapshot_token'], 'signed_snapshot_token_for_package_101');
       expect(mockRepo.createIdempotencyKeys.single, isNotEmpty);
     });
 
@@ -466,7 +573,7 @@ void main() {
       controller.myPosList.assignAll([testPos]);
       controller.linkedNetworks.assignAll([testLink]);
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -495,14 +602,14 @@ void main() {
       );
     });
 
-    test('Server price change rejection automatically triggers quote re-fetch to protect user', () async {
+    test('Server price change rejection does not trigger an automatic background quote request', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
       controller.myPosList.assignAll([testPos]);
       controller.linkedNetworks.assignAll([testLink]);
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -527,11 +634,10 @@ void main() {
       final success = await controller.submitOrder();
 
       expect(success, isFalse);
-      await Future<void>.delayed(const Duration(milliseconds: 500));
       await pumpEventQueue();
 
-      // Verified: Quote was automatically re-requested to refresh updated prices
-      expect(mockRepo.lastQuotePayload, isNotNull);
+      expect(mockRepo.lastQuotePayload, isNull);
+      expect(controller.packageErrorMessage.value, isNotNull);
     });
   });
 
@@ -566,7 +672,7 @@ void main() {
       controller.isLoadingQuote.value = false;
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 5,
           voucherCount: 500,
@@ -599,6 +705,52 @@ void main() {
       expect(find.text('45,000.00 YER'), findsOneWidget);
     });
 
+    testWidgets(
+      'Hides expired pricing state after cart tariff refresh succeeds',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        Get.put(controller);
+        controller.selectedNetworkId.value = 10;
+        controller.selectedPosId.value = 20;
+        controller.myPosList.assignAll([testPos]);
+        controller.linkedNetworks.assignAll([testLink]);
+        controller.procurementCart.add(
+          ProcurementCartLineEntity(
+            package: _expiredTestPackage(),
+            sheets: 1,
+            voucherCount: 100,
+          ),
+        );
+        packageRepo.refreshedPackages = [testPackage];
+
+        final expiredPricingState = find.byWidgetPredicate(
+          (widget) =>
+              widget is CustomStateView &&
+              widget.kind == CustomStateKind.pricingExpired,
+        );
+
+        await tester.pumpWidget(
+          buildTestableWidget(const ProcurementCheckoutBar()),
+        );
+        await tester.pumpAndSettle();
+
+        expect(expiredPricingState, findsOneWidget);
+
+        await controller.refreshNetworkPackages();
+        await tester.pumpAndSettle();
+
+        expect(controller.hasCurrentProcurementSnapshots, isTrue);
+        expect(expiredPricingState, findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('Shows expired quote state and explicit refresh action', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
@@ -611,7 +763,7 @@ void main() {
       controller.quoteError.value = null;
       controller.isLoadingQuote.value = false;
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -653,7 +805,7 @@ void main() {
       controller.quoteError.value = null;
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -681,7 +833,7 @@ void main() {
       controller.isLoadingQuote.value = false;
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,

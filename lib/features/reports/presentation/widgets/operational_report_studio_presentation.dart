@@ -58,23 +58,26 @@ class OperationalReportStudioPresentation extends StatelessWidget {
           const SizedBox(height: 12),
           OperationalReportValidationNotice(
             title: 'راجع تصميم المخرجات',
-            messages: issues.map((issue) {
-              return switch (issue.code) {
-                'unknown_column' => 'العمود «${issue.fieldId}» غير موجود.',
-                'required_column_hidden' =>
-                  'يجب إبقاء العمود «${issue.fieldId}» ظاهراً.',
-                'unknown_sort_column' || 'sorting_not_allowed' =>
-                  'الترتيب حسب «${issue.fieldId}» غير مدعوم.',
-                'unknown_group_column' || 'grouping_not_allowed' =>
-                  'التجميع حسب «${issue.fieldId}» غير مدعوم.',
-                'template_not_allowed' => 'قالب التقرير المحدد غير متاح.',
-                'locale_not_allowed' => 'لغة المستند المحددة غير مدعومة.',
-                'page_profile_not_allowed' => 'حجم الصفحة المحدد غير متاح.',
-                'metrics_not_available' => 'هذا التقرير لا يوفّر مؤشرات.',
-                'charts_not_available' => 'هذا التقرير لا يوفّر رسوماً بيانية.',
-                _ => 'إعداد «${issue.fieldId}» غير صالح.',
-              };
-            }).toList(growable: false),
+            messages: issues
+                .map((issue) {
+                  return switch (issue.code) {
+                    'unknown_column' => 'العمود «${issue.fieldId}» غير موجود.',
+                    'required_column_hidden' =>
+                      'يجب إبقاء العمود «${issue.fieldId}» ظاهراً.',
+                    'unknown_sort_column' || 'sorting_not_allowed' =>
+                      'الترتيب حسب «${issue.fieldId}» غير مدعوم.',
+                    'unknown_group_column' || 'grouping_not_allowed' =>
+                      'التجميع حسب «${issue.fieldId}» غير مدعوم.',
+                    'template_not_allowed' => 'قالب التقرير المحدد غير متاح.',
+                    'locale_not_allowed' => 'لغة المستند المحددة غير مدعومة.',
+                    'page_profile_not_allowed' => 'حجم الصفحة المحدد غير متاح.',
+                    'metrics_not_available' => 'هذا التقرير لا يوفّر مؤشرات.',
+                    'charts_not_available' =>
+                      'هذا التقرير لا يوفّر رسوماً بيانية.',
+                    _ => 'إعداد «${issue.fieldId}» غير صالح.',
+                  };
+                })
+                .toList(growable: false),
           ),
         ],
       ],

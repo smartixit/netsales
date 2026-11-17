@@ -45,18 +45,28 @@ class NetworkWorkspaceBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<BillingReportsController>()) {
-      registerLazyIfAbsent<BillingReportsController>(() => BillingReportsController(
-        useCases: Get.find<BillingUseCases>(),
-        networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
-        networkIdSignal: Get.find<NetworkWorkspaceController>().selectedNetworkId,
-      ), fenix: true);
+      registerLazyIfAbsent<BillingReportsController>(
+        () => BillingReportsController(
+          useCases: Get.find<BillingUseCases>(),
+          networkId: () =>
+              Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
+          networkIdSignal:
+              Get.find<NetworkWorkspaceController>().selectedNetworkId,
+        ),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<BillingController>()) {
-      registerLazyIfAbsent<BillingController>(() => BillingController(
-        useCases: Get.find<BillingUseCases>(),
-        networkId: () => Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
-        networkIdSignal: Get.find<NetworkWorkspaceController>().selectedNetworkId,
-      ), fenix: true);
+      registerLazyIfAbsent<BillingController>(
+        () => BillingController(
+          useCases: Get.find<BillingUseCases>(),
+          networkId: () =>
+              Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
+          networkIdSignal:
+              Get.find<NetworkWorkspaceController>().selectedNetworkId,
+        ),
+        fenix: true,
+      );
     }
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();

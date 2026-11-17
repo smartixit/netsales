@@ -10,10 +10,7 @@ import 'package:netsales/widgets/badges/custom_status_badge.dart';
 
 /// هوية طلب التوريد وحالته والأطراف المرتبطة به.
 class ProcurementRequestOverviewPanel extends StatelessWidget {
-  const ProcurementRequestOverviewPanel({
-    super.key,
-    required this.request,
-  });
+  const ProcurementRequestOverviewPanel({super.key, required this.request});
 
   final RequestEntity request;
 
@@ -35,9 +32,7 @@ class ProcurementRequestOverviewPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

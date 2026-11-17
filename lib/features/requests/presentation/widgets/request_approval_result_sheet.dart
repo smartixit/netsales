@@ -63,7 +63,8 @@ class RequestApprovalResultSheet extends StatelessWidget {
         SizedBox(height: 18.h),
         _InvoiceResultRow(
           label: 'رقم الطلب',
-          value: result.request.requestUuid ?? result.request.requestId.toString(),
+          value:
+              result.request.requestUuid ?? result.request.requestId.toString(),
         ),
         _InvoiceResultRow(
           label: 'رقم الفاتورة',
@@ -140,15 +141,16 @@ class _InvoiceResultRow extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: (emphasize
-                      ? AppTypography.titleSmall
-                      : AppTypography.bodyMedium)
-                  .copyWith(
-                color: highlight ? colors.primary : colors.onSurface,
-                fontWeight: emphasize || highlight
-                    ? FontWeight.bold
-                    : FontWeight.w600,
-              ),
+              style:
+                  (emphasize
+                          ? AppTypography.titleSmall
+                          : AppTypography.bodyMedium)
+                      .copyWith(
+                        color: highlight ? colors.primary : colors.onSurface,
+                        fontWeight: emphasize || highlight
+                            ? FontWeight.bold
+                            : FontWeight.w600,
+                      ),
             ),
           ),
         ],

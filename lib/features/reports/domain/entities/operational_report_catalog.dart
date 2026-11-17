@@ -62,10 +62,8 @@ class OperationalReportCatalogEntry {
 }
 
 class OperationalReportCatalog {
-  OperationalReportCatalog({
-    required this.schemaVersion,
-    required this.entries,
-  }) : definitionRegistry = _buildRegistry(entries);
+  OperationalReportCatalog({required this.schemaVersion, required this.entries})
+    : definitionRegistry = _buildRegistry(entries);
 
   final ReportDefinitionRegistry definitionRegistry;
 

@@ -67,7 +67,9 @@ class InvoiceDetailsController extends GetxController {
     );
 
     try {
-      final succeeded = await invoiceDocumentUseCase.exportAndSaveInvoice(currentInvoice);
+      final succeeded = await invoiceDocumentUseCase.exportAndSaveInvoice(
+        currentInvoice,
+      );
       if (succeeded) {
         CustomSnackbar.show(
           title: 'تم تصدير الفاتورة',
@@ -102,7 +104,9 @@ class InvoiceDetailsController extends GetxController {
 
     isExporting.value = true;
     try {
-      final succeeded = await invoiceDocumentUseCase.printInvoice(currentInvoice);
+      final succeeded = await invoiceDocumentUseCase.printInvoice(
+        currentInvoice,
+      );
       if (!succeeded) {
         CustomSnackbar.show(
           title: 'تعذر الطباعة',
@@ -128,7 +132,9 @@ class InvoiceDetailsController extends GetxController {
 
     isExporting.value = true;
     try {
-      final succeeded = await invoiceDocumentUseCase.shareInvoice(currentInvoice);
+      final succeeded = await invoiceDocumentUseCase.shareInvoice(
+        currentInvoice,
+      );
       if (!succeeded) {
         CustomSnackbar.show(
           title: 'تعذرت المشاركة',

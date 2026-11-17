@@ -33,10 +33,7 @@ class InvoiceItemRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // الشريط اللوني للباقة
-              Container(
-                width: 4,
-                color: packageColor,
-              ),
+              Container(width: 4, color: packageColor),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
@@ -64,7 +61,8 @@ class InvoiceItemRow extends StatelessWidget {
                                 AppSpacing.hXs,
                                 Expanded(
                                   child: Text(
-                                    item.packageName ?? 'باقة #${item.packageId}',
+                                    item.packageName ??
+                                        'باقة #${item.packageId}',
                                     style: AppTypography.bodyMedium.copyWith(
                                       color: colors.onSurface,
                                       fontWeight: FontWeight.w600,
@@ -104,7 +102,9 @@ class InvoiceItemRow extends StatelessWidget {
                         flex: 2,
                         child: Text(
                           item.itemDiscount > 0
-                              ? AmountFormatter.format(item.itemDiscount.toString())
+                              ? AmountFormatter.format(
+                                  item.itemDiscount.toString(),
+                                )
                               : '-',
                           textAlign: TextAlign.center,
                           style: AppTypography.bodySmall.copyWith(
@@ -119,7 +119,9 @@ class InvoiceItemRow extends StatelessWidget {
                       Expanded(
                         flex: 3,
                         child: Text(
-                          AmountFormatter.format(item.itemTotalAmount.toString()),
+                          AmountFormatter.format(
+                            item.itemTotalAmount.toString(),
+                          ),
                           textAlign: TextAlign.end,
                           style: AppTypography.titleSmall.copyWith(
                             color: colors.primary,

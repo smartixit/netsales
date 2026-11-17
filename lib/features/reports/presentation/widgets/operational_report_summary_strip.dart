@@ -7,10 +7,7 @@ import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 
 class OperationalReportSummaryStrip extends StatelessWidget {
-  const OperationalReportSummaryStrip({
-    required this.summary,
-    super.key,
-  });
+  const OperationalReportSummaryStrip({required this.summary, super.key});
 
   final OperationalReportSummary summary;
 
@@ -59,22 +56,23 @@ class OperationalReportSummaryStrip extends StatelessWidget {
               borderColor: colors.outlineVariant.withValues(alpha: 0.65),
               radius: 16,
               child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  metric.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    metric.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                displayValue,
-              ],
+                  displayValue,
+                ],
+              ),
             ),
-          ));
+          );
         },
       ),
     );

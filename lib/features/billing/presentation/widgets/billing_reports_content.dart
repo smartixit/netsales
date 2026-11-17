@@ -10,15 +10,12 @@ import 'package:netsales/features/billing/presentation/widgets/billing_report_su
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_reports_header.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// Composition-only content for Billing subscription reports.
 class BillingReportsContent extends StatelessWidget {
-  const BillingReportsContent({
-    super.key,
-    required this.controller,
-  });
+  const BillingReportsContent({super.key, required this.controller});
 
   final BillingReportsController controller;
 
@@ -76,32 +73,32 @@ class BillingReportsContent extends StatelessWidget {
               onPresentationChanged: controller.setPresentation,
               onPreview: controller.applyFilters,
               isBusy: controller.isLoading.value,
-              actionBuilder: (
-                context, {
-                required label,
-                required icon,
-                required onPressed,
-                required secondary,
-              }) =>
-                  secondary
-                      ? CustomButton.outline(
-                          text: label,
-                          prefix: icon,
-                          onPressed: onPressed,
-                        )
-                      : CustomButton.primary(
-                          text: label,
-                          prefix: icon,
-                          onPressed: onPressed,
-                        ),
-              filterSectionBuilder: (
-                context, {
-                required definition,
-                required criteria,
-                required resolveLabel,
-                required onChanged,
-              }) =>
-                  BillingReportFilterSection(
+              actionBuilder:
+                  (
+                    context, {
+                    required label,
+                    required icon,
+                    required onPressed,
+                    required secondary,
+                  }) => secondary
+                  ? CustomButton.outline(
+                      text: label,
+                      prefix: icon,
+                      onPressed: onPressed,
+                    )
+                  : CustomButton.primary(
+                      text: label,
+                      prefix: icon,
+                      onPressed: onPressed,
+                    ),
+              filterSectionBuilder:
+                  (
+                    context, {
+                    required definition,
+                    required criteria,
+                    required resolveLabel,
+                    required onChanged,
+                  }) => BillingReportFilterSection(
                     controller: controller,
                     definition: definition,
                     criteria: criteria,
@@ -109,14 +106,14 @@ class BillingReportsContent extends StatelessWidget {
                     onChanged: onChanged,
                     english: english,
                   ),
-              presentationSectionBuilder: (
-                context, {
-                required definition,
-                required presentation,
-                required resolveLabel,
-                required onChanged,
-              }) =>
-                  BillingReportPresentationSection(
+              presentationSectionBuilder:
+                  (
+                    context, {
+                    required definition,
+                    required presentation,
+                    required resolveLabel,
+                    required onChanged,
+                  }) => BillingReportPresentationSection(
                     controller: controller,
                     definition: definition,
                     presentation: presentation,
@@ -127,12 +124,13 @@ class BillingReportsContent extends StatelessWidget {
             ),
           if (controller.errorMessage.value != null)
             CustomErrorState.compact(
-              title: english ? 'Unable to load report data' : 'تعذر تحميل بيانات التقرير',
+              title: english
+                  ? 'Unable to load report data'
+                  : 'تعذر تحميل بيانات التقرير',
               subtitle: controller.errorMessage.value,
               onRetry: controller.loadCatalog,
             ),
-          if (reportSummary != null &&
-              reportSummary['record_count'] is num)
+          if (reportSummary != null && reportSummary['record_count'] is num)
             CustomResultsCounterBar(
               count: controller.rows.length,
               totalCount: (reportSummary['record_count'] as num).toInt(),
@@ -148,31 +146,27 @@ class BillingReportsContent extends StatelessWidget {
               summary: reportSummary,
               charts: controller.charts,
               title: english ? 'Report summary' : 'ملخص التقرير',
-              arabicLabel: (key) => BillingReportLabels.field(
-                key,
-                english: english,
-              ),
+              arabicLabel: (key) =>
+                  BillingReportLabels.field(key, english: english),
             ),
           BillingReportRecordsSection(
             controller: controller,
-            arabicLabel: (key) => BillingReportLabels.field(
-              key,
-              english: english,
-            ),
-            displayValue: (key, value) => BillingReportLabels.displayValue(
-              key,
-              value,
-              english: english,
-            ),
-            emptyTitle: english ? 'No matching records' : 'لا توجد سجلات مطابقة',
+            arabicLabel: (key) =>
+                BillingReportLabels.field(key, english: english),
+            displayValue: (key, value) =>
+                BillingReportLabels.displayValue(key, value, english: english),
+            emptyTitle: english
+                ? 'No matching records'
+                : 'لا توجد سجلات مطابقة',
             emptySubtitle: english
                 ? 'Change the search or filters, then reload the report.'
                 : 'غيّر معايير البحث أو الفلاتر ثم أعد تحميل التقرير.',
-            loadMoreLabel: english ? 'Load more report records' : 'تحميل المزيد من سجلات التقرير',
+            loadMoreLabel: english
+                ? 'Load more report records'
+                : 'تحميل المزيد من سجلات التقرير',
           ),
         ],
       );
     });
   }
-
 }

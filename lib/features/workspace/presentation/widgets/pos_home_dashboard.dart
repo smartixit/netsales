@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -14,9 +15,8 @@ import 'package:netsales/features/workspace/presentation/widgets/pos_quick_actio
 import 'package:netsales/features/workspace/presentation/widgets/pos_recent_transactions_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_selected_network_financial_summary.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_welcome_header.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 
 /// الشاشة الرئيسية لمساحة عمل نقطة البيع (PosHomeDashboard)
@@ -42,11 +42,38 @@ class PosHomeDashboard extends StatelessWidget {
             controller.activePos.value == null) {
           return const Column(
             children: [
-              CustomSkeletonCard(height: 126),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 126,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
               SizedBox(height: 20),
-              CustomSkeletonCard(height: 210),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 210,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
               SizedBox(height: 16),
-              CustomSkeletonCard(height: 156),
+              CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 1,
+                  cardHeight: 156,
+                  maxColumns: 1,
+                  minItemWidth: 180,
+                ),
+              ),
             ],
           );
         }
@@ -87,7 +114,8 @@ class PosHomeDashboard extends StatelessWidget {
             // 4. كرت السيولة والملخص المالي للشبكة المحددة (VIP Luxury Carbon Card)
             if (controller.selectedNetworkLink.value != null) ...[
               PosSelectedNetworkFinancialSummary(
-                networkName: controller
+                networkName:
+                    controller
                         .selectedNetworkLink
                         .value!
                         .network
@@ -122,11 +150,7 @@ class PosHomeDashboard extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.bolt_rounded,
-                    color: colors.primary,
-                    size: 20.r,
-                  ),
+                  Icon(Icons.bolt_rounded, color: colors.primary, size: 20.r),
                   SizedBox(width: 8.w),
                   Text(
                     'العمليات السريعة',

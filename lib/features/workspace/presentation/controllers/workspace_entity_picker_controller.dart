@@ -115,9 +115,7 @@ class WorkspaceEntityPickerController extends GetxController {
   }
 
   Future<void> selectPosById(int posId) async {
-    final pos = pointsOfSale.firstWhereOrNull(
-      (item) => item.posId == posId,
-    );
+    final pos = pointsOfSale.firstWhereOrNull((item) => item.posId == posId);
     if (pos == null) return;
     await WorkspaceService.to.saveActivePosId(pos.posId);
     if (Get.isRegistered<PosWorkspaceController>()) {

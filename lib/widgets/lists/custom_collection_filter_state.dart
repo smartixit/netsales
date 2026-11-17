@@ -17,15 +17,11 @@ class CustomCollectionFilterState {
   String get search => _search;
 
   Map<String, dynamic> get queryParameters => {
-        if (_search.isNotEmpty) 'search': _search,
-        if ((selectedStatus.value ?? '').isNotEmpty)
-          'status': selectedStatus.value,
-      };
+    if (_search.isNotEmpty) 'search': _search,
+    if ((selectedStatus.value ?? '').isNotEmpty) 'status': selectedStatus.value,
+  };
 
-  void onSearchChanged(
-    String value,
-    Future<void> Function() reload,
-  ) {
+  void onSearchChanged(String value, Future<void> Function() reload) {
     _search = value.trim();
     _debounce?.cancel();
     _debounce = Timer(

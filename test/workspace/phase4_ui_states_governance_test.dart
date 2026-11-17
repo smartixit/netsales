@@ -16,13 +16,15 @@ import 'package:netsales/features/requests/domain/entities/request_modification_
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/delete_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
+import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockResilientRequestRepo implements RequestRepository {
@@ -89,6 +91,11 @@ class MockResilientRequestRepo implements RequestRepository {
   @override
   Future<RequestModificationPreviewEntity> previewRequestModification(int requestId, List<RequestModificationLineEntity> items) async => throw UnimplementedError();
 
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class DummyCommercialRepo implements CommercialRepository {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -193,10 +200,11 @@ void main() {
         permissions: [AppPermissions.requestsView],
       );
 
-      final posController = PosProcurementController(
+      final posController = PosProcurementOrdersController(
         getRequestsUseCase: GetRequestsUseCase(mockRepo),
-        createRequestUseCase: CreateRequestUseCase(mockRepo),
+        getMyPosUseCase: GetMyPosUseCase(DummyCommercialRepo()),
         cancelRequestUseCase: CancelRequestUseCase(mockRepo),
+        deleteRequestUseCase: DeleteRequestUseCase(mockRepo),
       );
 
       // canCancelOrder and canCreateOrder must strictly reflect user permissions

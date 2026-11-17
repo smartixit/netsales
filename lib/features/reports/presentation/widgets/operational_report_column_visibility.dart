@@ -23,18 +23,15 @@ class OperationalReportColumnVisibility extends StatelessWidget {
   Widget build(BuildContext context) {
     final visible = presentation.visibleColumnIds.isEmpty
         ? definition.columns
-            .where((column) => column.visibleByDefault)
-            .map((column) => column.id)
-            .toSet()
+              .where((column) => column.visibleByDefault)
+              .map((column) => column.id)
+              .toSet()
         : presentation.visibleColumnIds.toSet();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'الأعمدة الظاهرة',
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
+        Text('الأعمدة الظاهرة', style: Theme.of(context).textTheme.titleSmall),
         for (final column in definition.columns)
           Row(
             children: [

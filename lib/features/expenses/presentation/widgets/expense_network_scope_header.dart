@@ -76,4 +76,3 @@ class ExpenseNetworkScopeHeader extends StatelessWidget {
     });
   }
 }
-

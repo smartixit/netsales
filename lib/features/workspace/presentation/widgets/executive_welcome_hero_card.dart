@@ -33,10 +33,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
     final todayStr = controller.todayFormatted;
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: 14.h,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14.h),
       decoration: BoxDecoration(
         color: isDark ? colors.surfaceContainerLow : colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -186,10 +183,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
               // كبسولة التاريخ
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8.w,
-                    vertical: 6.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
                   decoration: BoxDecoration(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.04)
@@ -265,8 +259,8 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                               alpha: isDark ? 0.14 : 0.08,
                             )
                           : (isDark
-                              ? Colors.white.withValues(alpha: 0.04)
-                              : colors.surfaceContainerLow),
+                                ? Colors.white.withValues(alpha: 0.04)
+                                : colors.surfaceContainerLow),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       border: Border.all(
                         color: pendingCount > 0
@@ -274,8 +268,10 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                                 alpha: isDark ? 0.4 : 0.3,
                               )
                             : (isDark
-                                ? Colors.white.withValues(alpha: 0.06)
-                                : colors.outlineVariant.withValues(alpha: 0.6)),
+                                  ? Colors.white.withValues(alpha: 0.06)
+                                  : colors.outlineVariant.withValues(
+                                      alpha: 0.6,
+                                    )),
                         width: 0.8,
                       ),
                     ),
@@ -285,10 +281,11 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                           width: 26.r,
                           height: 26.r,
                           decoration: BoxDecoration(
-                            color: (pendingCount > 0
-                                    ? colors.warning
-                                    : colors.primary)
-                                .withValues(alpha: 0.14),
+                            color:
+                                (pendingCount > 0
+                                        ? colors.warning
+                                        : colors.primary)
+                                    .withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Icon(

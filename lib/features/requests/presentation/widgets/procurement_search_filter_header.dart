@@ -84,7 +84,9 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: selected
                           ? colors.primary.withValues(alpha: 0.12)
-                          : colors.surfaceContainerHighest.withValues(alpha: 0.45),
+                          : colors.surfaceContainerHighest.withValues(
+                              alpha: 0.45,
+                            ),
                       borderRadius: BorderRadius.circular(24.r),
                       border: Border.all(
                         color: selected
@@ -96,8 +98,12 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
                       child: Text(
                         filter.label,
                         style: AppTypography.labelMedium.copyWith(
-                          color: selected ? colors.primary : colors.onSurfaceVariant,
-                          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                          color: selected
+                              ? colors.primary
+                              : colors.onSurfaceVariant,
+                          fontWeight: selected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
                         ),
                       ),
                     ),

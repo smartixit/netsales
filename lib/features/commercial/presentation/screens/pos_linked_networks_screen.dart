@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_card_skeleton.dart';
 import 'package:netsales/features/commercial/presentation/widgets/pos_linked_network_card.dart';
 import 'package:netsales/features/commercial/presentation/widgets/pos_linked_networks_search_filter_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// شاشة استعراض الشبكات المزودة لنقطة البيع (POS Linked Networks Screen)
@@ -59,9 +59,11 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
               () => CustomResultsCounterBar(
                 count: controller.links.length,
                 recordLabel: 'شبكة مزودة',
-                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                isFiltered:
+                    controller.searchQuery.value.isNotEmpty ||
                     controller.selectedStatusFilter.value != null,
-                isLoading: controller.isLoading.value && controller.links.isEmpty,
+                isLoading:
+                    controller.isLoading.value && controller.links.isEmpty,
                 onClear: controller.resetFilters,
               ),
             ),
@@ -76,9 +78,11 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
               () => CustomResultsCounterBar(
                 count: controller.links.length,
                 recordLabel: 'شبكة مزودة',
-                isFiltered: controller.searchQuery.value.isNotEmpty ||
+                isFiltered:
+                    controller.searchQuery.value.isNotEmpty ||
                     controller.selectedStatusFilter.value != null,
-                isLoading: controller.isLoading.value && controller.links.isEmpty,
+                isLoading:
+                    controller.isLoading.value && controller.links.isEmpty,
                 onClear: controller.resetFilters,
               ),
             ),
@@ -93,9 +97,13 @@ class PosLinkedNetworksScreen extends GetView<CommercialDirectoryController> {
               if (controller.isLoading.value) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
-                  child: const CustomSkeletonFeed(
-                    itemCount: 4,
-                    cardHeight: 110,
+                  child: const CustomStateView.loading(
+                    presentation: CustomStatePresentation.skeletonOnly,
+                    skeleton: CustomStateSkeleton(
+                      layout: CustomStateSkeletonLayout.list,
+                      itemCount: 4,
+                      cardHeight: 110,
+                    ),
                   ),
                 );
               }

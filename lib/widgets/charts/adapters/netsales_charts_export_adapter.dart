@@ -73,9 +73,7 @@ abstract final class NetSalesChartsExportAdapter {
         autoOpen: false,
       );
     } catch (error) {
-      return FileExportResult.failure(
-        'تعذر إنشاء ملف PDF للمخطط: $error',
-      );
+      return FileExportResult.failure('تعذر إنشاء ملف PDF للمخطط: $error');
     }
   }
 
@@ -179,9 +177,7 @@ abstract final class NetSalesChartsExportAdapter {
           );
       final result = await SharePlus.instance.share(
         ShareParams(
-          files: [
-            XFile.fromData(pdfBytes, mimeType: 'application/pdf'),
-          ],
+          files: [XFile.fromData(pdfBytes, mimeType: 'application/pdf')],
           fileNameOverrides: ['$title.pdf'],
           downloadFallbackEnabled: true,
         ),

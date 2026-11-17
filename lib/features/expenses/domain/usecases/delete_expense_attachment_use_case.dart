@@ -5,14 +5,10 @@ class DeleteExpenseAttachmentUseCase {
 
   final ExpenseRepository repository;
 
-  Future<void> call({
-    required int expenseId,
-    required int attachmentId,
-  }) {
+  Future<void> call({required int expenseId, required int attachmentId}) {
     return repository.deleteAttachment(
       expenseId: expenseId,
       attachmentId: attachmentId,
     );
   }
 }
-

@@ -15,7 +15,8 @@ class PosWalletDashboardController extends GetxController {
   final GetPosWalUseCase getPosWalUseCase;
   final GetPosWalletLogsUseCase getPosWalletLogsUseCase;
   final GetPosWalletByNetworkAndPosUseCase getPosWalletByNetworkAndPosUseCase;
-  final ExportWalletStatementDocumentUseCase exportWalletStatementDocumentUseCase;
+  final ExportWalletStatementDocumentUseCase
+  exportWalletStatementDocumentUseCase;
 
   PosWalletDashboardController({
     required this.getPosWalUseCase,
@@ -66,8 +67,7 @@ class PosWalletDashboardController extends GetxController {
     unawaited(
       ManualWalletTransactionSheet.show(
         walletId: wallet.walletId,
-        accountName:
-            wallet.posName ?? 'محفظة نقطة البيع #${wallet.posId}',
+        accountName: wallet.posName ?? 'محفظة نقطة البيع #${wallet.posId}',
         currentBalance: wallet.walletBalance,
         isPosWallet: true,
         onSuccess: loadWallets,
@@ -136,7 +136,8 @@ class PosWalletDashboardController extends GetxController {
     walletsNextCursor.value = null;
 
     try {
-      final effectivePosId = _filterPosId ?? WorkspaceService.to.savedActivePosId;
+      final effectivePosId =
+          _filterPosId ?? WorkspaceService.to.savedActivePosId;
       final res = await getPosWalUseCase(
         networkId: _filterNetworkId,
         posId: effectivePosId,
@@ -320,27 +321,47 @@ class PosWalletDashboardController extends GetxController {
     if (wallet == null || isExportingStatement.value) return;
     isExportingStatement.value = true;
     try {
-      final walletBefore = await getPosWalletByNetworkAndPosUseCase(wallet.networkId, wallet.posId);
+      final walletBefore = await getPosWalletByNetworkAndPosUseCase(
+        wallet.networkId,
+        wallet.posId,
+      );
       final statementLogs = await _loadAllStatementLogs(wallet.walletId);
-      final walletAfter = await getPosWalletByNetworkAndPosUseCase(wallet.networkId, wallet.posId);
+      final walletAfter = await getPosWalletByNetworkAndPosUseCase(
+        wallet.networkId,
+        wallet.posId,
+      );
       if (selectedWallet.value?.walletId != wallet.walletId) return;
       if (walletBefore.updatedAt != walletAfter.updatedAt ||
           walletBefore.walletBalance != walletAfter.walletBalance ||
           walletBefore.currencyCode != walletAfter.currencyCode ||
           walletBefore.openingBalance != walletAfter.openingBalance) {
-        throw StateError('تغيرت بيانات المحفظة أثناء إعداد الكشف؛ لم يتم إنشاء مستند ببيانات مختلطة. أعد المحاولة.');
+        throw StateError(
+          'تغيرت بيانات المحفظة أثناء إعداد الكشف؛ لم يتم إنشاء مستند ببيانات مختلطة. أعد المحاولة.',
+        );
       }
-      final success = await exportWalletStatementDocumentUseCase.exportPos(walletBefore, statementLogs);
+      final success = await exportWalletStatementDocumentUseCase.exportPos(
+        walletBefore,
+        statementLogs,
+      );
       CustomSnackbar.show(
         title: success ? 'تم إنشاء كشف الحساب' : 'تعذر حفظ كشف الحساب',
-        message: success ? 'تم تجهيز كشف حساب محفظة نقطة البيع وحفظ ملف PDF.' : 'لم تكتمل عملية حفظ ملف كشف الحساب.',
+        message: success
+            ? 'تم تجهيز كشف حساب محفظة نقطة البيع وحفظ ملف PDF.'
+            : 'لم تكتمل عملية حفظ ملف كشف الحساب.',
         type: success ? SnackType.success : SnackType.error,
       );
     } catch (error) {
       final message = error is StateError
           ? error.toString().replaceFirst('Bad state: ', '')
-          : AppException.sanitizeMessage(error, fallback: 'تعذر إنشاء كشف حساب محفظة نقطة البيع.');
-      CustomSnackbar.show(title: 'تعذر إنشاء كشف الحساب', message: message, type: SnackType.error);
+          : AppException.sanitizeMessage(
+              error,
+              fallback: 'تعذر إنشاء كشف حساب محفظة نقطة البيع.',
+            );
+      CustomSnackbar.show(
+        title: 'تعذر إنشاء كشف الحساب',
+        message: message,
+        type: SnackType.error,
+      );
     } finally {
       isExportingStatement.value = false;
     }
@@ -354,23 +375,35 @@ class PosWalletDashboardController extends GetxController {
       if (selectedWallet.value?.walletId != walletId) {
         throw StateError('تم تغيير المحفظة أثناء تجهيز الكشف؛ أعد المحاولة.');
       }
-      final page = await getPosWalletLogsUseCase(walletId, cursor: cursor, perPage: 50);
+      final page = await getPosWalletLogsUseCase(
+        walletId,
+        cursor: cursor,
+        perPage: 50,
+      );
       result.addAll(page.items);
       if (result.length > _maxStatementRows) {
-        throw StateError('يتجاوز عدد الحركات الحد الآمن لتوليد PDF؛ لم يتم إنشاء كشف جزئي.');
+        throw StateError(
+          'يتجاوز عدد الحركات الحد الآمن لتوليد PDF؛ لم يتم إنشاء كشف جزئي.',
+        );
       }
       cursor = page.nextCursor?.trim();
       if (cursor != null && cursor.isEmpty) cursor = null;
       if (cursor != null && !seenCursors.add(cursor)) {
-        throw StateError('توقف ترقيم الحركات عند مؤشر متكرر؛ لم يتم إنشاء كشف ناقص.');
+        throw StateError(
+          'توقف ترقيم الحركات عند مؤشر متكرر؛ لم يتم إنشاء كشف ناقص.',
+        );
       }
     } while (cursor != null);
 
     final latestPage = await getPosWalletLogsUseCase(walletId, perPage: 1);
     final capturedLatestId = result.isEmpty ? null : result.first.logId;
-    final currentLatestId = latestPage.items.isEmpty ? null : latestPage.items.first.logId;
+    final currentLatestId = latestPage.items.isEmpty
+        ? null
+        : latestPage.items.first.logId;
     if (capturedLatestId != currentLatestId) {
-      throw StateError('سُجلت حركة جديدة أثناء إعداد الكشف؛ لم يتم إنشاء كشف غير متزامن. أعد المحاولة.');
+      throw StateError(
+        'سُجلت حركة جديدة أثناء إعداد الكشف؛ لم يتم إنشاء كشف غير متزامن. أعد المحاولة.',
+      );
     }
     return result;
   }

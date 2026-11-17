@@ -29,14 +29,15 @@ class BillingTrialPolicySummary extends StatelessWidget {
     );
     final modePresentation =
         EnumPresentationRegistry.resolveBillingTrialEntitlementMode(mode);
-    final awaitingApproval = trial['requires_manual_approval'] == true &&
+    final awaitingApproval =
+        trial['requires_manual_approval'] == true &&
         status == 'PENDING_APPROVAL';
     final awaitingActivation = trial['awaiting_first_activation'] == true;
     final adjustments = trial['adjustments'] is List
         ? (trial['adjustments'] as List)
-            .whereType<Map<String, dynamic>>()
-            .map((item) => Map<String, dynamic>.from(item))
-            .toList(growable: false)
+              .whereType<Map<String, dynamic>>()
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList(growable: false)
         : const <Map<String, dynamic>>[];
     final rawEntitlementConfig = trial['entitlement_config'];
     final entitlementConfig = rawEntitlementConfig is Map
@@ -46,8 +47,8 @@ class BillingTrialPolicySummary extends StatelessWidget {
         trial['allowed_features'] ?? entitlementConfig['allowed_features'];
     final allowedFeatures = rawAllowedFeatures is List
         ? rawAllowedFeatures
-            .map((item) => item.toString())
-            .toList(growable: false)
+              .map((item) => item.toString())
+              .toList(growable: false)
         : const <String>[];
 
     return CustomSurfaceCard(
@@ -89,7 +90,10 @@ class BillingTrialPolicySummary extends StatelessWidget {
           ],
           if (mode == BillingTrialEntitlementMode.restricted) ...[
             const SizedBox(height: 8),
-            Text('المزايا المسموحة خلال التجربة', style: AppTypography.titleSmall),
+            Text(
+              'المزايا المسموحة خلال التجربة',
+              style: AppTypography.titleSmall,
+            ),
             if (allowedFeatures.isEmpty)
               const Text('لم يحدد الخادم مزايا مقيدة بالاسم.')
             else
@@ -113,18 +117,18 @@ class BillingTrialPolicySummary extends StatelessWidget {
   }
 
   Widget _detail(String label, String value) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 142,
-              child: Text(label, style: AppTypography.bodySmall),
-            ),
-            Expanded(child: Text(value, style: AppTypography.bodyMedium)),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 3),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 142,
+          child: Text(label, style: AppTypography.bodySmall),
         ),
-      );
+        Expanded(child: Text(value, style: AppTypography.bodyMedium)),
+      ],
+    ),
+  );
 
   Widget _notice(BuildContext context, String message, IconData icon) {
     return Padding(
@@ -149,7 +153,9 @@ class BillingTrialPolicySummary extends StatelessWidget {
     final reason = adjustment['reason']?.toString();
     return CustomInfoListTile(
       padding: EdgeInsets.zero,
-      title: Text(_adjustmentTypeLabel(adjustment['adjustment_type']?.toString())),
+      title: Text(
+        _adjustmentTypeLabel(adjustment['adjustment_type']?.toString()),
+      ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -227,11 +233,10 @@ class BillingTrialPolicySummary extends StatelessWidget {
     return value.toString().replaceFirst('T', ' ');
   }
 
-  String _adjustmentTypeLabel(String? value) =>
-      switch (value?.toUpperCase()) {
-        'EXTEND' => 'تمديد مدة التجربة',
-        'SHORTEN' => 'تقليص مدة التجربة',
-        'TERMINATE' => 'إنهاء التجربة',
-        _ => value ?? 'تعديل',
-      };
+  String _adjustmentTypeLabel(String? value) => switch (value?.toUpperCase()) {
+    'EXTEND' => 'تمديد مدة التجربة',
+    'SHORTEN' => 'تقليص مدة التجربة',
+    'TERMINATE' => 'إنهاء التجربة',
+    _ => value ?? 'تعديل',
+  };
 }

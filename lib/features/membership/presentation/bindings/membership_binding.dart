@@ -27,9 +27,7 @@ class MembershipBinding extends Bindings {
       fenix: true,
     );
     registerLazyIfAbsent<MembershipRepository>(
-      () => MembershipRepositoryImpl(
-        Get.find<MembershipRemoteDataSource>(),
-      ),
+      () => MembershipRepositoryImpl(Get.find<MembershipRemoteDataSource>()),
       fenix: true,
     );
 
@@ -38,9 +36,8 @@ class MembershipBinding extends Bindings {
       fenix: true,
     );
     registerLazyIfAbsent<GetAssignableMembershipRolesUseCase>(
-      () => GetAssignableMembershipRolesUseCase(
-        Get.find<MembershipRepository>(),
-      ),
+      () =>
+          GetAssignableMembershipRolesUseCase(Get.find<MembershipRepository>()),
       fenix: true,
     );
     registerLazyIfAbsent<AddMembershipUseCase>(

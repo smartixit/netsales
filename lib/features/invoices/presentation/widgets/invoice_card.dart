@@ -89,7 +89,9 @@ class InvoiceCard extends StatelessWidget {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: colors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(AppRadius.sm),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.sm,
+                                ),
                               ),
                               child: Icon(
                                 Icons.receipt_outlined,
@@ -114,7 +116,10 @@ class InvoiceCard extends StatelessWidget {
                                   if (invoice.invoiceDate != null)
                                     Text(
                                       invoice.invoiceDate!.length >= 10
-                                          ? invoice.invoiceDate!.substring(0, 10)
+                                          ? invoice.invoiceDate!.substring(
+                                              0,
+                                              10,
+                                            )
                                           : invoice.invoiceDate!,
                                       style: AppTypography.bodySmall.copyWith(
                                         color: colors.onSurfaceVariant,
@@ -128,7 +133,8 @@ class InvoiceCard extends StatelessWidget {
                       ),
                       AppSpacing.hSm,
                       CustomStatusBadge(
-                        label: invoice.paymentStatusLabel ??
+                        label:
+                            invoice.paymentStatusLabel ??
                             paymentPresentation.label,
                         tone: paymentPresentation.tone,
                         icon: paymentPresentation.icon,
@@ -274,14 +280,13 @@ class InvoiceCard extends StatelessWidget {
                           child: LinearProgressIndicator(
                             value: paidPct,
                             minHeight: 5,
-                            backgroundColor:
-                                colors.surfaceContainerHighest,
+                            backgroundColor: colors.surfaceContainerHighest,
                             valueColor: AlwaysStoppedAnimation<Color>(
                               invoice.isPaid
                                   ? colors.primary
                                   : (invoice.isPartiallyPaid
-                                      ? colors.warning
-                                      : colors.error),
+                                        ? colors.warning
+                                        : colors.error),
                             ),
                           ),
                         ),
@@ -297,7 +302,9 @@ class InvoiceCard extends StatelessWidget {
           InkWell(
             onTap: onToggleExpansion,
             borderRadius: BorderRadius.vertical(
-              bottom: isExpanded ? Radius.zero : Radius.circular(AppRadius.card),
+              bottom: isExpanded
+                  ? Radius.zero
+                  : Radius.circular(AppRadius.card),
             ),
             child: Container(
               padding: EdgeInsets.symmetric(
@@ -415,7 +422,9 @@ class InvoiceCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // قائمة البنود بالكميات الموحدة وفق محرك VoucherSheetCalculator
-          ...invoice.items.map((item) => _buildInvoiceItemTile(context, item, colors)),
+          ...invoice.items.map(
+            (item) => _buildInvoiceItemTile(context, item, colors),
+          ),
 
           AppSpacing.vSm,
 

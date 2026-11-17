@@ -81,16 +81,12 @@ class CustomResultsCounterBar extends StatelessWidget {
             children: [
               // 1. أيقونة الدلالة الإحصائية
               Icon(
-                isFiltered
-                    ? Icons.filter_alt_outlined
-                    : Icons.list_alt_rounded,
+                isFiltered ? Icons.filter_alt_outlined : Icons.list_alt_rounded,
                 size: 16.sp,
-                color: isFiltered
-                    ? colors.primary
-                    : colors.onSurfaceVariant,
+                color: isFiltered ? colors.primary : colors.onSurfaceVariant,
               ),
               SizedBox(width: 6.w),
-      
+
               // 2. نص العداد وحالة النتائج
               Expanded(
                 child: AnimatedSwitcher(
@@ -109,32 +105,49 @@ class CustomResultsCounterBar extends StatelessWidget {
                         )
                       : Row(
                           key: ValueKey('count_${count}_$totalCount'),
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisSize: MainAxisSize.max,
                           children: [
-                            Text(
-                              isFiltered ? 'نتائج البحث: ' : 'الإجمالي: ',
-                              style: AppTypography.labelMedium.copyWith(
-                                color: colors.onSurfaceVariant,
+                            Flexible(
+                              child: Text(
+                                isFiltered ? 'نتائج البحث: ' : 'الإجمالي: ',
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: colors.onSurfaceVariant,
+                                ),
                               ),
                             ),
-                            Text(
-                              '$count $recordLabel',
-                              style: AppTypography.labelMedium.copyWith(
-                                color: isFiltered
-                                    ? colors.primary
-                                    : colors.onSurface,
-                                fontWeight: FontWeight.bold,
+                            SizedBox(width: 4.w),
+                            Flexible(
+                              flex: 2,
+                              child: Text(
+                                '$count $recordLabel',
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: isFiltered
+                                      ? colors.primary
+                                      : colors.onSurface,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             if (totalCount != null &&
                                 isFiltered &&
                                 totalCount != count) ...[
                               SizedBox(width: 4.w),
-                              Text(
-                                '(من أصل $totalCount)',
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: colors.onSurfaceVariant.withValues(
-                                    alpha: 0.8,
+                              Flexible(
+                                child: Text(
+                                  '(من أصل $totalCount)',
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.labelSmall.copyWith(
+                                    color: colors.onSurfaceVariant.withValues(
+                                      alpha: 0.8,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -143,7 +156,7 @@ class CustomResultsCounterBar extends StatelessWidget {
                         ),
                 ),
               ),
-      
+
               // 3. زر مسح التصفية
               if (showClearButton)
                 CustomButton.icon(
@@ -157,7 +170,7 @@ class CustomResultsCounterBar extends StatelessWidget {
                 ),
             ],
           ),
-      
+
           // 4. شارات الفلاتر النشطة إن وجدت
           if (activeFilters.isNotEmpty && !isLoading) ...[
             SizedBox(height: 6.h),

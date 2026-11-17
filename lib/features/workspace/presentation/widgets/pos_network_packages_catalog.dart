@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
@@ -9,24 +10,30 @@ import 'package:netsales/features/workspace/presentation/models/pos_network_pack
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// كتالوج باقات الشبكة وأسعار الجملة المعتمدة حقيقياً من الـ API (PosNetworkPackagesCatalog)
 class PosNetworkPackagesCatalog extends StatelessWidget {
   final PosWorkspaceController controller;
 
-  const PosNetworkPackagesCatalog({
-    super.key,
-    required this.controller,
-  });
+  const PosNetworkPackagesCatalog({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.isLoadingPackages.value && controller.networkPackages.isEmpty) {
-        return const CustomSkeletonCard(height: 160);
+      if (controller.isLoadingPackages.value &&
+          controller.networkPackages.isEmpty) {
+        return const CustomStateView.loading(
+          presentation: CustomStatePresentation.skeletonOnly,
+          skeleton: CustomStateSkeleton(
+            layout: CustomStateSkeletonLayout.cards,
+            itemCount: 1,
+            cardHeight: 160,
+            maxColumns: 1,
+            minItemWidth: 180,
+          ),
+        );
       }
 
       final packages = controller.networkPackageItems;
@@ -42,7 +49,8 @@ class PosNetworkPackagesCatalog extends StatelessWidget {
               const CustomEmptyState(
                 icon: Icons.inventory_2_outlined,
                 title: 'لا توجد باقات معتمدة حالياً',
-                subtitle: 'لم يقم مزود الشبكة بنشر أي باقات كروت نشطة حتى الآن.',
+                subtitle:
+                    'لم يقم مزود الشبكة بنشر أي باقات كروت نشطة حتى الآن.',
               ),
             ],
           ),
@@ -163,7 +171,10 @@ class PackageWholesaleCard extends StatelessWidget {
                 ),
                 if (package.discountLabel.isNotEmpty)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 5.w,
+                      vertical: 1.h,
+                    ),
                     decoration: BoxDecoration(
                       color: colors.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(4.r),

@@ -1,6 +1,12 @@
 /// كيان الخصم الفعلي المطبق لنقطة بيع على باقة معينة (Effective Package Discount Entity)
 /// يعكس القيم المالية المعتمدة سيادياً من خادم Laravel (Server-Authoritative Values §34)
 class EffectivePackageDiscountEntity {
+  /// Identifies the package when the entity is returned by the POS discount catalogue.
+  final int? packageId;
+
+  /// Indicates whether the custom discount is active at the current server time.
+  final bool isEffectiveNow;
+
   /// نسبة الخصم النقدي %
   final double discountCash;
 
@@ -26,6 +32,8 @@ class EffectivePackageDiscountEntity {
   final double creditSavings;
 
   const EffectivePackageDiscountEntity({
+    this.packageId,
+    this.isEffectiveNow = true,
     required this.discountCash,
     required this.discountCredit,
     required this.isCustom,
@@ -36,4 +44,3 @@ class EffectivePackageDiscountEntity {
     required this.creditSavings,
   });
 }
-

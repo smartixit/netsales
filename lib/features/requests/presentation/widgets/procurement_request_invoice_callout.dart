@@ -24,9 +24,7 @@ class ProcurementRequestInvoiceCallout extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.success.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: colors.success.withValues(alpha: 0.24),
-        ),
+        border: Border.all(color: colors.success.withValues(alpha: 0.24)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,11 +32,7 @@ class ProcurementRequestInvoiceCallout extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.receipt_long_rounded,
-                color: colors.success,
-                size: 22,
-              ),
+              Icon(Icons.receipt_long_rounded, color: colors.success, size: 22),
               AppSpacing.hSm,
               Expanded(
                 child: Text(

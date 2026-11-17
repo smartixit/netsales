@@ -192,9 +192,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
 
     if (!res.success || res.data == null) {
       throw AppException(
-        res.message.isNotEmpty
-            ? res.message
-            : 'تعذر استرجاع ملخص المديونية.',
+        res.message.isNotEmpty ? res.message : 'تعذر استرجاع ملخص المديونية.',
         code: 'DEBT_SUMMARY_REQUEST_FAILED',
         details: res.errors,
       );

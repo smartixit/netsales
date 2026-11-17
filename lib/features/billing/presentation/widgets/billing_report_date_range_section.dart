@@ -29,14 +29,19 @@ class BillingReportDateRangeSection extends StatelessWidget {
       children: [
         if (hasFromDate)
           CustomButton.outline(
-            text: _dateLabel(english ? 'From date' : 'من تاريخ', criteria.filters['from_date']),
+            text: _dateLabel(
+              english ? 'From date' : 'من تاريخ',
+              criteria.filters['from_date'],
+            ),
             prefix: Icons.calendar_today,
-            onPressed: () =>
-                _pickCriteriaDate(context, 'from_date'),
+            onPressed: () => _pickCriteriaDate(context, 'from_date'),
           ),
         if (hasToDate)
           CustomButton.outline(
-            text: _dateLabel(english ? 'To date' : 'إلى تاريخ', criteria.filters['to_date']),
+            text: _dateLabel(
+              english ? 'To date' : 'إلى تاريخ',
+              criteria.filters['to_date'],
+            ),
             prefix: Icons.event,
             onPressed: () => _pickCriteriaDate(context, 'to_date'),
           ),
@@ -62,8 +67,9 @@ class BillingReportDateRangeSection extends StatelessWidget {
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
-    final value =
-        selected != null && selected.isNotEmpty ? selected.first : null;
+    final value = selected != null && selected.isNotEmpty
+        ? selected.first
+        : null;
     if (value == null) return;
 
     if (id == 'from_date') {

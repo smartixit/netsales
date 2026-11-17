@@ -65,10 +65,7 @@ class PosDebtLedgerController extends GetxController {
       selectedPosId.value != null && selectedNetworkId.value != null;
 
   void openInvoiceDetails(InvoiceEntity invoice) {
-    Get.toNamed<void>(
-      AppRoutes.purchaseInvoiceDetails,
-      arguments: invoice,
-    );
+    Get.toNamed<void>(AppRoutes.purchaseInvoiceDetails, arguments: invoice);
   }
 
   PosEntity? get selectedPos {
@@ -158,7 +155,9 @@ class PosDebtLedgerController extends GetxController {
       }
       posOptions.assignAll(uniquePositions);
 
-      final posIds = uniquePositions.map((p) => p.posId).toList(growable: false);
+      final posIds = uniquePositions
+          .map((p) => p.posId)
+          .toList(growable: false);
       final savedPosId = WorkspaceService.to.savedActivePosId;
 
       // Debt data must not default to an arbitrary tenant when the account

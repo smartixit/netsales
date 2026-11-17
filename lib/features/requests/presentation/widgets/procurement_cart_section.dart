@@ -7,14 +7,14 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_line_entity.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_quantity_editor_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// عرض سلة بنود التوريد وإجراءات تعديل الكمية أو حذف الباقة.
-class ProcurementCartSection extends GetView<PosProcurementController> {
+class ProcurementCartSection extends GetView<PosNewProcurementOrderController> {
   const ProcurementCartSection({super.key});
 
   @override
@@ -77,8 +77,9 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
             )
           else
             ...lines.map((line) {
-              final quoteLine = controller.serverQuote.value
-                  ?.findLine(line.package.packageId);
+              final quoteLine = controller.serverQuote.value?.findLine(
+                line.package.packageId,
+              );
 
               return _ProcurementCartLineCard(
                 line: line,
@@ -87,9 +88,12 @@ class ProcurementCartSection extends GetView<PosProcurementController> {
                   package: line.package,
                   currentQuantity: line.voucherCount,
                 ),
-                onDelete: () => controller.removeCartLine(line.package.packageId),
-                onIncrement: () => controller.adjustPackageQuantity(line.package, 1),
-                onDecrement: () => controller.adjustPackageQuantity(line.package, -1),
+                onDelete: () =>
+                    controller.removeCartLine(line.package.packageId),
+                onIncrement: () =>
+                    controller.adjustPackageQuantity(line.package, 1),
+                onDecrement: () =>
+                    controller.adjustPackageQuantity(line.package, -1),
               );
             }),
         ],
@@ -137,10 +141,7 @@ class _ProcurementCartLineCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // الشريط اللوني الرقيق على حافة البطاقة
-                Container(
-                  width: 5,
-                  color: packageColor,
-                ),
+                Container(width: 5, color: packageColor),
                 Expanded(
                   child: Padding(
                     padding: EdgeInsets.all(AppSpacing.md),
@@ -155,7 +156,9 @@ class _ProcurementCartLineCard extends StatelessWidget {
                               height: 40,
                               decoration: BoxDecoration(
                                 color: packageColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(AppRadius.sm),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.sm,
+                                ),
                               ),
                               child: Icon(
                                 Icons.wifi_tethering_rounded,
@@ -183,7 +186,9 @@ class _ProcurementCartLineCard extends StatelessWidget {
                                     ),
                                   ),
                                   if (quoteLine != null)
-                                    _CartLineQuoteSummary(quoteLine: quoteLine!),
+                                    _CartLineQuoteSummary(
+                                      quoteLine: quoteLine!,
+                                    ),
                                 ],
                               ),
                             ),
@@ -208,11 +213,17 @@ class _ProcurementCartLineCard extends StatelessWidget {
                               child: CustomInteractiveBounce(
                                 onTap: onEdit,
                                 child: Container(
-                                  constraints: const BoxConstraints(minHeight: 40),
+                                  constraints: const BoxConstraints(
+                                    minHeight: 40,
+                                  ),
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    color: colors.primary.withValues(alpha: 0.07),
-                                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                                    color: colors.primary.withValues(
+                                      alpha: 0.07,
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.sm,
+                                    ),
                                   ),
                                   child: Text(
                                     '${line.voucherCount} كرت • تعديل',
@@ -235,10 +246,13 @@ class _ProcurementCartLineCard extends StatelessWidget {
                             AppSpacing.hXs,
                             CustomButton.icon(
                               icon: Icons.delete_outline_rounded,
-                              tooltip: 'حذف ${line.package.packageName} من الطلب',
+                              tooltip:
+                                  'حذف ${line.package.packageName} من الطلب',
                               size: AppButtonSize.small,
                               foregroundColor: colors.error,
-                              backgroundColor: colors.error.withValues(alpha: 0.08),
+                              backgroundColor: colors.error.withValues(
+                                alpha: 0.08,
+                              ),
                               onPressed: onDelete,
                             ),
                           ],

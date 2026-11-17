@@ -285,7 +285,8 @@ class NetworkDirectInvoiceController extends GetxController {
     final package = availablePackages.firstWhereOrNull(
       (p) => p.packageId == packageId,
     );
-    if (package != null && (currentVoucherCount == 0 || quantityInput.value.trim() == '1')) {
+    if (package != null &&
+        (currentVoucherCount == 0 || quantityInput.value.trim() == '1')) {
       setVoucherCount(package.packageVoucherCount);
     }
   }
@@ -452,9 +453,6 @@ class NetworkDirectInvoiceController extends GetxController {
     if (Get.isRegistered<NetworkInvoicesController>()) {
       await Get.find<NetworkInvoicesController>().loadInvoices(isRefresh: true);
     }
-    await Get.offNamed<void>(
-      AppRoutes.saleInvoiceDetails,
-      arguments: invoice,
-    );
+    await Get.offNamed<void>(AppRoutes.saleInvoiceDetails, arguments: invoice);
   }
 }

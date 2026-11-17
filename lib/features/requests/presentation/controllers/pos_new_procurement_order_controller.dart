@@ -6,8 +6,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
-import 'package:netsales/core/models/paginated_list.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/form_validators.dart';
@@ -15,7 +13,7 @@ import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discount_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discounts_for_pos_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
@@ -23,73 +21,40 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
+import 'package:netsales/features/requests/domain/services/procurement_estimate_calculator.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
-import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/delete_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-/// متحكم إدارة طلبات التوريد والشراء لنقاط البيع (POS Procurement Controller)
-class PosProcurementController extends GetxController {
-  final GetRequestsUseCase getRequestsUseCase;
+/// Owns the POS procurement form, catalogue, signed pricing snapshots and submission lifecycle.
+class PosNewProcurementOrderController extends GetxController {
   final CreateRequestUseCase createRequestUseCase;
   final UpdateRequestUseCase? updateRequestUseCase;
-  final CancelRequestUseCase cancelRequestUseCase;
-  final DeleteRequestUseCase? deleteRequestUseCase;
   final GetMyPosUseCase? getMyPosUseCase;
   final GetPosNetworksListUseCase? getPosNetworksListUseCase;
   final GetPackagesUseCase? getPackagesUseCase;
-  final GetEffectivePackageDiscountUseCase? getEffectivePackageDiscountUseCase;
+  final GetEffectivePackageDiscountsForPosUseCase?
+  getEffectivePackageDiscountsForPosUseCase;
   final GetProcurementQuoteUseCase? getProcurementQuoteUseCase;
+  final ProcurementEstimateCalculator procurementEstimateCalculator;
 
-  PosProcurementController({
-    required this.getRequestsUseCase,
+  PosNewProcurementOrderController({
     required this.createRequestUseCase,
     this.updateRequestUseCase,
-    required this.cancelRequestUseCase,
-    this.deleteRequestUseCase,
     this.getMyPosUseCase,
     this.getPosNetworksListUseCase,
     this.getPackagesUseCase,
-    this.getEffectivePackageDiscountUseCase,
+    this.getEffectivePackageDiscountsForPosUseCase,
     this.getProcurementQuoteUseCase,
+    this.procurementEstimateCalculator = const ProcurementEstimateCalculator(),
   });
-
-  // State: قائمة الطلبات والترقيم
-  final requests = <RequestEntity>[].obs;
-  final isLoading = false.obs;
-  final isLoadingMore = false.obs;
-  final errorMessage = RxnString();
-  final loadMoreError = RxnString();
-  final nextCursor = RxnString();
-
-  bool get hasMore => nextCursor.value != null;
-
-  /// معرف الطلب المفتوح في الـ Accordion حالياً (الطي الحصري الذكي)
-  final RxnInt expandedRequestId = RxnInt();
-
-  /// تبديل فتح/إغلاق الـ Accordion بحيث إذا فتحت بطاقة تُقفل الأخرى تلقائياً
-  void toggleAccordion(int requestId) {
-    if (expandedRequestId.value == requestId) {
-      expandedRequestId.value = null;
-    } else {
-      expandedRequestId.value = requestId;
-    }
-  }
 
   /// حالة وضع التعديل (Edit Mode)
   final isEditing = false.obs;
   final editingRequestId = RxnInt();
-
-  // فلاتر وبحث الطلبات
-  final searchController = TextEditingController();
-  final searchQuery = ''.obs;
-  final statusFilter = RxnString(); // null = all, PENDING, APPROVED, etc.
 
   // Guided procurement flow: build the request, then review and submit it.
   final currentOrderStep = 0.obs;
@@ -116,6 +81,7 @@ class PosProcurementController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final myPosList = <PosEntity>[].obs;
   final selectedPosId = RxnInt();
+  final isLoadingMyPos = false.obs;
 
   /// نقطة البيع النشطة المحددة حالياً
   PosEntity? get activePos =>
@@ -124,6 +90,9 @@ class PosProcurementController extends GetxController {
   final linkedNetworks = <NetworkPosLinkEntity>[].obs;
   final selectedNetworkId = RxnInt();
   final isLoadingNetworks = false.obs;
+
+  /// يحدد بطاقة السياق المفتوحة حالياً لمنع تكدس خيارات الشبكة ونقطة البيع.
+  final expandedProcurementContext = ''.obs;
 
   final availablePackages = <PackageEntity>[].obs;
   final selectedPackage = Rxn<PackageEntity>();
@@ -135,14 +104,21 @@ class PosProcurementController extends GetxController {
   final packageNextCursor = RxnString();
   final packageErrorMessage = RxnString();
   final packageLoadMoreErrorMessage = RxnString();
+  int _lifecycleRevision = 0;
   int _packageRevision = 0;
   bool _suppressPackageSearchListener = false;
 
-  // الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية
-  final effectiveDiscount = Rxn<EffectivePackageDiscountEntity>();
-  final isLoadingDiscount = false.obs;
-  final discountError = RxnString();
-  int _discountLoadRevision = 0;
+  final effectiveDiscountsByPackageId =
+      <int, EffectivePackageDiscountEntity>{}.obs;
+  final isLoadingPackageDiscounts = false.obs;
+  final packageDiscountError = RxnString();
+  int _packageDiscountRevision = 0;
+  final isRefreshingCartPricing = false.obs;
+  final cartPricingRefreshError = RxnString();
+  int _cartPricingRefreshRevision = 0;
+
+  EffectivePackageDiscountEntity? discountForPackage(int packageId) =>
+      effectiveDiscountsByPackageId[packageId];
 
   // عرض الأسعار الرسمي المعتمد سيادياً من الخادم لكامل سلة التوريد (Phase 3.1 Quote)
   final serverQuote = Rxn<ProcurementQuoteEntity>();
@@ -151,13 +127,18 @@ class PosProcurementController extends GetxController {
   int _quoteRevision = 0;
 
   final procurementCart = <ProcurementCartLineEntity>[].obs;
+  final Map<int, TextEditingController> _packageQuantityControllers = {};
+
+  TextEditingController quantityControllerForPackage(int packageId) =>
+      _packageQuantityControllers.putIfAbsent(
+        packageId,
+        TextEditingController.new,
+      );
 
   bool get hasCartItems => procurementCart.isNotEmpty;
 
   /// يمنع إرسال الطلب بعرض سعر قديم أثناء تقارب نقرات الكمية.
   final isQuotePending = false.obs;
-  final _cartQuoteChanges = 0.obs;
-  Worker? _cartQuoteWorker;
 
   /// هل يملك الطلب عرض سعر حديثاً يطابق سياق الإرسال الحالي؟
   bool get hasCurrentServerQuote {
@@ -172,14 +153,40 @@ class PosProcurementController extends GetxController {
         quote.networkId == selectedNetworkId.value &&
         quote.posId == selectedPosId.value &&
         quote.saleType == selectedSaleType.value;
-    if (!matchesContext) return false;
+    if (!matchesContext || quote.items.length != procurementCart.length) {
+      return false;
+    }
+    final matchesCart = procurementCart.every((line) {
+      final quotedLine = quote.findLine(line.package.packageId);
+      return quotedLine != null && quotedLine.voucherCount == line.voucherCount;
+    });
+    if (!matchesCart) return false;
 
     final expiresAt = quote.expiresAt;
     return expiresAt == null || DateTime.now().isBefore(expiresAt);
   }
 
+  bool get hasCurrentProcurementSnapshots => procurementEstimateCalculator
+      .hasCurrentSnapshots(procurementCart.map((line) => line.package));
+
+  int? estimatedLineTotalMinor(PackageEntity package, int quantity) =>
+      procurementEstimateCalculator.calculateLineTotalMinor(
+        package,
+        quantity,
+        selectedSaleType.value,
+      );
+
+  (int, int, int)? get estimatedProcurementTotalsMinor =>
+      procurementEstimateCalculator.calculateCartTotalsMinor(
+        procurementCart,
+        selectedSaleType.value,
+      );
+
   bool get canSubmitOrder =>
-      hasCartItems && !isSubmitting.value && hasCurrentServerQuote;
+      hasCartItems &&
+      hasCurrentProcurementSnapshots &&
+      !isRefreshingCartPricing.value &&
+      !isSubmitting.value;
 
   void _setSelectedNetworkId(int? value) {
     selectedNetworkId.value = value;
@@ -203,7 +210,6 @@ class PosProcurementController extends GetxController {
   final selectedSaleType = SaleType.cash.obs;
   final isSubmitting = false.obs;
 
-  int _requestListRevision = 0;
   String? _pendingCreatePayloadSignature;
   String? _pendingCreateIdempotencyKey;
 
@@ -320,9 +326,6 @@ class PosProcurementController extends GetxController {
   void onInit() {
     super.onInit();
 
-    searchController.addListener(() {
-      searchQuery.value = searchController.text;
-    });
     packageSearchController.addListener(() {
       if (!_suppressPackageSearchListener) {
         packageSearchQuery.value = packageSearchController.text.trim();
@@ -333,67 +336,77 @@ class PosProcurementController extends GetxController {
     });
 
     debounce(
-      searchQuery,
-      (_) => loadRequests(isRefresh: true),
-      time: const Duration(milliseconds: 500),
-    );
-    debounce(
       packageSearchQuery,
-      (_) => refreshNetworkPackages(),
+      (_) => _refreshPackageSearchResults(),
       time: const Duration(milliseconds: 350),
     );
 
-    _cartQuoteWorker = debounce(
-      _cartQuoteChanges,
-      (_) => unawaited(fetchServerQuote()),
-      time: const Duration(milliseconds: 450),
-    );
+    // POS procurement estimates are derived locally from the current signed catalogue snapshot.
+    ever(selectedSaleType, (_) => _refreshProcurementPresentation());
 
-    ever(selectedSaleType, (_) => _scheduleServerQuoteRefresh());
-
-    loadInitialData();
+    _initializeForm();
   }
 
   @override
   void onClose() {
-    searchController.dispose();
     packageSearchController.dispose();
     quantityController.dispose();
     notesController.dispose();
-    _cartQuoteWorker?.dispose();
-    _requestListRevision++;
+    for (final controller in _packageQuantityControllers.values) {
+      controller.dispose();
+    }
+    _lifecycleRevision++;
+    _packageRevision++;
+    _packageDiscountRevision++;
+    _cartPricingRefreshRevision++;
+    _quoteRevision++;
+    isRefreshingCartPricing.value = false;
+    isLoadingPackages.value = false;
+    isLoadingMorePackages.value = false;
+    isLoadingPackageDiscounts.value = false;
+    isLoadingQuote.value = false;
+    isQuotePending.value = false;
     super.onClose();
   }
 
-  /// تحميل البيانات الأولية لنقاط البيع وقائمة الطلبات
-  Future<void> loadInitialData() async {
-    await loadMyPos();
-    await loadRequests(isRefresh: true);
-  }
-
   /// جلب وتحديد نقطة البيع النشطة التابعة للمستخدم الحالي
-  Future<void> loadMyPos() async {
+  Future<void> loadMyPos({int? preferredPosId, int? preferredNetworkId}) async {
     if (getMyPosUseCase == null) return;
+
+    final lifecycleRevision = _lifecycleRevision;
+    isLoadingMyPos.value = true;
+    late final List<PosEntity> posList;
     try {
-      final posList = await getMyPosUseCase!();
+      posList = await getMyPosUseCase!();
+      if (lifecycleRevision != _lifecycleRevision) return;
       myPosList.assignAll(posList);
-
-      final resolvedId = WorkspaceService.to.resolveActivePosId(
-        posList.map((p) => p.posId).toList(),
-      );
-
-      if (resolvedId != null) {
-        selectedPosId.value = resolvedId;
-        await loadLinkedNetworks(resolvedId);
-      } else {
-        selectedPosId.value = null;
-        _setSelectedNetworkId(null);
-        _setSelectedPackage(null);
-        linkedNetworks.clear();
-        availablePackages.clear();
-      }
     } catch (_) {
-      // Non-fatal, handled gracefully
+      // Non-fatal; the context selector will present its empty state.
+      myPosList.clear();
+      return;
+    } finally {
+      isLoadingMyPos.value = false;
+    }
+
+    if (lifecycleRevision != _lifecycleRevision) return;
+    final availablePosIds = posList.map((p) => p.posId).toList();
+    final resolvedId = preferredPosId != null && availablePosIds.contains(preferredPosId)
+        ? preferredPosId
+        : WorkspaceService.to.resolveActivePosId(availablePosIds);
+
+    if (resolvedId != null) {
+      selectedPosId.value = resolvedId;
+      await loadLinkedNetworks(
+        resolvedId,
+        preferredNetworkId: preferredNetworkId,
+      );
+      selectedNetworkId.value=linkedNetworks.firstOrNull?.networkId;
+    } else {
+      selectedPosId.value = null;
+      _setSelectedNetworkId(null);
+      _setSelectedPackage(null);
+      linkedNetworks.clear();
+      availablePackages.clear();
     }
   }
 
@@ -405,14 +418,15 @@ class PosProcurementController extends GetxController {
     if (!isAuthorized) return;
 
     selectedPosId.value = posId;
+    expandedProcurementContext.value = '';
     await WorkspaceService.to.saveActivePosId(posId);
 
     // تصفير بيانات وسلة وسياق الشبكات والباقات والخصومات السابقة كلياً
     clearProcurementCart();
     _setSelectedPackage(null);
     _setSelectedNetworkId(null);
-    effectiveDiscount.value = null;
-    discountError.value = null;
+    effectiveDiscountsByPackageId.clear();
+    packageDiscountError.value = null;
     linkedNetworks.clear();
     availablePackages.clear();
 
@@ -420,8 +434,12 @@ class PosProcurementController extends GetxController {
   }
 
   /// جلب قائمة الشبكات الموردة المرتبطة بنقطة البيع المحددة
-  Future<void> loadLinkedNetworks(int posId) async {
+  Future<void> loadLinkedNetworks(
+    int posId, {
+    int? preferredNetworkId,
+  }) async {
     if (getPosNetworksListUseCase == null) return;
+    final lifecycleRevision = _lifecycleRevision;
 
     _setSelectedNetworkId(null);
     _setSelectedPackage(null);
@@ -432,18 +450,27 @@ class PosProcurementController extends GetxController {
 
     try {
       final paginated = await getPosNetworksListUseCase!(posId, status: true);
-      if (selectedPosId.value != null && selectedPosId.value != posId) {
+      if (lifecycleRevision != _lifecycleRevision ||
+          (selectedPosId.value != null && selectedPosId.value != posId)) {
         return;
       }
 
       linkedNetworks.assignAll(paginated.items);
-      if (linkedNetworks.length == 1) {
-        final networkId = linkedNetworks.first.networkId;
-        _setSelectedNetworkId(networkId);
-        await loadNetworkPackages(networkId);
+      final preferredLink = preferredNetworkId == null
+          ? null
+          : linkedNetworks.firstWhereOrNull(
+              (link) => link.networkId == preferredNetworkId,
+            );
+      final selectedLink = preferredNetworkId != null
+          ? preferredLink
+          : (linkedNetworks.length == 1 ? linkedNetworks.first : null);
+      if (selectedLink != null) {
+        _setSelectedNetworkId(selectedLink.networkId);
+        await loadNetworkPackages(selectedLink.networkId);
       }
     } catch (_) {
-      if (selectedPosId.value != null && selectedPosId.value != posId) {
+      if (lifecycleRevision != _lifecycleRevision ||
+          (selectedPosId.value != null && selectedPosId.value != posId)) {
         return;
       }
       linkedNetworks.clear();
@@ -457,6 +484,7 @@ class PosProcurementController extends GetxController {
 
   /// جلب أول صفحة من كتالوج الشبكة مع بحث خادمي وحماية من الاستجابات القديمة.
   Future<void> loadNetworkPackages(int networkId) async {
+    final lifecycleRevision = _lifecycleRevision;
     _suppressPackageSearchListener = true;
     packageSearchController.clear();
     packageSearchQuery.value = '';
@@ -464,12 +492,151 @@ class PosProcurementController extends GetxController {
     packageNextCursor.value = null;
     packageLoadMoreErrorMessage.value = null;
     await _fetchNetworkPackages(networkId, reset: true);
+    if (lifecycleRevision != _lifecycleRevision) return;
+    await loadEffectivePackageDiscounts();
   }
 
   Future<void> refreshNetworkPackages() async {
     final networkId = selectedNetworkId.value;
     if (networkId == null) return;
-    await _fetchNetworkPackages(networkId, reset: true);
+
+    final cartLines = procurementCart.toList(growable: false);
+    if (cartLines.isEmpty) {
+      await _fetchNetworkPackages(networkId, reset: true);
+      return;
+    }
+
+    final posId = selectedPosId.value;
+    final useCase = getPackagesUseCase;
+    if (posId == null || useCase == null || isRefreshingCartPricing.value) {
+      return;
+    }
+
+    final revision = ++_cartPricingRefreshRevision;
+    final packageIds = cartLines
+        .map((line) => line.package.packageId)
+        .toSet()
+        .toList(growable: false);
+    final refreshedPackages = <int, PackageEntity>{};
+
+    isRefreshingCartPricing.value = true;
+    cartPricingRefreshError.value = null;
+    try {
+      // The API caps an ID-filtered request at 50 packages. Keep large carts
+      // bounded without downloading unrelated catalogue pages.
+      for (var offset = 0; offset < packageIds.length; offset += 50) {
+        final batch = packageIds.skip(offset).take(50).toList(growable: false);
+        final result = await useCase(
+          networkId: networkId,
+          posId: posId,
+          status: true,
+          packageIds: batch,
+          perPage: batch.length,
+        );
+
+        if (revision != _cartPricingRefreshRevision ||
+            selectedNetworkId.value != networkId ||
+            selectedPosId.value != posId) {
+          return;
+        }
+
+        for (final package in result.items) {
+          if (batch.contains(package.packageId) &&
+              package.networkId == networkId) {
+            refreshedPackages[package.packageId] = package;
+          }
+        }
+      }
+
+      if (refreshedPackages.length != packageIds.length ||
+          packageIds.any((id) => !refreshedPackages.containsKey(id))) {
+        throw const AppException(
+          'لم تصل تعرفة حديثة لكل الباقات المختارة. تحقق من حالة الباقات ثم أعد المحاولة.',
+        );
+      }
+
+      // Do not apply a response to a cart that the user changed while it was
+      // in flight. The next refresh will use the latest cart contents.
+      if (!_matchesCartSnapshot(cartLines)) return;
+
+      final refreshedLines = cartLines.map((line) {
+        final package = refreshedPackages[line.package.packageId]!;
+        if (package.packageVoucherCount <= 0) {
+          throw const AppException('تعذر تحديث التعرفة بسبب سعة باقة غير صالحة.');
+        }
+
+        return ProcurementCartLineEntity(
+          package: package,
+          voucherCount: line.voucherCount,
+          sheets: VoucherSheetCalculator.breakdown(
+            line.voucherCount,
+            package.packageVoucherCount,
+          ).totalSheetsFraction,
+        );
+      }).toList(growable: false);
+
+      if (!procurementEstimateCalculator.hasCurrentSnapshots(
+        refreshedLines.map((line) => line.package),
+      )) {
+        throw const AppException(
+          'استلم التطبيق بيانات أسعار غير مكتملة أو منتهية. أعد تحديث التعرفة.',
+        );
+      }
+
+      cartPricingRefreshError.value = null;
+      procurementCart.assignAll(refreshedLines);
+      final refreshedAvailablePackages = availablePackages
+          .map(
+            (package) => refreshedPackages[package.packageId] ?? package,
+          )
+          .toList(growable: false);
+      availablePackages.assignAll(refreshedAvailablePackages);
+      final selectedPackageIdValue = selectedPackageId.value;
+      if (selectedPackageIdValue != null) {
+        final refreshedSelectedPackage =
+            refreshedPackages[selectedPackageIdValue];
+        if (refreshedSelectedPackage != null) {
+          _setSelectedPackage(refreshedSelectedPackage);
+        }
+      }
+      effectiveDiscountsByPackageId.clear();
+
+      // A previous server quote is no longer relevant after the signed
+      // package snapshots have been replaced.
+      _quoteRevision++;
+      serverQuote.value = null;
+      quoteError.value = null;
+      isLoadingQuote.value = false;
+      isQuotePending.value = false;
+      _refreshProcurementPresentation();
+
+      unawaited(loadEffectivePackageDiscounts());
+    } catch (error) {
+      if (revision != _cartPricingRefreshRevision) return;
+      cartPricingRefreshError.value = AppException.sanitizeMessage(
+        error,
+        fallback: 'لم نتمكن من جلب التعرفة الحالية للباقات المختارة.',
+      );
+    } finally {
+      if (revision == _cartPricingRefreshRevision) {
+        isRefreshingCartPricing.value = false;
+      }
+    }
+  }
+
+  bool _matchesCartSnapshot(List<ProcurementCartLineEntity> snapshot) {
+    if (procurementCart.length != snapshot.length) return false;
+
+    for (var index = 0; index < snapshot.length; index++) {
+      final current = procurementCart[index];
+      final previous = snapshot[index];
+      if (current.package.packageId != previous.package.packageId ||
+          current.voucherCount != previous.voucherCount) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   Future<void> _fetchNetworkPackages(
@@ -496,6 +663,7 @@ class PosProcurementController extends GetxController {
     try {
       final paginated = await getPackagesUseCase!(
         networkId: networkId,
+        posId: selectedPosId.value,
         status: true,
         search: packageSearchQuery.value.isEmpty
             ? null
@@ -514,11 +682,11 @@ class PosProcurementController extends GetxController {
         // Cart quantities are independent from catalogue pagination and search.
         // Loading a catalogue page must never create or replace an order line.
       } else {
-        final knownIds = availablePackages.map((item) => item.packageId).toSet();
+        final knownIds = availablePackages
+            .map((item) => item.packageId)
+            .toSet();
         availablePackages.addAll(
-          paginated.items.where(
-            (item) => !knownIds.contains(item.packageId),
-          ),
+          paginated.items.where((item) => !knownIds.contains(item.packageId)),
         );
         packageNextCursor.value = paginated.nextCursor;
       }
@@ -552,7 +720,16 @@ class PosProcurementController extends GetxController {
     packageSearchController.clear();
     packageSearchQuery.value = '';
     _suppressPackageSearchListener = false;
-    refreshNetworkPackages();
+    _refreshPackageSearchResults();
+  }
+
+  /// Search changes refresh the visible catalogue only; cart pricing refresh
+  /// is an explicit action and must not be triggered by typing.
+  void _refreshPackageSearchResults() {
+    final networkId = selectedNetworkId.value;
+    if (networkId != null) {
+      _fetchNetworkPackages(networkId, reset: true);
+    }
   }
 
   Future<void> loadMorePackages() async {
@@ -563,11 +740,10 @@ class PosProcurementController extends GetxController {
 
   /// اختيار الشبكة الموردة وتحديث الباقات
   void onNetworkSelected(int networkId) {
+    expandedProcurementContext.value = '';
     _setSelectedNetworkId(networkId);
     clearProcurementCart();
     _setSelectedPackage(null);
-    effectiveDiscount.value = null;
-    discountError.value = null;
     availablePackages.clear();
     clearVoucherQuantity();
     loadNetworkPackages(networkId);
@@ -598,7 +774,15 @@ class PosProcurementController extends GetxController {
       return;
     }
 
-    final safeCount = voucherCount < 0 ? 0 : voucherCount;
+    final safeCount = voucherCount.clamp(0, 1000000);
+    final quantityController = quantityControllerForPackage(package.packageId);
+    final quantityText = safeCount == 0 ? '' : '$safeCount';
+    if (quantityController.text != quantityText) {
+      quantityController.value = TextEditingValue(
+        text: quantityText,
+        selection: TextSelection.collapsed(offset: quantityText.length),
+      );
+    }
     final existingIndex = procurementCart.indexWhere(
       (line) => line.package.packageId == package.packageId,
     );
@@ -611,7 +795,7 @@ class PosProcurementController extends GetxController {
       if (existingIndex != -1) {
         procurementCart.removeAt(existingIndex);
         if (procurementCart.isEmpty) returnToOrderItems();
-        _scheduleServerQuoteRefresh();
+        _refreshProcurementPresentation();
       }
       return;
     }
@@ -638,7 +822,7 @@ class PosProcurementController extends GetxController {
     } else {
       procurementCart[existingIndex] = line;
     }
-    _scheduleServerQuoteRefresh();
+    _refreshProcurementPresentation();
   }
 
   /// التحكم السريع في الكمية من بطاقة الكتالوج أو بطاقة السلة.
@@ -650,18 +834,51 @@ class PosProcurementController extends GetxController {
     );
   }
 
-  /// يبطل العرض السابق فوراً ثم يطلب معاينة موحدة بعد توقف التفاعل.
-  void _scheduleServerQuoteRefresh() {
-    _quoteRevision++;
-    serverQuote.value = null;
-    quoteError.value = null;
-    isLoadingQuote.value = false;
-    if (procurementCart.isEmpty || getProcurementQuoteUseCase == null) {
-      isQuotePending.value = false;
+  /// Rebuilds reactive UI values without a network request.
+  void _refreshProcurementPresentation() {
+    procurementCart.refresh();
+  }
+
+  /// Loads every active custom discount for the current POS in one catalogue-level request.
+  Future<void> loadEffectivePackageDiscounts() async {
+    if (isClosed) return;
+    final networkId = selectedNetworkId.value;
+    final posId = selectedPosId.value;
+    final useCase = getEffectivePackageDiscountsForPosUseCase;
+    if (networkId == null || posId == null || useCase == null) {
+      effectiveDiscountsByPackageId.clear();
       return;
     }
-    isQuotePending.value = true;
-    _cartQuoteChanges.value++;
+
+    final revision = ++_packageDiscountRevision;
+    isLoadingPackageDiscounts.value = true;
+    packageDiscountError.value = null;
+    try {
+      final discounts = await useCase(networkId: networkId, posId: posId);
+      if (revision != _packageDiscountRevision ||
+          selectedNetworkId.value != networkId ||
+          selectedPosId.value != posId) {
+        return;
+      }
+      effectiveDiscountsByPackageId.assignAll({
+        for (final discount in discounts)
+          if (discount.packageId != null) discount.packageId!: discount,
+      });
+      _refreshProcurementPresentation();
+    } catch (error) {
+      if (revision != _packageDiscountRevision) {
+        return;
+      }
+      effectiveDiscountsByPackageId.clear();
+      packageDiscountError.value = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر تحميل التعرفات الخاصة بنقطة البيع.',
+      );
+    } finally {
+      if (revision == _packageDiscountRevision) {
+        isLoadingPackageDiscounts.value = false;
+      }
+    }
   }
 
   void removeCartLine(int packageId) {
@@ -670,11 +887,17 @@ class PosProcurementController extends GetxController {
     if (procurementCart.length == previousLength) return;
 
     if (procurementCart.isEmpty) returnToOrderItems();
-    _scheduleServerQuoteRefresh();
+    _refreshProcurementPresentation();
   }
 
   void clearProcurementCart() {
+    _cartPricingRefreshRevision++;
+    isRefreshingCartPricing.value = false;
+    cartPricingRefreshError.value = null;
     procurementCart.clear();
+    for (final controller in _packageQuantityControllers.values) {
+      controller.clear();
+    }
     _quoteRevision++;
     isLoadingQuote.value = false;
     isQuotePending.value = false;
@@ -764,7 +987,7 @@ class PosProcurementController extends GetxController {
       sheets: nextCount / sheetSize,
       voucherCount: nextCount,
     );
-    _scheduleServerQuoteRefresh();
+    _refreshProcurementPresentation();
   }
 
   void adjustCartLineBySheet(int packageId, int direction) {
@@ -772,159 +995,14 @@ class PosProcurementController extends GetxController {
       (item) => item.package.packageId == packageId,
     );
     if (line == null || direction == 0) return;
-    adjustCartLine(
-      packageId,
-      line.package.packageVoucherCount * direction,
-    );
+    adjustCartLine(packageId, line.package.packageVoucherCount * direction);
   }
 
-  /// واجهة توافقية لقراءة الخصم التفصيلي؛ لا تُستخدم لتحديد كمية الطلب.
-  /// كمية الطلب نفسها تُدار حصراً عبر procurementCart.
+  /// The POS tariff catalogue is loaded once per network/POS context.
+  /// Selecting a package is a local presentation operation only.
   void onPackageSelected(PackageEntity package) {
     _setSelectedPackage(package);
     setDefaultSheetIfEmpty();
-    unawaited(loadEffectiveDiscount());
-  }
-
-  /// استرجاع الخصم الفعلي المعتمد للباقة المحددة لنقطة البيع الحالية من Laravel
-  Future<void> loadEffectiveDiscount() async {
-    final posId = selectedPosId.value;
-    final networkId = selectedNetworkId.value;
-    final packageId = selectedPackage.value?.packageId;
-
-    effectiveDiscount.value = null;
-    discountError.value = null;
-
-    if (posId == null ||
-        networkId == null ||
-        packageId == null ||
-        getEffectivePackageDiscountUseCase == null) {
-      return;
-    }
-
-    final revision = ++_discountLoadRevision;
-    isLoadingDiscount.value = true;
-
-    try {
-      final result = await getEffectivePackageDiscountUseCase!(
-        networkId: networkId,
-        posId: posId,
-        packageId: packageId,
-      );
-
-      if (revision != _discountLoadRevision ||
-          selectedPosId.value != posId ||
-          selectedNetworkId.value != networkId ||
-          selectedPackage.value?.packageId != packageId) {
-        return;
-      }
-
-      effectiveDiscount.value = result;
-    } catch (e) {
-      if (revision != _discountLoadRevision) return;
-      discountError.value = e is AppException ? e.message : e.toString();
-    } finally {
-      if (revision == _discountLoadRevision) {
-        isLoadingDiscount.value = false;
-      }
-    }
-  }
-
-  /// تحميل طلبات التوريد من الخادم مع ترقيم المؤشر
-  Future<void> loadRequests({bool isRefresh = false}) async {
-    final revision = ++_requestListRevision;
-    isLoading.value = true;
-    errorMessage.value = null;
-
-    nextCursor.value = null;
-    isLoadingMore.value = false;
-
-    final posId = selectedPosId.value;
-    final status = statusFilter.value;
-    final query = searchQuery.value.trim();
-    final effectiveSearch = query.isEmpty ? null : query;
-
-    try {
-      final PaginatedList<RequestEntity> result = await getRequestsUseCase(
-        posId: posId,
-        status: status,
-        search: effectiveSearch,
-        cursor: null,
-      );
-      if (revision != _requestListRevision) return;
-
-      requests.assignAll(result.items);
-      nextCursor.value = result.nextCursor;
-    } catch (error) {
-      if (revision != _requestListRevision) return;
-      errorMessage.value = error is AppException
-          ? error.message
-          : 'تعذر تحميل قائمة طلبات التوريد: $error';
-    } finally {
-      if (revision == _requestListRevision) {
-        isLoading.value = false;
-      }
-    }
-  }
-
-  /// تحميل المزيد دون السماح لاستجابة صفحة قديمة بتلويث نتائج التصفية الحالية.
-  Future<void> loadMoreRequests() async {
-    final cursor = nextCursor.value;
-    if (isLoadingMore.value || isLoading.value || cursor == null) {
-      return;
-    }
-
-    final revision = _requestListRevision;
-    final posId = selectedPosId.value;
-    final status = statusFilter.value;
-    final query = searchQuery.value.trim();
-    final effectiveSearch = query.isEmpty ? null : query;
-    isLoadingMore.value = true;
-
-    try {
-      final PaginatedList<RequestEntity> result = await getRequestsUseCase(
-        posId: posId,
-        status: status,
-        search: effectiveSearch,
-        cursor: cursor,
-      );
-      if (revision != _requestListRevision) return;
-
-      final existingIds = requests.map((request) => request.requestId).toSet();
-      final newItems = result.items
-          .where((request) => !existingIds.contains(request.requestId))
-          .toList(growable: false);
-
-      requests.addAll(newItems);
-      nextCursor.value = result.nextCursor;
-      loadMoreError.value = null;
-    } catch (error) {
-      if (revision == _requestListRevision) {
-        loadMoreError.value = AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر تحميل المزيد من طلبات التوريد.',
-        );
-      }
-    } finally {
-      if (revision == _requestListRevision) {
-        isLoadingMore.value = false;
-      }
-    }
-  }
-
-  /// تغيير فلتر الحالة وإعادة التحميل من الخادم
-  void setStatusFilter(String? status) {
-    if (statusFilter.value == status) return;
-    statusFilter.value = status;
-    loadRequests(isRefresh: true);
-  }
-
-  /// إعادة تعيين الفلاتر والبحث
-  void resetFilters() {
-    searchController.clear();
-    searchQuery.value = '';
-    statusFilter.value = null;
-    loadRequests(isRefresh: true);
   }
 
   /// تهيئة نموذج طلب جديد
@@ -944,21 +1022,31 @@ class PosProcurementController extends GetxController {
     }
   }
 
-  /// فتح شاشة تعديل طلب التوريد القائم المعلق
-  Future<void> openEditOrder(RequestEntity request) async {
+  /// Initializes the form from immutable route arguments; no list-controller state is shared.
+  Future<void> _initializeForm() async {
+    final lifecycleRevision = _lifecycleRevision;
+    final request = Get.arguments;
+    if (request is! RequestEntity) {
+      initNewOrderForm();
+      await loadMyPos();
+      return;
+    }
+
     isEditing.value = true;
     editingRequestId.value = request.requestId;
-    selectedPosId.value = request.posId;
-    selectedNetworkId.value = request.networkId;
     selectedSaleType.value = request.saleType;
     notesController.text = request.requestNote ?? '';
-    clearProcurementCart();
-
-    await loadNetworkPackages(request.networkId);
+    await loadMyPos(
+      preferredPosId: request.posId,
+      preferredNetworkId: request.networkId,
+    );
+    if (lifecycleRevision != _lifecycleRevision) return;
 
     for (final item in request.items) {
-      final pkg = availablePackages
-              .firstWhereOrNull((p) => p.packageId == item.packageId) ??
+      final pkg =
+          availablePackages.firstWhereOrNull(
+            (package) => package.packageId == item.packageId,
+          ) ??
           item.voucherPackage ??
           PackageEntity(
             packageId: item.packageId,
@@ -979,20 +1067,19 @@ class PosProcurementController extends GetxController {
             status: true,
           );
 
-      final sheetSize =
-          pkg.packageVoucherCount > 0 ? pkg.packageVoucherCount : 100;
-      final calculatedSheets = item.voucherCount / sheetSize;
+      final sheetSize = pkg.packageVoucherCount > 0
+          ? pkg.packageVoucherCount
+          : 100;
       procurementCart.add(
         ProcurementCartLineEntity(
           package: pkg,
-          sheets: calculatedSheets,
+          sheets: item.voucherCount / sheetSize,
           voucherCount: item.voucherCount,
         ),
       );
     }
 
-    _scheduleServerQuoteRefresh();
-    await Get.toNamed<void>(AppRoutes.newProcurementOrder);
+    _refreshProcurementPresentation();
   }
 
   /// إرسال تحديثات الطلب المعلق إلى الخادم
@@ -1022,10 +1109,8 @@ class PosProcurementController extends GetxController {
     );
 
     try {
-      final token = serverQuote.value?.pricingToken;
       final payload = <String, dynamic>{
         'sale_type': selectedSaleType.value.wireValue,
-        if (token != null && token.isNotEmpty) 'pricing_token': token,
         if (notesController.text.trim().isNotEmpty)
           'request_note': notesController.text.trim(),
         'items': procurementCart
@@ -1039,11 +1124,6 @@ class PosProcurementController extends GetxController {
       };
 
       final updated = await updateRequestUseCase!(requestId, payload);
-      final index = requests.indexWhere((r) => r.requestId == requestId);
-      if (index != -1) {
-        requests[index] = updated;
-      }
-
       isEditing.value = false;
       editingRequestId.value = null;
       clearProcurementCart();
@@ -1080,61 +1160,6 @@ class PosProcurementController extends GetxController {
       return false;
     } finally {
       isSubmitting.value = false;
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
-    }
-  }
-
-  /// حذف طلب توريد ملغي أو معلق من قبل نقطة البيع
-  Future<bool> deleteRequest(int requestId) async {
-    if (deleteRequestUseCase == null) {
-      CustomSnackbar.show(
-        title: 'العملية غير مدعومة',
-        message: 'خاصية حذف الطلبات غير مهيأة.',
-        type: SnackType.error,
-      );
-      return false;
-    }
-
-    await CustomAnimationOverlay.showLoading(
-      message: 'جاري حذف طلب التوريد من السجل...',
-    );
-
-    try {
-      await deleteRequestUseCase!(requestId);
-      requests.removeWhere((r) => r.requestId == requestId);
-
-      await CustomAnimationOverlay.showSuccess(
-        message: 'تم حذف طلب التوريد بنجاح',
-      );
-      CustomSnackbar.show(
-        title: 'تم الحذف',
-        message: 'تم حذف سجل الطلب بنجاح.',
-        type: SnackType.success,
-      );
-      return true;
-    } on AppException catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
-      CustomSnackbar.show(
-        title: 'تعذر حذف الطلب',
-        message: e.message,
-        type: SnackType.error,
-      );
-      return false;
-    } catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
-      CustomSnackbar.show(
-        title: 'خطأ غير متوقع',
-        message: 'تعذر إتمام عملية الحذف: $e',
-        type: SnackType.error,
-      );
-      return false;
-    } finally {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
@@ -1208,32 +1233,14 @@ class PosProcurementController extends GetxController {
       return false;
     }
 
-    if (getProcurementQuoteUseCase != null) {
-      final quote = serverQuote.value;
-      final quoteMatchesContext =
-          quote != null &&
-          quote.networkId == selectedNetworkId.value &&
-          quote.posId == posId &&
-          quote.saleType == selectedSaleType.value;
-      final quoteExpired = quote?.expiresAt != null &&
-          !DateTime.now().isBefore(quote!.expiresAt!);
-
-      if (isQuotePending.value ||
-          isLoadingQuote.value ||
-          !quoteMatchesContext ||
-          quoteExpired) {
-        if (!isLoadingQuote.value && !isQuotePending.value) {
-          _scheduleServerQuoteRefresh();
-        }
-        CustomSnackbar.show(
-          title: quoteExpired ? 'انتهت صلاحية عرض الأسعار' : 'عرض الأسعار غير جاهز',
-          message: quoteExpired
-              ? 'تم طلب عرض أسعار محدث. راجعه قبل تقديم الطلب.'
-              : 'يجب جلب عرض الأسعار المعتمد للشبكة ونقطة البيع وطريقة الدفع الحالية قبل التقديم.',
-          type: SnackType.warning,
-        );
-        return false;
-      }
+    if (!hasCurrentProcurementSnapshots) {
+      CustomSnackbar.show(
+        title: 'بيانات التعرفة غير مكتملة أو منتهية',
+        message:
+            'حدّث كتالوج الباقات للحصول على تعرفة موقعة وحديثة قبل الإرسال.',
+        type: SnackType.warning,
+      );
+      return false;
     }
 
     isSubmitting.value = true;
@@ -1242,12 +1249,10 @@ class PosProcurementController extends GetxController {
     );
 
     try {
-      final token = serverQuote.value?.pricingToken;
       final payload = <String, dynamic>{
         'network_id': selectedNetworkId.value!,
         'pos_id': selectedPosId.value!,
         'sale_type': selectedSaleType.value.wireValue,
-        if (token != null && token.isNotEmpty) 'pricing_token': token,
         if (notesController.text.trim().isNotEmpty)
           'request_note': notesController.text.trim(),
         'items': procurementCart
@@ -1255,6 +1260,8 @@ class PosProcurementController extends GetxController {
               (line) => {
                 'package_id': line.package.packageId,
                 'voucher_count': line.voucherCount,
+                'pricing_snapshot_token':
+                    line.package.procurementPricingSnapshotToken,
               },
             )
             .toList(growable: false),
@@ -1264,7 +1271,6 @@ class PosProcurementController extends GetxController {
         payload,
         idempotencyKey: _resolveCreateIdempotencyKey(payload),
       );
-      requests.insert(0, created);
       clearProcurementCart();
       clearVoucherQuantity();
 
@@ -1281,10 +1287,11 @@ class PosProcurementController extends GetxController {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
-      if (e.message.contains('أسعار') ||
+      if (e.message.contains('تعرفة') ||
           e.message.contains('pricing') ||
-          e.message.contains('عرض الأسعار')) {
-        _scheduleServerQuoteRefresh();
+          e.message.contains('سعر') ||
+          e.message.contains('أسعار')) {
+        packageErrorMessage.value = e.message;
       }
       CustomSnackbar.show(
         title: 'فشل تقديم الطلب',
@@ -1310,92 +1317,10 @@ class PosProcurementController extends GetxController {
     }
   }
 
-  /// إلغاء طلب توريد قيد الانتظار
-  Future<bool> cancelRequest(int requestId) async {
-    await CustomAnimationOverlay.showLoading(
-      message: 'جاري إلغاء طلب التوريد...',
-    );
-
-    try {
-      final cancelled = await cancelRequestUseCase(requestId);
-
-      final index = requests.indexWhere((r) => r.requestId == requestId);
-      if (index != -1) {
-        requests[index] = cancelled;
-      } else {
-        requests.add(cancelled);
-      }
-
-      await CustomAnimationOverlay.showSuccess(
-        message: 'تم إلغاء طلب الكروت بنجاح',
-      );
-      CustomSnackbar.show(
-        title: 'تم الإلغاء',
-        message: 'تم إلغاء الطلب رقم #${cancelled.requestUuid} بنجاح.',
-        type: SnackType.success,
-      );
-      return true;
-    } on AppException catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
-      CustomSnackbar.show(
-        title: 'تعذر إلغاء الطلب',
-        message: e.message,
-        type: SnackType.error,
-      );
-      return false;
-    } catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
-      CustomSnackbar.show(
-        title: 'خطأ غير متوقع',
-        message: 'تعذر إلغاء الطلب: $e',
-        type: SnackType.error,
-      );
-      return false;
-    } finally {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
-    }
-  }
-
-  /// فتح شاشة تفاصيل طلب التوريد
-  Future<void> openRequestDetails(RequestEntity request) async {
-    await Get.toNamed<void>(
-      AppRoutes.voucherRequestDetails,
-      arguments: request,
-    );
-  }
-
-  /// التوجيه لشاشة إنشاء طلب توريد جديد
-  Future<void> navigateToNewOrder() async {
-    initNewOrderForm();
-    await Get.toNamed<void>(AppRoutes.newProcurementOrder);
-  }
-
-  /// حوار إلغاء طلب التوريد
-  Future<void> promptCancelRequest(RequestEntity request) async {
-    await ProcurementActionDialogs.showCancelDialog(
-      requestId: request.requestId,
-      onConfirm: () => cancelRequest(request.requestId),
-    );
-  }
-
-  /// حوار حذف طلب التوريد الملغي أو المعلق
-  Future<void> promptDeleteRequest(RequestEntity request) async {
-    await ProcurementActionDialogs.showDeleteDialog(
-      requestId: request.requestId,
-      requestUuid: request.requestUuid,
-      onConfirm: () => deleteRequest(request.requestId),
-    );
-  }
-
-  /// تقديم طلب التوريد أو حفظ التعديلات والعودة في حال النجاح
+  /// Submits the current form and closes only after a successful server response.
   Future<void> submitOrderAndClose() async {
-    final ok = isEditing.value ? await updateOrder() : await submitOrder();
-    if (ok) Get.back<void>();
+    final success = isEditing.value ? await updateOrder() : await submitOrder();
+    if (success) Get.back<void>();
   }
 }
+

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -6,7 +7,6 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_delete_confirm_dialog.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 
 /// شبكة باقات الكروت المخصصة للأجهزة اللوحية مع ترقيم الصفحات القائم على المؤشر (Infinite Scroll)
 class PackageCatalogGrid extends GetView<PackageCatalogController> {
@@ -68,7 +68,16 @@ class PackageCatalogGrid extends GetView<PackageCatalogController> {
                     horizontal: AppSpacing.cardPadding,
                     vertical: AppSpacing.xs,
                   ),
-                  child: CustomSkeletonCard(height: 140.h),
+                  child: CustomStateView.loading(
+                    presentation: CustomStatePresentation.skeletonOnly,
+                    skeleton: CustomStateSkeleton(
+                      layout: CustomStateSkeletonLayout.cards,
+                      itemCount: 1,
+                      cardHeight: 140.h,
+                      maxColumns: 1,
+                      minItemWidth: 180,
+                    ),
+                  ),
                 ),
               ),
           ],

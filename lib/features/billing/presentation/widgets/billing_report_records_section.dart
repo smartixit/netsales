@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 class BillingReportRecordsSection extends StatelessWidget {
@@ -26,16 +26,21 @@ class BillingReportRecordsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (controller.isLoading.value && controller.rows.isEmpty) {
-      return const CustomSkeletonFeed(itemCount: 3, shrinkWrap: true);
+      return const CustomStateView.loading(
+        presentation: CustomStatePresentation.skeletonOnly,
+        skeleton: CustomStateSkeleton(
+          layout: CustomStateSkeletonLayout.list,
+          itemCount: 3,
+          cardHeight: 112,
+          hasLeading: true,
+        ),
+      );
     }
     if (controller.rows.isEmpty && controller.errorMessage.value != null) {
       return const SizedBox.shrink();
     }
     if (controller.rows.isEmpty) {
-      return CustomEmptyState.boxed(
-        title: emptyTitle,
-        subtitle: emptySubtitle,
-      );
+      return CustomEmptyState.boxed(title: emptyTitle, subtitle: emptySubtitle);
     }
 
     return Column(

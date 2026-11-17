@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_search_filter_header.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_list_intro.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
@@ -22,7 +21,7 @@ import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 /// 2. الـ Accordion الحصري الذكي لتفاصيل باقات وكميات وأسعار الطلب.
 /// 3. إمكانية تعديل الطلب المعلق وإلغائه، أو حذف الطلبات الملغية.
 /// 4. الحشو السفلي الآمن الذي يمنع تغطية البطاقات بشريط التنقل العائم.
-class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
+class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController> {
   const PosProcurementOrdersScreen({super.key, this.embedded = false});
 
   final bool embedded;
@@ -83,7 +82,14 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
               if (controller.isLoading.value) {
                 return Padding(
                   padding: EdgeInsets.all(AppSpacing.md),
-                  child: CustomSkeletonFeed(itemCount: 4, cardHeight: 130.h),
+                  child: CustomStateView.loading(
+                    presentation: CustomStatePresentation.skeletonOnly,
+                    skeleton: CustomStateSkeleton(
+                      layout: CustomStateSkeletonLayout.list,
+                      itemCount: 4,
+                      cardHeight: 130.h,
+                    ),
+                  ),
                 );
               }
 
@@ -151,7 +157,16 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementController> {
                           padding: EdgeInsets.symmetric(
                             vertical: AppSpacing.xs,
                           ),
-                          child: CustomSkeletonCard(height: 130.h),
+                          child: CustomStateView.loading(
+                            presentation: CustomStatePresentation.skeletonOnly,
+                            skeleton: CustomStateSkeleton(
+                              layout: CustomStateSkeletonLayout.cards,
+                              itemCount: 1,
+                              cardHeight: 130.h,
+                              maxColumns: 1,
+                              minItemWidth: 180,
+                            ),
+                          ),
                         );
                       }
 

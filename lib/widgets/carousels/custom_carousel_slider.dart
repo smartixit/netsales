@@ -4,7 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_indicators.dart';
 
-export 'package:carousel_slider/carousel_slider.dart' show CarouselSliderController;
+export 'package:carousel_slider/carousel_slider.dart'
+    show CarouselSliderController;
 export 'package:netsales/widgets/carousels/custom_carousel_card.dart';
 export 'package:netsales/widgets/carousels/custom_carousel_indicators.dart';
 

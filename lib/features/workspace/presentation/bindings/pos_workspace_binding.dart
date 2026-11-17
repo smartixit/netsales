@@ -14,7 +14,7 @@ import 'package:netsales/features/invoices/presentation/bindings/invoice_binding
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
 import 'package:netsales/features/reports/presentation/bindings/operational_reports_binding.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
+import 'package:netsales/features/requests/presentation/bindings/pos_procurement_orders_binding.dart';
 import 'package:netsales/features/workspace/presentation/bindings/workspace_coordinator_binding.dart';
 import 'package:netsales/features/workspace/presentation/bindings/workspace_entity_picker_binding.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
@@ -29,7 +29,10 @@ class PosWorkspaceBinding extends Bindings {
     FinanceBinding().dependencies();
     InvoiceBinding().dependencies();
     MembershipBinding(isNetwork: false).dependencies();
-    ProcurementRequestBinding().dependencies();
+    // The orders screen is embedded in this workspace shell, not opened
+    // through AppRoutes.procurementOrders. Register its controller here so
+    // the embedded tab resolves it and its lifetime follows the workspace route.
+    PosProcurementOrdersBinding().dependencies();
     PackageCatalogBinding().dependencies();
 
     registerLazyIfAbsent<PosWorkspaceController>(

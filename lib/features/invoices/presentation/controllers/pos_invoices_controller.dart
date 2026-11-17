@@ -35,10 +35,7 @@ class PosInvoicesController extends GetxController {
   bool get hasMore => nextCursor.value != null;
 
   void openInvoiceDetails(InvoiceEntity invoice) {
-    Get.toNamed<void>(
-      AppRoutes.purchaseInvoiceDetails,
-      arguments: invoice,
-    );
+    Get.toNamed<void>(AppRoutes.purchaseInvoiceDetails, arguments: invoice);
   }
 
   // فلاتر البحث ونوع الشراء

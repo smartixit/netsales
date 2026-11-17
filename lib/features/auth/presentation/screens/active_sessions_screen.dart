@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/auth/presentation/controllers/active_sessions_controller.dart';
 import 'package:netsales/features/auth/presentation/widgets/current_device_card.dart';
 import 'package:netsales/features/auth/presentation/widgets/logout_other_devices_card.dart';
 import 'package:netsales/features/auth/presentation/widgets/other_device_card.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// شاشة إدارة الأجهزة والجلسات النشطة (ActiveSessionsScreen)
@@ -28,7 +28,15 @@ class ActiveSessionsScreen extends GetView<ActiveSessionsController> {
       appBarSubtitle: 'إدارة أجهزتك المقترنة والتحكم في جلسات الدخول الفعالة',
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const CustomSkeletonFeed();
+          return const CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.list,
+              itemCount: 3,
+              cardHeight: 112,
+              hasLeading: true,
+            ),
+          );
         }
 
         if (controller.errorMessage.value != null) {

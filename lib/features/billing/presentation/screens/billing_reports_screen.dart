@@ -5,8 +5,9 @@ import 'package:netsales/features/billing/presentation/widgets/billing_reports_c
 
 /// Composition-only route screen for subscription reports.
 class BillingReportsScreen extends GetView<BillingReportsController> {
- const BillingReportsScreen({super.key});
+  const BillingReportsScreen({super.key});
 
- @override
- Widget build(BuildContext context) => BillingReportsContent(controller:controller);
+  @override
+  Widget build(BuildContext context) =>
+      BillingReportsContent(controller: controller);
 }

@@ -19,11 +19,21 @@ class BillingDialogs {
     BillingController controller,
     Map<String, dynamic> account,
   ) async {
-    final legal = TextEditingController(text: account['legal_name']?.toString() ?? '');
-    final email = TextEditingController(text: account['billing_email']?.toString() ?? '');
-    final tax = TextEditingController(text: account['tax_number']?.toString() ?? '');
-    final address = TextEditingController(text: account['billing_address']?.toString() ?? '');
-    final terms = TextEditingController(text: account['payment_terms_days']?.toString() ?? '0');
+    final legal = TextEditingController(
+      text: account['legal_name']?.toString() ?? '',
+    );
+    final email = TextEditingController(
+      text: account['billing_email']?.toString() ?? '',
+    );
+    final tax = TextEditingController(
+      text: account['tax_number']?.toString() ?? '',
+    );
+    final address = TextEditingController(
+      text: account['billing_address']?.toString() ?? '',
+    );
+    final terms = TextEditingController(
+      text: account['payment_terms_days']?.toString() ?? '0',
+    );
     try {
       final accepted = await CustomDialog.show(
         type: DialogType.custom,
@@ -33,11 +43,34 @@ class BillingDialogs {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CustomTextField(controller: legal, label: 'الاسم القانوني', isRequired: true),
-              CustomTextField(controller: email, label: 'البريد المحاسبي', keyboardType: TextInputType.emailAddress, isRequired: false),
-              CustomTextField(controller: tax, label: 'الرقم الضريبي', isRequired: false),
-              CustomTextField(controller: address, label: 'عنوان الفوترة', maxLines: 2, isRequired: false),
-              CustomTextField(controller: terms, label: 'أيام السداد', keyboardType: TextInputType.number, isRequired: true),
+              CustomTextField(
+                controller: legal,
+                label: 'الاسم القانوني',
+                isRequired: true,
+              ),
+              CustomTextField(
+                controller: email,
+                label: 'البريد المحاسبي',
+                keyboardType: TextInputType.emailAddress,
+                isRequired: false,
+              ),
+              CustomTextField(
+                controller: tax,
+                label: 'الرقم الضريبي',
+                isRequired: false,
+              ),
+              CustomTextField(
+                controller: address,
+                label: 'عنوان الفوترة',
+                maxLines: 2,
+                isRequired: false,
+              ),
+              CustomTextField(
+                controller: terms,
+                label: 'أيام السداد',
+                keyboardType: TextInputType.number,
+                isRequired: true,
+              ),
             ],
           ),
         ),
@@ -49,7 +82,9 @@ class BillingDialogs {
           'legal_name': legal.text.trim(),
           'billing_email': email.text.trim().isEmpty ? null : email.text.trim(),
           'tax_number': tax.text.trim().isEmpty ? null : tax.text.trim(),
-          'billing_address': address.text.trim().isEmpty ? null : address.text.trim(),
+          'billing_address': address.text.trim().isEmpty
+              ? null
+              : address.text.trim(),
           'payment_terms_days': int.tryParse(terms.text.trim()) ?? 0,
         });
       }
@@ -74,8 +109,18 @@ class BillingDialogs {
           mainAxisSize: MainAxisSize.min,
           children: [
             CustomTextField(controller: name, label: 'الاسم', isRequired: true),
-            CustomTextField(controller: email, label: 'البريد الإلكتروني', keyboardType: TextInputType.emailAddress, isRequired: false),
-            CustomTextField(controller: phone, label: 'رقم الهاتف', keyboardType: TextInputType.phone, isRequired: false),
+            CustomTextField(
+              controller: email,
+              label: 'البريد الإلكتروني',
+              keyboardType: TextInputType.emailAddress,
+              isRequired: false,
+            ),
+            CustomTextField(
+              controller: phone,
+              label: 'رقم الهاتف',
+              keyboardType: TextInputType.phone,
+              isRequired: false,
+            ),
           ],
         ),
         confirmLabel: 'إضافة',
@@ -102,8 +147,12 @@ class BillingDialogs {
     Map<String, dynamic> contact,
   ) async {
     final name = TextEditingController(text: contact['name']?.toString() ?? '');
-    final email = TextEditingController(text: contact['email']?.toString() ?? '');
-    final phone = TextEditingController(text: contact['phone']?.toString() ?? '');
+    final email = TextEditingController(
+      text: contact['email']?.toString() ?? '',
+    );
+    final phone = TextEditingController(
+      text: contact['phone']?.toString() ?? '',
+    );
     try {
       final accepted = await CustomDialog.show(
         type: DialogType.custom,
@@ -112,8 +161,18 @@ class BillingDialogs {
           mainAxisSize: MainAxisSize.min,
           children: [
             CustomTextField(controller: name, label: 'الاسم', isRequired: true),
-            CustomTextField(controller: email, label: 'البريد الإلكتروني', keyboardType: TextInputType.emailAddress, isRequired: false),
-            CustomTextField(controller: phone, label: 'رقم الهاتف', keyboardType: TextInputType.phone, isRequired: false),
+            CustomTextField(
+              controller: email,
+              label: 'البريد الإلكتروني',
+              keyboardType: TextInputType.emailAddress,
+              isRequired: false,
+            ),
+            CustomTextField(
+              controller: phone,
+              label: 'رقم الهاتف',
+              keyboardType: TextInputType.phone,
+              isRequired: false,
+            ),
           ],
         ),
         confirmLabel: 'حفظ',
@@ -134,7 +193,10 @@ class BillingDialogs {
     }
   }
 
-  static Future<void> deleteContact(BillingController controller, int id) async {
+  static Future<void> deleteContact(
+    BillingController controller,
+    int id,
+  ) async {
     final accepted = await CustomDialog.show(
       type: DialogType.danger,
       title: 'حذف جهة الاتصال',
@@ -150,8 +212,13 @@ class BillingDialogs {
     Map<String, dynamic> invoice,
   ) async {
     final invoiceId = (invoice['invoice_id'] as num?)?.toInt();
-    final remaining = int.tryParse(invoice['remaining_minor']?.toString() ?? '0') ?? 0;
-    if (invoiceId == null || remaining <= 0 || controller.paymentMethods.isEmpty) return;
+    final remaining =
+        int.tryParse(invoice['remaining_minor']?.toString() ?? '0') ?? 0;
+    if (invoiceId == null ||
+        remaining <= 0 ||
+        controller.paymentMethods.isEmpty) {
+      return;
+    }
 
     final amount = TextEditingController(text: remaining.toString());
     final reference = TextEditingController();
@@ -169,31 +236,54 @@ class BillingDialogs {
                 alignment: AlignmentDirectional.centerStart,
                 child: Text('المبلغ المتبقي: $remaining وحدة صغرى'),
               ),
-              Obx(() => CustomDropdown<int>(
-                items: controller.paymentMethods.map((method) => DropdownItem<int>(
-                  value: (method['payment_method_id'] as num).toInt(),
-                  child: Text(method['name']?.toString() ?? method['code']?.toString() ?? 'وسيلة دفع'),
-                )).toList(),
-                rxValue: controller.selectedPaymentMethodId,
-                onChanged: (id) => controller.selectedPaymentMethodId.value = id,
-                label: 'وسيلة الدفع',
-                hint: 'اختر وسيلة الدفع',
-              )),
-              CustomTextField(controller: amount, label: 'المبلغ بالوحدة الصغرى', keyboardType: TextInputType.number),
-              CustomTextField(controller: reference, label: 'مرجع التحويل', isRequired: false),
+              Obx(
+                () => CustomDropdown<int>(
+                  items: controller.paymentMethods
+                      .map(
+                        (method) => DropdownItem<int>(
+                          value: (method['payment_method_id'] as num).toInt(),
+                          child: Text(
+                            method['name']?.toString() ??
+                                method['code']?.toString() ??
+                                'وسيلة دفع',
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  rxValue: controller.selectedPaymentMethodId,
+                  onChanged: (id) =>
+                      controller.selectedPaymentMethodId.value = id,
+                  label: 'وسيلة الدفع',
+                  hint: 'اختر وسيلة الدفع',
+                ),
+              ),
+              CustomTextField(
+                controller: amount,
+                label: 'المبلغ بالوحدة الصغرى',
+                keyboardType: TextInputType.number,
+              ),
+              CustomTextField(
+                controller: reference,
+                label: 'مرجع التحويل',
+                isRequired: false,
+              ),
               const SizedBox(height: 8),
-              Obx(() => CustomFilePicker.single(
-                initialFile: controller.paymentProof.value,
-                onFileChanged: (file) => controller.paymentProof.value = file,
-                preset: FileTypePreset.custom,
-                allowedExtensions: const ['pdf', 'jpg', 'jpeg', 'png'],
-                maxFileSizeBytes: 5 * 1024 * 1024,
-                label: 'إثبات الدفع',
-                hint: 'PDF أو JPG أو PNG، بحد أقصى 5MB',
-                displayMode: FilePickerDisplayMode.button,
-              )),
+              Obx(
+                () => CustomFilePicker.single(
+                  initialFile: controller.paymentProof.value,
+                  onFileChanged: (file) => controller.paymentProof.value = file,
+                  preset: FileTypePreset.custom,
+                  allowedExtensions: const ['pdf', 'jpg', 'jpeg', 'png'],
+                  maxFileSizeBytes: 5 * 1024 * 1024,
+                  label: 'إثبات الدفع',
+                  hint: 'PDF أو JPG أو PNG، بحد أقصى 5MB',
+                  displayMode: FilePickerDisplayMode.button,
+                ),
+              ),
               const SizedBox(height: 8),
-              const Text('سيُسجل الطلب بانتظار مراجعة المنصة. لن يتفعل الاشتراك قبل اعتماد الدفع.'),
+              const Text(
+                'سيُسجل الطلب بانتظار مراجعة المنصة. لن يتفعل الاشتراك قبل اعتماد الدفع.',
+              ),
             ],
           ),
         ),
@@ -202,8 +292,11 @@ class BillingDialogs {
       );
       final amountMinor = int.tryParse(amount.text.trim());
       final methodId = controller.selectedPaymentMethodId.value;
-      if (accepted == true && amountMinor != null && amountMinor > 0 &&
-          amountMinor <= remaining && methodId != null) {
+      if (accepted == true &&
+          amountMinor != null &&
+          amountMinor > 0 &&
+          amountMinor <= remaining &&
+          methodId != null) {
         await controller.recordPayment(
           invoiceId,
           methodId,
@@ -229,7 +322,8 @@ class BillingDialogs {
       await CustomDialog.show(
         type: DialogType.error,
         title: 'تعذر تحميل تفاصيل الاشتراك',
-        message: controller.errorMessage.value ??
+        message:
+            controller.errorMessage.value ??
             'لم يتمكن الخادم من إرجاع تفاصيل الاشتراك.',
         confirmLabel: 'حسناً',
       );
@@ -272,20 +366,20 @@ class BillingDialogs {
                 policy['eligibility_mode'] ?? policyVersion['eligibility_mode'],
             'requires_manual_approval':
                 policy['requires_manual_approval'] ??
-                    policyVersion['requires_manual_approval'] ??
-                    false,
+                policyVersion['requires_manual_approval'] ??
+                false,
             'end_behavior':
                 policy['end_behavior'] ?? policyVersion['end_behavior'],
             'entitlement_mode':
                 policy['entitlement_mode'] ??
-                    policyVersion['entitlement_mode'] ??
-                    'FULL_PLAN',
-            'allowed_features': entitlementConfig['allowed_features'] ?? const <dynamic>[],
+                policyVersion['entitlement_mode'] ??
+                'FULL_PLAN',
+            'allowed_features':
+                entitlementConfig['allowed_features'] ?? const <dynamic>[],
             'awaiting_first_activation':
                 detail['status'] == 'INCOMPLETE' &&
-                    (policy['start_trigger'] ??
-                            policyVersion['start_trigger']) ==
-                        'FIRST_ACTIVATION',
+                (policy['start_trigger'] ?? policyVersion['start_trigger']) ==
+                    'FIRST_ACTIVATION',
             'adjustments': redemption?['adjustments'] ?? const <dynamic>[],
           };
     await CustomDialog.show(
@@ -293,49 +387,64 @@ class BillingDialogs {
       title: 'تفاصيل الاشتراك',
       confirmLabel: 'إغلاق',
       maxWidth: 600,
-      content: Obx(() => SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('الحالة: ${detail['status_label']?.toString() ?? detail['status']?.toString() ?? '—'}'),
-            Text('بداية الفترة: ${detail['current_period_start']?.toString() ?? '—'}'),
-            Text('نهاية الفترة: ${detail['current_period_end']?.toString() ?? '—'}'),
-            if (trial != null) ...[
-              const SizedBox(height: 8),
-              BillingTrialPolicySummary(trial: trial),
+      content: Obx(
+        () => SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'الحالة: ${detail['status_label']?.toString() ?? detail['status']?.toString() ?? '—'}',
+              ),
+              Text(
+                'بداية الفترة: ${detail['current_period_start']?.toString() ?? '—'}',
+              ),
+              Text(
+                'نهاية الفترة: ${detail['current_period_end']?.toString() ?? '—'}',
+              ),
+              if (trial != null) ...[
+                const SizedBox(height: 8),
+                BillingTrialPolicySummary(trial: trial),
+              ],
+              const SizedBox(height: 10),
+              Text('الاستخدام المسجل', style: AppTypography.titleSmall),
+              ...controller.usageRows.map(
+                (row) => Text(
+                  '${row['meter'] is Map<String, dynamic> ? row['meter']['name']?.toString() ?? 'عداد' : 'عداد'}: ${row['quantity']?.toString() ?? '0'}',
+                ),
+              ),
+              CustomCursorLoadMore(
+                hasMore: controller.usagePage.hasMore,
+                isLoading: controller.usagePage.isLoadingMore.value,
+                error: controller.usagePage.loadMoreError.value,
+                onPressed: controller.loadMoreUsage,
+                label: 'تحميل المزيد من سجلات الاستخدام',
+              ),
+              const SizedBox(height: 10),
+              Text('سجل الأحداث', style: AppTypography.titleSmall),
+              ...controller.eventRows.map(
+                (row) => Text(
+                  '${row['event_type']?.toString() ?? 'حدث'} — ${row['occurred_at']?.toString() ?? ''}',
+                ),
+              ),
+              CustomCursorLoadMore(
+                hasMore: controller.eventsPage.hasMore,
+                isLoading: controller.eventsPage.isLoadingMore.value,
+                error: controller.eventsPage.loadMoreError.value,
+                onPressed: controller.loadMoreEvents,
+                label: 'تحميل المزيد من الأحداث',
+              ),
             ],
-            const SizedBox(height: 10),
-            Text('الاستخدام المسجل', style: AppTypography.titleSmall),
-            ...controller.usageRows.map((row) => Text(
-              '${row['meter'] is Map<String, dynamic> ? row['meter']['name']?.toString() ?? 'عداد' : 'عداد'}: ${row['quantity']?.toString() ?? '0'}',
-            )),
-            CustomCursorLoadMore(
-              hasMore: controller.usagePage.hasMore,
-              isLoading: controller.usagePage.isLoadingMore.value,
-              error: controller.usagePage.loadMoreError.value,
-              onPressed: controller.loadMoreUsage,
-              label: 'تحميل المزيد من سجلات الاستخدام',
-            ),
-            const SizedBox(height: 10),
-            Text('سجل الأحداث', style: AppTypography.titleSmall),
-            ...controller.eventRows.map((row) => Text(
-              '${row['event_type']?.toString() ?? 'حدث'} — ${row['occurred_at']?.toString() ?? ''}',
-            )),
-            CustomCursorLoadMore(
-              hasMore: controller.eventsPage.hasMore,
-              isLoading: controller.eventsPage.isLoadingMore.value,
-              error: controller.eventsPage.loadMoreError.value,
-              onPressed: controller.loadMoreEvents,
-              label: 'تحميل المزيد من الأحداث',
-            ),
-          ],
+          ),
         ),
-      )),
+      ),
     );
   }
 
-  static Future<void> purchase(BillingController controller, int priceId) async {
+  static Future<void> purchase(
+    BillingController controller,
+    int priceId,
+  ) async {
     final eligibility = await controller.checkTrial(priceId);
     if (eligibility == null) return;
     final ready = eligibility['purchase_ready'] == true;
@@ -348,10 +457,11 @@ class BillingDialogs {
     final trialPolicy = rawPolicy is Map
         ? Map<String, dynamic>.from(rawPolicy)
         : null;
-    final blockers = (eligibility['purchase_blockers'] as List<dynamic>? ??
-            const <dynamic>[])
-        .map((item) => _purchaseBlockerLabel(item.toString()))
-        .join('، ');
+    final blockers =
+        (eligibility['purchase_blockers'] as List<dynamic>? ??
+                const <dynamic>[])
+            .map((item) => _purchaseBlockerLabel(item.toString()))
+            .join('، ');
     final accepted = await CustomDialog.show(
       type: ready ? DialogType.confirmation : DialogType.warning,
       title: 'تأكيد الاشتراك',
@@ -382,18 +492,21 @@ class BillingDialogs {
   }
 
   static String _trialReasonLabel(String code) => switch (code) {
-        'TRIAL_NOT_AVAILABLE' => 'لا توجد سياسة تجربة منشورة لهذا السعر',
-        'TRIAL_ALREADY_REDEEMED' => 'تم استخدام التجربة مسبقاً ضمن نطاق السياسة',
-        _ => code,
-      };
+    'TRIAL_NOT_AVAILABLE' => 'لا توجد سياسة تجربة منشورة لهذا السعر',
+    'TRIAL_ALREADY_REDEEMED' => 'تم استخدام التجربة مسبقاً ضمن نطاق السياسة',
+    _ => code,
+  };
 
   static String _purchaseBlockerLabel(String code) => switch (code) {
-        'DUNNING_POLICY_UNAVAILABLE' => 'سياسة التحصيل غير منشورة أو غير فعالة',
-        'NETWORK_SUBSCRIPTION_ALREADY_EXISTS' => 'توجد دورة اشتراك قائمة للشبكة',
-        _ => code,
-      };
+    'DUNNING_POLICY_UNAVAILABLE' => 'سياسة التحصيل غير منشورة أو غير فعالة',
+    'NETWORK_SUBSCRIPTION_ALREADY_EXISTS' => 'توجد دورة اشتراك قائمة للشبكة',
+    _ => code,
+  };
 
-  static Future<void> cancelSubscription(BillingController controller, int id) async {
+  static Future<void> cancelSubscription(
+    BillingController controller,
+    int id,
+  ) async {
     final accepted = await CustomDialog.show(
       type: DialogType.danger,
       title: 'إلغاء الاشتراك',

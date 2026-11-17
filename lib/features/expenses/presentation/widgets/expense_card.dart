@@ -123,4 +123,3 @@ class ExpenseCard extends StatelessWidget {
     );
   }
 }
-

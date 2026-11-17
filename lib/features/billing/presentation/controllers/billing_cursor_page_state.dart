@@ -60,8 +60,7 @@ class BillingCursorPageState {
   }) {
     if (revision != _revision) return;
     final next = _extractNextCursor(page);
-    if (next != null &&
-        (next == requestedCursor || !_seenCursors.add(next))) {
+    if (next != null && (next == requestedCursor || !_seenCursors.add(next))) {
       throw StateError('The billing API returned a repeated cursor.');
     }
     final known = items
@@ -80,9 +79,7 @@ class BillingCursorPageState {
 
   int get revision => _revision;
 
-  static List<Map<String, dynamic>> _extractRows(
-    Map<String, dynamic> page,
-  ) {
+  static List<Map<String, dynamic>> _extractRows(Map<String, dynamic> page) {
     dynamic raw = page['data'] ?? page['items'];
     if (raw is Map<String, dynamic>) {
       raw = raw['data'] ?? raw['items'];
@@ -94,14 +91,14 @@ class BillingCursorPageState {
         .toList(growable: false);
   }
 
-  List<Map<String, dynamic>> _deduplicate(
-    List<Map<String, dynamic>> rows,
-  ) {
+  List<Map<String, dynamic>> _deduplicate(List<Map<String, dynamic>> rows) {
     final seen = <String>{};
-    return rows.where((row) {
-      final identity = row[identityKey]?.toString();
-      return identity == null || seen.add(identity);
-    }).toList(growable: false);
+    return rows
+        .where((row) {
+          final identity = row[identityKey]?.toString();
+          return identity == null || seen.add(identity);
+        })
+        .toList(growable: false);
   }
 
   static String? _extractNextCursor(Map<String, dynamic> page) {
@@ -117,5 +114,4 @@ class BillingCursorPageState {
     if (next is! String || next.isEmpty) return null;
     return Uri.tryParse(next)?.queryParameters['cursor'];
   }
-
 }

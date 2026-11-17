@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/voucher_quantity_stepper.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// محرر ثانوي للكمية الدقيقة؛ يُفتح عند الحاجة ولا يزاحم بطاقة الباقة.
-class ProcurementQuantityEditorSheet extends GetView<PosProcurementController> {
-  const ProcurementQuantityEditorSheet({
-    super.key,
-    required this.package,
-  });
+class ProcurementQuantityEditorSheet extends GetView<PosNewProcurementOrderController> {
+  const ProcurementQuantityEditorSheet({super.key, required this.package});
 
   final PackageEntity package;
 
@@ -20,7 +17,7 @@ class ProcurementQuantityEditorSheet extends GetView<PosProcurementController> {
     required PackageEntity package,
     required int currentQuantity,
   }) async {
-    final controller = Get.find<PosProcurementController>();
+    final controller = Get.find<PosNewProcurementOrderController>();
     controller.preparePackageQuantityEdit(package, currentQuantity);
 
     await CustomBottomSheet.show<void>(
@@ -43,10 +40,7 @@ class ProcurementQuantityEditorSheet extends GetView<PosProcurementController> {
             Get.back<void>();
           },
         ),
-        CustomButton.text(
-          text: 'إلغاء',
-          onPressed: () => Get.back<void>(),
-        ),
+        CustomButton.text(text: 'إلغاء', onPressed: () => Get.back<void>()),
       ],
     );
   }

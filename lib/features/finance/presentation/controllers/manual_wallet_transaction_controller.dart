@@ -12,10 +12,7 @@ import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-enum ManualTransactionType {
-  deposit,
-  withdraw,
-}
+enum ManualTransactionType { deposit, withdraw }
 
 class ManualWalletTransactionController extends GetxController {
   ManualWalletTransactionController({
@@ -53,8 +50,7 @@ class ManualWalletTransactionController extends GetxController {
   double get currentBalance => _currentBalance;
   bool get isPosWallet => _isPosWallet;
 
-  bool get isDeposit =>
-      transactionType.value == ManualTransactionType.deposit;
+  bool get isDeposit => transactionType.value == ManualTransactionType.deposit;
 
   bool get isNegativeBalance =>
       !isDeposit && enteredAmount.value > _currentBalance;
@@ -134,8 +130,9 @@ class ManualWalletTransactionController extends GetxController {
   }
 
   void setTransactionTypeIndex(int index) {
-    transactionType.value =
-        index == 0 ? ManualTransactionType.deposit : ManualTransactionType.withdraw;
+    transactionType.value = index == 0
+        ? ManualTransactionType.deposit
+        : ManualTransactionType.withdraw;
   }
 
   void selectSuggestion(String suggestion) {
@@ -250,7 +247,8 @@ class ManualWalletTransactionController extends GetxController {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
-      final isTimeout = e.toString().toLowerCase().contains('timeout') ||
+      final isTimeout =
+          e.toString().toLowerCase().contains('timeout') ||
           e.toString().toLowerCase().contains('connection') ||
           e.toString().toLowerCase().contains('socket');
 
@@ -258,8 +256,7 @@ class ManualWalletTransactionController extends GetxController {
           ? 'انقطع الاتصال أثناء انتظار تأكيد القيد المالي. يرجى مراجعة كشف الحساب وسجل القيود للتأكد من إدراج العملية قبل إعادة المحاولة تجنباً للتكرار.'
           : AppException.sanitizeMessage(
               e,
-              fallback:
-                  'تعذر تسجيل القيد المالي بدفتر الأستاذ. يرجى المحاولة مجدداً.',
+              fallback: 'تعذر تسجيل القيد المالي بدفتر الأستاذ. يرجى المحاولة مجدداً.',
             );
 
       CustomSnackbar.show(
@@ -275,4 +272,3 @@ class ManualWalletTransactionController extends GetxController {
     }
   }
 }
-

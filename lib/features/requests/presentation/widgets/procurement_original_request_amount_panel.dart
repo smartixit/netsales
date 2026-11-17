@@ -24,9 +24,7 @@ class ProcurementOriginalRequestAmountPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(
-          color: colors.primary.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -50,10 +48,7 @@ class ProcurementOriginalRequestAmountPanel extends StatelessWidget {
               ),
             ],
           ),
-          CustomAmountToWordsBanner(
-            amount: amount,
-            currencyCode: 'YER',
-          ),
+          CustomAmountToWordsBanner(amount: amount, currencyCode: 'YER'),
         ],
       ),
     );

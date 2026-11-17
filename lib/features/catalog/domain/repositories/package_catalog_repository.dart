@@ -7,10 +7,12 @@ abstract class PackageCatalogRepository {
   /// استرجاع قائمة الباقات مع الفلترة والبحث وترقيم المؤشر
   Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
+    int? posId,
     bool? status,
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   });
 
   /// استرجاع باقات شبكة معينة مع ترقيم المؤشر
@@ -24,6 +26,12 @@ abstract class PackageCatalogRepository {
 
   /// استرجاع تفاصيل باقة محددة
   Future<PackageEntity> getPackageDetails(int packageId);
+
+  /// استرجاع جميع الخصومات المخصصة الفعالة لنقطة بيع وشبكة في طلب واحد.
+  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({
+    required int networkId,
+    required int posId,
+  });
 
   /// استرجاع الخصم الفعلي المعتمد لنقطة بيع على باقة معينة من الخادم
   Future<EffectivePackageDiscountEntity> getEffectiveDiscount({

@@ -57,7 +57,8 @@ class CustomAmountToWordsBanner extends StatelessWidget {
 
     return Container(
       margin: margin ?? EdgeInsets.only(top: AppSpacing.xs),
-      padding: padding ??
+      padding:
+          padding ??
           EdgeInsets.symmetric(
             horizontal: AppSpacing.sm,
             vertical: AppSpacing.xs,
@@ -74,16 +75,13 @@ class CustomAmountToWordsBanner extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(
-            Icons.format_quote_rounded,
-            size: 16.r,
-            color: colors.primary,
-          ),
+          Icon(Icons.format_quote_rounded, size: 16.r, color: colors.primary),
           SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
               words,
-              style: textStyle ??
+              style:
+                  textStyle ??
                   AppTypography.bodySmall.copyWith(
                     color: colors.primary,
                     fontWeight: FontWeight.w600,

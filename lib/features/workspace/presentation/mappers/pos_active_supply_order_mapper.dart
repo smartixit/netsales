@@ -25,8 +25,11 @@ class PosActiveSupplyOrderMapper {
           request.requestTotalAmount,
         ),
         isReviewActive: status == 'PENDING' || status == 'UNDER_REVIEW',
-        isReviewComplete: const {'APPROVED', 'PROCESSING', 'DELIVERED'}
-            .contains(status),
+        isReviewComplete: const {
+          'APPROVED',
+          'PROCESSING',
+          'DELIVERED',
+        }.contains(status),
         isDeliveryActive: status == 'PROCESSING',
         isDeliveryComplete: status == 'DELIVERED',
       );

@@ -23,7 +23,7 @@ class OperationalReportStudioFilters extends StatelessWidget {
   final TextEditingController Function(String filterId) textControllerFor;
   final RxnString Function(String filterId) choiceValueFor;
   final void Function(String filterId, ReportFilterValue? value)
-      onFilterChanged;
+  onFilterChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -44,26 +44,28 @@ class OperationalReportStudioFilters extends StatelessWidget {
       controls.add(
         OperationalReportValidationNotice(
           title: 'راجع معايير التقرير',
-          messages: issues.map((issue) {
-            final field = definition.filter(issue.fieldId);
-            final label = field == null
-                ? issue.fieldId
-                : resolveLabel(context, field.labelKey);
-            return switch (issue.code) {
-              'required_filter_missing' => 'الحقل «$label» مطلوب.',
-              'unknown_filter' =>
-                'المرشح «$label» غير موجود في تعريف التقرير الحالي.',
-              'filter_type_mismatch' =>
-                'نوع القيمة المحددة للحقل «$label» غير متوافق.',
-              'text_too_short' =>
-                'النص في الحقل «$label» أقصر من الحد المسموح.',
-              'text_too_long' =>
-                'النص في الحقل «$label» يتجاوز الحد المسموح.',
-              'choice_not_allowed' =>
-                'القيمة المختارة للحقل «$label» غير متاحة.',
-              _ => 'تعذر التحقق من الحقل «$label».',
-            };
-          }).toList(growable: false),
+          messages: issues
+              .map((issue) {
+                final field = definition.filter(issue.fieldId);
+                final label = field == null
+                    ? issue.fieldId
+                    : resolveLabel(context, field.labelKey);
+                return switch (issue.code) {
+                  'required_filter_missing' => 'الحقل «$label» مطلوب.',
+                  'unknown_filter' =>
+                    'المرشح «$label» غير موجود في تعريف التقرير الحالي.',
+                  'filter_type_mismatch' =>
+                    'نوع القيمة المحددة للحقل «$label» غير متوافق.',
+                  'text_too_short' =>
+                    'النص في الحقل «$label» أقصر من الحد المسموح.',
+                  'text_too_long' =>
+                    'النص في الحقل «$label» يتجاوز الحد المسموح.',
+                  'choice_not_allowed' =>
+                    'القيمة المختارة للحقل «$label» غير متاحة.',
+                  _ => 'تعذر التحقق من الحقل «$label».',
+                };
+              })
+              .toList(growable: false),
         ),
       );
     }

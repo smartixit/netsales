@@ -86,8 +86,8 @@ class DateFormatter {
   /// صباح الخير / طاب يومك / مساء الخير بحسب توقيت اليوم
   static String greeting([DateTime? time, DateLang lang = DateLang.ar]) =>
       lang == DateLang.en
-          ? GreetingFormatter.greetingEn(time)
-          : GreetingFormatter.greeting(time);
+      ? GreetingFormatter.greetingEn(time)
+      : GreetingFormatter.greeting(time);
 
   /// 02:30 م / 02:30 PM
   static String time(

@@ -34,19 +34,18 @@ class ProcurementQuoteLineEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        packageId,
-        packageName,
-        packageColor,
-        packageVoucherCount,
-        voucherCount,
-        unitPrice,
-        discountRate,
-        effectivePrice,
-        lineGrossTotal,
-        lineDiscountAmount,
-        lineNetTotal,
-        isCustomDiscount,
-        pricingToken,
-      ];
+    packageId,
+    packageName,
+    packageColor,
+    packageVoucherCount,
+    voucherCount,
+    unitPrice,
+    discountRate,
+    effectivePrice,
+    lineGrossTotal,
+    lineDiscountAmount,
+    lineNetTotal,
+    isCustomDiscount,
+    pricingToken,
+  ];
 }
-

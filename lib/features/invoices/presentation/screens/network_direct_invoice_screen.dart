@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -8,7 +9,6 @@ import 'package:netsales/features/invoices/presentation/controllers/network_dire
 import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_cart_section.dart';
 import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_section_widgets.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
@@ -41,7 +41,14 @@ class NetworkDirectInvoiceScreen
             controller.authorizedNetworks.isEmpty) {
           return Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),
-            child: const CustomSkeletonFeed(itemCount: 3, cardHeight: 90),
+            child: const CustomStateView.loading(
+              presentation: CustomStatePresentation.skeletonOnly,
+              skeleton: CustomStateSkeleton(
+                layout: CustomStateSkeletonLayout.list,
+                itemCount: 3,
+                cardHeight: 90,
+              ),
+            ),
           );
         }
 
@@ -121,7 +128,14 @@ class NetworkDirectInvoiceScreen
                 AppSpacing.vMd,
                 Obx(() {
                   if (controller.isLoadingPos.value) {
-                    return const LinearProgressIndicator();
+                    return const CustomStateView.loading(
+                      presentation: CustomStatePresentation.skeletonOnly,
+                      skeleton: CustomStateSkeleton(
+                        layout: CustomStateSkeletonLayout.text,
+                        lineCount: 2,
+                        showCardSurface: false,
+                      ),
+                    );
                   }
                   if (controller.linkedPos.isEmpty) {
                     return DirectInvoiceInlineNotice(
@@ -170,13 +184,19 @@ class NetworkDirectInvoiceScreen
                 AppSpacing.vLg,
                 const DirectInvoiceSectionHeading(
                   title: 'باقات الكروت والكميات',
-                  description:
-                      'أدخل عدد الكروت المطلوب لكل باقة، ثم أضفها إلى الفاتورة.',
+                  description: 'أدخل عدد الكروت المطلوب لكل باقة، ثم أضفها إلى الفاتورة.',
                 ),
                 AppSpacing.vSm,
                 Obx(() {
                   if (controller.isLoadingPackages.value) {
-                    return const LinearProgressIndicator();
+                    return const CustomStateView.loading(
+                      presentation: CustomStatePresentation.skeletonOnly,
+                      skeleton: CustomStateSkeleton(
+                        layout: CustomStateSkeletonLayout.text,
+                        lineCount: 2,
+                        showCardSurface: false,
+                      ),
+                    );
                   }
                   if (controller.availablePackages.isEmpty) {
                     return DirectInvoiceInlineNotice(
@@ -194,7 +214,9 @@ class NetworkDirectInvoiceScreen
                     searchEnabled: controller.availablePackages.length > 5,
                     items: controller.availablePackages
                         .map((package) {
-                          final pkgColor = CustomColorPicker.parseHex(package.packageColor);
+                          final pkgColor = CustomColorPicker.parseHex(
+                            package.packageColor,
+                          );
                           return DropdownItem<int>(
                             value: package.packageId,
                             child: Row(
@@ -267,8 +289,7 @@ class NetworkDirectInvoiceScreen
                 AppSpacing.vLg,
                 const DirectInvoiceSectionHeading(
                   title: 'طريقة البيع',
-                  description:
-                      'اختر نوع الفاتورة؛ يتم التحقق من الرصيد والسقف الائتماني لدى الخادم.',
+                  description: 'اختر نوع الفاتورة؛ يتم التحقق من الرصيد والسقف الائتماني لدى الخادم.',
                 ),
                 AppSpacing.vSm,
                 Obx(
@@ -319,4 +340,3 @@ class NetworkDirectInvoiceScreen
     );
   }
 }
-

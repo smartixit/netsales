@@ -44,8 +44,8 @@ class WorkspaceNetworkPickerTile extends StatelessWidget {
               color: isSelected
                   ? colors.primary
                   : (isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : colors.outlineVariant.withValues(alpha: 0.8)),
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : colors.outlineVariant.withValues(alpha: 0.8)),
               width: isSelected ? 1.5 : 1,
             ),
             boxShadow: [
@@ -78,20 +78,18 @@ class WorkspaceNetworkPickerTile extends StatelessWidget {
                     color: isDark ? const Color(0xFF0E1522) : colors.surface,
                   ),
                   alignment: Alignment.center,
-                  child:
-                      item.logoUrl != null &&
-                              item.logoUrl!.isNotEmpty
-                          ? CustomCachedImage.avatar(
-                              url: item.logoUrl,
-                              radius: 19.r,
-                            )
-                          : Text(
-                              initials,
-                              style: AppTypography.titleSmall.copyWith(
-                                color: colors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                  child: item.logoUrl != null && item.logoUrl!.isNotEmpty
+                      ? CustomCachedImage.avatar(
+                          url: item.logoUrl,
+                          radius: 19.r,
+                        )
+                      : Text(
+                          initials,
+                          style: AppTypography.titleSmall.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
               SizedBox(width: AppSpacing.md),
@@ -140,10 +138,7 @@ class WorkspaceNetworkPickerTile extends StatelessWidget {
               // شارة التحديد
               if (isSelected)
                 Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8.w,
-                    vertical: 3.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                   decoration: BoxDecoration(
                     color: colors.primary,
                     borderRadius: BorderRadius.circular(AppRadius.full),

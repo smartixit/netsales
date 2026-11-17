@@ -23,7 +23,7 @@ This document provides direct mapping from Flutter feature domains to their cano
 ## 2. Invariant Rules for Flutter Engineers
 1. **Never calculate financial balances on client:** Rely 100% on Laravel API responses.
 2. **Reuse existing infrastructure (Mandatory):**
-   - Use `lib/widgets/` for all UI components (`CustomDialog`, `CustomBottomSheet`, `CustomButton`, `CustomTextField`, `CustomSnackbar`, `CustomToast`, `CustomEmptyState`, `CustomLoadingState`, `CustomErrorState`, skeletons, pickers). Never invent fake names or redundant dialogs.
+   - Use `lib/widgets/` for all UI components (`CustomDialog`, `CustomBottomSheet`, `CustomButton`, `CustomTextField`, `CustomSnackbar`, `CustomToast`, `CustomStateView`, specialized state components under `widgets/feedback/states/`, skeleton recipes under `widgets/feedback/skeletons/`, pickers). Never invent fake names or redundant dialogs.
    - Use `lib/core/utils/` for formatters (`DateFormatter`, `AmountFormatter`, `TextFormatter`, `FileSizeFormatter`, `FormValidators`, `IdempotencyHelper`).
    - Use `lib/core/services/` for system services (`ApiService`, `WorkspaceService`, `SessionService`, `ThemeService`, `StorageService`, etc.).
    - Use `lib/core/themes/` and `lib/core/constants/` for tokens (`AppColors`, `AppTypography`, `AppRadius`, `AppSpacing`, `AppElevation`, `AppGradients`, `AppMotion`, `AppThemes`).
@@ -83,3 +83,25 @@ The canonical Laravel collection endpoints validate `search`, `status`, `per_pag
 Each Flutter collection owns an independent filter and cursor state. A change in one collection must not reset another collection's criteria or pages. Switching Billing account or Network clears all prior-scope criteria. First-page and load-more responses must be discarded when account, network, or page revision changes.
 
 Financial resources expose decimal money values (`total`, `remaining`, `amount`) and nested `currency.code` / `currency.decimal_places`. Render those authoritative values with shared currency widgets; do not display `*_minor` values as decimal currency amounts.
+
+
+## 4. Canonical Shared Feedback & State UI
+
+`lib/widgets/feedback/custom_state_view.dart` is the single visual source for all application-level data states:
+- **Loading** — `CustomStateView.loading`
+- **Empty** — `CustomStateView.empty`
+- **Error** — `CustomStateView.error`
+- **Offline** — `CustomStateView.offline`
+- **Pricing expired** — `CustomStateView.pricingExpired`\n- **Not found** — `CustomStateView.notFound` (a missing resource is not an empty query result)
+
+Choose `CustomStatePresentation.fullscreen`, `boxed`, `compact`, or `banner` according to the actual available space and user workflow. `CustomEmptyState`, `CustomErrorState`, and `CustomNotFoundState` are canonical semantic components under `states/`; they delegate shared presentation to `CustomStateView`. There are no compatibility facades for loading/empty/error states. `CustomOfflineState` handles full-content offline failures; `CustomOfflineBanner` remains a distinct inline warning that preserves already-loaded content.
+
+All shared loading placeholders use the adaptive skeleton engine exposed by `CustomStateView.loading`, the pure `CustomStateSkeleton` recipe model, `CustomStateSkeletonView` renderer, and named `SkeletonRecipes` in `widgets/feedback/skeletons/. It supports responsive `list`, `cards`, `grid`, and `detail` layouts, configurable item count, minimum grid item width, maximum columns, card height, spacing, leading/trailing placeholders, and custom widget builders. `CustomSkeletonFeed`, `CustomSkeletonGrid`, and `CustomSkeletonListTile` are removed and must not be reintroduced. The low-level `CustomSkeletonShimmer` remains an animation primitive only. During cursor pagination, the skeleton is appended to existing content and never replaces loaded records. Expired authoritative pricing must clearly block submission and provide a refresh action when supported by the relevant use case.
+
+## POS procurement pricing snapshots — DEC-PROC-01
+
+The POS procurement package catalogue request must include the active `pos_id` when loading packages for a selected Network. Laravel returns a signed `procurement_pricing` snapshot per package, including integer minor-unit base price, cash/credit discount basis points, signed token, and 30-minute expiry.
+
+The POS procurement UI may use these snapshot inputs for a non-binding display-only line estimate and cart summary. Recalculate locally on quantity/payment-type changes; do not call a quote endpoint to refresh totals before new-request submission. Submit package IDs, quantities, and each item's `pricing_snapshot_token` only. Laravel validates each token against current tariff/discount state and computes the final request totals. This exception is limited to the new POS procurement workspace and does not weaken server financial authority in any other domain.
+
+When a cart snapshot expires, refreshing the tariff must request the cart's package IDs through the same network/POS-scoped catalogue endpoint (`package_ids[]`, maximum 50 per request), replace each cart line's package snapshot only after every requested active package is returned with a current signed token, and preserve the selected voucher quantities. A partial/failed refresh must leave the existing cart untouched and the expired-pricing state visible.

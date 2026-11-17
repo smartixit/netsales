@@ -66,8 +66,7 @@ class BillingFinancialSection extends StatelessWidget {
         ? Map<String, dynamic>.from(rawCurrency)
         : const <String, dynamic>{};
     final currencyCode = currency['code']?.toString();
-    final decimalPlaces =
-        (currency['decimal_places'] as num?)?.toInt() ?? 2;
+    final decimalPlaces = (currency['decimal_places'] as num?)?.toInt() ?? 2;
 
     return CustomSurfaceCard(
       margin: const EdgeInsets.all(4),

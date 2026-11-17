@@ -80,62 +80,60 @@ class OperationalReportStudioWorkspace extends StatelessWidget {
         resolveLabel: _resolveLabel,
         onCriteriaChanged: controller.updateCriteria,
         onPresentationChanged: controller.updatePresentation,
-        filterSectionBuilder: (
-          context, {
-          required definition,
-          required criteria,
-          required resolveLabel,
-          required onChanged,
-        }) =>
-            OperationalReportStudioFilters(
+        filterSectionBuilder:
+            (
+              context, {
+              required definition,
+              required criteria,
+              required resolveLabel,
+              required onChanged,
+            }) => OperationalReportStudioFilters(
               definition: definition,
               criteria: criteria,
               resolveLabel: resolveLabel,
-              textControllerFor: (filterId) => controller.textControllerFor(
-                definition.filter(filterId)!,
-              ),
+              textControllerFor: (filterId) =>
+                  controller.textControllerFor(definition.filter(filterId)!),
               choiceValueFor: controller.choiceValueFor,
               onFilterChanged: controller.setFilterValue,
             ),
-        presentationSectionBuilder: (
-          context, {
-          required definition,
-          required presentation,
-          required resolveLabel,
-          required onChanged,
-        }) =>
-            OperationalReportStudioPresentation(
+        presentationSectionBuilder:
+            (
+              context, {
+              required definition,
+              required presentation,
+              required resolveLabel,
+              required onChanged,
+            }) => OperationalReportStudioPresentation(
               definition: definition,
               presentation: presentation,
               resolveLabel: resolveLabel,
               onChanged: controller.updatePresentation,
             ),
-        onSavePreset: () => OperationalReportPresetDialog.show(
-          onSave: controller.savePreset,
-        ),
+        onSavePreset: () =>
+            OperationalReportPresetDialog.show(onSave: controller.savePreset),
         onPreview: controller.summary.value == null
             ? null
             : controller.exportDetailedPdf,
-        actionBuilder: (
-          context, {
-          required label,
-          required icon,
-          required onPressed,
-          required secondary,
-        }) =>
-            secondary
-                ? CustomButton.outline(
-                    text: label,
-                    prefix: icon,
-                    onPressed: onPressed,
-                  )
-                : CustomButton.primary(
-                    text: label,
-                    prefix: icon,
-                    onPressed: onPressed,
-                  ),
-        isBusy: controller.isLoading.value ||
-            controller.isPdfActionRunning.value,
+        actionBuilder:
+            (
+              context, {
+              required label,
+              required icon,
+              required onPressed,
+              required secondary,
+            }) => secondary
+            ? CustomButton.outline(
+                text: label,
+                prefix: icon,
+                onPressed: onPressed,
+              )
+            : CustomButton.primary(
+                text: label,
+                prefix: icon,
+                onPressed: onPressed,
+              ),
+        isBusy:
+            controller.isLoading.value || controller.isPdfActionRunning.value,
       ),
     );
   }

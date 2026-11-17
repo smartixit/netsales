@@ -14,13 +14,16 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
   @override
   Future<PaginatedList<PackageEntity>> getPackages({
     int? networkId,
+    int? posId,
     bool? status,
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async {
     final query = <String, dynamic>{};
     if (networkId != null) query['network_id'] = networkId;
+    if (posId != null) query['pos_id'] = posId;
     if (status != null) query['status'] = status ? '1' : '0';
     if (search != null && search.trim().isNotEmpty) {
       query['search'] = search.trim();
@@ -29,6 +32,9 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
       query['cursor'] = cursor;
     }
     if (perPage != null) query['per_page'] = perPage;
+    if (packageIds != null && packageIds.isNotEmpty) {
+      query['package_ids[]'] = packageIds;
+    }
 
     final response = await _remoteDataSource.getPackages(
       query: query.isEmpty ? null : query,
@@ -85,6 +91,27 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
 
     if (response.success && response.data != null) {
       return response.data!;
+    }
+
+    throw AppException(response.message);
+  }
+
+  @override
+  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({
+    required int networkId,
+    required int posId,
+  }) async {
+    final response = await _remoteDataSource.getEffectiveDiscountsForPos(
+      networkId: networkId,
+      posId: posId,
+    );
+
+    if (response.success && response.data != null) {
+      return response.data!
+          .where(
+            (discount) => discount.packageId != null && discount.isEffectiveNow,
+          )
+          .toList(growable: false);
     }
 
     throw AppException(response.message);

@@ -8,23 +8,25 @@ class PosNetworkPackageMapper {
   static List<PosNetworkPackageViewModel> map(
     Iterable<PackageEntity> packages,
   ) {
-    return List.unmodifiable(packages.map((package) {
-      final discount = package.packageDefaultCashDiscount > 0
-          ? '${package.packageDefaultCashDiscount.toStringAsFixed(0)}%'
-          : '';
-      final specifications = [
-        if (package.uptimeDisplay.isNotEmpty) package.uptimeDisplay,
-        if (package.validityDisplay.isNotEmpty) package.validityDisplay,
-      ].join(' • ');
+    return List.unmodifiable(
+      packages.map((package) {
+        final discount = package.packageDefaultCashDiscount > 0
+            ? '${package.packageDefaultCashDiscount.toStringAsFixed(0)}%'
+            : '';
+        final specifications = [
+          if (package.uptimeDisplay.isNotEmpty) package.uptimeDisplay,
+          if (package.validityDisplay.isNotEmpty) package.validityDisplay,
+        ].join(' • ');
 
-      return PosNetworkPackageViewModel(
-        packageId: package.packageId,
-        name: package.packageName,
-        discountLabel: discount,
-        specifications: specifications,
-        supplyPrice: AmountFormatter.formatValue(package.effectiveCashPrice),
-        retailPrice: AmountFormatter.formatValue(package.packageVoucherPrice),
-      );
-    }));
+        return PosNetworkPackageViewModel(
+          packageId: package.packageId,
+          name: package.packageName,
+          discountLabel: discount,
+          specifications: specifications,
+          supplyPrice: AmountFormatter.formatValue(package.effectiveCashPrice),
+          retailPrice: AmountFormatter.formatValue(package.packageVoucherPrice),
+        );
+      }),
+    );
   }
 }

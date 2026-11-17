@@ -7,11 +7,7 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 
 class ExpenseItemRow extends StatelessWidget {
-  const ExpenseItemRow({
-    super.key,
-    required this.item,
-    required this.index,
-  });
+  const ExpenseItemRow({super.key, required this.item, required this.index});
 
   final ExpenseItemEntity item;
   final int index;
@@ -29,9 +25,7 @@ class ExpenseItemRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: .4),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: .4)),
       ),
       child: Row(
         children: [
@@ -74,4 +68,3 @@ class ExpenseItemRow extends StatelessWidget {
     );
   }
 }
-

@@ -41,7 +41,7 @@ Before writing any UI widgets:
 ## 6. Arabic, RTL & Complete Interface State Quality
 - **First-Class RTL:** Verify correct reading order, logical alignment, appropriate icon orientation, and zero label clipping or awkward wraps.
 - **Explicit State Handling:** Every data view must implement contextual:
-  - **Loading:** Tailored skeleton shimmers (`CustomSkeletonFeed`, `CustomSkeletonGrid`, etc.).
+  - **Loading:** Responsive content-shaped skeletons configured through `CustomStateView.loading`, `CustomStateSkeleton`, and `SkeletonRecipes`; no separate feed/grid widgets.
   - **Empty:** Feature-specific contextual message explaining what is missing and offering a clear next action.
   - **Error:** Actionable error state with user retry.
   - **Success:** Polished, responsive data presentation.
@@ -54,3 +54,18 @@ A UI feature is **incomplete** and rejected if it exhibits:
 - Broken responsive layout or awkward stretching.
 - Poor information hierarchy or unverified visual rendering.
 - Visual verification must cover actual affected screens across representative phone/tablet sizes and Light/Dark themes. Never claim visual verification without real rendered evidence.
+
+
+## 6.1 Canonical Shared State System (MANDATORY)
+- `lib/widgets/feedback/custom_state_view.dart` is the single canonical visual system for:
+  - `CustomStateKind.loading`
+  - `CustomStateKind.empty`
+  - `CustomStateKind.error`
+  - `CustomStateKind.offline`
+  - `CustomStateKind.pricingExpired`
+- Every new or refactored data state MUST use `CustomStateView` (or its named constructors) for a consistent visual language, hierarchy, spacing, iconography, and actions.
+- Specialized `CustomEmptyState`, `CustomErrorState`, and `CustomNotFoundState` are semantic components under `lib/widgets/feedback/states/`; they delegate shared presentation to `CustomStateView` and are not compatibility wrappers. `CustomStateView.notFound` must remain distinct from an empty result.
+- `CustomOfflineState` is the full-content offline component; `CustomOfflineBanner` is an inline warning that must preserve already-loaded content.
+- Expired/invalid server pricing must use `CustomStateView.pricingExpired` and offer an explicit refresh action where refresh is available.
+- Loading skeleton primitives remain valid for content-shaped initial loading and incremental pagination. They are not alternative full-page state designs. Keep load-more skeletons appended to existing data.
+- Do not create feature-local duplicate state cards. Add a new presentation option or behavior to `CustomStateView` when a genuinely shared need exists.

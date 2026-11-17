@@ -94,7 +94,8 @@ class CommercialDirectoryController extends GetxController {
     if (governorates.isNotEmpty) return;
     try {
       isLoadingGovernorates.value = true;
-      final useCase = getGovernoratesUseCase ??
+      final useCase =
+          getGovernoratesUseCase ??
           (Get.isRegistered<GetGovernoratesUseCase>()
               ? Get.find<GetGovernoratesUseCase>()
               : null);
@@ -111,7 +112,8 @@ class CommercialDirectoryController extends GetxController {
   /// جلب مديريات محافظة معينة
   Future<List<DirectorateEntity>> loadDirectorates(int governorateId) async {
     try {
-      final useCase = getDirectoratesUseCase ??
+      final useCase =
+          getDirectoratesUseCase ??
           (Get.isRegistered<GetDirectoratesUseCase>()
               ? Get.find<GetDirectoratesUseCase>()
               : null);
@@ -269,8 +271,12 @@ class CommercialDirectoryController extends GetxController {
       if (targetNetworkId <= 0) {
         final networks = await getMyNetworksUseCase();
         if (networks.isNotEmpty) {
-          final networkIds = networks.map((n) => n.networkId).toList(growable: false);
-          targetNetworkId = WorkspaceService.to.resolveActiveNetworkId(networkIds) ?? networks.first.networkId;
+          final networkIds = networks
+              .map((n) => n.networkId)
+              .toList(growable: false);
+          targetNetworkId =
+              WorkspaceService.to.resolveActiveNetworkId(networkIds) ??
+              networks.first.networkId;
           activeNetworkId.value = targetNetworkId;
           await WorkspaceService.to.saveActiveNetworkId(targetNetworkId);
         }
@@ -987,10 +993,7 @@ class CommercialDirectoryController extends GetxController {
     if (netId <= 0) return;
     final network = await fetchNetworkDetails(netId);
     if (network != null) {
-      await NetworkDetailsBottomSheet.show(
-        network: network,
-        canEdit: true,
-      );
+      await NetworkDetailsBottomSheet.show(network: network, canEdit: true);
     }
   }
 
