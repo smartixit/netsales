@@ -165,4 +165,19 @@ void main() {
     expect(find.byKey(const ValueKey('screen-specific-skeleton')), findsOneWidget);
   });
 
+  testWidgets('renders not-found separately from empty results', (tester) async {
+    configureViewport(tester);
+    await tester.pumpWidget(
+      buildTestable(
+        const CustomStateView.notFound(
+          presentation: CustomStatePresentation.compact,
+        ),
+      ),
+    );
+
+    expect(find.text('المورد المطلوب غير موجود'), findsOneWidget);
+    expect(find.text('غير موجود'), findsOneWidget);
+    expect(find.byIcon(Icons.search_off_rounded), findsOneWidget);
+  });
+
 }
