@@ -19,6 +19,7 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async {
     final query = <String, dynamic>{};
     if (networkId != null) query['network_id'] = networkId;
@@ -31,6 +32,9 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
       query['cursor'] = cursor;
     }
     if (perPage != null) query['per_page'] = perPage;
+    if (packageIds != null && packageIds.isNotEmpty) {
+      query['package_ids[]'] = packageIds;
+    }
 
     final response = await _remoteDataSource.getPackages(
       query: query.isEmpty ? null : query,
