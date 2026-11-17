@@ -359,7 +359,7 @@ class PosNewProcurementOrderController extends GetxController {
   }
 
   /// جلب وتحديد نقطة البيع النشطة التابعة للمستخدم الحالي
-  Future<void> loadMyPos({int? preferredPosId}) async {
+  Future<void> loadMyPos({int? preferredPosId, int? preferredNetworkId}) async {
     if (getMyPosUseCase == null) return;
 
     isLoadingMyPos.value = true;
@@ -382,7 +382,10 @@ class PosNewProcurementOrderController extends GetxController {
 
     if (resolvedId != null) {
       selectedPosId.value = resolvedId;
-      await loadLinkedNetworks(resolvedId);
+      await loadLinkedNetworks(
+        resolvedId,
+        preferredNetworkId: preferredNetworkId,
+      );
     } else {
       selectedPosId.value = null;
       _setSelectedNetworkId(null);
@@ -416,7 +419,10 @@ class PosNewProcurementOrderController extends GetxController {
   }
 
   /// جلب قائمة الشبكات الموردة المرتبطة بنقطة البيع المحددة
-  Future<void> loadLinkedNetworks(int posId) async {
+  Future<void> loadLinkedNetworks(
+    int posId, {
+    int? preferredNetworkId,
+  }) async {
     if (getPosNetworksListUseCase == null) return;
 
     _setSelectedNetworkId(null);
@@ -433,10 +439,16 @@ class PosNewProcurementOrderController extends GetxController {
       }
 
       linkedNetworks.assignAll(paginated.items);
-      if (linkedNetworks.length == 1) {
-        final networkId = linkedNetworks.first.networkId;
-        _setSelectedNetworkId(networkId);
-        await loadNetworkPackages(networkId);
+      final preferredLink = preferredNetworkId == null
+          ? null
+          : linkedNetworks.firstWhereOrNull(
+              (link) => link.networkId == preferredNetworkId,
+            );
+      final selectedLink = preferredLink ??
+          (linkedNetworks.length == 1 ? linkedNetworks.first : null);
+      if (selectedLink != null) {
+        _setSelectedNetworkId(selectedLink.networkId);
+        await loadNetworkPackages(selectedLink.networkId);
       }
     } catch (_) {
       if (selectedPosId.value != null && selectedPosId.value != posId) {
@@ -1001,10 +1013,10 @@ class PosNewProcurementOrderController extends GetxController {
     editingRequestId.value = request.requestId;
     selectedSaleType.value = request.saleType;
     notesController.text = request.requestNote ?? '';
-    await loadMyPos(preferredPosId: request.posId);
-
-    selectedNetworkId.value = request.networkId;
-    await loadNetworkPackages(request.networkId);
+    await loadMyPos(
+      preferredPosId: request.posId,
+      preferredNetworkId: request.networkId,
+    );
 
     for (final item in request.items) {
       final pkg =
