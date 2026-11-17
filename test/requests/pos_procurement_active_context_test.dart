@@ -216,7 +216,7 @@ void main() {
     network: network2,
   );
 
-  const package1 = PackageEntity(
+  final package1 = PackageEntity(
     packageId: 50,
     networkId: 10,
     packageName: 'باقة الفجر 100 كرت',
@@ -230,9 +230,14 @@ void main() {
     effectiveCashPrice: 1000.0,
     effectiveCreditPrice: 1000.0,
     status: true,
+    procurementBaseUnitPriceMinor: 100000,
+    procurementCashDiscountBasisPoints: 0,
+    procurementCreditDiscountBasisPoints: 0,
+    procurementPricingSnapshotToken: 'signed_snapshot_for_package_50',
+    procurementPricingSnapshotExpiresAt: DateTime(2099),
   );
 
-  const package2 = PackageEntity(
+  final package2 = PackageEntity(
     packageId: 60,
     networkId: 20,
     packageName: 'باقة البحر 200 كرت',
@@ -246,6 +251,11 @@ void main() {
     effectiveCashPrice: 2000.0,
     effectiveCreditPrice: 2000.0,
     status: true,
+    procurementBaseUnitPriceMinor: 200000,
+    procurementCashDiscountBasisPoints: 0,
+    procurementCreditDiscountBasisPoints: 0,
+    procurementPricingSnapshotToken: 'signed_snapshot_for_package_60',
+    procurementPricingSnapshotExpiresAt: DateTime(2099),
   );
 
   late MockRequestRepo mockRequestRepo;

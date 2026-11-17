@@ -813,6 +813,7 @@ class PosProcurementController extends GetxController {
                 'package_id': line.package.packageId,
                 'voucher_count': line.voucherCount,
                 'pricing_snapshot_token': line.package.procurementPricingSnapshotToken,
+                'pricing_snapshot_token': line.package.procurementPricingSnapshotToken,
               },
             )
             .toList(growable: false),
@@ -1269,12 +1270,10 @@ class PosProcurementController extends GetxController {
     );
 
     try {
-      final token = serverQuote.value?.pricingToken;
       final payload = <String, dynamic>{
         'network_id': selectedNetworkId.value!,
         'pos_id': selectedPosId.value!,
         'sale_type': selectedSaleType.value.wireValue,
-        if (token != null && token.isNotEmpty) 'pricing_token': token,
         if (notesController.text.trim().isNotEmpty)
           'request_note': notesController.text.trim(),
         'items': procurementCart
@@ -1308,7 +1307,7 @@ class PosProcurementController extends GetxController {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
-      if (e.message.contains('تعرفة') || e.message.contains('pricing') || e.message.contains('سعر')) {
+      if (e.message.contains('تعرفة') || e.message.contains('pricing') || e.message.contains('سعر') || e.message.contains('أسعار')) {
         packageErrorMessage.value = e.message;
       }
       CustomSnackbar.show(
