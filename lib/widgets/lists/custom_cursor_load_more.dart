@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 
 /// Shared cursor-pagination tail: inline skeleton, retry state, or load action.
