@@ -173,8 +173,6 @@ class PosProcurementController extends GetxController {
 
   /// يمنع إرسال الطلب بعرض سعر قديم أثناء تقارب نقرات الكمية.
   final isQuotePending = false.obs;
-  final _cartQuoteChanges = 0.obs;
-  Worker? _cartQuoteWorker;
 
   /// هل يملك الطلب عرض سعر حديثاً يطابق سياق الإرسال الحالي؟
   bool get hasCurrentServerQuote {
@@ -195,8 +193,7 @@ class PosProcurementController extends GetxController {
     return expiresAt == null || DateTime.now().isBefore(expiresAt);
   }
 
-  bool get canSubmitOrder =>
-      hasCartItems && !isSubmitting.value && hasCurrentServerQuote;
+  bool get canSubmitOrder => hasCartItems && !isSubmitting.value;
 
   void _setSelectedNetworkId(int? value) {
     selectedNetworkId.value = value;
