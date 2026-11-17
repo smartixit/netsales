@@ -48,8 +48,7 @@ class ProcurementContextSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final motionDisabled = AppMotion.disabled(context);
-    final duration = motionDisabled
+    final duration = AppMotion.disabled(context)
         ? Duration.zero
         : const Duration(milliseconds: 260);
 
