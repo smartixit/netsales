@@ -183,7 +183,7 @@ final testLink = NetworkPosLinkEntity(
   pos: testPos,
 );
 
-const testPackage = PackageEntity(
+final testPackage = PackageEntity(
   packageId: 101,
   networkId: 10,
   packageName: 'باقة الفخامة',
@@ -351,7 +351,7 @@ void main() {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(package: testPackage, sheets: 1, voucherCount: 101),
+        ProcurementCartLineEntity(package: testPackage, sheets: 1, voucherCount: 101),
       );
 
       expect(controller.estimatedLineTotalMinor(testPackage, 101), 909000);
@@ -376,7 +376,7 @@ void main() {
       controller.selectedPosId.value = 20;
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -417,7 +417,7 @@ void main() {
       controller.myPosList.assignAll([testPos]);
       controller.linkedNetworks.assignAll([testLink]);
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -443,7 +443,7 @@ void main() {
       controller.linkedNetworks.assignAll([testLink]);
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -478,7 +478,7 @@ void main() {
       controller.myPosList.assignAll([testPos]);
       controller.linkedNetworks.assignAll([testLink]);
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -514,7 +514,7 @@ void main() {
       controller.linkedNetworks.assignAll([testLink]);
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -577,7 +577,7 @@ void main() {
       controller.isLoadingQuote.value = false;
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 5,
           voucherCount: 500,
@@ -622,7 +622,7 @@ void main() {
       controller.quoteError.value = null;
       controller.isLoadingQuote.value = false;
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -664,7 +664,7 @@ void main() {
       controller.quoteError.value = null;
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
@@ -692,7 +692,7 @@ void main() {
       controller.isLoadingQuote.value = false;
 
       controller.procurementCart.add(
-        const ProcurementCartLineEntity(
+        ProcurementCartLineEntity(
           package: testPackage,
           sheets: 1,
           voucherCount: 100,
