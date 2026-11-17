@@ -68,7 +68,7 @@ import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_sh
 import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_screen.dart';
 import 'package:netsales/widgets/data_grid/showcase/data_grid_showcase_binding.dart';
 import 'package:netsales/widgets/data_grid/showcase/data_grid_showcase_screen.dart';
-import 'package:netsales/widgets/feedback/custom_not_found.dart';
+import 'package:netsales/widgets/feedback/states/custom_not_found_state.dart';
 import 'package:netsales/widgets/feedback/custom_unauthorized.dart';
 
 /// ============================================================================
@@ -88,7 +88,7 @@ abstract final class AppPages {
     ),
 
     // Not Found
-    GetPage(name: AppRoutes.notFound, page: () => const CustomNotFound()),
+    GetPage(name: AppRoutes.notFound, page: () => const CustomNotFoundState()),
 
     // Unauthorized Access Rejection (Deep Link Defense)
     GetPage(
