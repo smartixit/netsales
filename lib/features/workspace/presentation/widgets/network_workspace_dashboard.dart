@@ -11,8 +11,8 @@ import 'package:netsales/features/workspace/presentation/widgets/executive_sales
 import 'package:netsales/features/workspace/presentation/widgets/executive_welcome_hero_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/network_live_pending_orders_stream.dart';
 import 'package:netsales/features/workspace/presentation/widgets/network_provider_carousel_section.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 
