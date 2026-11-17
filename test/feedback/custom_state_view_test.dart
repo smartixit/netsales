@@ -107,4 +107,62 @@ void main() {
     await tester.pump();
     expect(retried, isTrue);
   });
+  testWidgets('builds adaptive list skeleton with requested item count', (tester) async {
+    configureViewport(tester);
+    await tester.pumpWidget(
+      buildTestable(
+        const CustomStateView.loading(
+          presentation: CustomStatePresentation.skeletonOnly,
+          skeleton: CustomStateSkeleton(
+            layout: CustomStateSkeletonLayout.list,
+            itemCount: 4,
+            cardHeight: 88,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(FractionallySizedBox), findsNWidgets(8));
+  });
+
+  testWidgets('adapts grid skeleton to available width', (tester) async {
+    configureViewport(tester);
+    await tester.pumpWidget(
+      buildTestable(
+        const SizedBox(
+          width: 720,
+          child: CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.grid,
+              itemCount: 6,
+              maxColumns: 3,
+              minItemWidth: 180,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Wrap), findsOneWidget);
+    expect(find.byType(FractionallySizedBox), findsNWidgets(12));
+  });
+
+  testWidgets('supports a screen-shaped custom skeleton builder', (tester) async {
+    configureViewport(tester);
+    await tester.pumpWidget(
+      buildTestable(
+        CustomStateView.loading(
+          presentation: CustomStatePresentation.skeletonOnly,
+          skeletonBuilder: (_) => const SizedBox(
+            key: ValueKey('screen-specific-skeleton'),
+            height: 240,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const ValueKey('screen-specific-skeleton')), findsOneWidget);
+  });
+
 }
