@@ -9,6 +9,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 
 /// ملخص الطلب وإرساله؛ يبقى ثابتاً ويعرض صفوف الإجمالي والخصم والصافي.
 class ProcurementCheckoutBar extends GetView<PosProcurementController> {
@@ -23,6 +24,8 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
       final count = lines.fold<int>(0, (sum, line) => sum + line.voucherCount);
       final currency = quote?.currency ?? 'ر.ي';
       final quoteReady = controller.hasCurrentServerQuote && quote != null;
+      final quoteExpired = quote?.expiresAt != null &&
+          !DateTime.now().isBefore(quote!.expiresAt!);
       final isCompact = MediaQuery.sizeOf(context).width <= AppBreakpoints.mobileMax;
       final summaryRows = <Widget>[
         _SummaryRow(label: 'الإجمالي قبل الخصم', value: quoteReady ? AmountFormatter.formatValue(quote.grossTotal) : '—', currency: currency),
@@ -44,6 +47,13 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
             final metrics = Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (quoteExpired && !controller.isQuotePending.value) ...[
+                  CustomStateView.pricingExpired(
+                    presentation: CustomStatePresentation.compact,
+                    onAction: controller.fetchServerQuote,
+                  ),
+                  AppSpacing.vXs,
+                ],
                 ...summaryRows,
                 AppSpacing.vXs,
                 Row(children: [
