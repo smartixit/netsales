@@ -9,7 +9,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/workspace_entity_picker_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_network_picker_tile.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_pos_picker_tile.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
