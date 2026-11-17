@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -35,9 +36,9 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
           padding: EdgeInsets.fromLTRB(AppSpacing.cardPadding, AppSpacing.sm, AppSpacing.cardPadding, AppSpacing.sm),
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
             border: Border(top: BorderSide(color: colors.outlineVariant.withValues(alpha: .4))),
-            boxShadow: [BoxShadow(color: colors.shadow.withValues(alpha: .10), blurRadius: 22, offset: const Offset(0, -7))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .10), blurRadius: 22, offset: const Offset(0, -7))],
           ),
           child: LayoutBuilder(builder: (context, constraints) {
             final metrics = Column(
@@ -92,7 +93,7 @@ class _SummaryRow extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: AppSpacing.xxs),
       child: Row(children: [
         Expanded(child: Text(label, style: (isEmphasized ? AppTypography.labelLarge : AppTypography.labelSmall).copyWith(color: isEmphasized ? colors.onSurface : colors.onSurfaceVariant, fontWeight: isEmphasized ? FontWeight.w900 : FontWeight.w600))),
-        Text(value, style: (isEmphasized ? AppTypography.titleSmall : AppTypography.labelMedium).copyWith(color: isDiscount ? colors.success : (isEmphasized ? colors.primary : colors.onSurface), fontWeight: FontWeight.w900)),
+        Text(value, style: (isEmphasized ? AppTypography.titleSmall : AppTypography.labelMedium).copyWith(color: isDiscount ? colors.tertiary : (isEmphasized ? colors.primary : colors.onSurface), fontWeight: FontWeight.w900)),
         AppSpacing.hXxs,
         Text(currency, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
       ]),
