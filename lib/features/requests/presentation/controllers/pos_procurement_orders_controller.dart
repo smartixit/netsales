@@ -91,6 +91,13 @@ class PosProcurementOrdersController extends GetxController {
     ]);
   }
 
+  Future<void> refreshOrders() async {
+    await Future.wait([
+      loadRequests(isRefresh: true),
+      loadStatusSummary(),
+    ]);
+  }
+
   Future<void> loadStatusSummary() async {
     isSummaryLoading.value = true;
     try {
