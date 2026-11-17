@@ -53,11 +53,26 @@ class ProcurementPackageOptionCard extends StatelessWidget {
     final active = quantity > 0;
     final sheet = package.packageVoucherCount;
     final half = sheet > 0 ? (sheet / 2).ceil() : 1;
-    final cashPrice = discount?.effectiveCashPrice ?? package.effectiveCashPrice;
-    final creditPrice = discount?.effectiveCreditPrice ?? package.effectiveCreditPrice;
-    final cashRate = discount?.discountCash ?? package.packageDefaultCashDiscount;
-    final creditRate = discount?.discountCredit ?? package.packageDefaultCreditDiscount;
-    final basePrice = discount?.originalPackagePrice ?? package.packageVoucherPrice;
+    final cashPrice = discount?.effectiveCashPrice ??
+        (package.procurementCashUnitPriceMinor != null
+            ? package.procurementCashUnitPriceMinor! / 100
+            : package.effectiveCashPrice);
+    final creditPrice = discount?.effectiveCreditPrice ??
+        (package.procurementCreditUnitPriceMinor != null
+            ? package.procurementCreditUnitPriceMinor! / 100
+            : package.effectiveCreditPrice);
+    final cashRate = discount?.discountCash ??
+        (package.procurementCashDiscountBasisPoints != null
+            ? package.procurementCashDiscountBasisPoints! / 100
+            : package.packageDefaultCashDiscount);
+    final creditRate = discount?.discountCredit ??
+        (package.procurementCreditDiscountBasisPoints != null
+            ? package.procurementCreditDiscountBasisPoints! / 100
+            : package.packageDefaultCreditDiscount);
+    final basePrice = discount?.originalPackagePrice ??
+        (package.procurementBaseUnitPriceMinor != null
+            ? package.procurementBaseUnitPriceMinor! / 100
+            : package.packageVoucherPrice);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
@@ -124,7 +139,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
         Row(children: [
           Expanded(child: CustomButton.outline(text: '− ورقة', icon: Icons.remove_circle_outline_rounded, size: AppButtonSize.small, foregroundColor: colors.onSurfaceVariant, onPressed: quantity > 0 ? () => onSetQuantity((quantity - (sheet > 0 ? sheet : 1)).clamp(0, 1 << 30)) : null)),
           AppSpacing.hXs,
-          Expanded(child: CustomButton.outline(text: '½ ورقة', icon: Icons.exposure_minus_1_rounded, size: AppButtonSize.small, foregroundColor: colors.onSurfaceVariant, onPressed: () => onSetQuantity(quantity + half))),
+          Expanded(child: CustomButton.outline(text: '½ ورقة', size: AppButtonSize.small, foregroundColor: colors.onSurfaceVariant, onPressed: () => onSetQuantity(quantity + half))),
           AppSpacing.hXs,
           Expanded(child: CustomButton.outline(text: '+ ورقة', icon: Icons.add_circle_outline_rounded, size: AppButtonSize.small, foregroundColor: accent, onPressed: () => onSetQuantity(quantity + (sheet > 0 ? sheet : 1)))),
         ]),
