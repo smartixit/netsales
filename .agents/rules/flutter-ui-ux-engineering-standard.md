@@ -54,3 +54,18 @@ A UI feature is **incomplete** and rejected if it exhibits:
 - Broken responsive layout or awkward stretching.
 - Poor information hierarchy or unverified visual rendering.
 - Visual verification must cover actual affected screens across representative phone/tablet sizes and Light/Dark themes. Never claim visual verification without real rendered evidence.
+
+
+## 6.1 Canonical Shared State System (MANDATORY)
+- `lib/widgets/feedback/custom_state_view.dart` is the single canonical visual system for:
+  - `CustomStateKind.loading`
+  - `CustomStateKind.empty`
+  - `CustomStateKind.error`
+  - `CustomStateKind.offline`
+  - `CustomStateKind.pricingExpired`
+- Every new or refactored data state MUST use `CustomStateView` (or its named constructors) for a consistent visual language, hierarchy, spacing, iconography, and actions.
+- Legacy `CustomEmptyState`, `CustomErrorState`, and `CustomLoadingState` remain compatibility facades only; do not add new state visuals to those wrappers.
+- `CustomOfflineBanner` must render the same canonical offline design in banner presentation.
+- Expired/invalid server pricing must use `CustomStateView.pricingExpired` and offer an explicit refresh action where refresh is available.
+- Loading skeleton primitives remain valid for content-shaped initial loading and incremental pagination. They are not alternative full-page state designs. Keep load-more skeletons appended to existing data.
+- Do not create feature-local duplicate state cards. Add a new presentation option or behavior to `CustomStateView` when a genuinely shared need exists.
