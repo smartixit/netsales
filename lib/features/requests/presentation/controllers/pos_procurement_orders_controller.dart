@@ -39,7 +39,9 @@ class PosProcurementOrdersController extends GetxController {
   final requests = <RequestEntity>[].obs;
   final Rxn<RequestStatusSummaryEntity> statusSummary = Rxn<RequestStatusSummaryEntity>();
   final isSummaryLoading = false.obs;
-  final isLoading = false.obs;
+  // Start in loading state so the first frame never announces an empty list
+  // before loadInitialData finishes resolving the active POS context.
+  final isLoading = true.obs;
   final isLoadingMore = false.obs;
   final errorMessage = RxnString();
   final loadMoreError = RxnString();
