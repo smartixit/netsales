@@ -83,3 +83,7 @@ Before reporting any UI feature complete:
 3. **Theme Coverage:** Verify both Light and Dark theme palettes.
 4. **No Unrendered Claims:** Inspect rendered output when the environment allows it; never claim visual verification without real rendered evidence.
 5. **Quality Standard:** Confirm zero layout overflows (`RenderFlex overflowed`) and responsive user feedback.
+
+
+## 6.1 Canonical Shared State Components
+Use `lib/widgets/feedback/custom_state_view.dart` as the one visual source for Loading, Empty, Error, Offline, and Pricing Expired states. Select the matching `CustomStateKind` and a proportional presentation (fullscreen, boxed, compact, banner). Preserve content-shaped skeletons for initial feed loading and append-only load-more behavior. Legacy state widgets are compatibility adapters; do not build new visual variants in them or create feature-local duplicates. Expired server quotes must expose the available refresh action.
