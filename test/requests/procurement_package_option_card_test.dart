@@ -107,6 +107,9 @@ void main() {
       expect(find.text('ورقة'), findsOneWidget);
       expect(find.text('نصف'), findsOneWidget);
       expect(find.text('تصفير'), findsOneWidget);
+      expect(find.text('المحدد'), findsOneWidget);
+      expect(find.byKey(const ValueKey('procurement-price-option-cash')), findsOneWidget);
+      expect(find.byKey(const ValueKey('procurement-price-option-credit')), findsOneWidget);
 
       final basePriceTop = tester
           .getTopLeft(find.text('السعر الأساسي قبل الخصم'))
@@ -169,6 +172,7 @@ void main() {
 
     expect(find.text('السعر الأساسي قبل الخصم'), findsOneWidget);
     expect(find.text('السعر النقدي'), findsOneWidget);
+    expect(find.text('المحدد'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
