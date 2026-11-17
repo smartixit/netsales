@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -27,7 +28,7 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
       final estimate = lines.fold<(double, double, double)>((0, 0, 0), (sum, line) {
         final custom = controller.discountForPackage(line.package.packageId);
         final base = custom?.originalPackagePrice ?? line.package.packageVoucherPrice;
-        final unit = controller.selectedSaleType.value.name == 'cash'
+        final unit = controller.selectedSaleType.value == SaleType.cash
             ? (custom?.effectiveCashPrice ?? line.package.effectiveCashPrice)
             : (custom?.effectiveCreditPrice ?? line.package.effectiveCreditPrice);
         final gross = base * line.voucherCount;
