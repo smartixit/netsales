@@ -44,7 +44,6 @@ class MockRequestRepository implements RequestRepository {
     String? search,
     String? cursor,
     int? perPage,
-    List<int>? packageIds,
   }) async {
     lastRequestedNetworkId = networkId;
     if (shouldThrow) {
@@ -271,6 +270,7 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
     String? search,
     String? cursor,
     int? perPage,
+    List<int>? packageIds,
   }) async {
     lastSearch = search;
     final scopedPackages = packageIds == null
