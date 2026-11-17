@@ -14,7 +14,7 @@ import 'package:netsales/features/catalog/presentation/widgets/package_catalog_l
 import 'package:netsales/features/catalog/presentation/widgets/package_filter_bottom_sheet.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_search_filter_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
