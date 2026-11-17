@@ -81,20 +81,10 @@ class PosProcurementOrderCard extends StatelessWidget {
         ),
     ];
     if (actions.isEmpty) return Future<void>.value();
-    return CustomBottomSheet.show<void>(
+    return CustomBottomSheet.showActions<void>(
       title: 'إجراءات الطلب #${request.requestId}',
       leadingIcon: Icons.more_horiz_rounded,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: actions.map((action) => ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Icon(action.icon is IconData ? action.icon as IconData : Icons.circle_outlined),
-          title: Text(action.title),
-          onTap: () {
-            Navigator.of(Get.context!).pop();
-            action.onTap();
-          },
-        )).toList(growable: false),
+      items: actions,
     );
   }
 
