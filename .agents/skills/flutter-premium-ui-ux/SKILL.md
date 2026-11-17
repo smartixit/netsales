@@ -69,7 +69,7 @@ Before assembling any widget tree:
 
 ## 6. UI State & Feedback Checklist
 Every data-driven screen must implement:
-1. **Loading State:** Responsive skeleton layouts configured through `CustomStateView.loading` + `CustomStateSkeleton` (`list`, `cards`, `grid`, `detail`).
+1. **Loading State:** Responsive skeleton layouts configured through `CustomStateView.loading`, the `CustomStateSkeleton` model, `CustomStateSkeletonView` renderer, and `SkeletonRecipes` (`list`, `cards`, `grid`, `detail`).
 2. **Empty State:** Distinct [`CustomEmptyState`](lib/widgets/feedback/states/custom_empty_state.dart) with feature-specific title, explanatory subtitle, and next action.
 3. **Error State:** [`CustomErrorState`](lib/widgets/feedback/states/custom_error_state.dart) with actionable retry button.
 4. **Success State:** Crisp, responsive presentation of authoritative server data.
@@ -86,4 +86,4 @@ Before reporting any UI feature complete:
 
 
 ## 6.1 Canonical Shared State Components
-Use `lib/widgets/feedback/custom_state_view.dart` as the one visual source for Loading, Empty, Error, Offline, and Pricing Expired states. Select the matching `CustomStateKind` and a proportional presentation (fullscreen, boxed, compact, banner). Preserve content-shaped skeletons for initial feed loading and append-only load-more behavior. Legacy state widgets are compatibility adapters; do not build new visual variants in them or create feature-local duplicates. Expired server quotes must expose the available refresh action.
+Use `lib/widgets/feedback/custom_state_view.dart` as the one visual source for Loading, Empty, Error, Offline, and Pricing Expired states. Select the matching `CustomStateKind` and a proportional presentation (fullscreen, boxed, compact, banner). Preserve content-shaped skeletons for initial feed loading and append-only load-more behavior. Specialized state components under `states/` are canonical semantic components, not compatibility adapters. Do not create feature-local duplicate state visuals or loading engines. Expired server quotes must expose the available refresh action.
