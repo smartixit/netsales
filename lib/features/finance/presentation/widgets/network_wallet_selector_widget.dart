@@ -10,8 +10,8 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/finance/presentation/controllers/network_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_selector_skeleton.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// مكون تحديد محفظة الشبكة في لوحة المالية (Network Wallet Selector)
