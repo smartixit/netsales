@@ -193,7 +193,7 @@ class _PackageHero extends StatelessWidget {
             // The card is hosted in a vertical scroll view, so its max height
             // is unbounded. Center lets the hero grow to its natural content
             // height instead of stretching children toward infinity.
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Padding(
