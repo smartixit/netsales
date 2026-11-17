@@ -6,6 +6,7 @@ import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
+import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
@@ -129,7 +130,14 @@ class PosProcurementOrderCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Container(
+                  padding: EdgeInsets.all(11.r),
+                  decoration: BoxDecoration(
+                    gradient: AppGradients.accentHero3(context, accent),
+                    borderRadius: BorderRadius.circular(18.r),
+                    border: Border.all(color: accent.withValues(alpha: .16)),
+                  ),
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
@@ -166,9 +174,17 @@ class PosProcurementOrderCard extends StatelessWidget {
                       CustomStatusBadge.fromPresentation(status, isCompact: true),
                     ],
                   ),
+                ),
                   AppSpacing.vMd,
-                  Row(
-                    children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 11.r, vertical: 9.r),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(15.r),
+                      border: Border.all(color: colors.outlineVariant.withValues(alpha: .38)),
+                    ),
+                    child: Row(
+                      children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,19 +222,28 @@ class PosProcurementOrderCard extends StatelessWidget {
                         )
                       else
                         Icon(Icons.inventory_2_outlined, color: colors.primary, size: 22.r),
-                    ],
+                      ],
+                    ),
                   ),
                   AppSpacing.vMd,
                   Divider(height: 1, color: colors.outlineVariant.withValues(alpha: 0.35)),
                   AppSpacing.vSm,
-                  Row(
-                    children: [
-                      Expanded(child: _Metric(label: 'عدد البنود', value: request.items.length.toString())),
-                      _MetricDivider(),
-                      Expanded(child: _Metric(label: 'إجمالي الكمية', value: request.totalVouchers.toString())),
-                      _MetricDivider(),
-                      Expanded(child: _Metric(label: 'نوع السعر', value: saleType.label)),
-                    ],
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.r, vertical: 11.r),
+                    decoration: BoxDecoration(
+                      gradient: AppGradients.accentBadge(context, accent),
+                      borderRadius: BorderRadius.circular(15.r),
+                      border: Border.all(color: accent.withValues(alpha: .12)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(child: _Metric(label: 'عدد البنود', value: request.items.length.toString())),
+                        _MetricDivider(),
+                        Expanded(child: _Metric(label: 'إجمالي الكمية', value: request.totalVouchers.toString())),
+                        _MetricDivider(),
+                        Expanded(child: _Metric(label: 'نوع السعر', value: saleType.label)),
+                      ],
+                    ),
                   ),
                   AppSpacing.vSm,
                   Row(
