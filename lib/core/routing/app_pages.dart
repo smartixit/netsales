@@ -29,6 +29,8 @@ import 'package:netsales/features/catalog/presentation/screens/package_catalog_s
 import 'package:netsales/features/catalog/presentation/screens/package_details_screen.dart';
 import 'package:netsales/features/catalog/presentation/screens/package_form_screen.dart';
 import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
+import 'package:netsales/features/requests/presentation/bindings/pos_procurement_orders_binding.dart';
+import 'package:netsales/features/requests/presentation/bindings/pos_new_procurement_order_binding.dart';
 import 'package:netsales/features/requests/presentation/screens/network_supply_requests_review_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/pos_new_procurement_order_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/pos_procurement_orders_screen.dart';
@@ -285,7 +287,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.procurementOrders,
       page: () => const PosProcurementOrdersScreen(),
-      binding: ProcurementRequestBinding(),
+      binding: PosProcurementOrdersBinding(),
       middlewares: [
         AuthGuard(),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
@@ -294,7 +296,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.newProcurementOrder,
       page: () => const PosNewProcurementOrderScreen(),
-      binding: ProcurementRequestBinding(),
+      binding: PosNewProcurementOrderBinding(),
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(
