@@ -1043,7 +1043,6 @@ class PosNewProcurementOrderController extends GetxController {
       );
     }
 
-    await loadEffectivePackageDiscounts();
     _refreshProcurementPresentation();
   }
 
