@@ -171,6 +171,7 @@ class PosProcurementOrderCard extends StatelessWidget {
                               fallback: colors.primary,
                             );
                             return Container(
+                              key: const ValueKey('pos-order-package-color-accent'),
                               width: 7.r,
                               height: 30.r,
                               margin: EdgeInsetsDirectional.only(end: 5.w),
