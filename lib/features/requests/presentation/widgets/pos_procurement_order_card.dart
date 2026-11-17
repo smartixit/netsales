@@ -114,12 +114,17 @@ class PosProcurementOrderCard extends StatelessWidget {
         border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.38)),
         boxShadow: AppElevation.level2(context),
       ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-          Container(width: 4.w, color: accent),
-          Expanded(
+      child: Stack(
+        children: [
+          PositionedDirectional(
+            start: 0,
+            top: 0,
+            bottom: 0,
+            width: 4.w,
+            child: ColoredBox(color: accent),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: 4.w),
             child: Padding(
               padding: EdgeInsets.all(AppSpacing.cardPadding),
               child: Column(
@@ -251,8 +256,7 @@ class PosProcurementOrderCard extends StatelessWidget {
               ),
             ),
           ),
-          ],
-        ),
+        ],
       ),
     );
   }
