@@ -365,7 +365,6 @@ class CustomStateView extends StatelessWidget {
   }
 
   Widget _buildBadge(BuildContext context, Color accent) {
-    final colors = context.colors;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
       decoration: BoxDecoration(
@@ -514,10 +513,6 @@ class CustomStateView extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingPreview(Color accent) {
-    return _LoadingPreview(accent: accent);
-  }
-
   bool get _hasActions =>
       customAction != null ||
       (actionLabel != null && onAction != null) ||
@@ -529,7 +524,6 @@ class _LoadingPreview extends StatelessWidget {
   final Color accent;
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: 300.w),
       child: Column(children: [
