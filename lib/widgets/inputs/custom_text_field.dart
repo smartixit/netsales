@@ -32,6 +32,9 @@ class CustomTextField extends StatefulWidget {
     this.autofillHints,
     this.isRequired = true,
     this.contentPadding,
+    this.isDense = false,
+    this.textAlign = TextAlign.start,
+    this.textStyle,
   });
 
   final TextEditingController controller;
@@ -81,6 +84,13 @@ class CustomTextField extends StatefulWidget {
   final bool isRequired;
 
   final EdgeInsetsGeometry? contentPadding;
+
+  /// Dense presentation for compact inline controls while preserving the shared field style.
+  final bool isDense;
+
+  final TextAlign textAlign;
+
+  final TextStyle? textStyle;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -263,6 +273,8 @@ class _CustomTextFieldState extends State<CustomTextField>
 
           textInputAction: widget.textInputAction,
 
+          textAlign: widget.textAlign,
+
           maxLines: widget.obscureText ? 1 : widget.maxLines,
 
           minLines: widget.minLines,
@@ -289,9 +301,11 @@ class _CustomTextFieldState extends State<CustomTextField>
 
         autofillHints: widget.autofillHints,
 
-        style: theme.textTheme.bodyLarge,
+        style: widget.textStyle ?? theme.textTheme.bodyLarge,
 
         decoration: InputDecoration(
+          isDense: widget.isDense,
+          contentPadding: widget.contentPadding,
           label: widget.label.isNotEmpty
               ? Text.rich(
                   TextSpan(
