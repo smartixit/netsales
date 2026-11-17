@@ -1202,7 +1202,7 @@ class _LineTotal extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              'قيمة البند التقديرية',
+              'إجمالي البند',
               style: AppTypography.labelMedium.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -1239,10 +1239,10 @@ class _LineTotal extends StatelessWidget {
             )
           else
             Text(
-              selected ? 'حدّث التعرفة' : '—',
-              style: AppTypography.labelMedium.copyWith(
-                color: Colors.white.withValues(alpha: .86),
-                fontWeight: FontWeight.w600,
+              selected ? 'حدّث التعرفة' : '0.00',
+              style: AppTypography.currencyMedium.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
               ),
             ),
         ],
