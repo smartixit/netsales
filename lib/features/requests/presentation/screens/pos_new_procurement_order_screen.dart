@@ -6,7 +6,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_network_context_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
@@ -16,7 +16,7 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// مساحة إنشاء طلب التوريد الواحدة: السياق، الباقات، الكميات والإرسال دون شاشة مراجعة منفصلة.
-class PosNewProcurementOrderScreen extends GetView<PosProcurementController> {
+class PosNewProcurementOrderScreen extends GetView<PosNewProcurementOrderController> {
   const PosNewProcurementOrderScreen({super.key});
 
   @override
