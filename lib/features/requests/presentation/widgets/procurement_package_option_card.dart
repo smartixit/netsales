@@ -1139,7 +1139,6 @@ class _QuantityControls extends StatelessWidget {
             Expanded(
               child: CustomButton.outline(
                 text: 'ورقة',
-                icon: Icons.note_add_outlined,
                 size: AppButtonSize.small,
                 foregroundColor: colors.onSurfaceVariant,
                 borderColor: colors.outlineVariant,
@@ -1151,7 +1150,6 @@ class _QuantityControls extends StatelessWidget {
             Expanded(
               child: CustomButton.outline(
                 text: 'نصف',
-                icon: Icons.description_outlined,
                 size: AppButtonSize.small,
                 foregroundColor: colors.onSurfaceVariant,
                 borderColor: colors.outlineVariant,
@@ -1163,7 +1161,6 @@ class _QuantityControls extends StatelessWidget {
             Expanded(
               child: CustomButton.outline(
                 text: 'تصفير',
-                icon: Icons.refresh_rounded,
                 size: AppButtonSize.small,
                 foregroundColor: colors.error,
                 borderColor: colors.error.withValues(alpha: .55),
