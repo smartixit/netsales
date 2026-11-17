@@ -231,6 +231,10 @@ class FakeCommercialRepository implements CommercialRepository {
 }
 
 class FakePackageCatalogRepository implements PackageCatalogRepository {
+  List<PackageEntity>? refreshedPackages;
+  List<int>? lastRequestedPackageIds;
+  bool throwOnPackageRefresh = false;
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
@@ -242,11 +246,21 @@ class FakePackageCatalogRepository implements PackageCatalogRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) async =>
-      PaginatedList(
-        items: [testPackage],
+    List<int>? packageIds,
+  }) async {
+    if (packageIds != null) {
+      lastRequestedPackageIds = List<int>.of(packageIds);
+      if (throwOnPackageRefresh) {
+        throw const AppException('تعذر تحديث التعرفة', code: '500');
+      }
+      return PaginatedList(
+        items: refreshedPackages ?? [testPackage],
         nextCursor: null,
       );
+    }
+
+    return PaginatedList(items: [testPackage], nextCursor: null);
+  }
 }
 
 void main() {
@@ -277,6 +291,60 @@ void main() {
 
   tearDown(() {
     Get.reset();
+  });
+
+  test('Refreshing expired cart pricing replaces snapshots and preserves quantities', () async {
+    controller.selectedNetworkId.value = 10;
+    controller.selectedPosId.value = 20;
+    controller.myPosList.assignAll([testPos]);
+    controller.linkedNetworks.assignAll([testLink]);
+
+    final expiredPackage = PackageEntity(
+      packageId: testPackage.packageId,
+      networkId: testPackage.networkId,
+      packageName: testPackage.packageName,
+      packageBalance: testPackage.packageBalance,
+      packageVoucherPrice: testPackage.packageVoucherPrice,
+      packageVoucherCount: testPackage.packageVoucherCount,
+      packageDefaultCashDiscount: testPackage.packageDefaultCashDiscount,
+      packageDefaultCreditDiscount: testPackage.packageDefaultCreditDiscount,
+      cashDiscountAmount: testPackage.cashDiscountAmount,
+      creditDiscountAmount: testPackage.creditDiscountAmount,
+      effectiveCashPrice: testPackage.effectiveCashPrice,
+      effectiveCreditPrice: testPackage.effectiveCreditPrice,
+      status: true,
+      procurementBaseUnitPriceMinor: 10000,
+      procurementCashUnitPriceMinor: 9000,
+      procurementCreditUnitPriceMinor: 9500,
+      procurementCashDiscountBasisPoints: 1000,
+      procurementCreditDiscountBasisPoints: 500,
+      procurementPricingSnapshotToken: 'expired_snapshot_token',
+      procurementPricingSnapshotExpiresAt: DateTime(2020),
+    );
+    packageRepo.refreshedPackages = [testPackage];
+    controller.procurementCart.add(
+      ProcurementCartLineEntity(
+        package: expiredPackage,
+        sheets: 2.5,
+        voucherCount: 250,
+      ),
+    );
+
+    expect(controller.hasCurrentProcurementSnapshots, isFalse);
+
+    await controller.refreshNetworkPackages();
+
+    expect(packageRepo.lastRequestedPackageIds, [testPackage.packageId]);
+    expect(controller.procurementCart, hasLength(1));
+    expect(
+      controller.procurementCart.single.package.procurementPricingSnapshotToken,
+      testPackage.procurementPricingSnapshotToken,
+    );
+    expect(controller.procurementCart.single.voucherCount, 250);
+    expect(controller.procurementCart.single.sheets, 2.5);
+    expect(controller.hasCurrentProcurementSnapshots, isTrue);
+    expect(controller.estimatedProcurementTotalsMinor, isNotNull);
+    expect(controller.isRefreshingCartPricing.value, isFalse);
   });
 
   group('Phase 3.1: Procurement Quote Entity & Model Serialization', () {
