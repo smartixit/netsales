@@ -6,10 +6,11 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/toasts/custom_toast.dart';
-import 'package:netsales/widgets/feedback/custom_state_skeleton.dart';
+import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
+export 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 
-part 'custom_state_view_renderer.dart';
+part 'states/custom_state_view_renderer.dart';
 
 /// الحالات الموحدة المعتمدة لكل واجهات NetSales.
 enum CustomStateKind {
@@ -195,6 +196,5 @@ class CustomStateView extends StatelessWidget {
   final WidgetBuilder? skeletonBuilder;
 
   @override
-    @override
   Widget build(BuildContext context) => _buildStateView(context);
 }
