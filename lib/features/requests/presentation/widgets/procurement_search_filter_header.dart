@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
-/// بحث وفلاتر حالات طلب التوريد، مع تمرير أفقي مناسب لمساحة الهاتف.
+/// Compact search and server-side status filtering for procurement orders.
 class ProcurementSearchFilterHeader extends StatelessWidget {
   const ProcurementSearchFilterHeader({
     super.key,
@@ -25,92 +24,82 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
   final VoidCallback onClearSearch;
 
   static const _filters = <_RequestFilter>[
-    _RequestFilter(label: 'الكل', value: null),
-    _RequestFilter(label: 'بانتظار المراجعة', value: 'PENDING'),
-    _RequestFilter(label: 'معتمدة', value: 'APPROVED'),
-    _RequestFilter(label: 'مرفوضة', value: 'REJECTED'),
-    _RequestFilter(label: 'ملغاة', value: 'CANCELLED'),
+    _RequestFilter(label: 'كل الطلبات', value: null, icon: Icons.all_inbox_rounded),
+    _RequestFilter(label: 'قيد المراجعة', value: 'PENDING', icon: Icons.schedule_rounded),
+    _RequestFilter(label: 'معتمدة', value: 'APPROVED', icon: Icons.check_circle_outline_rounded),
+    _RequestFilter(label: 'مرفوضة', value: 'REJECTED', icon: Icons.cancel_outlined),
+    _RequestFilter(label: 'ملغاة', value: 'CANCELLED', icon: Icons.delete_outline_rounded),
   ];
+
+  Future<void> _openFilters() async {
+    await CustomBottomSheet.showActions<void>(
+      title: 'تصفية الطلبات',
+      subtitle: 'اختر حالة الطلب التي تريد عرضها',
+      leadingIcon: Icons.filter_list_rounded,
+      items: _filters.map((filter) {
+        final selected = selectedStatus == filter.value;
+        return CustomBottomSheetActionItem(
+          title: filter.label,
+          icon: filter.icon,
+          trailing: selected
+              ? Icon(Icons.check_circle_rounded, color: Colors.green, size: 20.r)
+              : null,
+          onTap: () => onStatusChanged(filter.value),
+        );
+      }).toList(growable: false),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final selectedLabel = _filters
+        .where((filter) => filter.value == selectedStatus)
+        .map((filter) => filter.label)
+        .firstOrNull ?? 'كل الطلبات';
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.cardPadding,
-        AppSpacing.sm,
+        AppSpacing.md,
         AppSpacing.cardPadding,
         AppSpacing.sm,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          CustomTextField(
-            controller: searchController,
-            label: 'البحث في الطلبات',
-            hint: 'رقم الطلب أو اسم الشبكة أو نقطة البيع',
-            prefixIcon: const Icon(Icons.search_rounded),
-            suffixIcon: searchQuery.isNotEmpty
-                ? CustomButton.icon(
-                    icon: Icons.close_rounded,
-                    tooltip: 'مسح البحث',
-                    dimension: 36.r,
-                    backgroundColor: Colors.transparent,
-                    onPressed: onClearSearch,
-                  )
-                : null,
-            isRequired: false,
-          ),
-          AppSpacing.vSm,
-          SizedBox(
-            height: 42.h,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: _filters.length,
-              separatorBuilder: (_, _) => AppSpacing.hXs,
-              itemBuilder: (context, index) {
-                final filter = _filters[index];
-                final selected = selectedStatus == filter.value;
-                return CustomInteractiveBounce(
-                  onTap: () => onStatusChanged(filter.value),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? colors.primary.withValues(alpha: 0.12)
-                          : colors.surfaceContainerHighest.withValues(
-                              alpha: 0.45,
-                            ),
-                      borderRadius: BorderRadius.circular(24.r),
-                      border: Border.all(
-                        color: selected
-                            ? colors.primary.withValues(alpha: 0.42)
-                            : colors.outlineVariant.withValues(alpha: 0.35),
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        filter.label,
-                        style: AppTypography.labelMedium.copyWith(
-                          color: selected
-                              ? colors.primary
-                              : colors.onSurfaceVariant,
-                          fontWeight: selected
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+          Expanded(
+            child: CustomTextField(
+              controller: searchController,
+              label: 'البحث في الطلبات',
+              hint: 'رقم الطلب أو اسم الشبكة أو نقطة البيع',
+              prefixIcon: Icon(Icons.search_rounded, color: colors.onSurfaceVariant),
+              suffixIcon: searchQuery.isNotEmpty
+                  ? CustomButton.icon(
+                      icon: Icons.close_rounded,
+                      tooltip: 'مسح البحث',
+                      dimension: 34.r,
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: colors.onSurfaceVariant,
+                      onPressed: onClearSearch,
+                    )
+                  : null,
+              isRequired: false,
+              isDense: true,
             ),
+          ),
+          AppSpacing.hSm,
+          CustomButton.icon(
+            icon: Icons.filter_list_rounded,
+            tooltip: 'تصفية الطلبات: $selectedLabel',
+            dimension: 52.r,
+            backgroundColor: selectedStatus == null
+                ? colors.surfaceContainerHighest
+                : colors.primary.withValues(alpha: 0.12),
+            foregroundColor: selectedStatus == null
+                ? colors.onSurfaceVariant
+                : colors.primary,
+            borderColor: selectedStatus == null ? colors.outlineVariant : colors.primary,
+            onPressed: _openFilters,
           ),
         ],
       ),
@@ -119,8 +108,13 @@ class ProcurementSearchFilterHeader extends StatelessWidget {
 }
 
 class _RequestFilter {
-  const _RequestFilter({required this.label, required this.value});
+  const _RequestFilter({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
 
   final String label;
   final String? value;
+  final IconData icon;
 }
