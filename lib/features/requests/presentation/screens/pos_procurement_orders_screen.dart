@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
@@ -23,8 +24,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
         ? MediaQuery.paddingOf(context).bottom
         : AppSpacing.cardPadding;
 
-    final content = Padding(
-      child: Column(
+    final content = Column(
         children: [
           PosProcurementOrdersHero(
             embedded: embedded,
@@ -128,9 +128,9 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
                           child: CustomStateView.loading(
                             presentation: CustomStatePresentation.skeletonOnly,
                             skeleton: CustomStateSkeleton(
-                              layout: CustomStateSkeletonLayout.cards,
+                              layout: CustomStateSkeletonLayout.list,
                               itemCount: 1,
-                              cardHeight: 190.h,
+                              cardHeight: 150.h,
                               maxColumns: 1,
                             ),
                           ),
@@ -158,8 +158,7 @@ class PosProcurementOrdersScreen extends GetView<PosProcurementOrdersController>
             }),
           ),
         ],
-      ),
-    );
+      );
 
     if (embedded) return content;
 
