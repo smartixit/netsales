@@ -11,7 +11,7 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_requ
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_overview_panel.dart';
 import 'package:netsales/features/requests/presentation/widgets/request_modification_summary_panel.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// شاشة تفاصيل الطلب: تنسيق الصفحة وربط أقسامها فقط.
