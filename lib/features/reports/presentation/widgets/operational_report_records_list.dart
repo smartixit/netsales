@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_record_card.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 class OperationalReportRecordsList extends StatelessWidget {
@@ -28,7 +28,7 @@ class OperationalReportRecordsList extends StatelessWidget {
       }
 
       if (controller.isLoading.value && controller.reports.isEmpty) {
-        return const CustomSkeletonFeed(itemCount: 5);
+        return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 5, cardHeight: 112, ));
       }
 
       if (controller.errorMessage.value != null &&
