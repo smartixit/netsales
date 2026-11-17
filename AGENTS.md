@@ -63,7 +63,7 @@
     - Sheets: `CustomBottomSheet`, `InvoicePrintFormatSheet`.
     - Buttons: `CustomButton`, `CustomThemeToggleButton`.
     - Inputs: `CustomTextField`, `CustomPasswordField`, `CustomPasswordRequirementItem`, `CustomPhoneField`, `CustomPinField`, `CustomDropdown`, `CustomNumericKeyboard`.
-    - Feedback & States: `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Skeleton Shimmers (`CustomSkeletonCard`, `CustomSkeletonFeed`, `CustomSkeletonGrid`, `CustomSkeletonListTile`, `CustomSkeletonShimmer`, `CustomSkeletonText`).
+    - Feedback & States: canonical `CustomStateView` (Loading, Empty, Error, Offline, Pricing Expired), compatibility facades `CustomEmptyState`, `CustomErrorState`, `CustomLoadingState`, plus `CustomLoadingIndicatorBar`, `CustomNotFound`, `CustomOfflineBanner`, `CustomUnauthorized`, `CustomTabPlaceholder`, Skeleton Shimmers (`CustomSkeletonCard`, `CustomSkeletonFeed`, `CustomSkeletonGrid`, `CustomSkeletonListTile`, `CustomSkeletonShimmer`, `CustomSkeletonText`).
     - Toasts & Snackbars: `CustomSnackbar`, `CustomToast`.
     - Pickers: `CustomDatePickerField`, `CustomDatePickerModal`, `CustomFilePicker`, `CustomImagePicker`, `CustomContactPickerIconButton`, `CustomColorPicker`, `CustomPosSelectorField`.
     - Navigation & Foundation: `CustomAppScaffold`, `CustomFloatingBottomNavBar`, `DoubleBackExitScope`.
@@ -95,3 +95,11 @@
   - Interactive or compact chips must use `CustomChip` (`lib/widgets/badges/custom_chip.dart`).
   - **Prohibition:** Never write ad-hoc `switch` statements or conditional color mappings for statuses directly inside screen or widget files.
 
+
+## 4.1 Canonical Shared State Presentation
+- All new or refactored Loading, Empty, Error, Offline, and Pricing Expired UI states MUST use `CustomStateView` from `lib/widgets/feedback/custom_state_view.dart`.
+- Existing `CustomEmptyState`, `CustomErrorState`, and `CustomLoadingState` are compatibility facades and must delegate to `CustomStateView`; do not add independent state visuals to them.
+- `CustomOfflineBanner` uses the shared offline state in banner presentation.
+- Feature-local state cards are prohibited. Shared state improvements belong in `CustomStateView`.
+- Content-shaped skeletons remain the required pattern for feed/list loading and append-only pagination; they complement the canonical state component and do not replace its design.
+- Pricing expiry is a first-class state: show a clear expired-price message and the supported refresh action, and keep submission disabled until the authoritative quote is current.
