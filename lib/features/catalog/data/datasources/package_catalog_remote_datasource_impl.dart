@@ -60,6 +60,34 @@ class PackageCatalogRemoteDataSourceImpl
   }
 
   @override
+  Future<ApiResponse<List<EffectivePackageDiscountModel>>> getEffectiveDiscountsForPos({
+    required int networkId,
+    required int posId,
+  }) {
+    return ApiService.instance.get<List<EffectivePackageDiscountModel>>(
+      ApiConstants.voucherPackageDiscounts,
+      queryParameters: {
+        'network_id': networkId,
+        'pos_id': posId,
+        'status': '1',
+        'all': '1',
+      },
+      fromJson: (data) {
+        if (data is List) {
+          return data
+              .map(
+                (item) => EffectivePackageDiscountModel.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList(growable: false);
+        }
+        return const <EffectivePackageDiscountModel>[];
+      },
+    );
+  }
+
+  @override
   Future<ApiResponse<EffectivePackageDiscountModel>> getEffectiveDiscount({
     required int networkId,
     required int posId,
