@@ -55,16 +55,15 @@ class CustomStateSkeletonView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (builder != null) return builder!(context);
+    final skeletonContent = builder?.call(context) ??
+        switch (recipe.layout) {
+          CustomStateSkeletonLayout.list => _buildList(context),
+          CustomStateSkeletonLayout.cards => _buildResponsiveCollection(context),
+          CustomStateSkeletonLayout.grid => _buildResponsiveCollection(context),
+          CustomStateSkeletonLayout.detail => _buildDetail(context),
+        };
 
-    return CustomSkeletonShimmer(
-      child: switch (recipe.layout) {
-        CustomStateSkeletonLayout.list => _buildList(context),
-        CustomStateSkeletonLayout.cards => _buildResponsiveCollection(context),
-        CustomStateSkeletonLayout.grid => _buildResponsiveCollection(context),
-        CustomStateSkeletonLayout.detail => _buildDetail(context),
-      },
-    );
+    return CustomSkeletonShimmer(child: skeletonContent);
   }
 
   Widget _buildList(BuildContext context) {
