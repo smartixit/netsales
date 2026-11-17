@@ -198,6 +198,13 @@ const testPackage = PackageEntity(
   effectiveCreditPrice: 95.0,
   status: true,
   packageColor: '#00AAFF',
+  procurementBaseUnitPriceMinor: 10000,
+  procurementCashUnitPriceMinor: 9000,
+  procurementCreditUnitPriceMinor: 9500,
+  procurementCashDiscountBasisPoints: 1000,
+  procurementCreditDiscountBasisPoints: 500,
+  procurementPricingSnapshotToken: 'signed_snapshot_token_for_package_101',
+  procurementPricingSnapshotExpiresAt: DateTime(2099),
 );
 
 class FakeCommercialRepository implements CommercialRepository {
@@ -340,6 +347,17 @@ void main() {
   });
 
   group('Phase 3.1: PosProcurementController Server Authoritative Quote Integration', () {
+    test('Local estimate uses signed minor-unit price and rounds discount on the line gross', () {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
+      controller.procurementCart.add(
+        const ProcurementCartLineEntity(package: testPackage, sheets: 1, voucherCount: 101),
+      );
+
+      expect(controller.estimatedLineTotalMinor(testPackage, 101), 909000);
+      expect(controller.estimatedProcurementTotalsMinor, (1010000, 101000, 909000));
+    });
+
     test('Changing a cart quantity updates local state without requesting a server quote', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
@@ -393,7 +411,7 @@ void main() {
       expect(controller.quoteError.value, isNull);
     });
 
-    test('Submission fetches the authoritative quote once and then creates the request', () async {
+    test('Submission creates the request directly without fetching a quote', () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
       controller.myPosList.assignAll([testPos]);
@@ -410,9 +428,12 @@ void main() {
       final submitted = await controller.submitOrder();
 
       expect(submitted, isTrue);
-      expect(mockRepo.lastQuotePayload, isNotNull);
-      expect(mockRepo.lastQuotePayload!['sale_type'], 'CASH');
-      expect(mockRepo.lastCreatePayload?['pricing_token'], 'fake_valid_hmac_token');
+      expect(mockRepo.lastQuotePayload, isNull);
+      expect(mockRepo.lastCreatePayload?['pricing_token'], isNull);
+      expect(
+        mockRepo.lastCreatePayload?['items']?[0]['pricing_snapshot_token'],
+        'signed_snapshot_token_for_package_101',
+      );
     });
 
     test('Submitting order includes pricing_token from authoritative server quote', () async {
@@ -445,7 +466,9 @@ void main() {
       final success = await controller.submitOrder();
 
       expect(success, isTrue);
-      expect(mockRepo.lastCreatePayload!['pricing_token'], 'authoritative_server_token_xyz');
+      expect(mockRepo.lastQuotePayload, isNull);
+      expect(mockRepo.lastCreatePayload!['pricing_token'], isNull);
+      expect(mockRepo.lastCreatePayload!['items'][0]['pricing_snapshot_token'], 'signed_snapshot_token_for_package_101');
       expect(mockRepo.createIdempotencyKeys.single, isNotEmpty);
     });
 
@@ -518,8 +541,8 @@ void main() {
       expect(success, isFalse);
       await pumpEventQueue();
 
-      expect(mockRepo.lastQuotePayload, isNotNull);
-      expect(controller.quoteError.value, isNotNull);
+      expect(mockRepo.lastQuotePayload, isNull);
+      expect(controller.packageErrorMessage.value, isNotNull);
     });
   });
 
