@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -8,7 +9,6 @@ import 'package:netsales/features/invoices/presentation/controllers/network_dire
 import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_cart_section.dart';
 import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_section_widgets.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
@@ -41,7 +41,7 @@ class NetworkDirectInvoiceScreen
             controller.authorizedNetworks.isEmpty) {
           return Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),
-            child: const CustomSkeletonFeed(itemCount: 3, cardHeight: 90),
+            child: const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 3, cardHeight: 90, )),
           );
         }
 
