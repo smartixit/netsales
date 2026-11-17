@@ -48,13 +48,11 @@ void main() {
     final summaryRow = tester.getSize(find.byType(Row));
     expect(summaryRow.height.isFinite, isTrue);
     expect(summaryRow.width.isFinite, isTrue);
-    final cards = tester.widgetList<Container>(
-      find.descendant(
-        of: find.byType(PosProcurementOrdersSummaryStrip),
-        matching: find.byType(Container),
-      ),
-    ).where((container) => container.constraints?.hasBoundedHeight ?? false);
-    expect(cards, isNotEmpty);
+    final cardSlots = find.byType(Expanded);
+    expect(cardSlots, findsNWidgets(3));
+    final firstCardSize = tester.getSize(cardSlots.first);
+    final lastCardSize = tester.getSize(cardSlots.last);
+    expect(firstCardSize.height, lastCardSize.height);
     expect(tester.takeException(), isNull);
   });
 
