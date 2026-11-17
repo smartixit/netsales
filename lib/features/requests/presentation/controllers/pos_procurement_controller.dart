@@ -384,7 +384,7 @@ class PosProcurementController extends GetxController {
     );
     debounce(
       packageSearchQuery,
-      (_) => refreshNetworkPackages(),
+      (_) => _refreshPackageSearchResults(),
       time: const Duration(milliseconds: 350),
     );
 
@@ -734,7 +734,16 @@ class PosProcurementController extends GetxController {
     packageSearchController.clear();
     packageSearchQuery.value = '';
     _suppressPackageSearchListener = false;
-    refreshNetworkPackages();
+    _refreshPackageSearchResults();
+  }
+
+  /// Search changes refresh the visible catalogue only; cart pricing refresh
+  /// is an explicit action and must not be triggered by typing.
+  void _refreshPackageSearchResults() {
+    final networkId = selectedNetworkId.value;
+    if (networkId != null) {
+      _fetchNetworkPackages(networkId, reset: true);
+    }
   }
 
   Future<void> loadMorePackages() async {
