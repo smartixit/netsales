@@ -106,7 +106,8 @@ class ProcurementCheckoutBar extends GetView<PosProcurementController> {
                           : 'انتهت صلاحية التعرفة',
                       subtitle: controller.isRefreshingCartPricing.value
                           ? 'نحدّث أسعار الباقات المختارة مع الحفاظ على كميات السلة.'
-                          : 'حدّث التعرفة الحالية قبل إرسال طلب التوريد.',
+                          : controller.cartPricingRefreshError.value ??
+                                'حدّث التعرفة الحالية قبل إرسال طلب التوريد.',
                       actionLabel: controller.isRefreshingCartPricing.value
                           ? 'جارٍ التحديث...'
                           : 'تحديث التعرفة',
