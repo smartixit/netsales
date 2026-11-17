@@ -152,7 +152,11 @@ class CustomErrorState extends StatelessWidget {
     };
 
     return CustomStateView(
-      kind: isOffline ? CustomStateKind.offline : CustomStateKind.error,
+      kind: isOffline
+          ? CustomStateKind.offline
+          : type == ErrorStateType.notFound
+              ? CustomStateKind.notFound
+              : CustomStateKind.error,
       title: title,
       subtitle: subtitle,
       presentation: presentation,
