@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_context_selector.dart';
 
 /// Adapts linked Network entities to the shared procurement context selector.
 class ProcurementNetworkContextSection
-    extends GetView<PosProcurementController> {
+    extends GetView<PosNewProcurementOrderController> {
   const ProcurementNetworkContextSection({super.key});
 
   @override
