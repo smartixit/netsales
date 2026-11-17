@@ -11,7 +11,6 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_pack
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -156,7 +155,7 @@ isCashSale: controller.selectedSaleType.value == SaleType.cash,
                             if (controller.isLoadingMorePackages.value)
                               SizedBox(
                                 width: cardWidth,
-                                child: const CustomSkeletonCard(height: 124),
+                                child: const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 124, maxColumns: 1, minItemWidth: 180)),
                               ),
                           ],
                         ),
