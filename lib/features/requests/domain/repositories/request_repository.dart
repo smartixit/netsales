@@ -4,6 +4,7 @@ import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 
 /// واجهة مستودع دورة حياة طلبات الكروت والتوريد
 abstract interface class RequestRepository {
@@ -19,6 +20,8 @@ abstract interface class RequestRepository {
     String? cursor,
     int? perPage,
   });
+
+  Future<RequestStatusSummaryEntity> getRequestStatusSummary({int? posId});
 
   /// جلب تفاصيل طلب محدد بالكامل متضمناً البنود وسجل المراجعة
   Future<RequestEntity> getRequestDetails(int requestId);
