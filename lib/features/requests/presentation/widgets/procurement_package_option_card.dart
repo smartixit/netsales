@@ -262,38 +262,19 @@ class _PackageHero extends StatelessWidget {
                           ],
                         ),
                       ),
-                      AppSpacing.vSm,
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            key: const ValueKey(
-                              'procurement-package-color-accent',
-                            ),
-                            width: 4.r,
-                            height: 42.r,
-                            decoration: BoxDecoration(
-                              color: packageAccentColor,
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                          ),
-                          AppSpacing.hXs,
-                          Expanded(
-                            child: Text(
-                              package.packageName,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.start,
-                              style: AppTypography.titleMedium.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w700,
-                                height: 1.3,
-                              ),
-                            ),
-                          ),
-                        ],
+                      AppSpacing.vMd,
+                      Text(
+                        package.packageName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.start,
+                        style: AppTypography.titleMedium.copyWith(
+                          color: packageAccentColor,
+                          fontWeight: FontWeight.w700,
+                          height: 1.3,
+                        ),
                       ),
-                      AppSpacing.vXs,
+                      AppSpacing.vSm,
                       Container(
                         constraints: BoxConstraints(
                           maxWidth: constraints.maxWidth - artworkSize - 28.r,
@@ -303,10 +284,10 @@ class _PackageHero extends StatelessWidget {
                           vertical: 4.r,
                         ),
                         decoration: BoxDecoration(
-                          color: colors.primary.withValues(alpha: .08),
+                          color: packageAccentColor.withValues(alpha: .08),
                           borderRadius: BorderRadius.circular(AppRadius.chip),
                           border: Border.all(
-                            color: colors.primary.withValues(alpha: .14),
+                            color: packageAccentColor.withValues(alpha: .14),
                           ),
                         ),
                         child: Row(
@@ -315,7 +296,7 @@ class _PackageHero extends StatelessWidget {
                             Icon(
                               Icons.layers_rounded,
                               size: 13.r,
-                              color: colors.primary,
+                              color: packageAccentColor,
                             ),
                             AppSpacing.hXxs,
                             Flexible(
@@ -324,7 +305,7 @@ class _PackageHero extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.labelSmall.copyWith(
-                                  color: colors.primary,
+                                  color: packageAccentColor,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
