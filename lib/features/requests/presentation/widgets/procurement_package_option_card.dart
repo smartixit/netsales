@@ -11,7 +11,6 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:flutter/services.dart';
 import 'package:netsales/widgets/badges/custom_chip.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 
 /// بطاقة باقة التوريد؛ جميع تعديلات الكمية تتم مباشرة داخل البطاقة.
 class ProcurementPackageOptionCard extends StatelessWidget {
