@@ -197,6 +197,7 @@ extension on CustomStateView {
                       text: 'نسخ تفاصيل الخطأ',
                       icon: Icons.copy_rounded,
                       size: AppButtonSize.small,
+                      foregroundColor: colors.primary,
                       onPressed: () async {
                         await UrlLauncherService.copyToClipboard(technicalDetails!);
                         CustomToast.show(message: 'تم نسخ تفاصيل الخطأ للحافظة', icon: Icons.copy_rounded);
