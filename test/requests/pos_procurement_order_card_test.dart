@@ -99,6 +99,7 @@ void main() {
     expect(find.text('عدد البنود'), findsOneWidget);
     expect(find.text('إجمالي الكمية'), findsOneWidget);
     expect(find.text('نوع السعر'), findsOneWidget);
+    expect(find.text('نقدي'), findsOneWidget);
     expect(find.text('عرض التفاصيل'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
