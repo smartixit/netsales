@@ -24,7 +24,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
     required this.quantityController,
     this.customDiscount,
     this.quoteLine,
-    this.isPricingLoading = false,
+    this.isDiscountLoading = false,
   });
 
   final PackageEntity package;
@@ -34,7 +34,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
   final TextEditingController quantityController;
   final EffectivePackageDiscountEntity? customDiscount;
   final ProcurementQuoteLineEntity? quoteLine;
-  final bool isPricingLoading;
+  final bool isDiscountLoading;
 
   double get _basePrice => customDiscount?.originalPackagePrice ??
       (package.procurementBaseUnitPriceMinor != null
@@ -122,7 +122,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
                   cashDiscount: _cashDiscount,
                   creditDiscount: _creditDiscount,
                   isCashSale: isCashSale,
-                  isPricingLoading: isPricingLoading,
+                  isDiscountLoading: isDiscountLoading,
                   money: _money,
                 ),
                 Padding(
@@ -306,7 +306,7 @@ class _TariffPanel extends StatelessWidget {
     required this.cashDiscount,
     required this.creditDiscount,
     required this.isCashSale,
-    required this.isPricingLoading,
+    required this.isDiscountLoading,
     required this.money,
   });
 
@@ -316,7 +316,7 @@ class _TariffPanel extends StatelessWidget {
   final double cashDiscount;
   final double creditDiscount;
   final bool isCashSale;
-  final bool isPricingLoading;
+  final bool isDiscountLoading;
   final String Function(num) money;
 
   @override
@@ -339,7 +339,7 @@ class _TariffPanel extends StatelessWidget {
             children: [
               Text(
                 'تعرفة هذه الباقة',
-                style: AppTypography.labelMedium.copyWith(
+                style: AppTypography.labelSmall.copyWith(
                   color: colors.onSurfaceVariant,
                   fontWeight: FontWeight.w900,
                 ),
@@ -400,7 +400,7 @@ class _TariffPanel extends StatelessWidget {
               ),
             ],
           ),
-          if (isPricingLoading) ...[
+          if (isDiscountLoading) ...[
             AppSpacing.vXs,
             ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.full),
@@ -656,7 +656,7 @@ class _QuantityControls extends StatelessWidget {
             Expanded(
               child: Text(
                 'الكمية المطلوبة',
-                style: AppTypography.labelLarge.copyWith(
+                style: AppTypography.labelMedium.copyWith(
                   color: colors.onSurface,
                   fontWeight: FontWeight.w900,
                 ),
@@ -692,7 +692,7 @@ class _QuantityControls extends StatelessWidget {
                   isRequired: false,
                   isDense: true,
                   textAlign: TextAlign.center,
-                  textStyle: AppTypography.titleMedium.copyWith(
+                  textStyle: AppTypography.titleSmall.copyWith(
                     color: colors.onSurface,
                     fontWeight: FontWeight.w900,
                   ),
@@ -736,7 +736,7 @@ class _QuantityControls extends StatelessWidget {
           children: [
             Expanded(
               child: CustomButton.outline(
-                text: '+ ورقة',
+                text: 'ورقة',
                 icon: Icons.note_add_outlined,
                 size: AppButtonSize.small,
                 foregroundColor: colors.onSurfaceVariant,
@@ -748,7 +748,7 @@ class _QuantityControls extends StatelessWidget {
             AppSpacing.hXs,
             Expanded(
               child: CustomButton.outline(
-                text: '½ ورقة',
+                text: 'نصف',
                 icon: Icons.description_outlined,
                 size: AppButtonSize.small,
                 foregroundColor: colors.onSurfaceVariant,

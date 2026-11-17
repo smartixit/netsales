@@ -147,23 +147,42 @@ class ProcurementPackageSelectionSection
                           children: [
                             ...controller.availablePackages.map((package) {
                               return SizedBox(
+                                key: ValueKey('procurement-package-${package.packageId}'),
                                 width: cardWidth,
-                                child: ProcurementPackageOptionCard(
-                                  package: package,
-                                  quantity: controller.cartQuantityForPackage(
-                                    package.packageId,
-                                  ),
-                                  customDiscount: controller.discountForPackage(package.packageId),
-                                  quantityController: controller.quantityControllerForPackage(package.packageId),
-                                  isPricingLoading: controller.isLoadingPackageDiscounts.value,
-                                  isCashSale: controller.selectedSaleType.value == SaleType.cash,
-                                  quoteLine: controller.hasCurrentServerQuote
-                                      ? controller.serverQuote.value
-                                          ?.findLine(package.packageId)
-                                      : null,
-                                  onSetQuantity: (quantity) =>
-                                      controller.setPackageVoucherCount(package, quantity),
-                                ),
+                                child: Obx(() {
+                                  final quantity = controller
+                                      .cartQuantityForPackage(package.packageId);
+                                  final customDiscount = controller
+                                      .discountForPackage(package.packageId);
+                                  final isDiscountLoading =
+                                      controller.isLoadingPackageDiscounts.value;
+                                  final isCashSale =
+                                      controller.selectedSaleType.value ==
+                                          SaleType.cash;
+                                  final quote = controller.serverQuote.value;
+                                  final hasCurrentQuote =
+                                      controller.hasCurrentServerQuote;
+
+                                  return ProcurementPackageOptionCard(
+                                    package: package,
+                                    quantity: quantity,
+                                    customDiscount: customDiscount,
+                                    quantityController:
+                                        controller.quantityControllerForPackage(
+                                      package.packageId,
+                                    ),
+                                    isDiscountLoading: isDiscountLoading,
+                                    isCashSale: isCashSale,
+                                    quoteLine: hasCurrentQuote
+                                        ? quote?.findLine(package.packageId)
+                                        : null,
+                                    onSetQuantity: (nextQuantity) =>
+                                        controller.setPackageVoucherCount(
+                                      package,
+                                      nextQuantity,
+                                    ),
+                                  );
+                                }),
                               );
                             }),
                             if (controller.isLoadingMorePackages.value)

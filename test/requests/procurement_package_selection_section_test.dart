@@ -1,0 +1,160 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/themes/app_themes.dart';
+import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
+import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
+
+class _FakeRequestRepository implements RequestRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  Future<PaginatedList<RequestEntity>> getRequests({
+    int? networkId,
+    int? posId,
+    String? status,
+    String? search,
+    String? cursor,
+    int? perPage,
+  }) async {
+    return const PaginatedList(items: [], nextCursor: null);
+  }
+}
+
+const _testPackage = PackageEntity(
+  packageId: 101,
+  networkId: 10,
+  packageName: 'باقة الاختبار',
+  packageBalance: 1000,
+  packageVoucherPrice: 100,
+  packageVoucherCount: 100,
+  packageDefaultCashDiscount: 0,
+  packageDefaultCreditDiscount: 0,
+  cashDiscountAmount: 0,
+  creditDiscountAmount: 0,
+  effectiveCashPrice: 100,
+  effectiveCreditPrice: 100,
+  status: true,
+);
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  late PosProcurementController controller;
+
+  setUp(() {
+    Get.reset();
+    final repository = _FakeRequestRepository();
+    controller = PosProcurementController(
+      getRequestsUseCase: GetRequestsUseCase(repository),
+      createRequestUseCase: CreateRequestUseCase(repository),
+      cancelRequestUseCase: CancelRequestUseCase(repository),
+    );
+  });
+
+  tearDown(Get.reset);
+
+  Widget buildTestableWidget() {
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      builder: (context, _) => MaterialApp(
+        theme: AppThemes.light,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: const ProcurementPackageSelectionSection(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void configurePackageCatalog({required bool discountLoading}) {
+    controller.selectedNetworkId.value = _testPackage.networkId;
+    controller.availablePackages.assignAll([_testPackage]);
+    controller.isLoadingPackages.value = false;
+    controller.isLoadingMorePackages.value = false;
+    controller.isLoadingPackageDiscounts.value = discountLoading;
+    controller.packageErrorMessage.value = null;
+    controller.packageDiscountError.value = null;
+  }
+
+  Future<void> tapAndPump(WidgetTester tester, Finder finder) async {
+    await tester.tap(finder);
+    await tester.pump(const Duration(milliseconds: 250));
+  }
+
+  testWidgets(
+    'تستمر أزرار الكمية في العمل مع النقرات المتتابعة لكل الإجراءات',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      Get.put(controller);
+      configurePackageCatalog(discountLoading: false);
+      await tester.pumpWidget(buildTestableWidget());
+      await tester.pumpAndSettle();
+
+      final addCard = find.byIcon(Icons.add_rounded);
+      for (var index = 0; index < 3; index++) {
+        await tapAndPump(tester, addCard);
+      }
+      expect(controller.cartQuantityForPackage(_testPackage.packageId), 3);
+
+      final removeCard = find.byIcon(Icons.remove_rounded);
+      for (var index = 0; index < 2; index++) {
+        await tapAndPump(tester, removeCard);
+      }
+      expect(controller.cartQuantityForPackage(_testPackage.packageId), 1);
+
+      expect(find.text('ورقة'), findsOneWidget);
+      await tapAndPump(tester, find.text('ورقة'));
+      expect(controller.cartQuantityForPackage(_testPackage.packageId), 101);
+
+      expect(find.text('نصف'), findsOneWidget);
+      await tapAndPump(tester, find.text('نصف'));
+      expect(controller.cartQuantityForPackage(_testPackage.packageId), 151);
+
+      await tapAndPump(tester, find.text('تصفير'));
+      expect(controller.cartQuantityForPackage(_testPackage.packageId), 0);
+    },
+  );
+
+  testWidgets(
+    'يختفي مؤشر تحميل الخصومات من بطاقة التعرفة عند انتهاء التحميل',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      Get.put(controller);
+      configurePackageCatalog(discountLoading: true);
+      await tester.pumpWidget(buildTestableWidget());
+      await tester.pump();
+
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+
+      controller.isLoadingPackageDiscounts.value = false;
+      await tester.pump();
+
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+    },
+  );
+}
