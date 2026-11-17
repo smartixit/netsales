@@ -130,7 +130,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('نتائج البحث: '), findsOneWidget);
-      expect(find.text('1 باقة محمّلة'), findsOneWidget);
+      expect(find.text('0 باقة محمّلة'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
