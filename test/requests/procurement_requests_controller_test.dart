@@ -403,6 +403,10 @@ void main() {
       controller.onInit();
     });
 
+    test('starts in loading state before the active POS context is resolved', () {
+      expect(ordersController.isLoading.value, isTrue);
+    });
+
     test('Initializes state and loads requests with cursor', () async {
       await ordersController.loadInitialData();
       expect(ordersController.requests.length, 2);
