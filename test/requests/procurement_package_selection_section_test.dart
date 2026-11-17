@@ -8,10 +8,8 @@ import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
-import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_sale_type_selector.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -54,15 +52,13 @@ const _testPackage = PackageEntity(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  late PosProcurementController controller;
+  late PosNewProcurementOrderController controller;
 
   setUp(() {
     Get.reset();
     final repository = _FakeRequestRepository();
-    controller = PosProcurementController(
-      getRequestsUseCase: GetRequestsUseCase(repository),
+    controller = PosNewProcurementOrderController(
       createRequestUseCase: CreateRequestUseCase(repository),
-      cancelRequestUseCase: CancelRequestUseCase(repository),
     );
   });
 
