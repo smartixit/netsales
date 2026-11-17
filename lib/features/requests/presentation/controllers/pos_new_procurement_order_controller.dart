@@ -104,6 +104,7 @@ class PosNewProcurementOrderController extends GetxController {
   final packageNextCursor = RxnString();
   final packageErrorMessage = RxnString();
   final packageLoadMoreErrorMessage = RxnString();
+  int _lifecycleRevision = 0;
   int _packageRevision = 0;
   bool _suppressPackageSearchListener = false;
 
@@ -354,7 +355,17 @@ class PosNewProcurementOrderController extends GetxController {
     for (final controller in _packageQuantityControllers.values) {
       controller.dispose();
     }
+    _lifecycleRevision++;
+    _packageRevision++;
     _packageDiscountRevision++;
+    _cartPricingRefreshRevision++;
+    _quoteRevision++;
+    isRefreshingCartPricing.value = false;
+    isLoadingPackages.value = false;
+    isLoadingMorePackages.value = false;
+    isLoadingPackageDiscounts.value = false;
+    isLoadingQuote.value = false;
+    isQuotePending.value = false;
     super.onClose();
   }
 
@@ -362,10 +373,12 @@ class PosNewProcurementOrderController extends GetxController {
   Future<void> loadMyPos({int? preferredPosId, int? preferredNetworkId}) async {
     if (getMyPosUseCase == null) return;
 
+    final lifecycleRevision = _lifecycleRevision;
     isLoadingMyPos.value = true;
     late final List<PosEntity> posList;
     try {
       posList = await getMyPosUseCase!();
+      if (lifecycleRevision != _lifecycleRevision) return;
       myPosList.assignAll(posList);
     } catch (_) {
       // Non-fatal; the context selector will present its empty state.
@@ -375,6 +388,7 @@ class PosNewProcurementOrderController extends GetxController {
       isLoadingMyPos.value = false;
     }
 
+    if (lifecycleRevision != _lifecycleRevision) return;
     final availablePosIds = posList.map((p) => p.posId).toList();
     final resolvedId = preferredPosId != null && availablePosIds.contains(preferredPosId)
         ? preferredPosId
