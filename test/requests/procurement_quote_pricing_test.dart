@@ -351,6 +351,32 @@ void main() {
     expect(controller.isRefreshingCartPricing.value, isFalse);
   });
 
+  test('Incomplete cart tariff refresh keeps expired snapshots and quantities', () async {
+    controller.selectedNetworkId.value = 10;
+    controller.selectedPosId.value = 20;
+    packageRepo.refreshedPackages = [];
+    final expiredPackage = _expiredTestPackage();
+    controller.procurementCart.add(
+      ProcurementCartLineEntity(
+        package: expiredPackage,
+        sheets: 2.5,
+        voucherCount: 250,
+      ),
+    );
+
+    await controller.refreshNetworkPackages();
+
+    expect(
+      controller.procurementCart.single.package.procurementPricingSnapshotToken,
+      expiredPackage.procurementPricingSnapshotToken,
+    );
+    expect(controller.procurementCart.single.voucherCount, 250);
+    expect(controller.hasCurrentProcurementSnapshots, isFalse);
+    expect(controller.estimatedProcurementTotalsMinor, isNull);
+    expect(controller.cartPricingRefreshError.value, isNotNull);
+    expect(controller.isRefreshingCartPricing.value, isFalse);
+  });
+
   group('Phase 3.1: Procurement Quote Entity & Model Serialization', () {
     test('ProcurementQuoteModel parses JSON and calculates discount percentage accurately', () {
       final json = {
