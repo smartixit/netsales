@@ -89,9 +89,9 @@ class ProcurementPackageOptionCard extends StatelessWidget {
         ]),
         AppSpacing.vSm,
         Row(children: [
-          Expanded(child: _PricePill(label: 'نقدي', value: package.procurementCashUnitPriceMinor == null ? '—' : AmountFormatter.formatMinor(package.procurementCashUnitPriceMinor!), active: isCashSale, accent: accent)),
+          Expanded(child: _PricePill(label: 'نقدي', value: package.procurementCashUnitPriceMinor == null ? '—' : AmountFormatter.formatValue(package.procurementCashUnitPriceMinor! / 100, decimalPlaces: 2), active: isCashSale, accent: accent)),
           AppSpacing.hXs,
-          Expanded(child: _PricePill(label: 'آجل', value: package.procurementCreditUnitPriceMinor == null ? '—' : AmountFormatter.formatMinor(package.procurementCreditUnitPriceMinor!), active: !isCashSale, accent: accent)),
+          Expanded(child: _PricePill(label: 'آجل', value: package.procurementCreditUnitPriceMinor == null ? '—' : AmountFormatter.formatValue(package.procurementCreditUnitPriceMinor! / 100, decimalPlaces: 2), active: !isCashSale, accent: accent)),
         ]),
         AppSpacing.vSm,
         Divider(height: 1, color: colors.outlineVariant.withValues(alpha: .4)),
