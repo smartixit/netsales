@@ -9,8 +9,8 @@ import 'package:netsales/features/finance/presentation/widgets/network_wallet_lo
 import 'package:netsales/features/finance/presentation/widgets/network_wallet_selector_widget.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_log_entry_skeleton.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class NetworkWalletDashboardScreen
