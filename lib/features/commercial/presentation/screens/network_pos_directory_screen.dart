@@ -9,8 +9,8 @@ import 'package:netsales/features/commercial/presentation/widgets/network_pos_ca
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_card_skeleton.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_search_filter_header.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
 /// شاشة دليل نقاط البيع وإدارة روابط الشراكة بمساحة عمل الشبكة
