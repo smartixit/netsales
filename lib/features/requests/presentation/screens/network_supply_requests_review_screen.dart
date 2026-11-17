@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
@@ -11,7 +12,6 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_list
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/custom_error_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_feed.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
@@ -122,7 +122,7 @@ class NetworkSupplyRequestsReviewScreen
             if (controller.isLoading.value) {
               return Padding(
                 padding: EdgeInsets.all(AppSpacing.md),
-                child: CustomSkeletonFeed(itemCount: 4, cardHeight: 140.h),
+                child: CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 4, cardHeight: 140.h, )),
               );
             }
 
@@ -182,10 +182,7 @@ class NetworkSupplyRequestsReviewScreen
                   separatorBuilder: (context, index) => AppSpacing.vSm,
                   itemBuilder: (context, index) {
                     if (index == controller.requests.length) {
-                      return const CustomSkeletonFeed(
-                        itemCount: 1,
-                        cardHeight: 132,
-                      );
+                      return const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.list, itemCount: 1, cardHeight: 132, ));
                     }
 
                     final request = controller.requests[index];
