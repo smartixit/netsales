@@ -8,8 +8,8 @@ import 'package:netsales/features/workspace/presentation/models/pos_network_caro
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_network_carousel_card.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_slider.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
