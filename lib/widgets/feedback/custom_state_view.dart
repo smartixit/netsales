@@ -7,8 +7,9 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/toasts/custom_toast.dart';
 import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
-export 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
+
+export 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
 
 part 'states/custom_state_view_layout.dart';
 part 'states/custom_state_view_content.dart';
