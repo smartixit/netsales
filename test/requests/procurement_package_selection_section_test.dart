@@ -14,6 +14,7 @@ import 'package:netsales/features/requests/domain/usecases/get_requests_use_case
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_sale_type_selector.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton_view.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
