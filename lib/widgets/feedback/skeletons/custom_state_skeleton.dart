@@ -1,5 +1,5 @@
 /// Content-shaped skeleton layouts shared by lists, cards, grids and details.
-enum CustomStateSkeletonLayout { list, cards, grid, detail }
+enum CustomStateSkeletonLayout { list, cards, grid, detail, text }
 
 /// Immutable recipe describing the geometry of a loading placeholder.
 ///
