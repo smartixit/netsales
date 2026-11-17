@@ -124,6 +124,8 @@ class PosProcurementController extends GetxController {
   final linkedNetworks = <NetworkPosLinkEntity>[].obs;
   final selectedNetworkId = RxnInt();
   final isLoadingNetworks = false.obs;
+  /// يحدد بطاقة السياق المفتوحة حالياً لمنع تكدس خيارات الشبكة ونقطة البيع.
+  final expandedProcurementContext = ''.obs;
 
   final availablePackages = <PackageEntity>[].obs;
   final selectedPackage = Rxn<PackageEntity>();
