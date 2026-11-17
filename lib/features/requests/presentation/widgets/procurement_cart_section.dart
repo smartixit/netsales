@@ -7,14 +7,14 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_line_entity.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_quantity_editor_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// عرض سلة بنود التوريد وإجراءات تعديل الكمية أو حذف الباقة.
-class ProcurementCartSection extends GetView<PosProcurementController> {
+class ProcurementCartSection extends GetView<PosNewProcurementOrderController> {
   const ProcurementCartSection({super.key});
 
   @override
