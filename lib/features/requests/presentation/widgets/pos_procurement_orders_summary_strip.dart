@@ -51,7 +51,7 @@ class PosProcurementOrdersSummaryStrip extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.cardPadding),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           for (var index = 0; index < cards.length; index++) ...[
             if (index > 0) AppSpacing.hSm,
@@ -94,7 +94,7 @@ class _SummaryCard extends StatelessWidget {
     final colors = context.colors;
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      constraints: BoxConstraints(minHeight: 104.h),
+      height: 108.h,
       padding: EdgeInsets.fromLTRB(9.r, 10.r, 9.r, 9.r),
       decoration: BoxDecoration(
         gradient: data.gradient,
