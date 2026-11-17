@@ -21,13 +21,11 @@ import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
-import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/finance/domain/repositories/finance_repository.dart';
 import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
-import 'package:netsales/features/requests/presentation/controllers/pos_procurement_controller.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Mocks
@@ -320,10 +318,8 @@ void main() {
       () async {
         mockCommercialRepo.posItems = [pos1];
 
-        final controller = PosProcurementController(
-          getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
+        final controller = PosNewProcurementOrderController(
           createRequestUseCase: CreateRequestUseCase(mockRequestRepo),
-          cancelRequestUseCase: CancelRequestUseCase(mockRequestRepo),
           getMyPosUseCase: GetMyPosUseCase(mockCommercialRepo),
           getPosNetworksListUseCase: GetPosNetworksListUseCase(
             mockCommercialRepo,
@@ -360,10 +356,8 @@ void main() {
       expect(WorkspaceService.instance.savedActivePosId, equals(202));
 
       // Now POS Procurement controller loads
-      final procurementCtrl = PosProcurementController(
-        getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
+      final procurementCtrl = PosNewProcurementOrderController(
         createRequestUseCase: CreateRequestUseCase(mockRequestRepo),
-        cancelRequestUseCase: CancelRequestUseCase(mockRequestRepo),
         getMyPosUseCase: GetMyPosUseCase(mockCommercialRepo),
         getPosNetworksListUseCase: GetPosNetworksListUseCase(
           mockCommercialRepo,
@@ -400,10 +394,8 @@ void main() {
         await SessionService.instance.init();
         await WorkspaceService.instance.init();
 
-        final procurementCtrl = PosProcurementController(
-          getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
+        final procurementCtrl = PosNewProcurementOrderController(
           createRequestUseCase: CreateRequestUseCase(mockRequestRepo),
-          cancelRequestUseCase: CancelRequestUseCase(mockRequestRepo),
           getMyPosUseCase: GetMyPosUseCase(mockCommercialRepo),
           getPosNetworksListUseCase: GetPosNetworksListUseCase(
             mockCommercialRepo,
@@ -422,10 +414,8 @@ void main() {
     test('Acceptance 4: تبديل نقطة البيع يصفر السلة ويرسل الطلب لـ pos_id المحدد فعلياً', () async {
       mockCommercialRepo.posItems = [pos1, pos2];
 
-      final controller = PosProcurementController(
-        getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
+      final controller = PosNewProcurementOrderController(
         createRequestUseCase: CreateRequestUseCase(mockRequestRepo),
-        cancelRequestUseCase: CancelRequestUseCase(mockRequestRepo),
         getMyPosUseCase: GetMyPosUseCase(mockCommercialRepo),
         getPosNetworksListUseCase: GetPosNetworksListUseCase(
           mockCommercialRepo,
@@ -480,10 +470,8 @@ void main() {
 
       mockCommercialRepo.posItems = []; // No authorized points exist
 
-      final controller = PosProcurementController(
-        getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
+      final controller = PosNewProcurementOrderController(
         createRequestUseCase: CreateRequestUseCase(mockRequestRepo),
-        cancelRequestUseCase: CancelRequestUseCase(mockRequestRepo),
         getMyPosUseCase: GetMyPosUseCase(mockCommercialRepo),
         getPosNetworksListUseCase: GetPosNetworksListUseCase(
           mockCommercialRepo,
@@ -510,10 +498,8 @@ void main() {
       // API returns [pos3, pos2, pos1] or [pos1, pos3, pos2]
       mockCommercialRepo.posItems = [pos3, pos1, pos2];
 
-      final controller = PosProcurementController(
-        getRequestsUseCase: GetRequestsUseCase(mockRequestRepo),
+      final controller = PosNewProcurementOrderController(
         createRequestUseCase: CreateRequestUseCase(mockRequestRepo),
-        cancelRequestUseCase: CancelRequestUseCase(mockRequestRepo),
         getMyPosUseCase: GetMyPosUseCase(mockCommercialRepo),
         getPosNetworksListUseCase: GetPosNetworksListUseCase(
           mockCommercialRepo,
