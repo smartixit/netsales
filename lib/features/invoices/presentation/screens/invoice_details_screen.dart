@@ -12,7 +12,7 @@ import 'package:netsales/features/invoices/presentation/widgets/invoice_info_row
 import 'package:netsales/features/invoices/presentation/widgets/invoice_item_row.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 
