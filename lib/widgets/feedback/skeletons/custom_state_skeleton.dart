@@ -92,7 +92,8 @@ class CustomStateSkeletonView extends StatelessWidget {
         final minWidth = recipe.minItemWidth.w;
         final columns = ((availableWidth + spacing) / (minWidth + spacing))
             .floor()
-            .clamp(1, recipe.maxColumns);
+            .clamp(1, recipe.maxColumns)
+            .toInt();
         final itemWidth =
             (availableWidth - spacing * (columns - 1)) / columns;
 
