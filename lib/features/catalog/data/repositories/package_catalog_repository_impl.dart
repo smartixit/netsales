@@ -93,6 +93,25 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
   }
 
   @override
+  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({
+    required int networkId,
+    required int posId,
+  }) async {
+    final response = await _remoteDataSource.getEffectiveDiscountsForPos(
+      networkId: networkId,
+      posId: posId,
+    );
+
+    if (response.success && response.data != null) {
+      return response.data!
+          .where((discount) => discount.packageId != null && discount.isEffectiveNow)
+          .toList(growable: false);
+    }
+
+    throw AppException(response.message);
+  }
+
+  @override
   Future<EffectivePackageDiscountEntity> getEffectiveDiscount({
     required int networkId,
     required int posId,
