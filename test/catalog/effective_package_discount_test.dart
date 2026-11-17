@@ -8,7 +8,6 @@ import 'package:netsales/features/catalog/domain/usecases/get_effective_package_
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
-import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 
