@@ -5,8 +5,8 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/finance/presentation/controllers/pos_wallet_dashboard_controller.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_dual_wallet_card.dart';
 import 'package:netsales/features/finance/presentation/widgets/wallet_selector_skeleton.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 
 /// مكون تحديد محفظة نقطة البيع في لوحة المالية (POS Wallet Selector)
 class PosWalletSelectorWidget extends StatelessWidget {
