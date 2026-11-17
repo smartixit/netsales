@@ -209,7 +209,7 @@ class _PackageHero extends StatelessWidget {
                                   : 'باقة الشبكة',
                           style: AppTypography.labelSmall.copyWith(
                             color: Colors.white,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
@@ -221,9 +221,9 @@ class _PackageHero extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.end,
-                    style: AppTypography.titleMedium.copyWith(
+                    style: AppTypography.titleSmall.copyWith(
                       color: colors.onSurface,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       height: 1.3,
                     ),
                   ),
@@ -588,7 +588,7 @@ class _TariffPanel extends StatelessWidget {
                 style: AppTypography.labelSmall.copyWith(
                   color: colors.onSurfaceVariant,
                   decoration: TextDecoration.lineThrough,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -638,7 +638,7 @@ class _PriceColumn extends StatelessWidget {
                 textAlign: TextAlign.end,
                 style: AppTypography.labelMedium.copyWith(
                   color: colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -661,9 +661,9 @@ class _PriceColumn extends StatelessWidget {
             '${money(price)} ر.ي',
             textDirection: TextDirection.ltr,
             maxLines: 1,
-            style: AppTypography.titleLarge.copyWith(
+            style: AppTypography.currencyMedium.copyWith(
               color: colors.onSurface,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               height: 1,
             ),
           ),
@@ -681,7 +681,7 @@ class _PriceColumn extends StatelessWidget {
               'خصم ${discount.toStringAsFixed(2)}٪',
               style: AppTypography.labelSmall.copyWith(
                 color: colors.success,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           )
@@ -776,7 +776,7 @@ class _Specification extends StatelessWidget {
             textAlign: TextAlign.center,
             style: AppTypography.labelMedium.copyWith(
               color: colors.onSurface,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -826,7 +826,7 @@ class _QuantityControls extends StatelessWidget {
                 'الكمية المطلوبة',
                 style: AppTypography.labelMedium.copyWith(
                   color: colors.onSurface,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -860,9 +860,9 @@ class _QuantityControls extends StatelessWidget {
                   isRequired: false,
                   isDense: true,
                   textAlign: TextAlign.center,
-                  textStyle: AppTypography.titleSmall.copyWith(
+                  textStyle: AppTypography.inputText.copyWith(
                     color: colors.onSurface,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w500,
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 3.r,
@@ -965,9 +965,9 @@ class _PaperEquivalent extends StatelessWidget {
             child: Text(
               'المكافئ الورقي: $description',
               textAlign: TextAlign.center,
-              style: AppTypography.labelLarge.copyWith(
+              style: AppTypography.labelMedium.copyWith(
                 color: colors.onSurface,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -1006,9 +1006,9 @@ class _LineTotal extends StatelessWidget {
           Expanded(
             child: Text(
               'قيمة البند التقديرية',
-              style: AppTypography.titleSmall.copyWith(
+              style: AppTypography.labelMedium.copyWith(
                 color: Colors.white,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -1018,9 +1018,9 @@ class _LineTotal extends StatelessWidget {
               child: Text(
                 '${AmountFormatter.formatValue(line!.lineNetTotal, decimalPlaces: 2)} ر.ي',
                 textDirection: TextDirection.ltr,
-                style: AppTypography.titleLarge.copyWith(
+                style: AppTypography.currencyMedium.copyWith(
                   color: Colors.white,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             )
@@ -1029,7 +1029,7 @@ class _LineTotal extends StatelessWidget {
               selected ? 'بانتظار عرض السعر' : '—',
               style: AppTypography.labelMedium.copyWith(
                 color: Colors.white.withValues(alpha: .86),
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
               ),
             ),
         ],
