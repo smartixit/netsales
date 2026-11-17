@@ -10,8 +10,8 @@ import 'package:netsales/features/finance/presentation/widgets/repayment_card.da
 import 'package:netsales/features/finance/presentation/widgets/repayment_card_skeleton.dart';
 import 'package:netsales/features/finance/presentation/widgets/repayment_history_scope_panel.dart';
 import 'package:netsales/widgets/badges/custom_chip.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class RepaymentHistoryScreen extends GetView<RepaymentHistoryController> {
