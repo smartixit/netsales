@@ -108,7 +108,7 @@ class PosWorkspaceController extends GetxController {
 
   String get welcomeGreeting => GreetingFormatter.greeting();
 
-  String get todayFormatted => DateFormatter.smart(DateTime.now());
+  String get todayFormatted => DateFormatter.fullDate(DateTime.now());
 
   String get activePosName => activePos.value?.posName ?? 'نقطة البيع';
 
