@@ -10,7 +10,7 @@ import 'package:netsales/features/reports/presentation/widgets/operational_repor
 import 'package:netsales/features/reports/presentation/widgets/operational_report_summary_and_charts.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_studio_workspace.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_type_selector.dart';
-import 'package:netsales/widgets/feedback/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 class OperationalReportsScreen extends GetView<OperationalReportsController> {
