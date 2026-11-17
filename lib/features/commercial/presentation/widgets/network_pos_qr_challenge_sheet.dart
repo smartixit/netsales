@@ -4,7 +4,7 @@ import 'package:netsales/features/commercial/domain/entities/network_pos_link_ch
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/features/commercial/presentation/controllers/commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/network_pos_qr_share_card.dart';
-import 'package:netsales/widgets/feedback/custom_error_state.dart';
+import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// نافذة سفلية لعرض ومشاركة دعوة ربط نقطة البيع بالشبكة عبر QR
