@@ -706,6 +706,7 @@ class _TariffPanel extends StatelessWidget {
                   money: money,
                   selected: !isCashSale,
                   isDiscountLoading: isDiscountLoading,
+                  isSecond: true,
                 ),
               ),
             ],
@@ -726,6 +727,7 @@ class _PriceOptionCard extends StatelessWidget {
     required this.money,
     required this.selected,
     required this.isDiscountLoading,
+    this.isSecond = false,
   });
 
   final Key selectedMarkerKey;
@@ -734,6 +736,7 @@ class _PriceOptionCard extends StatelessWidget {
   final double discount;
   final String Function(num) money;
   final bool selected;
+  final bool isSecond;
   final bool isDiscountLoading;
 
   @override
@@ -751,7 +754,19 @@ class _PriceOptionCard extends StatelessWidget {
           color: selected
               ? colors.primary.withValues(alpha: .10)
               : colors.surface,
-          borderRadius: BorderRadius.circular(13.r),
+          borderRadius: !isSecond
+              ? BorderRadiusDirectional.only(
+                  topStart: Radius.circular(AppRadius.md),
+                  bottomStart: Radius.circular(AppRadius.md),
+                  topEnd: Radius.circular(AppRadius.xs),
+                  bottomEnd: Radius.circular(AppRadius.xs),
+                )
+              : BorderRadiusDirectional.only(
+                  topStart: Radius.circular(AppRadius.xs),
+                  bottomStart: Radius.circular(AppRadius.xs),
+                  topEnd: Radius.circular(AppRadius.md),
+                  bottomEnd: Radius.circular(AppRadius.md),
+                ),
           border: Border.all(
             color: selected
                 ? colors.primary.withValues(alpha: .72)
