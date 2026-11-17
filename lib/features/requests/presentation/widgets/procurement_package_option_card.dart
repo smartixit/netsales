@@ -185,7 +185,10 @@ class _PackageHero extends StatelessWidget {
         return ConstrainedBox(
           constraints: BoxConstraints(minHeight: artworkSize),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            // The card is hosted in a vertical scroll view, so its max height
+            // is unbounded. Center lets the hero grow to its natural content
+            // height instead of stretching children toward infinity.
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Padding(
