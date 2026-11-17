@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
@@ -10,7 +11,6 @@ import 'package:netsales/features/workspace/presentation/controllers/workspace_e
 import 'package:netsales/features/workspace/presentation/widgets/workspace_network_picker_tile.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_pos_picker_tile.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/custom_skeleton_card.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -82,11 +82,11 @@ class WorkspaceEntityPickerSheet extends StatelessWidget {
                   isLoading
                       ? Column(
                           children: [
-                            const CustomSkeletonCard(height: 72),
+                            const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 72, maxColumns: 1, minItemWidth: 180)),
                             SizedBox(height: AppSpacing.sm),
-                            const CustomSkeletonCard(height: 72),
+                            const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 72, maxColumns: 1, minItemWidth: 180)),
                             SizedBox(height: AppSpacing.sm),
-                            const CustomSkeletonCard(height: 72),
+                            const CustomStateView.loading(presentation: CustomStatePresentation.skeletonOnly, skeleton: CustomStateSkeleton(layout: CustomStateSkeletonLayout.cards, itemCount: 1, cardHeight: 72, maxColumns: 1, minItemWidth: 180)),
                           ],
                         )
                   : errorMessage != null &&
