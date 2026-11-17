@@ -23,6 +23,7 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
+import 'package:netsales/features/requests/domain/services/procurement_estimate_calculator.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
@@ -46,6 +47,7 @@ class PosProcurementController extends GetxController {
   final GetPackagesUseCase? getPackagesUseCase;
   final GetEffectivePackageDiscountsForPosUseCase? getEffectivePackageDiscountsForPosUseCase;
   final GetProcurementQuoteUseCase? getProcurementQuoteUseCase;
+  final ProcurementEstimateCalculator procurementEstimateCalculator;
 
   PosProcurementController({
     required this.getRequestsUseCase,
@@ -58,6 +60,7 @@ class PosProcurementController extends GetxController {
     this.getPackagesUseCase,
     this.getEffectivePackageDiscountsForPosUseCase,
     this.getProcurementQuoteUseCase,
+    this.procurementEstimateCalculator = const ProcurementEstimateCalculator(),
   });
 
   // State: قائمة الطلبات والترقيم
@@ -192,45 +195,23 @@ class PosProcurementController extends GetxController {
     return expiresAt == null || DateTime.now().isBefore(expiresAt);
   }
 
-  bool get hasCurrentProcurementSnapshots {
-    if (procurementCart.isEmpty) return false;
-    final now = DateTime.now();
-    return procurementCart.every((line) {
-      final package = line.package;
-      final token = package.procurementPricingSnapshotToken;
-      final expiresAt = package.procurementPricingSnapshotExpiresAt;
-      return package.procurementBaseUnitPriceMinor != null &&
-          package.procurementCashDiscountBasisPoints != null &&
-          package.procurementCreditDiscountBasisPoints != null &&
-          token != null && token.isNotEmpty && expiresAt != null && now.isBefore(expiresAt);
-    });
-  }
+  bool get hasCurrentProcurementSnapshots =>
+      procurementEstimateCalculator.hasCurrentSnapshots(
+        procurementCart.map((line) => line.package),
+      );
 
-  int? estimatedLineTotalMinor(PackageEntity package, int quantity) {
-    if (quantity <= 0 || !hasCurrentProcurementSnapshots) return null;
-    final base = package.procurementBaseUnitPriceMinor;
-    final rate = selectedSaleType.value == SaleType.cash ? package.procurementCashDiscountBasisPoints : package.procurementCreditDiscountBasisPoints;
-    if (base == null || rate == null) return null;
-    final gross = base * quantity;
-    return gross - ((gross * rate + 5000) ~/ 10000);
-  }
+  int? estimatedLineTotalMinor(PackageEntity package, int quantity) =>
+      procurementEstimateCalculator.calculateLineTotalMinor(
+        package,
+        quantity,
+        selectedSaleType.value,
+      );
 
-  (int, int, int)? get estimatedProcurementTotalsMinor {
-    if (!hasCurrentProcurementSnapshots) return null;
-    var gross = 0;
-    var discount = 0;
-    var net = 0;
-    for (final line in procurementCart) {
-      final base = line.package.procurementBaseUnitPriceMinor!;
-      final rate = selectedSaleType.value == SaleType.cash ? line.package.procurementCashDiscountBasisPoints! : line.package.procurementCreditDiscountBasisPoints!;
-      final lineGross = base * line.voucherCount;
-      final lineDiscount = (lineGross * rate + 5000) ~/ 10000;
-      gross += lineGross;
-      discount += lineDiscount;
-      net += lineGross - lineDiscount;
-    }
-    return (gross, discount, net);
-  }
+  (int, int, int)? get estimatedProcurementTotalsMinor =>
+      procurementEstimateCalculator.calculateCartTotalsMinor(
+        procurementCart,
+        selectedSaleType.value,
+      );
 
   bool get canSubmitOrder => hasCartItems && hasCurrentProcurementSnapshots && !isSubmitting.value;
 
