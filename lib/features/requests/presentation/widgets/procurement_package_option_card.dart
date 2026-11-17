@@ -111,7 +111,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
         children: [
           _PackageHero(
             package: package,
-            isCustomDiscount: customDiscount?.isCustom == true,
+            isCustomDiscount: package.procurementIsCustomDiscount,
             discount: discount,
           ),
           Padding(
@@ -202,11 +202,17 @@ class _PackageHero extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.star_rounded, color: Colors.white, size: 14.r),
+                        Icon(
+                          isCustomDiscount
+                              ? Icons.storefront_rounded
+                              : Icons.star_rounded,
+                          color: Colors.white,
+                          size: 14.r,
+                        ),
                         AppSpacing.hXxs,
                         Text(
                           isCustomDiscount
-                              ? 'خصم خاص'
+                              ? 'خصم نقطة البيع'
                               : discount > 0
                                   ? 'عرض الباقة'
                                   : 'باقة الشبكة',
@@ -231,13 +237,37 @@ class _PackageHero extends StatelessWidget {
                     ),
                   ),
                   AppSpacing.vXxs,
-                  Text(
-                    'باقة إنترنت متكاملة للمنشآت',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: colors.onSurfaceVariant,
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.r,
+                      vertical: 4.r,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: .08),
+                      borderRadius: BorderRadius.circular(AppRadius.chip),
+                      border: Border.all(
+                        color: colors.primary.withValues(alpha: .14),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.layers_rounded,
+                          size: 13.r,
+                          color: colors.primary,
+                        ),
+                        AppSpacing.hXxs,
+                        Text(
+                          'سعة الورقة: ${package.packageVoucherCount} كرت',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -546,6 +576,43 @@ class _TariffPanel extends StatelessWidget {
       ),
       child: Column(
         children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 9.r, vertical: 7.r),
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHighest.withValues(alpha: .26),
+              borderRadius: BorderRadius.circular(AppRadius.chip),
+              border: Border.all(
+                color: colors.outlineVariant.withValues(alpha: .48),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.sell_outlined, size: 14.r, color: colors.onSurfaceVariant),
+                AppSpacing.hXxs,
+                Expanded(
+                  child: Text(
+                    'السعر الأساسي قبل الخصم',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant),
+                  ),
+                ),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '${money(basePrice)} ر.ي',
+                    textDirection: TextDirection.ltr,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      decoration: TextDecoration.lineThrough,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          AppSpacing.vSm,
           Row(
             children: [
               Expanded(
@@ -570,28 +637,6 @@ class _TariffPanel extends StatelessWidget {
                   discount: creditDiscount,
                   money: money,
                   selected: !isCashSale,
-                ),
-              ),
-            ],
-          ),
-          AppSpacing.vXs,
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'السعر الأساسي قبل الخصم',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              Text(
-                '${money(basePrice)} ر.ي',
-                textDirection: TextDirection.ltr,
-                style: AppTypography.labelSmall.copyWith(
-                  color: colors.onSurfaceVariant,
-                  decoration: TextDecoration.lineThrough,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -717,9 +762,9 @@ class _SpecificationStrip extends StatelessWidget {
         children: [
           Expanded(
             child: _Specification(
-              icon: Icons.inventory_2_rounded,
-              label: 'السعة',
-              value: '${package.packageVoucherCount} كرت',
+              icon: Icons.data_usage_rounded,
+              label: 'الرصيد',
+              value: package.balanceDisplay,
             ),
           ),
           _SpecificationDivider(color: colors.outlineVariant),
@@ -822,24 +867,12 @@ class _QuantityControls extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'الكمية المطلوبة',
-                style: AppTypography.labelMedium.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            Text(
-              'سعة الورقة: $sheetSize كرت',
-              style: AppTypography.labelSmall.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-          ],
+        Text(
+          'الكمية المطلوبة',
+          style: AppTypography.labelMedium.copyWith(
+            color: colors.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         AppSpacing.vSm,
         Row(
