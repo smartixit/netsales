@@ -30,20 +30,17 @@ class InfinityFreeChallengeSolver {
 
   /// استخراج الثوابت [a, b, c] من نص صفحة التحدي.
   static List<String>? extractConstants(String html) {
-    final a = RegExp(
-      r'var a=toNumbers\("([0-9a-f]+)"\)',
-      caseSensitive: false,
-    ).firstMatch(html);
-    final b = RegExp(
-      r'[a-z,]?b=toNumbers\("([0-9a-f]+)"\)',
-      caseSensitive: false,
-    ).firstMatch(html);
-    final c = RegExp(
-      r'[a-z,]?c=toNumbers\("([0-9a-f]+)"\)',
-      caseSensitive: false,
-    ).firstMatch(html);
-    if (a == null || b == null || c == null) return null;
-    return [a.group(1)!, b.group(1)!, c.group(1)!];
+    // Tolerate minification and whitespace changes in InfinityFree's script.
+    String? capture(String name) => RegExp(
+          r'\b$name\s*=\s*toNumbers\s*\(\s*"([0-9a-f]+)"\s*\)',
+          caseSensitive: false,
+        ).firstMatch(html)?.group(1);
+
+    final key = capture('a');
+    final iv = capture('b');
+    final cipherText = capture('c');
+    if (key == null || iv == null || cipherText == null) return null;
+    return [key, iv, cipherText];
   }
 
   /// يحسب قيمة كوكي `__test` من الصفحة المعروضة (تُعيد null عند الفشل).
@@ -72,22 +69,29 @@ class InfinityFreeChallengeSolver {
 
   /// مطابقة دالة «unpadBytesOut» في aes.js — تُزيل حشوة PKCS7 المبسّطة
   /// فقط عندما يتجاوز حجم الناتج كتلة واحدة (أيضاً 16 بايتً لا تُلمس).
+  /// Matches SlowAES unpadBytesOut, including its single-block behavior.
   static Uint8List _unpadBytesOut(Uint8List data) {
-    if (data.length <= 16) return data;
-    var count = 0;
-    var lastValue = -1;
-    var i = data.length - 1;
-    for (; i >= data.length - 1 - 16 && data[i] <= 16; i--) {
-      if (lastValue == -1) lastValue = data[i];
-      if (data[i] != lastValue) {
-        count = 0;
+    if (data.isEmpty) return data;
+    var padCount = 0;
+    var padByte = -1;
+    const blockSize = 16;
+    for (var i = data.length - 1;
+        i >= data.length - 1 - blockSize;
+        i--) {
+      if (data[i] <= blockSize) {
+        if (padByte == -1) padByte = data[i];
+        if (data[i] != padByte) {
+          padCount = 0;
+          break;
+        }
+        padCount++;
+      } else {
         break;
       }
-      count++;
-      if (count == lastValue) break;
+      if (padCount == padByte) break;
     }
-    if (count > 0) {
-      return Uint8List.sublistView(data, 0, data.length - count);
+    if (padCount > 0) {
+      return Uint8List.sublistView(data, 0, data.length - padCount);
     }
     return data;
   }
