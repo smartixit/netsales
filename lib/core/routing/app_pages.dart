@@ -31,9 +31,8 @@ import 'package:netsales/features/catalog/presentation/screens/package_form_scre
 import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
 import 'package:netsales/features/requests/presentation/bindings/pos_procurement_orders_binding.dart';
 import 'package:netsales/features/requests/presentation/bindings/pos_new_procurement_order_binding.dart';
-import 'package:netsales/features/requests/presentation/screens/network_supply_requests_review_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/pos_new_procurement_order_screen.dart';
-import 'package:netsales/features/requests/presentation/screens/pos_procurement_orders_screen.dart';
+import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/procurement_request_details_screen.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
@@ -286,7 +285,7 @@ abstract final class AppPages {
     // ========================================================================
     GetPage(
       name: AppRoutes.procurementOrders,
-      page: () => const PosProcurementOrdersScreen(),
+      page: () => const ProcurementOrdersScreen(),
       binding: PosProcurementOrdersBinding(),
       middlewares: [
         AuthGuard(),
@@ -307,7 +306,7 @@ abstract final class AppPages {
     ),
     GetPage(
       name: AppRoutes.supplyRequestsReview,
-      page: () => const NetworkSupplyRequestsReviewScreen(),
+      page: () => const ProcurementOrdersScreen(isNetwork: true),
       binding: ProcurementRequestBinding(),
       middlewares: [
         AuthGuard(),

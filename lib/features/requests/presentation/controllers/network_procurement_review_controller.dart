@@ -53,14 +53,32 @@ class NetworkProcurementReviewController extends GetxController {
 
   // State: قائمة طلبات التوريد الواردة والترقيم
   final requests = <RequestEntity>[].obs;
-  final isLoading = false.obs;
+  final isLoading = true.obs;
   final isLoadingMore = false.obs;
   final isProcessingDecision = false.obs;
   final errorMessage = RxnString();
   final loadMoreError = RxnString();
   final nextCursor = RxnString();
+  final expandedRequestId = RxnInt();
 
   bool get hasMore => nextCursor.value != null;
+
+  int get totalOrdersCount => requests.length;
+  int get pendingOrdersCount =>
+      requests.where((request) => request.isPending).length;
+  int get approvedOrdersCount =>
+      requests.where((request) => request.isApproved).length;
+
+  Future<void> refreshOrders() =>
+      loadRequests(isRefresh: true, clearOnStart: true);
+
+  void toggleAccordion(int requestId) {
+    if (expandedRequestId.value == requestId) {
+      expandedRequestId.value = null;
+    } else {
+      expandedRequestId.value = requestId;
+    }
+  }
 
   // فلاتر وبحث الطلبات
   final searchController = TextEditingController();
@@ -318,8 +336,8 @@ class NetworkProcurementReviewController extends GetxController {
 
     debounce(
       searchQuery,
-      (_) => loadRequests(isRefresh: true),
-      time: const Duration(milliseconds: 500),
+      (_) => loadRequests(isRefresh: true, clearOnStart: true),
+      time: const Duration(milliseconds: 350),
     );
 
     loadNetworksAndRequests();
@@ -336,7 +354,7 @@ class NetworkProcurementReviewController extends GetxController {
   /// تحميل الشبكات التابعة للمشغل ثم جلب الطلبات الواردة
   Future<void> loadNetworksAndRequests() async {
     await loadAuthorizedNetworks();
-    await loadRequests(isRefresh: true);
+    await loadRequests(isRefresh: true, clearOnStart: true);
   }
 
   /// جلب الشبكات المعتمدة التابعة لمشغل الشبكة
@@ -365,8 +383,14 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   /// تحميل طلبات التوريد الواردة من نقاط البيع
-  Future<void> loadRequests({bool isRefresh = false}) async {
+  Future<void> loadRequests({
+    bool isRefresh = false,
+    bool clearOnStart = false,
+  }) async {
     final revision = ++_requestListRevision;
+    if (clearOnStart || requests.isEmpty) {
+      requests.clear();
+    }
     isLoading.value = true;
     errorMessage.value = null;
     nextCursor.value = null;
@@ -449,7 +473,7 @@ class NetworkProcurementReviewController extends GetxController {
   void setStatusFilter(String? status) {
     if (statusFilter.value == status) return;
     statusFilter.value = status;
-    loadRequests(isRefresh: true);
+    loadRequests(isRefresh: true, clearOnStart: true);
   }
 
   /// إعادة تعيين الفلاتر والبحث
@@ -457,7 +481,7 @@ class NetworkProcurementReviewController extends GetxController {
     searchController.clear();
     searchQuery.value = '';
     statusFilter.value = null;
-    loadRequests(isRefresh: true);
+    loadRequests(isRefresh: true, clearOnStart: true);
   }
 
   /// تغيير الشبكة المحددة
@@ -468,7 +492,7 @@ class NetworkProcurementReviewController extends GetxController {
     if (networkId != null && Get.isRegistered<WorkspaceService>()) {
       await WorkspaceService.to.saveActiveNetworkId(networkId);
     }
-    await loadRequests(isRefresh: true);
+    await loadRequests(isRefresh: true, clearOnStart: true);
   }
 
   /// مراجعة واعتماد طلب الكروت وتوليد الفاتورة آلياً

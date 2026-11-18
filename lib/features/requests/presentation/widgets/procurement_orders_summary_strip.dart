@@ -10,13 +10,14 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 ///
 /// يعرض إجمالي الطلبات، والطلبات قيد المراجعة، والطلبات المعتمدة مع استخدام
 /// الـ CustomSkeletonShimmer الموحد للنصوص أثناء التحميل ودعم النقر للتصفية السريعة.
-class PosProcurementOrdersSummaryStrip extends StatelessWidget {
-  const PosProcurementOrdersSummaryStrip({
+class ProcurementOrdersSummaryStrip extends StatelessWidget {
+  const ProcurementOrdersSummaryStrip({
     super.key,
     required this.totalCount,
     required this.pendingCount,
     required this.approvedCount,
     this.isLoading = false,
+    this.isNetworkView = false,
     this.selectedStatus,
     this.onStatusTap,
   });
@@ -25,6 +26,7 @@ class PosProcurementOrdersSummaryStrip extends StatelessWidget {
   final int pendingCount;
   final int approvedCount;
   final bool isLoading;
+  final bool isNetworkView;
   final String? selectedStatus;
   final ValueChanged<String?>? onStatusTap;
 
@@ -34,14 +36,14 @@ class PosProcurementOrdersSummaryStrip extends StatelessWidget {
 
     final cards = [
       _SummaryCardData(
-        label: 'إجمالي الطلبات',
+        label: isNetworkView ? 'الطلبات الواردة' : 'إجمالي الطلبات',
         count: totalCount,
         statusValue: null,
         icon: Icons.receipt_long_rounded,
         accentColor: colors.primary,
       ),
       _SummaryCardData(
-        label: 'قيد المراجعة',
+        label: isNetworkView ? 'بانتظار الاعتماد' : 'قيد المراجعة',
         count: pendingCount,
         statusValue: 'PENDING',
         icon: Icons.hourglass_top_rounded,

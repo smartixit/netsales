@@ -62,7 +62,8 @@ class PosProcurementOrdersController extends GetxController {
   bool get canCancelOrder =>
       PermissionService.to.can(AppPermissions.requestsEdit);
 
-  Future<void> refreshOrders() => loadRequests(isRefresh: true);
+  Future<void> refreshOrders() =>
+      loadRequests(isRefresh: true, clearOnStart: true);
 
   @override
   void onInit() {

@@ -8,17 +8,21 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 ///
 /// تجسد نفس العمق البصري والتدرج اللوني الزمردي الغني [0xFF087F68, 0xFF075B55, 0xFF123F49]
 /// مع الحواف الذهبية الدافئة والدوائر الهندسية الخافتة المستلهمة من شاشة إنشاء الطلب الجديد.
-class PosProcurementOrdersHero extends StatelessWidget {
-  const PosProcurementOrdersHero({
+class ProcurementOrdersHero extends StatelessWidget {
+  const ProcurementOrdersHero({
     super.key,
-    required this.onCreate,
-    required this.canCreate,
+    this.onCreate,
+    this.canCreate = false,
     this.embedded = false,
+    this.title,
+    this.subtitle,
   });
 
-  final VoidCallback onCreate;
+  final VoidCallback? onCreate;
   final bool canCreate;
   final bool embedded;
+  final String? title;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +119,7 @@ class PosProcurementOrdersHero extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'طلبات التوريد',
+                            title ?? 'طلبات التوريد',
                             style: AppTypography.titleLarge.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w900,
@@ -124,7 +128,7 @@ class PosProcurementOrdersHero extends StatelessWidget {
                           ),
                           AppSpacing.vXs,
                           Text(
-                            'متابعة وإدارة طلبات كروت الشبكات، حالات الاعتماد، وتفاصيل الكميات فورياً.',
+                            subtitle ?? 'متابعة وإدارة طلبات كروت الشبكات، حالات الاعتماد، وتفاصيل الكميات فورياً.',
                             style: AppTypography.bodySmall.copyWith(
                               color: Colors.white.withValues(alpha: .88),
                               height: 1.5,

@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
-import 'package:netsales/features/requests/presentation/screens/pos_procurement_orders_screen.dart';
+import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell_screen.dart';
 
 void main() {
@@ -67,11 +67,11 @@ void main() {
       expect(service.canSwitchWorkspace(dualMembershipUser), isTrue);
     });
 
-    test('PosProcurementOrdersScreen supports embedded configuration', () {
-      const embeddedScreen = PosProcurementOrdersScreen(embedded: true);
+    test('ProcurementOrdersScreen supports embedded configuration', () {
+      const embeddedScreen = ProcurementOrdersScreen(embedded: true);
       expect(embeddedScreen.embedded, isTrue);
 
-      const standardScreen = PosProcurementOrdersScreen();
+      const standardScreen = ProcurementOrdersScreen();
       expect(standardScreen.embedded, isFalse);
     });
 

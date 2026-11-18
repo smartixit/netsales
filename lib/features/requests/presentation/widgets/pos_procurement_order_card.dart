@@ -181,7 +181,7 @@ class ProcurementOrderCard extends StatelessWidget {
                 ),
                 AppSpacing.vSm,
 
-                // سكة القياسات الثلاثية (باقات، كمية، إجمالي القيمة)
+                // سكة القياسات الثلاثية (باقات، كمية، إجمالي الطلب)
                 _OrderMetricsRail(
                   itemCount: request.items.length,
                   totalQuantity: request.totalVouchers,
@@ -979,7 +979,7 @@ class _OrderMetricsRail extends StatelessWidget {
           _MetricDivider(),
           Expanded(
             child: _OrderMetricItem(
-              label: 'إجمالي القيمة',
+              label: 'إجمالي الطلب',
               value: AmountFormatter.formatValue(totalAmount),
               icon: Icons.payments_outlined,
               isHighlighted: true,
