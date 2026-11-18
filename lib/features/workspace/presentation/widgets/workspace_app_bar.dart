@@ -69,15 +69,15 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
         padding: EdgeInsets.only(
           left: AppBreakpoints.screenMargin(context),
           right: AppBreakpoints.screenMargin(context),
-          top: 10.h,
-          bottom: 6.h,
+          top: 8.h,
+          // bottom: 6.h,
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppRadius.xl),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
             child: Container(
-              height: 64.h,
+              height: 100.h,
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
                 color: isDark

@@ -171,12 +171,15 @@ class _KpiSummaryCard extends StatelessWidget {
                 ),
               )
             else
-              Text(
-                '${data.count}',
-                style: AppTypography.headlineSmall.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.w900,
-                  height: 1.1,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  '${data.count}',
+                  style: AppTypography.headlineSmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w900,
+                    height: 1.1,
+                  ),
                 ),
               ),
           ],

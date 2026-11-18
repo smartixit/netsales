@@ -244,6 +244,10 @@ class _OrderCardHeader extends StatelessWidget {
     final displayUuid = request.requestUuid?.isNotEmpty == true
         ? request.requestUuid!
         : '#${request.requestId}';
+    final timeStr = _timeLabel();
+    final dateTimeText = timeStr.isNotEmpty
+        ? '${_dateLabel()} • $timeStr'
+        : _dateLabel();
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.r, vertical: 12.r),
@@ -308,14 +312,18 @@ class _OrderCardHeader extends StatelessWidget {
                 Row(
                   children: [
                     Flexible(
-                      child: Text(
-                        displayUuid,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.titleSmall.copyWith(
-                          color: colors.onSurface,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          displayUuid,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.titleSmall.copyWith(
+                            color: colors.onSurface,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ),
@@ -376,7 +384,6 @@ class _OrderCardHeader extends StatelessWidget {
 
                 // السطر 3: الوقت والتاريخ كاملاً وبوضوح تام
                 Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.access_time_rounded,
@@ -384,13 +391,15 @@ class _OrderCardHeader extends StatelessWidget {
                       color: colors.onSurfaceVariant,
                     ),
                     AppSpacing.hXxs,
-                    Text(
-                      _timeLabel().isNotEmpty
-                          ? '${_dateLabel()} • ${_timeLabel()}'
-                          : _dateLabel(),
-                      style: AppTypography.caption.copyWith(
-                        color: colors.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
+                    Flexible(
+                      child: Text(
+                        dateTimeText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.caption.copyWith(
+                          color: colors.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -682,19 +691,27 @@ class _AccordionItemRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              AmountFormatter.formatValue(item.itemTotalAmount),
-              style: AppTypography.labelLarge.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w900,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerEnd,
+              child: Text(
+                AmountFormatter.formatValue(item.itemTotalAmount),
+                style: AppTypography.labelLarge.copyWith(
+                  color: colors.primary,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
             if (item.itemDiscount > 0)
-              Text(
-                'خصم: ${AmountFormatter.formatValue(item.itemDiscount)}',
-                style: AppTypography.labelSmall.copyWith(
-                  color: colors.success,
-                  fontWeight: FontWeight.w600,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerEnd,
+                child: Text(
+                  'خصم: ${AmountFormatter.formatValue(item.itemDiscount)}',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.success,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
           ],
@@ -793,13 +810,16 @@ class _OrderMetricItem extends StatelessWidget {
           ),
         ),
         AppSpacing.vXxs,
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTypography.titleSmall.copyWith(
-            color: isHighlighted ? colors.primary : colors.onSurface,
-            fontWeight: FontWeight.w800,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.titleSmall.copyWith(
+              color: isHighlighted ? colors.primary : colors.onSurface,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
       ],

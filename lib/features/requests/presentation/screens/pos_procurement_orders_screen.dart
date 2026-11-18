@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/pos_procurement_order_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/pos_procurement_orders_hero.dart';
@@ -27,6 +28,7 @@ class PosProcurementOrdersScreen
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     // هوامش موحدة ومتطابقة بدقة مع لوحة التحكم (PosHomeDashboard) لمنع أي تداخل
     final topPadding = embedded
         ? MediaQuery.paddingOf(context).top + 20.h
@@ -36,8 +38,12 @@ class PosProcurementOrdersScreen
         : MediaQuery.paddingOf(context).bottom + AppSpacing.xl;
     final horizontalPadding = AppBreakpoints.screenMargin(context);
 
-    final scrollView = RefreshIndicator.adaptive(
+    final scrollView = RefreshIndicator(
       onRefresh: controller.refreshOrders,
+      color: colors.primary,
+      backgroundColor: colors.surface,
+      strokeWidth: 2.5,
+      displacement: 40.h,
       child: NotificationListener<ScrollNotification>(
         onNotification: (scroll) {
           if (scroll.depth == 0 &&
@@ -55,7 +61,9 @@ class PosProcurementOrdersScreen
               key: const PageStorageKey<String>(
                 'pos-procurement-orders-scroll',
               ),
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
               slivers: [
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
