@@ -66,7 +66,9 @@ class ProcurementActionDialogs {
             hint: 'مثال: الرصيد الائتماني غير كافٍ أو الكمية غير متوفرة...',
             maxLines: 2,
             isRequired: true,
-            validator: FormValidators.descriptionValidator(fieldName: 'سبب الرفض'),
+            validator: FormValidators.descriptionValidator(
+              fieldName: 'سبب الرفض',
+            ),
           ),
         ),
       ),

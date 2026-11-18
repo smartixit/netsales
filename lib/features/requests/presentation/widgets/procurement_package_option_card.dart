@@ -195,16 +195,6 @@ class _PackageHero extends StatelessWidget {
             // height instead of stretching children toward infinity.
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                key: const ValueKey('procurement-package-color-accent'),
-                width: 4.r,
-                height: 54.r,
-                decoration: BoxDecoration(
-                  color: packageAccentColor,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-              ),
-              AppSpacing.hXs,
               Expanded(
                 child: Padding(
                   padding: EdgeInsetsDirectional.fromSTEB(

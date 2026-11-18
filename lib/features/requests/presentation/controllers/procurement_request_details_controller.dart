@@ -9,6 +9,7 @@ import 'package:netsales/features/requests/domain/usecases/cancel_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/delete_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
+import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -99,6 +100,9 @@ class ProcurementRequestDetailsController extends GetxController {
   Future<void> openEditOrder() async {
     final current = request.value;
     if (current == null) return;
+    if (Get.isRegistered<PosNewProcurementOrderController>()) {
+      await Get.delete<PosNewProcurementOrderController>();
+    }
     await Get.toNamed<void>(AppRoutes.newProcurementOrder, arguments: current);
     await loadRequestDetails(current.requestId);
   }
@@ -257,7 +261,7 @@ class ProcurementRequestDetailsController extends GetxController {
     final current = request.value;
     if (current == null) return;
     await ProcurementActionDialogs.showCancelDialog(
-      requestUuid: current.requestUuid??'-',
+      requestUuid: current.requestUuid ?? '-',
       onConfirm: () => cancelRequest(),
     );
   }
@@ -266,7 +270,7 @@ class ProcurementRequestDetailsController extends GetxController {
     final current = request.value;
     if (current == null) return;
     await ProcurementActionDialogs.showApprovalDialog(
-      requestUuid: current.requestUuid??'-',
+      requestUuid: current.requestUuid ?? '-',
       onConfirm: (note) => approveRequest(note: note),
     );
   }
@@ -275,7 +279,7 @@ class ProcurementRequestDetailsController extends GetxController {
     final current = request.value;
     if (current == null) return;
     await ProcurementActionDialogs.showRejectionDialog(
-      requestUuid: current.requestUuid??'-',
+      requestUuid: current.requestUuid ?? '-',
       onConfirm: (reason) => rejectRequest(reason),
     );
   }

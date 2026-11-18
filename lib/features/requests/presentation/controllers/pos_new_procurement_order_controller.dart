@@ -1030,20 +1030,63 @@ class PosNewProcurementOrderController extends GetxController {
     }
   }
 
-  /// Initializes the form from immutable route arguments; no list-controller state is shared.
+  /// Initializes the form from route arguments or fetched request details; no list-controller state is shared.
   Future<void> _initializeForm() async {
     final lifecycleRevision = _lifecycleRevision;
-    final request = Get.arguments;
-    if (request is! RequestEntity) {
+    final rawArgs = Get.arguments;
+    RequestEntity? request;
+    if (rawArgs is RequestEntity) {
+      request = rawArgs;
+    } else if (rawArgs is int && getRequestDetailsUseCase != null) {
+      try {
+        request = await getRequestDetailsUseCase!(rawArgs);
+      } catch (_) {
+        request = null;
+      }
+    } else if (rawArgs is Map && rawArgs['request'] is RequestEntity) {
+      request = rawArgs['request'] as RequestEntity;
+    }
+
+    if (request == null) {
       initNewOrderForm();
       await loadMyPos();
       return;
     }
 
+    // If request items are missing or empty, fetch the authoritative request details
+    if (request.items.isEmpty && getRequestDetailsUseCase != null) {
+      try {
+        final fullRequest = await getRequestDetailsUseCase!(request.requestId);
+        if (fullRequest.items.isNotEmpty) {
+          request = fullRequest;
+        }
+      } catch (_) {
+        // Continue with available request data
+      }
+    }
+
+    if (lifecycleRevision != _lifecycleRevision) return;
+
+    final targetRequest = request;
+    if (targetRequest == null) return;
+    await populateFromRequest(targetRequest);
+  }
+
+  /// يملأ النموذج بالبيانات الكاملة للطلب المراد تعديله
+  Future<void> populateFromRequest(RequestEntity request) async {
+    final lifecycleRevision = _lifecycleRevision;
+
     isEditing.value = true;
     editingRequestId.value = request.requestId;
     selectedSaleType.value = request.saleType;
     notesController.text = request.requestNote ?? '';
+
+    // تصفير السلة ووحدات التحكم السابقة
+    clearProcurementCart();
+    for (final controller in _packageQuantityControllers.values) {
+      controller.clear();
+    }
+
     await loadMyPos(
       preferredPosId: request.posId,
       preferredNetworkId: request.networkId,
@@ -1075,6 +1118,19 @@ class PosNewProcurementOrderController extends GetxController {
             status: true,
           );
 
+      // التأكد من وجود الباقة في قائمة الباقات المعروضة حتى يظهر كرتها في الواجهة
+      if (!availablePackages.any((p) => p.packageId == pkg.packageId)) {
+        availablePackages.add(pkg);
+      }
+
+      // تعبئة حقل الكمية الخاص بالباقة مباشرة
+      final qtyCtrl = quantityControllerForPackage(pkg.packageId);
+      final countText = '${item.voucherCount}';
+      qtyCtrl.value = TextEditingValue(
+        text: countText,
+        selection: TextSelection.collapsed(offset: countText.length),
+      );
+
       final sheetSize = pkg.packageVoucherCount > 0
           ? pkg.packageVoucherCount
           : 100;
@@ -1087,7 +1143,14 @@ class PosNewProcurementOrderController extends GetxController {
       );
     }
 
+    if (procurementCart.isNotEmpty) {
+      final firstLine = procurementCart.first;
+      _setSelectedPackage(firstLine.package);
+      setVoucherCount(firstLine.voucherCount);
+    }
+
     _refreshProcurementPresentation();
+    unawaited(fetchServerQuote());
   }
 
   /// إرسال تحديثات الطلب المعلق إلى الخادم

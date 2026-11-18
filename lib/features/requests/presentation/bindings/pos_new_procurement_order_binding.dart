@@ -6,6 +6,7 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
 import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
@@ -20,6 +21,7 @@ class PosNewProcurementOrderBinding extends Bindings {
       () => PosNewProcurementOrderController(
         createRequestUseCase: Get.find<CreateRequestUseCase>(),
         updateRequestUseCase: Get.find<UpdateRequestUseCase>(),
+        getRequestDetailsUseCase: Get.find<GetRequestDetailsUseCase>(),
         getMyPosUseCase: Get.find<GetMyPosUseCase>(),
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
