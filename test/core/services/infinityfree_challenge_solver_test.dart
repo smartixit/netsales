@@ -20,10 +20,11 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       ]);
     });
     test('matches SlowAES for the single-block challenge', () {
-      // The decrypted block ends in 0x0d, but it is not a repeated padding run.
+      // SlowAES strips the final 0x0d byte because its unpadBytesOut
+      // removes any trailing matching run, even a single byte.
       expect(
         InfinityFreeChallengeSolver.solveChallenge(challenge),
-        'e84330a69c6df373fc2fd2a2827a5f0d',
+        'e84330a69c6df373fc2fd2a2827a5f',
       );
     });
     test('accepts whitespace around declarations and arguments', () {

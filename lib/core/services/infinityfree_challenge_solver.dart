@@ -90,9 +90,10 @@ class InfinityFreeChallengeSolver {
       }
       if (padCount == padByte) break;
     }
-    // Strip only a complete padding sequence; a single trailing byte whose
-    // value is 0x0d is not 13 bytes of padding.
-    if (padCount > 0 && padCount == padByte) {
+    // Match SlowAES exactly: it removes the trailing matching run whenever
+    // at least one byte was collected, even if the run is shorter than the
+    // numeric value of the last byte. This quirk is part of the cookie format.
+    if (padCount > 0) {
       return Uint8List.sublistView(data, 0, data.length - padCount);
     }
     return data;
