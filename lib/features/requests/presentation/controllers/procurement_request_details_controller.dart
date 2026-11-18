@@ -257,7 +257,7 @@ class ProcurementRequestDetailsController extends GetxController {
     final current = request.value;
     if (current == null) return;
     await ProcurementActionDialogs.showCancelDialog(
-      requestId: current.requestId,
+      requestUuid: current.requestUuid??'-',
       onConfirm: () => cancelRequest(),
     );
   }
@@ -266,7 +266,7 @@ class ProcurementRequestDetailsController extends GetxController {
     final current = request.value;
     if (current == null) return;
     await ProcurementActionDialogs.showApprovalDialog(
-      requestId: current.requestId,
+      requestUuid: current.requestUuid??'-',
       onConfirm: (note) => approveRequest(note: note),
     );
   }
@@ -275,7 +275,7 @@ class ProcurementRequestDetailsController extends GetxController {
     final current = request.value;
     if (current == null) return;
     await ProcurementActionDialogs.showRejectionDialog(
-      requestId: current.requestId,
+      requestUuid: current.requestUuid??'-',
       onConfirm: (reason) => rejectRequest(reason),
     );
   }

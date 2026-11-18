@@ -10,14 +10,14 @@ class ProcurementActionDialogs {
 
   /// نافذة حوار اعتماد طلب التوريد مع ملاحظة اختيارية
   static Future<void> showApprovalDialog({
-    required int requestId,
+    required String requestUuid,
     required Future<void> Function(String? note) onConfirm,
   }) async {
     final noteController = TextEditingController();
 
     await CustomDialog.show(
       type: DialogType.confirmation,
-      title: 'اعتماد طلب التوريد #$requestId',
+      title: 'اعتماد طلب التوريد #$requestUuid',
       message: 'سيتم احتساب وتوليد فاتورة المبيعات آلياً عبر الخادم وتسوية الرصيد المالي.',
       confirmLabel: 'تأكيد الاعتماد',
       cancelLabel: 'تراجع',
@@ -43,7 +43,7 @@ class ProcurementActionDialogs {
 
   /// نافذة حوار رفض طلب التوريد مع بيان السبب الإلزامي
   static Future<void> showRejectionDialog({
-    required int requestId,
+    required String requestUuid,
     required Future<void> Function(String reason) onConfirm,
   }) async {
     final reasonController = TextEditingController();
@@ -51,7 +51,7 @@ class ProcurementActionDialogs {
 
     await CustomDialog.show(
       type: DialogType.custom,
-      title: 'رفض طلب التوريد #$requestId',
+      title: 'رفض طلب التوريد #$requestUuid',
       message: 'يرجى كتابة سبب الرفض المعتمد لتوثيقه في السجل وإشعار الوكيل.',
       confirmLabel: 'تأكيد الرفض',
       cancelLabel: 'إلغاء',
@@ -84,12 +84,12 @@ class ProcurementActionDialogs {
 
   /// نافذة حوار إلغاء طلب التوريد من قبل نقطة البيع
   static Future<void> showCancelDialog({
-    required int requestId,
+    required String requestUuid,
     required Future<void> Function() onConfirm,
   }) async {
     await CustomDialog.show(
       type: DialogType.warning,
-      title: 'إلغاء طلب التوريد #$requestId',
+      title: 'إلغاء طلب التوريد #$requestUuid',
       message:
           'هل أنت متأكد من رغبتك في إلغاء هذا الطلب قبل مراجعته من الشبكة؟',
       confirmLabel: 'نعم، إلغاء الطلب',
@@ -103,14 +103,12 @@ class ProcurementActionDialogs {
 
   /// نافذة حوار حذف طلب التوريد (حذف ناعم للطلبات الملغية أو المعلقة)
   static Future<void> showDeleteDialog({
-    required int requestId,
-    String? requestUuid,
+    required String requestUuid,
     required Future<void> Function() onConfirm,
   }) async {
-    final ref = requestUuid != null ? '#$requestUuid' : '#$requestId';
     await CustomDialog.show(
       type: DialogType.error,
-      title: 'حذف طلب التوريد $ref',
+      title: 'حذف طلب التوريد $requestUuid',
       message: 'هل أنت متأكد من حذف هذا الطلب نهائياً من قائمة طلباتك؟ لن تظهر هذه المعاملة مجدداً.',
       confirmLabel: 'نعم، حذف الطلب',
       cancelLabel: 'تراجع',

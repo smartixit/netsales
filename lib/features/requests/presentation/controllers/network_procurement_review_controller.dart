@@ -706,7 +706,7 @@ class NetworkProcurementReviewController extends GetxController {
   /// حوار اعتماد طلب التوريد
   Future<void> promptApproveRequest(RequestEntity request) async {
     await ProcurementActionDialogs.showApprovalDialog(
-      requestId: request.requestId,
+      requestUuid: request.requestUuid??'-',
       onConfirm: (note) => approveRequest(request.requestId, requestNote: note),
     );
   }
@@ -714,7 +714,7 @@ class NetworkProcurementReviewController extends GetxController {
   /// حوار رفض طلب التوريد
   Future<void> promptRejectRequest(RequestEntity request) async {
     await ProcurementActionDialogs.showRejectionDialog(
-      requestId: request.requestId,
+      requestUuid: request.requestUuid??'-',
       onConfirm: (reason) => rejectRequest(request.requestId, reason),
     );
   }

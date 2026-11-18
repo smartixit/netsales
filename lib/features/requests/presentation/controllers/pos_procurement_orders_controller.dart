@@ -345,15 +345,14 @@ class PosProcurementOrdersController extends GetxController {
 
   Future<void> promptCancelRequest(RequestEntity request) async {
     await ProcurementActionDialogs.showCancelDialog(
-      requestId: request.requestId,
+      requestUuid: request.requestUuid ??'-',
       onConfirm: () => cancelRequest(request.requestId),
     );
   }
 
   Future<void> promptDeleteRequest(RequestEntity request) async {
     await ProcurementActionDialogs.showDeleteDialog(
-      requestId: request.requestId,
-      requestUuid: request.requestUuid,
+      requestUuid: request.requestUuid??'-',
       onConfirm: () => deleteRequest(request.requestId),
     );
   }
