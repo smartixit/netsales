@@ -110,9 +110,7 @@ class CustomBottomSheet extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isDestructive
                           ? colors.error.withValues(alpha: 0.08)
-                          : colors.surfaceContainerHighest.withValues(
-                              alpha: 0.35,
-                            ),
+                          : colors.surfaceContainer.withValues(alpha: 0.35),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       border: Border.all(
                         color: isDestructive

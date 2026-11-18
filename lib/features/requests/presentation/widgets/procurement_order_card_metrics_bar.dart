@@ -7,7 +7,7 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 
 /// شريط المقاييس الثلاثية لبطاقة طلب التوريد (Order Card Metrics Bar)
 ///
-/// يعرض عدد الباقات، إجمالي الكروت، وإجمالي المبلغ الصافي المطلوب
+/// يعرض عدد الباقات، عدد الكروت، وإجمالي المبلغ الصافي المطلوب
 /// مع حماية FittedBox لمنع أي انقطاع أو تجاوز في أرقام المبالغ.
 class ProcurementOrderCardMetricsBar extends StatelessWidget {
   const ProcurementOrderCardMetricsBar({
@@ -44,10 +44,10 @@ class ProcurementOrderCardMetricsBar extends StatelessWidget {
           ),
           _MetricDivider(color: colors.outlineVariant.withValues(alpha: .5)),
 
-          // 2. إجمالي الكروت
+          // 2. عدد الكروت
           Expanded(
             child: _MetricColumn(
-              label: 'إجمالي الكروت',
+              label: 'عدد الكروت',
               value: '$totalQuantity',
               textColor: colors.onSurface,
             ),

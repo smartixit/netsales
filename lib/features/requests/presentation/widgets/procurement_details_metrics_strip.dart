@@ -40,7 +40,7 @@ class ProcurementDetailsMetricsStrip extends StatelessWidget {
         caption: request.items.isNotEmpty ? 'صافي الطلب' : null,
       ),
       _MetricData(
-        label: 'إجمالي الكروت',
+        label: 'عدد الكروت',
         value: '${request.totalVouchers}',
         unit: 'كرت',
         icon: Icons.confirmation_number_rounded,
