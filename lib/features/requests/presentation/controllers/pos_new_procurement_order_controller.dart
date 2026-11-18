@@ -421,6 +421,7 @@ class PosNewProcurementOrderController extends GetxController {
 
   /// تغيير نقطة البيع النشطة صراحة من واجهة طلب التوريد
   Future<void> onPosSelected(int posId) async {
+    if (isEditing.value) return;
     if (selectedPosId.value == posId) return;
 
     final isAuthorized = myPosList.any((p) => p.posId == posId);
@@ -748,6 +749,7 @@ class PosNewProcurementOrderController extends GetxController {
 
   /// اختيار الشبكة الموردة وتحديث الباقات
   void onNetworkSelected(int networkId) {
+    if (isEditing.value) return;
     expandedProcurementContext.value = '';
     _setSelectedNetworkId(networkId);
     clearProcurementCart();

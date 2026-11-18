@@ -27,6 +27,8 @@ class ProcurementContextSelector extends StatelessWidget {
     required this.options,
     this.isLoading = false,
     this.emptyMessage,
+    this.isReadOnly = false,
+    this.readOnlyBadgeText = 'للقراءة فقط',
   });
 
   final String title;
@@ -41,6 +43,8 @@ class ProcurementContextSelector extends StatelessWidget {
   final bool canExpand;
   final bool isLoading;
   final String? emptyMessage;
+  final bool isReadOnly;
+  final String readOnlyBadgeText;
   final VoidCallback onToggle;
   final List<ProcurementContextOption> options;
 
@@ -78,7 +82,7 @@ class ProcurementContextSelector extends StatelessWidget {
           children: [
             InkWell(
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              onTap: canExpand ? onToggle : null,
+              onTap: (!isReadOnly && canExpand) ? onToggle : null,
               child: Padding(
                 padding: EdgeInsets.all(AppSpacing.md),
                 child: Column(
@@ -116,7 +120,45 @@ class ProcurementContextSelector extends StatelessWidget {
                             ],
                           ),
                         ),
-                        if (canExpand) ...[
+                        if (isReadOnly)
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.surfaceContainerHighest.withValues(
+                                alpha: .55,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.full,
+                              ),
+                              border: Border.all(
+                                color: colors.outlineVariant.withValues(
+                                  alpha: .6,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.lock_outline_rounded,
+                                  size: 13.r,
+                                  color: colors.onSurfaceVariant,
+                                ),
+                                AppSpacing.hXxs,
+                                Text(
+                                  readOnlyBadgeText,
+                                  style: AppTypography.labelSmall.copyWith(
+                                    color: colors.onSurfaceVariant,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (canExpand) ...[
                           CustomButton.text(
                             text: isExpanded ? 'إغلاق' : 'تغيير',
                             icon: isExpanded

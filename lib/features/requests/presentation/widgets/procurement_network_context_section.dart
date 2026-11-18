@@ -14,6 +14,7 @@ class ProcurementNetworkContextSection
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Obx(() {
+      final isEditMode = controller.isEditing.value;
       final links = controller.linkedNetworks;
       final selected = links.firstWhereOrNull(
         (link) => link.networkId == controller.selectedNetworkId.value,
@@ -23,7 +24,9 @@ class ProcurementNetworkContextSection
 
       return ProcurementContextSelector(
         title: 'الشبكة المورّدة',
-        subtitle: 'الجهة التي ستوفر الباقات والأسعار لهذا الطلب',
+        subtitle: isEditMode
+            ? 'الجهة المورّدة للطلب (أطراف الطلب ثابتة أثناء التعديل)'
+            : 'الجهة التي ستوفر الباقات والأسعار لهذا الطلب',
         icon: Icons.cell_tower_rounded,
         accent: colors.primary,
         selectedName: selected?.network?.networkName ?? 'اختر الشبكة المورّدة',
@@ -36,12 +39,15 @@ class ProcurementNetworkContextSection
           fallback: 'ش',
         ),
         isExpanded: isExpanded,
-        canExpand: links.length > 1,
+        canExpand: !isEditMode && links.length > 1,
+        isReadOnly: isEditMode,
+        readOnlyBadgeText: 'للقراءة فقط',
         isLoading: controller.isLoadingNetworks.value,
         emptyMessage: links.isEmpty
             ? 'لا توجد شبكات مورّدة نشطة مرتبطة بنقطة البيع حالياً.'
             : null,
         onToggle: () {
+          if (isEditMode) return;
           controller.expandedProcurementContext.value = isExpanded
               ? ''
               : 'network';

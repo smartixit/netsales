@@ -14,13 +14,16 @@ class ProcurementPosContextSection
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Obx(() {
+      final isEditMode = controller.isEditing.value;
       final positions = controller.myPosList;
       final selected = controller.activePos;
       final isExpanded = controller.expandedProcurementContext.value == 'pos';
 
       return ProcurementContextSelector(
         title: 'نقطة البيع',
-        subtitle: 'الموقع الذي سيستلم الباقات المورّدة',
+        subtitle: isEditMode
+            ? 'نقطة البيع المستلمة (أطراف الطلب ثابتة أثناء التعديل)'
+            : 'الموقع الذي سيستلم الباقات المورّدة',
         icon: Icons.storefront_rounded,
         accent: colors.secondary,
         selectedName: selected?.posName ?? 'اختر نقطة البيع',
@@ -32,12 +35,15 @@ class ProcurementPosContextSection
           fallback: 'ن',
         ),
         isExpanded: isExpanded,
-        canExpand: positions.length > 1,
+        canExpand: !isEditMode && positions.length > 1,
+        isReadOnly: isEditMode,
+        readOnlyBadgeText: 'للقراءة فقط',
         isLoading: controller.isLoadingMyPos.value,
         emptyMessage: positions.isEmpty && !controller.isLoadingMyPos.value
             ? 'لا توجد نقاط بيع معتمدة ومصرح بها لحسابك حالياً.'
             : null,
         onToggle: () {
+          if (isEditMode) return;
           controller.expandedProcurementContext.value = isExpanded ? '' : 'pos';
         },
         options: positions
