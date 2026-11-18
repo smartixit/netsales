@@ -487,12 +487,19 @@ class _ProposedItemsSection
           ...lines.map((line) {
             final pkg = _resolvePackage(line.packageId);
             final isAdded = _isItemNewlyAdded(line.packageId);
+            final previewItem = controller.currentPreview.value?.items.firstWhereOrNull(
+              (i) => i.packageId == line.packageId,
+            );
+            final authoritativeTotal = (previewItem != null && previewItem.voucherCount == line.voucherCount)
+                ? previewItem.itemTotalAmount
+                : null;
 
             return Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.sm),
               child: ProcurementPackageOptionCard(
                 package: pkg,
                 quantity: line.voucherCount,
+                estimatedLineTotal: authoritativeTotal,
                 onSetQuantity: (qty) =>
                     controller.setModificationQuantity(line.packageId, qty),
                 isCashSale: request?.saleType == SaleType.cash,
@@ -571,10 +578,15 @@ class _AvailablePackagesCatalogSection
           ),
           AppSpacing.vSm,
           if (controller.isLoadingPackages.value)
-            Center(
-              child: Padding(
-                padding: EdgeInsets.all(AppSpacing.md),
-                child: const CircularProgressIndicator.adaptive(),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: const CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: 2,
+                  showCardSurface: true,
+                ),
               ),
             )
           else if (available.isEmpty)

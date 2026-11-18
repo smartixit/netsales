@@ -1300,12 +1300,16 @@ class _LineTotal extends StatelessWidget {
     required this.estimatedLineTotalMinor,
     required this.currency,
     required this.selected,
+    this.unitPrice,
+    this.quantity = 0,
   });
 
   final num? estimatedLineTotal;
   final int? estimatedLineTotalMinor;
   final String currency;
   final bool selected;
+  final num? unitPrice;
+  final int quantity;
 
   @override
   Widget build(BuildContext context) {
@@ -1314,6 +1318,8 @@ class _LineTotal extends StatelessWidget {
       formattedTotal = AmountFormatter.formatValue(estimatedLineTotal!, decimalPlaces: 2);
     } else if (estimatedLineTotalMinor != null) {
       formattedTotal = AmountFormatter.format((estimatedLineTotalMinor! / 100).toStringAsFixed(2));
+    } else if (selected && unitPrice != null && unitPrice! > 0 && quantity > 0) {
+      formattedTotal = AmountFormatter.formatValue(unitPrice! * quantity, decimalPlaces: 2);
     }
 
     return Container(
@@ -1344,28 +1350,20 @@ class _LineTotal extends StatelessWidget {
               ),
             ),
           ),
-          if (formattedTotal != null)
-            Expanded(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  '$formattedTotal $currency',
-                  textDirection: TextDirection.rtl,
-                  style: AppTypography.currencyMedium.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '${formattedTotal ?? "0.00"} $currency',
+                textDirection: TextDirection.rtl,
+                style: AppTypography.currencyMedium.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            )
-          else
-            Text(
-              selected ? 'حدّث التعرفة' : '0.00',
-              style: AppTypography.currencyMedium.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
             ),
+          ),
         ],
       ),
     );

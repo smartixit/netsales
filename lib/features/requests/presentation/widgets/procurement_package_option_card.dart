@@ -18,6 +18,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
     this.customDiscount,
     this.quoteLine,
     this.estimatedLineTotalMinor,
+    this.estimatedLineTotal,
     this.isDiscountLoading = false,
     this.onDelete,
     this.trailingHeaderAction,
@@ -33,6 +34,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
   final EffectivePackageDiscountEntity? customDiscount;
   final ProcurementQuoteLineEntity? quoteLine;
   final int? estimatedLineTotalMinor;
+  final num? estimatedLineTotal;
   final bool isDiscountLoading;
   final VoidCallback? onDelete;
   final Widget? trailingHeaderAction;
@@ -70,6 +72,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
           : package.packageDefaultCreditDiscount);
 
   num? get _lineTotal {
+    if (estimatedLineTotal != null) return estimatedLineTotal;
     if (quoteLine != null && quantity > 0 && quoteLine!.voucherCount == quantity) {
       return quoteLine!.lineNetTotal;
     }
