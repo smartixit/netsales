@@ -265,20 +265,6 @@ class _PackageHero extends StatelessWidget {
                       AppSpacing.vMd,
                       Row(
                         children: [
-                          Container(
-                            key: const ValueKey(
-                              'procurement-package-color-accent',
-                            ),
-                            width: 4.r,
-                            height: 18.r,
-                            decoration: BoxDecoration(
-                              color: packageAccentColor,
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.full,
-                              ),
-                            ),
-                          ),
-                          AppSpacing.hXs,
                           Expanded(
                             child: Text(
                               package.packageName,
