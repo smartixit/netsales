@@ -8,7 +8,8 @@ import 'package:netsales/widgets/inputs/voucher_quantity_stepper.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// محرر ثانوي للكمية الدقيقة؛ يُفتح عند الحاجة ولا يزاحم بطاقة الباقة.
-class ProcurementQuantityEditorSheet extends GetView<PosNewProcurementOrderController> {
+class ProcurementQuantityEditorSheet
+    extends GetView<PosNewProcurementOrderController> {
   const ProcurementQuantityEditorSheet({super.key, required this.package});
 
   final PackageEntity package;

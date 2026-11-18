@@ -2,27 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/enums/request_status.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
-import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
+import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_item_entity.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-/// Request card built from the package card's layered visual language:
-/// a focused identity hero, a distinct contents panel, and a precise metric rail.
+/// بطاقة طلب التوريد المتطورة بنظام الأكورديون الأنيق (Procurement Order Card V2 - Executive Edition)
+///
+/// تجسد نفس العمق البصري للبطاقات الزمردية في شاشة إنشاء الطلب:
+/// حواف 24.r، ظلال مزدوجة بمسحة زمردية، شريط ترويسة بهوية الطلب يعرض الـ UUID كاملاً بدون انقطاع
+/// مع نقل شارة الحالة للسطر المساعد، أكورديون تفاعلي أنيق لاستعراض بنود الطلب والكميات والأوراق،
+/// وسكة القياس ثلاثية الأعمدة، وأزرار الإجراءات التفاعلية السلسة.
 class PosProcurementOrderCard extends StatelessWidget {
   const PosProcurementOrderCard({
     super.key,
     required this.request,
     required this.onDetails,
+    this.isExpanded = false,
+    this.onToggleExpand,
     this.onEdit,
     this.onCancel,
     this.onDelete,
@@ -30,51 +40,44 @@ class PosProcurementOrderCard extends StatelessWidget {
 
   final RequestEntity request;
   final VoidCallback onDetails;
+  final bool isExpanded;
+  final VoidCallback? onToggleExpand;
   final VoidCallback? onEdit;
   final VoidCallback? onCancel;
   final VoidCallback? onDelete;
 
-  String _dateLabel() {
-    final raw = request.requestDate ?? request.createdAt;
-    if (raw == null || raw.isEmpty) return 'التاريخ غير متاح';
-    final parsed = DateTime.tryParse(raw);
-    return parsed == null ? raw : DateFormatter.longDate(parsed);
-  }
-
-  String _timeLabel() {
-    final raw = request.requestDate ?? request.createdAt;
-    if (raw == null || raw.isEmpty) return '';
-    final parsed = DateTime.tryParse(raw);
-    return parsed == null ? '' : DateFormatter.time(parsed);
-  }
-
   Future<void> _showActions() async {
     final actions = <CustomBottomSheetActionItem>[
+      CustomBottomSheetActionItem(
+        title: 'عرض تفاصيل الطلب الكاملة',
+        icon: Icons.visibility_outlined,
+        onTap: onDetails,
+      ),
       if (onEdit != null)
         CustomBottomSheetActionItem(
-          title: 'تعديل الطلب',
+          title: 'تعديل كميات الطلب',
           icon: Icons.edit_note_rounded,
           onTap: onEdit!,
         ),
       if (onCancel != null)
         CustomBottomSheetActionItem(
-          title: 'إلغاء الطلب',
+          title: 'إلغاء طلب التوريد',
           icon: Icons.cancel_outlined,
           isDestructive: true,
           onTap: onCancel!,
         ),
       if (onDelete != null)
         CustomBottomSheetActionItem(
-          title: 'حذف من السجل',
+          title: 'حذف سجل الطلب',
           icon: Icons.delete_outline_rounded,
           isDestructive: true,
           onTap: onDelete!,
         ),
     ];
-    if (actions.isEmpty) return;
+
     await CustomBottomSheet.showActions<void>(
-      title: 'إجراءات الطلب #${request.requestId}',
-      leadingIcon: Icons.more_horiz_rounded,
+      title: 'إجراءات طلب التوريد #${request.requestId}',
+      leadingIcon: Icons.receipt_long_rounded,
       items: actions,
     );
   }
@@ -94,142 +97,138 @@ class PosProcurementOrderCard extends StatelessWidget {
         .map((item) => item.voucherPackage)
         .whereType<PackageEntity>()
         .toList(growable: false);
-    final visiblePackages = packages.take(4).toList(growable: false);
 
     return Container(
-      clipBehavior: Clip.antiAlias,
+      width: double.infinity,
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: AppRadius.xxlRadius,
+        borderRadius: BorderRadius.circular(24.r),
         border: Border.all(
-          color: colors.primary.withValues(alpha: .17),
-          width: 1,
+          color: colors.primary.withValues(alpha: .15),
+          width: 1.0,
         ),
-        boxShadow: AppElevation.level3(context),
-      ),
-      child: Stack(
-        children: [
-          PositionedDirectional(
-            start: 0,
-            top: 0,
-            bottom: 0,
-            width: 4.w,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: AppGradients.accentBadge(
-                  context,
-                  _statusColor(context, request.status),
-                ),
-              ),
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF064F43).withValues(alpha: .065),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _OrderIdentityHero(
-                request: request,
-                status: status,
-                saleType: saleType,
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  13.r,
-                  12.r,
-                  13.r,
-                  12.r,
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .025),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 1. ترويسة هوية الطلب (عرض الـ UUID كاملاً بدون كلمة "طلب توريد" مع نقل شارة الحالة للسطر الثاني)
+          _OrderCardHeader(
+            request: request,
+            status: status,
+            saleType: saleType,
+          ),
+
+          // 2. المحتوى الداخلي للطلب
+          Padding(
+            padding: EdgeInsets.fromLTRB(14.r, 12.r, 14.r, 14.r),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // لوحة الباقات المضمنة في الطلب بنظام الأكورديون الأنيق
+                _OrderItemsAccordion(
+                  request: request,
+                  packages: packages,
+                  isExpanded: isExpanded,
+                  onToggle: onToggleExpand,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                AppSpacing.vSm,
+
+                // سكة القياسات الثلاثية (باقات، كمية، إجمالي القيمة)
+                _OrderMetricsRail(
+                  itemCount: request.items.length,
+                  totalQuantity: request.totalVouchers,
+                  totalAmount: request.requestTotalAmount,
+                ),
+                AppSpacing.vSm,
+
+                // شريط أزرار الإجراءات
+                Row(
                   children: [
-                    _PackageSummaryPanel(
-                      request: request,
-                      packages: visiblePackages,
+                    Expanded(
+                      child: CustomButton.outline(
+                        text: 'عرض التفاصيل',
+                        icon: Icons.chevron_right_rounded,
+                        iconPosition: AppButtonIconPosition.end,
+                        size: AppButtonSize.small,
+                        foregroundColor: colors.primary,
+                        borderColor: colors.primary.withValues(alpha: .6),
+                        onPressed: onDetails,
+                      ),
                     ),
-                    AppSpacing.vSm,
-                    _OrderMetricRail(
-                      itemCount: request.items.length,
-                      totalQuantity: request.totalVouchers,
-                      saleType: saleType,
-                    ),
-                    AppSpacing.vSm,
-                    Row(
-                      children: [
-                        if (onEdit != null ||
-                            onCancel != null ||
-                            onDelete != null) ...[
-                          CustomButton.icon(
-                            icon: Icons.more_vert_rounded,
-                            tooltip: 'إجراءات أخرى',
-                            dimension: 38.r,
-                            backgroundColor: colors.surfaceContainerHigh,
-                            foregroundColor: colors.onSurfaceVariant,
-                            borderColor: colors.outlineVariant.withValues(alpha: .75),
-                            onPressed: _showActions,
-                          ),
-                          AppSpacing.hXs,
-                        ],
-                        CustomButton.outline(
-                          text: 'عرض التفاصيل',
-                          icon: Icons.chevron_left_rounded,
-                          iconPosition: AppButtonIconPosition.end,
-                          width: 142.w,
-                          height: 40.h,
-                          size: AppButtonSize.small,
-                          foregroundColor: colors.primary,
-                          borderColor: colors.primary.withValues(alpha: .72),
-                          onPressed: onDetails,
-                        ),
-                        const Spacer(),
-                        Text(
-                          request.requestUuid?.isNotEmpty == true
-                              ? request.requestUuid!
-                              : 'طلب #${request.requestId}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.caption.copyWith(
-                            color: colors.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+                    if (onEdit != null) ...[
+                      AppSpacing.hXs,
+                      CustomButton.icon(
+                        icon: Icons.edit_note_rounded,
+                        tooltip: 'تعديل الطلب',
+                        dimension: 38.r,
+                        backgroundColor: colors.surfaceContainerHigh,
+                        foregroundColor: colors.primary,
+                        borderColor: colors.primary.withValues(alpha: .3),
+                        onPressed: onEdit,
+                      ),
+                    ],
+                    if (onCancel != null) ...[
+                      AppSpacing.hXs,
+                      CustomButton.icon(
+                        icon: Icons.cancel_outlined,
+                        tooltip: 'إلغاء الطلب',
+                        dimension: 38.r,
+                        backgroundColor: colors.error.withValues(alpha: .08),
+                        foregroundColor: colors.error,
+                        borderColor: colors.error.withValues(alpha: .25),
+                        onPressed: onCancel,
+                      ),
+                    ],
+                    AppSpacing.hXs,
+                    CustomButton.icon(
+                      icon: Icons.more_horiz_rounded,
+                      tooltip: 'المزيد من الخيارات',
+                      dimension: 38.r,
+                      backgroundColor: colors.surfaceContainer,
+                      foregroundColor: colors.onSurfaceVariant,
+                      borderColor: colors.outlineVariant.withValues(alpha: .6),
+                      onPressed: _showActions,
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
-
-  Color _statusColor(BuildContext context, RequestStatus status) {
-    final colors = context.colors;
-    final presentation = EnumPresentationRegistry.resolveRequestStatus(status);
-    return switch (presentation.tone.name) {
-      'success' => colors.success,
-      'warning' => colors.warning,
-      'danger' => colors.error,
-      _ => colors.onSurfaceVariant,
-    };
-  }
 }
 
-class _OrderIdentityHero extends StatelessWidget {
-  const _OrderIdentityHero({
+class _OrderCardHeader extends StatelessWidget {
+  const _OrderCardHeader({
     required this.request,
     required this.status,
     required this.saleType,
   });
 
   final RequestEntity request;
-  final dynamic status;
-  final dynamic saleType;
+  final EnumPresentation status;
+  final EnumPresentation saleType;
 
   String _dateLabel() {
     final raw = request.requestDate ?? request.createdAt;
     if (raw == null || raw.isEmpty) return 'التاريخ غير متاح';
     final parsed = DateTime.tryParse(raw);
-    return parsed == null ? raw : DateFormatter.longDate(parsed);
+    return parsed == null ? raw : DateFormatter.fullDate(parsed);
   }
 
   String _timeLabel() {
@@ -242,109 +241,159 @@ class _OrderIdentityHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final displayUuid = request.requestUuid?.isNotEmpty == true
+        ? request.requestUuid!
+        : '#${request.requestId}';
 
     return Container(
-      padding: EdgeInsets.all(13.r),
+      padding: EdgeInsets.symmetric(horizontal: 14.r, vertical: 12.r),
       decoration: BoxDecoration(
-        gradient: AppGradients.accentHero3(context, colors.primary),
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            colors.primary.withValues(alpha: .06),
+            colors.primary.withValues(alpha: .015),
+            Colors.transparent,
+          ],
+        ),
         border: Border(
           bottom: BorderSide(
-            color: colors.primary.withValues(alpha: .10),
+            color: colors.primary.withValues(alpha: .08),
+            width: 1.0,
           ),
         ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── الجهة الأولى (اليمين): الأيقونة الزمردية الفاخرة بهوية التطبيق ──
           Container(
-            width: 54.r,
-            height: 58.r,
+            width: 44.r,
+            height: 44.r,
             decoration: BoxDecoration(
-              gradient: AppGradients.financialHero(context),
-              borderRadius: BorderRadius.circular(18.r),
+              gradient: const LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [Color(0xFF087F68), Color(0xFF075B55)],
+              ),
+              borderRadius: BorderRadius.circular(14.r),
               border: Border.all(
-                color: colors.onPrimary.withValues(alpha: .22),
+                color: const Color(0xFFFFD98A).withValues(alpha: .40),
+                width: 1.0,
               ),
-              boxShadow: AppElevation.tinted(
-                context,
-                colors.primary,
-                alpha: .16,
-                blur: 12,
-                dy: 4,
-              ),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(
-                  Icons.receipt_long_rounded,
-                  color: colors.onPrimary,
-                  size: 27.r,
-                ),
-                PositionedDirectional(
-                  end: 7.r,
-                  top: 7.r,
-                  child: Container(
-                    width: 7.r,
-                    height: 7.r,
-                    decoration: BoxDecoration(
-                      color: colors.tertiary,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: colors.onPrimary, width: 1),
-                    ),
-                  ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF087F68).withValues(alpha: .22),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
+            child: Icon(
+              Icons.receipt_long_rounded,
+              color: Colors.white,
+              size: 22.r,
+            ),
           ),
           AppSpacing.hSm,
+
+          // ── الجهة الثانية (اليسار): العمود الذي يحتوي على 3 أسطر متناسقة ──
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                // السطر 1: رقم الطلب كاملاً مع زر النسخ السريع بكامل العرض المتاح دون أي تزاحم
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
+                    Flexible(
                       child: Text(
-                        'طلب توريد #${request.requestId}',
+                        displayUuid,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTypography.titleMedium.copyWith(
+                        style: AppTypography.titleSmall.copyWith(
                           color: colors.onSurface,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ),
                     AppSpacing.hXxs,
-                    CustomStatusBadge.fromPresentation(
-                      status,
-                      isCompact: true,
-                    ),
-                  ],
-                ),
-                AppSpacing.vXs,
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.xxs,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    _OrderMetaItem(
-                      icon: Icons.calendar_today_rounded,
-                      label: _dateLabel(),
-                    ),
-                    if (_timeLabel().isNotEmpty)
-                      _OrderMetaItem(
-                        icon: Icons.schedule_rounded,
-                        label: _timeLabel(),
+                    CustomInteractiveBounce(
+                      onTap: () {
+                        UrlLauncherService.copyToClipboard(
+                          displayUuid,
+                          confirmationMessage: 'تم نسخ معرف الطلب',
+                        );
+                        CustomSnackbar.show(
+                          title: 'تم النسخ',
+                          message: 'تم نسخ المعرف $displayUuid إلى الحافظة',
+                          type: SnackType.info,
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(4.r),
+                        decoration: BoxDecoration(
+                          color: colors.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(6.r),
+                          border: Border.all(
+                            color: colors.outlineVariant.withValues(alpha: .4),
+                            width: 0.5,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.copy_rounded,
+                          size: 12.r,
+                          color: colors.onSurfaceVariant,
+                        ),
                       ),
+                    ),
                   ],
                 ),
-                AppSpacing.vXs,
-                CustomStatusBadge.fromPresentation(
-                  saleType,
-                  isCompact: true,
+                AppSpacing.vXxs,
+
+                // السطر 2: الشارات مع إمكانية التمرير الأفقي لمنع أي تجاوز أو قص مهما زاد عددها أو طولها
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CustomStatusBadge.fromPresentation(
+                        status,
+                        isCompact: true,
+                      ),
+                      AppSpacing.hXs,
+                      CustomStatusBadge.fromPresentation(
+                        saleType,
+                        isCompact: true,
+                      ),
+                    ],
+                  ),
+                ),
+                AppSpacing.vXxs,
+
+                // السطر 3: الوقت والتاريخ كاملاً وبوضوح تام
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.access_time_rounded,
+                      size: 11.5.r,
+                      color: colors.onSurfaceVariant,
+                    ),
+                    AppSpacing.hXxs,
+                    Text(
+                      _timeLabel().isNotEmpty
+                          ? '${_dateLabel()} • ${_timeLabel()}'
+                          : _dateLabel(),
+                      style: AppTypography.caption.copyWith(
+                        color: colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -355,110 +404,212 @@ class _OrderIdentityHero extends StatelessWidget {
   }
 }
 
-class _OrderMetaItem extends StatelessWidget {
-  const _OrderMetaItem({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 12.r, color: colors.onSurfaceVariant),
-        AppSpacing.hXxs,
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTypography.caption.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PackageSummaryPanel extends StatelessWidget {
-  const _PackageSummaryPanel({
+/// أكورديون بنود طلب التوريد المتطور (Items Accordion)
+class _OrderItemsAccordion extends StatelessWidget {
+  const _OrderItemsAccordion({
     required this.request,
     required this.packages,
+    required this.isExpanded,
+    this.onToggle,
   });
 
   final RequestEntity request;
   final List<PackageEntity> packages;
+  final bool isExpanded;
+  final VoidCallback? onToggle;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final packageCount = request.items.length;
-    final visibleNames = packages.take(2).map((package) => package.packageName).toList();
+    final itemCount = request.items.length;
+    final visibleNames = packages.take(3).map((p) => p.packageName).toList();
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 11.r),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeInOutCubic,
       decoration: BoxDecoration(
-        gradient: AppGradients.accentHero3(context, colors.primary),
-        borderRadius: BorderRadius.circular(18.r),
+        color: colors.surfaceContainerLow.withValues(alpha: .5),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: colors.primary.withValues(alpha: .13),
+          color: isExpanded
+              ? colors.primary.withValues(alpha: .35)
+              : colors.outlineVariant.withValues(alpha: .5),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _PackageAccentStack(packages: packages),
-          AppSpacing.hSm,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  packageCount == 0
-                      ? 'لا توجد باقات'
-                      : '$packageCount ${packageCount == 1 ? 'باقة' : 'باقات'}',
-                  style: AppTypography.titleSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                AppSpacing.vXxs,
-                Text(
-                  '${request.totalVouchers} وحدة',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-                if (visibleNames.isNotEmpty) ...[
-                  AppSpacing.vXxs,
-                  Text(
-                    visibleNames.join(' • '),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.caption.copyWith(
-                      color: colors.primary,
+          // شريط النقر لفتح أو إغلاق الأكورديون (باستخدام InkWell لضمان استجابة كل البكسلات للنقر)
+          Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(16.r),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16.r),
+              onTap: onToggle,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 10.r),
+                child: Row(
+                  children: [
+                    // شريط ألوان الباقات التوضيحي
+                    if (packages.isNotEmpty)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (
+                            var i = 0;
+                            i < packages.length.clamp(0, 4);
+                            i++
+                          ) ...[
+                            if (i > 0) AppSpacing.hXxs,
+                            Container(
+                              width: 5.r,
+                              height: 32.r,
+                              decoration: BoxDecoration(
+                                color: CustomColorPicker.parseHex(
+                                  packages[i].packageColor,
+                                  fallback: colors.primary,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.full,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    if (packages.isNotEmpty) AppSpacing.hSm,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            itemCount == 0
+                                ? 'لا توجد باقات محددة'
+                                : '$itemCount ${itemCount == 1 ? 'باقة' : 'باقات'} • ${request.totalVouchers} كرت',
+                            style: AppTypography.labelLarge.copyWith(
+                              color: colors.onSurface,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          if (visibleNames.isNotEmpty && !isExpanded) ...[
+                            AppSpacing.vXxs,
+                            Text(
+                              visibleNames.join(' • '),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.caption.copyWith(
+                                color: colors.primary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Container(
-            width: 42.r,
-            height: 42.r,
-            decoration: BoxDecoration(
-              color: colors.surface.withValues(alpha: .76),
-              borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(
-                color: colors.primary.withValues(alpha: .12),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isExpanded ? 'إخفاء البنود' : 'عرض البنود',
+                          style: AppTypography.caption.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        AppSpacing.hXxs,
+                        AnimatedRotation(
+                          turns: isExpanded ? 0.5 : 0.0,
+                          duration: const Duration(milliseconds: 280),
+                          curve: Curves.easeInOutCubic,
+                          child: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: colors.primary,
+                            size: 20.r,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-            child: Icon(
-              Icons.inventory_2_rounded,
-              color: colors.primary,
-              size: 21.r,
+          ),
+
+          // المحتوى المتمدد للأكورديون بحركة انسيابية فائقة (AnimatedSize + ClipRect)
+          ClipRect(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeInOutCubic,
+              alignment: Alignment.topCenter,
+              child: isExpanded
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Divider(
+                          height: 1,
+                          color: colors.outlineVariant.withValues(alpha: .4),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(12.r, 8.r, 12.r, 10.r),
+                          child: Column(
+                            children: [
+                              for (
+                                var i = 0;
+                                i < request.items.length;
+                                i++
+                              ) ...[
+                                if (i > 0)
+                                  Divider(
+                                    height: 12.h,
+                                    color: colors.outlineVariant.withValues(
+                                      alpha: .25,
+                                    ),
+                                  ),
+                                _AccordionItemRow(item: request.items[i]),
+                              ],
+                              if (request.requestNote != null &&
+                                  request.requestNote!.trim().isNotEmpty) ...[
+                                AppSpacing.vSm,
+                                Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 10.r,
+                                    vertical: 6.r,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colors.surfaceContainerHighest
+                                        .withValues(alpha: .5),
+                                    borderRadius: BorderRadius.circular(8.r),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        Icons.sticky_note_2_outlined,
+                                        size: 13.r,
+                                        color: colors.onSurfaceVariant,
+                                      ),
+                                      AppSpacing.hXxs,
+                                      Expanded(
+                                        child: Text(
+                                          'ملاحظات: ${request.requestNote}',
+                                          style: AppTypography.caption.copyWith(
+                                            color: colors.onSurfaceVariant,
+                                            height: 1.35,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
             ),
           ),
         ],
@@ -467,98 +618,138 @@ class _PackageSummaryPanel extends StatelessWidget {
   }
 }
 
-class _PackageAccentStack extends StatelessWidget {
-  const _PackageAccentStack({required this.packages});
+/// سطر البند الفردي داخل الأكورديون مع تفاصيل الكميات والأوراق والقيمة
+class _AccordionItemRow extends StatelessWidget {
+  const _AccordionItemRow({required this.item});
 
-  final List<PackageEntity> packages;
+  final RequestItemEntity item;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    if (packages.isEmpty) {
-      return Container(
-        width: 7.r,
-        height: 34.r,
-        decoration: BoxDecoration(
-          color: colors.primary.withValues(alpha: .25),
-          borderRadius: BorderRadius.circular(AppRadius.full),
-        ),
-      );
-    }
+    final package = item.voucherPackage;
+    final packageName = package?.packageName ?? 'باقة #${item.packageId}';
+    final sheetSize = (package?.packageVoucherCount ?? 0) > 0
+        ? package!.packageVoucherCount
+        : 1;
+    final sheetDescription = VoucherSheetCalculator.describe(
+      item.voucherCount,
+      sheetSize,
+    );
 
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        for (var index = 0; index < packages.length; index++) ...[
-          if (index > 0) AppSpacing.hXxs,
-          Container(
-            key: packages.length == 1
-                ? const ValueKey('pos-order-package-color-accent')
-                : ValueKey('pos-order-package-color-accent-${packages[index].packageId}'),
-            width: 6.r,
-            height: 34.r,
-            decoration: BoxDecoration(
-              color: CustomColorPicker.parseHex(
-                packages[index].packageColor,
-                fallback: colors.primary,
-              ),
-              borderRadius: BorderRadius.circular(AppRadius.full),
-              boxShadow: AppElevation.level1(context),
+        // علامة لون الباقة
+        Container(
+          width: 4.r,
+          height: 28.r,
+          decoration: BoxDecoration(
+            color: CustomColorPicker.parseHex(
+              package?.packageColor,
+              fallback: colors.primary,
             ),
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
-        ],
+        ),
+        AppSpacing.hSm,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                packageName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.labelMedium.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              AppSpacing.vXxs,
+              Text(
+                '${item.voucherCount} كرت ($sheetDescription)',
+                style: AppTypography.caption.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        AppSpacing.hSm,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              AmountFormatter.formatValue(item.itemTotalAmount),
+              style: AppTypography.labelLarge.copyWith(
+                color: colors.primary,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            if (item.itemDiscount > 0)
+              Text(
+                'خصم: ${AmountFormatter.formatValue(item.itemDiscount)}',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.success,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }
 }
 
-class _OrderMetricRail extends StatelessWidget {
-  const _OrderMetricRail({
+class _OrderMetricsRail extends StatelessWidget {
+  const _OrderMetricsRail({
     required this.itemCount,
     required this.totalQuantity,
-    required this.saleType,
+    required this.totalAmount,
   });
 
   final int itemCount;
   final int totalQuantity;
-  final dynamic saleType;
+  final double totalAmount;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 7.r, vertical: 10.r),
+      padding: EdgeInsets.symmetric(horizontal: 8.r, vertical: 10.r),
       decoration: BoxDecoration(
-        gradient: AppGradients.accentBadge(context, colors.primary),
+        color: colors.surfaceContainerLow.withValues(alpha: .35),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: colors.primary.withValues(alpha: .10),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: .4)),
       ),
       child: Row(
         children: [
           Expanded(
-            child: _OrderMetric(
+            child: _OrderMetricItem(
               label: 'عدد البنود',
-              value: itemCount.toString(),
-              icon: Icons.list_alt_rounded,
+              value: '$itemCount',
+              icon: Icons.format_list_numbered_rounded,
             ),
           ),
           _MetricDivider(),
           Expanded(
-            child: _OrderMetric(
-              label: 'إجمالي الكمية',
-              value: totalQuantity.toString(),
+            child: _OrderMetricItem(
+              label: 'إجمالي الكروت',
+              value: '$totalQuantity',
               icon: Icons.confirmation_number_outlined,
             ),
           ),
           _MetricDivider(),
           Expanded(
-            child: _OrderMetric(
-              label: 'نوع البيع',
-              value: saleType.label,
-              icon: saleType.icon ?? Icons.sell_outlined,
-              emphasize: true,
+            child: _OrderMetricItem(
+              label: 'إجمالي القيمة',
+              value: AmountFormatter.formatValue(totalAmount),
+              icon: Icons.payments_outlined,
+              isHighlighted: true,
             ),
           ),
         ],
@@ -567,55 +758,51 @@ class _OrderMetricRail extends StatelessWidget {
   }
 }
 
-class _OrderMetric extends StatelessWidget {
-  const _OrderMetric({
+class _OrderMetricItem extends StatelessWidget {
+  const _OrderMetricItem({
     required this.label,
     required this.value,
     required this.icon,
-    this.emphasize = false,
+    this.isHighlighted = false,
   });
 
   final String label;
   final String value;
   final IconData icon;
-  final bool emphasize;
+  final bool isHighlighted;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 3.r),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 15.r,
-            color: emphasize ? colors.primary : colors.onSurfaceVariant,
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 15.r,
+          color: isHighlighted ? colors.primary : colors.onSurfaceVariant,
+        ),
+        AppSpacing.vXxs,
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.labelSmall.copyWith(
+            color: colors.onSurfaceVariant,
           ),
-          AppSpacing.vXxs,
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
+        ),
+        AppSpacing.vXxs,
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.titleSmall.copyWith(
+            color: isHighlighted ? colors.primary : colors.onSurface,
+            fontWeight: FontWeight.w800,
           ),
-          AppSpacing.vXxs,
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: AppTypography.titleSmall.copyWith(
-              color: emphasize ? colors.primary : colors.onSurface,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -623,8 +810,8 @@ class _OrderMetric extends StatelessWidget {
 class _MetricDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
-        width: 1,
-        height: 44.h,
-        color: context.colors.outlineVariant.withValues(alpha: .55),
-      );
+    width: 1,
+    height: 36.h,
+    color: context.colors.outlineVariant.withValues(alpha: .4),
+  );
 }

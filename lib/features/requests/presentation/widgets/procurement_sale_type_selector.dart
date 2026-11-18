@@ -5,7 +5,8 @@ import 'package:netsales/features/requests/presentation/controllers/pos_new_proc
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 
 /// محدد نوع البيع النقدي/الآجل، مع مراقبة مستقلة لحالة الاختيار.
-class ProcurementSaleTypeSelector extends GetView<PosNewProcurementOrderController> {
+class ProcurementSaleTypeSelector
+    extends GetView<PosNewProcurementOrderController> {
   const ProcurementSaleTypeSelector({super.key});
 
   @override

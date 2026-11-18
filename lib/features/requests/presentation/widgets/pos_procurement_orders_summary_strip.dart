@@ -1,65 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
-import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
+/// شريط ملخص مؤشرات حالات الطلبات (Orders KPI Summary Strip - Executive Edition)
+///
+/// يعرض إجمالي الطلبات، والطلبات قيد المراجعة، والطلبات المعتمدة مع استخدام
+/// الـ CustomSkeletonShimmer الموحد للنصوص أثناء التحميل ودعم النقر للتصفية السريعة.
 class PosProcurementOrdersSummaryStrip extends StatelessWidget {
   const PosProcurementOrdersSummaryStrip({
     super.key,
-    required this.summary,
-    required this.isLoading,
+    required this.totalCount,
+    required this.pendingCount,
+    required this.approvedCount,
+    this.isLoading = false,
+    this.selectedStatus,
+    this.onStatusTap,
   });
 
-  final RequestStatusSummaryEntity? summary;
+  final int totalCount;
+  final int pendingCount;
+  final int approvedCount;
   final bool isLoading;
+  final String? selectedStatus;
+  final ValueChanged<String?>? onStatusTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+
     final cards = [
       _SummaryCardData(
         label: 'إجمالي الطلبات',
-        value: summary?.total,
-        color: colors.primary,
+        count: totalCount,
+        statusValue: null,
         icon: Icons.receipt_long_rounded,
-        gradient: AppGradients.financialHero(context),
-        foreground: colors.onPrimary,
-        prominent: true,
+        accentColor: colors.primary,
       ),
       _SummaryCardData(
         label: 'قيد المراجعة',
-        value: summary?.pending,
-        color: colors.warning,
+        count: pendingCount,
+        statusValue: 'PENDING',
         icon: Icons.hourglass_top_rounded,
-        gradient: AppGradients.accentHero3(context, colors.warning),
-        foreground: colors.onSurface,
+        accentColor: colors.warning,
       ),
       _SummaryCardData(
         label: 'معتمدة',
-        value: summary?.approved,
-        color: colors.success,
-        icon: Icons.verified_rounded,
-        gradient: AppGradients.accentHero3(context, colors.success),
-        foreground: colors.onSurface,
+        count: approvedCount,
+        statusValue: 'APPROVED',
+        icon: Icons.check_circle_rounded,
+        accentColor: colors.success,
       ),
     ];
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.cardPadding),
+    return Container(
+      margin: EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          for (var index = 0; index < cards.length; index++) ...[
-            if (index > 0) AppSpacing.hXs,
+          for (var i = 0; i < cards.length; i++) ...[
+            if (i > 0) AppSpacing.hSm,
             Expanded(
-              child: _SummaryCard(
-                data: cards[index],
+              child: _KpiSummaryCard(
+                data: cards[i],
                 isLoading: isLoading,
+                isSelected: selectedStatus == cards[i].statusValue,
+                onTap: onStatusTap != null
+                    ? () => onStatusTap!(cards[i].statusValue)
+                    : null,
               ),
             ),
           ],
@@ -72,95 +82,105 @@ class PosProcurementOrdersSummaryStrip extends StatelessWidget {
 class _SummaryCardData {
   const _SummaryCardData({
     required this.label,
-    required this.value,
-    required this.color,
+    required this.count,
+    required this.statusValue,
     required this.icon,
-    required this.gradient,
-    required this.foreground,
-    this.prominent = false,
+    required this.accentColor,
   });
 
   final String label;
-  final int? value;
-  final Color color;
+  final int count;
+  final String? statusValue;
   final IconData icon;
-  final Gradient gradient;
-  final Color foreground;
-  final bool prominent;
+  final Color accentColor;
 }
 
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.data, required this.isLoading});
+class _KpiSummaryCard extends StatelessWidget {
+  const _KpiSummaryCard({
+    required this.data,
+    required this.isLoading,
+    required this.isSelected,
+    this.onTap,
+  });
 
   final _SummaryCardData data;
   final bool isLoading;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final dark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      height: 96.h,
-      padding: EdgeInsetsDirectional.fromSTEB(8.r, 9.r, 8.r, 8.r),
-      decoration: BoxDecoration(
-        gradient: data.gradient,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(
-          color: data.prominent
-              ? colors.onPrimary.withValues(alpha: .16)
-              : data.color.withValues(alpha: dark ? .24 : .18),
+    return CustomInteractiveBounce(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.r, vertical: 12.r),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(18.r),
+          border: Border.all(
+            color: isSelected
+                ? data.accentColor
+                : colors.outlineVariant.withValues(alpha: .5),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? data.accentColor.withValues(alpha: .12)
+                  : Colors.black.withValues(alpha: .03),
+              blurRadius: isSelected ? 12 : 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
-        boxShadow: data.prominent
-            ? AppElevation.tinted(
-                context,
-                data.color,
-                alpha: .14,
-                blur: 14,
-                dy: 5,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(data.icon, size: 16.r, color: data.accentColor),
+                AppSpacing.hXxs,
+                Flexible(
+                  child: Text(
+                    data.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            AppSpacing.vXs,
+            if (isLoading)
+              CustomSkeletonShimmer(
+                child: Container(
+                  width: 36.w,
+                  height: 22.h,
+                  margin: EdgeInsets.symmetric(vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                ),
               )
-            : AppElevation.level1(context),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 31.r,
-            height: 31.r,
-            decoration: BoxDecoration(
-              color: data.foreground.withValues(alpha: data.prominent ? .14 : .10),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: data.foreground.withValues(alpha: .20),
+            else
+              Text(
+                '${data.count}',
+                style: AppTypography.headlineSmall.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
+                ),
               ),
-            ),
-            child: Icon(
-              data.icon,
-              size: 17.r,
-              color: data.prominent ? data.foreground : data.color,
-            ),
-          ),
-          AppSpacing.vXxs,
-          Text(
-            isLoading ? '—' : (data.value?.toString() ?? '—'),
-            style: AppTypography.titleLarge.copyWith(
-              color: data.foreground,
-              fontWeight: FontWeight.w700,
-              height: 1.05,
-            ),
-          ),
-          AppSpacing.vXxs,
-          Text(
-            data.label,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.labelSmall.copyWith(
-              color: data.foreground.withValues(alpha: .88),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

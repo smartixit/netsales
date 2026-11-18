@@ -48,11 +48,21 @@ class PosProcurementOrdersController extends GetxController {
 
   bool get hasMore => nextCursor.value != null;
 
+  int get totalOrdersCount => requests.length;
+
+  int get pendingOrdersCount =>
+      requests.where((request) => request.isPending).length;
+
+  int get approvedOrdersCount =>
+      requests.where((request) => request.isApproved).length;
+
   bool get canCreateOrder =>
       PermissionService.to.can(AppPermissions.requestsCreate);
 
   bool get canCancelOrder =>
       PermissionService.to.can(AppPermissions.requestsEdit);
+
+  Future<void> refreshOrders() => loadRequests(isRefresh: true);
 
   @override
   void onInit() {
@@ -194,7 +204,9 @@ class PosProcurementOrdersController extends GetxController {
 
     try {
       final cancelled = await cancelRequestUseCase(requestId);
-      final index = requests.indexWhere((request) => request.requestId == requestId);
+      final index = requests.indexWhere(
+        (request) => request.requestId == requestId,
+      );
       if (index == -1) {
         requests.add(cancelled);
       } else {
@@ -282,10 +294,7 @@ class PosProcurementOrdersController extends GetxController {
   }
 
   Future<void> openEditOrder(RequestEntity request) async {
-    await Get.toNamed<void>(
-      AppRoutes.newProcurementOrder,
-      arguments: request,
-    );
+    await Get.toNamed<void>(AppRoutes.newProcurementOrder, arguments: request);
     await loadInitialData();
   }
 

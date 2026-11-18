@@ -16,7 +16,8 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// مساحة إنشاء طلب التوريد الواحدة: السياق، الباقات، الكميات والإرسال دون شاشة مراجعة منفصلة.
-class PosNewProcurementOrderScreen extends GetView<PosNewProcurementOrderController> {
+class PosNewProcurementOrderScreen
+    extends GetView<PosNewProcurementOrderController> {
   const PosNewProcurementOrderScreen({super.key});
 
   @override
