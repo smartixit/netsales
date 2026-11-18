@@ -1,210 +1,615 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/utils/package_spec_formatter.dart';
+import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/requests/domain/entities/request_item_entity.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 
-/// بطاقة الباقة التوريدية المفصلة بالمعايير التنفيذية
+/// بطاقة الباقة التوريدية المتطورة بنظام حركة الأكورديون المعتمد لصفحة الطلبات
 ///
-/// مصممة بهندسة تخطيط آمنة 100% وبدون أي IntrinsicHeight أو حدود غير متماثلة
-/// تضمن ثبات العرض وسرعة الأداء وعدم حدوث أي استثناء أثناء الرسم.
+/// تجسد المعايير العالمية في عرض بنود طلبات التوريد:
+/// - أسلوب حركة الأكورديون المطابق تماماً لبطاقات الطلبات (AnimatedSize + ClipRect بمدة 280ms و Curve.easeInOutCubic).
+/// - نظام أكورديون حصري ينسجم مع نمط صفحة الطلبات (فتح بند يغلق الآخر بنعومة تامة).
+/// - توضيح نوع الخصم المعتمد بدقة (خصم خاص بنقطة البيع VS خصم افتراضي تعاقدي).
+/// - سكك قياسية متوازنة للكمية، توزيع الشيتات، وسعر الكرت والخصم مع حماية تامة ضد التجاوز.
 class ProcurementDetailsItemCard extends StatelessWidget {
   const ProcurementDetailsItemCard({
     super.key,
     required this.item,
     required this.index,
+    this.isExpanded = false,
+    this.onToggleExpand,
   });
 
   final RequestItemEntity item;
   final int index;
+  final bool isExpanded;
+  final VoidCallback? onToggleExpand;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final package = item.voucherPackage;
 
-    // استخراج لون الباقة بأمان مع لون احتياطي معتمد
-    final accentColor =
-        CustomColorPicker.parseHex(package?.packageColor);
+    // استخراج لون الباقة مع لون احتياطي معتمد
+    final accentColor = CustomColorPicker.parseHex(
+      package?.packageColor,
+      fallback: colors.primary,
+    );
 
     final packageName = package?.packageName ?? 'باقة كروت #${item.packageId}';
 
-    // حساب عدد الشيتات المقابلة
-    final sheetSize = package?.packageVoucherCount ?? 100;
+    // حسابات الشيتات وتوصيف الأوراق
+    final sheetSize = (package?.packageVoucherCount ?? 0) > 0
+        ? package!.packageVoucherCount
+        : 100;
+    final sheetDescription = VoucherSheetCalculator.describe(
+      item.voucherCount,
+      sheetSize,
+    );
     final sheetsCount = sheetSize > 0 ? (item.voucherCount / sheetSize) : 0.0;
     final sheetsFormatted = sheetsCount.truncateToDouble() == sheetsCount
         ? sheetsCount.toInt().toString()
         : sheetsCount.toStringAsFixed(1);
 
+    final grossAmount = item.voucherPrice * item.voucherCount;
+    final hasDiscount = item.itemDiscount > 0;
+    final isCustomDiscount = package?.procurementIsCustomDiscount == true;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(AppRadius.card),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(20.r),
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            accentColor.withValues(alpha: isExpanded ? 0.08 : 0.035),
+            colors.surface,
+            colors.surface,
+          ],
+          stops: const [0.0, 0.40, 1.0],
+        ),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.35),
-          width: 1,
+          color: isExpanded
+              ? accentColor.withValues(alpha: 0.45)
+              : colors.outlineVariant.withValues(alpha: 0.35),
+          width: isExpanded ? 1.2 : 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: colors.shadow.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: accentColor.withValues(alpha: isExpanded ? 0.09 : 0.04),
+            blurRadius: isExpanded ? 18 : 10,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // الصف الأول: شارة الأيقونة وهوية الباقة + اسم الباقة + الإجمالي الصافي للبند
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // حاوية أيقونة الباقة الملونة
-              Container(
-                width: 34.r,
-                height: 34.r,
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(
-                    color: accentColor.withValues(alpha: 0.28),
-                    width: 0.8,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '#${index + 1}',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: accentColor,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 11.sp,
-                  ),
-                ),
-              ),
-              AppSpacing.hSm,
-              Expanded(
-                child: Text(
-                  packageName,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              AppSpacing.hSm,
-              // الإجمالي المالي للبند
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: Text(
-                      AmountFormatter.formatValue(item.itemTotalAmount),
-                      style: AppTypography.labelLarge.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: colors.primary,
+          // ── 1. ترويسة هوية الباقة والترقيم والقيمة الصافية ──
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onToggleExpand,
+              splashColor: accentColor.withValues(alpha: 0.08),
+              highlightColor: accentColor.withValues(alpha: 0.04),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(14.r, 14.r, 14.r, 10.r),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // شارة رقم الباقة وهوية لونها الفاخر
+                    Container(
+                      width: 42.r,
+                      height: 42.r,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
+                          colors: [
+                            accentColor.withValues(alpha: 0.20),
+                            accentColor.withValues(alpha: 0.06),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: accentColor.withValues(alpha: 0.38),
+                          width: 1.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: accentColor.withValues(alpha: 0.16),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Padding(
+                          padding: EdgeInsets.all(4.r),
+                          child: Text(
+                            '#${index + 1}',
+                            style: AppTypography.titleSmall.copyWith(
+                              color: accentColor,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  Text(
-                    'الإجمالي الصافي',
-                    style: AppTypography.caption.copyWith(
-                      color: colors.onSurfaceVariant,
-                      fontSize: 9.sp,
+                    AppSpacing.hSm,
+
+                    // اسم الباقة ومعلومات الشبكة
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            packageName,
+                            style: AppTypography.titleSmall.copyWith(
+                              color: colors.onSurface,
+                              fontWeight: FontWeight.w800,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 3.h),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.layers_outlined,
+                                size: 11.5.r,
+                                color: colors.onSurfaceVariant,
+                              ),
+                              SizedBox(width: 4.w),
+                              Flexible(
+                                child: Text(
+                                  'سعة الشيت: $sheetSize كرت',
+                                  style: AppTypography.caption.copyWith(
+                                    color: colors.onSurfaceVariant,
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    AppSpacing.hSm,
+
+                    // كبسولة الإجمالي الصافي للبند
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(
+                          color: colors.primary.withValues(alpha: 0.25),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              AmountFormatter.formatValue(item.itemTotalAmount),
+                              style: AppTypography.labelLarge.copyWith(
+                                color: colors.primary,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 1.h),
+                          Text(
+                            'الصافي',
+                            style: AppTypography.caption.copyWith(
+                              color: colors.primary.withValues(alpha: 0.85),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 9.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // ── 2. شريط كبسولات مواصفات الباقة ──
+          if (package != null) ...[
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14.r),
+              child: Wrap(
+                spacing: 6.w,
+                runSpacing: 4.h,
+                children: [
+                  if (package.packageBalance > 0)
+                    _buildSpecBadge(
+                      context,
+                      label: package.balanceDisplay,
+                      icon: Icons.data_usage_rounded,
+                      tintColor: const Color(0xFF0284C7),
+                    ),
+                  if (package.packageValidity != null)
+                    _buildSpecBadge(
+                      context,
+                      label: package.validityDisplay,
+                      icon: Icons.calendar_today_rounded,
+                      tintColor: const Color(0xFFD97706),
+                    ),
+                  if (package.packageUptime != null)
+                    _buildSpecBadge(
+                      context,
+                      label: package.uptimeDisplay,
+                      icon: Icons.timer_outlined,
+                      tintColor: const Color(0xFF7C3AED),
+                    ),
                 ],
               ),
-            ],
-          ),
-
-          // مواصفات الباقة إن وجدت
-          if (package != null) ...[
-            SizedBox(height: 8.h),
-            Wrap(
-              spacing: 6.w,
-              runSpacing: 4.h,
-              children: [
-                if (package.packageBalance > 0)
-                  _buildSpecBadge(
-                    context,
-                    label: PackageSpecFormatter.formatBalance(
-                      package.packageBalance,
-                    ),
-                    icon: Icons.data_usage_rounded,
-                  ),
-                if (package.packageValidity != null)
-                  _buildSpecBadge(
-                    context,
-                    label: PackageSpecFormatter.formatValidity(
-                      package.packageValidity,
-                    ),
-                    icon: Icons.event_available_rounded,
-                  ),
-                if (package.packageUptime != null)
-                  _buildSpecBadge(
-                    context,
-                    label: PackageSpecFormatter.formatUptime(
-                      package.packageUptime,
-                    ),
-                    icon: Icons.timer_outlined,
-                  ),
-              ],
             ),
+            SizedBox(height: 10.h),
           ],
 
-          SizedBox(height: 10.h),
-          Divider(
-            height: 1,
-            color: colors.outlineVariant.withValues(alpha: 0.25),
-          ),
-          SizedBox(height: 10.h),
-
-          // الصف السفلي: تفاصيل الكميات والأسعار
-          Row(
-            children: [
-              // الكمية
-              Expanded(
-                child: _buildDetailColumn(
-                  context,
-                  label: 'الكمية المطلوبة',
-                  value: '${item.voucherCount} كرت',
-                  subValue: '($sheetsFormatted شيت)',
-                ),
-              ),
-
-              // سعر الكرت
-              Expanded(
-                child: _buildDetailColumn(
-                  context,
-                  label: 'سعر الكرت',
-                  value: AmountFormatter.formatValue(item.voucherPrice),
-                ),
-              ),
-
-              // الخصم إن وجد
-              if (item.itemDiscount > 0)
+          // ── 3. السكك القياسية المزدوجة (الكمية والأوراق VS سعر الكرت والخصم) ──
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14.r),
+            child: Row(
+              children: [
+                // سكة الكمية وتوزيع الشيتات
                 Expanded(
-                  child: _buildDetailColumn(
-                    context,
-                    label: 'الخصم',
-                    value: AmountFormatter.formatValue(item.itemDiscount),
-                    isDiscount: true,
+                  child: Container(
+                    padding: EdgeInsets.all(10.r),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerLow.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: colors.outlineVariant.withValues(alpha: 0.30),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.filter_none_rounded,
+                              size: 12.r,
+                              color: colors.primary,
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              'الكمية المطلوبة',
+                              style: AppTypography.caption.copyWith(
+                                color: colors.onSurfaceVariant,
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 4.h),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${item.voucherCount} كرت',
+                                style: AppTypography.titleSmall.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: colors.onSurface,
+                                ),
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                '($sheetsFormatted شيت)',
+                                style: AppTypography.caption.copyWith(
+                                  color: colors.primary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 10.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          sheetDescription,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.caption.copyWith(
+                            color: colors.onSurfaceVariant,
+                            fontSize: 9.5.sp,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-            ],
+                SizedBox(width: 8.w),
+
+                // سكة سعر الكرت والخصم التجاري مع تمييز (خصم خاص VS خصم افتراضي)
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.all(10.r),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerLow.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: colors.outlineVariant.withValues(alpha: 0.30),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.sell_outlined,
+                              size: 12.r,
+                              color: hasDiscount
+                                  ? (isCustomDiscount
+                                        ? const Color(0xFF059669)
+                                        : const Color(0xFF0284C7))
+                                  : colors.primary,
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              'سعر الكرت',
+                              style: AppTypography.caption.copyWith(
+                                color: colors.onSurfaceVariant,
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 4.h),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            AmountFormatter.formatValue(item.voucherPrice),
+                            style: AppTypography.titleSmall.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: colors.onSurface,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        if (hasDiscount)
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6.w,
+                                vertical: 2.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    (isCustomDiscount
+                                            ? const Color(0xFF10B981)
+                                            : const Color(0xFF0EA5E9))
+                                        .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(5.r),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isCustomDiscount
+                                        ? Icons.storefront_rounded
+                                        : Icons.auto_awesome_rounded,
+                                    size: 10.r,
+                                    color: isCustomDiscount
+                                        ? const Color(0xFF059669)
+                                        : const Color(0xFF0284C7),
+                                  ),
+                                  SizedBox(width: 3.w),
+                                  Text(
+                                    '${isCustomDiscount ? 'خصم خاص' : 'خصم افتراضي'}: ${AmountFormatter.formatValue(item.itemDiscount)}',
+                                    style: AppTypography.caption.copyWith(
+                                      color: isCustomDiscount
+                                          ? const Color(0xFF059669)
+                                          : const Color(0xFF0284C7),
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 9.5.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        else
+                          Text(
+                            'سعر أساسي بدون خصم',
+                            style: AppTypography.caption.copyWith(
+                              color: colors.onSurfaceVariant,
+                              fontSize: 9.5.sp,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── 4. المحتوى المتمدد للأكورديون بحركة انسيابية فائقة (AnimatedSize + ClipRect) ──
+          ClipRect(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.fastOutSlowIn,
+              alignment: Alignment.topCenter,
+              child: isExpanded
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: 12.h),
+                        Divider(
+                          height: 1,
+                          color: accentColor.withValues(alpha: 0.20),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(14.r, 12.r, 14.r, 6.r),
+                          child: Container(
+                            padding: EdgeInsets.all(12.r),
+                            decoration: BoxDecoration(
+                              color: colors.surfaceContainerLowest,
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: colors.outlineVariant.withValues(
+                                  alpha: 0.35,
+                                ),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.analytics_outlined,
+                                      size: 14.r,
+                                      color: accentColor,
+                                    ),
+                                    SizedBox(width: 5.w),
+                                    Text(
+                                      'تفاصيل الحسبة والتدقيق المالي للبند',
+                                      style: AppTypography.labelMedium.copyWith(
+                                        color: colors.onSurface,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8.h),
+
+                                _buildAuditRow(
+                                  context,
+                                  label: 'القيمة الإجمالية الأساسية',
+                                  formula:
+                                      '${item.voucherCount} كرت × ${AmountFormatter.formatValue(item.voucherPrice)}',
+                                  amount: AmountFormatter.formatValue(
+                                    grossAmount,
+                                  ),
+                                ),
+
+                                if (hasDiscount) ...[
+                                  SizedBox(height: 6.h),
+                                  _buildAuditRow(
+                                    context,
+                                    label: isCustomDiscount
+                                        ? 'الخصم الخاص الممنوح (مخصص لنقطتك)'
+                                        : 'الخصم الافتراضي للباقة (تعاقدي)',
+                                    amount:
+                                        '-${AmountFormatter.formatValue(item.itemDiscount)}',
+                                    isDiscount: true,
+                                  ),
+                                ],
+
+                                SizedBox(height: 6.h),
+                                Divider(
+                                  height: 1,
+                                  color: colors.outlineVariant.withValues(
+                                    alpha: 0.25,
+                                  ),
+                                ),
+                                SizedBox(height: 6.h),
+
+                                _buildAuditRow(
+                                  context,
+                                  label: 'صافي القيمة المستحقة للبند',
+                                  amount: AmountFormatter.formatValue(
+                                    item.itemTotalAmount,
+                                  ),
+                                  isTotal: true,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ),
+
+          // ── 5. شريط النقر لفتح أو إغلاق الأكورديون (باستخدام InkWell لضمان استجابة كل البكسلات للنقر) ──
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onToggleExpand,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14.r, vertical: 9.h),
+                child: Row(
+                  children: [
+                    Icon(
+                      isExpanded
+                          ? Icons.unfold_less_rounded
+                          : Icons.unfold_more_rounded,
+                      size: 14.r,
+                      color: accentColor,
+                    ),
+                    SizedBox(width: 5.w),
+                    Expanded(
+                      child: Text(
+                        isExpanded
+                            ? 'إخفاء تفاصيل التدقيق المالي'
+                            : 'عرض تفاصيل الحسبة والتدقيق المالي للبند',
+                        style: AppTypography.caption.copyWith(
+                          color: accentColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10.5.sp,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
+                    AnimatedRotation(
+                      turns: isExpanded ? 0.5 : 0.0,
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeInOutCubic,
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 20.r,
+                        color: accentColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -215,26 +620,29 @@ class ProcurementDetailsItemCard extends StatelessWidget {
     BuildContext context, {
     required String label,
     required IconData icon,
+    required Color tintColor,
   }) {
-    final colors = context.colors;
-
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(AppRadius.xs),
+        color: tintColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(
+          color: tintColor.withValues(alpha: 0.22),
+          width: 0.7,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 11.r, color: colors.onSurfaceVariant),
+          Icon(icon, size: 11.r, color: tintColor),
           SizedBox(width: 4.w),
           Text(
             label,
             style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant,
+              color: tintColor,
               fontSize: 10.sp,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -242,53 +650,58 @@ class ProcurementDetailsItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailColumn(
+  Widget _buildAuditRow(
     BuildContext context, {
     required String label,
-    required String value,
-    String? subValue,
+    required String amount,
+    String? formula,
     bool isDiscount = false,
+    bool isTotal = false,
   }) {
     final colors = context.colors;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
+    final Color valueColor = isTotal
+        ? colors.primary
+        : (isDiscount ? const Color(0xFF059669) : colors.onSurface);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: colors.onSurfaceVariant,
-            fontSize: 10.sp,
-          ),
-        ),
-        SizedBox(height: 2.h),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                value,
-                style: AppTypography.labelMedium.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: isDiscount
-                      ? const Color(0xFF10B981)
-                      : colors.onSurface,
+                label,
+                style: AppTypography.caption.copyWith(
+                  color: isTotal ? colors.onSurface : colors.onSurfaceVariant,
+                  fontWeight: isTotal ? FontWeight.w800 : FontWeight.w500,
+                  fontSize: 10.5.sp,
                 ),
               ),
-              if (subValue != null) ...[
-                SizedBox(width: 3.w),
+              if (formula != null) ...[
+                SizedBox(height: 1.h),
                 Text(
-                  subValue,
+                  formula,
                   style: AppTypography.caption.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontSize: 10.sp,
+                    color: colors.onSurfaceVariant.withValues(alpha: 0.8),
+                    fontSize: 9.sp,
                   ),
                 ),
               ],
             ],
           ),
+        ),
+        SizedBox(width: 8.w),
+        Text(
+          amount,
+          style:
+              (isTotal ? AppTypography.labelLarge : AppTypography.labelMedium)
+                  .copyWith(
+                    fontWeight: isTotal ? FontWeight.w900 : FontWeight.w700,
+                    color: valueColor,
+                  ),
         ),
       ],
     );

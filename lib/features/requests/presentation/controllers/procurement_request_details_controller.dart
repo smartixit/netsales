@@ -33,6 +33,19 @@ class ProcurementRequestDetailsController extends GetxController {
   final isLoading = false.obs;
   final errorMessage = RxnString();
 
+  /// فهرس البند المفتوح حالياً بنظام الأكورديون الحصري (فتح بند يغلق البنود الأخرى تلقائياً)
+  final expandedItemIndex = Rxn<int>();
+
+  void toggleItemExpansion(int index) {
+    if (expandedItemIndex.value == index) {
+      expandedItemIndex.value = null;
+    } else {
+      expandedItemIndex.value = index;
+    }
+  }
+
+  bool isItemExpanded(int index) => expandedItemIndex.value == index;
+
   bool get isNetworkWorkspace =>
       Get.isRegistered<WorkspaceService>() &&
       WorkspaceService.to.activeWorkspace == AppWorkspace.network;

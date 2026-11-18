@@ -176,6 +176,8 @@ class ProcurementRequestDetailsScreen
                       ProcurementDetailsItemCard(
                         item: request.items[i],
                         index: i,
+                        isExpanded: controller.isItemExpanded(i),
+                        onToggleExpand: () => controller.toggleItemExpansion(i),
                       ),
                     ],
 
