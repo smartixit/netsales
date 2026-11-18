@@ -215,6 +215,8 @@ class CustomPackageOptionCard extends StatelessWidget {
                     estimatedLineTotalMinor: estimatedLineTotalMinor,
                     currency: currency,
                     selected: selected,
+                    unitPrice: isCashSale ? cashPrice : creditPrice,
+                    quantity: quantity,
                   ),
                 ],
               ],

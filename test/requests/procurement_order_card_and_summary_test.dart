@@ -178,7 +178,7 @@ void main() {
       expect(find.text('2'), findsOneWidget);
       expect(find.text('عدد الكروت'), findsOneWidget);
       expect(find.text('350'), findsOneWidget);
-      expect(find.text('إجمالي المبلغ'), findsOneWidget);
+      expect(find.text('إجمالي الطلب'), findsOneWidget);
     });
 
     testWidgets('renders accordion and toggles expansion smoothly', (
