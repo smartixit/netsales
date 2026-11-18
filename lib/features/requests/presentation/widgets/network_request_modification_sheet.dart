@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -24,9 +25,10 @@ import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// شيت مراجعة وتعديل طلب التوريد لمشغلي الشبكة
 /// يتميز بـ:
-/// 1. شريط سياق تجاري تنفيذي رشيق (Context Summary Bar) بدون أي تراكم بصري.
-/// 2. إعادة استخدام بطاقات الباقات المرنة والمستقلة (CustomPackageOptionCard / ProcurementPackageOptionCard).
-/// 3. قسم معاينة مالية تنفيذي مصمم كقسيمة اعتماد وفاتورة تقديرية رسمية (Executive Quotation Voucher).
+/// 1. بطاقة أطراف وسياق تجاري تنفيذي فاخرة (Executive Commercial Parties Card) ثنائية الأبعاد بدون أي قص للأسماء.
+/// 2. استخدام فوري وسلس لبطاقات الباقات المستقلة (CustomPackageOptionCard) مع دعم الحذف والتحكم المباشر.
+/// 3. قسيمة فاتورة تقديرية رقمية فاخرة (Executive Digital Quotation Voucher) ذات عمق بصري ومحاسبي استثنائي.
+/// 4. فتح فوري للشيت بدون أي تأخير شبكي مع إظهار هيكل التحميل التفاعلي وتعطيل الإجراءات حتى اكتمال البيانات.
 class NetworkRequestModificationSheet
     extends GetView<NetworkProcurementReviewController> {
   const NetworkRequestModificationSheet({super.key});
@@ -34,7 +36,11 @@ class NetworkRequestModificationSheet
   static Future<void> open(RequestEntity request) async {
     final controller = Get.find<NetworkProcurementReviewController>();
     if (!request.isPending) return;
+
+    // إطلاق جلب البيانات في الخلفية دون حظر فتح الشيت نهائياً
     unawaited(controller.beginModification(request));
+
+    // فتح الشيت فوراً بزمن استجابة فوري (< 16ms)
     await CustomBottomSheet.show<void>(
       title: 'مراجعة طلب #${request.requestUuid ?? request.requestId}',
       subtitle: 'عدّل كميات الباقات أو أضف باقات جديدة، ثم عاين الأسعار قبل الاعتماد.',
@@ -59,7 +65,7 @@ class NetworkRequestModificationSheet
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (request != null) ...[
-            _ContextSummaryBar(request: request),
+            _ExecutiveCommercialPartiesCard(request: request),
             AppSpacing.vMd,
           ],
           if (isLoadingEditor && lines.isEmpty) ...[
@@ -94,9 +100,10 @@ class NetworkRequestModificationSheet
   }
 }
 
-/// 1. شريط السياق التجاري التنفيذي الأنيق (بديل الـ Hero المزدحم)
-class _ContextSummaryBar extends StatelessWidget {
-  const _ContextSummaryBar({required this.request});
+/// 1. بطاقة أطراف وسياق العملية التوريدية التنفيذية الفاخرة (Executive Commercial Parties Card)
+/// تمنح كل طرف مساحته الكاملة والواضحة مع شريط بيانات علوي يمنع أي ضغط أو قص للأسماء.
+class _ExecutiveCommercialPartiesCard extends StatelessWidget {
+  const _ExecutiveCommercialPartiesCard({required this.request});
 
   final RequestEntity request;
 
@@ -109,84 +116,202 @@ class _ContextSummaryBar extends StatelessWidget {
         request.saleTypeLabel ??
         (request.saleType == SaleType.credit ? 'آجل' : 'نقدي');
     final isCash = request.saleType == SaleType.cash;
+    final uuid = request.requestUuid ?? request.requestId.toString();
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
+        color: colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: .5),
+          color: colors.outlineVariant.withValues(alpha: 0.45),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: colors.shadow.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // شبكة التوريد
-          Icon(Icons.cell_tower_rounded, size: 16.r, color: colors.primary),
-          AppSpacing.hXxs,
-          Expanded(
-            child: Text(
-              networkName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.labelMedium.copyWith(
-                color: colors.onSurface,
-                fontWeight: FontWeight.w700,
-              ),
+          // شريط الميتاداتا العلوي: الرقم المرجعي ونوع البيع
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs + 2,
             ),
-          ),
-          // سهم الاتجاه
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-            child: Icon(
-              Icons.arrow_forward_rounded,
-              size: 15.r,
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-          // نقطة البيع
-          Icon(Icons.storefront_rounded, size: 16.r, color: colors.secondary),
-          AppSpacing.hXxs,
-          Expanded(
-            child: Text(
-              posName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.labelMedium.copyWith(
-                color: colors.onSurface,
-                fontWeight: FontWeight.w700,
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerLow.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(AppRadius.lg),
               ),
-            ),
-          ),
-          AppSpacing.hXs,
-          // نوع البيع
-          CustomStatusBadge(
-            label: saleTypeLabel,
-            icon: isCash ? Icons.payments_outlined : Icons.account_balance_wallet_outlined,
-            tone: isCash ? SemanticTone.success : SemanticTone.info,
-            isCompact: true,
-          ),
-          if (request.requestUuid != null) ...[
-            AppSpacing.hXs,
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 6.r, vertical: 2.r),
-              decoration: BoxDecoration(
-                color: colors.surfaceContainerHighest.withValues(alpha: .5),
-                borderRadius: BorderRadius.circular(AppRadius.xs),
-              ),
-              child: Text(
-                '#${request.requestUuid}',
-                style: AppTypography.labelSmall.copyWith(
-                  fontSize: 10.sp,
-                  color: colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w700,
+              border: Border(
+                bottom: BorderSide(
+                  color: colors.outlineVariant.withValues(alpha: 0.35),
                 ),
               ),
             ),
-          ],
+            child: Row(
+              children: [
+                Icon(Icons.tag_rounded, size: 15.r, color: colors.primary),
+                AppSpacing.hXxs,
+                Expanded(
+                  child: Text(
+                    uuid,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                CustomStatusBadge(
+                  label: saleTypeLabel,
+                  icon: isCash
+                      ? Icons.payments_outlined
+                      : Icons.account_balance_wallet_outlined,
+                  tone: isCash ? SemanticTone.success : SemanticTone.info,
+                  isCompact: true,
+                ),
+              ],
+            ),
+          ),
+          // المسار التجاري الواسع: شبكة التوريد ➔ نقطة البيع
+          Padding(
+            padding: EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // الطرف الأول: الشبكة المورّدة
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 38.r,
+                        height: 38.r,
+                        decoration: BoxDecoration(
+                          color: colors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(
+                            color: colors.primary.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.cell_tower_rounded,
+                            size: 20.r,
+                            color: colors.primary,
+                          ),
+                        ),
+                      ),
+                      AppSpacing.hSm,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'الشبكة المورّدة',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: colors.onSurfaceVariant,
+                                fontSize: 10.sp,
+                              ),
+                            ),
+                            AppSpacing.vXxs,
+                            Text(
+                              networkName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: colors.onSurface,
+                                fontWeight: FontWeight.w700,
+                                height: 1.25,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // أيقونة الربط التوريدي في المنتصف
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                  child: Container(
+                    width: 28.r,
+                    height: 28.r,
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerHighest.withValues(
+                        alpha: 0.5,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 15.r,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+                // الطرف الثاني: نقطة البيع
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 38.r,
+                        height: 38.r,
+                        decoration: BoxDecoration(
+                          color: colors.secondary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(
+                            color: colors.secondary.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.storefront_rounded,
+                            size: 20.r,
+                            color: colors.secondary,
+                          ),
+                        ),
+                      ),
+                      AppSpacing.hSm,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'نقطة البيع المستلمة',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: colors.onSurfaceVariant,
+                                fontSize: 10.sp,
+                              ),
+                            ),
+                            AppSpacing.vXxs,
+                            Text(
+                              posName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: colors.onSurface,
+                                fontWeight: FontWeight.w700,
+                                height: 1.25,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -194,32 +319,36 @@ class _ContextSummaryBar extends StatelessWidget {
 }
 
 /// 2. قسم الباقات المقترحة للاعتماد (معاد استخدام ProcurementPackageOptionCard بالكامل)
-class _ProposedItemsSection extends GetView<NetworkProcurementReviewController> {
-  const _ProposedItemsSection({
-    required this.request,
-    required this.lines,
-  });
+class _ProposedItemsSection
+    extends GetView<NetworkProcurementReviewController> {
+  const _ProposedItemsSection({required this.request, required this.lines});
 
   final RequestEntity? request;
   final List<RequestModificationLineEntity> lines;
 
   PackageEntity _resolvePackage(int packageId) {
-    final fromCatalog = controller.availablePackages
-        .firstWhereOrNull((p) => p.packageId == packageId);
+    final fromCatalog = controller.availablePackages.firstWhereOrNull(
+      (p) => p.packageId == packageId,
+    );
     if (fromCatalog != null) return fromCatalog;
 
-    final fromRequest = request?.items.firstWhereOrNull((i) => i.packageId == packageId);
-    if (fromRequest?.voucherPackage != null) return fromRequest!.voucherPackage!;
+    final fromRequest = request?.items.firstWhereOrNull(
+      (i) => i.packageId == packageId,
+    );
+    if (fromRequest?.voucherPackage != null)
+      return fromRequest!.voucherPackage!;
 
     return PackageEntity(
       packageId: packageId,
       networkId: request?.networkId ?? 0,
-      packageName: fromRequest?.voucherPackage?.packageName ?? 'باقة #$packageId',
+      packageName:
+          fromRequest?.voucherPackage?.packageName ?? 'باقة #$packageId',
       packageColor: fromRequest?.voucherPackage?.packageColor ?? '#087B61',
       packageBalance: fromRequest?.voucherPackage?.packageBalance ?? 0,
       packageValidity: fromRequest?.voucherPackage?.packageValidity ?? 0,
       packageUptime: fromRequest?.voucherPackage?.packageUptime ?? 0,
-      packageVoucherCount: fromRequest?.voucherPackage?.packageVoucherCount ?? 100,
+      packageVoucherCount:
+          fromRequest?.voucherPackage?.packageVoucherCount ?? 100,
       packageVoucherPrice: fromRequest?.voucherPrice ?? 0,
       packageDefaultCashDiscount: fromRequest?.itemDiscount ?? 0,
       packageDefaultCreditDiscount: 0,
@@ -334,7 +463,8 @@ class _ProposedItemsSection extends GetView<NetworkProcurementReviewController> 
                   line.packageId,
                   line.voucherCount,
                 ),
-                onDelete: () => controller.removeModificationPackage(line.packageId),
+                onDelete: () =>
+                    controller.removeModificationPackage(line.packageId),
                 customHeaderTag: isAdded ? 'باقة مضافة' : null,
                 customHeaderTagColor: isAdded ? colors.tertiary : null,
               ),
@@ -583,13 +713,13 @@ class _ExecutiveQuotationPreviewSection
             Container(
               padding: EdgeInsets.all(AppSpacing.xs),
               decoration: BoxDecoration(
-                color: colors.tertiary.withValues(alpha: .12),
+                color: colors.primary.withValues(alpha: .12),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
                 Icons.receipt_long_rounded,
                 size: 16.r,
-                color: colors.tertiary,
+                color: colors.primary,
               ),
             ),
             AppSpacing.hXs,
@@ -610,18 +740,33 @@ class _ExecutiveQuotationPreviewSection
             width: double.infinity,
             padding: EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: colors.surfaceContainerLow,
+              color: colors.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(
-                color: colors.primary.withValues(alpha: .25),
-              ),
+              border: Border.all(color: colors.primary.withValues(alpha: .22)),
+              boxShadow: [
+                BoxShadow(
+                  color: colors.shadow.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: Column(
               children: [
-                Icon(
-                  Icons.calculate_outlined,
-                  size: 38.r,
-                  color: colors.primary,
+                Container(
+                  width: 52.r,
+                  height: 52.r,
+                  decoration: BoxDecoration(
+                    color: colors.primary.withValues(alpha: 0.10),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.calculate_outlined,
+                      size: 26.r,
+                      color: colors.primary,
+                    ),
+                  ),
                 ),
                 AppSpacing.vSm,
                 Text(
@@ -644,16 +789,13 @@ class _ExecutiveQuotationPreviewSection
             ),
           )
         else
-          _ExecutiveQuotationVoucherCard(
-            request: request,
-            preview: preview!,
-          ),
+          _ExecutiveQuotationVoucherCard(request: request, preview: preview!),
       ],
     );
   }
 }
 
-/// بطاقة القسيمة المالية الرسمية المنظمة
+/// بطاقة القسيمة المالية الرسمية المنظمة فائقة العمق البصري
 class _ExecutiveQuotationVoucherCard extends StatelessWidget {
   const _ExecutiveQuotationVoucherCard({
     required this.request,
@@ -669,52 +811,56 @@ class _ExecutiveQuotationVoucherCard extends StatelessWidget {
     final diff = preview.previewTotalAmount - preview.originalTotalAmount;
     final isIncrease = diff > 0.01;
     final isDecrease = diff < -0.01;
+    final diffAbs = diff.abs();
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+        color: colors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: .6),
+          color: colors.outlineVariant.withValues(alpha: 0.40),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: .04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: colors.shadow.withValues(alpha: 0.05),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ترويسة القسيمة الرسمية
+          // شريط الترويسة الرسمي للقسيمة
           Container(
             padding: EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
               vertical: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: colors.surfaceContainerLow,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+              gradient: LinearGradient(
+                colors: [
+                  colors.primary.withValues(alpha: 0.08),
+                  colors.surfaceContainerLow,
+                ],
+              ),
               border: Border(
-                bottom: BorderSide(color: colors.outlineVariant.withValues(alpha: .5)),
+                bottom: BorderSide(
+                  color: colors.outlineVariant.withValues(alpha: 0.35),
+                ),
               ),
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.verified_outlined,
-                  size: 16.r,
-                  color: colors.primary,
-                ),
-                AppSpacing.hXxs,
+                Icon(Icons.verified_rounded, size: 16.r, color: colors.primary),
+                AppSpacing.hXs,
                 Expanded(
                   child: Text(
                     'تسعير رسمي صادر وموثق من الخادم',
                     style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
+                      color: colors.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -732,125 +878,181 @@ class _ExecutiveQuotationVoucherCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // جدول المقارنة المالية التنفيذية
-                _VoucherFinancialRow(
-                  label: 'الطلب الأصلي',
-                  amount: preview.originalTotalAmount,
-                  isMuted: true,
-                ),
-                AppSpacing.vXs,
-                _VoucherFinancialRow(
-                  label: 'إجمالي البضاعة المقترحة (الأساسي)',
-                  amount: preview.grossTotalAmount,
-                ),
-                AppSpacing.vXs,
-                _VoucherFinancialRow(
-                  label: 'إجمالي الخصم',
-                  amount: preview.totalDiscountAmount,
-                  isDiscount: true,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                  child: Divider(
-                    height: 1,
-                    color: colors.outlineVariant.withValues(alpha: .6),
-                  ),
-                ),
-                // صافي القيمة المعتمدة البارزة
+                // 1. لوحة الصافي السيادي المعتمد (The Hero Net Amount)
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.sm,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.md,
                   ),
                   decoration: BoxDecoration(
-                    color: colors.primary.withValues(alpha: .10),
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(
-                      color: colors.primary.withValues(alpha: .30),
+                    gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [
+                        const Color(0xFF087A5F),
+                        const Color(0xFF055743),
+                      ],
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'المقترح للاعتماد',
-                              style: AppTypography.titleSmall.copyWith(
-                                color: colors.primary,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            Text(
-                              'صافي القيمة التي ستعتمد وتصدر بها الفاتورة',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.onSurfaceVariant,
-                                fontSize: 9.5.sp,
-                              ),
-                            ),
-                          ],
-                        ),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF087A5F).withValues(alpha: 0.25),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
                       ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'المقترح للاعتماد',
+                              style: AppTypography.labelMedium.copyWith(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.r,
+                              vertical: 3.r,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.full,
+                              ),
+                            ),
+                            child: Text(
+                              'صافي الفاتورة',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: Colors.white,
+                                fontSize: 9.5.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      AppSpacing.vXs,
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
                           '${AmountFormatter.formatValue(preview.previewTotalAmount)} ر.ي',
                           textDirection: TextDirection.rtl,
                           style: AppTypography.titleLarge.copyWith(
-                            color: colors.primary,
+                            color: Colors.white,
+                            fontSize: 26.sp,
                             fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
                           ),
+                        ),
+                      ),
+                      AppSpacing.vXxs,
+                      Text(
+                        'صافي القيمة التي ستعتمد وتصدر بها الفاتورة الرسمية',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: Colors.white.withValues(alpha: 0.75),
+                          fontSize: 10.sp,
                         ),
                       ),
                     ],
                   ),
                 ),
                 AppSpacing.vMd,
-                // شريط تباين الفارق المالي
+                // 2. جدول الحسابات المحاسبي الأنيق
+                Container(
+                  padding: EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerLow.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: colors.outlineVariant.withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      _VoucherFinancialRow(
+                        label: 'الطلب الأصلي',
+                        amount: preview.originalTotalAmount,
+                        isMuted: true,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4.r),
+                        child: Divider(
+                          height: 1,
+                          color: colors.outlineVariant.withValues(alpha: 0.25),
+                        ),
+                      ),
+                      _VoucherFinancialRow(
+                        label: 'إجمالي البضاعة المقترحة (الأساسي)',
+                        amount: preview.grossTotalAmount,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4.r),
+                        child: Divider(
+                          height: 1,
+                          color: colors.outlineVariant.withValues(alpha: 0.25),
+                        ),
+                      ),
+                      _VoucherFinancialRow(
+                        label: 'إجمالي الخصم',
+                        amount: preview.totalDiscountAmount,
+                        isDiscount: true,
+                      ),
+                    ],
+                  ),
+                ),
+                AppSpacing.vSm,
+                // 3. شريط الفارق المالي والمقارنة التنفيذية
                 Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xs,
+                    vertical: AppSpacing.xs + 2,
                   ),
                   decoration: BoxDecoration(
-                    color: isIncrease
-                        ? colors.secondary.withValues(alpha: .08)
-                        : isDecrease
-                            ? colors.tertiary.withValues(alpha: .08)
-                            : colors.surfaceContainerLow,
+                    color: isDecrease
+                        ? colors.tertiary.withValues(alpha: 0.08)
+                        : isIncrease
+                        ? colors.secondary.withValues(alpha: 0.08)
+                        : colors.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(AppRadius.chip),
                     border: Border.all(
-                      color: isIncrease
-                          ? colors.secondary.withValues(alpha: .25)
-                          : isDecrease
-                              ? colors.tertiary.withValues(alpha: .25)
-                              : colors.outlineVariant.withValues(alpha: .4),
+                      color: isDecrease
+                          ? colors.tertiary.withValues(alpha: 0.3)
+                          : isIncrease
+                          ? colors.secondary.withValues(alpha: 0.3)
+                          : colors.outlineVariant.withValues(alpha: 0.4),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
-                        isIncrease
+                        isDecrease
+                            ? Icons.trending_down_rounded
+                            : isIncrease
                             ? Icons.trending_up_rounded
-                            : isDecrease
-                                ? Icons.trending_down_rounded
-                                : Icons.horizontal_rule_rounded,
+                            : Icons.horizontal_rule_rounded,
                         size: 16.r,
-                        color: isIncrease
+                        color: isDecrease
+                            ? colors.tertiary
+                            : isIncrease
                             ? colors.secondary
-                            : isDecrease
-                                ? colors.tertiary
-                                : colors.onSurfaceVariant,
+                            : colors.onSurfaceVariant,
                       ),
                       AppSpacing.hXs,
                       Expanded(
                         child: Text(
-                          isIncrease
-                              ? 'الفارق الإجمالي: زيادة بمقدار ${AmountFormatter.formatValue(diff)} ر.ي مقارنة بالطلب الأصلي'
-                              : isDecrease
-                                  ? 'الفارق الإجمالي: وفر بمقدار ${AmountFormatter.formatValue(diff.abs())} ر.ي مقارنة بالطلب الأصلي'
-                                  : 'الفارق الإجمالي: القيمة متطابقة تماماً مع الطلب الأصلي',
+                          isDecrease
+                              ? 'الفارق الإجمالي: وفر بمقدار ${AmountFormatter.formatValue(diffAbs)} ر.ي مقارنة بالطلب الأصلي'
+                              : isIncrease
+                              ? 'الفارق الإجمالي: زيادة بمقدار ${AmountFormatter.formatValue(diffAbs)} ر.ي مقارنة بالطلب الأصلي'
+                              : 'الفارق الإجمالي: القيمة متطابقة تماماً مع الطلب الأصلي',
                           style: AppTypography.labelSmall.copyWith(
                             color: colors.onSurface,
                             fontWeight: FontWeight.w700,
@@ -861,13 +1063,25 @@ class _ExecutiveQuotationVoucherCard extends StatelessWidget {
                   ),
                 ),
                 AppSpacing.vMd,
-                // سجل الفروقات والتعديلات
-                Text(
-                  'سجل الفروقات المباشر على البنود',
-                  style: AppTypography.labelLarge.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w800,
-                  ),
+                // 4. سجل الفروقات والتعديلات (Audit Trail)
+                Row(
+                  children: [
+                    Icon(
+                      Icons.history_toggle_off_rounded,
+                      size: 16.r,
+                      color: colors.onSurfaceVariant,
+                    ),
+                    AppSpacing.hXxs,
+                    Expanded(
+                      child: Text(
+                        'سجل الفروقات المباشر على البنود',
+                        style: AppTypography.labelLarge.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 AppSpacing.vXs,
                 ...preview.items.map((item) => _PreviewItemDiffRow(item: item)),
@@ -922,8 +1136,8 @@ class _VoucherFinancialRow extends StatelessWidget {
               color: isDiscount
                   ? colors.tertiary
                   : isMuted
-                      ? colors.onSurfaceVariant
-                      : colors.onSurface,
+                  ? colors.onSurfaceVariant
+                  : colors.onSurface,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -955,8 +1169,8 @@ class _PreviewItemDiffRow extends StatelessWidget {
           color: isAdded
               ? colors.tertiary.withValues(alpha: .06)
               : isModified
-                  ? colors.secondary.withValues(alpha: .06)
-                  : colors.surfaceContainerLow,
+              ? colors.secondary.withValues(alpha: .06)
+              : colors.surfaceContainerLow,
           borderRadius: BorderRadius.circular(AppRadius.sm),
           border: Border.all(
             color: colors.outlineVariant.withValues(alpha: .35),
@@ -968,25 +1182,28 @@ class _PreviewItemDiffRow extends StatelessWidget {
               isAdded
                   ? Icons.add_circle_outline_rounded
                   : isModified
-                      ? Icons.edit_outlined
-                      : Icons.check_circle_outline_rounded,
+                  ? Icons.edit_outlined
+                  : Icons.check_circle_outline_rounded,
               size: 15.r,
               color: isAdded
                   ? colors.tertiary
                   : isModified
-                      ? colors.secondary
-                      : colors.onSurfaceVariant,
+                  ? colors.secondary
+                  : colors.onSurfaceVariant,
             ),
             AppSpacing.hXs,
             Expanded(
               child: Text(
                 item.packageName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: AppTypography.bodySmall.copyWith(
                   fontWeight: FontWeight.w700,
                   color: colors.onSurface,
                 ),
               ),
             ),
+            AppSpacing.hXs,
             if (isAdded)
               CustomStatusBadge(
                 label: 'باقة مضافة',
@@ -1006,12 +1223,16 @@ class _PreviewItemDiffRow extends StatelessWidget {
                   color: colors.onSurfaceVariant,
                 ),
               ),
-            AppSpacing.hSm,
-            Text(
-              '${AmountFormatter.formatValue(item.itemTotalAmount)} ر.ي',
-              style: AppTypography.labelMedium.copyWith(
-                fontWeight: FontWeight.w700,
-                color: colors.onSurface,
+            AppSpacing.hXs,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                '${AmountFormatter.formatValue(item.itemTotalAmount)} ر.ي',
+                textDirection: TextDirection.rtl,
+                style: AppTypography.labelMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: colors.onSurface,
+                ),
               ),
             ),
           ],
@@ -1038,11 +1259,9 @@ class _RemovedItemDiffRow extends StatelessWidget {
           vertical: AppSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: colors.error.withValues(alpha: .06),
+          color: colors.error.withValues(alpha: .05),
           borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(
-            color: colors.error.withValues(alpha: .25),
-          ),
+          border: Border.all(color: colors.error.withValues(alpha: .22)),
         ),
         child: Row(
           children: [
@@ -1053,13 +1272,24 @@ class _RemovedItemDiffRow extends StatelessWidget {
             ),
             AppSpacing.hXs,
             Expanded(
-              child: Text(
-                item.packageName,
-                style: AppTypography.bodySmall.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colors.error,
-                  decoration: TextDecoration.lineThrough,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.packageName,
+                    style: AppTypography.bodySmall.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.onSurface,
+                    ),
+                  ),
+                  Text(
+                    'الكمية الأصلية: ${item.originalVoucherCount} كرت',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.error,
+                      fontSize: 10.sp,
+                    ),
+                  ),
+                ],
               ),
             ),
             const CustomStatusBadge(
@@ -1117,7 +1347,9 @@ class _ModificationFooter extends GetView<NetworkProcurementReviewController> {
               Expanded(
                 flex: 2,
                 child: CustomButton.primary(
-                  text: preview != null ? 'اعتماد الطلب المعدل' : 'اعتماد بالتعديل',
+                  text: preview != null
+                      ? 'اعتماد الطلب المعدل'
+                      : 'اعتماد بالتعديل',
                   icon: Icons.check_circle_rounded,
                   size: AppButtonSize.medium,
                   loading: isProcessing,
