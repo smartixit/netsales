@@ -25,6 +25,7 @@ import 'package:netsales/features/requests/domain/services/procurement_estimate_
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -33,6 +34,7 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class PosNewProcurementOrderController extends GetxController {
   final CreateRequestUseCase createRequestUseCase;
   final UpdateRequestUseCase? updateRequestUseCase;
+  final GetRequestDetailsUseCase? getRequestDetailsUseCase;
   final GetMyPosUseCase? getMyPosUseCase;
   final GetPosNetworksListUseCase? getPosNetworksListUseCase;
   final GetPackagesUseCase? getPackagesUseCase;
@@ -44,6 +46,7 @@ class PosNewProcurementOrderController extends GetxController {
   PosNewProcurementOrderController({
     required this.createRequestUseCase,
     this.updateRequestUseCase,
+    this.getRequestDetailsUseCase,
     this.getMyPosUseCase,
     this.getPosNetworksListUseCase,
     this.getPackagesUseCase,
@@ -401,7 +404,12 @@ class PosNewProcurementOrderController extends GetxController {
         resolvedId,
         preferredNetworkId: preferredNetworkId,
       );
-      selectedNetworkId.value = linkedNetworks.firstOrNull?.networkId;
+      if (preferredNetworkId != null &&
+          linkedNetworks.any((link) => link.networkId == preferredNetworkId)) {
+        selectedNetworkId.value = preferredNetworkId;
+      } else if (selectedNetworkId.value == null) {
+        selectedNetworkId.value = linkedNetworks.firstOrNull?.networkId;
+      }
     } else {
       selectedPosId.value = null;
       _setSelectedNetworkId(null);
@@ -455,13 +463,13 @@ class PosNewProcurementOrderController extends GetxController {
 
       linkedNetworks.assignAll(paginated.items);
       final preferredLink = preferredNetworkId == null
-          ? linkedNetworks.first
+          ? linkedNetworks.firstOrNull
           : linkedNetworks.firstWhereOrNull(
               (link) => link.networkId == preferredNetworkId,
             );
       final selectedLink = preferredNetworkId != null
           ? preferredLink
-          : linkedNetworks.first;
+          : linkedNetworks.firstOrNull;
       if (selectedLink != null) {
         _setSelectedNetworkId(selectedLink.networkId);
         await loadNetworkPackages(selectedLink.networkId);

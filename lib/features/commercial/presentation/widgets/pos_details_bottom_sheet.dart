@@ -9,6 +9,7 @@ import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
@@ -218,12 +219,10 @@ class PosDetailsBottomSheet {
                 prefixIcon: const Icon(Icons.store_rounded),
                 readOnly: !isEditing.value,
                 isRequired: isEditing.value,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'اسم نقطة البيع مطلوب';
-                  }
-                  return null;
-                },
+                validator: FormValidators.nameValidator(
+                  fieldName: 'اسم النقطة',
+                  minWordsCount: 2,
+                ),
               ),
             ),
 
@@ -239,12 +238,9 @@ class PosDetailsBottomSheet {
                 readOnly: !isEditing.value,
                 isRequired: isEditing.value,
                 keyboardType: TextInputType.phone,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'رقم الهاتف مطلوب';
-                  }
-                  return null;
-                },
+                validator: FormValidators.phoneValidator(
+                  fieldName: 'رقم الهاتف',
+                ),
               ),
             ),
 

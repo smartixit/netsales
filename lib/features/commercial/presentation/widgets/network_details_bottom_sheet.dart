@@ -6,6 +6,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
@@ -154,12 +155,10 @@ class NetworkDetailsBottomSheet {
                 prefixIcon: const Icon(Icons.business_rounded),
                 readOnly: !isEditing.value,
                 isRequired: isEditing.value,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'اسم الشبكة مطلوب';
-                  }
-                  return null;
-                },
+                validator: FormValidators.nameValidator(
+                  fieldName: 'اسم الشبكة',
+                  minWordsCount: 2,
+                ),
               ),
             ),
 
@@ -175,12 +174,9 @@ class NetworkDetailsBottomSheet {
                 readOnly: !isEditing.value,
                 isRequired: isEditing.value,
                 keyboardType: TextInputType.phone,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'رقم الهاتف مطلوب';
-                  }
-                  return null;
-                },
+                validator: FormValidators.phoneValidator(
+                  fieldName: 'رقم الهاتف',
+                ),
               ),
             ),
 

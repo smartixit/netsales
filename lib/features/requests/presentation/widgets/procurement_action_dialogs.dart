@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -63,14 +64,9 @@ class ProcurementActionDialogs {
             controller: reasonController,
             label: 'سبب الرفض الإلزامي',
             hint: 'مثال: الرصيد الائتماني غير كافٍ أو الكمية غير متوفرة...',
-            maxLines: 3,
+            maxLines: 2,
             isRequired: true,
-            validator: (val) {
-              if (val == null || val.trim().length < 3) {
-                return 'سبب الرفض يجب ألا يقل عن 3 أحرف';
-              }
-              return null;
-            },
+            validator: FormValidators.descriptionValidator(fieldName: 'سبب الرفض'),
           ),
         ),
       ),
