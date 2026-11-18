@@ -825,50 +825,56 @@ class _PriceOptionCard extends StatelessWidget {
                   width: 37.r,
                   height: 16.r,
                   child: Center(
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 160),
-                      opacity: selected ? 1 : 0,
-                      child: Text(
-                        'المحدد',
-                        maxLines: 1,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 9.r,
-                        ),
-                      ),
-                    ),
+                    child: selected
+                        ? AnimatedOpacity(
+                            duration: const Duration(milliseconds: 160),
+                            opacity: 1,
+                            child: Text(
+                              'المحدد',
+                              maxLines: 1,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: colors.primary,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 9.r,
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
                   ),
                 ),
                 AppSpacing.hXxs,
                 SizedBox.square(
                   dimension: 19.r,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 160),
-                    opacity: selected ? 1 : 0,
-                    child: Tooltip(
-                      message: 'نوع البيع المحدد',
-                      child: Container(
-                        key: selectedMarkerKey,
-                        decoration: BoxDecoration(
-                          color: colors.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: colors.primary.withValues(alpha: .20),
-                              blurRadius: 5,
-                              offset: const Offset(0, 1),
+                  child: selected
+                      ? AnimatedOpacity(
+                          duration: const Duration(milliseconds: 160),
+                          opacity: 1,
+                          child: Tooltip(
+                            message: 'نوع البيع المحدد',
+                            child: Container(
+                              key: selectedMarkerKey,
+                              decoration: BoxDecoration(
+                                color: colors.primary,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: colors.primary.withValues(
+                                      alpha: .20,
+                                    ),
+                                    blurRadius: 5,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.check_rounded,
+                                size: 13.r,
+                                color: colors.onPrimary,
+                              ),
                             ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.check_rounded,
-                          size: 13.r,
-                          color: colors.onPrimary,
-                        ),
-                      ),
-                    ),
-                  ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ],
             ),

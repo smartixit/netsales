@@ -5,6 +5,7 @@ import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 import 'package:netsales/features/requests/data/models/request_modification_preview_model.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 
@@ -13,6 +14,18 @@ class RequestRepositoryImpl implements RequestRepository {
   final RequestRemoteDataSource _remoteDataSource;
 
   const RequestRepositoryImpl(this._remoteDataSource);
+
+  @override
+  Future<RequestStatusSummaryEntity> getRequestStatusSummary({
+    int? networkId,
+    int? posId,
+  }) async {
+    final query = <String, dynamic>{'network_id': ?networkId, 'pos_id': ?posId};
+    final response = await _remoteDataSource.getRequestStatusSummary(
+      query: query.isNotEmpty ? query : null,
+    );
+    return response.data ?? RequestStatusSummaryEntity.empty;
+  }
 
   @override
   Future<ProcurementQuoteEntity> getQuote(Map<String, dynamic> payload) async {

@@ -162,7 +162,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('إجمالي القيمة'), findsOneWidget);
+      expect(find.text('إجمالي الطلب'), findsOneWidget);
       expect(find.text('إجمالي الكروت'), findsOneWidget);
       expect(find.text('200'), findsOneWidget);
       expect(

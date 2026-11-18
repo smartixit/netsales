@@ -124,7 +124,7 @@ class ProcurementDetailsActionBar extends StatelessWidget {
             AppSpacing.hSm,
             Expanded(
               flex: 3,
-              child: CustomButton.secondary(
+              child: CustomButton.primary(
                 text: 'تعديل بنود الطلب',
                 icon: Icons.edit_note_rounded,
                 onPressed: controller.openEditOrder,

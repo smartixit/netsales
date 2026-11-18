@@ -31,7 +31,7 @@ class ProcurementDetailsMetricsStrip extends StatelessWidget {
     // بيانات المؤشرات الأربعة الأساسية
     final metrics = [
       _MetricData(
-        label: 'إجمالي القيمة',
+        label: 'إجمالي الطلب',
         value: AmountFormatter.formatValue(request.requestTotalAmount),
         unit: 'ر.ي',
         icon: Icons.account_balance_wallet_rounded,

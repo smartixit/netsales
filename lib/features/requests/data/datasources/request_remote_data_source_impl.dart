@@ -5,6 +5,7 @@ import 'package:netsales/features/requests/data/datasources/request_remote_data_
 import 'package:netsales/features/requests/data/models/procurement_quote_model.dart';
 import 'package:netsales/features/requests/data/models/request_model.dart';
 import 'package:netsales/features/requests/data/models/request_approval_result_model.dart';
+import 'package:netsales/features/requests/data/models/request_status_summary_model.dart';
 
 /// تطبيق مصدر البيانات البعيد لطلبات الكروت عبر ApiService
 class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
@@ -39,6 +40,18 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
         }
         return [];
       },
+    );
+  }
+
+  @override
+  Future<ApiResponse<RequestStatusSummaryModel>> getRequestStatusSummary({
+    Map<String, dynamic>? query,
+  }) {
+    return ApiService.instance.get<RequestStatusSummaryModel>(
+      ApiConstants.voucherRequestsSummary,
+      queryParameters: query,
+      fromJson: (data) =>
+          RequestStatusSummaryModel.fromJson(data as Map<String, dynamic>),
     );
   }
 

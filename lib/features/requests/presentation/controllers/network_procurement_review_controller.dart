@@ -11,12 +11,14 @@ import 'package:netsales/features/commercial/domain/entities/network_entity.dart
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_status_summary_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
@@ -37,6 +39,7 @@ class NetworkProcurementReviewController extends GetxController {
   final PreviewRequestModificationUseCase previewRequestModificationUseCase;
   final GetPackagesUseCase getPackagesUseCase;
   final GetRequestDetailsUseCase getRequestDetailsUseCase;
+  final GetRequestStatusSummaryUseCase? getRequestStatusSummaryUseCase;
   int _modificationRevision = 0;
   int _editorLoadRevision = 0;
   int _packageLoadRevision = 0;
@@ -49,11 +52,14 @@ class NetworkProcurementReviewController extends GetxController {
     required this.getPackagesUseCase,
     required this.getRequestDetailsUseCase,
     this.getMyNetworksUseCase,
+    this.getRequestStatusSummaryUseCase,
   });
 
   // State: قائمة طلبات التوريد الواردة والترقيم
   final requests = <RequestEntity>[].obs;
+  final statusSummary = Rxn<RequestStatusSummaryEntity>();
   final isLoading = true.obs;
+  final isLoadingSummary = false.obs;
   final isLoadingMore = false.obs;
   final isProcessingDecision = false.obs;
   final errorMessage = RxnString();
@@ -63,14 +69,24 @@ class NetworkProcurementReviewController extends GetxController {
 
   bool get hasMore => nextCursor.value != null;
 
-  int get totalOrdersCount => requests.length;
+  int get totalOrdersCount => statusSummary.value?.total ?? requests.length;
   int get pendingOrdersCount =>
+      statusSummary.value?.pending ??
       requests.where((request) => request.isPending).length;
   int get approvedOrdersCount =>
+      statusSummary.value?.approved ??
       requests.where((request) => request.isApproved).length;
+  int get rejectedOrdersCount =>
+      statusSummary.value?.rejected ??
+      requests.where((request) => request.isRejected).length;
+  int get cancelledOrdersCount =>
+      statusSummary.value?.cancelled ??
+      requests.where((request) => request.isCancelled).length;
 
-  Future<void> refreshOrders() =>
-      loadRequests(isRefresh: true, clearOnStart: true);
+  Future<void> refreshOrders() => Future.wait([
+    loadRequests(isRefresh: true, clearOnStart: true),
+    loadStatusSummary(),
+  ]);
 
   void toggleAccordion(int requestId) {
     if (expandedRequestId.value == requestId) {
@@ -354,7 +370,25 @@ class NetworkProcurementReviewController extends GetxController {
   /// تحميل الشبكات التابعة للمشغل ثم جلب الطلبات الواردة
   Future<void> loadNetworksAndRequests() async {
     await loadAuthorizedNetworks();
-    await loadRequests(isRefresh: true, clearOnStart: true);
+    await Future.wait([
+      loadRequests(isRefresh: true, clearOnStart: true),
+      loadStatusSummary(),
+    ]);
+  }
+
+  Future<void> loadStatusSummary() async {
+    if (getRequestStatusSummaryUseCase == null) return;
+    try {
+      isLoadingSummary.value = true;
+      final summary = await getRequestStatusSummaryUseCase!(
+        networkId: selectedNetworkId.value,
+      );
+      statusSummary.value = summary;
+    } catch (_) {
+      // Fallback gracefully
+    } finally {
+      isLoadingSummary.value = false;
+    }
   }
 
   /// جلب الشبكات المعتمدة التابعة لمشغل الشبكة

@@ -23,6 +23,7 @@ import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
@@ -39,6 +40,14 @@ class FakeQuoteRequestRepository implements RequestRepository {
   Map<String, dynamic>? lastCreatePayload;
   final List<String?> createIdempotencyKeys = [];
   Map<String, dynamic>? lastQuotePayload;
+
+  @override
+  Future<RequestStatusSummaryEntity> getRequestStatusSummary({
+    int? networkId,
+    int? posId,
+  }) async {
+    return RequestStatusSummaryEntity.empty;
+  }
 
   @override
   Future<ProcurementQuoteEntity> getQuote(Map<String, dynamic> payload) async {

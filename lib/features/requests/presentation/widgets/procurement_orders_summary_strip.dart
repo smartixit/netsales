@@ -6,16 +6,19 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
-/// شريط ملخص مؤشرات حالات الطلبات (Orders KPI Summary Strip - Executive Edition)
+/// شريط ملخص مؤشرات حالات الطلبات التفاعلي (Orders KPI Summary Strip - Executive Edition)
 ///
-/// يعرض إجمالي الطلبات، والطلبات قيد المراجعة، والطلبات المعتمدة مع استخدام
-/// الـ CustomSkeletonShimmer الموحد للنصوص أثناء التحميل ودعم النقر للتصفية السريعة.
+/// يعرض إجمالي الطلبات والحالات الخمس المعتمدة من الخادم:
+/// (الكل، قيد المراجعة، معتمدة، مرفوضة، ملغية) مع استخدام الـ CustomSkeletonShimmer
+/// ودعم النقر المباشر للتصفية السريعة والتمرير الأفقي الانسيابي.
 class ProcurementOrdersSummaryStrip extends StatelessWidget {
   const ProcurementOrdersSummaryStrip({
     super.key,
     required this.totalCount,
     required this.pendingCount,
     required this.approvedCount,
+    this.rejectedCount = 0,
+    this.cancelledCount = 0,
     this.isLoading = false,
     this.isNetworkView = false,
     this.selectedStatus,
@@ -25,6 +28,8 @@ class ProcurementOrdersSummaryStrip extends StatelessWidget {
   final int totalCount;
   final int pendingCount;
   final int approvedCount;
+  final int rejectedCount;
+  final int cancelledCount;
   final bool isLoading;
   final bool isNetworkView;
   final String? selectedStatus;
@@ -56,16 +61,33 @@ class ProcurementOrdersSummaryStrip extends StatelessWidget {
         icon: Icons.check_circle_rounded,
         accentColor: colors.success,
       ),
+      _SummaryCardData(
+        label: 'مرفوضة',
+        count: rejectedCount,
+        statusValue: 'REJECTED',
+        icon: Icons.cancel_outlined,
+        accentColor: colors.error,
+      ),
+      _SummaryCardData(
+        label: 'ملغية',
+        count: cancelledCount,
+        statusValue: 'CANCELLED',
+        icon: Icons.block_rounded,
+        accentColor: colors.onSurfaceVariant,
+      ),
     ];
 
     return Container(
       margin: EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Row(
-        children: [
-          for (var i = 0; i < cards.length; i++) ...[
-            if (i > 0) AppSpacing.hSm,
-            Expanded(
-              child: _KpiSummaryCard(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        clipBehavior: Clip.none,
+        child: Row(
+          children: [
+            for (var i = 0; i < cards.length; i++) ...[
+              if (i > 0) AppSpacing.hSm,
+              _KpiSummaryCard(
                 data: cards[i],
                 isLoading: isLoading,
                 isSelected: selectedStatus == cards[i].statusValue,
@@ -73,9 +95,9 @@ class ProcurementOrdersSummaryStrip extends StatelessWidget {
                     ? () => onStatusTap!(cards[i].statusValue)
                     : null,
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -116,11 +138,16 @@ class _KpiSummaryCard extends StatelessWidget {
 
     return CustomInteractiveBounce(
       onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.r, vertical: 12.r),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        constraints: BoxConstraints(minWidth: 106.w),
+        padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 10.r),
         decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(18.r),
+          color: isSelected
+              ? data.accentColor.withValues(alpha: .08)
+              : colors.surface,
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isSelected
                 ? data.accentColor
@@ -130,7 +157,7 @@ class _KpiSummaryCard extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? data.accentColor.withValues(alpha: .12)
+                  ? data.accentColor.withValues(alpha: .14)
                   : Colors.black.withValues(alpha: .03),
               blurRadius: isSelected ? 12 : 6,
               offset: const Offset(0, 3),
@@ -143,8 +170,9 @@ class _KpiSummaryCard extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(data.icon, size: 16.r, color: data.accentColor),
+                Icon(data.icon, size: 15.r, color: data.accentColor),
                 AppSpacing.hXxs,
                 Flexible(
                   child: Text(
@@ -152,8 +180,12 @@ class _KpiSummaryCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? data.accentColor
+                          : colors.onSurfaceVariant,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w600,
                     ),
                   ),
                 ),
@@ -164,7 +196,7 @@ class _KpiSummaryCard extends StatelessWidget {
               CustomSkeletonShimmer(
                 child: Container(
                   width: 36.w,
-                  height: 22.h,
+                  height: 20.h,
                   margin: EdgeInsets.symmetric(vertical: 2.h),
                   decoration: BoxDecoration(
                     color: colors.surfaceContainerHighest,
@@ -177,7 +209,7 @@ class _KpiSummaryCard extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   '${data.count}',
-                  style: AppTypography.headlineSmall.copyWith(
+                  style: AppTypography.titleMedium.copyWith(
                     color: colors.onSurface,
                     fontWeight: FontWeight.w900,
                     height: 1.1,

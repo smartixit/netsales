@@ -4,9 +4,16 @@ import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 
 /// واجهة مستودع دورة حياة طلبات الكروت والتوريد
 abstract interface class RequestRepository {
+  /// جلب ملخص إحصائي معتمد لعدد الطلبات حسب حالتها
+  Future<RequestStatusSummaryEntity> getRequestStatusSummary({
+    int? networkId,
+    int? posId,
+  });
+
   /// احتساب ومعاينة عرض أسعار سيادي معتمد لطلب توريد جديد
   Future<ProcurementQuoteEntity> getQuote(Map<String, dynamic> payload);
 

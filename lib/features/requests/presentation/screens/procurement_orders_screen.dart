@@ -209,6 +209,12 @@ class ProcurementOrdersScreen extends StatelessWidget {
                           approvedCount: isNetworkWorkspace
                               ? networkCtrl!.approvedOrdersCount
                               : posCtrl!.approvedOrdersCount,
+                          rejectedCount: isNetworkWorkspace
+                              ? networkCtrl!.rejectedOrdersCount
+                              : posCtrl!.rejectedOrdersCount,
+                          cancelledCount: isNetworkWorkspace
+                              ? networkCtrl!.cancelledOrdersCount
+                              : posCtrl!.cancelledOrdersCount,
                           isLoading: isLoading.value && requests.isEmpty,
                           selectedStatus: statusFilter.value,
                           onStatusTap: onStatusChanged,

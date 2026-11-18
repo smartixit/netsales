@@ -9,8 +9,10 @@ import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/delete_request_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_status_summary_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
@@ -23,15 +25,19 @@ class PosProcurementOrdersController extends GetxController {
     required this.getMyPosUseCase,
     required this.cancelRequestUseCase,
     required this.deleteRequestUseCase,
+    this.getRequestStatusSummaryUseCase,
   });
 
   final GetRequestsUseCase getRequestsUseCase;
   final GetMyPosUseCase getMyPosUseCase;
   final CancelRequestUseCase cancelRequestUseCase;
   final DeleteRequestUseCase deleteRequestUseCase;
+  final GetRequestStatusSummaryUseCase? getRequestStatusSummaryUseCase;
 
   final requests = <RequestEntity>[].obs;
+  final statusSummary = Rxn<RequestStatusSummaryEntity>();
   final isLoading = true.obs;
+  final isLoadingSummary = false.obs;
   final isLoadingMore = false.obs;
   final errorMessage = RxnString();
   final loadMoreError = RxnString();
@@ -48,13 +54,23 @@ class PosProcurementOrdersController extends GetxController {
 
   bool get hasMore => nextCursor.value != null;
 
-  int get totalOrdersCount => requests.length;
+  int get totalOrdersCount => statusSummary.value?.total ?? requests.length;
 
   int get pendingOrdersCount =>
+      statusSummary.value?.pending ??
       requests.where((request) => request.isPending).length;
 
   int get approvedOrdersCount =>
+      statusSummary.value?.approved ??
       requests.where((request) => request.isApproved).length;
+
+  int get rejectedOrdersCount =>
+      statusSummary.value?.rejected ??
+      requests.where((request) => request.isRejected).length;
+
+  int get cancelledOrdersCount =>
+      statusSummary.value?.cancelled ??
+      requests.where((request) => request.isCancelled).length;
 
   bool get canCreateOrder =>
       PermissionService.to.can(AppPermissions.requestsCreate);
@@ -62,8 +78,10 @@ class PosProcurementOrdersController extends GetxController {
   bool get canCancelOrder =>
       PermissionService.to.can(AppPermissions.requestsEdit);
 
-  Future<void> refreshOrders() =>
-      loadRequests(isRefresh: true, clearOnStart: true);
+  Future<void> refreshOrders() => Future.wait([
+    loadRequests(isRefresh: true, clearOnStart: true),
+    loadStatusSummary(),
+  ]);
 
   @override
   void onInit() {
@@ -90,7 +108,25 @@ class PosProcurementOrdersController extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
     await loadMyPos();
-    await loadRequests(isRefresh: true, clearOnStart: true);
+    await Future.wait([
+      loadRequests(isRefresh: true, clearOnStart: true),
+      loadStatusSummary(),
+    ]);
+  }
+
+  Future<void> loadStatusSummary() async {
+    if (getRequestStatusSummaryUseCase == null) return;
+    try {
+      isLoadingSummary.value = true;
+      final summary = await getRequestStatusSummaryUseCase!(
+        posId: selectedPosId.value,
+      );
+      statusSummary.value = summary;
+    } catch (_) {
+      // Fallback to local counts gracefully
+    } finally {
+      isLoadingSummary.value = false;
+    }
   }
 
   Future<void> loadMyPos() async {

@@ -23,6 +23,7 @@ import 'package:netsales/features/requests/domain/usecases/create_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/delete_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
+import 'package:netsales/features/requests/domain/usecases/get_request_status_summary_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
@@ -146,6 +147,10 @@ class ProcurementRequestBinding extends Bindings {
       () => GetProcurementQuoteUseCase(Get.find<RequestRepository>()),
       fenix: true,
     );
+    registerLazyIfAbsent<GetRequestStatusSummaryUseCase>(
+      () => GetRequestStatusSummaryUseCase(Get.find<RequestRepository>()),
+      fenix: true,
+    );
 
     // 4. Controllers
     registerLazyIfAbsent<NetworkProcurementReviewController>(
@@ -158,6 +163,8 @@ class ProcurementRequestBinding extends Bindings {
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
         getRequestDetailsUseCase: Get.find<GetRequestDetailsUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
+        getRequestStatusSummaryUseCase:
+            Get.find<GetRequestStatusSummaryUseCase>(),
       ),
       fenix: true,
     );

@@ -13,6 +13,7 @@ import 'package:netsales/features/requests/domain/entities/request_approval_resu
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/cancel_request_use_case.dart';
@@ -26,6 +27,26 @@ class MockRequestRepository implements RequestRepository {
 
   MockRequestRepository(List<RequestEntity> initial) {
     _requests.addAll(initial);
+  }
+
+  @override
+  Future<RequestStatusSummaryEntity> getRequestStatusSummary({
+    int? networkId,
+    int? posId,
+  }) async {
+    final filtered = _requests.where((r) {
+      if (networkId != null && r.networkId != networkId) return false;
+      if (posId != null && r.posId != posId) return false;
+      return true;
+    }).toList();
+
+    return RequestStatusSummaryEntity(
+      total: filtered.length,
+      pending: filtered.where((r) => r.isPending).length,
+      approved: filtered.where((r) => r.isApproved).length,
+      rejected: filtered.where((r) => r.isRejected).length,
+      cancelled: filtered.where((r) => r.isCancelled).length,
+    );
   }
 
   @override

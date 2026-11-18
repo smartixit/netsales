@@ -77,7 +77,7 @@ class ProcurementRequestDetailsScreen
 
       // 3. عرض صفحة التفاصيل المتكاملة
       return CustomAppScaffold(
-        appBarTitle: 'طلب توريد $displayUuid',
+        appBarTitle: displayUuid,
         showBackButton: true,
         bottomNavigationBar: ProcurementDetailsActionBar(
           request: request,
