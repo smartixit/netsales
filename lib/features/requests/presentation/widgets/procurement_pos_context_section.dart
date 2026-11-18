@@ -6,7 +6,8 @@ import 'package:netsales/features/requests/presentation/controllers/pos_new_proc
 import 'package:netsales/features/requests/presentation/widgets/procurement_context_selector.dart';
 
 /// Adapts the user's authorized POS entities to the shared context selector.
-class ProcurementPosContextSection extends GetView<PosNewProcurementOrderController> {
+class ProcurementPosContextSection
+    extends GetView<PosNewProcurementOrderController> {
   const ProcurementPosContextSection({super.key});
 
   @override

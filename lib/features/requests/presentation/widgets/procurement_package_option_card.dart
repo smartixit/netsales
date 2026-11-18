@@ -195,6 +195,16 @@ class _PackageHero extends StatelessWidget {
             // height instead of stretching children toward infinity.
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                key: const ValueKey('procurement-package-color-accent'),
+                width: 4.r,
+                height: 54.r,
+                decoration: BoxDecoration(
+                  color: packageAccentColor,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+              ),
+              AppSpacing.hXs,
               Expanded(
                 child: Padding(
                   padding: EdgeInsetsDirectional.fromSTEB(
@@ -810,6 +820,26 @@ class _PriceOptionCard extends StatelessWidget {
                 ),
                 // Reserve the same marker footprint in both states. The
                 // selection animation changes visibility and color only.
+                AppSpacing.hXxs,
+                SizedBox(
+                  width: 37.r,
+                  height: 16.r,
+                  child: Center(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 160),
+                      opacity: selected ? 1 : 0,
+                      child: Text(
+                        'المحدد',
+                        maxLines: 1,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 9.r,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 AppSpacing.hXxs,
                 SizedBox.square(
                   dimension: 19.r,

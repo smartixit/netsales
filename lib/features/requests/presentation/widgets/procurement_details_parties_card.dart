@@ -1,0 +1,225 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
+import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
+import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
+
+/// بطاقة أطراف العملية التجارية والشراكة التوريدية
+class ProcurementDetailsPartiesCard extends StatelessWidget {
+  const ProcurementDetailsPartiesCard({super.key, required this.request});
+
+  final RequestEntity request;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final saleType = EnumPresentationRegistry.resolveSaleType(
+      request.saleType,
+      serverLabel: request.saleTypeLabel,
+    );
+
+    final networkName =
+        request.networkName != null && request.networkName!.trim().isNotEmpty
+        ? request.networkName!
+        : 'شبكة #${request.networkId}';
+
+    final posName =
+        request.posName != null && request.posName!.trim().isNotEmpty
+        ? request.posName!
+        : 'نقطة بيع #${request.posId}';
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: 0.35),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colors.shadow.withValues(alpha: 0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.hub_outlined, size: 16.r, color: colors.primary),
+              SizedBox(width: 6.w),
+              Expanded(
+                child: Text(
+                  'أطراف العملية التوريدية',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              AppSpacing.hXs,
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                  border: Border.all(
+                    color: colors.primary.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Text(
+                  'طريقة السداد: ${saleType.label}',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.vSm,
+          Divider(
+            height: 1,
+            color: colors.outlineVariant.withValues(alpha: 0.25),
+          ),
+          AppSpacing.vMd,
+
+          // 1. الطرف المورّد (الشبكة)
+          _buildPartyTile(
+            context,
+            roleLabel: 'الجهة المورّدة (مزود الشبكة)',
+            partyName: networkName,
+            phoneNumber: request.networkPhone,
+            logoUrl: request.networkLogo,
+            iconGradient: const [Color(0xFF0284C7), Color(0xFF0369A1)],
+          ),
+
+          // موصل التدفق
+          Padding(
+            padding: EdgeInsets.only(right: 20.w, top: 4.h, bottom: 4.h),
+            child: Row(
+              children: [
+                Container(
+                  width: 2.w,
+                  height: 16.h,
+                  color: colors.outlineVariant.withValues(alpha: 0.5),
+                ),
+                SizedBox(width: 8.w),
+                Icon(
+                  Icons.arrow_downward_rounded,
+                  size: 14.r,
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  'توريد كروت باقات الإنترنت',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+                    fontSize: 10.sp,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 2. الطرف الطالب (نقطة البيع)
+          _buildPartyTile(
+            context,
+            roleLabel: 'الجهة الطالبة (نقطة البيع)',
+            partyName: posName,
+            phoneNumber: request.posPhone,
+            logoUrl: request.posLogo,
+            iconGradient: const [Color(0xFF087F68), Color(0xFF065F46)],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPartyTile(
+    BuildContext context, {
+    required String roleLabel,
+    required String partyName,
+    String? phoneNumber,
+    String? logoUrl,
+    required List<Color> iconGradient,
+  }) {
+    final colors = context.colors;
+
+    return Container(
+      padding: EdgeInsets.all(10.r),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          CustomAvatarBadge(
+            imageUrl: logoUrl,
+            initials: TextFormatter.avatarInitial(partyName),
+            size: AvatarBadgeSize.sm,
+            customDimension: 38.r,
+            borderRadius: BorderRadius.circular(10.r),
+            gradientColors: iconGradient,
+            hasPulse: false,
+          ),
+          AppSpacing.hSm,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  roleLabel,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  partyName,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          if (phoneNumber != null && phoneNumber.trim().isNotEmpty) ...[
+            AppSpacing.hXs,
+            CustomButton.icon(
+              icon: Icons.phone_forwarded_rounded,
+              tooltip: 'اتصال: $phoneNumber',
+              backgroundColor: colors.surface,
+              foregroundColor: colors.primary,
+              borderColor: colors.outlineVariant.withValues(alpha: 0.4),
+              onPressed: () => UrlLauncherService.callPhone(phoneNumber.trim()),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

@@ -65,7 +65,9 @@ void main() {
     controller = PosNewProcurementOrderController(
       createRequestUseCase: CreateRequestUseCase(MockRequestRepo()),
       getMyPosUseCase: GetMyPosUseCase(MockCommercialRepo()),
-      getPosNetworksListUseCase: GetPosNetworksListUseCase(MockCommercialRepo()),
+      getPosNetworksListUseCase: GetPosNetworksListUseCase(
+        MockCommercialRepo(),
+      ),
       getPackagesUseCase: GetPackagesUseCase(MockPackageRepo()),
     );
     controller.preparePackageQuantityEdit(testPackage, 0);
@@ -159,7 +161,10 @@ void main() {
 
       controller.adjustCartLine(10, 1);
       expect(controller.procurementCart.single.voucherCount, 52);
-      expect(controller.procurementCart.single.sheets, closeTo(52 / 51, 0.0001));
+      expect(
+        controller.procurementCart.single.sheets,
+        closeTo(52 / 51, 0.0001),
+      );
 
       controller.adjustCartLine(10, -1);
       expect(controller.procurementCart.single.voucherCount, 51);

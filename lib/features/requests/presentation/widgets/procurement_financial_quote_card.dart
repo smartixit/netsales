@@ -13,7 +13,8 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 
 /// بطاقة عرض وتلخيص الحساب المالي الرسمي المعتمد من الخادم لطلب التوريد (Server-Authoritative Quote Card)
-class ProcurementFinancialQuoteCard extends GetView<PosNewProcurementOrderController> {
+class ProcurementFinancialQuoteCard
+    extends GetView<PosNewProcurementOrderController> {
   const ProcurementFinancialQuoteCard({super.key});
 
   @override

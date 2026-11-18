@@ -22,7 +22,13 @@ class RequestModel extends RequestEntity {
     super.invoiceId,
     super.invoiceUuid,
     super.networkName,
+    super.networkPhone,
+    super.networkLogo,
     super.posName,
+    super.posPhone,
+    super.posLogo,
+    super.createdByName,
+    super.reviewedByName,
     super.items = const [],
     super.modificationSummary,
     super.createdAt,
@@ -30,15 +36,39 @@ class RequestModel extends RequestEntity {
   });
 
   factory RequestModel.fromJson(Map<String, dynamic> json) {
-    // استخراج اسم الشبكة ونقطة البيع من العلاقات المحملة مسبقاً إن وجدت
+    // استخراج اسم الشبكة ونقطة البيع وجهات الاتصال من العلاقات المحملة مسبقاً إن وجدت
     String? networkName;
+    String? networkPhone;
+    String? networkLogo;
     if (json['network'] is Map<String, dynamic>) {
-      networkName = json['network']['network_name'] as String?;
+      final net = json['network'] as Map<String, dynamic>;
+      networkName = net['network_name'] as String?;
+      networkPhone = net['network_phone_number'] as String?;
+      networkLogo = (net['network_profile_logo'] ?? net['logo_url']) as String?;
     }
 
     String? posName;
+    String? posPhone;
+    String? posLogo;
     if (json['pos'] is Map<String, dynamic>) {
-      posName = json['pos']['pos_name'] as String?;
+      final p = json['pos'] as Map<String, dynamic>;
+      posName = p['pos_name'] as String?;
+      posPhone = p['pos_phone_number'] as String?;
+      posLogo = (p['pos_profile_logo'] ?? p['logo_url']) as String?;
+    }
+
+    String? createdByName;
+    if (json['created_by_user'] is Map<String, dynamic>) {
+      createdByName =
+          (json['created_by_user'] as Map<String, dynamic>)['user_full_name']
+              as String?;
+    }
+
+    String? reviewedByName;
+    if (json['reviewed_by_user'] is Map<String, dynamic>) {
+      reviewedByName =
+          (json['reviewed_by_user'] as Map<String, dynamic>)['user_full_name']
+              as String?;
     }
 
     // استخراج البنود
@@ -80,7 +110,13 @@ class RequestModel extends RequestEntity {
       invoiceId: json['invoice_id'] as int?,
       invoiceUuid: json['invoice_uuid'] as String?,
       networkName: networkName,
+      networkPhone: networkPhone,
+      networkLogo: networkLogo,
       posName: posName,
+      posPhone: posPhone,
+      posLogo: posLogo,
+      createdByName: createdByName,
+      reviewedByName: reviewedByName,
       items: itemsList,
       modificationSummary: modificationSummary,
       createdAt: json['created_at'] as String?,

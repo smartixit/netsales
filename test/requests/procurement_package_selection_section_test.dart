@@ -95,48 +95,47 @@ void main() {
     await tester.pump(const Duration(milliseconds: 250));
   }
 
-  testWidgets(
-    'يعرض عداد نتائج الباقات أسفل البحث ويتحدث مع حالة البحث',
-    (tester) async {
-      tester.view.physicalSize = const Size(375, 812);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
+  testWidgets('يعرض عداد نتائج الباقات أسفل البحث ويتحدث مع حالة البحث', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
 
-      Get.put(controller);
-      configurePackageCatalog(discountLoading: false);
-      // This test targets the counter/search relationship, not package-card layout.
-      // The empty catalogue keeps the counter and search state visible without
-      // introducing card internals or continuously animated loading skeletons.
-      controller.availablePackages.clear();
+    Get.put(controller);
+    configurePackageCatalog(discountLoading: false);
+    // This test targets the counter/search relationship, not package-card layout.
+    // The empty catalogue keeps the counter and search state visible without
+    // introducing card internals or continuously animated loading skeletons.
+    controller.availablePackages.clear();
 
-      await tester.pumpWidget(buildTestableWidget());
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(buildTestableWidget());
+    await tester.pumpAndSettle();
 
-      final searchField = find.byType(CustomTextField).first;
-      final counter = find.byType(CustomResultsCounterBar);
+    final searchField = find.byType(CustomTextField).first;
+    final counter = find.byType(CustomResultsCounterBar);
 
-      expect(counter, findsOneWidget);
-      expect(
-        tester.getTopLeft(counter).dy,
-        greaterThan(tester.getBottomLeft(searchField).dy),
-      );
-      expect(find.text('0 باقة محمّلة'), findsOneWidget);
-      expect(find.text('الإجمالي: '), findsOneWidget);
+    expect(counter, findsOneWidget);
+    expect(
+      tester.getTopLeft(counter).dy,
+      greaterThan(tester.getBottomLeft(searchField).dy),
+    );
+    expect(find.text('0 باقة محمّلة'), findsOneWidget);
+    expect(find.text('الإجمالي: '), findsOneWidget);
 
-      controller.packageSearchQuery.value = 'الاختبار';
-      await tester.pump();
-      // Flush the controller's 350ms search debounce within the fake clock.
-      await tester.pump(const Duration(milliseconds: 400));
-      await tester.pump();
+    controller.packageSearchQuery.value = 'الاختبار';
+    await tester.pump();
+    // Flush the controller's 350ms search debounce within the fake clock.
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
 
-      expect(find.text('نتائج البحث: '), findsOneWidget);
-      expect(find.text('0 باقة محمّلة'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(find.text('نتائج البحث: '), findsOneWidget);
+    expect(find.text('0 باقة محمّلة'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'تستمر أزرار الكمية في العمل مع النقرات المتتابعة لكل الإجراءات',
@@ -178,31 +177,30 @@ void main() {
     },
   );
 
-  testWidgets(
-    'تظهر هياكل نصية للخصومات ثم تختفي عند اكتمال التحميل',
-    (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
+  testWidgets('تظهر هياكل نصية للخصومات ثم تختفي عند اكتمال التحميل', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
 
-      Get.put(controller);
-      configurePackageCatalog(discountLoading: true);
-      await tester.pumpWidget(buildTestableWidget());
-      await tester.pump();
+    Get.put(controller);
+    configurePackageCatalog(discountLoading: true);
+    await tester.pumpWidget(buildTestableWidget());
+    await tester.pump();
 
-      expect(find.byType(LinearProgressIndicator), findsNothing);
-      expect(find.byType(CustomStateSkeletonView), findsWidgets);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(find.byType(CustomStateSkeletonView), findsWidgets);
 
-      controller.isLoadingPackageDiscounts.value = false;
-      await tester.pump();
+    controller.isLoadingPackageDiscounts.value = false;
+    await tester.pump();
 
-      expect(find.byType(LinearProgressIndicator), findsNothing);
-      expect(find.byType(CustomStateSkeletonView), findsNothing);
-    },
-  );
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(find.byType(CustomStateSkeletonView), findsNothing);
+  });
 
   testWidgets(
     'يحدث محدد النقدي والآجل نفسه عند النقر وعند تغيير الحالة من المتحكم',
@@ -259,5 +257,4 @@ void main() {
       expect(labelColor('آجل'), inactiveColor);
     },
   );
-
 }

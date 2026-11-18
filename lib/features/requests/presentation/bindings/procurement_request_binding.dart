@@ -165,6 +165,10 @@ class ProcurementRequestBinding extends Bindings {
     registerLazyIfAbsent<ProcurementRequestDetailsController>(
       () => ProcurementRequestDetailsController(
         getRequestDetailsUseCase: Get.find<GetRequestDetailsUseCase>(),
+        cancelRequestUseCase: Get.find<CancelRequestUseCase>(),
+        approveRequestUseCase: Get.find<ApproveRequestUseCase>(),
+        rejectRequestUseCase: Get.find<RejectRequestUseCase>(),
+        deleteRequestUseCase: Get.find<DeleteRequestUseCase>(),
       ),
       fenix: true,
     );

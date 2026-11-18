@@ -5,7 +5,7 @@ import 'package:netsales/features/finance/presentation/widgets/pos_finance_works
 import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
 import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 import 'package:netsales/features/reports/presentation/screens/operational_reports_screen.dart';
-import 'package:netsales/features/requests/presentation/screens/pos_procurement_orders_screen.dart';
+import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/adaptive_workspace_scaffold.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_home_dashboard.dart';
@@ -30,7 +30,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           label: 'الطلبات',
           icon: Icons.receipt_long_outlined,
           activeIcon: Icons.receipt_long_rounded,
-          content: PosProcurementOrdersScreen(embedded: true),
+          content: ProcurementOrdersScreen(embedded: true),
         ),
         const WorkspaceNavItem(
           label: 'فواتيري',

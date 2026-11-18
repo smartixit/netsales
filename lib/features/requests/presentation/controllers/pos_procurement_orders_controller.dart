@@ -31,7 +31,7 @@ class PosProcurementOrdersController extends GetxController {
   final DeleteRequestUseCase deleteRequestUseCase;
 
   final requests = <RequestEntity>[].obs;
-  final isLoading = false.obs;
+  final isLoading = true.obs;
   final isLoadingMore = false.obs;
   final errorMessage = RxnString();
   final loadMoreError = RxnString();
@@ -48,11 +48,22 @@ class PosProcurementOrdersController extends GetxController {
 
   bool get hasMore => nextCursor.value != null;
 
+  int get totalOrdersCount => requests.length;
+
+  int get pendingOrdersCount =>
+      requests.where((request) => request.isPending).length;
+
+  int get approvedOrdersCount =>
+      requests.where((request) => request.isApproved).length;
+
   bool get canCreateOrder =>
       PermissionService.to.can(AppPermissions.requestsCreate);
 
   bool get canCancelOrder =>
       PermissionService.to.can(AppPermissions.requestsEdit);
+
+  Future<void> refreshOrders() =>
+      loadRequests(isRefresh: true, clearOnStart: true);
 
   @override
   void onInit() {
@@ -62,8 +73,8 @@ class PosProcurementOrdersController extends GetxController {
     });
     debounce(
       searchQuery,
-      (_) => loadRequests(isRefresh: true),
-      time: const Duration(milliseconds: 500),
+      (_) => loadRequests(isRefresh: true, clearOnStart: true),
+      time: const Duration(milliseconds: 350),
     );
     loadInitialData();
   }
@@ -76,8 +87,10 @@ class PosProcurementOrdersController extends GetxController {
   }
 
   Future<void> loadInitialData() async {
+    isLoading.value = true;
+    errorMessage.value = null;
     await loadMyPos();
-    await loadRequests(isRefresh: true);
+    await loadRequests(isRefresh: true, clearOnStart: true);
   }
 
   Future<void> loadMyPos() async {
@@ -93,8 +106,14 @@ class PosProcurementOrdersController extends GetxController {
     }
   }
 
-  Future<void> loadRequests({bool isRefresh = false}) async {
+  Future<void> loadRequests({
+    bool isRefresh = false,
+    bool clearOnStart = false,
+  }) async {
     final revision = ++_requestListRevision;
+    if (clearOnStart) {
+      requests.clear();
+    }
     isLoading.value = true;
     errorMessage.value = null;
     loadMoreError.value = null;
@@ -171,14 +190,14 @@ class PosProcurementOrdersController extends GetxController {
   void setStatusFilter(String? status) {
     if (statusFilter.value == status) return;
     statusFilter.value = status;
-    loadRequests(isRefresh: true);
+    loadRequests(isRefresh: true, clearOnStart: true);
   }
 
   void resetFilters() {
     searchController.clear();
     searchQuery.value = '';
     statusFilter.value = null;
-    loadRequests(isRefresh: true);
+    loadRequests(isRefresh: true, clearOnStart: true);
   }
 
   void toggleAccordion(int requestId) {
@@ -194,7 +213,9 @@ class PosProcurementOrdersController extends GetxController {
 
     try {
       final cancelled = await cancelRequestUseCase(requestId);
-      final index = requests.indexWhere((request) => request.requestId == requestId);
+      final index = requests.indexWhere(
+        (request) => request.requestId == requestId,
+      );
       if (index == -1) {
         requests.add(cancelled);
       } else {
@@ -282,10 +303,7 @@ class PosProcurementOrdersController extends GetxController {
   }
 
   Future<void> openEditOrder(RequestEntity request) async {
-    await Get.toNamed<void>(
-      AppRoutes.newProcurementOrder,
-      arguments: request,
-    );
+    await Get.toNamed<void>(AppRoutes.newProcurementOrder, arguments: request);
     await loadInitialData();
   }
 

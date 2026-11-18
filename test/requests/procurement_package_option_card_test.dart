@@ -115,8 +115,14 @@ void main() {
       expect(find.text('نصف'), findsOneWidget);
       expect(find.text('تصفير'), findsOneWidget);
       expect(find.text('المحدد'), findsOneWidget);
-      expect(find.byKey(const ValueKey('procurement-price-option-cash')), findsOneWidget);
-      expect(find.byKey(const ValueKey('procurement-price-option-credit')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('procurement-price-option-cash')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('procurement-price-option-credit')),
+        findsOneWidget,
+      );
 
       final basePriceTop = tester
           .getTopLeft(find.text('السعر الأساسي قبل الخصم'))
