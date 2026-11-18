@@ -90,7 +90,9 @@ class InfinityFreeChallengeSolver {
       }
       if (padCount == padByte) break;
     }
-    if (padCount > 0) {
+    // Strip only a complete padding sequence; a single trailing byte whose
+    // value is 0x0d is not 13 bytes of padding.
+    if (padCount > 0 && padCount == padByte) {
       return Uint8List.sublistView(data, 0, data.length - padCount);
     }
     return data;
