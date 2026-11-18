@@ -47,7 +47,8 @@ class MockRequestRepository implements RequestRepository {
         if (!r.requestId.toString().contains(search) &&
             !(r.networkName?.toLowerCase().contains(search.toLowerCase()) ??
                 false) &&
-            !(r.posName?.toLowerCase().contains(search.toLowerCase()) ?? false)) {
+            !(r.posName?.toLowerCase().contains(search.toLowerCase()) ??
+                false)) {
           return false;
         }
       }
@@ -80,9 +81,9 @@ class MockRequestRepository implements RequestRepository {
   @override
   Future<RequestEntity> getRequestDetails(int requestId) async {
     final found = _requests.cast<RequestEntity?>().firstWhere(
-          (r) => r?.requestId == requestId,
-          orElse: () => null,
-        );
+      (r) => r?.requestId == requestId,
+      orElse: () => null,
+    );
     if (found == null) {
       throw const AppException('الطلب غير موجود', code: '404');
     }
@@ -148,20 +149,24 @@ class MockRequestRepository implements RequestRepository {
       saleType: 'CASH',
       saleTypeLabel: 'نقدي',
       hasModifications: true,
-      items: items.map((item) => RequestModificationPreviewItemEntity(
-        packageId: item.packageId,
-        packageName: 'باقة اختبار',
-        voucherCount: item.voucherCount,
-        voucherPrice: 1000,
-        itemDiscount: 10,
-        itemTotalAmount: item.voucherCount * 900,
-        grossTotalAmount: item.voucherCount * 1000,
-        discountAmount: item.voucherCount * 100,
-        source: 'ORIGINAL',
-        pricingToken: item.pricingToken,
-        changeType: 'QUANTITY_CHANGED',
-        originalVoucherCount: item.voucherCount - 1,
-      )).toList(growable: false),
+      items: items
+          .map(
+            (item) => RequestModificationPreviewItemEntity(
+              packageId: item.packageId,
+              packageName: 'باقة اختبار',
+              voucherCount: item.voucherCount,
+              voucherPrice: 1000,
+              itemDiscount: 10,
+              itemTotalAmount: item.voucherCount * 900,
+              grossTotalAmount: item.voucherCount * 1000,
+              discountAmount: item.voucherCount * 100,
+              source: 'ORIGINAL',
+              pricingToken: item.pricingToken,
+              changeType: 'QUANTITY_CHANGED',
+              originalVoucherCount: item.voucherCount - 1,
+            ),
+          )
+          .toList(growable: false),
       removedItems: const [],
     );
   }
@@ -272,54 +277,57 @@ class MockRequestRepository implements RequestRepository {
 
 void main() {
   group('Procurement Request Models and Serialization Tests', () {
-    test('RequestModel fromJson deserializes full backend resource correctly', () {
-      final json = {
-        'request_id': 101,
-        'network_id': 5,
-        'pos_id': 12,
-        'request_uuid': 'req-uuid-12345',
-        'sale_type': 'CASH',
-        'sale_type_label': 'نقدي',
-        'request_total_amount': 25000.0,
-        'request_date': '2026-11-07 10:00:00',
-        'status': 'PENDING',
-        'status_label': 'قيد الانتظار',
-        'created_by': 1,
-        'reviewed_by': null,
-        'review_date': null,
-        'request_note': 'طلب عاجل للأسبوع القادم',
-        'invoice_id': null,
-        'invoice_uuid': null,
-        'network': {'network_name': 'شبكة يمن نت'},
-        'pos': {'pos_name': 'نقطة الأمل للمبيعات'},
-        'items': [
-          {
-            'item_id': 1,
-            'request_id': 101,
-            'package_id': 3,
-            'voucher_price': 1000.0,
-            'voucher_count': 25,
-            'item_discount': 100.0,
-            'item_total_amount': 22500.0,
-          }
-        ],
-      };
+    test(
+      'RequestModel fromJson deserializes full backend resource correctly',
+      () {
+        final json = {
+          'request_id': 101,
+          'network_id': 5,
+          'pos_id': 12,
+          'request_uuid': 'req-uuid-12345',
+          'sale_type': 'CASH',
+          'sale_type_label': 'نقدي',
+          'request_total_amount': 25000.0,
+          'request_date': '2026-11-07 10:00:00',
+          'status': 'PENDING',
+          'status_label': 'قيد الانتظار',
+          'created_by': 1,
+          'reviewed_by': null,
+          'review_date': null,
+          'request_note': 'طلب عاجل للأسبوع القادم',
+          'invoice_id': null,
+          'invoice_uuid': null,
+          'network': {'network_name': 'شبكة يمن نت'},
+          'pos': {'pos_name': 'نقطة الأمل للمبيعات'},
+          'items': [
+            {
+              'item_id': 1,
+              'request_id': 101,
+              'package_id': 3,
+              'voucher_price': 1000.0,
+              'voucher_count': 25,
+              'item_discount': 100.0,
+              'item_total_amount': 22500.0,
+            },
+          ],
+        };
 
-      final model = RequestModel.fromJson(json);
+        final model = RequestModel.fromJson(json);
 
-      expect(model.requestId, 101);
-      expect(model.networkId, 5);
-      expect(model.posId, 12);
-      expect(model.requestUuid, 'req-uuid-12345');
-      expect(model.saleType, SaleType.cash);
-      expect(model.requestTotalAmount, 25000.0);
-      expect(model.status, RequestStatus.pending);
-      expect(model.isPending, true);
-      expect(model.networkName, 'شبكة يمن نت');
-      expect(model.posName, 'نقطة الأمل للمبيعات');
-      expect(model.items.length, 1);
-      expect(model.items.first.voucherCount, 25);
-    });
+        expect(model.requestId, 101);
+        expect(model.networkId, 5);
+        expect(model.posId, 12);
+        expect(model.requestUuid, 'req-uuid-12345');
+        expect(model.saleType, SaleType.cash);
+        expect(model.requestTotalAmount, 25000.0);
+        expect(model.status, RequestStatus.pending);
+        expect(model.isPending, true);
+        expect(model.networkName, 'شبكة يمن نت');
+        expect(model.posName, 'نقطة الأمل للمبيعات');
+        expect(model.items.length, 1);
+        expect(model.items.first.voucherCount, 25);
+      },
+    );
 
     test('RequestModel maps the server modification summary without recomputing values', () {
       final model = RequestModel.fromJson({
@@ -484,21 +492,24 @@ void main() {
       expect(cancelled.status, RequestStatus.cancelled);
     });
 
-    test('ApproveRequestUseCase updates status to APPROVED and sets invoice',
-        () async {
-      final approved = await approveRequestUseCase(1);
-      expect(approved.request.isApproved, true);
-      expect(approved.request.status, RequestStatus.approved);
-      expect(approved.invoice.invoiceId, 901);
-    });
+    test(
+      'ApproveRequestUseCase updates status to APPROVED and sets invoice',
+      () async {
+        final approved = await approveRequestUseCase(1);
+        expect(approved.request.isApproved, true);
+        expect(approved.request.status, RequestStatus.approved);
+        expect(approved.invoice.invoiceId, 901);
+      },
+    );
 
-    test('RejectRequestUseCase updates status to REJECTED with reason',
-        () async {
-      final rejected = await rejectRequestUseCase(1, 'الرصيد غير كافٍ');
-      expect(rejected.isRejected, true);
-      expect(rejected.status, RequestStatus.rejected);
-      expect(rejected.requestNote, contains('الرصيد غير كافٍ'));
-    });
+    test(
+      'RejectRequestUseCase updates status to REJECTED with reason',
+      () async {
+        final rejected = await rejectRequestUseCase(1, 'الرصيد غير كافٍ');
+        expect(rejected.isRejected, true);
+        expect(rejected.status, RequestStatus.rejected);
+        expect(rejected.requestNote, contains('الرصيد غير كافٍ'));
+      },
+    );
   });
 }
-

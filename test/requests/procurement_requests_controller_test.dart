@@ -139,19 +139,19 @@ class MockRequestRepository implements RequestRepository {
     );
     this.items[index] = updated;
     return RequestApprovalResultEntity(
-        request: updated,
-        invoice: InvoiceEntity(
-          invoiceId: 777,
-          networkId: updated.networkId,
-          posId: updated.posId,
-          requestId: updated.requestId,
-          invoiceTotalAmount: updated.requestTotalAmount,
-          paidAmount: updated.requestTotalAmount,
-          remainingAmount: 0,
-          paymentStatusRaw: 'PAID',
-          isFullyPaid: true,
-        ),
-      );
+      request: updated,
+      invoice: InvoiceEntity(
+        invoiceId: 777,
+        networkId: updated.networkId,
+        posId: updated.posId,
+        requestId: updated.requestId,
+        invoiceTotalAmount: updated.requestTotalAmount,
+        paidAmount: updated.requestTotalAmount,
+        remainingAmount: 0,
+        paymentStatusRaw: 'PAID',
+        isFullyPaid: true,
+      ),
+    );
   }
 
   @override
@@ -169,8 +169,6 @@ class MockRequestRepository implements RequestRepository {
       items: [],
     );
   }
-
-
 
   @override
   Future<RequestEntity> rejectRequest(
@@ -277,14 +275,14 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
     lastSearch = search;
     final scopedPackages = packageIds == null
         ? packages
-        : packages.where((package) => packageIds.contains(package.packageId)).toList();
+        : packages
+              .where((package) => packageIds.contains(package.packageId))
+              .toList();
     final filtered = search == null || search.isEmpty
         ? scopedPackages
         : scopedPackages
-            .where(
-              (package) => package.packageName.contains(search),
-            )
-            .toList(growable: false);
+              .where((package) => package.packageName.contains(search))
+              .toList(growable: false);
     return PaginatedList<PackageEntity>(items: filtered);
   }
 
@@ -445,48 +443,54 @@ void main() {
       },
     );
 
-    test('catalogue quantity controls maintain independent package quantities', () async {
-      await controller.loadLinkedNetworks(20);
-      const secondPackage = PackageEntity(
-        packageId: 6,
-        networkId: 10,
-        packageName: 'باقة الفضة',
-        packageBalance: 5.0,
-        packageVoucherCount: 60,
-        packageVoucherPrice: 900.0,
-        packageDefaultCashDiscount: 0,
-        packageDefaultCreditDiscount: 0,
-        cashDiscountAmount: 0,
-        creditDiscountAmount: 0,
-        effectiveCashPrice: 900,
-        effectiveCreditPrice: 900,
-        status: true,
-      );
+    test(
+      'catalogue quantity controls maintain independent package quantities',
+      () async {
+        await controller.loadLinkedNetworks(20);
+        const secondPackage = PackageEntity(
+          packageId: 6,
+          networkId: 10,
+          packageName: 'باقة الفضة',
+          packageBalance: 5.0,
+          packageVoucherCount: 60,
+          packageVoucherPrice: 900.0,
+          packageDefaultCashDiscount: 0,
+          packageDefaultCreditDiscount: 0,
+          cashDiscountAmount: 0,
+          creditDiscountAmount: 0,
+          effectiveCashPrice: 900,
+          effectiveCreditPrice: 900,
+          status: true,
+        );
 
-      controller.adjustPackageQuantity(samplePackage, 1);
-      controller.adjustPackageQuantity(secondPackage, 1);
-      controller.adjustPackageQuantity(samplePackage, 1);
+        controller.adjustPackageQuantity(samplePackage, 1);
+        controller.adjustPackageQuantity(secondPackage, 1);
+        controller.adjustPackageQuantity(samplePackage, 1);
 
-      expect(controller.cartQuantityForPackage(5), 2);
-      expect(controller.cartQuantityForPackage(6), 1);
-      expect(controller.procurementCart.length, 2);
+        expect(controller.cartQuantityForPackage(5), 2);
+        expect(controller.cartQuantityForPackage(6), 1);
+        expect(controller.procurementCart.length, 2);
 
-      controller.adjustPackageQuantity(samplePackage, -2);
-      expect(controller.cartQuantityForPackage(5), 0);
-      expect(controller.cartQuantityForPackage(6), 1);
-      expect(controller.procurementCart.length, 1);
-    });
+        controller.adjustPackageQuantity(samplePackage, -2);
+        expect(controller.cartQuantityForPackage(5), 0);
+        expect(controller.cartQuantityForPackage(6), 1);
+        expect(controller.procurementCart.length, 1);
+      },
+    );
 
-    test('manual quantities accept non-sheet multiples and zero removes the line', () async {
-      await controller.loadLinkedNetworks(20);
-      controller.setPackageVoucherCount(samplePackage, 175);
-      expect(controller.cartQuantityForPackage(5), 175);
-      expect(controller.procurementCart.single.voucherCount, 175);
-      expect(controller.procurementCart.single.sheets, 1.75);
+    test(
+      'manual quantities accept non-sheet multiples and zero removes the line',
+      () async {
+        await controller.loadLinkedNetworks(20);
+        controller.setPackageVoucherCount(samplePackage, 175);
+        expect(controller.cartQuantityForPackage(5), 175);
+        expect(controller.procurementCart.single.voucherCount, 175);
+        expect(controller.procurementCart.single.sheets, 1.75);
 
-      controller.setPackageVoucherCount(samplePackage, 0);
-      expect(controller.procurementCart, isEmpty);
-    });
+        controller.setPackageVoucherCount(samplePackage, 0);
+        expect(controller.procurementCart, isEmpty);
+      },
+    );
   });
 
   group('NetworkProcurementReviewController Tests (M6.2)', () {
