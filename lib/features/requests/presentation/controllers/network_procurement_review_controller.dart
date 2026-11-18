@@ -112,8 +112,31 @@ class NetworkProcurementReviewController extends GetxController {
   final lastApprovalResult = Rxn<RequestApprovalResultEntity>();
   final modificationLines = <RequestModificationLineEntity>[].obs;
   final editingRequestId = RxnInt();
+  final editingRequest = Rxn<RequestEntity>();
   final modificationNoteController = TextEditingController();
+  final Map<int, TextEditingController> _modificationQuantityControllers = {};
   int _requestListRevision = 0;
+
+  /// وحدة تحكم نصية متزامنة لكمية الباقة في مسودة التعديل
+  TextEditingController modificationQuantityController(
+    int packageId,
+    int currentQuantity,
+  ) {
+    final controller = _modificationQuantityControllers.putIfAbsent(
+      packageId,
+      () => TextEditingController(text: currentQuantity.toString()),
+    );
+    if (controller.text != currentQuantity.toString() &&
+        !controller.value.isComposingRangeValid) {
+      controller.value = TextEditingValue(
+        text: currentQuantity.toString(),
+        selection: TextSelection.collapsed(
+          offset: currentQuantity.toString().length,
+        ),
+      );
+    }
+    return controller;
+  }
 
   /// التحقق من صلاحيات مراجعة واعتماد وتعديل طلبات التوريد لمشغل الشبكة
   bool get canApproveRequests =>
@@ -131,6 +154,7 @@ class NetworkProcurementReviewController extends GetxController {
     _packageLoadRevision++;
     _modificationRevision++;
     editingRequestId.value = requestId;
+    editingRequest.value = request;
     currentPreview.value = null;
     modificationLines.clear();
     availablePackages.clear();
@@ -146,6 +170,7 @@ class NetworkProcurementReviewController extends GetxController {
         return;
       }
 
+      editingRequest.value = detailedRequest;
       modificationLines.assignAll(
         detailedRequest.items.map(
           (item) => RequestModificationLineEntity(
@@ -166,6 +191,7 @@ class NetworkProcurementReviewController extends GetxController {
         return;
       }
       editingRequestId.value = null;
+      editingRequest.value = null;
       modificationLines.clear();
       currentPreview.value = null;
       CustomSnackbar.show(
@@ -226,6 +252,13 @@ class NetworkProcurementReviewController extends GetxController {
       voucherCount: quantity,
       pricingToken: current.pricingToken,
     );
+    final textCtrl = _modificationQuantityControllers[packageId];
+    if (textCtrl != null && textCtrl.text != quantity.toString()) {
+      textCtrl.value = TextEditingValue(
+        text: quantity.toString(),
+        selection: TextSelection.collapsed(offset: quantity.toString().length),
+      );
+    }
     currentPreview.value = null;
   }
 
@@ -240,6 +273,25 @@ class NetworkProcurementReviewController extends GetxController {
     );
     final sheetSize = package?.packageVoucherCount ?? 0;
     final step = sheetSize > 0 ? sheetSize : 1;
+
+    final target = isIncrement
+        ? line.voucherCount + step
+        : (line.voucherCount - step > 0 ? line.voucherCount - step : 1);
+
+    setModificationQuantity(packageId, target);
+  }
+
+  /// زيادة أو إنقاص كمية التعديل بمقدار نصف ورقة
+  void stepModificationHalfSheet(int packageId, {required bool isIncrement}) {
+    final line = modificationLines.firstWhereOrNull(
+      (l) => l.packageId == packageId,
+    );
+    if (line == null) return;
+    final package = availablePackages.firstWhereOrNull(
+      (p) => p.packageId == packageId,
+    );
+    final sheetSize = package?.packageVoucherCount ?? 0;
+    final step = sheetSize > 1 ? (sheetSize / 2).ceil() : 1;
 
     final target = isIncrement
         ? line.voucherCount + step
@@ -263,6 +315,8 @@ class NetworkProcurementReviewController extends GetxController {
   void removeModificationPackage(int packageId) {
     _modificationRevision++;
     modificationLines.removeWhere((line) => line.packageId == packageId);
+    _modificationQuantityControllers[packageId]?.dispose();
+    _modificationQuantityControllers.remove(packageId);
     currentPreview.value = null;
   }
 
@@ -336,10 +390,15 @@ class NetworkProcurementReviewController extends GetxController {
     _packageLoadRevision++;
     isLoadingPackages.value = false;
     editingRequestId.value = null;
+    editingRequest.value = null;
     currentPreview.value = null;
     modificationLines.clear();
     availablePackages.clear();
     modificationNoteController.clear();
+    for (final c in _modificationQuantityControllers.values) {
+      c.dispose();
+    }
+    _modificationQuantityControllers.clear();
   }
 
   @override
@@ -363,6 +422,10 @@ class NetworkProcurementReviewController extends GetxController {
   void onClose() {
     searchController.dispose();
     modificationNoteController.dispose();
+    for (final c in _modificationQuantityControllers.values) {
+      c.dispose();
+    }
+    _modificationQuantityControllers.clear();
     _requestListRevision++;
     super.onClose();
   }
