@@ -122,14 +122,14 @@ class _ExecutiveCommercialPartiesCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: colors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.45),
+          color: colors.outlineVariant.withValues(alpha: 0.40),
         ),
         boxShadow: [
           BoxShadow(
             color: colors.shadow.withValues(alpha: 0.04),
-            blurRadius: 14,
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -137,36 +137,75 @@ class _ExecutiveCommercialPartiesCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // شريط الميتاداتا العلوي: الرقم المرجعي ونوع البيع
+          // 1. الترويسة القيادية لهوية الطلب ونوع البيع
           Container(
             padding: EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
-              vertical: AppSpacing.xs + 2,
+              vertical: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
               color: colors.surfaceContainerLow.withValues(alpha: 0.6),
               borderRadius: BorderRadius.vertical(
-                top: Radius.circular(AppRadius.lg),
+                top: Radius.circular(AppRadius.xl),
               ),
               border: Border(
                 bottom: BorderSide(
-                  color: colors.outlineVariant.withValues(alpha: 0.35),
+                  color: colors.outlineVariant.withValues(alpha: 0.30),
                 ),
               ),
             ),
             child: Row(
               children: [
-                Icon(Icons.tag_rounded, size: 15.r, color: colors.primary),
-                AppSpacing.hXxs,
-                Expanded(
-                  child: Text(
-                    uuid,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w700,
+                Container(
+                  width: 32.r,
+                  height: 32.r,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colors.primary,
+                        colors.primary.withValues(alpha: 0.8),
+                      ],
                     ),
+                    borderRadius: BorderRadius.circular(8.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.primary.withValues(alpha: 0.25),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.receipt_long_rounded,
+                      size: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                AppSpacing.hSm,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'طلب توريد',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                          fontSize: 9.5.sp,
+                        ),
+                      ),
+                      Text(
+                        uuid,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.titleSmall.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 CustomStatusBadge(
@@ -180,133 +219,131 @@ class _ExecutiveCommercialPartiesCard extends StatelessWidget {
               ],
             ),
           ),
-          // المسار التجاري الواسع: شبكة التوريد ➔ نقطة البيع
+          // 2. بطاقة مسار الشراكة التوريدية (المورّد ➔ المستلم)
           Padding(
             padding: EdgeInsets.all(AppSpacing.md),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // الطرف الأول: الشبكة المورّدة
+                // طرف الشبكة المورّدة
                 Expanded(
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 38.r,
-                        height: 38.r,
-                        decoration: BoxDecoration(
-                          color: colors.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                          border: Border.all(
-                            color: colors.primary.withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.cell_tower_rounded,
-                            size: 20.r,
-                            color: colors.primary,
-                          ),
-                        ),
+                  child: Container(
+                    padding: EdgeInsets.all(AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerLow.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(
+                        color: colors.primary.withValues(alpha: 0.20),
                       ),
-                      AppSpacing.hSm,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Text(
-                              'الشبكة المورّدة',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.onSurfaceVariant,
-                                fontSize: 10.sp,
-                              ),
+                            Icon(
+                              Icons.cell_tower_rounded,
+                              size: 15.r,
+                              color: colors.primary,
                             ),
-                            AppSpacing.vXxs,
-                            Text(
-                              networkName,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w700,
-                                height: 1.25,
+                            AppSpacing.hXxs,
+                            Expanded(
+                              child: Text(
+                                'الشبكة المورّدة',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.primary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 10.sp,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                        AppSpacing.vXxs,
+                        Text(
+                          networkName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.onSurface,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                // أيقونة الربط التوريدي في المنتصف
+                // أيقونة التدفق التجاري
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                   child: Container(
-                    width: 28.r,
-                    height: 28.r,
+                    width: 26.r,
+                    height: 26.r,
                     decoration: BoxDecoration(
-                      color: colors.surfaceContainerHighest.withValues(
-                        alpha: 0.5,
-                      ),
+                      color: colors.surfaceContainerHigh,
                       shape: BoxShape.circle,
+                      border: Border.all(
+                        color: colors.outlineVariant.withValues(alpha: 0.4),
+                      ),
                     ),
                     child: Center(
                       child: Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 15.r,
+                        Icons.arrow_back_rounded,
+                        size: 14.r,
                         color: colors.onSurfaceVariant,
                       ),
                     ),
                   ),
                 ),
-                // الطرف الثاني: نقطة البيع
+                // طرف نقطة البيع المستلمة
                 Expanded(
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 38.r,
-                        height: 38.r,
-                        decoration: BoxDecoration(
-                          color: colors.secondary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                          border: Border.all(
-                            color: colors.secondary.withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.storefront_rounded,
-                            size: 20.r,
-                            color: colors.secondary,
-                          ),
-                        ),
+                  child: Container(
+                    padding: EdgeInsets.all(AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerLow.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(
+                        color: colors.secondary.withValues(alpha: 0.20),
                       ),
-                      AppSpacing.hSm,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Text(
-                              'نقطة البيع المستلمة',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.onSurfaceVariant,
-                                fontSize: 10.sp,
-                              ),
+                            Icon(
+                              Icons.storefront_rounded,
+                              size: 15.r,
+                              color: colors.secondary,
                             ),
-                            AppSpacing.vXxs,
-                            Text(
-                              posName,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w700,
-                                height: 1.25,
+                            AppSpacing.hXxs,
+                            Expanded(
+                              child: Text(
+                                'نقطة البيع المستلمة',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: colors.secondary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 10.sp,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                        AppSpacing.vXxs,
+                        Text(
+                          posName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.onSurface,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -990,7 +1027,7 @@ class _ExecutiveQuotationVoucherCard extends StatelessWidget {
                         ),
                       ),
                       _VoucherFinancialRow(
-                        label: 'إجمالي البضاعة المقترحة (الأساسي)',
+                        label: 'الإجمالي قبل الخصم',
                         amount: preview.grossTotalAmount,
                       ),
                       Padding(
@@ -1158,85 +1195,161 @@ class _PreviewItemDiffRow extends StatelessWidget {
     final isAdded = item.changeType == 'ITEM_ADDED';
     final isModified = item.changeType == 'QUANTITY_MODIFIED';
 
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 3.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
+    return Container(
+      margin: EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: isAdded
+            ? colors.tertiary.withValues(alpha: 0.05)
+            : isModified
+            ? colors.secondary.withValues(alpha: 0.05)
+            : colors.surfaceContainerLow.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(
           color: isAdded
-              ? colors.tertiary.withValues(alpha: .06)
+              ? colors.tertiary.withValues(alpha: 0.35)
               : isModified
-              ? colors.secondary.withValues(alpha: .06)
-              : colors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: .35),
+              ? colors.secondary.withValues(alpha: 0.35)
+              : colors.outlineVariant.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // السطر الأول: أيقونة الباقة واسمها مع شارة التعديل التنفيذية
+          Row(
+            children: [
+              Container(
+                width: 26.r,
+                height: 26.r,
+                decoration: BoxDecoration(
+                  color: isAdded
+                      ? colors.tertiary.withValues(alpha: 0.15)
+                      : isModified
+                      ? colors.secondary.withValues(alpha: 0.15)
+                      : colors.surfaceContainerHigh,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    isAdded
+                        ? Icons.add_rounded
+                        : isModified
+                        ? Icons.edit_rounded
+                        : Icons.check_rounded,
+                    size: 15.r,
+                    color: isAdded
+                        ? colors.tertiary
+                        : isModified
+                        ? colors.secondary
+                        : colors.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              AppSpacing.hXs,
+              Expanded(
+                child: Text(
+                  item.packageName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.titleSmall.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: colors.onSurface,
+                  ),
+                ),
+              ),
+              AppSpacing.hXs,
+              if (isAdded)
+                const CustomStatusBadge(
+                  label: 'باقة مضافة',
+                  tone: SemanticTone.success,
+                  isCompact: true,
+                )
+              else if (isModified)
+                CustomStatusBadge(
+                  label: '${item.originalVoucherCount} ➔ ${item.voucherCount}',
+                  tone: SemanticTone.info,
+                  isCompact: true,
+                )
+              else
+                Text(
+                  '${item.voucherCount} كرت',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
           ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              isAdded
-                  ? Icons.add_circle_outline_rounded
-                  : isModified
-                  ? Icons.edit_outlined
-                  : Icons.check_circle_outline_rounded,
-              size: 15.r,
-              color: isAdded
-                  ? colors.tertiary
-                  : isModified
-                  ? colors.secondary
-                  : colors.onSurfaceVariant,
+          AppSpacing.vXs,
+          // السطر الثاني: التفاصيل المحاسبية للبند (الكمية، سعر الوحدة، الإجمالي الصافي)
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
             ),
-            AppSpacing.hXs,
-            Expanded(
-              child: Text(
-                item.packageName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodySmall.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: colors.onSurface,
-                ),
-              ),
+            decoration: BoxDecoration(
+              color: colors.surface.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
-            AppSpacing.hXs,
-            if (isAdded)
-              CustomStatusBadge(
-                label: 'باقة مضافة',
-                tone: SemanticTone.success,
-                isCompact: true,
-              )
-            else if (isModified)
-              CustomStatusBadge(
-                label: '${item.originalVoucherCount} ➔ ${item.voucherCount}',
-                tone: SemanticTone.info,
-                isCompact: true,
-              )
-            else
-              Text(
-                '${item.voucherCount} كرت',
-                style: AppTypography.labelSmall.copyWith(
-                  color: colors.onSurfaceVariant,
+            child: Row(
+              children: [
+                // جهة الكمية والتسعير
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      text: '${item.voucherCount} كرت',
+                      style: AppTypography.labelMedium.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      children: [
+                        TextSpan(
+                          text:
+                              ' × ${AmountFormatter.formatValue(item.voucherPrice)} ر.ي',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.onSurfaceVariant,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-            AppSpacing.hXs,
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                '${AmountFormatter.formatValue(item.itemTotalAmount)} ر.ي',
-                textDirection: TextDirection.rtl,
-                style: AppTypography.labelMedium.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: colors.onSurface,
+                AppSpacing.hXs,
+                // جهة الصافي النهائي للبند
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${AmountFormatter.formatValue(item.itemTotalAmount)} ر.ي',
+                        textDirection: TextDirection.rtl,
+                        style: AppTypography.titleSmall.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: colors.primary,
+                        ),
+                      ),
+                      if (item.discountAmount > 0)
+                        Text(
+                          'وفر خصم: -${AmountFormatter.formatValue(item.discountAmount)} ر.ي',
+                          textDirection: TextDirection.rtl,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.tertiary,
+                            fontSize: 9.5.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1251,54 +1364,93 @@ class _RemovedItemDiffRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 3.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: colors.error.withValues(alpha: .05),
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(color: colors.error.withValues(alpha: .22)),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.remove_circle_outline_rounded,
-              size: 15.r,
-              color: colors.error,
-            ),
-            AppSpacing.hXs,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.packageName,
-                    style: AppTypography.bodySmall.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colors.onSurface,
-                    ),
+    return Container(
+      margin: EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: colors.error.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: colors.error.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 26.r,
+                height: 26.r,
+                decoration: BoxDecoration(
+                  color: colors.error.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.remove_circle_outline_rounded,
+                    size: 15.r,
+                    color: colors.error,
                   ),
-                  Text(
-                    'الكمية الأصلية: ${item.originalVoucherCount} كرت',
+                ),
+              ),
+              AppSpacing.hXs,
+              Expanded(
+                child: Text(
+                  item.packageName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.titleSmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colors.onSurface,
+                  ),
+                ),
+              ),
+              AppSpacing.hXs,
+              const CustomStatusBadge(
+                label: 'تم حذفها من الطلب',
+                tone: SemanticTone.danger,
+                isCompact: true,
+              ),
+            ],
+          ),
+          AppSpacing.vXs,
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: colors.surface.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'الكمية الأصلية الملغاة: ${item.originalVoucherCount} كرت',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTypography.labelSmall.copyWith(
                       color: colors.error,
-                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
-              ),
+                ),
+                AppSpacing.hXs,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'وفر مستبعد: ${AmountFormatter.formatValue(item.originalItemTotal)} ر.ي',
+                    textDirection: TextDirection.rtl,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const CustomStatusBadge(
-              label: 'تم حذفها من الطلب',
-              tone: SemanticTone.danger,
-              isCompact: true,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1334,7 +1486,7 @@ class _ModificationFooter extends GetView<NetworkProcurementReviewController> {
             children: [
               Expanded(
                 child: CustomButton.outline(
-                  text: 'معاينة التعديل',
+                  text: 'معاينة',
                   icon: Icons.calculate_outlined,
                   size: AppButtonSize.medium,
                   loading: isPreviewing,
