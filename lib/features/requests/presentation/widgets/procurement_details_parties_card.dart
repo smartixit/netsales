@@ -6,8 +6,10 @@ import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 
 /// بطاقة أطراف العملية التجارية والشراكة التوريدية
 class ProcurementDetailsPartiesCard extends StatelessWidget {
@@ -102,7 +104,7 @@ class ProcurementDetailsPartiesCard extends StatelessWidget {
             roleLabel: 'الجهة المورّدة (مزود الشبكة)',
             partyName: networkName,
             phoneNumber: request.networkPhone,
-            icon: Icons.cell_tower_rounded,
+            logoUrl: request.networkLogo,
             iconGradient: const [Color(0xFF0284C7), Color(0xFF0369A1)],
           ),
 
@@ -140,7 +142,7 @@ class ProcurementDetailsPartiesCard extends StatelessWidget {
             roleLabel: 'الجهة الطالبة (نقطة البيع)',
             partyName: posName,
             phoneNumber: request.posPhone,
-            icon: Icons.storefront_rounded,
+            logoUrl: request.posLogo,
             iconGradient: const [Color(0xFF087F68), Color(0xFF065F46)],
           ),
         ],
@@ -153,7 +155,7 @@ class ProcurementDetailsPartiesCard extends StatelessWidget {
     required String roleLabel,
     required String partyName,
     String? phoneNumber,
-    required IconData icon,
+    String? logoUrl,
     required List<Color> iconGradient,
   }) {
     final colors = context.colors;
@@ -169,18 +171,14 @@ class ProcurementDetailsPartiesCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 36.r,
-            height: 36.r,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: iconGradient,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Icon(icon, size: 18.r, color: Colors.white),
+          CustomAvatarBadge(
+            imageUrl: logoUrl,
+            initials: TextFormatter.avatarInitial(partyName),
+            size: AvatarBadgeSize.sm,
+            customDimension: 38.r,
+            borderRadius: BorderRadius.circular(10.r),
+            gradientColors: iconGradient,
+            hasPulse: false,
           ),
           AppSpacing.hSm,
           Expanded(

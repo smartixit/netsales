@@ -157,13 +157,15 @@ class ProcurementDetailsTimeline extends StatelessWidget {
             ? 'تم الاعتماد $approver وإصدار الفاتورة المعتمدة #${request.invoiceUuid}'
             : 'تمت المصادقة $approver على الكميات وتوليد الفاتورة آلياً';
       case RequestStatus.rejected:
-        final rejector =
-            request.reviewedByName != null && request.reviewedByName!.isNotEmpty
+        final hasRejector =
+            request.reviewedByName != null &&
+            request.reviewedByName!.isNotEmpty;
+        final rejectorPrefix = hasRejector
             ? 'بواسطة ${request.reviewedByName} • '
             : '';
         return request.requestNote != null && request.requestNote!.isNotEmpty
-            ? '${rejector}السبب: ${request.requestNote}'
-            : '${rejector}تم رفض الطلب وتوثيق السبب';
+            ? '$rejectorPrefixالسبب: ${request.requestNote}'
+            : '$rejectorPrefixتم رفض الطلب وتوثيق السبب';
       case RequestStatus.cancelled:
         final canceller =
             request.createdByName != null && request.createdByName!.isNotEmpty

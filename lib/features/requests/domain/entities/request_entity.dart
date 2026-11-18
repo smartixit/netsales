@@ -23,8 +23,10 @@ class RequestEntity {
   final String? invoiceUuid;
   final String? networkName;
   final String? networkPhone;
+  final String? networkLogo;
   final String? posName;
   final String? posPhone;
+  final String? posLogo;
   final String? createdByName;
   final String? reviewedByName;
   final List<RequestItemEntity> items;
@@ -51,8 +53,10 @@ class RequestEntity {
     this.invoiceUuid,
     this.networkName,
     this.networkPhone,
+    this.networkLogo,
     this.posName,
     this.posPhone,
+    this.posLogo,
     this.createdByName,
     this.reviewedByName,
     this.items = const [],

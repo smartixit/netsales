@@ -23,8 +23,10 @@ class RequestModel extends RequestEntity {
     super.invoiceUuid,
     super.networkName,
     super.networkPhone,
+    super.networkLogo,
     super.posName,
     super.posPhone,
+    super.posLogo,
     super.createdByName,
     super.reviewedByName,
     super.items = const [],
@@ -37,18 +39,22 @@ class RequestModel extends RequestEntity {
     // استخراج اسم الشبكة ونقطة البيع وجهات الاتصال من العلاقات المحملة مسبقاً إن وجدت
     String? networkName;
     String? networkPhone;
+    String? networkLogo;
     if (json['network'] is Map<String, dynamic>) {
       final net = json['network'] as Map<String, dynamic>;
       networkName = net['network_name'] as String?;
       networkPhone = net['network_phone_number'] as String?;
+      networkLogo = (net['network_profile_logo'] ?? net['logo_url']) as String?;
     }
 
     String? posName;
     String? posPhone;
+    String? posLogo;
     if (json['pos'] is Map<String, dynamic>) {
       final p = json['pos'] as Map<String, dynamic>;
       posName = p['pos_name'] as String?;
       posPhone = p['pos_phone_number'] as String?;
+      posLogo = (p['pos_profile_logo'] ?? p['logo_url']) as String?;
     }
 
     String? createdByName;
@@ -105,8 +111,10 @@ class RequestModel extends RequestEntity {
       invoiceUuid: json['invoice_uuid'] as String?,
       networkName: networkName,
       networkPhone: networkPhone,
+      networkLogo: networkLogo,
       posName: posName,
       posPhone: posPhone,
+      posLogo: posLogo,
       createdByName: createdByName,
       reviewedByName: reviewedByName,
       items: itemsList,

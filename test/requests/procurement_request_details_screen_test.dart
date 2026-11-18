@@ -14,6 +14,7 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_deta
 import 'package:netsales/features/requests/presentation/widgets/procurement_details_metrics_strip.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_details_parties_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_details_timeline.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 
 class _FakeGetRequestDetailsUseCase implements GetRequestDetailsUseCase {
   final RequestEntity detailEntity;
@@ -103,10 +104,12 @@ void main() {
           'network': {
             'network_name': 'شبكة السرعة الذهبية',
             'network_phone_number': '777000111',
+            'network_profile_logo': 'https://example.com/network.png',
           },
           'pos': {
             'pos_name': 'مركز الأمل للاتصالات',
             'pos_phone_number': '777222333',
+            'pos_profile_logo': 'https://example.com/pos.png',
           },
           'created_by_user': {'user_full_name': 'أحمد التاجر'},
           'reviewed_by_user': {'user_full_name': 'عمر المشرف'},
@@ -117,8 +120,10 @@ void main() {
         expect(model.requestId, 1);
         expect(model.networkName, 'شبكة السرعة الذهبية');
         expect(model.networkPhone, '777000111');
+        expect(model.networkLogo, 'https://example.com/network.png');
         expect(model.posName, 'مركز الأمل للاتصالات');
         expect(model.posPhone, '777222333');
+        expect(model.posLogo, 'https://example.com/pos.png');
         expect(model.createdByName, 'أحمد التاجر');
         expect(model.reviewedByName, 'عمر المشرف');
       },
@@ -198,6 +203,7 @@ void main() {
       expect(find.text('شبكة السرعة الذهبية'), findsOneWidget);
       expect(find.text('مركز الأمل للاتصالات'), findsOneWidget);
       expect(find.byIcon(Icons.phone_forwarded_rounded), findsNWidgets(2));
+      expect(find.byType(CustomAvatarBadge), findsNWidgets(2));
     });
 
     testWidgets('renders item card with package specifications and amounts', (
