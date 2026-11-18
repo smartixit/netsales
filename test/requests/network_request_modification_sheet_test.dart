@@ -272,9 +272,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // النقر على + ورقة
-      final addSheetButton = find.text('+ ورقة');
+      // النقر على ورقة كاملة
+      final addSheetButton = find.text('ورقة');
       expect(addSheetButton, findsOneWidget);
+      await tester.ensureVisible(addSheetButton);
       await tester.tap(addSheetButton);
       await tester.pumpAndSettle();
 

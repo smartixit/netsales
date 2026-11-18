@@ -113,6 +113,8 @@ class NetworkProcurementReviewController extends GetxController {
   final modificationLines = <RequestModificationLineEntity>[].obs;
   final editingRequestId = RxnInt();
   final editingRequest = Rxn<RequestEntity>();
+  final isLoadingEditor = false.obs;
+  final editorError = RxnString();
   final modificationNoteController = TextEditingController();
   final Map<int, TextEditingController> _modificationQuantityControllers = {};
   int _requestListRevision = 0;
@@ -155,9 +157,22 @@ class NetworkProcurementReviewController extends GetxController {
     _modificationRevision++;
     editingRequestId.value = requestId;
     editingRequest.value = request;
+    isLoadingEditor.value = true;
+    editorError.value = null;
     currentPreview.value = null;
     modificationLines.clear();
     availablePackages.clear();
+
+    if (request.items.isNotEmpty) {
+      modificationLines.assignAll(
+        request.items.map(
+          (item) => RequestModificationLineEntity(
+            packageId: item.packageId,
+            voucherCount: item.voucherCount,
+          ),
+        ),
+      );
+    }
 
     try {
       final detailedRequest = await getRequestDetailsUseCase(requestId);
@@ -190,15 +205,17 @@ class NetworkProcurementReviewController extends GetxController {
           editingRequestId.value != requestId) {
         return;
       }
-      editingRequestId.value = null;
-      editingRequest.value = null;
-      modificationLines.clear();
-      currentPreview.value = null;
+      editorError.value =
+          error is AppException ? error.message : error.toString();
       CustomSnackbar.show(
         title: 'تعذر تحميل تفاصيل الطلب',
-        message: error is AppException ? error.message : error.toString(),
+        message: editorError.value!,
         type: SnackType.error,
       );
+    } finally {
+      if (loadRevision == _editorLoadRevision) {
+        isLoadingEditor.value = false;
+      }
     }
   }
 
@@ -589,7 +606,10 @@ class NetworkProcurementReviewController extends GetxController {
     if (networkId != null && Get.isRegistered<WorkspaceService>()) {
       await WorkspaceService.to.saveActiveNetworkId(networkId);
     }
-    await loadRequests(isRefresh: true, clearOnStart: true);
+    await Future.wait([
+      loadRequests(isRefresh: true, clearOnStart: true),
+      loadStatusSummary(),
+    ]);
   }
 
   /// مراجعة واعتماد طلب الكروت وتوليد الفاتورة آلياً
