@@ -80,159 +80,144 @@ class ProcurementRequestDetailsScreen
       return CustomAppScaffold(
         appBarTitle: 'طلب توريد $displayUuid',
         showBackButton: true,
-        actions: [
-          CustomButton.icon(
-            icon: Icons.refresh_rounded,
-            tooltip: 'تحديث التفاصيل',
-            backgroundColor: Colors.transparent,
-            foregroundColor: colors.onSurface,
-            onPressed: () => controller.loadRequestDetails(request.requestId),
-          ),
-          AppSpacing.hXs,
-        ],
         bottomNavigationBar: ProcurementDetailsActionBar(
           request: request,
           controller: controller,
         ),
-        body: RefreshIndicator.adaptive(
-          onRefresh: () => controller.loadRequestDetails(request.requestId),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.cardPadding,
-              AppSpacing.cardPadding,
-              AppSpacing.cardPadding,
-              AppSpacing.xl,
-            ),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1. الترويسة القيادية بالعمق اللوني المتكيف
-                    ProcurementDetailsHero(request: request),
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.cardPadding,
+            AppSpacing.cardPadding,
+            AppSpacing.cardPadding,
+            AppSpacing.xl,
+          ),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 760),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. الترويسة القيادية بالعمق اللوني المتكيف
+                  ProcurementDetailsHero(request: request),
+                  AppSpacing.vMd,
+
+                  // 2. شريط المؤشرات المالية والتشغيلية
+                  ProcurementDetailsMetricsStrip(request: request),
+
+                  // 3. ملخص المقارنة في حالة وجود تعديلات بعد المراجعة
+                  if (request.isApproved &&
+                      request.modificationSummary != null) ...[
                     AppSpacing.vMd,
-
-                    // 2. شريط المؤشرات المالية والتشغيلية
-                    ProcurementDetailsMetricsStrip(request: request),
-
-                    // 3. ملخص المقارنة في حالة وجود تعديلات بعد المراجعة
-                    if (request.isApproved &&
-                        request.modificationSummary != null) ...[
-                      AppSpacing.vMd,
-                      RequestModificationSummaryPanel(
-                        summary: request.modificationSummary!,
-                      ),
-                    ],
-
-                    // 4. بطاقة التنبيه للفاتورة المعتمدة
-                    if (request.isApproved && request.invoiceId != null) ...[
-                      AppSpacing.vMd,
-                      ProcurementRequestInvoiceCallout(
-                        onOpenInvoice: controller.openLinkedInvoice,
-                      ),
-                    ],
-                    AppSpacing.vMd,
-
-                    // 5. مسار التدقيق والتسلسل الزمني لمراحل الطلب
-                    ProcurementDetailsTimeline(request: request),
-                    AppSpacing.vMd,
-
-                    // 6. بطاقة أطراف العملية التوريدية (الشبكة ونقطة البيع)
-                    ProcurementDetailsPartiesCard(request: request),
-                    AppSpacing.vLg,
-
-                    // 7. عنوان قسم الباقات المفصلة
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.inventory_2_outlined,
-                          size: 18.r,
-                          color: colors.primary,
-                        ),
-                        SizedBox(width: 6.w),
-                        Expanded(
-                          child: Text(
-                            'تفاصيل الباقات المطلوبة (${request.items.length})',
-                            style: AppTypography.titleSmall.copyWith(
-                              color: colors.onSurface,
-                              fontWeight: FontWeight.w800,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    RequestModificationSummaryPanel(
+                      summary: request.modificationSummary!,
                     ),
-                    AppSpacing.vSm,
-
-                    // 8. قائمة بطاقات الباقات
-                    for (int i = 0; i < request.items.length; i++) ...[
-                      if (i > 0) AppSpacing.vSm,
-                      ProcurementDetailsItemCard(
-                        item: request.items[i],
-                        index: i,
-                        isExpanded: controller.isItemExpanded(i),
-                        onToggleExpand: () => controller.toggleItemExpansion(i),
-                      ),
-                    ],
-
-                    // 9. بطاقة الملاحظات إن وجدت
-                    if (request.requestNote != null &&
-                        request.requestNote!.trim().isNotEmpty) ...[
-                      AppSpacing.vMd,
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(AppSpacing.cardPadding),
-                        decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withValues(
-                            alpha: 0.35,
-                          ),
-                          borderRadius: BorderRadius.circular(AppRadius.card),
-                          border: Border.all(
-                            color: colors.outlineVariant.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.notes_rounded,
-                                  size: 16.r,
-                                  color: colors.onSurfaceVariant,
-                                ),
-                                SizedBox(width: 6.w),
-                                Text(
-                                  'ملاحظات الطلب',
-                                  style: AppTypography.labelMedium.copyWith(
-                                    color: colors.onSurface,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 6.h),
-                            Text(
-                              request.requestNote!.trim(),
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.onSurfaceVariant,
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-
-                    SizedBox(height: 24.h),
                   ],
-                ),
+
+                  // 4. بطاقة التنبيه للفاتورة المعتمدة
+                  if (request.isApproved && request.invoiceId != null) ...[
+                    AppSpacing.vMd,
+                    ProcurementRequestInvoiceCallout(
+                      onOpenInvoice: controller.openLinkedInvoice,
+                    ),
+                  ],
+                  AppSpacing.vMd,
+
+                  // 5. مسار التدقيق والتسلسل الزمني لمراحل الطلب
+                  ProcurementDetailsTimeline(request: request),
+                  AppSpacing.vMd,
+
+                  // 6. بطاقة أطراف العملية التوريدية (الشبكة ونقطة البيع)
+                  ProcurementDetailsPartiesCard(request: request),
+                  AppSpacing.vLg,
+
+                  // 7. عنوان قسم الباقات المفصلة
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 18.r,
+                        color: colors.primary,
+                      ),
+                      SizedBox(width: 6.w),
+                      Expanded(
+                        child: Text(
+                          'تفاصيل الباقات المطلوبة (${request.items.length})',
+                          style: AppTypography.titleSmall.copyWith(
+                            color: colors.onSurface,
+                            fontWeight: FontWeight.w800,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  AppSpacing.vSm,
+
+                  // 8. قائمة بطاقات الباقات
+                  for (int i = 0; i < request.items.length; i++) ...[
+                    if (i > 0) AppSpacing.vSm,
+                    ProcurementDetailsItemCard(
+                      item: request.items[i],
+                      index: i,
+                      isExpanded: controller.isItemExpanded(i),
+                      onToggleExpand: () => controller.toggleItemExpansion(i),
+                    ),
+                  ],
+
+                  // 9. بطاقة الملاحظات إن وجدت
+                  if (request.requestNote != null &&
+                      request.requestNote!.trim().isNotEmpty) ...[
+                    AppSpacing.vMd,
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(AppSpacing.cardPadding),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainerHighest.withValues(
+                          alpha: 0.35,
+                        ),
+                        borderRadius: BorderRadius.circular(AppRadius.card),
+                        border: Border.all(
+                          color: colors.outlineVariant.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.notes_rounded,
+                                size: 16.r,
+                                color: colors.onSurfaceVariant,
+                              ),
+                              SizedBox(width: 6.w),
+                              Text(
+                                'ملاحظات الطلب',
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: colors.onSurface,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 6.h),
+                          Text(
+                            request.requestNote!.trim(),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: colors.onSurfaceVariant,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  SizedBox(height: 24.h),
+                ],
               ),
             ),
           ),

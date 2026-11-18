@@ -179,7 +179,7 @@ class ProcurementDetailsItemCard extends StatelessWidget {
                               SizedBox(width: 4.w),
                               Flexible(
                                 child: Text(
-                                  'سعة الشيت: $sheetSize كرت',
+                                  'سعة الورقة: $sheetSize كرت',
                                   style: AppTypography.caption.copyWith(
                                     color: colors.onSurfaceVariant,
                                     fontSize: 10.sp,
@@ -330,7 +330,7 @@ class ProcurementDetailsItemCard extends StatelessWidget {
                               ),
                               SizedBox(width: 4.w),
                               Text(
-                                '($sheetsFormatted شيت)',
+                                '($sheetsFormatted ورقة)',
                                 style: AppTypography.caption.copyWith(
                                   color: colors.primary,
                                   fontWeight: FontWeight.w700,

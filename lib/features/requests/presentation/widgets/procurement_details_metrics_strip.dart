@@ -48,12 +48,12 @@ class ProcurementDetailsMetricsStrip extends StatelessWidget {
         caption: 'رصيد إجمالي',
       ),
       _MetricData(
-        label: 'عدد الشيتات',
+        label: 'إجمالي الأوراق',
         value: sheetsFormatted,
-        unit: 'شيت',
+        unit: 'ورقة',
         icon: Icons.layers_rounded,
         accentColor: const Color(0xFF7C3AED), // Violet
-        caption: 'طباعة A4',
+        caption: 'أوراق A4',
       ),
       _MetricData(
         label: 'الباقات المطلوبة',

@@ -213,7 +213,7 @@ void main() {
       expect(find.text('باقة 1 جيجا توريد'), findsOneWidget);
       expect(find.text('#1'), findsOneWidget);
       expect(find.text('200 كرت'), findsOneWidget);
-      expect(find.text('(2 شيت)'), findsOneWidget);
+      expect(find.text('(2 ورقة)'), findsOneWidget);
     });
 
     testWidgets('renders complete details screen and triggers refresh', (

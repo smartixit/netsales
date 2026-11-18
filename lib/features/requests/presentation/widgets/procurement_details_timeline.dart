@@ -22,14 +22,14 @@ class ProcurementDetailsTimeline extends StatelessWidget {
         ? DateTime.tryParse(request.requestDate!)
         : null;
     final requestDateStr = requestDate != null
-        ? DateFormatter.fullDate(requestDate)
+        ? DateFormatter.dateTime(requestDate)
         : (request.requestDate ?? '');
 
     final reviewDate = request.reviewDate != null
         ? DateTime.tryParse(request.reviewDate!)
         : null;
     final reviewDateStr = reviewDate != null
-        ? DateFormatter.fullDate(reviewDate)
+        ? DateFormatter.dateTime(reviewDate)
         : (request.reviewDate ?? '');
 
     return Container(
@@ -149,15 +149,27 @@ class ProcurementDetailsTimeline extends StatelessWidget {
   String _resolveDecisionSubtitle() {
     switch (request.status) {
       case RequestStatus.approved:
+        final approver =
+            request.reviewedByName != null && request.reviewedByName!.isNotEmpty
+            ? 'بواسطة ${request.reviewedByName}'
+            : '';
         return request.invoiceUuid != null && request.invoiceUuid!.isNotEmpty
-            ? 'تم إصدار الفاتورة المعتمدة رقم #${request.invoiceUuid}'
-            : 'تمت المصادقة على الكميات وتوليد الفاتورة آلياً';
+            ? 'تم الاعتماد $approver وإصدار الفاتورة المعتمدة #${request.invoiceUuid}'
+            : 'تمت المصادقة $approver على الكميات وتوليد الفاتورة آلياً';
       case RequestStatus.rejected:
+        final rejector =
+            request.reviewedByName != null && request.reviewedByName!.isNotEmpty
+            ? 'بواسطة ${request.reviewedByName} • '
+            : '';
         return request.requestNote != null && request.requestNote!.isNotEmpty
-            ? 'السبب: ${request.requestNote}'
-            : 'تم رفض الطلب وتوثيق السبب';
+            ? '${rejector}السبب: ${request.requestNote}'
+            : '${rejector}تم رفض الطلب وتوثيق السبب';
       case RequestStatus.cancelled:
-        return 'تم إلغاء الطلب من قبل نقطة البيع قبل البت فيه';
+        final canceller =
+            request.createdByName != null && request.createdByName!.isNotEmpty
+            ? 'بواسطة ${request.createdByName}'
+            : 'من قبل نقطة البيع';
+        return 'تم إلغاء الطلب $canceller قبل البت فيه';
       case RequestStatus.pending:
       default:
         return 'الطلب بانتظار اعتماد المشرف أو تعديل الكميات';
