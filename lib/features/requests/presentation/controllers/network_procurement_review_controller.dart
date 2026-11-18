@@ -148,6 +148,28 @@ class NetworkProcurementReviewController extends GetxController {
   bool get canModifyRequests =>
       PermissionService.to.can(AppPermissions.requestsEdit);
 
+  /// هل توجد تعديلات فعلية على مسودة الباقات مقارنة بالطلب الأصلي
+  bool get hasModificationChanges {
+    final original = editingRequest.value;
+    if (original == null) return false;
+    if (modificationLines.isEmpty) return false;
+
+    // اختلاف عدد الباقات يعني إضافة باقة جديدة أو حذف باقة أصلية
+    if (original.items.length != modificationLines.length) return true;
+
+    // فحص كل بند أصلي: هل تغيرت كميته أو تم استبعاده
+    for (final origItem in original.items) {
+      final line = modificationLines.firstWhereOrNull(
+        (l) => l.packageId == origItem.packageId,
+      );
+      if (line == null || line.voucherCount != origItem.voucherCount) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   Future<void> beginModification(RequestEntity request) async {
     if (!request.isPending) return;
 

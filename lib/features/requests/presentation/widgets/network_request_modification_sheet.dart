@@ -42,8 +42,8 @@ class NetworkRequestModificationSheet
 
     // فتح الشيت فوراً بزمن استجابة فوري (< 16ms)
     await CustomBottomSheet.show<void>(
-      title: 'مراجعة طلب #${request.requestUuid ?? request.requestId}',
-      subtitle: 'عدّل كميات الباقات أو أضف باقات جديدة، ثم عاين الأسعار قبل الاعتماد.',
+      title: 'مراجعة طلب\n #${request.requestUuid ?? request.requestId}',
+      subtitle: 'عدّل كميات الباقات أو أضف باقات جديدة، ثم قم بمعاينة الأسعار قبل الاعتماد.',
       leadingIcon: Icons.edit_note_rounded,
       scrollable: true,
       maxHeightFactor: 0.94,
@@ -784,7 +784,19 @@ class _ExecutiveQuotationPreviewSection
           ],
         ),
         AppSpacing.vSm,
-        if (preview == null)
+        if (controller.isPreviewingModification.value)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: CustomStateView.loading(
+              presentation: CustomStatePresentation.skeletonOnly,
+              skeleton: const CustomStateSkeleton(
+                layout: CustomStateSkeletonLayout.detail,
+                itemCount: 1,
+                showCardSurface: true,
+              ),
+            ),
+          )
+        else if (preview == null)
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(AppSpacing.lg),
@@ -1482,7 +1494,9 @@ class _ModificationFooter extends GetView<NetworkProcurementReviewController> {
       final isProcessing = controller.isProcessingDecision.value;
       final preview = controller.currentPreview.value;
       final hasLines = controller.modificationLines.isNotEmpty;
+      final hasChanges = controller.hasModificationChanges;
       final isBusy = isLoadingEditor || isPreviewing || isProcessing;
+      final canSubmit = hasLines && hasChanges && !isBusy;
 
       return Container(
         padding: EdgeInsets.all(AppSpacing.md),
@@ -1502,7 +1516,7 @@ class _ModificationFooter extends GetView<NetworkProcurementReviewController> {
                   icon: Icons.calculate_outlined,
                   size: AppButtonSize.medium,
                   loading: isPreviewing,
-                  onPressed: hasLines && !isBusy
+                  onPressed: canSubmit
                       ? () => controller.previewModification()
                       : null,
                 ),
@@ -1517,7 +1531,7 @@ class _ModificationFooter extends GetView<NetworkProcurementReviewController> {
                   icon: Icons.check_circle_rounded,
                   size: AppButtonSize.medium,
                   loading: isProcessing,
-                  onPressed: hasLines && !isBusy
+                  onPressed: canSubmit
                       ? () => controller.confirmAndApproveModification()
                       : null,
                 ),
