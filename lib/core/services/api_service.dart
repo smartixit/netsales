@@ -12,7 +12,6 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_request_replay_state.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
-import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
 import 'package:netsales/core/services/infinityfree_challenge_interceptor.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/package_info_service.dart';
