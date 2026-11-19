@@ -574,7 +574,7 @@ void main() {
     });
 
     test(
-      'rejectRequest with empty reason returns false and prevents mutation',
+      'rejectRequest with empty reason prevents mutation',
       () async {
         await controller.rejectRequest(1, '');
         expect(controller.requests.first.isPending, true);
