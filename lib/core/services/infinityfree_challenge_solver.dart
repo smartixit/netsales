@@ -28,22 +28,18 @@ class InfinityFreeChallengeSolver {
         lower.contains('tonumbers');
   }
 
-  /// استخراج الثوابت [a, b, c] من نص صفحة التحدي.
+  /// استخراج الثوابت [a, b, c] مع تحمل اختلاف المسافات والتصغير.
   static List<String>? extractConstants(String html) {
-    final a = RegExp(
-      r'var a=toNumbers\("([0-9a-f]+)"\)',
-      caseSensitive: false,
-    ).firstMatch(html);
-    final b = RegExp(
-      r'[a-z,]?b=toNumbers\("([0-9a-f]+)"\)',
-      caseSensitive: false,
-    ).firstMatch(html);
-    final c = RegExp(
-      r'[a-z,]?c=toNumbers\("([0-9a-f]+)"\)',
-      caseSensitive: false,
-    ).firstMatch(html);
-    if (a == null || b == null || c == null) return null;
-    return [a.group(1)!, b.group(1)!, c.group(1)!];
+    String? capture(String name) => RegExp(
+          '\\b$name\\s*=\\s*toNumbers\\s*\\(\\s*"([0-9a-f]+)"\\s*\\)',
+          caseSensitive: false,
+        ).firstMatch(html)?.group(1);
+
+    final key = capture('a');
+    final iv = capture('b');
+    final cipherText = capture('c');
+    if (key == null || iv == null || cipherText == null) return null;
+    return [key, iv, cipherText];
   }
 
   /// يحسب قيمة كوكي `__test` من الصفحة المعروضة (تُعيد null عند الفشل).
@@ -53,8 +49,8 @@ class InfinityFreeChallengeSolver {
     return _decryptConstants(constants[0], constants[1], constants[2]);
   }
 
-  /// مطابقة «toNumbers»: تحويل سلسلة hex إلى مصفوفة بايتات.
   static Uint8List _toNumbers(String hex) {
+    if (hex.length.isOdd) throw const FormatException('Invalid hex length');
     final out = Uint8List(hex.length ~/ 2);
     for (var i = 0; i < out.length; i++) {
       out[i] = int.parse(hex.substring(i * 2, i * 2 + 2), radix: 16);
@@ -70,26 +66,24 @@ class InfinityFreeChallengeSolver {
     return sb.toString();
   }
 
-  /// مطابقة دالة «unpadBytesOut» في aes.js — تُزيل حشوة PKCS7 المبسّطة
-  /// فقط عندما يتجاوز حجم الناتج كتلة واحدة (أيضاً 16 بايتً لا تُلمس).
+  /// يحاكي إزالة الذيل المتكرر في SlowAES unpadBytesOut.
+  ///
+  /// هذه ليست إزالة PKCS#7 قياسية: SlowAES تزيل عدد البايتات المتطابقة
+  /// المتتالية في نهاية الناتج حتى لو كان عددها أقل من قيمة البايت نفسه.
   static Uint8List _unpadBytesOut(Uint8List data) {
-    if (data.length <= 16) return data;
-    var count = 0;
-    var lastValue = -1;
-    var i = data.length - 1;
-    for (; i >= data.length - 1 - 16 && data[i] <= 16; i--) {
-      if (lastValue == -1) lastValue = data[i];
-      if (data[i] != lastValue) {
-        count = 0;
-        break;
-      }
-      count++;
-      if (count == lastValue) break;
+    if (data.isEmpty) return data;
+    final lastByte = data.last;
+    if (lastByte > 16) return data;
+
+    var trailingCount = 0;
+    for (var i = data.length - 1;
+        i >= 0 && trailingCount < 16 && data[i] == lastByte;
+        i--) {
+      trailingCount++;
     }
-    if (count > 0) {
-      return Uint8List.sublistView(data, 0, data.length - count);
-    }
-    return data;
+
+    if (trailingCount == 0) return data;
+    return Uint8List.sublistView(data, 0, data.length - trailingCount);
   }
 
   static String? _decryptConstants(String aHex, String bHex, String cHex) {
@@ -98,7 +92,10 @@ class InfinityFreeChallengeSolver {
       final iv = _toNumbers(bHex);
       final ciphertext = _toNumbers(cHex);
 
-      if (key.length != 16 || iv.length != 16 || ciphertext.length % 16 != 0) {
+      if (key.length != 16 ||
+          iv.length != 16 ||
+          ciphertext.isEmpty ||
+          ciphertext.length % 16 != 0) {
         return null;
       }
 
@@ -110,8 +107,7 @@ class InfinityFreeChallengeSolver {
         cipher.processBlock(ciphertext, offset, plaintext, offset);
       }
 
-      final unpadded = _unpadBytesOut(plaintext);
-      return _toHex(unpadded);
+      return _toHex(_unpadBytesOut(plaintext));
     } catch (_) {
       return null;
     }
