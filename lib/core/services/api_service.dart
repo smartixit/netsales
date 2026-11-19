@@ -9,8 +9,8 @@ import 'package:netsales/core/config/app_environment.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
-import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/api_request_replay_state.dart';
+import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
@@ -788,9 +788,9 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
           options.headers,
           'Cookie',
           InfinityFreeChallengeSolver.mergeChallengeCookie(
-              existingCookieHeader: existingCookie,
-              challengeCookie: _cachedCookies[host]!,
-            ),
+            existingCookieHeader: existingCookie,
+            challengeCookie: _cachedCookies[host]!,
+          ),
         );
       } else {
         _cachedCookies.remove(host);
@@ -834,7 +834,9 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     // FormData and streaming bodies are one-shot and cannot be safely replayed.
     if (options.data is FormData || options.data is Stream) {
       if (AppEnvironment.enableLogging) {
-        log('⚠️ تعذر إعادة طلب InfinityFree لأن جسم الطلب غير قابل لإعادة الإرسال.');
+        log(
+          '⚠️ تعذر إعادة طلب InfinityFree لأن جسم الطلب غير قابل لإعادة الإرسال.',
+        );
       }
       return handler.next(response);
     }
