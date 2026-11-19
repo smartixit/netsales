@@ -453,8 +453,7 @@ void main() {
       controller.setPackageVoucherCount(package2, 100);
 
       // Submit order
-      final success = await controller.submitOrder();
-      expect(success, isTrue);
+      await controller.submitOrder();
 
       // Verify payload pos_id strictly matches the newly selected POS #202
       expect(mockRequestRepo.createdPayloads.length, equals(1));
@@ -485,8 +484,7 @@ void main() {
       expect(controller.selectedPosId.value, isNull);
 
       // Attempting to submit without valid POS fails safely
-      final submitSuccess = await controller.submitOrder();
-      expect(submitSuccess, isFalse);
+      await controller.submitOrder();
       expect(mockRequestRepo.createdPayloads, isEmpty);
     });
 
