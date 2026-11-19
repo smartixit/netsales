@@ -97,8 +97,8 @@ jobs:
             test/core/services/infinityfree_challenge_interceptor_test.dart \
             test/requests/pos_procurement_active_context_test.dart \
             test/requests/procurement_quote_pricing_test.dart \
-            test/requests/procurement_requests_controller_test.dart
-          lib/features/requests/presentation/controllers/network_procurement_review_controller.dart; then
+            test/requests/procurement_requests_controller_test.dart \
+            lib/features/requests/presentation/controllers/network_procurement_review_controller.dart; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -112,8 +112,8 @@ jobs:
             test/core/services/infinityfree_challenge_interceptor_test.dart \
             test/requests/pos_procurement_active_context_test.dart \
             test/requests/procurement_quote_pricing_test.dart \
-            test/requests/procurement_requests_controller_test.dart
-          lib/features/requests/presentation/controllers/network_procurement_review_controller.dart
+            test/requests/procurement_requests_controller_test.dart \
+            lib/features/requests/presentation/controllers/network_procurement_review_controller.dart
           git commit -m "chore(data-grid): format sources and synchronize dependencies"
           git push origin "HEAD:${GITHUB_REF_NAME}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -133,7 +133,6 @@ jobs:
           flutter test test/requests/pos_procurement_active_context_test.dart
           flutter test test/requests/procurement_quote_pricing_test.dart
           flutter test test/requests/procurement_requests_controller_test.dart
-          lib/features/requests/presentation/controllers/network_procurement_review_controller.dart
 
       - name: Analyze project
         run: flutter analyze
