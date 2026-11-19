@@ -103,6 +103,9 @@ jobs:
             "repos/${GITHUB_REPOSITORY}/actions/workflows/datagrid-quality.yml/dispatches" \
             -f ref="${GITHUB_REF_NAME}"
 
+      - name: Run InfinityFree challenge interceptor tests
+        run: flutter test test/core/services/infinityfree_challenge_interceptor_test.dart
+
       - name: Analyze project
         run: flutter analyze
 
