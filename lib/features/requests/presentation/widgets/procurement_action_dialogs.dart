@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
@@ -29,11 +28,10 @@ class ProcurementActionDialogs {
           label: 'ملاحظات الاعتماد (اختياري)',
           hint: 'أضف أي ملاحظات للوكيل بخصوص الفاتورة...',
           maxLines: 2,
-          isRequired: false,
+          validator: FormValidators.descriptionValidator(isRequired: false),
         ),
       ),
       onConfirm: () async {
-        Get.back<void>();
         final note = noteController.text.trim().isEmpty
             ? null
             : noteController.text.trim();
@@ -74,7 +72,6 @@ class ProcurementActionDialogs {
       ),
       onConfirm: () async {
         if (!formKey.currentState!.validate()) return;
-        Get.back<void>();
         await onConfirm(reasonController.text.trim());
       },
     );
@@ -93,7 +90,6 @@ class ProcurementActionDialogs {
       confirmLabel: 'نعم، إلغاء الطلب',
       cancelLabel: 'تراجع',
       onConfirm: () async {
-        Get.back<void>();
         await onConfirm();
       },
     );
@@ -111,7 +107,6 @@ class ProcurementActionDialogs {
       confirmLabel: 'نعم، حذف الطلب',
       cancelLabel: 'تراجع',
       onConfirm: () async {
-        Get.back<void>();
         await onConfirm();
       },
     );

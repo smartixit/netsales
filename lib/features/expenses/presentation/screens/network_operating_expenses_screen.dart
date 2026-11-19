@@ -78,9 +78,35 @@ class NetworkOperatingExpensesScreen
                                 )
                               : null,
                         ),
-                        AppSpacing.vMd,
 
-                        // 2. محدد الشبكة المتعددة
+                        // 2. شريط ملخص المؤشرات
+                        Obx(() {
+                          final sum = controller.summary.value;
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                            child: ExpensesSummaryStrip(
+                              totalCount: sum?.totalCount ?? controller.expenses.length,
+                              totalAmount: sum?.totalAmount ?? 0.0,
+                              thisMonthAmount: sum?.thisMonthAmount ?? 0.0,
+                              todayAmount: sum?.todayAmount ?? 0.0,
+                              isLoading: controller.isLoading.value,
+                            ),
+                          );
+                        }),
+
+                        // 3. ترويسة البحث
+                        Obx(() {
+                          return ExpensesSearchFilterHeader(
+                            searchController: controller.searchController,
+                            searchQuery: controller.searchQuery.value,
+                            onClearSearch: () {
+                              controller.searchController.clear();
+                              controller.searchQuery.value = '';
+                            },
+                          );
+                        }),
+
+                        // 4. محدد الشبكة المتعددة
                         Obx(() {
                           final networks = controller.authorizedNetworks;
                           if (networks.length <= 1) return const SizedBox.shrink();
@@ -101,32 +127,6 @@ class NetworkOperatingExpensesScreen
                             ),
                           );
                         }),
-
-                        // 3. شريط ملخص المؤشرات
-                        Obx(() {
-                          final sum = controller.summary.value;
-                          return ExpensesSummaryStrip(
-                            totalCount: sum?.totalCount ?? controller.expenses.length,
-                            totalAmount: sum?.totalAmount ?? 0.0,
-                            thisMonthAmount: sum?.thisMonthAmount ?? 0.0,
-                            todayAmount: sum?.todayAmount ?? 0.0,
-                            isLoading: controller.isLoading.value,
-                          );
-                        }),
-                        AppSpacing.vMd,
-
-                        // 4. ترويسة البحث
-                        Obx(() {
-                          return ExpensesSearchFilterHeader(
-                            searchController: controller.searchController,
-                            searchQuery: controller.searchQuery.value,
-                            onClearSearch: () {
-                              controller.searchController.clear();
-                              controller.searchQuery.value = '';
-                            },
-                          );
-                        }),
-                        AppSpacing.vMd,
                       ]),
                     ),
                   ),
@@ -136,13 +136,14 @@ class NetworkOperatingExpensesScreen
                     if (controller.isLoading.value && controller.expenses.isEmpty) {
                       return SliverPadding(
                         padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                        sliver: const SliverToBoxAdapter(
+                        sliver: SliverToBoxAdapter(
                           child: CustomStateView.loading(
                             presentation: CustomStatePresentation.skeletonOnly,
                             skeleton: CustomStateSkeleton(
                               layout: CustomStateSkeletonLayout.list,
                               itemCount: 4,
-                              cardHeight: 150,
+                              cardHeight: 160.h,
+                              maxColumns: 1,
                             ),
                           ),
                         ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -23,7 +22,7 @@ class ExpenseCardActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 8.h),
+      padding: EdgeInsets.only(top: AppSpacing.sm),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -37,7 +36,7 @@ class ExpenseCardActions extends StatelessWidget {
                 CustomDialog.showDanger(
                   title: 'حذف المصروف التشغيلي',
                   message:
-                      'هل أنت متأكد من حذف هذا المصروف؟ سيتم استرجاع كامل المبلغ (${expense.formattedTotalAmount} YER) تلقائياً لمحفظة الشبكة.',
+                      'هل أنت متأكد من حذف هذا المصروف؟ سيتم استرجاع كامل المبلغ (${expense.formattedTotalAmount} ر.ي) تلقائياً لمحفظة الشبكة.',
                   confirmLabel: 'نعم، حذف واسترجاع',
                   cancelLabel: 'إلغاء',
                   onConfirm: onDelete,

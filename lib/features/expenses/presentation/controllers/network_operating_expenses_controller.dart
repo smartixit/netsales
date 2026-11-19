@@ -13,6 +13,7 @@ import 'package:netsales/features/expenses/domain/entities/expense_summary_entit
 import 'package:netsales/features/expenses/domain/usecases/delete_expense_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/get_expense_summary_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/get_expenses_use_case.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم قائمة المصروفات التشغيلية لمشغل الشبكة (Network Operating Expenses Controller)
@@ -242,10 +243,16 @@ class NetworkOperatingExpensesController extends GetxController {
 
   /// حذف مصروف تشغيلي مع العكس المالي التلقائي
   Future<void> deleteExpense(int expenseId) async {
+    await CustomAnimationOverlay.showLoading(
+      message: 'جاري حذف المصروف واسترجاع المبلغ للمحفظة...',
+    );
     try {
       await deleteExpenseUseCase(expenseId);
       expenses.removeWhere((e) => e.expenseId == expenseId);
       _expenseIds.remove(expenseId);
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
       CustomSnackbar.show(
         title: 'تم الحذف بنجاح',
         message: 'تم حذف المصروف واسترجاع المبلغ لمحفظة الشبكة.',
@@ -253,11 +260,18 @@ class NetworkOperatingExpensesController extends GetxController {
       );
       await loadSummary();
     } catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
       CustomSnackbar.show(
         title: 'تعذر حذف المصروف',
         message: AppException.sanitizeMessage(e.toString()),
         type: SnackType.error,
       );
+    } finally {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 

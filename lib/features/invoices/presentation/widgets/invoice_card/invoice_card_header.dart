@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
@@ -117,7 +117,7 @@ class InvoiceCardHeader extends StatelessWidget {
                               fit: BoxFit.scaleDown,
                               alignment: AlignmentDirectional.centerStart,
                               child: Text(
-                                'فاتورة #$displayRef',
+                                displayRef,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.titleSmall.copyWith(
@@ -131,21 +131,32 @@ class InvoiceCardHeader extends StatelessWidget {
                           AppSpacing.hXxs,
                           CustomInteractiveBounce(
                             onTap: () {
-                              Clipboard.setData(
-                                ClipboardData(text: invoice.invoiceUuid ?? invoice.invoiceId.toString()),
+                              UrlLauncherService.copyToClipboard(
+                                displayRef,
+                                confirmationMessage: 'تم نسخ معرّف الفاتورة',
                               );
                               CustomSnackbar.show(
                                 title: 'تم النسخ',
-                                message: 'تم نسخ معرّف الفاتورة إلى الحافظة بنجاح.',
+                                message: 'تم نسخ المعرّف $displayRef إلى الحافظة',
                                 type: SnackType.info,
                               );
                             },
-                            child: Padding(
-                              padding: EdgeInsets.all(3.r),
+                            child: Container(
+                              padding: EdgeInsets.all(4.r),
+                              decoration: BoxDecoration(
+                                color: colors.surfaceContainerHigh,
+                                borderRadius: BorderRadius.circular(6.r),
+                                border: Border.all(
+                                  color: colors.outlineVariant.withValues(
+                                    alpha: .4,
+                                  ),
+                                  width: 0.5,
+                                ),
+                              ),
                               child: Icon(
                                 Icons.copy_rounded,
-                                size: 14.r,
-                                color: colors.onSurfaceVariant.withValues(alpha: .7),
+                                size: 12.r,
+                                color: colors.onSurfaceVariant,
                               ),
                             ),
                           ),

@@ -34,8 +34,7 @@ class ExpenseCardAccordionItemRow extends StatelessWidget {
             ),
             child: Text(
               '$index',
-              style: AppTypography.bodySmall.copyWith(
-                fontSize: 10.sp,
+              style: AppTypography.caption.copyWith(
                 fontWeight: FontWeight.w700,
                 color: colors.onSurfaceVariant,
               ),
@@ -45,9 +44,9 @@ class ExpenseCardAccordionItemRow extends StatelessWidget {
           Expanded(
             child: Text(
               item.itemStatement,
-              style: AppTypography.bodyMedium.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 color: colors.onSurface,
-                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -56,13 +55,26 @@ class ExpenseCardAccordionItemRow extends StatelessWidget {
           AppSpacing.hSm,
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(
-              '${item.formattedAmount} YER',
-              style: AppTypography.titleSmall.copyWith(
-                color: colors.error,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w700,
-              ),
+            alignment: AlignmentDirectional.centerEnd,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  item.formattedAmount,
+                  style: AppTypography.titleSmall.copyWith(
+                    color: colors.error,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                AppSpacing.hXxs,
+                Text(
+                  'ر.ي',
+                  style: AppTypography.caption.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

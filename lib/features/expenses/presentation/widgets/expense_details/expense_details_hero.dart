@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
@@ -106,13 +106,13 @@ class ExpenseDetailsHero extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    SizedBox(height: 3.h),
+                    AppSpacing.vXxs,
                     Row(
                       children: [
                         Flexible(
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerRight,
+                            alignment: AlignmentDirectional.centerStart,
                             child: Text(
                               expense.displayReference,
                               style: AppTypography.bodySmall.copyWith(
@@ -125,24 +125,32 @@ class ExpenseDetailsHero extends StatelessWidget {
                         AppSpacing.hXs,
                         CustomInteractiveBounce(
                           onTap: () {
-                            Clipboard.setData(
-                              ClipboardData(text: expense.displayReference),
+                            UrlLauncherService.copyToClipboard(
+                              expense.displayReference,
+                              confirmationMessage: 'تم نسخ رقم المصروف',
                             );
                             CustomSnackbar.show(
                               title: 'تم النسخ',
-                              message: 'تم نسخ رقم المصروف إلى الحافظة.',
-                              type: SnackType.success,
+                              message:
+                                  'تم نسخ المعرّف ${expense.displayReference} إلى الحافظة',
+                              type: SnackType.info,
                             );
                           },
                           child: Container(
                             padding: EdgeInsets.all(4.r),
                             decoration: BoxDecoration(
-                              color: colors.surfaceContainerHighest.withValues(alpha: .5),
+                              color: colors.surfaceContainerHigh,
                               borderRadius: BorderRadius.circular(6.r),
+                              border: Border.all(
+                                color: colors.outlineVariant.withValues(
+                                  alpha: .4,
+                                ),
+                                width: 0.5,
+                              ),
                             ),
                             child: Icon(
                               Icons.copy_rounded,
-                              size: 13.r,
+                              size: 12.r,
                               color: colors.onSurfaceVariant,
                             ),
                           ),
@@ -182,12 +190,11 @@ class ExpenseDetailsHero extends StatelessWidget {
                   children: [
                     Text(
                       'إجمالي المبلغ المصروف',
-                      style: AppTypography.bodySmall.copyWith(
+                      style: AppTypography.caption.copyWith(
                         color: colors.onSurfaceVariant,
-                        fontSize: 11.sp,
                       ),
                     ),
-                    SizedBox(height: 2.h),
+                    AppSpacing.vXxs,
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Row(
@@ -202,12 +209,12 @@ class ExpenseDetailsHero extends StatelessWidget {
                               fontWeight: FontWeight.w900,
                             ),
                           ),
-                          SizedBox(width: 4.w),
+                          AppSpacing.hXxs,
                           Text(
-                            'YER',
-                            style: AppTypography.labelSmall.copyWith(
+                            'ر.ي',
+                            style: AppTypography.caption.copyWith(
                               color: colors.onSurfaceVariant,
-                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -222,12 +229,11 @@ class ExpenseDetailsHero extends StatelessWidget {
                   children: [
                     Text(
                       'التاريخ المعتمد',
-                      style: AppTypography.bodySmall.copyWith(
+                      style: AppTypography.caption.copyWith(
                         color: colors.onSurfaceVariant,
-                        fontSize: 11.sp,
                       ),
                     ),
-                    SizedBox(height: 2.h),
+                    AppSpacing.vXxs,
                     Text(
                       expense.formattedExpenseDate,
                       style: AppTypography.titleSmall.copyWith(

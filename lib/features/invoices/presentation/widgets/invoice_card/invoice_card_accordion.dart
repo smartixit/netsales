@@ -80,7 +80,7 @@ class InvoiceCardAccordion extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(width: 2.w),
+                    AppSpacing.hXxs,
                     AnimatedRotation(
                       turns: isExpanded ? 0.5 : 0.0,
                       duration: const Duration(milliseconds: 250),
@@ -104,7 +104,7 @@ class InvoiceCardAccordion extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(10.w, 0, 10.w, 10.h),
               child: invoice.items.isEmpty
                   ? Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.h),
+                      padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
                       child: Text(
                         'لا توجد بنود تفصيلية مسجلة.',
                         textAlign: TextAlign.center,
@@ -120,7 +120,7 @@ class InvoiceCardAccordion extends StatelessWidget {
                           color: colors.outlineVariant.withValues(alpha: .25),
                           height: 1,
                         ),
-                        SizedBox(height: 8.h),
+                        AppSpacing.vSm,
                         ...invoice.items.map(
                           (item) => InvoiceCardAccordionItemRow(item: item),
                         ),

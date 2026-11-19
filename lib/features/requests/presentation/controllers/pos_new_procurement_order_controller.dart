@@ -100,18 +100,17 @@ class PosNewProcurementOrderController extends GetxController {
   final isLoadingNetworks = false.obs;
 
   /// الشبكة المورّدة النشطة المحددة حالياً
-  NetworkPosLinkEntity? get activeNetworkLink =>
-      linkedNetworks.firstWhereOrNull(
-        (link) => link.networkId == selectedNetworkId.value,
-      );
+  NetworkPosLinkEntity? get activeNetworkLink => linkedNetworks
+      .firstWhereOrNull((link) => link.networkId == selectedNetworkId.value);
 
   /// يحدد بطاقة السياق المفتوحة حالياً لمنع تكدس خيارات الشبكة ونقطة البيع.
   final expandedProcurementContext = ''.obs;
 
   void togglePosContextExpansion() {
     if (isEditing.value) return;
-    expandedProcurementContext.value =
-        expandedProcurementContext.value == 'pos' ? '' : 'pos';
+    expandedProcurementContext.value = expandedProcurementContext.value == 'pos'
+        ? ''
+        : 'pos';
   }
 
   void toggleNetworkContextExpansion() {
@@ -1228,32 +1227,30 @@ class PosNewProcurementOrderController extends GetxController {
   }
 
   /// إرسال تحديثات الطلب المعلق إلى الخادم
-  Future<bool> updateOrder() async {
-    final requestId = editingRequestId.value;
-    if (requestId == null || updateRequestUseCase == null) {
-      CustomSnackbar.show(
-        title: 'خطأ في عملية التعديل',
-        message: 'معرف الطلب المراد تعديله غير متوفر.',
-        type: SnackType.error,
-      );
-      return false;
-    }
-
-    if (procurementCart.isEmpty) {
-      CustomSnackbar.show(
-        title: 'سلة التوريد فارغة',
-        message: 'أضف باقة واحدة على الأقل إلى الطلب قبل إرسال التعديل.',
-        type: SnackType.warning,
-      );
-      return false;
-    }
-
-    isSubmitting.value = true;
-    await CustomAnimationOverlay.showLoading(
-      message: 'جاري تحديث بيانات طلب التوريد...',
-    );
-
+  Future<void> updateOrder() async {
     try {
+      final requestId = editingRequestId.value;
+      if (requestId == null || updateRequestUseCase == null) {
+        CustomSnackbar.show(
+          title: 'خطأ في عملية التعديل',
+          message: 'معرف الطلب المراد تعديله غير متوفر.',
+          type: SnackType.error,
+        );
+      }
+
+      if (procurementCart.isEmpty) {
+        CustomSnackbar.show(
+          title: 'سلة التوريد فارغة',
+          message: 'أضف باقة واحدة على الأقل إلى الطلب قبل إرسال التعديل.',
+          type: SnackType.warning,
+        );
+      }
+
+      isSubmitting.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري تحديث بيانات طلب التوريد...',
+      );
+
       final payload = <String, dynamic>{
         'sale_type': selectedSaleType.value.wireValue,
         if (notesController.text.trim().isNotEmpty)
@@ -1268,7 +1265,7 @@ class PosNewProcurementOrderController extends GetxController {
             .toList(growable: false),
       };
 
-      final updated = await updateRequestUseCase!(requestId, payload);
+      await updateRequestUseCase!(requestId!, payload);
       isEditing.value = false;
       editingRequestId.value = null;
       clearProcurementCart();
@@ -1277,32 +1274,25 @@ class PosNewProcurementOrderController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم حفظ تعديلات طلب التوريد بنجاح',
       );
-      CustomSnackbar.show(
-        title: 'تم التحديث بنجاح',
-        message: 'تم تحديث طلب التوريد رقم #${updated.requestUuid} بنجاح.',
-        type: SnackType.success,
-      );
-      return true;
+      Get.back<void>();
+
+      // CustomSnackbar.show(
+      //   title: 'تم التحديث بنجاح',
+      //   message: 'تم تحديث طلب التوريد رقم #${updated.requestUuid} بنجاح.',
+      //   type: SnackType.success,
+      // );
     } on AppException catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
       CustomSnackbar.show(
         title: 'فشل تعديل الطلب',
         message: e.message,
         type: SnackType.error,
       );
-      return false;
     } catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
       CustomSnackbar.show(
         title: 'خطأ غير متوقع',
         message: 'تعذر تعديل طلب التوريد: $e',
         type: SnackType.error,
       );
-      return false;
     } finally {
       isSubmitting.value = false;
       if (CustomAnimationOverlay.isShowing) {
@@ -1312,88 +1302,81 @@ class PosNewProcurementOrderController extends GetxController {
   }
 
   /// إرسال وتقديم طلب التوريد الجديد إلى الخادم
-  Future<bool> submitOrder() async {
+  Future<void> submitOrder() async {
     if (formKey.currentState != null && !formKey.currentState!.validate()) {
-      return false;
+      return;
     }
-
-    final posId = selectedPosId.value;
-    if (posId == null) {
-      CustomSnackbar.show(
-        title: 'نقطة البيع مفقودة',
-        message: 'يرجى اختيار نقطة البيع النشطة لتنفيذ الطلب باسمها.',
-        type: SnackType.warning,
-      );
-      return false;
-    }
-
-    final isAuthorizedPos = myPosList.any((p) => p.posId == posId);
-    if (!isAuthorizedPos) {
-      CustomSnackbar.show(
-        title: 'نقطة البيع غير صالحة',
-        message: 'نقطة البيع المحددة لم تعد متاحة أو سارية في حسابك.',
-        type: SnackType.error,
-      );
-      return false;
-    }
-
-    if (selectedNetworkId.value == null) {
-      CustomSnackbar.show(
-        title: 'تحديد الشبكة مطلوب',
-        message: 'يرجى اختيار شبكة الإنترنت الموردة للكروت.',
-        type: SnackType.warning,
-      );
-      return false;
-    }
-
-    final isLinkedNetwork = linkedNetworks.any(
-      (link) => link.networkId == selectedNetworkId.value,
-    );
-    if (!isLinkedNetwork) {
-      CustomSnackbar.show(
-        title: 'تعارض في الشبكة الموردة',
-        message: 'الشبكة المحددة غير مرتبطة بنقطة البيع الحالية.',
-        type: SnackType.error,
-      );
-      return false;
-    }
-
-    if (procurementCart.isEmpty) {
-      CustomSnackbar.show(
-        title: 'سلة التوريد فارغة',
-        message: 'أضف باقة واحدة على الأقل إلى الطلب قبل إرساله.',
-        type: SnackType.warning,
-      );
-      return false;
-    }
-
-    if (procurementCart.any(
-      (line) => line.package.networkId != selectedNetworkId.value,
-    )) {
-      CustomSnackbar.show(
-        title: 'تعارض في الشبكة الموردة',
-        message: 'تحتوي السلة على باقات لا تنتمي إلى الشبكة المحددة.',
-        type: SnackType.error,
-      );
-      return false;
-    }
-
-    if (!hasCurrentProcurementSnapshots) {
-      CustomSnackbar.show(
-        title: 'بيانات التعرفة غير مكتملة أو منتهية',
-        message:
-            'حدّث كتالوج الباقات للحصول على تعرفة موقعة وحديثة قبل الإرسال.',
-        type: SnackType.warning,
-      );
-      return false;
-    }
-
-    isSubmitting.value = true;
-    await CustomAnimationOverlay.showLoading(
-      message: 'جاري تقديم طلب التوريد للشبكة...',
-    );
 
     try {
+      isSubmitting.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري تقديم طلب التوريد للشبكة...',
+      );
+
+      final posId = selectedPosId.value;
+      if (posId == null) {
+        CustomSnackbar.show(
+          title: 'نقطة البيع مفقودة',
+          message: 'يرجى اختيار نقطة البيع النشطة لتنفيذ الطلب باسمها.',
+          type: SnackType.warning,
+        );
+      }
+
+      final isAuthorizedPos = myPosList.any((p) => p.posId == posId);
+      if (!isAuthorizedPos) {
+        CustomSnackbar.show(
+          title: 'نقطة البيع غير صالحة',
+          message: 'نقطة البيع المحددة لم تعد متاحة أو سارية في حسابك.',
+          type: SnackType.error,
+        );
+      }
+
+      if (selectedNetworkId.value == null) {
+        CustomSnackbar.show(
+          title: 'تحديد الشبكة مطلوب',
+          message: 'يرجى اختيار شبكة الإنترنت الموردة للكروت.',
+          type: SnackType.warning,
+        );
+      }
+
+      final isLinkedNetwork = linkedNetworks.any(
+        (link) => link.networkId == selectedNetworkId.value,
+      );
+      if (!isLinkedNetwork) {
+        CustomSnackbar.show(
+          title: 'تعارض في الشبكة الموردة',
+          message: 'الشبكة المحددة غير مرتبطة بنقطة البيع الحالية.',
+          type: SnackType.error,
+        );
+      }
+
+      if (procurementCart.isEmpty) {
+        CustomSnackbar.show(
+          title: 'سلة التوريد فارغة',
+          message: 'أضف باقة واحدة على الأقل إلى الطلب قبل إرساله.',
+          type: SnackType.warning,
+        );
+      }
+
+      if (procurementCart.any(
+        (line) => line.package.networkId != selectedNetworkId.value,
+      )) {
+        CustomSnackbar.show(
+          title: 'تعارض في الشبكة الموردة',
+          message: 'تحتوي السلة على باقات لا تنتمي إلى الشبكة المحددة.',
+          type: SnackType.error,
+        );
+      }
+
+      if (!hasCurrentProcurementSnapshots) {
+        CustomSnackbar.show(
+          title: 'بيانات التعرفة غير مكتملة أو منتهية',
+          message:
+              'حدّث كتالوج الباقات للحصول على تعرفة موقعة وحديثة قبل الإرسال.',
+          type: SnackType.warning,
+        );
+      }
+
       final payload = <String, dynamic>{
         'network_id': selectedNetworkId.value!,
         'pos_id': selectedPosId.value!,
@@ -1412,7 +1395,7 @@ class PosNewProcurementOrderController extends GetxController {
             .toList(growable: false),
       };
 
-      final created = await createRequestUseCase(
+      await createRequestUseCase(
         payload,
         idempotencyKey: _resolveCreateIdempotencyKey(payload),
       );
@@ -1422,38 +1405,31 @@ class PosNewProcurementOrderController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم تقديم طلب الكروت بنجاح وهو قيد الانتظار',
       );
-      CustomSnackbar.show(
-        title: 'نجاح تقديم الطلب',
-        message: 'تم إرسال الطلب رقم #${created.requestUuid} للشبكة بنجاح.',
-        type: SnackType.success,
-      );
-      return true;
+      Get.back<void>();
+      // CustomSnackbar.show(
+      //   title: 'نجاح تقديم الطلب',
+      //   message: 'تم إرسال الطلب رقم #${created.requestUuid} للشبكة بنجاح.',
+      //   type: SnackType.success,
+      // );
     } on AppException catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
       if (e.message.contains('تعرفة') ||
           e.message.contains('pricing') ||
           e.message.contains('سعر') ||
           e.message.contains('أسعار')) {
         packageErrorMessage.value = e.message;
       }
+
       CustomSnackbar.show(
         title: 'فشل تقديم الطلب',
         message: e.message,
         type: SnackType.error,
       );
-      return false;
     } catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
       CustomSnackbar.show(
         title: 'خطأ غير متوقع',
         message: 'تعذر إرسال طلب التوريد: $e',
         type: SnackType.error,
       );
-      return false;
     } finally {
       isSubmitting.value = false;
       if (CustomAnimationOverlay.isShowing) {
@@ -1464,7 +1440,7 @@ class PosNewProcurementOrderController extends GetxController {
 
   /// Submits the current form and closes only after a successful server response.
   Future<void> submitOrderAndClose() async {
-    final success = isEditing.value ? await updateOrder() : await submitOrder();
-    if (success) Get.back<void>();
+    isEditing.value ? await updateOrder() : await submitOrder();
+    // if (success) Get.back<void>();
   }
 }

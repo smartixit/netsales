@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
@@ -46,20 +46,21 @@ class ExpenseCardHeader extends StatelessWidget {
             children: [
               // أيقونة سند الصرف
               Container(
-                width: 38.r,
-                height: 38.r,
+                width: 44.r,
+                height: 44.r,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                     colors: [
                       colors.error,
-                      colors.error.withValues(alpha: .80),
+                      colors.error.withValues(alpha: .85),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(14.r),
                   border: Border.all(
                     color: colors.error.withValues(alpha: .40),
+                    width: 1.0,
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -69,10 +70,10 @@ class ExpenseCardHeader extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_upward_rounded,
                   color: Colors.white,
-                  size: 20,
+                  size: 22.r,
                 ),
               ),
               AppSpacing.hSm,
@@ -89,12 +90,12 @@ class ExpenseCardHeader extends StatelessWidget {
                         Flexible(
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerRight,
+                            alignment: AlignmentDirectional.centerStart,
                             child: Text(
                               expense.displayReference,
                               style: AppTypography.titleSmall.copyWith(
                                 color: colors.onSurface,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w900,
                                 letterSpacing: 0.5,
                               ),
                             ),
@@ -103,36 +104,43 @@ class ExpenseCardHeader extends StatelessWidget {
                         AppSpacing.hXs,
                         CustomInteractiveBounce(
                           onTap: () {
-                            Clipboard.setData(
-                              ClipboardData(text: expense.displayReference),
+                            UrlLauncherService.copyToClipboard(
+                              expense.displayReference,
+                              confirmationMessage: 'تم نسخ رقم المصروف',
                             );
                             CustomSnackbar.show(
                               title: 'تم النسخ',
-                              message: 'تم نسخ رقم المصروف إلى الحافظة.',
-                              type: SnackType.success,
+                              message:
+                                  'تم نسخ المعرّف ${expense.displayReference} إلى الحافظة',
+                              type: SnackType.info,
                             );
                           },
                           child: Container(
                             padding: EdgeInsets.all(4.r),
                             decoration: BoxDecoration(
-                              color: colors.surfaceContainerHighest.withValues(alpha: .5),
+                              color: colors.surfaceContainerHigh,
                               borderRadius: BorderRadius.circular(6.r),
+                              border: Border.all(
+                                color: colors.outlineVariant.withValues(
+                                  alpha: .4,
+                                ),
+                                width: 0.5,
+                              ),
                             ),
                             child: Icon(
                               Icons.copy_rounded,
-                              size: 13.r,
+                              size: 12.r,
                               color: colors.onSurfaceVariant,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 2.h),
+                    AppSpacing.vXxs,
                     Text(
                       expense.displayNetworkName,
                       style: AppTypography.bodySmall.copyWith(
                         color: colors.onSurfaceVariant,
-                        fontSize: 11.sp,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -167,9 +175,8 @@ class ExpenseCardHeader extends StatelessWidget {
                   AppSpacing.hXs,
                   Text(
                     expense.formattedExpenseDate,
-                    style: AppTypography.bodySmall.copyWith(
+                    style: AppTypography.caption.copyWith(
                       color: colors.onSurfaceVariant,
-                      fontSize: 11.sp,
                     ),
                   ),
                 ],
@@ -185,9 +192,8 @@ class ExpenseCardHeader extends StatelessWidget {
                   AppSpacing.hXs,
                   Text(
                     expense.displayCreatorName,
-                    style: AppTypography.bodySmall.copyWith(
+                    style: AppTypography.caption.copyWith(
                       color: colors.onSurfaceVariant,
-                      fontSize: 11.sp,
                     ),
                   ),
                 ],

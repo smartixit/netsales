@@ -95,22 +95,28 @@ class InvoiceDetailsItemCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 2.h),
+                      AppSpacing.vXxs,
                       Text(
                         'سعر الكرت المعتمد: ${item.formattedVoucherPrice}',
-                        style: AppTypography.labelSmall.copyWith(
+                        style: AppTypography.caption.copyWith(
                           color: colors.onSurfaceVariant,
-                          fontSize: 10.5.sp,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Text(
-                  item.formattedItemTotalAmount,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w900,
+                AppSpacing.hSm,
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: Text(
+                      item.formattedItemTotalAmount,
+                      style: AppTypography.titleSmall.copyWith(
+                        color: colors.primary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -135,12 +141,11 @@ class InvoiceDetailsItemCard extends StatelessWidget {
                       children: [
                         Text(
                           'توزيع الكميات',
-                          style: AppTypography.labelSmall.copyWith(
+                          style: AppTypography.caption.copyWith(
                             color: colors.onSurfaceVariant,
-                            fontSize: 10.sp,
                           ),
                         ),
-                        SizedBox(height: 2.h),
+                        AppSpacing.vXxs,
                         Text(
                           item.fullQuantityLabel,
                           style: AppTypography.bodySmall.copyWith(
@@ -167,12 +172,11 @@ class InvoiceDetailsItemCard extends StatelessWidget {
                         children: [
                           Text(
                             'الخصم الممنوح',
-                            style: AppTypography.labelSmall.copyWith(
+                            style: AppTypography.caption.copyWith(
                               color: colors.error,
-                              fontSize: 10.sp,
                             ),
                           ),
-                          SizedBox(height: 2.h),
+                          AppSpacing.vXxs,
                           Text(
                             item.formattedDiscount,
                             style: AppTypography.bodySmall.copyWith(

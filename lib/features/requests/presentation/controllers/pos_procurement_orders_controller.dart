@@ -244,11 +244,10 @@ class PosProcurementOrdersController extends GetxController {
   }
 
   Future<bool> cancelRequest(int requestId) async {
-    await CustomAnimationOverlay.showLoading(
-      message: 'جاري إلغاء طلب التوريد...',
-    );
-
     try {
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري إلغاء طلب التوريد...',
+      );
       final cancelled = await cancelRequestUseCase(requestId);
       final index = requests.indexWhere(
         (request) => request.requestId == requestId,
@@ -262,11 +261,7 @@ class PosProcurementOrdersController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم إلغاء طلب الكروت بنجاح',
       );
-      CustomSnackbar.show(
-        title: 'تم الإلغاء',
-        message: 'تم إلغاء الطلب رقم #${cancelled.requestUuid} بنجاح.',
-        type: SnackType.success,
-      );
+
       return true;
     } on AppException catch (error) {
       CustomSnackbar.show(
@@ -290,21 +285,16 @@ class PosProcurementOrdersController extends GetxController {
   }
 
   Future<bool> deleteRequest(int requestId) async {
-    await CustomAnimationOverlay.showLoading(
-      message: 'جاري حذف طلب التوريد من السجل...',
-    );
-
     try {
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري حذف طلب التوريد من السجل...',
+      );
       await deleteRequestUseCase(requestId);
       requests.removeWhere((request) => request.requestId == requestId);
       await CustomAnimationOverlay.showSuccess(
         message: 'تم حذف طلب التوريد بنجاح',
       );
-      CustomSnackbar.show(
-        title: 'تم الحذف',
-        message: 'تم حذف سجل الطلب بنجاح.',
-        type: SnackType.success,
-      );
+
       return true;
     } on AppException catch (error) {
       CustomSnackbar.show(

@@ -42,6 +42,10 @@ import 'package:netsales/features/invoices/presentation/screens/invoice_details_
 import 'package:netsales/features/invoices/presentation/screens/network_wholesale_invoices_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/network_direct_invoice_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
+import 'package:netsales/features/expenses/presentation/bindings/expense_binding.dart';
+import 'package:netsales/features/expenses/presentation/screens/network_expense_details_screen.dart';
+import 'package:netsales/features/expenses/presentation/screens/network_expense_form_screen.dart';
+import 'package:netsales/features/expenses/presentation/screens/network_operating_expenses_screen.dart';
 import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/finance/presentation/screens/network_wallet_dashboard_screen.dart';
 import 'package:netsales/features/finance/presentation/screens/pos_debt_ledger_screen.dart';
@@ -370,6 +374,55 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+
+    // ==========================================
+    // 9.5. المصروفات التشغيلية لمزود الشبكة (Network Operating Expenses)
+    // ==========================================
+    // قائمة وسجل المصروفات التشغيلية لمزود الشبكة
+    GetPage(
+      name: AppRoutes.operatingExpenses,
+      page: () => const NetworkOperatingExpensesScreen(),
+      binding: ExpenseBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(
+          anyPermissions: [
+            AppPermissions.expensesView,
+          ],
+        ),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    // تفاصيل سند المصروف التشغيلي ومرفقاته
+    GetPage(
+      name: AppRoutes.operatingExpenseDetails,
+      page: () => const NetworkExpenseDetailsScreen(),
+      binding: ExpenseBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(
+          anyPermissions: [
+            AppPermissions.expensesView,
+          ],
+        ),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    // إنشاء وتسجيل سند مصروف تشغيلي جديد
+    GetPage(
+      name: AppRoutes.createOperatingExpense,
+      page: () => const NetworkExpenseFormScreen(),
+      binding: ExpenseBinding(),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(
+          anyPermissions: [
+            AppPermissions.expensesCreate,
+          ],
+        ),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
 

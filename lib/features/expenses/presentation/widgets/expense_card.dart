@@ -71,19 +71,19 @@ class ExpenseCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // شريط قياس المبالغ والبنود
+                  // 1. لوحة بنود المصروف بنظام الأكورديون الموحد
+                  ExpenseCardAccordion(
+                    expense: expense,
+                    isExpanded: isExpanded,
+                    onToggle: onToggleExpansion,
+                  ),
+                  AppSpacing.vSm,
+
+                  // 2. سكة قياس المبالغ والبنود
                   ExpenseCardMetricsBar(expense: expense),
                   AppSpacing.vSm,
 
-                  // أكورديون البنود التفاعلي
-                  if (onToggleExpansion != null)
-                    ExpenseCardAccordion(
-                      expense: expense,
-                      isExpanded: isExpanded,
-                      onToggle: onToggleExpansion!,
-                    ),
-
-                  // أزرار الإجراءات السريعة
+                  // 3. أزرار الإجراءات السريعة
                   ExpenseCardActions(
                     expense: expense,
                     onTapDetails: onTap,

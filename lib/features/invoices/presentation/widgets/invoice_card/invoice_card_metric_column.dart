@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
@@ -35,10 +35,9 @@ class InvoiceCardMetricColumn extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: AppTypography.labelSmall.copyWith(
             color: colors.onSurfaceVariant,
-            fontSize: 10.5.sp,
           ),
         ),
-        SizedBox(height: 3.h),
+        AppSpacing.vXxs,
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Row(
@@ -55,12 +54,11 @@ class InvoiceCardMetricColumn extends StatelessWidget {
                 ),
               ),
               if (unit != null) ...[
-                SizedBox(width: 2.w),
+                AppSpacing.hXxs,
                 Text(
                   unit!,
-                  style: AppTypography.labelSmall.copyWith(
+                  style: AppTypography.caption.copyWith(
                     color: colors.onSurfaceVariant,
-                    fontSize: 9.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

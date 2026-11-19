@@ -281,8 +281,9 @@ class NetworkProcurementReviewController extends GetxController {
           editingRequestId.value != requestId) {
         return;
       }
-      editorError.value =
-          error is AppException ? error.message : error.toString();
+      editorError.value = error is AppException
+          ? error.message
+          : error.toString();
       CustomSnackbar.show(
         title: 'تعذر تحميل تفاصيل الطلب',
         message: editorError.value!,
@@ -689,17 +690,16 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   /// مراجعة واعتماد طلب الكروت وتوليد الفاتورة آلياً
-  Future<bool> approveRequest(
+  Future<void> approveRequest(
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
   }) async {
-    isProcessingDecision.value = true;
-    await CustomAnimationOverlay.showLoading(
-      message: 'جاري اعتماد الطلب وتوليد فاتورة المبيعات...',
-    );
-
     try {
+      isProcessingDecision.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري اعتماد الطلب وتوليد فاتورة المبيعات...',
+      );
       final approvalResult = await approveRequestUseCase(
         requestId,
         requestNote: requestNote,
@@ -717,12 +717,8 @@ class NetworkProcurementReviewController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم اعتماد الطلب وتوليد الفاتورة والتسوية بنجاح',
       );
-      CustomSnackbar.show(
-        title: 'نجاح الاعتماد',
-        message:
-            'تم اعتماد الطلب رقم #${approvedRequest.requestUuid ?? approvedRequest.requestId} وتوليد الفاتورة رقم #${approvalResult.invoice.invoiceUuid ?? approvalResult.invoice.invoiceId}.',
-        type: SnackType.success,
-      );
+      Get.back<void>();
+
       if (Get.context != null) {
         await CustomBottomSheet.show<void>(
           title: 'اكتمل اعتماد الطلب',
@@ -756,27 +752,18 @@ class NetworkProcurementReviewController extends GetxController {
           ),
         );
       }
-      return true;
     } on AppException catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
       CustomSnackbar.show(
         title: 'فشل اعتماد الطلب',
         message: e.message,
         type: SnackType.error,
       );
-      return false;
     } catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
       CustomSnackbar.show(
         title: 'خطأ غير متوقع',
         message: 'تعذر اعتماد طلب الكروت: $e',
         type: SnackType.error,
       );
-      return false;
     } finally {
       isProcessingDecision.value = false;
       if (CustomAnimationOverlay.isShowing) {
@@ -786,22 +773,21 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   /// رفض طلب الكروت مع توثيق السبب الإلزامي
-  Future<bool> rejectRequest(int requestId, String rejectionReason) async {
-    if (rejectionReason.trim().isEmpty) {
-      CustomSnackbar.show(
-        title: 'سبب الرفض إلزامي',
-        message: 'يرجى كتابة سبب رفض الطلب لتوثيقه في السجل.',
-        type: SnackType.warning,
-      );
-      return false;
-    }
-
-    isProcessingDecision.value = true;
-    await CustomAnimationOverlay.showLoading(
-      message: 'جاري تسجيل رفض الطلب وتوثيق السبب...',
-    );
-
+  Future<void> rejectRequest(int requestId, String rejectionReason) async {
     try {
+      if (rejectionReason.trim().isEmpty) {
+        CustomSnackbar.show(
+          title: 'سبب الرفض إلزامي',
+          message: 'يرجى كتابة سبب رفض الطلب لتوثيقه في السجل.',
+          type: SnackType.warning,
+        );
+      }
+
+      isProcessingDecision.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري تسجيل رفض الطلب وتوثيق السبب...',
+      );
+
       final rejected = await rejectRequestUseCase(
         requestId,
         rejectionReason.trim(),
@@ -815,32 +801,19 @@ class NetworkProcurementReviewController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم رفض طلب الكروت وتوثيق السبب بنجاح',
       );
-      CustomSnackbar.show(
-        title: 'تم الرفض',
-        message: 'تم رفض الطلب رقم #${rejected.requestId} وإشعار نقطة البيع.',
-        type: SnackType.success,
-      );
-      return true;
+
     } on AppException catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
       CustomSnackbar.show(
         title: 'فشل رفض الطلب',
         message: e.message,
         type: SnackType.error,
       );
-      return false;
     } catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
       CustomSnackbar.show(
         title: 'خطأ غير متوقع',
         message: 'تعذر تسجيل رفض الطلب: $e',
         type: SnackType.error,
       );
-      return false;
     } finally {
       isProcessingDecision.value = false;
       if (CustomAnimationOverlay.isShowing) {
@@ -864,10 +837,7 @@ class NetworkProcurementReviewController extends GetxController {
 
   /// فتح الفاتورة المرتبطة بالطلب
   Future<void> openInvoice(int invoiceId) async {
-    await Get.toNamed<void>(
-      AppRoutes.saleInvoiceDetails,
-      arguments: invoiceId,
-    );
+    await Get.toNamed<void>(AppRoutes.saleInvoiceDetails, arguments: invoiceId);
   }
 
   /// فتح تفاصيل طلب التوريد
@@ -886,8 +856,7 @@ class NetworkProcurementReviewController extends GetxController {
 
     await CustomBottomSheet.show<void>(
       title: 'مراجعة طلب ${request.displayReference}',
-      subtitle:
-          'عدّل كميات الباقات أو أضف باقات جديدة، ثم قم بمعاينة الأسعار قبل الاعتماد.',
+      subtitle: 'عدّل كميات الباقات أو أضف باقات جديدة، ثم قم بمعاينة الأسعار قبل الاعتماد.',
       leadingIcon: Icons.edit_note_rounded,
       scrollable: true,
       maxHeightFactor: 0.94,
@@ -923,12 +892,12 @@ class NetworkProcurementReviewController extends GetxController {
       message: 'سيتم اعتماد البنود المعروضة في آخر معاينة وإنشاء الفاتورة وفق أسعار النظام المعتمدة. لا يمكن تعديل الطلب بعد اعتماده.',
       confirmLabel: 'اعتماد وإنشاء الفاتورة',
       onConfirm: () async {
-        final success = await approvePreview(
+        await approvePreview(
           requestNote: modificationNoteController.text.trim().isEmpty
               ? null
               : modificationNoteController.text.trim(),
         );
-        if (success) Get.back<void>();
+        // if (success) Get.back<void>();
       },
     );
   }

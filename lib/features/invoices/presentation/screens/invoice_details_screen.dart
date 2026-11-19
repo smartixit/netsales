@@ -65,7 +65,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
         );
       }
 
-      final displayReference = 'فاتورة #${invoice.displayReference}';
+      final displayReference = invoice.displayReference;
 
       // 3. عرض صفحة التفاصيل المتكاملة بالمعايير العالمية
       return CustomAppScaffold(
@@ -123,7 +123,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                           size: 18.r,
                           color: colors.primary,
                         ),
-                        SizedBox(width: 6.w),
+                        AppSpacing.hXs,
                         Expanded(
                           child: Text(
                             'بنود الفاتورة (${invoice.items.length})',

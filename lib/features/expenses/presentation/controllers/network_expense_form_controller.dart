@@ -3,12 +3,15 @@ import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/features/expenses/domain/usecases/create_expense_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/get_expense_details_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/update_expense_use_case.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// سطر بند المصروف داخل نموذج الإدخال
@@ -180,7 +183,8 @@ class NetworkExpenseFormController extends GetxController {
   void _calculateTotal() {
     double sum = 0.0;
     for (final line in lineItems) {
-      final val = double.tryParse(line.amountController.text.trim()) ?? 0.0;
+      final cleaned = AmountFormatter.clean(line.amountController.text);
+      final val = double.tryParse(cleaned) ?? 0.0;
       sum += val;
     }
     estimatedTotal.value = sum;
@@ -237,7 +241,8 @@ class NetworkExpenseFormController extends GetxController {
     for (var i = 0; i < lineItems.length; i++) {
       final line = lineItems[i];
       final st = line.statementController.text.trim();
-      final am = double.tryParse(line.amountController.text.trim());
+      final cleaned = AmountFormatter.clean(line.amountController.text);
+      final am = double.tryParse(cleaned);
 
       if (st.isEmpty && (am == null || am == 0)) {
         continue;
@@ -276,10 +281,14 @@ class NetworkExpenseFormController extends GetxController {
       return;
     }
 
-    final dateStr =
-        '${selectedDate.value.year}-${selectedDate.value.month.toString().padLeft(2, '0')}-${selectedDate.value.day.toString().padLeft(2, '0')}';
+    final dateStr = DateFormatter.date(selectedDate.value);
 
     isSubmitting.value = true;
+    await CustomAnimationOverlay.showLoading(
+      message: isEditMode.value
+          ? 'جاري تحديث بيانات المصروف والتسوية...'
+          : 'جاري تسجيل المصروف والخصم من المحفظة...',
+    );
     try {
       if (isEditMode.value && expenseId != null) {
         await updateExpenseUseCase(
@@ -288,6 +297,9 @@ class NetworkExpenseFormController extends GetxController {
           items: itemsPayload,
           attachmentPaths: attachmentPaths,
         );
+        if (CustomAnimationOverlay.isShowing) {
+          await CustomAnimationOverlay.hide();
+        }
         CustomSnackbar.show(
           title: 'تم التحديث بنجاح',
           message: 'تم تحديث بيانات المصروف وتسوية المحفظة بنجاح.',
@@ -300,6 +312,9 @@ class NetworkExpenseFormController extends GetxController {
           items: itemsPayload,
           attachmentPaths: attachmentPaths,
         );
+        if (CustomAnimationOverlay.isShowing) {
+          await CustomAnimationOverlay.hide();
+        }
         CustomSnackbar.show(
           title: 'تم تسجيل المصروف بنجاح',
           message: 'تم تسجيل المصروف وخصم المبلغ من محفظة الشبكة بنجاح.',
@@ -309,6 +324,9 @@ class NetworkExpenseFormController extends GetxController {
 
       Get.back(result: true);
     } catch (e) {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
       CustomSnackbar.show(
         title: isEditMode.value ? 'فشل تحديث المصروف' : 'فشل تسجيل المصروف',
         message: AppException.sanitizeMessage(e.toString()),
@@ -316,6 +334,9 @@ class NetworkExpenseFormController extends GetxController {
       );
     } finally {
       isSubmitting.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 }

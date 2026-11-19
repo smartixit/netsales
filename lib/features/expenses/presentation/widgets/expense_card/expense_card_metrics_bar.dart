@@ -65,7 +65,7 @@ class ExpenseCardMetricsBar extends StatelessWidget {
             child: ExpenseCardMetricColumn(
               label: 'إجمالي الصرف',
               value: expense.formattedTotalAmount,
-              unit: 'YER',
+              unit: 'ر.ي',
               accentColor: colors.error,
               crossAxisAlignment: CrossAxisAlignment.end,
             ),

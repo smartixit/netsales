@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/presentation/widgets/invoice_card/invoice_card_metric_column.dart';
 
@@ -75,7 +77,7 @@ class InvoiceCardMetricsBar extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          AppSpacing.vSm,
 
           // شريط نسبة السداد التفاعلي
           Row(
@@ -97,15 +99,14 @@ class InvoiceCardMetricsBar extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 8.w),
+              AppSpacing.hSm,
               Text(
                 invoice.isPaid
                     ? 'مسددة'
                     : (invoice.remainingAmount > 0
                         ? 'متبقي: ${invoice.formattedRemainingAmount}'
                         : '${(paidPct * 100).toInt()}%'),
-                style: TextStyle(
-                  fontSize: 10.sp,
+                style: AppTypography.labelSmall.copyWith(
                   fontWeight: FontWeight.bold,
                   color: invoice.isPaid
                       ? colors.success

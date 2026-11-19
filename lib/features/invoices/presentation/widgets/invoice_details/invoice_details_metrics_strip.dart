@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
@@ -48,7 +47,7 @@ class InvoiceDetailsMetricsStrip extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 8.h),
+        AppSpacing.vSm,
         Row(
           children: [
             Expanded(
@@ -77,7 +76,7 @@ class InvoiceDetailsMetricsStrip extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 8.h),
+        AppSpacing.vSm,
 
         // شريط تفقيط المبلغ المالي المعتمد
         CustomAmountToWordsBanner(

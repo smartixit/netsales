@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:netsales/core/utils/file_size_formatter.dart';
 
 /// كيان مرفق المصروف التشغيلي (Expense Attachment Entity)
 class ExpenseAttachmentEntity extends Equatable {
@@ -23,6 +24,9 @@ class ExpenseAttachmentEntity extends Equatable {
   final String fileUrl;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+
+  /// حجم الملف منسقاً بوحدات التخزين المناسبة
+  String get formattedSize => FileSizeFormatter.format(attachmentSize);
 
   @override
   List<Object?> get props => [

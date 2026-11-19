@@ -43,7 +43,7 @@ class InvoiceCardAccordionItemRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(10.r),
             ),
           ),
-          SizedBox(width: 8.w),
+          AppSpacing.hSm,
 
           // اسم الباقة وسعر الكرت المفرد
           Expanded(
@@ -61,12 +61,11 @@ class InvoiceCardAccordionItemRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 2.h),
+                AppSpacing.vXxs,
                 Text(
                   'سعر الكرت: ${item.formattedVoucherPrice}',
-                  style: AppTypography.labelSmall.copyWith(
+                  style: AppTypography.caption.copyWith(
                     color: colors.onSurfaceVariant,
-                    fontSize: 10.sp,
                   ),
                 ),
               ],
@@ -91,7 +90,6 @@ class InvoiceCardAccordionItemRow extends StatelessWidget {
                 style: AppTypography.labelSmall.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 10.sp,
                 ),
               ),
             ),
@@ -105,19 +103,26 @@ class InvoiceCardAccordionItemRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  item.formattedItemTotalAmount,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Text(
+                    item.formattedItemTotalAmount,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 if (item.hasDiscount)
-                  Text(
-                    'خصم: ${item.formattedDiscount}',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.error,
-                      fontSize: 9.5.sp,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: Text(
+                      'خصم: ${item.formattedDiscount}',
+                      style: AppTypography.caption.copyWith(
+                        color: colors.error,
+                      ),
                     ),
                   ),
               ],
