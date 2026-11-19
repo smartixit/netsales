@@ -28,6 +28,47 @@ class InfinityFreeChallengeSolver {
         lower.contains('tonumbers');
   }
 
+  /// يحوّل أي نوع استجابة شائع من Dio إلى نص صفحة التحدي عند تطابقها.
+  static String? challengeHtml(dynamic data) {
+    final String? body;
+    if (data is String) {
+      body = data;
+    } else if (data is List<int>) {
+      try {
+        body = utf8.decode(data);
+      } on FormatException {
+        return null;
+      }
+    } else {
+      return null;
+    }
+
+    return isChallengeBody(body) ? body : null;
+  }
+
+  /// يحدد صفحة التحدي سواء أعادها Dio كنص أو كبايتات.
+  static bool isChallengeResponse(dynamic data) {
+    return challengeHtml(data) != null;
+  }
+
+  /// يحسب قيمة كوكي التحدي لأي نوع استجابة نصي/ثنائي يدعمه المحلل.
+  static String? solveChallengeResponse(dynamic data) {
+    final html = challengeHtml(data);
+    if (html == null) return null;
+    return solveChallenge(html);
+  }
+
+  /// يستخرج انتقال JavaScript من أي نوع استجابة يدعمه المحلل.
+  static Uri? extractChallengeRedirectFromResponse(
+    dynamic data, {
+    required Uri requestUri,
+  }) {
+    final html = challengeHtml(data);
+    if (html == null) return null;
+
+    return extractChallengeRedirectUri(html, requestUri: requestUri);
+  }
+
   /// استخراج الثوابت [a, b, c] مع تحمل اختلاف المسافات والتصغير.
   static List<String>? extractConstants(String html) {
     String? capture(String name) => RegExp(
