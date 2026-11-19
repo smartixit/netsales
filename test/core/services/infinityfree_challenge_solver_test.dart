@@ -30,6 +30,48 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       );
     });
 
+    test('decrypts a multi-block CBC challenge against an independent vector', () {
+      final multiBlockChallenge = challenge.replaceFirst(
+        '25b509cc7dadcdb532275647f94524cc',
+        '848cbc60dcde88fe99cfe77c054994ce'
+        '60a11c76f356fe15a23aa2d618e0e504'
+        '35020a24332ee3fa1643fa52935a2b01',
+      );
+
+      expect(
+        InfinityFreeChallengeSolver.solveChallenge(multiBlockChallenge),
+        '4e657453616c657320496e66696e69747946726565206368616c6c656e6765207265747279',
+      );
+    });
+
+    test('matches SlowAES behavior when padding-like bytes are inconsistent', () {
+      final inconsistentPaddingChallenge = challenge.replaceFirst(
+        '25b509cc7dadcdb532275647f94524cc',
+        '7faa7da20fa612dde3cf9b7f3331b50c',
+      );
+
+      // SlowAES cancels unpadding when the preceding byte is another value
+      // in the 1..16 range; it must not strip only the final 0x0c byte.
+      expect(
+        InfinityFreeChallengeSolver.solveChallenge(
+          inconsistentPaddingChallenge,
+        ),
+        '4142434445464748494a4b4c4d4e0d0c',
+      );
+    });
+
+    test('removes a complete thirteen-byte SlowAES padding suffix', () {
+      final paddedChallenge = challenge.replaceFirst(
+        '25b509cc7dadcdb532275647f94524cc',
+        '0216da59dd377dd41308e253403e5aed',
+      );
+
+      expect(
+        InfinityFreeChallengeSolver.solveChallenge(paddedChallenge),
+        '414243',
+      );
+    });
+
     test('extracts constants despite whitespace and line breaks', () {
       const spaced = '''
 var a = toNumbers ( "f655ba9d09a112d4968c63579db590b4" ),
