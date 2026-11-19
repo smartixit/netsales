@@ -24,10 +24,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
 
   InfinityFreeChallengeInterceptor(this._dio);
 
-  static String? _headerValue(
-    Map<String, dynamic> headers,
-    String name,
-  ) {
+  static String? _headerValue(Map<String, dynamic> headers, String name) {
     for (final entry in headers.entries) {
       if (entry.key.toLowerCase() == name.toLowerCase()) {
         return entry.value?.toString();
@@ -51,10 +48,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
   }
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     final host = options.uri.host;
     final isVerificationProbe =
         options.extra[infinityFreeVerificationProbeFlagKey] == true;
@@ -179,8 +173,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
         _challengeFailure(
           options: options,
           response: response,
-          message:
-              'رفضت الاستضافة طلب التحقق؛ ما زالت صفحة JavaScript تصل إلى التطبيق.',
+          message: 'رفضت الاستضافة طلب التحقق؛ ما زالت صفحة JavaScript تصل إلى التطبيق.',
         ),
       );
       return;
@@ -188,8 +181,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
 
     final requestUri = options.uri;
     final cookie = InfinityFreeChallengeSolver.solveChallenge(challengeHtml);
-    final redirectUri =
-        InfinityFreeChallengeSolver.extractChallengeRedirectUri(
+    final redirectUri = InfinityFreeChallengeSolver.extractChallengeRedirectUri(
       challengeHtml,
       requestUri: requestUri,
     );
@@ -219,8 +211,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
         _challengeFailure(
           options: options,
           response: response,
-          message:
-              'طلب يحتوي على ملفات أو تدفق بيانات لا يمكن إعادة إرساله بأمان بعد تحقق الاستضافة.',
+          message: 'طلب يحتوي على ملفات أو تدفق بيانات لا يمكن إعادة إرساله بأمان بعد تحقق الاستضافة.',
         ),
       );
       return;
@@ -249,8 +240,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     // this request stops returning the challenge page.
     late final Response<dynamic> verificationResponse;
     try {
-      verificationResponse =
-          await _dio.fetch<dynamic>(verificationOptions);
+      verificationResponse = await _dio.fetch<dynamic>(verificationOptions);
 
       if (InfinityFreeChallengeSolver.isChallengeResponse(
         verificationResponse.data,
@@ -258,8 +248,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
         throw _challengeFailure(
           options: verificationOptions,
           response: verificationResponse,
-          message:
-              'رفضت الاستضافة كوكي التحقق؛ أعادت صفحة التحدي إلى طلب GET الخاص بالتحقق.',
+          message: 'رفضت الاستضافة كوكي التحقق؛ أعادت صفحة التحدي إلى طلب GET الخاص بالتحقق.',
         );
       }
 
@@ -298,17 +287,15 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
 
     // Cache only after the verification navigation has been accepted.
     _cachedCookies[requestUri.host] = cookie;
-    _cookieExpiry[requestUri.host] =
-        DateTime.now().add(const Duration(hours: 6));
+    _cookieExpiry[requestUri.host] = DateTime.now().add(
+      const Duration(hours: 6),
+    );
 
     // Replay the original request unchanged apart from the verified cookie,
     // User-Agent, and one-shot recursion guard. This preserves POST + payload.
     final replayOptions = options.copyWith(
       queryParameters: <String, dynamic>{...options.queryParameters},
-      extra: <String, dynamic>{
-        ...options.extra,
-        _retryFlagKey: true,
-      },
+      extra: <String, dynamic>{...options.extra, _retryFlagKey: true},
     );
 
     final existingCookie = _headerValue(replayOptions.headers, 'Cookie');

@@ -8,265 +8,274 @@ import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
 
 void main() {
   group('InfinityFreeChallengeInterceptor', () {
-    test('POST challenge verifies with GET then replays original POST unchanged',
-        () async {
-      final baseUri = Uri.parse('https://post-success.example');
-      final loginUri = baseUri.resolve('/api/v1/auth/login');
-      final challenge = _challenge(loginUri);
-      const originalBody = '{"payload":"sealed-login-payload"}';
-      var postCount = 0;
-      final adapter = _ScriptedAdapter((request, body) async {
-        if (request.method == 'POST') {
-          postCount++;
-          return postCount == 1
-              ? _html(challenge)
-              : _text('login-ok', 200);
-        }
+    test(
+      'POST challenge verifies with GET then replays original POST unchanged',
+      () async {
+        final baseUri = Uri.parse('https://post-success.example');
+        final loginUri = baseUri.resolve('/api/v1/auth/login');
+        final challenge = _challenge(loginUri);
+        const originalBody = '{"payload":"sealed-login-payload"}';
+        var postCount = 0;
+        final adapter = _ScriptedAdapter((request, body) async {
+          if (request.method == 'POST') {
+            postCount++;
+            return postCount == 1 ? _html(challenge) : _text('login-ok', 200);
+          }
 
-        if (request.method == 'GET' &&
-            request.uri.queryParameters['i'] == '1') {
-          return _text('Method Not Allowed', 405);
-        }
-        return _text('unexpected request', 400);
-      });
-      final dio = _dio(baseUri, adapter);
+          if (request.method == 'GET' &&
+              request.uri.queryParameters['i'] == '1') {
+            return _text('Method Not Allowed', 405);
+          }
+          return _text('unexpected request', 400);
+        });
+        final dio = _dio(baseUri, adapter);
 
-      final response = await dio.post<String>(
-        '/api/v1/auth/login',
-        data: originalBody,
-        options: Options(
-          contentType: Headers.jsonContentType,
-          responseType: ResponseType.plain,
-          headers: {'Cookie': 'laravel_session=session-1; __test=stale'},
-        ),
-      );
-
-      expect(response.statusCode, 200);
-      expect(response.data, 'login-ok');
-
-      // Initial POST -> browser-equivalent verification GET -> original POST.
-      expect(adapter.requests, hasLength(3));
-      final initial = adapter.requests[0];
-      final probe = adapter.requests[1];
-      final replay = adapter.requests[2];
-
-      expect(initial.method, 'POST');
-      expect(initial.uri, loginUri);
-      expect(initial.body, isNotNull);
-      expect(String.fromCharCodes(initial.body!), originalBody);
-
-      expect(probe.method, 'GET');
-      expect(probe.uri, loginUri.replace(queryParameters: {'i': '1'}));
-      expect(probe.body, isNull);
-      expect(probe.header('Content-Type'), isNull);
-      expect(probe.header('Cookie'), contains('laravel_session=session-1'));
-      expect(probe.header('Cookie'), contains('__test='));
-      expect(
-        probe.header('User-Agent'),
-        InfinityFreeChallengeSolver.browserUserAgent,
-      );
-
-      expect(ApiRequestReplayState.isCryptoPrepared(replay.options), isTrue);
-      expect(ApiRequestReplayState.isCryptoPrepared(probe.options), isFalse);
-      expect(replay.method, 'POST');
-      expect(replay.uri, loginUri);
-      expect(String.fromCharCodes(replay.body!), originalBody);
-      expect(replay.header('Cookie'), contains('laravel_session=session-1'));
-      expect(replay.header('Cookie'), contains('__test='));
-      expect(
-        replay.header('User-Agent'),
-        InfinityFreeChallengeSolver.browserUserAgent,
-      );
-      dio.close(force: true);
-    });
-
-    test('GET challenge verifies with GET then replays the original GET',
-        () async {
-      final baseUri = Uri.parse('https://get-success.example');
-      final publicKeysUri = baseUri.resolve('/api/v1/security/public-keys');
-      var originalGetCount = 0;
-      final adapter = _ScriptedAdapter((request, body) async {
-        if (request.method == 'GET' &&
-            request.uri.path == publicKeysUri.path &&
-            request.uri.queryParameters.isEmpty) {
-          originalGetCount++;
-          return originalGetCount == 1
-              ? _html(_challenge(publicKeysUri))
-              : _text('{"data":{"keys":[]}}', 200);
-        }
-        if (request.method == 'GET' &&
-            request.uri.queryParameters['i'] == '1') {
-          return _text('verification accepted', 200);
-        }
-        return _text('unexpected request', 400);
-      });
-      final dio = _dio(baseUri, adapter);
-
-      final response = await dio.get<String>(
-        '/api/v1/security/public-keys',
-        options: Options(responseType: ResponseType.plain),
-      );
-
-      expect(response.statusCode, 200);
-      expect(response.data, '{"data":{"keys":[]}}');
-      expect(adapter.requests, hasLength(3));
-      expect(adapter.requests.map((e) => e.method), ['GET', 'GET', 'GET']);
-      expect(adapter.requests[0].uri, publicKeysUri);
-      expect(
-        adapter.requests[1].uri,
-        publicKeysUri.replace(queryParameters: {'i': '1'}),
-      );
-      expect(adapter.requests[2].uri, publicKeysUri);
-      expect(adapter.requests[1].header('Cookie'), contains('__test='));
-      expect(adapter.requests[2].header('Cookie'), contains('__test='));
-      dio.close(force: true);
-    });
-
-    test('uses the freshly solved cookie instead of a stale host cache',
-        () async {
-      final baseUri = Uri.parse('https://cookie-refresh.example');
-      final primeUri = baseUri.resolve('/api/v1/prime');
-      final updateUri = baseUri.resolve('/api/v1/update');
-      final cachedCookie = 'e84330a69c6df373fc2fd2a2827a5f';
-      const refreshedCookie =
-          '4142434445464748494a4b4c4d4e0d0c';
-      var primeOriginalCount = 0;
-      var updateOriginalCount = 0;
-      final adapter = _ScriptedAdapter((request, body) async {
-        if (request.uri.path == primeUri.path &&
-            request.uri.queryParameters.isEmpty) {
-          primeOriginalCount++;
-          return primeOriginalCount == 1
-              ? _html(_challenge(primeUri))
-              : _text('primed', 200);
-        }
-        if (request.uri.path == primeUri.path &&
-            request.uri.queryParameters['i'] == '1') {
-          return _text('prime-verified', 200);
-        }
-        if (request.uri.path == updateUri.path &&
-            request.uri.queryParameters.isEmpty) {
-          updateOriginalCount++;
-          return updateOriginalCount == 1
-              ? _html(
-                  _challenge(
-                    updateUri,
-                    cipherText: '7faa7da20fa612dde3cf9b7f3331b50c',
-                  ),
-                )
-              : _text('updated', 200);
-        }
-        if (request.uri.path == updateUri.path &&
-            request.uri.queryParameters['i'] == '1') {
-          final cookie = request.headers.entries
-              .firstWhere(
-                (entry) => entry.key.toLowerCase() == 'cookie',
-              )
-              .value
-              .toString();
-          expect(cookie, contains('__test=$refreshedCookie'));
-          expect(cookie, isNot(contains('__test=$cachedCookie')));
-          return _text('update-verified', 200);
-        }
-        return _text('unexpected request', 400);
-      });
-      final dio = _dio(baseUri, adapter);
-
-      final primeResponse = await dio.get<String>(
-        '/api/v1/prime',
-        options: Options(responseType: ResponseType.plain),
-      );
-      expect(primeResponse.data, 'primed');
-
-      final updateResponse = await dio.get<String>(
-        '/api/v1/update',
-        options: Options(responseType: ResponseType.plain),
-      );
-      expect(updateResponse.data, 'updated');
-      expect(adapter.requests, hasLength(6));
-      expect(adapter.requests[4].header('Cookie'), contains(refreshedCookie));
-      dio.close(force: true);
-    });
-
-    test('does not replay or cache cookie when verification GET is challenged',
-        () async {
-      final baseUri = Uri.parse('https://probe-fails.example');
-      final loginUri = baseUri.resolve('/api/v1/auth/login');
-      final challenge = _challenge(loginUri);
-      var firstTwoRequests = 0;
-      final adapter = _ScriptedAdapter((request, body) async {
-        if (request.uri.path == '/api/v1/auth/login') {
-          firstTwoRequests++;
-          return _html(challenge);
-        }
-        return _text('health-ok', 200);
-      });
-      final dio = _dio(baseUri, adapter);
-
-      await expectLater(
-        dio.post<String>(
+        final response = await dio.post<String>(
           '/api/v1/auth/login',
-          data: '{"payload":"must-not-replay"}',
+          data: originalBody,
           options: Options(
             contentType: Headers.jsonContentType,
             responseType: ResponseType.plain,
+            headers: {'Cookie': 'laravel_session=session-1; __test=stale'},
           ),
-        ),
-        throwsA(isA<DioException>()),
-      );
+        );
 
-      expect(firstTwoRequests, 2);
-      expect(adapter.requests, hasLength(2));
-      expect(adapter.requests[0].method, 'POST');
-      expect(adapter.requests[1].method, 'GET');
-      expect(adapter.requests[1].uri.queryParameters, {'i': '1'});
+        expect(response.statusCode, 200);
+        expect(response.data, 'login-ok');
 
-      await dio.get<String>(
-        '/api/v1/health',
-        options: Options(responseType: ResponseType.plain),
-      );
-      expect(adapter.requests, hasLength(3));
-      expect(adapter.requests[2].header('Cookie') ?? '', isNot(contains('__test=')));
-      dio.close(force: true);
-    });
+        // Initial POST -> browser-equivalent verification GET -> original POST.
+        expect(adapter.requests, hasLength(3));
+        final initial = adapter.requests[0];
+        final probe = adapter.requests[1];
+        final replay = adapter.requests[2];
 
-    test('does not start another handshake when original replay is challenged',
-        () async {
-      final baseUri = Uri.parse('https://replay-fails.example');
-      final loginUri = baseUri.resolve('/api/v1/auth/login');
-      final challenge = _challenge(loginUri);
-      final adapter = _ScriptedAdapter((request, body) async {
-        if (request.method == 'GET' &&
-            request.uri.queryParameters['i'] == '1') {
-          return _text('verified', 200);
-        }
-        if (request.uri.path == '/api/v1/auth/login') {
-          return _html(challenge);
-        }
-        return _text('unexpected request', 400);
-      });
-      final dio = _dio(baseUri, adapter);
+        expect(initial.method, 'POST');
+        expect(initial.uri, loginUri);
+        expect(initial.body, isNotNull);
+        expect(String.fromCharCodes(initial.body!), originalBody);
 
-      await expectLater(
-        dio.post<String>(
-          '/api/v1/auth/login',
-          data: '{"payload":"sealed"}',
-          options: Options(
-            contentType: Headers.jsonContentType,
-            responseType: ResponseType.plain,
+        expect(probe.method, 'GET');
+        expect(probe.uri, loginUri.replace(queryParameters: {'i': '1'}));
+        expect(probe.body, isNull);
+        expect(probe.header('Content-Type'), isNull);
+        expect(probe.header('Cookie'), contains('laravel_session=session-1'));
+        expect(probe.header('Cookie'), contains('__test='));
+        expect(
+          probe.header('User-Agent'),
+          InfinityFreeChallengeSolver.browserUserAgent,
+        );
+
+        expect(ApiRequestReplayState.isCryptoPrepared(replay.options), isTrue);
+        expect(ApiRequestReplayState.isCryptoPrepared(probe.options), isFalse);
+        expect(replay.method, 'POST');
+        expect(replay.uri, loginUri);
+        expect(String.fromCharCodes(replay.body!), originalBody);
+        expect(replay.header('Cookie'), contains('laravel_session=session-1'));
+        expect(replay.header('Cookie'), contains('__test='));
+        expect(
+          replay.header('User-Agent'),
+          InfinityFreeChallengeSolver.browserUserAgent,
+        );
+        dio.close(force: true);
+      },
+    );
+
+    test(
+      'GET challenge verifies with GET then replays the original GET',
+      () async {
+        final baseUri = Uri.parse('https://get-success.example');
+        final publicKeysUri = baseUri.resolve('/api/v1/security/public-keys');
+        var originalGetCount = 0;
+        final adapter = _ScriptedAdapter((request, body) async {
+          if (request.method == 'GET' &&
+              request.uri.path == publicKeysUri.path &&
+              request.uri.queryParameters.isEmpty) {
+            originalGetCount++;
+            return originalGetCount == 1
+                ? _html(_challenge(publicKeysUri))
+                : _text('{"data":{"keys":[]}}', 200);
+          }
+          if (request.method == 'GET' &&
+              request.uri.queryParameters['i'] == '1') {
+            return _text('verification accepted', 200);
+          }
+          return _text('unexpected request', 400);
+        });
+        final dio = _dio(baseUri, adapter);
+
+        final response = await dio.get<String>(
+          '/api/v1/security/public-keys',
+          options: Options(responseType: ResponseType.plain),
+        );
+
+        expect(response.statusCode, 200);
+        expect(response.data, '{"data":{"keys":[]}}');
+        expect(adapter.requests, hasLength(3));
+        expect(adapter.requests.map((e) => e.method), ['GET', 'GET', 'GET']);
+        expect(adapter.requests[0].uri, publicKeysUri);
+        expect(
+          adapter.requests[1].uri,
+          publicKeysUri.replace(queryParameters: {'i': '1'}),
+        );
+        expect(adapter.requests[2].uri, publicKeysUri);
+        expect(adapter.requests[1].header('Cookie'), contains('__test='));
+        expect(adapter.requests[2].header('Cookie'), contains('__test='));
+        dio.close(force: true);
+      },
+    );
+
+    test(
+      'uses the freshly solved cookie instead of a stale host cache',
+      () async {
+        final baseUri = Uri.parse('https://cookie-refresh.example');
+        final primeUri = baseUri.resolve('/api/v1/prime');
+        final updateUri = baseUri.resolve('/api/v1/update');
+        final cachedCookie = 'e84330a69c6df373fc2fd2a2827a5f';
+        const refreshedCookie = '4142434445464748494a4b4c4d4e0d0c';
+        var primeOriginalCount = 0;
+        var updateOriginalCount = 0;
+        final adapter = _ScriptedAdapter((request, body) async {
+          if (request.uri.path == primeUri.path &&
+              request.uri.queryParameters.isEmpty) {
+            primeOriginalCount++;
+            return primeOriginalCount == 1
+                ? _html(_challenge(primeUri))
+                : _text('primed', 200);
+          }
+          if (request.uri.path == primeUri.path &&
+              request.uri.queryParameters['i'] == '1') {
+            return _text('prime-verified', 200);
+          }
+          if (request.uri.path == updateUri.path &&
+              request.uri.queryParameters.isEmpty) {
+            updateOriginalCount++;
+            return updateOriginalCount == 1
+                ? _html(
+                    _challenge(
+                      updateUri,
+                      cipherText: '7faa7da20fa612dde3cf9b7f3331b50c',
+                    ),
+                  )
+                : _text('updated', 200);
+          }
+          if (request.uri.path == updateUri.path &&
+              request.uri.queryParameters['i'] == '1') {
+            final cookie = request.headers.entries
+                .firstWhere((entry) => entry.key.toLowerCase() == 'cookie')
+                .value
+                .toString();
+            expect(cookie, contains('__test=$refreshedCookie'));
+            expect(cookie, isNot(contains('__test=$cachedCookie')));
+            return _text('update-verified', 200);
+          }
+          return _text('unexpected request', 400);
+        });
+        final dio = _dio(baseUri, adapter);
+
+        final primeResponse = await dio.get<String>(
+          '/api/v1/prime',
+          options: Options(responseType: ResponseType.plain),
+        );
+        expect(primeResponse.data, 'primed');
+
+        final updateResponse = await dio.get<String>(
+          '/api/v1/update',
+          options: Options(responseType: ResponseType.plain),
+        );
+        expect(updateResponse.data, 'updated');
+        expect(adapter.requests, hasLength(6));
+        expect(adapter.requests[4].header('Cookie'), contains(refreshedCookie));
+        dio.close(force: true);
+      },
+    );
+
+    test(
+      'does not replay or cache cookie when verification GET is challenged',
+      () async {
+        final baseUri = Uri.parse('https://probe-fails.example');
+        final loginUri = baseUri.resolve('/api/v1/auth/login');
+        final challenge = _challenge(loginUri);
+        var firstTwoRequests = 0;
+        final adapter = _ScriptedAdapter((request, body) async {
+          if (request.uri.path == '/api/v1/auth/login') {
+            firstTwoRequests++;
+            return _html(challenge);
+          }
+          return _text('health-ok', 200);
+        });
+        final dio = _dio(baseUri, adapter);
+
+        await expectLater(
+          dio.post<String>(
+            '/api/v1/auth/login',
+            data: '{"payload":"must-not-replay"}',
+            options: Options(
+              contentType: Headers.jsonContentType,
+              responseType: ResponseType.plain,
+            ),
           ),
-        ),
-        throwsA(isA<DioException>()),
-      );
+          throwsA(isA<DioException>()),
+        );
 
-      expect(adapter.requests, hasLength(3));
-      expect(adapter.requests.map((e) => e.method), ['POST', 'GET', 'POST']);
-      expect(
-        adapter.requests.map((e) => e.uri.queryParameters),
-        [<String, String>{}, {'i': '1'}, <String, String>{}],
-      );
-      dio.close(force: true);
-    });
+        expect(firstTwoRequests, 2);
+        expect(adapter.requests, hasLength(2));
+        expect(adapter.requests[0].method, 'POST');
+        expect(adapter.requests[1].method, 'GET');
+        expect(adapter.requests[1].uri.queryParameters, {'i': '1'});
+
+        await dio.get<String>(
+          '/api/v1/health',
+          options: Options(responseType: ResponseType.plain),
+        );
+        expect(adapter.requests, hasLength(3));
+        expect(
+          adapter.requests[2].header('Cookie') ?? '',
+          isNot(contains('__test=')),
+        );
+        dio.close(force: true);
+      },
+    );
+
+    test(
+      'does not start another handshake when original replay is challenged',
+      () async {
+        final baseUri = Uri.parse('https://replay-fails.example');
+        final loginUri = baseUri.resolve('/api/v1/auth/login');
+        final challenge = _challenge(loginUri);
+        final adapter = _ScriptedAdapter((request, body) async {
+          if (request.method == 'GET' &&
+              request.uri.queryParameters['i'] == '1') {
+            return _text('verified', 200);
+          }
+          if (request.uri.path == '/api/v1/auth/login') {
+            return _html(challenge);
+          }
+          return _text('unexpected request', 400);
+        });
+        final dio = _dio(baseUri, adapter);
+
+        await expectLater(
+          dio.post<String>(
+            '/api/v1/auth/login',
+            data: '{"payload":"sealed"}',
+            options: Options(
+              contentType: Headers.jsonContentType,
+              responseType: ResponseType.plain,
+            ),
+          ),
+          throwsA(isA<DioException>()),
+        );
+
+        expect(adapter.requests, hasLength(3));
+        expect(adapter.requests.map((e) => e.method), ['POST', 'GET', 'POST']);
+        expect(adapter.requests.map((e) => e.uri.queryParameters), [
+          <String, String>{},
+          {'i': '1'},
+          <String, String>{},
+        ]);
+        dio.close(force: true);
+      },
+    );
   });
 }
 
@@ -322,10 +331,8 @@ ResponseBody _text(String body, int statusCode) {
 class _ScriptedAdapter implements HttpClientAdapter {
   _ScriptedAdapter(this.respond);
 
-  final Future<ResponseBody> Function(
-    RequestOptions request,
-    List<int>? body,
-  ) respond;
+  final Future<ResponseBody> Function(RequestOptions request, List<int>? body)
+  respond;
   final requests = <_RecordedRequest>[];
 
   @override

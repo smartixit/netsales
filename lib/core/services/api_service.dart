@@ -719,7 +719,8 @@ class _SessionAuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.requestOptions.extra[infinityFreeVerificationProbeFlagKey] == true) {
+    if (err.requestOptions.extra[infinityFreeVerificationProbeFlagKey] ==
+        true) {
       return handler.next(err);
     }
 
