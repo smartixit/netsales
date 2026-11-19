@@ -1,5 +1,6 @@
 import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/core/enums/sale_type.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/request_item_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_summary_entity.dart';
 
@@ -79,7 +80,58 @@ class RequestEntity {
 
   /// إجمالي عدد الأوراق المقابلة لكافة بنود الطلب
   double get totalSheets => items.fold<double>(0.0, (sum, item) {
-    final sheetSize = item.voucherPackage?.packageVoucherCount ?? 100;
+    final sheetSize = item.sheetSize;
     return sum + (sheetSize > 0 ? item.voucherCount / sheetSize : 0.0);
   });
+
+  /// صيغة نصية منسقة لعدد الأوراق الكلية للطلب
+  String get formattedTotalSheets =>
+      totalSheets.truncateToDouble() == totalSheets
+          ? totalSheets.toInt().toString()
+          : totalSheets.toStringAsFixed(1);
+
+  /// معرف العرض السيادي للطلب
+  String get displayReference =>
+      requestUuid != null && requestUuid!.trim().isNotEmpty
+          ? requestUuid!.trim()
+          : '#$requestId';
+
+  /// تاريخ تقديم الطلب المحول
+  DateTime? get parsedRequestDate =>
+      DateTime.tryParse(requestDate ?? createdAt ?? '');
+
+  /// تاريخ المراجعة والتدقيق المحول
+  DateTime? get parsedReviewDate =>
+      DateTime.tryParse(reviewDate ?? updatedAt ?? '');
+
+  /// صيغة تاريخ تقديم الطلب المنسقة
+  String get formattedRequestDate => parsedRequestDate != null
+      ? DateFormatter.dateTime(parsedRequestDate!)
+      : (requestDate ?? createdAt ?? 'التاريخ غير متاح');
+
+  /// صيغة تاريخ المراجعة المنسقة
+  String get formattedReviewDate => parsedReviewDate != null
+      ? DateFormatter.dateTime(parsedReviewDate!)
+      : (reviewDate ?? updatedAt ?? '');
+
+  /// اسم نقطة البيع المنسق للعرض
+  String get displayPosName =>
+      posName != null && posName!.trim().isNotEmpty
+          ? posName!.trim()
+          : 'نقطة بيع #$posId';
+
+  /// اسم الشبكة المنسق للعرض
+  String get displayNetworkName =>
+      networkName != null && networkName!.trim().isNotEmpty
+          ? networkName!.trim()
+          : 'شبكة #$networkId';
+
+  /// هل الطلب يتضمن ملاحظات؟
+  bool get hasNote => requestNote != null && requestNote!.trim().isNotEmpty;
+
+  /// هل الطلب يتضمن ملخص تعديلات؟
+  bool get hasModificationSummary => isApproved && modificationSummary != null;
+
+  /// هل الطلب معتمد ومرتبط بفاتورة صادرة؟
+  bool get hasInvoice => isApproved && invoiceId != null && invoiceId! > 0;
 }

@@ -5,9 +5,11 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_context_option.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_context_option_tile.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_context_selected_identity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
-import 'package:netsales/widgets/images/custom_cached_image.dart';
 
 /// Shared presentation for the supplier Network and destination POS selectors.
 class ProcurementContextSelector extends StatelessWidget {
@@ -127,15 +129,13 @@ class ProcurementContextSelector extends StatelessWidget {
                               vertical: AppSpacing.xs,
                             ),
                             decoration: BoxDecoration(
-                              color: colors.surfaceContainerHighest.withValues(
-                                alpha: .55,
-                              ),
+                              color: colors.surfaceContainerLow,
                               borderRadius: BorderRadius.circular(
                                 AppRadius.full,
                               ),
                               border: Border.all(
                                 color: colors.outlineVariant.withValues(
-                                  alpha: .6,
+                                  alpha: .4,
                                 ),
                               ),
                             ),
@@ -143,7 +143,7 @@ class ProcurementContextSelector extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  Icons.lock_outline_rounded,
+                                  Icons.lock_rounded,
                                   size: 13.r,
                                   color: colors.onSurfaceVariant,
                                 ),
@@ -158,84 +158,113 @@ class ProcurementContextSelector extends StatelessWidget {
                               ],
                             ),
                           )
-                        else if (canExpand) ...[
-                          CustomButton.text(
-                            text: isExpanded ? 'إغلاق' : 'تغيير',
-                            icon: isExpanded
-                                ? Icons.keyboard_arrow_up_rounded
-                                : Icons.swap_horiz_rounded,
-                            size: AppButtonSize.small,
-                            onPressed: onToggle,
-                          ),
+                        else if (canExpand)
                           AnimatedRotation(
-                            turns: isExpanded ? .5 : 0,
+                            turns: isExpanded ? 0.5 : 0.0,
                             duration: duration,
-                            child: Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: accent,
-                              size: 20.r,
+                            child: Container(
+                              width: 32.r,
+                              height: 32.r,
+                              decoration: BoxDecoration(
+                                color: colors.surfaceContainerLow,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: colors.outlineVariant.withValues(
+                                    alpha: .4,
+                                  ),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                size: 20.r,
+                                color: colors.onSurfaceVariant,
+                              ),
                             ),
                           ),
-                        ],
                       ],
                     ),
                     AppSpacing.vSm,
-                    if (isLoading)
-                      const CustomStateView.loading(
-                        presentation: CustomStatePresentation.skeletonOnly,
-                        skeleton: CustomStateSkeleton(
-                          layout: CustomStateSkeletonLayout.text,
-                          lineCount: 2,
-                          showCardSurface: false,
-                        ),
-                      )
-                    else if (emptyMessage != null)
-                      Text(
-                        emptyMessage!,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: colors.error,
-                        ),
-                      )
-                    else
-                      _SelectedIdentity(
-                        name: selectedName,
-                        detail: selectedDetail,
-                        logoUrl: selectedLogoUrl,
-                        initial: selectedInitial,
-                        accent: accent,
-                      ),
+                    ProcurementContextSelectedIdentity(
+                      name: selectedName,
+                      detail: selectedDetail,
+                      logoUrl: selectedLogoUrl,
+                      initial: selectedInitial,
+                      accent: accent,
+                    ),
                   ],
                 ),
               ),
             ),
-            ClipRect(
-              child: AnimatedSize(
-                duration: duration,
-                curve: Curves.easeInOutCubic,
-                alignment: Alignment.topCenter,
-                child: isExpanded && options.length > 1
+            AnimatedCrossFade(
+              crossFadeState: isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: duration,
+              firstChild: const SizedBox(width: double.infinity, height: 0),
+              secondChild: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: colors.outlineVariant.withValues(alpha: .35),
+                    ),
+                  ),
+                ),
+                child: isExpanded
                     ? Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                          AppSpacing.md,
-                          0,
+                        padding: EdgeInsets.fromLTRB(
                           AppSpacing.md,
                           AppSpacing.sm,
+                          AppSpacing.md,
+                          AppSpacing.md,
                         ),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Divider(
-                              height: AppSpacing.sm,
-                              color: colors.outlineVariant.withValues(
-                                alpha: .5,
-                              ),
-                            ),
-                            ...options.map(
-                              (option) => Padding(
-                                padding: EdgeInsets.only(bottom: AppSpacing.xs),
-                                child: _ContextOptionTile(
-                                  option: option,
-                                  accent: accent,
+                            if (isLoading)
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: AppSpacing.md,
                                 ),
+                                child: CustomStateView.loading(
+                                  presentation:
+                                      CustomStatePresentation.skeletonOnly,
+                                  skeleton: const CustomStateSkeleton(
+                                    layout: CustomStateSkeletonLayout.list,
+                                    itemCount: 2,
+                                  ),
+                                ),
+                              )
+                            else if (options.isEmpty)
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: AppSpacing.md,
+                                ),
+                                child: CustomStateView.empty(
+                                  title: emptyMessage ?? 'لا توجد خيارات متاحة',
+                                  presentation: CustomStatePresentation.compact,
+                                ),
+                              )
+                            else
+                              ListView.separated(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: options.length,
+                                separatorBuilder: (_, _) => AppSpacing.vXs,
+                                itemBuilder: (context, index) {
+                                  final option = options[index];
+                                  return ProcurementContextOptionTile(
+                                    option: option,
+                                    accent: accent,
+                                  );
+                                },
+                              ),
+                            AppSpacing.vSm,
+                            Align(
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: CustomButton.text(
+                                text: 'إغلاق القائمة',
+                                icon: Icons.keyboard_arrow_up_rounded,
+                                onPressed: onToggle,
                               ),
                             ),
                           ],
@@ -245,177 +274,6 @@ class ProcurementContextSelector extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class ProcurementContextOption {
-  const ProcurementContextOption({
-    required this.id,
-    required this.name,
-    required this.detail,
-    required this.logoUrl,
-    required this.initial,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final int id;
-  final String name;
-  final String detail;
-  final String? logoUrl;
-  final String initial;
-  final bool selected;
-  final VoidCallback onTap;
-}
-
-class _SelectedIdentity extends StatelessWidget {
-  const _SelectedIdentity({
-    required this.name,
-    required this.detail,
-    required this.logoUrl,
-    required this.initial,
-    required this.accent,
-  });
-
-  final String name;
-  final String detail;
-  final String? logoUrl;
-  final String initial;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      padding: EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            accent.withValues(alpha: .12),
-            colors.primary.withValues(alpha: .045),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: accent.withValues(alpha: .30)),
-      ),
-      child: Row(
-        children: [
-          CustomCachedImage.logo(
-            url: logoUrl,
-            size: 48.r,
-            borderRadius: 14.r,
-            fallbackText: initial,
-            fallbackTextStyle: AppTypography.titleMedium.copyWith(
-              color: accent,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          AppSpacing.hSm,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                AppSpacing.vXxs,
-                Text(
-                  detail,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.verified_rounded, color: accent, size: 21.r),
-        ],
-      ),
-    );
-  }
-}
-
-class _ContextOptionTile extends StatelessWidget {
-  const _ContextOptionTile({required this.option, required this.accent});
-
-  final ProcurementContextOption option;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        onTap: option.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 170),
-          padding: EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: option.selected
-                ? accent.withValues(alpha: .105)
-                : colors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(
-              color: option.selected
-                  ? accent.withValues(alpha: .62)
-                  : colors.outlineVariant.withValues(alpha: .34),
-              width: option.selected ? 1.35 : 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              CustomCachedImage.logo(
-                url: option.logoUrl,
-                size: 38.r,
-                borderRadius: 11.r,
-                fallbackText: option.initial,
-              ),
-              AppSpacing.hSm,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      option.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.labelLarge.copyWith(
-                        color: colors.onSurface,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      option.detail,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (option.selected)
-                Icon(Icons.check_circle_rounded, color: accent, size: 20.r),
-            ],
-          ),
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_context_option.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_context_selector.dart';
 
 /// Adapts linked Network entities to the shared procurement context selector.
@@ -16,9 +17,7 @@ class ProcurementNetworkContextSection
     return Obx(() {
       final isEditMode = controller.isEditing.value;
       final links = controller.linkedNetworks;
-      final selected = links.firstWhereOrNull(
-        (link) => link.networkId == controller.selectedNetworkId.value,
-      );
+      final selected = controller.activeNetworkLink;
       final isExpanded =
           controller.expandedProcurementContext.value == 'network';
 
@@ -46,12 +45,7 @@ class ProcurementNetworkContextSection
         emptyMessage: links.isEmpty
             ? 'لا توجد شبكات مورّدة نشطة مرتبطة بنقطة البيع حالياً.'
             : null,
-        onToggle: () {
-          if (isEditMode) return;
-          controller.expandedProcurementContext.value = isExpanded
-              ? ''
-              : 'network';
-        },
+        onToggle: controller.toggleNetworkContextExpansion,
         options: links
             .map(
               (link) => ProcurementContextOption(

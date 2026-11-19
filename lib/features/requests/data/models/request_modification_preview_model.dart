@@ -1,4 +1,6 @@
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_preview_item_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_removed_item_entity.dart';
 
 class RequestModificationPreviewModel extends RequestModificationPreviewEntity {
   const RequestModificationPreviewModel({

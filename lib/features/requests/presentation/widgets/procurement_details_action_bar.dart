@@ -4,7 +4,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/presentation/controllers/procurement_request_details_controller.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_details_action_row.dart';
 
 /// شريط الإجراءات التفاعلي المخصص في أسفل صفحة تفاصيل الطلب
 class ProcurementDetailsActionBar extends StatelessWidget {
@@ -62,90 +62,14 @@ class ProcurementDetailsActionBar extends StatelessWidget {
           heightFactor: 1.0,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 760),
-            child: _buildActionRow(context, isNetwork: isNetwork),
+            child: ProcurementDetailsActionRow(
+              request: request,
+              controller: controller,
+              isNetwork: isNetwork,
+            ),
           ),
         ),
       ),
     );
-  }
-
-  Widget _buildActionRow(BuildContext context, {required bool isNetwork}) {
-    // 1. منظور الشبكة (اعتماد / رفض أو استعراض الفاتورة)
-    if (isNetwork) {
-      if (request.isPending) {
-        return Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: CustomButton.danger(
-                text: 'رفض الطلب',
-                icon: Icons.cancel_outlined,
-                onPressed: controller.promptRejectRequest,
-              ),
-            ),
-            AppSpacing.hSm,
-            Expanded(
-              flex: 3,
-              child: CustomButton.primary(
-                text: 'اعتماد وإصدار الفاتورة',
-                icon: Icons.verified_rounded,
-                onPressed: controller.promptApproveRequest,
-              ),
-            ),
-          ],
-        );
-      }
-
-      if (request.isApproved && request.invoiceId != null) {
-        return SizedBox(
-          width: double.infinity,
-          child: CustomButton.primary(
-            text: 'عرض فاتورة المبيعات المرتبطة',
-            icon: Icons.receipt_long_rounded,
-            onPressed: controller.openLinkedInvoice,
-          ),
-        );
-      }
-    }
-
-    // 2. منظور نقطة البيع (إلغاء / تعديل أو استعراض الفاتورة)
-    if (!isNetwork) {
-      if (request.isPending) {
-        return Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: CustomButton.danger(
-                text: 'إلغاء الطلب',
-                icon: Icons.close_rounded,
-                onPressed: controller.promptCancelRequest,
-              ),
-            ),
-            AppSpacing.hSm,
-            Expanded(
-              flex: 3,
-              child: CustomButton.primary(
-                text: 'تعديل بنود الطلب',
-                icon: Icons.edit_note_rounded,
-                onPressed: controller.openEditOrder,
-              ),
-            ),
-          ],
-        );
-      }
-
-      if (request.isApproved && request.invoiceId != null) {
-        return SizedBox(
-          width: double.infinity,
-          child: CustomButton.primary(
-            text: 'عرض فاتورة المشتريات المرتبطة',
-            icon: Icons.receipt_long_rounded,
-            onPressed: controller.openLinkedInvoice,
-          ),
-        );
-      }
-    }
-
-    return const SizedBox.shrink();
   }
 }

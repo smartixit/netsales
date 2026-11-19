@@ -9,22 +9,15 @@ import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
-import 'package:netsales/widgets/images/custom_avatar_badge.dart';
+import 'package:netsales/features/requests/presentation/mappers/procurement_status_style_mapper.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// ترويسة بطاقة طلب التوريد (Order Card Header - Executive Edition)
-///
-/// تعرض هوية الطلب الديناميكية المتوافقة مع حالة الطلب:
-/// - أيقونة الطلب بتدرج وظلال تتكيف مع الحالة (معلق = عنبري، معتمد = زمردي، مرفوض = قرمزي، ملغي = رمادي).
-/// - معرّف الطلب بالكامل مع زر النسخ وزر الانتقال السريع للفاتورة (إن وجدت).
-/// - اسم وشعار الطرف الآخر في العملية التوريدية عبر CustomAvatarBadge مع الحرف الأول كبديل.
-/// - شارات الحالة الدلالية ونوع البيع مع إمكانية التمرير الأفقي.
-/// - التاريخ والوقت المنسق عبر DateFormatter.dateTime واسم المراجع ومقدم الطلب.
 class ProcurementOrderCardHeader extends StatelessWidget {
   const ProcurementOrderCardHeader({
     super.key,
@@ -32,81 +25,34 @@ class ProcurementOrderCardHeader extends StatelessWidget {
     required this.status,
     required this.saleType,
     this.isNetworkView = false,
+    this.onInvoiceTap,
   });
 
   final RequestEntity request;
   final EnumPresentation status;
   final EnumPresentation saleType;
   final bool isNetworkView;
+  final VoidCallback? onInvoiceTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final displayUuid = request.requestUuid?.isNotEmpty == true
-        ? request.requestUuid!
-        : '#${request.requestId}';
-
-    final parsedDate = DateTime.tryParse(
-      request.requestDate ?? request.createdAt ?? '',
-    );
-    final dateLabel = parsedDate != null
-        ? DateFormatter.dateTime(parsedDate)
-        : (request.requestDate ?? request.createdAt ?? 'التاريخ غير متاح');
+    final displayUuid = request.displayReference;
+    final dateLabel = request.formattedRequestDate;
 
     // تحديد الطرف الآخر في المعاملة: في مساحة الشبكة الطرف هو نقطة البيع، وفي مساحة نقطة البيع الطرف هو الشبكة
     final partyName = isNetworkView
-        ? (request.posName?.isNotEmpty == true
-              ? request.posName!
-              : 'نقطة بيع #${request.posId}')
-        : (request.networkName?.isNotEmpty == true
-              ? request.networkName!
-              : 'شبكة #${request.networkId}');
+        ? request.displayPosName
+        : request.displayNetworkName;
     final partyLogo = isNetworkView ? request.posLogo : request.networkLogo;
     final partyInitial = TextFormatter.avatarInitial(partyName);
 
-    // تدرج لوني وظلال متوافقة ديناميكياً مع حالة الطلب
-    final LinearGradient iconGradient;
-    final Color iconBorderColor;
-    final Color iconShadowColor;
-    final IconData statusIcon;
-
-    if (request.isPending) {
-      iconGradient = const LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [Color(0xFFD97706), Color(0xFFB45309)],
-      );
-      iconBorderColor = const Color(0xFFFFE082).withValues(alpha: .55);
-      iconShadowColor = const Color(0xFFD97706).withValues(alpha: .28);
-      statusIcon = Icons.hourglass_top_rounded;
-    } else if (request.isApproved) {
-      iconGradient = const LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [Color(0xFF087F68), Color(0xFF075B55)],
-      );
-      iconBorderColor = const Color(0xFFFFD98A).withValues(alpha: .40);
-      iconShadowColor = const Color(0xFF087F68).withValues(alpha: .22);
-      statusIcon = Icons.check_circle_rounded;
-    } else if (request.isRejected) {
-      iconGradient = const LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [Color(0xFFBE123C), Color(0xFF9F1239)],
-      );
-      iconBorderColor = const Color(0xFFFECDD3).withValues(alpha: .45);
-      iconShadowColor = const Color(0xFFBE123C).withValues(alpha: .24);
-      statusIcon = Icons.cancel_rounded;
-    } else {
-      iconGradient = const LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [Color(0xFF64748B), Color(0xFF475569)],
-      );
-      iconBorderColor = const Color(0xFFE2E8F0).withValues(alpha: .40);
-      iconShadowColor = const Color(0xFF64748B).withValues(alpha: .20);
-      statusIcon = Icons.block_rounded;
-    }
+    // تدرج لوني وظلال متوافقة ديناميكياً مع حالة الطلب عبر المحول الموحد
+    final style = ProcurementStatusStyleMapper.resolve(request);
+    final iconGradient = style.iconGradient;
+    final iconBorderColor = style.iconBorderColor;
+    final iconShadowColor = style.iconShadowColor;
+    final statusIcon = style.statusIcon;
 
     // هوية الفاعلين: المراجع ومقدم الطلب
     final reviewedName = request.reviewedByName?.trim();
@@ -223,7 +169,7 @@ class ProcurementOrderCardHeader extends StatelessWidget {
                         request.invoiceId! > 0) ...[
                       AppSpacing.hSm,
                       CustomInteractiveBounce(
-                        onTap: () {
+                        onTap: onInvoiceTap ?? () {
                           final route =
                               (Get.isRegistered<WorkspaceService>() &&
                                   WorkspaceService.to.activeWorkspace ==

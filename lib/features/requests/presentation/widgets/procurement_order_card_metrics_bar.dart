@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_order_card_metric_column.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_order_card_metric_divider.dart';
 
 /// شريط المقاييس الثلاثية لبطاقة طلب التوريد (Order Card Metrics Bar)
 ///
@@ -36,28 +36,32 @@ class ProcurementOrderCardMetricsBar extends StatelessWidget {
         children: [
           // 1. عدد الباقات
           Expanded(
-            child: _MetricColumn(
+            child: ProcurementOrderCardMetricColumn(
               label: 'الباقات',
               value: '$itemCount',
               textColor: colors.onSurface,
             ),
           ),
-          _MetricDivider(color: colors.outlineVariant.withValues(alpha: .5)),
+          ProcurementOrderCardMetricDivider(
+            color: colors.outlineVariant.withValues(alpha: .5),
+          ),
 
           // 2. عدد الكروت
           Expanded(
-            child: _MetricColumn(
+            child: ProcurementOrderCardMetricColumn(
               label: 'عدد الكروت',
               value: '$totalQuantity',
               textColor: colors.onSurface,
             ),
           ),
-          _MetricDivider(color: colors.outlineVariant.withValues(alpha: .5)),
+          ProcurementOrderCardMetricDivider(
+            color: colors.outlineVariant.withValues(alpha: .5),
+          ),
 
           // 3. إجمالي الطلب الصافي
           Expanded(
             flex: 2,
-            child: _MetricColumn(
+            child: ProcurementOrderCardMetricColumn(
               label: 'إجمالي الطلب',
               value: AmountFormatter.formatValue(totalAmount),
               textColor: colors.primary,
@@ -66,74 +70,6 @@ class ProcurementOrderCardMetricsBar extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _MetricColumn extends StatelessWidget {
-  const _MetricColumn({
-    required this.label,
-    required this.value,
-    required this.textColor,
-    this.isEmphasized = false,
-  });
-
-  final String label;
-  final String value;
-  final Color textColor;
-  final bool isEmphasized;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTypography.caption.copyWith(
-            color: colors.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        AppSpacing.vXxs,
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            value,
-            style: isEmphasized
-                ? AppTypography.titleMedium.copyWith(
-                    color: textColor,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.2,
-                  )
-                : AppTypography.titleSmall.copyWith(
-                    color: textColor,
-                    fontWeight: FontWeight.w800,
-                  ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MetricDivider extends StatelessWidget {
-  const _MetricDivider({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 1.0,
-      height: 28.h,
-      color: color,
-      margin: EdgeInsets.symmetric(horizontal: 4.r),
     );
   }
 }

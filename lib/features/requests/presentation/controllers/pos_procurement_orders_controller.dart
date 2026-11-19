@@ -327,6 +327,13 @@ class PosProcurementOrdersController extends GetxController {
     }
   }
 
+  Future<void> openInvoice(int invoiceId) async {
+    await Get.toNamed<void>(
+      AppRoutes.purchaseInvoiceDetails,
+      arguments: invoiceId,
+    );
+  }
+
   Future<void> openRequestDetails(RequestEntity request) async {
     await Get.toNamed<void>(
       AppRoutes.voucherRequestDetails,

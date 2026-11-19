@@ -3,54 +3,36 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
-/// مقدمة بصرية مشتركة لقوائم طلبات التوريد.
-class ProcurementListIntro extends StatelessWidget {
-  const ProcurementListIntro({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
+class ProcurementEditModeBanner extends StatelessWidget {
+  const ProcurementEditModeBanner({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.fromLTRB(
-        AppSpacing.cardPadding,
-        AppSpacing.md,
-        AppSpacing.cardPadding,
-        AppSpacing.xs,
-      ),
       padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.35),
-        ),
-        boxShadow: AppElevation.level1(context),
+        color: colors.primaryContainer.withValues(alpha: .22),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: colors.primary.withValues(alpha: .28)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 44.r,
-            height: 44.r,
+            padding: EdgeInsets.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color: colors.primary.withValues(alpha: 0.11),
-              borderRadius: BorderRadius.circular(AppRadius.md),
+              color: colors.primary.withValues(alpha: .14),
+              shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: colors.primary, size: 23.r),
+            child: Icon(
+              Icons.lock_clock_rounded,
+              size: 18.r,
+              color: colors.primary,
+            ),
           ),
           AppSpacing.hSm,
           Expanded(
@@ -58,18 +40,18 @@ class ProcurementListIntro extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  style: AppTypography.titleSmall.copyWith(
+                  'أطراف العملية التوريدية ثابتة أثناء التعديل',
+                  style: AppTypography.labelLarge.copyWith(
                     color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 AppSpacing.vXxs,
                 Text(
-                  subtitle,
+                  'تم تثبيت الشبكة المورّدة ونقطة البيع لضمان دقة اتفاقية الأسعار والائتمان المعتمد. يمكنك تعديل طريقة الدفع، الملاحظات، والكميات بحرية.\nإذا أردت توريد طلب لشبكة أخرى، يمكنك إلغاء هذا الطلب وإنشاء طلب جديد.',
                   style: AppTypography.bodySmall.copyWith(
                     color: colors.onSurfaceVariant,
-                    height: 1.45,
+                    height: 1.5,
                   ),
                 ),
               ],

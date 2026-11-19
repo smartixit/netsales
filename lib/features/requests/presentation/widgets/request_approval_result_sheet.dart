@@ -3,15 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
-import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
+import 'package:netsales/features/requests/presentation/widgets/approval_result/approval_result_document_tile.dart';
+import 'package:netsales/features/requests/presentation/widgets/approval_result/approval_result_financial_row.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
-import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// قسيمة إشعار الفوترة والاعتماد التنفيذية المعتمدة (Executive Approved Invoice Voucher)
 ///
@@ -41,10 +39,7 @@ class RequestApprovalResultSheet extends StatelessWidget {
       serverLabel: invoice.saleTypeLabel,
     );
 
-    final requestUuid =
-        request.requestUuid != null && request.requestUuid!.trim().isNotEmpty
-            ? request.requestUuid!.trim()
-            : '#${request.requestId}';
+    final requestUuid = request.displayReference;
 
     final invoiceUuid =
         invoice.invoiceUuid != null && invoice.invoiceUuid!.trim().isNotEmpty
@@ -222,7 +217,7 @@ class RequestApprovalResultSheet extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _DocumentIdentityTile(
+              ApprovalResultDocumentTile(
                 title: 'رقم الفاتورة الصادرة',
                 uuid: invoiceUuid,
                 icon: Icons.receipt_long_rounded,
@@ -235,7 +230,7 @@ class RequestApprovalResultSheet extends StatelessWidget {
                   color: colors.outlineVariant.withValues(alpha: 0.25),
                 ),
               ),
-              _DocumentIdentityTile(
+              ApprovalResultDocumentTile(
                 title: 'رقم الطلب الأصلي',
                 uuid: requestUuid,
                 icon: Icons.shopping_bag_outlined,
@@ -325,7 +320,7 @@ class RequestApprovalResultSheet extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _FinancialRow(
+              ApprovalResultFinancialRow(
                 label: 'إجمالي الفاتورة',
                 value: AmountFormatter.formatValue(invoice.invoiceTotalAmount),
                 isEmphasized: true,
@@ -337,7 +332,7 @@ class RequestApprovalResultSheet extends StatelessWidget {
                   color: colors.outlineVariant.withValues(alpha: 0.25),
                 ),
               ),
-              _FinancialRow(
+              ApprovalResultFinancialRow(
                 label: 'المبلغ المسدد',
                 value: AmountFormatter.formatValue(invoice.paidAmount),
                 toneColor: colors.tertiary,
@@ -349,7 +344,7 @@ class RequestApprovalResultSheet extends StatelessWidget {
                   color: colors.outlineVariant.withValues(alpha: 0.25),
                 ),
               ),
-              _FinancialRow(
+              ApprovalResultFinancialRow(
                 label: 'المتبقي',
                 value: AmountFormatter.formatValue(invoice.remainingAmount),
                 toneColor: invoice.remainingAmount > 0
@@ -363,7 +358,7 @@ class RequestApprovalResultSheet extends StatelessWidget {
                   color: colors.outlineVariant.withValues(alpha: 0.25),
                 ),
               ),
-              _FinancialRow(
+              ApprovalResultFinancialRow(
                 label: 'نوع البيع',
                 value: saleType.label,
               ),
@@ -374,7 +369,7 @@ class RequestApprovalResultSheet extends StatelessWidget {
                   color: colors.outlineVariant.withValues(alpha: 0.25),
                 ),
               ),
-              _FinancialRow(
+              ApprovalResultFinancialRow(
                 label: 'حالة السداد',
                 value: payment.label,
                 badgeTone: payment.tone,
@@ -419,154 +414,3 @@ class RequestApprovalResultSheet extends StatelessWidget {
   }
 }
 
-class _DocumentIdentityTile extends StatelessWidget {
-  const _DocumentIdentityTile({
-    required this.title,
-    required this.uuid,
-    required this.icon,
-    required this.isPrimary,
-  });
-
-  final String title;
-  final String uuid;
-  final IconData icon;
-  final bool isPrimary;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Row(
-      children: [
-        Container(
-          width: 30.r,
-          height: 30.r,
-          decoration: BoxDecoration(
-            color: isPrimary
-                ? colors.primary.withValues(alpha: 0.12)
-                : colors.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(6.r),
-          ),
-          child: Center(
-            child: Icon(
-              icon,
-              size: 16.r,
-              color: isPrimary ? colors.primary : colors.onSurfaceVariant,
-            ),
-          ),
-        ),
-        AppSpacing.hSm,
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTypography.labelSmall.copyWith(
-                  color: colors.onSurfaceVariant,
-                  fontSize: 10.sp,
-                ),
-              ),
-              Text(
-                uuid,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodySmall.copyWith(
-                  color: isPrimary ? colors.primary : colors.onSurface,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-        CustomInteractiveBounce(
-          onTap: () {
-            UrlLauncherService.copyToClipboard(
-              uuid,
-              confirmationMessage: 'تم النسخ للحافظة',
-            );
-            CustomSnackbar.show(
-              title: 'تم النسخ',
-              message: 'تم نسخ $uuid للحافظة',
-              type: SnackType.info,
-            );
-          },
-          child: Container(
-            padding: EdgeInsets.all(5.r),
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(6.r),
-              border: Border.all(
-                color: colors.outlineVariant.withValues(alpha: 0.4),
-                width: 0.5,
-              ),
-            ),
-            child: Icon(
-              Icons.copy_rounded,
-              size: 13.r,
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _FinancialRow extends StatelessWidget {
-  const _FinancialRow({
-    required this.label,
-    required this.value,
-    this.isEmphasized = false,
-    this.toneColor,
-    this.badgeTone,
-  });
-
-  final String label;
-  final String value;
-  final bool isEmphasized;
-  final Color? toneColor;
-  final SemanticTone? badgeTone;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: AppTypography.bodySmall.copyWith(
-              color: isEmphasized ? colors.onSurface : colors.onSurfaceVariant,
-              fontWeight: isEmphasized ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-        ),
-        if (badgeTone != null)
-          CustomStatusBadge(
-            label: value,
-            tone: badgeTone!,
-            isCompact: true,
-          )
-        else
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              label == 'نوع البيع' ? value : '$value ر.ي',
-              textDirection: TextDirection.rtl,
-              style: (isEmphasized
-                      ? AppTypography.titleSmall
-                      : AppTypography.bodyMedium)
-                  .copyWith(
-                color: toneColor ?? (isEmphasized ? colors.primary : colors.onSurface),
-                fontWeight: isEmphasized ? FontWeight.w900 : FontWeight.w700,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}

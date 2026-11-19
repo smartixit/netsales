@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -10,6 +9,7 @@ import 'package:netsales/features/requests/presentation/widgets/procurement_deta
 import 'package:netsales/features/requests/presentation/widgets/procurement_details_hero.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_details_item_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_details_metrics_strip.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_details_notes_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_details_parties_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_details_timeline.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_request_invoice_callout.dart';
@@ -70,10 +70,7 @@ class ProcurementRequestDetailsScreen
         );
       }
 
-      final displayUuid =
-          request.requestUuid != null && request.requestUuid!.trim().isNotEmpty
-          ? request.requestUuid!.trim()
-          : '#${request.requestId}';
+      final displayUuid = request.displayReference;
 
       // 3. عرض صفحة التفاصيل المتكاملة
       return CustomAppScaffold(
@@ -106,8 +103,7 @@ class ProcurementRequestDetailsScreen
                   ProcurementDetailsMetricsStrip(request: request),
 
                   // 3. ملخص المقارنة في حالة وجود تعديلات بعد المراجعة
-                  if (request.isApproved &&
-                      request.modificationSummary != null) ...[
+                  if (request.hasModificationSummary) ...[
                     AppSpacing.vMd,
                     RequestModificationSummaryPanel(
                       summary: request.modificationSummary!,
@@ -115,7 +111,7 @@ class ProcurementRequestDetailsScreen
                   ],
 
                   // 4. بطاقة التنبيه للفاتورة المعتمدة
-                  if (request.isApproved && request.invoiceId != null) ...[
+                  if (request.hasInvoice) ...[
                     AppSpacing.vMd,
                     ProcurementRequestInvoiceCallout(
                       onOpenInvoice: controller.openLinkedInvoice,
@@ -167,51 +163,10 @@ class ProcurementRequestDetailsScreen
                   ],
 
                   // 9. بطاقة الملاحظات إن وجدت
-                  if (request.requestNote != null &&
-                      request.requestNote!.trim().isNotEmpty) ...[
+                  if (request.hasNote) ...[
                     AppSpacing.vMd,
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(AppSpacing.cardPadding),
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerHighest.withValues(
-                          alpha: 0.35,
-                        ),
-                        borderRadius: BorderRadius.circular(AppRadius.card),
-                        border: Border.all(
-                          color: colors.outlineVariant.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.notes_rounded,
-                                size: 16.r,
-                                color: colors.onSurfaceVariant,
-                              ),
-                              SizedBox(width: 6.w),
-                              Text(
-                                'ملاحظات الطلب',
-                                style: AppTypography.labelMedium.copyWith(
-                                  color: colors.onSurface,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 6.h),
-                          Text(
-                            request.requestNote!.trim(),
-                            style: AppTypography.bodySmall.copyWith(
-                              color: colors.onSurfaceVariant,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
-                      ),
+                    ProcurementDetailsNotesCard(
+                      notes: request.requestNote!.trim(),
                     ),
                   ],
 

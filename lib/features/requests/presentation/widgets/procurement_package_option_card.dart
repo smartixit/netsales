@@ -42,34 +42,19 @@ class ProcurementPackageOptionCard extends StatelessWidget {
   final Color? customHeaderTagColor;
 
   double get _basePrice =>
-      customDiscount?.originalPackagePrice ??
-      (package.procurementBaseUnitPriceMinor != null
-          ? package.procurementBaseUnitPriceMinor! / 100
-          : package.packageVoucherPrice);
+      customDiscount?.originalPackagePrice ?? package.resolvedBasePrice;
 
   double get _cashPrice =>
-      customDiscount?.effectiveCashPrice ??
-      (package.procurementCashUnitPriceMinor != null
-          ? package.procurementCashUnitPriceMinor! / 100
-          : package.effectiveCashPrice);
+      customDiscount?.effectiveCashPrice ?? package.resolvedCashPrice;
 
   double get _creditPrice =>
-      customDiscount?.effectiveCreditPrice ??
-      (package.procurementCreditUnitPriceMinor != null
-          ? package.procurementCreditUnitPriceMinor! / 100
-          : package.effectiveCreditPrice);
+      customDiscount?.effectiveCreditPrice ?? package.resolvedCreditPrice;
 
   double get _cashDiscount =>
-      customDiscount?.discountCash ??
-      (package.procurementCashDiscountBasisPoints != null
-          ? package.procurementCashDiscountBasisPoints! / 100
-          : package.packageDefaultCashDiscount);
+      customDiscount?.discountCash ?? package.resolvedCashDiscount;
 
   double get _creditDiscount =>
-      customDiscount?.discountCredit ??
-      (package.procurementCreditDiscountBasisPoints != null
-          ? package.procurementCreditDiscountBasisPoints! / 100
-          : package.packageDefaultCreditDiscount);
+      customDiscount?.discountCredit ?? package.resolvedCreditDiscount;
 
   num? get _lineTotal {
     if (estimatedLineTotal != null) return estimatedLineTotal;

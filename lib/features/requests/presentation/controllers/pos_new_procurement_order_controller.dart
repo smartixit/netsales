@@ -86,6 +86,11 @@ class PosNewProcurementOrderController extends GetxController {
   final selectedPosId = RxnInt();
   final isLoadingMyPos = false.obs;
 
+  /// عنوان الشاشة المنسق بحسب وضع الإنشاء أو التعديل
+  String get screenTitle => isEditing.value
+      ? 'تعديل طلب التوريد #${editingRequestId.value}'
+      : 'طلب توريد جديد';
+
   /// نقطة البيع النشطة المحددة حالياً
   PosEntity? get activePos =>
       myPosList.firstWhereOrNull((p) => p.posId == selectedPosId.value);
@@ -94,8 +99,26 @@ class PosNewProcurementOrderController extends GetxController {
   final selectedNetworkId = RxnInt();
   final isLoadingNetworks = false.obs;
 
+  /// الشبكة المورّدة النشطة المحددة حالياً
+  NetworkPosLinkEntity? get activeNetworkLink =>
+      linkedNetworks.firstWhereOrNull(
+        (link) => link.networkId == selectedNetworkId.value,
+      );
+
   /// يحدد بطاقة السياق المفتوحة حالياً لمنع تكدس خيارات الشبكة ونقطة البيع.
   final expandedProcurementContext = ''.obs;
+
+  void togglePosContextExpansion() {
+    if (isEditing.value) return;
+    expandedProcurementContext.value =
+        expandedProcurementContext.value == 'pos' ? '' : 'pos';
+  }
+
+  void toggleNetworkContextExpansion() {
+    if (isEditing.value) return;
+    expandedProcurementContext.value =
+        expandedProcurementContext.value == 'network' ? '' : 'network';
+  }
 
   final availablePackages = <PackageEntity>[].obs;
   final selectedPackage = Rxn<PackageEntity>();
@@ -184,6 +207,55 @@ class PosNewProcurementOrderController extends GetxController {
         procurementCart,
         selectedSaleType.value,
       );
+
+  /// هل تتوفر تقديرات مالية صالحة لسلة الطلب؟
+  bool get hasEstimate => estimatedProcurementTotalsMinor != null;
+
+  /// هل تحتاج أسعار السلة إلى تحديث التعرفة؟
+  bool get needsPricingRefresh => !hasEstimate && hasCartItems;
+
+  /// عدد الباقات المختلفة المختارة في السلة
+  int get cartPackagesCount => procurementCart.length;
+
+  /// إجمالي عدد الكروت في سلة الطلب الحالية
+  int get checkoutTotalVouchers =>
+      procurementCart.fold<int>(0, (sum, line) => sum + line.voucherCount);
+
+  /// عملة تسعير الطلب المعتمدة
+  String get checkoutCurrency => serverQuote.value?.currency ?? 'ر.ي';
+
+  /// هل يتوفر عرض تسعير معتمد وخادم جاهز؟
+  bool get isQuoteReady => hasCurrentServerQuote && serverQuote.value != null;
+
+  /// إجمالي الطلب الإجمالي قبل الخصم لشريط إتمام الطلب
+  double get checkoutGrossAmount {
+    if (isQuoteReady) return serverQuote.value!.grossTotal;
+    final estimate = estimatedProcurementTotalsMinor;
+    return estimate != null ? estimate.$1 / 100.0 : 0.0;
+  }
+
+  /// إجمالي خصم الطلب لشريط إتمام الطلب
+  double get checkoutDiscountAmount {
+    if (isQuoteReady) return serverQuote.value!.discountTotal;
+    final estimate = estimatedProcurementTotalsMinor;
+    return estimate != null ? estimate.$2 / 100.0 : 0.0;
+  }
+
+  /// صافي الطلب التقديري لشريط إتمام الطلب
+  double get checkoutNetAmount {
+    if (isQuoteReady) return serverQuote.value!.netTotal;
+    final estimate = estimatedProcurementTotalsMinor;
+    return estimate != null ? estimate.$3 / 100.0 : 0.0;
+  }
+
+  /// فهرس محدد نوع البيع (0: نقدي، 1: آجل)
+  int get selectedSaleTypeIndex =>
+      selectedSaleType.value == SaleType.cash ? 0 : 1;
+
+  /// تعيين نوع البيع عبر الفهرس
+  void setSaleTypeIndex(int index) {
+    selectedSaleType.value = index == 0 ? SaleType.cash : SaleType.credit;
+  }
 
   bool get canSubmitOrder =>
       hasCartItems &&

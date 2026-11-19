@@ -5,20 +5,13 @@ import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/presentation/mappers/procurement_status_style_mapper.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// ترويسة تفاصيل طلب التوريد المتطورة المتطابقة مع بطاقات شاشة الطلبات
-///
-/// تجسد المعايير المعتمدة لهوية الطلب:
-/// - أيقونة إيصال ثلاثية الأبعاد بتدرج لوني وحدود وظلال تتكيف ديناميكياً مع حالة الطلب.
-/// - تدرج لوني خافت يتنفس من لون الحالة مع إطار وظلال زمردية/عنبرية ناعمة.
-/// - شارات حالة البيع وحالة الطلب الرسمية من EnumPresentationRegistry.
-/// - عرض التاريخ بالصيغة الزمنية الدقيقة DateFormatter.dateTime().
-/// - إظهار أسماء القائمين على الاعتماد أو الرفض أو الإلغاء بشكل تنفيذي واضح.
 class ProcurementDetailsHero extends StatelessWidget {
   const ProcurementDetailsHero({super.key, required this.request});
 
@@ -27,63 +20,12 @@ class ProcurementDetailsHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-
-    final parsedDate = DateTime.tryParse(
-      request.requestDate ?? request.createdAt ?? '',
-    );
-    final dateLabel = parsedDate != null
-        ? DateFormatter.dateTime(parsedDate)
-        : (request.requestDate ?? request.createdAt ?? 'التاريخ غير متاح');
-
-    final displayUuid =
-        request.requestUuid != null && request.requestUuid!.trim().isNotEmpty
-        ? request.requestUuid!.trim()
-        : '#${request.requestId}';
-
-    final isPending = request.isPending;
-    final isApproved = request.isApproved;
-    final isRejected = request.isRejected;
-    final isCancelled = request.isCancelled;
-
-    // تدرجات الأيقونة وحدودها وظلالها المتكيفة ديناميكياً تماماً كما في شاشة الطلبات
-    final LinearGradient iconGradient;
-    final Color iconBorderColor;
-    final Color iconShadowColor;
-
-    if (isPending) {
-      iconGradient = const LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [Color(0xFFD97706), Color(0xFFB45309)],
-      );
-      iconBorderColor = const Color(0xFFFFE082).withValues(alpha: .55);
-      iconShadowColor = const Color(0xFFD97706).withValues(alpha: .28);
-    } else if (isApproved) {
-      iconGradient = const LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [Color(0xFF087F68), Color(0xFF075B55)],
-      );
-      iconBorderColor = const Color(0xFFFFD98A).withValues(alpha: .40);
-      iconShadowColor = const Color(0xFF087F68).withValues(alpha: .22);
-    } else if (isRejected) {
-      iconGradient = const LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [Color(0xFFDC2626), Color(0xFF991B1B)],
-      );
-      iconBorderColor = const Color(0xFFFCA5A5).withValues(alpha: .50);
-      iconShadowColor = const Color(0xFFDC2626).withValues(alpha: .25);
-    } else {
-      // ملغي أو حالة افتراضية
-      iconGradient = const LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [Color(0xFF475569), Color(0xFF334155)],
-      );
-      iconBorderColor = const Color(0xFFCBD5E1).withValues(alpha: .40);
-      iconShadowColor = const Color(0xFF475569).withValues(alpha: .20);
-    }
+    final dateLabel = request.formattedRequestDate;
+    final displayUuid = request.displayReference;
+    final style = ProcurementStatusStyleMapper.resolve(request);
+    final iconGradient = style.iconGradient;
+    final iconBorderColor = style.iconBorderColor;
+    final iconShadowColor = style.iconShadowColor;
 
     final status = EnumPresentationRegistry.resolveRequestStatus(
       request.status,
@@ -290,7 +232,7 @@ class ProcurementDetailsHero extends StatelessWidget {
                 ),
 
                 // السطر 4: توثيق متخذ القرار (اسم المعتمد / الرافض / الملغي)
-                if (isApproved &&
+                if (request.isApproved &&
                     request.reviewedByName != null &&
                     request.reviewedByName!.trim().isNotEmpty) ...[
                   AppSpacing.vXxs,
@@ -315,7 +257,7 @@ class ProcurementDetailsHero extends StatelessWidget {
                       ),
                     ],
                   ),
-                ] else if (isRejected &&
+                ] else if (request.isRejected &&
                     request.reviewedByName != null &&
                     request.reviewedByName!.trim().isNotEmpty) ...[
                   AppSpacing.vXxs,
@@ -340,7 +282,7 @@ class ProcurementDetailsHero extends StatelessWidget {
                       ),
                     ],
                   ),
-                ] else if (isCancelled) ...[
+                ] else if (request.isCancelled) ...[
                   AppSpacing.vXxs,
                   Row(
                     children: [

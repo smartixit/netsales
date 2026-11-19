@@ -8,6 +8,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_summary_metric.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 
@@ -19,28 +20,17 @@ class ProcurementCheckoutBar extends GetView<PosNewProcurementOrderController> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Obx(() {
-      final lines = controller.procurementCart;
-      final quote = controller.serverQuote.value;
-      final count = lines.fold<int>(0, (sum, line) => sum + line.voucherCount);
-      final currency = quote?.currency ?? 'ر.ي';
-      final quoteReady = controller.hasCurrentServerQuote && quote != null;
-      final estimate = controller.estimatedProcurementTotalsMinor;
-      final hasEstimate = estimate != null;
+      final gross = controller.checkoutGrossAmount;
+      final discount = controller.checkoutDiscountAmount;
+      final net = controller.checkoutNetAmount;
+      final count = controller.checkoutTotalVouchers;
+      final currency = controller.checkoutCurrency;
       final isCompact =
           MediaQuery.sizeOf(context).width <= AppBreakpoints.mobileMax;
-      final gross = quoteReady
-          ? quote.grossTotal
-          : (hasEstimate ? estimate.$1 / 100 : 0);
-      final discount = quoteReady
-          ? quote.discountTotal
-          : (hasEstimate ? estimate.$2 / 100 : 0);
-      final net = quoteReady
-          ? quote.netTotal
-          : (hasEstimate ? estimate.$3 / 100 : 0);
       final summaryRows = Row(
         children: [
           Expanded(
-            child: _SummaryMetric(
+            child: ProcurementCheckoutSummaryMetric(
               label: 'الإجمالي',
               value: AmountFormatter.formatValue(gross),
               currency: currency,
@@ -48,7 +38,7 @@ class ProcurementCheckoutBar extends GetView<PosNewProcurementOrderController> {
           ),
           AppSpacing.hXs,
           Expanded(
-            child: _SummaryMetric(
+            child: ProcurementCheckoutSummaryMetric(
               label: 'الخصم',
               value: AmountFormatter.formatValue(discount),
               currency: currency,
@@ -57,7 +47,7 @@ class ProcurementCheckoutBar extends GetView<PosNewProcurementOrderController> {
           ),
           AppSpacing.hXs,
           Expanded(
-            child: _SummaryMetric(
+            child: ProcurementCheckoutSummaryMetric(
               label: 'الصافي التقديري',
               value: AmountFormatter.formatValue(net),
               currency: currency,
@@ -99,7 +89,7 @@ class ProcurementCheckoutBar extends GetView<PosNewProcurementOrderController> {
               final metrics = Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (!hasEstimate && lines.isNotEmpty) ...[
+                  if (controller.needsPricingRefresh) ...[
                     CustomStateView.pricingExpired(
                       title: controller.isRefreshingCartPricing.value
                           ? 'جارٍ تحديث التعرفة'
@@ -137,7 +127,7 @@ class ProcurementCheckoutBar extends GetView<PosNewProcurementOrderController> {
                       ),
                       const Spacer(),
                       Text(
-                        '${lines.length} باقة مختارة',
+                        '${controller.cartPackagesCount} باقة مختارة',
                         style: AppTypography.labelSmall.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
@@ -178,82 +168,5 @@ class ProcurementCheckoutBar extends GetView<PosNewProcurementOrderController> {
         ),
       );
     });
-  }
-}
-
-class _SummaryMetric extends StatelessWidget {
-  const _SummaryMetric({
-    required this.label,
-    required this.value,
-    required this.currency,
-    this.isDiscount = false,
-    this.isNet = false,
-  });
-
-  final String label;
-  final String value;
-  final String currency;
-  final bool isDiscount;
-  final bool isNet;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final accent = isNet
-        ? colors.primary
-        : (isDiscount ? colors.tertiary : colors.onSurface);
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: isNet
-            ? colors.primary.withValues(alpha: .08)
-            : colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: isNet
-              ? colors.primary.withValues(alpha: .24)
-              : colors.outlineVariant.withValues(alpha: .35),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          AppSpacing.vXxs,
-          SizedBox(
-            width: double.infinity,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                value,
-                maxLines: 1,
-                style: AppTypography.titleSmall.copyWith(
-                  color: accent,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          ),
-          Text(
-            currency,
-            style: AppTypography.labelSmall.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

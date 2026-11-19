@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
@@ -22,6 +24,7 @@ import 'package:netsales/features/requests/domain/usecases/get_request_status_su
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
+import 'package:netsales/features/requests/presentation/widgets/modification_sheet/network_request_modification_footer.dart';
 import 'package:netsales/features/requests/presentation/widgets/network_request_modification_sheet.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
@@ -168,6 +171,57 @@ class NetworkProcurementReviewController extends GetxController {
     }
 
     return false;
+  }
+
+  /// الباقات غير المضافة بعد من الكتالوج
+  List<PackageEntity> get unselectedAvailablePackages {
+    final selectedIds = modificationLines.map((line) => line.packageId).toSet();
+    return availablePackages
+        .where((p) => !selectedIds.contains(p.packageId))
+        .toList(growable: false);
+  }
+
+  /// استرجاع بيانات الباقة للعرض عند التعديل
+  PackageEntity resolvePackageForModification(int packageId) {
+    final fromCatalog = availablePackages.firstWhereOrNull(
+      (p) => p.packageId == packageId,
+    );
+    if (fromCatalog != null) return fromCatalog;
+
+    final fromRequest = editingRequest.value?.items.firstWhereOrNull(
+      (i) => i.packageId == packageId,
+    );
+    if (fromRequest?.voucherPackage != null) {
+      return fromRequest!.voucherPackage!;
+    }
+
+    return PackageEntity(
+      packageId: packageId,
+      networkId: editingRequest.value?.networkId ?? 0,
+      packageName:
+          fromRequest?.voucherPackage?.packageName ?? 'باقة #$packageId',
+      packageColor: fromRequest?.voucherPackage?.packageColor ?? '#087B61',
+      packageBalance: fromRequest?.voucherPackage?.packageBalance ?? 0,
+      packageValidity: fromRequest?.voucherPackage?.packageValidity ?? 0,
+      packageUptime: fromRequest?.voucherPackage?.packageUptime ?? 0,
+      packageVoucherCount:
+          fromRequest?.voucherPackage?.packageVoucherCount ?? 100,
+      packageVoucherPrice: fromRequest?.voucherPrice ?? 0,
+      packageDefaultCashDiscount: fromRequest?.itemDiscount ?? 0,
+      packageDefaultCreditDiscount: 0,
+      cashDiscountAmount: 0,
+      creditDiscountAmount: 0,
+      effectiveCashPrice: fromRequest?.voucherPrice ?? 0,
+      effectiveCreditPrice: fromRequest?.voucherPrice ?? 0,
+      status: true,
+    );
+  }
+
+  /// التحقق مما إذا كان البند مضافاً حديثاً وغير موجود بالطلب الأصلي
+  bool isItemNewlyAdded(int packageId) {
+    final original = editingRequest.value;
+    if (original == null) return false;
+    return !original.items.any((i) => i.packageId == packageId);
   }
 
   Future<void> beginModification(RequestEntity request) async {
@@ -795,6 +849,27 @@ class NetworkProcurementReviewController extends GetxController {
     }
   }
 
+  /// القيمة الإجمالية المعتمدة لبند مسودة التعديل إن كان متطابقاً مع آخر معاينة
+  double? authoritativeTotalForModificationLine(
+    RequestModificationLineEntity line,
+  ) {
+    final previewItem = currentPreview.value?.items.firstWhereOrNull(
+      (item) => item.packageId == line.packageId,
+    );
+    if (previewItem != null && previewItem.voucherCount == line.voucherCount) {
+      return previewItem.itemTotalAmount;
+    }
+    return null;
+  }
+
+  /// فتح الفاتورة المرتبطة بالطلب
+  Future<void> openInvoice(int invoiceId) async {
+    await Get.toNamed<void>(
+      AppRoutes.saleInvoiceDetails,
+      arguments: invoiceId,
+    );
+  }
+
   /// فتح تفاصيل طلب التوريد
   Future<void> openRequestDetails(RequestEntity request) async {
     await Get.toNamed<void>(
@@ -805,7 +880,21 @@ class NetworkProcurementReviewController extends GetxController {
 
   /// فتح شاشة تعديل طلب التوريد
   Future<void> openModificationSheet(RequestEntity request) async {
-    await NetworkRequestModificationSheet.open(request);
+    if (!request.isPending) return;
+
+    unawaited(beginModification(request));
+
+    await CustomBottomSheet.show<void>(
+      title: 'مراجعة طلب ${request.displayReference}',
+      subtitle:
+          'عدّل كميات الباقات أو أضف باقات جديدة، ثم عاين الأسعار قبل الاعتماد.',
+      leadingIcon: Icons.edit_note_rounded,
+      scrollable: true,
+      maxHeightFactor: 0.94,
+      stickyFooter: const NetworkRequestModificationFooter(),
+      child: const NetworkRequestModificationSheet(),
+    );
+    clearModificationEditor();
   }
 
   /// حوار اعتماد طلب التوريد

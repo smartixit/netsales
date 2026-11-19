@@ -4,8 +4,9 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/requests/domain/entities/request_item_entity.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_details_audit_row.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_details_spec_badge.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 
 /// بطاقة الباقة التوريدية المتطورة بنظام حركة الأكورديون المعتمد لصفحة الطلبات
@@ -40,24 +41,13 @@ class ProcurementDetailsItemCard extends StatelessWidget {
       fallback: colors.primary,
     );
 
-    final packageName = package?.packageName ?? 'باقة كروت #${item.packageId}';
-
-    // حسابات الشيتات وتوصيف الأوراق
-    final sheetSize = (package?.packageVoucherCount ?? 0) > 0
-        ? package!.packageVoucherCount
-        : 100;
-    final sheetDescription = VoucherSheetCalculator.describe(
-      item.voucherCount,
-      sheetSize,
-    );
-    final sheetsCount = sheetSize > 0 ? (item.voucherCount / sheetSize) : 0.0;
-    final sheetsFormatted = sheetsCount.truncateToDouble() == sheetsCount
-        ? sheetsCount.toInt().toString()
-        : sheetsCount.toStringAsFixed(1);
-
-    final grossAmount = item.voucherPrice * item.voucherCount;
-    final hasDiscount = item.itemDiscount > 0;
-    final isCustomDiscount = package?.procurementIsCustomDiscount == true;
+    final packageName = item.packageName;
+    final sheetSize = item.sheetSize;
+    final sheetDescription = item.sheetDescription;
+    final sheetsFormatted = item.formattedSheetsCount;
+    final grossAmount = item.grossAmount;
+    final hasDiscount = item.hasDiscount;
+    final isCustomDiscount = item.isCustomDiscount;
 
     return Container(
       width: double.infinity,
@@ -251,22 +241,19 @@ class ProcurementDetailsItemCard extends StatelessWidget {
                 runSpacing: 4.h,
                 children: [
                   if (package.packageBalance > 0)
-                    _buildSpecBadge(
-                      context,
+                    ProcurementDetailsSpecBadge(
                       label: package.balanceDisplay,
                       icon: Icons.data_usage_rounded,
                       tintColor: const Color(0xFF0284C7),
                     ),
                   if (package.packageValidity != null)
-                    _buildSpecBadge(
-                      context,
+                    ProcurementDetailsSpecBadge(
                       label: package.validityDisplay,
                       icon: Icons.calendar_today_rounded,
                       tintColor: const Color(0xFFD97706),
                     ),
                   if (package.packageUptime != null)
-                    _buildSpecBadge(
-                      context,
+                    ProcurementDetailsSpecBadge(
                       label: package.uptimeDisplay,
                       icon: Icons.timer_outlined,
                       tintColor: const Color(0xFF7C3AED),
@@ -514,8 +501,7 @@ class ProcurementDetailsItemCard extends StatelessWidget {
                                 ),
                                 SizedBox(height: 8.h),
 
-                                _buildAuditRow(
-                                  context,
+                                ProcurementDetailsAuditRow(
                                   label: 'القيمة الإجمالية الأساسية',
                                   formula:
                                       '${item.voucherCount} كرت × ${AmountFormatter.formatValue(item.voucherPrice)}',
@@ -526,8 +512,7 @@ class ProcurementDetailsItemCard extends StatelessWidget {
 
                                 if (hasDiscount) ...[
                                   SizedBox(height: 6.h),
-                                  _buildAuditRow(
-                                    context,
+                                  ProcurementDetailsAuditRow(
                                     label: isCustomDiscount
                                         ? 'الخصم الخاص الممنوح (مخصص لنقطتك)'
                                         : 'الخصم الافتراضي للباقة (تعاقدي)',
@@ -546,8 +531,7 @@ class ProcurementDetailsItemCard extends StatelessWidget {
                                 ),
                                 SizedBox(height: 6.h),
 
-                                _buildAuditRow(
-                                  context,
+                                ProcurementDetailsAuditRow(
                                   label: 'صافي القيمة المستحقة للبند',
                                   amount: AmountFormatter.formatValue(
                                     item.itemTotalAmount,
@@ -613,97 +597,6 @@ class ProcurementDetailsItemCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSpecBadge(
-    BuildContext context, {
-    required String label,
-    required IconData icon,
-    required Color tintColor,
-  }) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: tintColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(6.r),
-        border: Border.all(
-          color: tintColor.withValues(alpha: 0.22),
-          width: 0.7,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 11.r, color: tintColor),
-          SizedBox(width: 4.w),
-          Text(
-            label,
-            style: AppTypography.labelSmall.copyWith(
-              color: tintColor,
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAuditRow(
-    BuildContext context, {
-    required String label,
-    required String amount,
-    String? formula,
-    bool isDiscount = false,
-    bool isTotal = false,
-  }) {
-    final colors = context.colors;
-
-    final Color valueColor = isTotal
-        ? colors.primary
-        : (isDiscount ? const Color(0xFF059669) : colors.onSurface);
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: AppTypography.caption.copyWith(
-                  color: isTotal ? colors.onSurface : colors.onSurfaceVariant,
-                  fontWeight: isTotal ? FontWeight.w800 : FontWeight.w500,
-                  fontSize: 10.5.sp,
-                ),
-              ),
-              if (formula != null) ...[
-                SizedBox(height: 1.h),
-                Text(
-                  formula,
-                  style: AppTypography.caption.copyWith(
-                    color: colors.onSurfaceVariant.withValues(alpha: 0.8),
-                    fontSize: 9.sp,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-        SizedBox(width: 8.w),
-        Text(
-          amount,
-          style:
-              (isTotal ? AppTypography.labelLarge : AppTypography.labelMedium)
-                  .copyWith(
-                    fontWeight: isTotal ? FontWeight.w900 : FontWeight.w700,
-                    color: valueColor,
-                  ),
-        ),
-      ],
     );
   }
 }

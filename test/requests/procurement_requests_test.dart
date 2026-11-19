@@ -13,6 +13,7 @@ import 'package:netsales/features/requests/domain/entities/request_approval_resu
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_modification_preview_item_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
 import 'package:netsales/features/requests/domain/repositories/request_repository.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';

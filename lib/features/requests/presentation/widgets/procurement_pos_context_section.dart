@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_context_option.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_context_selector.dart';
 
 /// Adapts the user's authorized POS entities to the shared context selector.
@@ -42,10 +43,7 @@ class ProcurementPosContextSection
         emptyMessage: positions.isEmpty && !controller.isLoadingMyPos.value
             ? 'لا توجد نقاط بيع معتمدة ومصرح بها لحسابك حالياً.'
             : null,
-        onToggle: () {
-          if (isEditMode) return;
-          controller.expandedProcurementContext.value = isExpanded ? '' : 'pos';
-        },
+        onToggle: controller.togglePosContextExpansion,
         options: positions
             .map(
               (pos) => ProcurementContextOption(

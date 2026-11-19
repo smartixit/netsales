@@ -31,6 +31,7 @@ class ProcurementOrderCard extends StatelessWidget {
     this.onApprove,
     this.onModify,
     this.onReject,
+    this.onInvoiceTap,
   });
 
   final RequestEntity request;
@@ -44,6 +45,7 @@ class ProcurementOrderCard extends StatelessWidget {
   final VoidCallback? onApprove;
   final VoidCallback? onModify;
   final VoidCallback? onReject;
+  final VoidCallback? onInvoiceTap;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +97,7 @@ class ProcurementOrderCard extends StatelessWidget {
               status: status,
               saleType: saleType,
               isNetworkView: isNetworkView,
+              onInvoiceTap: onInvoiceTap,
             ),
 
             // 2. المحتوى الداخلي للطلب

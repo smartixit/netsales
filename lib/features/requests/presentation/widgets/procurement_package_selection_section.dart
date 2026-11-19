@@ -6,6 +6,7 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_catalog_failure_state.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_option_card.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
@@ -18,38 +19,6 @@ import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 class ProcurementPackageSelectionSection
     extends GetView<PosNewProcurementOrderController> {
   const ProcurementPackageSelectionSection({super.key});
-
-  Widget _buildCatalogFailureState(BuildContext context) {
-    final message = controller.packageErrorMessage.value ?? '';
-    final normalized = message.toLowerCase();
-    final offline =
-        normalized.contains('socket') ||
-        normalized.contains('network') ||
-        normalized.contains('connection') ||
-        normalized.contains('internet') ||
-        message.contains('الاتصال') ||
-        message.contains('الإنترنت');
-    final networkId = controller.selectedNetworkId.value;
-    final retry = networkId == null
-        ? null
-        : () => controller.loadNetworkPackages(networkId);
-
-    if (offline) {
-      return CustomStateView.offline(
-        title: 'تعذر الاتصال بكتالوج الشبكة',
-        subtitle: 'تحقق من اتصال الإنترنت ثم أعد المحاولة لتحميل الباقات.',
-        presentation: CustomStatePresentation.compact,
-        onAction: retry,
-      );
-    }
-
-    return CustomStateView.error(
-      title: 'تعذر تحميل كتالوج الباقات',
-      subtitle: message,
-      presentation: CustomStatePresentation.compact,
-      onAction: retry,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +95,14 @@ class ProcurementPackageSelectionSection
                   controller.availablePackages.isEmpty)
                 SizedBox(
                   width: double.infinity,
-                  child: _buildCatalogFailureState(context),
+                  child: ProcurementCatalogFailureState(
+                    errorMessage: controller.packageErrorMessage.value!,
+                    onRetry: controller.selectedNetworkId.value == null
+                        ? null
+                        : () => controller.loadNetworkPackages(
+                              controller.selectedNetworkId.value!,
+                            ),
+                  ),
                 )
               else if (controller.availablePackages.isEmpty &&
                   controller.packageSearchQuery.value.isNotEmpty)
