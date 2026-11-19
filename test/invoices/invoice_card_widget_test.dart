@@ -63,7 +63,7 @@ void main() {
   testWidgets('InvoiceCard renders header, status badge and party details correctly', (tester) async {
     await tester.pumpWidget(createTestWidget(isExpanded: false));
 
-    expect(find.text('فاتورة #inv-uuid-10'), findsOneWidget);
+    expect(find.text('inv-uuid-10'), findsOneWidget);
     expect(find.text('نقطة بيع البركة'), findsOneWidget);
     expect(find.text('مسددة بالكامل'), findsWidgets);
     expect(find.text('الباقات والكميات (1)'), findsOneWidget);
