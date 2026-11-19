@@ -139,6 +139,65 @@ var a = toNumbers ( "f655ba9d09a112d4968c63579db590b4" ),
       ]);
     });
 
+    test('extracts the challenge redirect query from the same endpoint', () {
+      final requestUri = Uri.parse(
+        'https://netsales.kesug.com/api/v1/security/public-keys?locale=ar',
+      );
+      const html = '''
+<script>
+document.cookie="__test=token; path=/";
+location.href="https://netsales.kesug.com/api/v1/security/public-keys?i=1";
+</script>
+''';
+
+      final target = InfinityFreeChallengeSolver.extractChallengeRedirectUri(
+        html,
+        requestUri: requestUri,
+      );
+
+      expect(target, isNotNull);
+      expect(target!.queryParameters, {'i': '1'});
+      expect(target.path, requestUri.path);
+      expect(target.origin, requestUri.origin);
+    });
+
+    test('resolves a relative same-endpoint challenge redirect', () {
+      final requestUri = Uri.parse(
+        'https://netsales.kesug.com/api/v1/auth/login',
+      );
+
+      final target = InfinityFreeChallengeSolver.extractChallengeRedirectUri(
+        'location.href="/api/v1/auth/login?i=2";',
+        requestUri: requestUri,
+      );
+
+      expect(
+        target?.toString(),
+        'https://netsales.kesug.com/api/v1/auth/login?i=2',
+      );
+    });
+
+    test('rejects challenge redirects to a different origin or path', () {
+      final requestUri = Uri.parse(
+        'https://netsales.kesug.com/api/v1/auth/login',
+      );
+
+      expect(
+        InfinityFreeChallengeSolver.extractChallengeRedirectUri(
+          'location.href="https://evil.example/api/v1/auth/login?i=1";',
+          requestUri: requestUri,
+        ),
+        isNull,
+      );
+      expect(
+        InfinityFreeChallengeSolver.extractChallengeRedirectUri(
+          'location.href="https://netsales.kesug.com/other?i=1";',
+          requestUri: requestUri,
+        ),
+        isNull,
+      );
+    });
+
     test('rejects incomplete challenge constants', () {
       expect(
         InfinityFreeChallengeSolver.solveChallenge(
