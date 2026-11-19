@@ -284,7 +284,10 @@ Dio _dio(Uri baseUri, _ScriptedAdapter adapter) {
   return dio;
 }
 
-String _challenge(\n  Uri requestUri, {\n  String cipherText = '25b509cc7dadcdb532275647f94524cc',\n}) {
+String _challenge(
+  Uri requestUri, {
+  String cipherText = '25b509cc7dadcdb532275647f94524cc',
+}) {
   final redirect = requestUri.replace(queryParameters: {'i': '1'});
   return '''
 <html><body><script type="text/javascript" src="/aes.js"></script><script>
