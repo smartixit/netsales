@@ -1137,14 +1137,6 @@ class _CryptoInterceptor extends Interceptor {
   ) {
     final options = response.requestOptions;
 
-    // The challenge interceptor is later in the response chain. Defer
-    // finalizing and disposing the ephemeral key until that interceptor has
-    // replayed the same sealed request with the verification cookie.
-    if (options.extra['__test_retried'] != true &&
-        InfinityFreeChallengeSolver.isChallengeResponse(response.data)) {
-      return handler.next(response);
-    }
-
     if (!ApiRequestReplayState.tryFinishCryptoLifecycle(options)) {
       return handler.next(response);
     }
