@@ -72,15 +72,13 @@ class InfinityFreeChallengeSolver {
   /// قيمته ضمن 1..16 فإن المرجع يلغي الإزالة كلها. أما البايت السابق
   /// الأكبر من 16 فينهي الفحص مع الإبقاء على عدد البايتات المتطابقة المكتشف.
   static Uint8List _unpadBytesOut(Uint8List data) {
-    if (data.length < 16) return data;
-
     var padCount = 0;
     var padByte = -1;
     const blockSize = 16;
 
     for (
       var i = data.length - 1;
-      i >= data.length - 1 - blockSize;
+      i >= 0 && i >= data.length - 1 - blockSize;
       i--
     ) {
       if (data[i] <= blockSize) {
