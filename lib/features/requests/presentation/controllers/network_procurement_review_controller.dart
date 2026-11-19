@@ -780,6 +780,7 @@ class NetworkProcurementReviewController extends GetxController {
           message: 'يرجى كتابة سبب رفض الطلب لتوثيقه في السجل.',
           type: SnackType.warning,
         );
+        return;
       }
 
       isProcessingDecision.value = true;
