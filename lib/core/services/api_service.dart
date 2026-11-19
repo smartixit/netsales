@@ -10,6 +10,7 @@ import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
+import 'package:netsales/core/services/api_request_replay_state.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
@@ -835,7 +836,7 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     options.extra[_retryFlagKey] = true;
     // The request body and ephemeral response key were already prepared by
     // _CryptoInterceptor. The replay must not seal the sealed payload again.
-    options.extra[_CryptoInterceptor._preparedRequestKey] = true;
+    ApiRequestReplayState.markCryptoPrepared(options);
 
     try {
       final retried = await _dio.fetch<dynamic>(options);
@@ -939,10 +940,6 @@ class _RetryInterceptor extends Interceptor {
 class _CryptoInterceptor extends Interceptor {
   final Dio _dio;
 
-  static const _preparedRequestKey = '__netsales_crypto_request_prepared';
-  static const _cryptoLifecycleFinishedKey =
-      '__netsales_crypto_lifecycle_finished';
-
   _CryptoInterceptor(this._dio);
 
   @override
@@ -958,8 +955,7 @@ class _CryptoInterceptor extends Interceptor {
         options.extra['bypass_encryption'] == true ||
         _isBypassEndpoint(options.path);
 
-    if (isBypassed ||
-        options.extra[_preparedRequestKey] == true) {
+    if (isBypassed || ApiRequestReplayState.isCryptoPrepared(options)) {
       return handler.next(options);
     }
 
@@ -995,7 +991,7 @@ class _CryptoInterceptor extends Interceptor {
         options.extra['_crypto_keypair'] = ephemeral;
       }
 
-      options.extra[_preparedRequestKey] = true;
+      ApiRequestReplayState.markCryptoPrepared(options);
     } catch (e, stack) {
       log(
         '⚠️ [CryptoInterceptor] Encryption failed for ${options.uri}: $e\n$stack',
@@ -1010,13 +1006,14 @@ class _CryptoInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
-    final extra = response.requestOptions.extra;
-    if (extra[_cryptoLifecycleFinishedKey] == true) {
+    if (!ApiRequestReplayState.tryFinishCryptoLifecycle(
+      response.requestOptions,
+    )) {
       return handler.next(response);
     }
 
-    final keyPair = extra['_crypto_keypair'] as KeyPair?;
-    extra[_cryptoLifecycleFinishedKey] = true;
+    final keyPair =
+        response.requestOptions.extra['_crypto_keypair'] as KeyPair?;
 
     if (keyPair != null) {
       try {
@@ -1056,10 +1053,8 @@ class _CryptoInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    final extra = err.requestOptions.extra;
-    if (extra[_cryptoLifecycleFinishedKey] != true) {
-      extra[_cryptoLifecycleFinishedKey] = true;
-      final keyPair = extra['_crypto_keypair'] as KeyPair?;
+    if (ApiRequestReplayState.tryFinishCryptoLifecycle(err.requestOptions)) {
+      final keyPair = err.requestOptions.extra['_crypto_keypair'] as KeyPair?;
       try {
         keyPair?.dispose();
       } catch (_) {}
