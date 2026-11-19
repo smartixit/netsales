@@ -56,6 +56,8 @@ abstract final class AppRoutes {
   static const String packageDetails = '/network/packages/details';
   static const String packageForm = '/network/packages/form';
   static const String operatingExpenses = '/network/operating-expenses';
+  static const String operatingExpenseDetails = '/network/operating-expenses/details';
+  static const String createOperatingExpense = '/network/operating-expenses/create';
   static const String networkTeamManagement = '/network/team-management';
   static const String voucherRequestDetails =
       '/network/voucher-request-details';

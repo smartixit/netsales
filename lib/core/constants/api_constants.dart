@@ -280,6 +280,7 @@ abstract final class ApiConstants {
   // 15. المصروفات التشغيلية والبنود والمرفقات (Expenses & Operational Disbursals)
   // ==========================================================================
   static const String expenses = '/expenses';
+  static const String expensesSummary = '/expenses/summary';
   static const String expensesTrashed = '/expenses/trashed';
   static String expense(int id) => '/expenses/$id';
   static String expenseRestore(int id) => '/expenses/$id/restore';
