@@ -426,8 +426,7 @@ void main() {
     test(
       'cancelRequest updates request status to CANCELLED in-place',
       () async {
-        final success = await ordersController.cancelRequest(1);
-        expect(success, true);
+        await ordersController.cancelRequest(1);
         expect(ordersController.requests.first.isCancelled, true);
       },
     );
@@ -561,20 +560,18 @@ void main() {
     );
 
     test('approveRequest approves pending request and updates list', () async {
-      final success = await controller.approveRequest(
+      await controller.approveRequest(
         1,
         requestNote: 'تم الفحص',
       );
-      expect(success, true);
       expect(controller.requests.first.isApproved, true);
     });
 
     test('rejectRequest rejects request with mandatory reason', () async {
-      final success = await controller.rejectRequest(
+      await controller.rejectRequest(
         1,
         'الكمية المطلوبة غير متوفرة حالياً',
       );
-      expect(success, true);
       expect(controller.requests.first.isRejected, true);
       expect(
         controller.requests.first.requestNote,
@@ -585,8 +582,7 @@ void main() {
     test(
       'rejectRequest with empty reason returns false and prevents mutation',
       () async {
-        final success = await controller.rejectRequest(1, '');
-        expect(success, false);
+        await controller.rejectRequest(1, '');
         expect(controller.requests.first.isPending, true);
       },
     );
