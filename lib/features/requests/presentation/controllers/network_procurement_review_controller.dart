@@ -887,7 +887,7 @@ class NetworkProcurementReviewController extends GetxController {
     await CustomBottomSheet.show<void>(
       title: 'مراجعة طلب ${request.displayReference}',
       subtitle:
-          'عدّل كميات الباقات أو أضف باقات جديدة، ثم عاين الأسعار قبل الاعتماد.',
+          'عدّل كميات الباقات أو أضف باقات جديدة، ثم قم بمعاينة الأسعار قبل الاعتماد.',
       leadingIcon: Icons.edit_note_rounded,
       scrollable: true,
       maxHeightFactor: 0.94,

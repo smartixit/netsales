@@ -134,4 +134,46 @@ class RequestEntity {
 
   /// هل الطلب معتمد ومرتبط بفاتورة صادرة؟
   bool get hasInvoice => isApproved && invoiceId != null && invoiceId! > 0;
+
+  /// عنوان عقدة القرار والفوترة في المسار الزمني
+  String get timelineDecisionTitle {
+    switch (status) {
+      case RequestStatus.approved:
+        return 'تم الاعتماد وإصدار الفاتورة';
+      case RequestStatus.rejected:
+        return 'تم رفض الطلب';
+      case RequestStatus.cancelled:
+        return 'تم إلغاء الطلب';
+      case RequestStatus.pending:
+      case RequestStatus.unknown:
+        return 'في انتظار القرار النهائي';
+    }
+  }
+
+  /// تفاصيل عقدة القرار والفوترة في المسار الزمني
+  String get timelineDecisionSubtitle {
+    switch (status) {
+      case RequestStatus.approved:
+        final approver = reviewedByName != null && reviewedByName!.isNotEmpty
+            ? 'بواسطة $reviewedByName'
+            : '';
+        return invoiceUuid != null && invoiceUuid!.isNotEmpty
+            ? 'تم الاعتماد $approver وإصدار الفاتورة المعتمدة #$invoiceUuid'
+            : 'تمت المصادقة $approver على الكميات وتوليد الفاتورة آلياً';
+      case RequestStatus.rejected:
+        final hasRejector =
+            reviewedByName != null && reviewedByName!.isNotEmpty;
+        final rejectorPrefix = hasRejector ? 'بواسطة $reviewedByName • ' : '';
+        return requestNote != null && requestNote!.isNotEmpty
+            ? '$rejectorPrefixالسبب: $requestNote'
+            : '$rejectorPrefixتم رفض الطلب وتوثيق السبب';
+      case RequestStatus.cancelled:
+        return requestNote != null && requestNote!.isNotEmpty
+            ? 'السبب: $requestNote'
+            : 'تم إلغاء الطلب من قبل نقطة البيع';
+      case RequestStatus.pending:
+      case RequestStatus.unknown:
+        return 'الطلب بانتظار مراجعة وقرار إدارة الشبكة المورّدة';
+    }
+  }
 }

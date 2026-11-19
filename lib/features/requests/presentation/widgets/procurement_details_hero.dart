@@ -6,7 +6,6 @@ import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
-import 'package:netsales/features/requests/presentation/mappers/procurement_status_style_mapper.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -22,11 +21,6 @@ class ProcurementDetailsHero extends StatelessWidget {
     final colors = context.colors;
     final dateLabel = request.formattedRequestDate;
     final displayUuid = request.displayReference;
-    final style = ProcurementStatusStyleMapper.resolve(request);
-    final iconGradient = style.iconGradient;
-    final iconBorderColor = style.iconBorderColor;
-    final iconShadowColor = style.iconShadowColor;
-
     final status = EnumPresentationRegistry.resolveRequestStatus(
       request.status,
       serverLabel: request.statusLabel,
@@ -35,6 +29,18 @@ class ProcurementDetailsHero extends StatelessWidget {
       request.saleType,
       serverLabel: request.saleTypeLabel,
     );
+
+    final toneColor = status.tone.color(context);
+    final iconGradient = LinearGradient(
+      begin: Alignment.topRight,
+      end: Alignment.bottomLeft,
+      colors: [
+        toneColor,
+        toneColor.withValues(alpha: 0.85),
+      ],
+    );
+    final iconBorderColor = toneColor.withValues(alpha: 0.40);
+    final iconShadowColor = toneColor.withValues(alpha: 0.25);
 
     return Container(
       width: double.infinity,
@@ -241,7 +247,7 @@ class ProcurementDetailsHero extends StatelessWidget {
                       Icon(
                         Icons.verified_user_outlined,
                         size: 11.5.r,
-                        color: const Color(0xFF087F68),
+                        color: colors.emeraldDark,
                       ),
                       AppSpacing.hXxs,
                       Flexible(
@@ -250,7 +256,7 @@ class ProcurementDetailsHero extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.caption.copyWith(
-                            color: const Color(0xFF087F68),
+                            color: colors.emeraldDark,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -266,7 +272,7 @@ class ProcurementDetailsHero extends StatelessWidget {
                       Icon(
                         Icons.cancel_outlined,
                         size: 11.5.r,
-                        color: const Color(0xFFDC2626),
+                        color: colors.error,
                       ),
                       AppSpacing.hXxs,
                       Flexible(
@@ -275,7 +281,7 @@ class ProcurementDetailsHero extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.caption.copyWith(
-                            color: const Color(0xFFDC2626),
+                            color: colors.error,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -289,7 +295,7 @@ class ProcurementDetailsHero extends StatelessWidget {
                       Icon(
                         Icons.block_rounded,
                         size: 11.5.r,
-                        color: const Color(0xFF475569),
+                        color: colors.onSurfaceVariant,
                       ),
                       AppSpacing.hXxs,
                       Flexible(
@@ -298,7 +304,7 @@ class ProcurementDetailsHero extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.caption.copyWith(
-                            color: const Color(0xFF475569),
+                            color: colors.onSurfaceVariant,
                             fontWeight: FontWeight.w700,
                           ),
                         ),

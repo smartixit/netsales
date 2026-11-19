@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_context_option.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_context_selector.dart';
+import 'package:netsales/widgets/inputs/custom_context_option.dart';
+import 'package:netsales/widgets/inputs/custom_context_selector.dart';
 
 /// Adapts linked Network entities to the shared procurement context selector.
 class ProcurementNetworkContextSection
@@ -21,7 +21,7 @@ class ProcurementNetworkContextSection
       final isExpanded =
           controller.expandedProcurementContext.value == 'network';
 
-      return ProcurementContextSelector(
+      return CustomContextSelector(
         title: 'الشبكة المورّدة',
         subtitle: isEditMode
             ? 'الجهة المورّدة للطلب (أطراف الطلب ثابتة أثناء التعديل)'
@@ -48,7 +48,7 @@ class ProcurementNetworkContextSection
         onToggle: controller.toggleNetworkContextExpansion,
         options: links
             .map(
-              (link) => ProcurementContextOption(
+              (link) => CustomContextOption(
                 id: link.networkId,
                 name: link.network?.networkName ?? 'شبكة #${link.networkId}',
                 detail: link.network?.networkAddress ?? 'شبكة مورّدة مرتبطة',

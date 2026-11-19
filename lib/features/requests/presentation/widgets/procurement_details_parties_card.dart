@@ -101,7 +101,7 @@ class ProcurementDetailsPartiesCard extends StatelessWidget {
             partyName: networkName,
             phoneNumber: request.networkPhone,
             logoUrl: request.networkLogo,
-            iconGradient: const [Color(0xFF0284C7), Color(0xFF0369A1)],
+            iconGradient: [colors.skyAccent, colors.primary],
           ),
 
           // موصل التدفق
@@ -138,7 +138,7 @@ class ProcurementDetailsPartiesCard extends StatelessWidget {
             partyName: posName,
             phoneNumber: request.posPhone,
             logoUrl: request.posLogo,
-            iconGradient: const [Color(0xFF087F68), Color(0xFF065F46)],
+            iconGradient: [colors.emeraldDark, colors.emeraldDeep],
           ),
         ],
       ),

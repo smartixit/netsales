@@ -25,7 +25,7 @@ class ProcurementDetailsAuditRow extends StatelessWidget {
 
     final Color valueColor = isTotal
         ? colors.primary
-        : (isDiscount ? const Color(0xFF059669) : colors.onSurface);
+        : (isDiscount ? colors.success : colors.onSurface);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,

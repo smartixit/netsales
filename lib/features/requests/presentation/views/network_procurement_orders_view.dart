@@ -6,9 +6,9 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_order_card.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_orders_hero.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_orders_summary_strip.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_search_filter_header.dart';
+import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
@@ -71,12 +71,11 @@ class NetworkProcurementOrdersView
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       // 1. الترويسة القيادية لطلبات التوريد الواردة
-                      ProcurementOrdersHero(
-                        embedded: embedded,
+                      const CustomPageHeroCard(
                         title: 'طلبات التوريد الواردة',
                         subtitle:
                             'مراجعة واعتماد طلبات نقاط البيع، مقارنة الكميات والأسعار، وإصدار الفواتير المعتمدة.',
-                        canCreate: false,
+                        icon: Icons.receipt_long_rounded,
                       ),
 
                       // 2. شريط ملخص المؤشرات

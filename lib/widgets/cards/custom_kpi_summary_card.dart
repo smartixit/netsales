@@ -3,12 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_orders_summary_card_data.dart';
+import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
-class ProcurementOrdersKpiSummaryCard extends StatelessWidget {
-  const ProcurementOrdersKpiSummaryCard({
+/// بطاقة مؤشر الأداء والحالات التفاعلية الموحدة (CustomKpiSummaryCard)
+class CustomKpiSummaryCard extends StatelessWidget {
+  const CustomKpiSummaryCard({
     super.key,
     required this.data,
     required this.isLoading,
@@ -16,7 +17,7 @@ class ProcurementOrdersKpiSummaryCard extends StatelessWidget {
     this.onTap,
   });
 
-  final ProcurementOrdersSummaryCardData data;
+  final CustomKpiCardData data;
   final bool isLoading;
   final bool isSelected;
   final VoidCallback? onTap;
@@ -99,9 +100,11 @@ class ProcurementOrdersKpiSummaryCard extends StatelessWidget {
                 child: Text(
                   '${data.count}',
                   style: AppTypography.titleMedium.copyWith(
-                    color: colors.onSurface,
+                    color: isSelected
+                        ? data.accentColor
+                        : colors.onSurface,
                     fontWeight: FontWeight.w900,
-                    height: 1.1,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
               ),

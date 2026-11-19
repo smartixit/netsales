@@ -6,9 +6,10 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_order_card.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_orders_hero.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_orders_summary_strip.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_search_filter_header.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
@@ -68,13 +69,20 @@ class PosProcurementOrdersView
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       // 1. الترويسة القيادية لطلبات التوريد
-                      ProcurementOrdersHero(
-                        embedded: embedded,
+                      CustomPageHeroCard(
                         title: 'طلبات التوريد',
                         subtitle:
                             'متابعة وإدارة طلبات كروت الشبكات، حالات الاعتماد، وتفاصيل الكميات فورياً.',
-                        canCreate: !embedded && controller.canCreateOrder,
-                        onCreate: controller.navigateToNewOrder,
+                        icon: Icons.receipt_long_rounded,
+                        action: (!embedded && controller.canCreateOrder)
+                            ? CustomButton.primary(
+                                text: 'طلب توريد جديد +',
+                                icon: Icons.add_shopping_cart_rounded,
+                                shape: AppButtonShape.pill,
+                                size: AppButtonSize.small,
+                                onPressed: controller.navigateToNewOrder,
+                              )
+                            : null,
                       ),
 
                       // 2. شريط ملخص المؤشرات

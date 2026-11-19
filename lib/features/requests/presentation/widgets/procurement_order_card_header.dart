@@ -11,7 +11,6 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
-import 'package:netsales/features/requests/presentation/mappers/procurement_status_style_mapper.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -47,12 +46,19 @@ class ProcurementOrderCardHeader extends StatelessWidget {
     final partyLogo = isNetworkView ? request.posLogo : request.networkLogo;
     final partyInitial = TextFormatter.avatarInitial(partyName);
 
-    // تدرج لوني وظلال متوافقة ديناميكياً مع حالة الطلب عبر المحول الموحد
-    final style = ProcurementStatusStyleMapper.resolve(request);
-    final iconGradient = style.iconGradient;
-    final iconBorderColor = style.iconBorderColor;
-    final iconShadowColor = style.iconShadowColor;
-    final statusIcon = style.statusIcon;
+    // تمثيل التدرج اللوني والظلال والأيقونة من السجل المركزي الموحد
+    final toneColor = status.tone.color(context);
+    final iconGradient = LinearGradient(
+      begin: Alignment.topRight,
+      end: Alignment.bottomLeft,
+      colors: [
+        toneColor,
+        toneColor.withValues(alpha: 0.85),
+      ],
+    );
+    final iconBorderColor = toneColor.withValues(alpha: 0.40);
+    final iconShadowColor = toneColor.withValues(alpha: 0.25);
+    final statusIcon = status.icon;
 
     // هوية الفاعلين: المراجع ومقدم الطلب
     final reviewedName = request.reviewedByName?.trim();

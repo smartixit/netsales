@@ -53,7 +53,7 @@ class ProcurementDetailsTimelineNode extends StatelessWidget {
                 width: 2.w,
                 height: 38.h,
                 color: isCompleted
-                    ? const Color(0xFF10B981).withValues(alpha: 0.4)
+                    ? colors.success.withValues(alpha: 0.4)
                     : colors.outlineVariant.withValues(alpha: 0.35),
               ),
           ],

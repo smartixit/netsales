@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
-import 'package:netsales/features/requests/presentation/mappers/procurement_timeline_decision_mapper.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_details_timeline_node.dart';
 
 /// الخط الزمني المالي والإداري التوثيقي لدورة حياة طلب التوريد
@@ -74,7 +74,7 @@ class ProcurementDetailsTimeline extends StatelessWidget {
                 : request.displayPosName,
             timestamp: requestDateStr,
             icon: Icons.check_circle_rounded,
-            iconColor: const Color(0xFF10B981),
+            iconColor: colors.success,
             isCompleted: true,
             isLast: false,
           ),
@@ -94,21 +94,24 @@ class ProcurementDetailsTimeline extends StatelessWidget {
             icon: request.isPending
                 ? Icons.hourglass_top_rounded
                 : Icons.check_circle_rounded,
-            iconColor: request.isPending
-                ? const Color(0xFFD97706)
-                : const Color(0xFF10B981),
+            iconColor: request.isPending ? colors.warning : colors.success,
             isCompleted: !request.isPending,
             isLast: false,
           ),
 
           // الخطوة 3: القرار والفوترة
           ProcurementDetailsTimelineNode(
-            title: ProcurementTimelineDecisionMapper.resolveTitle(request),
-            subtitle: ProcurementTimelineDecisionMapper.resolveSubtitle(request),
+            title: request.timelineDecisionTitle,
+            subtitle: request.timelineDecisionSubtitle,
             timestamp: reviewDateStr.isNotEmpty ? reviewDateStr : null,
-            icon: ProcurementTimelineDecisionMapper.resolveIcon(request),
-            iconColor:
-                ProcurementTimelineDecisionMapper.resolveColor(request, context),
+            icon: EnumPresentationRegistry.resolveRequestStatus(
+              request.status,
+              serverLabel: request.statusLabel,
+            ).icon ?? Icons.pending_actions_rounded,
+            iconColor: EnumPresentationRegistry.resolveRequestStatus(
+              request.status,
+              serverLabel: request.statusLabel,
+            ).tone.color(context),
             isCompleted: !request.isPending,
             isLast: true,
           ),

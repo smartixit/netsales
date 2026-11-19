@@ -107,6 +107,18 @@ class AppColors {
   final LinearGradient warningGradient;
   final LinearGradient infoGradient;
 
+  // ── 15. Executive Brand & Hero Tokens (توكنز الهوية القيادية والترويسة) ──
+  final LinearGradient executiveHeroGradient;
+  final Color executiveGoldAccent;
+  final Color executiveGoldIcon;
+  final Color emeraldDark;
+  final Color emeraldDeep;
+  final Color emeraldGlow;
+  final Color skyAccent;
+  final Color purpleAccent;
+  final Color amberAccent;
+  final Color roseAccent;
+
   const AppColors({
     required this.primary,
     required this.onPrimary,
@@ -181,6 +193,16 @@ class AppColors {
     required this.errorGradient,
     required this.warningGradient,
     required this.infoGradient,
+    required this.executiveHeroGradient,
+    required this.executiveGoldAccent,
+    required this.executiveGoldIcon,
+    required this.emeraldDark,
+    required this.emeraldDeep,
+    required this.emeraldGlow,
+    required this.skyAccent,
+    required this.purpleAccent,
+    required this.amberAccent,
+    required this.roseAccent,
   });
 
   /// ── الوصول الموحد التلقائي حسب الثيم النشط في الشاشة ──
@@ -287,6 +309,20 @@ class AppColors {
     infoGradient: LinearGradient(
       colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
     ),
+    executiveHeroGradient: LinearGradient(
+      begin: Alignment.topRight,
+      end: Alignment.bottomLeft,
+      colors: [Color(0xFF087F68), Color(0xFF075B55), Color(0xFF123F49)],
+    ),
+    executiveGoldAccent: Color(0xFFFFD98A),
+    executiveGoldIcon: Color(0xFFFFE7B0),
+    emeraldDark: Color(0xFF087F68),
+    emeraldDeep: Color(0xFF064F43),
+    emeraldGlow: Color(0xFF10B981),
+    skyAccent: Color(0xFF0284C7),
+    purpleAccent: Color(0xFF7C3AED),
+    amberAccent: Color(0xFFD97706),
+    roseAccent: Color(0xFFBE123C),
   );
 
   // ===========================================================================
@@ -387,6 +423,20 @@ class AppColors {
     infoGradient: LinearGradient(
       colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
     ),
+    executiveHeroGradient: LinearGradient(
+      begin: Alignment.topRight,
+      end: Alignment.bottomLeft,
+      colors: [Color(0xFF087F68), Color(0xFF075B55), Color(0xFF123F49)],
+    ),
+    executiveGoldAccent: Color(0xFFFFD98A),
+    executiveGoldIcon: Color(0xFFFFE7B0),
+    emeraldDark: Color(0xFF087F68),
+    emeraldDeep: Color(0xFF064F43),
+    emeraldGlow: Color(0xFF10B981),
+    skyAccent: Color(0xFF0284C7),
+    purpleAccent: Color(0xFF7C3AED),
+    amberAccent: Color(0xFFD97706),
+    roseAccent: Color(0xFFBE123C),
   );
 }
 

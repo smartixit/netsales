@@ -3,12 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_details_metric_data.dart';
+import 'package:netsales/widgets/cards/custom_metric_card_data.dart';
 
-class ProcurementDetailsMetricCard extends StatelessWidget {
-  const ProcurementDetailsMetricCard({super.key, required this.data});
+/// بطاقة عرض الإحصائيات والمؤشرات المالية الموحدة (CustomMetricDisplayCard)
+class CustomMetricDisplayCard extends StatelessWidget {
+  const CustomMetricDisplayCard({super.key, required this.data});
 
-  final ProcurementDetailsMetricData data;
+  final CustomMetricCardData data;
 
   @override
   Widget build(BuildContext context) {
@@ -99,21 +100,23 @@ class ProcurementDetailsMetricCard extends StatelessWidget {
                 Text(
                   data.value,
                   style: AppTypography.titleMedium.copyWith(
-                    fontWeight: FontWeight.w800,
                     color: data.isPrimary ? data.accentColor : colors.onSurface,
-                    letterSpacing: -0.2,
-                  ),
-                  maxLines: 1,
-                ),
-                SizedBox(width: 4.w),
-                Text(
-                  data.unit,
-                  style: AppTypography.caption.copyWith(
-                    color: colors.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16.sp,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
+                if (data.unit != null) ...[
+                  SizedBox(width: 3.w),
+                  Text(
+                    data.unit!,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 10.sp,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

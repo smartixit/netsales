@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_orders_kpi_summary_card.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_orders_summary_card_data.dart';
+import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
+import 'package:netsales/widgets/indicators/custom_status_summary_strip.dart';
 
-/// شريط ملخص مؤشرات حالات الطلبات التفاعلي (Orders KPI Summary Strip - Executive Edition)
-///
-/// يعرض إجمالي الطلبات والحالات الخمس المعتمدة من الخادم:
-/// (الكل، قيد المراجعة، معتمدة، مرفوضة، ملغية) مع استخدام الـ CustomSkeletonShimmer
-/// ودعم النقر المباشر للتصفية السريعة والتمرير الأفقي الانسيابي.
+/// شريط ملخص مؤشرات حالات الطلبات التفاعلي مستنداً إلى [CustomStatusSummaryStrip]
 class ProcurementOrdersSummaryStrip extends StatelessWidget {
   const ProcurementOrdersSummaryStrip({
     super.key,
@@ -38,65 +33,48 @@ class ProcurementOrdersSummaryStrip extends StatelessWidget {
     final colors = context.colors;
 
     final cards = [
-      ProcurementOrdersSummaryCardData(
+      CustomKpiCardData(
         label: isNetworkView ? 'الطلبات الواردة' : 'إجمالي الطلبات',
         count: totalCount,
-        statusValue: null,
+        statusKey: null,
         icon: Icons.receipt_long_rounded,
         accentColor: colors.primary,
       ),
-      ProcurementOrdersSummaryCardData(
+      CustomKpiCardData(
         label: isNetworkView ? 'بانتظار الاعتماد' : 'قيد المراجعة',
         count: pendingCount,
-        statusValue: 'PENDING',
+        statusKey: 'PENDING',
         icon: Icons.hourglass_top_rounded,
         accentColor: colors.warning,
       ),
-      ProcurementOrdersSummaryCardData(
+      CustomKpiCardData(
         label: 'معتمدة',
         count: approvedCount,
-        statusValue: 'APPROVED',
+        statusKey: 'APPROVED',
         icon: Icons.check_circle_rounded,
         accentColor: colors.success,
       ),
-      ProcurementOrdersSummaryCardData(
+      CustomKpiCardData(
         label: 'مرفوضة',
         count: rejectedCount,
-        statusValue: 'REJECTED',
+        statusKey: 'REJECTED',
         icon: Icons.cancel_outlined,
         accentColor: colors.error,
       ),
-      ProcurementOrdersSummaryCardData(
+      CustomKpiCardData(
         label: 'ملغية',
         count: cancelledCount,
-        statusValue: 'CANCELLED',
+        statusKey: 'CANCELLED',
         icon: Icons.block_rounded,
         accentColor: colors.onSurfaceVariant,
       ),
     ];
 
-    return Container(
-      margin: EdgeInsets.only(bottom: AppSpacing.sm),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        clipBehavior: Clip.none,
-        child: Row(
-          children: [
-            for (var i = 0; i < cards.length; i++) ...[
-              if (i > 0) AppSpacing.hSm,
-              ProcurementOrdersKpiSummaryCard(
-                data: cards[i],
-                isLoading: isLoading,
-                isSelected: selectedStatus == cards[i].statusValue,
-                onTap: onStatusTap != null
-                    ? () => onStatusTap!(cards[i].statusValue)
-                    : null,
-              ),
-            ],
-          ],
-        ),
-      ),
+    return CustomStatusSummaryStrip(
+      cards: cards,
+      selectedKey: selectedStatus,
+      isLoading: isLoading,
+      onSelectKey: onStatusTap,
     );
   }
 }

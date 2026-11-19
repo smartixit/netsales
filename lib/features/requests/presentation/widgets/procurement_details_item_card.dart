@@ -244,19 +244,19 @@ class ProcurementDetailsItemCard extends StatelessWidget {
                     ProcurementDetailsSpecBadge(
                       label: package.balanceDisplay,
                       icon: Icons.data_usage_rounded,
-                      tintColor: const Color(0xFF0284C7),
+                      tintColor: colors.skyAccent,
                     ),
                   if (package.packageValidity != null)
                     ProcurementDetailsSpecBadge(
                       label: package.validityDisplay,
                       icon: Icons.calendar_today_rounded,
-                      tintColor: const Color(0xFFD97706),
+                      tintColor: colors.amberAccent,
                     ),
                   if (package.packageUptime != null)
                     ProcurementDetailsSpecBadge(
                       label: package.uptimeDisplay,
                       icon: Icons.timer_outlined,
-                      tintColor: const Color(0xFF7C3AED),
+                      tintColor: colors.purpleAccent,
                     ),
                 ],
               ),
@@ -365,8 +365,8 @@ class ProcurementDetailsItemCard extends StatelessWidget {
                               size: 12.r,
                               color: hasDiscount
                                   ? (isCustomDiscount
-                                        ? const Color(0xFF059669)
-                                        : const Color(0xFF0284C7))
+                                        ? colors.success
+                                        : colors.skyAccent)
                                   : colors.primary,
                             ),
                             SizedBox(width: 4.w),
@@ -403,8 +403,8 @@ class ProcurementDetailsItemCard extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color:
                                     (isCustomDiscount
-                                            ? const Color(0xFF10B981)
-                                            : const Color(0xFF0EA5E9))
+                                            ? colors.success
+                                            : colors.skyAccent)
                                         .withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(5.r),
                               ),
@@ -417,16 +417,16 @@ class ProcurementDetailsItemCard extends StatelessWidget {
                                         : Icons.auto_awesome_rounded,
                                     size: 10.r,
                                     color: isCustomDiscount
-                                        ? const Color(0xFF059669)
-                                        : const Color(0xFF0284C7),
+                                        ? colors.success
+                                        : colors.skyAccent,
                                   ),
                                   SizedBox(width: 3.w),
                                   Text(
                                     '${isCustomDiscount ? 'خصم خاص' : 'خصم افتراضي'}: ${AmountFormatter.formatValue(item.itemDiscount)}',
                                     style: AppTypography.caption.copyWith(
                                       color: isCustomDiscount
-                                          ? const Color(0xFF059669)
-                                          : const Color(0xFF0284C7),
+                                          ? colors.success
+                                          : colors.skyAccent,
                                       fontWeight: FontWeight.w700,
                                       fontSize: 9.5.sp,
                                     ),

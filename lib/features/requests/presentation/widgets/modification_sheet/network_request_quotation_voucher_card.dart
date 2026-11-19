@@ -103,18 +103,18 @@ class NetworkRequestQuotationVoucherCard extends StatelessWidget {
                     vertical: AppSpacing.md,
                   ),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
                       colors: [
-                        Color(0xFF087A5F),
-                        Color(0xFF055743),
+                        colors.emeraldDark,
+                        colors.emeraldDeep,
                       ],
                     ),
                     borderRadius: BorderRadius.circular(AppRadius.lg),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF087A5F).withValues(alpha: 0.25),
+                        color: colors.emeraldDark.withValues(alpha: 0.25),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),

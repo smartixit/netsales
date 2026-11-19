@@ -8,11 +8,11 @@ import 'package:netsales/features/requests/presentation/controllers/pos_new_proc
 import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_edit_mode_banner.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_network_context_section.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_new_order_hero_card.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_pos_context_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_sale_type_selector.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_section_heading.dart';
+import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -66,9 +66,14 @@ class PosNewProcurementOrderScreen
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ProcurementNewOrderHeroCard(
-                          isEditMode: isEditMode,
-                          requestId: controller.editingRequestId.value,
+                        CustomPageHeroCard(
+                          title: isEditMode
+                              ? 'تحديث طلب التوريد'
+                              : 'مساحة طلب التوريد',
+                          subtitle: isEditMode
+                              ? 'مراجعة تفاصيل الطلب #${controller.editingRequestId.value ?? ''} وتعديل الكميات قبل حفظ التغييرات.'
+                              : 'اختر الشبكة ونقطة البيع، ثم كوّن طلبك مباشرة من الباقات والأسعار المتاحة.',
+                          icon: Icons.inventory_2_rounded,
                         ),
                         if (isEditMode) ...[
                           AppSpacing.vSm,

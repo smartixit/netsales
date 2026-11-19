@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_context_option.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_context_selector.dart';
+import 'package:netsales/widgets/inputs/custom_context_option.dart';
+import 'package:netsales/widgets/inputs/custom_context_selector.dart';
 
 /// Adapts the user's authorized POS entities to the shared context selector.
 class ProcurementPosContextSection
@@ -20,7 +20,7 @@ class ProcurementPosContextSection
       final selected = controller.activePos;
       final isExpanded = controller.expandedProcurementContext.value == 'pos';
 
-      return ProcurementContextSelector(
+      return CustomContextSelector(
         title: 'نقطة البيع',
         subtitle: isEditMode
             ? 'نقطة البيع المستلمة (أطراف الطلب ثابتة أثناء التعديل)'
@@ -46,7 +46,7 @@ class ProcurementPosContextSection
         onToggle: controller.togglePosContextExpansion,
         options: positions
             .map(
-              (pos) => ProcurementContextOption(
+              (pos) => CustomContextOption(
                 id: pos.posId,
                 name: pos.posName,
                 detail: pos.posAddress ?? 'نقطة بيع معتمدة',

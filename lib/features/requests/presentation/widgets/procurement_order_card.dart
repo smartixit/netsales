@@ -76,7 +76,7 @@ class ProcurementOrderCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF064F43).withValues(alpha: .065),
+              color: colors.emeraldDeep.withValues(alpha: .065),
               blurRadius: 18,
               offset: const Offset(0, 6),
             ),

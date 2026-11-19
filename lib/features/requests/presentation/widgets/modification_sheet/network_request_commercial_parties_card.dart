@@ -175,9 +175,9 @@ class NetworkRequestCommercialPartiesCard extends StatelessWidget {
                       size: AvatarBadgeSize.sm,
                       customDimension: 36.r,
                       borderRadius: BorderRadius.circular(9.r),
-                      gradientColors: const [
-                        Color(0xFF0284C7),
-                        Color(0xFF0369A1),
+                      gradientColors: [
+                        colors.skyAccent,
+                        colors.primary,
                       ],
                       hasPulse: false,
                     ),
@@ -249,9 +249,9 @@ class NetworkRequestCommercialPartiesCard extends StatelessWidget {
                       size: AvatarBadgeSize.sm,
                       customDimension: 36.r,
                       borderRadius: BorderRadius.circular(9.r),
-                      gradientColors: const [
-                        Color(0xFF087F68),
-                        Color(0xFF065F46),
+                      gradientColors: [
+                        colors.emeraldDark,
+                        colors.emeraldDeep,
                       ],
                       hasPulse: false,
                     ),

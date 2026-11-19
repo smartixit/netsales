@@ -59,19 +59,19 @@ class RequestApprovalResultSheet extends StatelessWidget {
             width: 64.r,
             height: 64.r,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
-                colors: [Color(0xFF0D7A5F), Color(0xFF065440)],
+                colors: [colors.emeraldDark, colors.emeraldDeep],
               ),
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF2ECC71).withValues(alpha: 0.5),
+                color: colors.success.withValues(alpha: 0.5),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF0D7A5F).withValues(alpha: 0.35),
+                  color: colors.emeraldDark.withValues(alpha: 0.35),
                   blurRadius: 16,
                   offset: const Offset(0, 5),
                 ),
@@ -112,15 +112,15 @@ class RequestApprovalResultSheet extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
-              colors: [Color(0xFF087A5F), Color(0xFF044836)],
+              colors: [colors.emeraldDark, colors.emeraldDeep],
             ),
             borderRadius: BorderRadius.circular(AppRadius.lg),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF087A5F).withValues(alpha: 0.28),
+                color: colors.emeraldDark.withValues(alpha: 0.28),
                 blurRadius: 14,
                 offset: const Offset(0, 5),
               ),

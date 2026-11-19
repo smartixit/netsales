@@ -3,8 +3,8 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_details_metric_card.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_details_metric_data.dart';
+import 'package:netsales/widgets/cards/custom_metric_card_data.dart';
+import 'package:netsales/widgets/cards/custom_metric_display_card.dart';
 
 /// شبكة المؤشرات التنفيذية لطلب التوريد (ProcurementDetailsMetricsStrip)
 ///
@@ -26,7 +26,7 @@ class ProcurementDetailsMetricsStrip extends StatelessWidget {
 
     // بيانات المؤشرات الأربعة الأساسية
     final metrics = [
-      ProcurementDetailsMetricData(
+      CustomMetricCardData(
         label: 'إجمالي الطلب',
         value: AmountFormatter.formatValue(request.requestTotalAmount),
         unit: 'ر.ي',
@@ -35,28 +35,28 @@ class ProcurementDetailsMetricsStrip extends StatelessWidget {
         isPrimary: true,
         caption: request.items.isNotEmpty ? 'صافي الطلب' : null,
       ),
-      ProcurementDetailsMetricData(
+      CustomMetricCardData(
         label: 'عدد الكروت',
         value: '${request.totalVouchers}',
         unit: 'كرت',
         icon: Icons.confirmation_number_rounded,
-        accentColor: const Color(0xFF0284C7),
+        accentColor: colors.skyAccent,
         caption: 'رصيد إجمالي',
       ),
-      ProcurementDetailsMetricData(
+      CustomMetricCardData(
         label: 'إجمالي الأوراق',
         value: sheetsFormatted,
         unit: 'ورقة',
         icon: Icons.layers_rounded,
-        accentColor: const Color(0xFF7C3AED),
+        accentColor: colors.purpleAccent,
         caption: 'أوراق A4',
       ),
-      ProcurementDetailsMetricData(
+      CustomMetricCardData(
         label: 'الباقات المطلوبة',
         value: '${request.items.length}',
         unit: 'باقات',
         icon: Icons.widgets_rounded,
-        accentColor: const Color(0xFFD97706),
+        accentColor: colors.warning,
         caption: 'فئات مختلفة',
       ),
     ];
@@ -71,17 +71,17 @@ class ProcurementDetailsMetricsStrip extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Expanded(child: ProcurementDetailsMetricCard(data: metrics[0])),
+                  Expanded(child: CustomMetricDisplayCard(data: metrics[0])),
                   AppSpacing.hSm,
-                  Expanded(child: ProcurementDetailsMetricCard(data: metrics[1])),
+                  Expanded(child: CustomMetricDisplayCard(data: metrics[1])),
                 ],
               ),
               AppSpacing.vSm,
               Row(
                 children: [
-                  Expanded(child: ProcurementDetailsMetricCard(data: metrics[2])),
+                  Expanded(child: CustomMetricDisplayCard(data: metrics[2])),
                   AppSpacing.hSm,
-                  Expanded(child: ProcurementDetailsMetricCard(data: metrics[3])),
+                  Expanded(child: CustomMetricDisplayCard(data: metrics[3])),
                 ],
               ),
             ],
@@ -92,7 +92,7 @@ class ProcurementDetailsMetricsStrip extends StatelessWidget {
           children: [
             for (int i = 0; i < metrics.length; i++) ...[
               if (i > 0) AppSpacing.hSm,
-              Expanded(child: ProcurementDetailsMetricCard(data: metrics[i])),
+              Expanded(child: CustomMetricDisplayCard(data: metrics[i])),
             ],
           ],
         );
