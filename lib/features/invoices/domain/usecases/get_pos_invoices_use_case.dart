@@ -2,7 +2,7 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 
-/// حالة استخدام جلب فواتير نقطة البيع (فواتير المشتريات)
+/// حالة استخدام جلب فواتير المشتريات لنقطة البيع
 class GetPosInvoicesUseCase {
   final InvoiceRepository repository;
 
@@ -10,7 +10,9 @@ class GetPosInvoicesUseCase {
 
   Future<PaginatedList<InvoiceEntity>> call({
     int? posId,
+    int? networkId,
     String? saleType,
+    String? paymentStatus,
     String? search,
     String? fromDate,
     String? toDate,
@@ -19,7 +21,9 @@ class GetPosInvoicesUseCase {
   }) {
     return repository.getInvoices(
       posId: posId,
+      networkId: networkId,
       saleType: saleType,
+      paymentStatus: paymentStatus,
       search: search,
       fromDate: fromDate,
       toDate: toDate,

@@ -1,11 +1,11 @@
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_document_repository.dart';
 
-/// Coordinates the supported output operations for an official invoice.
+/// حالة استخدام العمليات المستندية للفواتير (تصدير، طباعة، مشاركة)
 class InvoiceDocumentUseCase {
-  const InvoiceDocumentUseCase(this.repository);
-
   final InvoiceDocumentRepository repository;
+
+  const InvoiceDocumentUseCase(this.repository);
 
   Future<bool> exportAndSaveInvoice(InvoiceEntity invoice) {
     return repository.exportAndSaveInvoice(invoice);

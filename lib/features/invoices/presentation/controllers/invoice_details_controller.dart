@@ -2,12 +2,12 @@ import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
-import 'package:netsales/features/invoices/domain/usecases/invoice_document_use_case.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_invoice_details_use_case.dart';
+import 'package:netsales/features/invoices/domain/usecases/invoice_document_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-/// متحكم شاشة تفاصيل الفاتورة المالية وعمليات التصدير والطباعة
+/// متحكم شاشة تفاصيل الفاتورة المالية والعمليات المستندية المعتمدة
 class InvoiceDetailsController extends GetxController {
   final GetInvoiceDetailsUseCase getInvoiceDetailsUseCase;
   final InvoiceDocumentUseCase invoiceDocumentUseCase;
@@ -21,6 +21,17 @@ class InvoiceDetailsController extends GetxController {
   final isLoading = false.obs;
   final isExporting = false.obs;
   final errorMessage = RxnString();
+
+  // ── التوسيع الحصري لبنود الفاتورة في شاشة التفاصيل ──
+  final expandedItemIndex = RxnInt();
+
+  void toggleItemExpansion(int index) {
+    if (expandedItemIndex.value == index) {
+      expandedItemIndex.value = null;
+    } else {
+      expandedItemIndex.value = index;
+    }
+  }
 
   @override
   void onInit() {
@@ -56,6 +67,33 @@ class InvoiceDetailsController extends GetxController {
     }
   }
 
+  /// إعادة تحديث بيانات الفاتورة
+  Future<void> refreshDetails() async {
+    final current = invoice.value;
+    if (current != null) {
+      await loadInvoiceDetails(current.invoiceId);
+    }
+  }
+
+  /// الانتقال إلى تفاصيل طلب التوريد المرتبط إن وجد
+  void openLinkedRequest() {
+    final current = invoice.value;
+    if (current != null && current.requestId != null) {
+      Get.toNamed<void>(
+        AppRoutes.voucherRequestDetails,
+        arguments: current.requestId,
+      );
+    }
+  }
+
+  /// التوافق مع استدعاءات المعرف المباشر لطلب التوريد
+  void openVoucherRequestDetails(int requestId) {
+    Get.toNamed<void>(
+      AppRoutes.voucherRequestDetails,
+      arguments: requestId,
+    );
+  }
+
   /// تصدير وحفظ مستند الفاتورة كـ PDF في الجهاز
   Future<void> exportPdf() async {
     final currentInvoice = invoice.value;
@@ -79,7 +117,7 @@ class InvoiceDetailsController extends GetxController {
       } else {
         CustomSnackbar.show(
           title: 'فشل التصدير',
-          message: 'تعذر حفظ ملف الفاتورة.',
+          message: 'تعذر حفظ ملف الفاتورة في الجهاز.',
           type: SnackType.error,
         );
       }
@@ -151,13 +189,5 @@ class InvoiceDetailsController extends GetxController {
     } finally {
       isExporting.value = false;
     }
-  }
-
-  /// فتح تفاصيل طلب التوريد المرتبط
-  Future<void> openVoucherRequestDetails(int requestId) async {
-    await Get.toNamed<void>(
-      AppRoutes.voucherRequestDetails,
-      arguments: requestId,
-    );
   }
 }

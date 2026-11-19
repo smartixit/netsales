@@ -1,43 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_radius.dart';
-import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/invoices/presentation/controllers/invoice_details_controller.dart';
-import 'package:netsales/features/invoices/presentation/widgets/invoice_info_row.dart';
-import 'package:netsales/features/invoices/presentation/widgets/invoice_item_row.dart';
-import 'package:netsales/widgets/badges/custom_status_badge.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_details_action_bar.dart';
+import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_details_hero.dart';
+import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_details_item_card.dart';
+import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_details_metrics_strip.dart';
+import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_details_parties_card.dart';
+import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_request_callout.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_amount_to_words_banner.dart';
 
-/// شاشة استعراض تفاصيل الفاتورة وبنودها والعمليات المستندية (Invoice Details Screen)
+/// شاشة استعراض تفاصيل الفاتورة المالية وبنودها والعمليات المستندية المعتمدة
 class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
-  final bool isNetworkPerspective;
+  const InvoiceDetailsScreen({
+    super.key,
+    this.isNetworkPerspective = true,
+  });
 
-  const InvoiceDetailsScreen({super.key, this.isNetworkPerspective = true});
+  final bool isNetworkPerspective;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
     return Obx(() {
+      // 1. حالة التحميل الهيكلي (Skeleton Loading State)
       if (controller.isLoading.value && controller.invoice.value == null) {
         return CustomAppScaffold(
-          appBar: AppBar(title: const Text('تفاصيل الفاتورة')),
+          appBarTitle: 'تفاصيل الفاتورة',
           body: Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),
             child: const CustomStateView.loading(
               presentation: CustomStatePresentation.skeletonOnly,
               skeleton: CustomStateSkeleton(
                 layout: CustomStateSkeletonLayout.list,
-                itemCount: 3,
-                cardHeight: 112,
+                itemCount: 4,
+                cardHeight: 140,
               ),
             ),
           ),
@@ -45,14 +48,16 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
       }
 
       final invoice = controller.invoice.value;
+
+      // 2. حالة عدم العثور على الفاتورة
       if (invoice == null) {
         return CustomAppScaffold(
-          appBar: AppBar(title: const Text('تفاصيل الفاتورة')),
+          appBarTitle: 'تفاصيل الفاتورة',
           body: Center(
             child: CustomEmptyState(
               icon: Icons.receipt_long_outlined,
               title: 'الفاتورة غير موجودة',
-              subtitle: 'تعذر العثور على بيانات الفاتورة المحددة.',
+              subtitle: 'تعذر العثور على بيانات الفاتورة المحددة أو تم حذفها.',
               actionLabel: 'العودة',
               onAction: () => Get.back<void>(),
             ),
@@ -60,356 +65,104 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
         );
       }
 
-      final paymentPresentation =
-          EnumPresentationRegistry.resolveInvoicePaymentStatus(
-            invoice.paymentStatus,
-          );
-      final saleTypePresentation = EnumPresentationRegistry.resolveSaleType(
-        invoice.saleType,
-      );
+      final displayReference = 'فاتورة #${invoice.displayReference}';
 
+      // 3. عرض صفحة التفاصيل المتكاملة بالمعايير العالمية
       return CustomAppScaffold(
-        appBar: AppBar(
-          title: Text('فاتورة #${invoice.invoiceUuid}'),
-          actions: [
-            // زر الطباعة
-            CustomButton.icon(
-              icon: Icons.print_outlined,
-              tooltip: 'طباعة الفاتورة',
-              backgroundColor: Colors.transparent,
-              foregroundColor: colors.onSurfaceVariant,
-              onPressed: controller.printInvoice,
-            ),
-            // زر المشاركة
-            CustomButton.icon(
-              icon: Icons.share_outlined,
-              tooltip: 'مشاركة الفاتورة',
-              backgroundColor: Colors.transparent,
-              foregroundColor: colors.onSurfaceVariant,
-              onPressed: controller.shareInvoice,
-            ),
-          ],
-        ),
-        body: RefreshIndicator(
-          onRefresh: () => controller.loadInvoiceDetails(invoice.invoiceId),
+        appBarTitle: displayReference,
+        showBackButton: true,
+        bottomNavigationBar: InvoiceDetailsActionBar(controller: controller),
+        body: RefreshIndicator.adaptive(
+          color: colors.primary,
+          backgroundColor: colors.surface,
+          strokeWidth: 2.5,
+          onRefresh: controller.refreshDetails,
           child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.all(AppSpacing.cardPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. بطاقة ترويسة الفاتورة والحالة السيادية
-                Container(
-                  padding: EdgeInsets.all(AppSpacing.cardPadding),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.card),
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'فاتورة مبيعات معتمدة',
-                                style: AppTypography.titleMedium.copyWith(
-                                  color: colors.onSurface,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (invoice.invoiceUuid != null)
-                                Text(
-                                  invoice.invoiceUuid!,
-                                  style: AppTypography.bodySmall.copyWith(
-                                    color: colors.onSurfaceVariant,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                            ],
-                          ),
-                          CustomStatusBadge(
-                            label:
-                                invoice.paymentStatusLabel ??
-                                paymentPresentation.label,
-                            tone: paymentPresentation.tone,
-                            icon: paymentPresentation.icon,
-                          ),
-                        ],
-                      ),
-                      AppSpacing.vSm,
-                      Divider(
-                        color: colors.outlineVariant.withValues(alpha: 0.3),
-                      ),
-                      AppSpacing.vXs,
-                      InvoiceInfoRow(
-                        label: 'تاريخ الإصدار:',
-                        value: invoice.invoiceDate ?? invoice.createdAt ?? '-',
-                      ),
-                      InvoiceInfoRow(
-                        label: 'نوع البيع:',
-                        value:
-                            invoice.saleTypeLabel ?? saleTypePresentation.label,
-                      ),
-                      if (invoice.requestId != null)
-                        InkWell(
-                          onTap: () => controller.openVoucherRequestDetails(
-                            invoice.requestId!,
-                          ),
-                          child: InvoiceInfoRow(
-                            label: 'طلب التوريد المرتبط:',
-                            value: 'طلب #${invoice.requestId} (عرض)',
-                            isHighlight: true,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.cardPadding,
+              AppSpacing.cardPadding,
+              AppSpacing.cardPadding,
+              AppSpacing.xl,
+            ),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 1. الترويسة القيادية بالعمق اللوني المتكيف
+                    InvoiceDetailsHero(invoice: invoice),
+                    AppSpacing.vMd,
 
-                AppSpacing.vMd,
+                    // 2. شريط المؤشرات المالية والتشغيلية والتفقيط
+                    InvoiceDetailsMetricsStrip(invoice: invoice),
 
-                // 2. بطاقة الأطراف التجارية (المزود ونقطة البيع)
-                Container(
-                  padding: EdgeInsets.all(AppSpacing.cardPadding),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.card),
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'أطراف المعاملة التجارية',
-                        style: AppTypography.titleSmall.copyWith(
-                          color: colors.onSurface,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      AppSpacing.vSm,
-                      InvoiceInfoRow(
-                        label: 'المزود (الشبكة):',
-                        value:
-                            invoice.networkName ?? 'شبكة #${invoice.networkId}',
-                      ),
-                      InvoiceInfoRow(
-                        label: 'العميل (نقطة البيع):',
-                        value: invoice.posName ?? 'نقطة بيع #${invoice.posId}',
-                      ),
-                      if (invoice.posPhoneNumber != null)
-                        InvoiceInfoRow(
-                          label: 'هاتف نقطة البيع:',
-                          value: invoice.posPhoneNumber!,
-                        ),
-                    ],
-                  ),
-                ),
-
-                AppSpacing.vMd,
-
-                // 3. جدول بنود الفاتورة
-                Text(
-                  'بنود الفاتورة (${invoice.items.length})',
-                  style: AppTypography.titleSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                AppSpacing.vXs,
-
-                // رأس جدول البنود
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(AppRadius.xs),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          'الباقة',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'الكمية',
-                          textAlign: TextAlign.center,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'الخصم',
-                          textAlign: TextAlign.center,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          'الإجمالي',
-                          textAlign: TextAlign.end,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    // 3. بطاقة التنبيه للربط بطلب التوريد المعتمد
+                    if (invoice.hasRequest) ...[
+                      AppSpacing.vMd,
+                      InvoiceRequestCallout(
+                        invoice: invoice,
+                        onOpenRequest: controller.openLinkedRequest,
                       ),
                     ],
-                  ),
-                ),
-                AppSpacing.vXs,
+                    AppSpacing.vMd,
 
-                if (invoice.items.isEmpty)
-                  Container(
-                    padding: EdgeInsets.all(AppSpacing.cardPadding),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'لا توجد بنود تفصيلية معروضة لهذه الفاتورة.',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  )
-                else
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: invoice.items.length,
-                    separatorBuilder: (context, index) => AppSpacing.vXs,
-                    itemBuilder: (context, index) {
-                      return InvoiceItemRow(
-                        item: invoice.items[index],
-                        index: index,
-                      );
-                    },
-                  ),
+                    // 4. بطاقة أطراف المعاملة المالية (المزود ونقطة البيع)
+                    InvoiceDetailsPartiesCard(invoice: invoice),
+                    AppSpacing.vLg,
 
-                AppSpacing.vLg,
-
-                // 4. ملخص المبالغ المالية السيادية
-                Container(
-                  padding: EdgeInsets.all(AppSpacing.cardPadding),
-                  decoration: BoxDecoration(
-                    color: colors.primary.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(AppRadius.card),
-                    border: Border.all(
-                      color: colors.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'إجمالي الفاتورة:',
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: colors.onSurface,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            AmountFormatter.format(
-                              invoice.invoiceTotalAmount.toString(),
-                            ),
-                            style: AppTypography.titleLarge.copyWith(
-                              color: colors.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      CustomAmountToWordsBanner(
-                        amount: invoice.invoiceTotalAmount,
-                        currencyCode: 'YER',
-                      ),
-                      AppSpacing.vSm,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'المبلغ المسدد:',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: colors.onSurfaceVariant,
-                            ),
-                          ),
-                          Text(
-                            AmountFormatter.format(
-                              invoice.paidAmount.toString(),
-                            ),
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: colors.onSurface,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      AppSpacing.vXs,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'المبلغ المتبقي للسداد:',
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: invoice.remainingAmount > 0
-                                  ? colors.error
-                                  : colors.onSurfaceVariant,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            AmountFormatter.format(
-                              invoice.remainingAmount.toString(),
-                            ),
+                    // 5. عنوان قسم الباقات المفصلة
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: 18.r,
+                          color: colors.primary,
+                        ),
+                        SizedBox(width: 6.w),
+                        Expanded(
+                          child: Text(
+                            'بنود الفاتورة (${invoice.items.length})',
                             style: AppTypography.titleMedium.copyWith(
-                              color: invoice.remainingAmount > 0
-                                  ? colors.error
-                                  : colors.primary,
+                              color: colors.onSurface,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                    AppSpacing.vSm,
+
+                    // 6. قائمة بطاقات بنود الفاتورة
+                    if (invoice.items.isEmpty)
+                      Container(
+                        padding: EdgeInsets.all(AppSpacing.cardPadding),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'لا توجد بنود تفصيلية معروضة لهذه الفاتورة.',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      )
+                    else
+                      for (int i = 0; i < invoice.items.length; i++)
+                        Padding(
+                          padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                          child: InvoiceDetailsItemCard(
+                            item: invoice.items[i],
+                            index: i,
+                          ),
+                        ),
+
+                    AppSpacing.vLg,
+                  ],
                 ),
-
-                AppSpacing.vLg,
-
-                // 5. زر تصدير الفاتورة كـ PDF
-                CustomButton(
-                  text: 'تصدير وحفظ الفاتورة كـ PDF',
-                  icon: Icons.picture_as_pdf_outlined,
-                  onPressed: controller.exportPdf,
-                ),
-
-                AppSpacing.vXl,
-              ],
+              ),
             ),
           ),
         ),

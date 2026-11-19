@@ -3,12 +3,11 @@ import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_i
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 
-/// Creates a standalone B2B sale invoice using server-authoritative pricing
-/// and wallet settlement. Client input contains quantities only.
+/// حالة استخدام إنشاء فاتورة مبيعات مباشرة لمشغل الشبكة
 class CreateDirectSaleInvoiceUseCase {
-  final InvoiceRepository _repository;
+  final InvoiceRepository repository;
 
-  const CreateDirectSaleInvoiceUseCase(this._repository);
+  const CreateDirectSaleInvoiceUseCase(this.repository);
 
   Future<InvoiceEntity> call({
     required int networkId,
@@ -17,22 +16,28 @@ class CreateDirectSaleInvoiceUseCase {
     required List<DirectInvoiceItemInputEntity> items,
     required String idempotencyKey,
   }) {
-    if (networkId <= 0 || posId <= 0 || items.isEmpty) {
-      throw ArgumentError('Direct invoice requires a network, POS and items.');
+    if (networkId <= 0) {
+      throw ArgumentError('يجب تحديد شبكة صالحة لإصدار الفاتورة.');
     }
-    if (idempotencyKey.trim().isEmpty) {
-      throw ArgumentError.value(idempotencyKey, 'idempotencyKey');
+    if (posId <= 0) {
+      throw ArgumentError('يجب تحديد نقطة بيع صالحة كطرف مستفيد.');
     }
     if (saleType == SaleType.unknown) {
-      throw ArgumentError.value(saleType, 'saleType');
+      throw ArgumentError('يجب تحديد نوع بيع صالح (كاش أو آجل).');
     }
-    if (items.any((item) => item.packageId <= 0 || item.voucherCount <= 0)) {
-      throw ArgumentError(
-        'Direct invoice item identifiers and quantities must be positive.',
-      );
+    if (items.isEmpty) {
+      throw ArgumentError('لا يمكن إنشاء فاتورة مبيعات خالية من البنود.');
+    }
+    for (final item in items) {
+      if (item.voucherCount <= 0) {
+        throw ArgumentError('يجب أن تكون كمية الكروت أكبر من الصفر.');
+      }
+    }
+    if (idempotencyKey.trim().isEmpty) {
+      throw ArgumentError('مفتاح منع التكرار (Idempotency Key) مطلوب.');
     }
 
-    return _repository.createDirectInvoice(
+    return repository.createDirectInvoice(
       networkId: networkId,
       posId: posId,
       saleType: saleType,

@@ -41,7 +41,7 @@ class CustomContextSelectedIdentity extends StatelessWidget {
         vertical: 10.h,
       ),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest.withValues(alpha: .5),
+        color: colors.surfaceContainer.withValues(alpha: .5),
         borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
           color: colors.outlineVariant.withValues(alpha: .55),

@@ -43,6 +43,7 @@ class _RecordingInvoiceRepository implements InvoiceRepository {
     int? networkId,
     int? posId,
     String? saleType,
+    String? paymentStatus,
     String? search,
     String? fromDate,
     String? toDate,

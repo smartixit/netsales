@@ -8,43 +8,47 @@ import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-/// متحكم فواتير المشتريات لنقطة البيع (POS Purchase Invoices Controller)
+/// متحكم فواتير مشتريات نقطة البيع (POS Purchase Invoices Controller)
+///
+/// يدير حالة قائمة فواتير المشتريات، الترقيم بالمؤشر، الفلاتر والبحث،
+/// مؤشرات الأداء اللحظية (KPIs)، وتوسيع البطاقات.
 class PosInvoicesController extends GetxController {
   final GetPosInvoicesUseCase getPosInvoicesUseCase;
 
   PosInvoicesController({required this.getPosInvoicesUseCase});
 
-  // State: قائمة فواتير المشتريات والترقيم بالمؤشر
+  // ── الحالة الأساسية والترقيم ──
   final invoices = <InvoiceEntity>[].obs;
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
   final errorMessage = RxnString();
   final nextCursor = RxnString();
 
-  // حالة التوسيع الحصرية لبطاقات الفواتير (Single-Expansion Accordion)
+  // ── حالة التوسيع الحصرية للبطاقات ──
   final expandedInvoiceId = RxnInt();
 
-  void toggleInvoiceExpansion(int invoiceId) {
-    if (expandedInvoiceId.value == invoiceId) {
-      expandedInvoiceId.value = null;
-    } else {
-      expandedInvoiceId.value = invoiceId;
-    }
-  }
-
-  bool get hasMore => nextCursor.value != null;
-
-  void openInvoiceDetails(InvoiceEntity invoice) {
-    Get.toNamed<void>(AppRoutes.purchaseInvoiceDetails, arguments: invoice);
-  }
-
-  // فلاتر البحث ونوع الشراء
+  // ── فلاتر البحث والحالة ونوع الشراء ──
   final searchController = TextEditingController();
   final searchQuery = ''.obs;
-  final selectedSaleType = RxnString(); // null = all, CASH, CREDIT
+  final statusFilter = RxnString();
+  final selectedSaleType = RxnString();
 
   final Set<int> _invoiceIds = {};
   int _requestIdCounter = 0;
+
+  bool get hasMore => nextCursor.value != null;
+
+  // ── مؤشرات الأداء المحسوبة (KPI Counters) ──
+  int get totalInvoicesCount => invoices.length;
+
+  int get paidInvoicesCount =>
+      invoices.where((i) => i.isPaid).length;
+
+  int get partiallyPaidInvoicesCount =>
+      invoices.where((i) => i.isPartiallyPaid).length;
+
+  int get unpaidInvoicesCount =>
+      invoices.where((i) => i.isUnpaid).length;
 
   @override
   void onInit() {
@@ -69,6 +73,44 @@ class PosInvoicesController extends GetxController {
     super.onClose();
   }
 
+  /// التوسيع أو الطي الحصري لبطاقة الفاتورة
+  void toggleInvoiceExpansion(int invoiceId) {
+    if (expandedInvoiceId.value == invoiceId) {
+      expandedInvoiceId.value = null;
+    } else {
+      expandedInvoiceId.value = invoiceId;
+    }
+  }
+
+  /// تعيين فلتر حالة الفاتورة
+  void setStatusFilter(String? status) {
+    if (statusFilter.value == status) {
+      statusFilter.value = null;
+    } else {
+      statusFilter.value = status;
+    }
+    loadInvoices(isRefresh: true);
+  }
+
+  /// تعيين فلتر نوع المعاملة
+  void onSaleTypeChanged(String? type) {
+    if (selectedSaleType.value == type) return;
+    selectedSaleType.value = type;
+    loadInvoices(isRefresh: true);
+  }
+
+  /// إعادة تعيين كافة الفلاتر والبحث
+  void resetFilters() {
+    searchController.clear();
+    searchQuery.value = '';
+    statusFilter.value = null;
+    selectedSaleType.value = null;
+    loadInvoices(isRefresh: true);
+  }
+
+  /// تحديث قائمة الفواتير
+  Future<void> refreshInvoices() => loadInvoices(isRefresh: true);
+
   /// جلب فواتير مشتريات نقطة البيع
   Future<void> loadInvoices({bool isRefresh = false}) async {
     if (isRefresh) {
@@ -84,12 +126,12 @@ class PosInvoicesController extends GetxController {
       final PaginatedList<InvoiceEntity> result = await getPosInvoicesUseCase(
         posId: activePosId,
         saleType: selectedSaleType.value,
+        paymentStatus: statusFilter.value,
         search: searchQuery.value,
         cursor: isRefresh ? null : nextCursor.value,
         perPage: 15,
       );
 
-      // حماية ضد استجابات الطلبات المتأخرة
       if (currentRequestId != _requestIdCounter) return;
 
       if (isRefresh) {
@@ -134,18 +176,8 @@ class PosInvoicesController extends GetxController {
     await loadInvoices(isRefresh: false);
   }
 
-  /// تغيير فلتر نوع المعاملة
-  void onSaleTypeChanged(String? type) {
-    if (selectedSaleType.value == type) return;
-    selectedSaleType.value = type;
-    loadInvoices(isRefresh: true);
-  }
-
-  /// إعادة تعيين الفلاتر
-  void resetFilters() {
-    searchController.clear();
-    searchQuery.value = '';
-    selectedSaleType.value = null;
-    loadInvoices(isRefresh: true);
+  /// الانتقال إلى واجهة تفاصيل الفاتورة
+  void openInvoiceDetails(InvoiceEntity invoice) {
+    Get.toNamed<void>(AppRoutes.purchaseInvoiceDetails, arguments: invoice);
   }
 }

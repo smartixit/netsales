@@ -1,7 +1,7 @@
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 
-/// حالة استخدام جلب تفاصيل فاتورة محددة
+/// حالة استخدام جلب تفاصيل فاتورة مالية محددة
 class GetInvoiceDetailsUseCase {
   final InvoiceRepository repository;
 

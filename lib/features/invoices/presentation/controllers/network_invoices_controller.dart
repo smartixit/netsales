@@ -13,6 +13,9 @@ import 'package:netsales/features/invoices/domain/usecases/get_network_invoices_
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم فواتير مبيعات الجملة لمشغل الشبكة (Network Wholesale Invoices Controller)
+///
+/// يدير حالة القائمة، الترقيم بالمؤشر، البحث المؤجل، الفلاتر المتعددة،
+/// مؤشرات الأداء اللحظية (KPIs)، وتوسيع البطاقات الحصري.
 class NetworkInvoicesController extends GetxController {
   final GetNetworkInvoicesUseCase getNetworkInvoicesUseCase;
   final GetMyNetworksUseCase? getMyNetworksUseCase;
@@ -22,48 +25,43 @@ class NetworkInvoicesController extends GetxController {
     this.getMyNetworksUseCase,
   });
 
-  // State: قائمة الفواتير والترقيم بالمؤشر
+  // ── الحالة الأساسية والترقيم ──
   final invoices = <InvoiceEntity>[].obs;
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
   final errorMessage = RxnString();
   final nextCursor = RxnString();
 
-  // حالة التوسيع الحصرية لبطاقات الفواتير (Single-Expansion Accordion)
+  // ── حالة التوسيع الحصرية للبطاقات ──
   final expandedInvoiceId = RxnInt();
 
-  void toggleInvoiceExpansion(int invoiceId) {
-    if (expandedInvoiceId.value == invoiceId) {
-      expandedInvoiceId.value = null;
-    } else {
-      expandedInvoiceId.value = invoiceId;
-    }
-  }
+  // ── فلاتر البحث والحالة ونوع البيع ──
+  final searchController = TextEditingController();
+  final searchQuery = ''.obs;
+  final statusFilter = RxnString();
+  final selectedSaleType = RxnString();
+  final selectedNetworkId = RxnInt();
+  final authorizedNetworks = <NetworkEntity>[].obs;
+
+  final Set<int> _invoiceIds = {};
+  int _requestIdCounter = 0;
 
   bool get hasMore => nextCursor.value != null;
 
   bool get canCreateInvoice =>
       PermissionService.to.can(AppPermissions.salesCreate);
 
-  void navigateToCreateInvoice() {
-    Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice);
-  }
+  // ── مؤشرات الأداء المحسوبة (KPI Counters) ──
+  int get totalInvoicesCount => invoices.length;
 
-  void openInvoiceDetails(InvoiceEntity invoice) {
-    Get.toNamed<void>(AppRoutes.saleInvoiceDetails, arguments: invoice);
-  }
+  int get paidInvoicesCount =>
+      invoices.where((i) => i.isPaid).length;
 
-  // فلاتر البحث ونوع البيع
-  final searchController = TextEditingController();
-  final searchQuery = ''.obs;
-  final selectedSaleType = RxnString(); // null = all, CASH, CREDIT
-  final selectedNetworkId = RxnInt();
+  int get partiallyPaidInvoicesCount =>
+      invoices.where((i) => i.isPartiallyPaid).length;
 
-  // شبكات المشغل التابعة
-  final authorizedNetworks = <NetworkEntity>[].obs;
-
-  final Set<int> _invoiceIds = {};
-  int _requestIdCounter = 0;
+  int get unpaidInvoicesCount =>
+      invoices.where((i) => i.isUnpaid).length;
 
   @override
   void onInit() {
@@ -88,6 +86,54 @@ class NetworkInvoicesController extends GetxController {
     super.onClose();
   }
 
+  /// التوسيع أو الطي الحصري لبطاقة الفاتورة
+  void toggleInvoiceExpansion(int invoiceId) {
+    if (expandedInvoiceId.value == invoiceId) {
+      expandedInvoiceId.value = null;
+    } else {
+      expandedInvoiceId.value = invoiceId;
+    }
+  }
+
+  /// تعيين فلتر حالة الفاتورة
+  void setStatusFilter(String? status) {
+    if (statusFilter.value == status) {
+      statusFilter.value = null;
+    } else {
+      statusFilter.value = status;
+    }
+    loadInvoices(isRefresh: true);
+  }
+
+  /// تعيين فلتر نوع المعاملة
+  void onSaleTypeChanged(String? type) {
+    if (selectedSaleType.value == type) return;
+    selectedSaleType.value = type;
+    loadInvoices(isRefresh: true);
+  }
+
+  /// تغيير فلتر الشبكة
+  void onNetworkFilterChanged(int? networkId) {
+    if (selectedNetworkId.value == networkId) return;
+    selectedNetworkId.value = networkId;
+    if (networkId != null) {
+      WorkspaceService.to.saveActiveNetworkId(networkId);
+    }
+    loadInvoices(isRefresh: true);
+  }
+
+  /// إعادة تعيين كافة الفلاتر والبحث
+  void resetFilters() {
+    searchController.clear();
+    searchQuery.value = '';
+    statusFilter.value = null;
+    selectedSaleType.value = null;
+    loadInvoices(isRefresh: true);
+  }
+
+  /// تحديث قائمة الفواتير
+  Future<void> refreshInvoices() => loadInvoices(isRefresh: true);
+
   /// تحميل شبكات المشغل ثم جلب الفواتير
   Future<void> loadNetworksAndInvoices() async {
     if (getMyNetworksUseCase != null) {
@@ -105,13 +151,13 @@ class NetworkInvoicesController extends GetxController {
           await WorkspaceService.to.saveActiveNetworkId(resolvedId);
         }
       } catch (_) {
-        // الاستمرار بدون شبكة محددة ليعتمد الخادم Scoping التلقائي
+        // الاستمرار بالاعتماد على التحديد التلقائي من الخادم
       }
     }
     await loadInvoices(isRefresh: true);
   }
 
-  /// جلب فواتير مبيعات الجملة
+  /// جلب فواتير مبيعات الجملة مع حماية الطلبات المتأخرة
   Future<void> loadInvoices({bool isRefresh = false}) async {
     if (isRefresh) {
       isLoading.value = true;
@@ -126,12 +172,12 @@ class NetworkInvoicesController extends GetxController {
           await getNetworkInvoicesUseCase(
             networkId: selectedNetworkId.value,
             saleType: selectedSaleType.value,
+            paymentStatus: statusFilter.value,
             search: searchQuery.value,
             cursor: isRefresh ? null : nextCursor.value,
             perPage: 15,
           );
 
-      // حماية ضد استجابات الطلبات المتأخرة (Stale Request Protection)
       if (currentRequestId != _requestIdCounter) return;
 
       if (isRefresh) {
@@ -168,7 +214,7 @@ class NetworkInvoicesController extends GetxController {
     }
   }
 
-  /// تحميل الصفحة التالية من الفواتير بالمؤشر (Cursor Load-More)
+  /// تحميل الصفحة التالية من الفواتير بالمؤشر
   Future<void> loadMoreInvoices() async {
     if (isLoadingMore.value || !hasMore || isLoading.value) return;
 
@@ -176,28 +222,13 @@ class NetworkInvoicesController extends GetxController {
     await loadInvoices(isRefresh: false);
   }
 
-  /// تغيير فلتر نوع البيع
-  void onSaleTypeChanged(String? type) {
-    if (selectedSaleType.value == type) return;
-    selectedSaleType.value = type;
-    loadInvoices(isRefresh: true);
+  /// الانتقال إلى واجهة إنشاء فاتورة مبيعات مباشرة
+  void navigateToCreateInvoice() {
+    Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice);
   }
 
-  /// تغيير شبكة المشغل
-  void onNetworkChanged(int? networkId) {
-    if (selectedNetworkId.value == networkId) return;
-    selectedNetworkId.value = networkId;
-    if (networkId != null) {
-      WorkspaceService.to.saveActiveNetworkId(networkId);
-    }
-    loadInvoices(isRefresh: true);
-  }
-
-  /// إعادة تعيين الفلاتر
-  void resetFilters() {
-    searchController.clear();
-    searchQuery.value = '';
-    selectedSaleType.value = null;
-    loadInvoices(isRefresh: true);
+  /// الانتقال إلى واجهة تفاصيل الفاتورة
+  void openInvoiceDetails(InvoiceEntity invoice) {
+    Get.toNamed<void>(AppRoutes.saleInvoiceDetails, arguments: invoice);
   }
 }

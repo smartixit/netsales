@@ -2,16 +2,15 @@ import 'package:netsales/features/invoices/data/services/invoice_document_servic
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_document_repository.dart';
 
-/// Infrastructure adapter between the invoice use case and document engine.
+/// تطبيق مستودع عمليات المستندات للفاتورة
 class InvoiceDocumentRepositoryImpl implements InvoiceDocumentRepository {
-  const InvoiceDocumentRepositoryImpl({required this.documentService});
-
   final InvoiceDocumentService documentService;
 
+  const InvoiceDocumentRepositoryImpl({required this.documentService});
+
   @override
-  Future<bool> exportAndSaveInvoice(InvoiceEntity invoice) async {
-    final result = await documentService.exportAndSaveInvoice(invoice);
-    return result.isSuccess;
+  Future<bool> exportAndSaveInvoice(InvoiceEntity invoice) {
+    return documentService.exportAndSaveInvoice(invoice);
   }
 
   @override

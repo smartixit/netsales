@@ -1,7 +1,8 @@
-import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 
-/// Presentation-only line in the direct invoice draft cart.
+/// سطر باقة في سلة إنشاء الفاتورة المباشرة
+///
+/// يربط كيان الباقة المعروضة بالكمية المحددة من الكروت دون حسابات أسعار محلية.
 class DirectInvoiceCartLineEntity {
   final PackageEntity package;
   final int voucherCount;
@@ -11,23 +12,13 @@ class DirectInvoiceCartLineEntity {
     required this.voucherCount,
   });
 
-  DirectInvoiceCartLineEntity copyWith({int? voucherCount}) {
+  DirectInvoiceCartLineEntity copyWith({
+    PackageEntity? package,
+    int? voucherCount,
+  }) {
     return DirectInvoiceCartLineEntity(
-      package: package,
+      package: package ?? this.package,
       voucherCount: voucherCount ?? this.voucherCount,
     );
-  }
-
-  /// التوصيف اللغوي الفصيح لكمية الأوراق المعادل للكروت
-  String get sheetDescription {
-    final sheetSize = package.packageVoucherCount;
-    if (sheetSize <= 0) return '$voucherCount كرت';
-    return VoucherSheetCalculator.describe(voucherCount, sheetSize);
-  }
-
-  /// التوصيف المزدوج الكامل للبند (الأوراق والكروت)
-  String get fullQuantityLabel {
-    final desc = sheetDescription;
-    return '$desc  •  $voucherCount كرت';
   }
 }

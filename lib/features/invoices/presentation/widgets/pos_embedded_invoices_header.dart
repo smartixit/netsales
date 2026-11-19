@@ -5,7 +5,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/invoices/presentation/controllers/pos_invoices_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
-/// رأس شاشة فواتير المشتريات المضمنة (Embedded Invoices Header)
+/// رأس شاشة فواتير المشتريات المضمنة في تبويبات نقطة البيع
 class PosEmbeddedInvoicesHeader extends StatelessWidget {
   const PosEmbeddedInvoicesHeader({super.key, required this.controller});
 

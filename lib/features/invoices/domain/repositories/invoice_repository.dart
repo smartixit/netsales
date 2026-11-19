@@ -1,15 +1,16 @@
-import 'package:netsales/core/models/paginated_list.dart';
-import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/core/enums/sale_type.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
+import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 
-/// واجهة مستودع فواتير المبيعات والمشتريات
-abstract interface class InvoiceRepository {
-  /// استرجاع قائمة الفواتير مع الترقيم بالمؤشر والفلاتر المعتمدة
+/// العقد التجريدي لمستودع فواتير المبيعات والمشتريات الرسمية
+abstract class InvoiceRepository {
+  /// جلب قائمة الفواتير المالية مع الفلترة والترقيم بالمؤشر
   Future<PaginatedList<InvoiceEntity>> getInvoices({
     int? networkId,
     int? posId,
     String? saleType,
+    String? paymentStatus,
     String? search,
     String? fromDate,
     String? toDate,
@@ -17,7 +18,10 @@ abstract interface class InvoiceRepository {
     int? perPage,
   });
 
-  /// إنشاء فاتورة مبيعات مباشرة. لا تستقبل أسعاراً أو خصومات أو إجماليات من العميل.
+  /// جلب تفاصيل فاتورة مالية محددة بالمعرف الرقمي
+  Future<InvoiceEntity> getInvoiceDetails(int invoiceId);
+
+  /// إنشاء فاتورة مبيعات مباشرة مع الحساب المالي السيادي على الخادم
   Future<InvoiceEntity> createDirectInvoice({
     required int networkId,
     required int posId,
@@ -25,7 +29,4 @@ abstract interface class InvoiceRepository {
     required List<DirectInvoiceItemInputEntity> items,
     required String idempotencyKey,
   });
-
-  /// استرجاع تفاصيل فاتورة محددة بكافة بنودها وأطرافها
-  Future<InvoiceEntity> getInvoiceDetails(int invoiceId);
 }

@@ -196,7 +196,7 @@ class CustomContextSelector extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withValues(alpha: .4),
+                          color: colors.surfaceContainer.withValues(alpha: .4),
                           borderRadius: BorderRadius.circular(AppRadius.md),
                           border: Border.all(
                             color: colors.outlineVariant.withValues(alpha: .45),

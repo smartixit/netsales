@@ -1,6 +1,6 @@
 import 'package:netsales/features/invoices/domain/entities/invoice_item_entity.dart';
 
-/// نموذج بيانات بند فاتورة المبيعات (Sale Invoice Item DTO)
+/// نموذج بيانات بند الفاتورة المحول من استجابة الـ API
 class InvoiceItemModel extends InvoiceItemEntity {
   const InvoiceItemModel({
     required super.itemId,
@@ -18,43 +18,36 @@ class InvoiceItemModel extends InvoiceItemEntity {
   });
 
   factory InvoiceItemModel.fromJson(Map<String, dynamic> json) {
-    String? pkgName;
-    String? pkgColor;
-    int sheetSize = 0;
-    if (json['package'] is Map<String, dynamic>) {
-      final pkg = json['package'] as Map<String, dynamic>;
-      pkgName = pkg['package_name'] as String?;
-      pkgColor = pkg['package_color'] as String?;
-      sheetSize = (pkg['package_voucher_count'] as num?)?.toInt() ?? 0;
-    }
+    final packageData = json['package'] as Map<String, dynamic>?;
 
     return InvoiceItemModel(
-      itemId: json['item_id'] as int? ?? 0,
-      invoiceId: json['invoice_id'] as int? ?? 0,
-      packageId: json['package_id'] as int? ?? 0,
+      itemId: (json['item_id'] as num?)?.toInt() ?? 0,
+      invoiceId: (json['invoice_id'] as num?)?.toInt() ?? 0,
+      packageId: (json['package_id'] as num?)?.toInt() ?? 0,
       voucherPrice: (json['voucher_price'] as num?)?.toDouble() ?? 0.0,
       voucherCount: (json['voucher_count'] as num?)?.toInt() ?? 0,
       itemDiscount: (json['item_discount'] as num?)?.toDouble() ?? 0.0,
       itemTotalAmount: (json['item_total_amount'] as num?)?.toDouble() ?? 0.0,
-      packageName: pkgName,
-      packageColor: pkgColor,
-      sheetSize: sheetSize,
+      packageName: packageData?['package_name'] as String?,
+      packageColor: packageData?['package_color'] as String?,
+      sheetSize: (packageData?['package_voucher_count'] as num?)?.toInt() ?? 0,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'item_id': itemId,
-      'invoice_id': invoiceId,
-      'package_id': packageId,
-      'voucher_price': voucherPrice,
-      'voucher_count': voucherCount,
-      'item_discount': itemDiscount,
-      'item_total_amount': itemTotalAmount,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'item_id': itemId,
+    'invoice_id': invoiceId,
+    'package_id': packageId,
+    'voucher_price': voucherPrice,
+    'voucher_count': voucherCount,
+    'item_discount': itemDiscount,
+    'item_total_amount': itemTotalAmount,
+    if (packageName != null) 'package_name': packageName,
+    if (packageColor != null) 'package_color': packageColor,
+    'sheet_size': sheetSize,
+    if (createdAt != null) 'created_at': createdAt,
+    if (updatedAt != null) 'updated_at': updatedAt,
+  };
 }
