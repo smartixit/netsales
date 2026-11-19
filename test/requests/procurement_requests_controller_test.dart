@@ -573,12 +573,9 @@ void main() {
       );
     });
 
-    test(
-      'rejectRequest with empty reason prevents mutation',
-      () async {
-        await controller.rejectRequest(1, '');
-        expect(controller.requests.first.isPending, true);
-      },
-    );
+    test('rejectRequest with empty reason prevents mutation', () async {
+      await controller.rejectRequest(1, '');
+      expect(controller.requests.first.isPending, true);
+    });
   });
 }
