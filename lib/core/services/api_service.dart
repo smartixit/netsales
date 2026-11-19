@@ -676,6 +676,10 @@ class _SessionAuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    if (options.extra[infinityFreeVerificationProbeFlagKey] == true) {
+      return handler.next(options);
+    }
+
     final storage = StorageService.instance;
 
     // حقن معرف الجلسة
