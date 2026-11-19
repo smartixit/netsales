@@ -72,6 +72,18 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       );
     });
 
+    test('matches SlowAES handling of a full zero-byte trailing block', () {
+      final zeroBlockChallenge = challenge.replaceFirst(
+        '25b509cc7dadcdb532275647f94524cc',
+        '9b9a54eb2de11baef8f0060729ce78fb',
+      );
+
+      expect(
+        InfinityFreeChallengeSolver.solveChallenge(zeroBlockChallenge),
+        '',
+      );
+    });
+
     test('preserves unrelated cookies and replaces an existing challenge cookie', () {
       expect(
         InfinityFreeChallengeSolver.mergeChallengeCookie(
