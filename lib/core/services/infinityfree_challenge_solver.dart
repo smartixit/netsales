@@ -143,7 +143,7 @@ class InfinityFreeChallengeSolver {
         .where(
           (cookie) =>
               cookie.isNotEmpty &&
-              !RegExp(r'^__test\\s*=', caseSensitive: false).hasMatch(cookie),
+              !RegExp(r'^__test\s*=', caseSensitive: false).hasMatch(cookie),
         )
         .toList();
 
