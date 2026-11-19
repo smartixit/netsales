@@ -223,7 +223,7 @@ class LoginController extends GetxController {
 
   /// التوجيه لصفحة استعادة كلمة المرور
   void goToForgotPassword() {
-    Get.toNamed<void>(AppRoutes.forgotPassword);
+    Get.offNamed<void>(AppRoutes.forgotPassword);
   }
 
   /// التوجيه لصفحة اختيار نوع الحساب الجديد

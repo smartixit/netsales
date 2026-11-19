@@ -1,28 +1,29 @@
-/// كيان معاينة دعوة الربط المشفرة من جانب نقطة البيع
-class NetworkPosLinkPreviewEntity {
-  final String challengeUuid;
-  final int networkId;
-  final String networkName;
-  final String? networkPhone;
-  final String? governorateName;
-  final String? directorateName;
-  final int? posId;
-  final String? posName;
-  final DateTime expiresAt;
-  final bool alreadyLinked;
+import 'package:equatable/equatable.dart';
+import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 
+/// كيان معاينة دعوة الربط المشفرة بعد مسح رمز QR
+class NetworkPosLinkPreviewEntity extends Equatable {
   const NetworkPosLinkPreviewEntity({
     required this.challengeUuid,
-    required this.networkId,
-    required this.networkName,
-    this.networkPhone,
-    this.governorateName,
-    this.directorateName,
-    this.posId,
-    this.posName,
-    required this.expiresAt,
-    required this.alreadyLinked,
+    required this.network,
+    this.pos,
+    this.expiresAt,
+    this.isTargeted = false,
   });
 
-  bool get isExpired => DateTime.now().isAfter(expiresAt);
+  final String challengeUuid;
+  final NetworkEntity network;
+  final PosEntity? pos;
+  final String? expiresAt;
+  final bool isTargeted;
+
+  @override
+  List<Object?> get props => [
+        challengeUuid,
+        network,
+        pos,
+        expiresAt,
+        isTargeted,
+      ];
 }

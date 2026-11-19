@@ -186,6 +186,7 @@ class NetworkInfoCard extends GetView<RegisterNetworkController> {
                 label: 'العنوان التفصيلي',
                 hint: 'مثال: الشارع العام، بجوار البريد',
                 prefixIcon: Icon(Icons.place_outlined, size: 20.r),
+                isRequired: false,
                 validator: FormValidators.addressValidator(
                   fieldName: 'عنوان الشبكة',
                   isRequired: false,
@@ -201,6 +202,7 @@ class NetworkInfoCard extends GetView<RegisterNetworkController> {
                 hint: 'info@network.com',
                 prefixIcon: Icon(Icons.alternate_email_rounded, size: 20.r),
                 keyboardType: TextInputType.emailAddress,
+                isRequired: false,
                 validator: FormValidators.emailValidator(
                   fieldName: 'بريد الشبكة',
                   isRequired: false,

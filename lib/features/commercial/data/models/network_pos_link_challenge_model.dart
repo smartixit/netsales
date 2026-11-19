@@ -1,55 +1,60 @@
-import 'package:netsales/core/enums/linking_challenge_status.dart';
+import 'package:netsales/features/commercial/data/models/network_model.dart';
+import 'package:netsales/features/commercial/data/models/pos_model.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 
+/// نموذج بيانات تحدي ودعوة ربط نقطة البيع بالشبكة عبر QR
 class NetworkPosLinkChallengeModel extends NetworkPosLinkChallengeEntity {
   const NetworkPosLinkChallengeModel({
+    required super.challengeId,
     required super.challengeUuid,
+    required super.payload,
     required super.networkId,
-    super.networkName,
     super.posId,
-    super.posName,
-    required super.payloadToken,
-    required super.status,
+    super.status,
     super.statusLabel,
-    required super.expiresAt,
+    super.expiresAt,
+    super.consumedAt,
     super.createdAt,
+    super.updatedAt,
+    super.network,
+    super.pos,
   });
 
   factory NetworkPosLinkChallengeModel.fromJson(Map<String, dynamic> json) {
-    String? netName;
-    if (json['network'] is Map<String, dynamic>) {
-      netName = json['network']['network_name'] as String?;
-    }
-
-    String? pointName;
-    if (json['pos'] is Map<String, dynamic>) {
-      pointName = json['pos']['pos_name'] as String?;
-    }
-
-    final rawStatus = json['status']?.toString();
-    final parsedStatus = LinkingChallengeStatus.fromWire(rawStatus);
-
-    final rawExpiresAt = json['expires_at']?.toString();
-    final expiresAt = rawExpiresAt != null
-        ? DateTime.tryParse(rawExpiresAt) ?? DateTime.now()
-        : DateTime.now();
-
-    final rawCreatedAt = json['created_at']?.toString();
-    final createdAt = rawCreatedAt != null
-        ? DateTime.tryParse(rawCreatedAt)
-        : null;
-
     return NetworkPosLinkChallengeModel(
+      challengeId: (json['challenge_id'] as num?)?.toInt() ?? 0,
       challengeUuid: json['challenge_uuid']?.toString() ?? '',
+      payload: json['payload']?.toString() ?? '',
       networkId: (json['network_id'] as num?)?.toInt() ?? 0,
-      networkName: netName,
       posId: (json['pos_id'] as num?)?.toInt(),
-      posName: pointName,
-      payloadToken: json['payload_token']?.toString() ?? '',
-      status: parsedStatus,
+      status: json['status']?.toString(),
       statusLabel: json['status_label']?.toString(),
-      expiresAt: expiresAt,
-      createdAt: createdAt,
+      expiresAt: json['expires_at']?.toString(),
+      consumedAt: json['consumed_at']?.toString(),
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+      network: json['network'] is Map<String, dynamic>
+          ? NetworkModel.fromJson(json['network'] as Map<String, dynamic>)
+          : null,
+      pos: json['pos'] is Map<String, dynamic>
+          ? PosModel.fromJson(json['pos'] as Map<String, dynamic>)
+          : null,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'challenge_id': challengeId,
+      'challenge_uuid': challengeUuid,
+      'payload': payload,
+      'network_id': networkId,
+      'pos_id': posId,
+      'status': status,
+      'status_label': statusLabel,
+      'expires_at': expiresAt,
+      'consumed_at': consumedAt,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+    };
   }
 }

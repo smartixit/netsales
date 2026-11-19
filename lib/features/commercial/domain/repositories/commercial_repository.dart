@@ -5,85 +5,72 @@ import 'package:netsales/features/commercial/domain/entities/network_pos_link_en
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 
-/// عقد مستودع الكيانات والروابط التجارية
-abstract interface class CommercialRepository {
-  /// جلب قائمة الشبكات التابعة للمستخدم الحالي
+/// العقد التجريدي لمستودع العلاقات التجارية ونقاط البيع والشبكات
+abstract class CommercialRepository {
+  /// جلب الشبكات المصرح للمستخدم بالوصول إليها
   Future<List<NetworkEntity>> getMyNetworks();
 
-  /// جلب قائمة نقاط البيع التابعة للمستخدم الحالي
+  /// جلب نقاط البيع المصرح للمستخدم بالوصول إليها
   Future<List<PosEntity>> getMyPos();
 
-  /// جلب قائمة نقاط البيع المرتبطة بشبكة محددة مع دعم الترقيم بالمؤشر والفلترة
-  Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList(
-    int networkId, {
-    String? cursor,
-    String? search,
+  /// جلب قائمة نقاط البيع المرتبطة بشبكة محددة مع الفلترة والترقيم بالمؤشر
+  Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList({
+    required int networkId,
     bool? status,
+    String? search,
+    String? cursor,
     int? perPage,
-    Map<String, dynamic>? query,
   });
 
-  /// جلب قائمة الشبكات المرتبطة بنقطة بيع محددة مع دعم الترقيم بالمؤشر والفلترة
-  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList(
-    int posId, {
-    String? cursor,
-    String? search,
+  /// جلب قائمة الشبكات المرتبطة بنقطة بيع محددة مع الفلترة والترقيم بالمؤشر
+  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList({
+    required int posId,
     bool? status,
+    String? search,
+    String? cursor,
     int? perPage,
-    Map<String, dynamic>? query,
   });
 
-  /// ربط نقطة بيع بشبكة
+  /// ربط يدوي مباشر بين شبكة ونقطة بيع
   Future<NetworkPosLinkEntity> createNetworkPosLink({
     required int networkId,
-    int? posId,
-    String? posUuid,
-    bool? status,
+    required int posId,
   });
 
-  /// تبديل حالة الارتباط بين الشبكة ونقطة البيع
-  Future<NetworkPosLinkEntity> toggleNetworkPosLinkStatus(int linkId);
+  /// تبديل حالة نشاط الارتباط التجاري (تفعيل / تجميد)
+  Future<NetworkPosLinkEntity> toggleNetworkPosLinkStatus(int networkPosId);
 
-  /// فك الارتباط بين الشبكة ونقطة البيع
-  Future<void> deleteNetworkPosLink(int linkId);
+  /// فك الارتباط التجاري بين الشبكة ونقطة البيع
+  Future<void> deleteNetworkPosLink(int networkPosId);
 
-  /// جلب تفاصيل شبكة محددة
-  Future<NetworkEntity> getNetworkDetails(int networkId);
-
-  /// جلب تفاصيل نقطة بيع محددة
-  Future<PosEntity> getPosDetails(int posId);
-
-  /// تحديث بيانات شبكة
-  Future<NetworkEntity> updateNetworkDetails(
-    int networkId,
-    Map<String, dynamic> data,
-  );
-
-  /// تحديث بيانات نقطة بيع
-  Future<PosEntity> updatePosDetails(int posId, Map<String, dynamic> data);
-
-  /// إنشاء تحدي ربط مشفر عبر رمز QR
-  Future<NetworkPosLinkChallengeEntity> createLinkChallenge({
+  /// توليد دعوة وتحدي ربط مشفر عبر رمز QR من جانب الشبكة
+  Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
     int? posId,
     String? posUuid,
-    int? durationMinutes,
+    int durationMinutes = 15,
   });
 
-  /// معاينة وفحص تحدي الربط المشفر من جانب نقطة البيع
-  Future<NetworkPosLinkPreviewEntity> previewLinkChallenge({
+  /// فحص ومعاينة دعوة الربط المشفرة من جانب نقطة البيع
+  Future<NetworkPosLinkPreviewEntity> previewNetworkPosLinkChallenge({
     required String payload,
     int? posId,
     String? posUuid,
   });
 
-  /// تأكيد واعتماد ربط نقطة البيع بالشبكة عبر التحدي
-  Future<NetworkPosLinkEntity> confirmLinkChallenge({
+  /// تأكيد اعتماد الربط التجاري من جانب نقطة البيع عبر التحدي المشفر
+  Future<NetworkPosLinkEntity> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
     int? posId,
     String? posUuid,
   });
 
-  /// إلغاء وإبطال تحدي الربط
-  Future<void> revokeLinkChallenge(String uuid);
+  /// إلغاء دعوة الربط المشفرة
+  Future<void> revokeNetworkPosLinkChallenge(String challengeUuid);
+
+  /// جلب التفاصيل الكاملة لشبكة محددة
+  Future<NetworkEntity> getNetworkDetails(int networkId);
+
+  /// جلب التفاصيل الكاملة لنقطة بيع محددة
+  Future<PosEntity> getPosDetails(int posId);
 }

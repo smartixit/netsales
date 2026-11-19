@@ -155,6 +155,7 @@ class NetworkOwnerInfoCard extends GetView<RegisterNetworkController> {
                 hint: 'owner@example.com',
                 prefixIcon: Icon(Icons.email_outlined, size: 20.r),
                 keyboardType: TextInputType.emailAddress,
+                isRequired: false,
                 validator: FormValidators.emailValidator(
                   fieldName: 'البريد الإلكتروني للمسؤول',
                   isRequired: false,

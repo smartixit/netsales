@@ -1,31 +1,62 @@
+import 'package:equatable/equatable.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
+import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 
-/// كيان دعوة ربط نقطة البيع بالشبكة عبر QR
-class NetworkPosLinkChallengeEntity {
-  final String challengeUuid;
-  final int networkId;
-  final String? networkName;
-  final int? posId;
-  final String? posName;
-  final String payloadToken;
-  final LinkingChallengeStatus status;
-  final String? statusLabel;
-  final DateTime expiresAt;
-  final DateTime? createdAt;
-
+/// كيان تحدي ودعوة ربط نقطة البيع بالشبكة عبر رمز QR
+class NetworkPosLinkChallengeEntity extends Equatable {
   const NetworkPosLinkChallengeEntity({
+    required this.challengeId,
     required this.challengeUuid,
+    required this.payload,
     required this.networkId,
-    this.networkName,
     this.posId,
-    this.posName,
-    required this.payloadToken,
-    required this.status,
+    this.status,
     this.statusLabel,
-    required this.expiresAt,
+    this.expiresAt,
+    this.consumedAt,
     this.createdAt,
+    this.updatedAt,
+    this.network,
+    this.pos,
   });
 
-  bool get isExpired => DateTime.now().isAfter(expiresAt);
-  bool get isPending => status == LinkingChallengeStatus.pending && !isExpired;
+  final int challengeId;
+  final String challengeUuid;
+  final String payload;
+  final int networkId;
+  final int? posId;
+  final String? status;
+  final String? statusLabel;
+  final String? expiresAt;
+  final String? consumedAt;
+  final String? createdAt;
+  final String? updatedAt;
+  final NetworkEntity? network;
+  final PosEntity? pos;
+
+  LinkingChallengeStatus get typedStatus =>
+      LinkingChallengeStatus.fromWire(status);
+
+  bool get isPending => typedStatus == LinkingChallengeStatus.pending;
+  bool get isConsumed => typedStatus == LinkingChallengeStatus.consumed;
+  bool get isExpired => typedStatus == LinkingChallengeStatus.expired;
+  bool get isRevoked => typedStatus == LinkingChallengeStatus.revoked;
+
+  @override
+  List<Object?> get props => [
+        challengeId,
+        challengeUuid,
+        payload,
+        networkId,
+        posId,
+        status,
+        statusLabel,
+        expiresAt,
+        consumedAt,
+        createdAt,
+        updatedAt,
+        network,
+        pos,
+      ];
 }

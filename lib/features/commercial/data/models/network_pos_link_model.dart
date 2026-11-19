@@ -2,7 +2,7 @@ import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 
-/// نموذج بيانات ارتباط نقطة البيع بالشبكة (Network–POS Link Data Model)
+/// نموذج بيانات ارتباط نقطة البيع بالشبكة (Network POS Link Model)
 class NetworkPosLinkModel extends NetworkPosLinkEntity {
   const NetworkPosLinkModel({
     required super.networkPosId,
@@ -15,32 +15,22 @@ class NetworkPosLinkModel extends NetworkPosLinkEntity {
     super.pos,
   });
 
-  factory NetworkPosLinkModel.fromJson(dynamic json) {
-    if (json is! Map<String, dynamic>) {
-      throw FormatException(
-        'Invalid JSON type for NetworkPosLinkModel: ${json.runtimeType}',
-      );
-    }
-
-    NetworkModel? network;
-    if (json['network'] is Map<String, dynamic>) {
-      network = NetworkModel.fromJson(json['network'] as Map<String, dynamic>);
-    }
-
-    PosModel? pos;
-    if (json['pos'] is Map<String, dynamic>) {
-      pos = PosModel.fromJson(json['pos'] as Map<String, dynamic>);
-    }
-
+  factory NetworkPosLinkModel.fromJson(Map<String, dynamic> json) {
     return NetworkPosLinkModel(
-      networkPosId: _toInt(json['network_pos_id']),
-      networkId: _toInt(json['network_id']),
-      posId: _toInt(json['pos_id']),
-      status: _toBool(json['status']),
+      networkPosId: (json['network_pos_id'] as num?)?.toInt() ?? 0,
+      networkId: (json['network_id'] as num?)?.toInt() ?? 0,
+      posId: (json['pos_id'] as num?)?.toInt() ?? 0,
+      status: json['status'] == true ||
+          json['status'] == 1 ||
+          json['status'] == '1',
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
-      network: network,
-      pos: pos,
+      network: json['network'] is Map<String, dynamic>
+          ? NetworkModel.fromJson(json['network'] as Map<String, dynamic>)
+          : null,
+      pos: json['pos'] is Map<String, dynamic>
+          ? PosModel.fromJson(json['pos'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -52,19 +42,8 @@ class NetworkPosLinkModel extends NetworkPosLinkEntity {
       'status': status,
       'created_at': createdAt,
       'updated_at': updatedAt,
+      'network': network is NetworkModel ? (network as NetworkModel).toJson() : null,
+      'pos': pos is PosModel ? (pos as PosModel).toJson() : null,
     };
-  }
-
-  static int _toInt(dynamic value) {
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value) ?? 0;
-    return 0;
-  }
-
-  static bool _toBool(dynamic value) {
-    if (value is bool) return value;
-    if (value is int) return value == 1;
-    if (value is String) return value == '1' || value.toLowerCase() == 'true';
-    return true;
   }
 }

@@ -126,6 +126,7 @@ class ProcurementRequestDetailsController extends GetxController {
       final cancelled = await cancelUseCase(current.requestId);
       request.value = cancelled;
 
+      Get.back<void>();
       await CustomAnimationOverlay.showSuccess(
         message: 'تم إلغاء طلب الكروت بنجاح',
       );
@@ -167,6 +168,7 @@ class ProcurementRequestDetailsController extends GetxController {
       final result = await approveUseCase(current.requestId, requestNote: note);
       request.value = result.request;
 
+      Get.back<void>();
       await CustomAnimationOverlay.showSuccess(
         message: 'تم اعتماد الطلب وتوليد الفاتورة بنجاح',
       );
@@ -208,6 +210,7 @@ class ProcurementRequestDetailsController extends GetxController {
       final rejected = await rejectUseCase(current.requestId, reason);
       request.value = rejected;
 
+      Get.back<void>();
       await CustomAnimationOverlay.showSuccess(
         message: 'تم رفض طلب التوريد وتوثيق السبب',
       );

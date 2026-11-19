@@ -1,6 +1,6 @@
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 
-/// نموذج بيانات نقطة البيع (POS Data Model)
+/// نموذج بيانات نقطة البيع لمطابقة عقد الخادم (POS Model)
 class PosModel extends PosEntity {
   const PosModel({
     required super.posId,
@@ -22,54 +22,40 @@ class PosModel extends PosEntity {
     super.updatedAt,
   });
 
-  factory PosModel.fromJson(dynamic json) {
-    if (json is! Map<String, dynamic>) {
-      throw FormatException(
-        'Invalid JSON type for PosModel: ${json.runtimeType}',
-      );
+  factory PosModel.fromJson(Map<String, dynamic> json) {
+    String? resolvedOwnerName;
+    if (json['pos_holder_name'] != null) {
+      resolvedOwnerName = json['pos_holder_name']?.toString();
+    } else if (json['owner'] is Map) {
+      resolvedOwnerName = json['owner']['user_full_name']?.toString();
     }
 
-    String? ownerName;
-    if (json['owner'] is Map) {
-      ownerName = json['owner']['user_full_name']?.toString();
-    } else if (json['owner_name'] != null) {
-      ownerName = json['owner_name']?.toString();
-    }
-
-    String? governorateName;
+    String? govName;
     if (json['governorate'] is Map) {
-      governorateName = json['governorate']['governorate_name']?.toString();
-    } else if (json['governorate_name'] != null) {
-      governorateName = json['governorate_name']?.toString();
+      govName = json['governorate']['governorate_name']?.toString();
     }
 
-    String? directorateName;
+    String? dirName;
     if (json['directorate'] is Map) {
-      directorateName = json['directorate']['directorate_name']?.toString();
-    } else if (json['directorate_name'] != null) {
-      directorateName = json['directorate_name']?.toString();
+      dirName = json['directorate']['directorate_name']?.toString();
     }
 
     return PosModel(
-      posId: _toInt(json['pos_id']),
-      ownerId: _toInt(json['owner_id']),
+      posId: (json['pos_id'] as num?)?.toInt() ?? 0,
+      ownerId: (json['owner_id'] as num?)?.toInt() ?? 0,
       posUuid: json['pos_uuid']?.toString() ?? '',
       posName: json['pos_name']?.toString() ?? '',
       posPhoneNumber: json['pos_phone_number']?.toString() ?? '',
       posEmail: json['pos_email']?.toString(),
       posAddress: json['pos_address']?.toString(),
-      governorateId: json['governorate_id'] != null
-          ? _toInt(json['governorate_id'])
-          : null,
-      directorateId: json['directorate_id'] != null
-          ? _toInt(json['directorate_id'])
-          : null,
-      governorateName: governorateName,
-      directorateName: directorateName,
+      governorateId: (json['governorate_id'] as num?)?.toInt(),
+      directorateId: (json['directorate_id'] as num?)?.toInt(),
+      governorateName: govName,
+      directorateName: dirName,
       status: json['status']?.toString(),
       statusLabel: json['status_label']?.toString(),
-      ownerName: ownerName,
-      posProfileLogoUrl: json['pos_profile_logo_url']?.toString(),
+      ownerName: resolvedOwnerName,
+      posProfileLogoUrl: json['pos_profile_logo']?.toString(),
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
     );
@@ -87,13 +73,11 @@ class PosModel extends PosEntity {
       'governorate_id': governorateId,
       'directorate_id': directorateId,
       'status': status,
-      'pos_profile_logo_url': posProfileLogoUrl,
+      'status_label': statusLabel,
+      'pos_holder_name': ownerName,
+      'pos_profile_logo': posProfileLogoUrl,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
     };
-  }
-
-  static int _toInt(dynamic value) {
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value) ?? 0;
-    return 0;
   }
 }

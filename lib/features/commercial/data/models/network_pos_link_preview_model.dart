@@ -1,39 +1,39 @@
+import 'package:netsales/features/commercial/data/models/network_model.dart';
+import 'package:netsales/features/commercial/data/models/pos_model.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 
+/// نموذج بيانات فحص ومعاينة دعوة الربط المشفرة
 class NetworkPosLinkPreviewModel extends NetworkPosLinkPreviewEntity {
   const NetworkPosLinkPreviewModel({
     required super.challengeUuid,
-    required super.networkId,
-    required super.networkName,
-    super.networkPhone,
-    super.governorateName,
-    super.directorateName,
-    super.posId,
-    super.posName,
-    required super.expiresAt,
-    required super.alreadyLinked,
+    required super.network,
+    super.pos,
+    super.expiresAt,
+    super.isTargeted,
   });
 
   factory NetworkPosLinkPreviewModel.fromJson(Map<String, dynamic> json) {
-    final net = json['network'] as Map<String, dynamic>? ?? {};
-    final pos = json['pos'] as Map<String, dynamic>?;
-
-    final rawExpires = json['expires_at']?.toString();
-    final expiresAt = rawExpires != null
-        ? DateTime.tryParse(rawExpires) ?? DateTime.now()
-        : DateTime.now();
+    final netData = json['network'] as Map<String, dynamic>? ?? {};
+    final posData = json['pos'] as Map<String, dynamic>?;
 
     return NetworkPosLinkPreviewModel(
       challengeUuid: json['challenge_uuid']?.toString() ?? '',
-      networkId: (net['network_id'] as num?)?.toInt() ?? 0,
-      networkName: net['network_name']?.toString() ?? 'شبكة غير معروفة',
-      networkPhone: net['network_phone_number']?.toString(),
-      governorateName: net['governorate']?.toString(),
-      directorateName: net['directorate']?.toString(),
-      posId: (pos?['pos_id'] as num?)?.toInt(),
-      posName: pos?['pos_name']?.toString(),
-      expiresAt: expiresAt,
-      alreadyLinked: json['already_linked'] == true,
+      network: NetworkModel.fromJson(netData),
+      pos: posData != null ? PosModel.fromJson(posData) : null,
+      expiresAt: json['expires_at']?.toString(),
+      isTargeted: json['is_targeted'] == true,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'challenge_uuid': challengeUuid,
+      'network': network is NetworkModel
+          ? (network as NetworkModel).toJson()
+          : null,
+      'pos': pos is PosModel ? (pos as PosModel).toJson() : null,
+      'expires_at': expiresAt,
+      'is_targeted': isTargeted,
+    };
   }
 }

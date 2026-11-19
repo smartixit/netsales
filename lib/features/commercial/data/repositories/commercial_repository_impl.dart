@@ -1,4 +1,4 @@
-import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
@@ -8,313 +8,131 @@ import 'package:netsales/features/commercial/domain/entities/network_pos_link_pr
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 
-/// تطبيق مستودع الكيانات والروابط التجارية
+/// تطبيق مستودع العلاقات التجارية والشركاء
 class CommercialRepositoryImpl implements CommercialRepository {
-  const CommercialRepositoryImpl(this._remoteDataSource);
+  CommercialRepositoryImpl([CommercialRemoteDataSource? remoteDataSource])
+      : _remote = remoteDataSource ?? Get.find<CommercialRemoteDataSource>();
 
-  final CommercialRemoteDataSource _remoteDataSource;
+  final CommercialRemoteDataSource _remote;
 
   @override
-  Future<List<NetworkEntity>> getMyNetworks() async {
-    const pageSize = 100;
-    final networks = <NetworkEntity>[];
-    final seenNetworkIds = <int>{};
-    final seenCursors = <String>{};
-    String? cursor;
-
-    while (true) {
-      final query = <String, dynamic>{'per_page': pageSize, 'cursor': ?cursor};
-      final response = await _remoteDataSource.getMyNetworks(query: query);
-
-      if (!response.success || response.data == null) {
-        throw AppException(
-          response.message.isNotEmpty
-              ? response.message
-              : 'تعذر تحميل قائمة الشبكات المصرح بها.',
-        );
-      }
-
-      for (final network in response.data!) {
-        if (network.networkId > 0 && seenNetworkIds.add(network.networkId)) {
-          networks.add(network);
-        }
-      }
-
-      final nextCursor = response.nextCursor?.trim();
-      if (nextCursor == null || nextCursor.isEmpty) {
-        return networks;
-      }
-      if (!seenCursors.add(nextCursor)) {
-        throw AppException('توقف تحميل الشبكات بسبب تكرار مؤشر الصفحة.');
-      }
-      cursor = nextCursor;
-    }
+  Future<List<NetworkEntity>> getMyNetworks() {
+    return _remote.getMyNetworks();
   }
 
   @override
-  Future<List<PosEntity>> getMyPos() async {
-    const pageSize = 100;
-    final positions = <PosEntity>[];
-    final seenPosIds = <int>{};
-    final seenCursors = <String>{};
-    String? cursor;
-
-    while (true) {
-      final query = <String, dynamic>{'per_page': pageSize, 'cursor': ?cursor};
-      final response = await _remoteDataSource.getMyPos(query: query);
-
-      if (!response.success || response.data == null) {
-        throw AppException(
-          response.message.isNotEmpty
-              ? response.message
-              : 'تعذر تحميل قائمة نقاط البيع المصرح بها.',
-        );
-      }
-
-      for (final pos in response.data!) {
-        if (pos.posId > 0 && seenPosIds.add(pos.posId)) {
-          positions.add(pos);
-        }
-      }
-
-      final nextCursor = response.nextCursor?.trim();
-      if (nextCursor == null || nextCursor.isEmpty) {
-        return positions;
-      }
-      if (!seenCursors.add(nextCursor)) {
-        throw AppException('توقف تحميل نقاط البيع بسبب تكرار مؤشر الصفحة.');
-      }
-      cursor = nextCursor;
-    }
+  Future<List<PosEntity>> getMyPos() {
+    return _remote.getMyPos();
   }
 
   @override
-  Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList(
-    int networkId, {
-    String? cursor,
-    String? search,
+  Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList({
+    required int networkId,
     bool? status,
+    String? search,
+    String? cursor,
     int? perPage,
-    Map<String, dynamic>? query,
-  }) async {
-    final mergedQuery = <String, dynamic>{
-      'cursor': ?cursor,
-      if (search != null && search.isNotEmpty) 'search': search,
-      if (status != null) 'status': status ? '1' : '0',
-      'per_page': ?perPage,
-      ...?query,
-    };
-
-    final response = await _remoteDataSource.getNetworkPosList(
-      networkId,
-      query: mergedQuery.isEmpty ? null : mergedQuery,
+  }) {
+    return _remote.getNetworkPosList(
+      networkId: networkId,
+      status: status,
+      search: search,
+      cursor: cursor,
+      perPage: perPage,
     );
-
-    if (response.success && response.data != null) {
-      return PaginatedList<NetworkPosLinkEntity>(
-        items: response.data!,
-        nextCursor: response.nextCursor,
-        prevCursor: response.prevCursor,
-      );
-    }
-
-    throw AppException(response.message);
   }
 
   @override
-  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList(
-    int posId, {
-    String? cursor,
-    String? search,
+  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList({
+    required int posId,
     bool? status,
+    String? search,
+    String? cursor,
     int? perPage,
-    Map<String, dynamic>? query,
-  }) async {
-    final mergedQuery = <String, dynamic>{
-      'cursor': ?cursor,
-      if (search != null && search.isNotEmpty) 'search': search,
-      if (status != null) 'status': status ? '1' : '0',
-      'per_page': ?perPage,
-      ...?query,
-    };
-
-    final response = await _remoteDataSource.getPosNetworksList(
-      posId,
-      query: mergedQuery.isEmpty ? null : mergedQuery,
+  }) {
+    return _remote.getPosNetworksList(
+      posId: posId,
+      status: status,
+      search: search,
+      cursor: cursor,
+      perPage: perPage,
     );
-
-    if (response.success && response.data != null) {
-      return PaginatedList<NetworkPosLinkEntity>(
-        items: response.data!,
-        nextCursor: response.nextCursor,
-        prevCursor: response.prevCursor,
-      );
-    }
-
-    throw AppException(response.message);
   }
 
   @override
   Future<NetworkPosLinkEntity> createNetworkPosLink({
     required int networkId,
-    int? posId,
-    String? posUuid,
-    bool? status,
-  }) async {
-    final response = await _remoteDataSource.createNetworkPosLink(
+    required int posId,
+  }) {
+    return _remote.createNetworkPosLink(
       networkId: networkId,
       posId: posId,
-      posUuid: posUuid,
-      status: status,
     );
-
-    if (response.success && response.data != null) {
-      return response.data!;
-    }
-
-    throw AppException(response.message);
   }
 
   @override
-  Future<NetworkPosLinkEntity> toggleNetworkPosLinkStatus(int linkId) async {
-    final response = await _remoteDataSource.toggleNetworkPosLinkStatus(linkId);
-
-    if (response.success && response.data != null) {
-      return response.data!;
-    }
-
-    throw AppException(response.message);
+  Future<NetworkPosLinkEntity> toggleNetworkPosLinkStatus(int networkPosId) {
+    return _remote.toggleNetworkPosLinkStatus(networkPosId);
   }
 
   @override
-  Future<void> deleteNetworkPosLink(int linkId) async {
-    final response = await _remoteDataSource.deleteNetworkPosLink(linkId);
-
-    if (!response.success) {
-      throw AppException(response.message);
-    }
+  Future<void> deleteNetworkPosLink(int networkPosId) {
+    return _remote.deleteNetworkPosLink(networkPosId);
   }
 
   @override
-  Future<NetworkEntity> getNetworkDetails(int networkId) async {
-    final response = await _remoteDataSource.getNetworkDetails(networkId);
-
-    if (response.success && response.data != null) {
-      return response.data!;
-    }
-
-    throw AppException(response.message);
-  }
-
-  @override
-  Future<PosEntity> getPosDetails(int posId) async {
-    final response = await _remoteDataSource.getPosDetails(posId);
-
-    if (response.success && response.data != null) {
-      return response.data!;
-    }
-
-    throw AppException(response.message);
-  }
-
-  @override
-  Future<NetworkEntity> updateNetworkDetails(
-    int networkId,
-    Map<String, dynamic> data,
-  ) async {
-    final response = await _remoteDataSource.updateNetworkDetails(
-      networkId,
-      data,
-    );
-
-    if (response.success && response.data != null) {
-      return response.data!;
-    }
-
-    throw AppException(response.message);
-  }
-
-  @override
-  Future<PosEntity> updatePosDetails(
-    int posId,
-    Map<String, dynamic> data,
-  ) async {
-    final response = await _remoteDataSource.updatePosDetails(posId, data);
-
-    if (response.success && response.data != null) {
-      return response.data!;
-    }
-
-    throw AppException(response.message);
-  }
-
-  @override
-  Future<NetworkPosLinkChallengeEntity> createLinkChallenge({
+  Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
     int? posId,
     String? posUuid,
-    int? durationMinutes,
-  }) async {
-    final response = await _remoteDataSource.createLinkChallenge(
+    int durationMinutes = 15,
+  }) {
+    return _remote.createNetworkPosLinkChallenge(
       networkId: networkId,
       posId: posId,
       posUuid: posUuid,
       durationMinutes: durationMinutes,
     );
-
-    if (response.success && response.data != null) {
-      return response.data!;
-    }
-
-    throw AppException(response.message);
   }
 
   @override
-  Future<NetworkPosLinkPreviewEntity> previewLinkChallenge({
+  Future<NetworkPosLinkPreviewEntity> previewNetworkPosLinkChallenge({
     required String payload,
     int? posId,
     String? posUuid,
-  }) async {
-    final response = await _remoteDataSource.previewLinkChallenge(
+  }) {
+    return _remote.previewNetworkPosLinkChallenge(
       payload: payload,
       posId: posId,
       posUuid: posUuid,
     );
-
-    if (response.success && response.data != null) {
-      return response.data!;
-    }
-
-    throw AppException(response.message);
   }
 
   @override
-  Future<NetworkPosLinkEntity> confirmLinkChallenge({
+  Future<NetworkPosLinkEntity> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
     int? posId,
     String? posUuid,
-  }) async {
-    final response = await _remoteDataSource.confirmLinkChallenge(
+  }) {
+    return _remote.confirmNetworkPosLinkChallenge(
       challengeUuid: challengeUuid,
       posId: posId,
       posUuid: posUuid,
     );
-
-    if (response.success && response.data != null) {
-      return response.data!;
-    }
-
-    throw AppException(response.message);
   }
 
   @override
-  Future<void> revokeLinkChallenge(String uuid) async {
-    final response = await _remoteDataSource.revokeLinkChallenge(uuid);
+  Future<void> revokeNetworkPosLinkChallenge(String challengeUuid) {
+    return _remote.revokeNetworkPosLinkChallenge(challengeUuid);
+  }
 
-    if (response.success) {
-      return;
-    }
+  @override
+  Future<NetworkEntity> getNetworkDetails(int networkId) {
+    return _remote.getNetworkDetails(networkId);
+  }
 
-    throw AppException(response.message);
+  @override
+  Future<PosEntity> getPosDetails(int posId) {
+    return _remote.getPosDetails(posId);
   }
 }

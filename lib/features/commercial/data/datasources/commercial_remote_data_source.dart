@@ -1,88 +1,63 @@
-import 'package:netsales/core/models/api_response.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 
-/// عقد مصدر البيانات البعيد للكيانات والروابط التجارية
-abstract interface class CommercialRemoteDataSource {
-  /// جلب قائمة الشبكات التابعة للمستخدم الحالي
-  Future<ApiResponse<List<NetworkModel>>> getMyNetworks({
-    Map<String, dynamic>? query,
-  });
+/// واجهة مصدر البيانات البعيد للعلاقات التجارية
+abstract class CommercialRemoteDataSource {
+  Future<List<NetworkModel>> getMyNetworks();
 
-  /// جلب قائمة نقاط البيع التابعة للمستخدم الحالي
-  Future<ApiResponse<List<PosModel>>> getMyPos({Map<String, dynamic>? query});
+  Future<List<PosModel>> getMyPos();
 
-  /// جلب قائمة نقاط البيع المرتبطة بشبكة
-  Future<ApiResponse<List<NetworkPosLinkModel>>> getNetworkPosList(
-    int networkId, {
-    Map<String, dynamic>? query,
-  });
-
-  /// جلب قائمة الشبكات المرتبطة بنقطة بيع
-  Future<ApiResponse<List<NetworkPosLinkModel>>> getPosNetworksList(
-    int posId, {
-    Map<String, dynamic>? query,
-  });
-
-  /// ربط نقطة بيع بشبكة
-  Future<ApiResponse<NetworkPosLinkModel>> createNetworkPosLink({
+  Future<PaginatedList<NetworkPosLinkModel>> getNetworkPosList({
     required int networkId,
-    int? posId,
-    String? posUuid,
     bool? status,
+    String? search,
+    String? cursor,
+    int? perPage,
   });
 
-  /// تبديل حالة الارتباط
-  Future<ApiResponse<NetworkPosLinkModel>> toggleNetworkPosLinkStatus(
-    int linkId,
-  );
+  Future<PaginatedList<NetworkPosLinkModel>> getPosNetworksList({
+    required int posId,
+    bool? status,
+    String? search,
+    String? cursor,
+    int? perPage,
+  });
 
-  /// فك الارتباط
-  Future<ApiResponse<void>> deleteNetworkPosLink(int linkId);
+  Future<NetworkPosLinkModel> createNetworkPosLink({
+    required int networkId,
+    required int posId,
+  });
 
-  /// جلب تفاصيل شبكة
-  Future<ApiResponse<NetworkModel>> getNetworkDetails(int networkId);
+  Future<NetworkPosLinkModel> toggleNetworkPosLinkStatus(int networkPosId);
 
-  /// جلب تفاصيل نقطة بيع
-  Future<ApiResponse<PosModel>> getPosDetails(int posId);
+  Future<void> deleteNetworkPosLink(int networkPosId);
 
-  /// تحديث بيانات شبكة
-  Future<ApiResponse<NetworkModel>> updateNetworkDetails(
-    int networkId,
-    Map<String, dynamic> data,
-  );
-
-  /// تحديث بيانات نقطة بيع
-  Future<ApiResponse<PosModel>> updatePosDetails(
-    int posId,
-    Map<String, dynamic> data,
-  );
-
-  /// إنشاء تحدي ربط مشفر عبر رمز QR
-  Future<ApiResponse<NetworkPosLinkChallengeModel>> createLinkChallenge({
+  Future<NetworkPosLinkChallengeModel> createNetworkPosLinkChallenge({
     required int networkId,
     int? posId,
     String? posUuid,
-    int? durationMinutes,
+    int durationMinutes = 15,
   });
 
-  /// معاينة وفحص تحدي ربط مشفر من جانب نقطة البيع
-  Future<ApiResponse<NetworkPosLinkPreviewModel>> previewLinkChallenge({
+  Future<NetworkPosLinkPreviewModel> previewNetworkPosLinkChallenge({
     required String payload,
     int? posId,
     String? posUuid,
   });
 
-  /// تأكيد واعتماد ربط نقطة البيع بالشبكة عبر التحدي
-  Future<ApiResponse<NetworkPosLinkModel>> confirmLinkChallenge({
+  Future<NetworkPosLinkModel> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
     int? posId,
     String? posUuid,
   });
 
-  /// إلغاء وإبطال تحدي الربط
-  Future<ApiResponse<void>> revokeLinkChallenge(String uuid);
+  Future<void> revokeNetworkPosLinkChallenge(String challengeUuid);
+
+  Future<NetworkModel> getNetworkDetails(int networkId);
+
+  Future<PosModel> getPosDetails(int posId);
 }
