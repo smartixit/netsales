@@ -1072,25 +1072,39 @@ class _CryptoInterceptor extends Interceptor {
     }
 
     if (!crypto.isReady) {
-      return handler.next(options);
+      return handler.reject(
+        DioException(
+          requestOptions: options,
+          type: DioExceptionType.unknown,
+          error: const AppException(
+            'تعذر تهيئة مكتبة التشفير الآمن؛ أُوقف الطلب لحماية بياناته.',
+          ),
+        ),
+      );
     }
 
     try {
       final method = options.method.toUpperCase();
 
-      // 1. طلبات التعديل والإرسال التي تحتوي حمولة (POST, PUT, PATCH) وليست FormData
+      // 1. Encrypt mutating requests with the current server X25519 public key.
       if (['POST', 'PUT', 'PATCH'].contains(method) &&
           options.data != null &&
           options.data is! FormData) {
         if (!crypto.hasServerBoxKey) {
-          await crypto.syncServerPublicKeys(dio: _dio);
+          final synchronized = await crypto.syncServerPublicKeys(dio: _dio);
+          if (!synchronized || !crypto.hasServerBoxKey) {
+            throw const AppException(
+              'تعذر جلب مفتاح التشفير العام من الخادم؛ أُوقف تسجيل الدخول ولم تُرسل بيانات الاعتماد دون تشفير.',
+            );
+          }
         }
+
         final sealed = crypto.sealRequestPayload(options.data);
         options.data = sealed.body;
         options.headers['X-Client-Public-Key'] = sealed.clientPublicKeyHex;
         options.extra['_crypto_keypair'] = sealed.ephemeralKeyPair;
       } else {
-        // 2. طلبات القراءة أو الحذف التي تتطلب استجابة مشفرة من الخادم
+        // 2. Read/delete requests still need a response key pair.
         final ephemeral = crypto.generateEphemeralKeyPair();
         final clientPublicKeyHex = AppCryptoService.bytesToHex(
           ephemeral.publicKey,
@@ -1102,7 +1116,14 @@ class _CryptoInterceptor extends Interceptor {
       ApiRequestReplayState.markCryptoPrepared(options);
     } catch (e, stack) {
       log(
-        '⚠️ [CryptoInterceptor] Encryption failed for ${options.uri}: $e\n$stack',
+        '❌ [CryptoInterceptor] Secure request preparation failed for ${options.uri}: $e\n$stack',
+      );
+      return handler.reject(
+        DioException(
+          requestOptions: options,
+          type: DioExceptionType.unknown,
+          error: e,
+        ),
       );
     }
 
@@ -1114,9 +1135,17 @@ class _CryptoInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
-    if (!ApiRequestReplayState.tryFinishCryptoLifecycle(
-      response.requestOptions,
-    )) {
+    final options = response.requestOptions;
+
+    // The challenge interceptor is later in the response chain. Defer
+    // finalizing and disposing the ephemeral key until that interceptor has
+    // replayed the same sealed request with the verification cookie.
+    if (options.extra['__test_retried'] != true &&
+        InfinityFreeChallengeSolver.isChallengeResponse(response.data)) {
+      return handler.next(response);
+    }
+
+    if (!ApiRequestReplayState.tryFinishCryptoLifecycle(options)) {
       return handler.next(response);
     }
 
