@@ -9,8 +9,6 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/flows/pos_network_linking_flow.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_active_supply_order_tracker.dart';
-import 'package:netsales/features/workspace/presentation/widgets/pos_connected_networks_carousel_section.dart';
-import 'package:netsales/features/workspace/presentation/widgets/pos_network_packages_catalog.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_quick_action_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_recent_transactions_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_selected_network_financial_summary.dart';
@@ -104,14 +102,7 @@ class PosHomeDashboard extends StatelessWidget {
             ),
             AppSpacing.vLg,
 
-            // 2. كاروسيل بطاقات الشبكات المرتبطة بنقطة البيع
-            PosConnectedNetworksCarouselSection(
-              controller: controller,
-              onLinkNetwork: PosNetworkLinkingFlow(controller).start,
-            ),
-            AppSpacing.vLg,
-
-            // 4. كرت السيولة والملخص المالي للشبكة المحددة (VIP Luxury Carbon Card)
+            // 2. كرت السيولة والملخص المالي للشبكة المحددة (VIP Luxury Carbon Card)
             if (controller.selectedNetworkLink.value != null) ...[
               PosSelectedNetworkFinancialSummary(
                 networkName:
@@ -133,19 +124,11 @@ class PosHomeDashboard extends StatelessWidget {
               AppSpacing.vLg,
             ],
 
-            // 5. متابعة طلبات التوريد المفتوحة من الـ API الحقيقي
+            // 3. متابعة طلبات التوريد المفتوحة من الـ API الحقيقي
             PosActiveSupplyOrderTracker(controller: controller),
             AppSpacing.vLg,
 
-            // 6. قسم آخر العمليات والحركات الحية من الـ API الحقيقي
-            PosRecentTransactionsSection(controller: controller),
-            AppSpacing.vLg,
-
-            // 7. كتالوج باقات الشبكة وأسعار الجملة المعتمدة
-            PosNetworkPackagesCatalog(controller: controller),
-            AppSpacing.vLg,
-
-            // 8. لوحة العمليات السريعة المتكاملة
+            // 4. لوحة العمليات السريعة المتكاملة
             Padding(
               padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
               child: Row(
@@ -206,6 +189,10 @@ class PosHomeDashboard extends StatelessWidget {
                 ),
               ],
             ),
+            AppSpacing.vLg,
+
+            // 5. قسم آخر العمليات والحركات الحية من الـ API الحقيقي
+            PosRecentTransactionsSection(controller: controller),
           ],
         );
       }),

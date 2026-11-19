@@ -42,11 +42,14 @@ class WorkspaceEntityPickerController extends GetxController {
 
   void prepareForWorkspace(AppWorkspace workspace) {
     selectedSegment.value = workspace == AppWorkspace.network ? 0 : 1;
-    unawaited(loadEntities());
+    if (networks.isEmpty && pointsOfSale.isEmpty) {
+      unawaited(loadEntities());
+    }
   }
 
-  Future<void> loadEntities({bool forceSkeleton = true}) async {
-    if (forceSkeleton) {
+  Future<void> loadEntities({bool forceSkeleton = false}) async {
+    final hasNoData = networks.isEmpty && pointsOfSale.isEmpty;
+    if (forceSkeleton || hasNoData) {
       isLoading.value = true;
     }
     errorMessage.value = null;

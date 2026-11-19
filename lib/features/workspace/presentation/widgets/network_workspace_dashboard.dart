@@ -5,13 +5,11 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
-import 'package:netsales/features/workspace/presentation/flows/network_pos_invite_flow.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_liquidity_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_metrics_grid.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_sales_velocity_chart.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_welcome_hero_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/network_live_pending_orders_stream.dart';
-import 'package:netsales/features/workspace/presentation/widgets/network_provider_carousel_section.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
@@ -112,16 +110,19 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
             ),
             AppSpacing.vLg,
 
-            // 2. قسم كاروسيل بطاقات الشبكات التابعة للمزود
-            if (controller.networks.isNotEmpty) ...[
-              NetworkProviderCarouselSection(
-                controller: controller,
-                onInvitePos: NetworkPosInviteFlow(controller).start,
+            // 2. شريط أحدث طلبات التوريد بانتظار الاعتماد (أولوية قصوى لفك الاختناقات)
+            if (controller.recentPendingOrderItems.isNotEmpty) ...[
+              NetworkLivePendingOrdersStream(
+                items: controller.recentPendingOrderItems,
+                totalPendingCount: dashboard.pendingRequestsCount > 0
+                    ? dashboard.pendingRequestsCount
+                    : controller.recentPendingOrderItems.length,
+                onViewAll: () => controller.onNavItemSelected(1),
               ),
               AppSpacing.vLg,
             ],
 
-            // 4. كرت السيولة والعمليات السريعة
+            // 3. كرت السيولة والعمليات السريعة
             if (dashboard.showLiquiditySection) ...[
               ExecutiveLiquidityCard(
                 summary: dashboard.liquiditySummary,
@@ -132,7 +133,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
               AppSpacing.vLg,
             ],
 
-            // 5. منحنى وتيرة المبيعات والطلبات
+            // 4. منحنى وتيرة المبيعات والطلبات
             if (dashboard.showSalesSection) ...[
               ExecutiveSalesVelocityChart(
                 chartDefinition: dashboard.salesChartDefinition,
@@ -143,7 +144,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
               AppSpacing.vLg,
             ],
 
-            // 6. شبكة المؤشرات الحيوية التنفيذية (2 أعمدة متوازية)
+            // 5. شبكة المؤشرات الحيوية التنفيذية (2 أعمدة متوازية)
             ExecutiveMetricsGrid(
               items: dashboard.kpiMetrics,
               onPointsOfSaleTap: () => controller.onNavItemSelected(2),
@@ -153,19 +154,6 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
               onExpensesTap: () => controller.onNavItemSelected(3),
               onWalletTap: () => controller.onNavItemSelected(3),
             ),
-            AppSpacing.vXl,
-
-            // 7. شريط أحدث طلبات التوريد بانتظار الاعتماد
-            if (controller.recentPendingOrderItems.isNotEmpty) ...[
-              NetworkLivePendingOrdersStream(
-                items: controller.recentPendingOrderItems,
-                totalPendingCount: dashboard.pendingRequestsCount > 0
-                    ? dashboard.pendingRequestsCount
-                    : controller.recentPendingOrderItems.length,
-                onViewAll: () => controller.onNavItemSelected(1),
-              ),
-              AppSpacing.vXl,
-            ],
           ],
         );
       }),
