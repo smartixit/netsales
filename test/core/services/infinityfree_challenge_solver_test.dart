@@ -126,6 +126,38 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       },
     );
 
+    test('recognizes challenge responses returned as byte arrays', () {
+      final bytes = challenge.codeUnits;
+
+      expect(InfinityFreeChallengeSolver.challengeHtml(bytes), challenge);
+      expect(InfinityFreeChallengeSolver.isChallengeResponse(bytes), isTrue);
+      expect(
+        InfinityFreeChallengeSolver.solveChallengeResponse(bytes),
+        'e84330a69c6df373fc2fd2a2827a5f',
+      );
+    });
+
+    test('extracts a safe redirect from a byte-array challenge response', () {
+      final requestUri = Uri.parse(
+        'https://netsales.kesug.com/api/v1/auth/login',
+      );
+      final bytes = challenge
+          .replaceFirst(
+            '</script>',
+            'location.href="https://netsales.kesug.com/api/v1/auth/login?i=1";'
+            '</script>',
+          )
+          .codeUnits;
+
+      final target =
+          InfinityFreeChallengeSolver.extractChallengeRedirectFromResponse(
+        bytes,
+        requestUri: requestUri,
+      );
+
+      expect(target?.toString(), 'https://netsales.kesug.com/api/v1/auth/login?i=1');
+    });
+
     test('extracts constants despite whitespace and line breaks', () {
       const spaced = '''
 var a = toNumbers ( "f655ba9d09a112d4968c63579db590b4" ),
@@ -137,6 +169,65 @@ var a = toNumbers ( "f655ba9d09a112d4968c63579db590b4" ),
         '98344c2eee86c3994890592585b49f80',
         '25b509cc7dadcdb532275647f94524cc',
       ]);
+    });
+
+    test('extracts the challenge redirect query from the same endpoint', () {
+      final requestUri = Uri.parse(
+        'https://netsales.kesug.com/api/v1/security/public-keys?locale=ar',
+      );
+      const html = '''
+<script>
+document.cookie="__test=token; path=/";
+location.href="https://netsales.kesug.com/api/v1/security/public-keys?i=1";
+</script>
+''';
+
+      final target = InfinityFreeChallengeSolver.extractChallengeRedirectUri(
+        html,
+        requestUri: requestUri,
+      );
+
+      expect(target, isNotNull);
+      expect(target!.queryParameters, {'i': '1'});
+      expect(target.path, requestUri.path);
+      expect(target.origin, requestUri.origin);
+    });
+
+    test('resolves a relative same-endpoint challenge redirect', () {
+      final requestUri = Uri.parse(
+        'https://netsales.kesug.com/api/v1/auth/login',
+      );
+
+      final target = InfinityFreeChallengeSolver.extractChallengeRedirectUri(
+        'location.href="/api/v1/auth/login?i=2";',
+        requestUri: requestUri,
+      );
+
+      expect(
+        target?.toString(),
+        'https://netsales.kesug.com/api/v1/auth/login?i=2',
+      );
+    });
+
+    test('rejects challenge redirects to a different origin or path', () {
+      final requestUri = Uri.parse(
+        'https://netsales.kesug.com/api/v1/auth/login',
+      );
+
+      expect(
+        InfinityFreeChallengeSolver.extractChallengeRedirectUri(
+          'location.href="https://evil.example/api/v1/auth/login?i=1";',
+          requestUri: requestUri,
+        ),
+        isNull,
+      );
+      expect(
+        InfinityFreeChallengeSolver.extractChallengeRedirectUri(
+          'location.href="https://netsales.kesug.com/other?i=1";',
+          requestUri: requestUri,
+        ),
+        isNull,
+      );
     });
 
     test('rejects incomplete challenge constants', () {

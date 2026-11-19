@@ -28,6 +28,47 @@ class InfinityFreeChallengeSolver {
         lower.contains('tonumbers');
   }
 
+  /// يحوّل أي نوع استجابة شائع من Dio إلى نص صفحة التحدي عند تطابقها.
+  static String? challengeHtml(dynamic data) {
+    final String? body;
+    if (data is String) {
+      body = data;
+    } else if (data is List<int>) {
+      try {
+        body = utf8.decode(data);
+      } on FormatException {
+        return null;
+      }
+    } else {
+      return null;
+    }
+
+    return isChallengeBody(body) ? body : null;
+  }
+
+  /// يحدد صفحة التحدي سواء أعادها Dio كنص أو كبايتات.
+  static bool isChallengeResponse(dynamic data) {
+    return challengeHtml(data) != null;
+  }
+
+  /// يحسب قيمة كوكي التحدي لأي نوع استجابة نصي/ثنائي يدعمه المحلل.
+  static String? solveChallengeResponse(dynamic data) {
+    final html = challengeHtml(data);
+    if (html == null) return null;
+    return solveChallenge(html);
+  }
+
+  /// يستخرج انتقال JavaScript من أي نوع استجابة يدعمه المحلل.
+  static Uri? extractChallengeRedirectFromResponse(
+    dynamic data, {
+    required Uri requestUri,
+  }) {
+    final html = challengeHtml(data);
+    if (html == null) return null;
+
+    return extractChallengeRedirectUri(html, requestUri: requestUri);
+  }
+
   /// استخراج الثوابت [a, b, c] مع تحمل اختلاف المسافات والتصغير.
   static List<String>? extractConstants(String html) {
     String? capture(String name) => RegExp(
@@ -151,6 +192,39 @@ class InfinityFreeChallengeSolver {
 
   /// User-Agent شبيه بمتصفح — تشترطه الاستضافة بجانب الكوكي في كل طلب.
   static String get browserUserAgent => _browserUserAgent;
+
+  /// يستخرج عنوان الانتقال الذي ينفذه JavaScript بعد ضبط كوكي التحقق.
+  ///
+  /// لا نقبل إلا انتقالاً إلى نفس scheme/host/port/path للطلب الحالي؛
+  /// نحتاج معامل التحقق (مثل i=1) فقط، ولا نتبع أي إعادة توجيه إلى وجهة أخرى.
+  static Uri? extractChallengeRedirectUri(
+    String html, {
+    required Uri requestUri,
+  }) {
+    final match = RegExp(
+      r'''location\s*\.\s*href\s*=\s*["']([^"']+)["']''',
+      caseSensitive: false,
+    ).firstMatch(html);
+    final location = match?.group(1);
+    if (location == null || location.isEmpty) return null;
+
+    try {
+      final targetUri = requestUri.resolve(location);
+      final sameOrigin =
+          targetUri.scheme.toLowerCase() == requestUri.scheme.toLowerCase() &&
+          targetUri.host.toLowerCase() == requestUri.host.toLowerCase() &&
+          targetUri.port == requestUri.port;
+      final samePath = targetUri.path == requestUri.path;
+
+      if (!sameOrigin || !samePath || !targetUri.hasQuery) {
+        return null;
+      }
+
+      return targetUri;
+    } on FormatException {
+      return null;
+    }
+  }
 
   /// القيمة المتوقعة لكوكي __test محسوبة من `c` في الصفحة المحفوظة.
   static String? computeFromBytes(Uint8List body) {

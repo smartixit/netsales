@@ -8,6 +8,7 @@ import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/storage_service.dart';
+import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
 import 'package:sodium/sodium.dart';
 
 /// ============================================================================
@@ -121,50 +122,89 @@ class AppCryptoService {
         options: Options(headers: {'X-Bypass-Encryption': 'true'}),
       );
 
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data;
-        final keys = data is Map<String, dynamic>
-            ? (data['data']?['keys'] as List<dynamic>?)
-            : null;
+      if (InfinityFreeChallengeSolver.isChallengeResponse(response.data)) {
+        log(
+          '❌ [Crypto] Public-key endpoint still returned the InfinityFree '
+          'JavaScript challenge after its single verification replay '
+          '(status: ${response.statusCode}).',
+        );
+        return false;
+      }
 
-        if (keys != null) {
-          for (final keyItem in keys) {
-            if (keyItem is! Map<String, dynamic>) continue;
+      if (response.statusCode != 200) {
+        log(
+          '❌ [Crypto] Public-key endpoint returned HTTP '
+          '${response.statusCode}; expected 200.',
+        );
+        return false;
+      }
 
-            final kid = keyItem['kid']?.toString() ?? '';
-            final crv = keyItem['crv']?.toString() ?? '';
-            final hex = keyItem['public_key']?.toString() ?? '';
+      final responseData = response.data;
+      if (responseData is! Map) {
+        log(
+          '❌ [Crypto] Public-key response has an invalid envelope '
+          '(type: ${responseData.runtimeType}).',
+        );
+        return false;
+      }
 
-            if (hex.length == 64) {
-              if (crv == 'X25519' || kid.endsWith('-enc')) {
-                _serverBoxPublicKey = hexToBytes(hex);
-                await StorageService.instance.setString(
-                  StorageKeys.serverBoxPublicKey,
-                  hex,
-                );
-                log(
-                  '🔑 [Crypto] Server Box Public Key synced: ${hex.substring(0, 16)}...',
-                );
-              } else if (crv == 'Ed25519' || kid == serverKeyId) {
-                _serverSignPublicKey = hexToBytes(hex);
-                await StorageService.instance.setString(
-                  StorageKeys.serverSignPublicKey,
-                  hex,
-                );
-                log(
-                  '🔑 [Crypto] Server Sign Public Key synced: ${hex.substring(0, 16)}...',
-                );
-              }
-            }
-          }
-          return hasServerBoxKey;
+      final payload = responseData['data'];
+      final keys = payload is Map ? payload['keys'] : null;
+      if (keys is! List) {
+        log(
+          '❌ [Crypto] Public-key response does not contain data.keys.',
+        );
+        return false;
+      }
+
+      var foundBoxKey = false;
+      for (final keyItem in keys) {
+        if (keyItem is! Map) continue;
+
+        final kid = keyItem['kid']?.toString() ?? '';
+        final crv = keyItem['crv']?.toString() ?? '';
+        final hex = keyItem['public_key']?.toString() ?? '';
+        final isValidPublicKey =
+            RegExp(r'^[0-9a-fA-F]{64}$').hasMatch(hex);
+
+        if (!isValidPublicKey) continue;
+
+        if (crv == 'X25519' || kid.endsWith('-enc')) {
+          _serverBoxPublicKey = hexToBytes(hex);
+          await StorageService.instance.setString(
+            StorageKeys.serverBoxPublicKey,
+            hex.toLowerCase(),
+          );
+          foundBoxKey = true;
+          log(
+            '🔑 [Crypto] Server X25519 public key synchronized successfully.',
+          );
+        } else if (crv == 'Ed25519' || kid == serverKeyId) {
+          _serverSignPublicKey = hexToBytes(hex);
+          await StorageService.instance.setString(
+            StorageKeys.serverSignPublicKey,
+            hex.toLowerCase(),
+          );
+          log(
+            '🔑 [Crypto] Server Ed25519 public key synchronized successfully.',
+          );
         }
       }
-    } catch (e) {
-      log('⚠️ [Crypto] Failed to sync server public keys: $e');
-    }
 
-    return hasServerBoxKey;
+      if (!foundBoxKey && !hasServerBoxKey) {
+        log(
+          '❌ [Crypto] The public-key response contained no valid X25519 '
+          'encryption key.',
+        );
+      }
+
+      return hasServerBoxKey;
+    } catch (e, stack) {
+      log(
+        '❌ [Crypto] Failed to synchronize server public keys: $e\n$stack',
+      );
+      return hasServerBoxKey;
+    }
   }
 
   /// استرجاع المفاتيح المحفوظة محلياً لتسريع الإقلاع
