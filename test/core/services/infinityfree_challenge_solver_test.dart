@@ -72,6 +72,27 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       );
     });
 
+    test('preserves unrelated cookies and replaces an existing challenge cookie', () {
+      expect(
+        InfinityFreeChallengeSolver.mergeChallengeCookie(
+          existingCookieHeader:
+              'laravel_session=session-value; __test=old-value; XSRF-TOKEN=csrf-value',
+          challengeCookie: 'new-value',
+        ),
+        'laravel_session=session-value; XSRF-TOKEN=csrf-value; __test=new-value',
+      );
+    });
+
+    test('adds the challenge cookie when no cookie header exists', () {
+      expect(
+        InfinityFreeChallengeSolver.mergeChallengeCookie(
+          existingCookieHeader: null,
+          challengeCookie: 'new-value',
+        ),
+        '__test=new-value',
+      );
+    });
+
     test('extracts constants despite whitespace and line breaks', () {
       const spaced = '''
 var a = toNumbers ( "f655ba9d09a112d4968c63579db590b4" ),
