@@ -12,7 +12,7 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/services/api_request_replay_state.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
-import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
+import 'package:netsales/core/services/infinityfree_challenge_interceptor.dart';
 import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/package_info_service.dart';
 import 'package:netsales/core/services/sms_retriever_service.dart';
@@ -87,7 +87,7 @@ class ApiService {
       // 0. Centralized connectivity guard (fail-fast, no retries when offline)
       _ConnectivityInterceptor(),
       _RetryInterceptor(_dio),
-      _InfinityFreeChallengeInterceptor(_dio),
+      InfinityFreeChallengeInterceptor(_dio),
       _SessionAuthInterceptor(),
       _CryptoInterceptor(_dio),
     ]);
@@ -676,6 +676,10 @@ class _SessionAuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    if (options.extra[infinityFreeVerificationProbeFlagKey] == true) {
+      return handler.next(options);
+    }
+
     final storage = StorageService.instance;
 
     // حقن معرف الجلسة
@@ -719,6 +723,11 @@ class _SessionAuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (err.requestOptions.extra[infinityFreeVerificationProbeFlagKey] ==
+        true) {
+      return handler.next(err);
+    }
+
     final statusCode = err.response?.statusCode;
 
     // التعامل مع انتهاء صلاحية الجلسة
@@ -736,225 +745,6 @@ class _SessionAuthInterceptor extends Interceptor {
     }
 
     return handler.next(err);
-  }
-}
-
-/// معترض حل تحدي الاستضافة المجانية InfinityFree تلقائياً
-class _InfinityFreeChallengeInterceptor extends Interceptor {
-  final Dio _dio;
-  static const _retryFlagKey = '__test_retried';
-  static final Map<String, String> _cachedCookies = {};
-  static final Map<String, DateTime> _cookieExpiry = {};
-
-  _InfinityFreeChallengeInterceptor(this._dio);
-
-  static String? _headerValue(
-    Map<String, dynamic> headers,
-    String name,
-  ) {
-    for (final entry in headers.entries) {
-      if (entry.key.toLowerCase() == name.toLowerCase()) {
-        return entry.value?.toString();
-      }
-    }
-    return null;
-  }
-
-  static void _setHeader(
-    Map<String, dynamic> headers,
-    String name,
-    String value,
-  ) {
-    final matchingKeys = headers.keys
-        .where((key) => key.toLowerCase() == name.toLowerCase())
-        .toList();
-    for (final key in matchingKeys) {
-      headers.remove(key);
-    }
-    headers[name] = value;
-  }
-
-  @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
-    final host = Uri.tryParse(options.uri.toString())?.host;
-    if (host != null && _cachedCookies.containsKey(host)) {
-      final expiry = _cookieExpiry[host];
-      if (expiry != null && DateTime.now().isBefore(expiry)) {
-        final existingCookie = _headerValue(options.headers, 'Cookie');
-        _setHeader(
-          options.headers,
-          'Cookie',
-          InfinityFreeChallengeSolver.mergeChallengeCookie(
-            existingCookieHeader: existingCookie,
-            challengeCookie: _cachedCookies[host]!,
-          ),
-        );
-      } else {
-        _cachedCookies.remove(host);
-        _cookieExpiry.remove(host);
-      }
-    }
-    _setHeader(
-      options.headers,
-      'User-Agent',
-      InfinityFreeChallengeSolver.browserUserAgent,
-    );
-    return handler.next(options);
-  }
-
-  void _finishCryptoLifecycle(RequestOptions options) {
-    if (!ApiRequestReplayState.tryFinishCryptoLifecycle(options)) {
-      return;
-    }
-
-    final keyPair = options.extra['_crypto_keypair'] as KeyPair?;
-    try {
-      keyPair?.dispose();
-    } catch (_) {}
-  }
-
-  DioException _challengeFailure({
-    required RequestOptions options,
-    Response<dynamic>? response,
-    required String message,
-    Object? cause,
-  }) {
-    return DioException(
-      requestOptions: options,
-      response: response,
-      type: DioExceptionType.badResponse,
-      error: AppException(message),
-      message: cause?.toString(),
-    );
-  }
-
-  @override
-  void onResponse(
-    Response<dynamic> response,
-    ResponseInterceptorHandler handler,
-  ) async {
-    final options = response.requestOptions;
-    final body = response.data;
-    final challengeHtml = InfinityFreeChallengeSolver.challengeHtml(body);
-
-    if (challengeHtml == null) {
-      return handler.next(response);
-    }
-
-    // The retry is deliberately bounded to one verification replay.
-    if (options.extra[_retryFlagKey] == true) {
-      _finishCryptoLifecycle(options);
-      return handler.reject(
-        _challengeFailure(
-          options: options,
-          response: response,
-          message:
-              'رفضت الاستضافة الطلب بعد محاولة التحقق؛ ما زالت صفحة JavaScript تصل إلى التطبيق.',
-        ),
-      );
-    }
-
-    final requestUri = options.uri;
-    final cookie = InfinityFreeChallengeSolver.solveChallenge(challengeHtml);
-    final redirectUri =
-        InfinityFreeChallengeSolver.extractChallengeRedirectUri(
-          challengeHtml,
-          requestUri: requestUri,
-        );
-
-    if (cookie == null || redirectUri == null) {
-      _finishCryptoLifecycle(options);
-      if (AppEnvironment.enableLogging) {
-        log(
-          '⚠️ تعذر إكمال تحدي InfinityFree: '
-          'challenge cookie أو same-endpoint redirect غير صالح.',
-        );
-      }
-      return handler.reject(
-        _challengeFailure(
-          options: options,
-          response: response,
-          message: 'تعذر إكمال خطوة التحقق التي تطلبها الاستضافة.',
-        ),
-      );
-    }
-
-    // FormData and streaming bodies are one-shot and cannot be safely replayed.
-    if (options.data is FormData || options.data is Stream) {
-      _finishCryptoLifecycle(options);
-      return handler.reject(
-        _challengeFailure(
-          options: options,
-          response: response,
-          message:
-              'طلب يحتوي على ملفات أو تدفق بيانات لا يمكن إعادة إرساله بأمان بعد تحقق الاستضافة.',
-        ),
-      );
-    }
-
-    final host = requestUri.host;
-    if (host.isEmpty) {
-      _finishCryptoLifecycle(options);
-      return handler.reject(
-        _challengeFailure(
-          options: options,
-          response: response,
-          message: 'تعذر تحديد نطاق الاستضافة لحفظ كوكي التحقق.',
-        ),
-      );
-    }
-
-    _cachedCookies[host] = cookie;
-    // The challenge in the received page specifies max-age=21600 (six hours).
-    _cookieExpiry[host] = DateTime.now().add(const Duration(hours: 6));
-
-    final replayOptions = options.copyWith(
-      queryParameters: <String, dynamic>{...redirectUri.queryParameters},
-      extra: <String, dynamic>{
-        ...options.extra,
-        _retryFlagKey: true,
-      },
-    );
-
-    final existingCookie = _headerValue(replayOptions.headers, 'Cookie');
-    _setHeader(
-      replayOptions.headers,
-      'Cookie',
-      InfinityFreeChallengeSolver.mergeChallengeCookie(
-        existingCookieHeader: existingCookie,
-        challengeCookie: cookie,
-      ),
-    );
-    _setHeader(
-      replayOptions.headers,
-      'User-Agent',
-      InfinityFreeChallengeSolver.browserUserAgent,
-    );
-
-    // Keep the already-sealed body and its matching ephemeral key. In
-    // particular, the server needs this same key to encrypt the login reply.
-    ApiRequestReplayState.markCryptoPrepared(replayOptions);
-
-    try {
-      final retried = await _dio.fetch<dynamic>(replayOptions);
-      return handler.resolve(retried);
-    } catch (e) {
-      _finishCryptoLifecycle(replayOptions);
-      if (AppEnvironment.enableLogging) {
-        log('❌ فشلت إعادة الطلب بعد تحدي InfinityFree: $e');
-      }
-      return handler.reject(
-        _challengeFailure(
-          options: replayOptions,
-          response: response,
-          message: 'تعذرت إعادة الطلب بعد إكمال خطوة تحقق الاستضافة.',
-          cause: e,
-        ),
-      );
-    }
   }
 }
 
@@ -990,6 +780,9 @@ class _RetryInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     final requestOptions = err.requestOptions;
+    if (requestOptions.extra[infinityFreeVerificationProbeFlagKey] == true) {
+      return handler.next(err);
+    }
     final retryCount = (requestOptions.extra['retry_count'] as int?) ?? 0;
 
     final statusCode = err.response?.statusCode;

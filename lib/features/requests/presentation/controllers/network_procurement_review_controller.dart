@@ -780,6 +780,7 @@ class NetworkProcurementReviewController extends GetxController {
           message: 'يرجى كتابة سبب رفض الطلب لتوثيقه في السجل.',
           type: SnackType.warning,
         );
+        return;
       }
 
       isProcessingDecision.value = true;
@@ -800,7 +801,6 @@ class NetworkProcurementReviewController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم رفض طلب الكروت وتوثيق السبب بنجاح',
       );
-
     } on AppException catch (e) {
       CustomSnackbar.show(
         title: 'فشل رفض الطلب',
