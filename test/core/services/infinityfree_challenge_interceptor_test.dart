@@ -13,12 +13,13 @@ void main() {
       final loginUri = baseUri.resolve('/api/v1/auth/login');
       final challenge = _challenge(loginUri);
       const originalBody = '{"payload":"sealed-login-payload"}';
+      var postCount = 0;
       final adapter = _ScriptedAdapter((request, body) async {
         if (request.method == 'POST') {
-          if (request.uri.queryParameters.isEmpty) {
-            return _html(challenge);
-          }
-          return _text('unexpected query on original POST', 400);
+          postCount++;
+          return postCount == 1
+              ? _html(challenge)
+              : _text('login-ok', 200);
         }
 
         if (request.method == 'GET' &&
@@ -39,8 +40,8 @@ void main() {
         ),
       );
 
-      expect(response.statusCode, 405 == response.statusCode ? 405 : 200);
-      expect(response.data, 'Method Not Allowed');
+      expect(response.statusCode, 200);
+      expect(response.data, 'login-ok');
 
       // Initial POST -> browser-equivalent verification GET -> original POST.
       expect(adapter.requests, hasLength(3));
@@ -80,20 +81,19 @@ void main() {
         () async {
       final baseUri = Uri.parse('https://get-success.example');
       final publicKeysUri = baseUri.resolve('/api/v1/security/public-keys');
+      var originalGetCount = 0;
       final adapter = _ScriptedAdapter((request, body) async {
         if (request.method == 'GET' &&
+            request.uri.path == publicKeysUri.path &&
             request.uri.queryParameters.isEmpty) {
-          if (adapterRequestCountFor(adapter: null) == -1) {
-            return _text('unreachable', 500);
-          }
+          originalGetCount++;
+          return originalGetCount == 1
+              ? _html(_challenge(publicKeysUri))
+              : _text('{"data":{"keys":[]}}', 200);
         }
         if (request.method == 'GET' &&
             request.uri.queryParameters['i'] == '1') {
           return _text('verification accepted', 200);
-        }
-        if (request.uri.path == publicKeysUri.path &&
-            request.uri.queryParameters.isEmpty) {
-          return _text('{"data":{"keys":[]}}', 200);
         }
         return _text('unexpected request', 400);
       });
