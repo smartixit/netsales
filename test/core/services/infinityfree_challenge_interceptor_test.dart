@@ -122,6 +122,72 @@ void main() {
       dio.close(force: true);
     });
 
+    test('uses the freshly solved cookie instead of a stale host cache',
+        () async {
+      final baseUri = Uri.parse('https://cookie-refresh.example');
+      final primeUri = baseUri.resolve('/api/v1/prime');
+      final updateUri = baseUri.resolve('/api/v1/update');
+      final cachedCookie = 'e84330a69c6df373fc2fd2a2827a5f';
+      const refreshedCookie =
+          '4142434445464748494a4b4c4d4e0d0c';
+      var primeOriginalCount = 0;
+      var updateOriginalCount = 0;
+      final adapter = _ScriptedAdapter((request, body) async {
+        if (request.uri.path == primeUri.path &&
+            request.uri.queryParameters.isEmpty) {
+          primeOriginalCount++;
+          return primeOriginalCount == 1
+              ? _html(_challenge(primeUri))
+              : _text('primed', 200);
+        }
+        if (request.uri.path == primeUri.path &&
+            request.uri.queryParameters['i'] == '1') {
+          return _text('prime-verified', 200);
+        }
+        if (request.uri.path == updateUri.path &&
+            request.uri.queryParameters.isEmpty) {
+          updateOriginalCount++;
+          return updateOriginalCount == 1
+              ? _html(
+                  _challenge(
+                    updateUri,
+                    cipherText: '7faa7da20fa612dde3cf9b7f3331b50c',
+                  ),
+                )
+              : _text('updated', 200);
+        }
+        if (request.uri.path == updateUri.path &&
+            request.uri.queryParameters['i'] == '1') {
+          final cookie = request.headers.entries
+              .firstWhere(
+                (entry) => entry.key.toLowerCase() == 'cookie',
+              )
+              .value
+              .toString();
+          expect(cookie, contains('__test=$refreshedCookie'));
+          expect(cookie, isNot(contains('__test=$cachedCookie')));
+          return _text('update-verified', 200);
+        }
+        return _text('unexpected request', 400);
+      });
+      final dio = _dio(baseUri, adapter);
+
+      final primeResponse = await dio.get<String>(
+        '/api/v1/prime',
+        options: Options(responseType: ResponseType.plain),
+      );
+      expect(primeResponse.data, 'primed');
+
+      final updateResponse = await dio.get<String>(
+        '/api/v1/update',
+        options: Options(responseType: ResponseType.plain),
+      );
+      expect(updateResponse.data, 'updated');
+      expect(adapter.requests, hasLength(6));
+      expect(adapter.requests[4].header('Cookie'), contains(refreshedCookie));
+      dio.close(force: true);
+    });
+
     test('does not replay or cache cookie when verification GET is challenged',
         () async {
       final baseUri = Uri.parse('https://probe-fails.example');
@@ -218,12 +284,12 @@ Dio _dio(Uri baseUri, _ScriptedAdapter adapter) {
   return dio;
 }
 
-String _challenge(Uri requestUri) {
+String _challenge(\n  Uri requestUri, {\n  String cipherText = '25b509cc7dadcdb532275647f94524cc',\n}) {
   final redirect = requestUri.replace(queryParameters: {'i': '1'});
   return '''
 <html><body><script type="text/javascript" src="/aes.js"></script><script>
 function toNumbers(d){var e=[];d.replace(/(..)/g,function(d){e.push(parseInt(d,16))});return e}
-var a=toNumbers("f655ba9d09a112d4968c63579db590b4"),b=toNumbers("98344c2eee86c3994890592585b49f80"),c=toNumbers("25b509cc7dadcdb532275647f94524cc");
+var a=toNumbers("f655ba9d09a112d4968c63579db590b4"),b=toNumbers("98344c2eee86c3994890592585b49f80"),c=toNumbers("$cipherText");
 document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path=/";
 location.href="$redirect";
 </script></body></html>
