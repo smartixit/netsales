@@ -39,9 +39,8 @@ import 'package:netsales/features/commercial/presentation/screens/network_pos_di
 import 'package:netsales/features/commercial/presentation/screens/pos_linked_networks_screen.dart';
 import 'package:netsales/features/invoices/presentation/bindings/invoice_binding.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoice_details_screen.dart';
-import 'package:netsales/features/invoices/presentation/screens/network_wholesale_invoices_screen.dart';
+import 'package:netsales/features/invoices/presentation/screens/invoices_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/network_direct_invoice_screen.dart';
-import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
 import 'package:netsales/features/expenses/presentation/bindings/expense_binding.dart';
 import 'package:netsales/features/expenses/presentation/screens/network_expense_details_screen.dart';
 import 'package:netsales/features/expenses/presentation/screens/network_expense_form_screen.dart';
@@ -342,7 +341,7 @@ abstract final class AppPages {
     ),
     GetPage(
       name: AppRoutes.wholesaleInvoices,
-      page: () => const NetworkWholesaleInvoicesScreen(),
+      page: () => const InvoicesScreen(isNetwork: true),
       binding: InvoiceBinding(),
       middlewares: [
         AuthGuard(),
@@ -360,7 +359,7 @@ abstract final class AppPages {
     ),
     GetPage(
       name: AppRoutes.purchaseInvoices,
-      page: () => const PosPurchaseInvoicesScreen(),
+      page: () => const InvoicesScreen(),
       binding: InvoiceBinding(),
       middlewares: [
         AuthGuard(),

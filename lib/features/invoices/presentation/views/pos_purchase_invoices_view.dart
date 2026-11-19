@@ -13,11 +13,10 @@ import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
-import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
-/// شاشة قائمة فواتير المشتريات لنقطة البيع (POS Purchase Invoices Screen)
-class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
-  const PosPurchaseInvoicesScreen({super.key, this.embedded = false});
+/// واجهة استعراض وإدارة فواتير المشتريات لنقطة البيع (POS Workspace View)
+class PosPurchaseInvoicesView extends GetView<PosInvoicesController> {
+  const PosPurchaseInvoicesView({super.key, this.embedded = false});
 
   final bool embedded;
 
@@ -33,7 +32,7 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
         : MediaQuery.paddingOf(context).bottom + AppSpacing.xl;
     final horizontalPadding = AppBreakpoints.screenMargin(context);
 
-    final content = Align(
+    return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 760),
@@ -54,7 +53,9 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
               return false;
             },
             child: CustomScrollView(
-              key: const PageStorageKey<String>('pos-purchase-invoices-scroll'),
+              key: const PageStorageKey<String>(
+                'pos-purchase-invoices-scroll',
+              ),
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
@@ -103,7 +104,8 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
                           selectedStatus: controller.statusFilter.value,
                           onStatusChanged: controller.setStatusFilter,
                           onClearSearch: controller.searchController.clear,
-                          searchHint: 'بحث برقم الفاتورة، UUID، أو اسم الشبكة المزودة...',
+                          searchHint:
+                              'بحث برقم الفاتورة، UUID، أو اسم الشبكة المزودة...',
                         ),
                       ),
                     ]),
@@ -237,13 +239,6 @@ class PosPurchaseInvoicesScreen extends GetView<PosInvoicesController> {
           ),
         ),
       ),
-    );
-
-    if (embedded) return content;
-
-    return CustomAppScaffold(
-      appBarTitle: 'فواتير المشتريات',
-      body: content,
     );
   }
 }

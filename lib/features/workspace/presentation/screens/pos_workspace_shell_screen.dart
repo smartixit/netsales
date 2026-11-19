@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/features/finance/presentation/widgets/pos_finance_workspace_hub.dart';
-import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
+import 'package:netsales/features/invoices/presentation/screens/invoices_screen.dart';
 import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 import 'package:netsales/features/reports/presentation/screens/operational_reports_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
@@ -36,7 +36,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           label: 'فواتيري',
           icon: Icons.receipt_outlined,
           activeIcon: Icons.receipt_rounded,
-          content: PosPurchaseInvoicesScreen(embedded: true),
+          content: InvoicesScreen(embedded: true),
         ),
         const WorkspaceNavItem(
           label: 'الرصيد',

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/features/invoices/presentation/screens/pos_purchase_invoices_screen.dart';
+import 'package:netsales/features/invoices/presentation/screens/invoices_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell_screen.dart';
 
@@ -75,11 +75,11 @@ void main() {
       expect(standardScreen.embedded, isFalse);
     });
 
-    test('PosPurchaseInvoicesScreen supports embedded configuration', () {
-      const embeddedScreen = PosPurchaseInvoicesScreen(embedded: true);
+    test('InvoicesScreen supports embedded configuration', () {
+      const embeddedScreen = InvoicesScreen(embedded: true);
       expect(embeddedScreen.embedded, isTrue);
 
-      const standardScreen = PosPurchaseInvoicesScreen();
+      const standardScreen = InvoicesScreen();
       expect(standardScreen.embedded, isFalse);
     });
   });
