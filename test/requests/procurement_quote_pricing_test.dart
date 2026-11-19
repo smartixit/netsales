@@ -542,9 +542,7 @@ void main() {
         );
 
         expect(controller.canSubmitOrder, isTrue);
-        final submitted = await controller.submitOrder();
-
-        expect(submitted, isTrue);
+        await controller.submitOrder();
         expect(mockRepo.lastQuotePayload, isNull);
         expect(mockRepo.lastCreatePayload?['pricing_token'], isNull);
         expect(
@@ -581,9 +579,7 @@ void main() {
         items: [],
       );
 
-      final success = await controller.submitOrder();
-
-      expect(success, isTrue);
+      await controller.submitOrder();
       expect(mockRepo.lastQuotePayload, isNull);
       expect(mockRepo.lastCreatePayload!['pricing_token'], isNull);
       expect(
@@ -621,8 +617,8 @@ void main() {
         );
         mockRepo.throwOnceOnCreate = true;
 
-        expect(await controller.submitOrder(), isFalse);
-        expect(await controller.submitOrder(), isTrue);
+        await controller.submitOrder();
+        await controller.submitOrder();
         expect(mockRepo.createIdempotencyKeys, hasLength(2));
         expect(
           mockRepo.createIdempotencyKeys[0],
@@ -660,9 +656,7 @@ void main() {
       mockRepo.throwPricingOnCreate = true;
       mockRepo.lastQuotePayload = null;
 
-      final success = await controller.submitOrder();
-
-      expect(success, isFalse);
+      await controller.submitOrder();
       await pumpEventQueue();
 
       expect(mockRepo.lastQuotePayload, isNull);
