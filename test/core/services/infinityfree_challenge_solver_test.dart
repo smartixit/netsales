@@ -126,6 +126,36 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       },
     );
 
+    test('recognizes challenge responses returned as byte arrays', () {
+      final bytes = challenge.codeUnits;
+
+      expect(InfinityFreeChallengeSolver.challengeHtml(bytes), challenge);
+      expect(InfinityFreeChallengeSolver.isChallengeResponse(bytes), isTrue);
+      expect(
+        InfinityFreeChallengeSolver.solveChallengeResponse(bytes),
+        'e84330a69c6df373fc2fd2a2827a5f',
+      );
+    });
+
+    test('extracts a safe redirect from a byte-array challenge response', () {
+      final requestUri = Uri.parse(
+        'https://netsales.kesug.com/api/v1/auth/login',
+      );
+      final bytes = '''
+<script>
+location.href="https://netsales.kesug.com/api/v1/auth/login?i=1";
+</script>
+'''.codeUnits;
+
+      final target =
+          InfinityFreeChallengeSolver.extractChallengeRedirectFromResponse(
+        bytes,
+        requestUri: requestUri,
+      );
+
+      expect(target?.toString(), 'https://netsales.kesug.com/api/v1/auth/login?i=1');
+    });
+
     test('extracts constants despite whitespace and line breaks', () {
       const spaced = '''
 var a = toNumbers ( "f655ba9d09a112d4968c63579db590b4" ),
