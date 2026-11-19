@@ -719,6 +719,10 @@ class _SessionAuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (err.requestOptions.extra[_infinityFreeVerificationProbeFlagKey] == true) {
+      return handler.next(err);
+    }
+
     final statusCode = err.response?.statusCode;
 
     // التعامل مع انتهاء صلاحية الجلسة
@@ -813,6 +817,11 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     handler.next(options);
   }
 
+  void _clearCachedCookie(String host) {
+    _cachedCookies.remove(host);
+    _cookieExpiry.remove(host);
+  }
+
   void _finishCryptoLifecycle(RequestOptions options) {
     if (!ApiRequestReplayState.tryFinishCryptoLifecycle(options)) {
       return;
@@ -895,6 +904,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     // A challenge on either the verification probe or the original replay
     // means verification did not complete. Never start another handshake.
     if (options.extra[_retryFlagKey] == true) {
+      _clearCachedCookie(options.uri.host);
       _finishCryptoLifecycle(options);
       handler.reject(
         _challengeFailure(
@@ -985,7 +995,12 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       }
 
       final verificationStatus = verificationResponse.statusCode;
-      if (verificationStatus == null || verificationStatus >= 500) {
+      final acceptedVerificationStatus =
+          verificationStatus != null &&
+          ((verificationStatus >= 200 && verificationStatus < 300) ||
+              verificationStatus == 404 ||
+              verificationStatus == 405);
+      if (!acceptedVerificationStatus) {
         throw _challengeFailure(
           options: verificationOptions,
           response: verificationResponse,
