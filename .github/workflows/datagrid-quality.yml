@@ -9,6 +9,7 @@ on:
       - chore/pub-compatible-cache-picker
       - chore/pub-audioplayers-6.8.1
       - chore/pub-compatible-updates
+      - fix/infinityfree-two-step-verification
   pull_request:
     branches:
       - main
