@@ -9,6 +9,7 @@ import 'package:netsales/core/config/app_environment.dart';
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
+import 'package:netsales/core/services/api_request_replay_state.dart';
 import 'package:netsales/core/services/app_crypto_service.dart';
 import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
@@ -747,6 +748,32 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
 
   _InfinityFreeChallengeInterceptor(this._dio);
 
+  static String? _headerValue(
+    Map<String, dynamic> headers,
+    String name,
+  ) {
+    for (final entry in headers.entries) {
+      if (entry.key.toLowerCase() == name.toLowerCase()) {
+        return entry.value?.toString();
+      }
+    }
+    return null;
+  }
+
+  static void _setHeader(
+    Map<String, dynamic> headers,
+    String name,
+    String value,
+  ) {
+    final matchingKeys = headers.keys
+        .where((key) => key.toLowerCase() == name.toLowerCase())
+        .toList();
+    for (final key in matchingKeys) {
+      headers.remove(key);
+    }
+    headers[name] = value;
+  }
+
   @override
   void onRequest(
     RequestOptions options,
@@ -755,15 +782,26 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     final host = Uri.tryParse(options.uri.toString())?.host;
     if (host != null && _cachedCookies.containsKey(host)) {
       final expiry = _cookieExpiry[host];
-      if (expiry == null || DateTime.now().isBefore(expiry)) {
-        options.headers['Cookie'] = '__test=${_cachedCookies[host]}';
+      if (expiry != null && DateTime.now().isBefore(expiry)) {
+        final existingCookie = _headerValue(options.headers, 'Cookie');
+        _setHeader(
+          options.headers,
+          'Cookie',
+          InfinityFreeChallengeSolver.mergeChallengeCookie(
+            existingCookieHeader: existingCookie,
+            challengeCookie: _cachedCookies[host]!,
+          ),
+        );
       } else {
         _cachedCookies.remove(host);
         _cookieExpiry.remove(host);
       }
     }
-    options.headers['User-Agent'] =
-        InfinityFreeChallengeSolver.browserUserAgent;
+    _setHeader(
+      options.headers,
+      'User-Agent',
+      InfinityFreeChallengeSolver.browserUserAgent,
+    );
     return handler.next(options);
   }
 
@@ -772,40 +810,61 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) async {
-    final body = response.data;
-
-    final isChallenge =
-        (body is String && InfinityFreeChallengeSolver.isChallengeBody(body)) ||
-        (body is Uint8List &&
-            InfinityFreeChallengeSolver.computeFromBytes(body) != null);
-
-    if (!isChallenge) return handler.next(response);
-
-    if (response.requestOptions.extra[_retryFlagKey] == true) {
+    final options = response.requestOptions;
+    if (options.extra[_retryFlagKey] == true) {
       return handler.next(response);
     }
 
+    final body = response.data;
     final String? cookie;
     if (body is String) {
-      cookie = InfinityFreeChallengeSolver.solveChallenge(body);
-    } else if (body is Uint8List) {
-      cookie = InfinityFreeChallengeSolver.computeFromBytes(body);
+      cookie = InfinityFreeChallengeSolver.isChallengeBody(body)
+          ? InfinityFreeChallengeSolver.solveChallenge(body)
+          : null;
+    } else if (body is List<int>) {
+      cookie = InfinityFreeChallengeSolver.computeFromBytes(
+        Uint8List.fromList(body),
+      );
     } else {
       cookie = null;
     }
 
     if (cookie == null) return handler.next(response);
 
-    final host =
-        Uri.tryParse(response.requestOptions.uri.toString())?.host ?? '';
+    // FormData and streaming bodies are one-shot and cannot be safely replayed.
+    if (options.data is FormData || options.data is Stream) {
+      if (AppEnvironment.enableLogging) {
+        log(
+          '⚠️ تعذر إعادة طلب InfinityFree لأن جسم الطلب غير قابل لإعادة الإرسال.',
+        );
+      }
+      return handler.next(response);
+    }
+
+    final host = Uri.tryParse(options.uri.toString())?.host;
+    if (host == null || host.isEmpty) return handler.next(response);
+
     _cachedCookies[host] = cookie;
     _cookieExpiry[host] = DateTime.now().add(const Duration(hours: 5));
 
-    final options = response.requestOptions;
-    options.headers['Cookie'] = '__test=$cookie';
-    options.headers['User-Agent'] =
-        InfinityFreeChallengeSolver.browserUserAgent;
+    final existingCookie = _headerValue(options.headers, 'Cookie');
+    _setHeader(
+      options.headers,
+      'Cookie',
+      InfinityFreeChallengeSolver.mergeChallengeCookie(
+        existingCookieHeader: existingCookie,
+        challengeCookie: cookie,
+      ),
+    );
+    _setHeader(
+      options.headers,
+      'User-Agent',
+      InfinityFreeChallengeSolver.browserUserAgent,
+    );
     options.extra[_retryFlagKey] = true;
+    // The request body and ephemeral response key were already prepared by
+    // _CryptoInterceptor. The replay must not seal the sealed payload again.
+    ApiRequestReplayState.markCryptoPrepared(options);
 
     try {
       final retried = await _dio.fetch<dynamic>(options);
@@ -924,7 +983,7 @@ class _CryptoInterceptor extends Interceptor {
         options.extra['bypass_encryption'] == true ||
         _isBypassEndpoint(options.path);
 
-    if (isBypassed) {
+    if (isBypassed || ApiRequestReplayState.isCryptoPrepared(options)) {
       return handler.next(options);
     }
 
@@ -959,6 +1018,8 @@ class _CryptoInterceptor extends Interceptor {
         options.headers['X-Client-Public-Key'] = clientPublicKeyHex;
         options.extra['_crypto_keypair'] = ephemeral;
       }
+
+      ApiRequestReplayState.markCryptoPrepared(options);
     } catch (e, stack) {
       log(
         '⚠️ [CryptoInterceptor] Encryption failed for ${options.uri}: $e\n$stack',
@@ -973,6 +1034,12 @@ class _CryptoInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
+    if (!ApiRequestReplayState.tryFinishCryptoLifecycle(
+      response.requestOptions,
+    )) {
+      return handler.next(response);
+    }
+
     final keyPair =
         response.requestOptions.extra['_crypto_keypair'] as KeyPair?;
 
@@ -1014,10 +1081,12 @@ class _CryptoInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    final keyPair = err.requestOptions.extra['_crypto_keypair'] as KeyPair?;
-    try {
-      keyPair?.dispose();
-    } catch (_) {}
+    if (ApiRequestReplayState.tryFinishCryptoLifecycle(err.requestOptions)) {
+      final keyPair = err.requestOptions.extra['_crypto_keypair'] as KeyPair?;
+      try {
+        keyPair?.dispose();
+      } catch (_) {}
+    }
 
     return handler.next(err);
   }
