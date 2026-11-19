@@ -141,11 +141,13 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       final requestUri = Uri.parse(
         'https://netsales.kesug.com/api/v1/auth/login',
       );
-      final bytes = '''
-<script>
-location.href="https://netsales.kesug.com/api/v1/auth/login?i=1";
-</script>
-'''.codeUnits;
+      final bytes = challenge
+          .replaceFirst(
+            '</script>',
+            'location.href="https://netsales.kesug.com/api/v1/auth/login?i=1";'
+            '</script>',
+          )
+          .codeUnits;
 
       final target =
           InfinityFreeChallengeSolver.extractChallengeRedirectFromResponse(
