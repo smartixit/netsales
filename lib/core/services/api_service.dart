@@ -747,6 +747,18 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
 
   _InfinityFreeChallengeInterceptor(this._dio);
 
+  static String? _headerValue(
+    Map<String, dynamic> headers,
+    String name,
+  ) {
+    for (final entry in headers.entries) {
+      if (entry.key.toLowerCase() == name.toLowerCase()) {
+        return entry.value?.toString();
+      }
+    }
+    return null;
+  }
+
   @override
   void onRequest(
     RequestOptions options,
@@ -755,8 +767,13 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     final host = Uri.tryParse(options.uri.toString())?.host;
     if (host != null && _cachedCookies.containsKey(host)) {
       final expiry = _cookieExpiry[host];
-      if (expiry == null || DateTime.now().isBefore(expiry)) {
-        options.headers['Cookie'] = '__test=${_cachedCookies[host]}';
+      if (expiry != null && DateTime.now().isBefore(expiry)) {
+        final existingCookie = _headerValue(options.headers, 'Cookie');
+        options.headers['Cookie'] =
+            InfinityFreeChallengeSolver.mergeChallengeCookie(
+              existingCookieHeader: existingCookie,
+              challengeCookie: _cachedCookies[host]!,
+            );
       } else {
         _cachedCookies.remove(host);
         _cookieExpiry.remove(host);
@@ -772,40 +789,53 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) async {
-    final body = response.data;
-
-    final isChallenge =
-        (body is String && InfinityFreeChallengeSolver.isChallengeBody(body)) ||
-        (body is Uint8List &&
-            InfinityFreeChallengeSolver.computeFromBytes(body) != null);
-
-    if (!isChallenge) return handler.next(response);
-
-    if (response.requestOptions.extra[_retryFlagKey] == true) {
+    final options = response.requestOptions;
+    if (options.extra[_retryFlagKey] == true) {
       return handler.next(response);
     }
 
+    final body = response.data;
     final String? cookie;
     if (body is String) {
-      cookie = InfinityFreeChallengeSolver.solveChallenge(body);
-    } else if (body is Uint8List) {
-      cookie = InfinityFreeChallengeSolver.computeFromBytes(body);
+      cookie = InfinityFreeChallengeSolver.isChallengeBody(body)
+          ? InfinityFreeChallengeSolver.solveChallenge(body)
+          : null;
+    } else if (body is List<int>) {
+      cookie = InfinityFreeChallengeSolver.computeFromBytes(
+        Uint8List.fromList(body),
+      );
     } else {
       cookie = null;
     }
 
     if (cookie == null) return handler.next(response);
 
-    final host =
-        Uri.tryParse(response.requestOptions.uri.toString())?.host ?? '';
+    // FormData and streaming bodies are one-shot and cannot be safely replayed.
+    if (options.data is FormData || options.data is Stream) {
+      if (AppEnvironment.enableLogging) {
+        log('⚠️ تعذر إعادة طلب InfinityFree لأن جسم الطلب غير قابل لإعادة الإرسال.');
+      }
+      return handler.next(response);
+    }
+
+    final host = Uri.tryParse(options.uri.toString())?.host;
+    if (host == null || host.isEmpty) return handler.next(response);
+
     _cachedCookies[host] = cookie;
     _cookieExpiry[host] = DateTime.now().add(const Duration(hours: 5));
 
-    final options = response.requestOptions;
-    options.headers['Cookie'] = '__test=$cookie';
+    final existingCookie = _headerValue(options.headers, 'Cookie');
+    options.headers['Cookie'] =
+        InfinityFreeChallengeSolver.mergeChallengeCookie(
+          existingCookieHeader: existingCookie,
+          challengeCookie: cookie,
+        );
     options.headers['User-Agent'] =
         InfinityFreeChallengeSolver.browserUserAgent;
     options.extra[_retryFlagKey] = true;
+    // The request body and ephemeral response key were already prepared by
+    // _CryptoInterceptor. The replay must not seal the sealed payload again.
+    options.extra[_CryptoInterceptor._preparedRequestKey] = true;
 
     try {
       final retried = await _dio.fetch<dynamic>(options);
@@ -909,6 +939,10 @@ class _RetryInterceptor extends Interceptor {
 class _CryptoInterceptor extends Interceptor {
   final Dio _dio;
 
+  static const _preparedRequestKey = '__netsales_crypto_request_prepared';
+  static const _cryptoLifecycleFinishedKey =
+      '__netsales_crypto_lifecycle_finished';
+
   _CryptoInterceptor(this._dio);
 
   @override
@@ -924,7 +958,8 @@ class _CryptoInterceptor extends Interceptor {
         options.extra['bypass_encryption'] == true ||
         _isBypassEndpoint(options.path);
 
-    if (isBypassed) {
+    if (isBypassed ||
+        options.extra[_preparedRequestKey] == true) {
       return handler.next(options);
     }
 
@@ -959,6 +994,8 @@ class _CryptoInterceptor extends Interceptor {
         options.headers['X-Client-Public-Key'] = clientPublicKeyHex;
         options.extra['_crypto_keypair'] = ephemeral;
       }
+
+      options.extra[_preparedRequestKey] = true;
     } catch (e, stack) {
       log(
         '⚠️ [CryptoInterceptor] Encryption failed for ${options.uri}: $e\n$stack',
@@ -973,8 +1010,13 @@ class _CryptoInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
-    final keyPair =
-        response.requestOptions.extra['_crypto_keypair'] as KeyPair?;
+    final extra = response.requestOptions.extra;
+    if (extra[_cryptoLifecycleFinishedKey] == true) {
+      return handler.next(response);
+    }
+
+    final keyPair = extra['_crypto_keypair'] as KeyPair?;
+    extra[_cryptoLifecycleFinishedKey] = true;
 
     if (keyPair != null) {
       try {
@@ -1014,10 +1056,14 @@ class _CryptoInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    final keyPair = err.requestOptions.extra['_crypto_keypair'] as KeyPair?;
-    try {
-      keyPair?.dispose();
-    } catch (_) {}
+    final extra = err.requestOptions.extra;
+    if (extra[_cryptoLifecycleFinishedKey] != true) {
+      extra[_cryptoLifecycleFinishedKey] = true;
+      final keyPair = extra['_crypto_keypair'] as KeyPair?;
+      try {
+        keyPair?.dispose();
+      } catch (_) {}
+    }
 
     return handler.next(err);
   }
