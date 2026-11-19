@@ -805,51 +805,123 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     return handler.next(options);
   }
 
+  void _finishCryptoLifecycle(RequestOptions options) {
+    if (!ApiRequestReplayState.tryFinishCryptoLifecycle(options)) {
+      return;
+    }
+
+    final keyPair = options.extra['_crypto_keypair'] as KeyPair?;
+    try {
+      keyPair?.dispose();
+    } catch (_) {}
+  }
+
+  DioException _challengeFailure({
+    required RequestOptions options,
+    Response<dynamic>? response,
+    required String message,
+    Object? cause,
+  }) {
+    return DioException(
+      requestOptions: options,
+      response: response,
+      type: DioExceptionType.badResponse,
+      error: AppException(message),
+      message: cause?.toString(),
+    );
+  }
+
   @override
   void onResponse(
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) async {
     final options = response.requestOptions;
-    if (options.extra[_retryFlagKey] == true) {
+    final body = response.data;
+    final challengeHtml = InfinityFreeChallengeSolver.challengeHtml(body);
+
+    if (challengeHtml == null) {
       return handler.next(response);
     }
 
-    final body = response.data;
-    final String? cookie;
-    if (body is String) {
-      cookie = InfinityFreeChallengeSolver.isChallengeBody(body)
-          ? InfinityFreeChallengeSolver.solveChallenge(body)
-          : null;
-    } else if (body is List<int>) {
-      cookie = InfinityFreeChallengeSolver.computeFromBytes(
-        Uint8List.fromList(body),
+    // The retry is deliberately bounded to one verification replay.
+    if (options.extra[_retryFlagKey] == true) {
+      _finishCryptoLifecycle(options);
+      return handler.reject(
+        _challengeFailure(
+          options: options,
+          response: response,
+          message:
+              'رفضت الاستضافة الطلب بعد محاولة التحقق؛ ما زالت صفحة JavaScript تصل إلى التطبيق.',
+        ),
       );
-    } else {
-      cookie = null;
     }
 
-    if (cookie == null) return handler.next(response);
+    final requestUri = options.uri;
+    final cookie = InfinityFreeChallengeSolver.solveChallenge(challengeHtml);
+    final redirectUri =
+        InfinityFreeChallengeSolver.extractChallengeRedirectUri(
+          challengeHtml,
+          requestUri: requestUri,
+        );
+
+    if (cookie == null || redirectUri == null) {
+      _finishCryptoLifecycle(options);
+      if (AppEnvironment.enableLogging) {
+        log(
+          '⚠️ تعذر إكمال تحدي InfinityFree: '
+          'challenge cookie أو same-endpoint redirect غير صالح.',
+        );
+      }
+      return handler.reject(
+        _challengeFailure(
+          options: options,
+          response: response,
+          message: 'تعذر إكمال خطوة التحقق التي تطلبها الاستضافة.',
+        ),
+      );
+    }
 
     // FormData and streaming bodies are one-shot and cannot be safely replayed.
     if (options.data is FormData || options.data is Stream) {
-      if (AppEnvironment.enableLogging) {
-        log(
-          '⚠️ تعذر إعادة طلب InfinityFree لأن جسم الطلب غير قابل لإعادة الإرسال.',
-        );
-      }
-      return handler.next(response);
+      _finishCryptoLifecycle(options);
+      return handler.reject(
+        _challengeFailure(
+          options: options,
+          response: response,
+          message:
+              'طلب يحتوي على ملفات أو تدفق بيانات لا يمكن إعادة إرساله بأمان بعد تحقق الاستضافة.',
+        ),
+      );
     }
 
-    final host = Uri.tryParse(options.uri.toString())?.host;
-    if (host == null || host.isEmpty) return handler.next(response);
+    final host = requestUri.host;
+    if (host.isEmpty) {
+      _finishCryptoLifecycle(options);
+      return handler.reject(
+        _challengeFailure(
+          options: options,
+          response: response,
+          message: 'تعذر تحديد نطاق الاستضافة لحفظ كوكي التحقق.',
+        ),
+      );
+    }
 
     _cachedCookies[host] = cookie;
-    _cookieExpiry[host] = DateTime.now().add(const Duration(hours: 5));
+    // The challenge in the received page specifies max-age=21600 (six hours).
+    _cookieExpiry[host] = DateTime.now().add(const Duration(hours: 6));
 
-    final existingCookie = _headerValue(options.headers, 'Cookie');
+    final replayOptions = options.copyWith(
+      queryParameters: <String, dynamic>{...redirectUri.queryParameters},
+      extra: <String, dynamic>{
+        ...options.extra,
+        _retryFlagKey: true,
+      },
+    );
+
+    final existingCookie = _headerValue(replayOptions.headers, 'Cookie');
     _setHeader(
-      options.headers,
+      replayOptions.headers,
       'Cookie',
       InfinityFreeChallengeSolver.mergeChallengeCookie(
         existingCookieHeader: existingCookie,
@@ -857,23 +929,31 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
       ),
     );
     _setHeader(
-      options.headers,
+      replayOptions.headers,
       'User-Agent',
       InfinityFreeChallengeSolver.browserUserAgent,
     );
-    options.extra[_retryFlagKey] = true;
-    // The request body and ephemeral response key were already prepared by
-    // _CryptoInterceptor. The replay must not seal the sealed payload again.
-    ApiRequestReplayState.markCryptoPrepared(options);
+
+    // Keep the already-sealed body and its matching ephemeral key. In
+    // particular, the server needs this same key to encrypt the login reply.
+    ApiRequestReplayState.markCryptoPrepared(replayOptions);
 
     try {
-      final retried = await _dio.fetch<dynamic>(options);
+      final retried = await _dio.fetch<dynamic>(replayOptions);
       return handler.resolve(retried);
     } catch (e) {
+      _finishCryptoLifecycle(replayOptions);
       if (AppEnvironment.enableLogging) {
-        log('❌ إعادة المحاولة بعد تحدي InfinityFree فشلت: $e');
+        log('❌ فشلت إعادة الطلب بعد تحدي InfinityFree: $e');
       }
-      return handler.next(response);
+      return handler.reject(
+        _challengeFailure(
+          options: replayOptions,
+          response: response,
+          message: 'تعذرت إعادة الطلب بعد إكمال خطوة تحقق الاستضافة.',
+          cause: e,
+        ),
+      );
     }
   }
 }
@@ -992,25 +1072,39 @@ class _CryptoInterceptor extends Interceptor {
     }
 
     if (!crypto.isReady) {
-      return handler.next(options);
+      return handler.reject(
+        DioException(
+          requestOptions: options,
+          type: DioExceptionType.unknown,
+          error: const AppException(
+            'تعذر تهيئة مكتبة التشفير الآمن؛ أُوقف الطلب لحماية بياناته.',
+          ),
+        ),
+      );
     }
 
     try {
       final method = options.method.toUpperCase();
 
-      // 1. طلبات التعديل والإرسال التي تحتوي حمولة (POST, PUT, PATCH) وليست FormData
+      // 1. Encrypt mutating requests with the current server X25519 public key.
       if (['POST', 'PUT', 'PATCH'].contains(method) &&
           options.data != null &&
           options.data is! FormData) {
         if (!crypto.hasServerBoxKey) {
-          await crypto.syncServerPublicKeys(dio: _dio);
+          final synchronized = await crypto.syncServerPublicKeys(dio: _dio);
+          if (!synchronized || !crypto.hasServerBoxKey) {
+            throw const AppException(
+              'تعذر جلب مفتاح التشفير العام من الخادم؛ أُوقف تسجيل الدخول ولم تُرسل بيانات الاعتماد دون تشفير.',
+            );
+          }
         }
+
         final sealed = crypto.sealRequestPayload(options.data);
         options.data = sealed.body;
         options.headers['X-Client-Public-Key'] = sealed.clientPublicKeyHex;
         options.extra['_crypto_keypair'] = sealed.ephemeralKeyPair;
       } else {
-        // 2. طلبات القراءة أو الحذف التي تتطلب استجابة مشفرة من الخادم
+        // 2. Read/delete requests still need a response key pair.
         final ephemeral = crypto.generateEphemeralKeyPair();
         final clientPublicKeyHex = AppCryptoService.bytesToHex(
           ephemeral.publicKey,
@@ -1022,7 +1116,14 @@ class _CryptoInterceptor extends Interceptor {
       ApiRequestReplayState.markCryptoPrepared(options);
     } catch (e, stack) {
       log(
-        '⚠️ [CryptoInterceptor] Encryption failed for ${options.uri}: $e\n$stack',
+        '❌ [CryptoInterceptor] Secure request preparation failed for ${options.uri}: $e\n$stack',
+      );
+      return handler.reject(
+        DioException(
+          requestOptions: options,
+          type: DioExceptionType.unknown,
+          error: e,
+        ),
       );
     }
 
@@ -1034,9 +1135,17 @@ class _CryptoInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
-    if (!ApiRequestReplayState.tryFinishCryptoLifecycle(
-      response.requestOptions,
-    )) {
+    final options = response.requestOptions;
+
+    // The challenge interceptor is later in the response chain. Defer
+    // finalizing and disposing the ephemeral key until that interceptor has
+    // replayed the same sealed request with the verification cookie.
+    if (options.extra['__test_retried'] != true &&
+        InfinityFreeChallengeSolver.isChallengeResponse(response.data)) {
+      return handler.next(response);
+    }
+
+    if (!ApiRequestReplayState.tryFinishCryptoLifecycle(options)) {
       return handler.next(response);
     }
 
