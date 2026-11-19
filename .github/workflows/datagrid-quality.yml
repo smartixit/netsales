@@ -63,7 +63,11 @@ jobs:
 
       - name: Format DataGrid sources on branch pushes
         if: github.event_name == 'push' && github.ref_name != 'chore/pub-dependency-maintenance'
-        run: dart format lib/widgets/data_grid test/widgets/data_grid
+        run: >-
+          dart format lib/widgets/data_grid test/widgets/data_grid
+          lib/core/services/api_service.dart
+          lib/core/services/infinityfree_challenge_interceptor.dart
+          test/core/services/infinityfree_challenge_interceptor_test.dart
 
       - name: Verify Dart formatting
         if: github.head_ref != 'chore/pub-dependency-maintenance' && github.ref_name != 'chore/pub-dependency-maintenance'
@@ -78,14 +82,14 @@ jobs:
         id: synchronize
         if: github.event_name == 'push' && github.ref_name != 'chore/pub-dependency-maintenance'
         run: |
-          if git diff --quiet -- pubspec.lock lib/widgets/data_grid test/widgets/data_grid; then
+          if git diff --quiet -- pubspec.lock lib/widgets/data_grid test/widgets/data_grid lib/core/services/api_service.dart lib/core/services/infinityfree_challenge_interceptor.dart test/core/services/infinityfree_challenge_interceptor_test.dart; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pubspec.lock lib/widgets/data_grid test/widgets/data_grid
+          git add pubspec.lock lib/widgets/data_grid test/widgets/data_grid lib/core/services/api_service.dart lib/core/services/infinityfree_challenge_interceptor.dart test/core/services/infinityfree_challenge_interceptor_test.dart
           git commit -m "chore(data-grid): format sources and synchronize dependencies"
           git push origin "HEAD:${GITHUB_REF_NAME}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
