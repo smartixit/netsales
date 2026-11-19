@@ -130,6 +130,27 @@ class InfinityFreeChallengeSolver {
     }
   }
 
+  /// يحدّث كوكي التحدي مع الحفاظ على بقية الكوكيز الموجودة للوجهة نفسها.
+  ///
+  /// يمنع تكرار __test ويستبدل قيمته القديمة دون حذف جلسة الخادم أو XSRF.
+  static String mergeChallengeCookie({
+    required String? existingCookieHeader,
+    required String challengeCookie,
+  }) {
+    final cookies = (existingCookieHeader ?? '')
+        .split(';')
+        .map((cookie) => cookie.trim())
+        .where(
+          (cookie) =>
+              cookie.isNotEmpty &&
+              !RegExp(r'^__test\\s*=', caseSensitive: false).hasMatch(cookie),
+        )
+        .toList();
+
+    cookies.add('__test=$challengeCookie');
+    return cookies.join('; ');
+  }
+
   /// User-Agent شبيه بمتصفح — تشترطه الاستضافة بجانب الكوكي في كل طلب.
   static String get browserUserAgent => _browserUserAgent;
 
