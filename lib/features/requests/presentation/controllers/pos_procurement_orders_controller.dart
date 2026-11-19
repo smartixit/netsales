@@ -243,7 +243,7 @@ class PosProcurementOrdersController extends GetxController {
         : requestId;
   }
 
-  Future<bool> cancelRequest(int requestId) async {
+  Future<void> cancelRequest(int requestId) async {
     try {
       await CustomAnimationOverlay.showLoading(
         message: 'جاري إلغاء طلب التوريد...',
@@ -262,21 +262,18 @@ class PosProcurementOrdersController extends GetxController {
         message: 'تم إلغاء طلب الكروت بنجاح',
       );
 
-      return true;
     } on AppException catch (error) {
       CustomSnackbar.show(
         title: 'تعذر إلغاء الطلب',
         message: error.message,
         type: SnackType.error,
       );
-      return false;
     } catch (error) {
       CustomSnackbar.show(
         title: 'خطأ غير متوقع',
         message: 'تعذر إلغاء الطلب: $error',
         type: SnackType.error,
       );
-      return false;
     } finally {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
@@ -284,7 +281,7 @@ class PosProcurementOrdersController extends GetxController {
     }
   }
 
-  Future<bool> deleteRequest(int requestId) async {
+  Future<void> deleteRequest(int requestId) async {
     try {
       await CustomAnimationOverlay.showLoading(
         message: 'جاري حذف طلب التوريد من السجل...',
@@ -295,21 +292,18 @@ class PosProcurementOrdersController extends GetxController {
         message: 'تم حذف طلب التوريد بنجاح',
       );
 
-      return true;
     } on AppException catch (error) {
       CustomSnackbar.show(
         title: 'تعذر حذف الطلب',
         message: error.message,
         type: SnackType.error,
       );
-      return false;
     } catch (error) {
       CustomSnackbar.show(
         title: 'خطأ غير متوقع',
         message: 'تعذر إتمام عملية الحذف: $error',
         type: SnackType.error,
       );
-      return false;
     } finally {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();

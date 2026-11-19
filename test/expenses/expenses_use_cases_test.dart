@@ -3,14 +3,14 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_attachment_entity.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_item_entity.dart';
-import 'package:netsales/features/expenses/domain/repositories/expenses_repository.dart';
+import 'package:netsales/features/expenses/domain/entities/expense_summary_entity.dart';
+import 'package:netsales/features/expenses/domain/repositories/expense_repository.dart';
 import 'package:netsales/features/expenses/domain/usecases/create_expense_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/delete_expense_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/get_expense_details_use_case.dart';
-import 'package:netsales/features/expenses/domain/usecases/get_network_expenses_use_case.dart';
-import 'package:netsales/features/expenses/domain/usecases/update_expense_use_case.dart';
+import 'package:netsales/features/expenses/domain/usecases/get_expenses_use_case.dart';
 
-class _MockExpensesRepository implements ExpensesRepository {
+class _MockExpenseRepository implements ExpenseRepository {
   int getExpensesCalls = 0;
   int getDetailsCalls = 0;
   int createCalls = 0;
@@ -20,17 +20,15 @@ class _MockExpensesRepository implements ExpensesRepository {
   int? lastRequestedExpenseId;
   int? lastDeletedExpenseId;
 
-  final sampleExpense = const ExpenseEntity(
+  final sampleExpense = ExpenseEntity(
     expenseId: 101,
     networkId: 1,
-    expenseReference: 'EXP-2026-001',
-    expenseDate: '2026-11-20',
-    totalAmount: 15000.0,
-    itemsCount: 2,
-    attachmentsCount: 1,
+    expenseUuid: 'a8b1c2d3-e4f5-4678-90ab-cdef12345678',
+    expenseTotalAmount: 15000.0,
+    expenseDate: DateTime(2026, 11, 20),
     creatorName: 'أحمد المحاسب',
     networkName: 'شبكة النور',
-    items: [
+    items: const [
       ExpenseItemEntity(
         itemId: 1,
         expenseId: 101,
@@ -44,7 +42,7 @@ class _MockExpensesRepository implements ExpensesRepository {
         itemAmount: 5000.0,
       ),
     ],
-    attachments: [
+    attachments: const [
       ExpenseAttachmentEntity(
         attachmentId: 1,
         expenseId: 101,
@@ -58,8 +56,8 @@ class _MockExpensesRepository implements ExpensesRepository {
   );
 
   @override
-  Future<PaginatedList<ExpenseEntity>> getNetworkExpenses({
-    required int networkId,
+  Future<PaginatedList<ExpenseEntity>> getExpenses({
+    int? networkId,
     String? search,
     String? fromDate,
     String? toDate,
@@ -82,9 +80,23 @@ class _MockExpensesRepository implements ExpensesRepository {
   }
 
   @override
+  Future<ExpenseSummaryEntity> getExpenseSummary({
+    int? networkId,
+    String? fromDate,
+    String? toDate,
+  }) async {
+    return const ExpenseSummaryEntity(
+      totalCount: 1,
+      totalAmount: 15000.0,
+      thisMonthAmount: 15000.0,
+      todayAmount: 5000.0,
+    );
+  }
+
+  @override
   Future<ExpenseEntity> createExpense({
     required int networkId,
-    required String expenseDate,
+    String? expenseDate,
     required List<Map<String, dynamic>> items,
     List<String> attachmentPaths = const [],
   }) async {
@@ -95,8 +107,8 @@ class _MockExpensesRepository implements ExpensesRepository {
   @override
   Future<ExpenseEntity> updateExpense({
     required int expenseId,
-    required String expenseDate,
-    required List<Map<String, dynamic>> items,
+    String? expenseDate,
+    List<Map<String, dynamic>>? items,
     List<String> attachmentPaths = const [],
   }) async {
     updateCalls++;
@@ -108,25 +120,31 @@ class _MockExpensesRepository implements ExpensesRepository {
     deleteCalls++;
     lastDeletedExpenseId = expenseId;
   }
+
+  @override
+  Future<void> deleteExpenseAttachment({
+    required int expenseId,
+    required int attachmentId,
+  }) async {}
 }
 
 void main() {
-  late _MockExpensesRepository repository;
+  late _MockExpenseRepository repository;
 
   setUp(() {
-    repository = _MockExpensesRepository();
+    repository = _MockExpenseRepository();
   });
 
   group('Expenses Domain Use Cases Tests', () {
-    test('GetNetworkExpensesUseCase calls repository and returns paginated list', () async {
-      final useCase = GetNetworkExpensesUseCase(repository);
+    test('GetExpensesUseCase calls repository and returns paginated list', () async {
+      final useCase = GetExpensesUseCase(repository);
 
       final result = await useCase(networkId: 1);
 
       expect(repository.getExpensesCalls, 1);
       expect(result.items.length, 1);
-      expect(result.items.first.expenseReference, 'EXP-2026-001');
-      expect(result.items.first.totalAmount, 15000.0);
+      expect(result.items.first.expenseUuid, 'a8b1c2d3-e4f5-4678-90ab-cdef12345678');
+      expect(result.items.first.expenseTotalAmount, 15000.0);
     });
 
     test('GetExpenseDetailsUseCase returns complete expense entity with items and attachments', () async {
@@ -174,6 +192,7 @@ void main() {
       expect(expense.items.first.itemStatement, 'صيانة كابلات فايبر');
       expect(expense.items.first.itemAmount, 10000.0);
       expect(expense.attachments.first.attachmentName, 'فاتورة_ديزل.pdf');
+      expect(expense.displayReference, 'a8b1c2d3-e4f5-4678-90ab-cdef12345678');
     });
   });
 }

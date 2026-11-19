@@ -1275,12 +1275,6 @@ class PosNewProcurementOrderController extends GetxController {
         message: 'تم حفظ تعديلات طلب التوريد بنجاح',
       );
       Get.back<void>();
-
-      // CustomSnackbar.show(
-      //   title: 'تم التحديث بنجاح',
-      //   message: 'تم تحديث طلب التوريد رقم #${updated.requestUuid} بنجاح.',
-      //   type: SnackType.success,
-      // );
     } on AppException catch (e) {
       CustomSnackbar.show(
         title: 'فشل تعديل الطلب',
@@ -1406,11 +1400,6 @@ class PosNewProcurementOrderController extends GetxController {
         message: 'تم تقديم طلب الكروت بنجاح وهو قيد الانتظار',
       );
       Get.back<void>();
-      // CustomSnackbar.show(
-      //   title: 'نجاح تقديم الطلب',
-      //   message: 'تم إرسال الطلب رقم #${created.requestUuid} للشبكة بنجاح.',
-      //   type: SnackType.success,
-      // );
     } on AppException catch (e) {
       if (e.message.contains('تعرفة') ||
           e.message.contains('pricing') ||
@@ -1441,6 +1430,5 @@ class PosNewProcurementOrderController extends GetxController {
   /// Submits the current form and closes only after a successful server response.
   Future<void> submitOrderAndClose() async {
     isEditing.value ? await updateOrder() : await submitOrder();
-    // if (success) Get.back<void>();
   }
 }

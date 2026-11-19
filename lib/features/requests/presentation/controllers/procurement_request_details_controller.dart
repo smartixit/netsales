@@ -108,9 +108,9 @@ class ProcurementRequestDetailsController extends GetxController {
   }
 
   /// إلغاء الطلب من قبل نقطة البيع
-  Future<bool> cancelRequest() async {
+  Future<void> cancelRequest() async {
     final current = request.value;
-    if (current == null) return false;
+    if (current == null) return;
 
     try {
       await CustomAnimationOverlay.showLoading(
@@ -121,7 +121,7 @@ class ProcurementRequestDetailsController extends GetxController {
           (Get.isRegistered<CancelRequestUseCase>()
               ? Get.find<CancelRequestUseCase>()
               : null);
-      if (cancelUseCase == null) return false;
+      if (cancelUseCase == null) return;
 
       final cancelled = await cancelUseCase(current.requestId);
       request.value = cancelled;
@@ -129,22 +129,18 @@ class ProcurementRequestDetailsController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم إلغاء طلب الكروت بنجاح',
       );
-
-      return true;
     } on AppException catch (error) {
       CustomSnackbar.show(
         title: 'تعذر إلغاء الطلب',
         message: error.message,
         type: SnackType.error,
       );
-      return false;
     } catch (error) {
       CustomSnackbar.show(
         title: 'خطأ غير متوقع',
         message: 'تعذر إلغاء الطلب: $error',
         type: SnackType.error,
       );
-      return false;
     } finally {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
@@ -153,9 +149,9 @@ class ProcurementRequestDetailsController extends GetxController {
   }
 
   /// اعتماد الطلب وتوليد الفاتورة من قبل إدارة الشبكة
-  Future<bool> approveRequest({String? note}) async {
+  Future<void> approveRequest({String? note}) async {
     final current = request.value;
-    if (current == null) return false;
+    if (current == null) return;
 
     try {
       await CustomAnimationOverlay.showLoading(
@@ -166,7 +162,7 @@ class ProcurementRequestDetailsController extends GetxController {
           (Get.isRegistered<ApproveRequestUseCase>()
               ? Get.find<ApproveRequestUseCase>()
               : null);
-      if (approveUseCase == null) return false;
+      if (approveUseCase == null) return;
 
       final result = await approveUseCase(current.requestId, requestNote: note);
       request.value = result.request;
@@ -174,22 +170,18 @@ class ProcurementRequestDetailsController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم اعتماد الطلب وتوليد الفاتورة بنجاح',
       );
-
-      return true;
     } on AppException catch (error) {
       CustomSnackbar.show(
         title: 'تعذر اعتماد الطلب',
         message: error.message,
         type: SnackType.error,
       );
-      return false;
     } catch (error) {
       CustomSnackbar.show(
         title: 'خطأ غير متوقع',
         message: 'تعذر اعتماد الطلب: $error',
         type: SnackType.error,
       );
-      return false;
     } finally {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
@@ -198,9 +190,9 @@ class ProcurementRequestDetailsController extends GetxController {
   }
 
   /// رفض الطلب مع توثيق السبب
-  Future<bool> rejectRequest(String reason) async {
+  Future<void> rejectRequest(String reason) async {
     final current = request.value;
-    if (current == null) return false;
+    if (current == null) return;
 
     try {
       await CustomAnimationOverlay.showLoading(
@@ -211,7 +203,7 @@ class ProcurementRequestDetailsController extends GetxController {
           (Get.isRegistered<RejectRequestUseCase>()
               ? Get.find<RejectRequestUseCase>()
               : null);
-      if (rejectUseCase == null) return false;
+      if (rejectUseCase == null) return;
 
       final rejected = await rejectUseCase(current.requestId, reason);
       request.value = rejected;
@@ -219,22 +211,18 @@ class ProcurementRequestDetailsController extends GetxController {
       await CustomAnimationOverlay.showSuccess(
         message: 'تم رفض طلب التوريد وتوثيق السبب',
       );
-
-      return true;
     } on AppException catch (error) {
       CustomSnackbar.show(
         title: 'تعذر رفض الطلب',
         message: error.message,
         type: SnackType.error,
       );
-      return false;
     } catch (error) {
       CustomSnackbar.show(
         title: 'خطأ غير متوقع',
         message: 'تعذر إتمام عملية الرفض: $error',
         type: SnackType.error,
       );
-      return false;
     } finally {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();

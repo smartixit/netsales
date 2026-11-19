@@ -450,11 +450,11 @@ class NetworkProcurementReviewController extends GetxController {
     }
   }
 
-  Future<bool> approvePreview({String? requestNote}) async {
+  Future<void> approvePreview({String? requestNote}) async {
     final preview = currentPreview.value;
     final requestId = editingRequestId.value;
     if (preview == null || requestId == null || !preview.hasModifications) {
-      return false;
+      return;
     }
     final draft = modificationLines
         .map((line) => '${line.packageId}:${line.voucherCount}')
@@ -469,7 +469,6 @@ class NetworkProcurementReviewController extends GetxController {
         message: 'تغيرت البنود بعد المعاينة. أعد المعاينة قبل الاعتماد.',
         type: SnackType.warning,
       );
-      return false;
     }
     return approveRequest(
       requestId,
