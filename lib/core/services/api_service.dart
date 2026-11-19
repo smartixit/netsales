@@ -87,7 +87,7 @@ class ApiService {
       // 0. Centralized connectivity guard (fail-fast, no retries when offline)
       _ConnectivityInterceptor(),
       _RetryInterceptor(_dio),
-      _InfinityFreeChallengeInterceptor(_dio),
+      InfinityFreeChallengeInterceptor(_dio),
       _SessionAuthInterceptor(),
       _CryptoInterceptor(_dio),
     ]);
@@ -739,14 +739,21 @@ class _SessionAuthInterceptor extends Interceptor {
   }
 }
 
-/// معترض حل تحدي الاستضافة المجانية InfinityFree تلقائياً
-class _InfinityFreeChallengeInterceptor extends Interceptor {
+const String _infinityFreeVerificationProbeFlagKey =
+    '__netsales_infinityfree_verification_probe';
+
+/// Handles the InfinityFree JavaScript test-cookie challenge.
+///
+/// The browser executes the challenge's location.href as a GET navigation.
+/// We therefore verify the cookie with a standalone GET before replaying the
+/// original request with its original method, URI, and body.
+class InfinityFreeChallengeInterceptor extends Interceptor {
   final Dio _dio;
   static const _retryFlagKey = '__test_retried';
   static final Map<String, String> _cachedCookies = {};
   static final Map<String, DateTime> _cookieExpiry = {};
 
-  _InfinityFreeChallengeInterceptor(this._dio);
+  InfinityFreeChallengeInterceptor(this._dio);
 
   static String? _headerValue(
     Map<String, dynamic> headers,
@@ -778,9 +785,9 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
   void onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
-  ) async {
-    final host = Uri.tryParse(options.uri.toString())?.host;
-    if (host != null && _cachedCookies.containsKey(host)) {
+  ) {
+    final host = options.uri.host;
+    if (host.isNotEmpty && _cachedCookies.containsKey(host)) {
       final expiry = _cookieExpiry[host];
       if (expiry != null && DateTime.now().isBefore(expiry)) {
         final existingCookie = _headerValue(options.headers, 'Cookie');
@@ -797,12 +804,13 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
         _cookieExpiry.remove(host);
       }
     }
+
     _setHeader(
       options.headers,
       'User-Agent',
       InfinityFreeChallengeSolver.browserUserAgent,
     );
-    return handler.next(options);
+    handler.next(options);
   }
 
   void _finishCryptoLifecycle(RequestOptions options) {
@@ -831,61 +839,104 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     );
   }
 
+  RequestOptions _createVerificationOptions({
+    required RequestOptions original,
+    required Uri redirectUri,
+    required String challengeCookie,
+  }) {
+    final existingCookie = _headerValue(original.headers, 'Cookie');
+    final headers = <String, dynamic>{
+      'Accept':
+          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Cookie': InfinityFreeChallengeSolver.mergeChallengeCookie(
+        existingCookieHeader: existingCookie,
+        challengeCookie: challengeCookie,
+      ),
+      'User-Agent': InfinityFreeChallengeSolver.browserUserAgent,
+    };
+
+    final verificationOptions = original.copyWith(
+      method: 'GET',
+      queryParameters: <String, dynamic>{...redirectUri.queryParameters},
+      headers: headers,
+      extra: <String, dynamic>{
+        _retryFlagKey: true,
+        _infinityFreeVerificationProbeFlagKey: true,
+        'bypass_encryption': true,
+      },
+      responseType: ResponseType.plain,
+      validateStatus: (status) => status != null,
+      receiveDataWhenStatusError: true,
+      followRedirects: false,
+    );
+
+    // RequestOptions.copyWith treats data:null as "keep the old data".
+    // Clear it explicitly so a POST login body can never reach the probe GET.
+    verificationOptions.data = null;
+    verificationOptions.contentType = null;
+    return verificationOptions;
+  }
+
   @override
   void onResponse(
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) async {
     final options = response.requestOptions;
-    final body = response.data;
-    final challengeHtml = InfinityFreeChallengeSolver.challengeHtml(body);
+    final challengeHtml = InfinityFreeChallengeSolver.challengeHtml(
+      response.data,
+    );
 
     if (challengeHtml == null) {
-      return handler.next(response);
+      handler.next(response);
+      return;
     }
 
-    // The retry is deliberately bounded to one verification replay.
+    // A challenge on either the verification probe or the original replay
+    // means verification did not complete. Never start another handshake.
     if (options.extra[_retryFlagKey] == true) {
       _finishCryptoLifecycle(options);
-      return handler.reject(
+      handler.reject(
         _challengeFailure(
           options: options,
           response: response,
           message:
-              'رفضت الاستضافة الطلب بعد محاولة التحقق؛ ما زالت صفحة JavaScript تصل إلى التطبيق.',
+              'رفضت الاستضافة طلب التحقق؛ ما زالت صفحة JavaScript تصل إلى التطبيق.',
         ),
       );
+      return;
     }
 
     final requestUri = options.uri;
     final cookie = InfinityFreeChallengeSolver.solveChallenge(challengeHtml);
     final redirectUri =
         InfinityFreeChallengeSolver.extractChallengeRedirectUri(
-          challengeHtml,
-          requestUri: requestUri,
-        );
+      challengeHtml,
+      requestUri: requestUri,
+    );
 
     if (cookie == null || redirectUri == null) {
       _finishCryptoLifecycle(options);
       if (AppEnvironment.enableLogging) {
         log(
-          '⚠️ تعذر إكمال تحدي InfinityFree: '
-          'challenge cookie أو same-endpoint redirect غير صالح.',
+          'تعذر إكمال تحدي InfinityFree: challenge cookie أو '
+          'same-endpoint redirect غير صالح.',
         );
       }
-      return handler.reject(
+      handler.reject(
         _challengeFailure(
           options: options,
           response: response,
-          message: 'تعذر إكمال خطوة التحقق التي تطلبها الاستضافة.',
+          message: 'تعذر استخراج بيانات خطوة تحقق الاستضافة.',
         ),
       );
+      return;
     }
 
-    // FormData and streaming bodies are one-shot and cannot be safely replayed.
+    // FormData and streaming bodies are one-shot and cannot be replayed safely.
     if (options.data is FormData || options.data is Stream) {
       _finishCryptoLifecycle(options);
-      return handler.reject(
+      handler.reject(
         _challengeFailure(
           options: options,
           response: response,
@@ -893,26 +944,83 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
               'طلب يحتوي على ملفات أو تدفق بيانات لا يمكن إعادة إرساله بأمان بعد تحقق الاستضافة.',
         ),
       );
+      return;
     }
 
-    final host = requestUri.host;
-    if (host.isEmpty) {
+    if (requestUri.host.isEmpty) {
       _finishCryptoLifecycle(options);
-      return handler.reject(
+      handler.reject(
         _challengeFailure(
           options: options,
           response: response,
           message: 'تعذر تحديد نطاق الاستضافة لحفظ كوكي التحقق.',
         ),
       );
+      return;
     }
 
-    _cachedCookies[host] = cookie;
-    // The challenge in the received page specifies max-age=21600 (six hours).
-    _cookieExpiry[host] = DateTime.now().add(const Duration(hours: 6));
+    final verificationOptions = _createVerificationOptions(
+      original: options,
+      redirectUri: redirectUri,
+      challengeCookie: cookie,
+    );
 
+    // First perform the browser-equivalent location.href navigation (GET).
+    // The cookie is not cached and the original request is not replayed unless
+    // this request stops returning the challenge page.
+    late final Response<dynamic> verificationResponse;
+    try {
+      verificationResponse =
+          await _dio.fetch<dynamic>(verificationOptions);
+
+      if (InfinityFreeChallengeSolver.isChallengeResponse(
+        verificationResponse.data,
+      )) {
+        throw _challengeFailure(
+          options: verificationOptions,
+          response: verificationResponse,
+          message:
+              'رفضت الاستضافة كوكي التحقق؛ أعادت صفحة التحدي إلى طلب GET الخاص بالتحقق.',
+        );
+      }
+
+      final verificationStatus = verificationResponse.statusCode;
+      if (verificationStatus == null || verificationStatus >= 500) {
+        throw _challengeFailure(
+          options: verificationOptions,
+          response: verificationResponse,
+          message:
+              'لم يثبت طلب GET اجتياز تحقق الاستضافة '
+              '(HTTP ${verificationStatus ?? 'unknown'}).',
+        );
+      }
+    } catch (error) {
+      _finishCryptoLifecycle(options);
+      if (AppEnvironment.enableLogging) {
+        log('فشل GET التحقق من InfinityFree: $error');
+      }
+      handler.reject(
+        _challengeFailure(
+          options: options,
+          response: response,
+          message:
+              'فشل طلب GET المستقل للتحقق من كوكي الاستضافة؛ '
+              'لم يُعَد إرسال الطلب الأصلي.',
+          cause: error,
+        ),
+      );
+      return;
+    }
+
+    // Cache only after the verification navigation has been accepted.
+    _cachedCookies[requestUri.host] = cookie;
+    _cookieExpiry[requestUri.host] =
+        DateTime.now().add(const Duration(hours: 6));
+
+    // Replay the original request unchanged apart from the verified cookie,
+    // User-Agent, and one-shot recursion guard. This preserves POST + payload.
     final replayOptions = options.copyWith(
-      queryParameters: <String, dynamic>{...redirectUri.queryParameters},
+      queryParameters: <String, dynamic>{...options.queryParameters},
       extra: <String, dynamic>{
         ...options.extra,
         _retryFlagKey: true,
@@ -934,24 +1042,24 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
       InfinityFreeChallengeSolver.browserUserAgent,
     );
 
-    // Keep the already-sealed body and its matching ephemeral key. In
-    // particular, the server needs this same key to encrypt the login reply.
+    // The original request may already be sealed. Preserve its exact body and
+    // ephemeral response key; do not encrypt the body a second time.
     ApiRequestReplayState.markCryptoPrepared(replayOptions);
 
     try {
       final retried = await _dio.fetch<dynamic>(replayOptions);
-      return handler.resolve(retried);
-    } catch (e) {
+      handler.resolve(retried);
+    } catch (error) {
       _finishCryptoLifecycle(replayOptions);
       if (AppEnvironment.enableLogging) {
-        log('❌ فشلت إعادة الطلب بعد تحدي InfinityFree: $e');
+        log('فشلت إعادة الطلب الأصلي بعد تحقق InfinityFree: $error');
       }
-      return handler.reject(
+      handler.reject(
         _challengeFailure(
           options: replayOptions,
           response: response,
-          message: 'تعذرت إعادة الطلب بعد إكمال خطوة تحقق الاستضافة.',
-          cause: e,
+          message: 'تعذرت إعادة الطلب الأصلي بعد اجتياز تحقق الاستضافة.',
+          cause: error,
         ),
       );
     }
@@ -990,6 +1098,9 @@ class _RetryInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     final requestOptions = err.requestOptions;
+    if (requestOptions.extra[_infinityFreeVerificationProbeFlagKey] == true) {
+      return handler.next(err);
+    }
     final retryCount = (requestOptions.extra['retry_count'] as int?) ?? 0;
 
     final statusCode = err.response?.statusCode;
