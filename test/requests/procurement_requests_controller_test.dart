@@ -560,18 +560,12 @@ void main() {
     );
 
     test('approveRequest approves pending request and updates list', () async {
-      await controller.approveRequest(
-        1,
-        requestNote: 'تم الفحص',
-      );
+      await controller.approveRequest(1, requestNote: 'تم الفحص');
       expect(controller.requests.first.isApproved, true);
     });
 
     test('rejectRequest rejects request with mandatory reason', () async {
-      await controller.rejectRequest(
-        1,
-        'الكمية المطلوبة غير متوفرة حالياً',
-      );
+      await controller.rejectRequest(1, 'الكمية المطلوبة غير متوفرة حالياً');
       expect(controller.requests.first.isRejected, true);
       expect(
         controller.requests.first.requestNote,
