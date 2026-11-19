@@ -760,6 +760,20 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     return null;
   }
 
+  static void _setHeader(
+    Map<String, dynamic> headers,
+    String name,
+    String value,
+  ) {
+    final matchingKeys = headers.keys
+        .where((key) => key.toLowerCase() == name.toLowerCase())
+        .toList();
+    for (final key in matchingKeys) {
+      headers.remove(key);
+    }
+    headers[name] = value;
+  }
+
   @override
   void onRequest(
     RequestOptions options,
@@ -770,18 +784,24 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
       final expiry = _cookieExpiry[host];
       if (expiry != null && DateTime.now().isBefore(expiry)) {
         final existingCookie = _headerValue(options.headers, 'Cookie');
-        options.headers['Cookie'] =
-            InfinityFreeChallengeSolver.mergeChallengeCookie(
+        _setHeader(
+          options.headers,
+          'Cookie',
+          InfinityFreeChallengeSolver.mergeChallengeCookie(
               existingCookieHeader: existingCookie,
               challengeCookie: _cachedCookies[host]!,
-            );
+            ),
+        );
       } else {
         _cachedCookies.remove(host);
         _cookieExpiry.remove(host);
       }
     }
-    options.headers['User-Agent'] =
-        InfinityFreeChallengeSolver.browserUserAgent;
+    _setHeader(
+      options.headers,
+      'User-Agent',
+      InfinityFreeChallengeSolver.browserUserAgent,
+    );
     return handler.next(options);
   }
 
@@ -826,13 +846,19 @@ class _InfinityFreeChallengeInterceptor extends Interceptor {
     _cookieExpiry[host] = DateTime.now().add(const Duration(hours: 5));
 
     final existingCookie = _headerValue(options.headers, 'Cookie');
-    options.headers['Cookie'] =
-        InfinityFreeChallengeSolver.mergeChallengeCookie(
-          existingCookieHeader: existingCookie,
-          challengeCookie: cookie,
-        );
-    options.headers['User-Agent'] =
-        InfinityFreeChallengeSolver.browserUserAgent;
+    _setHeader(
+      options.headers,
+      'Cookie',
+      InfinityFreeChallengeSolver.mergeChallengeCookie(
+        existingCookieHeader: existingCookie,
+        challengeCookie: cookie,
+      ),
+    );
+    _setHeader(
+      options.headers,
+      'User-Agent',
+      InfinityFreeChallengeSolver.browserUserAgent,
+    );
     options.extra[_retryFlagKey] = true;
     // The request body and ephemeral response key were already prepared by
     // _CryptoInterceptor. The replay must not seal the sealed payload again.
