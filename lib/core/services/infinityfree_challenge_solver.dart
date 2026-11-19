@@ -66,24 +66,41 @@ class InfinityFreeChallengeSolver {
     return sb.toString();
   }
 
-  /// يحاكي إزالة الذيل المتكرر في SlowAES unpadBytesOut.
+  /// تطابق خوارزمية SlowAES unpadBytesOut المرجعية، لا PKCS#7 الصارمة.
   ///
-  /// هذه ليست إزالة PKCS#7 قياسية: SlowAES تزيل عدد البايتات المتطابقة
-  /// المتتالية في نهاية الناتج حتى لو كان عددها أقل من قيمة البايت نفسه.
+  /// تزيل عدد البايتات المتطابقة في الذيل، لكن إذا ظهر قبلها بايت آخر
+  /// قيمته ضمن 1..16 فإن المرجع يلغي الإزالة كلها. أما البايت السابق
+  /// الأكبر من 16 فينهي الفحص مع الإبقاء على عدد البايتات المتطابقة المكتشف.
   static Uint8List _unpadBytesOut(Uint8List data) {
-    if (data.isEmpty) return data;
-    final lastByte = data.last;
-    if (lastByte > 16) return data;
+    if (data.length < 16) return data;
 
-    var trailingCount = 0;
-    for (var i = data.length - 1;
-        i >= 0 && trailingCount < 16 && data[i] == lastByte;
-        i--) {
-      trailingCount++;
+    var padCount = 0;
+    var padByte = -1;
+    const blockSize = 16;
+
+    for (
+      var i = data.length - 1;
+      i >= data.length - 1 - blockSize;
+      i--
+    ) {
+      if (data[i] <= blockSize) {
+        if (padByte == -1) padByte = data[i];
+
+        if (data[i] != padByte) {
+          padCount = 0;
+          break;
+        }
+
+        padCount++;
+      } else {
+        break;
+      }
+
+      if (padCount == padByte) break;
     }
 
-    if (trailingCount == 0) return data;
-    return Uint8List.sublistView(data, 0, data.length - trailingCount);
+    if (padCount == 0) return data;
+    return Uint8List.sublistView(data, 0, data.length - padCount);
   }
 
   static String? _decryptConstants(String aHex, String bHex, String cHex) {
