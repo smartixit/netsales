@@ -2,7 +2,8 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:netsales/core/services/api_service.dart';
+import 'package:netsales/core/services/api_request_replay_state.dart';
+import 'package:netsales/core/services/infinityfree_challenge_interceptor.dart';
 import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
 
 void main() {
@@ -65,6 +66,8 @@ void main() {
         InfinityFreeChallengeSolver.browserUserAgent,
       );
 
+      expect(ApiRequestReplayState.isCryptoPrepared(replay.options), isTrue);
+      expect(ApiRequestReplayState.isCryptoPrepared(probe.options), isFalse);
       expect(replay.method, 'POST');
       expect(replay.uri, loginUri);
       expect(String.fromCharCodes(replay.body!), originalBody);
