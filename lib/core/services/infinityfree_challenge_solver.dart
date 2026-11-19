@@ -152,6 +152,39 @@ class InfinityFreeChallengeSolver {
   /// User-Agent شبيه بمتصفح — تشترطه الاستضافة بجانب الكوكي في كل طلب.
   static String get browserUserAgent => _browserUserAgent;
 
+  /// يستخرج عنوان الانتقال الذي ينفذه JavaScript بعد ضبط كوكي التحقق.
+  ///
+  /// لا نقبل إلا انتقالاً إلى نفس scheme/host/port/path للطلب الحالي؛
+  /// نحتاج معامل التحقق (مثل i=1) فقط، ولا نتبع أي إعادة توجيه إلى وجهة أخرى.
+  static Uri? extractChallengeRedirectUri(
+    String html, {
+    required Uri requestUri,
+  }) {
+    final match = RegExp(
+      r'''location\s*\.\s*href\s*=\s*["']([^"']+)["']''',
+      caseSensitive: false,
+    ).firstMatch(html);
+    final location = match?.group(1);
+    if (location == null || location.isEmpty) return null;
+
+    try {
+      final targetUri = requestUri.resolve(location);
+      final sameOrigin =
+          targetUri.scheme.toLowerCase() == requestUri.scheme.toLowerCase() &&
+          targetUri.host.toLowerCase() == requestUri.host.toLowerCase() &&
+          targetUri.port == requestUri.port;
+      final samePath = targetUri.path == requestUri.path;
+
+      if (!sameOrigin || !samePath || !targetUri.hasQuery) {
+        return null;
+      }
+
+      return targetUri;
+    } on FormatException {
+      return null;
+    }
+  }
+
   /// القيمة المتوقعة لكوكي __test محسوبة من `c` في الصفحة المحفوظة.
   static String? computeFromBytes(Uint8List body) {
     try {
