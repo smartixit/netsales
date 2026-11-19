@@ -56,7 +56,11 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) {
     final host = options.uri.host;
-    if (host.isNotEmpty && _cachedCookies.containsKey(host)) {
+    final isVerificationProbe =
+        options.extra[infinityFreeVerificationProbeFlagKey] == true;
+    if (!isVerificationProbe &&
+        host.isNotEmpty &&
+        _cachedCookies.containsKey(host)) {
       final expiry = _cookieExpiry[host];
       if (expiry != null && DateTime.now().isBefore(expiry)) {
         final existingCookie = _headerValue(options.headers, 'Cookie');
