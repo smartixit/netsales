@@ -23,14 +23,18 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       ]);
     });
 
-    test('matches the challenge cookie for the supplied single AES block', () {
+    test(
+      'matches the challenge cookie for the supplied single AES block',
+      () {
       expect(
         InfinityFreeChallengeSolver.solveChallenge(challenge),
         'e84330a69c6df373fc2fd2a2827a5f',
       );
     });
 
-    test('decrypts a multi-block CBC challenge against an independent vector', () {
+    test(
+      'decrypts a multi-block CBC challenge against an independent vector',
+      () {
       final multiBlockChallenge = challenge.replaceFirst(
         '25b509cc7dadcdb532275647f94524cc',
         '848cbc60dcde88fe99cfe77c054994ce'
@@ -44,7 +48,9 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       );
     });
 
-    test('matches SlowAES behavior when padding-like bytes are inconsistent', () {
+    test(
+      'matches SlowAES behavior when padding-like bytes are inconsistent',
+      () {
       final inconsistentPaddingChallenge = challenge.replaceFirst(
         '25b509cc7dadcdb532275647f94524cc',
         '7faa7da20fa612dde3cf9b7f3331b50c',
@@ -60,7 +66,9 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       );
     });
 
-    test('removes a complete thirteen-byte SlowAES padding suffix', () {
+    test(
+      'removes a complete thirteen-byte SlowAES padding suffix',
+      () {
       final paddedChallenge = challenge.replaceFirst(
         '25b509cc7dadcdb532275647f94524cc',
         '0216da59dd377dd41308e253403e5aed',
@@ -72,7 +80,9 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       );
     });
 
-    test('matches SlowAES handling of a full zero-byte trailing block', () {
+    test(
+      'matches SlowAES handling of a full zero-byte trailing block',
+      () {
       final zeroBlockChallenge = challenge.replaceFirst(
         '25b509cc7dadcdb532275647f94524cc',
         '9b9a54eb2de11baef8f0060729ce78fb',
@@ -84,7 +94,9 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       );
     });
 
-    test('preserves unrelated cookies and replaces an existing challenge cookie', () {
+    test(
+      'preserves unrelated cookies and replaces an existing challenge cookie',
+      () {
       expect(
         InfinityFreeChallengeSolver.mergeChallengeCookie(
           existingCookieHeader:
@@ -95,7 +107,9 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       );
     });
 
-    test('adds the challenge cookie when no cookie header exists', () {
+    test(
+      'adds the challenge cookie when no cookie header exists',
+      () {
       expect(
         InfinityFreeChallengeSolver.mergeChallengeCookie(
           existingCookieHeader: null,
