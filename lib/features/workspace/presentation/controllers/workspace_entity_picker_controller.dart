@@ -121,7 +121,6 @@ class WorkspaceEntityPickerController extends GetxController {
     }
 
     if (Get.isRegistered<WorkspaceCoordinatorController>()) {
-      await WorkspaceService.to.setActiveWorkspace(AppWorkspace.network);
       Get.back<void>();
       await WorkspaceCoordinatorController.to.switchWorkspace(AppWorkspace.network);
     }
@@ -139,7 +138,6 @@ class WorkspaceEntityPickerController extends GetxController {
     }
 
     if (Get.isRegistered<WorkspaceCoordinatorController>()) {
-      await WorkspaceService.to.setActiveWorkspace(AppWorkspace.pos);
       Get.back<void>();
       await WorkspaceCoordinatorController.to.switchWorkspace(AppWorkspace.pos);
     }

@@ -108,7 +108,6 @@ class PosLinkedNetworkSelector extends StatelessWidget {
               selectedId: selected?.networkId,
               onSelected: (link) => controller.selectNetwork(
                 link,
-                index: activeLinks.indexOf(link),
               ),
             ),
             if (controller.hasMoreNetworks.value) ...[

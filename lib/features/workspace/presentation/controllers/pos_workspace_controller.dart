@@ -68,7 +68,6 @@ class PosWorkspaceController extends GetxController {
 
   final RxnString networkCursor = RxnString();
   final RxBool hasMoreNetworks = false.obs;
-  final RxInt currentNetworkIndex = 0.obs;
 
   int _posGeneration = 0;
   int _networkGeneration = 0;
@@ -220,7 +219,6 @@ class PosWorkspaceController extends GetxController {
       selectedNetworkLink.value = null;
       networkCursor.value = null;
       hasMoreNetworks.value = false;
-      currentNetworkIndex.value = 0;
       _clearScopedData();
     } else {
       isLoadingMoreNetworks.value = true;
@@ -277,7 +275,6 @@ class PosWorkspaceController extends GetxController {
 
   Future<void> selectNetwork(
     NetworkPosLinkEntity link, {
-    int? index,
     bool forceRefresh = false,
   }) async {
     final posId = activePos.value?.posId;
@@ -296,7 +293,6 @@ class PosWorkspaceController extends GetxController {
     }
 
     selectedNetworkLink.value = authorizedLink;
-    currentNetworkIndex.value = index ?? networkLinks.indexOf(authorizedLink);
     await StorageService.instance.setInt(
       _networkStorageKey(posId),
       authorizedLink.networkId,
@@ -364,15 +360,6 @@ class PosWorkspaceController extends GetxController {
     }
   }
 
-  Future<void> onNetworkPageChanged(int index) async {
-    if (index < 0 || index >= networkLinks.length) return;
-    await selectNetwork(networkLinks[index], index: index);
-    if (index >= networkLinks.length - 2 && hasMoreNetworks.value) {
-      final posId = activePos.value?.posId;
-      if (posId != null) await loadNetworks(posId, refresh: false);
-    }
-  }
-
   Future<void> retryNetworks() async {
     final posId = activePos.value?.posId;
     if (posId != null) await loadNetworks(posId);
@@ -409,7 +396,6 @@ class PosWorkspaceController extends GetxController {
     selectedNetworkLink.value = null;
     networkCursor.value = null;
     hasMoreNetworks.value = false;
-    currentNetworkIndex.value = 0;
     isLoadingNetworks.value = false;
     isLoadingMoreNetworks.value = false;
     networksError.value = null;
@@ -441,7 +427,6 @@ class PosWorkspaceController extends GetxController {
     }
     await selectNetwork(
       newLink,
-      index: existingIndex < 0 ? 0 : existingIndex,
       forceRefresh: true,
     );
     return true;
