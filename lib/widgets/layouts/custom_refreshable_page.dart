@@ -67,7 +67,14 @@ class CustomRefreshablePage extends StatelessWidget {
     bool embedded = false,
   }) {
     final mediaQuery = MediaQuery.of(context);
-    final topPadding = embedded ? mediaQuery.padding.top + 20.h : AppSpacing.md;
+    // Embedded workspace pages render beneath a translucent, extended app bar.
+    // Reserve its complete layout extent, not only the status-bar inset.
+    final topPadding = embedded
+        ? mediaQuery.padding.top +
+              AppSpacing.appBarHeight +
+              AppSpacing.sm +
+              AppSpacing.md
+        : AppSpacing.md;
     final bottomPadding = embedded
         ? 115.h + mediaQuery.padding.bottom
         : mediaQuery.padding.bottom + AppSpacing.xl;
