@@ -26,7 +26,7 @@ void main() {
 
   tearDown(Get.reset);
 
-  test('restored local credentials are not marked server-verified', () async {
+  test('restored local credentials remain unverified until server validation', () async {
     final storage = StorageService.instance;
     final user = UserModel.fromJson({
       'user_id': 71,
@@ -54,17 +54,13 @@ void main() {
     expect(storage.getInt(savedPosNetworkKey), 801);
     expect(storage.getInt(savedNetworkKey), 702);
 
-    await SessionService.instance.syncSessionProfile(
-      user: user,
-      permissions: const <String>[],
-    );
-
+    await SessionService.instance.syncSessionProfile(user: user, permissions: const <String>[]);
     expect(storage.getInt(savedPosKey), isNull);
     expect(storage.getInt(savedPosNetworkKey), isNull);
     expect(storage.getInt(savedNetworkKey), isNull);
   });
 
-  test('a 403 blocked state preserves the local session but blocks verification', () async {
+  test('403 blocked state preserves session and keeps the current device identity in memory', () async {
     final user = UserModel.fromJson({
       'user_id': 72,
       'user_full_name': 'مستخدم محظور',
@@ -73,19 +69,22 @@ void main() {
     });
     await SessionService.instance.startSession(
       user: user,
-      session: const UserSessionModel(
+      session: UserSessionModel(
         sessionId: 'blocked-session-id',
         userId: 72,
         deviceUuid: 'device-72',
       ),
       permissions: const <String>[],
     );
-
     SessionService.instance.markSessionAccessBlocked();
 
     expect(SessionService.instance.isAuthenticated, isTrue);
     expect(SessionService.instance.isSessionVerified, isFalse);
     expect(SessionService.instance.isAccessBlocked, isTrue);
     expect(StorageService.instance.sessionId, 'blocked-session-id');
+    expect(
+      SessionService.instance.currentSession?.deviceUuid,
+      'device-72',
+    );
   });
 }
