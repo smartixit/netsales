@@ -1,3 +1,4 @@
+import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/features/workspace/domain/entities/network_expenses_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_packages_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_pending_request_entity.dart';
@@ -55,7 +56,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
 
     if (networkId is! num ||
         networkName is! String ||
-        networkName.isEmpty ||
+        networkName.trim().isEmpty ||
         generatedAt is! String ||
         generatedAt.isEmpty ||
         periodKey is! String ||
@@ -76,7 +77,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
         .toList(growable: false);
 
     return NetworkWorkspaceOverviewModel(
-      networkId: networkId.toInt(),
+      networkId: _requiredInt(networkId, 'network.network_id'),
       networkName: networkName,
       generatedAt: generatedAt,
       periodKey: periodKey,
@@ -122,6 +123,12 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
         statusLabel is! String ||
         statusLabel.trim().isEmpty) {
       throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
+    }
+
+    if (status != RequestStatus.pending.wireValue) {
+      throw const FormatException(
+        'قائمة الطلبات المعلقة تحتوي على حالة غير متوقعة.',
+      );
     }
 
     return NetworkPendingRequestEntity(
