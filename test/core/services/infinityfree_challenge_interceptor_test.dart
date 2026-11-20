@@ -231,8 +231,10 @@ void main() {
           failure = error;
         }
 
-        expect(failure, isNotNull);
-        expect(failure!.response?.statusCode, 200);
+        if (failure == null) {
+          fail('Expected the failed verification GET to throw DioException.');
+        }
+        expect(failure.response?.statusCode, 200);
         expect(failure.response?.data, contains('aes.js'));
         expect(failure.requestOptions.uri.queryParameters, {'i': '1'});
 
