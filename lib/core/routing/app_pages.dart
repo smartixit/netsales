@@ -97,6 +97,10 @@ abstract final class AppPages {
       name: AppRoutes.unauthorized,
       page: () => CustomUnauthorized(
         isSessionBlocked: SessionService.to.isAccessBlocked,
+        onSessionBlockedLogout: () async {
+          await SessionService.to.terminateSession();
+          await Get.offAllNamed<void>(AppRoutes.login);
+        },
       ),
     ),
 

@@ -13,9 +13,14 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 /// ============================================================================
 /// تظهر عند محاولة الوصول المباشر (Deep Links) إلى مسار غير مصرح به للمستخدم.
 class CustomUnauthorized extends StatelessWidget {
-  const CustomUnauthorized({super.key, this.isSessionBlocked = false});
+  const CustomUnauthorized({
+    super.key,
+    this.isSessionBlocked = false,
+    this.onSessionBlockedLogout,
+  });
 
   final bool isSessionBlocked;
+  final Future<void> Function()? onSessionBlockedLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -65,8 +70,7 @@ class CustomUnauthorized extends StatelessWidget {
                 icon: isSessionBlocked ? Icons.logout_rounded : Icons.home_rounded,
                 onPressed: () async {
                   if (isSessionBlocked) {
-                    await SessionService.to.terminateSession();
-                    await Get.offAllNamed<void>(AppRoutes.login);
+                    await onSessionBlockedLogout?.call();
                     return;
                   }
                   await Get.offAllNamed<void>(AppRoutes.dashboard);

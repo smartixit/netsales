@@ -36,7 +36,7 @@ void main() {
     });
     await storage.saveSession('cached-session-id');
     await storage.setModel(StorageKeys.userData, user, (value) => value.toJson());
-    await storage.setStringList(StorageKeys.permissionsStorage, const []);
+    await storage.setStringList(StorageKeys.permissionsStorage, const <String>[]);
 
     await SessionService.instance.init();
 
@@ -59,7 +59,7 @@ void main() {
         userId: 72,
         deviceUuid: 'device-72',
       ),
-      permissions: const [],
+      permissions: const <String>[],
     );
 
     SessionService.instance.markSessionAccessBlocked();
