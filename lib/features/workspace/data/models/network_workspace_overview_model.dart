@@ -241,11 +241,15 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
     return value.toInt();
   }
 
-  static bool _isAmount(String value) =>
-      RegExp(r'^\d+(?:\.\d+)?
-).hasMatch(value);
-}
-).hasMatch(value);
-}
-).hasMatch(value);
+  static bool _isAmount(String value) {
+    if (value.isEmpty) return false;
+    final parts = value.split('.');
+    if (parts.length > 2 || parts.first.isEmpty) return false;
+    if (!_containsOnlyDigits(parts.first)) return false;
+    return parts.length == 1 ||
+        (parts[1].isNotEmpty && _containsOnlyDigits(parts[1]));
+  }
+
+  static bool _containsOnlyDigits(String value) =>
+      value.codeUnits.every((unit) => unit >= 48 && unit <= 57);
 }
