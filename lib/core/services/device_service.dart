@@ -53,11 +53,14 @@ class DeviceService extends GetxService {
         _fallbackDeviceInfo();
       }
     } catch (error, stack) {
-      log('Failed to extract descriptive device metadata: $error', stackTrace: stack);
+      log(
+        '⚠️ [DeviceService] Failed to extract platform device info: $error',
+        stackTrace: stack,
+      );
       _fallbackDeviceInfo();
     }
     await _resolveDeviceUuid();
-    log('Device identity initialized. Type=$_deviceType');
+    log('📱 [DeviceService] Device identity initialized. Type=$_deviceType');
     return this;
   }
 
@@ -149,7 +152,8 @@ class DeviceService extends GetxService {
       );
     } catch (error, stack) {
       log(
-        'Cannot initialize authoritative device identity on $platform; authentication is blocked.',
+        '⚠️ [DeviceService] FlutterUdid lookup failed on $platform. '
+        'Authoritative device identity is unavailable; authentication is blocked: $error',
         error: error,
         stackTrace: stack,
       );
