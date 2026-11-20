@@ -32,71 +32,63 @@ void main() {
     ),
   ];
 
-  testWidgets(
-    'AdaptiveWorkspaceScaffold renders CustomFloatingBottomNavBar on mobile screens (< 600px)',
-    (tester) async {
-      tester.view.physicalSize = const Size(375 * 2, 812 * 2);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
+  Future<void> pumpAtSize(
+    WidgetTester tester, {
+    required Size logicalSize,
+  }) async {
+    tester.view.physicalSize = logicalSize * 2;
+    tester.view.devicePixelRatio = 2;
+    addTearDown(() => tester.view.resetPhysicalSize());
 
-      int selectedIndex = 0;
-
-      await tester.pumpWidget(
-        buildTestableWidget(
-          child: AdaptiveWorkspaceScaffold(
-            appBar: const WorkspaceAppBar(
-              title: 'مساحة العمل',
-              workspace: AppWorkspace.network,
-            ),
-            items: testItems,
-            currentIndex: selectedIndex,
-            onIndexChanged: (index) {
-              selectedIndex = index;
-            },
+    await tester.pumpWidget(
+      buildTestableWidget(
+        child: AdaptiveWorkspaceScaffold(
+          appBar: const WorkspaceAppBar(
+            title: 'مساحة العمل',
+            workspace: AppWorkspace.network,
           ),
+          items: testItems,
+          currentIndex: 0,
+          onIndexChanged: (_) {},
         ),
-      );
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
 
-      await tester.pumpAndSettle();
+  testWidgets('portrait phone uses the floating bottom navigation bar', (
+    tester,
+  ) async {
+    await pumpAtSize(tester, logicalSize: const Size(375, 812));
 
-      // Verify Mobile CustomFloatingBottomNavBar is rendered
-      expect(find.byType(CustomFloatingBottomNavBar), findsOneWidget);
-      expect(find.byType(NavigationRail), findsNothing);
-      expect(find.text('محتوى الرئيسية'), findsOneWidget);
-    },
-  );
+    expect(find.byType(CustomFloatingBottomNavBar), findsOneWidget);
+    expect(find.byType(NavigationRail), findsNothing);
+    expect(find.byType(NavigationDrawer), findsNothing);
+  });
 
-  testWidgets(
-    'AdaptiveWorkspaceScaffold renders NavigationRail on tablet screens (>= 600px)',
-    (tester) async {
-      tester.view.physicalSize = const Size(800 * 2, 1024 * 2);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
+  testWidgets('compact-height phone uses NavigationRail instead of bottom bar', (
+    tester,
+  ) async {
+    await pumpAtSize(tester, logicalSize: const Size(375, 450));
 
-      int selectedIndex = 0;
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(CustomFloatingBottomNavBar), findsNothing);
+    expect(find.byType(NavigationDrawer), findsNothing);
+  });
 
-      await tester.pumpWidget(
-        buildTestableWidget(
-          child: AdaptiveWorkspaceScaffold(
-            appBar: const WorkspaceAppBar(
-              title: 'مساحة العمل',
-              workspace: AppWorkspace.network,
-            ),
-            items: testItems,
-            currentIndex: selectedIndex,
-            onIndexChanged: (index) {
-              selectedIndex = index;
-            },
-          ),
-        ),
-      );
+  testWidgets('tablet uses NavigationRail', (tester) async {
+    await pumpAtSize(tester, logicalSize: const Size(800, 1024));
 
-      await tester.pumpAndSettle();
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(CustomFloatingBottomNavBar), findsNothing);
+    expect(find.byType(NavigationDrawer), findsNothing);
+  });
 
-      // Verify Tablet NavigationRail is rendered
-      expect(find.byType(NavigationRail), findsOneWidget);
-      expect(find.byType(CustomFloatingBottomNavBar), findsNothing);
-      expect(find.text('محتوى الرئيسية'), findsOneWidget);
-    },
-  );
+  testWidgets('desktop uses persistent NavigationDrawer', (tester) async {
+    await pumpAtSize(tester, logicalSize: const Size(1440, 900));
+
+    expect(find.byType(NavigationDrawer), findsOneWidget);
+    expect(find.byType(NavigationRail), findsNothing);
+    expect(find.byType(CustomFloatingBottomNavBar), findsNothing);
+  });
 }
