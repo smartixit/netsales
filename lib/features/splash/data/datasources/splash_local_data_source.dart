@@ -1,14 +1,10 @@
-/// عقد مصدر البيانات المحلي لشاشة الإقلاع
+/// نتيجة التحقق من جلسة محلية محفوظة مع الخادم.
+enum SessionValidationResult { valid, unauthorized, forbidden, unavailable }
+
+/// عقد مصدر البيانات المحلي لشاشة الإقلاع.
 abstract interface class SplashLocalDataSource {
-  /// تهيئة خدمات البنية التحتية الأساسية للتطبيق بشكل متوازٍ
   Future<void> initializeInfrastructureServices();
-
-  /// التحقق مما إذا كان التطبيق يُفتح للمرة الأولى
   bool get isFirstLaunch;
-
-  /// التحقق من توفر جلسة مصادقة نشطة محلياً
   bool get isAuthenticated;
-
-  /// التحقق السيادي المباشر من سريان الجلسة مع الخادم عبر مسار /auth/me
-  Future<bool> validateSessionWithServer();
+  Future<SessionValidationResult> validateSessionWithServer();
 }

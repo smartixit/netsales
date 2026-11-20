@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:get/get.dart';
@@ -31,6 +32,8 @@ class SessionService extends GetxService {
   final Rxn<UserModel> _user = Rxn<UserModel>();
   final Rxn<UserSessionModel> _session = Rxn<UserSessionModel>();
   final RxBool _isAuthenticated = false.obs;
+  final RxBool _isSessionVerified = false.obs;
+  Future<void>? _terminationFuture;
 
   /// بيانات المستخدم الحالي المسجل
   UserModel? get currentUser => _user.value;
@@ -45,11 +48,15 @@ class SessionService extends GetxService {
   /// حالة المصادقة النشطة
   bool get isAuthenticated => _isAuthenticated.value;
 
+  /// True only after /auth/me succeeds or a fresh login succeeds.
+  bool get isSessionVerified => _isSessionVerified.value;
+
   /// التحقق مما إذا كان المستخدم مجبراً على تغيير كلمة المرور قبل الوصول للوحة التحكم
   bool get mustChangePassword => _user.value?.mustChangePassword ?? false;
 
   /// تهيئة الخدمة واستعادة بيانات الجلسة من التخزين المحلي عند إقلاع التطبيق
   Future<SessionService> init() async {
+    _isSessionVerified.value = false;
     final storage = StorageService.instance;
     final sessionId = storage.sessionId;
     final cachedUser = storage.getModel<UserModel>(
@@ -77,16 +84,12 @@ class SessionService extends GetxService {
         );
       }
 
-      if (Get.isRegistered<PushNotificationService>()) {
-        await PushNotificationService.to.syncTokenWithBackend();
-      }
-
       if (Get.isRegistered<WorkspaceService>()) {
         await WorkspaceService.to.syncWithUserMemberships(cachedUser);
       }
 
       log(
-        '🔑 [SessionService] Session restored for user #${cachedUser.userId} (${cachedUser.userFullName}) with ${cachedUser.workspaceMemberships.length} memberships',
+        '🔑 [SessionService] Local session restored with ${cachedUser.workspaceMemberships.length} workspace memberships; awaiting server verification.',
       );
     } else {
       _isAuthenticated.value = false;
@@ -94,13 +97,11 @@ class SessionService extends GetxService {
     }
 
     // ربط انتهاء الصلاحية من عميل الشبكة تلقائياً
-    ApiService.onUnauthorized = () {
-      log(
-        '⚠️ [SessionService] Unauthorized event received (401). Terminating session...',
-      );
-      terminateSession();
+    ApiService.onUnauthorized = () async {
+      log('⚠️ [SessionService] Protected request rejected with 401.');
+      await terminateSession();
       if (Get.currentRoute != AppRoutes.login) {
-        Get.offAllNamed<void>(AppRoutes.login);
+        await Get.offAllNamed<void>(AppRoutes.login);
       }
     };
 
@@ -125,6 +126,7 @@ class SessionService extends GetxService {
     _user.value = user;
     _session.value = session;
     _isAuthenticated.value = true;
+    _isSessionVerified.value = true;
 
     if (Get.isRegistered<PermissionService>()) {
       PermissionService.to.updateAccess(
@@ -134,7 +136,8 @@ class SessionService extends GetxService {
     }
 
     if (Get.isRegistered<PushNotificationService>()) {
-      await PushNotificationService.to.syncTokenWithBackend();
+      unawaited(PushNotificationService.to.syncTokenWithBackend());
+      PushNotificationService.to.releasePendingNavigation();
     }
 
     if (Get.isRegistered<WorkspaceService>()) {
@@ -145,9 +148,22 @@ class SessionService extends GetxService {
       ServerTaskRunnerService.to.startForegroundHeartbeat();
     }
 
-    log(
-      '✅ [SessionService] Session started successfully for user #${user.userId}',
-    );
+    log('✅ [SessionService] Authenticated session started successfully.');
+  }
+
+  /// Confirm a restored local session only after the backend accepts /auth/me.
+  /// This method is idempotent and starts authenticated background work once.
+  void markSessionVerified() {
+    if (!_isAuthenticated.value || _isSessionVerified.value) return;
+
+    _isSessionVerified.value = true;
+    if (Get.isRegistered<PushNotificationService>()) {
+      unawaited(PushNotificationService.to.syncTokenWithBackend());
+      PushNotificationService.to.releasePendingNavigation();
+    }
+    if (Get.isRegistered<ServerTaskRunnerService>()) {
+      ServerTaskRunnerService.to.startForegroundHeartbeat();
+    }
   }
 
   /// تحديث ومزامنة سياق جلسة المستخدم بالكامل وبشكل ذري
@@ -217,8 +233,23 @@ class SessionService extends GetxService {
     }
   }
 
-  /// إنهاء الجلسة بالكامل وتصفير الحالات والتخزين
-  Future<void> terminateSession() async {
+  /// إنهاء الجلسة مرة واحدة حتى لو وصلت عدة استجابات 401 بالتزامن.
+  Future<void> terminateSession() {
+    final activeTermination = _terminationFuture;
+    if (activeTermination != null) return activeTermination;
+
+    final termination = _performSessionTermination();
+    _terminationFuture = termination;
+    return termination.whenComplete(() {
+      if (identical(_terminationFuture, termination)) {
+        _terminationFuture = null;
+      }
+    });
+  }
+
+  Future<void> _performSessionTermination() async {
+    _isSessionVerified.value = false;
+    _isAuthenticated.value = false;
     final storage = StorageService.instance;
     await storage.clearSession();
     await storage.remove(StorageKeys.userId);
@@ -228,15 +259,22 @@ class SessionService extends GetxService {
 
     final previousUserId = _user.value?.userId;
     if (previousUserId != null) {
+      final posContextKey = '${StorageKeys.activePosTenantPrefix}_$previousUserId';
+      final savedPosId = storage.getInt(posContextKey);
+      if (savedPosId != null) {
+        await storage.remove(
+          '${StorageKeys.activePosNetworkPrefix}_${previousUserId}_$savedPosId',
+        );
+      }
+      await storage.remove(posContextKey);
       await storage.remove(
-        '${StorageKeys.activePosTenantPrefix}_$previousUserId',
+        '${StorageKeys.activeNetworkTenantPrefix}_$previousUserId',
       );
       await storage.remove(StorageKeys.activeWorkspaceKey);
     }
 
     _user.value = null;
     _session.value = null;
-    _isAuthenticated.value = false;
 
     if (Get.isRegistered<PermissionService>()) {
       PermissionService.to.clear();

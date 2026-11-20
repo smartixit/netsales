@@ -62,6 +62,11 @@ class ServerTaskRunnerService extends GetxService {
 
   /// بدء النبض الدوري الخفيف أثناء استخدام التطبيق
   void startForegroundHeartbeat({Duration interval = minCatchupInterval}) {
+    if (!SessionService.to.isAuthenticated ||
+        !SessionService.to.isSessionVerified) {
+      log('⏭️ [ServerTaskRunnerService] تأجيل النبض حتى التحقق من الجلسة.');
+      return;
+    }
     if (isHeartbeatRunning) {
       log('⚙️ [ServerTaskRunnerService] النبض الدوري يعمل بالفعل');
       return;
@@ -111,7 +116,10 @@ class ServerTaskRunnerService extends GetxService {
       // 2. التحقق من وجود جلسة صالحة ومصادقة نشطة
       final session = SessionService.to;
       final sessionId = session.currentSessionId;
-      if (!session.isAuthenticated || sessionId == null || sessionId.isEmpty) {
+      if (!session.isAuthenticated ||
+          !session.isSessionVerified ||
+          sessionId == null ||
+          sessionId.isEmpty) {
         log(
           '⏭️ [ServerTaskRunnerService] لا توجد جلسة نشطة — تخطي مهام السيرفر',
         );

@@ -60,6 +60,7 @@ class ThemeService extends GetxService with WidgetsBindingObserver {
     final mode = switch (saved) {
       'dark' => ThemeMode.dark,
       'light' => ThemeMode.light,
+      'system' => ThemeMode.system,
       _ => ThemeMode.light,
     };
 

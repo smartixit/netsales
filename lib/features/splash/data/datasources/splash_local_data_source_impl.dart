@@ -14,6 +14,7 @@ import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/server_task_runner_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
+import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/splash/data/datasources/splash_local_data_source.dart';
 
 /// تطبيق مصدر البيانات المحلي لشاشة الإقلاع وتنسيق الخدمات الأساسية
@@ -22,16 +23,22 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
 
   @override
   Future<void> initializeInfrastructureServices() async {
-    // تشغيل التهيئة المتوازية للخدمات الأساسية المستقلة عن فحص الاتصال
+    // خدمات المنصة المحلية المستقلة يمكن تهيئتها بالتوازي.
     await Future.wait([
       PackageInfoService.instance.init(),
       DeviceService.instance.init(),
       AppCryptoService.instance.init(),
-      PushNotificationService.instance.init(),
     ]);
 
-    // يجب اكتمال الفحص الأولي قبل السماح لأي خدمة ببدء طلبات الشبكة.
+    // DeviceService جاهز؛ نستعيد الجلسة ونزامن عضويات مساحة العمل محليًا.
+    await SessionService.instance.init();
+    await WorkspaceService.instance.init();
+
+    // لا يُسمح بأي طلب شبكي قبل اكتمال فحص الاتصال الأولي.
     await InternetConnectionService.instance.initialize();
+
+    // تجهيز الإشعارات اختياري ولا يحجب التحقق من الجلسة أو قرار الإقلاع.
+    unawaited(PushNotificationService.instance.init());
 
     // الإعدادات المحلية حُمّلت في PublicSettingsService.onInit قبل أول إطار.
     // لا نحدّثها من الخادم إلا بعد اكتمال فحص الاتصال وثبوت توفر الإنترنت.
@@ -39,20 +46,14 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
       unawaited(PublicSettingsService.instance.fetchSettings());
     }
 
-    // ── Warm-up & Health Check: إيقاظ الخادم وتهيئة اتصال الشبكة مسبقاً ──
-    unawaited(_warmUpBackendServer());
-
-    // مزامنة مفاتيح السيرفر السيادية في الخلفية فور جاهزية محرك التشفير
-    unawaited(
-      AppCryptoService.instance.syncServerPublicKeys(
-        dio: ApiService.instance.dio,
-      ),
-    );
-
-    // ── تشغيل النبض واستدراك مهام السيرفر في الخلفية عند وجود جلسة سارية ──
-    if (SessionService.to.isAuthenticated) {
-      unawaited(ServerTaskRunnerService.to.runCatchupTasks());
-      ServerTaskRunnerService.to.startForegroundHeartbeat();
+    if (InternetConnectionService.instance.isConnected) {
+      // عمليات عامة لا تتطلب جلسة مستخدم.
+      unawaited(_warmUpBackendServer());
+      unawaited(
+        AppCryptoService.instance.syncServerPublicKeys(
+          dio: ApiService.instance.dio,
+        ),
+      );
     }
 
     // تفعيل مراقبة الاتصال الشبكي بعد اكتمال واجهات التطبيق بأمان
@@ -70,53 +71,55 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
   }
 
   @override
-  Future<bool> validateSessionWithServer() async {
-    // إذا كان الجهاز غير متصل بالإنترنت، لا نعتبر البيانات المخزنة محلياً إثباتاً لجلسة نشطة وموثقة على الخادم
-    if (!InternetConnectionService.instance.isConnected) {
-      log(
-        '⚠️ [Splash] Offline startup: server session cannot be verified authoritatively.',
-      );
-      return false;
+  Future<SessionValidationResult> validateSessionWithServer() async {
+    if (!await InternetConnectionService.instance.hasInternet()) {
+      return SessionValidationResult.unavailable;
+    }
+
+    final response = await ApiService.instance.get<Map<String, dynamic>>(
+      ApiConstants.me,
+      fromJson: (json) => json is Map
+          ? Map<String, dynamic>.from(json)
+          : <String, dynamic>{},
+    );
+
+    if (response.statusCode == 401) {
+      await SessionService.to.terminateSession();
+      return SessionValidationResult.unauthorized;
+    }
+    if (response.statusCode == 403) {
+      return SessionValidationResult.forbidden;
+    }
+    if (!response.success || response.statusCode != 200 || response.data == null) {
+      return SessionValidationResult.unavailable;
+    }
+
+    final profileData = response.data!;
+    final rawUser = profileData['user'];
+    final rawPermissions = profileData['permissions'];
+    if (rawUser is! Map || rawPermissions is! List) {
+      return SessionValidationResult.unavailable;
     }
 
     try {
-      final response = await ApiService.instance.get<Map<String, dynamic>>(
-        ApiConstants.me,
-        fromJson: (json) =>
-            json is Map ? Map<String, dynamic>.from(json) : <String, dynamic>{},
+      final updatedUser = UserModel.fromJson({
+        ...Map<String, dynamic>.from(rawUser),
+        'workspace_roles': profileData['workspace_roles'] ?? const <dynamic>[],
+        'is_super_admin': profileData['is_super_admin'],
+        'role_key': profileData['role_key'],
+      });
+      final permissions = rawPermissions.map((value) => value.toString()).toList();
+
+      await SessionService.to.syncSessionProfile(
+        user: updatedUser,
+        permissions: permissions,
+        roleKey: profileData['role_key']?.toString(),
       );
-
-      if (response.success && response.data != null) {
-        final profileData = response.data!;
-        final rawUser = profileData['user'];
-        if (rawUser is Map) {
-          final updatedUser = UserModel.fromJson({
-            ...Map<String, dynamic>.from(rawUser),
-            'workspace_roles':
-                profileData['workspace_roles'] ?? const <dynamic>[],
-            'is_super_admin': profileData['is_super_admin'],
-            'role_key': profileData['role_key'],
-          });
-
-          final rawPerms = profileData['permissions'];
-          final permissions = rawPerms is List
-              ? rawPerms.map((e) => e.toString()).toList()
-              : const <String>[];
-
-          await SessionService.to.syncSessionProfile(
-            user: updatedUser,
-            permissions: permissions,
-            roleKey: profileData['role_key']?.toString(),
-          );
-        }
-        return true;
-      }
-
-      await SessionService.to.terminateSession();
-      return false;
-    } catch (_) {
-      // عند الرفض بـ 401، يقوم معترض ApiService.onUnauthorized بإنهاء الجلسة تلقائياً
-      return false;
+      SessionService.to.markSessionVerified();
+      return SessionValidationResult.valid;
+    } catch (error, stack) {
+      log('❌ [Splash] Invalid /auth/me payload.', stackTrace: stack);
+      return SessionValidationResult.unavailable;
     }
   }
 

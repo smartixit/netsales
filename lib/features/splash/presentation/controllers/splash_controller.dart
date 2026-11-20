@@ -4,10 +4,9 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
-import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/features/splash/domain/entities/boot_verification_unavailable_exception.dart';
 import 'package:netsales/features/splash/domain/usecases/determine_boot_destination_use_case.dart';
 import 'package:netsales/features/splash/domain/usecases/initialize_app_use_case.dart';
-import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم واجهة الإقلاع المسؤول عن تنسيق توقيت الظهور واتخاذ قرار التوجيه
 ///
@@ -27,6 +26,11 @@ class SplashController extends GetxController {
   static const Duration minSplashDuration = AppMotion.splashMinimum;
 
   bool _isDisposed = false;
+  bool _infrastructureReady = false;
+
+  final RxBool isRetryableError = false.obs;
+  final RxBool isRetrying = false.obs;
+  final RxString retryMessage = ''.obs;
 
   @override
   void onInit() {
@@ -35,39 +39,52 @@ class SplashController extends GetxController {
   }
 
   Future<void> _bootstrapApp() async {
+    final stopwatch = Stopwatch()..start();
     try {
-      final stopwatch = Stopwatch()..start();
-
-      // 1. تشغيل تهيئة البنية التحتية عبر حالة الاستخدام المعزولة
-      await initializeAppUseCase();
-
-      // 2. ضمان بقاء شاشة الإقلاع للمدة البصرية المطلوبة دون وميض حاد
+      await _resolveBootDestination(initializeInfrastructure: true);
       final elapsed = stopwatch.elapsed;
       if (elapsed < minSplashDuration) {
-        await Future<dynamic>.delayed(minSplashDuration - elapsed);
+        await Future<void>.delayed(minSplashDuration - elapsed);
       }
-      if (_isDisposed) return;
-
-      // 3. اتخاذ قرار مسار التوجيه التالي
-      final destination = await determineBootDestinationUseCase();
-      if (_isDisposed) return;
-
-      log(
-        '🚀 [SplashController] Bootstrapping complete. Navigating to: $destination',
-      );
-      await Get.offNamed<void>(destination);
-    } catch (e, stack) {
-      final cleanMessage = AppException.sanitizeMessage(e);
-      CustomSnackbar.show(
-        title: 'خطأ',
-        message: cleanMessage,
-        type: SnackType.error,
-      );
-      log('❌ [SplashController] Bootstrapping error: $e', stackTrace: stack);
-      if (!_isDisposed) {
-        await Get.offNamed<void>(AppRoutes.welcome);
-      }
+    } catch (error, stack) {
+      _showRetryState(error, stack);
     }
+  }
+
+  Future<void> retryBoot() async {
+    if (isRetrying.value || _isDisposed) return;
+    isRetrying.value = true;
+    isRetryableError.value = false;
+    try {
+      await _resolveBootDestination(
+        initializeInfrastructure: !_infrastructureReady,
+      );
+    } catch (error, stack) {
+      _showRetryState(error, stack);
+    } finally {
+      isRetrying.value = false;
+    }
+  }
+
+  Future<void> _resolveBootDestination({required bool initializeInfrastructure}) async {
+    if (initializeInfrastructure) {
+      await initializeAppUseCase();
+      _infrastructureReady = true;
+    }
+    if (_isDisposed) return;
+    final destination = await determineBootDestinationUseCase();
+    if (_isDisposed) return;
+    isRetryableError.value = false;
+    log('🚀 [SplashController] Boot destination resolved: $destination');
+    await Get.offNamed<void>(destination);
+  }
+
+  void _showRetryState(Object error, StackTrace stack) {
+    log('❌ [SplashController] Boot verification failed.', stackTrace: stack);
+    retryMessage.value = error is BootVerificationUnavailableException
+        ? error.toString()
+        : 'تعذر إكمال تهيئة التطبيق. تحقق من الاتصال ثم أعد المحاولة.';
+    isRetryableError.value = true;
   }
 
   @override

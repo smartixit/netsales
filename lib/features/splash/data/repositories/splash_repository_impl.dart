@@ -1,4 +1,5 @@
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/features/splash/domain/entities/boot_verification_unavailable_exception.dart';
 import 'package:netsales/features/splash/data/datasources/splash_local_data_source.dart';
 import 'package:netsales/features/splash/domain/repositories/splash_repository.dart';
 
@@ -15,21 +16,16 @@ class SplashRepositoryImpl implements SplashRepository {
 
   @override
   Future<String> getBootDestination() async {
-    // 1. إذا كان أول تشغيل للتطبيق -> توجيه لجولة التعريف (Onboarding)
-    if (_dataSource.isFirstLaunch) {
-      return AppRoutes.onboarding;
-    }
-
-    // 2. إذا كانت هناك جلسة مصادقة محلية، نتحقق من صحتها وسريانها مع الخادم مباشرة
     if (_dataSource.isAuthenticated) {
-      final isValidOnServer = await _dataSource.validateSessionWithServer();
-      if (isValidOnServer) {
-        return AppRoutes.dashboard;
-      }
-      return AppRoutes.welcome;
+      final result = await _dataSource.validateSessionWithServer();
+      return switch (result) {
+        SessionValidationResult.valid => AppRoutes.dashboard,
+        SessionValidationResult.unauthorized => AppRoutes.login,
+        SessionValidationResult.forbidden => AppRoutes.unauthorized,
+        SessionValidationResult.unavailable => throw const BootVerificationUnavailableException(),
+      };
     }
 
-    // 3. مستخدم غير مسجل أكمل جولة التعريف سابقاً -> توجيه لواجهة الترحيب (Welcome)
-    return AppRoutes.welcome;
+    return _dataSource.isFirstLaunch ? AppRoutes.onboarding : AppRoutes.welcome;
   }
 }

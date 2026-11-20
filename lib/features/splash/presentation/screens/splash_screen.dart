@@ -6,6 +6,7 @@ import 'package:netsales/core/themes/app_gradients.dart';
 import 'package:netsales/features/splash/presentation/controllers/splash_controller.dart';
 import 'package:netsales/features/splash/presentation/widgets/splash_body_content.dart';
 import 'package:netsales/features/splash/presentation/widgets/splash_circle_vector.dart';
+import 'package:netsales/widgets/feedback/states/custom_offline_state.dart';
 
 /// شاشة الإقلاع الرئيسية للنظام (Splash Screen)
 /// واجهة عرض نقية (Lean View) خالية من أي منطق أعمال وتلتزم بنظام التصميم الموحد.
@@ -35,7 +36,18 @@ class SplashScreen extends GetView<SplashController> {
             gradient: AppGradients.primaryGradient(context),
           ),
           child: Stack(
-            children: const [SplashCircleVector(), SplashBodyContent()],
+            children: [
+              const SplashCircleVector(),
+              Obx(
+                () => controller.isRetryableError.value
+                    ? CustomOfflineState(
+                        title: 'تعذر التحقق من الجلسة',
+                        subtitle: controller.retryMessage.value,
+                        onRetry: controller.retryBoot,
+                      )
+                    : const SplashBodyContent(),
+              ),
+            ],
           ),
         ),
       ),
