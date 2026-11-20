@@ -92,9 +92,20 @@ class WorkspaceService extends GetxService {
       if (preferred == AppWorkspace.network.name) return AppWorkspace.network;
       if (preferred == AppWorkspace.pos.name) return AppWorkspace.pos;
 
-      // The currently active workspace is a valid UX preference for a user
-      // authorized for both scopes; it is not a tenant/entity selection.
-      return currentWorkspace.value;
+      // When no explicit workspace preference exists, use only the exact
+      // primary role supplied by the authenticated backend response.
+      // Never infer a default from the in-memory initial value.
+      final primaryRoleKey = user.role?.roleKey ?? user.generalRoleKey;
+      if (_networkRoleKeys.contains(primaryRoleKey)) {
+        return AppWorkspace.network;
+      }
+      if (_posRoleKeys.contains(primaryRoleKey)) {
+        return AppWorkspace.pos;
+      }
+
+      throw StateError(
+        'A dual-scope account requires a saved workspace preference or an exact primary role.',
+      );
     }
 
     return hasNetworkRole ? AppWorkspace.network : AppWorkspace.pos;

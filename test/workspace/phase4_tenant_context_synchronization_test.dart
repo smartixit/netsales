@@ -124,6 +124,7 @@ void main() {
         ],
       );
 
+      await workspaceService.setActiveWorkspace(AppWorkspace.network);
       await workspaceService.syncWithUserMemberships(user);
 
       expect(storage.getInt('${StorageKeys.activePosTenantPrefix}_$userId'), isNull);
