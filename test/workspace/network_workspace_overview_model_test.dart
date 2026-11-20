@@ -85,6 +85,10 @@ void main() {
       expect(model.networkId, 12);
       expect(model.networkName, 'شبكة الاختبار');
       expect(model.periodKey, '30d');
+      expect(model.timezone, 'Asia/Aden');
+      expect(model.periodDays, 30);
+      expect(model.periodFrom, '2026-10-11T00:00:00+03:00');
+      expect(model.periodTo, '2026-11-09T10:00:00+03:00');
       expect(model.pointsOfSale?.active, 6);
       expect(model.sales?.totalAmount, '15000.00');
       expect(model.sales?.invoiceCount, 9);
@@ -99,39 +103,43 @@ void main() {
     });
 
     test(
-      'maps only typed operational groups and excludes deferred financial fields',
+      'maps typed operational groups and excludes deferred financial fields',
       () {
-      final model = NetworkWorkspaceOverviewModel.fromJson(
-        _validOverview(metrics: {
-          'sales': {
-            'invoice_count': 1,
-            'total_amount': '100.00',
-            'paid_amount': '75.00',
-            'outstanding_amount': '25.00',
-            'growth_rate': 0,
-            'trend': [],
-          },
-          'wallet': {'balance': '500.00'},
-          'unrecognized_metric_group': {'value': 'ignored'},
-        }),
-      );
+        final model = NetworkWorkspaceOverviewModel.fromJson(
+          _validOverview(
+            metrics: {
+              'sales': {
+                'invoice_count': 1,
+                'total_amount': '100.00',
+                'paid_amount': '75.00',
+                'outstanding_amount': '25.00',
+                'growth_rate': 0,
+                'trend': [],
+              },
+              'wallet': {'balance': '500.00'},
+              'unrecognized_metric_group': {'value': 'ignored'},
+            },
+          ),
+        );
 
-      expect(model.sales?.totalAmount, '100.00');
-      expect(model.sales?.invoiceCount, 1);
-      expect(model.pointsOfSale, isNull);
-      expect(model.expenses, isNull);
-    });
-
+        expect(model.sales?.totalAmount, '100.00');
+        expect(model.sales?.invoiceCount, 1);
+        expect(model.pointsOfSale, isNull);
+        expect(model.expenses, isNull);
+      },
+    );
 
     test(
       'preserves the exact server amount string without double conversion',
       () {
-      final model = NetworkWorkspaceOverviewModel.fromJson(_validOverview());
+        final model = NetworkWorkspaceOverviewModel.fromJson(
+          _validOverview(),
+        );
 
-      expect(
-        model.recentPendingRequests.single.requestTotalAmount,
-        '900.00',
-      );
+        expect(
+          model.recentPendingRequests.single.requestTotalAmount,
+          '900.00',
+        );
       },
     );
 
