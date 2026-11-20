@@ -248,8 +248,7 @@ class FakeCommercialRepository implements CommercialRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) async =>
-      PaginatedList(items: [testLink], nextCursor: null);
+  }) async => PaginatedList(items: [testLink], nextCursor: null);
 }
 
 class FakePackageCatalogRepository implements PackageCatalogRepository {
