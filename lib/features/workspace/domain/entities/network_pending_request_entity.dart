@@ -18,7 +18,7 @@ class NetworkPendingRequestEntity {
   final int posId;
   final String posName;
   final String requestDate;
-  final double requestTotalAmount;
+  final String requestTotalAmount;
   final String statusRaw;
   final String statusLabel;
 

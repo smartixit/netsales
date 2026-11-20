@@ -99,14 +99,10 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
               posName is! String ||
               requestDate is! String ||
               requestTotalAmount is! String ||
+              !RegExp(r'^\\d+(?:\\.\\d+)?
               status is! String ||
               statusLabel is! String) {
             throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
-          }
-
-          final amountNum = double.tryParse(requestTotalAmount);
-          if (amountNum == null || !amountNum.isFinite) {
-            throw const FormatException('قيمة إجمالي طلب التوريد غير صالحة.');
           }
 
           return NetworkPendingRequestEntity(
@@ -115,7 +111,36 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
             posId: posId.toInt(),
             posName: posName,
             requestDate: requestDate,
-            requestTotalAmount: amountNum,
+            requestTotalAmount: requestTotalAmount,
+            statusRaw: status,
+            statusLabel: statusLabel,
+          );
+        })
+        .toList(growable: false);
+
+    return NetworkWorkspaceOverviewModel(
+      networkId: networkId.toInt(),
+      networkName: networkName,
+      generatedAt: generatedAt,
+      periodKey: periodKey,
+      metrics: normalizedMetrics,
+      recentPendingRequests: pending,
+    );
+  }
+}
+).hasMatch(requestTotalAmount) ||
+              status is! String ||
+              statusLabel is! String) {
+            throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
+          }
+
+          return NetworkPendingRequestEntity(
+            requestId: requestId.toInt(),
+            requestUuid: requestUuid,
+            posId: posId.toInt(),
+            posName: posName,
+            requestDate: requestDate,
+            requestTotalAmount: requestTotalAmount,
             statusRaw: status,
             statusLabel: statusLabel,
           );

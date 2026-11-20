@@ -15,7 +15,7 @@ void main() {
         posId: 7,
         posName: 'نقطة صنعاء',
         requestDate: '2026-11-16',
-        requestTotalAmount: 1250,
+        requestTotalAmount: '1250.00',
         statusRaw: 'PENDING',
         statusLabel: 'بانتظار الاعتماد',
       );
