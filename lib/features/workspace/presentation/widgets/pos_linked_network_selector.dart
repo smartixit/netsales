@@ -162,7 +162,7 @@ class _NetworkChoices extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    link.networkId == selectedId
+                    link.networkPosId == selectedNetworkPosId
                         ? Icons.radio_button_checked
                         : Icons.radio_button_unchecked,
                     size: 16.r,

@@ -19,10 +19,10 @@ void main() {
   group('WorkspaceService resolution and routing', () {
     final workspaceService = WorkspaceService.instance;
 
-    test('null session user retains the neutral initial workspace state', () {
+    test('null session user does not resolve to a guessed workspace', () {
       expect(
-        workspaceService.resolveWorkspaceForUser(null),
-        AppWorkspace.network,
+        () => workspaceService.resolveWorkspaceForUser(null),
+        throwsStateError,
       );
     });
 
