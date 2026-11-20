@@ -13,50 +13,32 @@ class NetworkWorkspaceDashboardMapper {
   ) {
     if (overview == null) return _empty();
 
-    final metrics = overview.metrics;
-    final sales = overview.metric('sales');
-    final hasSales = sales != null;
-    final rawGrowth = sales?['growth_rate'];
-    if (hasSales && rawGrowth is! num) {
-      throw const FormatException('معدل نمو المبيعات غير صالح.');
-    }
-    final growthRate = rawGrowth is num ? rawGrowth.toDouble() : 0.0;
+    final sales = overview.sales;
+    final pointsOfSale = overview.pointsOfSale;
+    final requests = overview.requests;
+    final packages = overview.packages;
+    final expenses = overview.expenses;
 
-    final invoiceCountValue = sales?['invoice_count'];
-    if (hasSales && invoiceCountValue is! num) {
-      throw const FormatException('عدد فواتير المبيعات غير صالح.');
-    }
-    final salesSummary = (
-      totalSales: hasSales
-          ? AmountFormatter.format(overview.amount('sales', 'total_amount'))
-          : '',
-      invoiceCount: invoiceCountValue is num ? invoiceCountValue.toInt() : 0,
-      growthRate: growthRate,
-    );
-
-    final trend = sales?['trend'];
-    final points = <ChartDataPoint>[];
-    if (trend is List) {
-      for (final item in trend) {
-        if (item is! Map) continue;
-        final rawDate = item['date'];
-        final rawTotal = item['total'];
-        if (rawDate is! String || rawDate.isEmpty || rawTotal is! num) {
-          continue;
-        }
-        points.add(
-          ChartDataPoint(
-            x: _formatChartDate(rawDate),
-            y: rawTotal.toDouble(),
-          ),
-        );
-      }
-    }
+    final points = sales?.trend
+            .map(
+              (point) => ChartDataPoint(
+                x: _formatChartDate(point.date),
+                y: point.totalAmount,
+              ),
+            )
+            .toList(growable: false) ??
+        const <ChartDataPoint>[];
 
     return NetworkWorkspaceDashboardViewModel(
-      showSalesSection: hasSales,
-      pendingRequestsCount: _pendingRequestsCount(overview),
-      salesVelocitySummary: salesSummary,
+      showSalesSection: sales != null,
+      pendingRequestsCount: requests?.pending,
+      salesVelocitySummary: (
+        totalSales: sales == null
+            ? ''
+            : AmountFormatter.format(sales.totalAmount),
+        invoiceCount: sales?.invoiceCount ?? 0,
+        growthRate: sales?.growthRate ?? 0,
+      ),
       salesChartDefinition: ChartDefinition(
         family: ChartFamily.cartesian,
         type: ChartType.splineArea,
@@ -80,7 +62,13 @@ class NetworkWorkspaceDashboardMapper {
             ? 'لا توجد بيانات مبيعات لهذه الفترة'
             : null,
       ),
-      kpiMetrics: _mapMetrics(overview, metrics),
+      kpiMetrics: _mapMetrics(
+        pointsOfSale: pointsOfSale,
+        requests: requests,
+        packages: packages,
+        sales: sales,
+        expenses: expenses,
+      ),
     );
   }
 
@@ -109,100 +97,85 @@ class NetworkWorkspaceDashboardMapper {
         kpiMetrics: const [],
       );
 
-  static int? _pendingRequestsCount(NetworkWorkspaceOverviewEntity overview) {
-    final requests = overview.metric('requests');
-    if (requests == null) return null;
-    final value = requests['pending'];
-    if (value is! num) {
-      throw const FormatException('عدد طلبات التوريد المعلقة غير صالح.');
-    }
-    return value.toInt();
-  }
-
-  static List<DashboardMetricData> _mapMetrics(
-    NetworkWorkspaceOverviewEntity overview,
-    Map<String, dynamic> metrics,
-  ) {
+  static List<DashboardMetricData> _mapMetrics({
+    required pointsOfSale,
+    required requests,
+    required packages,
+    required sales,
+    required expenses,
+  }) {
     final items = <DashboardMetricData>[];
 
-    if (metrics['points_of_sale'] is Map<String, dynamic>) {
+    if (pointsOfSale != null) {
       items.add(
         DashboardMetricData(
           id: 'pos',
           title: 'نقاط البيع',
-          value: overview.count('points_of_sale', 'total'),
+          value: pointsOfSale.total.toString(),
           unit: 'نقطة',
           icon: Icons.storefront_rounded,
           tone: DashboardMetricTone.primary,
           variant: DashboardMetricVariant.standard,
           description:
-              'نشطة ${overview.count('points_of_sale', 'active')} · غير نشطة ${overview.count('points_of_sale', 'inactive')}',
+              'نشطة ${pointsOfSale.active} · غير نشطة ${pointsOfSale.inactive}',
         ),
       );
     }
 
-    if (metrics['requests'] is Map<String, dynamic>) {
+    if (requests != null) {
       items.add(
         DashboardMetricData(
           id: 'requests',
           title: 'طلبات التوريد',
-          value: overview.count('requests', 'total'),
+          value: requests.total.toString(),
           unit: 'طلب',
           icon: Icons.inbox_rounded,
           tone: DashboardMetricTone.warning,
           variant: DashboardMetricVariant.standard,
-          description:
-              'بانتظار الاعتماد ${overview.count('requests', 'pending')}',
+          description: 'بانتظار الاعتماد ${requests.pending}',
         ),
       );
     }
 
-    if (metrics['packages'] is Map<String, dynamic>) {
+    if (packages != null) {
       items.add(
         DashboardMetricData(
           id: 'packages',
           title: 'باقات الكتالوج',
-          value: overview.count('packages', 'total'),
+          value: packages.total.toString(),
           unit: 'باقة',
           icon: Icons.widgets_rounded,
           tone: DashboardMetricTone.info,
           variant: DashboardMetricVariant.standard,
-          description:
-              'باقات نشطة: ${overview.count('packages', 'active')}',
+          description: 'باقات نشطة: ${packages.active}',
         ),
       );
     }
 
-    if (metrics['sales'] is Map<String, dynamic>) {
+    if (sales != null) {
       items.add(
         DashboardMetricData(
           id: 'sales',
           title: 'فواتير المبيعات',
-          value: AmountFormatter.format(overview.amount('sales', 'total_amount')),
-          
+          value: AmountFormatter.format(sales.totalAmount),
           icon: Icons.receipt_long_rounded,
           tone: DashboardMetricTone.success,
           variant: DashboardMetricVariant.standard,
-          description:
-              '${overview.count('sales', 'invoice_count')} فاتورة',
+          description: '${sales.invoiceCount} فاتورة',
         ),
       );
     }
 
-    if (metrics['expenses'] is Map<String, dynamic>) {
+    if (expenses != null) {
       items.add(
         DashboardMetricData(
           id: 'expenses',
           title: 'مصروفات الشبكة',
-          value: AmountFormatter.format(
-            overview.amount('expenses', 'total_amount'),
-          ),
-          
+          value: AmountFormatter.format(expenses.totalAmount),
           icon: Icons.trending_down_rounded,
           tone: DashboardMetricTone.danger,
           variant: DashboardMetricVariant.standard,
-          description:
-              '${overview.count('expenses', 'count')} سند موثق',
+          description: '${expenses.count} سند موثق',
         ),
       );
     }

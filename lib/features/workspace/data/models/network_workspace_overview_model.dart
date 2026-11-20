@@ -1,4 +1,10 @@
+import 'package:netsales/features/workspace/domain/entities/network_expenses_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_packages_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_pending_request_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_points_of_sale_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_requests_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_sales_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_sales_trend_point_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 
 class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
@@ -7,7 +13,11 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
     required super.networkName,
     required super.generatedAt,
     required super.periodKey,
-    required super.metrics,
+    required super.sales,
+    required super.pointsOfSale,
+    required super.requests,
+    required super.packages,
+    required super.expenses,
     required super.recentPendingRequests,
   });
 
@@ -16,12 +26,11 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
       throw const FormatException('استجابة ملخص مساحة الشبكة ليست كائناً.');
     }
 
-    final json = Map<String, dynamic>.from(raw);
-    final network = json['network'];
-    final period = json['period'];
-    final metrics = json['metrics'];
-    final recent = json['recent_pending_requests'];
-    final timezone = json['timezone'];
+    final network = raw['network'];
+    final period = raw['period'];
+    final metrics = raw['metrics'];
+    final recent = raw['recent_pending_requests'];
+    final timezone = raw['timezone'];
 
     if (network is! Map<String, dynamic> ||
         period is! Map<String, dynamic> ||
@@ -34,7 +43,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
 
     final networkId = network['network_id'];
     final networkName = network['network_name'];
-    final generatedAt = json['generated_at'];
+    final generatedAt = raw['generated_at'];
     final periodKey = period['key'];
     final periodDays = period['days'];
     final periodFrom = period['from'];
@@ -56,104 +65,182 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
       throw const FormatException('حقول تعريف ملخص الشبكة غير صالحة.');
     }
 
-    const supportedMetricGroups = {
-      'sales',
-      'points_of_sale',
-      'requests',
-      'packages',
-      'expenses',
-    };
-    final normalizedMetrics = <String, dynamic>{};
-    for (final entry in metrics.entries) {
-      if (!supportedMetricGroups.contains(entry.key)) continue;
-      if (entry.value == null) {
-        normalizedMetrics[entry.key] = null;
-      } else if (entry.value is Map<String, dynamic>) {
-        normalizedMetrics[entry.key] = Map<String, dynamic>.from(
-          entry.value as Map,
-        );
-      } else {
-        throw FormatException('مجموعة المؤشرات غير صالحة: ${entry.key}.');
-      }
+    final pendingRequests = recent
+        .map(_parsePendingRequest)
+        .toList(growable: false);
+
+    return NetworkWorkspaceOverviewModel(
+      networkId: networkId.toInt(),
+      networkName: networkName,
+      generatedAt: generatedAt,
+      periodKey: periodKey,
+      sales: _parseSales(metrics['sales']),
+      pointsOfSale: _parsePointsOfSale(metrics['points_of_sale']),
+      requests: _parseRequests(metrics['requests']),
+      packages: _parsePackages(metrics['packages']),
+      expenses: _parseExpenses(metrics['expenses']),
+      recentPendingRequests: List.unmodifiable(pendingRequests),
+    );
+  }
+
+  static NetworkPendingRequestEntity _parsePendingRequest(dynamic raw) {
+    if (raw is! Map<String, dynamic>) {
+      throw const FormatException('عنصر طلب التوريد غير صالح.');
     }
 
-    final pending = recent
-        .map((dynamic item) {
-          if (item is! Map<String, dynamic>) {
-            throw const FormatException('عنصر طلب التوريد غير صالح.');
+    final requestId = raw['request_id'];
+    final requestUuid = raw['request_uuid'];
+    final posId = raw['pos_id'];
+    final posName = raw['pos_name'];
+    final requestDate = raw['request_date'];
+    final requestTotalAmount = raw['request_total_amount'];
+    final status = raw['status'];
+    final statusLabel = raw['status_label'];
+
+    if (requestId is! num ||
+        posId is! num ||
+        requestUuid is! String ||
+        requestUuid.trim().isEmpty ||
+        posName is! String ||
+        posName.trim().isEmpty ||
+        requestDate is! String ||
+        requestDate.isEmpty ||
+        requestTotalAmount is! String ||
+        !_isAmount(requestTotalAmount) ||
+        status is! String ||
+        status.isEmpty ||
+        statusLabel is! String ||
+        statusLabel.trim().isEmpty) {
+      throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
+    }
+
+    return NetworkPendingRequestEntity(
+      requestId: _requiredInt(requestId, 'request_id'),
+      requestUuid: requestUuid,
+      posId: _requiredInt(posId, 'pos_id'),
+      posName: posName,
+      requestDate: requestDate,
+      requestTotalAmount: requestTotalAmount,
+      statusRaw: status,
+      statusLabel: statusLabel,
+    );
+  }
+
+  static NetworkSalesMetricsEntity? _parseSales(dynamic raw) {
+    if (raw == null) return null;
+    final json = _requiredMap(raw, 'sales');
+    final trendRaw = json['trend'];
+    if (trendRaw != null && trendRaw is! List) {
+      throw const FormatException('اتجاه المبيعات غير صالح.');
+    }
+
+    final trend = (trendRaw as List? ?? const [])
+        .map((dynamic point) {
+          if (point is! Map<String, dynamic>) {
+            throw const FormatException('نقطة اتجاه المبيعات غير صالحة.');
           }
-
-          final request = Map<String, dynamic>.from(item);
-          final requestId = request['request_id'];
-          final requestUuid = request['request_uuid'];
-          final posId = request['pos_id'];
-          final posName = request['pos_name'];
-          final requestDate = request['request_date'];
-          final requestTotalAmount = request['request_total_amount'];
-          final status = request['status'];
-          final statusLabel = request['status_label'];
-
-          if (requestId is! num ||
-              requestUuid is! String ||
-              posId is! num ||
-              posName is! String ||
-              requestDate is! String ||
-              requestTotalAmount is! String ||
-              !RegExp(r'^\d+(?:\.\d+)?$').hasMatch(requestTotalAmount) ||
-              status is! String ||
-              statusLabel is! String) {
-            throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
+          final date = point['date'];
+          final total = point['total'];
+          final count = point['count'];
+          if (date is! String ||
+              date.isEmpty ||
+              total is! num ||
+              !total.isFinite ||
+              total < 0 ||
+              (count != null && count is! num)) {
+            throw const FormatException('حقول نقطة اتجاه المبيعات غير صالحة.');
           }
-
-          return NetworkPendingRequestEntity(
-            requestId: requestId.toInt(),
-            requestUuid: requestUuid,
-            posId: posId.toInt(),
-            posName: posName,
-            requestDate: requestDate,
-            requestTotalAmount: requestTotalAmount,
-            statusRaw: status,
-            statusLabel: statusLabel,
+          return NetworkSalesTrendPointEntity(
+            date: date,
+            totalAmount: total.toDouble(),
+            invoiceCount: count == null
+                ? null
+                : _requiredInt(count, 'sales.trend.count'),
           );
         })
         .toList(growable: false);
 
-    return NetworkWorkspaceOverviewModel(
-      networkId: networkId.toInt(),
-      networkName: networkName,
-      generatedAt: generatedAt,
-      periodKey: periodKey,
-      metrics: normalizedMetrics,
-      recentPendingRequests: pending,
+    final totalAmount = json['total_amount'];
+    final invoiceCount = json['invoice_count'];
+    final growthRate = json['growth_rate'];
+    if (totalAmount is! String ||
+        !_isAmount(totalAmount) ||
+        invoiceCount is! num ||
+        growthRate is! num ||
+        !growthRate.isFinite) {
+      throw const FormatException('مؤشرات المبيعات غير مكتملة أو غير صالحة.');
+    }
+
+    return NetworkSalesMetricsEntity(
+      totalAmount: totalAmount,
+      invoiceCount: _requiredInt(invoiceCount, 'sales.invoice_count'),
+      growthRate: growthRate.toDouble(),
+      trend: List.unmodifiable(trend),
     );
   }
-}
-).hasMatch(requestTotalAmount) ||
-              status is! String ||
-              statusLabel is! String) {
-            throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
-          }
 
-          return NetworkPendingRequestEntity(
-            requestId: requestId.toInt(),
-            requestUuid: requestUuid,
-            posId: posId.toInt(),
-            posName: posName,
-            requestDate: requestDate,
-            requestTotalAmount: requestTotalAmount,
-            statusRaw: status,
-            statusLabel: statusLabel,
-          );
-        })
-        .toList(growable: false);
-
-    return NetworkWorkspaceOverviewModel(
-      networkId: networkId.toInt(),
-      networkName: networkName,
-      generatedAt: generatedAt,
-      periodKey: periodKey,
-      metrics: normalizedMetrics,
-      recentPendingRequests: pending,
+  static NetworkPointsOfSaleMetricsEntity? _parsePointsOfSale(dynamic raw) {
+    if (raw == null) return null;
+    final json = _requiredMap(raw, 'points_of_sale');
+    return NetworkPointsOfSaleMetricsEntity(
+      total: _requiredInt(json['total'], 'points_of_sale.total'),
+      active: _requiredInt(json['active'], 'points_of_sale.active'),
+      inactive: _requiredInt(json['inactive'], 'points_of_sale.inactive'),
     );
   }
+
+  static NetworkRequestsMetricsEntity? _parseRequests(dynamic raw) {
+    if (raw == null) return null;
+    final json = _requiredMap(raw, 'requests');
+    return NetworkRequestsMetricsEntity(
+      total: _requiredInt(json['total'], 'requests.total'),
+      pending: _requiredInt(json['pending'], 'requests.pending'),
+      approved: _requiredInt(json['approved'], 'requests.approved'),
+      rejected: _requiredInt(json['rejected'], 'requests.rejected'),
+      cancelled: _requiredInt(json['cancelled'], 'requests.cancelled'),
+    );
+  }
+
+  static NetworkPackagesMetricsEntity? _parsePackages(dynamic raw) {
+    if (raw == null) return null;
+    final json = _requiredMap(raw, 'packages');
+    return NetworkPackagesMetricsEntity(
+      total: _requiredInt(json['total'], 'packages.total'),
+      active: _requiredInt(json['active'], 'packages.active'),
+      inactive: _requiredInt(json['inactive'], 'packages.inactive'),
+    );
+  }
+
+  static NetworkExpensesMetricsEntity? _parseExpenses(dynamic raw) {
+    if (raw == null) return null;
+    final json = _requiredMap(raw, 'expenses');
+    final totalAmount = json['total_amount'];
+    if (totalAmount is! String || !_isAmount(totalAmount)) {
+      throw const FormatException('إجمالي المصروفات غير صالح.');
+    }
+    return NetworkExpensesMetricsEntity(
+      count: _requiredInt(json['count'], 'expenses.count'),
+      totalAmount: totalAmount,
+    );
+  }
+
+  static Map<String, dynamic> _requiredMap(dynamic raw, String group) {
+    if (raw is! Map<String, dynamic>) {
+      throw FormatException('مجموعة المؤشرات $group غير صالحة.');
+    }
+    return raw;
+  }
+
+  static int _requiredInt(dynamic value, String field) {
+    if (value is! num ||
+        !value.isFinite ||
+        value < 0 ||
+        value != value.toInt()) {
+      throw FormatException('قيمة المؤشر $field غير صالحة.');
+    }
+    return value.toInt();
+  }
+
+  static bool _isAmount(String value) =>
+      RegExp(r'^\\d+(?:\\.\\d+)?$').hasMatch(value);
 }
