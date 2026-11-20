@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
@@ -88,8 +91,12 @@ class PosWorkspaceController extends GetxController {
 
   EnumPresentation get rolePresentation {
     final user = SessionService.to.currentUser;
+    final activePosId = activePos.value?.posId;
     final membership = user?.workspaceMemberships.firstWhereOrNull(
-      (item) => item.scope == RoleScope.pos,
+      (item) =>
+          item.scope == RoleScope.pos &&
+          activePosId != null &&
+          item.tenantId == activePosId,
     );
     final rawRoleKey =
         membership?.roleKey ?? user?.role?.roleKey ?? user?.generalRoleKey;

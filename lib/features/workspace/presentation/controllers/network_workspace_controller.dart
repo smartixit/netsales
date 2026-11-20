@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
@@ -57,8 +58,12 @@ class NetworkWorkspaceController extends GetxController {
 
   EnumPresentation get rolePresentation {
     final user = SessionService.to.currentUser;
+    final activeNetworkId = selectedNetworkId.value;
     final membership = user?.workspaceMemberships.firstWhereOrNull(
-      (item) => item.scope == RoleScope.network,
+      (item) =>
+          item.scope == RoleScope.network &&
+          activeNetworkId != null &&
+          item.tenantId == activeNetworkId,
     );
     final rawRoleKey =
         membership?.roleKey ?? user?.role?.roleKey ?? user?.generalRoleKey;
@@ -140,6 +145,7 @@ class NetworkWorkspaceController extends GetxController {
     isLoadingNetworks.value = true;
     networksError.value = null;
     overviewError.value = null;
+    networks.clear();
     overview.value = null;
     selectedNetworkId.value = null;
 
@@ -225,6 +231,7 @@ class NetworkWorkspaceController extends GetxController {
     selectedNetworkId.value = networkId;
     overview.value = null;
     overviewError.value = null;
+    isLoadingOverview.value = true;
     await WorkspaceService.to.saveActiveNetworkId(networkId);
     await loadOverview(revision: revision);
   }
