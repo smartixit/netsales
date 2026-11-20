@@ -129,6 +129,11 @@ class SessionService extends GetxService {
     final storage = StorageService.instance;
 
     await storage.saveSession(session.sessionId);
+    final sessionDeviceUuid = session.deviceUuid?.trim();
+    if (sessionDeviceUuid != null && sessionDeviceUuid.isNotEmpty) {
+      // Keep the exact device identity confirmed by the server for this session.
+      await storage.setString(StorageKeys.deviceUuid, sessionDeviceUuid);
+    }
     await storage.setInt(StorageKeys.userId, user.userId);
     await storage.setModel(StorageKeys.userData, user, (u) => u.toJson());
     await storage.setStringList(StorageKeys.permissionsStorage, permissions);
