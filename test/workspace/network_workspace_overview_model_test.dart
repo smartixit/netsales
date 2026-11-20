@@ -204,6 +204,17 @@ void main() {
       );
     });
 
+    test('rejects non-pending statuses in the pending request collection', () {
+      final response = _validOverview();
+      final requests = response['recent_pending_requests'] as List;
+      (requests.single as Map<String, dynamic>)['status'] = 'APPROVED';
+
+      expect(
+        () => NetworkWorkspaceOverviewModel.fromJson(response),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
     test('rejects malformed pending request entries', () {
       expect(
         () => NetworkWorkspaceOverviewModel.fromJson({
