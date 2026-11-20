@@ -187,7 +187,7 @@ void main() {
       expect(networkError, equals('تعذر الاتصال بالخادم، يرجى التحقق من الشبكة'));
 
       // 3. AppException instance clean message extraction
-      const appEx = AppException('الرصيد غير كافٍ لإتمام العملية');
+      const appEx = AppException('تعذر تنفيذ العملية');
       expect(AppException.sanitizeMessage(appEx), equals('الرصيد غير كافٍ لإتمام العملية'));
     });
 
