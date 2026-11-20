@@ -24,11 +24,11 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
     });
 
     test(
-      'matches the challenge cookie for the supplied single AES block',
+      'preserves the complete plaintext of a single AES block',
       () {
         expect(
           InfinityFreeChallengeSolver.solveChallenge(challenge),
-          'e84330a69c6df373fc2fd2a2827a5f',
+          'e84330a69c6df373fc2fd2a2827a5f0d',
         );
       },
     );
@@ -79,7 +79,7 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
 
         expect(
           InfinityFreeChallengeSolver.solveChallenge(paddedChallenge),
-          '414243',
+          '4142430d0d0d0d0d0d0d0d0d0d0d0d0d',
         );
       },
     );
@@ -94,7 +94,7 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
 
         expect(
           InfinityFreeChallengeSolver.solveChallenge(zeroBlockChallenge),
-          '',
+          '00000000000000000000000000000000',
         );
       },
     );
@@ -133,7 +133,7 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       expect(InfinityFreeChallengeSolver.isChallengeResponse(bytes), isTrue);
       expect(
         InfinityFreeChallengeSolver.solveChallengeResponse(bytes),
-        'e84330a69c6df373fc2fd2a2827a5f',
+        'e84330a69c6df373fc2fd2a2827a5f0d',
       );
     });
 
