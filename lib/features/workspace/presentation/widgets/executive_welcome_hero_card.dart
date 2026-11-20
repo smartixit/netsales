@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
@@ -35,23 +36,17 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
     final todayStr = controller.todayFormatted;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14.h),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
       decoration: BoxDecoration(
         color: isDark ? colors.surfaceContainerLow : colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
           color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
+              ? colors.onSurface.withValues(alpha: 0.08)
               : colors.outlineVariant.withValues(alpha: 0.7),
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: colors.shadow.withValues(alpha: isDark ? 0.35 : 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        boxShadow: AppElevation.level2(context),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -82,13 +77,12 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                           style: AppTypography.labelSmall.copyWith(
                             color: colors.onSurfaceVariant,
                             fontWeight: FontWeight.w600,
-                            fontSize: 10.5.sp,
-                          ),
+                                                      ),
                         ),
                         Container(
                           width: 3.5,
                           height: 3.5,
-                          margin: EdgeInsets.symmetric(horizontal: 5.w),
+                          margin: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: colors.outline,
@@ -97,7 +91,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 5.w,
-                            vertical: 1.h,
+                            vertical: AppSpacing.xxs,
                           ),
                           decoration: BoxDecoration(
                             color: colors.primary.withValues(alpha: 0.1),
@@ -108,13 +102,12 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                             style: AppTypography.labelSmall.copyWith(
                               color: colors.primary,
                               fontWeight: FontWeight.w700,
-                              fontSize: 9.5.sp,
-                            ),
+                                                          ),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 2.h),
+                    AppSpacing.vXxs,
                     Text(
                       realFullName,
                       maxLines: 1,
@@ -122,8 +115,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                       style: AppTypography.titleMedium.copyWith(
                         color: colors.onSurface,
                         fontWeight: FontWeight.w900,
-                        fontSize: 15.sp,
-                        letterSpacing: -0.2,
+                                                letterSpacing: -0.2,
                       ),
                     ),
                     SizedBox(height: 2.h),
@@ -137,8 +129,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                             style: AppTypography.bodySmall.copyWith(
                               color: colors.onSurfaceVariant,
                               fontWeight: FontWeight.w600,
-                              fontSize: 11.sp,
-                            ),
+                                                          ),
                           ),
                         ),
                         Container(
@@ -158,8 +149,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                             style: AppTypography.bodySmall.copyWith(
                               color: colors.primary,
                               fontWeight: FontWeight.bold,
-                              fontSize: 11.sp,
-                            ),
+                                                          ),
                           ),
                         ),
                       ],
@@ -173,7 +163,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
           SizedBox(height: AppSpacing.sm),
           Divider(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.06)
+                ? colors.onSurface.withValues(alpha: 0.06)
                 : colors.outlineVariant.withValues(alpha: 0.5),
             height: 1,
           ),
@@ -185,15 +175,15 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
               // كبسولة التاريخ
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.white.withValues(alpha: 0.04)
+                        ? colors.onSurface.withValues(alpha: 0.04)
                         : colors.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(AppRadius.md),
                     border: Border.all(
                       color: isDark
-                          ? Colors.white.withValues(alpha: 0.06)
+                          ? colors.onSurface.withValues(alpha: 0.06)
                           : colors.outlineVariant.withValues(alpha: 0.6),
                       width: 0.8,
                     ),
@@ -201,11 +191,11 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                   child: Row(
                     children: [
                       Container(
-                        width: 26.r,
-                        height: 26.r,
+                        width: AppSpacing.xxl,
+                        height: AppSpacing.xxl,
                         decoration: BoxDecoration(
                           color: colors.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6.r),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Icon(
                           Icons.calendar_today_rounded,
@@ -213,7 +203,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                           color: colors.primary,
                         ),
                       ),
-                      SizedBox(width: 6.w),
+                      AppSpacing.hXs,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,8 +213,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                               'تاريخ اليوم',
                               style: TextStyle(
                                 color: colors.onSurfaceVariant,
-                                fontSize: 9.sp,
-                                fontWeight: FontWeight.w500,
+                                                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             Text(
@@ -234,8 +223,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                               style: TextStyle(
                                 color: colors.onSurface,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 10.5.sp,
-                              ),
+                                                              ),
                             ),
                           ],
                         ),
@@ -244,7 +232,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 8.w),
+              AppSpacing.hSm,
 
               // كبسولة الطلبات المعلقة
               Expanded(
@@ -261,7 +249,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                               alpha: isDark ? 0.14 : 0.08,
                             )
                           : (isDark
-                                ? Colors.white.withValues(alpha: 0.04)
+                                ? colors.onSurface.withValues(alpha: 0.04)
                                 : colors.surfaceContainerLow),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       border: Border.all(
@@ -270,7 +258,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                                 alpha: isDark ? 0.4 : 0.3,
                               )
                             : (isDark
-                                  ? Colors.white.withValues(alpha: 0.06)
+                                  ? colors.onSurface.withValues(alpha: 0.06)
                                   : colors.outlineVariant.withValues(
                                       alpha: 0.6,
                                     )),
@@ -310,8 +298,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                                 'حالة التوريد',
                                 style: TextStyle(
                                   color: colors.onSurfaceVariant,
-                                  fontSize: 9.sp,
-                                  fontWeight: FontWeight.w500,
+                                                                    fontWeight: FontWeight.w500,
                                 ),
                               ),
                               Text(
@@ -327,8 +314,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                                       ? colors.warning
                                       : colors.onSurface,
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 10.5.sp,
-                                ),
+                                                                  ),
                               ),
                             ],
                           ),

@@ -80,13 +80,13 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
             filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
             child: Container(
               height: AppSpacing.appBarHeight,
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
               decoration: BoxDecoration(
                 color: colors.surface.withValues(alpha: isDark ? 0.92 : 0.94),
                 borderRadius: BorderRadius.circular(AppRadius.xl),
                 border: Border.all(
                   color: isDark
-                      ? Colors.white.withValues(alpha: 0.12)
+                      ? colors.onSurface.withValues(alpha: 0.12)
                       : colors.outlineVariant.withValues(alpha: 0.6),
                   width: 1.2.w,
                 ),
@@ -120,7 +120,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                             effectivePresentation,
                           ),
                     ),
-                  SizedBox(width: 10.w),
+                  AppSpacing.hSm,
 
                   // هوية المساحة والشبكة
                   Expanded(
@@ -142,7 +142,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 5.h),
+                              AppSpacing.vXs,
                               CustomSkeletonShimmer(
                                 child: Container(
                                   width: 108.w,
@@ -174,7 +174,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                                     isCompact: true,
                                     showDot: true,
                                   ),
-                                  SizedBox(height: 3.h),
+                                  AppSpacing.vXxs,
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -187,11 +187,10 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                                               .copyWith(
                                                 color: colors.onSurface,
                                                 fontWeight: FontWeight.w800,
-                                                fontSize: 14.sp,
-                                              ),
+                                                                                              ),
                                         ),
                                       ),
-                                      SizedBox(width: 4.w),
+                                      AppSpacing.hXxs,
                                       Icon(
                                         Icons.keyboard_arrow_down_rounded,
                                         size: 16.r,
@@ -209,7 +208,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                   // الإجراءات: شارة الإشعارات الحقيقية + زر التحكم القيادي
                   ...?actions,
                   const NotificationBadgeButton(),
-                  SizedBox(width: 8.w),
+                  AppSpacing.hSm,
                   CustomInteractiveBounce(
                     onTap:
                         onProfileTap ??
@@ -225,7 +224,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                         borderRadius: BorderRadius.circular(AppRadius.md),
                         border: Border.all(
                           color: isDark
-                              ? Colors.white.withValues(alpha: 0.1)
+                              ? colors.onSurface.withValues(alpha: 0.1)
                               : colors.outlineVariant,
                         ),
                       ),
