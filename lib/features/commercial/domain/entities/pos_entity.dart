@@ -83,6 +83,9 @@ class PosEntity extends Equatable {
     if (area.isNotEmpty) return area;
     if (addr != null && addr.isNotEmpty) return addr;
     log(directorateName.toString());
+    log(governorateName.toString());
+    log(addr.toString());
+    log(area.toString());
     return 'غير محدد';
   }
 

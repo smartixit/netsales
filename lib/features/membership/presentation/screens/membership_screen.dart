@@ -1,134 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/widgets/feedback/custom_state_view.dart';
-import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/membership/presentation/controllers/membership_controller.dart';
-import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
-import 'package:netsales/features/membership/presentation/widgets/membership_add_form.dart';
-import 'package:netsales/features/membership/presentation/widgets/membership_list.dart';
-import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
-import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
-import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/features/membership/presentation/views/network_members_view.dart';
+import 'package:netsales/features/membership/presentation/views/pos_members_view.dart';
+import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
-class MembershipScreen extends GetWidget<MembershipController> {
-  const MembershipScreen({super.key, required this.isNetwork});
-
-  final bool isNetwork;
-
-  String get controllerScopeTag =>
-      isNetwork ? MembershipBinding.networkTag : MembershipBinding.posTag;
-
-  @override
-  String? get tag => controllerScopeTag;
-  @override
-  Widget build(BuildContext context) => Obx(() {
-    final tenants = controller.isNetwork
-        ? controller.networks
-        : controller.positions;
-    final tenantItems = controller.isNetwork
-        ? controller.networks
-              .map(
-                (e) => DropdownItem<int>(
-                  value: e.networkId,
-                  child: Text(e.networkName),
-                ),
-              )
-              .toList()
-        : controller.positions
-              .map(
-                (e) =>
-                    DropdownItem<int>(value: e.posId, child: Text(e.posName)),
-              )
-              .toList();
-    if (controller.isLoadingTenants.value) {
-      return const CustomStateView.loading(
-        presentation: CustomStatePresentation.skeletonOnly,
-        skeleton: CustomStateSkeleton(
-          layout: CustomStateSkeletonLayout.list,
-          itemCount: 3,
-          cardHeight: 112,
-          hasLeading: true,
-        ),
-      );
-    }
-    if (controller.errorMessage.value != null && tenants.isEmpty) {
-      return CustomErrorState(
-        title: 'تعذر تحميل البيانات',
-        subtitle: controller.errorMessage.value,
-        onRetry: controller.loadTenants,
-      );
-    }
-    if (tenants.isEmpty) {
-      return const CustomEmptyState(
-        title: 'لا توجد منشآت متاحة',
-        subtitle: 'لا توجد شبكة أو نقطة بيع مرتبطة بحسابك لإدارة أعضائها.',
-      );
-    }
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1040),
-        child: ListView(
-          padding: EdgeInsets.all(AppSpacing.md),
-          children: [
-            Text(
-              controller.isNetwork ? 'فريق الشبكة' : 'فريق نقطة البيع',
-              style: AppTypography.headlineSmall,
-            ),
-            AppSpacing.vXs,
-            Text(
-              'إدارة العضويات التشغيلية والصلاحيات داخل الشبكة المحددة.',
-              style: AppTypography.bodyMedium,
-            ),
-            if (tenants.length > 1) ...[
-              AppSpacing.vMd,
-              CustomDropdown<int>(
-                items: tenantItems,
-                rxValue: controller.selectedTenantId,
-                onChanged: controller.selectTenant,
-                label: controller.tenantLabel,
-                hint: 'اختر ${controller.tenantLabel}',
-              ),
-            ],
-            AppSpacing.vLg,
-            if (controller.selectedTenantId.value == null)
-              const CustomEmptyState(
-                title: 'حدد الشبكة أولاً',
-                subtitle: 'اختر الشبكة أو نقطة البيع التي تريد إدارة فريقها.',
-              )
-            else ...[
-              MembershipAddForm(controller: controller),
-              AppSpacing.vLg,
-            ],
-            if (controller.selectedTenantId.value != null &&
-                controller.isLoading.value)
-              const CustomStateView.loading(
-                presentation: CustomStatePresentation.skeletonOnly,
-                skeleton: CustomStateSkeleton(
-                  layout: CustomStateSkeletonLayout.list,
-                  itemCount: 3,
-                  cardHeight: 112,
-                  hasLeading: true,
-                ),
-              )
-            else if (controller.selectedTenantId.value != null &&
-                controller.errorMessage.value != null)
-              CustomErrorState.boxed(
-                title: 'تعذر تحميل الأعضاء',
-                subtitle: controller.errorMessage.value,
-                onRetry: controller.loadMembers,
-              )
-            else if (controller.selectedTenantId.value != null &&
-                controller.members.isEmpty)
-              const CustomEmptyState(
-                title: 'لا يوجد أعضاء بعد',
-                subtitle: 'أضف أول عضو تشغيلي إلى هذه الشبكة.',
-              )
-            else if (controller.selectedTenantId.value != null)
-              MembershipList(controller: controller),
-          ],
-        ),
-      ),
-    );
+/// الشاشة الرئيسية الحاضنة لإدارة أعضاء وفريق المنشأة (MembershipScreen)
+///
+/// تعمل كحاضنة موحدة للشاشات المستقلة والواجهات المضمنة (مطابقة لنمط CommercialDirectoryScreen و InvoicesScreen):
+/// 1. مساحة شبكة التوزيع (Network Workspace): عبر [NetworkMembersView].
+/// 2. مساحة نقطة البيع (POS Workspace): عبر [PosMembersView].
+class MembershipScreen extends StatelessWidget {
+  const MembershipScreen({
+    super.key,
+    this.embedded = false,
+    this.isNetwork,
   });
+
+  final bool embedded;
+  final bool? isNetwork;
+
+  @override
+  Widget build(BuildContext context) {
+    final isNetworkWorkspace = isNetwork ??
+        (Get.isRegistered<WorkspaceService>() &&
+            WorkspaceService.to.activeWorkspace == AppWorkspace.network);
+
+    final view = isNetworkWorkspace
+        ? NetworkMembersView(embedded: embedded)
+        : PosMembersView(embedded: embedded);
+
+    if (embedded) return view;
+
+    return CustomAppScaffold(
+      appBarTitle:
+          isNetworkWorkspace ? 'فريق عمل الشبكة' : 'فريق عمل نقطة البيع',
+      body: view,
+    );
+  }
 }

@@ -1,36 +1,69 @@
-import 'package:netsales/features/membership/domain/entities/membership_entity.dart';
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
+import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
 
+/// العقد المجرد لمستودع إدارة أعضاء مساحات العمل (Domain Repository)
 abstract interface class MembershipRepository {
-  Future<List<MembershipEntity>> getMembers({
-    required bool isNetwork,
-    required int tenantId,
-  });
-  Future<List<MembershipRoleEntity>> getAssignableRoles({
-    required bool isNetwork,
-    required int tenantId,
-  });
-  Future<MembershipEntity> addMember({
-    required bool isNetwork,
-    required int tenantId,
+  // ── عمليات مساحة عمل الشبكة (Network Workspace) ──
+  Future<List<WorkspaceMemberEntity>> getNetworkMembers(int networkId);
+
+  Future<List<MembershipRoleEntity>> getNetworkAssignableRoles(int networkId);
+
+  Future<WorkspaceMemberEntity> addNetworkMember({
+    required int networkId,
     required String phoneNumber,
     required int roleId,
+    String status = 'ACTIVE',
   });
-  Future<MembershipEntity> updateRole({
-    required bool isNetwork,
-    required int tenantId,
+
+  Future<WorkspaceMemberEntity> updateNetworkMemberRole({
+    required int networkId,
     required int userId,
     required int roleId,
+    String? reason,
   });
-  Future<MembershipEntity> updateStatus({
-    required bool isNetwork,
-    required int tenantId,
+
+  Future<WorkspaceMemberEntity> updateNetworkMemberStatus({
+    required int networkId,
     required int userId,
     required String status,
+    String? reason,
   });
-  Future<void> removeMember({
-    required bool isNetwork,
-    required int tenantId,
+
+  Future<void> removeNetworkMember({
+    required int networkId,
     required int userId,
+    String? reason,
+  });
+
+  // ── عمليات مساحة عمل نقطة البيع (POS Workspace) ──
+  Future<List<WorkspaceMemberEntity>> getPosMembers(int posId);
+
+  Future<List<MembershipRoleEntity>> getPosAssignableRoles(int posId);
+
+  Future<WorkspaceMemberEntity> addPosMember({
+    required int posId,
+    required String phoneNumber,
+    required int roleId,
+    String status = 'ACTIVE',
+  });
+
+  Future<WorkspaceMemberEntity> updatePosMemberRole({
+    required int posId,
+    required int userId,
+    required int roleId,
+    String? reason,
+  });
+
+  Future<WorkspaceMemberEntity> updatePosMemberStatus({
+    required int posId,
+    required int userId,
+    required String status,
+    String? reason,
+  });
+
+  Future<void> removePosMember({
+    required int posId,
+    required int userId,
+    String? reason,
   });
 }

@@ -1,39 +1,43 @@
-import 'package:netsales/features/membership/domain/entities/membership_entity.dart';
+import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
 
-class MembershipModel extends MembershipEntity {
-  const MembershipModel({
+/// نموذج بيانات عضو مساحة العمل المحول من وإلى استجابة الـ API (Workspace Member Model)
+class WorkspaceMemberModel extends WorkspaceMemberEntity {
+  const WorkspaceMemberModel({
     required super.userId,
     required super.fullName,
     required super.phoneNumber,
     required super.roleId,
-    required super.roleKey,
-    required super.roleLabel,
-    required super.status,
+    super.roleKey,
+    super.roleLabel,
+    super.statusRaw,
+    super.statusLabel,
     super.profileLogo,
     super.isOwner,
   });
 
-  factory MembershipModel.fromJson(Map<String, dynamic> json) {
+  factory WorkspaceMemberModel.fromJson(Map<String, dynamic> json) {
     final user = json['user'] is Map
         ? Map<String, dynamic>.from(json['user'] as Map)
         : <String, dynamic>{};
     final role = json['role'] is Map
         ? Map<String, dynamic>.from(json['role'] as Map)
         : <String, dynamic>{};
-    return MembershipModel(
+
+    final rawStatus = json['status']?.toString() ?? 'UNKNOWN';
+
+    return WorkspaceMemberModel(
       userId: _toInt(json['user_id'] ?? user['user_id']),
       fullName: user['user_full_name']?.toString() ?? 'مستخدم',
       phoneNumber: user['user_phone_number']?.toString() ?? '',
-      profileLogo:
-          user['user_profile_logo_url']?.toString() ??
+      profileLogo: user['user_profile_logo_url']?.toString() ??
           user['user_profile_logo']?.toString(),
       roleId: _toInt(json['role_id'] ?? role['role_id']),
-      roleKey: role['role_key']?.toString() ?? '',
-      roleLabel:
-          role['role_key_label']?.toString() ??
+      roleKey: role['role_key']?.toString(),
+      roleLabel: role['role_key_label']?.toString() ??
           role['role_name']?.toString() ??
           'دور غير محدد',
-      status: json['status']?.toString() ?? 'UNKNOWN',
+      statusRaw: rawStatus,
+      statusLabel: json['status_label']?.toString(),
       isOwner: json['is_owner'] == true || json['is_owner'] == 1,
     );
   }

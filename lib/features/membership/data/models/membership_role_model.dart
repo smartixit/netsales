@@ -1,5 +1,6 @@
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 
+/// نموذج بيانات الدور التشغيلي القابل للإسناد للعضو (Data Model)
 class MembershipRoleModel extends MembershipRoleEntity {
   const MembershipRoleModel({
     required super.roleId,
@@ -13,8 +14,7 @@ class MembershipRoleModel extends MembershipRoleEntity {
             ? json['role_id'] as int
             : int.tryParse(json['role_id']?.toString() ?? '') ?? 0,
         roleKey: json['role_key']?.toString() ?? '',
-        name:
-            json['role_key_label']?.toString() ??
+        name: json['role_key_label']?.toString() ??
             json['role_name']?.toString() ??
             '',
       );

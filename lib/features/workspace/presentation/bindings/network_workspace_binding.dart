@@ -73,7 +73,7 @@ class NetworkWorkspaceBinding extends Bindings {
     WorkspaceEntityPickerBinding().dependencies();
     OperationalReportsBinding().dependencies();
     FinanceBinding().dependencies();
-    MembershipBinding(isNetwork: true).dependencies();
+    MembershipBinding().dependencies();
     ProcurementRequestBinding().dependencies();
 
     if (!Get.isRegistered<NetworkWorkspaceRemoteDataSource>()) {

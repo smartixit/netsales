@@ -5,7 +5,7 @@ import 'package:netsales/features/billing/presentation/screens/billing_reports_s
 import 'package:netsales/features/billing/presentation/screens/billing_workspace_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
 import 'package:netsales/features/finance/presentation/widgets/network_finance_workspace_hub.dart';
-import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
+import 'package:netsales/features/membership/presentation/views/network_members_view.dart';
 import 'package:netsales/features/reports/presentation/screens/operational_reports_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
@@ -64,7 +64,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           label: 'فريق العمل',
           icon: Icons.groups_outlined,
           activeIcon: Icons.groups_rounded,
-          content: MembershipScreen(isNetwork: true),
+          content: NetworkMembersView(embedded: true),
         ),
         WorkspaceNavItem(
           label: 'التقارير',

@@ -28,7 +28,7 @@ class PosWorkspaceBinding extends Bindings {
     OperationalReportsBinding().dependencies();
     FinanceBinding().dependencies();
     InvoiceBinding().dependencies();
-    MembershipBinding(isNetwork: false).dependencies();
+    MembershipBinding().dependencies();
     // The orders screen is embedded in this workspace shell, not opened
     // through AppRoutes.procurementOrders. Register its controller here so
     // the embedded tab resolves it and its lifetime follows the workspace route.

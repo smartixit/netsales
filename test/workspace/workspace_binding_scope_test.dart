@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
-import 'package:netsales/features/membership/presentation/controllers/membership_controller.dart';
-import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
+import 'package:netsales/features/membership/presentation/controllers/network_members_controller.dart';
+import 'package:netsales/features/membership/presentation/controllers/pos_members_controller.dart';
 
 void main() {
   setUp(() {
@@ -14,59 +14,24 @@ void main() {
     Get.reset();
   });
 
-  test('membership controllers are registered independently per workspace', () {
-    MembershipBinding(isNetwork: true).dependencies();
-    MembershipBinding(isNetwork: false).dependencies();
+  test('membership controllers are registered cleanly and independently per workspace', () {
+    MembershipBinding().dependencies();
 
-    expect(
-      Get.isRegistered<MembershipController>(
-        tag: MembershipBinding.networkTag,
-      ),
-      isTrue,
-    );
-    expect(
-      Get.isRegistered<MembershipController>(
-        tag: MembershipBinding.posTag,
-      ),
-      isTrue,
-    );
-    expect(Get.isRegistered<MembershipController>(), isFalse);
+    expect(Get.isRegistered<NetworkMembersController>(), isTrue);
+    expect(Get.isRegistered<PosMembersController>(), isTrue);
   });
 
-  test('membership screens resolve the matching workspace controller tag', () {
-    expect(
-      const MembershipScreen(isNetwork: true).controllerScopeTag,
-      MembershipBinding.networkTag,
-    );
-    expect(
-      const MembershipScreen(isNetwork: false).controllerScopeTag,
-      MembershipBinding.posTag,
-    );
-  });
-
-  test('re-entering workspace bindings does not duplicate registrations', () {
-    MembershipBinding(isNetwork: true).dependencies();
-    MembershipBinding(isNetwork: false).dependencies();
+  test('re-entering membership binding does not duplicate registrations', () {
+    MembershipBinding().dependencies();
 
     expect(
       () {
-        MembershipBinding(isNetwork: true).dependencies();
-        MembershipBinding(isNetwork: false).dependencies();
+        MembershipBinding().dependencies();
       },
       returnsNormally,
     );
 
-    expect(
-      Get.isRegistered<MembershipController>(
-        tag: MembershipBinding.networkTag,
-      ),
-      isTrue,
-    );
-    expect(
-      Get.isRegistered<MembershipController>(
-        tag: MembershipBinding.posTag,
-      ),
-      isTrue,
-    );
+    expect(Get.isRegistered<NetworkMembersController>(), isTrue);
+    expect(Get.isRegistered<PosMembersController>(), isTrue);
   });
 }

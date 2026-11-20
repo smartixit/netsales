@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/enums/membership_status.dart';
-import 'package:netsales/features/membership/data/models/membership_model.dart';
+import 'package:netsales/features/membership/data/models/workspace_member_model.dart';
 
 void main() {
-  group('MembershipModel', () {
+  group('WorkspaceMemberModel', () {
     test('maps nested user, role, status and authoritative owner flag', () {
-      final model = MembershipModel.fromJson({
+      final model = WorkspaceMemberModel.fromJson({
         'user_id': 42,
         'role_id': 7,
         'status': 'ACTIVE',
@@ -28,9 +28,11 @@ void main() {
       expect(model.phoneNumber, '777123456');
       expect(model.roleId, 7);
       expect(model.roleKey, 'NETWORK_USER');
-      expect(model.status, 'ACTIVE');
+      expect(model.status, MembershipStatus.active);
+      expect(model.statusRaw, 'ACTIVE');
       expect(model.isOwner, isTrue);
       expect(model.profileLogo, 'https://example.test/avatar.png');
+      expect(model.statusPresentation.label, 'نشط');
     });
 
     test('keeps unknown wire status explicit', () {
@@ -40,3 +42,4 @@ void main() {
     });
   });
 }
+
