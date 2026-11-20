@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
@@ -16,14 +15,15 @@ import 'package:netsales/features/workspace/presentation/mappers/workspace_pos_p
 import 'package:netsales/features/workspace/presentation/models/workspace_network_picker_item_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_pos_picker_item_view_model.dart';
 
+/// متحكم نافذة اختيار الكيانات والمساحات المرتبطة بالمستخدم (WorkspaceEntityPickerController)
 class WorkspaceEntityPickerController extends GetxController {
+  final GetMyNetworksUseCase getMyNetworksUseCase;
+  final GetMyPosUseCase getMyPosUseCase;
+
   WorkspaceEntityPickerController({
     required this.getMyNetworksUseCase,
     required this.getMyPosUseCase,
   });
-
-  final GetMyNetworksUseCase getMyNetworksUseCase;
-  final GetMyPosUseCase getMyPosUseCase;
 
   static WorkspaceEntityPickerController get to =>
       Get.find<WorkspaceEntityPickerController>();
@@ -32,9 +32,7 @@ class WorkspaceEntityPickerController extends GetxController {
   final RxList<PosEntity> pointsOfSale = <PosEntity>[].obs;
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
-  final RxInt selectedSegment = 0.obs;
-
-  int _generation = 0;
+  final RxInt selectedSegment = 0.obs; // 0: شبكات, 1: نقاط بيع
 
   List<WorkspaceNetworkPickerItemViewModel> get networkItems =>
       WorkspaceNetworkPickerMapper.map(networks);
@@ -44,39 +42,30 @@ class WorkspaceEntityPickerController extends GetxController {
 
   void prepareForWorkspace(AppWorkspace workspace) {
     selectedSegment.value = workspace == AppWorkspace.network ? 0 : 1;
-    if (networks.isEmpty && pointsOfSale.isEmpty && !isLoading.value) {
+    if (networks.isEmpty && pointsOfSale.isEmpty) {
       unawaited(loadEntities());
     }
   }
 
   Future<void> loadEntities({bool forceSkeleton = false}) async {
-    if (isLoading.value) return;
-    final generation = ++_generation;
-    if (forceSkeleton || (networks.isEmpty && pointsOfSale.isEmpty)) {
+    final hasNoData = networks.isEmpty && pointsOfSale.isEmpty;
+    if (forceSkeleton || hasNoData) {
       isLoading.value = true;
     }
     errorMessage.value = null;
-
     try {
-      final results = await Future.wait<Object>([
+      final results = await Future.wait([
         getMyNetworksUseCase(),
         getMyPosUseCase(),
       ]);
-      if (generation != _generation || isClosed) return;
       networks.assignAll(results[0] as List<NetworkEntity>);
       pointsOfSale.assignAll(results[1] as List<PosEntity>);
-    } catch (error) {
-      if (generation != _generation || isClosed) return;
-      networks.clear();
-      pointsOfSale.clear();
-      errorMessage.value = AppException.sanitizeMessage(
-        error,
-        fallback: 'تعذر تحميل الكيانات المرتبطة بالحساب.',
-      );
-    } finally {
-      if (generation == _generation && !isClosed) {
-        isLoading.value = false;
+    } catch (e) {
+      if (networks.isEmpty && pointsOfSale.isEmpty) {
+        errorMessage.value = 'تعذر تحميل الكيانات المرتبطة بحسابك.';
       }
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -112,36 +101,34 @@ class WorkspaceEntityPickerController extends GetxController {
       (item) => item.networkId == networkId,
     );
     if (network == null) return;
-
     await WorkspaceService.to.saveActiveNetworkId(network.networkId);
     if (Get.isRegistered<NetworkWorkspaceController>()) {
-      await Get.find<NetworkWorkspaceController>().selectNetwork(network.networkId);
+      await Get.find<NetworkWorkspaceController>().selectNetwork(
+        network.networkId,
+      );
       Get.back<void>();
-      return;
-    }
-
-    if (Get.isRegistered<WorkspaceCoordinatorController>()) {
-      await WorkspaceService.to.setActiveWorkspace(AppWorkspace.network);
+    } else if (Get.isRegistered<WorkspaceCoordinatorController>()) {
       Get.back<void>();
-      await WorkspaceCoordinatorController.to.switchWorkspace(AppWorkspace.network);
+      await WorkspaceCoordinatorController.to.switchWorkspace(
+        AppWorkspace.network,
+      );
+    } else {
+      Get.back<void>();
     }
   }
 
   Future<void> selectPosById(int posId) async {
     final pos = pointsOfSale.firstWhereOrNull((item) => item.posId == posId);
     if (pos == null) return;
-
     await WorkspaceService.to.saveActivePosId(pos.posId);
     if (Get.isRegistered<PosWorkspaceController>()) {
       await Get.find<PosWorkspaceController>().selectPos(pos);
       Get.back<void>();
-      return;
-    }
-
-    if (Get.isRegistered<WorkspaceCoordinatorController>()) {
-      await WorkspaceService.to.setActiveWorkspace(AppWorkspace.pos);
+    } else if (Get.isRegistered<WorkspaceCoordinatorController>()) {
       Get.back<void>();
       await WorkspaceCoordinatorController.to.switchWorkspace(AppWorkspace.pos);
+    } else {
+      Get.back<void>();
     }
   }
 }
