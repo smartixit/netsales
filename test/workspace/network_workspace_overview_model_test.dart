@@ -79,7 +79,7 @@ void main() {
       expect(model.recentPendingRequests.single.requestId, 90);
       expect(
         model.recentPendingRequests.single.requestTotalAmount,
-        900.00,
+        '900.00',
       );
     });
 
@@ -93,6 +93,27 @@ void main() {
 
       expect(model.metrics.containsKey('sales'), isTrue);
       expect(model.metrics.containsKey('unrecognized_metric_group'), isFalse);
+    });
+
+    test('preserves the exact server amount string without double conversion', () {
+      final model = NetworkWorkspaceOverviewModel.fromJson(_validOverview());
+
+      expect(
+        model.recentPendingRequests.single.requestTotalAmount,
+        '900.00',
+      );
+    });
+
+    test('rejects malformed pending request amount strings', () {
+      final response = _validOverview();
+      final requests = response['recent_pending_requests'] as List;
+      (requests.single as Map<String, dynamic>)['request_total_amount'] =
+          '900.00invalid';
+
+      expect(
+        () => NetworkWorkspaceOverviewModel.fromJson(response),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('rejects an incomplete top-level overview contract', () {
