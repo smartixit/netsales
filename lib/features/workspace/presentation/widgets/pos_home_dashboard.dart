@@ -3,7 +3,6 @@ import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
@@ -28,12 +27,6 @@ class PosHomeDashboard extends StatelessWidget {
     final colors = context.colors;
     return CustomRefreshablePage(
       onRefresh: controller.loadWorkspace,
-      padding: EdgeInsets.fromLTRB(
-        AppBreakpoints.screenMargin(context),
-        MediaQuery.paddingOf(context).top + 20.h,
-        AppBreakpoints.screenMargin(context),
-        115.h + MediaQuery.paddingOf(context).bottom,
-      ),
       maxContentWidth: 760,
       child: Obx(() {
         if (controller.isLoadingPos.value &&

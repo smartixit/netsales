@@ -30,6 +30,7 @@ class NetworkInvoicesController extends GetxController {
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
   final errorMessage = RxnString();
+  final loadMoreError = RxnString();
   final nextCursor = RxnString();
 
   // ── حالة التوسيع الحصرية للبطاقات ──

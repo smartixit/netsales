@@ -36,6 +36,7 @@ class NetworkOperatingExpensesController extends GetxController {
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
   final errorMessage = RxnString();
+  final loadMoreError = RxnString();
   final nextCursor = RxnString();
 
   // ── التوسيع الحصري للبطاقات ──
@@ -161,10 +162,12 @@ class NetworkOperatingExpensesController extends GetxController {
     if (isRefresh) {
       isLoading.value = true;
       errorMessage.value = null;
+      loadMoreError.value = null;
       nextCursor.value = null;
     } else {
       if (isLoadingMore.value || !hasMore) return;
       isLoadingMore.value = true;
+      loadMoreError.value = null;
     }
 
     try {
@@ -206,11 +209,7 @@ class NetworkOperatingExpensesController extends GetxController {
       if (isRefresh) {
         errorMessage.value = msg;
       } else {
-        CustomSnackbar.show(
-          title: 'خطأ أثناء تحميل المزيد',
-          message: msg,
-          type: SnackType.error,
-        );
+        loadMoreError.value = msg;
       }
     } finally {
       if (currentRequestId == _requestIdCounter) {
