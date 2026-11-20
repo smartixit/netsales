@@ -59,7 +59,10 @@ void main() {
         expect(probe.body, isNull);
         expect(probe.header('Content-Type'), isNull);
         expect(probe.header('Cookie'), contains('laravel_session=session-1'));
-        expect(probe.header('Cookie'), contains('__test='));
+        expect(
+          probe.header('Cookie'),
+          contains('__test=e84330a69c6df373fc2fd2a2827a5f0d'),
+        );
         expect(
           probe.header('User-Agent'),
           InfinityFreeChallengeSolver.browserUserAgent,
@@ -71,7 +74,10 @@ void main() {
         expect(replay.uri, loginUri);
         expect(String.fromCharCodes(replay.body!), originalBody);
         expect(replay.header('Cookie'), contains('laravel_session=session-1'));
-        expect(replay.header('Cookie'), contains('__test='));
+        expect(
+          replay.header('Cookie'),
+          contains('__test=e84330a69c6df373fc2fd2a2827a5f0d'),
+        );
         expect(
           replay.header('User-Agent'),
           InfinityFreeChallengeSolver.browserUserAgent,
@@ -118,8 +124,14 @@ void main() {
           publicKeysUri.replace(queryParameters: {'i': '1'}),
         );
         expect(adapter.requests[2].uri, publicKeysUri);
-        expect(adapter.requests[1].header('Cookie'), contains('__test='));
-        expect(adapter.requests[2].header('Cookie'), contains('__test='));
+        expect(
+          adapter.requests[1].header('Cookie'),
+          contains('__test=e84330a69c6df373fc2fd2a2827a5f0d'),
+        );
+        expect(
+          adapter.requests[2].header('Cookie'),
+          contains('__test=e84330a69c6df373fc2fd2a2827a5f0d'),
+        );
         dio.close(force: true);
       },
     );
@@ -130,7 +142,7 @@ void main() {
         final baseUri = Uri.parse('https://cookie-refresh.example');
         final primeUri = baseUri.resolve('/api/v1/prime');
         final updateUri = baseUri.resolve('/api/v1/update');
-        final cachedCookie = 'e84330a69c6df373fc2fd2a2827a5f';
+        final cachedCookie = 'e84330a69c6df373fc2fd2a2827a5f0d';
         const refreshedCookie = '4142434445464748494a4b4c4d4e0d0c';
         var primeOriginalCount = 0;
         var updateOriginalCount = 0;
@@ -205,17 +217,24 @@ void main() {
         });
         final dio = _dio(baseUri, adapter);
 
-        await expectLater(
-          dio.post<String>(
+        DioException? failure;
+        try {
+          await dio.post<String>(
             '/api/v1/auth/login',
             data: '{"payload":"must-not-replay"}',
             options: Options(
               contentType: Headers.jsonContentType,
               responseType: ResponseType.plain,
             ),
-          ),
-          throwsA(isA<DioException>()),
-        );
+          );
+        } on DioException catch (error) {
+          failure = error;
+        }
+
+        expect(failure, isNotNull);
+        expect(failure!.response?.statusCode, 200);
+        expect(failure.response?.data, contains('aes.js'));
+        expect(failure.requestOptions.uri.queryParameters, {'i': '1'});
 
         expect(firstTwoRequests, 2);
         expect(adapter.requests, hasLength(2));
