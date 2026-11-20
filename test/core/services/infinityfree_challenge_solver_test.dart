@@ -23,15 +23,12 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       ]);
     });
 
-    test(
-      'matches the challenge cookie for the supplied single AES block',
-      () {
-        expect(
-          InfinityFreeChallengeSolver.solveChallenge(challenge),
-          'e84330a69c6df373fc2fd2a2827a5f',
-        );
-      },
-    );
+    test('preserves the complete plaintext of a single AES block', () {
+      expect(
+        InfinityFreeChallengeSolver.solveChallenge(challenge),
+        'e84330a69c6df373fc2fd2a2827a5f0d',
+      );
+    });
 
     test(
       'decrypts a multi-block CBC challenge against an independent vector',
@@ -39,8 +36,8 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
         final multiBlockChallenge = challenge.replaceFirst(
           '25b509cc7dadcdb532275647f94524cc',
           '848cbc60dcde88fe99cfe77c054994ce'
-          '60a11c76f356fe15a23aa2d618e0e504'
-          '35020a24332ee3fa1643fa52935a2b01',
+              '60a11c76f356fe15a23aa2d618e0e504'
+              '35020a24332ee3fa1643fa52935a2b01',
         );
 
         expect(
@@ -69,43 +66,36 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       },
     );
 
-    test(
-      'removes a complete thirteen-byte SlowAES padding suffix',
-      () {
-        final paddedChallenge = challenge.replaceFirst(
-          '25b509cc7dadcdb532275647f94524cc',
-          '0216da59dd377dd41308e253403e5aed',
-        );
+    test('preserves a single block with thirteen padding-looking bytes', () {
+      final paddedChallenge = challenge.replaceFirst(
+        '25b509cc7dadcdb532275647f94524cc',
+        '0216da59dd377dd41308e253403e5aed',
+      );
 
-        expect(
-          InfinityFreeChallengeSolver.solveChallenge(paddedChallenge),
-          '414243',
-        );
-      },
-    );
+      expect(
+        InfinityFreeChallengeSolver.solveChallenge(paddedChallenge),
+        '4142430d0d0d0d0d0d0d0d0d0d0d0d0d',
+      );
+    });
 
-    test(
-      'matches SlowAES handling of a full zero-byte trailing block',
-      () {
-        final zeroBlockChallenge = challenge.replaceFirst(
-          '25b509cc7dadcdb532275647f94524cc',
-          '9b9a54eb2de11baef8f0060729ce78fb',
-        );
+    test('preserves a single block containing only zero bytes', () {
+      final zeroBlockChallenge = challenge.replaceFirst(
+        '25b509cc7dadcdb532275647f94524cc',
+        '9b9a54eb2de11baef8f0060729ce78fb',
+      );
 
-        expect(
-          InfinityFreeChallengeSolver.solveChallenge(zeroBlockChallenge),
-          '',
-        );
-      },
-    );
+      expect(
+        InfinityFreeChallengeSolver.solveChallenge(zeroBlockChallenge),
+        '00000000000000000000000000000000',
+      );
+    });
 
     test(
       'preserves unrelated cookies and replaces an existing challenge cookie',
       () {
         expect(
           InfinityFreeChallengeSolver.mergeChallengeCookie(
-            existingCookieHeader:
-                'laravel_session=session-value; __test=old-value; XSRF-TOKEN=csrf-value',
+            existingCookieHeader: 'laravel_session=session-value; __test=old-value; XSRF-TOKEN=csrf-value',
             challengeCookie: 'new-value',
           ),
           'laravel_session=session-value; XSRF-TOKEN=csrf-value; __test=new-value',
@@ -113,18 +103,15 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       },
     );
 
-    test(
-      'adds the challenge cookie when no cookie header exists',
-      () {
-        expect(
-          InfinityFreeChallengeSolver.mergeChallengeCookie(
-            existingCookieHeader: null,
-            challengeCookie: 'new-value',
-          ),
-          '__test=new-value',
-        );
-      },
-    );
+    test('adds the challenge cookie when no cookie header exists', () {
+      expect(
+        InfinityFreeChallengeSolver.mergeChallengeCookie(
+          existingCookieHeader: null,
+          challengeCookie: 'new-value',
+        ),
+        '__test=new-value',
+      );
+    });
 
     test('recognizes challenge responses returned as byte arrays', () {
       final bytes = challenge.codeUnits;
@@ -133,7 +120,7 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
       expect(InfinityFreeChallengeSolver.isChallengeResponse(bytes), isTrue);
       expect(
         InfinityFreeChallengeSolver.solveChallengeResponse(bytes),
-        'e84330a69c6df373fc2fd2a2827a5f',
+        'e84330a69c6df373fc2fd2a2827a5f0d',
       );
     });
 
@@ -145,17 +132,20 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
           .replaceFirst(
             '</script>',
             'location.href="https://netsales.kesug.com/api/v1/auth/login?i=1";'
-            '</script>',
+                '</script>',
           )
           .codeUnits;
 
       final target =
           InfinityFreeChallengeSolver.extractChallengeRedirectFromResponse(
-        bytes,
-        requestUri: requestUri,
-      );
+            bytes,
+            requestUri: requestUri,
+          );
 
-      expect(target?.toString(), 'https://netsales.kesug.com/api/v1/auth/login?i=1');
+      expect(
+        target?.toString(),
+        'https://netsales.kesug.com/api/v1/auth/login?i=1',
+      );
     });
 
     test('extracts constants despite whitespace and line breaks', () {

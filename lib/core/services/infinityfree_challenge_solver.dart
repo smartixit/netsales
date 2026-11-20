@@ -72,9 +72,9 @@ class InfinityFreeChallengeSolver {
   /// استخراج الثوابت [a, b, c] مع تحمل اختلاف المسافات والتصغير.
   static List<String>? extractConstants(String html) {
     String? capture(String name) => RegExp(
-          '\\b$name\\s*=\\s*toNumbers\\s*\\(\\s*"([0-9a-f]+)"\\s*\\)',
-          caseSensitive: false,
-        ).firstMatch(html)?.group(1);
+      '\\b$name\\s*=\\s*toNumbers\\s*\\(\\s*"([0-9a-f]+)"\\s*\\)',
+      caseSensitive: false,
+    ).firstMatch(html)?.group(1);
 
     final key = capture('a');
     final iv = capture('b');
@@ -113,9 +113,13 @@ class InfinityFreeChallengeSolver {
   /// قيمته ضمن 1..16 فإن المرجع يلغي الإزالة كلها. أما البايت السابق
   /// الأكبر من 16 فينهي الفحص مع الإبقاء على عدد البايتات المتطابقة المكتشف.
   static Uint8List _unpadBytesOut(Uint8List data) {
+    const blockSize = 16;
+    // SlowAES skips unpadding for a single 16-byte AES block. Applying the
+    // padding scan here changes valid browser output (notably a trailing 0x0d).
+    if (data.length <= blockSize) return data;
+
     var padCount = 0;
     var padByte = -1;
-    const blockSize = 16;
 
     for (
       var i = data.length - 1;

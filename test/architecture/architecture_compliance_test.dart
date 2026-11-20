@@ -161,18 +161,23 @@ void main() {
       );
     });
 
-    test('Zero client-side filteredLinks getter in CommercialDirectoryController', () {
-      final controllerFile = File(
-        'lib/features/commercial/presentation/controllers/commercial_directory_controller.dart',
-      );
-      expect(controllerFile.existsSync(), isTrue);
+    test('Zero client-side filteredLinks getter in Commercial directory controllers', () {
+      const controllerPaths = [
+        'lib/features/commercial/presentation/controllers/network_pos_directory_controller.dart',
+        'lib/features/commercial/presentation/controllers/pos_linked_networks_controller.dart',
+      ];
 
-      final content = controllerFile.readAsStringSync();
-      expect(
-        content.contains('get filteredLinks'),
-        isFalse,
-        reason: 'CommercialDirectoryController must use server-side search and cursor pagination, not in-memory filteredLinks getter.',
-      );
+      for (final path in controllerPaths) {
+        final controllerFile = File(path);
+        expect(controllerFile.existsSync(), isTrue, reason: 'Missing Commercial controller: $path');
+
+        final content = controllerFile.readAsStringSync();
+        expect(
+          content.contains('get filteredLinks'),
+          isFalse,
+          reason: '$path must use server-side search and cursor pagination, not an in-memory filteredLinks getter.',
+        );
+      }
     });
   });
 }
