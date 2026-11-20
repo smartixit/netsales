@@ -5,7 +5,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_linked_network_option_view_model.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
@@ -68,9 +68,7 @@ class PosLinkedNetworkSelector extends StatelessWidget {
         );
       }
 
-      final activeLinks = controller.networkLinks
-          .where((link) => link.status)
-          .toList(growable: false);
+      final activeLinks = controller.linkedNetworkOptions;
 
       if (activeLinks.isEmpty) {
         return const CustomEmptyState(
@@ -105,10 +103,8 @@ class PosLinkedNetworkSelector extends StatelessWidget {
             AppSpacing.vMd,
             _NetworkChoices(
               links: activeLinks,
-              selectedId: selected?.networkId,
-              onSelected: (link) => controller.selectNetwork(
-                link,
-              ),
+              selectedNetworkPosId: selected?.networkPosId,
+              onSelected: controller.selectNetworkLink,
             ),
             if (controller.hasMoreNetworks.value) ...[
               AppSpacing.vSm,
@@ -127,13 +123,13 @@ class PosLinkedNetworkSelector extends StatelessWidget {
 class _NetworkChoices extends StatelessWidget {
   const _NetworkChoices({
     required this.links,
-    required this.selectedId,
+    required this.selectedNetworkPosId,
     required this.onSelected,
   });
 
-  final List<NetworkPosLinkEntity> links;
-  final int? selectedId;
-  final Future<void> Function(NetworkPosLinkEntity link) onSelected;
+  final List<PosLinkedNetworkOptionViewModel> links;
+  final int? selectedNetworkPosId;
+  final Future<void> Function(int networkPosId) onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +140,7 @@ class _NetworkChoices extends StatelessWidget {
       children: [
         for (final link in links)
           CustomInteractiveBounce(
-            onTap: () => onSelected(link),
+            onTap: () => onSelected(link.networkPosId),
             child: Container(
               constraints: BoxConstraints(maxWidth: 240.w),
               padding: EdgeInsets.symmetric(
@@ -152,7 +148,7 @@ class _NetworkChoices extends StatelessWidget {
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                color: link.networkId == selectedId
+                color: link.networkPosId == selectedNetworkPosId
                     ? colors.primary.withValues(alpha: 0.12)
                     : colors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -177,7 +173,7 @@ class _NetworkChoices extends StatelessWidget {
                   AppSpacing.hSm,
                   Flexible(
                     child: Text(
-                      link.displayNetworkName,
+                      link.displayName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.labelMedium.copyWith(

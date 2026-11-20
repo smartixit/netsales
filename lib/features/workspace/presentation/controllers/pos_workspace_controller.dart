@@ -25,8 +25,10 @@ import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_active_supply_order_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_linked_network_option_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_workspace_transaction_mapper.dart';
 import 'package:netsales/features/workspace/presentation/models/pos_active_supply_order_view_model.dart';
+import 'package:netsales/features/workspace/presentation/models/pos_linked_network_option_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 
 /// Coordinates POS selection, linked supplier selection and dashboard data.
@@ -110,6 +112,12 @@ class PosWorkspaceController extends GetxController {
 
   PosActiveSupplyOrderViewModel? get activeSupplyOrder =>
       PosActiveSupplyOrderMapper.map(recentRequests);
+
+  List<PosLinkedNetworkOptionViewModel> get linkedNetworkOptions =>
+      PosLinkedNetworkOptionMapper.map(
+        links: networkLinks,
+        selectedNetworkPosId: selectedNetworkLink.value?.networkPosId,
+      );
 
   List<WorkspaceTransactionItemViewModel> get recentTransactionItems =>
       PosWorkspaceTransactionMapper.map(
@@ -297,6 +305,13 @@ class PosWorkspaceController extends GetxController {
       authorizedLink.networkId,
     );
     await loadNetworkScopedData(authorizedLink.networkId, posId: posId);
+  }
+
+  Future<void> selectNetworkLink(int networkPosId) async {
+    final link = networkLinks.firstWhereOrNull(
+      (candidate) => candidate.networkPosId == networkPosId && candidate.status,
+    );
+    if (link != null) await selectNetwork(link);
   }
 
   Future<void> loadNetworkScopedData(
