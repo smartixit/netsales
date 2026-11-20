@@ -1,6 +1,4 @@
 import 'package:netsales/core/enums/membership_status.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 
 /// كيان دورة حياة عضوية مساحة العمل لنظام NetSales (Workspace Member Entity)
@@ -35,13 +33,6 @@ class WorkspaceMemberEntity {
   bool get isActive => status == MembershipStatus.active;
   bool get isSuspended => status == MembershipStatus.suspended;
   bool get isInvited => status == MembershipStatus.invited;
-
-  /// محرك تمثيل الحالات الموحد للمنظومة (Enum Presentation Engine)
-  EnumPresentation get statusPresentation =>
-      EnumPresentationRegistry.resolveMembershipStatus(
-        status,
-        serverLabel: statusLabel,
-      );
 
   /// الحروف الأولى من اسم العضو للأفاتار باستخدام أداة TextFormatter المركزية
   String get displayInitials => TextFormatter.avatarInitials(fullName);

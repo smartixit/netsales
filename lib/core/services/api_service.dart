@@ -58,7 +58,7 @@ class ApiService {
   Dio get dio => _dio;
 
   /// دالة رد نداء تُستدعى تلقائياً عند انتهاء صلاحية الجلسة (401 Unauthorized)
-  static void Function()? onUnauthorized;
+  static Future<void> Function()? onUnauthorized;
 
   /// تهيئة عميل الاتصال وضبط تجاوز الشهادات في بيئة التطوير
   void _configureHttpClient() {
@@ -112,15 +112,15 @@ class ApiService {
         options: options,
         cancelToken: cancelToken,
       );
-      log('📍 Response -> ${response.data}');
+      _logResponse(endpoint, response.statusCode);
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -168,16 +168,16 @@ class ApiService {
             return list.map((item) => fromJson(item)).toList();
           }
         }
-        log('📍 Response -> ${response.data}');
+        _logResponse(endpoint, response.statusCode);
         return <T>[];
-      });
+      }, statusCode: response.statusCode);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<List<T>>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<List<T>>(e, endpoint);
     }
   }
@@ -206,15 +206,15 @@ class ApiService {
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
       );
-      log('📍 Response -> ${response.data}');
+      _logResponse(endpoint, response.statusCode);
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -241,15 +241,15 @@ class ApiService {
         options: effectiveOptions,
         cancelToken: cancelToken,
       );
-      log('📍 Response -> ${response.data}');
+      _logResponse(endpoint, response.statusCode);
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -276,15 +276,15 @@ class ApiService {
         options: effectiveOptions,
         cancelToken: cancelToken,
       );
-      log('📍 Response -> ${response.data}');
+      _logResponse(endpoint, response.statusCode);
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -311,15 +311,15 @@ class ApiService {
         options: effectiveOptions,
         cancelToken: cancelToken,
       );
-      log('📍 Response -> ${response.data}');
+      _logResponse(endpoint, response.statusCode);
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -366,15 +366,15 @@ class ApiService {
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
       );
-      log('📍 Response -> ${response.data}');
+      _logResponse(endpoint, response.statusCode);
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode} -> data=${e.response?.data}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -507,12 +507,14 @@ class ApiService {
           fromJson,
           isIdempotentHit: isIdempotentHit,
           idempotencyKey: idempotencyKey,
+          statusCode: response.statusCode,
         );
       }
       return ApiResponse<T>.fromSimpleJson(
         body,
         isIdempotentHit: isIdempotentHit,
         idempotencyKey: idempotencyKey,
+        statusCode: response.statusCode,
       );
     }
 
@@ -524,12 +526,14 @@ class ApiService {
           fromJson,
           isIdempotentHit: isIdempotentHit,
           idempotencyKey: idempotencyKey,
+          statusCode: response.statusCode,
         );
       }
       return ApiResponse<T>.fromSimpleJson(
         map,
         isIdempotentHit: isIdempotentHit,
         idempotencyKey: idempotencyKey,
+        statusCode: response.statusCode,
       );
     }
 
@@ -537,6 +541,7 @@ class ApiService {
     return ApiResponse<T>(
       success: isSuccess,
       message: isSuccess ? 'تمت العملية بنجاح' : 'حدث خطأ في الاستجابة',
+      statusCode: response.statusCode,
       data: isSuccess && fromJson != null && body != null
           ? fromJson(body)
           : null,
@@ -548,11 +553,8 @@ class ApiService {
   ApiResponse<T> _handleDioError<T>(DioException e, String endpoint) {
     if (AppEnvironment.enableLogging) {
       log(
-        '❌ Dio Error [$endpoint]: ${e.message} | Status: ${e.response?.statusCode}',
+        '❌ Dio Error [$endpoint]: ${e.type} | Status: ${e.response?.statusCode}',
       );
-      if (e.response?.data != null) {
-        log('Response data: ${e.response?.data}');
-      }
     }
 
     // 1. فحص انقطاع أو ضعف الاتصال بالإنترنت
@@ -561,6 +563,7 @@ class ApiService {
         success: false,
         message:
             'لا يتوفر اتصال بالإنترنت، يرجى التحقق من اتصالك والمحاولة مجدداً',
+        statusCode: e.response?.statusCode,
       );
     }
 
@@ -571,6 +574,7 @@ class ApiService {
       return ApiResponse<T>(
         success: false,
         message: 'انتهت مهلة الاتصال بالخادم، يرجى المحاولة مرة أخرى',
+        statusCode: e.response?.statusCode,
       );
     }
 
@@ -603,6 +607,7 @@ class ApiService {
         success: false,
         message: AppException.sanitizeMessage(message),
         errors: errors,
+        statusCode: statusCode,
       );
     }
 
@@ -614,7 +619,7 @@ class ApiService {
 
   ApiResponse<T> _handleUnexpectedError<T>(dynamic error, String endpoint) {
     if (AppEnvironment.enableLogging) {
-      log('❌ Unexpected Error [$endpoint]: $error');
+      log('❌ Unexpected API error [$endpoint]: ${error.runtimeType}');
     }
     return ApiResponse<T>(
       success: false,
@@ -623,6 +628,12 @@ class ApiService {
         fallback: 'حدث خطأ غير متوقع، يرجى المحاولة لاحقاً',
       ),
     );
+  }
+
+  void _logResponse(String endpoint, int? statusCode) {
+    if (AppEnvironment.enableLogging) {
+      log('📍 API response received [$endpoint] | Status: $statusCode');
+    }
   }
 
   String _extractUserFriendlyMessage({
@@ -738,9 +749,9 @@ class _SessionAuthInterceptor extends Interceptor {
           path.contains('/auth/register') ||
           path.contains('/auth/password');
 
-      if (!isPublicAuth) {
-        await StorageService.instance.clearSession();
-        ApiService.onUnauthorized?.call();
+      final isSessionValidation = path.endsWith('/auth/me');
+      if (!isPublicAuth && !isSessionValidation) {
+        await ApiService.onUnauthorized?.call();
       }
     }
 

@@ -74,6 +74,7 @@ class AppCryptoService {
 
   /// مفتاح التوقيع الرقمي العام للخادم (Ed25519 Sign Public Key - 32 bytes)
   Uint8List? _serverSignPublicKey;
+  Future<bool>? _publicKeysSyncFuture;
 
   /// هل مكتبة التشفير جاهزة للاستخدام
   bool get isReady => _isInitialized && _sodium != null;
@@ -113,9 +114,22 @@ class AppCryptoService {
   Future<bool> syncServerPublicKeys({
     required Dio dio,
     bool force = false,
-  }) async {
-    if (!force && hasServerBoxKey) return true;
+  }) {
+    if (!force && hasServerBoxKey) return Future<bool>.value(true);
 
+    final inFlight = _publicKeysSyncFuture;
+    if (inFlight != null) return inFlight;
+
+    final syncFuture = _syncServerPublicKeys(dio: dio);
+    _publicKeysSyncFuture = syncFuture;
+    return syncFuture.whenComplete(() {
+      if (identical(_publicKeysSyncFuture, syncFuture)) {
+        _publicKeysSyncFuture = null;
+      }
+    });
+  }
+
+  Future<bool> _syncServerPublicKeys({required Dio dio}) async {
     try {
       final response = await dio.get<dynamic>(
         ApiConstants.securityPublicKeys,

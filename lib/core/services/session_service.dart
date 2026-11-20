@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/models/user_model.dart';
@@ -12,7 +14,6 @@ import 'package:netsales/core/services/push_notification_service.dart';
 import 'package:netsales/core/services/server_task_runner_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/features/notifications/presentation/controllers/notification_controller.dart';
 
 /// ============================================================================
 /// خدمة إدارة الجلسة والهوية (Enterprise Identity & Session Lifecycle Service)
@@ -31,6 +32,10 @@ class SessionService extends GetxService {
   final Rxn<UserModel> _user = Rxn<UserModel>();
   final Rxn<UserSessionModel> _session = Rxn<UserSessionModel>();
   final RxBool _isAuthenticated = false.obs;
+  final RxBool _isSessionVerified = false.obs;
+  final RxBool _isAccessBlocked = false.obs;
+  Future<void>? _terminationFuture;
+  bool _handlingUnauthorized = false;
 
   /// بيانات المستخدم الحالي المسجل
   UserModel? get currentUser => _user.value;
@@ -45,11 +50,19 @@ class SessionService extends GetxService {
   /// حالة المصادقة النشطة
   bool get isAuthenticated => _isAuthenticated.value;
 
+  /// True only after /auth/me succeeds or a fresh login succeeds.
+  bool get isSessionVerified => _isSessionVerified.value;
+
+  /// Backend denied account/device access with 403; local credentials remain intact.
+  bool get isAccessBlocked => _isAccessBlocked.value;
+
   /// التحقق مما إذا كان المستخدم مجبراً على تغيير كلمة المرور قبل الوصول للوحة التحكم
   bool get mustChangePassword => _user.value?.mustChangePassword ?? false;
 
   /// تهيئة الخدمة واستعادة بيانات الجلسة من التخزين المحلي عند إقلاع التطبيق
   Future<SessionService> init() async {
+    _isSessionVerified.value = false;
+    _isAccessBlocked.value = false;
     final storage = StorageService.instance;
     final sessionId = storage.sessionId;
     final cachedUser = storage.getModel<UserModel>(
@@ -77,16 +90,8 @@ class SessionService extends GetxService {
         );
       }
 
-      if (Get.isRegistered<PushNotificationService>()) {
-        await PushNotificationService.to.syncTokenWithBackend();
-      }
-
-      if (Get.isRegistered<WorkspaceService>()) {
-        await WorkspaceService.to.syncWithUserMemberships(cachedUser);
-      }
-
       log(
-        '🔑 [SessionService] Session restored for user #${cachedUser.userId} (${cachedUser.userFullName}) with ${cachedUser.workspaceMemberships.length} memberships',
+        '🔑 [SessionService] Local session restored with ${cachedUser.workspaceMemberships.length} workspace memberships; awaiting server verification.',
       );
     } else {
       _isAuthenticated.value = false;
@@ -94,13 +99,20 @@ class SessionService extends GetxService {
     }
 
     // ربط انتهاء الصلاحية من عميل الشبكة تلقائياً
-    ApiService.onUnauthorized = () {
-      log(
-        '⚠️ [SessionService] Unauthorized event received (401). Terminating session...',
-      );
-      terminateSession();
-      if (Get.currentRoute != AppRoutes.login) {
-        Get.offAllNamed<void>(AppRoutes.login);
+    ApiService.onUnauthorized = () async {
+      if (_handlingUnauthorized ||
+          (!_isAuthenticated.value && Get.currentRoute == AppRoutes.login)) {
+        return;
+      }
+      _handlingUnauthorized = true;
+      try {
+        log('⚠️ [SessionService] Protected request rejected with 401.');
+        await terminateSession();
+        if (Get.currentRoute != AppRoutes.login) {
+          await Get.offAllNamed<void>(AppRoutes.login);
+        }
+      } finally {
+        _handlingUnauthorized = false;
       }
     };
 
@@ -125,6 +137,8 @@ class SessionService extends GetxService {
     _user.value = user;
     _session.value = session;
     _isAuthenticated.value = true;
+    _isSessionVerified.value = true;
+    _isAccessBlocked.value = false;
 
     if (Get.isRegistered<PermissionService>()) {
       PermissionService.to.updateAccess(
@@ -133,21 +147,50 @@ class SessionService extends GetxService {
       );
     }
 
-    if (Get.isRegistered<PushNotificationService>()) {
-      await PushNotificationService.to.syncTokenWithBackend();
-    }
-
     if (Get.isRegistered<WorkspaceService>()) {
       await WorkspaceService.to.syncWithUserMemberships(user);
+    }
+
+    if (Get.isRegistered<PushNotificationService>()) {
+      unawaited(PushNotificationService.to.syncTokenWithBackend());
+      _releasePendingNotificationNavigationAfterFrame();
     }
 
     if (Get.isRegistered<ServerTaskRunnerService>()) {
       ServerTaskRunnerService.to.startForegroundHeartbeat();
     }
 
-    log(
-      '✅ [SessionService] Session started successfully for user #${user.userId}',
-    );
+    log('✅ [SessionService] Authenticated session started successfully.');
+  }
+
+  /// Confirm a restored local session only after the backend accepts /auth/me.
+  /// This method is idempotent and starts authenticated background work once.
+  void markSessionVerified() {
+    if (!_isAuthenticated.value || _isSessionVerified.value) return;
+
+    _isSessionVerified.value = true;
+    if (Get.isRegistered<PushNotificationService>()) {
+      unawaited(PushNotificationService.to.syncTokenWithBackend());
+      _releasePendingNotificationNavigationAfterFrame();
+    }
+    if (Get.isRegistered<ServerTaskRunnerService>()) {
+      ServerTaskRunnerService.to.startForegroundHeartbeat();
+    }
+  }
+
+  /// A 403 from /auth/me blocks protected access without deleting local credentials.
+  void markSessionAccessBlocked() {
+    _isAccessBlocked.value = true;
+    _isSessionVerified.value = false;
+  }
+
+  void _releasePendingNotificationNavigationAfterFrame() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isAuthenticated.value && _isSessionVerified.value &&
+          Get.isRegistered<PushNotificationService>()) {
+        PushNotificationService.to.markNavigationReady();
+      }
+    });
   }
 
   /// تحديث ومزامنة سياق جلسة المستخدم بالكامل وبشكل ذري
@@ -173,9 +216,7 @@ class SessionService extends GetxService {
       await WorkspaceService.to.syncWithUserMemberships(user);
     }
 
-    log(
-      '🔄 [SessionService] User profile and workspace memberships synced successfully for user #${user.userId}',
-    );
+    log('🔄 [SessionService] User profile and workspace memberships synced.');
   }
 
   /// تحديث بيانات المستخدم في الذاكرة والتخزين المحلي
@@ -217,8 +258,24 @@ class SessionService extends GetxService {
     }
   }
 
-  /// إنهاء الجلسة بالكامل وتصفير الحالات والتخزين
-  Future<void> terminateSession() async {
+  /// إنهاء الجلسة مرة واحدة حتى لو وصلت عدة استجابات 401 بالتزامن.
+  Future<void> terminateSession() {
+    final activeTermination = _terminationFuture;
+    if (activeTermination != null) return activeTermination;
+
+    final termination = _performSessionTermination();
+    _terminationFuture = termination;
+    return termination.whenComplete(() {
+      if (identical(_terminationFuture, termination)) {
+        _terminationFuture = null;
+      }
+    });
+  }
+
+  Future<void> _performSessionTermination() async {
+    _isSessionVerified.value = false;
+    _isAccessBlocked.value = false;
+    _isAuthenticated.value = false;
     final storage = StorageService.instance;
     await storage.clearSession();
     await storage.remove(StorageKeys.userId);
@@ -228,15 +285,22 @@ class SessionService extends GetxService {
 
     final previousUserId = _user.value?.userId;
     if (previousUserId != null) {
+      final posContextKey = '${StorageKeys.activePosTenantPrefix}_$previousUserId';
+      final savedPosId = storage.getInt(posContextKey);
+      if (savedPosId != null) {
+        await storage.remove(
+          '${StorageKeys.activePosNetworkPrefix}_${previousUserId}_$savedPosId',
+        );
+      }
+      await storage.remove(posContextKey);
       await storage.remove(
-        '${StorageKeys.activePosTenantPrefix}_$previousUserId',
+        '${StorageKeys.activeNetworkTenantPrefix}_$previousUserId',
       );
       await storage.remove(StorageKeys.activeWorkspaceKey);
     }
 
     _user.value = null;
     _session.value = null;
-    _isAuthenticated.value = false;
 
     if (Get.isRegistered<PermissionService>()) {
       PermissionService.to.clear();
@@ -246,14 +310,8 @@ class SessionService extends GetxService {
       await PushNotificationService.to.clearFcmToken();
     }
 
-    if (Get.isRegistered<NotificationController>()) {
-      NotificationController.to.unreadCount.value = 0;
-      NotificationController.to.notifications.clear();
-    }
-
-    if (Get.isRegistered<ServerTaskRunnerService>()) {
-      await ServerTaskRunnerService.to.reset();
-    }
+    // Reset the singleton without resolving its lazy GetX registration.
+    await ServerTaskRunnerService.instance.reset();
 
     // if (Get.isRegistered<WorkspaceService>()) {
     //   await WorkspaceService.to.setActiveWorkspace(AppWorkspace.unsupported);

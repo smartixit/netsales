@@ -32,6 +32,12 @@ class AuthGuard extends GetMiddleware {
       });
       return const RouteSettings(name: AppRoutes.login);
     }
+    if (SessionService.to.isAccessBlocked) {
+      return const RouteSettings(name: AppRoutes.unauthorized);
+    }
+    if (!SessionService.to.isSessionVerified) {
+      return const RouteSettings(name: AppRoutes.initial);
+    }
 
     // الحزام الأمني: منع الوصول لأي صفحة إذا كان تغيير كلمة المرور إلزامياً
     if (SessionService.to.mustChangePassword &&
@@ -58,7 +64,19 @@ class GuestGuard extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     if (Get.isRegistered<SessionService>() &&
-        SessionService.to.isAuthenticated) {
+        SessionService.to.isAccessBlocked) {
+      return const RouteSettings(name: AppRoutes.unauthorized);
+    }
+
+    if (Get.isRegistered<SessionService>() &&
+        SessionService.to.isAuthenticated &&
+        !SessionService.to.isSessionVerified) {
+      return const RouteSettings(name: AppRoutes.initial);
+    }
+
+    if (Get.isRegistered<SessionService>() &&
+        SessionService.to.isAuthenticated &&
+        SessionService.to.isSessionVerified) {
       if (SessionService.to.mustChangePassword) {
         return const RouteSettings(name: AppRoutes.resetPassword);
       }
@@ -102,6 +120,14 @@ class PermissionGuardMiddleware extends GetMiddleware {
         );
       });
       return const RouteSettings(name: AppRoutes.login);
+    }
+
+    if (SessionService.to.isAccessBlocked) {
+      return const RouteSettings(name: AppRoutes.unauthorized);
+    }
+
+    if (!SessionService.to.isSessionVerified) {
+      return const RouteSettings(name: AppRoutes.initial);
     }
 
     if (SessionService.to.mustChangePassword &&

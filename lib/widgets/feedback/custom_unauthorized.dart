@@ -13,7 +13,14 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 /// ============================================================================
 /// تظهر عند محاولة الوصول المباشر (Deep Links) إلى مسار غير مصرح به للمستخدم.
 class CustomUnauthorized extends StatelessWidget {
-  const CustomUnauthorized({super.key});
+  const CustomUnauthorized({
+    super.key,
+    this.isSessionBlocked = false,
+    this.onSessionBlockedLogout,
+  });
+
+  final bool isSessionBlocked;
+  final Future<void> Function()? onSessionBlockedLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +56,9 @@ class CustomUnauthorized extends StatelessWidget {
               ),
               AppSpacing.vSm,
               Text(
-                'ليس لديك الصلاحية الكافية للوصول إلى هذا المسار أو تنفيذ هذا الإجراء.',
+                isSessionBlocked
+                    ? 'تم رفض الوصول إلى الحساب أو الجهاز من الخادم. يمكنك إنهاء الجلسة والمحاولة بحساب آخر.'
+                    : 'ليس لديك الصلاحية الكافية للوصول إلى هذا المسار أو تنفيذ هذا الإجراء.',
                 style: AppTypography.bodyMedium.copyWith(
                   color: colors.onSurfaceVariant,
                 ),
@@ -57,10 +66,14 @@ class CustomUnauthorized extends StatelessWidget {
               ),
               AppSpacing.vXl,
               CustomButton.primary(
-                text: 'العودة للرئيسية',
-                icon: Icons.home_rounded,
-                onPressed: () {
-                  Get.offAllNamed<void>(AppRoutes.dashboard);
+                text: isSessionBlocked ? 'تسجيل الخروج' : 'العودة للرئيسية',
+                icon: isSessionBlocked ? Icons.logout_rounded : Icons.home_rounded,
+                onPressed: () async {
+                  if (isSessionBlocked) {
+                    await onSessionBlockedLogout?.call();
+                    return;
+                  }
+                  await Get.offAllNamed<void>(AppRoutes.dashboard);
                 },
               ),
             ],

@@ -85,9 +85,7 @@ class DeviceService extends GetxService {
     // تثبيت واستعادة معرّف الجهاز السيادي الدائم المقاوم لإعادة التثبيت
     await _resolveDeviceUuid();
 
-    log(
-      '📱 [DeviceService] Enterprise Ready: Name="$_deviceName", Type=$_deviceType, UUID=$_deviceUuid',
-    );
+    log('📱 [DeviceService] Device identity initialized. Type=$_deviceType');
     return this;
   }
 

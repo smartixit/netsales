@@ -127,10 +127,8 @@ void main() async {
   Get.put<ThemeService>(ThemeService.instance, permanent: true);
 
   Get.put<PermissionService>(PermissionService.instance, permanent: true);
-  await SessionService.instance.init();
-  Get.put<SessionService>(SessionService.instance, permanent: true);
-  await WorkspaceService.instance.init();
   Get.put<WorkspaceService>(WorkspaceService.instance, permanent: true);
+  Get.put<SessionService>(SessionService.instance, permanent: true);
 
   // 3. تسجيل الخدمات العامة الدائمة في حاوية GetX لضمان استقرار التبعيات
   Get.put<DeviceService>(DeviceService.instance, permanent: true);
@@ -161,9 +159,8 @@ void main() async {
   // Edge-to-Edge (Android 15+ standard) — Guaranteed modern system bars
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  // 5. إطلاق الواجهة الرئيسية فوراً (Instant Native Splash Dismissal & Fast First Frame)
-  // ملاحظة: الخدمات الثقيلة (Firebase/FCM, Libsodium, DeviceInfo, Ping) تُهيأ
-  // بالتوازي وبشكل غير حاجب داخل SplashController أثناء دوران شاشة الإقلاع الأنيقة.
+  // 5. إطلاق الواجهة الرئيسية فوراً. استعادة الجلسة مؤجلة إلى Splash
+  // حتى تكتمل بصمة الجهاز والاتصال قبل أي طلب أو مزامنة تعتمد عليهما.
   runApp(const MyApp());
 }
 

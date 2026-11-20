@@ -78,6 +78,8 @@ class PushNotificationService extends GetxService {
       );
 
   String? _fcmToken;
+  Map<String, dynamic>? _pendingNavigationData;
+  bool _isNavigationReady = false;
 
   /// رمز الإشعارات الفورية الحالي للجهاز
   String? get fcmToken => _fcmToken;
@@ -243,11 +245,8 @@ class PushNotificationService extends GetxService {
     try {
       _fcmToken = await _fcm.getToken();
       if (_fcmToken != null && _fcmToken!.isNotEmpty) {
-        log(
-          '🔑 [PushNotificationService] FCM Token acquired: ${_fcmToken!.substring(0, 16)}...',
-        );
-        // مزامنة الرمز مع الخادم إذا كان المستخدم مسجلاً بالفعل
-        if (SessionService.to.isAuthenticated) {
+        log('🔑 [PushNotificationService] FCM token acquired.');
+        if (SessionService.to.isSessionVerified) {
           await syncTokenWithBackend();
         }
       }
@@ -258,7 +257,7 @@ class PushNotificationService extends GetxService {
           '🔄 [PushNotificationService] FCM Token rotated by Google Services.',
         );
         _fcmToken = newToken;
-        if (SessionService.to.isAuthenticated) {
+        if (SessionService.to.isSessionVerified) {
           await syncTokenWithBackend(force: true);
         }
       });
@@ -269,6 +268,11 @@ class PushNotificationService extends GetxService {
 
   /// مزامنة الرمز الحالي مع الواجهة الخلفية عبر نقطة الوصول /api/v1/notifications/fcm-token
   Future<bool> syncTokenWithBackend({bool force = false}) async {
+    if (!SessionService.to.isAuthenticated ||
+        !SessionService.to.isSessionVerified ||
+        DeviceService.instance.deviceUuid.isEmpty) {
+      return false;
+    }
     final token = _fcmToken;
     if (token == null || token.isEmpty) {
       return false;
@@ -298,9 +302,7 @@ class PushNotificationService extends GetxService {
 
       if (response.success) {
         await storage.setString(StorageKeys.fcmTokenStorage, token);
-        log(
-          '📡 [PushNotificationService] FCM Token synced with server for device: ${device.deviceUuid}',
-        );
+        log('📡 [PushNotificationService] FCM token synced with server.');
         return true;
       }
     } catch (e) {
@@ -317,6 +319,8 @@ class PushNotificationService extends GetxService {
     try {
       await StorageService.instance.remove(StorageKeys.fcmTokenStorage);
       _fcmToken = null;
+      _pendingNavigationData = null;
+      _isNavigationReady = false;
       if (isFcmSupported) {
         await _fcm.deleteToken();
       }
@@ -358,10 +362,7 @@ class PushNotificationService extends GetxService {
         log(
           '🚀 [PushNotificationService] App launched from terminated state via notification.',
         );
-        // ننتظر قليلاً حتى تكتمل جاهزية شجرة التوجيه والواجهات
-        Future<dynamic>.delayed(const Duration(milliseconds: 600), () {
-          _handleMessageNavigation(initialMessage);
-        });
+        _handleMessageNavigation(initialMessage);
       }
     } catch (e) {
       log('⚠️ [PushNotificationService] Error checking initial message: $e');
@@ -432,17 +433,38 @@ class PushNotificationService extends GetxService {
     }
   }
 
+  /// Called after the app has completed its primary boot/login navigation.
+  void markNavigationReady() {
+    if (!SessionService.to.isAuthenticated ||
+        !SessionService.to.isSessionVerified) {
+      return;
+    }
+    _isNavigationReady = true;
+    _releasePendingNavigation();
+  }
+
+  void _releasePendingNavigation() {
+    final pending = _pendingNavigationData;
+    if (pending == null || !_isNavigationReady) return;
+    _pendingNavigationData = null;
+    _dispatchPayloadNavigation(pending);
+  }
+
   /// توجيه المستخدم للشاشة المناسبة بحسب نوع الإشعار ومعرفه
   void _dispatchPayloadNavigation(Map<String, dynamic> data) {
     if (data.isEmpty) return;
+    if (!SessionService.to.isAuthenticated ||
+        !SessionService.to.isSessionVerified ||
+        !_isNavigationReady) {
+      _pendingNavigationData = Map<String, dynamic>.from(data);
+      return;
+    }
 
     final route = data['route']?.toString();
     final rawType = data['notification_type'] ?? data['entity_type'];
     final entityId = data['entity_id']?.toString() ?? data['id']?.toString();
 
-    log(
-      '🎯 [PushNotificationService] Dispatching deep link: type=$rawType, entityId=$entityId',
-    );
+    log('🎯 [PushNotificationService] Dispatching a verified notification deep link.');
 
     // 1. التوجيه المباشر بالمسار الصريح إن وُجد
     if (route != null && route.isNotEmpty) {

@@ -18,26 +18,26 @@ class InternetConnectionService {
   StreamSubscription<InternetStatus>? _internetSubscription;
 
   StreamSubscription<bool>? _stateSubscription;
+  Future<void>? _initializationFuture;
 
   bool _isConnected = false;
 
   bool get isConnected => _isConnected;
 
   /// Initialize network monitoring
-  Future<void> initialize() async {
-    // Check initial status
+  Future<void> initialize() {
+    return _initializationFuture ??= _initialize();
+  }
+
+  Future<void> _initialize() async {
     _isConnected = await _checkInternet();
+    if (!_controller.isClosed) _controller.add(_isConnected);
 
-    _controller.add(_isConnected);
-
-    // Listen for internet changes
-    _internetSubscription = _internet.onStatusChange.listen((status) {
+    _internetSubscription ??= _internet.onStatusChange.listen((status) {
       final connected = status == InternetStatus.connected;
-
       if (connected != _isConnected) {
         _isConnected = connected;
-
-        _controller.add(connected);
+        if (!_controller.isClosed) _controller.add(connected);
       }
     });
   }
@@ -48,8 +48,7 @@ class InternetConnectionService {
 
     if (status != _isConnected) {
       _isConnected = status;
-
-      _controller.add(status);
+      if (!_controller.isClosed) _controller.add(status);
     }
 
     return status;
