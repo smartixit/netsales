@@ -27,16 +27,10 @@ class NetworkOperatingExpensesScreen
       appBarTitle: 'المصروفات التشغيلية',
       body: CustomRefreshablePage.slivers(
         onRefresh: controller.refreshExpenses,
+        onLoadMore: controller.loadMoreExpenses,
+        hasMore: controller.hasMore,
         scrollKey:
             const PageStorageKey<String>('network-operating-expenses-scroll'),
-        onNotification: (scroll) {
-          if (scroll.depth == 0 &&
-              scroll.metrics.extentAfter <= 220 &&
-              controller.hasMore) {
-            controller.loadMoreExpenses();
-          }
-          return false;
-        },
         slivers: [
           // 1. الترويسة وبطاقات الملخص وفلاتر البحث
           SliverToBoxAdapter(

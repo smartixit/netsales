@@ -25,16 +25,10 @@ class NetworkProcurementOrdersView
     return CustomRefreshablePage.slivers(
       embedded: embedded,
       onRefresh: controller.refreshOrders,
+      onLoadMore: controller.loadMoreRequests,
+      hasMore: controller.hasMore,
       scrollKey:
           const PageStorageKey<String>('network-procurement-orders-scroll'),
-      onNotification: (scroll) {
-        if (scroll.depth == 0 &&
-            scroll.metrics.extentAfter <= 220 &&
-            controller.hasMore) {
-          controller.loadMoreRequests();
-        }
-        return false;
-      },
       slivers: [
         // 1. الترويسة القيادية لطلبات التوريد وشريط الملخص وفلاتر البحث
         SliverToBoxAdapter(

@@ -4,23 +4,28 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 
-/// ودجت الصفحة القابلة للتحديث الموحدة والمسؤولة مركزياً عن حساب الهوامش والمسافات الآمنة (Padding)
-/// تدعم نمطين: بناء ودجت مفرد (Box Child) أو قائمة شرائح متعددة (Slivers Pipeline) مع إعفاء الشاشات كلياً
-/// من حسابات الـ horizontalPadding و topPadding و bottomPadding وشريط التنقل السفلي العائم.
+/// ودجت الصفحة القابلة للتحديث الموحدة والمسؤولة مركزياً عن:
+/// 1. حساب الهوامش والمسافات الآمنة (Padding) للهواتف والأجهزة اللوحية
+/// 2. إدارة التمرير اللانهائي الذكي (Smart Infinite Scroll) عبر عتبة استباقية (280px) لجلب البيانات تلقائياً قبل وصول المستخدم للنهاية
+/// 3. دعم بناء ودجت مفرد (Box Child) أو قائمة شرائح متعددة (Slivers Pipeline) مع الحفاظ الكامل على Virtualization.
 class CustomRefreshablePage extends StatelessWidget {
   const CustomRefreshablePage({
     super.key,
     required this.onRefresh,
-    required Widget this._child,
+    required Widget child,
     this.embedded = false,
     this.padding,
     this.maxContentWidth = 760,
     this.edgeOffset,
     this.displacement,
+    this.onLoadMore,
+    this.hasMore = false,
+    this.loadMoreThreshold = 280.0,
     this.onNotification,
     this.scrollKey,
     this.physics,
-  })  : slivers = null;
+  })  : _child = child,
+        slivers = null;
 
   const CustomRefreshablePage.slivers({
     super.key,
@@ -31,6 +36,9 @@ class CustomRefreshablePage extends StatelessWidget {
     this.maxContentWidth = 760,
     this.edgeOffset,
     this.displacement,
+    this.onLoadMore,
+    this.hasMore = false,
+    this.loadMoreThreshold = 280.0,
     this.onNotification,
     this.scrollKey,
     this.physics,
@@ -44,6 +52,9 @@ class CustomRefreshablePage extends StatelessWidget {
   final double maxContentWidth;
   final double? edgeOffset;
   final double? displacement;
+  final VoidCallback? onLoadMore;
+  final bool hasMore;
+  final double loadMoreThreshold;
   final NotificationListenerCallback<ScrollNotification>? onNotification;
   final Key? scrollKey;
   final ScrollPhysics? physics;
@@ -107,9 +118,22 @@ class CustomRefreshablePage extends StatelessWidget {
       slivers: rootSlivers,
     );
 
-    if (onNotification != null) {
+    final shouldListenScroll = onNotification != null || onLoadMore != null;
+    if (shouldListenScroll) {
       scrollView = NotificationListener<ScrollNotification>(
-        onNotification: onNotification,
+        onNotification: (scroll) {
+          if (onNotification != null) {
+            final handled = onNotification!(scroll);
+            if (handled) return true;
+          }
+          if (onLoadMore != null &&
+              hasMore &&
+              scroll.depth == 0 &&
+              scroll.metrics.extentAfter <= loadMoreThreshold) {
+            onLoadMore!();
+          }
+          return false;
+        },
         child: scrollView,
       );
     }

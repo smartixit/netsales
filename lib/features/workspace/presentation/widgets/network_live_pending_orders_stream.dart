@@ -60,7 +60,7 @@ class NetworkLivePendingOrdersStream extends StatelessWidget {
               ),
               CustomButton.text(
                 text: 'معاينة الكل ($totalPendingCount)',
-                suffix: Icons.chevron_left_rounded,
+                suffix: Icons.chevron_right_rounded,
                 onPressed: onViewAll,
               ),
             ],

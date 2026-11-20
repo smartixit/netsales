@@ -243,7 +243,11 @@ class _ActionBadge extends StatelessWidget {
               ),
             ),
             SizedBox(width: 2.w),
-            Icon(Icons.chevron_left_rounded, size: 12.r, color: colors.primary),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 12.r,
+              color: colors.primary,
+            ),
           ],
         ),
       ),

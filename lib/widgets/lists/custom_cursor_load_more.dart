@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 
@@ -47,13 +46,6 @@ class CustomCursorLoadMore extends StatelessWidget {
         onRetry: onPressed,
       );
     }
-    if (!hasMore) return const SizedBox.shrink();
-    return Center(
-      child: CustomButton.outline(
-        text: label,
-        suffix: Icons.expand_more_rounded,
-        onPressed: onPressed,
-      ),
-    );
+    return const SizedBox.shrink();
   }
 }

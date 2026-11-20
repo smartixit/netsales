@@ -350,7 +350,7 @@ class PosSelectedNetworkFinancialSummary extends StatelessWidget {
                   ),
                   SizedBox(width: 4.w),
                   Icon(
-                    Icons.chevron_left_rounded,
+                    Icons.chevron_right_rounded,
                     size: 16.r,
                     color: Colors.white70,
                   ),

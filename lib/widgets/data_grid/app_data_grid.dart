@@ -887,7 +887,7 @@ class _GridPaginationBar extends StatelessWidget {
               CustomButton.icon(
                 icon: Directionality.of(context) == TextDirection.rtl
                     ? Icons.chevron_right_rounded
-                    : Icons.chevron_left_rounded,
+                    : Icons.chevron_right_rounded,
                 tooltip: 'السابق',
                 size: AppButtonSize.small,
                 enabled:
@@ -909,7 +909,7 @@ class _GridPaginationBar extends StatelessWidget {
               AppSpacing.hXs,
               CustomButton.icon(
                 icon: Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_left_rounded
+                    ? Icons.chevron_right_rounded
                     : Icons.chevron_right_rounded,
                 tooltip: 'التالي',
                 size: AppButtonSize.small,
