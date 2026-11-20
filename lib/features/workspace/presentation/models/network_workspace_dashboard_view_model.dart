@@ -18,7 +18,7 @@ class NetworkWorkspaceDashboardViewModel {
 
   final bool showSalesSection;
   final int? pendingRequestsCount;
-  final NetworkSalesVelocitySummary salesVelocitySummary;
+  final NetworkSalesTrendSummary salesTrendSummary;
   final ChartDefinition salesChartDefinition;
   final List<DashboardMetricData> kpiMetrics;
 }
