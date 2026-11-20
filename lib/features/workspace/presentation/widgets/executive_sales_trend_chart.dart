@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -46,12 +47,12 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
           // 1. رأس البطاقة المتجاوب (العنوان ومحدد الفترة)
           LayoutBuilder(
             builder: (context, constraints) {
-              final isCompact = constraints.maxWidth < 360;
+              final isCompact = constraints.maxWidth < AppBreakpoints.mobileSmallMax;
 
               final titleSection = Row(
                 children: [
                   Icon(Icons.show_chart_rounded, color: colors.primary, size: 18.r),
-                  SizedBox(width: 8.w),
+                  AppSpacing.hSm,
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,8 +64,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                           style: AppTypography.titleMedium.copyWith(
                             color: colors.onSurface,
                             fontWeight: FontWeight.w800,
-                            fontSize: 13.5.sp,
-                          ),
+                                                      ),
                         ),
                         Text(
                           'اتجاه إجمالي المبيعات والفواتير الصادرة',
@@ -72,8 +72,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodySmall.copyWith(
                             color: colors.onSurfaceVariant,
-                            fontSize: 10.5.sp,
-                          ),
+                                                      ),
                         ),
                       ],
                     ),
@@ -82,7 +81,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
               );
 
               final periodSelector = Container(
-                padding: const EdgeInsets.all(2.5),
+                padding: EdgeInsets.all(AppSpacing.xxs),
                 decoration: BoxDecoration(
                   color: colors.surfaceContainer,
                   borderRadius: BorderRadius.circular(AppRadius.md),
@@ -129,7 +128,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(child: titleSection),
-                  SizedBox(width: 8.w),
+                  AppSpacing.hSm,
                   periodSelector,
                 ],
               );
@@ -164,8 +163,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.labelSmall.copyWith(
                           color: colors.onSurfaceVariant,
-                          fontSize: 9.5.sp,
-                        ),
+                                                  ),
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -178,8 +176,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                               style: AppTypography.titleMedium.copyWith(
                                 color: colors.onSurface,
                                 fontWeight: FontWeight.w900,
-                                fontSize: 13.sp,
-                              ),
+                                                              ),
                             ),
                           ),
                         ],
@@ -189,14 +186,14 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                 ),
                 Container(
                   width: 1,
-                  height: 28.h,
+                  height: AppSpacing.xxl,
                   color: colors.outlineVariant.withValues(alpha: 0.3),
                 ),
                 // عدد الفواتير
                 Expanded(
                   flex: 3,
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w),
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -206,8 +203,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.labelSmall.copyWith(
                             color: colors.onSurfaceVariant,
-                            fontSize: 9.5.sp,
-                          ),
+                                                      ),
                         ),
                         Text(
                           '${summary.invoiceCount} فاتورة',
@@ -216,8 +212,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                           style: AppTypography.titleSmall.copyWith(
                             color: colors.onSurface,
                             fontWeight: FontWeight.w800,
-                            fontSize: 12.sp,
-                          ),
+                                                      ),
                         ),
                       ],
                     ),
@@ -225,14 +220,14 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                 ),
                 Container(
                   width: 1,
-                  height: 28.h,
+                  height: AppSpacing.xxl,
                   color: colors.outlineVariant.withValues(alpha: 0.3),
                 ),
                 // نمو المبيعات
                 Expanded(
                   flex: 3,
                   child: Padding(
-                    padding: EdgeInsets.only(right: 6.w),
+                    padding: EdgeInsets.only(right: AppSpacing.xs),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -242,8 +237,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.labelSmall.copyWith(
                             color: colors.onSurfaceVariant,
-                            fontSize: 9.5.sp,
-                          ),
+                                                      ),
                         ),
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -255,7 +249,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                               size: 13.r,
                               color: summary.growthRate >= 0 ? colors.success : colors.error,
                             ),
-                            SizedBox(width: 2.w),
+                            AppSpacing.hXxs,
                             Flexible(
                               child: Text(
                                 '${summary.growthRate >= 0 ? '+' : ''}${summary.growthRate.toStringAsFixed(1)}%',
@@ -264,8 +258,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                                 style: AppTypography.labelSmall.copyWith(
                                   color: summary.growthRate >= 0 ? colors.success : colors.error,
                                   fontWeight: FontWeight.w900,
-                                  fontSize: 10.5.sp,
-                                ),
+                                                                  ),
                               ),
                             ),
                           ],
@@ -311,7 +304,7 @@ class _PeriodPill extends StatelessWidget {
     return CustomInteractiveBounce(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.5.h),
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected ? colors.primary : Colors.transparent,
@@ -325,8 +318,7 @@ class _PeriodPill extends StatelessWidget {
           style: AppTypography.badgeText.copyWith(
             color: isSelected ? colors.onPrimary : colors.onSurfaceVariant,
             fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-            fontSize: 9.5.sp,
-          ),
+                      ),
         ),
       ),
     );
