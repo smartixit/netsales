@@ -189,9 +189,6 @@ class PosWorkspaceController extends GetxController {
           ? null
           : positions.firstWhereOrNull((position) => position.posId == selectedId);
 
-      if (activePos.value?.posId != selected?.posId) {
-        _clearNetworkContext();
-      }
       activePos.value = selected;
 
       if (selected == null) {
