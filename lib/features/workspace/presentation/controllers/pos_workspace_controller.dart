@@ -138,10 +138,22 @@ class PosWorkspaceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (WorkspaceService.to.activeWorkspace != AppWorkspace.pos) {
-      WorkspaceService.to.setActiveWorkspace(AppWorkspace.pos);
+    unawaited(_initializeWorkspace());
+  }
+
+  Future<void> _initializeWorkspace() async {
+    try {
+      if (WorkspaceService.to.activeWorkspace != AppWorkspace.pos) {
+        await WorkspaceService.to.setActiveWorkspace(AppWorkspace.pos);
+      }
+    } catch (error) {
+      // Workspace selection is a navigation preference. A storage failure
+      // must not prevent loading the server-authorized POS context.
+      log(
+        '⚠️ [PosWorkspaceController] Could not persist active workspace preference: $error',
+      );
     }
-    loadWorkspace();
+    await loadWorkspace();
   }
 
   Future<void> loadWorkspace() async {

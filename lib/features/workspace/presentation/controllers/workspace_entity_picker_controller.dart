@@ -125,13 +125,13 @@ class WorkspaceEntityPickerController extends GetxController {
     );
     if (network == null) return;
 
-    await WorkspaceService.to.saveActiveNetworkId(network.networkId);
     if (Get.isRegistered<NetworkWorkspaceController>()) {
       await Get.find<NetworkWorkspaceController>().selectNetwork(network.networkId);
       Get.back<void>();
       return;
     }
 
+    await WorkspaceService.to.saveActiveNetworkId(network.networkId);
     if (Get.isRegistered<WorkspaceCoordinatorController>()) {
       Get.back<void>();
       await WorkspaceCoordinatorController.to.switchWorkspace(AppWorkspace.network);
@@ -142,13 +142,13 @@ class WorkspaceEntityPickerController extends GetxController {
     final pos = pointsOfSale.firstWhereOrNull((item) => item.posId == posId);
     if (pos == null) return;
 
-    await WorkspaceService.to.saveActivePosId(pos.posId);
     if (Get.isRegistered<PosWorkspaceController>()) {
       await Get.find<PosWorkspaceController>().selectPos(pos);
       Get.back<void>();
       return;
     }
 
+    await WorkspaceService.to.saveActivePosId(pos.posId);
     if (Get.isRegistered<WorkspaceCoordinatorController>()) {
       Get.back<void>();
       await WorkspaceCoordinatorController.to.switchWorkspace(AppWorkspace.pos);
