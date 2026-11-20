@@ -137,7 +137,7 @@ class RepaymentCollectionController extends GetxController {
     try {
       final normalizedSearch = search?.trim();
       final res = await getNetworkPosListUseCase(
-        networkId,
+        networkId: networkId,
         cursor: cursor,
         search: normalizedSearch == null || normalizedSearch.isEmpty
             ? null

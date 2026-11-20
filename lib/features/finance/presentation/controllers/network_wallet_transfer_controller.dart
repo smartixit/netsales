@@ -105,7 +105,7 @@ class NetworkWalletTransferController extends GetxController {
     try {
       final normalizedSearch = search?.trim();
       final result = await getNetworkPosListUseCase(
-        wallet.networkId,
+        networkId:wallet.networkId,
         cursor: cursor,
         search: normalizedSearch == null || normalizedSearch.isEmpty
             ? null

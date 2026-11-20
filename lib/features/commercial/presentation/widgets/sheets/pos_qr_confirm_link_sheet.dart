@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_text_styles.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -76,7 +76,7 @@ class PosQrConfirmLinkSheet extends StatelessWidget {
                       SizedBox(width: AppSpacing.xs),
                       Text(
                         'بيانات مزود الشبكة المعتمد',
-                        style: AppTextStyles.titleSmall.copyWith(
+                        style: AppTypography.titleSmall.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colors.primary,
                         ),
@@ -86,23 +86,23 @@ class PosQrConfirmLinkSheet extends StatelessWidget {
                   SizedBox(height: AppSpacing.sm),
                   Text(
                     preview!.network.displayName,
-                    style: AppTextStyles.titleMedium.copyWith(
+                    style: AppTypography.titleMedium.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: colors.textPrimary,
+                      color: colors.onSurface,
                     ),
                   ),
                   SizedBox(height: 2.h),
                   Text(
                     'هاتف الدعم: ${preview!.network.displayPhone}',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: colors.textSecondary,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                   SizedBox(height: 2.h),
                   Text(
                     'المقر: ${preview!.network.displayLocation}',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: colors.textSecondary,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ],

@@ -25,10 +25,10 @@ class PosLinkedNetworkCardAccordion extends StatelessWidget {
 
     return CustomCardAccordion(
       title: 'بيانات التواصل والموقع الجغرافي للشبكة',
-      itemCount: 4,
+      count: 4,
       isExpanded: isExpanded,
       onToggle: onToggle,
-      expandedContent: Padding(
+      child: Padding(
         padding: EdgeInsets.symmetric(vertical: 4.h),
         child: Column(
           children: [
@@ -36,7 +36,7 @@ class PosLinkedNetworkCardAccordion extends StatelessWidget {
               icon: Icons.support_agent_rounded,
               label: 'هاتف خدمة العملاء',
               value: link.networkPhone,
-              onTap: () => UrlLauncherService.openDialer(link.networkPhone),
+              onTap: () => UrlLauncherService.callPhone(link.networkPhone),
             ),
             Divider(color: colors.outlineVariant.withValues(alpha: .5), height: 12.h),
             CommercialDetailRow(

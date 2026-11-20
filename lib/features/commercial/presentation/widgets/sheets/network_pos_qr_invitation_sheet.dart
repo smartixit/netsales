@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_text_styles.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/qr/custom_qr_code.dart';
@@ -80,17 +80,17 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     children: [
                       Text(
                         'كود الارتباط المباشر',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: colors.textSecondary,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                       SizedBox(height: 2.h),
                       Text(
                         challenge.payload,
-                        style: AppTextStyles.bodyMedium.copyWith(
+                        style: AppTypography.bodyMedium.copyWith(
                           fontFamily: 'monospace',
                           fontWeight: FontWeight.bold,
-                          color: colors.textPrimary,
+                          color: colors.onSurface,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -114,8 +114,8 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
           Text(
             'قم بمشاركة هذا الرمز أو كود الدعوة مع نقطة البيع لمسحه وتأكيد الارتباط التجاري فورياً.',
             textAlign: TextAlign.center,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: colors.textSecondary,
+            style: AppTypography.bodySmall.copyWith(
+              color: colors.onSurfaceVariant,
             ),
           ),
           SizedBox(height: AppSpacing.lg),

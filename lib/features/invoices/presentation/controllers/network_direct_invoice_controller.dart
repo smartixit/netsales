@@ -108,7 +108,7 @@ class NetworkDirectInvoiceController extends GetxController {
   Future<void> _loadLinkedPos(int networkId) async {
     isLoadingPos.value = true;
     try {
-      final posLinks = await getNetworkPosListUseCase(networkId);
+      final posLinks = await getNetworkPosListUseCase(networkId: networkId);
       final posList = posLinks.items
           .map((link) => link.pos)
           .whereType<PosEntity>()

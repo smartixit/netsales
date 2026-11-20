@@ -287,7 +287,7 @@ class PosDebtLedgerController extends GetxController {
     var autoSelectNetworkId = 0;
     try {
       final result = await getPosNetworksListUseCase(
-        posId,
+        posId:posId,
         cursor: cursor,
         search: search,
         perPage: 50,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_text_styles.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 
 /// سطر عرض معلومة موحد داخل أكورديون البطاقة التجارية
 class CommercialDetailRow extends StatelessWidget {
@@ -34,16 +34,16 @@ class CommercialDetailRow extends StatelessWidget {
             SizedBox(width: AppSpacing.xs),
             Text(
               label,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: colors.textSecondary,
+              style: AppTypography.bodySmall.copyWith(
+                color: colors.onSurfaceVariant,
               ),
             ),
             const Spacer(),
             Text(
               value,
-              style: AppTextStyles.bodySmall.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 fontWeight: FontWeight.w600,
-                color: onTap != null ? colors.primary : colors.textPrimary,
+                color: onTap != null ? colors.primary : colors.onSurface,
               ),
             ),
             if (onTap != null) ...[

@@ -123,7 +123,7 @@ class PosWorkspaceController extends GetxController {
             : null);
     if (useCase == null) return null;
 
-    return useCase.execute(payload: payload, posId: posId);
+    return previewNetworkPosLinkChallengeUseCase!(payload: payload, posId: posId);
   }
 
   Future<bool> confirmNetworkLinkChallenge({
@@ -137,7 +137,7 @@ class PosWorkspaceController extends GetxController {
             : null);
     if (useCase == null) return false;
 
-    final newLink = await useCase.execute(
+    final newLink = await confirmNetworkPosLinkChallengeUseCase!(
       challengeUuid: challengeUuid,
       posId: posId,
     );
@@ -323,7 +323,7 @@ class PosWorkspaceController extends GetxController {
 
     try {
       final result = await getPosNetworksListUseCase(
-        posId,
+        posId:posId,
         cursor: refresh ? null : networkCursor.value,
         perPage: 10,
       );

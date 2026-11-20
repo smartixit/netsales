@@ -176,7 +176,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }) async {
     final payload = <String, dynamic>{
       'network_id': networkId,
-      if (posId != null) 'pos_id': posId,
+      'pos_id': ?posId,
       if (posUuid != null && posUuid.trim().isNotEmpty) 'pos_uuid': posUuid.trim(),
       'duration_minutes': durationMinutes,
     };
@@ -204,7 +204,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }) async {
     final body = <String, dynamic>{
       'payload': payload,
-      if (posId != null) 'pos_id': posId,
+      'pos_id': ?posId,
       if (posUuid != null && posUuid.trim().isNotEmpty) 'pos_uuid': posUuid.trim(),
     };
 
@@ -231,7 +231,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }) async {
     final body = <String, dynamic>{
       'challenge_uuid': challengeUuid,
-      if (posId != null) 'pos_id': posId,
+      'pos_id': ?posId,
       if (posUuid != null && posUuid.trim().isNotEmpty) 'pos_uuid': posUuid.trim(),
     };
 

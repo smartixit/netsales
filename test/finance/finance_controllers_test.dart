@@ -88,13 +88,12 @@ class MockCommercialRepository implements CommercialRepository {
   Future<List<PosEntity>> getMyPos() async => myPos;
 
   @override
-  Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList(
-    int networkId, {
-    String? cursor,
-    String? search,
+  Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList({
+    required int networkId,
     bool? status,
+    String? search,
+    String? cursor,
     int? perPage,
-    Map<String, dynamic>? query,
   }) async {
     requestedNetworkIds.add(networkId);
     requestedNetworkPosCursors.add(cursor);
@@ -114,13 +113,12 @@ class MockCommercialRepository implements CommercialRepository {
   }
 
   @override
-  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList(
-    int posId, {
-    String? cursor,
-    String? search,
+  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList({
+    required int posId,
     bool? status,
+    String? search,
+    String? cursor,
     int? perPage,
-    Map<String, dynamic>? query,
   }) async {
     requestedPosNetworkIds.add(posId);
     requestedPosNetworkSearchQueries.add(search);

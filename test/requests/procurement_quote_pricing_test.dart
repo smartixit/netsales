@@ -242,14 +242,14 @@ class FakeCommercialRepository implements CommercialRepository {
   Future<List<PosEntity>> getMyPos() async => [testPos];
 
   @override
-  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList(
-    int posId, {
-    String? cursor,
-    String? search,
+  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList({
+    required int posId,
     bool? status,
+    String? search,
+    String? cursor,
     int? perPage,
-    Map<String, dynamic>? query,
-  }) async => PaginatedList(items: [testLink], nextCursor: null);
+  }) async =>
+      PaginatedList(items: [testLink], nextCursor: null);
 }
 
 class FakePackageCatalogRepository implements PackageCatalogRepository {

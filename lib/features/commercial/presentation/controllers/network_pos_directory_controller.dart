@@ -62,7 +62,7 @@ class NetworkPosDirectoryController extends GetxController {
   int get inactiveCount => links.where((link) => !link.isActive).length;
 
   bool get canManageCommercial =>
-      PermissionService.to.can(AppPermissions.networkPosManage);
+      PermissionService.to.can(AppPermissions.networksEdit);
 
   Future<void> refreshLinks() => loadLinks(isRefresh: true, clearOnStart: true);
 

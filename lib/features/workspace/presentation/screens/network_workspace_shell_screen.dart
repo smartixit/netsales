@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_reports_screen.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_workspace_screen.dart';
-import 'package:netsales/features/commercial/presentation/screens/network_pos_directory_screen.dart';
+import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
 import 'package:netsales/features/finance/presentation/widgets/network_finance_workspace_hub.dart';
 import 'package:netsales/features/membership/presentation/screens/membership_screen.dart';
 import 'package:netsales/features/reports/presentation/screens/operational_reports_screen.dart';
@@ -33,13 +33,13 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           activeIcon: Icons.receipt_long_rounded,
           content: ProcurementOrdersScreen(embedded: true, isNetwork: true),
         ),
-        WorkspaceNavItem(
+        const WorkspaceNavItem(
           label: 'نقاط البيع',
           icon: Icons.storefront_outlined,
           activeIcon: Icons.storefront_rounded,
-          content: NetworkPosDirectoryScreen(
-            networkId: controller.selectedNetworkId.value,
+          content: CommercialDirectoryScreen(
             embedded: true,
+            isNetwork: true,
           ),
         ),
         const WorkspaceNavItem(

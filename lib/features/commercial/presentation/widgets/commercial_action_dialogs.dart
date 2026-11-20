@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 
 /// نوافذ الحوار التفاعلية لقرارات فك الارتباط، تجميد النشاط، وتأكيد الشراكات التجارية

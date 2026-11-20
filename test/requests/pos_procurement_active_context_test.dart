@@ -111,13 +111,12 @@ class MockCommercialRepo implements CommercialRepository {
   Future<List<PosEntity>> getMyPos() async => posItems;
 
   @override
-  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList(
-    int posId, {
-    String? cursor,
-    String? search,
+  Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList({
+    required int posId,
     bool? status,
+    String? search,
+    String? cursor,
     int? perPage,
-    Map<String, dynamic>? query,
   }) async {
     return PaginatedList(
       items: linksByPos[posId] ?? const [],

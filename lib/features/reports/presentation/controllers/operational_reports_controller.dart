@@ -697,7 +697,7 @@ class OperationalReportsController extends GetxController {
 
     try {
       final result = await getNetworkPosListUseCase(
-        networkId,
+       networkId:  networkId,
         cursor: refresh ? null : posCursor.value,
         status: true,
         search: _posSearchQuery.isEmpty ? null : _posSearchQuery,

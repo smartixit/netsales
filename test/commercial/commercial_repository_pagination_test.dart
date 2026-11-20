@@ -1,150 +1,127 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:netsales/core/exceptions/app_exception.dart';
-import 'package:netsales/core/models/api_response.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 import 'package:netsales/features/commercial/data/repositories/commercial_repository_impl.dart';
 
-class _PagedCommercialRemoteDataSource implements CommercialRemoteDataSource {
-  final Map<String?, ApiResponse<List<NetworkModel>>> networkPages = {};
-  final Map<String?, ApiResponse<List<PosModel>>> posPages = {};
-  final List<Map<String, dynamic>> networkQueries = [];
-  final List<Map<String, dynamic>> posQueries = [];
+class _MockCommercialRemoteDataSource implements CommercialRemoteDataSource {
+  final Map<String?, PaginatedList<NetworkPosLinkModel>> pages = {};
+  final List<String?> requestedCursors = [];
 
   @override
-  Future<ApiResponse<List<NetworkModel>>> getMyNetworks({
-    Map<String, dynamic>? query,
-  }) async {
-    final normalizedQuery = Map<String, dynamic>.of(query ?? const {});
-    networkQueries.add(normalizedQuery);
-    final cursor = normalizedQuery['cursor']?.toString();
-    return networkPages[cursor] ??
-        ApiResponse<List<NetworkModel>>(
-          success: false,
-          message: 'Missing network test page for cursor: $cursor',
-        );
+  Future<List<NetworkModel>> getMyNetworks() async {
+    return const [
+      NetworkModel(
+        networkId: 1,
+        ownerId: 1,
+        networkName: 'شبكة 1',
+        networkPhoneNumber: '770000001',
+      ),
+    ];
   }
 
   @override
-  Future<ApiResponse<List<PosModel>>> getMyPos({
-    Map<String, dynamic>? query,
+  Future<List<PosModel>> getMyPos() async {
+    return const [
+      PosModel(
+        posId: 10,
+        ownerId: 2,
+        posUuid: 'POS-UUID-10',
+        posName: 'نقطة 10',
+        posPhoneNumber: '771000010',
+      ),
+    ];
+  }
+
+  @override
+  Future<PaginatedList<NetworkPosLinkModel>> getNetworkPosList({
+    required int networkId,
+    bool? status,
+    String? search,
+    String? cursor,
+    int? perPage,
   }) async {
-    final normalizedQuery = Map<String, dynamic>.of(query ?? const {});
-    posQueries.add(normalizedQuery);
-    final cursor = normalizedQuery['cursor']?.toString();
-    return posPages[cursor] ??
-        ApiResponse<List<PosModel>>(
-          success: false,
-          message: 'Missing POS test page for cursor: $cursor',
-        );
+    requestedCursors.add(cursor);
+    return pages[cursor] ?? const PaginatedList(items: []);
+  }
+
+  @override
+  Future<PaginatedList<NetworkPosLinkModel>> getPosNetworksList({
+    required int posId,
+    bool? status,
+    String? search,
+    String? cursor,
+    int? perPage,
+  }) async {
+    requestedCursors.add(cursor);
+    return pages[cursor] ?? const PaginatedList(items: []);
   }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-NetworkModel _network(int id) => NetworkModel(
-  networkId: id,
-  ownerId: 1,
-  networkName: 'Network $id',
-  networkPhoneNumber: '777000$id',
-);
-
-PosModel _pos(int id) => PosModel(
-  posId: id,
-  ownerId: 1,
-  posUuid: 'pos-$id',
-  posName: 'POS $id',
-  posPhoneNumber: '777100$id',
-);
+NetworkPosLinkModel _link(int id, int netId, int posId) => NetworkPosLinkModel(
+      networkPosId: id,
+      networkId: netId,
+      posId: posId,
+      status: true,
+    );
 
 void main() {
-  group('Commercial repository cursor pagination', () {
-    test('loads every authorized network page and removes duplicate IDs', () async {
-      final remote = _PagedCommercialRemoteDataSource()
-        ..networkPages[null] = ApiResponse<List<NetworkModel>>(
-          success: true,
-          message: 'first page',
-          data: [_network(1), _network(2)],
-          nextCursor: 'network-page-2',
-        )
-        ..networkPages['network-page-2'] = ApiResponse<List<NetworkModel>>(
-          success: true,
-          message: 'last page',
-          data: [_network(2), _network(3)],
-        );
+  group('CommercialRepositoryImpl Pagination Tests', () {
+    late _MockCommercialRemoteDataSource remote;
+    late CommercialRepositoryImpl repository;
 
-      final result = await CommercialRepositoryImpl(remote).getMyNetworks();
-
-      expect(result.map((item) => item.networkId), [1, 2, 3]);
-      expect(remote.networkQueries, [
-        {'per_page': 100},
-        {'per_page': 100, 'cursor': 'network-page-2'},
-      ]);
+    setUp(() {
+      remote = _MockCommercialRemoteDataSource();
+      repository = CommercialRepositoryImpl(remote);
     });
 
-    test('loads every authorized POS page and removes duplicate IDs', () async {
-      final remote = _PagedCommercialRemoteDataSource()
-        ..posPages[null] = ApiResponse<List<PosModel>>(
-          success: true,
-          message: 'first page',
-          data: [_pos(10), _pos(20)],
-          nextCursor: 'pos-page-2',
-        )
-        ..posPages['pos-page-2'] = ApiResponse<List<PosModel>>(
-          success: true,
-          message: 'last page',
-          data: [_pos(20), _pos(30)],
-        );
-
-      final result = await CommercialRepositoryImpl(remote).getMyPos();
-
-      expect(result.map((item) => item.posId), [10, 20, 30]);
-      expect(remote.posQueries, [
-        {'per_page': 100},
-        {'per_page': 100, 'cursor': 'pos-page-2'},
-      ]);
-    });
-
-    test('does not return partial network options when a later page fails', () async {
-      final remote = _PagedCommercialRemoteDataSource()
-        ..networkPages[null] = ApiResponse<List<NetworkModel>>(
-          success: true,
-          message: 'first page',
-          data: [_network(1)],
-          nextCursor: 'network-page-2',
-        )
-        ..networkPages['network-page-2'] = ApiResponse<List<NetworkModel>>(
-          success: false,
-          message: 'second page failed',
-        );
-
-      await expectLater(
-        CommercialRepositoryImpl(remote).getMyNetworks(),
-        throwsA(isA<AppException>()),
+    test('getNetworkPosList passes cursor to remote data source and returns page', () async {
+      remote.pages[null] = PaginatedList(
+        items: [_link(1, 10, 20)],
+        nextCursor: 'cursor_page_2',
       );
+      remote.pages['cursor_page_2'] = PaginatedList(
+        items: [_link(2, 10, 21)],
+        nextCursor: null,
+      );
+
+      final firstPage = await repository.getNetworkPosList(networkId: 10);
+      expect(firstPage.items.length, equals(1));
+      expect(firstPage.nextCursor, equals('cursor_page_2'));
+      expect(firstPage.hasMore, isTrue);
+
+      final secondPage = await repository.getNetworkPosList(
+        networkId: 10,
+        cursor: firstPage.nextCursor,
+      );
+      expect(secondPage.items.length, equals(1));
+      expect(secondPage.nextCursor, isNull);
+      expect(secondPage.hasMore, isFalse);
+
+      expect(remote.requestedCursors, equals([null, 'cursor_page_2']));
     });
 
-    test('stops with an explicit error when the server repeats a cursor', () async {
-      final remote = _PagedCommercialRemoteDataSource()
-        ..networkPages[null] = ApiResponse<List<NetworkModel>>(
-          success: true,
-          message: 'first page',
-          data: [_network(1)],
-          nextCursor: 'same-cursor',
-        )
-        ..networkPages['same-cursor'] = ApiResponse<List<NetworkModel>>(
-          success: true,
-          message: 'repeated cursor',
-          data: [_network(2)],
-          nextCursor: 'same-cursor',
-        );
-
-      await expectLater(
-        CommercialRepositoryImpl(remote).getMyNetworks(),
-        throwsA(isA<AppException>()),
+    test('getPosNetworksList forwards cursor and pagination parameters correctly', () async {
+      remote.pages[null] = PaginatedList(
+        items: [_link(1, 10, 30), _link(2, 11, 30)],
+        nextCursor: 'next_pos_cursor',
       );
+
+      final result = await repository.getPosNetworksList(
+        posId: 30,
+        status: true,
+        search: 'Al-Amal',
+        perPage: 20,
+      );
+
+      expect(result.items.length, equals(2));
+      expect(result.nextCursor, equals('next_pos_cursor'));
+      expect(remote.requestedCursors, equals([null]));
     });
   });
 }

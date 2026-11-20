@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_text_styles.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 
@@ -60,9 +61,9 @@ class NetworkPosCardHeader extends StatelessWidget {
               children: [
                 Text(
                   link.displayPosName,
-                  style: AppTextStyles.titleSmall.copyWith(
+                  style: AppTypography.titleSmall.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: colors.textPrimary,
+                    color: colors.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -78,8 +79,8 @@ class NetworkPosCardHeader extends StatelessWidget {
                       Flexible(
                         child: Text(
                           link.displayPosReference,
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: colors.textSecondary,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.onSurfaceVariant,
                             fontFamily: 'monospace',
                           ),
                           maxLines: 1,
@@ -90,7 +91,7 @@ class NetworkPosCardHeader extends StatelessWidget {
                       Icon(
                         Icons.copy_rounded,
                         size: 13.r,
-                        color: colors.textTertiary,
+                        color: colors.outline,
                       ),
                     ],
                   ),
@@ -103,10 +104,8 @@ class NetworkPosCardHeader extends StatelessWidget {
           // شارة حالة الارتباط
           CustomStatusBadge(
             label: link.isActive ? 'نشط' : 'مجمد',
-            type: link.isActive
-                ? StatusBadgeType.success
-                : StatusBadgeType.warning,
-            size: StatusBadgeSize.small,
+            tone: link.isActive ? SemanticTone.success : SemanticTone.warning,
+            isCompact: true,
           ),
         ],
       ),

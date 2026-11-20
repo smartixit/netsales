@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
-import 'package:netsales/features/commercial/presentation/widgets/network_pos_link_confirm_sheet.dart';
+import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_link_confirm_sheet.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
@@ -59,7 +59,7 @@ class PosNetworkLinkingFlow {
             if (linked) {
               await CustomAnimationOverlay.showSuccess(
                 message:
-                    'تم ربط نقطة البيع بنجاح مع شبكة ${preview.networkName}',
+                    'تم ربط نقطة البيع بنجاح مع شبكة ${preview.displayNetworkName}',
               );
             }
             return linked;
@@ -86,3 +86,4 @@ class PosNetworkLinkingFlow {
     }
   }
 }
+

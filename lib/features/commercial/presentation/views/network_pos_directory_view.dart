@@ -89,7 +89,7 @@ class NetworkPosDirectoryView extends GetView<NetworkPosDirectoryController> {
                                   final challenge = await controller
                                       .createQrInvitation();
                                   if (challenge != null) {
-                                    CustomBottomSheet.show<void>(
+                                    await CustomBottomSheet.show<void>(
                                       title: 'دعوة نقطة بيع عبر الرمز المشفر',
                                       subtitle: 'امسح الرمز أو انسخ كود الدعوة للارتباط المباشر',
                                       child: NetworkPosQrInvitationSheet(
