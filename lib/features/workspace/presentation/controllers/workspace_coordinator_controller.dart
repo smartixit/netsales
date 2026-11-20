@@ -13,6 +13,7 @@ import 'package:netsales/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:netsales/features/workspace/domain/entities/workspace_context_entity.dart';
 import 'package:netsales/features/workspace/domain/usecases/get_active_workspace_use_case.dart';
 import 'package:netsales/features/workspace/domain/usecases/set_active_workspace_use_case.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 
 /// المنسق العام لسياق مساحات العمل والتوجيه الآمن
 class WorkspaceCoordinatorController extends GetxController {
@@ -150,6 +151,8 @@ class WorkspaceCoordinatorController extends GetxController {
   Future<void> logout() async {
     isLoading.value = true;
     try {
+      await CustomAnimationOverlay.showLoading();
+
       if (Get.isRegistered<LogoutUseCase>()) {
         await Get.find<LogoutUseCase>()();
       } else if (Get.isRegistered<SessionService>()) {
@@ -164,6 +167,9 @@ class WorkspaceCoordinatorController extends GetxController {
         await WorkspaceService.to.setActiveWorkspace(AppWorkspace.network);
       }
       isLoading.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
       await Get.offAllNamed<dynamic>(AppRoutes.login);
     }
   }
