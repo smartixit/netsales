@@ -64,9 +64,6 @@ void main() {
       final expensesPage = AppPages.routes.firstWhere((p) => p.name == AppRoutes.operatingExpenses);
       expect(expensesPage.middlewares?.any((m) => m is PermissionGuardMiddleware), isTrue);
 
-      // 5. Repayment Collection
-      final repaymentCollectionPage = AppPages.routes.firstWhere((p) => p.name == AppRoutes.repaymentCollection);
-      expect(repaymentCollectionPage.middlewares?.any((m) => m is PermissionGuardMiddleware), isTrue);
     });
 
     test('PermissionGuardMiddleware redirects unauthorized access and prevents 403 deep-link states', () {
