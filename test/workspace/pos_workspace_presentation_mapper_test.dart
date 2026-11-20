@@ -3,37 +3,45 @@ import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_active_supply_order_mapper.dart';
 
 void main() {
-  group('POS workspace request presentation mapper', () {
-    test('maps active request progress using the request lifecycle status', () {
-      const request = RequestEntity(
-        requestId: 41,
-        networkId: 3,
-        posId: 7,
-        requestUuid: 'request-12345678',
-        requestTotalAmount: 1250,
-        statusRaw: 'PROCESSING',
-        statusLabel: 'قيد المعالجة',
-      );
+  RequestEntity request(String? status) => RequestEntity(
+    requestId: 41,
+    networkId: 3,
+    posId: 7,
+    requestUuid: 'request-12345678',
+    requestTotalAmount: 1250,
+    statusRaw: status,
+    statusLabel: status == 'PENDING' ? 'قيد الانتظار' : null,
+  );
 
-      final result = PosActiveSupplyOrderMapper.map([request]);
+  group('POS workspace active supply order mapper', () {
+    test('maps a request only when the API reports PENDING', () {
+      final result = PosActiveSupplyOrderMapper.map([
+        request('APPROVED'),
+        request('PENDING'),
+      ]);
 
       expect(result, isNotNull);
-      expect(result!.reference, 'request-');
-      expect(result.isReviewComplete, isTrue);
-      expect(result.isDeliveryActive, isTrue);
-      expect(result.isDeliveryComplete, isFalse);
+      expect(result!.request.requestId, 41);
+      expect(result.reference, 'request-12345678');
+      expect(result.statusPresentation.label, 'قيد الانتظار');
+      expect(result.formattedAmount, isNotEmpty);
     });
 
-    test('returns no active order for terminal request statuses', () {
-      const request = RequestEntity(
-        requestId: 42,
-        networkId: 3,
-        posId: 7,
-        requestTotalAmount: 0,
-        statusRaw: 'REJECTED',
-      );
+    test('does not infer an unknown or missing status as pending', () {
+      expect(PosActiveSupplyOrderMapper.map([request('PROCESSING')]), isNull);
+      expect(PosActiveSupplyOrderMapper.map([request(null)]), isNull);
+      expect(PosActiveSupplyOrderMapper.map([request('UNKNOWN')]), isNull);
+    });
 
-      expect(PosActiveSupplyOrderMapper.map([request]), isNull);
+    test('returns no active order when every request is terminal', () {
+      expect(
+        PosActiveSupplyOrderMapper.map([
+          request('APPROVED'),
+          request('REJECTED'),
+          request('CANCELLED'),
+        ]),
+        isNull,
+      );
     });
   });
 }
