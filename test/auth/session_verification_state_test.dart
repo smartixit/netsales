@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/models/user_session_model.dart';
-import 'package:netsales/core/services/device_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
@@ -73,7 +72,7 @@ void main() {
       session: UserSessionModel(
         sessionId: 'blocked-session-id',
         userId: 72,
-        deviceUuid: DeviceService.instance.deviceUuid,
+        deviceUuid: 'device-72',
       ),
       permissions: const <String>[],
     );
@@ -85,7 +84,7 @@ void main() {
     expect(StorageService.instance.sessionId, 'blocked-session-id');
     expect(
       SessionService.instance.currentSession?.deviceUuid,
-      DeviceService.instance.deviceUuid,
+      'device-72',
     );
   });
 }
