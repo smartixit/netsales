@@ -87,7 +87,7 @@ class NetworkWorkspaceDashboardMapper {
   static NetworkWorkspaceDashboardViewModel _empty() =>
       NetworkWorkspaceDashboardViewModel(
         showSalesSection: false,
-        pendingRequestsCount: 0,
+        pendingRequestsCount: null,
         salesVelocitySummary: (
           totalSales: '',
           invoiceCount: 0,
