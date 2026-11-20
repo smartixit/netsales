@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_more_navigation_sheet.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 
 /// Shared adaptive shell: bottom bar on portrait phones, rail on compact-height
@@ -13,6 +17,7 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
     required this.appBar,
     required this.items,
     this.mobileItems,
+    this.mobileMoreItems,
     required this.currentIndex,
     required this.onIndexChanged,
     this.onCenterActionTap,
@@ -23,6 +28,7 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
   final WorkspaceAppBar appBar;
   final List<WorkspaceNavItem> items;
   final List<WorkspaceNavItem>? mobileItems;
+  final List<WorkspaceNavItem>? mobileMoreItems;
   final int currentIndex;
   final ValueChanged<int> onIndexChanged;
   final VoidCallback? onCenterActionTap;
@@ -38,6 +44,7 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
 
     if (AppBreakpoints.usesBottomBar(context)) {
       final effectiveNavList = mobileItems ?? items;
+      final hasMoreItems = mobileMoreItems?.isNotEmpty == true;
       final floatingItems = effectiveNavList
           .map(
             (item) => CustomFloatingNavItem(
@@ -48,12 +55,25 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
               tooltip: item.tooltip,
             ),
           )
-          .toList(growable: false);
+          .toList(growable: true);
+      if (hasMoreItems) {
+        floatingItems.add(
+          const CustomFloatingNavItem(
+            icon: Icons.more_horiz_rounded,
+            activeIcon: Icons.more_horiz_rounded,
+            label: 'المزيد',
+            tooltip: 'المزيد من أقسام مساحة العمل',
+          ),
+        );
+      }
 
       final currentItem = items[activeIndex];
-      final mobileActiveIndex = mobileItems == null
+      final currentMobileIndex = mobileItems == null
           ? activeIndex
           : mobileItems!.indexOf(currentItem);
+      final mobileActiveIndex = currentMobileIndex >= 0
+          ? currentMobileIndex
+          : (hasMoreItems ? effectiveNavList.length : 0);
 
       return Scaffold(
         extendBody: true,
@@ -68,6 +88,26 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
         bottomNavigationBar: CustomFloatingBottomNavBar(
           currentIndex: mobileActiveIndex < 0 ? 0 : mobileActiveIndex,
           onTap: (navIndex) {
+            if (hasMoreItems && navIndex == effectiveNavList.length) {
+              unawaited(
+                Get.bottomSheet<void>(
+                  WorkspaceMoreNavigationSheet(
+                    items: mobileMoreItems!,
+                    selectedItem: mobileMoreItems!.contains(currentItem)
+                        ? currentItem
+                        : null,
+                    onSelected: (item) {
+                      Get.back<void>();
+                      final target = items.indexOf(item);
+                      if (target >= 0) onIndexChanged(target);
+                    },
+                  ),
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                ),
+              );
+              return;
+            }
             final target = mobileItems == null
                 ? navIndex
                 : items.indexOf(mobileItems![navIndex]);
