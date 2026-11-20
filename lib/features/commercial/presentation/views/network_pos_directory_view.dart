@@ -28,16 +28,11 @@ class NetworkPosDirectoryView extends GetView<NetworkPosDirectoryController> {
     return CustomRefreshablePage.slivers(
       embedded: embedded,
       onRefresh: controller.refreshLinks,
+      onLoadMore: controller.loadMoreLinks,
+      hasMore: controller.hasMore,
+      hasMorePredicate: () => controller.hasMore,
       scrollKey:
           const PageStorageKey<String>('network-pos-directory-scroll'),
-      onNotification: (scroll) {
-        if (scroll.depth == 0 &&
-            scroll.metrics.extentAfter <= 220 &&
-            controller.hasMore) {
-          controller.loadMoreLinks();
-        }
-        return false;
-      },
       slivers: [
         // 1. الترويسة القيادية لدليل نقاط البيع وشريط الملخص وفلاتر البحث
         SliverToBoxAdapter(

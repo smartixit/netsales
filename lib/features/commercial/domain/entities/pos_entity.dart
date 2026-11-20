@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:equatable/equatable.dart';
 import 'package:netsales/core/enums/pos_status.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
@@ -80,6 +82,7 @@ class PosEntity extends Equatable {
     }
     if (area.isNotEmpty) return area;
     if (addr != null && addr.isNotEmpty) return addr;
+    log(directorateName.toString());
     return 'غير محدد';
   }
 

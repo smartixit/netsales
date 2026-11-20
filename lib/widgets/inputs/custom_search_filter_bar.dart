@@ -72,21 +72,23 @@ class CustomSearchFilterBar<T> extends StatelessWidget {
       title: filterSheetTitle,
       subtitle: filterSheetSubtitle,
       leadingIcon: Icons.filter_list_rounded,
-      items: filterOptions.map((option) {
-        final isSelected = selectedFilter == option.value;
-        return CustomBottomSheetActionItem(
-          title: option.label,
-          icon: option.icon ?? Icons.label_outline_rounded,
-          trailing: isSelected
-              ? Icon(
-                  Icons.check_circle_rounded,
-                  color: context.colors.primary,
-                  size: 20.r,
-                )
-              : null,
-          onTap: () => onFilterChanged!(option.value),
-        );
-      }).toList(growable: false),
+      items: filterOptions
+          .map((option) {
+            final isSelected = selectedFilter == option.value;
+            return CustomBottomSheetActionItem(
+              title: option.label,
+              icon: option.icon ?? Icons.label_outline_rounded,
+              trailing: isSelected
+                  ? Icon(
+                      Icons.check_circle_rounded,
+                      color: context.colors.primary,
+                      size: 20.r,
+                    )
+                  : null,
+              onTap: () => onFilterChanged!(option.value),
+            );
+          })
+          .toList(growable: false),
     );
   }
 
@@ -97,10 +99,9 @@ class CustomSearchFilterBar<T> extends StatelessWidget {
     final hasSearchQuery = searchQuery.trim().isNotEmpty;
 
     // استخراج اسم الخيار النشط للعرض في الشارة
-    final activeOption = filterOptions.cast<CustomSearchFilterOption<T>?>().firstWhere(
-          (opt) => opt?.value == selectedFilter,
-          orElse: () => null,
-        );
+    final activeOption = filterOptions
+        .cast<CustomSearchFilterOption<T>?>()
+        .firstWhere((opt) => opt?.value == selectedFilter, orElse: () => null);
 
     return Container(
       margin: EdgeInsets.only(bottom: AppSpacing.sm),
@@ -151,7 +152,7 @@ class CustomSearchFilterBar<T> extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: hasActiveFilter
                           ? colors.primary.withValues(alpha: .12)
-                          : colors.surfaceContainerLow,
+                          : colors.surfaceContainer,
                       borderRadius: BorderRadius.circular(AppRadius.input),
                       border: Border.all(
                         color: hasActiveFilter
@@ -196,7 +197,9 @@ class CustomSearchFilterBar<T> extends StatelessWidget {
           ),
 
           // شريط توضيح الفلتر النشط إن وجد
-          if (showActiveFilterChip && hasActiveFilter && activeOption != null) ...[
+          if (showActiveFilterChip &&
+              hasActiveFilter &&
+              activeOption != null) ...[
             AppSpacing.vXs,
             Row(
               children: [

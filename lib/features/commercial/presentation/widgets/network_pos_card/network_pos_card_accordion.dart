@@ -24,7 +24,7 @@ class NetworkPosCardAccordion extends StatelessWidget {
     final colors = context.colors;
 
     return CustomCardAccordion(
-      title: 'بيانات الاتصال والموقع الجغرافي',
+      title: 'التفاصيل',
       count: 4,
       isExpanded: isExpanded,
       onToggle: onToggle,

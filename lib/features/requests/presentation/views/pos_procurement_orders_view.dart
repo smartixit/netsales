@@ -27,6 +27,7 @@ class PosProcurementOrdersView
       onRefresh: controller.refreshOrders,
       onLoadMore: controller.loadMoreRequests,
       hasMore: controller.hasMore,
+      hasMorePredicate: () => controller.hasMore,
       scrollKey: const PageStorageKey<String>('pos-procurement-orders-scroll'),
       slivers: [
         // 1. الترويسة القيادية لطلبات التوريد وشريط الملخص وفلاتر البحث

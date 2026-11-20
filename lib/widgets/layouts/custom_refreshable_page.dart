@@ -12,7 +12,7 @@ class CustomRefreshablePage extends StatelessWidget {
   const CustomRefreshablePage({
     super.key,
     required this.onRefresh,
-    required Widget child,
+    required Widget this.child,
     this.embedded = false,
     this.padding,
     this.maxContentWidth = 760,
@@ -20,12 +20,12 @@ class CustomRefreshablePage extends StatelessWidget {
     this.displacement,
     this.onLoadMore,
     this.hasMore = false,
+    this.hasMorePredicate,
     this.loadMoreThreshold = 280.0,
     this.onNotification,
     this.scrollKey,
     this.physics,
-  })  : _child = child,
-        slivers = null;
+  }) : slivers = null;
 
   const CustomRefreshablePage.slivers({
     super.key,
@@ -38,22 +38,24 @@ class CustomRefreshablePage extends StatelessWidget {
     this.displacement,
     this.onLoadMore,
     this.hasMore = false,
+    this.hasMorePredicate,
     this.loadMoreThreshold = 280.0,
     this.onNotification,
     this.scrollKey,
     this.physics,
-  })  : _child = null;
+  }) : child = null;
 
   final Future<void> Function() onRefresh;
   final bool embedded;
   final EdgeInsetsGeometry? padding;
-  final Widget? _child;
+  final Widget? child;
   final List<Widget>? slivers;
   final double maxContentWidth;
   final double? edgeOffset;
   final double? displacement;
   final VoidCallback? onLoadMore;
   final bool hasMore;
+  final ValueGetter<bool>? hasMorePredicate;
   final double loadMoreThreshold;
   final NotificationListenerCallback<ScrollNotification>? onNotification;
   final Key? scrollKey;
@@ -94,11 +96,11 @@ class CustomRefreshablePage extends StatelessWidget {
         );
 
     final List<Widget> rootSlivers;
-    if (_child != null) {
+    if (child != null) {
       rootSlivers = [
         SliverPadding(
           padding: effectivePadding,
-          sliver: SliverToBoxAdapter(child: _child),
+          sliver: SliverToBoxAdapter(child: child),
         ),
       ];
     } else {
@@ -126,8 +128,10 @@ class CustomRefreshablePage extends StatelessWidget {
             final handled = onNotification!(scroll);
             if (handled) return true;
           }
+          final canLoadMore =
+              hasMorePredicate != null ? hasMorePredicate!() : hasMore;
           if (onLoadMore != null &&
-              hasMore &&
+              canLoadMore &&
               scroll.depth == 0 &&
               scroll.metrics.extentAfter <= loadMoreThreshold) {
             onLoadMore!();

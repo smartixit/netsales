@@ -27,6 +27,7 @@ class NetworkProcurementOrdersView
       onRefresh: controller.refreshOrders,
       onLoadMore: controller.loadMoreRequests,
       hasMore: controller.hasMore,
+      hasMorePredicate: () => controller.hasMore,
       scrollKey:
           const PageStorageKey<String>('network-procurement-orders-scroll'),
       slivers: [

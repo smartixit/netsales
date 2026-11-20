@@ -29,15 +29,10 @@ class PosLinkedNetworksView extends GetView<PosLinkedNetworksController> {
     return CustomRefreshablePage.slivers(
       embedded: embedded,
       onRefresh: controller.refreshLinks,
+      onLoadMore: controller.loadMoreLinks,
+      hasMore: controller.hasMore,
+      hasMorePredicate: () => controller.hasMore,
       scrollKey: const PageStorageKey<String>('pos-linked-networks-scroll'),
-      onNotification: (scroll) {
-        if (scroll.depth == 0 &&
-            scroll.metrics.extentAfter <= 220 &&
-            controller.hasMore) {
-          controller.loadMoreLinks();
-        }
-        return false;
-      },
       slivers: [
         // 1. الترويسة القيادية لشبكات التزويد المرتبطة وشريط الملخص وفلاتر البحث
         SliverToBoxAdapter(

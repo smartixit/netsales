@@ -29,6 +29,7 @@ class NetworkOperatingExpensesScreen
         onRefresh: controller.refreshExpenses,
         onLoadMore: controller.loadMoreExpenses,
         hasMore: controller.hasMore,
+        hasMorePredicate: () => controller.hasMore,
         scrollKey:
             const PageStorageKey<String>('network-operating-expenses-scroll'),
         slivers: [

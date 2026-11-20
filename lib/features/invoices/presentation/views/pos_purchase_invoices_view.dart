@@ -24,15 +24,10 @@ class PosPurchaseInvoicesView extends GetView<PosInvoicesController> {
     return CustomRefreshablePage.slivers(
       embedded: embedded,
       onRefresh: controller.refreshInvoices,
+      onLoadMore: controller.loadMoreInvoices,
+      hasMore: controller.hasMore,
+      hasMorePredicate: () => controller.hasMore,
       scrollKey: const PageStorageKey<String>('pos-purchase-invoices-scroll'),
-      onNotification: (scroll) {
-        if (scroll.depth == 0 &&
-            scroll.metrics.extentAfter <= 220 &&
-            controller.hasMore) {
-          controller.loadMoreInvoices();
-        }
-        return false;
-      },
       slivers: [
         // 1. الترويسة القيادية لفواتير المشتريات وشريط الملخص وفلاتر البحث
         SliverToBoxAdapter(
