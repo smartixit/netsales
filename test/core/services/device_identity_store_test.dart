@@ -88,7 +88,7 @@ void main() {
   test('normalizes persisted identifiers to the server-supported 64 characters', () async {
     const resolver = DeviceIdentityStore();
     final identity = await resolver.resolve(
-      resolvePlatformIdentifier: () async => 'd' * 80,
+      resolvePlatformIdentifier: () async => List<String>.filled(80, 'd').join(),
       hardwareFingerprint: null,
       generateFallback: () => 'unused-fallback',
     );
