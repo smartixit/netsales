@@ -97,10 +97,10 @@ void main() {
     await SessionService.to.startSession(
       user: createTestUser(user2faEnabled: user2faEnabled),
       session: const UserSessionModel(
-      sessionId: 'test_session_id',
-      userId: 55,
-      deviceUuid: 'test-device-uuid',
-    ),
+        sessionId: 'test_session_id',
+        userId: 55,
+        deviceUuid: 'test-device-uuid',
+      ),
       permissions: const [],
     );
   }
