@@ -16,6 +16,10 @@ void main() {
         networkName: 'شبكة صنعاء',
         generatedAt: '2026-11-16T10:00:00Z',
         periodKey: '30d',
+        timezone: 'Asia/Aden',
+        periodDays: 30,
+        periodFrom: '2026-10-18T00:00:00+03:00',
+        periodTo: '2026-11-16T10:00:00+03:00',
         sales: const NetworkSalesMetricsEntity(
           totalAmount: '2500.00',
           invoiceCount: 2,

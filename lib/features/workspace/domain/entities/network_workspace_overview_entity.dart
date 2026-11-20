@@ -12,6 +12,10 @@ class NetworkWorkspaceOverviewEntity {
     required this.networkName,
     required this.generatedAt,
     required this.periodKey,
+    required this.timezone,
+    required this.periodDays,
+    required this.periodFrom,
+    required this.periodTo,
     required this.sales,
     required this.pointsOfSale,
     required this.requests,
@@ -24,6 +28,10 @@ class NetworkWorkspaceOverviewEntity {
   final String networkName;
   final String generatedAt;
   final String periodKey;
+  final String timezone;
+  final int periodDays;
+  final String periodFrom;
+  final String periodTo;
   final NetworkSalesMetricsEntity? sales;
   final NetworkPointsOfSaleMetricsEntity? pointsOfSale;
   final NetworkRequestsMetricsEntity? requests;

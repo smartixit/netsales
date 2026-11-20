@@ -13,6 +13,10 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
     required super.networkName,
     required super.generatedAt,
     required super.periodKey,
+    required super.timezone,
+    required super.periodDays,
+    required super.periodFrom,
+    required super.periodTo,
     required super.sales,
     required super.pointsOfSale,
     required super.requests,
@@ -57,7 +61,9 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
         periodKey is! String ||
         periodKey.isEmpty ||
         periodDays is! num ||
+        !periodDays.isFinite ||
         periodDays <= 0 ||
+        periodDays != periodDays.toInt() ||
         periodFrom is! String ||
         periodFrom.isEmpty ||
         periodTo is! String ||
@@ -74,6 +80,10 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
       networkName: networkName,
       generatedAt: generatedAt,
       periodKey: periodKey,
+      timezone: timezone,
+      periodDays: periodDays.toInt(),
+      periodFrom: periodFrom,
+      periodTo: periodTo,
       sales: _parseSales(metrics['sales']),
       pointsOfSale: _parsePointsOfSale(metrics['points_of_sale']),
       requests: _parseRequests(metrics['requests']),
