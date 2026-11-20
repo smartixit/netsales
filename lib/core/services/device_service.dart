@@ -17,7 +17,7 @@ import 'package:netsales/core/utils/idempotency_helper.dart';
 ///    - إلغاء التثبيت وإعادة التثبيت (Uninstall & Reinstall).
 ///    - عبر iOS Keychain / Android ID / معرّفات المنصة المناسبة.
 /// 2. صياغة اسم مقروء ومعبّر للجهاز (مثل: Samsung Galaxy S24 Ultra (Android 14)).
-— 3. تحديد نوع النظام المعتمد في الواجهة الخلفية (ANDROID, IOS, WINDOWS, MAC, LINUX, WEB).
+/// 3. تحديد نوع النظام المعتمد في الواجهة الخلفية (ANDROID, IOS, WINDOWS, MAC, LINUX, WEB).
 class DeviceService extends GetxService {
   DeviceService._();
 
