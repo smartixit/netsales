@@ -243,9 +243,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       final probeResponse = await _dio.fetch<dynamic>(verificationOptions);
       verificationResponse = probeResponse;
 
-      if (InfinityFreeChallengeSolver.isChallengeResponse(
-        probeResponse.data,
-      )) {
+      if (InfinityFreeChallengeSolver.isChallengeResponse(probeResponse.data)) {
         throw _challengeFailure(
           options: verificationOptions,
           response: probeResponse,
@@ -287,7 +285,10 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
           message:
               'فشل طلب GET المستقل للتحقق من كوكي الاستضافة؛ '
               'لم يُعَد إرسال الطلب الأصلي.',
-          cause: dioError?.error ?? dioError?.message ?? error.runtimeType.toString(),
+          cause:
+              dioError?.error ??
+              dioError?.message ??
+              error.runtimeType.toString(),
         ),
       );
       return;
@@ -345,7 +346,10 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
           options: failedOptions,
           response: failedResponse,
           message: 'تعذرت إعادة الطلب الأصلي بعد اجتياز تحقق الاستضافة.',
-          cause: dioError?.error ?? dioError?.message ?? error.runtimeType.toString(),
+          cause:
+              dioError?.error ??
+              dioError?.message ??
+              error.runtimeType.toString(),
         ),
       );
     }

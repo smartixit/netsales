@@ -72,9 +72,9 @@ class InfinityFreeChallengeSolver {
   /// استخراج الثوابت [a, b, c] مع تحمل اختلاف المسافات والتصغير.
   static List<String>? extractConstants(String html) {
     String? capture(String name) => RegExp(
-          '\\b$name\\s*=\\s*toNumbers\\s*\\(\\s*"([0-9a-f]+)"\\s*\\)',
-          caseSensitive: false,
-        ).firstMatch(html)?.group(1);
+      '\\b$name\\s*=\\s*toNumbers\\s*\\(\\s*"([0-9a-f]+)"\\s*\\)',
+      caseSensitive: false,
+    ).firstMatch(html)?.group(1);
 
     final key = capture('a');
     final iv = capture('b');
