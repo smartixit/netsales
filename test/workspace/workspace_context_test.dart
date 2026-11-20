@@ -10,25 +10,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() async {
+  setUp(() async {
     SharedPreferences.setMockInitialValues({});
     await StorageService.instance.init();
+    WorkspaceService.instance.currentWorkspace.value = AppWorkspace.network;
   });
 
-  group('WorkspaceService Resolution & Scope Boundaries Tests', () {
+  group('WorkspaceService resolution and routing', () {
     final workspaceService = WorkspaceService.instance;
 
-    test('Null user resolves to AppWorkspace.network', () {
-      final workspace = workspaceService.resolveWorkspaceForUser(null);
-      expect(workspace, equals(AppWorkspace.network));
+    test('null session user retains the neutral initial workspace state', () {
+      expect(
+        workspaceService.resolveWorkspaceForUser(null),
+        AppWorkspace.network,
+      );
     });
 
-    test('NETWORK_OWNER role resolves to AppWorkspace.network', () {
+    test('NETWORK_OWNER resolves to the Network workspace', () {
       final networkUser = UserModel(
         userId: 10,
         userFullName: 'Network Owner User',
         userPhoneNumber: '+967770000010',
-        userEmail: 'owner@network.com',
         role: const RoleModel(
           roleId: 10,
           roleKey: 'NETWORK_OWNER',
@@ -36,16 +38,17 @@ void main() {
         ),
       );
 
-      final workspace = workspaceService.resolveWorkspaceForUser(networkUser);
-      expect(workspace, equals(AppWorkspace.network));
+      expect(
+        workspaceService.resolveWorkspaceForUser(networkUser),
+        AppWorkspace.network,
+      );
     });
 
-    test('NETWORK_USER role resolves to AppWorkspace.network', () {
+    test('NETWORK_USER resolves to the Network workspace', () {
       final networkUser = UserModel(
         userId: 11,
         userFullName: 'Network Staff',
         userPhoneNumber: '+967770000011',
-        userEmail: 'staff@network.com',
         role: const RoleModel(
           roleId: 11,
           roleKey: 'NETWORK_USER',
@@ -53,16 +56,17 @@ void main() {
         ),
       );
 
-      final workspace = workspaceService.resolveWorkspaceForUser(networkUser);
-      expect(workspace, equals(AppWorkspace.network));
+      expect(
+        workspaceService.resolveWorkspaceForUser(networkUser),
+        AppWorkspace.network,
+      );
     });
 
-    test('POS_AGENT role resolves to AppWorkspace.pos', () {
+    test('POS_AGENT resolves to the POS workspace', () {
       final posUser = UserModel(
         userId: 20,
         userFullName: 'POS Agent User',
         userPhoneNumber: '+967770000020',
-        userEmail: 'agent@pos.com',
         role: const RoleModel(
           roleId: 20,
           roleKey: 'POS_AGENT',
@@ -70,16 +74,17 @@ void main() {
         ),
       );
 
-      final workspace = workspaceService.resolveWorkspaceForUser(posUser);
-      expect(workspace, equals(AppWorkspace.pos));
+      expect(
+        workspaceService.resolveWorkspaceForUser(posUser),
+        AppWorkspace.pos,
+      );
     });
 
-    test('POS_USER role resolves to AppWorkspace.pos', () {
+    test('POS_USER resolves to the POS workspace', () {
       final posUser = UserModel(
         userId: 21,
         userFullName: 'POS Staff User',
         userPhoneNumber: '+967770000021',
-        userEmail: 'posstaff@pos.com',
         role: const RoleModel(
           roleId: 21,
           roleKey: 'POS_USER',
@@ -87,19 +92,36 @@ void main() {
         ),
       );
 
-      final workspace = workspaceService.resolveWorkspaceForUser(posUser);
-      expect(workspace, equals(AppWorkspace.pos));
+      expect(
+        workspaceService.resolveWorkspaceForUser(posUser),
+        AppWorkspace.pos,
+      );
     });
 
-    test('workspaceRoute returns correct route strings for valid workspaces', () {
-      workspaceService.currentWorkspace.value = AppWorkspace.network;
-      expect(
-        workspaceService.workspaceRoute,
-        equals(AppRoutes.networkWorkspace),
+    test('an unknown role is not routed to a guessed workspace', () {
+      final unknownUser = UserModel(
+        userId: 22,
+        userFullName: 'Unknown',
+        userPhoneNumber: '700000022',
+        role: const RoleModel(
+          roleId: 22,
+          roleKey: 'UNRECOGNIZED_ROLE',
+          roleName: 'دور غير معروف',
+        ),
       );
 
+      expect(
+        () => workspaceService.resolveWorkspaceForUser(unknownUser),
+        throwsStateError,
+      );
+    });
+
+    test('workspaceRoute returns the route for the active supported workspace', () {
+      workspaceService.currentWorkspace.value = AppWorkspace.network;
+      expect(workspaceService.workspaceRoute, AppRoutes.networkWorkspace);
+
       workspaceService.currentWorkspace.value = AppWorkspace.pos;
-      expect(workspaceService.workspaceRoute, equals(AppRoutes.posWorkspace));
+      expect(workspaceService.workspaceRoute, AppRoutes.posWorkspace);
     });
   });
 }

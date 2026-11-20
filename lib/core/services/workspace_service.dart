@@ -4,16 +4,16 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 
-/// ============================================================================
-/// خدمة إدارة وتوجيه مساحات العمل التشغيلية (Workspace Routing & Resolution Service)
-/// ============================================================================
-/// تحدد مساحة العمل الفعالة للمستخدم (NETWORK أم POS) بناءً على عضوياته النشطة،
-/// وتمنع وصول حسابات إدارة المنصة.
+/// The single runtime authority for the currently selected workspace.
+///
+/// Workspace selection is a navigation preference only. Tenant identifiers
+/// are resolved independently against server-returned authorized entities.
 class WorkspaceService extends GetxService {
   WorkspaceService._();
 
@@ -23,15 +23,26 @@ class WorkspaceService extends GetxService {
       ? Get.find<WorkspaceService>()
       : instance;
 
+  static const Set<String> _networkRoleKeys = {
+    AppRoles.networkOwner,
+    AppRoles.networkUser,
+    AppRoles.networkAccountant,
+  };
+
+  static const Set<String> _posRoleKeys = {
+    AppRoles.posAgent,
+    AppRoles.posUser,
+    AppRoles.posAccountant,
+  };
+
   final Rx<AppWorkspace> currentWorkspace = AppWorkspace.network.obs;
 
   AppWorkspace get activeWorkspace => currentWorkspace.value;
 
-  /// تهيئة الخدمة واستعادة آخر مساحة عمل تم حفظها للمستخدم
   Future<WorkspaceService> init() async {
-    final storage = StorageService.instance;
-    final savedWorkspace = storage.getString(StorageKeys.activeWorkspaceKey);
-
+    final savedWorkspace = StorageService.instance.getString(
+      StorageKeys.activeWorkspaceKey,
+    );
     final currentUser = Get.isRegistered<SessionService>()
         ? SessionService.to.currentUser
         : null;
@@ -40,105 +51,79 @@ class WorkspaceService extends GetxService {
       currentUser,
       preferredWorkspace: savedWorkspace,
     );
-
-    if (savedWorkspace == 'pos' && resolved == AppWorkspace.pos) {
-      currentWorkspace.value = AppWorkspace.pos;
-    } else if (savedWorkspace == 'network' &&
-        resolved == AppWorkspace.network) {
-      currentWorkspace.value = AppWorkspace.network;
-    } else {
-      currentWorkspace.value = resolved;
-    }
+    currentWorkspace.value = resolved;
 
     log(
-      '🏢 [WorkspaceService] Initialized with workspace: ${currentWorkspace.value.name}',
+      '🏢 [WorkspaceService] Initialized with workspace: ${resolved.name}',
     );
     return this;
   }
 
-  /// تحديد مساحة العمل تلقائياً وبشكل حتمي بناءً على عضويات المستخدم وهويته
+  /// Resolves a supported workspace from exact backend role keys and scopes.
+  ///
+  /// A dual-scope user keeps a valid saved/current workspace preference. This
+  /// never selects a Network or POS tenant; tenant selection is handled by the
+  /// strict workspace-specific resolvers below.
   AppWorkspace resolveWorkspaceForUser(
     UserModel? user, {
     String? preferredWorkspace,
   }) {
-    if (user == null) {
-      return AppWorkspace.network;
+    if (user == null) return currentWorkspace.value;
+
+    final hasNetworkRole = _hasNetworkScope(user);
+    final hasPosRole = _hasPosScope(user);
+
+    if (!hasNetworkRole && !hasPosRole) {
+      throw StateError(
+        'The authenticated user has no supported Network or POS membership.',
+      );
     }
 
-    final preferred =
-        preferredWorkspace ??
-        (currentWorkspace.value.name.isNotEmpty
-            ? currentWorkspace.value.name
-            : StorageService.instance.getString(
-                StorageKeys.activeWorkspaceKey,
-              ));
-
-    // 2. فحص العضويات التشغيلية عبر WorkspaceMembershipModel أولاً
-    final hasNetworkRole =
-        user.hasNetworkMembership ||
-        user.role?.roleKey == AppRoles.networkOwner ||
-        user.role?.roleKey == AppRoles.networkUser ||
-        user.role?.roleKey == AppRoles.networkAccountant;
-
-    final hasPosRole =
-        user.hasPosMembership ||
-        user.role?.roleKey == AppRoles.posAgent ||
-        user.role?.roleKey == AppRoles.posUser ||
-        user.role?.roleKey == AppRoles.posAccountant;
-
-    // الحالة 3: يملك كلا النطاقين -> احترام التفضيل السابق إذا كان لا يزال سارياً
     if (hasNetworkRole && hasPosRole) {
-      if (preferred == 'pos') return AppWorkspace.pos;
-      if (preferred == 'network') return AppWorkspace.network;
-      return AppWorkspace.network;
+      final preferred = preferredWorkspace ??
+          StorageService.instance.getString(StorageKeys.activeWorkspaceKey);
+
+      if (preferred == AppWorkspace.network.name) return AppWorkspace.network;
+      if (preferred == AppWorkspace.pos.name) return AppWorkspace.pos;
+
+      // The currently active workspace is a valid UX preference for a user
+      // authorized for both scopes; it is not a tenant/entity selection.
+      return currentWorkspace.value;
     }
 
-    // الحالة 1: عضوية شبكة فقط
-    if (hasNetworkRole) {
-      return AppWorkspace.network;
-    }
-
-    // الحالة 2: عضوية نقطة بيع فقط
-    if (hasPosRole) {
-      return AppWorkspace.pos;
-    }
-
-    // Fallback آمن إن تطابق مفتاح الدور
-    final roleKey = user.role?.roleKey.toUpperCase() ?? '';
-    if (roleKey.contains('NET') ||
-        (user.role?.roleName.contains('شبك') ?? false)) {
-      return AppWorkspace.network;
-    }
-    if (roleKey.contains('POS') ||
-        (user.role?.roleName.contains('نقط') ?? false)) {
-      return AppWorkspace.pos;
-    }
-
-    return AppWorkspace.network;
+    return hasNetworkRole ? AppWorkspace.network : AppWorkspace.pos;
   }
 
-  /// التحقق مما إذا كان المستخدم يملك صلاحية التبديل بين مساحتي عمل (شبكة ونقطة بيع)
-  bool canSwitchWorkspace(UserModel? user) {
-    if (user == null || user.isSuperAdmin) return false;
-    final hasNetworkRole =
-        user.hasNetworkMembership ||
-        user.role?.roleKey == AppRoles.networkOwner ||
-        user.role?.roleKey == AppRoles.networkUser ||
-        user.role?.roleKey == AppRoles.networkAccountant;
+  bool canSwitchWorkspace(UserModel? user) =>
+      user != null &&
+      !user.isSuperAdmin &&
+      _hasNetworkScope(user) &&
+      _hasPosScope(user);
 
-    final hasPosRole =
-        user.hasPosMembership ||
-        user.role?.roleKey == AppRoles.posAgent ||
-        user.role?.roleKey == AppRoles.posUser ||
-        user.role?.roleKey == AppRoles.posAccountant;
-
-    return hasNetworkRole && hasPosRole;
+  bool _hasNetworkScope(UserModel user) {
+    final hasScopedMembership = user.workspaceMemberships.any(
+      (membership) =>
+          membership.scope == RoleScope.network &&
+          membership.tenantId > 0 &&
+          _networkRoleKeys.contains(membership.roleKey),
+    );
+    final topLevelRole = user.role?.roleKey ?? user.generalRoleKey;
+    return hasScopedMembership || _networkRoleKeys.contains(topLevelRole);
   }
 
-  /// مزامنة سياق مساحة العمل والمستأجر مع عضويات المستخدم النشطة
+  bool _hasPosScope(UserModel user) {
+    final hasScopedMembership = user.workspaceMemberships.any(
+      (membership) =>
+          membership.scope == RoleScope.pos &&
+          membership.tenantId > 0 &&
+          _posRoleKeys.contains(membership.roleKey),
+    );
+    final topLevelRole = user.role?.roleKey ?? user.generalRoleKey;
+    return hasScopedMembership || _posRoleKeys.contains(topLevelRole);
+  }
+
   Future<void> syncWithUserMemberships(UserModel? user) async {
     if (user == null) {
-      await setActiveWorkspace(AppWorkspace.network);
       return;
     }
 
@@ -149,15 +134,14 @@ class WorkspaceService extends GetxService {
       preferredWorkspace: savedWorkspace,
     );
 
-    // الحالة 5: التحقق من سريان العضوية السابقة لنقاط البيع والشبكات ومسح السياق الملغى
     final activePosMemberships = user.workspaceMemberships
-        .where((m) => m.isPos)
-        .toList();
+        .where((membership) => membership.isPos && membership.tenantId > 0)
+        .toList(growable: false);
     final savedPosId = storage.getInt(
       '${StorageKeys.activePosTenantPrefix}_${user.userId}',
     );
     if (savedPosId != null &&
-        !activePosMemberships.any((m) => m.tenantId == savedPosId)) {
+        !activePosMemberships.any((membership) => membership.tenantId == savedPosId)) {
       await storage.remove(
         '${StorageKeys.activePosTenantPrefix}_${user.userId}',
       );
@@ -170,13 +154,13 @@ class WorkspaceService extends GetxService {
     }
 
     final activeNetworkMemberships = user.workspaceMemberships
-        .where((m) => m.isNetwork)
-        .toList();
+        .where((membership) => membership.isNetwork && membership.tenantId > 0)
+        .toList(growable: false);
     final savedNetworkId = storage.getInt(
       '${StorageKeys.activeNetworkTenantPrefix}_${user.userId}',
     );
     if (savedNetworkId != null &&
-        !activeNetworkMemberships.any((m) => m.tenantId == savedNetworkId)) {
+        !activeNetworkMemberships.any((membership) => membership.tenantId == savedNetworkId)) {
       await storage.remove(
         '${StorageKeys.activeNetworkTenantPrefix}_${user.userId}',
       );
@@ -188,7 +172,6 @@ class WorkspaceService extends GetxService {
     await setActiveWorkspace(resolved);
   }
 
-  /// تعيين وحفظ مساحة العمل النشطة
   Future<void> setActiveWorkspace(AppWorkspace workspace) async {
     currentWorkspace.value = workspace;
     await StorageService.instance.setString(
@@ -198,11 +181,9 @@ class WorkspaceService extends GetxService {
     log('🏢 [WorkspaceService] Active workspace set to: ${workspace.name}');
   }
 
-  /// مفتاح التخزين الموحد لنقطة البيع النشطة للمستخدم الحالي
   String get activePosStorageKey =>
       '${StorageKeys.activePosTenantPrefix}_${SessionService.to.currentUser?.userId ?? 0}';
 
-  /// قراءة معرف نقطة البيع النشطة المحفوظة بأمان
   int? get savedActivePosId {
     try {
       return StorageService.instance.getInt(activePosStorageKey);
@@ -211,39 +192,30 @@ class WorkspaceService extends GetxService {
     }
   }
 
-  /// حفظ معرف نقطة البيع النشطة بأمان
   Future<void> saveActivePosId(int posId) async {
     try {
       await StorageService.instance.setInt(activePosStorageKey, posId);
     } catch (_) {}
   }
 
-  /// مسح معرف نقطة البيع النشطة بأمان
   Future<void> clearActivePosId() async {
     try {
       await StorageService.instance.remove(activePosStorageKey);
     } catch (_) {}
   }
 
-  /// تحديد معرف نقطة البيع النشطة:
-  /// 1. استعادة المعرف المحفوظ إن كان موجوداً ضمن القائمة المصرح بها.
-  /// 2. عند عدم وجود اختيار محفوظ -> اختيار أول نقطة بيع تلقائياً لتفادي الحالات الفارغة المعطلة.
-  int? resolveActivePosId(List<int> availablePosIds) {
-    if (availablePosIds.isEmpty) return null;
-
+  /// Workspace-only resolution: restore a valid saved tenant, or select the
+  /// sole authorized tenant. Multiple candidates require explicit user choice.
+  int? resolveWorkspaceActivePosId(List<int> availablePosIds) {
     final savedId = savedActivePosId;
-    if (savedId != null && availablePosIds.contains(savedId)) {
-      return savedId;
-    }
-
-    return availablePosIds.first;
+    if (savedId != null && availablePosIds.contains(savedId)) return savedId;
+    if (availablePosIds.length == 1) return availablePosIds.single;
+    return null;
   }
 
-  /// مفتاح التخزين الموحد للشبكة النشطة للمستخدم الحالي
   String get activeNetworkStorageKey =>
       '${StorageKeys.activeNetworkTenantPrefix}_${SessionService.to.currentUser?.userId ?? 0}';
 
-  /// قراءة معرف الشبكة النشطة المحفوظة بأمان
   int? get savedActiveNetworkId {
     try {
       return StorageService.instance.getInt(activeNetworkStorageKey);
@@ -252,43 +224,51 @@ class WorkspaceService extends GetxService {
     }
   }
 
-  /// حفظ معرف الشبكة النشطة بأمان
   Future<void> saveActiveNetworkId(int networkId) async {
     try {
       await StorageService.instance.setInt(activeNetworkStorageKey, networkId);
     } catch (_) {}
   }
 
-  /// مسح معرف الشبكة النشطة بأمان
   Future<void> clearActiveNetworkId() async {
     try {
       await StorageService.instance.remove(activeNetworkStorageKey);
     } catch (_) {}
   }
 
-  /// تحديد معرف الشبكة النشطة:
-  /// 1. استعادة المعرف المحفوظ إن كان موجوداً ضمن القائمة المصرح بها.
-  /// 2. عند عدم وجود اختيار محفوظ -> اختيار أول شبكة مصرح بها تلقائياً.
+  /// Workspace-only resolution: restore a valid saved tenant, or select the
+  /// sole authorized tenant. Multiple candidates require explicit user choice.
+  int? resolveWorkspaceActiveNetworkId(List<int> availableNetworkIds) {
+    final savedId = savedActiveNetworkId;
+    if (savedId != null && availableNetworkIds.contains(savedId)) return savedId;
+    if (availableNetworkIds.length == 1) return availableNetworkIds.single;
+    return null;
+  }
+
+  /// Legacy resolver retained for other features; Workspace controllers must
+  /// use the strict resolvers above and must never select the first tenant.
+  int? resolveActivePosId(List<int> availablePosIds) {
+    if (availablePosIds.isEmpty) return null;
+    final savedId = savedActivePosId;
+    if (savedId != null && availablePosIds.contains(savedId)) return savedId;
+    return availablePosIds.first;
+  }
+
+  /// Legacy resolver retained for other features; Workspace controllers must
+  /// use the strict resolvers above and must never select the first tenant.
   int? resolveActiveNetworkId(List<int> availableNetworkIds) {
     if (availableNetworkIds.isEmpty) return null;
-
     final savedId = savedActiveNetworkId;
-    if (savedId != null && availableNetworkIds.contains(savedId)) {
-      return savedId;
-    }
-
+    if (savedId != null && availableNetworkIds.contains(savedId)) return savedId;
     return availableNetworkIds.first;
   }
 
-  /// المسار المستهدف عند توجيه مساحة العمل
   String get workspaceRoute {
     switch (currentWorkspace.value) {
       case AppWorkspace.network:
         return AppRoutes.networkWorkspace;
       case AppWorkspace.pos:
         return AppRoutes.posWorkspace;
-      // case AppWorkspace.unsupported:
-      //   return AppRoutes.unsupportedPlatform;
     }
   }
 }

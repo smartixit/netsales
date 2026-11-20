@@ -6,52 +6,22 @@ import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
-import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
+import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/auth/domain/usecases/logout_use_case.dart';
-import 'package:netsales/features/workspace/domain/entities/workspace_context_entity.dart';
-import 'package:netsales/features/workspace/domain/usecases/get_active_workspace_use_case.dart';
-import 'package:netsales/features/workspace/domain/usecases/set_active_workspace_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 
-/// المنسق العام لسياق مساحات العمل والتوجيه الآمن
+/// Coordinates workspace navigation and shared session actions.
+///
+/// WorkspaceService is the single source of truth for the selected workspace.
 class WorkspaceCoordinatorController extends GetxController {
-  final GetActiveWorkspaceUseCase _getActiveWorkspaceUseCase;
-  final SetActiveWorkspaceUseCase _setActiveWorkspaceUseCase;
-
-  WorkspaceCoordinatorController({
-    required this._getActiveWorkspaceUseCase,
-    required this._setActiveWorkspaceUseCase,
-  });
-
   static WorkspaceCoordinatorController get to =>
       Get.find<WorkspaceCoordinatorController>();
 
-  final Rx<WorkspaceContextEntity> activeContext = const WorkspaceContextEntity(
-    workspace: AppWorkspace.network,
-  ).obs;
-
   final RxBool isLoading = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    refreshWorkspaceContext();
-  }
-
-  /// تحديث ومزامنة سياق مساحة العمل الحالية
-  Future<void> refreshWorkspaceContext() async {
-    isLoading.value = true;
-    try {
-      final context = await _getActiveWorkspaceUseCase();
-      activeContext.value = context;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  /// التحقق من صلاحية المستخدم للتبديل بين مساحتي عمل (شبكة ونقطة بيع)
   bool get canSwitchWorkspace {
     final user = Get.isRegistered<SessionService>()
         ? SessionService.to.currentUser
@@ -59,15 +29,11 @@ class WorkspaceCoordinatorController extends GetxController {
     return WorkspaceService.to.canSwitchWorkspace(user);
   }
 
-  /// نص التلميح للتنقل بين المساحات
-  String get switchWorkspaceTooltip {
-    final isNetwork = activeContext.value.workspace == AppWorkspace.network;
-    return isNetwork
-        ? 'التبديل إلى مساحة عمل نقطة البيع'
-        : 'التبديل إلى مساحة عمل مزود الشبكة';
-  }
+  String get switchWorkspaceTooltip =>
+      WorkspaceService.to.activeWorkspace == AppWorkspace.network
+      ? 'التبديل إلى مساحة عمل نقطة البيع'
+      : 'التبديل إلى مساحة عمل مزود الشبكة';
 
-  /// حل كائن العرض الدلالي للدور الوظيفي لمساحة العمل
   EnumPresentation resolveRolePresentation(AppWorkspace workspace) {
     final user = Get.isRegistered<SessionService>()
         ? SessionService.to.currentUser
@@ -76,7 +42,7 @@ class WorkspaceCoordinatorController extends GetxController {
         ? RoleScope.network
         : RoleScope.pos;
     final membership = user?.workspaceMemberships.firstWhereOrNull(
-      (m) => m.scope == targetScope,
+      (item) => item.scope == targetScope,
     );
     final rawRoleKey =
         membership?.roleKey ?? user?.role?.roleKey ?? user?.generalRoleKey;
@@ -84,14 +50,13 @@ class WorkspaceCoordinatorController extends GetxController {
         membership?.roleName ??
         user?.role?.roleName ??
         user?.role?.roleKeyLabel;
-    final typedRoleKey = RoleKey.fromWire(rawRoleKey);
+
     final presentation = EnumPresentationRegistry.resolveRoleKey(
-      typedRoleKey,
+      RoleKey.fromWire(rawRoleKey),
       serverLabel: serverLabel,
     );
-    if (presentation.isKnown) {
-      return presentation;
-    }
+    if (presentation.isKnown) return presentation;
+
     return EnumPresentationRegistry.resolveRoleScope(
       targetScope,
       serverLabel: serverLabel,
@@ -118,36 +83,34 @@ class WorkspaceCoordinatorController extends GetxController {
 
   void toggleTheme() => ThemeService.to.toggleTheme();
 
-  /// التبديل التلقائي إلى المساحة المقابلة
   Future<void> toggleWorkspace() async {
-    final isNetwork = activeContext.value.workspace == AppWorkspace.network;
-    final target = isNetwork ? AppWorkspace.pos : AppWorkspace.network;
+    final target = WorkspaceService.to.activeWorkspace == AppWorkspace.network
+        ? AppWorkspace.pos
+        : AppWorkspace.network;
     await switchWorkspace(target);
   }
 
-  /// التبديل المنسق لمساحة العمل مع التوجيه الآمن
   Future<void> switchWorkspace(AppWorkspace workspace) async {
-    // if (workspace == AppWorkspace.unsupported) {
-    //   await Get.offAllNamed<dynamic>(AppRoutes.unsupportedPlatform);
-    //   return;
-    // }
+    if (workspace == WorkspaceService.to.activeWorkspace) return;
 
-    await _setActiveWorkspaceUseCase(workspace);
-    await refreshWorkspaceContext();
+    isLoading.value = true;
+    try {
+      await WorkspaceService.to.setActiveWorkspace(workspace);
 
-    if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) {
-      Get.back<void>();
-      await Future<void>.delayed(const Duration(milliseconds: 150));
-    }
+      if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) {
+        Get.back<void>();
+        await Future<void>.delayed(AppMotion.fast);
+      }
 
-    if (workspace == AppWorkspace.network) {
-      await Get.offAllNamed<dynamic>(AppRoutes.networkWorkspace);
-    } else if (workspace == AppWorkspace.pos) {
-      await Get.offAllNamed<dynamic>(AppRoutes.posWorkspace);
+      final route = workspace == AppWorkspace.network
+          ? AppRoutes.networkWorkspace
+          : AppRoutes.posWorkspace;
+      await Get.offAllNamed<void>(route);
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  /// تسجيل الخروج الآمن وإنهاء الجلسة
   Future<void> logout() async {
     isLoading.value = true;
     try {
@@ -170,7 +133,7 @@ class WorkspaceCoordinatorController extends GetxController {
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
-      await Get.offAllNamed<dynamic>(AppRoutes.login);
+      await Get.offAllNamed<void>(AppRoutes.login);
     }
   }
 }

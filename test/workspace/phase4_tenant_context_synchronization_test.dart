@@ -19,6 +19,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await StorageService.instance.init();
     workspaceService = WorkspaceService.instance;
+    workspaceService.currentWorkspace.value = AppWorkspace.network;
     Get.put<WorkspaceService>(workspaceService);
   });
 
@@ -26,8 +27,8 @@ void main() {
     Get.reset();
   });
 
-  group('Phase 4.1: Workspace & Tenant Context Governance Matrix', () {
-    test('WorkspaceService resolves network and POS dual membership and allows switching', () {
+  group('Workspace and tenant context', () {
+    test('dual membership supports explicit workspace preference', () {
       final dualUser = UserModel(
         userId: 100,
         userFullName: 'Dual Scope Manager',
@@ -48,66 +49,61 @@ void main() {
         ],
       );
 
-      final canSwitch = workspaceService.canSwitchWorkspace(dualUser);
-      expect(canSwitch, isTrue);
-
-      final defaultWorkspace = workspaceService.resolveWorkspaceForUser(dualUser);
-      expect(defaultWorkspace, equals(AppWorkspace.network));
-
-      final posPreferred = workspaceService.resolveWorkspaceForUser(
-        dualUser,
-        preferredWorkspace: AppWorkspace.pos.name,
+      expect(workspaceService.canSwitchWorkspace(dualUser), isTrue);
+      expect(
+        workspaceService.resolveWorkspaceForUser(
+          dualUser,
+          preferredWorkspace: 'pos',
+        ),
+        AppWorkspace.pos,
       );
-      expect(posPreferred, equals(AppWorkspace.pos));
+      expect(
+        workspaceService.resolveWorkspaceForUser(
+          dualUser,
+          preferredWorkspace: 'network',
+        ),
+        AppWorkspace.network,
+      );
     });
 
-    test('Network active tenant resolution and storage synchronization', () async {
-      // 1. Single network -> auto resolves to that network
-      expect(workspaceService.resolveActiveNetworkId([50]), equals(50));
-
-      // 2. Multiple networks without saved selection -> auto resolves to first network
-      expect(workspaceService.resolveActiveNetworkId([50, 60, 70]), equals(50));
-
-      // 3. Save active network and verify resolution
+    test('single tenant resolves automatically but multiple tenants require choice', () async {
+      expect(workspaceService.resolveWorkspaceActiveNetworkId([50]), 50);
+      expect(workspaceService.resolveWorkspaceActiveNetworkId([50, 60, 70]), isNull);
       await workspaceService.saveActiveNetworkId(60);
-      expect(workspaceService.savedActiveNetworkId, equals(60));
-      expect(workspaceService.resolveActiveNetworkId([50, 60, 70]), equals(60));
-
-      // 4. If saved network is not in available authorized list -> falls back to first network
-      expect(workspaceService.resolveActiveNetworkId([80, 90]), equals(80));
-
-      // 5. Clear active network
+      expect(workspaceService.resolveWorkspaceActiveNetworkId([50, 60, 70]), 60);
+      expect(workspaceService.resolveWorkspaceActiveNetworkId([80, 90]), isNull);
       await workspaceService.clearActiveNetworkId();
       expect(workspaceService.savedActiveNetworkId, isNull);
     });
 
-    test('POS active tenant resolution and storage synchronization', () async {
-      // 1. Single POS -> auto resolves
-      expect(workspaceService.resolveActivePosId([101]), equals(101));
-
-      // 2. Multiple POS without saved selection -> auto resolves to first POS
-      expect(workspaceService.resolveActivePosId([101, 102, 103]), equals(101));
-
-      // 3. Save active POS and verify resolution
+    test('single POS resolves automatically but multiple POS require choice', () async {
+      expect(workspaceService.resolveWorkspaceActivePosId([101]), 101);
+      expect(workspaceService.resolveWorkspaceActivePosId([101, 102, 103]), isNull);
       await workspaceService.saveActivePosId(102);
-      expect(workspaceService.savedActivePosId, equals(102));
-      expect(workspaceService.resolveActivePosId([101, 102, 103]), equals(102));
-
-      // 4. Clear active POS
+      expect(workspaceService.resolveWorkspaceActivePosId([101, 102, 103]), 102);
+      expect(workspaceService.resolveWorkspaceActivePosId([201, 202]), isNull);
       await workspaceService.clearActivePosId();
       expect(workspaceService.savedActivePosId, isNull);
     });
 
-    test('Strict tenant isolation: revoked membership context is purged upon sync', () async {
+    test('saved tenant is restored only when it remains authorized', () async {
+      await workspaceService.saveActiveNetworkId(60);
+      expect(workspaceService.resolveWorkspaceActiveNetworkId([50, 60]), 60);
+      expect(workspaceService.resolveWorkspaceActiveNetworkId([50, 70]), isNull);
+
+      await workspaceService.saveActivePosId(102);
+      expect(workspaceService.resolveWorkspaceActivePosId([101, 102]), 102);
+      expect(workspaceService.resolveWorkspaceActivePosId([101, 103]), isNull);
+    });
+
+    test('revoked membership context is purged during synchronization', () async {
       final storage = StorageService.instance;
       const userId = 55;
 
-      // Seed previous active pos and network in storage for user 55
       await storage.setInt('${StorageKeys.activePosTenantPrefix}_$userId', 200);
       await storage.setInt('${StorageKeys.activePosNetworkPrefix}_${userId}_200', 88);
       await storage.setInt('${StorageKeys.activeNetworkTenantPrefix}_$userId', 99);
 
-      // User session updated with only POS 300 and Network 77 (200 & 99 were revoked)
       final user = UserModel(
         userId: userId,
         userFullName: 'Isolated User',
@@ -130,7 +126,6 @@ void main() {
 
       await workspaceService.syncWithUserMemberships(user);
 
-      // Verification: Revoked contexts are purged from storage to prevent tenant leakage
       expect(storage.getInt('${StorageKeys.activePosTenantPrefix}_$userId'), isNull);
       expect(storage.getInt('${StorageKeys.activePosNetworkPrefix}_${userId}_200'), isNull);
       expect(storage.getInt('${StorageKeys.activeNetworkTenantPrefix}_$userId'), isNull);
