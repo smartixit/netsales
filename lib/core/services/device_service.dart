@@ -5,6 +5,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_udid/flutter_udid.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/services/device_identity_store.dart';
 import 'package:netsales/core/utils/idempotency_helper.dart';
 
 /// ============================================================================
@@ -176,34 +177,20 @@ class DeviceService extends GetxService {
 
   /// حل وتثبيت معرّف الجهاز السيادي الدائم والمقاوم لإلغاء التثبيت ومسح البيانات
   Future<void> _resolveDeviceUuid() async {
-    // 1. الأولوية القصوى للمعرف العتادي الثابت (iOS Keychain / Android MediaDrm & SSAID / Windows Registry)
-    if (!kIsWeb) {
-      try {
-        final udid = await FlutterUdid.udid;
-        if (udid.trim().isNotEmpty) {
-          _deviceUuid = udid.trim();
-          if (_deviceUuid.length > 64) {
-            _deviceUuid = _deviceUuid.substring(0, 64);
-          }
-          return;
+    _deviceUuid = await const DeviceIdentityStore().resolve(
+      resolvePlatformIdentifier: () async {
+        if (kIsWeb) return null;
+        try {
+          final udid = await FlutterUdid.udid;
+          return udid.trim().isEmpty ? null : udid.trim();
+        } catch (error) {
+          log('⚠️ [DeviceService] FlutterUdid lookup failed: $error');
+          return null;
         }
-      } catch (e) {
-        log('⚠️ [DeviceService] FlutterUdid lookup failed: $e');
-      }
-    }
-
-    // 2. استخدام البصمة العتادية المقروءة من نظام التشغيل إن وُجدت
-    if (_hardwareFingerprint.isNotEmpty) {
-      _deviceUuid =
-          'dev-${_hardwareFingerprint.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}';
-      if (_deviceUuid.length > 64) {
-        _deviceUuid = _deviceUuid.substring(0, 64);
-      }
-      return;
-    }
-
-    // 3. التوليد السيبراني المقاوم للتصادم كشبكة أمان نهائية
-    _deviceUuid = IdempotencyHelper.generate('dev');
+      },
+      hardwareFingerprint: _hardwareFingerprint,
+      generateFallback: () => IdempotencyHelper.generate('dev'),
+    );
   }
 
   String _capitalize(String s) {
