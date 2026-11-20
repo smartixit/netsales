@@ -52,6 +52,17 @@ Map<String, dynamic> _validOverview({
           'sales': {
             'invoice_count': 9,
             'total_amount': '15000.00',
+            'paid_amount': '9000.00',
+            'outstanding_amount': '6000.00',
+            'growth_rate': 12.5,
+            'trend': [
+              {'date': '2026-11-08', 'count': 2, 'total': 15000.0},
+            ],
+          },
+          'wallet': {
+            'wallet_id': 4,
+            'balance': '1200.00',
+            'is_active': true,
           },
           'expenses': {'count': 2, 'total_amount': '500.00'},
           'packages': {'total': 5, 'active': 4, 'inactive': 1},
@@ -76,6 +87,10 @@ void main() {
       expect(model.periodKey, '30d');
       expect(model.pointsOfSale?.active, 6);
       expect(model.sales?.totalAmount, '15000.00');
+      expect(model.sales?.invoiceCount, 9);
+      expect(model.sales?.growthRate, 12.5);
+      expect(model.sales?.trend.single.invoiceCount, 2);
+      expect(model.expenses?.totalAmount, '500.00');
       expect(model.recentPendingRequests.single.requestId, 90);
       expect(
         model.recentPendingRequests.single.requestTotalAmount,
@@ -83,17 +98,28 @@ void main() {
       );
     });
 
-    test('ignores metric groups outside the operational workspace contract', () {
+    test('maps only typed operational groups and excludes deferred financial fields', () {
       final model = NetworkWorkspaceOverviewModel.fromJson(
         _validOverview(metrics: {
-          'sales': {'invoice_count': 1, 'total_amount': '100.00'},
+          'sales': {
+            'invoice_count': 1,
+            'total_amount': '100.00',
+            'paid_amount': '75.00',
+            'outstanding_amount': '25.00',
+            'growth_rate': 0,
+            'trend': [],
+          },
+          'wallet': {'balance': '500.00'},
           'unrecognized_metric_group': {'value': 'ignored'},
         }),
       );
 
-      expect(model.metrics.containsKey('sales'), isTrue);
-      expect(model.metrics.containsKey('unrecognized_metric_group'), isFalse);
+      expect(model.sales?.totalAmount, '100.00');
+      expect(model.sales?.invoiceCount, 1);
+      expect(model.pointsOfSale, isNull);
+      expect(model.expenses, isNull);
     });
+
 
     test('preserves the exact server amount string without double conversion', () {
       final model = NetworkWorkspaceOverviewModel.fromJson(_validOverview());

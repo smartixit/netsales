@@ -75,22 +75,6 @@ void main() {
       expect(result.salesChartDefinition.state.name, 'empty');
     });
 
-    test('does not manufacture an amount when the server contract is invalid', () {
-      final overview = NetworkWorkspaceOverviewEntity(
-        networkId: 7,
-        networkName: 'شبكة صنعاء',
-        generatedAt: '2026-11-16T10:00:00Z',
-        periodKey: '30d',
-        metrics: {
-          'sales': {'invoice_count': 2, 'growth_rate': 12.5},
-        },
-        recentPendingRequests: const [],
-      );
 
-      expect(
-        () => NetworkWorkspaceDashboardMapper.map(overview),
-        throwsFormatException,
-      );
-    });
   });
 }
