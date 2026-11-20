@@ -32,7 +32,7 @@ void main() {
       'user_id': 71,
       'user_full_name': 'مستخدم اختبار',
       'user_phone_number': '770000071',
-      'workspace_roles': [],
+      'workspace_roles': const <dynamic>[],
     });
     await storage.saveSession('cached-session-id');
     await storage.setModel(StorageKeys.userData, user, (value) => value.toJson());
@@ -50,7 +50,7 @@ void main() {
       'user_id': 72,
       'user_full_name': 'مستخدم محظور',
       'user_phone_number': '770000072',
-      'workspace_roles': [],
+      'workspace_roles': const <dynamic>[],
     });
     await SessionService.instance.startSession(
       user: user,
