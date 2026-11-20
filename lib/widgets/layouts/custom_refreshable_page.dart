@@ -67,15 +67,19 @@ class CustomRefreshablePage extends StatelessWidget {
     bool embedded = false,
   }) {
     final mediaQuery = MediaQuery.of(context);
-    // Embedded workspace pages render beneath a translucent, extended app bar.
-    // Reserve its complete layout extent, not only the status-bar inset.
-    final topPadding = embedded
+
+    // Only the portrait-phone shell extends content beneath its translucent
+    // app bar and floating bottom bar. At other breakpoints Scaffold already
+    // reserves the app bar and uses a side navigation rail/drawer.
+    final overlaysWorkspaceBars =
+        embedded && AppBreakpoints.usesBottomBar(context);
+    final topPadding = overlaysWorkspaceBars
         ? mediaQuery.padding.top +
               AppSpacing.appBarHeight +
               AppSpacing.sm +
               AppSpacing.md
         : AppSpacing.md;
-    final bottomPadding = embedded
+    final bottomPadding = overlaysWorkspaceBars
         ? 115.h + mediaQuery.padding.bottom
         : mediaQuery.padding.bottom + AppSpacing.xl;
     final horizontalPadding = AppBreakpoints.screenMargin(context);
