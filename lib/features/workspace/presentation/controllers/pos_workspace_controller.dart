@@ -258,9 +258,11 @@ class PosWorkspaceController extends GetxController {
         return;
       }
 
-      final knownIds = networkLinks.map((link) => link.networkId).toSet();
+      // A POS may have distinct relationship records for the same network.
+      // The relationship ID, not the network ID, identifies a selectable link.
+      final knownLinkIds = networkLinks.map((link) => link.networkPosId).toSet();
       for (final link in result.items) {
-        if (knownIds.add(link.networkId)) networkLinks.add(link);
+        if (knownLinkIds.add(link.networkPosId)) networkLinks.add(link);
       }
       networkCursor.value = result.nextCursor;
       hasMoreNetworks.value = result.hasMore;
@@ -307,7 +309,7 @@ class PosWorkspaceController extends GetxController {
     );
     if (posId == null || authorizedLink == null) return;
 
-    if (selectedNetworkLink.value?.networkId == link.networkId &&
+    if (selectedNetworkLink.value?.networkPosId == link.networkPosId &&
         !forceRefresh &&
         isLoadingRecentData.value) {
       return;
@@ -348,7 +350,10 @@ class PosWorkspaceController extends GetxController {
         );
         if (generation == _scopedDataGeneration &&
             activePos.value?.posId == posId &&
-            selectedNetworkLink.value?.networkId == networkId &&
+            selectedNetworkLink.value?.networkPosId ==
+                networkLinks.firstWhereOrNull(
+                  (link) => link.networkId == networkId,
+                )?.networkPosId &&
             !isClosed) {
           recentInvoices.assignAll(result.items);
         }

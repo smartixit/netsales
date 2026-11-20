@@ -104,8 +104,16 @@ class NetworkWorkspaceController extends GetxController {
   }
 
   Future<void> _initializeWorkspace() async {
-    if (WorkspaceService.to.activeWorkspace != AppWorkspace.network) {
-      await WorkspaceService.to.setActiveWorkspace(AppWorkspace.network);
+    try {
+      if (WorkspaceService.to.activeWorkspace != AppWorkspace.network) {
+        await WorkspaceService.to.setActiveWorkspace(AppWorkspace.network);
+      }
+    } catch (error) {
+      // Workspace selection is a local navigation preference. A storage
+      // failure must not prevent loading the server-authorized network scope.
+      log(
+        '⚠️ [NetworkWorkspaceController] Could not persist active workspace preference: $error',
+      );
     }
     await loadWorkspace();
   }
