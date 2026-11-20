@@ -65,10 +65,12 @@ class SessionService extends GetxService {
           permissions: cachedPermissions,
         );
       }
-      log('Local session restored; awaiting server verification.');
+      log(
+        '🔑 [SessionService] Local session restored with ${cachedUser.workspaceMemberships.length} workspace memberships; awaiting server verification.',
+      );
     } else {
       _isAuthenticated.value = false;
-      log('No active session found.');
+      log('ℹ️ [SessionService] No active session found.');
     }
 
     ApiService.onUnauthorized = () async {
@@ -78,7 +80,7 @@ class SessionService extends GetxService {
       }
       _handlingUnauthorized = true;
       try {
-        log('Protected request rejected with 401.');
+        log('⚠️ [SessionService] Protected request rejected with 401.');
         await terminateSession();
         if (Get.currentRoute != AppRoutes.login) {
           await Get.offAllNamed<void>(AppRoutes.login);
@@ -132,7 +134,7 @@ class SessionService extends GetxService {
     if (Get.isRegistered<ServerTaskRunnerService>()) {
       ServerTaskRunnerService.to.startForegroundHeartbeat();
     }
-    log('Authenticated session started successfully.');
+    log('✅ [SessionService] Authenticated session started successfully.');
   }
 
   void markSessionVerified() {
@@ -180,7 +182,7 @@ class SessionService extends GetxService {
     if (Get.isRegistered<WorkspaceService>()) {
       await WorkspaceService.to.syncWithUserMemberships(user);
     }
-    log('User profile and workspace memberships synced.');
+    log('🔄 [SessionService] User profile and workspace memberships synced.');
   }
 
   Future<void> updateCurrentUser(UserModel updatedUser) async {
@@ -264,6 +266,6 @@ class SessionService extends GetxService {
       await PushNotificationService.to.clearFcmToken();
     }
     await ServerTaskRunnerService.instance.reset();
-    log('Session terminated.');
+    log('🚪 [SessionService] Session terminated.');
   }
 }
