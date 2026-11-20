@@ -28,7 +28,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
     final greeting = controller.welcomeGreeting;
     final pendingCount = controller.pendingRequestsCount;
     final hasPendingMetric = pendingCount != null;
-    final hasPendingRequests = pendingCount != null && hasPendingRequests;
+    final hasPendingRequests = pendingCount != null && pendingCount > 0;
     final realFullName = controller.userName;
     final realRole = controller.userRole;
     final initials = controller.userInitials;
@@ -315,9 +315,11 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                hasPendingRequests
-                                    ? '$pendingCount طلب معلق'
-                                    : 'كل العمليات مستقرة',
+                                !hasPendingMetric
+                                    ? 'غير متاح'
+                                    : hasPendingRequests
+                                        ? '$pendingCount طلب معلق'
+                                        : 'لا توجد طلبات معلقة',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
