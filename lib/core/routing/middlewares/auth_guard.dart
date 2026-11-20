@@ -32,6 +32,9 @@ class AuthGuard extends GetMiddleware {
       });
       return const RouteSettings(name: AppRoutes.login);
     }
+    if (SessionService.to.isAccessBlocked) {
+      return const RouteSettings(name: AppRoutes.unauthorized);
+    }
     if (!SessionService.to.isSessionVerified) {
       return const RouteSettings(name: AppRoutes.initial);
     }
@@ -60,6 +63,11 @@ class GuestGuard extends GetMiddleware {
 
   @override
   RouteSettings? redirect(String? route) {
+    if (Get.isRegistered<SessionService>() &&
+        SessionService.to.isAccessBlocked) {
+      return const RouteSettings(name: AppRoutes.unauthorized);
+    }
+
     if (Get.isRegistered<SessionService>() &&
         SessionService.to.isAuthenticated &&
         !SessionService.to.isSessionVerified) {
@@ -112,6 +120,10 @@ class PermissionGuardMiddleware extends GetMiddleware {
         );
       });
       return const RouteSettings(name: AppRoutes.login);
+    }
+
+    if (SessionService.to.isAccessBlocked) {
+      return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
     if (!SessionService.to.isSessionVerified) {

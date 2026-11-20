@@ -553,7 +553,7 @@ class ApiService {
   ApiResponse<T> _handleDioError<T>(DioException e, String endpoint) {
     if (AppEnvironment.enableLogging) {
       log(
-        '❌ Dio Error [$endpoint]: ${e.message} | Status: ${e.response?.statusCode}',
+        '❌ Dio Error [$endpoint]: ${e.type} | Status: ${e.response?.statusCode}',
       );
     }
 

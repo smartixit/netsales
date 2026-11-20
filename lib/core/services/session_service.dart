@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/models/user_model.dart';
@@ -33,6 +34,7 @@ class SessionService extends GetxService {
   final Rxn<UserSessionModel> _session = Rxn<UserSessionModel>();
   final RxBool _isAuthenticated = false.obs;
   final RxBool _isSessionVerified = false.obs;
+  final RxBool _isAccessBlocked = false.obs;
   Future<void>? _terminationFuture;
   bool _handlingUnauthorized = false;
 
@@ -52,12 +54,16 @@ class SessionService extends GetxService {
   /// True only after /auth/me succeeds or a fresh login succeeds.
   bool get isSessionVerified => _isSessionVerified.value;
 
+  /// Backend denied account/device access with 403; local credentials remain intact.
+  bool get isAccessBlocked => _isAccessBlocked.value;
+
   /// التحقق مما إذا كان المستخدم مجبراً على تغيير كلمة المرور قبل الوصول للوحة التحكم
   bool get mustChangePassword => _user.value?.mustChangePassword ?? false;
 
   /// تهيئة الخدمة واستعادة بيانات الجلسة من التخزين المحلي عند إقلاع التطبيق
   Future<SessionService> init() async {
     _isSessionVerified.value = false;
+    _isAccessBlocked.value = false;
     final storage = StorageService.instance;
     final sessionId = storage.sessionId;
     final cachedUser = storage.getModel<UserModel>(
@@ -99,7 +105,10 @@ class SessionService extends GetxService {
 
     // ربط انتهاء الصلاحية من عميل الشبكة تلقائياً
     ApiService.onUnauthorized = () async {
-      if (_handlingUnauthorized) return;
+      if (_handlingUnauthorized ||
+          (!_isAuthenticated.value && Get.currentRoute == AppRoutes.login)) {
+        return;
+      }
       _handlingUnauthorized = true;
       try {
         log('⚠️ [SessionService] Protected request rejected with 401.');
@@ -134,6 +143,7 @@ class SessionService extends GetxService {
     _session.value = session;
     _isAuthenticated.value = true;
     _isSessionVerified.value = true;
+    _isAccessBlocked.value = false;
 
     if (Get.isRegistered<PermissionService>()) {
       PermissionService.to.updateAccess(
@@ -148,7 +158,7 @@ class SessionService extends GetxService {
 
     if (Get.isRegistered<PushNotificationService>()) {
       unawaited(PushNotificationService.to.syncTokenWithBackend());
-      PushNotificationService.to.releasePendingNavigation();
+      _releasePendingNotificationNavigationAfterFrame();
     }
 
     if (Get.isRegistered<ServerTaskRunnerService>()) {
@@ -166,11 +176,26 @@ class SessionService extends GetxService {
     _isSessionVerified.value = true;
     if (Get.isRegistered<PushNotificationService>()) {
       unawaited(PushNotificationService.to.syncTokenWithBackend());
-      PushNotificationService.to.releasePendingNavigation();
+      _releasePendingNotificationNavigationAfterFrame();
     }
     if (Get.isRegistered<ServerTaskRunnerService>()) {
       ServerTaskRunnerService.to.startForegroundHeartbeat();
     }
+  }
+
+  /// A 403 from /auth/me blocks protected access without deleting local credentials.
+  void markSessionAccessBlocked() {
+    _isAccessBlocked.value = true;
+    _isSessionVerified.value = false;
+  }
+
+  void _releasePendingNotificationNavigationAfterFrame() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isAuthenticated.value && _isSessionVerified.value &&
+          Get.isRegistered<PushNotificationService>()) {
+        PushNotificationService.to.releasePendingNavigation();
+      }
+    });
   }
 
   /// تحديث ومزامنة سياق جلسة المستخدم بالكامل وبشكل ذري
@@ -254,6 +279,7 @@ class SessionService extends GetxService {
 
   Future<void> _performSessionTermination() async {
     _isSessionVerified.value = false;
+    _isAccessBlocked.value = false;
     _isAuthenticated.value = false;
     final storage = StorageService.instance;
     await storage.clearSession();

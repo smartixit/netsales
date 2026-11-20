@@ -87,6 +87,7 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
       return SessionValidationResult.unauthorized;
     }
     if (response.statusCode == 403) {
+      SessionService.to.markSessionAccessBlocked();
       return SessionValidationResult.forbidden;
     }
     if (!response.success || response.statusCode != 200 || response.data == null) {

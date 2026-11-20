@@ -5,6 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
@@ -18,6 +19,7 @@ class CustomUnauthorized extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isSessionBlocked = SessionService.to.isAccessBlocked;
 
     return CustomAppScaffold(
       useSurfaceMesh: true,
@@ -49,7 +51,9 @@ class CustomUnauthorized extends StatelessWidget {
               ),
               AppSpacing.vSm,
               Text(
-                'ليس لديك الصلاحية الكافية للوصول إلى هذا المسار أو تنفيذ هذا الإجراء.',
+                isSessionBlocked
+                    ? 'تم رفض الوصول إلى الحساب أو الجهاز من الخادم. يمكنك إنهاء الجلسة والمحاولة بحساب آخر.'
+                    : 'ليس لديك الصلاحية الكافية للوصول إلى هذا المسار أو تنفيذ هذا الإجراء.',
                 style: AppTypography.bodyMedium.copyWith(
                   color: colors.onSurfaceVariant,
                 ),
@@ -57,9 +61,14 @@ class CustomUnauthorized extends StatelessWidget {
               ),
               AppSpacing.vXl,
               CustomButton.primary(
-                text: 'العودة للرئيسية',
-                icon: Icons.home_rounded,
-                onPressed: () {
+                text: isSessionBlocked ? 'تسجيل الخروج' : 'العودة للرئيسية',
+                icon: isSessionBlocked ? Icons.logout_rounded : Icons.home_rounded,
+                onPressed: () async {
+                  if (isSessionBlocked) {
+                    await SessionService.to.terminateSession();
+                    await Get.offAllNamed<void>(AppRoutes.login);
+                    return;
+                  }
                   Get.offAllNamed<void>(AppRoutes.dashboard);
                 },
               ),

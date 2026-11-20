@@ -24,6 +24,9 @@ class WorkspaceGuard extends GetMiddleware {
         !SessionService.to.isAuthenticated) {
       return const RouteSettings(name: AppRoutes.login);
     }
+    if (SessionService.to.isAccessBlocked) {
+      return const RouteSettings(name: AppRoutes.unauthorized);
+    }
     if (!SessionService.to.isSessionVerified) {
       return const RouteSettings(name: AppRoutes.initial);
     }
