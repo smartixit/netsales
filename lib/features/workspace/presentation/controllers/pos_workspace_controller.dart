@@ -113,6 +113,8 @@ class PosWorkspaceController extends GetxController {
   PosActiveSupplyOrderViewModel? get activeSupplyOrder =>
       PosActiveSupplyOrderMapper.map(recentRequests);
 
+  int? get selectedNetworkPosId => selectedNetworkLink.value?.networkPosId;
+
   List<PosLinkedNetworkOptionViewModel> get linkedNetworkOptions =>
       PosLinkedNetworkOptionMapper.map(
         links: networkLinks,

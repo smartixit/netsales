@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
@@ -51,7 +52,6 @@ class PosWorkspaceTransactionMapper {
     InvoiceEntity invoice,
     void Function(InvoiceEntity invoice) onOpenInvoice,
   ) {
-    final saleType = invoice.saleTypeLabel ?? 'شراء';
     final parsedDate = DateFormatter.tryParse(
       invoice.invoiceDate ?? invoice.createdAt ?? '',
     );
@@ -62,7 +62,6 @@ class PosWorkspaceTransactionMapper {
         : null;
 
     final subtitleParts = [
-      saleType,
       if (dateLabel.isNotEmpty) dateLabel,
       ?voucherDetail,
     ];
@@ -86,7 +85,6 @@ class PosWorkspaceTransactionMapper {
     RequestEntity request,
     void Function(RequestEntity request) onOpenRequest,
   ) {
-    final saleType = request.saleTypeLabel ?? 'طلب شراء';
     final parsedDate = DateFormatter.tryParse(
       request.requestDate ?? request.createdAt ?? '',
     );
@@ -95,9 +93,9 @@ class PosWorkspaceTransactionMapper {
     return WorkspaceTransactionItemViewModel(
       title: 'طلب توريد',
       reference: _shortReference(request.requestUuid, 'طلب توريد'),
-      subtitle: dateLabel.isEmpty ? saleType : '$saleType • $dateLabel',
+      subtitle: dateLabel,
       formattedAmount:
-          '${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي',
+          '${AmountFormatter.formatValue(request.requestTotalAmount)}',
       statusPresentation: EnumPresentationRegistry.resolveRequestStatus(
         request.status,
         serverLabel: request.statusLabel,

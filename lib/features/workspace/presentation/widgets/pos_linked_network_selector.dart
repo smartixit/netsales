@@ -22,7 +22,7 @@ class PosLinkedNetworkSelector extends StatelessWidget {
     final colors = context.colors;
     return Obx(() {
       if (controller.isLoadingNetworks.value &&
-          controller.networkLinks.isEmpty) {
+          controller.linkedNetworkOptions.isEmpty) {
         return CustomSurfaceCard(
           padding: EdgeInsets.all(AppSpacing.md),
           child: Row(
@@ -78,20 +78,20 @@ class PosLinkedNetworkSelector extends StatelessWidget {
         );
       }
 
-      final selected = controller.selectedNetworkLink.value;
+      final selectedNetworkPosId = controller.selectedNetworkPosId;
       return CustomSurfaceCard(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              selected == null ? 'اختر الشبكة المورّدة' : 'الشبكة المورّدة',
+              selectedNetworkPosId == null ? 'اختر الشبكة المورّدة' : 'الشبكة المورّدة',
               style: AppTypography.titleSmall.copyWith(
                 color: colors.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            if (selected == null) ...[
+            if (selectedNetworkPosId == null) ...[
               AppSpacing.vXs,
               Text(
                 'لديك أكثر من شبكة مرتبطة. اختر الشبكة التي تريد عرض نشاطها.',
@@ -103,7 +103,7 @@ class PosLinkedNetworkSelector extends StatelessWidget {
             AppSpacing.vMd,
             _NetworkChoices(
               links: activeLinks,
-              selectedNetworkPosId: selected?.networkPosId,
+              selectedNetworkPosId: selectedNetworkPosId,
               onSelected: controller.selectNetworkLink,
             ),
             if (controller.hasMoreNetworks.value) ...[
@@ -153,7 +153,7 @@ class _NetworkChoices extends StatelessWidget {
                     : colors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(AppRadius.md),
                 border: Border.all(
-                  color: link.networkId == selectedId
+                  color: link.networkPosId == selectedNetworkPosId
                       ? colors.primary
                       : colors.outlineVariant,
                 ),
