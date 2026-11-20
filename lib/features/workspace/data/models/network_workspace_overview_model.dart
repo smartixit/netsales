@@ -99,7 +99,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
               posName is! String ||
               requestDate is! String ||
               requestTotalAmount is! String ||
-              !RegExp(r'^\\d+(?:\\.\\d+)?
+              !RegExp(r'^\d+(?:\.\d+)?$').hasMatch(requestTotalAmount) ||
               status is! String ||
               statusLabel is! String) {
             throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
