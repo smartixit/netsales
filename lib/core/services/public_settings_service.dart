@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer';
 
 import 'package:get/get.dart';
@@ -56,13 +55,9 @@ class PublicSettingsService extends GetxService {
   @override
   void onInit() {
     super.onInit();
-    init();
-  }
 
-  /// تهيئة الخدمة مع القراءة الفورية من التخزين المحلي ثم التحديث من الخادم
-  Future<void> init() async {
-    // جلب أحدث الإعدادات من الخادم في الخلفية دون تعطيل الإقلاع
-    unawaited(fetchSettings());
+    // Cache loading is local-only. Network refresh is coordinated by Splash
+    // after the initial connectivity check has completed.
     _loadFromLocalCache();
   }
 
