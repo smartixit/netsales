@@ -19,7 +19,7 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
   final ValueChanged<String> onPeriodChanged;
   final NetworkSalesTrendSummary summary;
 
-  const ExecutiveSalesVelocityChart({
+  const ExecutiveSalesTrendChart({
     super.key,
     required this.chartDefinition,
     required this.selectedPeriod,
