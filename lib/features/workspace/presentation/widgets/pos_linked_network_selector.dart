@@ -166,7 +166,7 @@ class _NetworkChoices extends StatelessWidget {
                         ? Icons.radio_button_checked
                         : Icons.radio_button_unchecked,
                     size: 16.r,
-                    color: link.networkId == selectedId
+                    color: link.networkPosId == selectedNetworkPosId
                         ? colors.primary
                         : colors.onSurfaceVariant,
                   ),
