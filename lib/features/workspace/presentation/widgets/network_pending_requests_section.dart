@@ -19,7 +19,7 @@ class NetworkPendingRequestsSection extends StatelessWidget {
   });
 
   final List<WorkspaceTransactionItemViewModel> items;
-  final int totalPendingCount;
+  final int? totalPendingCount;
   final VoidCallback onViewAll;
 
   @override
@@ -48,7 +48,7 @@ class NetworkPendingRequestsSection extends StatelessWidget {
                 ),
               ),
               CustomButton.text(
-                text: 'عرض الكل ($totalPendingCount)',
+                text: totalPendingCount == null ? 'عرض الكل' : 'عرض الكل ($totalPendingCount)',
                 suffix: Icons.chevron_right_rounded,
                 onPressed: onViewAll,
               ),

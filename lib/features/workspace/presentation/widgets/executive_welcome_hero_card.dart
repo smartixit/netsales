@@ -27,6 +27,8 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
 
     final greeting = controller.welcomeGreeting;
     final pendingCount = controller.pendingRequestsCount;
+    final hasPendingMetric = pendingCount != null;
+    final hasPendingRequests = pendingCount != null && hasPendingRequests;
     final realFullName = controller.userName;
     final realRole = controller.userRole;
     final initials = controller.userInitials;
@@ -254,7 +256,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                       vertical: 6.h,
                     ),
                     decoration: BoxDecoration(
-                      color: pendingCount > 0
+                      color: hasPendingRequests
                           ? colors.warning.withValues(
                               alpha: isDark ? 0.14 : 0.08,
                             )
@@ -263,7 +265,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                                 : colors.surfaceContainerLow),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       border: Border.all(
-                        color: pendingCount > 0
+                        color: hasPendingRequests
                             ? colors.warning.withValues(
                                 alpha: isDark ? 0.4 : 0.3,
                               )
@@ -282,18 +284,18 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                           height: 26.r,
                           decoration: BoxDecoration(
                             color:
-                                (pendingCount > 0
+                                (hasPendingRequests
                                         ? colors.warning
                                         : colors.primary)
                                     .withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Icon(
-                            pendingCount > 0
+                            hasPendingRequests
                                 ? Icons.pending_actions_rounded
                                 : Icons.task_alt_rounded,
                             size: 13.r,
-                            color: pendingCount > 0
+                            color: hasPendingRequests
                                 ? colors.warning
                                 : colors.primary,
                           ),
@@ -313,13 +315,13 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                pendingCount > 0
+                                hasPendingRequests
                                     ? '$pendingCount طلب معلق'
                                     : 'كل العمليات مستقرة',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: pendingCount > 0
+                                  color: hasPendingRequests
                                       ? colors.warning
                                       : colors.onSurface,
                                   fontWeight: FontWeight.w700,
@@ -332,7 +334,7 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
                         Icon(
                           Icons.arrow_forward_ios_rounded,
                           size: 10.r,
-                          color: pendingCount > 0
+                          color: hasPendingRequests
                               ? colors.warning
                               : colors.onSurfaceVariant.withValues(alpha: 0.5),
                         ),
