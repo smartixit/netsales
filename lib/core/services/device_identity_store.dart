@@ -1,12 +1,30 @@
 import 'package:netsales/core/constants/storage_keys.dart';
 import 'package:netsales/core/services/storage_service.dart';
 
+/// Raised when the platform's authoritative device identifier is unavailable.
+class DeviceIdentityUnavailableException implements Exception {
+  const DeviceIdentityUnavailableException({this.cause});
+
+  final Object? cause;
+
+  @override
+  String toString() {
+    return 'The authoritative Android device identifier (Settings.Secure.ANDROID_ID) '
+        'could not be read. Device-bound authentication cannot continue safely'
+        '${cause == null ? '.' : ' (${cause.runtimeType}).'}';
+  }
+}
+
 /// Resolves and persists the device identity used by device-bound sessions.
 ///
-/// The persisted value has priority over fresh platform lookups. This matters
-/// when a platform identifier provider is temporarily unavailable or changes
-/// its returned value between process launches: an existing server session
-/// must keep presenting the same device UUID it was created with.
+/// Android is deliberately handled differently from other platforms:
+/// Settings.Secure.ANDROID_ID, obtained through FlutterUdid, is the only
+/// accepted identity. A previously persisted value is not trusted on Android,
+/// because older app versions could have stored Build.FINGERPRINT or a random
+/// fallback there. Build identifiers and random values must never replace the
+/// Android ID for session binding.
+///
+/// Other platforms retain the existing persisted-first resolution policy.
 class DeviceIdentityStore {
   const DeviceIdentityStore();
 
@@ -14,8 +32,17 @@ class DeviceIdentityStore {
     required Future<String?> Function() resolvePlatformIdentifier,
     required String? hardwareFingerprint,
     required String Function() generateFallback,
+    bool requirePlatformIdentifier = false,
   }) async {
     final storage = StorageService.instance;
+
+    if (requirePlatformIdentifier) {
+      return _resolveRequiredPlatformIdentifier(
+        storage: storage,
+        resolvePlatformIdentifier: resolvePlatformIdentifier,
+      );
+    }
+
     final persisted = storage.getString(StorageKeys.deviceUuid)?.trim();
     if (persisted != null && persisted.isNotEmpty) {
       final normalized = _limitLength(persisted);
@@ -35,7 +62,7 @@ class DeviceIdentityStore {
     try {
       resolved = (await resolvePlatformIdentifier())?.trim() ?? '';
     } catch (_) {
-      // Continue to the OS fingerprint and final persistent fallback.
+      // Continue to the platform-specific fallback for non-Android platforms.
     }
 
     if (resolved.isEmpty) {
@@ -60,7 +87,44 @@ class DeviceIdentityStore {
     }
 
     resolved = _limitLength(resolved);
-    await storage.setString(StorageKeys.deviceUuid, resolved);
+    final saved = await storage.setString(StorageKeys.deviceUuid, resolved);
+    if (!saved) {
+      throw StateError('Failed to persist the resolved device identity.');
+    }
+    return resolved;
+  }
+
+  Future<String> _resolveRequiredPlatformIdentifier({
+    required StorageService storage,
+    required Future<String?> Function() resolvePlatformIdentifier,
+  }) async {
+    String? platformIdentifier;
+    try {
+      platformIdentifier = await resolvePlatformIdentifier();
+    } catch (error) {
+      throw DeviceIdentityUnavailableException(cause: error);
+    }
+
+    final resolved = platformIdentifier?.trim() ?? '';
+    if (resolved.isEmpty) {
+      throw const DeviceIdentityUnavailableException();
+    }
+
+    // Never truncate or transform a security identifier: doing so could
+    // create collisions and would no longer be the exact platform ID.
+    if (resolved.length > 64) {
+      throw StateError(
+        'The platform device identifier exceeds the supported 64 characters.',
+      );
+    }
+
+    // Always refresh this value from Android ID. This intentionally replaces
+    // legacy values persisted by earlier builds (Build.FINGERPRINT/random ID).
+    final saved = await storage.setString(StorageKeys.deviceUuid, resolved);
+    if (!saved) {
+      throw StateError('Failed to persist the authoritative device identity.');
+    }
+
     return resolved;
   }
 

@@ -15,9 +15,9 @@ import 'package:netsales/core/utils/idempotency_helper.dart';
 /// 1. استخراج معرّف عتادي فريد ودائم (Persistent Hardware Device UUID) يصمد أمام:
 ///    - مسح بيانات التطبيق (Clear App Data).
 ///    - إلغاء التثبيت وإعادة التثبيت (Uninstall & Reinstall).
-///    - عبر iOS Keychain في هواتف آبل، و MediaDrm/Android ID في أجهزة أندرويد.
+///    - عبر iOS Keychain / Android ID / معرّفات المنصة المناسبة.
 /// 2. صياغة اسم مقروء ومعبّر للجهاز (مثل: Samsung Galaxy S24 Ultra (Android 14)).
-/// 3. تحديد نوع النظام المعتمد في الواجهة الخلفية (ANDROID, IOS, WINDOWS, MAC, LINUX, WEB).
+— 3. تحديد نوع النظام المعتمد في الواجهة الخلفية (ANDROID, IOS, WINDOWS, MAC, LINUX, WEB).
 class DeviceService extends GetxService {
   DeviceService._();
 
@@ -108,9 +108,11 @@ class DeviceService extends GetxService {
     _brand = android.brand.isNotEmpty ? android.brand : android.manufacturer;
     _model = android.model;
     _osVersion = 'Android ${android.version.release}';
-    _hardwareFingerprint = android.fingerprint.isNotEmpty
-        ? android.fingerprint
-        : android.id;
+
+    // AndroidDeviceInfo exposes android.os.Build fields. Build.FINGERPRINT
+    // and Build.ID identify an OS build, not this physical/app device, so
+    // neither is eligible for session identity or hardware fallback.
+    _hardwareFingerprint = '';
 
     final formattedBrand = _capitalize(_brand);
     _deviceName = '$formattedBrand $_model ($_osVersion)'.trim();
@@ -175,21 +177,29 @@ class DeviceService extends GetxService {
     _deviceName = 'NetSales Client Device';
   }
 
-  /// حل وتثبيت معرّف الجهاز السيادي الدائم والمقاوم لإلغاء التثبيت ومسح البيانات
+  /// حل وتثبيت معرّف الجهاز السيادي الدائم والمقاوم لإعادة التثبيت
   Future<void> _resolveDeviceUuid() async {
+    final isAndroid = !kIsWeb && Platform.isAndroid;
+
     _deviceUuid = await const DeviceIdentityStore().resolve(
       resolvePlatformIdentifier: () async {
         if (kIsWeb) return null;
         try {
+          // flutter_udid reads Settings.Secure.ANDROID_ID on Android.
           final udid = await FlutterUdid.udid;
           return udid.trim().isEmpty ? null : udid.trim();
         } catch (error) {
-          log('⚠️ [DeviceService] FlutterUdid lookup failed: $error');
+          log(
+            '[DeviceService] Platform identifier lookup failed '
+            '(android=$isAndroid, errorType=${error.runtimeType}).',
+          );
+          if (isAndroid) rethrow;
           return null;
         }
       },
-      hardwareFingerprint: _hardwareFingerprint,
+      hardwareFingerprint: isAndroid ? null : _hardwareFingerprint,
       generateFallback: () => IdempotencyHelper.generate('dev'),
+      requirePlatformIdentifier: isAndroid,
     );
   }
 
