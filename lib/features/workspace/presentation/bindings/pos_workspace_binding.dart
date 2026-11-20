@@ -7,8 +7,6 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
-import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
-import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/invoices/presentation/bindings/invoice_binding.dart';
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
@@ -26,7 +24,6 @@ class PosWorkspaceBinding extends Bindings {
     CommercialBinding().dependencies();
     WorkspaceEntityPickerBinding().dependencies();
     OperationalReportsBinding().dependencies();
-    FinanceBinding().dependencies();
     InvoiceBinding().dependencies();
     MembershipBinding().dependencies();
     // The orders screen is embedded in this workspace shell, not opened
@@ -39,8 +36,6 @@ class PosWorkspaceBinding extends Bindings {
       () => PosWorkspaceController(
         getMyPosUseCase: Get.find<GetMyPosUseCase>(),
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
-        getPosWalletByNetworkAndPosUseCase:
-            Get.find<GetPosWalletByNetworkAndPosUseCase>(),
         getPosInvoicesUseCase: Get.find<GetPosInvoicesUseCase>(),
         getRequestsUseCase: Get.find<GetRequestsUseCase>(),
         getNetworkPackagesUseCase: Get.find<GetNetworkPackagesUseCase>(),

@@ -46,10 +46,13 @@ class CustomPageHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final effectiveGradient = gradient ?? colors.executiveHeroGradient;
-    final effectiveBorder = borderColor ?? colors.executiveGoldAccent.withValues(alpha: .32);
-    final effectiveShadow = shadowColor ?? colors.emeraldDark.withValues(alpha: .23);
+    final effectiveBorder =
+        borderColor ?? colors.executiveGoldAccent.withValues(alpha: .32);
+    final effectiveShadow =
+        shadowColor ?? colors.emeraldDark.withValues(alpha: .23);
     final effectiveIconColor = iconColor ?? colors.executiveGoldIcon;
-    final effectiveIconContainerColor = iconContainerColor ?? Colors.white.withValues(alpha: .13);
+    final effectiveIconContainerColor =
+        iconContainerColor ?? Colors.white.withValues(alpha: .13);
 
     return Container(
       width: double.infinity,
@@ -125,11 +128,7 @@ class CustomPageHeroCard extends StatelessWidget {
                           color: effectiveIconColor.withValues(alpha: .38),
                         ),
                       ),
-                      child: Icon(
-                        icon,
-                        color: effectiveIconColor,
-                        size: 27.r,
-                      ),
+                      child: Icon(icon, color: effectiveIconColor, size: 27.r),
                     ),
                     AppSpacing.hMd,
                     Expanded(
@@ -148,10 +147,7 @@ class CustomPageHeroCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (badge != null) ...[
-                                AppSpacing.hXs,
-                                badge!,
-                              ],
+                              if (badge != null) ...[AppSpacing.hXs, badge!],
                             ],
                           ),
                           AppSpacing.vXs,
@@ -169,12 +165,7 @@ class CustomPageHeroCard extends StatelessWidget {
                 ),
                 if (action != null) ...[
                   AppSpacing.vMd,
-                  Row(
-                    children: [
-                      const Spacer(),
-                      action!,
-                    ],
-                  ),
+                  Row(children: [const Spacer(), action!]),
                 ],
               ],
             ),

@@ -62,11 +62,12 @@ class CustomRefreshablePage extends StatelessWidget {
   final ScrollPhysics? physics;
 
   /// حساب الهوامش القياسية المركزية للمنظومة
-  static EdgeInsets resolvePagePadding(BuildContext context, {bool embedded = false}) {
+  static EdgeInsets resolvePagePadding(
+    BuildContext context, {
+    bool embedded = false,
+  }) {
     final mediaQuery = MediaQuery.of(context);
-    final topPadding = embedded
-        ? mediaQuery.padding.top + 20.h
-        : AppSpacing.md;
+    final topPadding = embedded ? mediaQuery.padding.top + 20.h : AppSpacing.md;
     final bottomPadding = embedded
         ? 115.h + mediaQuery.padding.bottom
         : mediaQuery.padding.bottom + AppSpacing.xl;
@@ -84,16 +85,17 @@ class CustomRefreshablePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final effectivePadding = padding?.resolve(Directionality.of(context)) ??
+    final effectivePadding =
+        padding?.resolve(Directionality.of(context)) ??
         resolvePagePadding(context, embedded: embedded);
 
-    final effectiveEdgeOffset = edgeOffset ??
+    final effectiveEdgeOffset =
+        edgeOffset ??
         (effectivePadding.top > 0 ? effectivePadding.top - 14.h : 0.0);
 
-    final effectivePhysics = physics ??
-        const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        );
+    final effectivePhysics =
+        physics ??
+        const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics());
 
     final List<Widget> rootSlivers;
     if (child != null) {
@@ -107,9 +109,7 @@ class CustomRefreshablePage extends StatelessWidget {
       rootSlivers = [
         SliverPadding(
           padding: effectivePadding,
-          sliver: SliverMainAxisGroup(
-            slivers: slivers ?? const <Widget>[],
-          ),
+          sliver: SliverMainAxisGroup(slivers: slivers ?? const <Widget>[]),
         ),
       ];
     }
@@ -128,8 +128,9 @@ class CustomRefreshablePage extends StatelessWidget {
             final handled = onNotification!(scroll);
             if (handled) return true;
           }
-          final canLoadMore =
-              hasMorePredicate != null ? hasMorePredicate!() : hasMore;
+          final canLoadMore = hasMorePredicate != null
+              ? hasMorePredicate!()
+              : hasMore;
           if (onLoadMore != null &&
               canLoadMore &&
               scroll.depth == 0 &&

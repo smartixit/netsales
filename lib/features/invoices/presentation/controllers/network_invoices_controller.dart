@@ -55,14 +55,12 @@ class NetworkInvoicesController extends GetxController {
   // ── مؤشرات الأداء المحسوبة (KPI Counters) ──
   int get totalInvoicesCount => invoices.length;
 
-  int get paidInvoicesCount =>
-      invoices.where((i) => i.isPaid).length;
+  int get paidInvoicesCount => invoices.where((i) => i.isPaid).length;
 
   int get partiallyPaidInvoicesCount =>
       invoices.where((i) => i.isPartiallyPaid).length;
 
-  int get unpaidInvoicesCount =>
-      invoices.where((i) => i.isUnpaid).length;
+  int get unpaidInvoicesCount => invoices.where((i) => i.isUnpaid).length;
 
   @override
   void onInit() {

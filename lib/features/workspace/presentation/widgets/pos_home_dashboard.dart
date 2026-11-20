@@ -10,7 +10,6 @@ import 'package:netsales/features/workspace/presentation/flows/pos_network_linki
 import 'package:netsales/features/workspace/presentation/widgets/pos_active_supply_order_tracker.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_quick_action_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_recent_transactions_section.dart';
-import 'package:netsales/features/workspace/presentation/widgets/pos_selected_network_financial_summary.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_welcome_header.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
@@ -94,28 +93,6 @@ class PosHomeDashboard extends StatelessWidget {
               onQrTap: PosNetworkLinkingFlow(controller).start,
             ),
             AppSpacing.vLg,
-
-            // 2. كرت السيولة والملخص المالي للشبكة المحددة (VIP Luxury Carbon Card)
-            if (controller.selectedNetworkLink.value != null) ...[
-              PosSelectedNetworkFinancialSummary(
-                networkName:
-                    controller
-                        .selectedNetworkLink
-                        .value!
-                        .network
-                        ?.networkName ??
-                    'الشبكة المحددة',
-                summary: controller.selectedWalletSummary,
-                isLoading: controller.isLoadingWallet.value,
-                error: controller.walletError.value,
-                onRetry: () => controller.selectNetwork(
-                  controller.selectedNetworkLink.value!,
-                  index: controller.currentNetworkIndex.value,
-                ),
-                onOpenAccount: controller.openWalletStatement,
-              ),
-              AppSpacing.vLg,
-            ],
 
             // 3. متابعة طلبات التوريد المفتوحة من الـ API الحقيقي
             PosActiveSupplyOrderTracker(controller: controller),

@@ -212,10 +212,7 @@ class CustomContextSelector extends StatelessWidget {
                       )
                     else ...[
                       for (final option in options)
-                        CustomContextOptionTile(
-                          option: option,
-                          accent: accent,
-                        ),
+                        CustomContextOptionTile(option: option, accent: accent),
                     ],
                   ],
                 ),

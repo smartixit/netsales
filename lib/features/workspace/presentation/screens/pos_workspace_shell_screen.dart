@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/features/finance/presentation/widgets/pos_finance_workspace_hub.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoices_screen.dart';
 import 'package:netsales/features/membership/presentation/views/pos_members_view.dart';
 import 'package:netsales/features/reports/presentation/screens/operational_reports_screen.dart';
@@ -37,12 +36,6 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           icon: Icons.receipt_outlined,
           activeIcon: Icons.receipt_rounded,
           content: InvoicesScreen(embedded: true),
-        ),
-        const WorkspaceNavItem(
-          label: 'الرصيد',
-          icon: Icons.account_balance_wallet_outlined,
-          activeIcon: Icons.account_balance_wallet_rounded,
-          content: PosFinanceWorkspaceHub(),
         ),
         const WorkspaceNavItem(
           label: 'فريق العمل',

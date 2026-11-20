@@ -22,8 +22,6 @@ import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
-import 'package:netsales/features/finance/domain/entities/pos_wallet_entity.dart';
-import 'package:netsales/features/finance/domain/usecases/pos_wallet_use_cases.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
@@ -32,10 +30,6 @@ import 'package:netsales/features/workspace/presentation/models/workspace_transa
 import 'package:netsales/features/workspace/presentation/mappers/pos_workspace_transaction_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_network_package_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_active_supply_order_mapper.dart';
-import 'package:netsales/features/workspace/presentation/mappers/pos_wallet_summary_mapper.dart';
-import 'package:netsales/features/workspace/presentation/mappers/pos_network_carousel_card_mapper.dart';
-import 'package:netsales/features/workspace/presentation/models/pos_network_carousel_card_view_model.dart';
-import 'package:netsales/features/workspace/presentation/models/pos_wallet_summary_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/pos_active_supply_order_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/pos_network_package_view_model.dart';
 
@@ -44,7 +38,6 @@ class PosWorkspaceController extends GetxController {
   PosWorkspaceController({
     required this.getMyPosUseCase,
     required this.getPosNetworksListUseCase,
-    required this.getPosWalletByNetworkAndPosUseCase,
     this.getPosInvoicesUseCase,
     this.getRequestsUseCase,
     this.getNetworkPackagesUseCase,
@@ -54,7 +47,6 @@ class PosWorkspaceController extends GetxController {
 
   final GetMyPosUseCase getMyPosUseCase;
   final GetPosNetworksListUseCase getPosNetworksListUseCase;
-  final GetPosWalletByNetworkAndPosUseCase getPosWalletByNetworkAndPosUseCase;
   final GetPosInvoicesUseCase? getPosInvoicesUseCase;
   final GetRequestsUseCase? getRequestsUseCase;
   final GetNetworkPackagesUseCase? getNetworkPackagesUseCase;
@@ -70,7 +62,6 @@ class PosWorkspaceController extends GetxController {
       <NetworkPosLinkEntity>[].obs;
   final Rxn<NetworkPosLinkEntity> selectedNetworkLink =
       Rxn<NetworkPosLinkEntity>();
-  final Rxn<PosWalletEntity> selectedWallet = Rxn<PosWalletEntity>();
 
   // بيانات حية من الـ API: فواتير المشتريات، طلبات التوريد، وباقات الشبكة
   final RxList<InvoiceEntity> recentInvoices = <InvoiceEntity>[].obs;
@@ -123,7 +114,10 @@ class PosWorkspaceController extends GetxController {
             : null);
     if (useCase == null) return null;
 
-    return previewNetworkPosLinkChallengeUseCase!(payload: payload, posId: posId);
+    return previewNetworkPosLinkChallengeUseCase!(
+      payload: payload,
+      posId: posId,
+    );
   }
 
   Future<bool> confirmNetworkLinkChallenge({
@@ -191,16 +185,6 @@ class PosWorkspaceController extends GetxController {
 
   PosActiveSupplyOrderViewModel? get activeSupplyOrder =>
       PosActiveSupplyOrderMapper.map(recentRequests);
-
-  PosWalletSummaryViewModel? get selectedWalletSummary =>
-      PosWalletSummaryMapper.map(selectedWallet.value);
-
-  List<PosNetworkCarouselCardViewModel> get networkCarouselItems =>
-      PosNetworkCarouselCardMapper.map(
-        links: networkLinks,
-        selectedLink: selectedNetworkLink.value,
-        selectedWallet: selectedWallet.value,
-      );
 
   void openProcurementOrder(RequestEntity request) =>
       Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
@@ -315,7 +299,6 @@ class PosWorkspaceController extends GetxController {
       networkCursor.value = null;
       hasMoreNetworks.value = false;
       selectedNetworkLink.value = null;
-      selectedWallet.value = null;
       currentNetworkIndex.value = 0;
     } else {
       isLoadingMoreNetworks.value = true;
@@ -323,7 +306,7 @@ class PosWorkspaceController extends GetxController {
 
     try {
       final result = await getPosNetworksListUseCase(
-        posId:posId,
+        posId: posId,
         cursor: refresh ? null : networkCursor.value,
         perPage: 10,
       );
@@ -382,15 +365,12 @@ class PosWorkspaceController extends GetxController {
 
     final isSameNetwork =
         selectedNetworkLink.value?.networkId == link.networkId;
-    if (isSameNetwork &&
-        !forceRefresh &&
-        (selectedWallet.value != null || isLoadingWallet.value)) {
+    if (isSameNetwork && !forceRefresh && (isLoadingWallet.value)) {
       return;
     }
 
     selectedNetworkLink.value = link;
     currentNetworkIndex.value = index ?? networkLinks.indexOf(link);
-    selectedWallet.value = null;
     walletError.value = null;
 
     final generation = ++_walletGeneration;
@@ -401,17 +381,6 @@ class PosWorkspaceController extends GetxController {
         link.networkId,
       );
       if (generation != _walletGeneration) return;
-
-      final wallet = await getPosWalletByNetworkAndPosUseCase(
-        link.networkId,
-        posId,
-      );
-      if (generation != _walletGeneration ||
-          activePos.value?.posId != posId ||
-          selectedNetworkLink.value?.networkId != link.networkId) {
-        return;
-      }
-      selectedWallet.value = wallet;
 
       // جلب البيانات الحقيقية المرتبطة بالشبكة المحددة (فواتير، طلبات، باقات)
       await loadNetworkScopedData(link.networkId);
@@ -544,7 +513,6 @@ class PosWorkspaceController extends GetxController {
     ++_scopedDataGeneration;
     networkLinks.clear();
     selectedNetworkLink.value = null;
-    selectedWallet.value = null;
     recentInvoices.clear();
     recentRequests.clear();
     networkPackages.clear();

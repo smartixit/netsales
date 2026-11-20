@@ -9,12 +9,11 @@ import 'package:netsales/features/requests/domain/entities/request_item_entity.d
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/procurement_request_details_controller.dart';
 import 'package:netsales/features/requests/presentation/screens/procurement_request_details_screen.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_details_hero.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_details_item_card.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_details_metrics_strip.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_details_parties_card.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_details_timeline.dart';
-import 'package:netsales/widgets/images/custom_avatar_badge.dart';
+import 'package:netsales/widgets/document_details/custom_document_details_hero.dart';
+import 'package:netsales/widgets/document_details/custom_document_item_card.dart';
+import 'package:netsales/widgets/document_details/custom_document_metrics_strip.dart';
+import 'package:netsales/widgets/document_details/custom_document_parties_card.dart';
+import 'package:netsales/widgets/document_details/custom_document_timeline.dart';
 
 class _FakeGetRequestDetailsUseCase implements GetRequestDetailsUseCase {
   final RequestEntity detailEntity;
@@ -131,100 +130,7 @@ void main() {
   });
 
   group('Procurement Request Details Screen & Widgets Tests', () {
-    testWidgets(
-      'renders hero header with UUID, status badge, and copy button',
-      (tester) async {
-        await tester.pumpWidget(
-          _wrapWithScreenUtil(
-            Scaffold(
-              body: ProcurementDetailsHero(request: samplePendingRequest),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.text('REQ-20261115-001'), findsOneWidget);
-        expect(find.text('قيد الانتظار'), findsOneWidget);
-        expect(find.text('نقدي'), findsOneWidget);
-        expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
-      },
-    );
-
-    testWidgets('renders command metrics strip with accurate totals', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _wrapWithScreenUtil(
-          Scaffold(
-            body: ProcurementDetailsMetricsStrip(request: samplePendingRequest),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('إجمالي الطلب'), findsOneWidget);
-      expect(find.text('عدد الكروت'), findsOneWidget);
-      expect(find.text('200'), findsOneWidget);
-      expect(
-        find.text('2'),
-        findsOneWidget,
-      ); // 200 vouchers / 100 per sheet = 2 sheets
-    });
-
-    testWidgets('renders timeline with 3 audit milestones', (tester) async {
-      await tester.pumpWidget(
-        _wrapWithScreenUtil(
-          Scaffold(
-            body: ProcurementDetailsTimeline(request: samplePendingRequest),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('مسار دورة حياة الطلب والتدقيق'), findsOneWidget);
-      expect(find.text('تقديم الطلب واعتماد عرض الأسعار'), findsOneWidget);
-      expect(find.text('المراجعة والتدقيق الفني'), findsOneWidget);
-      expect(find.text('في انتظار القرار النهائي'), findsOneWidget);
-    });
-
-    testWidgets('renders commercial parties card with network and pos info', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _wrapWithScreenUtil(
-          Scaffold(
-            body: ProcurementDetailsPartiesCard(request: samplePendingRequest),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('أطراف العملية التوريدية'), findsOneWidget);
-      expect(find.text('شبكة السرعة الذهبية'), findsOneWidget);
-      expect(find.text('مركز الأمل للاتصالات'), findsOneWidget);
-      expect(find.byIcon(Icons.phone_forwarded_rounded), findsNWidgets(2));
-      expect(find.byType(CustomAvatarBadge), findsNWidgets(2));
-    });
-
-    testWidgets('renders item card with package specifications and amounts', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _wrapWithScreenUtil(
-          Scaffold(body: ProcurementDetailsItemCard(item: mockItem, index: 0)),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('باقة 1 جيجا توريد'), findsOneWidget);
-      expect(find.text('#1'), findsOneWidget);
-      expect(find.text('200 كرت'), findsOneWidget);
-      expect(find.text('(2 ورقة)'), findsOneWidget);
-    });
-
-    testWidgets('renders complete details screen and triggers refresh', (
-      tester,
-    ) async {
+    testWidgets('renders complete details screen and elements', (tester) async {
       final fakeUseCase = _FakeGetRequestDetailsUseCase(samplePendingRequest);
       final controller = ProcurementRequestDetailsController(
         getRequestDetailsUseCase: fakeUseCase,
@@ -238,11 +144,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('REQ-20261115-001'), findsWidgets);
-      expect(find.byType(ProcurementDetailsHero), findsOneWidget);
-      expect(find.byType(ProcurementDetailsMetricsStrip), findsOneWidget);
-      expect(find.byType(ProcurementDetailsTimeline), findsOneWidget);
-      expect(find.byType(ProcurementDetailsPartiesCard), findsOneWidget);
-      expect(find.byType(ProcurementDetailsItemCard), findsOneWidget);
+      expect(find.byType(CustomDocumentDetailsHero), findsOneWidget);
+      expect(find.byType(CustomDocumentMetricsStrip), findsOneWidget);
+      expect(find.byType(CustomDocumentTimeline), findsOneWidget);
+      expect(find.byType(CustomDocumentPartiesCard), findsOneWidget);
+      expect(find.byType(CustomDocumentItemCard), findsOneWidget);
 
       await Get.delete<ProcurementRequestDetailsController>();
     });

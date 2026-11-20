@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/enums/sale_type.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -173,12 +173,18 @@ class ProcurementFinancialQuoteCard
                     ),
                   ),
                   AppSpacing.hSm,
-                  CustomStatusBadge(
-                    label: quote.saleTypeLabel,
-                    tone: quote.saleType == SaleType.cash
-                        ? SemanticTone.success
-                        : SemanticTone.info,
-                  ),
+                  () {
+                    final saleTypePres =
+                        EnumPresentationRegistry.resolveSaleType(
+                          quote.saleType,
+                          serverLabel: quote.saleTypeLabel,
+                        );
+                    return CustomStatusBadge(
+                      label: saleTypePres.label,
+                      tone: saleTypePres.tone,
+                      icon: saleTypePres.icon,
+                    );
+                  }(),
                 ],
               ),
             ),

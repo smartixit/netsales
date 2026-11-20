@@ -100,9 +100,7 @@ class CustomKpiSummaryCard extends StatelessWidget {
                 child: Text(
                   '${data.count}',
                   style: AppTypography.titleMedium.copyWith(
-                    color: isSelected
-                        ? data.accentColor
-                        : colors.onSurface,
+                    color: isSelected ? data.accentColor : colors.onSurface,
                     fontWeight: FontWeight.w900,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),

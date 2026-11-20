@@ -5,10 +5,12 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
@@ -18,23 +20,29 @@ import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
+import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/approve_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_status_summary_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
-import 'package:netsales/features/requests/presentation/widgets/modification_sheet/network_request_modification_footer.dart';
+import 'package:netsales/features/requests/presentation/controllers/base_procurement_orders_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/network_request_modification_sheet.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_order_card_actions.dart';
+import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/features/requests/presentation/widgets/request_approval_result_sheet.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم مراجعة واعتماد طلبات التوريد لمشغلي الشبكة (Network Procurement Review Controller)
-class NetworkProcurementReviewController extends GetxController {
+class NetworkProcurementReviewController
+    extends BaseProcurementOrdersController {
   final GetRequestsUseCase getRequestsUseCase;
   final ApproveRequestUseCase approveRequestUseCase;
   final RejectRequestUseCase rejectRequestUseCase;
@@ -58,18 +66,157 @@ class NetworkProcurementReviewController extends GetxController {
     this.getRequestStatusSummaryUseCase,
   });
 
+  @override
+  String get pageTitle => 'مراجعة طلبات التوريد';
+
+  @override
+  String get pageSubtitle =>
+      'فحص واعتماد أو تعديل طلبات الكروت الواردة من نقاط البيع التابعة بدقة وسرعة.';
+
+  @override
+  IconData get pageIcon => Icons.fact_check_rounded;
+
+  @override
+  Widget? get headerAction => null;
+
+  @override
+  String get searchHint => 'بحث برقم الطلب، المعرف، أو اسم نقطة البيع...';
+
+  @override
+  List<CustomKpiCardData> buildKpiCards(BuildContext context) {
+    final colors = context.colors;
+    final pendingPres = EnumPresentationRegistry.resolveRequestStatus(
+      RequestStatus.pending,
+    );
+    final approvedPres = EnumPresentationRegistry.resolveRequestStatus(
+      RequestStatus.approved,
+    );
+    final rejectedPres = EnumPresentationRegistry.resolveRequestStatus(
+      RequestStatus.rejected,
+    );
+    final cancelledPres = EnumPresentationRegistry.resolveRequestStatus(
+      RequestStatus.cancelled,
+    );
+
+    return [
+      CustomKpiCardData(
+        label: 'الكل',
+        count: totalOrdersCount,
+        icon: Icons.all_inbox_rounded,
+        accentColor: colors.primary,
+        statusKey: null,
+      ),
+      CustomKpiCardData(
+        label: pendingPres.label,
+        count: pendingOrdersCount,
+        icon: pendingPres.icon ?? Icons.hourglass_top_rounded,
+        accentColor: pendingPres.tone.color(context),
+        statusKey: RequestStatus.pending.wireValue,
+      ),
+      CustomKpiCardData(
+        label: approvedPres.label,
+        count: approvedOrdersCount,
+        icon: approvedPres.icon ?? Icons.check_circle_rounded,
+        accentColor: approvedPres.tone.color(context),
+        statusKey: RequestStatus.approved.wireValue,
+      ),
+      CustomKpiCardData(
+        label: rejectedPres.label,
+        count: rejectedOrdersCount,
+        icon: rejectedPres.icon ?? Icons.cancel_rounded,
+        accentColor: rejectedPres.tone.color(context),
+        statusKey: RequestStatus.rejected.wireValue,
+      ),
+      CustomKpiCardData(
+        label: cancelledPres.label,
+        count: cancelledOrdersCount,
+        icon: cancelledPres.icon ?? Icons.highlight_off_rounded,
+        accentColor: cancelledPres.tone.color(context),
+        statusKey: RequestStatus.cancelled.wireValue,
+      ),
+    ];
+  }
+
+  @override
+  List<CustomSearchFilterOption<String?>> buildFilterOptions(
+    BuildContext context,
+  ) {
+    return [
+      const CustomSearchFilterOption<String?>(
+        label: 'جميع الحالات',
+        value: null,
+        icon: Icons.all_inbox_rounded,
+      ),
+      for (final RequestStatus status in RequestStatus.values.where(
+        (RequestStatus s) => s != RequestStatus.unknown,
+      ))
+        CustomSearchFilterOption<String?>(
+          label: EnumPresentationRegistry.resolveRequestStatus(status).label,
+          value: status.wireValue,
+          icon:
+              EnumPresentationRegistry.resolveRequestStatus(status).icon ??
+              Icons.label_outline_rounded,
+        ),
+    ];
+  }
+
+  @override
+  Widget? buildExtraFilters(BuildContext context) {
+    if (authorizedNetworks.length <= 1) return null;
+    return Padding(
+      padding: EdgeInsets.only(bottom: AppSpacing.sm),
+      child: CustomDropdown<int>(
+        label: 'تصفية بحسب الشبكة',
+        searchEnabled: false,
+        rxValue: selectedNetworkId,
+        items: authorizedNetworks.map((net) {
+          return DropdownItem<int>(
+            value: net.networkId,
+            child: Text(net.networkName),
+          );
+        }).toList(),
+        onChanged: onNetworkFilterChanged,
+      ),
+    );
+  }
+
+  @override
+  Widget buildCardActions(BuildContext context, RequestEntity request) {
+    return ProcurementOrderCardActions(
+      request: request,
+      onDetails: () => openRequestDetails(request),
+      isNetworkView: true,
+      onApprove: (request.isPending && canApproveRequests)
+          ? () => promptApproveRequest(request)
+          : null,
+      onModify: (request.isPending && canModifyRequests)
+          ? () => openModificationSheet(request)
+          : null,
+      onReject: (request.isPending && canRejectRequests)
+          ? () => promptRejectRequest(request)
+          : null,
+    );
+  }
+
   // State: قائمة طلبات التوريد الواردة والترقيم
+  @override
   final requests = <RequestEntity>[].obs;
   final statusSummary = Rxn<RequestStatusSummaryEntity>();
+  @override
   final isLoading = true.obs;
   final isLoadingSummary = false.obs;
+  @override
   final isLoadingMore = false.obs;
   final isProcessingDecision = false.obs;
+  @override
   final errorMessage = RxnString();
+  @override
   final loadMoreError = RxnString();
   final nextCursor = RxnString();
+  @override
   final expandedRequestId = RxnInt();
 
+  @override
   bool get hasMore => nextCursor.value != null;
 
   int get totalOrdersCount => statusSummary.value?.total ?? requests.length;
@@ -86,11 +233,13 @@ class NetworkProcurementReviewController extends GetxController {
       statusSummary.value?.cancelled ??
       requests.where((request) => request.isCancelled).length;
 
+  @override
   Future<void> refreshOrders() => Future.wait([
     loadRequests(isRefresh: true, clearOnStart: true),
     loadStatusSummary(),
   ]);
 
+  @override
   void toggleAccordion(int requestId) {
     if (expandedRequestId.value == requestId) {
       expandedRequestId.value = null;
@@ -100,8 +249,11 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   // فلاتر وبحث الطلبات
+  @override
   final searchController = TextEditingController();
+  @override
   final searchQuery = ''.obs;
+  @override
   final statusFilter = RxnString(); // null = all, PENDING, APPROVED, REJECTED
   final selectedNetworkId = RxnInt();
 
@@ -615,6 +767,7 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   /// تحميل المزيد مع منع الصفحات المتأخرة من تلويث نتائج فلتر أحدث.
+  @override
   Future<void> loadMoreRequests() async {
     final cursor = nextCursor.value;
     if (isLoadingMore.value || isLoading.value || cursor == null) {
@@ -660,6 +813,7 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   /// تغيير فلتر الحالة
+  @override
   void setStatusFilter(String? status) {
     if (statusFilter.value == status) return;
     statusFilter.value = status;
@@ -667,6 +821,7 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   /// إعادة تعيين الفلاتر والبحث
+  @override
   void resetFilters() {
     searchController.clear();
     searchQuery.value = '';
@@ -835,11 +990,13 @@ class NetworkProcurementReviewController extends GetxController {
   }
 
   /// فتح الفاتورة المرتبطة بالطلب
+  @override
   Future<void> openInvoice(int invoiceId) async {
     await Get.toNamed<void>(AppRoutes.saleInvoiceDetails, arguments: invoiceId);
   }
 
   /// فتح تفاصيل طلب التوريد
+  @override
   Future<void> openRequestDetails(RequestEntity request) async {
     await Get.toNamed<void>(
       AppRoutes.voucherRequestDetails,

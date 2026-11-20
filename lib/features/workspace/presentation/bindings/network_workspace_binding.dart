@@ -9,7 +9,6 @@ import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
-import 'package:netsales/features/finance/presentation/bindings/finance_binding.dart';
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
 import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
 import 'package:netsales/features/reports/presentation/bindings/operational_reports_binding.dart';
@@ -72,7 +71,6 @@ class NetworkWorkspaceBinding extends Bindings {
     CommercialBinding().dependencies();
     WorkspaceEntityPickerBinding().dependencies();
     OperationalReportsBinding().dependencies();
-    FinanceBinding().dependencies();
     MembershipBinding().dependencies();
     ProcurementRequestBinding().dependencies();
 

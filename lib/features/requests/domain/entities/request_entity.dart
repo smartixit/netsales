@@ -87,14 +87,14 @@ class RequestEntity {
   /// صيغة نصية منسقة لعدد الأوراق الكلية للطلب
   String get formattedTotalSheets =>
       totalSheets.truncateToDouble() == totalSheets
-          ? totalSheets.toInt().toString()
-          : totalSheets.toStringAsFixed(1);
+      ? totalSheets.toInt().toString()
+      : totalSheets.toStringAsFixed(1);
 
   /// معرف العرض السيادي للطلب
   String get displayReference =>
       requestUuid != null && requestUuid!.trim().isNotEmpty
-          ? requestUuid!.trim()
-          : '#$requestId';
+      ? requestUuid!.trim()
+      : '#$requestId';
 
   /// تاريخ تقديم الطلب المحول
   DateTime? get parsedRequestDate =>
@@ -115,16 +115,15 @@ class RequestEntity {
       : (reviewDate ?? updatedAt ?? '');
 
   /// اسم نقطة البيع المنسق للعرض
-  String get displayPosName =>
-      posName != null && posName!.trim().isNotEmpty
-          ? posName!.trim()
-          : 'نقطة بيع #$posId';
+  String get displayPosName => posName != null && posName!.trim().isNotEmpty
+      ? posName!.trim()
+      : 'نقطة بيع #$posId';
 
   /// اسم الشبكة المنسق للعرض
   String get displayNetworkName =>
       networkName != null && networkName!.trim().isNotEmpty
-          ? networkName!.trim()
-          : 'شبكة #$networkId';
+      ? networkName!.trim()
+      : 'شبكة #$networkId';
 
   /// هل الطلب يتضمن ملاحظات؟
   bool get hasNote => requestNote != null && requestNote!.trim().isNotEmpty;

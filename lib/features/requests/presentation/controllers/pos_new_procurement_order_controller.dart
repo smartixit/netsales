@@ -527,7 +527,10 @@ class PosNewProcurementOrderController extends GetxController {
     isLoadingPackages.value = false;
 
     try {
-      final paginated = await getPosNetworksListUseCase!(posId:posId, status: true);
+      final paginated = await getPosNetworksListUseCase!(
+        posId: posId,
+        status: true,
+      );
       if (lifecycleRevision != _lifecycleRevision ||
           (selectedPosId.value != null && selectedPosId.value != posId)) {
         return;

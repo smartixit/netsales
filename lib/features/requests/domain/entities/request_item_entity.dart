@@ -28,20 +28,18 @@ class RequestItemEntity {
   });
 
   /// سعة الورقة/الشيت بالكروت
-  int get sheetSize =>
-      (voucherPackage?.packageVoucherCount ?? 0) > 0
-          ? voucherPackage!.packageVoucherCount
-          : 100;
+  int get sheetSize => (voucherPackage?.packageVoucherCount ?? 0) > 0
+      ? voucherPackage!.packageVoucherCount
+      : 100;
 
   /// عدد الأوراق المحسوبة للبند
-  double get sheetsCount =>
-      sheetSize > 0 ? (voucherCount / sheetSize) : 0.0;
+  double get sheetsCount => sheetSize > 0 ? (voucherCount / sheetSize) : 0.0;
 
   /// صيغة نصية منسقة لعدد الأوراق
   String get formattedSheetsCount =>
       sheetsCount.truncateToDouble() == sheetsCount
-          ? sheetsCount.toInt().toString()
-          : sheetsCount.toStringAsFixed(1);
+      ? sheetsCount.toInt().toString()
+      : sheetsCount.toStringAsFixed(1);
 
   /// وصف التوزيع الورقي (شيت + كروت متبقية)
   String get sheetDescription =>

@@ -28,6 +28,7 @@ import 'package:netsales/features/requests/domain/usecases/get_requests_use_case
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/preview_request_modification_use_case.dart';
+import 'package:netsales/features/requests/presentation/controllers/base_procurement_orders_controller.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/features/requests/presentation/controllers/procurement_request_details_controller.dart';
 
@@ -166,6 +167,11 @@ class ProcurementRequestBinding extends Bindings {
         getRequestStatusSummaryUseCase:
             Get.find<GetRequestStatusSummaryUseCase>(),
       ),
+      fenix: true,
+    );
+
+    registerLazyIfAbsent<BaseProcurementOrdersController>(
+      () => Get.find<NetworkProcurementReviewController>(),
       fenix: true,
     );
 

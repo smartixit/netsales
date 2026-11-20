@@ -67,7 +67,9 @@ class CustomUnauthorized extends StatelessWidget {
               AppSpacing.vXl,
               CustomButton.primary(
                 text: isSessionBlocked ? 'تسجيل الخروج' : 'العودة للرئيسية',
-                icon: isSessionBlocked ? Icons.logout_rounded : Icons.home_rounded,
+                icon: isSessionBlocked
+                    ? Icons.logout_rounded
+                    : Icons.home_rounded,
                 onPressed: () async {
                   if (isSessionBlocked) {
                     await onSessionBlockedLogout?.call();

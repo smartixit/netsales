@@ -29,8 +29,8 @@ import 'package:netsales/features/requests/domain/usecases/create_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_checkout_bar.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
+import 'package:netsales/widgets/forms/custom_checkout_bar.dart';
 
 class FakeQuoteRequestRepository implements RequestRepository {
   ProcurementQuoteEntity? nextQuote;
@@ -663,126 +663,26 @@ void main() {
     });
   });
 
-  group(
-    'Phase 3.1: ProcurementFinancialQuoteCard Presentation Widget Tests',
-    () {
-      Widget buildTestableWidget(Widget child) {
-        return ScreenUtilInit(
-          designSize: const Size(375, 812),
-          minTextAdapt: true,
-          builder: (context, _) => MaterialApp(
-            theme: AppThemes.light,
-            home: Scaffold(
-              body: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: child,
-              ),
+  group('Phase 3.1: ProcurementFinancialQuoteCard Presentation Widget Tests', () {
+    Widget buildTestableWidget(Widget child) {
+      return ScreenUtilInit(
+        designSize: const Size(375, 812),
+        minTextAdapt: true,
+        builder: (context, _) => MaterialApp(
+          theme: AppThemes.light,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: child,
             ),
           ),
-        );
-      }
-
-      testWidgets(
-        'Renders gross total, discount with savings badge, and net total directly from quote',
-        (tester) async {
-          tester.view.physicalSize = const Size(1080, 2400);
-          tester.view.devicePixelRatio = 2.0;
-          addTearDown(() {
-            tester.view.resetPhysicalSize();
-            tester.view.resetDevicePixelRatio();
-          });
-
-          Get.put(controller);
-          controller.serverQuote.value = null;
-          controller.quoteError.value = null;
-          controller.isLoadingQuote.value = false;
-
-          controller.procurementCart.add(
-            ProcurementCartLineEntity(
-              package: testPackage,
-              sheets: 5,
-              voucherCount: 500,
-            ),
-          );
-
-          controller.serverQuote.value = const ProcurementQuoteEntity(
-            networkId: 10,
-            posId: 20,
-            saleType: SaleType.cash,
-            saleTypeLabel: 'نقدي',
-            grossTotal: 50000.0,
-            discountTotal: 5000.0,
-            netTotal: 45000.0,
-            currency: 'YER',
-            pricingToken: 'fake_valid_hmac_token',
-            items: [],
-          );
-
-          await tester.pumpWidget(
-            buildTestableWidget(const ProcurementFinancialQuoteCard()),
-          );
-          await tester.pumpAndSettle();
-
-          expect(find.text('عرض الأسعار المعتمد'), findsOneWidget);
-          expect(find.text('المجموع الأساسي:'), findsOneWidget);
-          expect(find.text('50,000.00 YER'), findsOneWidget);
-          expect(find.text('إجمالي الخصم المعتمد:'), findsOneWidget);
-          expect(find.text('- 5,000.00 YER'), findsOneWidget);
-          expect(find.text('وفر 10.0%'), findsOneWidget);
-          expect(find.text('صافي قيمة الطلب:'), findsOneWidget);
-          expect(find.text('45,000.00 YER'), findsOneWidget);
-        },
+        ),
       );
+    }
 
-      testWidgets(
-        'Hides expired pricing state after cart tariff refresh succeeds',
-        (tester) async {
-          tester.view.physicalSize = const Size(1080, 2400);
-          tester.view.devicePixelRatio = 2;
-          addTearDown(() {
-            tester.view.resetPhysicalSize();
-            tester.view.resetDevicePixelRatio();
-          });
-
-          Get.put(controller);
-          controller.selectedNetworkId.value = 10;
-          controller.selectedPosId.value = 20;
-          controller.myPosList.assignAll([testPos]);
-          controller.linkedNetworks.assignAll([testLink]);
-          controller.procurementCart.add(
-            ProcurementCartLineEntity(
-              package: _expiredTestPackage(),
-              sheets: 1,
-              voucherCount: 100,
-            ),
-          );
-          packageRepo.refreshedPackages = [testPackage];
-
-          final expiredPricingState = find.byWidgetPredicate(
-            (widget) =>
-                widget is CustomStateView &&
-                widget.kind == CustomStateKind.pricingExpired,
-          );
-
-          await tester.pumpWidget(
-            buildTestableWidget(const ProcurementCheckoutBar()),
-          );
-          await tester.pumpAndSettle();
-
-          expect(expiredPricingState, findsOneWidget);
-
-          await controller.refreshNetworkPackages();
-          await tester.pumpAndSettle();
-
-          expect(controller.hasCurrentProcurementSnapshots, isTrue);
-          expect(expiredPricingState, findsNothing);
-          expect(tester.takeException(), isNull);
-        },
-      );
-
-      testWidgets('Shows expired quote state and explicit refresh action', (
-        tester,
-      ) async {
+    testWidgets(
+      'Renders gross total, discount with savings badge, and net total directly from quote',
+      (tester) async {
         tester.view.physicalSize = const Size(1080, 2400);
         tester.view.devicePixelRatio = 2.0;
         addTearDown(() {
@@ -791,27 +691,29 @@ void main() {
         });
 
         Get.put(controller);
+        controller.serverQuote.value = null;
         controller.quoteError.value = null;
         controller.isLoadingQuote.value = false;
+
         controller.procurementCart.add(
           ProcurementCartLineEntity(
             package: testPackage,
-            sheets: 1,
-            voucherCount: 100,
+            sheets: 5,
+            voucherCount: 500,
           ),
         );
-        controller.serverQuote.value = ProcurementQuoteEntity(
+
+        controller.serverQuote.value = const ProcurementQuoteEntity(
           networkId: 10,
           posId: 20,
           saleType: SaleType.cash,
           saleTypeLabel: 'نقدي',
-          grossTotal: 10000,
-          discountTotal: 1000,
-          netTotal: 9000,
+          grossTotal: 50000.0,
+          discountTotal: 5000.0,
+          netTotal: 45000.0,
           currency: 'YER',
-          pricingToken: 'expired_quote_token',
-          expiresAt: DateTime.now().subtract(const Duration(minutes: 1)),
-          items: const [],
+          pricingToken: 'fake_valid_hmac_token',
+          items: [],
         );
 
         await tester.pumpWidget(
@@ -819,83 +721,202 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('انتهت صلاحية عرض السعر'), findsOneWidget);
-        expect(find.text('إعادة احتساب السعر'), findsOneWidget);
+        expect(find.text('عرض الأسعار المعتمد'), findsOneWidget);
+        expect(find.text('المجموع الأساسي:'), findsOneWidget);
+        expect(find.text('50,000.00 YER'), findsOneWidget);
+        expect(find.text('إجمالي الخصم المعتمد:'), findsOneWidget);
+        expect(find.text('- 5,000.00 YER'), findsOneWidget);
+        expect(find.text('وفر 10.0%'), findsOneWidget);
+        expect(find.text('صافي قيمة الطلب:'), findsOneWidget);
+        expect(find.text('45,000.00 YER'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Hides expired pricing state after cart tariff refresh succeeds',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        Get.put(controller);
+        controller.selectedNetworkId.value = 10;
+        controller.selectedPosId.value = 20;
+        controller.myPosList.assignAll([testPos]);
+        controller.linkedNetworks.assignAll([testLink]);
+        controller.procurementCart.add(
+          ProcurementCartLineEntity(
+            package: _expiredTestPackage(),
+            sheets: 1,
+            voucherCount: 100,
+          ),
+        );
+        packageRepo.refreshedPackages = [testPackage];
+
+        final expiredPricingState = find.byWidgetPredicate(
+          (widget) =>
+              widget is CustomStateView &&
+              widget.kind == CustomStateKind.pricingExpired,
+        );
+
+        await tester.pumpWidget(
+          buildTestableWidget(
+            Obx(
+              () => CustomCheckoutBar(
+                warningWidget: controller.needsPricingRefresh
+                    ? CustomStateView.pricingExpired(
+                        title: controller.isRefreshingCartPricing.value
+                            ? 'جارٍ تحديث التعرفة'
+                            : 'انتهت صلاحية التعرفة',
+                        subtitle: controller.isRefreshingCartPricing.value
+                            ? 'نحدّث أسعار الباقات المختارة مع الحفاظ على كميات السلة.'
+                            : controller.cartPricingRefreshError.value ??
+                                  'حدّث التعرفة الحالية قبل إرسال طلب التوريد.',
+                        actionLabel: controller.isRefreshingCartPricing.value
+                            ? 'جارٍ التحديث...'
+                            : 'تحديث التعرفة',
+                        presentation: CustomStatePresentation.compact,
+                        onAction: controller.isRefreshingCartPricing.value
+                            ? null
+                            : controller.refreshNetworkPackages,
+                      )
+                    : null,
+                actionLabel: 'إرسال طلب التوريد',
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(expiredPricingState, findsOneWidget);
+
+        await controller.refreshNetworkPackages();
+        await tester.pumpAndSettle();
+
+        expect(controller.hasCurrentProcurementSnapshots, isTrue);
+        expect(expiredPricingState, findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('Shows expired quote state and explicit refresh action', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
       });
 
-      testWidgets(
-        'Renders loading shimmer/indicator while fetching server quote',
-        (tester) async {
-          tester.view.physicalSize = const Size(1080, 2400);
-          tester.view.devicePixelRatio = 2.0;
-          addTearDown(() {
-            tester.view.resetPhysicalSize();
-            tester.view.resetDevicePixelRatio();
-          });
-
-          Get.put(controller);
-          controller.serverQuote.value = null;
-          controller.quoteError.value = null;
-
-          controller.procurementCart.add(
-            ProcurementCartLineEntity(
-              package: testPackage,
-              sheets: 1,
-              voucherCount: 100,
-            ),
-          );
-
-          controller.isLoadingQuote.value = true;
-
-          await tester.pumpWidget(
-            buildTestableWidget(const ProcurementFinancialQuoteCard()),
-          );
-          await tester.pump();
-
-          expect(
-            find.text('جاري احتساب السعر والخصم الفعليين المعتمدين...'),
-            findsOneWidget,
-          );
-        },
+      Get.put(controller);
+      controller.quoteError.value = null;
+      controller.isLoadingQuote.value = false;
+      controller.procurementCart.add(
+        ProcurementCartLineEntity(
+          package: testPackage,
+          sheets: 1,
+          voucherCount: 100,
+        ),
+      );
+      controller.serverQuote.value = ProcurementQuoteEntity(
+        networkId: 10,
+        posId: 20,
+        saleType: SaleType.cash,
+        saleTypeLabel: 'نقدي',
+        grossTotal: 10000,
+        discountTotal: 1000,
+        netTotal: 9000,
+        currency: 'YER',
+        pricingToken: 'expired_quote_token',
+        expiresAt: DateTime.now().subtract(const Duration(minutes: 1)),
+        items: const [],
       );
 
-      testWidgets(
-        'Renders error state with retry button when quote calculation fails',
-        (tester) async {
-          tester.view.physicalSize = const Size(1080, 2400);
-          tester.view.devicePixelRatio = 2.0;
-          addTearDown(() {
-            tester.view.resetPhysicalSize();
-            tester.view.resetDevicePixelRatio();
-          });
-
-          Get.put(controller);
-          controller.serverQuote.value = null;
-          controller.isLoadingQuote.value = false;
-
-          controller.procurementCart.add(
-            ProcurementCartLineEntity(
-              package: testPackage,
-              sheets: 1,
-              voucherCount: 100,
-            ),
-          );
-
-          controller.quoteError.value = 'تعذر الاتصال بخدمة التسعير';
-
-          await tester.pumpWidget(
-            buildTestableWidget(const ProcurementFinancialQuoteCard()),
-          );
-          await tester.pumpAndSettle();
-
-          expect(
-            find.text('تعذر الحصول على عرض الأسعار المعتمد'),
-            findsOneWidget,
-          );
-          expect(find.text('تعذر الاتصال بخدمة التسعير'), findsOneWidget);
-          expect(find.text('إعادة احتساب الأسعار'), findsOneWidget);
-        },
+      await tester.pumpWidget(
+        buildTestableWidget(const ProcurementFinancialQuoteCard()),
       );
-    },
-  );
+      await tester.pumpAndSettle();
+
+      expect(find.text('انتهت صلاحية عرض السعر'), findsOneWidget);
+      expect(find.text('إعادة احتساب السعر'), findsOneWidget);
+    });
+
+    testWidgets(
+      'Renders loading shimmer/indicator while fetching server quote',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        Get.put(controller);
+        controller.serverQuote.value = null;
+        controller.quoteError.value = null;
+
+        controller.procurementCart.add(
+          ProcurementCartLineEntity(
+            package: testPackage,
+            sheets: 1,
+            voucherCount: 100,
+          ),
+        );
+
+        controller.isLoadingQuote.value = true;
+
+        await tester.pumpWidget(
+          buildTestableWidget(const ProcurementFinancialQuoteCard()),
+        );
+        await tester.pump();
+
+        expect(
+          find.text('جاري احتساب السعر والخصم الفعليين المعتمدين...'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'Renders error state with retry button when quote calculation fails',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        Get.put(controller);
+        controller.serverQuote.value = null;
+        controller.isLoadingQuote.value = false;
+
+        controller.procurementCart.add(
+          ProcurementCartLineEntity(
+            package: testPackage,
+            sheets: 1,
+            voucherCount: 100,
+          ),
+        );
+
+        controller.quoteError.value = 'تعذر الاتصال بخدمة التسعير';
+
+        await tester.pumpWidget(
+          buildTestableWidget(const ProcurementFinancialQuoteCard()),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('تعذر الحصول على عرض الأسعار المعتمد'),
+          findsOneWidget,
+        );
+        expect(find.text('تعذر الاتصال بخدمة التسعير'), findsOneWidget);
+        expect(find.text('إعادة احتساب الأسعار'), findsOneWidget);
+      },
+    );
+  });
 }

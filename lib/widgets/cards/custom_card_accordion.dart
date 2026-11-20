@@ -60,11 +60,7 @@ class CustomCardAccordion extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
                 child: Row(
                   children: [
-                    Icon(
-                      icon,
-                      size: 16.r,
-                      color: colors.primary,
-                    ),
+                    Icon(icon, size: 16.r, color: colors.primary),
                     AppSpacing.hXs,
                     Flexible(
                       child: Text(

@@ -100,8 +100,8 @@ class ProcurementPackageSelectionSection
                     onRetry: controller.selectedNetworkId.value == null
                         ? null
                         : () => controller.loadNetworkPackages(
-                              controller.selectedNetworkId.value!,
-                            ),
+                            controller.selectedNetworkId.value!,
+                          ),
                   ),
                 )
               else if (controller.availablePackages.isEmpty &&

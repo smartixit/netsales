@@ -1,4 +1,5 @@
 import 'package:netsales/core/enums/sale_type.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/features/requests/data/models/procurement_quote_line_model.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 
@@ -18,10 +19,8 @@ class ProcurementQuoteModel extends ProcurementQuoteEntity {
   });
 
   factory ProcurementQuoteModel.fromJson(Map<String, dynamic> json) {
-    final rawSaleType = json['sale_type']?.toString() ?? 'CASH';
-    final parsedSaleType = rawSaleType.toUpperCase() == 'CREDIT'
-        ? SaleType.credit
-        : SaleType.cash;
+    final rawSaleType = json['sale_type']?.toString();
+    final parsedSaleType = SaleType.fromWire(rawSaleType);
 
     final rawItems = json['items'] as List<dynamic>? ?? [];
     final parsedItems = rawItems
@@ -36,13 +35,17 @@ class ProcurementQuoteModel extends ProcurementQuoteEntity {
       expires = DateTime.tryParse(json['expires_at'].toString());
     }
 
+    final effectiveSaleType = parsedSaleType.isKnown
+        ? parsedSaleType
+        : SaleType.cash;
+
     return ProcurementQuoteModel(
       networkId: json['network_id'] as int? ?? 0,
       posId: json['pos_id'] as int? ?? 0,
-      saleType: parsedSaleType,
+      saleType: effectiveSaleType,
       saleTypeLabel:
           json['sale_type_label'] as String? ??
-          (parsedSaleType == SaleType.cash ? 'نقدي' : 'آجل'),
+          EnumPresentationRegistry.resolveSaleType(effectiveSaleType).label,
       grossTotal: (json['gross_total'] as num?)?.toDouble() ?? 0.0,
       discountTotal: (json['discount_total'] as num?)?.toDouble() ?? 0.0,
       netTotal: (json['net_total'] as num?)?.toDouble() ?? 0.0,

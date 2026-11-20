@@ -6,6 +6,7 @@ import 'package:netsales/features/requests/domain/usecases/delete_request_use_ca
 import 'package:netsales/features/requests/domain/usecases/get_request_status_summary_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
+import 'package:netsales/features/requests/presentation/controllers/base_procurement_orders_controller.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_procurement_orders_controller.dart';
 
 /// Route-scoped dependencies for the POS procurement orders collection.
@@ -23,6 +24,10 @@ class PosProcurementOrdersBinding extends Bindings {
         getRequestStatusSummaryUseCase:
             Get.find<GetRequestStatusSummaryUseCase>(),
       ),
+    );
+
+    registerLazyIfAbsent<BaseProcurementOrdersController>(
+      () => Get.find<PosProcurementOrdersController>(),
     );
   }
 }

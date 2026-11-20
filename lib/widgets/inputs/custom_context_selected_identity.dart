@@ -36,16 +36,11 @@ class CustomContextSelectedIdentity extends StatelessWidget {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: 10.h,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 10.h),
       decoration: BoxDecoration(
         color: colors.surfaceContainer.withValues(alpha: .5),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: .55),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: .55)),
       ),
       child: Row(
         children: [
@@ -89,10 +84,7 @@ class CustomContextSelectedIdentity extends StatelessWidget {
           if (isReadOnly) ...[
             AppSpacing.hXs,
             Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 8.r,
-                vertical: 3.r,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: 8.r, vertical: 3.r),
               decoration: BoxDecoration(
                 color: colors.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(AppRadius.full),
