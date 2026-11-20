@@ -57,22 +57,34 @@ class WorkspaceEntityPickerController extends GetxController {
     }
     errorMessage.value = null;
 
+    Object? networkFailure;
+    Object? posFailure;
+
     try {
-      final results = await Future.wait<Object>([
-        getMyNetworksUseCase(),
-        getMyPosUseCase(),
+      List<NetworkEntity>? networkResult;
+      List<PosEntity>? posResult;
+      await Future.wait<void>([
+        getMyNetworksUseCase().then<void>(
+          (value) => networkResult = value,
+          onError: (Object error) => networkFailure = error,
+        ),
+        getMyPosUseCase().then<void>(
+          (value) => posResult = value,
+          onError: (Object error) => posFailure = error,
+        ),
       ]);
+
       if (generation != _generation || isClosed) return;
-      networks.assignAll(results[0] as List<NetworkEntity>);
-      pointsOfSale.assignAll(results[1] as List<PosEntity>);
-    } catch (error) {
-      if (generation != _generation || isClosed) return;
-      networks.clear();
-      pointsOfSale.clear();
-      errorMessage.value = AppException.sanitizeMessage(
-        error,
-        fallback: 'تعذر تحميل الكيانات المرتبطة بالحساب.',
-      );
+      networks.assignAll(networkResult ?? const <NetworkEntity>[]);
+      pointsOfSale.assignAll(posResult ?? const <PosEntity>[]);
+
+      final failure = networkFailure ?? posFailure;
+      if (failure != null) {
+        errorMessage.value = AppException.sanitizeMessage(
+          failure,
+          fallback: 'تعذر تحميل بعض الكيانات المرتبطة بالحساب.',
+        );
+      }
     } finally {
       if (generation == _generation && !isClosed) {
         isLoading.value = false;
