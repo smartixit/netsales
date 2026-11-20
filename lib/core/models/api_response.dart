@@ -3,6 +3,7 @@ class ApiResponse<T> {
   final String message;
   final T? data;
   final List<dynamic>? errors;
+  final int? statusCode;
 
   final String? nextCursor;
   final String? prevCursor;
@@ -19,6 +20,7 @@ class ApiResponse<T> {
     required this.message,
     this.data,
     this.errors,
+    this.statusCode,
     this.nextCursor,
     this.prevCursor,
     this.meta,
@@ -33,6 +35,7 @@ class ApiResponse<T> {
     T Function(Object? json) fromJsonT, {
     bool isIdempotentHit = false,
     String? idempotencyKey,
+    int? statusCode,
   }) {
     final metaMap = json['meta'] is Map<String, dynamic>
         ? json['meta'] as Map<String, dynamic>
@@ -50,6 +53,7 @@ class ApiResponse<T> {
       message: json['message']?.toString() ?? '',
       data: json['data'] != null ? fromJsonT(json['data']) : null,
       errors: _parseErrors(json['errors']),
+      statusCode: statusCode,
       nextCursor: nextCur,
       prevCursor: prevCur,
       meta: metaMap,
@@ -63,6 +67,7 @@ class ApiResponse<T> {
     Map<String, dynamic> json, {
     bool isIdempotentHit = false,
     String? idempotencyKey,
+    int? statusCode,
   }) {
     final metaMap = json['meta'] is Map<String, dynamic>
         ? json['meta'] as Map<String, dynamic>
@@ -80,6 +85,7 @@ class ApiResponse<T> {
       message: json['message']?.toString() ?? '',
       data: null,
       errors: _parseErrors(json['errors']),
+      statusCode: statusCode,
       nextCursor: nextCur,
       prevCursor: prevCur,
       meta: metaMap,
