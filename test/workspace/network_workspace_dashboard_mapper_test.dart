@@ -45,7 +45,7 @@ void main() {
       final result = NetworkWorkspaceDashboardMapper.map(null);
 
       expect(result.showSalesSection, isFalse);
-      expect(result.pendingRequestsCount, 0);
+      expect(result.pendingRequestsCount, isNull);
       expect(result.kpiMetrics, isEmpty);
       expect(result.salesChartDefinition.state.name, 'empty');
     });

@@ -22,9 +22,9 @@ void main() {
 
       expect(result, isNotNull);
       expect(result!.request.requestId, 9);
-      expect(result.reference, 'request-');
+      expect(result.reference, 'request-uuid-123');
       expect(result.statusPresentation.label, 'بانتظار الاعتماد');
-      expect(result.formattedAmount, '1,200');
+      expect(result.formattedAmount, '1,200.00');
     });
 
     test('does not infer missing or unknown status as pending', () {
