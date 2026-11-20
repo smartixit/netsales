@@ -327,9 +327,9 @@ class PosWorkspaceController extends GetxController {
     recentRequestsError.value = null;
     isLoadingRecentData.value = true;
 
-    try {
+    Future<void> loadInvoices() async {
       try {
-        final invoices = await getPosInvoicesUseCase(
+        final result = await getPosInvoicesUseCase(
           posId: posId,
           networkId: networkId,
           perPage: 5,
@@ -338,7 +338,7 @@ class PosWorkspaceController extends GetxController {
             activePos.value?.posId == posId &&
             selectedNetworkLink.value?.networkId == networkId &&
             !isClosed) {
-          recentInvoices.assignAll(invoices.items);
+          recentInvoices.assignAll(result.items);
         }
       } catch (error) {
         if (generation == _scopedDataGeneration && !isClosed) {
@@ -348,9 +348,11 @@ class PosWorkspaceController extends GetxController {
           );
         }
       }
+    }
 
+    Future<void> loadRequests() async {
       try {
-        final requests = await getRequestsUseCase(
+        final result = await getRequestsUseCase(
           posId: posId,
           networkId: networkId,
           perPage: 5,
@@ -359,7 +361,7 @@ class PosWorkspaceController extends GetxController {
             activePos.value?.posId == posId &&
             selectedNetworkLink.value?.networkId == networkId &&
             !isClosed) {
-          recentRequests.assignAll(requests.items);
+          recentRequests.assignAll(result.items);
         }
       } catch (error) {
         if (generation == _scopedDataGeneration && !isClosed) {
@@ -369,6 +371,10 @@ class PosWorkspaceController extends GetxController {
           );
         }
       }
+    }
+
+    try {
+      await Future.wait<void>([loadInvoices(), loadRequests()]);
     } finally {
       if (generation == _scopedDataGeneration && !isClosed) {
         isLoadingRecentData.value = false;
