@@ -65,9 +65,10 @@ class WorkspaceService extends GetxService {
 
   /// Resolves a supported workspace from exact backend role keys and scopes.
   ///
-  /// A dual-scope user keeps a valid saved/current workspace preference. This
-  /// never selects a Network or POS tenant; tenant selection is handled by the
-  /// strict workspace-specific resolvers below.
+  /// A dual-scope user keeps a valid saved preference, then may use the exact
+  /// primary role returned by the backend. No in-memory default is inferred.
+  /// This never selects a Network or POS tenant; tenant selection is handled
+  /// by the strict workspace-specific resolvers below.
   AppWorkspace resolveWorkspaceForUser(
     UserModel? user, {
     String? preferredWorkspace,
