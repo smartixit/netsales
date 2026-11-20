@@ -52,17 +52,10 @@ Map<String, dynamic> _validOverview({
           'sales': {
             'invoice_count': 9,
             'total_amount': '15000.00',
-            'paid_amount': '9000.00',
-            'outstanding_amount': '6000.00',
             'growth_rate': 12.5,
             'trend': [
               {'date': '2026-11-08', 'count': 2, 'total': 15000.0},
             ],
-          },
-          'wallet': {
-            'wallet_id': 4,
-            'balance': '1200.00',
-            'is_active': true,
           },
           'expenses': {'count': 2, 'total_amount': '500.00'},
           'packages': {'total': 5, 'active': 4, 'inactive': 1},
@@ -103,7 +96,7 @@ void main() {
     });
 
     test(
-      'maps typed operational groups and excludes deferred financial fields',
+      'maps only declared typed operational metric groups',
       () {
         final model = NetworkWorkspaceOverviewModel.fromJson(
           _validOverview(
@@ -111,12 +104,9 @@ void main() {
               'sales': {
                 'invoice_count': 1,
                 'total_amount': '100.00',
-                'paid_amount': '75.00',
-                'outstanding_amount': '25.00',
                 'growth_rate': 0,
                 'trend': [],
               },
-              'wallet': {'balance': '500.00'},
               'unrecognized_metric_group': {'value': 'ignored'},
             },
           ),
