@@ -9,6 +9,7 @@ void main() {
         'user_id': 42,
         'role_id': 7,
         'status': 'ACTIVE',
+        'status_label': 'نشط',
         'is_owner': true,
         'user': {
           'user_id': 42,
@@ -32,7 +33,7 @@ void main() {
       expect(model.statusRaw, 'ACTIVE');
       expect(model.isOwner, isTrue);
       expect(model.profileLogo, 'https://example.test/avatar.png');
-      expect(model.statusPresentation.label, 'نشط');
+      expect(model.statusLabel, 'نشط');
     });
 
     test('keeps unknown wire status explicit', () {
