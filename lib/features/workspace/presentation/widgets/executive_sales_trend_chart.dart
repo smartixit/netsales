@@ -12,7 +12,7 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// بطاقة اتجاه المبيعات (ExecutiveSalesTrendChart)
 /// يعتمد 100% على منظومة الرسوم البيانية المركزية الموحدة في lib/widgets/charts/
-class ExecutiveSalesVelocityChart extends StatelessWidget {
+class ExecutiveSalesTrendChart extends StatelessWidget {
   final ChartDefinition chartDefinition;
   final String selectedPeriod;
   final ValueChanged<String> onPeriodChanged;
@@ -210,7 +210,7 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '${summary.invoiceCount} عملية',
+                          '${summary.invoiceCount} فاتورة',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.titleSmall.copyWith(
@@ -237,7 +237,7 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'وتيرة النمو',
+                          'نمو المبيعات',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.labelSmall.copyWith(

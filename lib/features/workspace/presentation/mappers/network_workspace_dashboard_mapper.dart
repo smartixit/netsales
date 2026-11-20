@@ -49,7 +49,7 @@ class NetworkWorkspaceDashboardMapper {
         type: ChartType.splineArea,
         series: [
           ChartSeries(
-            id: 'sales_velocity',
+            id: 'sales_trend',
             name: 'المبيعات',
             data: points,
             strokeWidth: 2.8,
@@ -81,7 +81,7 @@ class NetworkWorkspaceDashboardMapper {
       NetworkWorkspaceDashboardViewModel(
         showSalesSection: false,
         pendingRequestsCount: null,
-        salesVelocitySummary: (
+        salesTrendSummary: (
           totalSales: '',
           invoiceCount: 0,
           growthRate: 0,
