@@ -193,7 +193,7 @@ class SessionService extends GetxService {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_isAuthenticated.value && _isSessionVerified.value &&
           Get.isRegistered<PushNotificationService>()) {
-        PushNotificationService.to.releasePendingNavigation();
+        PushNotificationService.to.markNavigationReady();
       }
     });
   }

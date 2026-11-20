@@ -79,6 +79,7 @@ class PushNotificationService extends GetxService {
 
   String? _fcmToken;
   Map<String, dynamic>? _pendingNavigationData;
+  bool _isNavigationReady = false;
 
   /// رمز الإشعارات الفورية الحالي للجهاز
   String? get fcmToken => _fcmToken;
@@ -319,6 +320,7 @@ class PushNotificationService extends GetxService {
       await StorageService.instance.remove(StorageKeys.fcmTokenStorage);
       _fcmToken = null;
       _pendingNavigationData = null;
+      _isNavigationReady = false;
       if (isFcmSupported) {
         await _fcm.deleteToken();
       }
@@ -431,10 +433,19 @@ class PushNotificationService extends GetxService {
     }
   }
 
-  /// Release a notification deep link only after the session is verified.
-  void releasePendingNavigation() {
+  /// Called after the app has completed its primary boot/login navigation.
+  void markNavigationReady() {
+    if (!SessionService.to.isAuthenticated ||
+        !SessionService.to.isSessionVerified) {
+      return;
+    }
+    _isNavigationReady = true;
+    _releasePendingNavigation();
+  }
+
+  void _releasePendingNavigation() {
     final pending = _pendingNavigationData;
-    if (pending == null || !SessionService.to.isSessionVerified) return;
+    if (pending == null || !_isNavigationReady) return;
     _pendingNavigationData = null;
     _dispatchPayloadNavigation(pending);
   }
@@ -443,7 +454,8 @@ class PushNotificationService extends GetxService {
   void _dispatchPayloadNavigation(Map<String, dynamic> data) {
     if (data.isEmpty) return;
     if (!SessionService.to.isAuthenticated ||
-        !SessionService.to.isSessionVerified) {
+        !SessionService.to.isSessionVerified ||
+        !_isNavigationReady) {
       _pendingNavigationData = Map<String, dynamic>.from(data);
       return;
     }
