@@ -1,7 +1,7 @@
 import 'package:netsales/widgets/charts/charting.dart';
 import 'package:netsales/widgets/dashboard_metrics/dashboard_metrics.dart';
 
-typedef NetworkSalesVelocitySummary = ({
+typedef NetworkSalesTrendSummary = ({
   String totalSales,
   int invoiceCount,
   double growthRate,
@@ -11,7 +11,7 @@ class NetworkWorkspaceDashboardViewModel {
   const NetworkWorkspaceDashboardViewModel({
     required this.showSalesSection,
     required this.pendingRequestsCount,
-    required this.salesVelocitySummary,
+    required this.salesTrendSummary,
     required this.salesChartDefinition,
     required this.kpiMetrics,
   });

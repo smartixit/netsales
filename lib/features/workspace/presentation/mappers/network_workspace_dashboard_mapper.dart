@@ -37,7 +37,7 @@ class NetworkWorkspaceDashboardMapper {
     return NetworkWorkspaceDashboardViewModel(
       showSalesSection: sales != null,
       pendingRequestsCount: requests?.pending,
-      salesVelocitySummary: (
+      salesTrendSummary: (
         totalSales: sales == null
             ? ''
             : AmountFormatter.format(sales.totalAmount),

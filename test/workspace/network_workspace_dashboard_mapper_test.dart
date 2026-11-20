@@ -60,7 +60,7 @@ void main() {
 
       expect(result.showSalesSection, isTrue);
       expect(result.pendingRequestsCount, 2);
-      expect(result.salesVelocitySummary.invoiceCount, 2);
+      expect(result.salesTrendSummary.invoiceCount, 2);
       expect(result.salesVelocitySummary.totalSales, '2,500.00');
       expect(result.kpiMetrics, hasLength(5));
       expect(

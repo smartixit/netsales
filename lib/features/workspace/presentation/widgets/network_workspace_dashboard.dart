@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/workspace/presentation/controllers/network_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_metrics_grid.dart';
-import 'package:netsales/features/workspace/presentation/widgets/executive_sales_velocity_chart.dart';
+import 'package:netsales/features/workspace/presentation/widgets/executive_sales_trend_chart.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_welcome_hero_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/network_pending_requests_section.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
@@ -113,9 +113,9 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
             if (controller.recentPendingOrderItems.isNotEmpty)
               AppSpacing.vLg,
             if (dashboard.showSalesSection) ...[
-              ExecutiveSalesVelocityChart(
+              ExecutiveSalesTrendChart(
                 chartDefinition: dashboard.salesChartDefinition,
-                summary: dashboard.salesVelocitySummary,
+                summary: dashboard.salesTrendSummary,
                 selectedPeriod: controller.selectedPeriod.value,
                 onPeriodChanged: controller.selectPeriod,
               ),
