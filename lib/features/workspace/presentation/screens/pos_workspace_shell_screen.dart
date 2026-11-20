@@ -11,6 +11,7 @@ import 'package:netsales/features/workspace/presentation/widgets/pos_home_dashbo
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
 
+/// هيكل مساحة عمل نقطة البيع (POS Workspace Shell - Executive Edition)
 class PosWorkspaceShell extends GetView<PosWorkspaceController> {
   const PosWorkspaceShell({super.key});
 
@@ -56,17 +57,17 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         ),
       ];
 
+      // القائمة المقلصة للتبويبات الأربعة الأساسية على الجوال
       final mobileNavItems = [
-        navItems[0],
-        navItems[1],
-        navItems[2],
-        navItems[3],
+        navItems[0], // الرئيسية
+        navItems[1], // طلبات التوريد
+        navItems[2], // فواتيري
+        navItems[3], // الرصيد والديون
       ];
 
       final isAppBarLoading =
           controller.isLoadingPos.value && controller.activePos.value == null;
-      final posTitle =
-          controller.activePos.value?.posName ?? 'اختر نقطة البيع';
+      final posTitle = controller.activePos.value?.posName ?? 'لوحة نقطة البيع';
 
       return AdaptiveWorkspaceScaffold(
         appBar: WorkspaceAppBar(
