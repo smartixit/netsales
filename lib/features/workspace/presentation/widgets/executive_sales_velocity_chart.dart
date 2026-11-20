@@ -7,7 +7,6 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/charts/charting.dart';
-import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// كرت منحنى وتيرة المبيعات والتدفقات النقدية (ExecutiveSalesVelocityChart)
@@ -50,7 +49,7 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
 
               final titleSection = Row(
                 children: [
-                  CustomPulsingIndicator(color: colors.primary, size: 8.r),
+                  Icon(Icons.show_chart_rounded, color: colors.primary, size: 18.r),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Column(
@@ -180,14 +179,6 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                                 fontWeight: FontWeight.w900,
                                 fontSize: 13.sp,
                               ),
-                            ),
-                          ),
-                          SizedBox(width: 3.w),
-                          Text(
-                            style: AppTypography.labelSmall.copyWith(
-                              color: colors.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 9.sp,
                             ),
                           ),
                         ],

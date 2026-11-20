@@ -256,7 +256,6 @@ class PosWorkspaceController extends GetxController {
       if (selectedNetworkLink.value == null && initial != null) {
         await selectNetwork(
           initial,
-          index: networkLinks.indexOf(initial),
         );
       }
     } catch (error) {
