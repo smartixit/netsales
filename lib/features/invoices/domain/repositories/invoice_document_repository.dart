@@ -1,13 +1,13 @@
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 
-/// العقد التجريدي لعمليات المستندات والطباعة والتصدير للفاتورة
-abstract class InvoiceDocumentRepository {
-  /// تصدير وحفظ مستند الفاتورة كـ PDF في ذاكرة الجهاز
-  Future<bool> exportAndSaveInvoice(InvoiceEntity invoice);
+/// واجهة تصدير وطباعة المستندات والمحررات الرسمية للفواتير
+abstract interface class InvoiceDocumentRepository {
+  /// طباعة الفاتورة مباشرة عبر الطابعة المتصلة
+  Future<bool> printInvoice(InvoiceEntity invoice);
 
-  /// مشاركة ملف الفاتورة عبر نافذة النظام
+  /// مشاركة ملف PDF الخاص بالفاتورة عبر تطبيقات التواصل
   Future<bool> shareInvoice(InvoiceEntity invoice);
 
-  /// إرسال مستند الفاتورة إلى خدمة الطباعة
-  Future<bool> printInvoice(InvoiceEntity invoice);
+  /// تصدير وحفظ ملف PDF للفاتورة في ذاكرة الجهاز
+  Future<bool> exportAndSaveInvoice(InvoiceEntity invoice);
 }

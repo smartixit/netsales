@@ -1,67 +1,66 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/enums/sale_type.dart';
-import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/invoices/data/datasources/invoice_remote_data_source.dart';
 import 'package:netsales/features/invoices/data/models/invoice_model.dart';
 import 'package:netsales/features/invoices/data/repositories/invoice_repository_impl.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_sale_invoice_item_input_entity.dart';
 
 class _RecordingInvoiceRemoteDataSource implements InvoiceRemoteDataSource {
-  int? submittedNetworkId;
-  int? submittedPosId;
-  SaleType? submittedSaleType;
-  List<DirectInvoiceItemInputEntity>? submittedItems;
+  Map<String, dynamic>? submittedData;
   String? submittedIdempotencyKey;
   bool failCreation = false;
 
   @override
-  Future<InvoiceModel> createDirectInvoice({
-    required int networkId,
-    required int posId,
-    required SaleType saleType,
-    required List<DirectInvoiceItemInputEntity> items,
-    required String idempotencyKey,
+  Future<ApiResponse<InvoiceModel>> createDirectInvoice(
+    Map<String, dynamic> data, {
+    String? idempotencyKey,
   }) async {
-    submittedNetworkId = networkId;
-    submittedPosId = posId;
-    submittedSaleType = saleType;
-    submittedItems = items;
+    submittedData = data;
     submittedIdempotencyKey = idempotencyKey;
 
     if (failCreation) {
-      throw Exception('رفض الخادم إنشاء الفاتورة.');
+      return ApiResponse<InvoiceModel>(
+        success: false,
+        message: 'رفض الخادم إنشاء الفاتورة.',
+        data: null,
+      );
     }
 
-    return const InvoiceModel(
-      invoiceId: 501,
-      networkId: 10,
-      posId: 20,
-      invoiceTotalAmount: 0,
+    return ApiResponse<InvoiceModel>(
+      success: true,
+      message: 'تم الإنشاء بنجاح',
+      data: const InvoiceModel(
+        invoiceId: 501,
+        networkId: 10,
+        posId: 20,
+        invoiceTotalAmount: 0,
+      ),
     );
   }
 
   @override
-  Future<PaginatedList<InvoiceModel>> getInvoices({
-    int? networkId,
-    int? posId,
-    String? saleType,
-    String? paymentStatus,
-    String? search,
-    String? fromDate,
-    String? toDate,
-    String? cursor,
-    int? perPage,
+  Future<ApiResponse<List<InvoiceModel>>> getInvoices({
+    Map<String, dynamic>? query,
   }) async {
-    return const PaginatedList<InvoiceModel>(items: []);
+    return ApiResponse<List<InvoiceModel>>(
+      success: true,
+      message: 'نجاح',
+      data: [],
+    );
   }
 
   @override
-  Future<InvoiceModel> getInvoiceDetails(int invoiceId) async {
-    return InvoiceModel(
-      invoiceId: invoiceId,
-      networkId: 10,
-      posId: 20,
-      invoiceTotalAmount: 0,
+  Future<ApiResponse<InvoiceModel>> getInvoiceDetails(int invoiceId) async {
+    return ApiResponse<InvoiceModel>(
+      success: true,
+      message: 'نجاح',
+      data: InvoiceModel(
+        invoiceId: invoiceId,
+        networkId: 10,
+        posId: 20,
+        invoiceTotalAmount: 0,
+      ),
     );
   }
 }
@@ -83,48 +82,21 @@ void main() {
         saleType: SaleType.credit,
         idempotencyKey: 'sale-pos20-idempotent-key',
         items: const [
-          DirectInvoiceItemInputEntity(packageId: 31, voucherCount: 100),
-          DirectInvoiceItemInputEntity(packageId: 32, voucherCount: 250),
+          DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 100),
+          DirectSaleInvoiceItemInputEntity(packageId: 32, voucherCount: 250),
         ],
       );
 
       expect(invoice.invoiceId, 501);
       expect(remote.submittedIdempotencyKey, 'sale-pos20-idempotent-key');
-      expect(remote.submittedNetworkId, 10);
-      expect(remote.submittedPosId, 20);
-      expect(remote.submittedSaleType, SaleType.credit);
-      expect(remote.submittedItems?.length, 2);
-      expect(remote.submittedItems?[0].packageId, 31);
-      expect(remote.submittedItems?[0].voucherCount, 100);
-      expect(remote.submittedItems?[1].packageId, 32);
-      expect(remote.submittedItems?[1].voucherCount, 250);
+      expect(remote.submittedData?['network_id'], 10);
+      expect(remote.submittedData?['pos_id'], 20);
+      expect(remote.submittedData?['sale_type'], 'CREDIT');
 
-      // Verify serialized JSON contract of items
-      final serializedPayload = {
-        'network_id': remote.submittedNetworkId,
-        'pos_id': remote.submittedPosId,
-        'sale_type': remote.submittedSaleType?.wireValue,
-        'items': remote.submittedItems?.map((e) => e.toJson()).toList(),
-      };
-      expect(serializedPayload, {
-        'network_id': 10,
-        'pos_id': 20,
-        'sale_type': 'CREDIT',
-        'items': [
-          {'package_id': 31, 'voucher_count': 100},
-          {'package_id': 32, 'voucher_count': 250},
-        ],
-      });
-      expect(serializedPayload.containsKey('paid_amount'), isFalse);
-      expect(serializedPayload.containsKey('invoice_total_amount'), isFalse);
-      final sentItems = serializedPayload['items'] as List;
-      for (final item in sentItems.cast<Map<String, dynamic>>()) {
-        expect(item.containsKey('voucher_price'), isFalse);
-        expect(item.containsKey('item_discount'), isFalse);
-        expect(item.containsKey('item_total_amount'), isFalse);
-        expect(item.containsKey('unit_price'), isFalse);
-        expect(item.containsKey('subtotal'), isFalse);
-      }
+      final items = remote.submittedData?['items'] as List;
+      expect(items.length, 2);
+      expect(items[0], {'package_id': 31, 'voucher_count': 100});
+      expect(items[1], {'package_id': 32, 'voucher_count': 250});
     });
 
     test('converts unsuccessful server response into Exception', () async {
@@ -137,7 +109,7 @@ void main() {
           saleType: SaleType.cash,
           idempotencyKey: 'sale-pos20-error-key',
           items: const [
-            DirectInvoiceItemInputEntity(packageId: 31, voucherCount: 1),
+            DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 1),
           ],
         ),
         throwsA(

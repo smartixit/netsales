@@ -2,24 +2,26 @@ import 'package:netsales/features/invoices/data/services/invoice_document_servic
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_document_repository.dart';
 
-/// تطبيق مستودع عمليات المستندات للفاتورة
+/// تطبيق مستودع طباعة وتصدير مستندات الفواتير
 class InvoiceDocumentRepositoryImpl implements InvoiceDocumentRepository {
-  final InvoiceDocumentService documentService;
+  final InvoiceDocumentService _documentService;
 
-  const InvoiceDocumentRepositoryImpl({required this.documentService});
+  const InvoiceDocumentRepositoryImpl({
+    this._documentService = const InvoiceDocumentService(),
+  });
 
   @override
-  Future<bool> exportAndSaveInvoice(InvoiceEntity invoice) {
-    return documentService.exportAndSaveInvoice(invoice);
+  Future<bool> printInvoice(InvoiceEntity invoice) {
+    return _documentService.printInvoice(invoice);
   }
 
   @override
   Future<bool> shareInvoice(InvoiceEntity invoice) {
-    return documentService.shareInvoice(invoice);
+    return _documentService.shareInvoice(invoice);
   }
 
   @override
-  Future<bool> printInvoice(InvoiceEntity invoice) {
-    return documentService.printInvoice(invoice);
+  Future<bool> exportAndSaveInvoice(InvoiceEntity invoice) {
+    return _documentService.exportAndSaveInvoice(invoice);
   }
 }

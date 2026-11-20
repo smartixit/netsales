@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/models/paginated_list.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_sale_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 import 'package:netsales/features/invoices/domain/usecases/create_direct_sale_invoice_use_case.dart';
@@ -11,7 +11,7 @@ class _RecordingInvoiceRepository implements InvoiceRepository {
   int? networkId;
   int? posId;
   SaleType? saleType;
-  List<DirectInvoiceItemInputEntity>? items;
+  List<DirectSaleInvoiceItemInputEntity>? items;
   String? idempotencyKey;
 
   @override
@@ -19,14 +19,15 @@ class _RecordingInvoiceRepository implements InvoiceRepository {
     required int networkId,
     required int posId,
     required SaleType saleType,
-    required List<DirectInvoiceItemInputEntity> items,
+    required List<DirectSaleInvoiceItemInputEntity> items,
     required String idempotencyKey,
+    double? paidAmount,
   }) async {
     createCalls++;
     this.networkId = networkId;
     this.posId = posId;
     this.saleType = saleType;
-    this.items = List<DirectInvoiceItemInputEntity>.unmodifiable(items);
+    this.items = List<DirectSaleInvoiceItemInputEntity>.unmodifiable(items);
     this.idempotencyKey = idempotencyKey;
 
     return InvoiceEntity(
@@ -78,8 +79,8 @@ void main() {
           saleType: SaleType.credit,
           idempotencyKey: 'sale-pos20-unique-test-key',
           items: const [
-            DirectInvoiceItemInputEntity(packageId: 31, voucherCount: 100),
-            DirectInvoiceItemInputEntity(packageId: 32, voucherCount: 250),
+            DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 100),
+            DirectSaleInvoiceItemInputEntity(packageId: 32, voucherCount: 250),
           ],
         );
 
@@ -90,8 +91,8 @@ void main() {
         expect(repository.saleType, SaleType.credit);
         expect(repository.idempotencyKey, 'sale-pos20-unique-test-key');
         expect(repository.items, const [
-          DirectInvoiceItemInputEntity(packageId: 31, voucherCount: 100),
-          DirectInvoiceItemInputEntity(packageId: 32, voucherCount: 250),
+          DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 100),
+          DirectSaleInvoiceItemInputEntity(packageId: 32, voucherCount: 250),
         ]);
       },
     );
@@ -120,7 +121,7 @@ void main() {
             saleType: SaleType.cash,
             idempotencyKey: 'sale-test-invalid-count',
             items: const [
-              DirectInvoiceItemInputEntity(packageId: 31, voucherCount: 0),
+              DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 0),
             ],
           ),
           throwsArgumentError,
@@ -139,7 +140,7 @@ void main() {
             saleType: SaleType.cash,
             idempotencyKey: ' ',
             items: const [
-              DirectInvoiceItemInputEntity(packageId: 31, voucherCount: 1),
+              DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 1),
             ],
           ),
           throwsArgumentError,
@@ -156,7 +157,7 @@ void main() {
           saleType: SaleType.unknown,
           idempotencyKey: 'sale-test-unknown-type',
           items: const [
-            DirectInvoiceItemInputEntity(packageId: 31, voucherCount: 1),
+            DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 1),
           ],
         ),
         throwsArgumentError,

@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/enums/sale_type.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
+import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_sale_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
-import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_document_repository.dart';
-import 'package:netsales/features/invoices/domain/usecases/invoice_document_use_case.dart';
+import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_invoice_details_use_case.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_network_invoices_use_case.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
+import 'package:netsales/features/invoices/domain/usecases/invoice_document_use_case.dart';
 import 'package:netsales/features/invoices/presentation/controllers/invoice_details_controller.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_invoices_controller.dart';
 import 'package:netsales/features/invoices/presentation/controllers/pos_invoices_controller.dart';
@@ -60,8 +60,9 @@ class MockInvoiceRepository implements InvoiceRepository {
     required int networkId,
     required int posId,
     required SaleType saleType,
-    required List<DirectInvoiceItemInputEntity> items,
+    required List<DirectSaleInvoiceItemInputEntity> items,
     required String idempotencyKey,
+    double? paidAmount,
   }) async {
     if (networkId <= 0 ||
         posId <= 0 ||
@@ -103,7 +104,7 @@ void main() {
   late GetInvoiceDetailsUseCase getInvoiceDetailsUseCase;
   late InvoiceDocumentUseCase invoiceDocumentUseCase;
 
-  final sampleInvoice1 = const InvoiceEntity(
+  const sampleInvoice1 = InvoiceEntity(
     invoiceId: 1,
     networkId: 1,
     posId: 2,
@@ -113,7 +114,7 @@ void main() {
     paymentStatusRaw: 'PAID',
   );
 
-  final sampleInvoice2 = const InvoiceEntity(
+  const sampleInvoice2 = InvoiceEntity(
     invoiceId: 2,
     networkId: 1,
     posId: 3,
@@ -128,7 +129,9 @@ void main() {
     getNetworkInvoicesUseCase = GetNetworkInvoicesUseCase(mockRepo);
     getPosInvoicesUseCase = GetPosInvoicesUseCase(mockRepo);
     getInvoiceDetailsUseCase = GetInvoiceDetailsUseCase(mockRepo);
-    invoiceDocumentUseCase = InvoiceDocumentUseCase(MockInvoiceDocumentRepository());
+    invoiceDocumentUseCase = InvoiceDocumentUseCase(
+      MockInvoiceDocumentRepository(),
+    );
   });
 
   group('NetworkInvoicesController Tests', () {
@@ -161,13 +164,11 @@ void main() {
         expect(controller.invoices.length, equals(1));
         expect(controller.hasMore, isTrue);
 
-        // تحميل صفحة ثانية تتضمن نفس العنصر وعنصر جديد
         mockRepo.mockList = [sampleInvoice1, sampleInvoice2];
         mockRepo.returnNextCursor = null;
 
         await controller.loadMoreInvoices();
 
-        // يجب ألا يتكرر sampleInvoice1
         expect(controller.invoices.length, equals(2));
         expect(controller.hasMore, isFalse);
       },
@@ -184,31 +185,30 @@ void main() {
       expect(controller.invoices.length, equals(1));
 
       controller.onSaleTypeChanged('CREDIT');
-      await controller.loadInvoices(isRefresh: true);
 
       expect(controller.selectedSaleType.value, equals('CREDIT'));
       expect(mockRepo.lastSaleType, equals('CREDIT'));
     });
 
-    test('toggleInvoiceExpansion manages exclusive accordion expansion correctly', () {
-      final controller = NetworkInvoicesController(
-        getNetworkInvoicesUseCase: getNetworkInvoicesUseCase,
-      );
+    test(
+      'toggleInvoiceExpansion manages exclusive accordion expansion correctly',
+      () {
+        final controller = NetworkInvoicesController(
+          getNetworkInvoicesUseCase: getNetworkInvoicesUseCase,
+        );
 
-      expect(controller.expandedInvoiceId.value, isNull);
+        expect(controller.expandedInvoiceId.value, isNull);
 
-      // توسيع الفاتورة رقم 1
-      controller.toggleInvoiceExpansion(1);
-      expect(controller.expandedInvoiceId.value, equals(1));
+        controller.toggleInvoiceExpansion(1);
+        expect(controller.expandedInvoiceId.value, equals(1));
 
-      // توسيع الفاتورة رقم 2 يجب أن يطوي الفاتورة 1 تلقائياً
-      controller.toggleInvoiceExpansion(2);
-      expect(controller.expandedInvoiceId.value, equals(2));
+        controller.toggleInvoiceExpansion(2);
+        expect(controller.expandedInvoiceId.value, equals(2));
 
-      // النقر على الفاتورة 2 مرة ثانية يطويها
-      controller.toggleInvoiceExpansion(2);
-      expect(controller.expandedInvoiceId.value, isNull);
-    });
+        controller.toggleInvoiceExpansion(2);
+        expect(controller.expandedInvoiceId.value, isNull);
+      },
+    );
   });
 
   group('PosInvoicesController Tests', () {

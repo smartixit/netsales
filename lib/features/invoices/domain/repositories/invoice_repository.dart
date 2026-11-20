@@ -1,11 +1,11 @@
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/models/paginated_list.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_sale_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 
-/// العقد التجريدي لمستودع فواتير المبيعات والمشتريات الرسمية
-abstract class InvoiceRepository {
-  /// جلب قائمة الفواتير المالية مع الفلترة والترقيم بالمؤشر
+/// واجهة مستودع فواتير المبيعات والمشتريات
+abstract interface class InvoiceRepository {
+  /// استرجاع قائمة الفواتير مع الترقيم المستند إلى المؤشرات (Cursor Pagination)
   Future<PaginatedList<InvoiceEntity>> getInvoices({
     int? networkId,
     int? posId,
@@ -18,15 +18,16 @@ abstract class InvoiceRepository {
     int? perPage,
   });
 
-  /// جلب تفاصيل فاتورة مالية محددة بالمعرف الرقمي
+  /// استرجاع تفاصيل فاتورة محددة بالكامل مع كافة البنود والجهات
   Future<InvoiceEntity> getInvoiceDetails(int invoiceId);
 
-  /// إنشاء فاتورة مبيعات مباشرة مع الحساب المالي السيادي على الخادم
+  /// إنشاء فاتورة بيع مباشرة جديدة من قبل مشغل الشبكة
   Future<InvoiceEntity> createDirectInvoice({
     required int networkId,
     required int posId,
     required SaleType saleType,
-    required List<DirectInvoiceItemInputEntity> items,
+    required List<DirectSaleInvoiceItemInputEntity> items,
     required String idempotencyKey,
+    double? paidAmount,
   });
 }
