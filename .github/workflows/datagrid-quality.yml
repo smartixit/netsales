@@ -10,7 +10,6 @@ on:
       - chore/pub-audioplayers-6.8.1
       - chore/pub-compatible-updates
       - fix/infinityfree-two-step-verification
-      - fix/infinityfree-slowaes-single-block-padding
   pull_request:
     branches:
       - main
