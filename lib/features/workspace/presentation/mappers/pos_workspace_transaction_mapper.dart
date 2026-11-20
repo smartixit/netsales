@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
@@ -71,10 +72,10 @@ class PosWorkspaceTransactionMapper {
       reference: reference,
       subtitle: subtitleParts.join(' • '),
       formattedAmount:
-          '- ${AmountFormatter.formatValue(invoice.invoiceTotalAmount)} ر.ي',
-      statusPresentation: EnumPresentationRegistry.resolveInvoicePaymentStatus(
-        invoice.paymentStatus,
-        serverLabel: invoice.paymentStatusLabel,
+          '- ${AmountFormatter.formatValue(invoice.invoiceTotalAmount)}',
+      statusPresentation: const EnumPresentation(
+        label: 'فاتورة',
+        tone: SemanticTone.neutral,
       ),
       icon: Icons.inventory_2_rounded,
       onTap: () => onOpenInvoice(invoice),

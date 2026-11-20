@@ -74,7 +74,7 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
               ),
               SizedBox(height: 6.h),
               Text(
-                'طلب توريد ${activeOrder.reference} • الإجمالي: ${activeOrder.formattedAmount} ر.ي',
+                'طلب توريد ${activeOrder.reference} • الإجمالي: ${activeOrder.formattedAmount}',
                 style: AppTypography.bodySmall.copyWith(
                   color: colors.onSurfaceVariant,
                 ),

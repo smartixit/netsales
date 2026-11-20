@@ -37,7 +37,6 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return CustomSurfaceCard(
       padding: EdgeInsets.all(AppSpacing.md),
@@ -68,7 +67,7 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'حجم الفواتير الصادرة وسرعة التدفقات النقدية الفعلية',
+                          'اتجاه إجمالي المبيعات والفواتير الصادرة',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodySmall.copyWith(
@@ -185,7 +184,6 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                           ),
                           SizedBox(width: 3.w),
                           Text(
-                            'ر.ي',
                             style: AppTypography.labelSmall.copyWith(
                               color: colors.primary,
                               fontWeight: FontWeight.bold,
