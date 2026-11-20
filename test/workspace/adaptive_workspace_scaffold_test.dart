@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/workspace/presentation/widgets/adaptive_workspace_scaffold.dart';
@@ -13,7 +14,7 @@ void main() {
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
-      builder: (context, _) => MaterialApp(theme: AppThemes.light, home: child),
+      builder: (context, _) => GetMaterialApp(theme: AppThemes.light, home: child),
     );
   }
 
@@ -91,4 +92,36 @@ void main() {
     expect(find.byType(NavigationRail), findsNothing);
     expect(find.byType(CustomFloatingBottomNavBar), findsNothing);
   });
+  testWidgets('mobile More destination opens the hidden workspace routes sheet', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375 * 2, 812 * 2);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(() => tester.view.resetPhysicalSize());
+    addTearDown(() => tester.view.resetDevicePixelRatio());
+
+    await tester.pumpWidget(
+      buildTestableWidget(
+        child: AdaptiveWorkspaceScaffold(
+          appBar: const WorkspaceAppBar(
+            title: 'مساحة العمل',
+            workspace: AppWorkspace.network,
+          ),
+          items: testItems,
+          mobileItems: [testItems.first],
+          mobileMoreItems: [testItems.last],
+          currentIndex: 0,
+          onIndexChanged: (_) {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('nav_item_1')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('المزيد من مساحة العمل'), findsOneWidget);
+    expect(find.text('الطلبات'), findsOneWidget);
+  });
+
 }
