@@ -87,7 +87,7 @@ void main() {
 
         expect(find.text('فاتورة توريد #204'), findsOneWidget);
         expect(find.text('INV-204'), findsOneWidget);
-        expect(find.text('شراء آجل • ورقة ونصف • 77 كرت'), findsOneWidget);
+        expect(find.text('ورقة ونصف • 77 كرت'), findsOneWidget);
         expect(find.text('- 350,000 ر.ي'), findsOneWidget);
       },
     );
