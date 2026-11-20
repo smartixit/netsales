@@ -56,8 +56,16 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
       throw const FormatException('حقول تعريف ملخص الشبكة غير صالحة.');
     }
 
+    const supportedMetricGroups = {
+      'sales',
+      'points_of_sale',
+      'requests',
+      'packages',
+      'expenses',
+    };
     final normalizedMetrics = <String, dynamic>{};
     for (final entry in metrics.entries) {
+      if (!supportedMetricGroups.contains(entry.key)) continue;
       if (entry.value == null) {
         normalizedMetrics[entry.key] = null;
       } else if (entry.value is Map<String, dynamic>) {

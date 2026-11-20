@@ -179,7 +179,7 @@ class NetworkWorkspaceDashboardMapper {
           id: 'sales',
           title: 'فواتير المبيعات',
           value: AmountFormatter.format(overview.amount('sales', 'total_amount')),
-          unit: 'ر.ي',
+          
           icon: Icons.receipt_long_rounded,
           tone: DashboardMetricTone.success,
           variant: DashboardMetricVariant.standard,
@@ -197,7 +197,7 @@ class NetworkWorkspaceDashboardMapper {
           value: AmountFormatter.format(
             overview.amount('expenses', 'total_amount'),
           ),
-          unit: 'ر.ي',
+          
           icon: Icons.trending_down_rounded,
           tone: DashboardMetricTone.danger,
           variant: DashboardMetricVariant.standard,
