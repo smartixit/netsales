@@ -3,8 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
@@ -49,7 +47,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => Size.fromHeight(AppSpacing.appBarHeight + AppSpacing.sm);
+  Size get preferredSize => Size.fromHeight(80.h);
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +69,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
         padding: EdgeInsets.only(
           left: AppBreakpoints.screenMargin(context),
           right: AppBreakpoints.screenMargin(context),
-          top: AppSpacing.sm,
+          top: 8.h,
           // bottom: 6.h,
         ),
         child: ClipRRect(
@@ -79,10 +77,12 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
             child: Container(
-              height: AppSpacing.appBarHeight,
+              height: 100.h,
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
-                color: colors.surface.withValues(alpha: isDark ? 0.92 : 0.94),
+                color: isDark
+                    ? const Color(0xFF0F172A).withValues(alpha: 0.85)
+                    : colors.surface.withValues(alpha: 0.88),
                 borderRadius: BorderRadius.circular(AppRadius.xl),
                 border: Border.all(
                   color: isDark
@@ -90,7 +90,13 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                       : colors.outlineVariant.withValues(alpha: 0.6),
                   width: 1.2.w,
                 ),
-                boxShadow: AppElevation.level3(context),
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.shadow.withValues(alpha: isDark ? 0.3 : 0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
@@ -221,7 +227,9 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                       width: 42.r,
                       height: 42.r,
                       decoration: BoxDecoration(
-                        color: colors.surfaceContainerLow,
+                        color: isDark
+                            ? const Color(0xFF131D2E)
+                            : colors.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(AppRadius.md),
                         border: Border.all(
                           color: isDark

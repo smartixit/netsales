@@ -6,7 +6,7 @@ import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 
-/// Maps invoice and procurement activity into one globally chronological list.
+/// Converts POS-scoped invoices and procurement requests into dashboard rows.
 class PosWorkspaceTransactionMapper {
   const PosWorkspaceTransactionMapper._();
 
@@ -16,34 +16,10 @@ class PosWorkspaceTransactionMapper {
     required void Function(InvoiceEntity invoice) onOpenInvoice,
     required void Function(RequestEntity request) onOpenRequest,
   }) {
-    final entries = <({DateTime? date, WorkspaceTransactionItemViewModel item})>[];
-
-    for (final invoice in invoices) {
-      entries.add((
-        date: DateFormatter.tryParse(
-          invoice.invoiceDate ?? invoice.createdAt ?? '',
-        ),
-        item: _mapInvoice(invoice, onOpenInvoice),
-      ));
-    }
-
-    for (final request in requests) {
-      entries.add((
-        date: DateFormatter.tryParse(
-          request.requestDate ?? request.createdAt ?? '',
-        ),
-        item: _mapRequest(request, onOpenRequest),
-      ));
-    }
-
-    entries.sort((a, b) {
-      if (a.date == null && b.date == null) return 0;
-      if (a.date == null) return 1;
-      if (b.date == null) return -1;
-      return b.date!.compareTo(a.date!);
-    });
-
-    return List.unmodifiable(entries.map((entry) => entry.item));
+    return [
+      ...invoices.map((invoice) => _mapInvoice(invoice, onOpenInvoice)),
+      ...requests.map((request) => _mapRequest(request, onOpenRequest)),
+    ];
   }
 
   static WorkspaceTransactionItemViewModel _mapInvoice(
@@ -72,6 +48,7 @@ class PosWorkspaceTransactionMapper {
       subtitle: subtitleParts.join(' • '),
       formattedAmount:
           '- ${AmountFormatter.formatValue(invoice.invoiceTotalAmount)} ر.ي',
+      amountColor: const Color(0xFFDC2626),
       statusPresentation: EnumPresentationRegistry.resolveInvoicePaymentStatus(
         invoice.paymentStatus,
         serverLabel: invoice.paymentStatusLabel,
@@ -90,10 +67,11 @@ class PosWorkspaceTransactionMapper {
       request.requestDate ?? request.createdAt ?? '',
     );
     final dateLabel = parsedDate == null ? '' : DateFormatter.smart(parsedDate);
+    final reference = _shortReference(request.requestUuid, 'طلب توريد');
 
     return WorkspaceTransactionItemViewModel(
       title: 'طلب توريد',
-      reference: _shortReference(request.requestUuid, 'طلب توريد'),
+      reference: reference,
       subtitle: dateLabel.isEmpty ? saleType : '$saleType • $dateLabel',
       formattedAmount:
           '${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي',

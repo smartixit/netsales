@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
@@ -85,7 +84,9 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
               final periodSelector = Container(
                 padding: const EdgeInsets.all(2.5),
                 decoration: BoxDecoration(
-                  color: colors.surfaceContainer,
+                  color: isDark
+                      ? const Color(0xFF0F172A)
+                      : colors.surfaceContainer,
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   border: Border.all(
                     color: colors.outlineVariant.withValues(alpha: 0.4),
@@ -145,7 +146,9 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
               vertical: AppSpacing.xs,
             ),
             decoration: BoxDecoration(
-              color: colors.surfaceContainerHighest.withValues(alpha: 0.45),
+              color: isDark
+                  ? const Color(0xFF0B132B).withValues(alpha: 0.6)
+                  : colors.surfaceContainerHighest.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(
                 color: colors.outlineVariant.withValues(alpha: 0.3),
@@ -263,7 +266,9 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                                   ? Icons.trending_up_rounded
                                   : Icons.trending_down_rounded,
                               size: 13.r,
-                              color: summary.growthRate >= 0 ? colors.success : colors.error,
+                              color: summary.growthRate >= 0
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFF43F5E),
                             ),
                             SizedBox(width: 2.w),
                             Flexible(
@@ -272,7 +277,9 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.labelSmall.copyWith(
-                                  color: summary.growthRate >= 0 ? colors.success : colors.error,
+                                  color: summary.growthRate >= 0
+                                      ? const Color(0xFF10B981)
+                                      : const Color(0xFFF43F5E),
                                   fontWeight: FontWeight.w900,
                                   fontSize: 10.5.sp,
                                 ),
@@ -326,14 +333,22 @@ class _PeriodPill extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? colors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.sm),
-          boxShadow: isSelected ? AppElevation.tinted(context, colors.primary, alpha: 0.18, blur: 6, dy: 1) : AppElevation.level0(context),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: colors.primary.withValues(alpha: 0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppTypography.badgeText.copyWith(
-            color: isSelected ? colors.onPrimary : colors.onSurfaceVariant,
+            color: isSelected ? Colors.white : colors.onSurfaceVariant,
             fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
             fontSize: 9.5.sp,
           ),

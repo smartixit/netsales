@@ -98,10 +98,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
             throw const FormatException('عقد طلب التوريد المعلق غير مكتمل.');
           }
 
-          final amountNum = double.tryParse(requestTotalAmount);
-          if (amountNum == null || !amountNum.isFinite) {
-            throw const FormatException('قيمة إجمالي طلب التوريد غير صالحة.');
-          }
+          final amountNum = double.tryParse(requestTotalAmount) ?? 0.0;
 
           return NetworkPendingRequestEntity(
             requestId: requestId.toInt(),

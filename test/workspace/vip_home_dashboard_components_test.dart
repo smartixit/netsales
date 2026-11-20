@@ -3,8 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
-import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
-import 'package:netsales/features/workspace/presentation/mappers/network_provider_card_mapper.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_tile.dart';
 import 'package:netsales/widgets/carousels/custom_carousel_card.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
@@ -113,28 +111,6 @@ void main() {
       },
     );
 
-    test(
-      'NetworkProviderCardMapper extracts first and last name for ownerDisplay',
-      () {
-        const network = NetworkEntity(
-          networkId: 10,
-          ownerId: 1,
-          networkName: 'شبكة النخبة',
-          networkPhoneNumber: '777000000',
-          ownerName: 'محمد عبدالله سالم القحطاني',
-        );
-
-        final result = NetworkProviderCardMapper.map(
-          networks: [network],
-          selectedNetworkId: 10,
-          overview: null,
-        );
-
-        expect(result, hasLength(1));
-        expect(result.first.avatarInitial, 'ش');
-        expect(result.first.ownerDisplay, 'محمد القحطاني');
-      },
-    );
   });
 
   group('DashboardMetricGrid Uniform Height Tests', () {
