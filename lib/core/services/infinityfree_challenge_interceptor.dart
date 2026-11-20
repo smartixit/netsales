@@ -238,21 +238,22 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     // First perform the browser-equivalent location.href navigation (GET).
     // The cookie is not cached and the original request is not replayed unless
     // this request stops returning the challenge page.
-    late final Response<dynamic> verificationResponse;
+    Response<dynamic>? verificationResponse;
     try {
-      verificationResponse = await _dio.fetch<dynamic>(verificationOptions);
+      final probeResponse = await _dio.fetch<dynamic>(verificationOptions);
+      verificationResponse = probeResponse;
 
       if (InfinityFreeChallengeSolver.isChallengeResponse(
-        verificationResponse.data,
+        probeResponse.data,
       )) {
         throw _challengeFailure(
           options: verificationOptions,
-          response: verificationResponse,
+          response: probeResponse,
           message: 'رفضت الاستضافة كوكي التحقق؛ أعادت صفحة التحدي إلى طلب GET الخاص بالتحقق.',
         );
       }
 
-      final verificationStatus = verificationResponse.statusCode;
+      final verificationStatus = probeResponse.statusCode;
       final acceptedVerificationStatus =
           verificationStatus != null &&
           ((verificationStatus >= 200 && verificationStatus < 300) ||
@@ -268,18 +269,25 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
         );
       }
     } catch (error) {
+      final dioError = error is DioException ? error : null;
+      final failedOptions = dioError?.requestOptions ?? verificationOptions;
+      final failedResponse = dioError?.response ?? verificationResponse;
       _finishCryptoLifecycle(options);
       if (AppEnvironment.enableLogging) {
-        log('فشل GET التحقق من InfinityFree: $error');
+        log(
+          'فشل GET التحقق من InfinityFree: '
+          'HTTP ${failedResponse?.statusCode ?? 'unknown'}, '
+          'type=${dioError?.type.name ?? error.runtimeType}.',
+        );
       }
       handler.reject(
         _challengeFailure(
-          options: options,
-          response: response,
+          options: failedOptions,
+          response: failedResponse,
           message:
               'فشل طلب GET المستقل للتحقق من كوكي الاستضافة؛ '
               'لم يُعَد إرسال الطلب الأصلي.',
-          cause: error,
+          cause: dioError?.error ?? dioError?.message ?? error.runtimeType.toString(),
         ),
       );
       return;
@@ -321,16 +329,23 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       final retried = await _dio.fetch<dynamic>(replayOptions);
       handler.resolve(retried);
     } catch (error) {
+      final dioError = error is DioException ? error : null;
+      final failedOptions = dioError?.requestOptions ?? replayOptions;
+      final failedResponse = dioError?.response ?? response;
       _finishCryptoLifecycle(replayOptions);
       if (AppEnvironment.enableLogging) {
-        log('فشلت إعادة الطلب الأصلي بعد تحقق InfinityFree: $error');
+        log(
+          'فشلت إعادة الطلب الأصلي بعد تحقق InfinityFree: '
+          'HTTP ${failedResponse.statusCode ?? 'unknown'}, '
+          'type=${dioError?.type.name ?? error.runtimeType}.',
+        );
       }
       handler.reject(
         _challengeFailure(
-          options: replayOptions,
-          response: response,
+          options: failedOptions,
+          response: failedResponse,
           message: 'تعذرت إعادة الطلب الأصلي بعد اجتياز تحقق الاستضافة.',
-          cause: error,
+          cause: dioError?.error ?? dioError?.message ?? error.runtimeType.toString(),
         ),
       );
     }
