@@ -245,25 +245,21 @@ class PosWorkspaceController extends GetxController {
       networkCursor.value = result.nextCursor;
       hasMoreNetworks.value = result.hasMore;
 
-      if (refresh) {
-        final savedId = StorageService.instance.getInt(_networkStorageKey(posId));
-        final saved = networkLinks.firstWhereOrNull(
-          (link) => link.networkId == savedId && link.status,
-        );
-        NetworkPosLinkEntity? initial;
-        if (saved != null) {
-          initial = saved;
-        } else if (!result.hasMore) {
-          final activeLinks = networkLinks.where((link) => link.status).toList();
-          if (activeLinks.length == 1) initial = activeLinks.single;
-        }
+      final savedId = StorageService.instance.getInt(_networkStorageKey(posId));
+      final saved = networkLinks.firstWhereOrNull(
+        (link) => link.networkId == savedId && link.status,
+      );
+      NetworkPosLinkEntity? initial = saved;
+      if (initial == null && !result.hasMore) {
+        final activeLinks = networkLinks.where((link) => link.status).toList();
+        if (activeLinks.length == 1) initial = activeLinks.single;
+      }
 
-        if (initial != null) {
-          await selectNetwork(
-            initial,
-            index: networkLinks.indexOf(initial),
-          );
-        }
+      if (selectedNetworkLink.value == null && initial != null) {
+        await selectNetwork(
+          initial,
+          index: networkLinks.indexOf(initial),
+        );
       }
     } catch (error) {
       if (generation != _networkGeneration || isClosed) return;
@@ -320,28 +316,47 @@ class PosWorkspaceController extends GetxController {
     isLoadingRecentData.value = true;
 
     try {
-      final results = await Future.wait([
-        getPosInvoicesUseCase(posId: posId, networkId: networkId, perPage: 5),
-        getRequestsUseCase(posId: posId, networkId: networkId, perPage: 5),
-      ]);
-
-      if (generation != _scopedDataGeneration ||
-          activePos.value?.posId != posId ||
-          selectedNetworkLink.value?.networkId != networkId ||
-          isClosed) {
-        return;
+      try {
+        final invoices = await getPosInvoicesUseCase(
+          posId: posId,
+          networkId: networkId,
+          perPage: 5,
+        );
+        if (generation == _scopedDataGeneration &&
+            activePos.value?.posId == posId &&
+            selectedNetworkLink.value?.networkId == networkId &&
+            !isClosed) {
+          recentInvoices.assignAll(invoices.items);
+        }
+      } catch (error) {
+        if (generation == _scopedDataGeneration && !isClosed) {
+          recentInvoicesError.value = AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر تحميل فواتير الشبكة المحددة.',
+          );
+        }
       }
 
-      recentInvoices.assignAll(results[0].items);
-      recentRequests.assignAll(results[1].items);
-    } catch (error) {
-      if (generation != _scopedDataGeneration || isClosed) return;
-      final message = AppException.sanitizeMessage(
-        error,
-        fallback: 'تعذر تحميل نشاط الشبكة المحددة.',
-      );
-      recentInvoicesError.value = message;
-      recentRequestsError.value = message;
+      try {
+        final requests = await getRequestsUseCase(
+          posId: posId,
+          networkId: networkId,
+          perPage: 5,
+        );
+        if (generation == _scopedDataGeneration &&
+            activePos.value?.posId == posId &&
+            selectedNetworkLink.value?.networkId == networkId &&
+            !isClosed) {
+          recentRequests.assignAll(requests.items);
+        }
+      } catch (error) {
+        if (generation == _scopedDataGeneration && !isClosed) {
+          recentRequestsError.value = AppException.sanitizeMessage(
+            error,
+            fallback: 'تعذر تحميل طلبات الشبكة المحددة.',
+          );
+        }
+      }
     } finally {
       if (generation == _scopedDataGeneration && !isClosed) {
         isLoadingRecentData.value = false;
@@ -361,6 +376,11 @@ class PosWorkspaceController extends GetxController {
   Future<void> retryNetworks() async {
     final posId = activePos.value?.posId;
     if (posId != null) await loadNetworks(posId);
+  }
+
+  Future<void> loadMoreNetworks() async {
+    final posId = activePos.value?.posId;
+    if (posId != null) await loadNetworks(posId, refresh: false);
   }
 
   Future<void> retryScopedData() async {

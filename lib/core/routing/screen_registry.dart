@@ -48,58 +48,6 @@ abstract final class ScreenRegistry {
 
   static const List<ScreenDescriptor> allScreens = [
     // -------------------------------------------------------------------------
-    // مسارات الهوية والمصادقة (AUTH Screens)
-    // -------------------------------------------------------------------------
-    // ScreenDescriptor(
-    //   screenId: 'AUTH-01',
-    //   route: AppRoutes.unsupportedPlatform,
-    //   titleAr: 'تسجيل الدخول',
-    //   titleEn: 'Sign In',
-    //   workspace: AppWorkspace.unsupported,
-    //   implementationState: ScreenImplementationState.implemented,
-    // ),
-    // ScreenDescriptor(
-    //   screenId: 'AUTH-02',
-    //   route: AppRoutes.twoFactorAuth,
-    //   titleAr: 'التحقق بخطوتين',
-    //   titleEn: 'Two-Factor Authentication',
-    //   workspace: AppWorkspace.unsupported,
-    //   implementationState: ScreenImplementationState.implemented,
-    // ),
-    // ScreenDescriptor(
-    //   screenId: 'AUTH-03',
-    //   route: AppRoutes.resetPassword,
-    //   titleAr: 'استعادة وتعيين كلمة المرور',
-    //   titleEn: 'Password Reset',
-    //   workspace: AppWorkspace.unsupported,
-    //   implementationState: ScreenImplementationState.implemented,
-    // ),
-    // ScreenDescriptor(
-    //   screenId: 'AUTH-04',
-    //   route: AppRoutes.registerNetwork,
-    //   titleAr: 'تسجيل مزود شبكة جديد',
-    //   titleEn: 'Network Provider Registration',
-    //   workspace: AppWorkspace.unsupported,
-    //   implementationState: ScreenImplementationState.implemented,
-    // ),
-    // ScreenDescriptor(
-    //   screenId: 'AUTH-05',
-    //   route: AppRoutes.registerPos,
-    //   titleAr: 'تسجيل نقطة بيع جديدة',
-    //   titleEn: 'Point of Sale Registration',
-    //   workspace: AppWorkspace.unsupported,
-    //   implementationState: ScreenImplementationState.implemented,
-    // ),
-    // ScreenDescriptor(
-    //   screenId: 'AUTH-06',
-    //   route: AppRoutes.unsupportedPlatform,
-    //   titleAr: 'بوابة توجيه إدارة المنصة العامة',
-    //   titleEn: 'Platform Admin Windows Desktop Gateway',
-    //   workspace: AppWorkspace.unsupported,
-    //   implementationState: ScreenImplementationState.implemented,
-    // ),
-
-    // -------------------------------------------------------------------------
     // شاشات مساحة عمل مزود الشبكة (NETWORK Workspace Screens - Phase 3.1 / 4)
     // -------------------------------------------------------------------------
     ScreenDescriptor(
@@ -127,15 +75,6 @@ abstract final class ScreenRegistry {
       titleEn: 'Wholesale Invoices',
       workspace: AppWorkspace.network,
       requiredPermission: AppPermissions.salesView,
-      implementationState: ScreenImplementationState.implemented,
-    ),
-    ScreenDescriptor(
-      screenId: 'NET-04',
-      route: AppRoutes.networkWalletStatement,
-      titleAr: 'كشف حركات محفظة الشبكة والحسابات',
-      titleEn: 'Network Wallet Statement',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.networkWalletsView,
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
@@ -202,25 +141,6 @@ abstract final class ScreenRegistry {
       isBalanceMutation: true,
       implementationState: ScreenImplementationState.implemented,
     ),
-    ScreenDescriptor(
-      screenId: 'NET-13',
-      route: AppRoutes.repaymentCollection,
-      titleAr: 'تحصيل سداد مديونيات نقاط البيع',
-      titleEn: 'Collect POS Debt Repayments',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.posWalletsCreate,
-      isBalanceMutation: true,
-      implementationState: ScreenImplementationState.implemented,
-    ),
-    ScreenDescriptor(
-      screenId: 'NET-14',
-      route: AppRoutes.repaymentHistory,
-      titleAr: 'سجل سندات السداد والتسويات',
-      titleEn: 'Repayment History',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.networkWalletsView,
-      implementationState: ScreenImplementationState.implemented,
-    ),
 
     // -------------------------------------------------------------------------
     // شاشات مساحة عمل نقطة البيع والوكيل (POS Workspace Screens - Phase 3.1 / 4)
@@ -251,15 +171,6 @@ abstract final class ScreenRegistry {
       titleEn: 'Purchase Invoices',
       workspace: AppWorkspace.pos,
       requiredPermission: AppPermissions.salesView,
-      implementationState: ScreenImplementationState.implemented,
-    ),
-    ScreenDescriptor(
-      screenId: 'POS-04',
-      route: AppRoutes.posWalletStatement,
-      titleAr: 'كشف الحساب الجاري والمديونية',
-      titleEn: 'POS Wallet Statement',
-      workspace: AppWorkspace.pos,
-      requiredPermission: AppPermissions.posWalletsView,
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
@@ -307,37 +218,7 @@ abstract final class ScreenRegistry {
       requiredPermission: AppPermissions.salesView,
       implementationState: ScreenImplementationState.implemented,
     ),
-    ScreenDescriptor(
-      screenId: 'POS-10',
-      route: AppRoutes.posDebtLedger,
-      titleAr: 'كشف الذمم والفواتير المستحقة',
-      titleEn: 'Debt Ledger and Outstanding Invoices',
-      workspace: AppWorkspace.pos,
-      requiredPermission: AppPermissions.posWalletsView,
-      implementationState: ScreenImplementationState.implemented,
-    ),
 
-    // -------------------------------------------------------------------------
-    // شاشات الأمان الموحدة لكافة البيئات (SEC Screens)
-    // -------------------------------------------------------------------------
-    // ScreenDescriptor(
-    //   screenId: 'SEC-01',
-    //   route: AppRoutes.activeSessions,
-    //   titleAr: 'مراقبة الجلسات والأجهزة النشطة',
-    //   titleEn: 'Active Devices & Sessions',
-    //   workspace: AppWorkspace.unsupported,
-    //   requiredPermission: AppPermissions.authView,
-    //   implementationState: ScreenImplementationState.implemented,
-    // ),
-    // ScreenDescriptor(
-    //   screenId: 'SEC-02',
-    //   route: AppRoutes.securitySettings,
-    //   titleAr: 'إعدادات الأمان وتغيير كلمة المرور',
-    //   titleEn: 'Security & 2FA Settings',
-    //   workspace: AppWorkspace.unsupported,
-    //   requiredPermission: AppPermissions.authManage,
-    //   implementationState: ScreenImplementationState.placeholder,
-    // ),
   ];
 
   static ScreenDescriptor? findById(String screenId) {

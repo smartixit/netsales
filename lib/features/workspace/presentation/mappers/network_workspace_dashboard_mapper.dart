@@ -17,12 +17,18 @@ class NetworkWorkspaceDashboardMapper {
     final sales = overview.metric('sales');
     final hasSales = sales != null;
     final rawGrowth = sales?['growth_rate'];
+    if (hasSales && rawGrowth is! num) {
+      throw const FormatException('معدل نمو المبيعات غير صالح.');
+    }
     final growthRate = rawGrowth is num ? rawGrowth.toDouble() : 0.0;
 
     final invoiceCountValue = sales?['invoice_count'];
+    if (hasSales && invoiceCountValue is! num) {
+      throw const FormatException('عدد فواتير المبيعات غير صالح.');
+    }
     final salesSummary = (
-      totalSales: sales?['total_amount'] is String
-          ? AmountFormatter.format(sales!['total_amount'] as String)
+      totalSales: hasSales
+          ? AmountFormatter.format(overview.amount('sales', 'total_amount'))
           : '',
       invoiceCount: invoiceCountValue is num ? invoiceCountValue.toInt() : 0,
       growthRate: growthRate,
@@ -104,10 +110,13 @@ class NetworkWorkspaceDashboardMapper {
       );
 
   static int _pendingRequestsCount(NetworkWorkspaceOverviewEntity overview) {
-    final value = overview.metric('requests')?['pending'];
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? 0;
-    return 0;
+    final requests = overview.metric('requests');
+    if (requests == null) return 0;
+    final value = requests['pending'];
+    if (value is! num) {
+      throw const FormatException('عدد طلبات التوريد المعلقة غير صالح.');
+    }
+    return value.toInt();
   }
 
   static List<DashboardMetricData> _mapMetrics(

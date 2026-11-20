@@ -111,6 +111,13 @@ class PosLinkedNetworkSelector extends StatelessWidget {
                 index: activeLinks.indexOf(link),
               ),
             ),
+            if (controller.hasMoreNetworks.value) ...[
+              AppSpacing.vSm,
+              CustomButton.text(
+                text: 'تحميل المزيد من الشبكات',
+                onPressed: controller.loadMoreNetworks,
+              ),
+            ],
           ],
         ),
       );

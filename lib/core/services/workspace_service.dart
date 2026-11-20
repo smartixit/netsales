@@ -47,10 +47,14 @@ class WorkspaceService extends GetxService {
         ? SessionService.to.currentUser
         : null;
 
-    final resolved = resolveWorkspaceForUser(
-      currentUser,
-      preferredWorkspace: savedWorkspace,
-    );
+    final resolved = currentUser == null
+        ? (savedWorkspace == AppWorkspace.pos.name
+              ? AppWorkspace.pos
+              : AppWorkspace.network)
+        : resolveWorkspaceForUser(
+            currentUser,
+            preferredWorkspace: savedWorkspace,
+          );
     currentWorkspace.value = resolved;
 
     log(
@@ -68,7 +72,9 @@ class WorkspaceService extends GetxService {
     UserModel? user, {
     String? preferredWorkspace,
   }) {
-    if (user == null) return currentWorkspace.value;
+    if (user == null) {
+      throw StateError('Cannot resolve a workspace without an authenticated user.');
+    }
 
     final hasNetworkRole = _hasNetworkScope(user);
     final hasPosRole = _hasPosScope(user);

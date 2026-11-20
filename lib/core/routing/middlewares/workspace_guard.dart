@@ -5,15 +5,12 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 
-/// ============================================================================
-/// وسيط حماية وتوجيه مساحات العمل التشغيلية (Workspace Routing Guard)
-/// ============================================================================
-/// يوجه المستخدم المسجل لمساحة عمله المعتمدة (NETWORK أو POS)
-/// ويعترض حسابات إدارة المنصة ويوجهها لصفحة التنبيه (AUTH-06).
+/// UX routing guard for supported operational workspaces.
+/// Authorization remains exclusively enforced by the Laravel API.
 class WorkspaceGuard extends GetMiddleware {
-  final AppWorkspace? targetWorkspace;
-
   WorkspaceGuard({this.targetWorkspace});
+
+  final AppWorkspace? targetWorkspace;
 
   @override
   int? get priority => 2;
@@ -32,31 +29,33 @@ class WorkspaceGuard extends GetMiddleware {
     }
 
     final user = SessionService.to.currentUser;
-    final workspaceService = WorkspaceService.to;
-    final resolved = workspaceService.resolveWorkspaceForUser(user);
-
-    // إذا كان الحساب مشرف منصة (SUPER_ADMIN / SUPPORT_AGENT)، اعتراض وتوجيه لـ AUTH-06
-    // if (resolved == AppWorkspace.unsupported) {
-    //   // if (route != AppRoutes.unsupportedPlatform) {
-    //     // return const RouteSettings(name: AppRoutes.unsupportedPlatform);
-    //   // }
-    //   // return null;
-    // }
-
-    // إذا كان المسار مقيداً بمساحة معينة لا تتطابق مع المستخدم، التوجيه لمساحته الصحيحة
-    if (targetWorkspace != null && targetWorkspace != resolved) {
-      final fallbackRoute = resolved == AppWorkspace.network
-          ? AppRoutes.networkWorkspace
-          : AppRoutes.posWorkspace;
-      return RouteSettings(name: fallbackRoute);
+    if (user == null) {
+      return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
-    // عند الدخول إلى المسار العام للوحة التحكم، التوجيه التلقائي لمساحة عمل المستخدم
+    final AppWorkspace resolved;
+    try {
+      resolved = WorkspaceService.to.resolveWorkspaceForUser(user);
+    } on StateError {
+      // An authenticated session without a supported operational role is
+      // invalid. Never infer a workspace from partial or unknown role data.
+      return const RouteSettings(name: AppRoutes.unauthorized);
+    }
+
+    if (targetWorkspace != null && targetWorkspace != resolved) {
+      return RouteSettings(
+        name: resolved == AppWorkspace.network
+            ? AppRoutes.networkWorkspace
+            : AppRoutes.posWorkspace,
+      );
+    }
+
     if (route == AppRoutes.dashboard) {
-      final destination = resolved == AppWorkspace.network
-          ? AppRoutes.networkWorkspace
-          : AppRoutes.posWorkspace;
-      return RouteSettings(name: destination);
+      return RouteSettings(
+        name: resolved == AppWorkspace.network
+            ? AppRoutes.networkWorkspace
+            : AppRoutes.posWorkspace,
+      );
     }
 
     return null;
