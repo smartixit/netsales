@@ -23,6 +23,12 @@ void main() {
 
       expect(response.success, isFalse);
       expect(response.statusCode, 401);
+
+      final forbidden = ApiResponse<void>.fromSimpleJson(
+        {'success': false, 'message': 'Forbidden'},
+        statusCode: 403,
+      );
+      expect(forbidden.statusCode, 403);
     });
   });
 }

@@ -69,7 +69,7 @@ class CustomUnauthorized extends StatelessWidget {
                     await Get.offAllNamed<void>(AppRoutes.login);
                     return;
                   }
-                  Get.offAllNamed<void>(AppRoutes.dashboard);
+                  await Get.offAllNamed<void>(AppRoutes.dashboard);
                 },
               ),
             ],
