@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/features/workspace/domain/entities/network_expenses_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_packages_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_points_of_sale_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_requests_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_sales_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/presentation/models/network_workspace_dashboard_view_model.dart';
 import 'package:netsales/widgets/charts/charting.dart';
@@ -98,11 +103,11 @@ class NetworkWorkspaceDashboardMapper {
       );
 
   static List<DashboardMetricData> _mapMetrics({
-    required pointsOfSale,
-    required requests,
-    required packages,
-    required sales,
-    required expenses,
+    required NetworkPointsOfSaleMetricsEntity? pointsOfSale,
+    required NetworkRequestsMetricsEntity? requests,
+    required NetworkPackagesMetricsEntity? packages,
+    required NetworkSalesMetricsEntity? sales,
+    required NetworkExpensesMetricsEntity? expenses,
   }) {
     final items = <DashboardMetricData>[];
 

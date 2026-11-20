@@ -98,7 +98,9 @@ void main() {
       );
     });
 
-    test('maps only typed operational groups and excludes deferred financial fields', () {
+    test(
+      'maps only typed operational groups and excludes deferred financial fields',
+      () {
       final model = NetworkWorkspaceOverviewModel.fromJson(
         _validOverview(metrics: {
           'sales': {
@@ -121,14 +123,17 @@ void main() {
     });
 
 
-    test('preserves the exact server amount string without double conversion', () {
+    test(
+      'preserves the exact server amount string without double conversion',
+      () {
       final model = NetworkWorkspaceOverviewModel.fromJson(_validOverview());
 
       expect(
         model.recentPendingRequests.single.requestTotalAmount,
         '900.00',
       );
-    });
+      },
+    );
 
     test('rejects malformed pending request amount strings', () {
       final response = _validOverview();

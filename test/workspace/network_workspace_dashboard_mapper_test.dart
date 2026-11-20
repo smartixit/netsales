@@ -74,7 +74,5 @@ void main() {
       expect(result.kpiMetrics, isEmpty);
       expect(result.salesChartDefinition.state.name, 'empty');
     });
-
-
   });
 }
