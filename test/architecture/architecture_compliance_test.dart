@@ -179,5 +179,58 @@ void main() {
         );
       }
     });
+
+    test('Public settings GetX lifecycle loads cache without starting a request', () {
+      final serviceFile = File(
+        'lib/core/services/public_settings_service.dart',
+      );
+      expect(serviceFile.existsSync(), isTrue);
+
+      final content = serviceFile.readAsStringSync();
+      final onInit = RegExp(
+        r'void onInit\(\)\s*\{([\s\S]*?)\n  \}',
+      ).firstMatch(content);
+
+      expect(onInit, isNotNull);
+      expect(onInit!.group(1), contains('_loadFromLocalCache();'));
+      expect(onInit.group(1), isNot(contains('fetchSettings')));
+    });
+
+    test('Splash refreshes public settings only after connectivity initialization', () {
+      final splashFile = File(
+        'lib/features/splash/data/datasources/splash_local_data_source_impl.dart',
+      );
+      expect(splashFile.existsSync(), isTrue);
+
+      final content = splashFile.readAsStringSync();
+      final parallelInitialization = RegExp(
+        r'await Future\.wait\(\s*\[([\s\S]*?)\]\s*\);',
+      ).firstMatch(content);
+
+      expect(parallelInitialization, isNotNull);
+      expect(
+        parallelInitialization!.group(1),
+        isNot(contains('InternetConnectionService')),
+      );
+      expect(
+        parallelInitialization.group(1),
+        isNot(contains('PublicSettingsService')),
+      );
+
+      final connectivityInitialization = content.indexOf(
+        'await InternetConnectionService.instance.initialize();',
+      );
+      final connectivityGuard = content.indexOf(
+        'if (InternetConnectionService.instance.isConnected)',
+      );
+      final settingsRefresh = content.indexOf(
+        'PublicSettingsService.instance.fetchSettings()',
+      );
+
+      expect(connectivityInitialization, greaterThanOrEqualTo(0));
+      expect(connectivityGuard, greaterThan(connectivityInitialization));
+      expect(settingsRefresh, greaterThan(connectivityGuard));
+    });
+
   });
 }

@@ -22,15 +22,22 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
 
   @override
   Future<void> initializeInfrastructureServices() async {
-    // تشغيل التهيئة المتوازية للخدمات الأساسية في طبقة البنية التحتية
+    // تشغيل التهيئة المتوازية للخدمات الأساسية المستقلة عن فحص الاتصال
     await Future.wait([
       PackageInfoService.instance.init(),
       DeviceService.instance.init(),
       AppCryptoService.instance.init(),
       PushNotificationService.instance.init(),
-      PublicSettingsService.instance.init(),
-      InternetConnectionService.instance.initialize(),
     ]);
+
+    // يجب اكتمال الفحص الأولي قبل السماح لأي خدمة ببدء طلبات الشبكة.
+    await InternetConnectionService.instance.initialize();
+
+    // الإعدادات المحلية حُمّلت في PublicSettingsService.onInit قبل أول إطار.
+    // لا نحدّثها من الخادم إلا بعد اكتمال فحص الاتصال وثبوت توفر الإنترنت.
+    if (InternetConnectionService.instance.isConnected) {
+      unawaited(PublicSettingsService.instance.fetchSettings());
+    }
 
     // ── Warm-up & Health Check: إيقاظ الخادم وتهيئة اتصال الشبكة مسبقاً ──
     unawaited(_warmUpBackendServer());
