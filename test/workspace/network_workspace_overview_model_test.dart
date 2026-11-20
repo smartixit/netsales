@@ -22,8 +22,6 @@ Map<String, dynamic> _validOverview({
     'request_uuid': 'REQ-90',
     'pos_id': 7,
     'pos_name': 'نقطة الاختبار',
-    'sale_type': 'CREDIT',
-    'sale_type_label': 'آجل',
     'status': 'PENDING',
     'status_label': 'قيد الانتظار',
   };
@@ -54,15 +52,8 @@ Map<String, dynamic> _validOverview({
           'sales': {
             'invoice_count': 9,
             'total_amount': '15000.00',
-            'paid_amount': '9000.00',
-            'outstanding_amount': '6000.00',
           },
           'expenses': {'count': 2, 'total_amount': '500.00'},
-          'wallet': {
-            'wallet_id': 4,
-            'balance': '1200.00',
-            'is_active': true,
-          },
           'packages': {'total': 5, 'active': 4, 'inactive': 1},
         },
     'recent_pending_requests': [request],
@@ -84,7 +75,7 @@ void main() {
       expect(model.networkName, 'شبكة الاختبار');
       expect(model.periodKey, '30d');
       expect(model.count('points_of_sale', 'active'), '6');
-      expect(model.amount('sales', 'outstanding_amount'), '6000.00');
+      expect(model.amount('sales', 'total_amount'), '15000.00');
       expect(model.recentPendingRequests.single.requestId, 90);
       expect(
         model.recentPendingRequests.single.requestTotalAmount,
@@ -92,13 +83,16 @@ void main() {
       );
     });
 
-    test('preserves an explicitly null wallet from the server', () {
+    test('ignores metric groups outside the operational workspace contract', () {
       final model = NetworkWorkspaceOverviewModel.fromJson(
-        _validOverview(metrics: {'wallet': null}),
+        _validOverview(metrics: {
+          'sales': {'invoice_count': 1, 'total_amount': '100.00'},
+          'unrecognized_metric_group': {'value': 'ignored'},
+        }),
       );
 
-      expect(model.metrics.containsKey('wallet'), isTrue);
-      expect(model.metrics['wallet'], isNull);
+      expect(model.metrics.containsKey('sales'), isTrue);
+      expect(model.metrics.containsKey('unrecognized_metric_group'), isFalse);
     });
 
     test('rejects an incomplete top-level overview contract', () {
