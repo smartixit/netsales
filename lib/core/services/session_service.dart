@@ -97,11 +97,9 @@ class SessionService extends GetxService {
     String? roleKey,
   }) async {
     final sessionDeviceUuid = session.deviceUuid?.trim();
-    if (sessionDeviceUuid == null ||
-        sessionDeviceUuid.isEmpty ||
-        sessionDeviceUuid != DeviceService.instance.deviceUuid) {
+    if (sessionDeviceUuid == null || sessionDeviceUuid.isEmpty) {
       throw StateError(
-        'The server session device identity does not match the current platform identity.',
+        'Cannot start an authenticated session without its device identity.',
       );
     }
 
