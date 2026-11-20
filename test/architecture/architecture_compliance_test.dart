@@ -232,5 +232,53 @@ void main() {
       expect(settingsRefresh, greaterThan(connectivityGuard));
     });
 
+    test('Bootstrap restores the device before the local session and connectivity before optional network services', () {
+      final file = File('lib/features/splash/data/datasources/splash_local_data_source_impl.dart');
+      final content = file.readAsStringSync();
+      final deviceInit = content.indexOf('DeviceService.instance.init()');
+      final sessionInit = content.indexOf('SessionService.instance.init()');
+      final workspaceInit = content.indexOf('WorkspaceService.instance.init()');
+      final connectivityInit = content.indexOf('InternetConnectionService.instance.initialize()');
+      final pushInit = content.indexOf('PushNotificationService.instance.init()');
+
+      expect(deviceInit, greaterThanOrEqualTo(0));
+      expect(sessionInit, greaterThan(deviceInit));
+      expect(workspaceInit, greaterThan(sessionInit));
+      expect(connectivityInit, greaterThan(workspaceInit));
+      expect(pushInit, greaterThan(connectivityInit));
+      expect(content, isNot(contains('ServerTaskRunnerService.to.runCatchupTasks')));
+      expect(content, isNot(contains('ServerTaskRunnerService.to.startForegroundHeartbeat')));
+    });
+
+    test('Session verification preserves the distinction between 401, 403, and temporary failures', () {
+      final file = File('lib/features/splash/data/datasources/splash_local_data_source_impl.dart');
+      final content = file.readAsStringSync();
+      final validationStart = content.indexOf('Future<SessionValidationResult> validateSessionWithServer()');
+      final validation = content.substring(validationStart);
+
+      expect(validation, contains('response.statusCode == 401'));
+      expect(validation, contains('response.statusCode == 403'));
+      expect(validation, contains('SessionValidationResult.unavailable'));
+      expect(validation, contains('SessionService.to.terminateSession()'));
+      expect(validation, isNot(contains('if (!response.success)')));
+    });
+
+    test('Protected routes require a server-verified session', () {
+      final authGuard = File('lib/core/routing/middlewares/auth_guard.dart').readAsStringSync();
+      final workspaceGuard = File('lib/core/routing/middlewares/workspace_guard.dart').readAsStringSync();
+      expect(authGuard, contains('!SessionService.to.isSessionVerified'));
+      expect(workspaceGuard, contains('!SessionService.to.isSessionVerified'));
+    });
+
+    test('Restored sessions do not synchronize FCM until server verification', () {
+      final session = File('lib/core/services/session_service.dart').readAsStringSync();
+      final initStart = session.indexOf('Future<SessionService> init()');
+      final startSession = session.indexOf('Future<void> startSession');
+      final initBody = session.substring(initStart, startSession);
+      expect(initBody, isNot(contains('syncTokenWithBackend')));
+      expect(session, contains('bool get isSessionVerified'));
+      expect(session, contains('void markSessionVerified()'));
+    });
+
   });
 }
