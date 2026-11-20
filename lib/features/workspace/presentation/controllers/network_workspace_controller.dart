@@ -86,7 +86,7 @@ class NetworkWorkspaceController extends GetxController {
   NetworkWorkspaceDashboardViewModel get dashboardViewModel =>
       NetworkWorkspaceDashboardMapper.map(overview.value);
 
-  int get pendingRequestsCount => dashboardViewModel.pendingRequestsCount;
+  int? get pendingRequestsCount => dashboardViewModel.pendingRequestsCount;
 
   List<WorkspaceTransactionItemViewModel> get recentPendingOrderItems =>
       NetworkWorkspaceTransactionMapper.mapPendingRequests(

@@ -109,9 +109,9 @@ class NetworkWorkspaceDashboardMapper {
         kpiMetrics: const [],
       );
 
-  static int _pendingRequestsCount(NetworkWorkspaceOverviewEntity overview) {
+  static int? _pendingRequestsCount(NetworkWorkspaceOverviewEntity overview) {
     final requests = overview.metric('requests');
-    if (requests == null) return 0;
+    if (requests == null) return null;
     final value = requests['pending'];
     if (value is! num) {
       throw const FormatException('عدد طلبات التوريد المعلقة غير صالح.');
@@ -125,7 +125,7 @@ class NetworkWorkspaceDashboardMapper {
   ) {
     final items = <DashboardMetricData>[];
 
-    if (metrics.containsKey('points_of_sale')) {
+    if (metrics['points_of_sale'] is Map<String, dynamic>) {
       items.add(
         DashboardMetricData(
           id: 'pos',
@@ -141,7 +141,7 @@ class NetworkWorkspaceDashboardMapper {
       );
     }
 
-    if (metrics.containsKey('requests')) {
+    if (metrics['requests'] is Map<String, dynamic>) {
       items.add(
         DashboardMetricData(
           id: 'requests',
@@ -157,7 +157,7 @@ class NetworkWorkspaceDashboardMapper {
       );
     }
 
-    if (metrics.containsKey('packages')) {
+    if (metrics['packages'] is Map<String, dynamic>) {
       items.add(
         DashboardMetricData(
           id: 'packages',
@@ -173,7 +173,7 @@ class NetworkWorkspaceDashboardMapper {
       );
     }
 
-    if (metrics.containsKey('sales')) {
+    if (metrics['sales'] is Map<String, dynamic>) {
       items.add(
         DashboardMetricData(
           id: 'sales',
@@ -189,7 +189,7 @@ class NetworkWorkspaceDashboardMapper {
       );
     }
 
-    if (metrics.containsKey('expenses')) {
+    if (metrics['expenses'] is Map<String, dynamic>) {
       items.add(
         DashboardMetricData(
           id: 'expenses',
