@@ -5,7 +5,6 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
@@ -14,12 +13,13 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 /// ============================================================================
 /// تظهر عند محاولة الوصول المباشر (Deep Links) إلى مسار غير مصرح به للمستخدم.
 class CustomUnauthorized extends StatelessWidget {
-  const CustomUnauthorized({super.key});
+  const CustomUnauthorized({super.key, this.isSessionBlocked = false});
+
+  final bool isSessionBlocked;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isSessionBlocked = SessionService.to.isAccessBlocked;
 
     return CustomAppScaffold(
       useSurfaceMesh: true,

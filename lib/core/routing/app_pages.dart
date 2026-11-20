@@ -6,6 +6,7 @@ import 'package:netsales/core/routing/middlewares/auth_guard.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/workspace_guard.dart';
+import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/auth/presentation/bindings/active_sessions_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
@@ -94,7 +95,9 @@ abstract final class AppPages {
     // Unauthorized Access Rejection (Deep Link Defense)
     GetPage(
       name: AppRoutes.unauthorized,
-      page: () => const CustomUnauthorized(),
+      page: () => CustomUnauthorized(
+        isSessionBlocked: SessionService.to.isAccessBlocked,
+      ),
     ),
 
     // ========================================================================
