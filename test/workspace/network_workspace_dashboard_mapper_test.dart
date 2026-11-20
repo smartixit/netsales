@@ -1,4 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:netsales/features/workspace/domain/entities/network_expenses_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_packages_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_points_of_sale_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_requests_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_sales_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_sales_trend_point_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/presentation/mappers/network_workspace_dashboard_mapper.dart';
 
@@ -10,20 +16,39 @@ void main() {
         networkName: 'شبكة صنعاء',
         generatedAt: '2026-11-16T10:00:00Z',
         periodKey: '30d',
-        metrics: {
-          'sales': {
-            'total_amount': '2500.00',
-            'growth_rate': 12.5,
-            'invoice_count': 2,
-            'trend': [
-              {'date': '2026-11-15', 'total': 2500},
-            ],
-          },
-          'points_of_sale': {'total': 5, 'active': 4, 'inactive': 1},
-          'requests': {'total': 3, 'pending': 2},
-          'packages': {'total': 4, 'active': 3},
-          'expenses': {'count': 1, 'total_amount': '300.00'},
-        },
+        sales: const NetworkSalesMetricsEntity(
+          totalAmount: '2500.00',
+          invoiceCount: 2,
+          growthRate: 12.5,
+          trend: [
+            NetworkSalesTrendPointEntity(
+              date: '2026-11-15',
+              totalAmount: 2500,
+              invoiceCount: 1,
+            ),
+          ],
+        ),
+        pointsOfSale: const NetworkPointsOfSaleMetricsEntity(
+          total: 5,
+          active: 4,
+          inactive: 1,
+        ),
+        requests: const NetworkRequestsMetricsEntity(
+          total: 3,
+          pending: 2,
+          approved: 1,
+          rejected: 0,
+          cancelled: 0,
+        ),
+        packages: const NetworkPackagesMetricsEntity(
+          total: 4,
+          active: 3,
+          inactive: 1,
+        ),
+        expenses: const NetworkExpensesMetricsEntity(
+          count: 1,
+          totalAmount: '300.00',
+        ),
         recentPendingRequests: const [],
       );
 

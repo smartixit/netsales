@@ -242,5 +242,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
   }
 
   static bool _isAmount(String value) =>
-      RegExp(r'^\\d+(?:\\.\\d+)?$').hasMatch(value);
+      RegExp(r'^\d+(?:\.\d+)?.hasMatch(value);
+}
+).hasMatch(value);
 }

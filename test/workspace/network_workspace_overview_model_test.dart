@@ -74,8 +74,8 @@ void main() {
       expect(model.networkId, 12);
       expect(model.networkName, 'شبكة الاختبار');
       expect(model.periodKey, '30d');
-      expect(model.count('points_of_sale', 'active'), '6');
-      expect(model.amount('sales', 'total_amount'), '15000.00');
+      expect(model.pointsOfSale?.active, 6);
+      expect(model.sales?.totalAmount, '15000.00');
       expect(model.recentPendingRequests.single.requestId, 90);
       expect(
         model.recentPendingRequests.single.requestTotalAmount,
