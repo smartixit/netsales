@@ -67,7 +67,9 @@ jobs:
           dart format lib/widgets/data_grid test/widgets/data_grid
           lib/core/services/api_service.dart
           lib/core/services/infinityfree_challenge_interceptor.dart
+          lib/core/services/infinityfree_challenge_solver.dart
           test/core/services/infinityfree_challenge_interceptor_test.dart
+          test/core/services/infinityfree_challenge_solver_test.dart
           test/requests/pos_procurement_active_context_test.dart
           test/requests/procurement_quote_pricing_test.dart
           test/requests/procurement_requests_controller_test.dart
@@ -80,7 +82,9 @@ jobs:
           lib/widgets/data_grid test/widgets/data_grid
           lib/core/services/api_service.dart
           lib/core/services/infinityfree_challenge_interceptor.dart
+          lib/core/services/infinityfree_challenge_solver.dart
           test/core/services/infinityfree_challenge_interceptor_test.dart
+          test/core/services/infinityfree_challenge_solver_test.dart
           test/requests/pos_procurement_active_context_test.dart
           test/requests/procurement_quote_pricing_test.dart
           test/requests/procurement_requests_controller_test.dart
@@ -94,7 +98,9 @@ jobs:
             pubspec.lock lib/widgets/data_grid test/widgets/data_grid \
             lib/core/services/api_service.dart \
             lib/core/services/infinityfree_challenge_interceptor.dart \
+            lib/core/services/infinityfree_challenge_solver.dart \
             test/core/services/infinityfree_challenge_interceptor_test.dart \
+            test/core/services/infinityfree_challenge_solver_test.dart \
             test/requests/pos_procurement_active_context_test.dart \
             test/requests/procurement_quote_pricing_test.dart \
             test/requests/procurement_requests_controller_test.dart \
@@ -109,7 +115,9 @@ jobs:
             pubspec.lock lib/widgets/data_grid test/widgets/data_grid \
             lib/core/services/api_service.dart \
             lib/core/services/infinityfree_challenge_interceptor.dart \
+            lib/core/services/infinityfree_challenge_solver.dart \
             test/core/services/infinityfree_challenge_interceptor_test.dart \
+            test/core/services/infinityfree_challenge_solver_test.dart \
             test/requests/pos_procurement_active_context_test.dart \
             test/requests/procurement_quote_pricing_test.dart \
             test/requests/procurement_requests_controller_test.dart \
@@ -130,6 +138,7 @@ jobs:
       - name: Run InfinityFree and affected procurement controller tests
         run: |
           flutter test test/core/services/infinityfree_challenge_interceptor_test.dart
+          flutter test test/core/services/infinityfree_challenge_solver_test.dart
           flutter test test/requests/pos_procurement_active_context_test.dart
           flutter test test/requests/procurement_quote_pricing_test.dart
           flutter test test/requests/procurement_requests_controller_test.dart
