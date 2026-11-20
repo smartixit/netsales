@@ -88,7 +88,6 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
           final requestUuid = request['request_uuid'];
           final posId = request['pos_id'];
           final posName = request['pos_name'];
-          final saleTypeLabel = request['sale_type_label'];
           final requestDate = request['request_date'];
           final requestTotalAmount = request['request_total_amount'];
           final status = request['status'];
@@ -98,7 +97,6 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
               requestUuid is! String ||
               posId is! num ||
               posName is! String ||
-              saleTypeLabel is! String ||
               requestDate is! String ||
               requestTotalAmount is! String ||
               status is! String ||
@@ -116,8 +114,6 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
             requestUuid: requestUuid,
             posId: posId.toInt(),
             posName: posName,
-            saleTypeRaw: request['sale_type']?.toString(),
-            saleTypeLabel: saleTypeLabel,
             requestDate: requestDate,
             requestTotalAmount: amountNum,
             statusRaw: status,

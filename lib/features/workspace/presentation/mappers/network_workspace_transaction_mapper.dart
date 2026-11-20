@@ -22,9 +22,7 @@ class NetworkWorkspaceTransactionMapper {
           final dateLabel = parsedDate == null
               ? ''
               : DateFormatter.smart(parsedDate);
-          final subtitle = dateLabel.isEmpty
-              ? request.saleTypeLabel
-              : '${request.saleTypeLabel} • $dateLabel';
+          final subtitle = dateLabel;
           void openRequest() => onOpenRequest(request.requestId);
 
           return WorkspaceTransactionItemViewModel(
