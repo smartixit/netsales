@@ -70,7 +70,7 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
     );
 
     test(
-      'removes a complete thirteen-byte SlowAES padding suffix',
+      'preserves a single block with thirteen padding-looking bytes',
       () {
         final paddedChallenge = challenge.replaceFirst(
           '25b509cc7dadcdb532275647f94524cc',
@@ -85,7 +85,7 @@ document.cookie="__test="+toHex(slowAES.decrypt(c,2,a,b))+"; max-age=21600; path
     );
 
     test(
-      'matches SlowAES handling of a full zero-byte trailing block',
+      'preserves a single block containing only zero bytes',
       () {
         final zeroBlockChallenge = challenge.replaceFirst(
           '25b509cc7dadcdb532275647f94524cc',
