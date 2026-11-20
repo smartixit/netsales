@@ -34,6 +34,7 @@ class SessionService extends GetxService {
   final RxBool _isAuthenticated = false.obs;
   final RxBool _isSessionVerified = false.obs;
   Future<void>? _terminationFuture;
+  bool _handlingUnauthorized = false;
 
   /// بيانات المستخدم الحالي المسجل
   UserModel? get currentUser => _user.value;
@@ -98,10 +99,16 @@ class SessionService extends GetxService {
 
     // ربط انتهاء الصلاحية من عميل الشبكة تلقائياً
     ApiService.onUnauthorized = () async {
-      log('⚠️ [SessionService] Protected request rejected with 401.');
-      await terminateSession();
-      if (Get.currentRoute != AppRoutes.login) {
-        await Get.offAllNamed<void>(AppRoutes.login);
+      if (_handlingUnauthorized) return;
+      _handlingUnauthorized = true;
+      try {
+        log('⚠️ [SessionService] Protected request rejected with 401.');
+        await terminateSession();
+        if (Get.currentRoute != AppRoutes.login) {
+          await Get.offAllNamed<void>(AppRoutes.login);
+        }
+      } finally {
+        _handlingUnauthorized = false;
       }
     };
 
@@ -135,13 +142,13 @@ class SessionService extends GetxService {
       );
     }
 
+    if (Get.isRegistered<WorkspaceService>()) {
+      await WorkspaceService.to.syncWithUserMemberships(user);
+    }
+
     if (Get.isRegistered<PushNotificationService>()) {
       unawaited(PushNotificationService.to.syncTokenWithBackend());
       PushNotificationService.to.releasePendingNavigation();
-    }
-
-    if (Get.isRegistered<WorkspaceService>()) {
-      await WorkspaceService.to.syncWithUserMemberships(user);
     }
 
     if (Get.isRegistered<ServerTaskRunnerService>()) {
@@ -189,9 +196,7 @@ class SessionService extends GetxService {
       await WorkspaceService.to.syncWithUserMemberships(user);
     }
 
-    log(
-      '🔄 [SessionService] User profile and workspace memberships synced successfully for user #${user.userId}',
-    );
+    log('🔄 [SessionService] User profile and workspace memberships synced.');
   }
 
   /// تحديث بيانات المستخدم في الذاكرة والتخزين المحلي

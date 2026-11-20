@@ -1,9 +1,7 @@
-import 'dart:async';
 import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_motion.dart';
-import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/features/splash/domain/entities/boot_verification_unavailable_exception.dart';
 import 'package:netsales/features/splash/domain/usecases/determine_boot_destination_use_case.dart';
 import 'package:netsales/features/splash/domain/usecases/initialize_app_use_case.dart';
@@ -41,11 +39,13 @@ class SplashController extends GetxController {
   Future<void> _bootstrapApp() async {
     final stopwatch = Stopwatch()..start();
     try {
-      await _resolveBootDestination(initializeInfrastructure: true);
+      await initializeAppUseCase();
+      _infrastructureReady = true;
       final elapsed = stopwatch.elapsed;
       if (elapsed < minSplashDuration) {
         await Future<void>.delayed(minSplashDuration - elapsed);
       }
+      await _navigateToBootDestination();
     } catch (error, stack) {
       _showRetryState(error, stack);
     }
@@ -56,9 +56,11 @@ class SplashController extends GetxController {
     isRetrying.value = true;
     isRetryableError.value = false;
     try {
-      await _resolveBootDestination(
-        initializeInfrastructure: !_infrastructureReady,
-      );
+      if (!_infrastructureReady) {
+        await initializeAppUseCase();
+        _infrastructureReady = true;
+      }
+      await _navigateToBootDestination();
     } catch (error, stack) {
       _showRetryState(error, stack);
     } finally {
@@ -66,11 +68,7 @@ class SplashController extends GetxController {
     }
   }
 
-  Future<void> _resolveBootDestination({required bool initializeInfrastructure}) async {
-    if (initializeInfrastructure) {
-      await initializeAppUseCase();
-      _infrastructureReady = true;
-    }
+  Future<void> _navigateToBootDestination() async {
     if (_isDisposed) return;
     final destination = await determineBootDestinationUseCase();
     if (_isDisposed) return;

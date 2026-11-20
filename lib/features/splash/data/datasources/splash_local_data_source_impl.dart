@@ -11,7 +11,6 @@ import 'package:netsales/core/services/internet_connection_service.dart';
 import 'package:netsales/core/services/package_info_service.dart';
 import 'package:netsales/core/services/public_settings_service.dart';
 import 'package:netsales/core/services/push_notification_service.dart';
-import 'package:netsales/core/services/server_task_runner_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';

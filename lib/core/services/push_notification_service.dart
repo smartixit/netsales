@@ -318,6 +318,7 @@ class PushNotificationService extends GetxService {
     try {
       await StorageService.instance.remove(StorageKeys.fcmTokenStorage);
       _fcmToken = null;
+      _pendingNavigationData = null;
       if (isFcmSupported) {
         await _fcm.deleteToken();
       }
@@ -451,9 +452,7 @@ class PushNotificationService extends GetxService {
     final rawType = data['notification_type'] ?? data['entity_type'];
     final entityId = data['entity_id']?.toString() ?? data['id']?.toString();
 
-    log(
-      '🎯 [PushNotificationService] Dispatching deep link: type=$rawType, entityId=$entityId',
-    );
+    log('🎯 [PushNotificationService] Dispatching a verified notification deep link.');
 
     // 1. التوجيه المباشر بالمسار الصريح إن وُجد
     if (route != null && route.isNotEmpty) {

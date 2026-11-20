@@ -116,11 +116,11 @@ class ApiService {
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -173,11 +173,11 @@ class ApiService {
       }, statusCode: response.statusCode);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<List<T>>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<List<T>>(e, endpoint);
     }
   }
@@ -210,11 +210,11 @@ class ApiService {
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -245,11 +245,11 @@ class ApiService {
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -280,11 +280,11 @@ class ApiService {
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -315,11 +315,11 @@ class ApiService {
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -370,11 +370,11 @@ class ApiService {
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, error=${e.error}, message=${e.message}, status=${e.response?.statusCode}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
-      log('📍 Error -> $e');
+      log('📍 API call failed [$endpoint].');
       return _handleUnexpectedError<T>(e, endpoint);
     }
   }
@@ -619,7 +619,7 @@ class ApiService {
 
   ApiResponse<T> _handleUnexpectedError<T>(dynamic error, String endpoint) {
     if (AppEnvironment.enableLogging) {
-      log('❌ Unexpected Error [$endpoint]: $error');
+      log('❌ Unexpected API error [$endpoint]: ${error.runtimeType}');
     }
     return ApiResponse<T>(
       success: false,
