@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -25,7 +26,10 @@ class MemberCardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final presentation = member.statusPresentation;
+    final presentation = EnumPresentationRegistry.resolveMembershipStatus(
+      member.status,
+      serverLabel: member.statusLabel,
+    );
 
     return InkWell(
       onTap: onToggleExpansion,
