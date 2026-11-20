@@ -87,5 +87,6 @@ void main() {
     expect(SessionService.instance.isSessionVerified, isFalse);
     expect(SessionService.instance.isAccessBlocked, isTrue);
     expect(StorageService.instance.sessionId, 'blocked-session-id');
+    expect(StorageService.instance.getString(StorageKeys.deviceUuid), 'device-72');
   });
 }
