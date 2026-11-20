@@ -128,12 +128,23 @@ class SessionService extends GetxService {
   }) async {
     final storage = StorageService.instance;
 
-    await storage.saveSession(session.sessionId);
     final sessionDeviceUuid = session.deviceUuid?.trim();
-    if (sessionDeviceUuid != null && sessionDeviceUuid.isNotEmpty) {
-      // Keep the exact device identity confirmed by the server for this session.
-      await storage.setString(StorageKeys.deviceUuid, sessionDeviceUuid);
+    if (sessionDeviceUuid == null || sessionDeviceUuid.isEmpty) {
+      throw StateError(
+        'Cannot persist an authenticated session without its server-confirmed device identity.',
+      );
     }
+
+    // Persist the server-confirmed device identity before the session token.
+    final deviceIdentitySaved = await storage.setString(
+      StorageKeys.deviceUuid,
+      sessionDeviceUuid,
+    );
+    if (!deviceIdentitySaved) {
+      throw StateError('Failed to persist the authenticated device identity.');
+    }
+
+    await storage.saveSession(session.sessionId);
     await storage.setInt(StorageKeys.userId, user.userId);
     await storage.setModel(StorageKeys.userData, user, (u) => u.toJson());
     await storage.setStringList(StorageKeys.permissionsStorage, permissions);
