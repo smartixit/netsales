@@ -269,7 +269,7 @@ class PosWorkspaceController extends GetxController {
 
       final savedId = StorageService.instance.getInt(_networkStorageKey(posId));
       final saved = networkLinks.firstWhereOrNull(
-        (link) => link.networkId == savedId && link.status,
+        (link) => link.networkPosId == savedId && link.status,
       );
       NetworkPosLinkEntity? initial = saved;
       if (initial == null && !result.hasMore) {
@@ -318,9 +318,13 @@ class PosWorkspaceController extends GetxController {
     selectedNetworkLink.value = authorizedLink;
     await StorageService.instance.setInt(
       _networkStorageKey(posId),
-      authorizedLink.networkId,
+      authorizedLink.networkPosId,
     );
-    await loadNetworkScopedData(authorizedLink.networkId, posId: posId);
+    await loadNetworkScopedData(
+      authorizedLink.networkId,
+      posId: posId,
+      networkPosId: authorizedLink.networkPosId,
+    );
   }
 
   Future<void> selectNetworkLink(int networkPosId) async {
@@ -333,6 +337,7 @@ class PosWorkspaceController extends GetxController {
   Future<void> loadNetworkScopedData(
     int networkId, {
     required int posId,
+    required int networkPosId,
   }) async {
     final generation = ++_scopedDataGeneration;
     recentInvoices.clear();
@@ -350,10 +355,7 @@ class PosWorkspaceController extends GetxController {
         );
         if (generation == _scopedDataGeneration &&
             activePos.value?.posId == posId &&
-            selectedNetworkLink.value?.networkPosId ==
-                networkLinks.firstWhereOrNull(
-                  (link) => link.networkId == networkId,
-                )?.networkPosId &&
+            selectedNetworkLink.value?.networkPosId == networkPosId &&
             !isClosed) {
           recentInvoices.assignAll(result.items);
         }
@@ -411,9 +413,13 @@ class PosWorkspaceController extends GetxController {
 
   Future<void> retryScopedData() async {
     final posId = activePos.value?.posId;
-    final networkId = selectedNetworkLink.value?.networkId;
-    if (posId != null && networkId != null) {
-      await loadNetworkScopedData(networkId, posId: posId);
+    final selectedLink = selectedNetworkLink.value;
+    if (posId != null && selectedLink != null) {
+      await loadNetworkScopedData(
+        selectedLink.networkId,
+        posId: posId,
+        networkPosId: selectedLink.networkPosId,
+      );
     }
   }
 
