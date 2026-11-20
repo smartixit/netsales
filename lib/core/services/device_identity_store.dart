@@ -18,7 +18,17 @@ class DeviceIdentityStore {
     final storage = StorageService.instance;
     final persisted = storage.getString(StorageKeys.deviceUuid)?.trim();
     if (persisted != null && persisted.isNotEmpty) {
-      return _limitLength(persisted);
+      final normalized = _limitLength(persisted);
+      if (normalized != persisted) {
+        final normalizedSaved = await storage.setString(
+          StorageKeys.deviceUuid,
+          normalized,
+        );
+        if (!normalizedSaved) {
+          throw StateError('Failed to normalize the persisted device identity.');
+        }
+      }
+      return normalized;
     }
 
     String resolved = '';
