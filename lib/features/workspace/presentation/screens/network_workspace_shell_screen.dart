@@ -75,6 +75,11 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         navItems[2],
         navItems[3],
       ];
+      final mobileMoreItems = [
+        navItems[4],
+        navItems[5],
+        navItems[6],
+      ];
 
       final isAppBarLoading =
           (controller.isLoadingNetworks.value ||
@@ -94,6 +99,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         ),
         items: navItems,
         mobileItems: mobileNavItems,
+        mobileMoreItems: mobileMoreItems,
         currentIndex: controller.selectedNavIndex.value,
         onIndexChanged: controller.onNavItemSelected,
         centerActionIcon: Icons.add_rounded,

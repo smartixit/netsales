@@ -62,6 +62,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         navItems[2],
         navItems[3],
       ];
+      final mobileMoreItems = [navItems[4]];
 
       final isAppBarLoading =
           controller.isLoadingPos.value && controller.activePos.value == null;
@@ -79,6 +80,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         ),
         items: navItems,
         mobileItems: mobileNavItems,
+        mobileMoreItems: mobileMoreItems,
         currentIndex: controller.selectedNavIndex.value,
         onIndexChanged: controller.onNavItemSelected,
         centerActionIcon: Icons.add_rounded,
