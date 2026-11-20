@@ -178,7 +178,7 @@ class _NetworkChoices extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.labelMedium.copyWith(
                         color: colors.onSurface,
-                        fontWeight: link.networkId == selectedId
+                        fontWeight: link.networkPosId == selectedNetworkPosId
                             ? FontWeight.bold
                             : FontWeight.medium,
                       ),
