@@ -38,11 +38,30 @@ void main() {
     await storage.setModel(StorageKeys.userData, user, (value) => value.toJson());
     await storage.setStringList(StorageKeys.permissionsStorage, const <String>[]);
 
+    final savedPosKey = '${StorageKeys.activePosTenantPrefix}_71';
+    final savedPosNetworkKey = '${StorageKeys.activePosNetworkPrefix}_71_701';
+    final savedNetworkKey = '${StorageKeys.activeNetworkTenantPrefix}_71';
+    await storage.setInt(savedPosKey, 701);
+    await storage.setInt(savedPosNetworkKey, 801);
+    await storage.setInt(savedNetworkKey, 702);
+
     await SessionService.instance.init();
 
     expect(SessionService.instance.isAuthenticated, isTrue);
     expect(SessionService.instance.isSessionVerified, isFalse);
     expect(SessionService.instance.currentSessionId, 'cached-session-id');
+    expect(storage.getInt(savedPosKey), 701);
+    expect(storage.getInt(savedPosNetworkKey), 801);
+    expect(storage.getInt(savedNetworkKey), 702);
+
+    await SessionService.instance.syncSessionProfile(
+      user: user,
+      permissions: const <String>[],
+    );
+
+    expect(storage.getInt(savedPosKey), isNull);
+    expect(storage.getInt(savedPosNetworkKey), isNull);
+    expect(storage.getInt(savedNetworkKey), isNull);
   });
 
   test('a 403 blocked state preserves the local session but blocks verification', () async {
